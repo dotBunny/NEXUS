@@ -1,0 +1,83 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NKillZoneComponent.h"
+#include "CoreMinimal.h"
+#include "Components/BoxComponent.h"
+#include "INActorPoolItem.h"
+#include "NActorPoolSubsystem.h"
+#include "NCoreMinimal.h"
+
+UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer)
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
+
+	SetIsReplicatedByDefault(false);
+
+	KillBox = CreateDefaultSubobject<UBoxComponent>(TEXT("KillBox"));
+	KillBox->SetupAttachment(this);
+	KillBox->SetRelativeLocation(FVector::Zero(), false);
+	KillBox->InitBoxExtent(FVector(100, 100, 5));
+	KillBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+}
+
+void UNKillZoneComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ActorPoolSubsystem = UNActorPoolSubsystem::Get(GetWorld());
+	KillBox->OnComponentBeginOverlap.AddDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
+}
+
+void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	KillBox->OnComponentBeginOverlap.RemoveDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
+}
+
+void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
+{
+	if (bDontDestroyStaticActors && !OtherActor->IsRootComponentMovable()) return;
+
+	// Check if actor pool, return to pool
+	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
+	if (ActorItem != nullptr)
+	{
+		if (!ActorItem->ReturnToActorPool())
+		{
+			// The intent is still to destroy
+			OtherActor->Destroy();
+			KillCount++;
+			return;
+		}
+
+		// Normal return happened via return to actor pool
+		KillCount++;
+		return;
+	}
+
+	// Check if we have a pool for this Actor, but it just doesnt implement the interface
+	if (ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
+	{
+		ActorPoolSubsystem->ReturnActor(OtherActor);
+		KillCount++;
+		return;
+	}
+
+	if (bDontDestroyNonInterfacedActors)
+	{
+		return;
+	}
+	
+	// Destroy, I guess.
+	if (!OtherActor->IsRooted())
+	{
+		OtherActor->Destroy();
+		KillCount++;
+	}
+	else
+	{
+		N_LOG(Warning, TEXT("[UNKillZoneComponent::OnOverlapBegin] Actor is rooted, cannot destroy: %s"), *OtherActor->GetName())
+	}
+}

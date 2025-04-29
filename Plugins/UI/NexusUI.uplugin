@@ -1,0 +1,45 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "NEXUS: User Interface",
+	"Description": "Components for creating a user interface based on UMG/Slate.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.p17d2jk1bzu",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusUI",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusUIEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

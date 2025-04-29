@@ -1,0 +1,68 @@
+name: 'Parse Results'
+description: 'Parses the TestResults file and adds to the summary.'
+            
+runs:
+  using: "composite"
+  steps:    
+    - name: Create markdown version of results
+      shell: powershell
+      run: |
+        $jsonPath = "${{ github.workspace }}\Staging\TestResults\index.json"
+        $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
+        if (Test-Path -Path $markdownPath)
+        {
+          Remove-Item -Path "$markdownPath" -Force 
+        }
+        if (Test-Path -Path $jsonPath)
+        {
+          Write-Output "Processing results from '$jsonPath' ..."
+          $jsonContent = Get-Content -Path "$jsonPath"
+          if ($jsonContent -eq $null -or $jsonContent -eq "")
+          {
+            Write-Output "No content found in '$jsonPath'."
+            return
+          }
+          $json = $jsonContent | ConvertFrom-Json
+          $device = $json.devices[0].deviceName
+          $totalDuration = [Math]::Round($json.totalDuration, 6)
+          $results_succeeded = $json.succeeded
+          $results_succeededWithWarnings = $json.succeededWithWarnings
+          $results_failed = $json.failed
+          $results_notRun = $json.notRun
+          $results_inProcess = $json.inProcess
+          Write-Output "Tests ran on $device took $totalDuration seconds."
+          Write-Output "Tests ran on **$device** took **$totalDuration seconds**." >> $markdownPath
+          Write-Output "" >> $markdownPath
+          Write-Output "## Results" >> $markdownPath
+          Write-Output "" >> $markdownPath
+          Write-Output "| :white_check_mark: **Pass** | :warning: **w/ Warning** | :x: **Failed** | :arrow_right_hook: **Skipped** | :finnadie: **Not Finished** |" >> $markdownPath
+          Write-Output "| --- | --- | --- | --- | --- |" >> $markdownPath
+          Write-Output "| $results_succeeded | $results_succeededWithWarnings | $results_failed | $results_notRun | $results_inProcess |" >> $markdownPath
+          Write-Output "" >> $markdownPath
+          Write-Output "## Tests" >> $markdownPath
+          Write-Output "" >> $markdownPath
+          Write-Output "| **Test** | **Result** | **Warnings** | **Errors** | **Duration** |" >> $markdownPath
+          Write-Output "| --- | --- | --- | --- | --- |" >> $markdownPath
+          foreach ($test in $json.tests) 
+          {
+              $test_fullTestPath = $test.fullTestPath.Replace(".", "::").Replace("Project::Functional Tests::", "")
+              $test_state = $test.state
+              if ($test_state -eq "Success")
+              {
+                  $test_state = ":green_circle: Pass"
+              }
+              elseif ($test_state -eq "Fail")
+              {
+                  $test_state = ":red_circle: Fail"
+              }
+
+              $test_warnings = $test.warnings
+              $test_errors = $test.errors
+              $test_duration = [Math]::Round($test.duration, 6)
+              Write-Output "| <code>$test_fullTestPath</code> | $test_state | $test_warnings | $test_errors | $test_duration |" >> $markdownPath
+          }
+        }
+        else
+        {
+          Write-Output "No results found at '$jsonPath'."
+        }

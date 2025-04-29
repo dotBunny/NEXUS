@@ -1,0 +1,41 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "NEXUS: Multiplayer",
+	"Description": "Functionality and tools that are useful when developing multiplayer games.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.g0rybejhpstq",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": false,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusMultiplayer",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusMultiplayerEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

@@ -1,0 +1,31 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "NEXUS: Material Library",
+	"Description": "Library of Materials commonly used.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.o9g9y0u28mka",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusMaterialLibrary",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

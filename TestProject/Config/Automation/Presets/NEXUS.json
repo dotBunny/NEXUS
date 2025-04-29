@@ -1,0 +1,11 @@
+{
+	"id": "NEXUS",
+	"name": "NEXUS",
+	"enabledTests": [
+		"NEXUS.NActorPools.Actor Pool",
+		"NEXUS.NActorPools.Actor Pool (Performance)",
+		"NEXUS.NCore.Base",
+		"NEXUS.NProcGen.Cell Actor Factory",
+		"Project.Functional Tests.NexusActorPoolsSamples.DEMO_NActorPools.FT_NActorPools"
+	]
+}

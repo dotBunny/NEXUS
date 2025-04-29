@@ -1,0 +1,32 @@
+name: 'Workspace Clean'
+description: 'Cleans up the workspace for any artifacts left over.'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Remove previous staging artifacts (?)
+      shell: powershell
+      run: |
+        Write-Output "Check for ${{ github.workspace }}\Staging\"
+        If (Test-Path -Path "${{ github.workspace }}\Staging\") 
+        {
+          Remove-Item -Path "${{ github.workspace }}\Staging\" -Recurse -Force 
+        }
+    - name: Create new staging folder
+      shell: powershell
+      run: |   
+        New-Item -Path "${{ github.workspace }}" -Name "Staging" -ItemType "Directory"
+
+    - name: Create new results folder
+      shell: powershell
+      run: |     
+        New-Item -Path "${{ github.workspace }}\Staging\" -Name "TestResults" -ItemType "Directory"   
+
+    - name: Clear project log (?)
+      shell: powershell
+      run: |
+        Write-Output "Check for ${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log"
+        If (Test-Path -Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log") 
+        { 
+          Remove-Item -Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log"
+        }

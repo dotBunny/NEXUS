@@ -1,0 +1,82 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.6",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "NEXUS",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "ModelingToolsEditorMode",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "NexusActorPools",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDynamicReferences",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusFixers",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMaterialLibrary",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMultiplayer",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusPicker",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusActorPoolsSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDynamicReferencesSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMaterialLibrarySamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusPickerSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusSharedSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUISamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMultiplayerSamples",
+			"Enabled": true
+		}
+	],
+	"AdditionalPluginDirectories": [
+		"../Plugins",
+		"../Samples"
+	]
+}

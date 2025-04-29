@@ -1,0 +1,28 @@
+name: 'Build Project'
+description: 'Builds the project with the Unreal Engine Build.bat'
+
+inputs:
+  build-batch-file:
+    description: 'The path to the Unreal Engine Build.bat'
+    default: 'C:\Program Files\Epic Games\UE_5.6\Engine\Build\BatchFiles\Build.bat'
+    required: false
+  target:
+    description: 'The UE Target to build'
+    default: 'NEXUSEditor'
+    required: false    
+  platform:
+    description: 'The target platform'
+    required: false
+    default: 'Win64'
+  config:
+    description: 'The build config'
+    required: false
+    default: 'Development'
+      
+runs:
+  using: "composite"
+  steps:
+    - name: Build.bat
+      shell: powershell
+      run: |
+        & "${{ inputs.build-batch-file }}" ${{ inputs.target }} ${{ inputs.platform }} ${{ inputs.config }} "${{ github.workspace }}\TestProject\NEXUS.uproject" -progress

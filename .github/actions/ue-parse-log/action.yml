@@ -1,0 +1,18 @@
+name: 'Parse Log'
+description: 'Parses the UnrealEditor log file for errors and warnings.'
+       
+runs:
+  using: "composite"
+  steps:    
+    - name: Parse Log File
+      shell: powershell
+      run: |
+        $logContent = Get-Content -Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log"
+        foreach ($line in $logContent) {
+            if ($line.Contains("Error: ")) {
+              Write-Host "::error ::$line"
+            }
+            if ($line.Contains("Warning: ")) {
+              Write-Host "::warning ::$line"
+            }
+          }

@@ -1,0 +1,50 @@
+name: 'Run Tests'
+description: 'Runs defined unit tests via the UnrealEditor-Cmd.exe'
+
+inputs:
+  ue-cmd:
+    description: 'The path to the UnrealEditor-Cmd.exe'
+    default: 'C:\Program Files\Epic Games\UE_5.6\Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
+    required: false
+  tests:
+    description: 'The test name prefix/category'
+    required: true    
+
+runs:
+  using: "composite"
+  steps:    
+    - name: UnrealEditor-Cmd 
+      shell: powershell
+      run: |
+        Write-Output "Building arguments ..."
+        $CommandArgs = @('"${{ github.workspace }}\TestProject\NEXUS.uproject"', '-unattended', '-nopause', '-testexit="Automation Test Queue Empty"', '-ReportExportPath="${{ github.workspace }}\Staging\TestResults"', '-log')                      
+        switch("${{ inputs.tests }}")
+        {
+          "Unit Tests"
+          { 
+            $CommandArgs += '-ExecCmds="Automation RunTest NEXUS.UnitTests;Quit"'
+            $CommandArgs +=  '-nullrhi'    
+          }
+          "Performance Tests" 
+          {
+            $CommandArgs += '-ExecCmds="Automation RunTest NEXUS.PerfTests;Quit"'
+            $CommandArgs +=  '-nullrhi'
+          }
+          "Functional Tests" 
+          { 
+            $CommandArgs += '-ExecCmds="Automation RunTest Tests.Nexus;Quit"'          
+          }
+        }        
+        Write-Output "Starting Process ..."
+        foreach ($arg in $CommandArgs) {        
+            Write-Output "ARG: $arg"
+        }
+        & "${{ inputs.ue-cmd }}" $CommandArgs
+    - name: Check Results
+      shell: powershell
+      run: |
+        If (!(Test-Path "${{ github.workspace }}\Staging\TestResults\index.json"))
+        { 
+          Write-Output "::error ::Unable to find test results JSON."          
+          exit -1
+        }

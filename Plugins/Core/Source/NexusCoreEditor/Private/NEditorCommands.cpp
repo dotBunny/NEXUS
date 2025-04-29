@@ -1,0 +1,207 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NEditorCommands.h"
+
+#include "BlueprintEditor.h"
+#include "NEditorUtils.h"
+#include "NMetaUtils.h"
+#include "InstanceObjects/NLeakTestInstanceObject.h"
+
+#define LOCTEXT_NAMESPACE "NexusEditor"
+
+void FNEditorCommands::RegisterCommands()
+{
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,
+	"NCore.Help.OpenOverwatch",
+	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
+	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
+	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
+	EUserInterfaceActionType::Button, FInputGesture());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
+	"NCore.Help.OpenIssues",
+	LOCTEXT("Command_Help_OpenBugReport", "Issues"),
+	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
+	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
+	EUserInterfaceActionType::Button, FInputGesture());
+
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
+	"NCore.Help.OpenBugReport",
+	LOCTEXT("Command_Help_OpenBugReport", "Report a Bug"),
+	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub repository's bug report form in your browser."),
+	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.ReportABug"),
+	EUserInterfaceActionType::Button, FInputGesture());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Roadmap,
+		"NCore.Help.OpenRoadmap",
+		LOCTEXT("Command_Help_OpenBugReport", "Roadmap"),
+		LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitOnlineLearning"),
+		EUserInterfaceActionType::Button, FInputGesture());	
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
+		"NCore.Help.OpenDocumentation",
+		LOCTEXT("Command_Help_OpenDocumentation", "Documentation"),
+		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation (Google Doc) in your browser."),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
+		EUserInterfaceActionType::Button, FInputGesture());
+
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
+	"NCore.Tools.LeakCheck",
+	LOCTEXT("Command_Tools_LeakCheck", "Leak Check"),
+	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
+	EUserInterfaceActionType::Button, FInputGesture());
+	
+	CommandList_Help = MakeShareable(new FUICommandList);
+	
+	CommandList_Help->MapAction(Get().CommandInfo_Help_BugReport,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpBugReport),
+		FCanExecuteAction());
+
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Overwatch,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpOverwatch),
+		FCanExecuteAction());
+
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Issues,
+	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpIssues),
+	FCanExecuteAction());
+
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Roadmap,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpRoadmap),
+		FCanExecuteAction());
+
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Documentation,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDocumentation),
+		FCanExecuteAction());
+
+
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
+			"NCore.Node.ExternalDocumentation",
+			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
+			LOCTEXT("Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
+			EUserInterfaceActionType::Button, FInputGesture());
+
+	CommandList_Node = MakeShareable(new FUICommandList);
+
+	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation_CanExecute));
+
+
+	CommandList_Tools = MakeShareable(new FUICommandList);
+	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck_CanExecute));
+}
+
+void FNEditorCommands::OnHelpOverwatch()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/1"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnHelpIssues()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/3"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnHelpBugReport()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://github.com/dotBunny/NEXUS/issues/new?template=bug_report.md"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnHelpRoadmap()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/2"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnHelpDocumentation()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnToolsLeakCheck()
+{
+	UNLeakTestInstanceObject::Create();
+}
+
+bool FNEditorCommands::OnToolsLeakCheck_CanExecute()
+{
+	return true;
+}
+
+void FNEditorCommands::OnNodeExternalDocumentation()
+{
+	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
+	if (Editor == nullptr) return;
+	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
+	if (Node == nullptr) return;
+	FPlatformProcess::LaunchURL(*FNMetaUtils::GetExternalDocumentationUnsafe(Node),nullptr, nullptr);
+}
+
+bool FNEditorCommands::OnNodeExternalDocumentation_CanExecute()
+{
+	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
+	if (Editor == nullptr) return false;
+	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
+	if (Node == nullptr) return false;
+	return FNMetaUtils::HasExternalDocumentation(Node);
+}
+
+void FNEditorCommands::BuildMenus()
+{
+	const FNEditorCommands Commands = Get();
+
+	// Tools Menu
+	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
+	{
+		FToolMenuSection& ToolsSection = Menu->FindOrAddSection("NEXUS");
+		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
+
+		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
+	}
+	
+	// Help Menu Submenu
+	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Help"))
+	{
+		FToolMenuSection& ApplicationSection = Menu->FindOrAddSection(FName("Reference"));
+		ApplicationSection.AddSubMenu(
+				"NEXUS",
+				LOCTEXT("NHelp", "NEXUS"),
+				LOCTEXT("NHelp_Tooltip", "Help related to NEXUS"),
+				FNewToolMenuDelegate::CreateStatic(&FillHelpSubMenu),
+				false,
+				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+			);
+	}
+	
+	// Support for DocsURL addition to nodes
+	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
+	{
+		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
+		DocumentationSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Node_ExternalDocumentation, Commands.CommandList_Node);
+	}
+}
+
+void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
+{
+	const FNEditorCommands Commands = FNEditorCommands::Get();
+
+	FToolMenuSection& ReferenceSection = Menu->FindOrAddSection("Reference");
+	ReferenceSection.Label = LOCTEXT("NHelp_Reference", "Reference");
+	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Documentation,Commands.CommandList_Help);
+	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Overwatch, Commands.CommandList_Help);
+	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Roadmap, Commands.CommandList_Help);
+
+	FToolMenuSection& SupportSection = Menu->FindOrAddSection("Support");
+	SupportSection.Label = LOCTEXT("NHelp_Support", "Support");
+	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_BugReport, Commands.CommandList_Help);
+	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Issues, Commands.CommandList_Help);
+}
+
+#undef LOCTEXT_NAMESPACE

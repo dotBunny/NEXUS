@@ -1,0 +1,28 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "NEXUS Samples: Material Library",
+	"Description": "Sample content for the NEXUS: Material Library plugin.",
+	"Category": "NEXUS Samples",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.o9g9y0u28mka",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "NexusSharedSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMaterialLibrary",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

@@ -1,0 +1,8 @@
+{
+	"id": "NEXUS-FunctionalTests",
+	"name": "NEXUS-FunctionalTests",
+	"enabledTests": [
+		"Project.Functional Tests.NexusActorPoolsSamples.DEMO_NActorPools.FT_NActorPools",
+		"Project.Functional Tests.NexusUISamples.DEMO_NUI.FT_NUI"
+	]
+}

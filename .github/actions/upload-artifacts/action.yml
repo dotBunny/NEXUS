@@ -1,0 +1,32 @@
+name: 'Upload Artifacts'
+description: 'Gathers and uploads any relevant artifacts.'
+
+inputs:
+  artifact-name:
+    default: 'test-results'
+    required: false
+
+runs:
+  using: "composite"
+  steps:  
+    - name: Copy UnrealEditor Log
+      shell: powershell
+      run: |
+        If (Test-Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log") 
+        { 
+          Copy-Item -Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log" -Destination "${{ github.workspace }}\Staging\" 
+        }
+        else
+        {
+          Write-Output "::error ::Unable to find UnrealEditor log."          
+          exit -1
+        }
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      id: upload-artifact
+      if: always()
+      with:
+        if-no-files-found: error 
+        name: ${{ inputs.artifact-name }}
+        path: '${{ github.workspace }}\Staging\'

@@ -1,0 +1,62 @@
+name: Unit Tests
+run-name: Unit Tests (NEXUS.UnitTests)
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+    paths:
+      - 'Plugins/**/Source/**'
+      - 'Samples/**/Content/**'
+      - 'TestProject/Content/**'
+      - 'TestProject/Source/**'
+
+jobs:
+  Smoke:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          clean: false
+
+      - name: Clean workspace
+        uses: ./.github/actions/workspace-clean
+
+      - name: Build project
+        uses: ./.github/actions/build-project 
+
+      - name: Run unit tests
+        uses: ./.github/actions/ue-cmd-tests
+        with:
+          tests: 'Unit Tests'
+
+      - name: Parse UE log
+        if: always()
+        uses: ./.github/actions/ue-parse-log
+
+      - name: Parse test results
+        if: always()
+        uses: ./.github/actions/ue-parse-results
+
+      - name: Gather and upload artifacts
+        if: always()
+        uses: ./.github/actions/upload-artifacts
+        with:
+          artifact-name: 'push-unit-tests-${{ github.run_number }}'
+
+      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
+      - name: Update summary
+        if: always()
+        shell: powershell
+        run: |
+          $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
+          if(Test-Path -Path $markdownPath)
+          {
+            $markdownLines = Get-Content -Path $markdownPath
+            $outputPath = $env:GITHUB_STEP_SUMMARY
+            Write-Output "Updating GITHUB_STEP_SUMMARY with $outputPath."
+            foreach ($line in $markdownLines) 
+            {
+              Write-Output "$line" >> $outputPath
+            }
+          }
+          

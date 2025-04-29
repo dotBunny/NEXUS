@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "NEXUS Samples: Actor Pools",
+	"Description": "Sample content for the NEXUS: Actor Pools plugin.",
+	"Category": "NEXUS Samples",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.sftliuzho90n",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "NexusSharedSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusActorPools",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusMaterialLibrary",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}
