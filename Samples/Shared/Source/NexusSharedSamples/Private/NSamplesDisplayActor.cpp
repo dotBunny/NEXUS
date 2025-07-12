@@ -3,6 +3,7 @@
 
 #include "NSamplesDisplayActor.h"
 
+#include "NColor.h"
 #include "NCoreMinimal.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -245,50 +246,6 @@ void ANSamplesDisplayActor::Rebuild()
 UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorComponent> ComponentClass)
 {
 	return this->GetComponentByClass(ComponentClass);
-}
-FColor ANSamplesDisplayActor::GetColor(const ENSamplesDisplayColor Color)
-{
-	return GetLinearColor(Color).ToFColor(true);
-}
-FLinearColor ANSamplesDisplayActor::GetLinearColor(const ENSamplesDisplayColor Color)
-{
-	constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
-	constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
-	constexpr FLinearColor BlueLight = FLinearColor(0.1019607843137255f, 0.8f, 0.9333333333333333f, 1.0f);
-	constexpr FLinearColor Pink = FLinearColor(0.8196078431372549f, 0.3529411764705882f, 0.8941176470588235f, 1.0f);
-	constexpr FLinearColor GreyLight = FLinearColor(0.123264f, 0.123264f, 0.123264f, 1.0f);
-	constexpr FLinearColor GreyDark = FLinearColor(0.029514f, 0.029514f, 0.029514f, 1.0f);
-	constexpr FLinearColor Yellow = FLinearColor(1.f, 1.f, 0.0f, 1.0f);
-	constexpr FLinearColor Orange = FLinearColor(1.f, 0.5f, 0.f, 1.0f);
-	
-	switch (Color)
-	{
-	case SDC_Black:
-		return FLinearColor::Black;
-	case SDC_White:
-		return FLinearColor::White;
-	case SDC_BlueLight:
-		return BlueLight;
-	case SDC_BlueMid:
-		return BlueMid;
-	case SDC_BlueDark:
-		return BlueDark;
-	case SDC_Red:
-		return FLinearColor::Red;
-	case SDC_Green:
-		return FLinearColor::Green;
-	case SDC_GreyLight:
-		return GreyLight;
-	case SDC_GreyDark:
-		return GreyDark;
-	case SDC_Yellow:
-		return Yellow;
-	case SDC_Orange:
-		return Orange;
-	case SDC_Pink:
-		break;
-	}
-	return Pink;
 }
 
 void ANSamplesDisplayActor::CreateDisplayInstances()
@@ -579,7 +536,7 @@ void ANSamplesDisplayActor::UpdateDescription()
 		DescriptionTextComponent->SetText(FText::FromString(FinalString));
 		DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
 		DescriptionTextComponent->SetWorldSize(DescriptionScale);
-		DescriptionTextComponent->SetTextRenderColor(GetColor(DescriptionColor));
+		DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));
 
 		if (bHeightVSFloorText)
 		{
@@ -615,7 +572,7 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 	}
 	if (DisplayMaterial != nullptr)
 	{
-		DisplayMaterial->SetVectorParameterValue(FName("Base Color"), GetLinearColor(Color));
+		DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
 	}
 }
 void ANSamplesDisplayActor::UpdateNotice()
@@ -639,7 +596,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 		}
 		if (NoticeMaterial != nullptr)
 		{
-			NoticeMaterial->SetVectorParameterValue(FName("Base Color"), GetLinearColor(NoticeColor));
+			NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeColor));
 		}
 		
 		NoticeDecalComponent->SetActive(true);
@@ -649,7 +606,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 
 		NoticeTextComponent->SetText(NoticeText);
 		NoticeTextComponent->SetWorldSize(NoticeScale);
-		NoticeTextComponent->SetTextRenderColor(GetColor(NoticeColor));
+		NoticeTextComponent->SetTextRenderColor(FNColor::GetColor(NoticeColor));
 		NoticeTextComponent->SetVisibility(true);
 		NoticeTextComponent->SetHiddenInGame(false);
 	}
@@ -723,7 +680,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 			TitleTextComponent->SetWorldSize(TitleScale);
 		}
 		TitleTextComponent->SetText(TitleText);
-		TitleTextComponent->SetTextRenderColor(GetColor(TitleColor));
+		TitleTextComponent->SetTextRenderColor(FNColor::GetColor(TitleColor));
 		TitleTextComponent->SetVerticalAlignment(EVRTA_TextCenter);
 	}
 	else

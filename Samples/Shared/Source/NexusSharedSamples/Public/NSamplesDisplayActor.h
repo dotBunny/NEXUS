@@ -6,31 +6,11 @@
 #include "CoreMinimal.h"
 #include "Components/TextRenderComponent.h"
 // ReSharper disable once CppUnusedIncludeDirective
+#include "NColor.h"
 #include "Engine/Font.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class USpotLightComponent;
-
-UENUM(BlueprintType)
-enum ENSamplesDisplayColor : uint8
-{
-	SDC_Black				UMETA(DisplayName = "Black"),
-	SDC_White				UMETA(DisplayName = "White"),
-
-	SDC_BlueLight			UMETA(DisplayName = "Light Blue"),
-	SDC_BlueMid				UMETA(DisplayName = "Mid Blue"),
-	SDC_BlueDark			UMETA(DisplayName = "Dark Blue"),
-
-	SDC_GreyLight			UMETA(DisplayName = "Light Grey"),
-	SDC_GreyDark			UMETA(DisplayName = "Dark Grey"),
-	
-
-	SDC_Red					UMETA(DisplayName = "Red"),
-	SDC_Orange				UMETA(DisplayName = "Orange"),
-	SDC_Yellow				UMETA(DisplayName = "Yellow"),
-	SDC_Green				UMETA(DisplayName = "Green"),
-	SDC_Pink				UMETA(DisplayName = "Pink")
-};
 
 /**
  * A display actor used in NEXUS demonstration levels
@@ -61,9 +41,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FString GetTaggedPrefix() const { return GetTitle(); };
 
-	static FLinearColor GetLinearColor(ENSamplesDisplayColor Color);
-	static FColor GetColor(ENSamplesDisplayColor Color);
-
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
@@ -85,7 +62,7 @@ protected:
 	float ShadowBoxCoverDepthPercentage = 0.333f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	TEnumAsByte<ENSamplesDisplayColor> Color = SDC_Black;
+	TEnumAsByte<ENColor> Color = NC_Black;
 
 	// TITLE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Text")
@@ -95,7 +72,7 @@ protected:
 	float TitleScale = 40.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> TitleColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> TitleColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Seperate Panel")
 	bool bSeparateTitlePanel = false;
@@ -120,7 +97,7 @@ protected:
 	float DescriptionTextPadding = 0.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> DescriptionColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> DescriptionColor = NC_White;
 
 	// SPOTLIGHT
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
@@ -152,7 +129,7 @@ protected:
 	bool bNoticeEnabled = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> NoticeColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> NoticeColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Text")
 	FText NoticeText = FText::FromString("DEPRECATED");
