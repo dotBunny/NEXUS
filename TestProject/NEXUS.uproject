@@ -73,6 +73,14 @@
 		{
 			"Name": "NexusMultiplayerSamples",
 			"Enabled": true
+		},
+		{
+			"Name": "NexusProcGen",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusProcGenSamples",
+			"Enabled": true
 		}
 	],
 	"AdditionalPluginDirectories": [
