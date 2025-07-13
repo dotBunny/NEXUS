@@ -67,4 +67,9 @@ public:
 		RandomTrackedPointInside(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
+
+	FORCEINLINE static bool IsPointInside(const FVector& Origin, const float Radius, const FVector& Point)
+	{
+		return (Origin - Point).Length() <= Radius;
+	}
 };

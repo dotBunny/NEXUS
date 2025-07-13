@@ -82,4 +82,10 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		
 		return ReturnLocation;
 	}
+
+	UFUNCTION(BlueprintCallable, DisplayName="Is Point Inside?", Category = "NEXUS|Picker|Sphere")
+	static bool IsPointInside(const FVector& Origin, const float Radius, const FVector& Point)
+	{
+		return FNSpherePicker::IsPointInside(Origin, Radius, Point);
+	}
 };

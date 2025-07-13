@@ -3,8 +3,9 @@
 
 #include "NSamplesDisplayActor.h"
 
+#include "FuncTestRenderingComponent.h"
 #include "NColor.h"
-#include "NCoreMinimal.h"
+#include "Components/BillboardComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
@@ -12,7 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
 
-ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer)
 {
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	SceneRoot->SetMobility(EComponentMobility::Static);
@@ -216,7 +217,7 @@ void ANSamplesDisplayActor::BeginPlay()
 {
 	if (bTimerEnabled)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, -TimerDuration);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
 	}
 	
 	Super::BeginPlay();
@@ -224,6 +225,9 @@ void ANSamplesDisplayActor::BeginPlay()
 
 void ANSamplesDisplayActor::Rebuild()
 {
+	// Fix stuff that was setup in the FunctionTest constructor
+	UpdateTestComponents();
+	
 	// Clear previous instances
 	PanelMain->ClearInstances();
 	PanelCorner->ClearInstances();
@@ -266,8 +270,50 @@ UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorC
 
 void ANSamplesDisplayActor::TimerExpired()
 {
-	OnTimerEvent.Broadcast();
-	TimerEvent();
+	OnTimerExpired();
+}
+
+void ANSamplesDisplayActor::PrepareTest()
+{
+	if (bTimerEnabled)
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
+	CheckPassCount = 0;
+	CheckFailCount = 0;
+	Super::PrepareTest();
+}
+
+void ANSamplesDisplayActor::CleanUp()
+{
+	if (bTimerEnabled)
+	{
+		if (!TimerHandle.IsValid())
+		{
+			GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
+		}
+	}
+	Super::CleanUp();
+}
+
+void ANSamplesDisplayActor::FinishTest(EFunctionalTestResult TestResult, const FString& Message)
+{
+	if (CheckPassCount > 0 || CheckFailCount > 0)
+	{
+		const FString UpdatedMessage = FString::Printf(TEXT("%s (PASS: %i | FAIL: %i)"), *Message.TrimStartAndEnd(), CheckPassCount, CheckFailCount);
+		if (CheckFailCount > 0)
+		{
+			Super::FinishTest(EFunctionalTestResult::Failed, UpdatedMessage);
+		}
+		else
+		{
+			Super::FinishTest(TestResult, UpdatedMessage);
+		}
+	}
+	else
+	{
+		Super::FinishTest(TestResult, Message);
+	}
 }
 
 void ANSamplesDisplayActor::CreateDisplayInstances()
@@ -774,6 +820,22 @@ void ANSamplesDisplayActor::UpdateCollisions() const
 		ShadowBoxTop->SetCollisionProfileName(FName("NoCollision"));
 		ShadowBoxRound->SetCollisionProfileName(FName("NoCollision"));
 	}
+}
+
+void ANSamplesDisplayActor::UpdateTestComponents()
+{
+	// Reset our SceneRoot
+	RootComponent = SceneRoot;
+	
+#if WITH_EDITORONLY_DATA
+	RenderComp->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	RenderComp->SetVisibility(false);
+	TestName->SetVisibility(false);
+	TestName->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	UBillboardComponent* TestSprite = GetSpriteComponent();
+	TestSprite->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	TestSprite->SetVisibility(false);
+#endif
 }
 
 
