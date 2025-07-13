@@ -12,6 +12,7 @@ namespace UnrealBuildTool.Rules
 			PublicDependencyModuleNames.AddRange(
 				[
 					"Core",
+					"Engine"
 				]
 			);
 
