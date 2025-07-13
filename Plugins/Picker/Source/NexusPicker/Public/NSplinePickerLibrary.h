@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "NSplinePicker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NWorldMacros.h"
 #include "NSplinePickerLibrary.generated.h"
 
 UCLASS()
@@ -22,31 +23,31 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	UFUNCTION(BlueprintCallable, DisplayName = "Next Grounded Point On", Category = "NEXUS|Picker|Spline")
 	static FVector NextGroundedPointOn(const USplineComponent* SplineComponent,
-		UWorld* InWorld = nullptr, const float CastBuffer = 500, const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::NextGroundedPointOn(ReturnLocation, SplineComponent, InWorld, CastBuffer, CollisionChannel);
+		FNSplinePicker::NextGroundedPointOn(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Random Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomPointOn(FVector& OutLocation, const USplineComponent* SplineComponent)
+	static FVector RandomPointOn(const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
 		FNSplinePicker::RandomPointOn(ReturnLocation, SplineComponent);
 		return ReturnLocation;
 	}
 	UFUNCTION(BlueprintCallable, DisplayName = "Random Grounded Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomGroundedPointOn(FVector& OutLocation, const USplineComponent* SplineComponent,
-		UWorld* InWorld = nullptr, const float CastBuffer = 500, const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	static FVector RandomGroundedPointOn(const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomGroundedPointOn(ReturnLocation, SplineComponent, InWorld, CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomGroundedPointOn(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomOneShotPointOn(const int32 Seed, FVector& OutLocation, const USplineComponent* SplineComponent)
+	static FVector RandomOneShotPointOn(const int32 Seed, const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
 		FNSplinePicker::RandomOneShotPointOn(Seed, ReturnLocation, SplineComponent);
@@ -54,16 +55,16 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Grounded Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomOneShotGroundedPointOn(const int32 Seed, FVector& OutLocation, const USplineComponent* SplineComponent,
-		UWorld* InWorld = nullptr, const float CastBuffer = 500, const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	static FVector RandomOneShotGroundedPointOn(const int32 Seed, const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomOneShotGroundedPointOn(Seed, ReturnLocation, SplineComponent, InWorld, CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomOneShotGroundedPointOn(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomTrackedPointOn(int32& Seed, FVector& OutLocation, const USplineComponent* SplineComponent)
+	static FVector RandomTrackedPointOn(int32& Seed, const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
 		FNSplinePicker::RandomTrackedPointOn(Seed, ReturnLocation, SplineComponent);
@@ -71,11 +72,11 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Grounded Point On", Category = "NEXUS|Picker|Spline")
-	static FVector RandomTrackedGroundedPointOn(int32& Seed, FVector& OutLocation, const USplineComponent* SplineComponent,
-		UWorld* InWorld = nullptr, const float CastBuffer = 500, const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	static FVector RandomTrackedGroundedPointOn(int32& Seed, const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomTrackedGroundedPointOn(Seed, ReturnLocation, SplineComponent, InWorld, CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomTrackedGroundedPointOn(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 };

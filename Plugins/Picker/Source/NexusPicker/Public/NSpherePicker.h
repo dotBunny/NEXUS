@@ -37,8 +37,7 @@ public:
 		RandomPointInside(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
-	
-	
+
 	FORCEINLINE static void RandomOneShotPointInside(const int32 Seed, FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius)
 	{

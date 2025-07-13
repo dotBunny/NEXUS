@@ -7,13 +7,13 @@
 #include "CollisionQueryParams.h"
 
 #define N_VARIABLES_PICKER_GROUNDED() \
-	const UWorld* InWorld = nullptr, const float CastBuffer = 500, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
+	const UWorld* InWorld = nullptr, const FVector& CastBuffer = FNPickerUtils::DefaultCastBuffer, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
 #define N_IMPLEMENT_PICKER_GROUNDED() \
 	FHitResult HitResult(ForceInit); \
-	if (InWorld->LineTraceSingleByChannel(HitResult, (OutLocation + (FVector::UpVector * CastBuffer)), OutLocation, CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
+	if (InWorld->LineTraceSingleByChannel(HitResult, OutLocation, (OutLocation + CastBuffer), CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
 	{ \
 		OutLocation = HitResult.Location; \
-	} \
+	}
 
 /**
  * Utility methods supporting picker operations.
@@ -22,4 +22,5 @@ class NEXUSPICKER_API FNPickerUtils
 {
 public:
 	static FCollisionQueryParams DefaultTraceParams;
+	static FVector DefaultCastBuffer;
 };
