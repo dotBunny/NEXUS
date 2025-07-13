@@ -1,18 +1,18 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Customizations/NSamplesDisplayActorCustomization.h"
+#include "Customizations/NSamplesLevelActorCustomization.h"
 #include "CoreMinimal.h"
 #include "NDetailLayoutBuilderUtils.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
-TSharedRef<IDetailCustomization> FNSamplesDisplayActorCustomization::MakeInstance()
+TSharedRef<IDetailCustomization> FNSamplesLevelActorCustomization::MakeInstance()
 {
-	return MakeShareable(new FNSamplesDisplayActorCustomization());
+	return MakeShareable(new FNSamplesLevelActorCustomization());
 }
 
-void FNSamplesDisplayActorCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
+void FNSamplesLevelActorCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
 	FNDetailLayoutBuilderUtils::HideDefaultCategories(DetailBuilder);
 	FNDetailLayoutBuilderUtils::HideActorCategories(DetailBuilder);

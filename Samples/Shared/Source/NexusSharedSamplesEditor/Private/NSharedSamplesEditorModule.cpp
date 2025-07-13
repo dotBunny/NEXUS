@@ -4,6 +4,8 @@
 #include "NSharedSamplesEditorModule.h"
 #include "Customizations/NSamplesDisplayActorCustomization.h"
 #include "NSamplesDisplayActor.h"
+#include "NSamplesLevelActor.h"
+#include "Customizations/NSamplesLevelActorCustomization.h"
 
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -21,7 +23,8 @@ void FNSharedSamplesEditorModule::ShutdownModule()
 	{
 		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
-		PropertyModule.UnregisterCustomClassLayout(ANSamplesDisplayActor::StaticClass()->GetFName());		
+		PropertyModule.UnregisterCustomClassLayout(ANSamplesDisplayActor::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(ANSamplesLevelActor::StaticClass()->GetFName());	
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
@@ -34,6 +37,9 @@ void FNSharedSamplesEditorModule::OnPostEngineInit()
 	
 	PropertyModule.RegisterCustomClassLayout(ANSamplesDisplayActor::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNSamplesDisplayActorCustomization::MakeInstance));
+
+	PropertyModule.RegisterCustomClassLayout(ANSamplesLevelActor::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNSamplesLevelActorCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 }

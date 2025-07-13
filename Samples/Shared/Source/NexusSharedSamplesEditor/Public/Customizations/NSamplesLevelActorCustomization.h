@@ -5,7 +5,7 @@
 
 #include "IDetailCustomization.h"
 
-class FNSamplesDisplayActorCustomization final : public IDetailCustomization
+class FNSamplesLevelActorCustomization final : public IDetailCustomization
 {
 public:
 	static TSharedRef<IDetailCustomization> MakeInstance();
