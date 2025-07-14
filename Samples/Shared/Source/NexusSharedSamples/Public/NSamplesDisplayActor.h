@@ -51,42 +51,35 @@ public:
 	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
 	// ~AFunctionalTest Interface
 
-	UFUNCTION(BlueprintCallable)
-	void CheckTrue(const bool bResult, const FString FailMessage)
-	{
-		if (bResult)
-		{
-			CheckPassCount++;
-		}
-		else
-		{
-			CheckFailCount++;
-			AddError(FailMessage);
-		}
-	}
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True")
+	void CheckTrue(const bool bResult, const FString FailMessage);
 
-	UFUNCTION(BlueprintCallable)
-	void CheckFalse(const bool bResult, const FString FailMessage)
-	{
-		if (!bResult)
-		{
-			CheckPassCount++;
-		}
-		else
-		{
-			CheckFailCount++;
-			AddError(FailMessage);
-		}
-	}
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False")
+	void CheckFalse(const bool bResult, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Location)")
+	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Location)")
+	void CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Object)")
+	void CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Object)")
+	void CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Actor)")
+	void CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Actor)")
+	void CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Pass Count ++")
 	void IncrementCheckPassCount() { CheckPassCount++; };
 	
-	UFUNCTION(BlueprintCallable)
-	void IncrementCheckFailCount()
-	{
-		CheckFailCount++;
-	};
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Fail Count ++")
+	void IncrementCheckFailCount() { CheckFailCount++; };
 	
 protected:
 
@@ -218,7 +211,10 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Has Test Logic?")
+	bool bTestEnabled = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
+	int TestIterationCount = 24;
 	
 private:
 	void TimerExpired();

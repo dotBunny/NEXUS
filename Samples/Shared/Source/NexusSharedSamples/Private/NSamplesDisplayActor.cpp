@@ -316,6 +316,104 @@ void ANSamplesDisplayActor::FinishTest(EFunctionalTestResult TestResult, const F
 	}
 }
 
+void ANSamplesDisplayActor::CheckTrue(const bool bResult, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FailMessage);
+	}
+}
+void ANSamplesDisplayActor::CheckFalse(const bool bResult, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FailMessage);
+	}
+}
+void ANSamplesDisplayActor::CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
+	}
+}
+void ANSamplesDisplayActor::CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
+	}
+}
+void ANSamplesDisplayActor::CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
+	}
+}
+
+
 void ANSamplesDisplayActor::CreateDisplayInstances()
 {
 	// Ensure width
@@ -826,6 +924,7 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 {
 	// Reset our SceneRoot
 	RootComponent = SceneRoot;
+	bIsEnabled = bTestEnabled;
 	
 #if WITH_EDITORONLY_DATA
 	RenderComp->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
