@@ -132,16 +132,16 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		switch (Distribution)
 		{
 		case APSD_Radius:
-			FNCirclePicker::RandomTrackedPointInside(Seed, SpawnLocation, Origin, DistributionRange.X, DistributionRange.Y);
+			FNCirclePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin, DistributionRange.X, DistributionRange.Y);
 			Seed++;
 			break;
 		case APSD_Sphere:
-			FNSpherePicker::RandomTrackedPointInside(Seed, SpawnLocation, Origin,DistributionRange.X, DistributionRange.Y);
+			FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin,DistributionRange.X, DistributionRange.Y);
 			Seed++;
 			break;
 		case APSD_Box:
 			FVector HalfDistribution = DistributionRange / 2.0f;
-			FNBoxPicker::RandomTrackedPointInside(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
+			FNBoxPicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
 			Seed++;
 			break;
 		case APSD_Spline:

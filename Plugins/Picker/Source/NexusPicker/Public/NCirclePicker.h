@@ -13,7 +13,7 @@
 class NEXUSPICKER_API FNCirclePicker
 {
 public:
-	FORCEINLINE static void NextPointInside(FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius)
 	{
 		const float PointTheta = FNRandom::Deterministic.Float() * 2.0f * PI;
@@ -22,15 +22,15 @@ public:
 		OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
 				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
 	}
-	FORCEINLINE static void NextGroundedPointInside(FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void NextGroundedPointInsideOrOn(FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius,
 			N_VARIABLES_PICKER_GROUNDED())
 	{
-		NextPointInside(OutLocation, Origin, MinimumRadius, MaximumRadius);
+		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
 	
-	FORCEINLINE static void RandomPointInside(FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius)
 	{
 		const float PointTheta = FNRandom::NonDeterministic.FRand() * 2.0f * PI;
@@ -39,15 +39,15 @@ public:
 		OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
 				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
 	}
-	FORCEINLINE static void RandomGroundedPointInside(FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomGroundedPointInsideOrOn(FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius,
 		N_VARIABLES_PICKER_GROUNDED())
 	{
-		RandomPointInside(OutLocation, Origin, MinimumRadius, MaximumRadius);
+		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
 	
-	FORCEINLINE static void RandomOneShotPointInside(const int32 Seed, FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius)
 	{
 		const FRandomStream RandomStream(Seed);
@@ -57,15 +57,15 @@ public:
 		OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
 				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
 	}
-	FORCEINLINE static void RandomOneShotGroundedPointInside(const int32 Seed, FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomOneShotGroundedPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius,
 		N_VARIABLES_PICKER_GROUNDED())
 	{
-		RandomOneShotPointInside(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
+		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
 	
-	FORCEINLINE static void RandomTrackedPointInside(int32& Seed, FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius)
 	{
 		const FRandomStream RandomStream(Seed);
@@ -76,11 +76,11 @@ public:
 				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
 		Seed = RandomStream.GetCurrentSeed();
 	}
-	FORCEINLINE static void RandomTrackedGroundedPointInside(int32& Seed, FVector& OutLocation, const FVector& Origin,
+	FORCEINLINE static void RandomTrackedGroundedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin,
 		const float MinimumRadius, const float MaximumRadius,
 		N_VARIABLES_PICKER_GROUNDED())
 	{
-		RandomTrackedPointInside(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
+		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
 };

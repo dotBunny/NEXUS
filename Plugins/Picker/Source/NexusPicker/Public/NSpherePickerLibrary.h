@@ -14,78 +14,78 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Next Point Inside", Category = "NEXUS|Picker|Sphere")
-	static FVector NextPointInside(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	UFUNCTION(BlueprintCallable, DisplayName = "Next Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	static FVector NextPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::NextPointInside(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNSpherePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Next Grounded Point Inside", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
-	static FVector NextGroundedPointInside(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
+	UFUNCTION(BlueprintCallable, DisplayName = "Next Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	static FVector NextGroundedPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::NextGroundedPointInside(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSpherePicker::NextGroundedPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Point Inside", Category = "NEXUS|Picker|Sphere")
-	static FVector RandomPointInside(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	static FVector RandomPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomPointInside(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNSpherePicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Grounded Point Inside", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomGroundedPointInside(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomGroundedPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomGroundedPointInside(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSpherePicker::RandomGroundedPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Point Inside", Category = "NEXUS|Picker|Sphere")
-	static FVector RandomOneShotPointInside(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	static FVector RandomOneShotPoint(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomOneShotPointInside(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNSpherePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Grounded Point Inside", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomOneShotGroundedPointInside(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
+	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomOneShotGroundedPoint(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomOneShotGroundedPointInside(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSpherePicker::RandomOneShotGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;	
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point Inside", Category = "NEXUS|Picker|Sphere")
-	static FVector RandomTrackedPointInside(int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	static FVector RandomTrackedPoint(int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomOneShotPointInside(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNSpherePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Grounded Point Inside", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomTrackedGroundedPointInside(int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomTrackedGroundedPoint(int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSpherePicker::RandomTrackedGroundedPointInside(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSpherePicker::RandomTrackedGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName="Is Point Inside?", Category = "NEXUS|Picker|Sphere")
-	static bool IsPointInside(const FVector& Origin, const float Radius, const FVector& Point)
+	UFUNCTION(BlueprintCallable, DisplayName="Is Point Inside Or On?", Category = "NEXUS|Picker|Sphere")
+	static bool IsPointInsideOrOn(const FVector& Origin, const float Radius, const FVector& Point)
 	{
-		return FNSpherePicker::IsPointInside(Origin, Radius, Point);
+		return FNSpherePicker::IsPointInsideOrOn(Origin, Radius, Point);
 	}
 };

@@ -585,9 +585,9 @@ void ANSamplesDisplayActor::UpdateDescription()
 
 		const float TitleSpacerOffset = GetTitleSpacerOffset();
 		
-		FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false),
-			Origin.Z - TitleSpacerOffset);
-		FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset, WallLocation.Y, WallLocation.X);
+		FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionTextPadding * .5f),
+			Origin.Z - TitleSpacerOffset - (DescriptionTextPadding * .5f));
+		FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
 
 		if (bSeparateTitlePanel)
 		{

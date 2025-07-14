@@ -14,72 +14,72 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Next Point Inside", Category = "NEXUS|Picker|Box")
-	static FVector NextPointInside(const FVector& Origin, const FBox& Dimensions)
+	UFUNCTION(BlueprintCallable, DisplayName = "Next Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	static FVector NextPoint(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::NextPointInside(ReturnLocation, Origin, Dimensions);
+		FNBoxPicker::NextPointInsideOrOn(ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
 	
-	UFUNCTION(BlueprintCallable, DisplayName = "Next Grounded Point Inside", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
-	static FVector NextGroundedPointInside(const FVector& Origin, const FBox& Dimensions,
+	UFUNCTION(BlueprintCallable, DisplayName = "Next Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	static FVector NextGroundedPoint(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::NextGroundedPointInside(ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNBoxPicker::NextGroundedPointInsideOrOn(ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Point Inside", Category = "NEXUS|Picker|Box")
-	static FVector RandomPointInside(const FVector& Origin, const FBox& Dimensions)
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	static FVector RandomPoint(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::RandomPointInside(ReturnLocation, Origin, Dimensions);
+		FNBoxPicker::RandomPointInsideOrOn(ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Grounded Point Inside", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomGroundedPointInside(const FVector& Origin, const FBox& Dimensions,
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomGroundedPoint(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::RandomGroundedPointInside(ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNBoxPicker::RandomGroundedPointInsideOrOn(ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Point Inside", Category = "NEXUS|Picker|Box")
-	static FVector RandomOneShotPointInside(const int32 Seed, const FVector& Origin, const FBox& Dimensions)
+	UFUNCTION(BlueprintCallable, DisplayName = "Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	static FVector RandomOneShotPoint(const int32 Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::RandomOneShotPointInside(Seed, ReturnLocation, Origin, Dimensions);
+		FNBoxPicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Grounded Point Inside", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomOneShotGroundedPointInside(const int32 Seed, const FVector& Origin, const FBox& Dimensions,
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomOneShotGroundedPoint(const int32 Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::RandomOneShotGroundedPointInside(Seed, ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNBoxPicker::RandomOneShotGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		return ReturnLocation;	
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Inside", Category = "NEXUS|Picker|Box")
-	static FVector RandomTrackedPointInside(int32& Seed, const FVector& Origin, const FBox& Dimensions)
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	static FVector RandomTrackedPoint(int32& Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
-		FNBoxPicker::RandomOneShotPointInside(Seed, ReturnLocation, Origin, Dimensions);
+		FNBoxPicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Grounded Point Inside", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomTrackedGroundedPointInside(int32& Seed, const FVector& Origin, const FBox& Dimensions,
+	UFUNCTION(BlueprintCallable, DisplayName = "Random Tracked Grounded Point (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomTrackedGroundedPoint(int32& Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		
 		FVector ReturnLocation;
-		FNBoxPicker::RandomTrackedGroundedPointInside(Seed, ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNBoxPicker::RandomTrackedGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, Dimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
 		
 		return ReturnLocation;
 	}

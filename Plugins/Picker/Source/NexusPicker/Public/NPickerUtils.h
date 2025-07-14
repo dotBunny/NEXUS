@@ -14,6 +14,7 @@
 	{ \
 		OutLocation = HitResult.Location; \
 	}
+#define N_GROUNDING_TOLERANCE 0.0001f
 
 /**
  * Utility methods supporting picker operations.
