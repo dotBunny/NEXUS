@@ -60,4 +60,29 @@ public:
 		RandomTrackedPointOn(Seed, OutLocation, SplineComponent);
 		N_IMPLEMENT_PICKER_GROUNDED()
 	}
+
+	FORCEINLINE static bool IsPointOn(const USplineComponent* SplineComponent, const FVector& Point)
+	{
+		if (!SplineComponent)
+		{
+			return false;
+		}
+		
+		const float Key = SplineComponent->FindInputKeyClosestToWorldLocation(Point);
+		const FVector ClosestLocationOnSpline = SplineComponent->GetLocationAtSplineInputKey(Key, ESplineCoordinateSpace::World);
+
+		return FVector::Distance(Point, ClosestLocationOnSpline) < N_PICKER_TOLERANCE;
+	}
+
+	FORCEINLINE static bool IsPointOnGrounded(const USplineComponent* SplineComponent, const FVector& Point)
+	{
+		if (!SplineComponent)
+		{
+			return false;
+		}
+		const float Key = SplineComponent->FindInputKeyClosestToWorldLocation(Point);
+		const FVector ClosestLocationOnSpline = SplineComponent->GetLocationAtSplineInputKey(Key, ESplineCoordinateSpace::World);
+		const FVector AdjustedPoint = FVector(Point.X, Point.Y, ClosestLocationOnSpline.Z);
+		return FVector::Distance(AdjustedPoint, ClosestLocationOnSpline) < N_PICKER_TOLERANCE;
+	}
 };

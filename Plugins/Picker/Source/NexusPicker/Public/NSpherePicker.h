@@ -30,7 +30,7 @@ public:
 		{
 			FVector Direction = OutLocation - Origin;
 			Direction.Normalize();
-			OutLocation = Origin + (Direction * (MaximumRadius - N_GROUNDING_TOLERANCE));
+			OutLocation = Origin + (Direction * (MaximumRadius - N_PICKER_TOLERANCE));
 		}
 	}
 	
@@ -50,7 +50,7 @@ public:
 		{
 			FVector Direction = OutLocation - Origin;
 			Direction.Normalize();
-			OutLocation = Origin + (Direction * (MaximumRadius - N_GROUNDING_TOLERANCE));
+			OutLocation = Origin + (Direction * (MaximumRadius - N_PICKER_TOLERANCE));
 		}
 	}
 
@@ -71,7 +71,7 @@ public:
 		{
 			FVector Direction = OutLocation - Origin;
 			Direction.Normalize();
-			OutLocation = Origin + (Direction * (MaximumRadius - N_GROUNDING_TOLERANCE));
+			OutLocation = Origin + (Direction * (MaximumRadius - N_PICKER_TOLERANCE));
 		}
 	}
 
@@ -94,7 +94,7 @@ public:
 		{
 			FVector Direction = OutLocation - Origin;
 			Direction.Normalize();
-			OutLocation = Origin + (Direction * (MaximumRadius - N_GROUNDING_TOLERANCE));
+			OutLocation = Origin + (Direction * (MaximumRadius - N_PICKER_TOLERANCE));
 		}
 	}
 

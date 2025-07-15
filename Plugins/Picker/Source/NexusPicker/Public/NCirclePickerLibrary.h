@@ -82,4 +82,10 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 		
 		return ReturnLocation;
 	}
+	
+	UFUNCTION(BlueprintCallable, DisplayName="Circle: Is Point Inside Or On?", Category = "NEXUS|Picker")
+	static bool IsPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FVector& Point)
+	{
+		return FNCirclePicker::IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Point);
+	}
 };

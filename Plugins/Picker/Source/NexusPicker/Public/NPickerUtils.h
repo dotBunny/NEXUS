@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
-#define N_GROUNDING_TOLERANCE 0.0001f
+#define N_PICKER_TOLERANCE 0.0001f
 
 #define N_VARIABLES_PICKER_GROUNDED() \
 	const UWorld* InWorld = nullptr, const FVector& CastBuffer = FNPickerUtils::DefaultCastBuffer, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic

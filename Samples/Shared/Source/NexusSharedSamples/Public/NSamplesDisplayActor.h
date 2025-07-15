@@ -9,6 +9,7 @@
 #include "FunctionalTest.h"
 #include "NColor.h"
 // ReSharper disable once CppUnusedIncludeDirective
+#include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NSamplesDisplayActor.generated.h"
@@ -200,18 +201,27 @@ protected:
 	{
 		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, Radius, 24, FNColor::GetLinearColor(ENColor::NC_White), TimerDuration * TimerIntervals, 0.25f);
 	}
-
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Sphere", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, FVector2D InnerOuter, const int TimerIntervals = 1)
 	{
 		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, InnerOuter.X, 24, FNColor::GetLinearColor(ENColor::NC_Black), TimerDuration * TimerIntervals, 0.25f);
 		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, InnerOuter.Y, 24, FNColor::GetLinearColor(ENColor::NC_White), TimerDuration * TimerIntervals, 0.25f);
 	}
-
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1)
 	{
 		UKismetSystemLibrary::DrawDebugBox(WorldContextObject, Location, Dimensions.GetExtent(), FNColor::GetLinearColor(NC_White), FRotator::ZeroRotator, TimerDuration * TimerIntervals, 0.25f);
+	}
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const int TimerIntervals = 1)
+	{
+		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, Radius, 24, FNColor::GetLinearColor(NC_White), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
+	}
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const int TimerIntervals = 1)
+	{
+		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, InnerOuter.X, 24, FNColor::GetLinearColor(NC_Black), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
+		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, InnerOuter.Y, 24, FNColor::GetLinearColor(NC_White), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
 	}
 
 	UFUNCTION(BlueprintImplementableEvent)

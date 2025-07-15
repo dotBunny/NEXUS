@@ -8,7 +8,7 @@
 #include "NRandom.h"
 
 /**
- * Methods for selecting points related to a circle.
+ * Methods for selecting points related to an axis-aligned circle.
  */
 class NEXUSPICKER_API FNCirclePicker
 {
@@ -82,5 +82,12 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_GROUNDED()
+	}
+
+	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FVector& Point)
+	{
+		const float DistanceSquared = FMath::Square(Point.X - Origin.X) + FMath::Square(Point.Y - Origin.Y);
+		return DistanceSquared >= FMath::Square(MinimumRadius) && DistanceSquared <= FMath::Square(MaximumRadius);
+
 	}
 };

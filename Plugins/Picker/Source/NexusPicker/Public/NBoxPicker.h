@@ -8,7 +8,7 @@
 #include "NRandom.h"
 
 /**
- * Methods for selecting points related to a box.
+ * Methods for selecting points related to an axis-aligned box.
  */
 class NEXUSPICKER_API FNBoxPicker
 {
