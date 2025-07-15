@@ -208,6 +208,12 @@ protected:
 		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, InnerOuter.Y, 24, FNColor::GetLinearColor(ENColor::NC_White), TimerDuration * TimerIntervals, 0.25f);
 	}
 
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1)
+	{
+		UKismetSystemLibrary::DrawDebugBox(WorldContextObject, Location, Dimensions.GetExtent(), FNColor::GetLinearColor(NC_White), FRotator::ZeroRotator, TimerDuration * TimerIntervals, 0.25f);
+	}
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
 
