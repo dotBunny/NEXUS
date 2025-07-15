@@ -23,6 +23,11 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_GROUNDED()
+		// Ensure the point is within the dimensions
+		if (!IsPointInsideOrOn(Origin, Dimensions, OutLocation))
+		{
+			OutLocation = FBox(Origin + Dimensions.Min, Origin + Dimensions.Max).GetClosestPointTo(OutLocation);
+		}
 	}
 	
 	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
@@ -35,6 +40,11 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_GROUNDED()
+		// Ensure the point is within the dimensions
+		if (!IsPointInsideOrOn(Origin, Dimensions, OutLocation))
+		{
+			OutLocation = FBox(Origin + Dimensions.Min, Origin + Dimensions.Max).GetClosestPointTo(OutLocation);
+		}
 	}
 	
 	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
@@ -49,6 +59,11 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_GROUNDED()
+		// Ensure the point is within the dimensions
+		if (!IsPointInsideOrOn(Origin, Dimensions, OutLocation))
+		{
+			OutLocation = FBox(Origin + Dimensions.Min, Origin + Dimensions.Max).GetClosestPointTo(OutLocation);
+		}
 	}
 	
 	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
@@ -64,11 +79,16 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_GROUNDED()
+		// Ensure the point is within the dimensions
+		if (!IsPointInsideOrOn(Origin, Dimensions, OutLocation))
+		{
+			OutLocation = FBox(Origin + Dimensions.Min, Origin + Dimensions.Max).GetClosestPointTo(OutLocation);
+		}
 	}
 
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Dimensions, const FVector& Point)
 	{
-		const FBox Box(Origin - Dimensions.Min, Origin + Dimensions.Max);
+		const FBox Box(Origin + Dimensions.Min, Origin + Dimensions.Max);
 		return Box.IsInsideOrOn(Point);
 	}
 };
