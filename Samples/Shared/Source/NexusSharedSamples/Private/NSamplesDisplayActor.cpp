@@ -270,6 +270,11 @@ UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorC
 
 void ANSamplesDisplayActor::TimerExpired()
 {
+	if (bIsRunning && bTestDisableTimer)
+	{
+		AddInfo("Skipped Timer");
+		return;
+	}
 	OnTimerExpired();
 }
 

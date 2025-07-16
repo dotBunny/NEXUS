@@ -67,11 +67,14 @@ public:
 		{
 			return false;
 		}
-		
-		const float Key = SplineComponent->FindInputKeyClosestToWorldLocation(Point);
-		const FVector ClosestLocationOnSpline = SplineComponent->GetLocationAtSplineInputKey(Key, ESplineCoordinateSpace::World);
 
-		return FVector::Distance(Point, ClosestLocationOnSpline) < N_PICKER_TOLERANCE;
+		const FVector ClosestLocationOnSpline = SplineComponent->FindLocationClosestToWorldLocation(Point, ESplineCoordinateSpace::World);
+		const float Distance = FVector::Distance(Point, ClosestLocationOnSpline);
+		if (Distance > N_PICKER_TOLERANCE)
+		{
+			N_LOG(Warning, TEXT("%s : %s : %f"), *ClosestLocationOnSpline.ToCompactString(), *Point.ToCompactString(), Distance)
+		}
+		return Distance <= N_PICKER_TOLERANCE;
 	}
 
 	FORCEINLINE static bool IsPointOnGrounded(const USplineComponent* SplineComponent, const FVector& Point)
@@ -80,9 +83,21 @@ public:
 		{
 			return false;
 		}
-		const float Key = SplineComponent->FindInputKeyClosestToWorldLocation(Point);
-		const FVector ClosestLocationOnSpline = SplineComponent->GetLocationAtSplineInputKey(Key, ESplineCoordinateSpace::World);
-		const FVector AdjustedPoint = FVector(Point.X, Point.Y, ClosestLocationOnSpline.Z);
-		return FVector::Distance(AdjustedPoint, ClosestLocationOnSpline) < N_PICKER_TOLERANCE;
+		
+		const float SplineLength = SplineComponent->GetSplineLength();
+		const int32 NumOfPoints = FMath::RoundToInt(SplineLength / N_PICKER_TOLERANCE);
+		const float DistancePerSegment = SplineLength / NumOfPoints;
+		
+		for (int32 i = 0; i <= NumOfPoints; ++i)
+		{
+			const float Distance = DistancePerSegment * i;
+			const FVector TestPoint = SplineComponent->GetLocationAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
+			if (FMath::Abs(TestPoint.X - Point.X) <= N_PICKER_TOLERANCE &&
+				FMath::Abs(TestPoint.Y - Point.Y) <= N_PICKER_TOLERANCE)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 };

@@ -12,10 +12,12 @@
 #include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class USpotLightComponent;
 
+#define N_TIMER_DRAW_THICKNESS 0.35f
 /**
  * A display used in NEXUS demonstration levels
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
@@ -194,34 +196,69 @@ protected:
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Point", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawPoint(UObject* WorldContextObject, const FVector Location, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugPoint(WorldContextObject, Location, 15.f, FNColor::GetLinearColor(ENColor::NC_Red), TimerDuration * TimerIntervals);
+		DrawDebugPoint(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, 15.f, FNColor::GetColor(NC_Red),
+			false, TimerDuration * TimerIntervals, SDPG_World);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Sphere", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawSphere(UObject* WorldContextObject, const FVector Location, float Radius, const int TimerIntervals = 1)
+	void TimerDrawSphere(UObject* WorldContextObject, const FVector Location, const float Radius, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, Radius, 24, FNColor::GetLinearColor(ENColor::NC_White), TimerDuration * TimerIntervals, 0.25f);
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Radius,24,
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Sphere", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, FVector2D InnerOuter, const int TimerIntervals = 1)
+	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, const FVector2D InnerOuter, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, InnerOuter.X, 24, FNColor::GetLinearColor(ENColor::NC_Black), TimerDuration * TimerIntervals, 0.25f);
-		UKismetSystemLibrary::DrawDebugSphere(WorldContextObject, Location, InnerOuter.Y, 24, FNColor::GetLinearColor(ENColor::NC_White), TimerDuration * TimerIntervals, 0.25f);
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
+			FNColor::GetColor(NC_Black), false,TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugBox(WorldContextObject, Location, Dimensions.GetExtent(), FNColor::GetLinearColor(NC_White), FRotator::ZeroRotator, TimerDuration * TimerIntervals, 0.25f);
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Dimensions.GetExtent(),
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, Radius, 24, FNColor::GetLinearColor(NC_White), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Radius, 24,
+			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
+			N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const int TimerIntervals = 1)
 	{
-		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, InnerOuter.X, 24, FNColor::GetLinearColor(NC_Black), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
-		UKismetSystemLibrary::DrawDebugCircle(WorldContextObject, Location, InnerOuter.Y, 24, FNColor::GetLinearColor(NC_White), TimerDuration * TimerIntervals, 0.25f, FVector::ForwardVector, FVector::LeftVector);
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
+			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
+
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
+			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
+			N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
+	}
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Spline", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawSpline(UObject* WorldContextObject, const USplineComponent* Spline, const int TimerIntervals = 1)
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> SplinePoints;
+		const float SplineLength = Spline->GetSplineLength();
+		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); // One point every ~20 units
+		const float DistancePerSegment = SplineLength / NumSegments;
+		SplinePoints.Reserve(NumSegments);
+		for (int32 i = 0; i <= NumSegments; ++i)
+		{
+			const float Distance = DistancePerSegment * i;
+			const FVector Point = Spline->GetLocationAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
+			SplinePoints.Add(Point);
+		}
+		for (int32 i = 0; i < SplinePoints.Num() - 1; ++i)
+		{
+			DrawDebugLine(World, SplinePoints[i], SplinePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
 	}
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -229,6 +266,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Has Test Logic?")
 	bool bTestEnabled = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
+	bool bTestDisableTimer = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
 	int TestIterationCount = 24;
 	

@@ -86,6 +86,9 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		return FNSplinePicker::IsPointOn(SplineComponent, Point);
 	}
 
+	/*
+	 * @notes DO NOT USE THIS IT IS ONLY FOR TESTING
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Point On? (Grounded)", Category = "NEXUS|Picker")
 	static bool IsPointOnGrounded(const USplineComponent* SplineComponent, const FVector& Point)
 	{
