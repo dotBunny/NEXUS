@@ -178,7 +178,7 @@ protected:
 	TEnumAsByte<ENColor> NoticeColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Text")
-	FText NoticeText = FText::FromString("DEPRECATED");
+	FText NoticeText = FText::FromString("");
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Scale")
 	float NoticeScale = 80.f;
@@ -263,11 +263,8 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Has Test Logic?")
-	bool bTestEnabled = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
-	bool bTestDisableTimer = true;
+	bool bTestDisableTimer = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
 	int TestIterationCount = 24;
 	

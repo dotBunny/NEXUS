@@ -225,7 +225,7 @@ void ANSamplesDisplayActor::BeginPlay()
 
 void ANSamplesDisplayActor::Rebuild()
 {
-	// Fix stuff that was setup in the FunctionTest constructor
+	// Fix stuff created in FunctionTest constructor
 	UpdateTestComponents();
 	
 	// Clear previous instances
@@ -270,19 +270,14 @@ UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorC
 
 void ANSamplesDisplayActor::TimerExpired()
 {
-	if (bIsRunning && bTestDisableTimer)
-	{
-		AddInfo("Skipped Timer");
-		return;
-	}
 	OnTimerExpired();
 }
 
 void ANSamplesDisplayActor::PrepareTest()
 {
-	if (bTimerEnabled)
+	if (bTimerEnabled && bTestDisableTimer)
 	{
-		GetWorldTimerManager().ClearTimer(TimerHandle);
+		GetWorldTimerManager().PauseTimer(TimerHandle);
 	}
 	CheckPassCount = 0;
 	CheckFailCount = 0;
@@ -291,11 +286,11 @@ void ANSamplesDisplayActor::PrepareTest()
 
 void ANSamplesDisplayActor::CleanUp()
 {
-	if (bTimerEnabled)
+	if (bTimerEnabled && bTestDisableTimer)
 	{
-		if (!TimerHandle.IsValid())
+		if (bTimerEnabled && bTestDisableTimer)
 		{
-			GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
+			GetWorldTimerManager().UnPauseTimer(TimerHandle);
 		}
 	}
 	Super::CleanUp();
@@ -641,7 +636,7 @@ void ANSamplesDisplayActor::UpdateDescription()
 	int WordCountIndex = WordCount - 1;
 	for (int i = 0; i < WordCount; i++)
 	{
-		// We dont want break on the last
+		// We don't want break on the last
 		if (i != WordCountIndex && BreakArray[i])
 		{
 			WordArray[i] = WordArray[i].Append(ParagraphSpacingMarkup);
@@ -676,7 +671,7 @@ void ANSamplesDisplayActor::UpdateDescription()
 	{
 		const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
 
-		FVector Origin = FVector::ZeroVector;
+		FVector Origin;
 		if (bSeparateTitlePanel)
 		{
 			Origin = TitleTextTransform().GetLocation();
@@ -929,7 +924,6 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 {
 	// Reset our SceneRoot
 	RootComponent = SceneRoot;
-	bIsEnabled = bTestEnabled;
 	
 #if WITH_EDITORONLY_DATA
 	RenderComp->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);

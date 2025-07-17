@@ -4,4 +4,4 @@
 #include "NPickerUtils.h"
 
 FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
-FVector FNPickerUtils::DefaultCastBuffer = FVector(0, 0, -500.f);
+FVector FNPickerUtils::DefaultProjection = FVector(0, 0, -500.f);

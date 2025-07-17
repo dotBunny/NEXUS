@@ -8,11 +8,11 @@
 
 #define N_PICKER_TOLERANCE 0.001f
 
-#define N_VARIABLES_PICKER_GROUNDED() \
-	const UWorld* InWorld = nullptr, const FVector& CastBuffer = FNPickerUtils::DefaultCastBuffer, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
-#define N_IMPLEMENT_PICKER_GROUNDED() \
+#define N_VARIABLES_PICKER_PROJECTION() \
+	const UWorld* InWorld = nullptr, const FVector& Projection = FNPickerUtils::DefaultProjection, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
+#define N_IMPLEMENT_PICKER_PROJECTION() \
 	FHitResult HitResult(ForceInit); \
-	if (InWorld->LineTraceSingleByChannel(HitResult, OutLocation, (OutLocation + CastBuffer), CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
+	if (InWorld->LineTraceSingleByChannel(HitResult, OutLocation, (OutLocation + Projection), CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
 	{ \
 		OutLocation = HitResult.Location; \
 	}
@@ -24,5 +24,5 @@ class NEXUSPICKER_API FNPickerUtils
 {
 public:
 	static FCollisionQueryParams DefaultTraceParams;
-	static FVector DefaultCastBuffer;
+	static FVector DefaultProjection;
 };

@@ -21,12 +21,12 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		FNSplinePicker::NextPointOn(ReturnLocation, SplineComponent);
 		return ReturnLocation;
 	}
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Grounded Point (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector NextGroundedPointOn(const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point Projected (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector NextPointOnProjected(const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::NextGroundedPointOn(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSplinePicker::NextPointOnProjected(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -37,12 +37,12 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		FNSplinePicker::RandomPointOn(ReturnLocation, SplineComponent);
 		return ReturnLocation;
 	}
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Grounded Point (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomGroundedPointOn(const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point Projected (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomPointOnProjected(const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomGroundedPointOn(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomPointOnProjected(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -54,12 +54,12 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Grounded Point (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomOneShotGroundedPointOn(const int32 Seed, const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Point Projected (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomOneShotPointOnProjected(const int32 Seed, const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomOneShotGroundedPointOn(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomOneShotPointOnProjected(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -71,12 +71,12 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Grounded Point (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomTrackedGroundedPointOn(UPARAM(ref)int32& Seed, const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Point Projected (On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomTrackedPointOnProjected(UPARAM(ref)int32& Seed, const USplineComponent* SplineComponent,
+		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomTrackedGroundedPointOn(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNSplinePicker::RandomTrackedPointOnProjected(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -86,8 +86,9 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 		return FNSplinePicker::IsPointOn(SplineComponent, Point);
 	}
 
+	// TODO: REMOVE
 	/*
-	 * @notes DO NOT USE THIS IT IS ONLY FOR TESTING
+	 * @notes This is extremely 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Point On? (Grounded)", Category = "NEXUS|Picker")
 	static bool IsPointOnGrounded(const USplineComponent* SplineComponent, const FVector& Point)

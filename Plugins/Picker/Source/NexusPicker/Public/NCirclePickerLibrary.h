@@ -15,77 +15,77 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point (Inside Or On)", Category = "NEXUS|Picker")
-	static FVector NextPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
 		FNCirclePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Grounded Point (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector NextGroundedPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
+		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::NextGroundedPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNCirclePicker::NextPointInsideOrOnProjected(ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point (Inside Or On)", Category = "NEXUS|Picker")
-	static FVector RandomPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	static FVector RandomPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNCirclePicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Grounded Point (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomGroundedPoint(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
+		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomGroundedPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNCirclePicker::RandomPointInsideOrOnProjected(ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker")
-	static FVector RandomOneShotPoint(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNCirclePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Grounded Point (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomOneShotGroundedPoint(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
+		UObject* WorldContextObject = nullptr, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomOneShotGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNCirclePicker::RandomOneShotPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;	
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker")
-	static FVector RandomTrackedPoint(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNCirclePicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		return ReturnLocation;
 	}
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Grounded Point (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
-	static FVector RandomTrackedGroundedPoint(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
-		UObject* WorldContextObject, FVector CastBuffer = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
+		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::RandomTrackedGroundedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), CastBuffer, CollisionChannel);
+		FNCirclePicker::RandomTrackedPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		
 		return ReturnLocation;
 	}
 	
 	UFUNCTION(BlueprintCallable, DisplayName="Circle: Is Point Inside Or On?", Category = "NEXUS|Picker")
-	static bool IsPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FVector& Point)
+	static bool IsPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation, const FVector& Point)
 	{
-		return FNCirclePicker::IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Point);
+		return FNCirclePicker::IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point);
 	}
 };
