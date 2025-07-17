@@ -8,6 +8,7 @@
 #include "NRandom.h"
 
 // TODO: Add Inner/Outer Dimension Option (#37)
+// TODO: GRound ->PRojected Naming
 
 /**
  * Provides various functions for generating points the plane of a square using different
@@ -22,10 +23,44 @@ public:
 	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 */
+	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	{
+		const float MaximumExtentX = MaximumDimensions.X * 0.5f;
+		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
+		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
+		const float MinimumExtentY = MinimumDimensions.Y * 0.5f;
+		// TODO
+		if (Rotation.IsZero())
+		{
+			OutLocation = FVector(
+				FNRandom::Deterministic.FloatRange(Origin.X - MaximumExtentX, Origin.X + MaximumExtentX),
+				FNRandom::Deterministic.FloatRange(Origin.Y - MaximumExtentY, Origin.Y + MaximumExtentY),
+				Origin.Z);
+		}
+		else
+		{
+			const FVector UnrotatedPosition = FVector(
+				FNRandom::Deterministic.FloatRange(Origin.X - MaximumExtentX, Origin.X + MaximumExtentX),
+				FNRandom::Deterministic.FloatRange(Origin.Y - MaximumExtentY, Origin.Y + MaximumExtentY),
+				Origin.Z);
+			OutLocation = Rotation.RotateVector(UnrotatedPosition);
+		}
+	}
+
+	/**
+	 * Generates a deterministic point inside or on the plane of a square.
+	 * Uses the deterministic random generator to ensure reproducible results.
+	 * 
+	 * @param OutLocation [out] The generated point location.
+	 * @param Origin The center point of the square.
 	 * @param Dimensions The width and height of the square (X and Y values).
 	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
 	 */
-	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
@@ -52,15 +87,22 @@ public:
 	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the square.
-	 * @param Dimensions The width and height of the square (X and Y values).
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
 	 * @param Rotation The rotation of the square around its center.
 	 * @param InWorld The world context for line tracing.
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void NextGroundedPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void NextGroundedPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
 	{
-		NextPointInsideOrOn(OutLocation, Origin, Dimensions, Rotation);
+		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
+		N_IMPLEMENT_PICKER_PROJECTION()
+	}
+
+	FORCEINLINE static void NextGroundedPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
+	{
+		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
 	
