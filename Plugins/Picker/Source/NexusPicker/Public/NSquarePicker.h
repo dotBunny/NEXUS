@@ -33,20 +33,28 @@ public:
 		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
 		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
 		const float MinimumExtentY = MinimumDimensions.Y * 0.5f;
-		// TODO
+
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(
-				FNRandom::Deterministic.FloatRange(Origin.X - MaximumExtentX, Origin.X + MaximumExtentX),
-				FNRandom::Deterministic.FloatRange(Origin.Y - MaximumExtentY, Origin.Y + MaximumExtentY),
-				Origin.Z);
+			OutLocation = Origin + FVector(
+				FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentX, Origin.X - MaximumExtentX) :
+					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentX, Origin.X + MaximumExtentX),
+				FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentY, Origin.X - MaximumExtentY) :
+					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentY, Origin.X + MaximumExtentY),
+					Origin.Z);
 		}
 		else
 		{
-			const FVector UnrotatedPosition = FVector(
-				FNRandom::Deterministic.FloatRange(Origin.X - MaximumExtentX, Origin.X + MaximumExtentX),
-				FNRandom::Deterministic.FloatRange(Origin.Y - MaximumExtentY, Origin.Y + MaximumExtentY),
-				Origin.Z);
+			const FVector UnrotatedPosition = Origin + FVector(
+				FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentX, Origin.X - MaximumExtentX) :
+					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentX, Origin.X + MaximumExtentX),
+				FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentY, Origin.X - MaximumExtentY) :
+					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentY, Origin.X + MaximumExtentY),
+					Origin.Z);
 			OutLocation = Rotation.RotateVector(UnrotatedPosition);
 		}
 	}
@@ -94,13 +102,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void NextGroundedPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void NextPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
 
-	FORCEINLINE static void NextGroundedPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void NextPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()

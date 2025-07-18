@@ -30,7 +30,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (Inside Or On)", Category = "NEXUS|Picker")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (Inside Or On)", Category = "NEXUS|Picker|Box")
 	static FVector NextPointInsideOrOn(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -45,7 +45,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (Inside Or On)", Category = "NEXUS|Picker")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (Inside Or On)", Category = "NEXUS|Picker|Box")
 	static FVector RandomPointInsideOrOn(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -61,7 +61,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Box")
 	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -78,7 +78,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Box")
 	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -96,7 +96,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -115,7 +115,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -135,7 +135,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -156,7 +156,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (Inside Or On)", Category = "NEXUS|Picker", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -175,7 +175,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Point       The point to check.
 	 * @return            True if the point is inside or on the FBox, false otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Box: Is Point Inside Or On?", Category = "NEXUS|Picker")
+	UFUNCTION(BlueprintCallable, DisplayName="Box: Is Point Inside Or On?", Category = "NEXUS|Picker|Box")
 	static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Dimensions, const FVector& Point)
 	{
 		return FNBoxPicker::IsPointInsideOrOn(Origin, Dimensions, Point);

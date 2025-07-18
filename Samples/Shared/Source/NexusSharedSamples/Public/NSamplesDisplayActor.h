@@ -260,6 +260,71 @@ protected:
 				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
 		}
 	}
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Square", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& Dimensions, const int TimerIntervals = 1)
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> SquarePoints;
+		SquarePoints.Reserve(5);
+		
+		const float ExtentX = Dimensions.X * 0.5f;
+		const float ExtentY = Dimensions.Y * 0.5f;
+		
+		SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+		SquarePoints.Add(Location + FVector(-ExtentX, ExtentY, 0));
+		SquarePoints.Add(Location + FVector(ExtentX, ExtentY, 0));
+		SquarePoints.Add(Location + FVector(ExtentX, -ExtentY, 0));
+		
+		SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+		
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, SquarePoints[i], SquarePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+	}
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Square", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerDimensions, const FVector2D& OuterDimensions, const int TimerIntervals = 1)
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> SquarePoints;
+		SquarePoints.Reserve(5);
+		
+		const float InnerExtentX = InnerDimensions.X * 0.5f;
+		const float InnerExtentY = InnerDimensions.Y * 0.5f;
+		const float OuterExtentX = OuterDimensions.X * 0.5f;
+		const float OuterExtentY = OuterDimensions.Y * 0.5f;
+		
+		SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+		SquarePoints.Add(Location + FVector(-InnerExtentX, InnerExtentY, 0));
+		SquarePoints.Add(Location + FVector(InnerExtentX, InnerExtentY, 0));
+		SquarePoints.Add(Location + FVector(InnerExtentX, -InnerExtentY, 0));
+
+		SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+		
+		
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, SquarePoints[i], SquarePoints[i + 1], FNColor::GetColor(NC_Black),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+
+		SquarePoints.Empty();
+		SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+		SquarePoints.Add(Location + FVector(-OuterExtentX, OuterExtentY, 0));
+		SquarePoints.Add(Location + FVector(OuterExtentX, OuterExtentY, 0));
+		SquarePoints.Add(Location + FVector(OuterExtentX, -OuterExtentY, 0));
+		
+		SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+		
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, SquarePoints[i], SquarePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+	}
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
