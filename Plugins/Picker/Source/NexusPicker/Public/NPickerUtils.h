@@ -24,5 +24,10 @@ class NEXUSPICKER_API FNPickerUtils
 {
 public:
 	static FCollisionQueryParams DefaultTraceParams;
+	
 	static FVector DefaultProjection;
+	static FRotator DefaultRotation;
+
+	static FRotator BaseRotation;
+	static FMatrix BaseMatrix;
 };

@@ -25,13 +25,14 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
+	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 * @return The generated point location.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point (Inside Or On)", Category = "NEXUS|Picker|Circle")
-	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
-		FNCirclePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
+		FNCirclePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		return ReturnLocation;
 	}
 

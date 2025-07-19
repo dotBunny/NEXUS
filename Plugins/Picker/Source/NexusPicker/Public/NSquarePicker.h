@@ -7,9 +7,6 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
-// TODO: Add Inner/Outer Dimension Option (#37)
-// TODO: GRound ->PRojected Naming
-
 /**
  * Provides various functions for generating points the plane of a square using different
  * random generation strategies (deterministic, non-deterministic, seeded).
@@ -17,6 +14,9 @@
 class NEXUSPICKER_API FNSquarePicker
 {
 public:
+
+	// NEXT POINT
+	
 	/**
 	 * Generates a deterministic point inside or on the plane of a square.
 	 * Uses the deterministic random generator to ensure reproducible results.
@@ -38,58 +38,25 @@ public:
 		{
 			OutLocation = Origin + FVector(
 				FNRandom::Deterministic.Bool() ?
-					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentX, Origin.X - MaximumExtentX) :
-					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentX, Origin.X + MaximumExtentX),
+					FNRandom::Deterministic.FloatRange(-MinimumExtentX, -MaximumExtentX) :
+					FNRandom::Deterministic.FloatRange(MinimumExtentX, MaximumExtentX),
 				FNRandom::Deterministic.Bool() ?
-					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentY, Origin.X - MaximumExtentY) :
-					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentY, Origin.X + MaximumExtentY),
-					Origin.Z);
+					FNRandom::Deterministic.FloatRange(-MinimumExtentY, -MaximumExtentY) :
+					FNRandom::Deterministic.FloatRange(MinimumExtentY, MaximumExtentY),
+					0.f);
 		}
 		else
 		{
-			const FVector UnrotatedPosition = Origin + FVector(
+			OutLocation = Origin + Rotation.RotateVector(FVector(
 				FNRandom::Deterministic.Bool() ?
-					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentX, Origin.X - MaximumExtentX) :
-					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentX, Origin.X + MaximumExtentX),
+					FNRandom::Deterministic.FloatRange(-MinimumExtentX, -MaximumExtentX) :
+					FNRandom::Deterministic.FloatRange(MinimumExtentX, MaximumExtentX),
 				FNRandom::Deterministic.Bool() ?
-					FNRandom::Deterministic.FloatRange(Origin.X - MinimumExtentY, Origin.X - MaximumExtentY) :
-					FNRandom::Deterministic.FloatRange(Origin.X + MinimumExtentY, Origin.X + MaximumExtentY),
-					Origin.Z);
-			OutLocation = Rotation.RotateVector(UnrotatedPosition);
+					FNRandom::Deterministic.FloatRange(-MinimumExtentY, -MaximumExtentY) :
+					FNRandom::Deterministic.FloatRange(MinimumExtentY, MaximumExtentY),
+					0.f));
 		}
 	}
-
-	/**
-	 * Generates a deterministic point inside or on the plane of a square.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the square.
-	 * @param Dimensions The width and height of the square (X and Y values).
-	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
-	 */
-	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
-	{
-		const float ExtentX = Dimensions.X * 0.5f;
-		const float ExtentY = Dimensions.Y * 0.5f;
-		if (Rotation.IsZero())
-		{
-			OutLocation = FVector(
-				FNRandom::Deterministic.FloatRange(Origin.X - ExtentX, Origin.X + ExtentX),
-				FNRandom::Deterministic.FloatRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-				Origin.Z);
-		}
-		else
-		{
-			const FVector UnrotatedPosition = FVector(
-				FNRandom::Deterministic.FloatRange(Origin.X - ExtentX, Origin.X + ExtentX),
-				FNRandom::Deterministic.FloatRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-				Origin.Z);
-			OutLocation = Rotation.RotateVector(UnrotatedPosition);
-		}
-		
-	}
-
 	/**
 	 * Generates a deterministic point inside or on the plane of a square, then projects it to the world.
 	 * 
@@ -107,13 +74,111 @@ public:
 		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-
+	/**
+	 * Generates a deterministic point inside or on the plane of a square.
+	 * Uses the deterministic random generator to ensure reproducible results.
+	 * 
+	 * @param OutLocation [out] The generated point location.
+	 * @param Origin The center point of the square.
+	 * @param Dimensions The width and height of the square (X and Y values).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 */
+	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	{
+		const float ExtentX = Dimensions.X * 0.5f;
+		const float ExtentY = Dimensions.Y * 0.5f;
+		if (Rotation.IsZero())
+		{
+			OutLocation = Origin + FVector(
+				FNRandom::Deterministic.FloatRange(-ExtentX, ExtentX),
+				FNRandom::Deterministic.FloatRange(-ExtentY, ExtentY),
+				0.f);
+		}
+		else
+		{
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+				FNRandom::Deterministic.FloatRange(-ExtentX, ExtentX),
+				FNRandom::Deterministic.FloatRange(-ExtentY, ExtentY),
+				0.f));
+		}
+		
+	}
+	/**
+	 * Generates a deterministic point inside or on the plane of a square, then projects it to the world.
+	 * 
+	 * @param OutLocation [out] The generated and projected point location.
+	 * @param Origin The center point of the square.
+	 * @param Dimensions The width and height of the square (X and Y values).
+	 * @param Rotation The rotation of the square around its center.
+	 * @param InWorld The world context for line tracing.
+	 * @param Projection Direction and distance for the line trace.
+	 * @param CollisionChannel The collision channel to use for tracing.
+	 */
 	FORCEINLINE static void NextPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, N_VARIABLES_PICKER_PROJECTION())
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM POINT
 	
+	/**
+	 * Generates a random point inside or on the plane of a square.
+	 * Uses the non-deterministic random generator for true randomness.
+	 * 
+	 * @param OutLocation [out] The generated point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 */
+	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	{
+		const float MaximumExtentX = MaximumDimensions.X * 0.5f;
+		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
+		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
+		const float MinimumExtentY = MinimumDimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			OutLocation = Origin + FVector(
+				(FNRandom::NonDeterministic.GetFraction() > 0.5f) ?
+					FNRandom::NonDeterministic.RandRange(-MinimumExtentX, Origin.X - MaximumExtentX) :
+					FNRandom::NonDeterministic.RandRange(Origin.X + MinimumExtentX, Origin.X + MaximumExtentX),
+				(FNRandom::NonDeterministic.GetFraction() > 0.5f) ?
+					FNRandom::NonDeterministic.RandRange(Origin.X - MinimumExtentY, -MaximumExtentY) :
+					FNRandom::NonDeterministic.RandRange(Origin.X + MinimumExtentY, Origin.X + MaximumExtentY),
+					0.f);
+		}
+		else
+		{
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+				(FNRandom::NonDeterministic.GetFraction() > 0.5f) ?
+					FNRandom::NonDeterministic.RandRange(-MinimumExtentX, -MaximumExtentX) :
+					FNRandom::NonDeterministic.RandRange(MinimumExtentX, MaximumExtentX),
+				(FNRandom::NonDeterministic.GetFraction() > 0.5f) ?
+					FNRandom::NonDeterministic.RandRange(-MinimumExtentY, -MaximumExtentY) :
+					FNRandom::NonDeterministic.RandRange(MinimumExtentY, MaximumExtentY),
+					0.f));
+		}
+	}
+	/**
+	 * Generates a random point inside or on the plane of a square, then projects it to the world.
+	 * 
+	 * @param OutLocation [out] The generated and projected point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 * @param InWorld The world context for line tracing.
+	 * @param Projection Direction and distance for the line trace.
+	 * @param CollisionChannel The collision channel to use for tracing.
+	 */
+	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	{
+		RandomPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
+		N_IMPLEMENT_PICKER_PROJECTION()
+	}
 	/**
 	 * Generates a random point inside or on the plane of a square.
 	 * Uses the non-deterministic random generator for true randomness.
@@ -123,28 +188,26 @@ public:
 	 * @param Dimensions The width and height of the square (X and Y values).
 	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
 	 */
-	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	FORCEINLINE static void RandomPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(
-			FNRandom::NonDeterministic.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			FNRandom::NonDeterministic.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-				Origin.Z);
+			OutLocation = Origin + FVector(
+			FNRandom::NonDeterministic.RandRange(-ExtentX, ExtentX),
+			FNRandom::NonDeterministic.RandRange(-ExtentY, ExtentY),
+				0.f);
 		}
 		else
 		{
-			const FVector UnrotatedPosition = FVector(
-			FNRandom::NonDeterministic.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			FNRandom::NonDeterministic.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-				Origin.Z);
-			OutLocation = Rotation.RotateVector(UnrotatedPosition);
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+			FNRandom::NonDeterministic.RandRange(-ExtentX, ExtentX),
+			FNRandom::NonDeterministic.RandRange(-ExtentY, ExtentY),
+				0.f));
 		}
 		
 	}
-
 	/**
 	 * Generates a random point inside or on the plane of a square, then projects it to the world.
 	 * 
@@ -156,12 +219,74 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomPointInsideOrOnProjectedSimple(FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
-		RandomPointInsideOrOn(OutLocation, Origin, Dimensions, Rotation);
+		RandomPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM ONE-SHOT POINT
 	
+	/**
+	 * Generates a random point inside or on the plane of a square using a provided seed.
+	 * Useful for one-time random point generation with reproducible results.
+	 * 
+	 * @param Seed The random seed to use.
+	 * @param OutLocation [out] The generated point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center.
+	 */
+	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation)
+	{
+		const FRandomStream RandomStream(Seed);
+		const float MaximumExtentX = MaximumDimensions.X * 0.5f;
+		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
+		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
+		const float MinimumExtentY = MinimumDimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			OutLocation = Origin + FVector(
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+					0.f);
+		}
+		else
+		{
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+					0.f));
+		}
+	}
+	/**
+	 * Generates a random point inside or on the plane of a square using a provided seed, then projects it to the world.
+	 * 
+	 * @param Seed The random seed to use.
+	 * @param OutLocation [out] The generated and projected point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 * @param InWorld The world context for line tracing.
+	 * @param Projection Direction and distance for the line trace.
+	 * @param CollisionChannel The collision channel to use for tracing.
+	 */
+	FORCEINLINE static void RandomOneShotPointInsideOrOnProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	{
+		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
+		N_IMPLEMENT_PICKER_PROJECTION()
+	}
 	/**
 	 * Generates a random point inside or on the plane of a square using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
@@ -172,29 +297,26 @@ public:
 	 * @param Dimensions The width and height of the square (X and Y values).
 	 * @param Rotation The rotation of the square around its center.
 	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation)
+	FORCEINLINE static void RandomOneShotPointInsideOrOnSimple(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation)
 	{
 		const FRandomStream RandomStream(Seed);
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(
-			RandomStream.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			RandomStream.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-			Origin.Z);
+			OutLocation = Origin + FVector(
+			RandomStream.RandRange(-ExtentX, ExtentX),
+			RandomStream.RandRange(-ExtentY, ExtentY),
+			0.f);
 		}
 		else
 		{
-			const FVector UnrotatedPosition = FVector(
-			RandomStream.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			RandomStream.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-			Origin.Z);
-			OutLocation = Rotation.RotateVector(UnrotatedPosition);
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+			RandomStream.RandRange(-ExtentX, ExtentX),
+			RandomStream.RandRange(-ExtentY, ExtentY),
+			0.f));
 		}
-		
 	}
-
 	/**
 	 * Generates a random point inside or on the plane of a square using a provided seed, then projects it to the world.
 	 * 
@@ -207,12 +329,76 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOnProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
-		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, Dimensions, Rotation);
+		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-	
+
+	// RANDOM TRACKED POINT
+
+	/**
+	 * Generates a random point inside or on the plane of a square while tracking the random seed state.
+	 * Updates the seed value to enable sequential random point generation.
+	 * 
+	 * @param Seed [in,out] The random seed to use and update.
+	 * @param OutLocation [out] The generated point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 */
+	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	{
+		const FRandomStream RandomStream(Seed);
+		const float MaximumExtentX = MaximumDimensions.X * 0.5f;
+		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
+		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
+		const float MinimumExtentY = MinimumDimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			OutLocation = Origin + FVector(
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+					0.f);
+		}
+		else
+		{
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
+				(RandomStream.GetFraction() > 0.5f) ?
+					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+					0.f));
+		}
+		Seed = RandomStream.GetCurrentSeed();
+	}
+	/**
+	 * Generates a random point inside or on the plane of a square while tracking the random seed state, then projects it to the world.
+	 * Updates the seed value to enable sequential random point generation.
+	 * 
+	 * @param Seed [in,out] The random seed to use and update.
+	 * @param OutLocation [out] The generated and projected point location.
+	 * @param Origin The center point of the square.
+	 * @param MinimumDimensions The minimum width and height of the square (X and Y values, inner bound).
+	 * @param MaximumDimensions The maximum width and height of the square (X and Y values, outer bound).
+	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
+	 * @param InWorld The world context for line tracing.
+	 * @param Projection Direction and distance for the line trace.
+	 * @param CollisionChannel The collision channel to use for tracing.
+	 */
+	FORCEINLINE static void RandomTrackedPointInsideOrOnProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	{
+		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
+		N_IMPLEMENT_PICKER_PROJECTION()
+	}
 	/**
 	 * Generates a random point inside or on the plane of a square while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
@@ -223,30 +409,28 @@ public:
 	 * @param Dimensions The width and height of the square (X and Y values).
 	 * @param Rotation The rotation of the square around its center (default is ZeroRotator).
 	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
+	FORCEINLINE static void RandomTrackedPointInsideOrOnSimple(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		const FRandomStream RandomStream(Seed);
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(
-			RandomStream.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			RandomStream.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-			Origin.Z);
+			OutLocation = Origin + FVector(
+			RandomStream.RandRange(-ExtentX, ExtentX),
+			RandomStream.RandRange(-ExtentY, ExtentY),
+			0.f);
 		}
 		else
 		{
-			const FVector UnrotatedPosition = FVector(
-			RandomStream.RandRange(Origin.X - ExtentX, Origin.X + ExtentX),
-			RandomStream.RandRange(Origin.Y - ExtentY, Origin.Y + ExtentY),
-			Origin.Z);
-			OutLocation = Rotation.RotateVector(UnrotatedPosition);
+			OutLocation = Origin + Rotation.RotateVector(FVector(
+			RandomStream.RandRange(-ExtentX, ExtentX),
+			RandomStream.RandRange(-ExtentY, ExtentY),
+			0.f));
 		}
 		
 		Seed = RandomStream.GetCurrentSeed();
 	}
-
 	/**
 	 * Generates a random point inside or on the plane of a square while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
@@ -260,11 +444,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOnProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomTrackedPointInsideOrOnSimpleProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
-		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, Dimensions, Rotation);
+		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// ASSERT
 	
 	/**
 	 * Checks if a point is inside or on the plane of a square.

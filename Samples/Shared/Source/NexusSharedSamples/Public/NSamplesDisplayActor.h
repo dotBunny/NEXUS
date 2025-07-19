@@ -221,22 +221,39 @@ protected:
 			SDPG_World, N_TIMER_DRAW_THICKNESS);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const int TimerIntervals = 1)
+	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1)
 	{
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Radius, 24,
+		FMatrix WorkingMatrix = BaseDrawMatrix;
+		WorkingMatrix.SetOrigin(Location);
+
+		// TODO: Not working for rotation
+		
+		FMatrix DrawMatrix = FRotationMatrix(Rotation) * WorkingMatrix;
+		DrawMatrix.SetOrigin(Location);
+		
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, Radius, 24,
 			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
+			N_TIMER_DRAW_THICKNESS,false);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const int TimerIntervals = 1)
+	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1)
 	{
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
-			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
-			SDPG_World, N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
 
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
+		FMatrix WorkingMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
+		WorkingMatrix.SetOrigin(Location);
+		
+		FMatrix DrawMatrix = FRotationMatrix(Rotation) * WorkingMatrix;
+		
+		// TODO: Not working for rotation
+		
+		
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.X, 24,
+			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS, false);
+
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.Y, 24,
 			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			N_TIMER_DRAW_THICKNESS, FVector::ForwardVector, FVector::LeftVector, false);
+			N_TIMER_DRAW_THICKNESS, false);
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Spline", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawSpline(UObject* WorldContextObject, const USplineComponent* Spline, const int TimerIntervals = 1)
@@ -261,7 +278,7 @@ protected:
 		}
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Square", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& Dimensions, const int TimerIntervals = 1)
+	void TimerDrawSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, int TimerIntervals = 1)
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		const float LifeTime = TimerDuration * TimerIntervals;
@@ -270,14 +287,25 @@ protected:
 		
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+			SquarePoints.Add(Location + FVector(-ExtentX, ExtentY, 0));
+			SquarePoints.Add(Location + FVector(ExtentX, ExtentY, 0));
+			SquarePoints.Add(Location + FVector(ExtentX, -ExtentY, 0));
 		
-		SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
-		SquarePoints.Add(Location + FVector(-ExtentX, ExtentY, 0));
-		SquarePoints.Add(Location + FVector(ExtentX, ExtentY, 0));
-		SquarePoints.Add(Location + FVector(ExtentX, -ExtentY, 0));
+			SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+		}
+		else
+		{
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, ExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, ExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, -ExtentY, 0)));
 		
-		SquarePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
-		
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
+		}
 		for (int32 i = 0; i < 4; ++i)
 		{
 			DrawDebugLine(World, SquarePoints[i], SquarePoints[i + 1], FNColor::GetColor(NC_White),
@@ -285,7 +313,7 @@ protected:
 		}
 	}
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Square", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerDimensions, const FVector2D& OuterDimensions, const int TimerIntervals = 1)
+	void TimerDrawComboSquare(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerDimensions, const FVector2D& OuterDimensions, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1)
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		const float LifeTime = TimerDuration * TimerIntervals;
@@ -296,14 +324,25 @@ protected:
 		const float InnerExtentY = InnerDimensions.Y * 0.5f;
 		const float OuterExtentX = OuterDimensions.X * 0.5f;
 		const float OuterExtentY = OuterDimensions.Y * 0.5f;
-		
-		SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
-		SquarePoints.Add(Location + FVector(-InnerExtentX, InnerExtentY, 0));
-		SquarePoints.Add(Location + FVector(InnerExtentX, InnerExtentY, 0));
-		SquarePoints.Add(Location + FVector(InnerExtentX, -InnerExtentY, 0));
 
-		SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
-		
+		if (Rotation.IsZero())
+		{
+			SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+			SquarePoints.Add(Location + FVector(-InnerExtentX, InnerExtentY, 0));
+			SquarePoints.Add(Location + FVector(InnerExtentX, InnerExtentY, 0));
+			SquarePoints.Add(Location + FVector(InnerExtentX, -InnerExtentY, 0));
+
+			SquarePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+		}
+		else
+		{
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, InnerExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, InnerExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, -InnerExtentY, 0)));
+
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
+		}
 		
 		for (int32 i = 0; i < 4; ++i)
 		{
@@ -312,12 +351,25 @@ protected:
 		}
 
 		SquarePoints.Empty();
-		SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
-		SquarePoints.Add(Location + FVector(-OuterExtentX, OuterExtentY, 0));
-		SquarePoints.Add(Location + FVector(OuterExtentX, OuterExtentY, 0));
-		SquarePoints.Add(Location + FVector(OuterExtentX, -OuterExtentY, 0));
+
+		if (Rotation.IsZero())
+		{
+			SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+			SquarePoints.Add(Location + FVector(-OuterExtentX, OuterExtentY, 0));
+			SquarePoints.Add(Location + FVector(OuterExtentX, OuterExtentY, 0));
+			SquarePoints.Add(Location + FVector(OuterExtentX, -OuterExtentY, 0));
 		
-		SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+			SquarePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+		}
+		else
+		{
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, OuterExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, OuterExtentY, 0)));
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, -OuterExtentY, 0)));
+		
+			SquarePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
+		}
 		
 		for (int32 i = 0; i < 4; ++i)
 		{
@@ -425,4 +477,5 @@ private:
 
 	int CheckPassCount = 0;
 	int CheckFailCount = 0;
+	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 };

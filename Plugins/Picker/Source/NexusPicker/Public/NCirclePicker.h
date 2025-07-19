@@ -16,6 +16,9 @@
 class NEXUSPICKER_API FNCirclePicker
 {
 public:
+
+	// NEXT POINT
+	
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
 	 * Uses the deterministic random generator to ensure reproducible results.
@@ -33,16 +36,13 @@ public:
 
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-					Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
+			OutLocation = Origin + FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f);
 		}
 		else
 		{
-			OutLocation = Rotation.RotateVector(FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-					Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z));
+			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle, then projects it to the world.
 	 * 
@@ -55,13 +55,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void NextPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin,
-		const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator,
-			N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void NextPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM POINT
 	
 	/**
 	 * Generates a random point inside or on the perimeter of a circle.
@@ -80,16 +80,13 @@ public:
 
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-					Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
+			OutLocation = Origin + FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f);
 		}
 		else
 		{
-			OutLocation = Rotation.RotateVector(FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-					Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z));
+			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
 	}
-
 	/**
 	 * Generates a random point inside or on the perimeter of a circle, then projects it to the world.
 	 * 
@@ -102,13 +99,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin,
-		const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator,
-		N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM ONE-SHOT POINT
 	
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed.
@@ -129,17 +126,14 @@ public:
 
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
+			OutLocation = Origin + FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f);
 		}
 		else
 		{
-			OutLocation = Rotation.RotateVector(FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-				Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z));
+			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
 		
 	}
-
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed, then projects it to the world.
 	 * 
@@ -153,13 +147,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOnProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin,
-		const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator,
-		N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomOneShotPointInsideOrOnProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM TRACKED
 	
 	/**
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state.
@@ -172,8 +166,7 @@ public:
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin,
-		const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
+	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		const FRandomStream RandomStream(Seed);
 		const float PointTheta = RandomStream.FRand() * 2.0f * PI;
@@ -181,18 +174,15 @@ public:
 
 		if (Rotation.IsZero())
 		{
-			OutLocation = FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-		Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z);
+			OutLocation = Origin + FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f);
 		}
 		else
 		{
-			OutLocation = Rotation.RotateVector(FVector(Origin.X + (PointRadius * FMath::Cos(PointTheta)),
-		Origin.Y + (PointRadius * FMath::Sin(PointTheta)), Origin.Z));
+			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
 
 		Seed = RandomStream.GetCurrentSeed();
 	}
-
 	/**
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
@@ -207,13 +197,13 @@ public:
 	 * @param Projection Direction and distance for the line trace.
 	 * @param CollisionChannel The collision channel to use for tracing.
 	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOnProjected(int32& Seed, FVector& OutLocation, const FVector& Origin,
-		const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator,
-		N_VARIABLES_PICKER_PROJECTION())
+	FORCEINLINE static void RandomTrackedPointInsideOrOnProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator, N_VARIABLES_PICKER_PROJECTION())
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// ASSERT
 	
 	/**
 	 * Checks if a point is inside or on the perimeter of a circle.
