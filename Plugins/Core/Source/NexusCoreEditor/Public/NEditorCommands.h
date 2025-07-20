@@ -46,4 +46,5 @@ public:
 
 	static void BuildMenus();
 	static void FillHelpSubMenu(UToolMenu* Menu);
+	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
 };

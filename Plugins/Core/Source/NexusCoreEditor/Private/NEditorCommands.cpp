@@ -4,6 +4,7 @@
 #include "NEditorCommands.h"
 
 #include "BlueprintEditor.h"
+#include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
 #include "InstanceObjects/NLeakTestInstanceObject.h"
@@ -157,10 +158,24 @@ void FNEditorCommands::BuildMenus()
 {
 	const FNEditorCommands Commands = Get();
 
-	// Tools Menu
-	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
+	// Project Levels
+	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File"))
 	{
-		FToolMenuSection& ToolsSection = Menu->FindOrAddSection("NEXUS");
+		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
+		FileOpenSection.AddSubMenu(
+				"NProjectLevels",
+				LOCTEXT("ProjectLevels", "Project Levels"),
+				LOCTEXT("ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
+				FNewToolMenuDelegate::CreateStatic(&FillProjectLevelsSubMenu),
+				false,
+				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+			);
+	}
+	
+	// Tools Menu
+	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
+	{
+		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("NEXUS");
 		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
@@ -185,6 +200,39 @@ void FNEditorCommands::BuildMenus()
 	{
 		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
 		DocumentationSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Node_ExternalDocumentation, Commands.CommandList_Node);
+	}
+}
+
+void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
+{
+	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", LOCTEXT("ProjectLevels", ""));
+	for (const UNEditorSettings* Settings = UNEditorSettings::Get();
+		const FSoftObjectPath& Path : Settings->ProjectLevels)
+	{
+		if (!Path.IsValid())
+		{
+			continue;
+		}
+		
+		const FText DisplayName = FText::FromString(Path.GetAssetName());
+		const FText DisplayTooltip = FText::FromString(Path.GetAssetPathString());
+		const FName AssetName = Path.GetAssetFName();
+
+		FUIAction ButtonAction = FUIAction(
+		FExecuteAction::CreateLambda([Path]()
+			{
+				if (const FString MapPath = Path.ToString(); MapPath.Len() > 0)
+				{
+					GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(MapPath);
+				}
+			}),
+			FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
+			FIsActionChecked(),
+			FIsActionButtonVisible());
+
+		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip, FSlateIcon(),
+			FToolUIActionChoice(ButtonAction),
+			EUserInterfaceActionType::Button, AssetName);
 	}
 }
 

@@ -33,10 +33,7 @@ public:
 	}
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, config, Category = "Quick Maps", DisplayName = "Core", meta = (AllowedClasses = "/Script/Engine.World"))
-	TArray<FSoftObjectPath> CoreMaps;
-
-	UPROPERTY(EditAnywhere, config, Category = "Quick Maps", DisplayName = "Gyms", meta = (AllowedClasses = "/Script/Engine.World"))
-	TArray<FSoftObjectPath> GymMaps;
+	UPROPERTY(EditAnywhere, config, Category = "Project Levels", DisplayName = "Project Levels", meta = (AllowedClasses = "/Script/Engine.World"))
+	TArray<FSoftObjectPath> ProjectLevels;
 #endif
 };

@@ -25,6 +25,5 @@ public:
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
 
 private:
-	UPROPERTY()
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
 };
