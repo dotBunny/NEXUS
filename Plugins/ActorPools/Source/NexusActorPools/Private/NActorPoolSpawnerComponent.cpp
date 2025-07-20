@@ -141,7 +141,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			break;
 		case APSD_Box:
 			FVector HalfDistribution = DistributionRange / 2.0f;
-			FNBoxPicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
+			FNBoxPicker::RandomTrackedPointInsideOrOnSimple(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
 			Seed++;
 			break;
 		case APSD_Spline:
