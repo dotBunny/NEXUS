@@ -24,6 +24,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
+	// NEXT POINT
+	
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Will always return the same point for identical input parameters.
@@ -40,7 +42,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Will always return the same point for identical input parameters.
@@ -56,7 +57,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::NextPointInsideOrOnSimple(ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -77,7 +77,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::NextPointInsideOrOnProjected(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -98,6 +97,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 
+
+	// RANDOM POINT
+	
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
@@ -114,7 +116,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
@@ -130,7 +131,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomPointInsideOrOnSimple(ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -151,7 +151,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomPointInsideOrOnProjected(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -172,6 +171,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 
+	// RANDOM ONE-SHOT POINT
+	
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
@@ -189,7 +190,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
@@ -206,7 +206,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
-	
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -228,7 +227,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;	
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
@@ -250,6 +248,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;	
 	}
 
+	// RANDOM TRACKED POINT
+	
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation with different results.
@@ -267,7 +267,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation with different results.
@@ -284,7 +283,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomTrackedPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
 	 * Updates the seed value to enable sequential random point generation with different results.
@@ -308,7 +306,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		
 		return ReturnLocation;
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
 	 * Updates the seed value to enable sequential random point generation with different results.
@@ -332,6 +329,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 
+	// ASSERT
+	
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
 	 * 

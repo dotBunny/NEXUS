@@ -13,6 +13,9 @@
 class NEXUSPICKER_API FNSpherePicker
 {
 public:
+
+	// NEXT POINT
+	
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the deterministic random generator to ensure reproducible results.
@@ -26,7 +29,6 @@ public:
 	{
 		OutLocation = Origin + (FNRandom::Deterministic.VRand() * FNRandom::Deterministic.FloatRange(MinimumRadius, MaximumRadius));
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
 	 * 
@@ -43,7 +45,6 @@ public:
 		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the deterministic random generator to ensure reproducible results.
@@ -56,7 +57,6 @@ public:
 	{
 		OutLocation = Origin + (FNRandom::Deterministic.VRand() * Radius);
 	}
-
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
 	 * 
@@ -73,6 +73,8 @@ public:
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
 
+	// RANDOM POINT
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
@@ -86,7 +88,6 @@ public:
 	{
 		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * FNRandom::NonDeterministic.FRandRange(MinimumRadius, MaximumRadius));
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
 	 * 
@@ -103,8 +104,6 @@ public:
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
@@ -117,7 +116,6 @@ public:
 	{
 		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * Radius);
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
 	 * 
@@ -134,6 +132,8 @@ public:
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
 
+	// RANDOM ONE-SHOT POINT
+	
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
@@ -149,7 +149,6 @@ public:
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
 	 * 
@@ -167,7 +166,6 @@ public:
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
@@ -182,7 +180,6 @@ public:
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * Radius);
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
 	 * 
@@ -199,6 +196,8 @@ public:
 		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Radius);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
+
+	// RANDOM TRACKED POINT
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
@@ -216,7 +215,6 @@ public:
 		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
 		Seed = RandomStream.GetCurrentSeed();
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
@@ -236,7 +234,6 @@ public:
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
@@ -252,7 +249,6 @@ public:
 		OutLocation = Origin + (RandomStream.VRand() * Radius);
 		Seed = RandomStream.GetCurrentSeed();
 	}
-
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
@@ -272,6 +268,8 @@ public:
 		N_IMPLEMENT_PICKER_PROJECTION()
 	}
 
+	// ASSERT
+	
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
 	 * 
