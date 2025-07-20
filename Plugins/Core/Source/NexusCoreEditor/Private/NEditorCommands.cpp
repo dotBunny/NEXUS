@@ -230,7 +230,8 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 			FIsActionChecked(),
 			FIsActionButtonVisible());
 
-		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip, FSlateIcon(),
+		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip,
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Level"),
 			FToolUIActionChoice(ButtonAction),
 			EUserInterfaceActionType::Button, AssetName);
 	}
