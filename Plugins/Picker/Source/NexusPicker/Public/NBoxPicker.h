@@ -58,9 +58,9 @@ public:
 	 */
 	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
 	{
-		OutLocation = Origin + FVector(FNRandom::NonDeterministic.RandRange(Dimensions.Min.X, Dimensions.Max.X),
-			FNRandom::NonDeterministic.RandRange(Dimensions.Min.Y, Dimensions.Max.Y),
-			FNRandom::NonDeterministic.RandRange(Dimensions.Min.Z, Dimensions.Max.Z));
+		OutLocation = Origin + FVector(FNRandom::NonDeterministic.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
+			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
+			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
 	}
 	
 	/**
@@ -91,9 +91,9 @@ public:
 	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
 	{
 		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + FVector(RandomStream.RandRange(Dimensions.Min.X, Dimensions.Max.X),
-				RandomStream.RandRange(Dimensions.Min.Y, Dimensions.Max.Y),
-				RandomStream.RandRange(Dimensions.Min.Z, Dimensions.Max.Z));
+		OutLocation = Origin + FVector(RandomStream.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
+				RandomStream.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
+				RandomStream.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
 	}
 	
 	/**
@@ -126,9 +126,9 @@ public:
 	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
 	{
 		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + FVector(RandomStream.RandRange(Dimensions.Min.X, Dimensions.Max.X),
-				RandomStream.RandRange(Dimensions.Min.Y, Dimensions.Max.Y),
-				RandomStream.RandRange(Dimensions.Min.Z, Dimensions.Max.Z));
+		OutLocation = Origin + FVector(RandomStream.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
+				RandomStream.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
+				RandomStream.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
 		Seed = RandomStream.GetCurrentSeed();
 	}
 	

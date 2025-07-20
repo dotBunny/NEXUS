@@ -142,23 +142,23 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					FNRandom::NonDeterministic.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					FNRandom::NonDeterministic.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					FNRandom::NonDeterministic.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					FNRandom::NonDeterministic.RandRange(MinimumExtentY, MaximumExtentY),
+				FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtentX, MaximumExtentX),
+					FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					FNRandom::NonDeterministic.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					FNRandom::NonDeterministic.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					FNRandom::NonDeterministic.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					FNRandom::NonDeterministic.RandRange(MinimumExtentY, MaximumExtentY),
+				FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtentX, MaximumExtentX),
+					FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
 	}
@@ -195,15 +195,15 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-			FNRandom::NonDeterministic.RandRange(-ExtentX, ExtentX),
-			FNRandom::NonDeterministic.RandRange(-ExtentY, ExtentY),
+			FNRandom::NonDeterministic.FRandRange(-ExtentX, ExtentX),
+			FNRandom::NonDeterministic.FRandRange(-ExtentY, ExtentY),
 				0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-			FNRandom::NonDeterministic.RandRange(-ExtentX, ExtentX),
-			FNRandom::NonDeterministic.RandRange(-ExtentY, ExtentY),
+			FNRandom::NonDeterministic.FRandRange(-ExtentX, ExtentX),
+			FNRandom::NonDeterministic.FRandRange(-ExtentY, ExtentY),
 				0.f));
 		}
 		
@@ -241,6 +241,7 @@ public:
 	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation)
 	{
 		const FRandomStream RandomStream(Seed);
+		
 		const float MaximumExtentX = MaximumDimensions.X * 0.5f;
 		const float MaximumExtentY = MaximumDimensions.Y * 0.5f;
 		const float MinimumExtentX = MinimumDimensions.X * 0.5f;
@@ -249,23 +250,23 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+			RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.FRandRange(MinimumExtentX, MaximumExtentX),
+					RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+			RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.FRandRange(MinimumExtentX, MaximumExtentX),
+					RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
 	}
@@ -305,15 +306,15 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-			RandomStream.RandRange(-ExtentX, ExtentX),
-			RandomStream.RandRange(-ExtentY, ExtentY),
+			RandomStream.FRandRange(-ExtentX, ExtentX),
+			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-			RandomStream.RandRange(-ExtentX, ExtentX),
-			RandomStream.RandRange(-ExtentY, ExtentY),
+			RandomStream.FRandRange(-ExtentX, ExtentX),
+			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f));
 		}
 	}
@@ -359,23 +360,23 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+			RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.FRandRange(MinimumExtentX, MaximumExtentX),
+					RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentX, -MaximumExtentX) :
-					RandomStream.RandRange(MinimumExtentX, MaximumExtentX),
-				FNRandom::Bool(FNRandom::NonDeterministic) ?
-					RandomStream.RandRange(-MinimumExtentY, -MaximumExtentY) :
-					RandomStream.RandRange(MinimumExtentY, MaximumExtentY),
+			RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentX, -MaximumExtentX) :
+					RandomStream.FRandRange(MinimumExtentX, MaximumExtentX),
+					RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					RandomStream.FRandRange(-MinimumExtentY, -MaximumExtentY) :
+					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
 		Seed = RandomStream.GetCurrentSeed();
@@ -417,15 +418,15 @@ public:
 		if (Rotation.IsZero())
 		{
 			OutLocation = Origin + FVector(
-			RandomStream.RandRange(-ExtentX, ExtentX),
-			RandomStream.RandRange(-ExtentY, ExtentY),
+			RandomStream.FRandRange(-ExtentX, ExtentX),
+			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f);
 		}
 		else
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector(
-			RandomStream.RandRange(-ExtentX, ExtentX),
-			RandomStream.RandRange(-ExtentY, ExtentY),
+			RandomStream.FRandRange(-ExtentX, ExtentX),
+			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f));
 		}
 		

@@ -20,9 +20,4 @@ public:
 	 * A non-deterministic random number generator that can be used at anytime.
 	 */
 	static FRandomStream NonDeterministic;
-
-	FORCEINLINE static bool Bool(const FRandomStream& Stream)
-	{
-		return Stream.FRandRange(0.0f, 1.0f) >= 0.5f;
-	}
 };
