@@ -168,7 +168,7 @@ void FNEditorCommands::BuildMenus()
 				LOCTEXT("ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
 				FNewToolMenuDelegate::CreateStatic(&FillProjectLevelsSubMenu),
 				false,
-				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
 			);
 	}
 	

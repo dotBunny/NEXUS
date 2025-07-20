@@ -15,6 +15,7 @@ TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 
 	Style.Set("NEXUS.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("NEXUS"), Icon16x16));
 	Style.Set("Command.LeakCheck", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_LeakCheck"), Icon16x16));
+	Style.Set("Command.ProjectLevels", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_ProjectLevels"), Icon16x16));
 	
 	return StyleRef;
 }
