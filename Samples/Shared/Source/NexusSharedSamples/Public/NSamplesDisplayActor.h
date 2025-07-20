@@ -220,6 +220,17 @@ protected:
 			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
 			SDPG_World, N_TIMER_DRAW_THICKNESS);
 	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Box", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboBox(UObject* WorldContextObject, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1) const
+	{
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerDimensions.GetExtent(),
+			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS);
+
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, OuterDimensions.GetExtent(),
+		FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
+	SDPG_World, N_TIMER_DRAW_THICKNESS);
+	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
 	{
