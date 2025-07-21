@@ -39,7 +39,6 @@ class NEXUSSHAREDSAMPLES_API UNSamplesUserWidget : public UUserWidget
 	int GetEventCount() const { return EventCount; };
 
 	UFUNCTION(BlueprintCallable, meta=(ExpandBoolAsExecs="ReturnValue"))
-	
 	// ReSharper disable once CppUE4BlueprintCallableFunctionMayBeConst
 	bool HasEvents() { return EventCount != 0; };
 	

@@ -60,6 +60,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False")
 	void CheckFalse(const bool bResult, const FString FailMessage);
 
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Count)")
+	void CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage);
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Count)")
+	void CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage);
+	
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Location)")
 	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
 

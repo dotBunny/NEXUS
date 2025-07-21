@@ -340,6 +340,33 @@ void ANSamplesDisplayActor::CheckFalse(const bool bResult, const FString FailMes
 		AddError(FailMessage);
 	}
 }
+
+void ANSamplesDisplayActor::CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
+	}
+}
+
+void ANSamplesDisplayActor::CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
+	}
+}
+
 void ANSamplesDisplayActor::CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
 {
 	if (bResult)
