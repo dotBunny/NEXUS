@@ -5,6 +5,7 @@
 #include "Customizations/NSamplesDisplayActorCustomization.h"
 #include "NSamplesDisplayActor.h"
 #include "NSamplesLevelActor.h"
+#include "NSharedSamplesEditorStyle.h"
 #include "Customizations/NSamplesLevelActorCustomization.h"
 
 #include "Interfaces/IPluginManager.h"
@@ -28,10 +29,15 @@ void FNSharedSamplesEditorModule::ShutdownModule()
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
+
+	FNSharedSamplesEditorStyle::Shutdown();
 }
 
 void FNSharedSamplesEditorModule::OnPostEngineInit()
 {
+	// Configure Style
+	FNSharedSamplesEditorStyle::Initialize();
+	
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 	
