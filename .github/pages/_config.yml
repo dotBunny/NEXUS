@@ -21,6 +21,7 @@ github:
   tree: https://github.com/dotBunny/NEXUS/tree/
 
 project:
+  changelog: https://github.com/dotBunny/NEXUS/blob/main/CHANGELOG.md
   overwatch: https://github.com/orgs/dotBunny/projects/6/views/1
   roadmap: https://github.com/orgs/dotBunny/projects/6/views/2
   issues: https://github.com/orgs/dotBunny/projects/6/views/3
