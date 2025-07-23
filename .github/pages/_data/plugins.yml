@@ -1,0 +1,52 @@
+# Plugins
+- name: Actor Pools
+  module: NActorPools
+  docs: h.sftliuzho90n
+  description: Generalized pooling system for Actors.
+
+- name: Core
+  module: NCore
+  docs: h.6wnlmrd2rnz0
+  description: Functionality used by all NEXUS plugins in the framework.
+
+- name: Dynamic References
+  module: NDynamicReferences
+  docs: h.51fac1n959re
+  description: Method for referring to runtime Actors without knowing them.
+
+- name: Fixers
+  module: NFixers
+  docs: h.1us7lypje3h0
+  description: A collection of tools for fixing content in the Unreal Editor.
+
+- name: Material Library
+  module: NMaterialLibrary
+  docs: h.o9g9y0u28mka
+  description: Library of Materials commonly used.
+
+- name: Multiplayer
+  module: NMultiplayer
+  docs: h.g0rybejhpstq
+  description: Functionality and tools that are useful when developing multiplayer games.
+
+- name: Picker
+  module: NPicker
+  docs: h.twqkskflup4j
+  description: Selection functionality for points and other items.
+
+- name: UI
+  module: NUI
+  docs: h.p17d2jk1bzu
+  description: Components for creating a user interface based on UMG/Slate.
+  
+- name: Developer Console
+  module: NDeveloperConsole
+  docs: h.h6lw3lqzs1e6
+  dev: true
+  description: N/A
+
+- name: ProcGen
+  module: NProcGen
+  docs: h.qb8kw7qgoy5x
+  dev: true
+  description: N/A

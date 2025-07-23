@@ -1,0 +1,14 @@
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background: $background-color;
+  color: $body-font-color;
+  font-family: $body-font;
+}
+
+.text-body-secondary {
+   color: $body-font-color !important;
+}
