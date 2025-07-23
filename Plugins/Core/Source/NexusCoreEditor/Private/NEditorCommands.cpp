@@ -113,7 +113,7 @@ void FNEditorCommands::OnHelpIssues()
 
 void FNEditorCommands::OnHelpBugReport()
 {
-	FPlatformProcess::LaunchURL(TEXT("https://github.com/dotBunny/NEXUS/issues/new?template=bug_report.md"),nullptr, nullptr);
+	FPlatformProcess::LaunchURL(TEXT("https://github.com/dotBunny/NEXUS/issues/new/choose"),nullptr, nullptr);
 }
 
 void FNEditorCommands::OnHelpRoadmap()

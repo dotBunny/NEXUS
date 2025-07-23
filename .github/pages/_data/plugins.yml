@@ -3,50 +3,60 @@
   module: NActorPools
   docs: h.sftliuzho90n
   description: Generalized pooling system for Actors.
+  repo: /Plugins/ActorPools/Source/NexusActorPools/Public
 
 - name: Core
   module: NCore
   docs: h.6wnlmrd2rnz0
   description: Functionality used by all NEXUS plugins in the framework.
+  repo: /Plugins/Core/Source/NexusCore/Public
 
 - name: Dynamic References
   module: NDynamicReferences
   docs: h.51fac1n959re
   description: Method for referring to runtime Actors without knowing them.
+  repo: /Plugins/DynamicReferences/Source/NexusDynamicReferences/Public
 
 - name: Fixers
   module: NFixers
   docs: h.1us7lypje3h0
   description: A collection of tools for fixing content in the Unreal Editor.
+  repo: /Plugins/Fixers/Source/NexusFixersEditor/Public
 
 - name: Material Library
   module: NMaterialLibrary
   docs: h.o9g9y0u28mka
   description: Library of Materials commonly used.
+  repo: /Plugins/MaterialLibrary/Content
 
 - name: Multiplayer
   module: NMultiplayer
   docs: h.g0rybejhpstq
   description: Functionality and tools that are useful when developing multiplayer games.
+  repo: /Plugins/Multiplayer/Source/NexusMultiplayer/Public
 
 - name: Picker
   module: NPicker
   docs: h.twqkskflup4j
   description: Selection functionality for points and other items.
+  repo: /Plugins/Picker/Source/NexusPicker/Public
 
 - name: UI
   module: NUI
   docs: h.p17d2jk1bzu
   description: Components for creating a user interface based on UMG/Slate.
+  repo: /Plugins/UI/Source/NexusUI/Public
   
 - name: Developer Console
   module: NDeveloperConsole
   docs: h.h6lw3lqzs1e6
   dev: true
   description: N/A
+  repo: /Plugins/DeveloperConsole/Source/NexusDeveloperConsole/Public
 
 - name: ProcGen
   module: NProcGen
   docs: h.qb8kw7qgoy5x
   dev: true
   description: N/A
+  repo: /Plugins/ProcGen/Source/NexusProcGen/Public

@@ -16,6 +16,7 @@ colors:
   background: "#2b2b2b"
 
 github:
+  home: https://github.com/dotBunny/NEXUS
   clone: https://github.com/dotBunny/NEXUS.git
   tree: https://github.com/dotBunny/NEXUS/tree/
 
@@ -24,7 +25,7 @@ project:
   roadmap: https://github.com/orgs/dotBunny/projects/6/views/2
   issues: https://github.com/orgs/dotBunny/projects/6/views/3
   bugs: https://github.com/orgs/dotBunny/projects/6/views/9
-  report: https://github.com/dotBunny/NEXUS/issues/new?template=bug_report.md
+  report: https://github.com/dotBunny/NEXUS/issues/new/choose
 
 exclude:
   - .sass-cache/
