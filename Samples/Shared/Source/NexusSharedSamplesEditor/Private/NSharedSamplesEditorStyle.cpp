@@ -17,6 +17,10 @@ TSharedRef<FSlateStyleSet> FNSharedSamplesEditorStyle::Create()
 	Style.Set("ClassIcon.NSamplesDisplayActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesDisplayActor"), Icon16x16));
 	Style.Set("ClassThumbnail.NSamplesDisplayActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesDisplayActor"), Icon128x128));
 
+	// NSamplesDisplayActor
+	Style.Set("ClassIcon.NSamplesLevelActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesLevelActor"), Icon16x16));
+	Style.Set("ClassThumbnail.NSamplesLevelActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesLevelActor"), Icon128x128));
+
 	// NSamplesUserWidget
 	Style.Set("ClassIcon.NSamplesUserWidget", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesUserWidget"), Icon16x16));
 	Style.Set("ClassThumbnail.NSamplesUserWidget",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesUserWidget"), Icon128x128));
