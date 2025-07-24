@@ -24,7 +24,6 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
-					"Kismet",
 					"ModelingComponents",
 					"Projects"
 				]
