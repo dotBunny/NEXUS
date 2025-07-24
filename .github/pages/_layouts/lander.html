@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="auto">
 {% include header.html %}
-<body>
+    <body>
 {% include nav.html %}
-<main>
-    <section class="py-5 text-center lander-header">
-        <div class="row py-lg-5">
-        <div class="col-lg-6 col-md-8 mx-auto">
-            <img src="/assets/images/brand.png" class="brand" />
-            <p class="lead text-body-secondary">A <strong>battle-tested</strong> collection of game-ready plugins for <strong>Unreal Engine.</strong></p>
-            <p class="lead text-body-secondary">The <strong>NEXUS Framework</strong> offers commonly used patterns and <em>opinionated</em> solutions for various areas of <strong>game development</strong>.</p>
-            <p class="cta">
-                <a href="{{ site.github.home }}" class="btn btn-primary my-2"><img src="/assets/svg/github.svg" alt="GitHub" width="16" height="16" /> GitHub</a>
-                <a href="{{ site.docs }}" class="btn btn-secondary my-2"><img src="/assets/svg/google.svg" alt="Google Docs" width="16" height="16" /> Documentation</a>
-                <a href="{{ site.project.roadmap }}" class="btn btn-secondary my-2"><img src="/assets/svg/roadmap.svg" alt="Roadmap" width="16" height="16" /> Roadmap</a>
-                <a href="{{ site.project.report }}" class="btn btn-danger my-2"><img src="/assets/svg/bug.svg" alt="Report Bug" width="16" height="16" /> Report Bug</a>               
-            </p>
-        </div>
-        </div>
-    </section>
-    {% include plugin-container.html %}
-</main>
+        <main>
+            <div class="py-5 text-center lander-header">
+                <div class="row py-lg-5">
+                <div class="col-lg-6 col-md-8 mx-auto">
+                    <img src="/assets/images/brand.png" class="brand" alt="NEXUS Framework">
+                    <p class="lead text-body-secondary">A <strong>battle-tested</strong> collection of game-ready plugins for <strong>Unreal Engine.</strong></p>
+                    <p class="lead text-body-secondary">The <strong>NEXUS Framework</strong> offers commonly used patterns and <em>opinionated</em> solutions for various areas of <strong>game development</strong>.</p>
+                    <p class="cta">
+                        <a href="{{ site.github.home }}" class="btn btn-primary my-2"><img src="/assets/svg/github.svg" alt="GitHub" width="16" height="16"> GitHub</a>
+                        <a href="{{ site.docs }}" class="btn btn-secondary my-2"><img src="/assets/svg/google.svg" alt="Google Docs" width="16" height="16"> Documentation</a>
+                        <a href="{{ site.project.roadmap }}" class="btn btn-secondary my-2"><img src="/assets/svg/roadmap.svg" alt="Roadmap" width="16" height="16"> Roadmap</a>
+                        <a href="{{ site.project.report }}" class="btn btn-danger my-2"><img src="/assets/svg/bug.svg" alt="Report Bug" width="16" height="16"> Report Bug</a>               
+                    </p>
+                </div>
+                </div>
+            </div>
+{% include plugin-container.html %}
+        </main>
 {% include body.html %}    
 {% include footer.html %}
-</body>
+    </body>
 </html>

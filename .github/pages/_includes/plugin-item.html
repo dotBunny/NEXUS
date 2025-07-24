@@ -1,20 +1,20 @@
-<div class="col">
-    <div class="card shadow-sm">
-        <div class="card-image" style="background-image: url(/assets/images/cards/{{ plugin.module }}.jpg)">
-            <h2>{{ plugin.name }}</h2>            
-        </div>
-        <div class="card-body">
-            <p class="card-text">{{ plugin.description }}</p>
-            <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                    <a href="{{ site.docs }}#heading={{ plugin.docs }}" type="button" class="btn btn-primary"><img src="/assets/svg/google.svg" alt="Google Docs" width="16" height="16" /> Docs</a>
-                </div>
-                {% if plugin.dev -%}
-                <a href="{{ site.github.tree }}dev{{ plugin.repo }}" title="Development Branch: {{ plugin.module }}"  type="button" class="btn btn-sm btn-outline-warning">dev</a>
-                {%- else -%}
-                <a href="{{ site.github.tree }}main{{ plugin.repo }}" title="Mainline Branch: {{ plugin.module }}" type="button" class="btn btn-sm btn-outline-success">main</a>
-                {%- endif %}                               
-            </div>
-        </div>
-    </div>
-</div>
+                        <div class="col">
+                            <div class="card shadow-sm">
+                                <div class="card-image" style="background-image: url(/assets/images/cards/{{ plugin.module }}.jpg)">
+                                    <h2>{{ plugin.name }}</h2>            
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text">{{ plugin.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="btn-group">
+                                            <a href="{{ site.docs }}#heading={{ plugin.docs }}" class="btn btn-primary"><img src="/assets/svg/google.svg" alt="Google Docs" width="16" height="16"> Docs</a>
+                                        </div>
+                                        {% if plugin.dev -%}
+                                        <a href="{{ site.github.tree }}dev{{ plugin.repo }}" title="Development Branch: {{ plugin.module }}"  type="button" class="btn btn-sm btn-outline-warning">dev</a>
+                                        {%- else -%}
+                                        <a href="{{ site.github.tree }}main{{ plugin.repo }}" title="Mainline Branch: {{ plugin.module }}" type="button" class="btn btn-sm btn-outline-success">main</a>
+                                        {%- endif %}                               
+                                    </div>
+                                </div>
+                            </div>
+                        </div>

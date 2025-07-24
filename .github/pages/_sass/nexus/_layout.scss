@@ -19,3 +19,36 @@ img.brand
     width: 25em;
     height: 25em;
 }
+
+
+img#nexus-n
+{
+  padding-right: 0px;
+    margin-right: -1.5px;
+    margin-top: 1px;
+}
+
+.navbar, .lander-header
+{
+  border-bottom-width: 1px;
+  border-bottom-color: $border-color;
+  border-bottom-style: solid;  
+}
+
+footer
+{
+    border-top-width: 1px;
+    border-top-color: $border-color;
+    border-top-style: solid;   
+   
+}
+footer a:visited, footer a:link
+{
+  text-decoration: none;
+  color: $foreground-muted !important;
+}
+footer a:hover
+{
+  text-decoration: underline;
+  color: $foreground-muted !important;
+}
