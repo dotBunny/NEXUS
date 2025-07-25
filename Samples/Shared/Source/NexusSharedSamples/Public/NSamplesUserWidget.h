@@ -51,9 +51,7 @@ class NEXUSSHAREDSAMPLES_API UNSamplesUserWidget : public UUserWidget
 
 	UPROPERTY(BlueprintAssignable, Category = "Events")
 	FNSamplesUserWidgetEventCountChanged OnEventCountChanged;
-	
-	
-	
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "NEXUS", meta=(BindWidget))
 	TObjectPtr<UWidget> MonitoredWidget;

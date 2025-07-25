@@ -692,9 +692,14 @@ void ANSamplesDisplayActor::UpdateDescription()
 	{
 		FinalString += WordArray[i];
 	}
+	
+	CachedDescription = FText::AsLocalizable_Advanced(
+		TEXT("NSamplesDisplayActor"),
+		GetTitle(),
+		FinalString);
 
 	// Set Position
-	if (!FinalString.IsEmpty())
+	if (!CachedDescription.IsEmpty())
 	{
 		const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
 
@@ -726,7 +731,7 @@ void ANSamplesDisplayActor::UpdateDescription()
 				bHeightVSFloorText ? FloorLocation : WallLocation, 
 				FVector::OneVector));
 		
-		DescriptionTextComponent->SetText(FText::FromString(FinalString));
+		DescriptionTextComponent->SetText(CachedDescription);
 		DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
 		DescriptionTextComponent->SetWorldSize(DescriptionScale);
 		DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));

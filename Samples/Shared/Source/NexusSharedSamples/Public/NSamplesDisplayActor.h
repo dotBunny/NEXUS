@@ -180,7 +180,7 @@ protected:
 	TEnumAsByte<ENColor> NoticeColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Text")
-	FText NoticeText = FText::FromString("");
+	FText NoticeText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Scale")
 	float NoticeScale = 80.f;
@@ -386,7 +386,9 @@ protected:
 	bool bTestDisableTimer = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
 	int TestIterationCount = 24;
-	
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
+	FText CachedDescription;
 private:
 	void TimerExpired();
 	
