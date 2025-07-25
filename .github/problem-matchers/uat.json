@@ -1,0 +1,22 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "RunUAT",
+      "pattern": [
+        {
+          "regexp": ".*Error:.*",
+          "severity": 1
+        },
+        {
+          "regexp": ".*Warning:.*",
+          "severity": 2
+        },
+        {
+          "regexp": ".*error\\(s\\).*",
+          "severity": 3
+        }
+      ]
+    }
+  ]
+}
+

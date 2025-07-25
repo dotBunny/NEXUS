@@ -16,9 +16,17 @@ inputs:
 
 runs:
   using: "composite"
-  steps:    
+  steps:  
+    - name: Add UAT Matcher
+      shell: powershell
+      run: |
+        echo "::add-matcher::uat.json"    
     - name: RunUAT 
       shell: powershell
       run: |
         Write-Output "Run UAT..."
         & "${{ inputs.ue-uat }}" ${{ inputs.command }} -project="${{ github.workspace }}\TestProject\NEXUS.uproject" ${{ inputs.additional-arguments }}
+    - name: Remove UAT Matcher
+      shell: powershell
+      run: |
+        echo "::remove-matcher::uat.json"
