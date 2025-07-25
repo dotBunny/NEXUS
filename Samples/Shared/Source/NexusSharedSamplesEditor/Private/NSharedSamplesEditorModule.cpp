@@ -35,6 +35,8 @@ void FNSharedSamplesEditorModule::ShutdownModule()
 
 void FNSharedSamplesEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	// Configure Style
 	FNSharedSamplesEditorStyle::Initialize();
 	
@@ -48,6 +50,8 @@ void FNSharedSamplesEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNSamplesLevelActorCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNSharedSamplesEditorModule, NexusSharedSamplesEditor)

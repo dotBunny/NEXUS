@@ -13,7 +13,11 @@ void FNDynamicReferencesModule::StartupModule()
 
 void FNDynamicReferencesModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	N_UPDATE_UPLUGIN("NexusDynamicReferencesSamples")
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNDynamicReferencesModule, NexusDynamicReferences)

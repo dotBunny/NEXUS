@@ -14,7 +14,9 @@ void FNPickerModule::StartupModule()
 
 void FNPickerModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
 	N_UPDATE_UPLUGIN("NexusPickerSamples")
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNPickerModule, NexusPicker)

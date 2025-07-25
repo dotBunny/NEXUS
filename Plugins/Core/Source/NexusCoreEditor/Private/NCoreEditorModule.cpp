@@ -37,6 +37,8 @@ void FNCoreEditorModule::StartupModule()
 
 void FNCoreEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	UNEditorUserSettings::OnPostEngineInit();
 	FNEditorStyle::Initialize();
 
@@ -45,6 +47,8 @@ void FNCoreEditorModule::OnPostEngineInit()
 		FNEditorCommands::Register();
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::BuildMenus));
 	}
+
+	bIsModuleInitialized = true;
 }
 #undef LOCTEXT_NAMESPACE
 

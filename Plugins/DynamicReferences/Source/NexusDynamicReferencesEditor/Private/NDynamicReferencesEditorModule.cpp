@@ -29,6 +29,8 @@ void FNDynamicReferencesEditorModule::ShutdownModule()
 
 void FNDynamicReferencesEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	// Configure Style
 	FNDynamicReferencesEditorStyle::Initialize();
 	
@@ -37,6 +39,8 @@ void FNDynamicReferencesEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNDynamicReferenceComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNDynamicReferencesComponentCustomization::MakeInstance));
 	PropertyModule.NotifyCustomizationModuleChanged();
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNDynamicReferencesEditorModule, NexusDynamicReferencesEditor)

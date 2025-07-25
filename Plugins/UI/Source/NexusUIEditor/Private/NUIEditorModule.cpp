@@ -18,7 +18,9 @@ void FNUIEditorModule::ShutdownModule()
 
 void FNUIEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
 	FNUIEditorStyle::Initialize();
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNUIEditorModule, NexusUIEditor)

@@ -38,13 +38,18 @@ void FNActorPoolsEditorModule::ShutdownModule()
 
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	FNActorPoolsEditorStyle::Initialize();
 
 	// Visualizers
-	const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShareable(new FNActorPoolSpawnerComponentVisualizer());
-	GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
-	ActorPoolSpawnerComponentVisualizer->OnRegister();
-
+	if (GUnrealEd)
+	{
+		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShareable(new FNActorPoolSpawnerComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
+		ActorPoolSpawnerComponentVisualizer->OnRegister();
+	}
+	
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 
@@ -52,6 +57,8 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNActorPoolSpawnerComponentCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNActorPoolsEditorModule, NexusActorPoolsEditor)

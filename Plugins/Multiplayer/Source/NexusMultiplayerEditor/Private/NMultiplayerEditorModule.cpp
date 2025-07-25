@@ -20,6 +20,8 @@ void FNMultiplayerEditorModule::ShutdownModule()
 
 void FNMultiplayerEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	// Configure Style
 	FNMultiplayerEditorStyle::Initialize();
 	
@@ -28,6 +30,8 @@ void FNMultiplayerEditorModule::OnPostEngineInit()
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerEditorToolMenu::Register));
 	}
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNMultiplayerEditorModule, NexusMultiplayerEditor)

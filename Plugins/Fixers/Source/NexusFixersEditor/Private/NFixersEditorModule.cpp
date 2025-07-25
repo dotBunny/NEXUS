@@ -22,6 +22,8 @@ void FNFixersEditorModule::ShutdownModule()
 
 void FNFixersEditorModule::OnPostEngineInit()
 {
+	if (IsModuleInitialized()) return;
+	
 	FNFixersEditorStyle::Initialize();
 	
 	if (FSlateApplication::IsInitialized())
@@ -29,6 +31,8 @@ void FNFixersEditorModule::OnPostEngineInit()
 		FNFixersEditorCommands::Register();
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNFixersEditorBulkOperations::Register));
 	}
+
+	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNFixersEditorModule, NexusFixersEditor)
