@@ -1,0 +1,45 @@
+name: BuildCookRun
+
+on:  
+  schedule:
+    - cron: '0 9 * * *' # 5:00 AM EST - Farm Not Busy
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Client Configuration'
+        required: false
+        default: 'Development'
+        type: choice
+        options:
+            - 'Development'
+            - 'DebugGame'
+            - 'Shipping'
+
+jobs:
+  PerfTests:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean workspace
+        uses: ./.github/actions/workspace-clean
+
+      - name: Build project
+        uses: ./.github/actions/build-project
+
+      - name: Run UAT
+        uses: ./.github/actions/ue-uat
+        with:
+          command: 'BuildCookRun'
+          additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=${{ inputs.configuration }} -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
+
+      - name: Parse UE log
+        if: always()
+        uses: ./.github/actions/ue-parse-log
+
+      - name: Gather and upload artifacts
+        if: always()
+        uses: ./.github/actions/upload-artifacts
+        with:
+          artifact-name: 'schedules-package-${{ github.run_number }}'
+    
