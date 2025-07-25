@@ -104,3 +104,26 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 
 	return Blueprint;
 }
+
+void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
+{
+	if (!GConfig->IsReadyForUse())
+	{
+		NE_LOG(Warning, TEXT("Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		return;
+	}
+		
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+
+	TArray<FString> DisallowedConfigFiles;
+	GConfig->GetArray(TEXT("Staging"), TEXT("DisallowedConfigFiles"), DisallowedConfigFiles, GGameIni);
+	if (!DisallowedConfigFiles.Contains(RelativeConfig))
+	{
+		DisallowedConfigFiles.Add(RelativeConfig);
+		GConfig->SetArray(TEXT("Staging"), TEXT("DisallowedConfigFiles"), DisallowedConfigFiles, GGameIni);
+		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *RelativeConfig);
+
+		// Save config
+		GConfig->Flush(false, GGameIni);
+	}
+}

@@ -7,6 +7,7 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "LevelEditorSubsystem.h"
+#include "NCoreEditorMinimal.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
@@ -129,4 +130,6 @@ public:
 		}
 		return MoveTemp(SelectedPaths);
 	}
+	
+	static void DisallowConfigFileFromStaging(const FString& Config);
 };

@@ -38,6 +38,9 @@ void FNCoreEditorModule::StartupModule()
 void FNCoreEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
+
+	// Check that the config does not get shipped
+	FNEditorUtils::DisallowConfigFileFromStaging("DefaultNexusEditor");
 	
 	UNEditorUserSettings::OnPostEngineInit();
 	
