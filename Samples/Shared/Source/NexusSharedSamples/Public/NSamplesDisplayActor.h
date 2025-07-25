@@ -116,10 +116,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display", DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
 	bool bCollisionEnabled = false;
 
-	// TITLE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Text")
-	FText TitleText = FText::FromString("Title");
-
+	FText TitleText;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Scale")
 	float TitleScale = 40.f;
 
@@ -128,14 +127,11 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Seperate Panel")
 	bool bSeparateTitlePanel = false;
-
+	
 	// DESCRIPTION
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text")
-	TArray<FText> DescriptionText = {
-		FText::FromString("Example of description, paragraph #1."),
-		FText::FromString("Example of description, paragraph #2.")
-	};
-
+	TArray<FText> DescriptionText;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Scale")
 	float DescriptionScale = 15.f;
 
