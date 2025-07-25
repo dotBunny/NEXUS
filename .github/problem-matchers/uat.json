@@ -3,17 +3,26 @@
     {
       "owner": "RunUAT_Error",
       "severity": "error",
-      "pattern": [{"regexp": ".*Error:.*"}]
+      "pattern": [{
+        "regexp": "(.*)Error:(.*)",
+        "message": 2
+      }]
     },
     {
       "owner": "RunUAT_Warning",
       "severity": "warning",
-      "pattern": [{ "regexp": ".*Warning:.*"}]
+      "pattern": [{ 
+        "regexp": "(.*)Warning:(.*)",
+        "message": 2
+      }]
     },
     {
       "owner": "RunUAT_Info",
       "severity": "info",
-      "pattern": [{ "regexp": ".*error\\(s\\).*"}]
+      "pattern": [{ 
+        "regexp": "LogInit: Display: (.*error\\(s\\).*)",
+        "message": 1
+        }]
     }
   ]
 }
