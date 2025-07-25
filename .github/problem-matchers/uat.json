@@ -15,14 +15,6 @@
         "regexp": "(.*)Warning:(.*)",
         "message": 2
       }]
-    },
-    {
-      "owner": "RunUAT_Info",
-      "severity": "info",
-      "pattern": [{ 
-        "regexp": "LogInit: Display: (.*error\\(s\\).*)",
-        "message": 1
-        }]
     }
   ]
 }
