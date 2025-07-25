@@ -20,9 +20,7 @@ div.card-image h2 {
     text-align: center;
     padding: 1em;
     color: #FFFFFF;
-    filter: drop-shadow(1px 1px 1px) $background-tertiary;
-    -webkit-text-stroke-width: 1px;
-    -webkit-text-stroke-color: $background-tertiary;
+    text-shadow: -1px -1px 0 $background-tertiary, 1px -1px 0 $background-tertiary, -1px 1px 0 $background-tertiary, 1px 1px 0 $background-tertiary;
 }
 
 p.cta a {
