@@ -6,6 +6,7 @@
 #include "NDynamicReferencesComponentCustomization.h"
 #include "NDynamicReferenceComponent.h"
 #include "NDynamicReferencesEditorStyle.h"
+#include "NEditorUtils.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -29,7 +30,7 @@ void FNDynamicReferencesEditorModule::ShutdownModule()
 
 void FNDynamicReferencesEditorModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
+	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	// Configure Style
 	FNDynamicReferencesEditorStyle::Initialize();
@@ -39,8 +40,6 @@ void FNDynamicReferencesEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNDynamicReferenceComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNDynamicReferencesComponentCustomization::MakeInstance));
 	PropertyModule.NotifyCustomizationModuleChanged();
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNDynamicReferencesEditorModule, NexusDynamicReferencesEditor)

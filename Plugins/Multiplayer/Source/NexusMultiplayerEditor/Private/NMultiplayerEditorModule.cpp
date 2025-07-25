@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NMultiplayerEditorModule.h"
+
+#include "NEditorUtils.h"
 #include "NMultiplayerEditorStyle.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -20,7 +22,7 @@ void FNMultiplayerEditorModule::ShutdownModule()
 
 void FNMultiplayerEditorModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
+	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	// Configure Style
 	FNMultiplayerEditorStyle::Initialize();
@@ -30,8 +32,6 @@ void FNMultiplayerEditorModule::OnPostEngineInit()
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerEditorToolMenu::Register));
 	}
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNMultiplayerEditorModule, NexusMultiplayerEditor)

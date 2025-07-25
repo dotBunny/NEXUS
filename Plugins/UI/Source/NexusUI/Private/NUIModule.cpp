@@ -14,9 +14,7 @@ void FNUIModule::StartupModule()
 
 void FNUIModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
 	N_UPDATE_UPLUGIN("NexusUISamples")
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNUIModule, NexusUI)

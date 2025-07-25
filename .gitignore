@@ -81,6 +81,7 @@ DerivedDataCache/*
 # NEXUS Test Project
 TestProject/DerivedDataCache/*
 TestProject/Saved/*
+TestProject/Build/*
 TestProject/.vsconfig
 *.DotSettings.user
 

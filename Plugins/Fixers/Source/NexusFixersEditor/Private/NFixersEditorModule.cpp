@@ -3,6 +3,7 @@
 
 #include "NFixersEditorModule.h"
 
+#include "NEditorUtils.h"
 #include "NFixersEditorBulkOperations.h"
 #include "NFixersEditorCommands.h"
 #include "NFixersEditorStyle.h"
@@ -22,7 +23,7 @@ void FNFixersEditorModule::ShutdownModule()
 
 void FNFixersEditorModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
+	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNFixersEditorStyle::Initialize();
 	
@@ -31,8 +32,6 @@ void FNFixersEditorModule::OnPostEngineInit()
 		FNFixersEditorCommands::Register();
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNFixersEditorBulkOperations::Register));
 	}
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNFixersEditorModule, NexusFixersEditor)

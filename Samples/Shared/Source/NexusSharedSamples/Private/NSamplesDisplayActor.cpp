@@ -13,7 +13,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
 
-ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer)
+ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	SceneRoot->SetMobility(EComponentMobility::Static);

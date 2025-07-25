@@ -7,14 +7,11 @@
 #include "NCoreMinimal.h"
 
 #define N_IMPLEMENT_MODULE(Type, Name) \
-private: \
-	bool bIsModuleInitialized = false; \
 public: \
 	FORCEINLINE static Type& Get() \
 	{ \
 		return FModuleManager::LoadModuleChecked<Type>(Name); \
 	} \
-	bool IsModuleInitialized() { return bIsModuleInitialized; }
 
 #define N_IMPLEMENT_MODULE_POST_ENGINE_INIT(Type, Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \

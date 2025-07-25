@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NSharedSamplesEditorModule.h"
+
+#include "NEditorUtils.h"
 #include "Customizations/NSamplesDisplayActorCustomization.h"
 #include "NSamplesDisplayActor.h"
 #include "NSamplesLevelActor.h"
@@ -35,7 +37,7 @@ void FNSharedSamplesEditorModule::ShutdownModule()
 
 void FNSharedSamplesEditorModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
+	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	// Configure Style
 	FNSharedSamplesEditorStyle::Initialize();
@@ -50,8 +52,6 @@ void FNSharedSamplesEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNSamplesLevelActorCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNSharedSamplesEditorModule, NexusSharedSamplesEditor)

@@ -8,18 +8,17 @@
 #include "NActorPoolSubsystem.h"
 #include "NCoreMinimal.h"
 
-UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer)
+UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	SetIsReplicatedByDefault(false);
-
-	KillBox = CreateDefaultSubobject<UBoxComponent>(TEXT("KillBox"));
-	KillBox->SetupAttachment(this);
-	KillBox->SetRelativeLocation(FVector::Zero(), false);
-	KillBox->InitBoxExtent(FVector(100, 100, 5));
-	KillBox->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
+	
+	SetRelativeLocation(FVector(254, 0, 17), false);
+	SetRelativeScale3D(FVector(2.25f, 2.75f, 2.f));
+	InitBoxExtent(FVector(100, 100, 5));
+	UPrimitiveComponent::SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 }
 
 void UNKillZoneComponent::BeginPlay()
@@ -27,13 +26,13 @@ void UNKillZoneComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ActorPoolSubsystem = UNActorPoolSubsystem::Get(GetWorld());
-	KillBox->OnComponentBeginOverlap.AddDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
+	OnComponentBeginOverlap.AddDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
 }
 
 void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	KillBox->OnComponentBeginOverlap.RemoveDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
+	OnComponentBeginOverlap.RemoveDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
 }
 
 void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)

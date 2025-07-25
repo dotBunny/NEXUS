@@ -14,11 +14,7 @@ void FNActorPoolsModule::StartupModule()
 
 void FNActorPoolsModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
-	
 	N_UPDATE_UPLUGIN("NexusActorPoolsSamples")
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNActorPoolsModule, NexusActorPools)

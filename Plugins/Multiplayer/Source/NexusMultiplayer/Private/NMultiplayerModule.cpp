@@ -14,9 +14,7 @@ void FNMultiplayerModule::StartupModule()
 
 void FNMultiplayerModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
 	N_UPDATE_UPLUGIN("NexusMultiplayerSamples")
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNMultiplayerModule, NexusMultiplayer)

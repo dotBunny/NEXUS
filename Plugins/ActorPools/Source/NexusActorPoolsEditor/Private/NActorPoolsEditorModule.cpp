@@ -5,6 +5,7 @@
 #include "ComponentVisualizer.h"
 #include "NActorPoolsEditorStyle.h"
 #include "NActorPoolSpawnerComponent.h"
+#include "NEditorUtils.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NActorPoolSpawnerComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
@@ -38,7 +39,7 @@ void FNActorPoolsEditorModule::ShutdownModule()
 
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
-	if (IsModuleInitialized()) return;
+	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
 
@@ -57,8 +58,6 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNActorPoolSpawnerComponentCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
-
-	bIsModuleInitialized = true;
 }
 
 IMPLEMENT_MODULE(FNActorPoolsEditorModule, NexusActorPoolsEditor)
