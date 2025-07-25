@@ -20,8 +20,8 @@ runs:
     - name: Add UAT Matcher
       shell: powershell
       run: |
-        echo "::add-matcher::uat.json"    
-    - name: RunUAT 
+        echo "::add-matcher::${{ github.workspace }}\.github\problem-matchers\uat.json"
+    - name: RunUAT
       shell: powershell
       run: |
         Write-Output "Run UAT..."
@@ -29,4 +29,4 @@ runs:
     - name: Remove UAT Matcher
       shell: powershell
       run: |
-        echo "::remove-matcher::uat.json"
+        echo "::remove-matcher::${{ github.workspace }}\.github\problem-matchers\uat.json"
