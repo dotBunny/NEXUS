@@ -1,22 +1,19 @@
 {
   "problemMatcher": [
     {
-      "owner": "RunUAT",
-      "pattern": [
-        {
-          "regexp": ".*Error:.*",
-          "severity": 1
-        },
-        {
-          "regexp": ".*Warning:.*",
-          "severity": 2
-        },
-        {
-          "regexp": ".*error\\(s\\).*",
-          "severity": 3
-        }
-      ]
+      "owner": "RunUAT_Error",
+      "severity": "error",
+      "pattern": [{"regexp": ".*Error:.*"}]
+    },
+    {
+      "owner": "RunUAT_Warning",
+      "severity": "warning",
+      "pattern": [{ "regexp": ".*Warning:.*"}]
+    },
+    {
+      "owner": "RunUAT_Info",
+      "severity": "info",
+      "pattern": [{ "regexp": ".*error\\(s\\).*"}]
     }
   ]
 }
-
