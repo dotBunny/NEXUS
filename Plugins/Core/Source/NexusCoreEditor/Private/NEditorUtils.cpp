@@ -107,23 +107,43 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 
 void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 {
+	const TCHAR* StagingSectionKey = TEXT("Staging");
+	const TCHAR* DisallowedConfigFilesKey = TEXT("+DisallowedConfigFiles");
+	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	
 	if (!GConfig->IsReadyForUse())
 	{
-		NE_LOG(Warning, TEXT("Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		NE_LOG(Warning, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
 		return;
 	}
-		
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
 
+	if (FPaths::FileExists(ProjectDefaultGamePath))
+	{
+		GConfig->LoadFile(ProjectDefaultGamePath);
+	}
+	else
+	{
+		GConfig->AddNewBranch(ProjectDefaultGamePath);
+		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+	}
+	
 	TArray<FString> DisallowedConfigFiles;
-	GConfig->GetArray(TEXT("Staging"), TEXT("DisallowedConfigFiles"), DisallowedConfigFiles, GGameIni);
+	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
+	if (ProjectDefaultGameConfig == nullptr)
+	{
+		NE_LOG(Error, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to load project DefaultGame.ini."))
+		return;
+	}
+	
+	ProjectDefaultGameConfig->GetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
 	if (!DisallowedConfigFiles.Contains(RelativeConfig))
 	{
 		DisallowedConfigFiles.Add(RelativeConfig);
-		GConfig->SetArray(TEXT("Staging"), TEXT("DisallowedConfigFiles"), DisallowedConfigFiles, GGameIni);
-		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *RelativeConfig);
+		ProjectDefaultGameConfig->SetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
+		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
 
-		// Save config
-		GConfig->Flush(false, GGameIni);
+		// Save and close the file that shouldn't be open
+		GConfig->Flush(true, ProjectDefaultGamePath);
 	}
 }
