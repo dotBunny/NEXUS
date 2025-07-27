@@ -1,8 +1,10 @@
                         <div class="col">
                             <div class="card shadow-sm">
-                                <div class="card-image" style="background-image: url(/assets/images/cards/{{ plugin.module }}.jpg)">
-                                    <h2>{{ plugin.name }}</h2>            
-                                </div>
+                                 <a href="{{ site.docs }}#heading={{ plugin.docs }}">
+                                    <div class="card-image" style="background-image: url(/assets/images/cards/{{ plugin.module }}.jpg)">
+                                        <h2>{{ plugin.name }}</h2>            
+                                    </div>
+                                </a>
                                 <div class="card-body">
                                     <p class="card-text">{{ plugin.description }}</p>
                                     <div class="d-flex justify-content-between align-items-center">

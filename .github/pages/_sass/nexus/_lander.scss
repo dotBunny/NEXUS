@@ -3,12 +3,22 @@
     background-color: $background-tertiary;
     border-color: $border-color !important;
     color: $foreground-muted !important;
+    filter: brightness(0.85);
+    transition: filter 0.25s ease-in-out;
 }
+.card:hover {
+    filter: brightness(1) !important;
+}
+
+.card.shadow-sm a {
+    text-decoration: none !important;
+}
+
 
 div.card-image {
     background-size: cover;
     height: 225px;
-    width: 100%; 
+    width: 100%;  
 }
 
 div.card-image h2 {
