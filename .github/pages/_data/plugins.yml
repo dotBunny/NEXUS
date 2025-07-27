@@ -11,6 +11,13 @@
   description: Functionality used by all NEXUS plugins in the framework.
   repo: /Plugins/Core/Source/NexusCore/Public
 
+- name: Developer Console
+  module: NDeveloperConsole
+  docs: h.h6lw3lqzs1e6
+  dev: true
+  description: Coming Soon
+  repo: /Plugins/DeveloperConsole/Source/NexusDeveloperConsole/Public
+
 - name: Dynamic References
   module: NDynamicReferences
   docs: h.51fac1n959re
@@ -41,22 +48,15 @@
   description: Selection functionality for points and other items.
   repo: /Plugins/Picker/Source/NexusPicker/Public
 
+- name: ProcGen
+  module: NProcGen
+  docs: h.qb8kw7qgoy5x
+  dev: true
+  description: Coming Soon
+  repo: /Plugins/ProcGen/Source/NexusProcGen/Public
+
 - name: UI
   module: NUI
   docs: h.p17d2jk1bzu
   description: Components for creating a user interface based on UMG/Slate.
   repo: /Plugins/UI/Source/NexusUI/Public
-  
-- name: Developer Console
-  module: NDeveloperConsole
-  docs: h.h6lw3lqzs1e6
-  dev: true
-  description: N/A
-  repo: /Plugins/DeveloperConsole/Source/NexusDeveloperConsole/Public
-
-- name: ProcGen
-  module: NProcGen
-  docs: h.qb8kw7qgoy5x
-  dev: true
-  description: N/A
-  repo: /Plugins/ProcGen/Source/NexusProcGen/Public
