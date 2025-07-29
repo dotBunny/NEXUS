@@ -9,6 +9,15 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
+#if PLATFORM_WINDOWS
+#include "Windows/WindowsHWrapper.h"
+#ifdef UNICODE
+#define SENDMESSAGE  SendMessageW
+#else
+#define SENDMESSAGE  SendMessageA
+#endif // !UNICODE
+#endif
+
 void FNEditorUtils::RegisterSettings(UDeveloperSettings* SettingsObject)
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
@@ -146,4 +155,61 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
 	}
+}
+
+void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
+{
+	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	{
+		MutableStyleSet->Set("AppIcon", Icon);
+	}
+	else
+	{
+		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIconSVG] Unable to replace icon."));
+	}
+}
+
+void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
+{
+	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	{
+		MutableStyleSet->Set("AppIcon", Icon);
+	}
+	else
+	{
+		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIcon] Unable to replace icon."));
+	}
+}
+
+bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
+{
+#if PLATFORM_WINDOWS
+	const FString FinalPath = FString::Printf(TEXT("%s.ico"), *IconPath);
+	if (FPaths::FileExists(FinalPath))
+	{
+		Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
+		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
+			GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
+		
+		if (hIcon)
+		{
+			// Set the large icon (Alt+Tab, taskbar)
+			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        
+			// Set the small icon (window title bar)
+			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        
+			// Also set it for the window class
+			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
+			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
+			return true;
+		}
+		NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s."), *FinalPath);
+		return false;
+	}
+	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] %s Not Found."), *FinalPath);
+#else
+	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform."));
+#endif
+	return false;
 }

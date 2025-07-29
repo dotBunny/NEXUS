@@ -7,9 +7,9 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "LevelEditorSubsystem.h"
-#include "NCoreEditorMinimal.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
+
 
 class UAsyncEditorDelay;
 
@@ -132,4 +132,8 @@ public:
 	}
 	
 	static void DisallowConfigFileFromStaging(const FString& Config);
+	
+	static void ReplaceAppIcon(FSlateImageBrush* Icon);
+	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
+	static bool ReplaceWindowIcon(const FString& IconPath);
 };
