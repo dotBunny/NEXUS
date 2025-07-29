@@ -1,8 +1,0 @@
-            <div class="album py-5 bg-body-tertiary">
-                <div class="container">
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-{% for plugin in site.data.plugins %}{% if plugin.dev %}{% else %}{% include plugin-item.html %}{%- endif -%}
-{% endfor %}{% for plugin in site.data.plugins %}{% if plugin.dev %}{% include plugin-item.html %}{%- endif -%}
-{% endfor %}                    </div>
-                </div>
-            </div>

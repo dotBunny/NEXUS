@@ -9,7 +9,7 @@ email: support@dotbunny.com
 baseurl: ""
 url: "https://nexus-framework.com"
 description: A battle-tested collection of game-ready plugins for Unreal Engine.
-docs: https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/?tab=t.0
+docs: https://docs.nexus-framework.com
 
 colors:
   primary: "#2b2b2b"
