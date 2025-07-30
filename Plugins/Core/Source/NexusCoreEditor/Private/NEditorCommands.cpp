@@ -45,7 +45,7 @@ void FNEditorCommands::RegisterCommands()
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
 		"NCore.Help.OpenDocumentation",
 		LOCTEXT("Command_Help_OpenDocumentation", "Documentation"),
-		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation (Google Doc) in your browser."),
+		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputGesture());
 
@@ -123,7 +123,7 @@ void FNEditorCommands::OnHelpRoadmap()
 
 void FNEditorCommands::OnHelpDocumentation()
 {
-	FPlatformProcess::LaunchURL(TEXT("https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/"),nullptr, nullptr);
+	FPlatformProcess::LaunchURL(TEXT("https://nexus-framework.com/docs/"),nullptr, nullptr);
 }
 
 void FNEditorCommands::OnToolsLeakCheck()
