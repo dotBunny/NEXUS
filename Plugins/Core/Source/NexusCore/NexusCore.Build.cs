@@ -13,7 +13,6 @@ namespace UnrealBuildTool.Rules
 				[
 					"Core",
 					"CoreUObject",
-					"FunctionalTesting",
 					"Engine",
 					"GeometryCore",
 					"GeometryFramework",
