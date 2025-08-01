@@ -9,7 +9,7 @@
 #include "NColor.h"
 // ReSharper disable once CppUnusedIncludeDirective
 
-#include "FunctionalTest.h"
+#include "NFunctionalTestProxy.h"
 #include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -25,7 +25,7 @@ class USpotLightComponent;
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
  */
 UCLASS(MinimalAPI, BlueprintType)
-class ANSamplesDisplayActor : public AFunctionalTest
+class ANSamplesDisplayActor : public ANFunctionalTestProxy
 {
 	GENERATED_BODY()
 
@@ -34,14 +34,6 @@ class ANSamplesDisplayActor : public AFunctionalTest
 	virtual void BeginPlay() override;
 
 public:
-
-	
-	// ~AFunctionalTest Interface
-	virtual void PrepareTest() override;
-	virtual void CleanUp() override;
-	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
-	// ~AFunctionalTest Interface
-
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
@@ -58,44 +50,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FString GetTaggedPrefix() const { return GetTitle(); };
 	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True")
-	void CheckTrue(const bool bResult, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False")
-	void CheckFalse(const bool bResult, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Count)")
-	void CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Count)")
-	void CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage);
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Location)")
-	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Location)")
-	void CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Object)")
-	void CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Object)")
-	void CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Actor)")
-	void CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Actor)")
-	void CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Pass Count ++")
-	void IncrementCheckPassCount() { CheckPassCount++; };
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Fail Count ++")
-	void IncrementCheckFailCount() { CheckFailCount++; };
-
-
-
 	
 protected:
 
@@ -389,15 +343,29 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
-	bool bTestDisableTimer = false;
+
+	// TESTING
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Test Name (Override)")
+	FText TestNameOverride;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
 	int TestIterationCount = 24;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
+	bool bTestDisableTimer = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
 	FText CachedDescription;
 private:
 	void TimerExpired();
+	UFUNCTION()
+	void OnPrepareTest();
+	UFUNCTION()
+	void OnStartedTest();
+	UFUNCTION()
+	void OnFinishedTest();
+	
 	
 	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
 	
@@ -422,6 +390,7 @@ private:
 	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
 	FTransform TitlePanelTextTransform() const;
 	FTransform TitleTextTransform() const;
+
 
 
 
@@ -486,7 +455,7 @@ private:
 
 	FTimerHandle TimerHandle;
 
-	int CheckPassCount = 0;
-	int CheckFailCount = 0;
+
 	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
+
 };

@@ -3,9 +3,8 @@
 
 #include "NSamplesDisplayActor.h"
 
-#include "FuncTestRenderingComponent.h"
 #include "NColor.h"
-#include "Components/BillboardComponent.h"
+#include "NCoreMinimal.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
@@ -205,10 +204,23 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		ShadowBoxTop->SetMaterial(0, MaterialWhite.Object);
 		ShadowBoxTop->SetMaterial(1, MaterialWhite.Object);
 	}
+
+	TestPrepared.BindUObject(this, &ANSamplesDisplayActor::OnPrepareTest);
+	TestStarted.BindUObject(this, &ANSamplesDisplayActor::OnStartedTest);
+	TestFinished.BindUObject(this, &ANSamplesDisplayActor::OnFinishedTest);
 }
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
 {
+	if (!TestNameOverride.IsEmptyOrWhitespace())
+	{
+		InitProxy(TestNameOverride.ToString());
+	}
+	else
+	{
+		InitProxy(TitleText.ToString());
+	}
+	
 	Rebuild();
 	Super::OnConstruction(Transform);
 }
@@ -222,6 +234,7 @@ void ANSamplesDisplayActor::BeginPlay()
 	
 	Super::BeginPlay();
 }
+
 
 void ANSamplesDisplayActor::Rebuild()
 {
@@ -273,18 +286,19 @@ void ANSamplesDisplayActor::TimerExpired()
 	OnTimerExpired();
 }
 
-void ANSamplesDisplayActor::PrepareTest()
+void ANSamplesDisplayActor::OnPrepareTest()
 {
 	if (bTimerEnabled && bTestDisableTimer)
 	{
 		GetWorldTimerManager().PauseTimer(TimerHandle);
 	}
-	CheckPassCount = 0;
-	CheckFailCount = 0;
-	Super::PrepareTest();
 }
 
-void ANSamplesDisplayActor::CleanUp()
+void ANSamplesDisplayActor::OnStartedTest()
+{
+}
+
+void ANSamplesDisplayActor::OnFinishedTest()
 {
 	if (bTimerEnabled && bTestDisableTimer)
 	{
@@ -292,151 +306,6 @@ void ANSamplesDisplayActor::CleanUp()
 		{
 			GetWorldTimerManager().UnPauseTimer(TimerHandle);
 		}
-	}
-	Super::CleanUp();
-}
-
-void ANSamplesDisplayActor::FinishTest(EFunctionalTestResult TestResult, const FString& Message)
-{
-	if (CheckPassCount > 0 || CheckFailCount > 0)
-	{
-		const FString UpdatedMessage = FString::Printf(TEXT("%s (PASS: %i | FAIL: %i)"), *Message.TrimStartAndEnd(), CheckPassCount, CheckFailCount);
-		if (CheckFailCount > 0)
-		{
-			Super::FinishTest(EFunctionalTestResult::Failed, UpdatedMessage);
-		}
-		else
-		{
-			Super::FinishTest(TestResult, UpdatedMessage);
-		}
-	}
-	else
-	{
-		Super::FinishTest(TestResult, Message);
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrue(const bool bResult, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FailMessage);
-	}
-}
-void ANSamplesDisplayActor::CheckFalse(const bool bResult, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FailMessage);
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
-	}
-}
-
-void ANSamplesDisplayActor::CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
-	}
-}
-void ANSamplesDisplayActor::CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
-	}
-}
-void ANSamplesDisplayActor::CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
 	}
 }
 
@@ -956,16 +825,6 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 {
 	// Reset our SceneRoot
 	RootComponent = SceneRoot;
-	
-#if WITH_EDITORONLY_DATA
-	RenderComp->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	RenderComp->SetVisibility(false);
-	TestName->SetVisibility(false);
-	TestName->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	UBillboardComponent* TestSprite = GetSpriteComponent();
-	TestSprite->AttachToComponent(SceneRoot, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	TestSprite->SetVisibility(false);
-#endif
 }
 
 
