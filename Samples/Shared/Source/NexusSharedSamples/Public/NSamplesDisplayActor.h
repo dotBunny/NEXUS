@@ -6,9 +6,10 @@
 #include "CoreMinimal.h"
 #include "Components/TextRenderComponent.h"
 // ReSharper disable once CppUnusedIncludeDirective
-#include "FunctionalTest.h"
 #include "NColor.h"
 // ReSharper disable once CppUnusedIncludeDirective
+
+#include "FunctionalTest.h"
 #include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -18,6 +19,7 @@
 class USpotLightComponent;
 
 #define N_TIMER_DRAW_THICKNESS 0.35f
+
 /**
  * A display used in NEXUS demonstration levels
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
@@ -32,6 +34,14 @@ class ANSamplesDisplayActor : public AFunctionalTest
 	virtual void BeginPlay() override;
 
 public:
+
+	
+	// ~AFunctionalTest Interface
+	virtual void PrepareTest() override;
+	virtual void CleanUp() override;
+	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
+	// ~AFunctionalTest Interface
+
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
@@ -47,13 +57,7 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetTaggedPrefix() const { return GetTitle(); };
-
-	// ~AFunctionalTest Interface
-	virtual void PrepareTest() override;
-	virtual void CleanUp() override;
-	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
-	// ~AFunctionalTest Interface
-
+	
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True")
 	void CheckTrue(const bool bResult, const FString FailMessage);
 
@@ -89,6 +93,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Fail Count ++")
 	void IncrementCheckFailCount() { CheckFailCount++; };
+
+
+
 	
 protected:
 
