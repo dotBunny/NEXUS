@@ -1,5 +1,7 @@
 ﻿#include "NFunctionalTestProxy.h"
 
+#include "NCoreMinimal.h"
+
 #if N_HAS_FUNCTIONAL_TESTING
 #include "FuncTestRenderingComponent.h"
 #include "Components/BillboardComponent.h"
@@ -14,35 +16,58 @@ ANFunctionalTestProxy::ANFunctionalTestProxy(const FObjectInitializer& ObjectIni
 	TestActorComponent = CreateDefaultSubobject<UChildActorComponent>(TEXT("TestActor"));
 }
 
-void ANFunctionalTestProxy::InitProxy(const FString& TestName)
+void ANFunctionalTestProxy::UpdateProxy(const FString& TestName)
 {
 	// Disable and kill off references
 	if (!bUseFunctionalTestProxy)
 	{
-		if (TestActorComponent != nullptr &&
-			TestActorComponent->GetChildActor() != nullptr)
+		DestroyProxy();
+		return;
+	}
+
+	if (FunctionalTestActor == nullptr)
+	{
+		CreateProxy();
+	}
+
+	RenameProxy(TestName);
+}
+void ANFunctionalTestProxy::CreateProxy()
+{
+	if (TestActorComponent == nullptr || !bUseFunctionalTestProxy || FunctionalTestActor != nullptr) return;
+
+	N_LOG(Warning, TEXT("RENAME PROXY"))
+	if (TestActorComponent->GetChildActor() != nullptr)
+	{
+		if (FunctionalTestActor == nullptr)
 		{
-			TestActorComponent->DestroyChildActor();
-			FunctionalTestActor = nullptr;
+#if N_HAS_FUNCTIONAL_TESTING
+			FunctionalTestActor = Cast<AFunctionalTest>(TestActorComponent->GetChildActor());
+#else
+			FunctionalTestActor = Cast<AActor>(TestActorComponent->GetChildActor());
+#endif
 		}
 		return;
 	}
 
-	if (TestActorComponent != nullptr &&
-		TestActorComponent->GetChildActor() == nullptr)
-	{
 #if N_HAS_FUNCTIONAL_TESTING
-		TestActorComponent->SetChildActorClass(AFunctionalTest::StaticClass());
+	TestActorComponent->SetChildActorClass(AFunctionalTest::StaticClass());
 #else
-		TestActorComponent->SetChildActorClass(AActor::StaticClass());
+	TestActorComponent->SetChildActorClass(AActor::StaticClass());
 #endif
+
+	// Ensure we have an actor
+	if (TestActorComponent->GetChildActor() == nullptr)
+	{
+		TestActorComponent->CreateChildActor();
 	}
 	
 #if N_HAS_FUNCTIONAL_TESTING
-	if (FunctionalTestActor == nullptr)
-	{
 		FunctionalTestActor = Cast<AFunctionalTest>(TestActorComponent->GetChildActor());
-		
+
+		// Mark not transient
+		FunctionalTestActor->ClearFlags(RF_Transient);
+	
 		// Bindings
 		FunctionalTestActor->OnTestPrepare.AddUniqueDynamic(this, &ANFunctionalTestProxy::OnTestPrepare);
 		FunctionalTestActor->OnTestFinished.AddUniqueDynamic(this, &ANFunctionalTestProxy::OnTestFinished);
@@ -53,20 +78,36 @@ void ANFunctionalTestProxy::InitProxy(const FString& TestName)
 		FunctionalTestActor->TestName->SetVisibility(false);
 		FunctionalTestActor->GetSpriteComponent()->SetVisibility(false);
 #endif
-	}
+#else
+	FunctionalTestActor = Cast<AActor>(TestActorComponent->GetChildActor());
 #endif
-
+}
+void ANFunctionalTestProxy::RenameProxy(const FString& TestName) const
+{
+	
 	// Handle updates
 	if (FunctionalTestActor != nullptr)
 	{
+		N_LOG(Warning, TEXT("RENAME PROXY"))	
 #if N_HAS_FUNCTIONAL_TESTING
+		FunctionalTestActor->TestLabel = TestName;
+		FunctionalTestActor->TestName->SetText(FText::FromString(TestName));
+		
 		FunctionalTestActor->SetActorLabel(TestName);
 #endif
 	}
 }
+void ANFunctionalTestProxy::DestroyProxy()
+{
+	if (TestActorComponent == nullptr || FunctionalTestActor == nullptr) return;
+	
+	TestActorComponent->SetChildActorClass(nullptr);
+	FunctionalTestActor = nullptr;
+}
 
 void ANFunctionalTestProxy::OnTestPrepare()
 {
+	N_LOG(Warning, TEXT("ANFunctionalTestProxy::OnTestPrepare"))
 	TestPrepared.ExecuteIfBound();
 
 	CheckPassCount = 0;
@@ -77,12 +118,14 @@ void ANFunctionalTestProxy::OnTestPrepare()
 
 void ANFunctionalTestProxy::OnTestFinished()
 {
+	N_LOG(Warning, TEXT("ANFunctionalTestProxy::OnTestFinished"))
 	TestFinished.ExecuteIfBound();
 	ReceiveTestFinished();
 }
 
 void ANFunctionalTestProxy::OnTestStart()
 {
+	N_LOG(Warning, TEXT("ANFunctionalTestProxy::OnTestStart"))
 	TestStarted.ExecuteIfBound();
 	ReceiveStartTest();
 }

@@ -212,17 +212,9 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
 {
-	if (!TestNameOverride.IsEmptyOrWhitespace())
-	{
-		InitProxy(TestNameOverride.ToString());
-	}
-	else
-	{
-		InitProxy(TitleText.ToString());
-	}
-	
 	Rebuild();
 	Super::OnConstruction(Transform);
+	UpdateProxy(TestNameOverride.IsEmptyOrWhitespace() ? TitleText.ToString() : TestNameOverride.ToString());
 }
 
 void ANSamplesDisplayActor::BeginPlay()

@@ -5,14 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/TextRenderComponent.h"
-// ReSharper disable once CppUnusedIncludeDirective
+// ReSharper disable CppUnusedIncludeDirective
 #include "NColor.h"
-// ReSharper disable once CppUnusedIncludeDirective
-
-#include "NFunctionalTestProxy.h"
-#include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
+// ReSharper restore CppUnusedIncludeDirective
+#include "NFunctionalTestProxy.h"
+#include "Components/SplineComponent.h"
 #include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 

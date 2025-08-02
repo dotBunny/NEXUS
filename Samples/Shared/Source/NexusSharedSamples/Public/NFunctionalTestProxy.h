@@ -37,7 +37,7 @@ class ANFunctionalTestProxy : public AActor
 public:
 
 	explicit ANFunctionalTestProxy(const FObjectInitializer& ObjectInitializer);
-	void InitProxy(const FString& TestName);
+	void UpdateProxy(const FString& TestName);
 	
 	FOnFunctionalTestProxyEventSignature TestPrepared;
 	UFUNCTION(BlueprintImplementableEvent, meta=( DisplayName="Prepare Test"))
@@ -107,4 +107,9 @@ private:
 	void OnTestFinished();
 	UFUNCTION(Category = "NEXUS|Functional Test")
 	void OnTestStart();
+
+
+	void CreateProxy();
+	void RenameProxy(const FString& TestName) const;
+	void DestroyProxy();
 };
