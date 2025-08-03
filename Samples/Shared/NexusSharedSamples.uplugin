@@ -29,7 +29,18 @@
 				"Linux",
 				"Win64"
 			]
+		},
+		{
+			"Name": "NexusSharedSamplesTests",
+			"Type": "DeveloperTool",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
+
 	],
 	"Plugins": [
 		{
