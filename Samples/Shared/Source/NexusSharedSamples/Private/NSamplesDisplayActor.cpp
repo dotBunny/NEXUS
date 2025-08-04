@@ -2,9 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NSamplesDisplayActor.h"
-
 #include "NColor.h"
-#include "NCoreMinimal.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
@@ -221,7 +219,6 @@ void ANSamplesDisplayActor::BeginPlay()
 	Super::BeginPlay();
 }
 
-
 void ANSamplesDisplayActor::Rebuild()
 {
 	// Fix stuff created in FunctionTest constructor
@@ -329,6 +326,7 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		CreateScalablePanelInstances(FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector), 2.f, false);
 	}
 }
+
 void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseTransform, const float Length, bool bIgnoreMainPanel) const
 {
 	const float PrimaryScaleY = (Width - 2) * 0.5f;
@@ -379,6 +377,7 @@ void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseT
 			FVector(0.f,0.f, (Length - 2.f) * 100.f),
 			FVector(1.f, PrimaryScaleY, 1.f)), BaseTransform));
 }
+
 void ANSamplesDisplayActor::CreateShadowBoxInstances() const
 {
 	// Ensure the cover is only there when we need it and it will behave appropriately
@@ -604,6 +603,7 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 		DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
 	}
 }
+
 void ANSamplesDisplayActor::UpdateNotice()
 {
 	NoticeDecalComponent->SetRelativeTransform(FTransform(
@@ -651,6 +651,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 		NoticeTextComponent->SetHiddenInGame(true);
 	}
 }
+
 void ANSamplesDisplayActor::UpdateSpotlight() const
 {
 	SpotlightComponent->SetRelativeLocationAndRotation(
@@ -689,6 +690,7 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 		SpotlightComponent->SetActive(false);
 	}
 }
+
 void ANSamplesDisplayActor::UpdateTitleText() const
 {
 	// Title Text
@@ -789,14 +791,12 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 	RootComponent = SceneRoot;
 }
 
-
 void ANSamplesDisplayActor::DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const
 {
 	Instance->SetupAttachment(PartRoot);
 	Instance->SetMobility(EComponentMobility::Static);
 	Instance->SetCollisionProfileName(FName("NoCollision"));
 }
-
 
 float ANSamplesDisplayActor::GetTitleOffset() const
 {
@@ -855,24 +855,12 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 			FVector::OneVector);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 void ANSamplesDisplayActor::PrepareTest()
 {
 	CheckFailCount = 0;
 	CheckPassCount = 0;
 	
-	if (bTimerEnabled && bTestDisableTimer)
+	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().PauseTimer(TimerHandle);
 	}
@@ -887,20 +875,16 @@ void ANSamplesDisplayActor::StartTest()
 
 void ANSamplesDisplayActor::CleanupTest()
 {
-	if (bTimerEnabled && bTestDisableTimer)
-	{
-		if (bTimerEnabled && bTestDisableTimer)
-		{
-			GetWorldTimerManager().UnPauseTimer(TimerHandle);
-		}
-	}
-
 	ReceiveTestFinished();
+
+	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().UnPauseTimer(TimerHandle);
+	}
 }
 
 void ANSamplesDisplayActor::FinishTest(ESampleTestResult TestResult, const FString& Message)
 {
-	
 	if (CheckPassCount > 0 || CheckFailCount > 0)
 	{
 		const FString UpdatedMessage = FString::Printf(TEXT("%s (PASS: %i | FAIL: %i)"), *Message.TrimStartAndEnd(), CheckPassCount, CheckFailCount);

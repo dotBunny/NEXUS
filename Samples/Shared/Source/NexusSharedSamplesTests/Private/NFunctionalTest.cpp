@@ -2,7 +2,6 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NFunctionalTest.h"
-
 #include "Components/BillboardComponent.h"
 
 ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -43,7 +42,7 @@ void ANFunctionalTest::PrepareTest()
 void ANFunctionalTest::StartTest()
 {
 	Super::StartTest();
-
+	
 	// Work with Display
 	if (Display != nullptr)
 	{
@@ -54,7 +53,7 @@ void ANFunctionalTest::StartTest()
 void ANFunctionalTest::CleanUp()
 {
 	Super::CleanUp();
-
+	
 	// Work with Display
 	if (Display != nullptr)
 	{
@@ -72,19 +71,37 @@ void ANFunctionalTest::CleanUp()
 
 void ANFunctionalTest::OnFinishTest(ESampleTestResult TestResult, const FString& Message)
 {
-	FinishTest(static_cast<EFunctionalTestResult>(TestResult), Message);
+	switch (TestResult)
+	{
+	case ESampleTestResult::Default:
+		FinishTest(EFunctionalTestResult::Default, Message);
+		break;
+	case ESampleTestResult::Invalid:
+		FinishTest(EFunctionalTestResult::Invalid, Message);
+		break;
+	case ESampleTestResult::Error:
+		FinishTest(EFunctionalTestResult::Error, Message);
+		break;
+	case ESampleTestResult::Running:
+		FinishTest(EFunctionalTestResult::Running, Message);
+		break;
+	case ESampleTestResult::Failed:
+		FinishTest(EFunctionalTestResult::Failed, Message);
+		break;
+	case ESampleTestResult::Succeeded:
+		FinishTest(EFunctionalTestResult::Succeeded, Message);
+		break;
+	}
 }
 
 #if WITH_EDITOR
 void ANFunctionalTest::UpdateFromDisplay()
 {
-
 	const ANSamplesDisplayActor* Target = TargetDisplay.Get();
 	if (Target != nullptr)
 	{
 		TestLabel = Target->GetTitle();
 		this->SetActorLabel(TestLabel);
 	}
-
 }
 #endif

@@ -33,16 +33,6 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 			
 			ShortName = "NexusSharedSamples";						
-			
-			// Dynamic Tests Setup
-			
-			if (Target.Configuration != UnrealTargetConfiguration.Shipping)
-			{
-				PublicDependencyModuleNames.Add("FunctionalTesting");
-				PrivateDefinitions.Add("N_HAS_FUNCTIONAL_TESTING=1");
-				PublicDefinitions.Add("N_HAS_FUNCTIONAL_TESTING=1");
-			}
-			
 		}
 	}
 }
