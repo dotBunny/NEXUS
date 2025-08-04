@@ -23,6 +23,19 @@ public:
 	virtual void CleanUp() override;
 	
 protected:
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		if (PropertyChangedEvent.Property && PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(ANFunctionalTest, TargetDisplay))
+		{
+			UpdateFromDisplay();
+		}
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+	}
+#endif
+
+	
 	void OnFinishTest(ESampleTestResult TestResult, const FString& Message);
 	void UpdateFromDisplay();
 	
