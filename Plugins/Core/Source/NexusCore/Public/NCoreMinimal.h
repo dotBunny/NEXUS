@@ -15,8 +15,8 @@ NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexus, Log, All);
 	UE_VLOG(LogNexus, Verbosity, Format, ##__VA_ARGS__)
 
 
-#define N_VERSION_NUMBER	1
+#define N_VERSION_NUMBER	2
 
 #define N_VERSION_MAJOR		0
 #define N_VERSION_MINOR		1
-#define N_VERSION_PATCH		0
+#define N_VERSION_PATCH		1

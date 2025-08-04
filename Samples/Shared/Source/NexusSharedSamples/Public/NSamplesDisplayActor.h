@@ -5,14 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/TextRenderComponent.h"
-// ReSharper disable once CppUnusedIncludeDirective
+// ReSharper disable CppUnusedIncludeDirective
 #include "NColor.h"
-// ReSharper disable once CppUnusedIncludeDirective
-
-#include "FunctionalTest.h"
-#include "Components/SplineComponent.h"
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
+// ReSharper restore CppUnusedIncludeDirective
+#include "Components/SplineComponent.h"
 #include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
@@ -20,13 +18,28 @@ class USpotLightComponent;
 
 #define N_TIMER_DRAW_THICKNESS 0.35f
 
+UENUM(BlueprintType)
+enum class ESampleTestResult : uint8
+{
+	Default,
+	Invalid,
+	Error,
+	Running,
+	Failed,
+	Succeeded
+};
+
+
 /**
  * A display used in NEXUS demonstration levels
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
  */
-UCLASS(MinimalAPI, BlueprintType)
-class ANSamplesDisplayActor : public AFunctionalTest
+UCLASS(BlueprintType)
+class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
+	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
+	DECLARE_DELEGATE_TwoParams(FOnTestFinishEventSignature, ESampleTestResult TestResult, const FString& Message)
+	
 	GENERATED_BODY()
 
 	explicit ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer);
@@ -34,14 +47,6 @@ class ANSamplesDisplayActor : public AFunctionalTest
 	virtual void BeginPlay() override;
 
 public:
-
-	
-	// ~AFunctionalTest Interface
-	virtual void PrepareTest() override;
-	virtual void CleanUp() override;
-	virtual void FinishTest(EFunctionalTestResult TestResult, const FString& Message) override;
-	// ~AFunctionalTest Interface
-
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
@@ -57,45 +62,60 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FString GetTaggedPrefix() const { return GetTitle(); };
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True")
+
+
+
+
+	// CALLBACKS FROM FUNCTIONAL TEST
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddWarning(const FString& Message) { OnTestWarning.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestWarning;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddError(const FString& Message) { OnTestError.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestError;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddInfo(const FString& Message) { OnTestInfo.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestInfo;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void FinishTest(ESampleTestResult TestResult, const FString& Message);
+	FOnTestFinishEventSignature OnTestFinish;
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True")
 	void CheckTrue(const bool bResult, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False")
 	void CheckFalse(const bool bResult, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Count)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Count)")
 	void CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Count)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Count)")
 	void CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage);
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Location)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Location)")
 	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Location)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Location)")
 	void CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Object)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Object)")
 	void CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Object)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Object)")
 	void CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check True (w/ Actor)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Actor)")
 	void CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check False (w/ Actor)")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Actor)")
 	void CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Pass Count ++")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check Pass Count ++")
 	void IncrementCheckPassCount() { CheckPassCount++; };
-	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Display|Testing", DisplayName="Check Fail Count ++")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check Fail Count ++")
 	void IncrementCheckFailCount() { CheckFailCount++; };
-
-
-
+	
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Prepare Test"))
+	void ReceivePrepareTest();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Start Test"))
+	void ReceiveStartTest();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Test Finished"))
+	void ReceiveTestFinished();
+	
+	void PrepareTest();
+	void StartTest();
+	void CleanupTest();
 	
 protected:
 
@@ -389,17 +409,21 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
-	bool bTestDisableTimer = false;
+
+	// TESTING
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
 	int TestIterationCount = 24;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
+	bool bTestDisableTimer = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
 	FText CachedDescription;
-private:
-	void TimerExpired();
 	
+private:
 	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
+
+	void TimerExpired();
 	
 	void CreateDisplayInstances();
 	void CreateScalablePanelInstances(const FTransform& BaseTransform, float Length, bool bIgnoreMainPanel = false) const;
@@ -422,9 +446,7 @@ private:
 	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
 	FTransform TitlePanelTextTransform() const;
 	FTransform TitleTextTransform() const;
-
-
-
+	
 	UPROPERTY()
 	TObjectPtr<USceneComponent> SceneRoot;
 
@@ -486,7 +508,9 @@ private:
 
 	FTimerHandle TimerHandle;
 
+
+	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
+	
 	int CheckPassCount = 0;
 	int CheckFailCount = 0;
-	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 };

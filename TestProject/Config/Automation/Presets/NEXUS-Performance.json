@@ -1,8 +1,0 @@
-{
-	"id": "NEXUS-Performance",
-	"name": "NEXUS-Performance",
-	"enabledTests": [
-		"NEXUS.PerfTests.NActorPools.Return",
-		"NEXUS.PerfTests.NActorPools.Warm"
-	]
-}

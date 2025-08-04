@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
+	"Version": 2,
+	"VersionName": "0.1.1",
 	"FriendlyName": "NEXUS Samples: Shared",
 	"Description": "Content used by the other samples to demonstrate and test functionality.",
 	"Category": "NEXUS Samples",
@@ -23,6 +23,16 @@
 		{
 			"Name": "NexusSharedSamplesEditor",
 			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusSharedSamplesTests",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
 				"Mac",
