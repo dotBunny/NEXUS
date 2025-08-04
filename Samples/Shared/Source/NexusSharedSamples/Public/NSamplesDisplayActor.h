@@ -174,6 +174,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Color")
 	TEnumAsByte<ENColor> DescriptionColor = NC_White;
 
+	// WATERMARK
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Enabled")
+	bool bWatermarkEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Scale")
+	float WatermarkScale = 2.25f;
+	
 	// SPOTLIGHT
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
 	bool bSpotlightEnabled = false;
@@ -437,6 +444,7 @@ private:
 	void UpdateTitleText() const;
 	void UpdateCollisions() const;
 	void UpdateTestComponents();
+	void UpdateWatermark() const;
 
 	void DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const;
 
@@ -484,6 +492,8 @@ private:
 	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxTop;
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxRound;
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> Watermark;
 	
 
 	UPROPERTY()
@@ -509,6 +519,8 @@ private:
 	FTimerHandle TimerHandle;
 
 
+	FTransform MainPanelTransform;
+	FTransform FloorPanelTransform;
 	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 	
 	int CheckPassCount = 0;

@@ -202,6 +202,17 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		ShadowBoxTop->SetMaterial(0, MaterialWhite.Object);
 		ShadowBoxTop->SetMaterial(1, MaterialWhite.Object);
 	}
+
+	Watermark = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Branding"));
+	Watermark->SetupAttachment(PartRoot);
+	Watermark->SetMobility(EComponentMobility::Static);
+	Watermark->SetCollisionProfileName(FName("NoCollision"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>BrandingMesh(TEXT("/NexusSharedSamples/SM_NSamples_NEXUS"));
+	if (BrandingMesh.Succeeded())
+	{
+		Watermark->SetStaticMesh(BrandingMesh.Object);
+		Watermark->SetMaterial(0, MaterialWhite.Object);
+	}
 }
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
@@ -257,6 +268,7 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateTitleText();
 	UpdateDescription();
 	UpdateCollisions();
+	UpdateWatermark();
 }
 
 UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorComponent> ComponentClass)
@@ -303,15 +315,18 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		if (Height >= 2.f)
 		{
 			// Traditional Display
-			CreateScalablePanelInstances(FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector), Height);
-			CreateScalablePanelInstances(FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector), Depth);
+			MainPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector);
+			CreateScalablePanelInstances(MainPanelTransform, Height);
+			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector);
+			CreateScalablePanelInstances(FloorPanelTransform, Depth);
 		}
 		else
 		{
-			
 			// Floor
-			CreateScalablePanelInstances(FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector), 1.f, true);
-			CreateScalablePanelInstances(FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector), Depth);
+			MainPanelTransform = FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector);
+			CreateScalablePanelInstances(MainPanelTransform, 1.f, true);
+			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector); 
+			CreateScalablePanelInstances(FloorPanelTransform, Depth);
 		}
 	}
 	else
@@ -321,9 +336,10 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		{
 			Height = 2.f;
 		}
-		
-		CreateScalablePanelInstances(FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector), Height);
-		CreateScalablePanelInstances(FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector), 2.f, false);
+		FloorPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector);
+		CreateScalablePanelInstances(FloorPanelTransform, Height);
+		MainPanelTransform = FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector);
+		CreateScalablePanelInstances(MainPanelTransform, 2.f, false);
 	}
 }
 
@@ -596,6 +612,7 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 			PanelCurve->SetMaterial(0, DisplayMaterial);
 			PanelSide->SetMaterial(0, DisplayMaterial);
 			PanelCurveEdge->SetMaterial(1, DisplayMaterial);
+			Watermark->SetMaterial(0, DisplayMaterial);
 		}
 	}
 	if (DisplayMaterial != nullptr)
@@ -766,6 +783,8 @@ void ANSamplesDisplayActor::UpdateCollisions() const
 		ShadowBoxSide->SetCollisionProfileName(FName("BlockAll"));
 		ShadowBoxTop->SetCollisionProfileName(FName("BlockAll"));
 		ShadowBoxRound->SetCollisionProfileName(FName("BlockAll"));
+		
+		Watermark->SetCollisionProfileName(FName("BlockAll"));
 	}
 	else
 	{
@@ -782,6 +801,8 @@ void ANSamplesDisplayActor::UpdateCollisions() const
 		ShadowBoxSide->SetCollisionProfileName(FName("NoCollision"));
 		ShadowBoxTop->SetCollisionProfileName(FName("NoCollision"));
 		ShadowBoxRound->SetCollisionProfileName(FName("NoCollision"));
+
+		Watermark->SetCollisionProfileName(FName("NoCollision"));
 	}
 }
 
@@ -789,6 +810,34 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 {
 	// Reset our SceneRoot
 	RootComponent = SceneRoot;
+}
+
+void ANSamplesDisplayActor::UpdateWatermark() const
+{
+	if (!bWatermarkEnabled)
+	{
+		Watermark->SetVisibility(false);
+		return;
+	}
+
+	Watermark->SetRelativeTransform(MainPanelTransform);
+	if (Height < 2.f)
+	{
+		FVector NewLocation = Watermark->GetRelativeLocation();
+		NewLocation += FVector(Depth * 50, 0, 9);
+		Watermark->SetRelativeLocation(NewLocation);
+		FRotator NewRotation = Watermark->GetRelativeRotation();
+		NewRotation.Pitch += 180.f;
+		Watermark->SetRelativeRotation(NewRotation);
+	}
+	else
+	{
+		FVector NewLocation = Watermark->GetRelativeLocation();
+		NewLocation += FVector(9, 0, 100 + (Height * 50));
+		Watermark->SetRelativeLocation(NewLocation);
+	}
+	Watermark->SetWorldScale3D(FVector(1, WatermarkScale, WatermarkScale));
+	Watermark->SetVisibility(true);
 }
 
 void ANSamplesDisplayActor::DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const
