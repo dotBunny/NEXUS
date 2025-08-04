@@ -1,8 +1,6 @@
-name: BuildCookRun
+name: Manual BuildCookRun
 
 on:  
-  schedule:
-    - cron: '0 9 * * *' # 5:00 AM EST - Farm Not Busy
   workflow_dispatch:
     inputs:
       configuration:
