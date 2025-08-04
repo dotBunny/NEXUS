@@ -37,7 +37,8 @@ class NEXUSCORE_API FNColor
 public:
 	static FLinearColor GetLinearColor(const ENColor& Color);
 	static FColor GetColor(const ENColor& Color);
-private:
+
+	
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
 	static constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
 	static constexpr FLinearColor BlueLight = FLinearColor(0.1019607843137255f, 0.8f, 0.9333333333333333f, 1.0f);
