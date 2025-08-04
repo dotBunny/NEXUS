@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - [#48](https://github.com/dotBunny/NEXUS/issues/48) Use `HideCategories` instead of using a layout customizer pattern. 
+- Corrected comparison link at bottom of `CHANGELOG`.
 
 ## [0.1.1] - 2025-08-01
 
@@ -31,5 +32,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
-[0.1.1]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.1.0...v0.1.1
+[0.1.1]: https://github.com/dotBunny/NEXUS/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dotBunny/NEXUS/releases/tag/v0.1.0
