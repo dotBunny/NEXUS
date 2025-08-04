@@ -11,7 +11,7 @@ class ALevelInstance;
 class ANCellActor;
 class UNCell;
 
-UCLASS()
+UCLASS(HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 {
 	friend class ANCellActor;

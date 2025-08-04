@@ -13,7 +13,9 @@ class UNCellJunctionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInitializedFromProxy);
 
-UCLASS(NotPlaceable, HideDropdown, Hidden, DisplayName = "NCell Actor")
+UCLASS(NotPlaceable, HideDropdown, Hidden, DisplayName = "NCell Actor", HideCategories=(Tags, Activation, Cooking,
+	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
+	Collision, Networking, Replication))
 class NEXUSPROCGEN_API ANCellActor : public AActor
 {
 	friend class UAssetValidator_World;

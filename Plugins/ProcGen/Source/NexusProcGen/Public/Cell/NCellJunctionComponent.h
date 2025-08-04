@@ -12,7 +12,8 @@
 class ALevelInstance;
 class UNCell;
 
-UCLASS(ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent))
+UCLASS(ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
+	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 {
 	GENERATED_BODY()

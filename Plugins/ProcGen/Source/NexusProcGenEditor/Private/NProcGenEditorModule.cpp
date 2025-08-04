@@ -13,10 +13,8 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "UObject/ObjectSaveContext.h"
 #include "EditorModeRegistry.h"
-#include "Customizations/NCellActorCustomization.h"
 #include "Customizations/NCellRootComponentCustomization.h"
 #include "Cell/NCellJunctionComponent.h"
-#include "Customizations/NCellJunctionComponentCustomization.h"
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
 #include "Cell/NCellProxy.h"
 #include "Customizations/NCellProxyCustomization.h"
@@ -99,18 +97,12 @@ void FNProcGenEditorModule::OnPostEngineInit()
 
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-	PropertyModule.RegisterCustomClassLayout(ANCellActor::StaticClass()->GetFName(),
-	FOnGetDetailCustomizationInstance::CreateStatic(&FNCellActorCustomization::MakeInstance));
 	
 	PropertyModule.RegisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNCellProxyCustomization::MakeInstance));
 
 	PropertyModule.RegisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName(),
 			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellRootComponentCustomization::MakeInstance));
-
-	PropertyModule.RegisterCustomClassLayout(UNCellJunctionComponent::StaticClass()->GetFName(),
-			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellJunctionComponentCustomization::MakeInstance));
 
 	PropertyModule.RegisterCustomClassLayout(UNProcGenComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNProcGenComponentCustomization::MakeInstance));

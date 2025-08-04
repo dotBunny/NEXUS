@@ -39,8 +39,8 @@ enum ENActorPoolSpawnerDistribution : uint8
 };
 
 // TODO: Toggle option to be determinisitc?
-
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(meta = (BlueprintSpawnableComponent),
+	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSACTORPOOLS_API UNActorPoolSpawnerComponent : public USceneComponent
 {
 	GENERATED_BODY()

@@ -7,7 +7,6 @@
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorUtils.h"
 #include "UnrealEdGlobals.h"
-#include "Customizations/NActorPoolSpawnerComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NModuleMacros.h"
 #include "Interfaces/IPluginManager.h"
@@ -21,19 +20,7 @@ void FNActorPoolsEditorModule::StartupModule()
 
 void FNActorPoolsEditorModule::ShutdownModule()
 {
-
 	//GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
-
-	// Unregister customizations
-	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
-	{
-		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-		PropertyModule.UnregisterCustomClassLayout(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
-
-		PropertyModule.NotifyCustomizationModuleChanged();
-	}
-	
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
@@ -50,14 +37,6 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
 	}
-	
-	// Register Customizations
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-	PropertyModule.RegisterCustomClassLayout(UNActorPoolSpawnerComponent::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FNActorPoolSpawnerComponentCustomization::MakeInstance));
-
-	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 IMPLEMENT_MODULE(FNActorPoolsEditorModule, NexusActorPoolsEditor)

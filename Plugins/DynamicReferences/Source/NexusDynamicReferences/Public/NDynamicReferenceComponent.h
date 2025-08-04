@@ -8,7 +8,8 @@
 #include "NDynamicReferenceComponent.generated.h"
 
 UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="Dynamic Reference",
-	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."))
+	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."),
+	HideCategories=(Tags, Activation, Cooking, AssetUserData, Navigation))
 class NEXUSDYNAMICREFERENCES_API UNDynamicReferenceComponent : public UActorComponent
 {
 	GENERATED_BODY()

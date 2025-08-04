@@ -7,7 +7,6 @@
 #include "Misc/AssertionMacros.h"
 #include "DetailWidgetRow.h"
 #include "Cell/NCellActor.h"
-#include "NDetailLayoutBuilderUtils.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
@@ -81,10 +80,6 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
 				]
 		];
-
-	FNDetailLayoutBuilderUtils::HideDefaultCategories(DetailBuilder);
-	FNDetailLayoutBuilderUtils::HideVisualCategories(DetailBuilder);
-	FNDetailLayoutBuilderUtils::HidePhysicsCategories(DetailBuilder);
 }
 
 #undef LOCTEXT_NAMESPACE

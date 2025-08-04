@@ -29,12 +29,12 @@ enum class ESampleTestResult : uint8
 	Succeeded
 };
 
-
 /**
  * A display used in NEXUS demonstration levels
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics, Networking, Replication))
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
 	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);

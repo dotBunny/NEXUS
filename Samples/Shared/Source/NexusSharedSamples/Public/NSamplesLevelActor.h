@@ -14,10 +14,12 @@ class AStaticMeshActor;
 class UDirectionalLightComponent;
 class UTextRenderComponent;
 
+
 /**
  * An actor used to control the base NEXUS demo level
  */
-UCLASS(Config = Game)
+UCLASS(Config = Game, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics, Networking, Replication))
 class NEXUSSHAREDSAMPLES_API ANSamplesLevelActor : public AActor
 {
 	GENERATED_BODY()
