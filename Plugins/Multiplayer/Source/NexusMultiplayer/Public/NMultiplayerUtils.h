@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NWorldUtils.h"
 #include "Components/SceneComponent.h"
 #include "Macros/NWorldMacros.h"
 
@@ -21,5 +20,10 @@ public:
 		{
 			World->ServerTravel(InURL, bAbsolute, bShouldSkipGameNotify);
 		}
+	}
+	
+	FORCEINLINE static bool IsMultiplayerTest()
+	{
+		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
 	}
 };

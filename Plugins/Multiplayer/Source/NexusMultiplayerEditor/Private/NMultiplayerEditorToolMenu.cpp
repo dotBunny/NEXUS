@@ -66,6 +66,7 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 	{
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
+		const FString MultiplayerFlag = FString::Printf(TEXT(" -%s"), TEXT("NMultiplayerTest"));
 	
 		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
 		PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
@@ -77,8 +78,9 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 
 		// Overrides
 		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters = Settings->ServerParameters;
+		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(MultiplayerFlag);
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters = Settings->ClientParameters;
-		
+		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(MultiplayerFlag);
 		
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
 		PlaySessionRequest.EditorPlaySettings->SetPlayNumberOfClients(Settings->ClientCount);

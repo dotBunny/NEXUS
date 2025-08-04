@@ -42,5 +42,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, DisplayName = "? Is Host", Category = "NEXUS|Multiplayer", meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool IsServerExec(UObject* WorldContextObject);
-	
+
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Is Multiplayer Test", Category = "NEXUS|Multiplayer")
+	static bool IsMultiplayerTest();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "? Is Multiplayer Test", Category = "NEXUS|Multiplayer", meta = (ExpandBoolAsExecs="ReturnValue"))
+	static bool IsMultiplayerTestExec();
+
 };

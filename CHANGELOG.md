@@ -10,8 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added support to programatically allow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging`.
-- [#45](https://github.com/dotBunny/NEXUS/issues/45) Added configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
+- Support to programatically allow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging`.
+- [#45](https://github.com/dotBunny/NEXUS/issues/45) Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
+- Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
   
 ### Changed
 

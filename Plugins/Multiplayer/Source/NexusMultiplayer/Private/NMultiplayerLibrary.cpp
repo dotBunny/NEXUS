@@ -4,6 +4,7 @@
 #include "NMultiplayerLibrary.h"
 
 #include "NCoreMinimal.h"
+#include "NMultiplayerUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
@@ -104,4 +105,14 @@ bool UNMultiplayerLibrary::IsServerExec(UObject* WorldContextObject)
 {
 	UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 	return World ? (World->GetNetMode() != NM_Client) : false;
+}
+
+bool UNMultiplayerLibrary::IsMultiplayerTest()
+{
+	return FNMultiplayerUtils::IsMultiplayerTest();
+}
+
+bool UNMultiplayerLibrary::IsMultiplayerTestExec()
+{
+	return FNMultiplayerUtils::IsMultiplayerTest();
 }
