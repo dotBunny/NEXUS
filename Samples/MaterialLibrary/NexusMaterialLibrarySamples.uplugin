@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
+	"Version": 2,
+	"VersionName": "0.1.1",
 	"FriendlyName": "NEXUS Samples: Material Library",
 	"Description": "Sample content for the NEXUS: Material Library plugin.",
 	"Category": "NEXUS Samples",
