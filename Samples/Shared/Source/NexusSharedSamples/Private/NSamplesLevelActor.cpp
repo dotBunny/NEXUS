@@ -163,10 +163,14 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 
 	// Update with level name
 	const FString LevelName = UGameplayStatics::GetCurrentLevelName(GetWorld(), true).Replace(TEXT("DEMO_"), TEXT(""));
-	const FText LevelText = FText::FromString(LevelName);
+	CachedLevelName = FText::AsLocalizable_Advanced(
+		TEXT("NSamplesLevelActor"),
+		LevelName,
+		LevelName);
+
 	if (DemoName != nullptr)
 	{
-		DemoName->SetText(LevelText);
+		DemoName->SetText(CachedLevelName);
 	}
 	
 	Super::OnConstruction(Transform);

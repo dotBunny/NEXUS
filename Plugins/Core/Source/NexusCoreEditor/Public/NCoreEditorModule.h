@@ -17,14 +17,16 @@ class FNCoreEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	void OnPostEngineInit();
+	
 	FNEditorInputProcessor* GetInputProcessor() const
 	{
 		return InputProcessor.Get();
 	}
 	
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
-
+	void ApplyWindowIcon(float Time) const;
 private:
-	UPROPERTY()
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
+	FDelegateHandle WindowIconDelegateHandle;
+	//int count = 0;
 };

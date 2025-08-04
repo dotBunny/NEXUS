@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NUIEditorModule.h"
+
+#include "NEditorUtils.h"
 #include "NUIEditorStyle.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -18,6 +20,7 @@ void FNUIEditorModule::ShutdownModule()
 
 void FNUIEditorModule::OnPostEngineInit()
 {
+	if (!FNEditorUtils::IsUserControlled()) return;
 	FNUIEditorStyle::Initialize();
 }
 

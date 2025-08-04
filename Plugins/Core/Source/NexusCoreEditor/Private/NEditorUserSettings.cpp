@@ -12,10 +12,12 @@
 
 void UNEditorUserSettings::OnPostEngineInit()
 {
-	UNEditorUserSettings* Settings = GetMutable();
-	Settings->ApplyEditorFrameRateLimit();
-	Settings->ApplyAlwaysShowFrameRateAndMemory();
-	Settings->ApplySpaceToPan();
+	if (UNEditorUserSettings* Settings = GetMutable())
+	{
+		Settings->ApplyEditorFrameRateLimit();
+		Settings->ApplyAlwaysShowFrameRateAndMemory();
+		Settings->ApplySpaceToPan();
+	}
 }
 
 void UNEditorUserSettings::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -65,6 +67,9 @@ void UNEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
 
 void UNEditorUserSettings::ApplySpaceToPan() const
 {
-	const FNCoreEditorModule& CoreEditorModule = FModuleManager::GetModuleChecked<FNCoreEditorModule>("NexusCoreEditor");
-	CoreEditorModule.GetInputProcessor()->bCachedPanSetting = bSpaceToPan;
+	if (FNEditorUtils::IsUserControlled())
+	{
+		const FNCoreEditorModule& CoreEditorModule = FModuleManager::GetModuleChecked<FNCoreEditorModule>("NexusCoreEditor");
+		CoreEditorModule.GetInputProcessor()->bCachedPanSetting = bSpaceToPan;
+	}
 }

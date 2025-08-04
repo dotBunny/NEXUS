@@ -1,0 +1,33 @@
+name: Manual BuildCookRun
+
+on:  
+  workflow_dispatch:
+    inputs:
+      configuration:
+        description: 'Client Configuration'
+        required: false
+        default: 'Development'
+        type: choice
+        options:
+            - 'Development'
+            - 'DebugGame'
+            - 'Shipping'
+
+jobs:
+  BuildCookRun:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean workspace
+        uses: ./.github/actions/workspace-clean
+
+      - name: Build project
+        uses: ./.github/actions/build-project
+
+      - name: Run UAT
+        uses: ./.github/actions/ue-uat
+        with:
+          command: 'BuildCookRun'
+          additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=${{ inputs.configuration }} -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
+    

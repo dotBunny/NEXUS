@@ -14,7 +14,7 @@ class UNActorPoolSubsystem;
  * A classic kill plane implementation with support for pooled actors.
  */
 UCLASS(meta = (BlueprintSpawnableComponent))
-class NEXUSACTORPOOLS_API UNKillZoneComponent : public USceneComponent
+class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	void ResetKillCount() { KillCount = 0; }
-	
+
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
@@ -49,6 +49,5 @@ protected:
 	
 private:
 	int KillCount = 0;
-	UBoxComponent* KillBox;
 	UNActorPoolSubsystem* ActorPoolSubsystem;
 };

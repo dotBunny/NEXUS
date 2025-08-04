@@ -7,6 +7,7 @@ namespace UnrealBuildTool.Rules
 	{
 		public NexusSharedSamples(ReadOnlyTargetRules Target) : base(Target)
 		{
+			
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 			PublicDependencyModuleNames.AddRange(
@@ -28,8 +29,9 @@ namespace UnrealBuildTool.Rules
 			);
 			
 			// NEXUS
+			PublicDependencyModuleNames.AddRange(["NexusCore"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
-
+			
 			ShortName = "NexusSharedSamples";						
 		}
 	}

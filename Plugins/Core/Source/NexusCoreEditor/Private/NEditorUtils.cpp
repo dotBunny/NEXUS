@@ -9,6 +9,15 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
+#if PLATFORM_WINDOWS
+#include "Windows/WindowsHWrapper.h"
+#ifdef UNICODE
+#define SENDMESSAGE  SendMessageW
+#else
+#define SENDMESSAGE  SendMessageA
+#endif // !UNICODE
+#endif
+
 void FNEditorUtils::RegisterSettings(UDeveloperSettings* SettingsObject)
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
@@ -103,4 +112,104 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 	Blueprint->MarkPackageDirty();
 
 	return Blueprint;
+}
+
+void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
+{
+	const TCHAR* StagingSectionKey = TEXT("Staging");
+	const TCHAR* DisallowedConfigFilesKey = TEXT("+DisallowedConfigFiles");
+	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	
+	if (!GConfig->IsReadyForUse())
+	{
+		NE_LOG(Warning, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		return;
+	}
+
+	if (FPaths::FileExists(ProjectDefaultGamePath))
+	{
+		GConfig->LoadFile(ProjectDefaultGamePath);
+	}
+	else
+	{
+		GConfig->AddNewBranch(ProjectDefaultGamePath);
+		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+	}
+	
+	TArray<FString> DisallowedConfigFiles;
+	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
+	if (ProjectDefaultGameConfig == nullptr)
+	{
+		NE_LOG(Error, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to load project DefaultGame.ini."))
+		return;
+	}
+	
+	ProjectDefaultGameConfig->GetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
+	if (!DisallowedConfigFiles.Contains(RelativeConfig))
+	{
+		DisallowedConfigFiles.Add(RelativeConfig);
+		ProjectDefaultGameConfig->SetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
+		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+
+		// Save and close the file that shouldn't be open
+		GConfig->Flush(true, ProjectDefaultGamePath);
+	}
+}
+
+void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
+{
+	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	{
+		MutableStyleSet->Set("AppIcon", Icon);
+	}
+	else
+	{
+		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIconSVG] Unable to replace icon."));
+	}
+}
+
+void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
+{
+	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	{
+		MutableStyleSet->Set("AppIcon", Icon);
+	}
+	else
+	{
+		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIcon] Unable to replace icon."));
+	}
+}
+
+bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
+{
+#if PLATFORM_WINDOWS
+	const FString FinalPath = FString::Printf(TEXT("%s.ico"), *IconPath);
+	if (FPaths::FileExists(FinalPath))
+	{
+		Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
+		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
+			GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
+		
+		if (hIcon)
+		{
+			// Set the large icon (Alt+Tab, taskbar)
+			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        
+			// Set the small icon (window title bar)
+			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+        
+			// Also set it for the window class
+			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
+			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
+			return true;
+		}
+		NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s."), *FinalPath);
+		return false;
+	}
+	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] %s Not Found."), *FinalPath);
+#else
+	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform."));
+#endif
+	return false;
 }

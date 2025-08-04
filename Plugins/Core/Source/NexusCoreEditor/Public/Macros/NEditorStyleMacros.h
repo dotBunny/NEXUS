@@ -16,6 +16,7 @@
 		} \
 		static void Shutdown() \
 		{ \
+			if(StyleInstance == nullptr) return; \
 			FSlateStyleRegistry::UnRegisterSlateStyle(*StyleInstance); \
 			ensure(StyleInstance.IsUnique()); \
 			StyleInstance.Reset(); \
@@ -28,7 +29,7 @@
 		} \
 		static TSharedPtr<FSlateStyleSet> GetStyleInstance() { return StyleInstance; }; \
 	private: \
-		static TSharedRef<FSlateStyleSet > Create(); \
+		static TSharedRef<FSlateStyleSet> Create(); \
 		static TSharedPtr<FSlateStyleSet> StyleInstance; \
 		static FString PluginDirectory;
 

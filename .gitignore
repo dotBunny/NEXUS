@@ -81,6 +81,7 @@ DerivedDataCache/*
 # NEXUS Test Project
 TestProject/DerivedDataCache/*
 TestProject/Saved/*
+TestProject/Build/*
 TestProject/.vsconfig
 *.DotSettings.user
 
@@ -89,3 +90,11 @@ TestProject/.vsconfig
 
 # Build Configuration
 !TestProject/Saved/UnrealBuildTool/BuildConfiguration.xml
+
+# GitHub Pages
+_site/*
+.github/pages/_site
+.github/pages/.sass-cache
+.github/pages/.jekyll-cache
+.github/pages/.jekyll-metadata
+.github/pages/vendor

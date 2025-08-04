@@ -11,7 +11,7 @@ public: \
 	FORCEINLINE static Type& Get() \
 	{ \
 		return FModuleManager::LoadModuleChecked<Type>(Name); \
-	}
+	} \
 
 #define N_IMPLEMENT_MODULE_POST_ENGINE_INIT(Type, Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \

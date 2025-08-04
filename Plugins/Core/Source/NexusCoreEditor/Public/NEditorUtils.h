@@ -10,6 +10,7 @@
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
+
 class UAsyncEditorDelay;
 
 /**
@@ -129,4 +130,10 @@ public:
 		}
 		return MoveTemp(SelectedPaths);
 	}
+	
+	static void DisallowConfigFileFromStaging(const FString& Config);
+	
+	static void ReplaceAppIcon(FSlateImageBrush* Icon);
+	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
+	static bool ReplaceWindowIcon(const FString& IconPath);
 };

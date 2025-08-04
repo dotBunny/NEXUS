@@ -6,6 +6,7 @@
 #include "NDynamicReferencesComponentCustomization.h"
 #include "NDynamicReferenceComponent.h"
 #include "NDynamicReferencesEditorStyle.h"
+#include "NEditorUtils.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -29,6 +30,8 @@ void FNDynamicReferencesEditorModule::ShutdownModule()
 
 void FNDynamicReferencesEditorModule::OnPostEngineInit()
 {
+	if (!FNEditorUtils::IsUserControlled()) return;
+	
 	// Configure Style
 	FNDynamicReferencesEditorStyle::Initialize();
 	

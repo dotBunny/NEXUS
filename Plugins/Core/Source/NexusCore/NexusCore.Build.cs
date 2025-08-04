@@ -13,7 +13,6 @@ namespace UnrealBuildTool.Rules
 				[
 					"Core",
 					"CoreUObject",
-					"FunctionalTesting",
 					"Engine",
 					"GeometryCore",
 					"GeometryFramework",
@@ -24,7 +23,6 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
-					"Kismet",
 					"ModelingComponents",
 					"Projects"
 				]

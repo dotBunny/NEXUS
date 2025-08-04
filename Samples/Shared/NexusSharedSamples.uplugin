@@ -1,15 +1,15 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
+	"Version": 2,
+	"VersionName": "0.1.1",
 	"FriendlyName": "NEXUS Samples: Shared",
 	"Description": "Content used by the other samples to demonstrate and test functionality.",
 	"Category": "NEXUS Samples",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.vs0j6nmp0un2",
+	"DocsURL": "https://nexus-framework.com/docs/getting-started/test-project/",
 	"MarketplaceURL": "",
-	"SupportURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
 	"CanContainContent": true,
 	"IsBetaVersion": false,
@@ -23,6 +23,16 @@
 		{
 			"Name": "NexusSharedSamplesEditor",
 			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		},
+		{
+			"Name": "NexusSharedSamplesTests",
+			"Type": "DeveloperTool",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
 				"Mac",

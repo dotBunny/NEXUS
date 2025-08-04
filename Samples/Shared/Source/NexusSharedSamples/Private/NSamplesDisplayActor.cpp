@@ -2,8 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NSamplesDisplayActor.h"
-
-#include "NCoreMinimal.h"
+#include "NColor.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
@@ -16,7 +15,12 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	SceneRoot->SetMobility(EComponentMobility::Static);
 	RootComponent = SceneRoot;
-	
+
+	// This is really just for organizational purposes and OCD.
+	PartRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Parts"));
+	PartRoot->SetupAttachment(SceneRoot);
+	PartRoot->SetMobility(EComponentMobility::Static);
+
 	// Create Materials
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_Grey"));
 	if (MaterialGrey.Succeeded())
@@ -30,7 +34,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	NoticeDecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
 	NoticeDecalComponent->bAutoActivate = false;
 	NoticeDecalComponent->SetMobility(EComponentMobility::Static);
-	NoticeDecalComponent->SetupAttachment(RootComponent);
+	NoticeDecalComponent->SetupAttachment(PartRoot);
 	NoticeDecalComponent->DecalSize = FVector::ZeroVector;
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DecalMaterial(TEXT("/NexusSharedSamples/M_NSamples_Notice"));
 	if (DecalMaterial.Succeeded())
@@ -38,7 +42,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		NoticeMaterialInterface = DecalMaterial.Object;
 	}
 	NoticeTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Notice"));
-	NoticeTextComponent->SetupAttachment(RootComponent);
+	NoticeTextComponent->SetupAttachment(PartRoot);
 	NoticeTextComponent->SetWorldSize(24.f);
 	NoticeTextComponent->HorizontalAlignment = EHTA_Center;
 	NoticeTextComponent->VerticalAlignment = EVRTA_TextCenter;
@@ -49,10 +53,10 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	
 	
 	TitleTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Title"));
-	TitleTextComponent->SetupAttachment(RootComponent);
+	TitleTextComponent->SetupAttachment(PartRoot);
 	
 	DescriptionTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Description"));
-	DescriptionTextComponent->SetupAttachment(RootComponent);
+	DescriptionTextComponent->SetupAttachment(PartRoot);
 	if (TextFont.Succeeded())
 	{
 		TitleTextComponent->SetFont(TextFont.Object);
@@ -69,7 +73,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	SpotlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spotlight"));
 	SpotlightComponent->bAutoActivate = false;
 	SpotlightComponent->SetMobility(EComponentMobility::Type::Stationary);
-	SpotlightComponent->SetupAttachment(RootComponent);
+	SpotlightComponent->SetupAttachment(PartRoot);
 	SpotlightComponent->SetIntensity(0.f);
 	SpotlightComponent->SetIntensityUnits(ELightUnits::Unitless);
 	SpotlightComponent->SetAttenuationRadius(0.f);
@@ -87,7 +91,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	// Turn off the sprite?
 	
 	TitleSpacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TitleSpacer"));
-	TitleSpacerComponent->SetupAttachment(RootComponent);
+	TitleSpacerComponent->SetupAttachment(PartRoot);
 	TitleSpacerComponent->SetCastShadow(false);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineCubeMesh(TEXT("/Engine/BasicShapes/Cube"));
 	if (EngineCubeMesh.Succeeded())
@@ -97,106 +101,106 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 	
 	// Create Display
-	ISM_CurveEdge = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_CurveEdge"));
-	DefaultInstanceStaticMesh(ISM_CurveEdge);
+	PanelCurveEdge = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Curve_Edge"));
+	DefaultInstanceStaticMesh(PanelCurveEdge);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EdgeCurveMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_EdgeCurve"));
 	if (EdgeCurveMesh.Succeeded())
 	{
-		ISM_CurveEdge->SetStaticMesh(EdgeCurveMesh.Object);
-		ISM_CurveEdge->SetMaterial(0, MaterialGreyDark.Object);
+		PanelCurveEdge->SetStaticMesh(EdgeCurveMesh.Object);
+		PanelCurveEdge->SetMaterial(0, MaterialGreyDark.Object);
 	}
 	
-	ISM_Side = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_Side"));
-	DefaultInstanceStaticMesh(ISM_Side);
+	PanelSide = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Side"));
+	DefaultInstanceStaticMesh(PanelSide);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SideMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Side"));
 	if (SideMesh.Succeeded())
 	{
-		ISM_Side->SetStaticMesh(SideMesh.Object);
-		ISM_Side->SetMaterial(1, MaterialGreyDark.Object);
+		PanelSide->SetStaticMesh(SideMesh.Object);
+		PanelSide->SetMaterial(1, MaterialGreyDark.Object);
 	}
 
-	ISM_Curve = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_Curve"));
-	DefaultInstanceStaticMesh(ISM_Curve);
+	PanelCurve = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Curve"));
+	DefaultInstanceStaticMesh(PanelCurve);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CurveMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Curve"));
 	if (CurveMesh.Succeeded())
 	{
-		ISM_Curve->SetStaticMesh(CurveMesh.Object);
+		PanelCurve->SetStaticMesh(CurveMesh.Object);
 	}
 
-	ISM_Corner = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_Corner"));
-	DefaultInstanceStaticMesh(ISM_Corner);
+	PanelCorner = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Corner"));
+	DefaultInstanceStaticMesh(PanelCorner);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CornerMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Corner"));
 	if (CornerMesh.Succeeded())
 	{
-		ISM_Corner->SetStaticMesh(CornerMesh.Object);
-		ISM_Corner->SetMaterial(1, MaterialGreyDark.Object);
+		PanelCorner->SetStaticMesh(CornerMesh.Object);
+		PanelCorner->SetMaterial(1, MaterialGreyDark.Object);
 	}
 
-	ISM_Main = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_Main"));
-	DefaultInstanceStaticMesh(ISM_Main);
+	PanelMain = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Main"));
+	DefaultInstanceStaticMesh(PanelMain);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MainMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Main"));
 	if (MainMesh.Succeeded())
 	{
-		ISM_Main->SetStaticMesh(MainMesh.Object);
+		PanelMain->SetStaticMesh(MainMesh.Object);
 	}
 
 	// Create Tag Bar
-	ISM_TitleBarMain = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_TitleBarMain"));
-	DefaultInstanceStaticMesh(ISM_TitleBarMain);
+	TitleBarMain = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_Main"));
+	DefaultInstanceStaticMesh(TitleBarMain);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarMainMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_Middle"));
 	if (TitleBarMainMesh.Succeeded())
 	{
-		ISM_TitleBarMain->SetStaticMesh(TitleBarMainMesh.Object);
-		ISM_TitleBarMain->SetMaterial(0, MaterialGreyDark.Object);
+		TitleBarMain->SetStaticMesh(TitleBarMainMesh.Object);
+		TitleBarMain->SetMaterial(0, MaterialGreyDark.Object);
 	}
 
-	ISM_TitleBarEnd = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_TitleBarEnd"));
-	DefaultInstanceStaticMesh(ISM_TitleBarEnd);
+	TitleBarEndLeft = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_End_Left"));
+	DefaultInstanceStaticMesh(TitleBarEndLeft);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarEndMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_R"));
 	if (TitleBarEndMesh.Succeeded())
 	{
-		ISM_TitleBarEnd->SetStaticMesh(TitleBarEndMesh.Object);
-		ISM_TitleBarEnd->SetMaterial(0, MaterialGreyDark.Object);
+		TitleBarEndLeft->SetStaticMesh(TitleBarEndMesh.Object);
+		TitleBarEndLeft->SetMaterial(0, MaterialGreyDark.Object);
 	}
 
-	ISM_TitleBarEndR = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_TitleBarEndR"));
-	DefaultInstanceStaticMesh(ISM_TitleBarEndR);
+	TitleBarEndRight = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_End_Right"));
+	DefaultInstanceStaticMesh(TitleBarEndRight);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarEndRMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_L"));
 	if (TitleBarEndRMesh.Succeeded())
 	{
-		ISM_TitleBarEndR->SetStaticMesh(TitleBarEndRMesh.Object);
-		ISM_TitleBarEndR->SetMaterial(0, MaterialGreyDark.Object);
+		TitleBarEndRight->SetStaticMesh(TitleBarEndRMesh.Object);
+		TitleBarEndRight->SetMaterial(0, MaterialGreyDark.Object);
 	}
 
 	// Create ShadowBox
-	ISM_ShadowStraight = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_ShadowStraight"));
-	DefaultInstanceStaticMesh(ISM_ShadowStraight);
+	ShadowBoxSide = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Side"));
+	DefaultInstanceStaticMesh(ShadowBoxSide);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowStraightMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_Side_Ribbed"));
 	if (ShadowStraightMesh.Succeeded())
 	{
-		ISM_ShadowStraight->SetStaticMesh(ShadowStraightMesh.Object);
-		ISM_ShadowStraight->SetMaterial(0, MaterialWhite.Object);
-		ISM_ShadowStraight->SetMaterial(1, MaterialWhite.Object);
+		ShadowBoxSide->SetStaticMesh(ShadowStraightMesh.Object);
+		ShadowBoxSide->SetMaterial(0, MaterialWhite.Object);
+		ShadowBoxSide->SetMaterial(1, MaterialWhite.Object);
 	}
 
-	ISM_ShadowRound = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_ShadowRound"));
-	DefaultInstanceStaticMesh(ISM_ShadowRound);
+	ShadowBoxRound = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Round"));
+	DefaultInstanceStaticMesh(ShadowBoxRound);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowRoundMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_RoundEdge"));
 	if (ShadowRoundMesh.Succeeded())
 	{
-		ISM_ShadowRound->SetStaticMesh(ShadowRoundMesh.Object);
-		ISM_ShadowRound->SetMaterial(0, MaterialWhite.Object);
-		ISM_ShadowRound->SetMaterial(1, MaterialWhite.Object);
+		ShadowBoxRound->SetStaticMesh(ShadowRoundMesh.Object);
+		ShadowBoxRound->SetMaterial(0, MaterialWhite.Object);
+		ShadowBoxRound->SetMaterial(1, MaterialWhite.Object);
 	}
 
-	ISM_ShadowStraightTop = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ISM_ShadowStraightTop"));
-	DefaultInstanceStaticMesh(ISM_ShadowStraightTop);
+	ShadowBoxTop = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Top"));
+	DefaultInstanceStaticMesh(ShadowBoxTop);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowStraightTopMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_Side"));
 	if (ShadowStraightTopMesh.Succeeded())
 	{
-		ISM_ShadowStraightTop->SetStaticMesh(ShadowStraightTopMesh.Object);
-		ISM_ShadowStraightTop->SetMaterial(0, MaterialWhite.Object);
-		ISM_ShadowStraightTop->SetMaterial(1, MaterialWhite.Object);
+		ShadowBoxTop->SetStaticMesh(ShadowStraightTopMesh.Object);
+		ShadowBoxTop->SetMaterial(0, MaterialWhite.Object);
+		ShadowBoxTop->SetMaterial(1, MaterialWhite.Object);
 	}
 }
 
@@ -206,22 +210,34 @@ void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 }
 
+void ANSamplesDisplayActor::BeginPlay()
+{
+	if (bTimerEnabled)
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
+	}
+	Super::BeginPlay();
+}
+
 void ANSamplesDisplayActor::Rebuild()
 {
+	// Fix stuff created in FunctionTest constructor
+	UpdateTestComponents();
+	
 	// Clear previous instances
-	ISM_Main->ClearInstances();
-	ISM_Corner->ClearInstances();
-	ISM_Side->ClearInstances();
-	ISM_Curve->ClearInstances();
-	ISM_CurveEdge->ClearInstances();
+	PanelMain->ClearInstances();
+	PanelCorner->ClearInstances();
+	PanelSide->ClearInstances();
+	PanelCurve->ClearInstances();
+	PanelCurveEdge->ClearInstances();
 
-	ISM_TitleBarMain->ClearInstances();
-	ISM_TitleBarEnd->ClearInstances();
-	ISM_TitleBarEndR->ClearInstances();
+	TitleBarMain->ClearInstances();
+	TitleBarEndLeft->ClearInstances();
+	TitleBarEndRight->ClearInstances();
 
-	ISM_ShadowStraight->ClearInstances();
-	ISM_ShadowStraightTop->ClearInstances();
-	ISM_ShadowRound->ClearInstances();
+	ShadowBoxSide->ClearInstances();
+	ShadowBoxTop->ClearInstances();
+	ShadowBoxRound->ClearInstances();
 
 	// Ensure depth
 	if (Depth < 0.5f)
@@ -240,55 +256,17 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateDisplayColor();
 	UpdateTitleText();
 	UpdateDescription();
+	UpdateCollisions();
 }
 
 UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorComponent> ComponentClass)
 {
 	return this->GetComponentByClass(ComponentClass);
 }
-FColor ANSamplesDisplayActor::GetColor(const ENSamplesDisplayColor Color)
+
+void ANSamplesDisplayActor::TimerExpired()
 {
-	return GetLinearColor(Color).ToFColor(true);
-}
-FLinearColor ANSamplesDisplayActor::GetLinearColor(const ENSamplesDisplayColor Color)
-{
-	constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
-	constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
-	constexpr FLinearColor BlueLight = FLinearColor(0.1019607843137255f, 0.8f, 0.9333333333333333f, 1.0f);
-	constexpr FLinearColor Pink = FLinearColor(0.8196078431372549f, 0.3529411764705882f, 0.8941176470588235f, 1.0f);
-	constexpr FLinearColor GreyLight = FLinearColor(0.123264f, 0.123264f, 0.123264f, 1.0f);
-	constexpr FLinearColor GreyDark = FLinearColor(0.029514f, 0.029514f, 0.029514f, 1.0f);
-	constexpr FLinearColor Yellow = FLinearColor(1.f, 1.f, 0.0f, 1.0f);
-	constexpr FLinearColor Orange = FLinearColor(1.f, 0.5f, 0.f, 1.0f);
-	
-	switch (Color)
-	{
-	case SDC_Black:
-		return FLinearColor::Black;
-	case SDC_White:
-		return FLinearColor::White;
-	case SDC_BlueLight:
-		return BlueLight;
-	case SDC_BlueMid:
-		return BlueMid;
-	case SDC_BlueDark:
-		return BlueDark;
-	case SDC_Red:
-		return FLinearColor::Red;
-	case SDC_Green:
-		return FLinearColor::Green;
-	case SDC_GreyLight:
-		return GreyLight;
-	case SDC_GreyDark:
-		return GreyDark;
-	case SDC_Yellow:
-		return Yellow;
-	case SDC_Orange:
-		return Orange;
-	case SDC_Pink:
-		break;
-	}
-	return Pink;
+	OnTimerExpired();
 }
 
 void ANSamplesDisplayActor::CreateDisplayInstances()
@@ -299,7 +277,7 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 	if (Height >= 2.f && Depth >= 2.f)
 	{
 		const float WidthY = (Width - 2.f) * 0.5f;
-		ISM_Curve->AddInstance(
+		PanelCurve->AddInstance(
 			FTransform(
 				FRotator::ZeroRotator,
 				FVector::ZeroVector,
@@ -316,7 +294,7 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		FRotator(90.f, 360.f, 180.f),
 		FVector(0.f, WidthY * -100.f, 0.f),
 		FVector::OneVector));
-		ISM_CurveEdge->AddInstances(InstanceTransforms, false, false, true);
+		PanelCurveEdge->AddInstances(InstanceTransforms, false, false, true);
 	}
 	
 	// Panels
@@ -348,6 +326,7 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		CreateScalablePanelInstances(FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector), 2.f, false);
 	}
 }
+
 void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseTransform, const float Length, bool bIgnoreMainPanel) const
 {
 	const float PrimaryScaleY = (Width - 2) * 0.5f;
@@ -359,7 +338,7 @@ void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseT
 
 	if (!bIgnoreMainPanel)
 	{
-		ISM_Main->AddInstance(
+		PanelMain->AddInstance(
 			UKismetMathLibrary::MakeRelativeTransform(
 				FTransform(
 					FRotator::ZeroRotator,
@@ -380,24 +359,25 @@ void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseT
 	FVector(0.f, SecondaryY * -1.f, SecondaryZ),
 	FVector::OneVector), BaseTransform));
 	
-	ISM_Corner->AddInstances(InstanceTransforms, false, false, true);
+	PanelCorner->AddInstances(InstanceTransforms, false, false, true);
 
 	// Sides
-	ScaleSafeInstance(ISM_Side, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator(0.f,0.f, 90.f),
 			FVector(0.f, ScaledLocationY, ScaledLocationZ),
 			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
 	
-	ScaleSafeInstance(ISM_Side, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator(0.f,0.f, -90.f),
 			FVector(0.f, ScaledLocationY * -1.f, ScaledLocationZ),
 			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
 	
-	ScaleSafeInstance(ISM_Side, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator::ZeroRotator,
 			FVector(0.f,0.f, (Length - 2.f) * 100.f),
 			FVector(1.f, PrimaryScaleY, 1.f)), BaseTransform));
 }
+
 void ANSamplesDisplayActor::CreateShadowBoxInstances() const
 {
 	// Ensure the cover is only there when we need it and it will behave appropriately
@@ -414,10 +394,10 @@ void ANSamplesDisplayActor::CreateShadowBoxInstances() const
 			(InstanceTransforms[0].GetLocation() * -1.f) + FVector(0.f, 0.f, (Height * 100) - 100.f),
 			InstanceTransforms[0].GetScale3D()));
 	
-	ISM_ShadowStraight->AddInstances(InstanceTransforms, false, false, true);
+	ShadowBoxSide->AddInstances(InstanceTransforms, false, false, true);
 	InstanceTransforms.Empty();
 	
-	ISM_ShadowStraightTop->AddInstance(FTransform(
+	ShadowBoxTop->AddInstance(FTransform(
 		FRotator(0.f, 0.f, -90.f),
 		FVector(0.f, (Width - 2.0f) * 50.f, Height * 100.f),
 		FVector((Depth - 1.f) * ShadowBoxCoverDepthPercentage, 1.f, (Width - 2.f) / 5.f)));
@@ -433,7 +413,7 @@ void ANSamplesDisplayActor::CreateShadowBoxInstances() const
 		FVector(Location.X, (Location.Y * -1.f) + 100.f, Location.Z + 100.f),
 		InstanceTransforms[0].GetScale3D()));
 	
-	ISM_ShadowRound->AddInstances(InstanceTransforms, false, false, true);
+	ShadowBoxRound->AddInstances(InstanceTransforms, false, false, true);
 }
 void ANSamplesDisplayActor::CreateTitlePanelInstances() const
 {
@@ -451,15 +431,15 @@ void ANSamplesDisplayActor::CreateTitlePanelInstances() const
 		FVector((Depth - 1.f) * 100.f, 0.f, 0.f),
 		FVector(1.f, WidthLimited - 3.f, 1.f));
 	
-	ISM_TitleBarMain->AddInstance(BaseTransform, false);
+	TitleBarMain->AddInstance(BaseTransform, false);
 	const FVector BaseLocation = BaseTransform.GetLocation();
 	
-	ISM_TitleBarEnd->AddInstance(FTransform(
+	TitleBarEndLeft->AddInstance(FTransform(
 			FRotator::ZeroRotator,
 			FVector(BaseLocation.X, BaseLocation.Y + (((WidthLimited - 3.f) * 50.f) * -1.f), BaseLocation.Z),
 			FVector::OneVector), false);
 	
-	ISM_TitleBarEndR->AddInstance(FTransform(
+	TitleBarEndRight->AddInstance(FTransform(
 		FRotator::ZeroRotator,
 		FVector(BaseLocation.X, BaseLocation.Y + ((WidthLimited - 3.f) * 50.f), BaseLocation.Z),
 		FVector::OneVector), false); 
@@ -513,7 +493,7 @@ void ANSamplesDisplayActor::UpdateDescription()
 	int WordCountIndex = WordCount - 1;
 	for (int i = 0; i < WordCount; i++)
 	{
-		// We dont want break on the last
+		// We don't want break on the last
 		if (i != WordCountIndex && BreakArray[i])
 		{
 			WordArray[i] = WordArray[i].Append(ParagraphSpacingMarkup);
@@ -542,13 +522,18 @@ void ANSamplesDisplayActor::UpdateDescription()
 	{
 		FinalString += WordArray[i];
 	}
+	
+	CachedDescription = FText::AsLocalizable_Advanced(
+		TEXT("NSamplesDisplayActor"),
+		GetTitle(),
+		FinalString);
 
 	// Set Position
-	if (!FinalString.IsEmpty())
+	if (!CachedDescription.IsEmpty())
 	{
 		const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
 
-		FVector Origin = FVector::ZeroVector;
+		FVector Origin;
 		if (bSeparateTitlePanel)
 		{
 			Origin = TitleTextTransform().GetLocation();
@@ -560,9 +545,9 @@ void ANSamplesDisplayActor::UpdateDescription()
 
 		const float TitleSpacerOffset = GetTitleSpacerOffset();
 		
-		FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false),
-			Origin.Z - TitleSpacerOffset);
-		FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset, WallLocation.Y, WallLocation.X);
+		FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionTextPadding * .5f),
+			Origin.Z - TitleSpacerOffset - (DescriptionTextPadding * .5f));
+		FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
 
 		if (bSeparateTitlePanel)
 		{
@@ -576,10 +561,10 @@ void ANSamplesDisplayActor::UpdateDescription()
 				bHeightVSFloorText ? FloorLocation : WallLocation, 
 				FVector::OneVector));
 		
-		DescriptionTextComponent->SetText(FText::FromString(FinalString));
+		DescriptionTextComponent->SetText(CachedDescription);
 		DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
 		DescriptionTextComponent->SetWorldSize(DescriptionScale);
-		DescriptionTextComponent->SetTextRenderColor(GetColor(DescriptionColor));
+		DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));
 
 		if (bHeightVSFloorText)
 		{
@@ -606,18 +591,19 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 		// Update the static meshes with the dynamic material
 		if (DisplayMaterial != nullptr)
 		{
-			ISM_Main->SetMaterial(0, DisplayMaterial);
-			ISM_Corner->SetMaterial(0, DisplayMaterial);
-			ISM_Curve->SetMaterial(0, DisplayMaterial);
-			ISM_Side->SetMaterial(0, DisplayMaterial);
-			ISM_CurveEdge->SetMaterial(1, DisplayMaterial);
+			PanelMain->SetMaterial(0, DisplayMaterial);
+			PanelCorner->SetMaterial(0, DisplayMaterial);
+			PanelCurve->SetMaterial(0, DisplayMaterial);
+			PanelSide->SetMaterial(0, DisplayMaterial);
+			PanelCurveEdge->SetMaterial(1, DisplayMaterial);
 		}
 	}
 	if (DisplayMaterial != nullptr)
 	{
-		DisplayMaterial->SetVectorParameterValue(FName("Base Color"), GetLinearColor(Color));
+		DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
 	}
 }
+
 void ANSamplesDisplayActor::UpdateNotice()
 {
 	NoticeDecalComponent->SetRelativeTransform(FTransform(
@@ -639,7 +625,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 		}
 		if (NoticeMaterial != nullptr)
 		{
-			NoticeMaterial->SetVectorParameterValue(FName("Base Color"), GetLinearColor(NoticeColor));
+			NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeColor));
 		}
 		
 		NoticeDecalComponent->SetActive(true);
@@ -649,7 +635,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 
 		NoticeTextComponent->SetText(NoticeText);
 		NoticeTextComponent->SetWorldSize(NoticeScale);
-		NoticeTextComponent->SetTextRenderColor(GetColor(NoticeColor));
+		NoticeTextComponent->SetTextRenderColor(FNColor::GetColor(NoticeColor));
 		NoticeTextComponent->SetVisibility(true);
 		NoticeTextComponent->SetHiddenInGame(false);
 	}
@@ -665,6 +651,7 @@ void ANSamplesDisplayActor::UpdateNotice()
 		NoticeTextComponent->SetHiddenInGame(true);
 	}
 }
+
 void ANSamplesDisplayActor::UpdateSpotlight() const
 {
 	SpotlightComponent->SetRelativeLocationAndRotation(
@@ -703,6 +690,7 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 		SpotlightComponent->SetActive(false);
 	}
 }
+
 void ANSamplesDisplayActor::UpdateTitleText() const
 {
 	// Title Text
@@ -723,7 +711,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 			TitleTextComponent->SetWorldSize(TitleScale);
 		}
 		TitleTextComponent->SetText(TitleText);
-		TitleTextComponent->SetTextRenderColor(GetColor(TitleColor));
+		TitleTextComponent->SetTextRenderColor(FNColor::GetColor(TitleColor));
 		TitleTextComponent->SetVerticalAlignment(EVRTA_TextCenter);
 	}
 	else
@@ -761,12 +749,52 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 	}
 }
 
+void ANSamplesDisplayActor::UpdateCollisions() const
+{
+	if (bCollisionEnabled)
+	{
+		PanelMain->SetCollisionProfileName(FName("BlockAll"));
+		PanelCorner->SetCollisionProfileName(FName("BlockAll"));
+		PanelSide->SetCollisionProfileName(FName("BlockAll"));
+		PanelCurve->SetCollisionProfileName(FName("BlockAll"));
+		PanelCurveEdge->SetCollisionProfileName(FName("BlockAll"));
+		
+		TitleBarMain->SetCollisionProfileName(FName("BlockAll"));
+		TitleBarEndLeft->SetCollisionProfileName(FName("BlockAll"));
+		TitleBarEndRight->SetCollisionProfileName(FName("BlockAll"));
+		
+		ShadowBoxSide->SetCollisionProfileName(FName("BlockAll"));
+		ShadowBoxTop->SetCollisionProfileName(FName("BlockAll"));
+		ShadowBoxRound->SetCollisionProfileName(FName("BlockAll"));
+	}
+	else
+	{
+		PanelMain->SetCollisionProfileName(FName("NoCollision"));
+		PanelCorner->SetCollisionProfileName(FName("NoCollision"));
+		PanelSide->SetCollisionProfileName(FName("NoCollision"));
+		PanelCurve->SetCollisionProfileName(FName("NoCollision"));
+		PanelCurveEdge->SetCollisionProfileName(FName("NoCollision"));
+		
+		TitleBarMain->SetCollisionProfileName(FName("NoCollision"));
+		TitleBarEndLeft->SetCollisionProfileName(FName("NoCollision"));
+		TitleBarEndRight->SetCollisionProfileName(FName("NoCollision"));
+		
+		ShadowBoxSide->SetCollisionProfileName(FName("NoCollision"));
+		ShadowBoxTop->SetCollisionProfileName(FName("NoCollision"));
+		ShadowBoxRound->SetCollisionProfileName(FName("NoCollision"));
+	}
+}
+
+void ANSamplesDisplayActor::UpdateTestComponents()
+{
+	// Reset our SceneRoot
+	RootComponent = SceneRoot;
+}
 
 void ANSamplesDisplayActor::DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const
 {
-	Instance->SetupAttachment(RootComponent);
+	Instance->SetupAttachment(PartRoot);
 	Instance->SetMobility(EComponentMobility::Static);
-	Instance->bDisableCollision = true;
 	Instance->SetCollisionProfileName(FName("NoCollision"));
 }
 
@@ -825,4 +853,169 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 			FRotator::ZeroRotator,
 			FVector(15.f, TextAlignmentOffset(1.0, false), Height * 100.f - (TitleScale + 50.f * 0.5f)),
 			FVector::OneVector);
+}
+
+void ANSamplesDisplayActor::PrepareTest()
+{
+	CheckFailCount = 0;
+	CheckPassCount = 0;
+	
+	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().PauseTimer(TimerHandle);
+	}
+
+	ReceivePrepareTest();
+}
+
+void ANSamplesDisplayActor::StartTest()
+{
+	ReceiveStartTest();
+}
+
+void ANSamplesDisplayActor::CleanupTest()
+{
+	ReceiveTestFinished();
+
+	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().UnPauseTimer(TimerHandle);
+	}
+}
+
+void ANSamplesDisplayActor::FinishTest(ESampleTestResult TestResult, const FString& Message)
+{
+	if (CheckPassCount > 0 || CheckFailCount > 0)
+	{
+		const FString UpdatedMessage = FString::Printf(TEXT("%s (PASS: %i | FAIL: %i)"), *Message.TrimStartAndEnd(), CheckPassCount, CheckFailCount);
+		OnTestFinish.ExecuteIfBound(TestResult, UpdatedMessage);
+	}
+	else
+	{
+		OnTestFinish.ExecuteIfBound(TestResult, Message);
+	}
+}
+
+void ANSamplesDisplayActor::CheckTrue(const bool bResult, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FailMessage);
+	}
+}
+void ANSamplesDisplayActor::CheckFalse(const bool bResult, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FailMessage);
+	}
+}
+
+void ANSamplesDisplayActor::CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
+	}
+}
+
+void ANSamplesDisplayActor::CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
+	}
+}
+
+void ANSamplesDisplayActor::CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
+	}
+}
+void ANSamplesDisplayActor::CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
+	}
+}
+void ANSamplesDisplayActor::CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
+{
+	if (bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
+	}
+}
+void ANSamplesDisplayActor::CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
+{
+	if (!bResult)
+	{
+		CheckPassCount++;
+	}
+	else
+	{
+		CheckFailCount++;
+		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
+	}
 }

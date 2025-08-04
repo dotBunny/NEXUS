@@ -3,6 +3,7 @@
 
 #include "NFixersEditorModule.h"
 
+#include "NEditorUtils.h"
 #include "NFixersEditorBulkOperations.h"
 #include "NFixersEditorCommands.h"
 #include "NFixersEditorStyle.h"
@@ -22,6 +23,8 @@ void FNFixersEditorModule::ShutdownModule()
 
 void FNFixersEditorModule::OnPostEngineInit()
 {
+	if (!FNEditorUtils::IsUserControlled()) return;
+	
 	FNFixersEditorStyle::Initialize();
 	
 	if (FSlateApplication::IsInitialized())

@@ -5,44 +5,46 @@
 
 #include "CoreMinimal.h"
 #include "Components/TextRenderComponent.h"
-// ReSharper disable once CppUnusedIncludeDirective
+// ReSharper disable CppUnusedIncludeDirective
+#include "NColor.h"
 #include "Engine/Font.h"
+#include "Kismet/KismetSystemLibrary.h"
+// ReSharper restore CppUnusedIncludeDirective
+#include "Components/SplineComponent.h"
+#include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class USpotLightComponent;
 
+#define N_TIMER_DRAW_THICKNESS 0.35f
+
 UENUM(BlueprintType)
-enum ENSamplesDisplayColor : uint8
+enum class ESampleTestResult : uint8
 {
-	SDC_Black				UMETA(DisplayName = "Black"),
-	SDC_White				UMETA(DisplayName = "White"),
-
-	SDC_BlueLight			UMETA(DisplayName = "Light Blue"),
-	SDC_BlueMid				UMETA(DisplayName = "Mid Blue"),
-	SDC_BlueDark			UMETA(DisplayName = "Dark Blue"),
-
-	SDC_GreyLight			UMETA(DisplayName = "Light Grey"),
-	SDC_GreyDark			UMETA(DisplayName = "Dark Grey"),
-	
-
-	SDC_Red					UMETA(DisplayName = "Red"),
-	SDC_Orange				UMETA(DisplayName = "Orange"),
-	SDC_Yellow				UMETA(DisplayName = "Yellow"),
-	SDC_Green				UMETA(DisplayName = "Green"),
-	SDC_Pink				UMETA(DisplayName = "Pink")
+	Default,
+	Invalid,
+	Error,
+	Running,
+	Failed,
+	Succeeded
 };
 
+
 /**
- * A display actor used in NEXUS demonstration levels
+ * A display used in NEXUS demonstration levels
  * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
  */
-UCLASS(Config = Game)
+UCLASS(BlueprintType)
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
+	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
+	DECLARE_DELEGATE_TwoParams(FOnTestFinishEventSignature, ESampleTestResult TestResult, const FString& Message)
+	
 	GENERATED_BODY()
 
 	explicit ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginPlay() override;
 
 public:
 	
@@ -61,9 +63,60 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FString GetTaggedPrefix() const { return GetTitle(); };
 
-	static FLinearColor GetLinearColor(ENSamplesDisplayColor Color);
-	static FColor GetColor(ENSamplesDisplayColor Color);
 
+
+
+	// CALLBACKS FROM FUNCTIONAL TEST
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddWarning(const FString& Message) { OnTestWarning.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestWarning;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddError(const FString& Message) { OnTestError.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestError;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void AddInfo(const FString& Message) { OnTestInfo.ExecuteIfBound(Message); };
+	FOnTestEventWithMessageSignature OnTestInfo;
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test")
+	void FinishTest(ESampleTestResult TestResult, const FString& Message);
+	FOnTestFinishEventSignature OnTestFinish;
+
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True")
+	void CheckTrue(const bool bResult, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False")
+	void CheckFalse(const bool bResult, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Count)")
+	void CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Count)")
+	void CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Location)")
+	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Location)")
+	void CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Object)")
+	void CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Object)")
+	void CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Actor)")
+	void CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Actor)")
+	void CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage);
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check Pass Count ++")
+	void IncrementCheckPassCount() { CheckPassCount++; };
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check Fail Count ++")
+	void IncrementCheckFailCount() { CheckFailCount++; };
+	
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Prepare Test"))
+	void ReceivePrepareTest();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Start Test"))
+	void ReceiveStartTest();
+	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Test Finished"))
+	void ReceiveTestFinished();
+	
+	void PrepareTest();
+	void StartTest();
+	void CleanupTest();
+	
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
@@ -85,28 +138,27 @@ protected:
 	float ShadowBoxCoverDepthPercentage = 0.333f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	TEnumAsByte<ENSamplesDisplayColor> Color = SDC_Black;
+	TEnumAsByte<ENColor> Color = NC_Black;
 
-	// TITLE
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display", DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
+	bool bCollisionEnabled = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Text")
-	FText TitleText = FText::FromString("Title");
-
+	FText TitleText;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Scale")
 	float TitleScale = 40.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> TitleColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> TitleColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Seperate Panel")
 	bool bSeparateTitlePanel = false;
-
+	
 	// DESCRIPTION
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text")
-	TArray<FText> DescriptionText = {
-		FText::FromString("Example of description, paragraph #1."),
-		FText::FromString("Example of description, paragraph #2.")
-	};
-
+	TArray<FText> DescriptionText;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Scale")
 	float DescriptionScale = 15.f;
 
@@ -120,7 +172,7 @@ protected:
 	float DescriptionTextPadding = 0.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> DescriptionColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> DescriptionColor = NC_White;
 
 	// SPOTLIGHT
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
@@ -152,19 +204,226 @@ protected:
 	bool bNoticeEnabled = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Color")
-	TEnumAsByte<ENSamplesDisplayColor> NoticeColor = ENSamplesDisplayColor::SDC_White;
+	TEnumAsByte<ENColor> NoticeColor = NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Text")
-	FText NoticeText = FText::FromString("DEPRECATED");
+	FText NoticeText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Scale")
 	float NoticeScale = 80.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Depth", meta=(ClampMin=0, ClampMax=256))
 	float NoticeDepth = 128.f;
+
+	// TIMER
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Enabled")
+	bool bTimerEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Duration", meta=(ClampMin=0, ClampMax=30))
+	float TimerDuration = 2.f;
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Point", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawPoint(UObject* WorldContextObject, const FVector Location, const int TimerIntervals = 1) const
+	{
+		DrawDebugPoint(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, 15.f, FNColor::GetColor(NC_Red),
+			false, TimerDuration * TimerIntervals, SDPG_World);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Sphere", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawSphere(UObject* WorldContextObject, const FVector Location, const float Radius, const int TimerIntervals = 1) const
+	{
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Radius,24,
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Sphere", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, const FVector2D InnerOuter, const int TimerIntervals = 1) const
+	{
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
+			FNColor::GetColor(NC_Black), false,TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1) const
+	{
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Dimensions.GetExtent(),
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Box", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboBox(UObject* WorldContextObject, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1) const
+	{
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerDimensions.GetExtent(),
+			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS);
+
+		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, OuterDimensions.GetExtent(),
+		FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
+	SDPG_World, N_TIMER_DRAW_THICKNESS);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
+	{
+		FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
+		DrawMatrix.SetOrigin(Location);
+		
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, Radius, 24,
+			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
+			N_TIMER_DRAW_THICKNESS,false);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
+	{
+		FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
+		DrawMatrix.SetOrigin(Location);
+
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.X, 24,
+			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
+			SDPG_World, N_TIMER_DRAW_THICKNESS, false);
+
+		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.Y, 24,
+			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
+			N_TIMER_DRAW_THICKNESS, false);
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Spline", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawSpline(UObject* WorldContextObject, const USplineComponent* Spline, const int TimerIntervals = 1) const
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> SplinePoints;
+		const float SplineLength = Spline->GetSplineLength();
+		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); // One point every ~20 units
+		const float DistancePerSegment = SplineLength / NumSegments;
+		SplinePoints.Reserve(NumSegments);
+		for (int32 i = 0; i <= NumSegments; ++i)
+		{
+			const float Distance = DistancePerSegment * i;
+			const FVector Point = Spline->GetLocationAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
+			SplinePoints.Add(Point);
+		}
+		for (int32 i = 0; i < SplinePoints.Num() - 1; ++i)
+		{
+			DrawDebugLine(World, SplinePoints[i], SplinePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Rectangle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawRectangle(UObject* WorldContextObject, const FVector Location, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, int TimerIntervals = 1) const
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> RectanglePoints;
+		RectanglePoints.Reserve(5);
+		
+		const float ExtentX = Dimensions.X * 0.5f;
+		const float ExtentY = Dimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			RectanglePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+			RectanglePoints.Add(Location + FVector(-ExtentX, ExtentY, 0));
+			RectanglePoints.Add(Location + FVector(ExtentX, ExtentY, 0));
+			RectanglePoints.Add(Location + FVector(ExtentX, -ExtentY, 0));
+		
+			RectanglePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
+		}
+		else
+		{
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, ExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, ExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, -ExtentY, 0)));
+		
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
+		}
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+	}
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Rectangle", meta = (WorldContext = "WorldContextObject"))
+	void TimerDrawComboRectangle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerDimensions, const FVector2D& OuterDimensions, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		const float LifeTime = TimerDuration * TimerIntervals;
+		TArray<FVector> RectanglePoints;
+		RectanglePoints.Reserve(5);
+		
+		const float InnerExtentX = InnerDimensions.X * 0.5f;
+		const float InnerExtentY = InnerDimensions.Y * 0.5f;
+		const float OuterExtentX = OuterDimensions.X * 0.5f;
+		const float OuterExtentY = OuterDimensions.Y * 0.5f;
+
+		if (Rotation.IsZero())
+		{
+			RectanglePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+			RectanglePoints.Add(Location + FVector(-InnerExtentX, InnerExtentY, 0));
+			RectanglePoints.Add(Location + FVector(InnerExtentX, InnerExtentY, 0));
+			RectanglePoints.Add(Location + FVector(InnerExtentX, -InnerExtentY, 0));
+
+			RectanglePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
+		}
+		else
+		{
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, InnerExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, InnerExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, -InnerExtentY, 0)));
+
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
+		}
+		
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_Black),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+
+		RectanglePoints.Empty();
+
+		if (Rotation.IsZero())
+		{
+			RectanglePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+			RectanglePoints.Add(Location + FVector(-OuterExtentX, OuterExtentY, 0));
+			RectanglePoints.Add(Location + FVector(OuterExtentX, OuterExtentY, 0));
+			RectanglePoints.Add(Location + FVector(OuterExtentX, -OuterExtentY, 0));
+		
+			RectanglePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
+		}
+		else
+		{
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, OuterExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, OuterExtentY, 0)));
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, -OuterExtentY, 0)));
+		
+			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
+		}
+		
+		for (int32 i = 0; i < 4; ++i)
+		{
+			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_White),
+				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+		}
+	}
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTimerExpired();
+
+	// TESTING
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
+	int TestIterationCount = 24;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
+	bool bTestDisableTimer = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
+	FText CachedDescription;
 	
 private:
 	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
+
+	void TimerExpired();
 	
 	void CreateDisplayInstances();
 	void CreateScalablePanelInstances(const FTransform& BaseTransform, float Length, bool bIgnoreMainPanel = false) const;
@@ -176,6 +435,8 @@ private:
 	void UpdateNotice();
 	void UpdateSpotlight() const;
 	void UpdateTitleText() const;
+	void UpdateCollisions() const;
+	void UpdateTestComponents();
 
 	void DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const;
 
@@ -185,9 +446,12 @@ private:
 	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
 	FTransform TitlePanelTextTransform() const;
 	FTransform TitleTextTransform() const;
-
+	
 	UPROPERTY()
 	TObjectPtr<USceneComponent> SceneRoot;
+
+	UPROPERTY()
+	TObjectPtr<USceneComponent> PartRoot;
 	
 	UPROPERTY()
 	TObjectPtr<UDecalComponent> NoticeDecalComponent;
@@ -199,27 +463,27 @@ private:
 	TObjectPtr<UTextRenderComponent> TitleTextComponent;
 
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_Main;
+	TObjectPtr<UInstancedStaticMeshComponent> PanelMain;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_Corner;
+	TObjectPtr<UInstancedStaticMeshComponent> PanelCorner;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_Side;
+	TObjectPtr<UInstancedStaticMeshComponent> PanelSide;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_Curve;
+	TObjectPtr<UInstancedStaticMeshComponent> PanelCurve;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_CurveEdge;
+	TObjectPtr<UInstancedStaticMeshComponent> PanelCurveEdge;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_TitleBarMain;
+	TObjectPtr<UInstancedStaticMeshComponent> TitleBarMain;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_TitleBarEnd;
+	TObjectPtr<UInstancedStaticMeshComponent> TitleBarEndLeft;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_TitleBarEndR;
+	TObjectPtr<UInstancedStaticMeshComponent> TitleBarEndRight;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_ShadowStraight;
+	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxSide;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_ShadowStraightTop;
+	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxTop;
 	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ISM_ShadowRound;
+	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxRound;
 	
 
 	UPROPERTY()
@@ -241,4 +505,12 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;
+
+	FTimerHandle TimerHandle;
+
+
+	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
+	
+	int CheckPassCount = 0;
+	int CheckFailCount = 0;
 };

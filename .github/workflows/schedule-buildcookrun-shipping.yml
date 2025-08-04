@@ -1,0 +1,24 @@
+name: BuildCookRun (Shipping)
+
+on:  
+  schedule:
+    - cron: '0 10 * * *' # 6:00 AM EST - Farm Not Busy
+
+jobs:
+  BuildCookRun:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean workspace
+        uses: ./.github/actions/workspace-clean
+
+      - name: Build project
+        uses: ./.github/actions/build-project
+
+      - name: Run UAT
+        uses: ./.github/actions/ue-uat
+        with:
+          command: 'BuildCookRun'
+          additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Shipping -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
+    

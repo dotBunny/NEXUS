@@ -7,7 +7,7 @@ A battle-tested collection of game-ready plugins for Unreal Engine. The **NEXUS*
 
 ## Getting Started
 
-Go read the [documentation](https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/#heading=h.k501g8du8nij)! **\</fullstop\>**
+Go read the [documentation](https://nexus-framework.com)! **\</fullstop\>**
 
 ## License
 
@@ -36,9 +36,3 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ````
-
-## Documentation
-
-We've elected to utilize [Google Docs](http://nexus.dotbunny.com/) to house the documentation for the **NEXUS** Framework. This way it is easy to read, search and most importantly **author**.
-
-*Let's not kid ourselves...* We are all a little lacking in documenting our work area, so this is our best bet at creating a spot to collate formalized documentation. Code documentation should still be present to mark up methods and other elements. 

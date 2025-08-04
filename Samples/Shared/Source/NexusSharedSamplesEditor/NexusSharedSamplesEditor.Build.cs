@@ -17,10 +17,10 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
-					"AssetDefinition",				
 					"CoreUObject",
 					"Engine",
 					"Projects",
+					"SlateCore"
 				]
 			);
 
