@@ -8,6 +8,8 @@
 ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	Display = nullptr;
+	
+#if WITH_EDITORONLY_DATA
 	if (bHideBillboard)
 	{
 		GetSpriteComponent()->SetVisibility(false);
@@ -16,6 +18,7 @@ ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) 
 	{
 		TestName->SetVisibility(false);
 	}
+#endif
 }
 
 void ANFunctionalTest::PrepareTest()
@@ -72,12 +75,16 @@ void ANFunctionalTest::OnFinishTest(ESampleTestResult TestResult, const FString&
 	FinishTest(static_cast<EFunctionalTestResult>(TestResult), Message);
 }
 
+#if WITH_EDITOR
 void ANFunctionalTest::UpdateFromDisplay()
 {
+
 	const ANSamplesDisplayActor* Target = TargetDisplay.Get();
 	if (Target != nullptr)
 	{
 		TestLabel = Target->GetTitle();
 		this->SetActorLabel(TestLabel);
 	}
+
 }
+#endif

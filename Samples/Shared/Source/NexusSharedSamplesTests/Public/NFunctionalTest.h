@@ -26,11 +26,13 @@ public:
 	
 protected:
 
+#if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	bool bHideBillboard = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	bool bHideName= true;
+#endif
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
@@ -41,11 +43,12 @@ protected:
 		}
 		Super::PostEditChangeProperty(PropertyChangedEvent);
 	}
+	void UpdateFromDisplay();
 #endif
 
 	
 	void OnFinishTest(ESampleTestResult TestResult, const FString& Message);
-	void UpdateFromDisplay();
+
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
