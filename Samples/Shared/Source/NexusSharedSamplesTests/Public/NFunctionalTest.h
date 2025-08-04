@@ -15,7 +15,9 @@ class ANFunctionalTest : public AFunctionalTest
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS|References", DisplayName="Target Display")
+	explicit ANFunctionalTest(const FObjectInitializer& ObjectInitializer);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS", DisplayName="Target Display")
 	TSoftObjectPtr<ANSamplesDisplayActor> TargetDisplay;
 
 	virtual void PrepareTest() override;
@@ -23,6 +25,12 @@ public:
 	virtual void CleanUp() override;
 	
 protected:
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
+	bool bHideBillboard = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
+	bool bHideName= true;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override

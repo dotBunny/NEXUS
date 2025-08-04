@@ -3,6 +3,21 @@
 
 #include "NFunctionalTest.h"
 
+#include "Components/BillboardComponent.h"
+
+ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	Display = nullptr;
+	if (bHideBillboard)
+	{
+		GetSpriteComponent()->SetVisibility(false);
+	}
+	if (bHideName)
+	{
+		TestName->SetVisibility(false);
+	}
+}
+
 void ANFunctionalTest::PrepareTest()
 {
 	Super::PrepareTest();
