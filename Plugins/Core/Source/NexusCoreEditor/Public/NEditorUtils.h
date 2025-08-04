@@ -132,6 +132,7 @@ public:
 	}
 	
 	static void DisallowConfigFileFromStaging(const FString& Config);
+	static void AllowConfigFileForStaging(const FString& Config);
 	
 	static void ReplaceAppIcon(FSlateImageBrush* Icon);
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);

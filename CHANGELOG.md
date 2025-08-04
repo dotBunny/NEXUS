@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - ???
 
+
+### Added
+
+- Added support to programatically allow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging`.
+- [#45](https://github.com/dotBunny/NEXUS/issues/45) Added configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
+  
 ### Changed
 
 - [#48](https://github.com/dotBunny/NEXUS/issues/48) Use `HideCategories` instead of using a layout customizer pattern. 

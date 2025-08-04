@@ -41,8 +41,9 @@ void FNCoreEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 
-	// Check that the config does not get shipped
+	// Setup staging rules for configs
 	FNEditorUtils::DisallowConfigFileFromStaging("DefaultNexusEditor");
+	FNEditorUtils::AllowConfigFileForStaging("DefaultNexusGame");
 	
 	UNEditorUserSettings::OnPostEngineInit();
 	

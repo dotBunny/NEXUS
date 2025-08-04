@@ -23,6 +23,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
+					"DeveloperSettings",
 					"ModelingComponents",
 					"Projects"
 				]

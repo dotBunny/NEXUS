@@ -157,6 +157,49 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	}
 }
 
+void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
+{
+	const TCHAR* StagingSectionKey = TEXT("Staging");
+	const TCHAR* AllowedConfigFilesKey = TEXT("+AllowedConfigFiles");
+	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	
+	if (!GConfig->IsReadyForUse())
+	{
+		NE_LOG(Warning, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		return;
+	}
+
+	if (FPaths::FileExists(ProjectDefaultGamePath))
+	{
+		GConfig->LoadFile(ProjectDefaultGamePath);
+	}
+	else
+	{
+		GConfig->AddNewBranch(ProjectDefaultGamePath);
+		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+	}
+	
+	TArray<FString> AllowedConfigFiles;
+	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
+	if (ProjectDefaultGameConfig == nullptr)
+	{
+		NE_LOG(Error, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to load project DefaultGame.ini."))
+		return;
+	}
+	
+	ProjectDefaultGameConfig->GetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
+	if (!AllowedConfigFiles.Contains(RelativeConfig))
+	{
+		AllowedConfigFiles.Add(RelativeConfig);
+		ProjectDefaultGameConfig->SetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
+		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+
+		// Save and close the file that shouldn't be open
+		GConfig->Flush(true, ProjectDefaultGamePath);
+	}
+}
+
 void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 {
 	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))

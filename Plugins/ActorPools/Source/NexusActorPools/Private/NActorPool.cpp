@@ -3,11 +3,11 @@
 
 #include "NActorPool.h"
 #include "INActorPoolItem.h"
+#include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NCoreMinimal.h"
 
-FNActorPoolSettings FNActorPool::DefaultSettings = FNActorPoolSettings();
 #if WITH_EDITOR
 int FNActorPool::ActorPoolTicket = 0;
 #endif
@@ -22,7 +22,7 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	}
 	else
 	{
-		UpdateSettings(DefaultSettings);
+		UpdateSettings(UNActorPoolsSettings::Get()->DefaultSettings);
 	}
 	PostInitialize();
 }

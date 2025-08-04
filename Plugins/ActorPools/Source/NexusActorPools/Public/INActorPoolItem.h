@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "NActorPool.h"
 #include "NActorPoolSettings.h"
+#include "NActorPoolsSettings.h"
 #include "INActorPoolItem.generated.h"
 
 /**
@@ -55,7 +56,7 @@ public:
 	 * Get the ActorPoolSettings used to determine how the ActorPool should be setup for this Actor.
 	 */
 	virtual FNActorPoolSettings& GetActorPoolSettings() {
-		static FNActorPoolSettings DefaultSettings;
+		static FNActorPoolSettings DefaultSettings = UNActorPoolsSettings::Get()->DefaultSettings;
 		return DefaultSettings;
 	};
 

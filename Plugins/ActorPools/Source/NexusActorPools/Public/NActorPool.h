@@ -111,8 +111,7 @@ public:
 private:
 
 	const FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
-	static FNActorPoolSettings DefaultSettings;
-
+	
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);
 	void PostInitialize();
 
