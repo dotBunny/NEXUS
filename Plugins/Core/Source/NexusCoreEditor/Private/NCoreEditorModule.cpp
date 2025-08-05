@@ -9,6 +9,7 @@
 #include "NEditorSettings.h"
 #include "NEditorStyle.h"
 #include "NEditorUserSettings.h"
+#include "InstanceObjects/NUpdateCheckInstanceObject.h"
 #include "Modules/ModuleManager.h"
 
 
@@ -56,7 +57,7 @@ void FNCoreEditorModule::OnPostEngineInit()
 
 		// App / Window
 		const UNEditorSettings* Settings = UNEditorSettings::Get();
-		const FString AppIconPath = Settings->AppIconPath;
+		const FString AppIconPath = Settings->ProjectAppIconPath;
 		if (!AppIconPath.IsEmpty())
 		{
 			// Size set in StarshipCoreStyle
@@ -79,7 +80,7 @@ void FNCoreEditorModule::OnPostEngineInit()
 			}
 			
 			// Register the window delegate to make sure our windows get changed, this will change the loading window as well as an indicator of success.
-			const FString WindowIconPath = Settings->WindowIconPath;
+			const FString WindowIconPath = Settings->ProjectWindowIconPath;
 			if (!WindowIconPath.IsEmpty())
 			{
 				const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *WindowIconPath);
@@ -90,12 +91,15 @@ void FNCoreEditorModule::OnPostEngineInit()
 			}
 			
 		}
+
+		// Check for updates
+		UNUpdateCheckInstanceObject::Create();
 	}
 }
 
 void FNCoreEditorModule::ApplyWindowIcon(float Time) const
 {
-	const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *UNEditorSettings::Get()->WindowIconPath);
+	const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *UNEditorSettings::Get()->ProjectWindowIconPath);
 	FNEditorUtils::ReplaceWindowIcon(BasePath);
 	GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
 }

@@ -17,6 +17,8 @@ public:
 	{
 		UAsyncEditorDelay* DelayedRefresh = NewObject<UAsyncEditorDelay>();
 		UNDelayedDetailsRefreshInstanceObject* LibraryObject = NewObject<UNDelayedDetailsRefreshInstanceObject>(DelayedRefresh);
+		LibraryObject->AddToRoot();
+		
 		DelayedRefresh->Complete.AddDynamic(LibraryObject, &UNDelayedDetailsRefreshInstanceObject::Execute);
 		DelayedRefresh->Start(0.5f, 5);
 	}
@@ -25,6 +27,7 @@ private:
 	UFUNCTION()
 	void Execute()
 	{
+		RemoveFromRoot();
 		FPropertyEditorModule& PropertyEditorModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
 		PropertyEditorModule.NotifyCustomizationModuleChanged();
 	}

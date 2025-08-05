@@ -17,12 +17,14 @@ class NEXUSCOREEDITOR_API UNLeakTestInstanceObject : public UObject
 public:
 	static void Create()
 	{
-		UAsyncEditorDelay* DelayedRefresh = NewObject<UAsyncEditorDelay>();
-		UNLeakTestInstanceObject* LeakTestObject = NewObject<UNLeakTestInstanceObject>(DelayedRefresh);
-		DelayedRefresh->Complete.AddDynamic(LeakTestObject, &UNLeakTestInstanceObject::Execute);
+		UAsyncEditorDelay* DelayedTest = NewObject<UAsyncEditorDelay>();
+		UNLeakTestInstanceObject* LeakTestObject = NewObject<UNLeakTestInstanceObject>(DelayedTest);
+		LeakTestObject->AddToRoot();
+		
+		DelayedTest->Complete.AddDynamic(LeakTestObject, &UNLeakTestInstanceObject::Execute);
 
 		LeakTestObject->BeforeSnapshot = FNObjectSnapshotUtils::Snapshot();
-		DelayedRefresh->Start(5.f, 100);
+		DelayedTest->Start(5.f, 100);
 	}
 	
 	FNObjectSnapshot BeforeSnapshot;
@@ -31,6 +33,8 @@ private:
 	UFUNCTION()
 	void Execute()
 	{
+		RemoveFromRoot();
+		
 		const FNObjectSnapshot AfterSnapshot = FNObjectSnapshotUtils::Snapshot();
 
 		// Process

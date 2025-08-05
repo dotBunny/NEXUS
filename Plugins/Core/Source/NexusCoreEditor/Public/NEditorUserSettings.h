@@ -53,6 +53,10 @@ public:
 	
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers", meta = (DisplayName = "Circle Sides", Tooltip = "The number of lines used to draw a debug circle."))
 	int DebugCircleSides = 64;
+
+	UPROPERTY(VisibleAnywhere, Config, Category = "Updates", meta = (DisplayName = "Last Checked"))
+	FDateTime UpdatesLastChecked = FDateTime(2025, 7, 12);
+	
 #endif // WITH_EDITORONLY_DATA
 
 private:
