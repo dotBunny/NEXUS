@@ -11,7 +11,7 @@ class ALevelInstance;
 /**
  * A collection of utility methods for multiplayer type things.
  */
-class NEXUSMULTIPLAYER_API FNMultiplayerUtils
+class FNMultiplayerUtils
 {
 public:
 	FORCEINLINE static void ServerTravel(const UObject *WorldContextObject, const FString& InURL, const bool bAbsolute = true, const bool bShouldSkipGameNotify = false)
