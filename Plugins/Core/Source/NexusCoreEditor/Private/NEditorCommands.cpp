@@ -7,7 +7,7 @@
 #include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
-#include "InstanceObjects/NLeakTestInstanceObject.h"
+#include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
@@ -128,7 +128,7 @@ void FNEditorCommands::OnHelpDocumentation()
 
 void FNEditorCommands::OnToolsLeakCheck()
 {
-	UNLeakTestInstanceObject::Create();
+	UNLeakTestDelayedEditorTask::Create();
 }
 
 bool FNEditorCommands::OnToolsLeakCheck_CanExecute()

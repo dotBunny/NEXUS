@@ -8,7 +8,7 @@
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
 #include "NEditorUtils.h"
-#include "InstanceObjects/NUpdateCheckInstanceObject.h"
+#include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "NEditorSettings.generated.h"
 
 UCLASS(config = NexusEditor, defaultconfig)
@@ -53,10 +53,15 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel" )
 	TEnumAsByte<ENUpdatesChannel> UpdatesChannel = NUC_GithubMain;
 
-	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom URI", meta=(
+	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom Query URI", meta=(
 		EditCondition="UpdatesChannel == ENUpdatesChannel::NUC_Custom", EditConditionHides,
 		ToolTip="A fully qualified URI to the NCoreMinimal.h file in your custom fork, see NUpdatesMonitor::MainURI as an example."))
-	FString UpdatesCustomURI = TEXT("");
+	FString UpdatesCustomQueryURI = TEXT("");
+
+	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom Update URI", meta=(
+		EditCondition="UpdatesChannel == ENUpdatesChannel::NUC_Custom", EditConditionHides,
+		ToolTip="A fully qualified URI to open when an update is detected as avaialble."))
+	FString UpdatesCustomUpdateURI = TEXT("");
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=")
 	int UpdatesIgnoreVersion = N_VERSION_NUMBER;

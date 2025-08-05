@@ -9,7 +9,7 @@
 #include "NEditorSettings.h"
 #include "NEditorStyle.h"
 #include "NEditorUserSettings.h"
-#include "InstanceObjects/NUpdateCheckInstanceObject.h"
+#include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
 
@@ -93,7 +93,7 @@ void FNCoreEditorModule::OnPostEngineInit()
 		}
 
 		// Check for updates
-		UNUpdateCheckInstanceObject::Create();
+		UNUpdateCheckDelayedEditorTask::Create();
 	}
 }
 

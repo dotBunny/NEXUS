@@ -5,36 +5,34 @@
 
 #include "EditorUtilityLibrary.h"
 #include "NCoreEditorMinimal.h"
+#include "NDelayedEditorTask.h"
 #include "Developer/NObjectSnapshot.h"
 #include "Developer/NObjectSnapshotUtils.h"
-#include "NLeakTestInstanceObject.generated.h"
+#include "NLeakTestDelayedEditorTask.generated.h"
 
 UCLASS()
-class NEXUSCOREEDITOR_API UNLeakTestInstanceObject : public UObject
+class NEXUSCOREEDITOR_API UNLeakTestDelayedEditorTask : public UNDelayedEditorTask
 {
 	GENERATED_BODY()
 
 public:
 	static void Create()
 	{
-		UAsyncEditorDelay* DelayedTest = NewObject<UAsyncEditorDelay>();
-		UNLeakTestInstanceObject* LeakTestObject = NewObject<UNLeakTestInstanceObject>(DelayedTest);
-		LeakTestObject->AddToRoot();
+		UAsyncEditorDelay* DelayedMechanism = CreateDelayMechanism();
+		UNLeakTestDelayedEditorTask* LeakTestObject = NewObject<UNLeakTestDelayedEditorTask>(DelayedMechanism);
+		LeakTestObject->Lock(DelayedMechanism);
 		
-		DelayedTest->Complete.AddDynamic(LeakTestObject, &UNLeakTestInstanceObject::Execute);
-
+		DelayedMechanism->Complete.AddDynamic(LeakTestObject, &UNLeakTestDelayedEditorTask::Execute);
 		LeakTestObject->BeforeSnapshot = FNObjectSnapshotUtils::Snapshot();
-		DelayedTest->Start(5.f, 100);
+		DelayedMechanism->Start(5.f, 100);
 	}
 	
-	FNObjectSnapshot BeforeSnapshot;
 private:
+	FNObjectSnapshot BeforeSnapshot;
 	
 	UFUNCTION()
 	void Execute()
 	{
-		RemoveFromRoot();
-		
 		const FNObjectSnapshot AfterSnapshot = FNObjectSnapshotUtils::Snapshot();
 
 		// Process
@@ -47,5 +45,7 @@ private:
 		{
 			NE_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] %s"), *Diff.ToString());
 		}
+
+		Release();
 	}
 };
