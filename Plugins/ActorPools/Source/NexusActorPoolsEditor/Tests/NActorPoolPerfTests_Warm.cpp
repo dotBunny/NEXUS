@@ -23,7 +23,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 		}
 			
 		Pool.Clear();
-	});
+	}, true);
 }
 
 #endif //WITH_TESTS

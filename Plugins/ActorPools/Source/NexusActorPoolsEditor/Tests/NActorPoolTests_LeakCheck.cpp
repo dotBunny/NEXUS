@@ -45,7 +45,7 @@ N_TEST(FNActorPoolTests_LeakCheck, "NEXUS::UnitTests::NActorPools::LeakCheck::Fo
 		const int PostClearObjects = FNDeveloperUtils::GetCurrentObjectCount();
 		
 		CHECK_EQUALS("Check the number of objects matches the previous count when forcibly destroying the pool.", PostClearObjects, PrePoolObjects);
-	});
+	}, true);
 }
 
 #endif //WITH_TESTS
