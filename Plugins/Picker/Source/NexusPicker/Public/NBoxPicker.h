@@ -41,6 +41,8 @@ public:
 		FNRandom::Deterministic.Bool() ?
 				FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
 				FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z));
+
+		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a FBox.
@@ -58,6 +60,7 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a FBox.
@@ -73,6 +76,8 @@ public:
 			FNRandom::Deterministic.FloatRange(Dimensions.Min.X, Dimensions.Max.X),
 		FNRandom::Deterministic.FloatRange(Dimensions.Min.Y, Dimensions.Max.Y),
 		FNRandom::Deterministic.FloatRange(Dimensions.Min.Z, Dimensions.Max.Z));
+
+		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a FBox, then projects it to the world.
@@ -88,6 +93,7 @@ public:
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -116,6 +122,8 @@ public:
 		FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
 				FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Z, -MaximumExtent.Z) :
 				FNRandom::NonDeterministic.FRandRange(MinimumExtent.Z, MaximumExtent.Z));
+
+		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox, then projects it to the world.
@@ -132,6 +140,7 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox.
@@ -146,6 +155,7 @@ public:
 		OutLocation = Origin + FVector(FNRandom::NonDeterministic.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
 			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
 			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
+		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox, then projects it to the world.
@@ -161,6 +171,7 @@ public:
 	{
 		RandomPointInsideOrOnSimple(OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -192,6 +203,8 @@ public:
 		RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f ?
 				RandomStream.FRandRange(-MinimumExtent.Z, -MaximumExtent.Z) :
 				RandomStream.FRandRange(MinimumExtent.Z, MaximumExtent.Z));
+
+		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox using a provided seed, then projects it to the world.	 
@@ -210,6 +223,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox using a provided seed.
@@ -226,6 +240,8 @@ public:
 		OutLocation = Origin + FVector(RandomStream.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
 				RandomStream.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
 				RandomStream.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
+
+		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox using a provided seed, then projects it to the world.	 
@@ -242,7 +258,9 @@ public:
 		N_VARIABLES_PICKER_PROJECTION())
 	{
 		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions);
+		
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED POINT
@@ -276,6 +294,8 @@ public:
 				RandomStream.FRandRange(MinimumExtent.Z, MaximumExtent.Z));
 		
 		Seed = RandomStream.GetCurrentSeed();
+		
+		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state, then grounds it to the world.
@@ -295,6 +315,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state.
@@ -312,6 +333,8 @@ public:
 				RandomStream.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
 				RandomStream.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
 		Seed = RandomStream.GetCurrentSeed();
+
+		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state, then grounds it to the world.
@@ -330,6 +353,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
 	}
 
 	// ASSERT
