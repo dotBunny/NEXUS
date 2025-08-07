@@ -33,7 +33,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 		}
 
 		Pool.Clear();
-	});
+	}, true);
 	
 }
 

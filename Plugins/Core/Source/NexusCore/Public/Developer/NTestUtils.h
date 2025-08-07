@@ -9,7 +9,7 @@
 class NEXUSCORE_API FNTestUtils
 {
 public:
-	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality)
+	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
 		// Create World
 		constexpr bool bInformEngineOfWorld = false;
@@ -27,7 +27,16 @@ public:
 		World->BeginPlay();
 
 		// Execute Test
+
+		// ReSharper disable once CppTooWideScope
+		TOptional<FGCScopeGuard> GCGuard;
+		if (bDisableGarbageCollection)
+		{
+			GCGuard.Emplace();
+		}
+
 		TestFunctionality(World);
+		
 
 		// Cleanup world
 		World->EndPlay(EEndPlayReason::Quit);
