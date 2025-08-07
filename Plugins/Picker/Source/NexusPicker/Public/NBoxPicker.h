@@ -7,8 +7,6 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
-// TODO: Add Inner/Outer Dimension Option (#36)
-
 /**
  * Provides various functions for generating points inside or on the surface of a FBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
