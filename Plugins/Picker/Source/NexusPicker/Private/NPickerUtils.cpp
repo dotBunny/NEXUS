@@ -7,6 +7,8 @@ DEFINE_LOG_CATEGORY(LogNexusPicker);
 
 FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
 
+bool FNPickerUtils::bVisualLoggingEnabled = true;
+
 FVector FNPickerUtils::DefaultProjection = FVector(0, 0, -500.f);
 FRotator FNPickerUtils::DefaultRotation = FRotator::ZeroRotator;
 

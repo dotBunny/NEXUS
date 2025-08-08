@@ -56,6 +56,7 @@ public:
 					FNRandom::Deterministic.FloatRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle, then projects it to the world.
@@ -73,6 +74,7 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle.
@@ -101,7 +103,7 @@ public:
 				FNRandom::Deterministic.FloatRange(-ExtentY, ExtentY),
 				0.f));
 		}
-		
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle, then projects it to the world.
@@ -118,6 +120,7 @@ public:
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -161,6 +164,8 @@ public:
 					FNRandom::NonDeterministic.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle, then projects it to the world.
@@ -178,6 +183,7 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle.
@@ -206,7 +212,7 @@ public:
 			FNRandom::NonDeterministic.FRandRange(-ExtentY, ExtentY),
 				0.f));
 		}
-		
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle, then projects it to the world.
@@ -223,6 +229,7 @@ public:
 	{
 		RandomPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -269,6 +276,7 @@ public:
 					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed, then projects it to the world.
@@ -287,6 +295,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed.
@@ -317,6 +326,8 @@ public:
 			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f));
 		}
+
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed, then projects it to the world.
@@ -334,6 +345,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED POINT
@@ -380,6 +392,7 @@ public:
 					0.f));
 		}
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state, then projects it to the world.
@@ -399,6 +412,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state.
@@ -431,6 +445,7 @@ public:
 		}
 		
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state, then projects it to the world.
@@ -449,6 +464,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// ASSERT
