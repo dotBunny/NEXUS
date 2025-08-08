@@ -46,8 +46,10 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	Mesh->SetCollisionObjectType(ECC_WorldStatic);
 	Mesh->EnableComplexAsSimpleCollision();
 	
+#if WITH_EDITOR	
 	bCanPlayFromHere = 0;
-
+#endif
+	
 	N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false)
 }
 
@@ -124,8 +126,11 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 
 	// Prep dynamic mesh for changes
 	Mesh->Modify();
+	
 	// Clear anything previous
+#if WITH_EDITOR	
 	Mesh->ClearAllCachedCookedPlatformData();
+#endif	
 
 	// Convert our mesh data to UE
 	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));

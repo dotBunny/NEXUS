@@ -87,13 +87,16 @@ void FNProcGenEditorModule::OnPostEngineInit()
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen"), true);
 
 	// Visualizers
-	const TSharedPtr<FComponentVisualizer> RootComponentVisualizer = MakeShareable(new FNCellRootComponentVisualizer());
-	GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
-	RootComponentVisualizer->OnRegister();
+	if (GUnrealEd != nullptr)
+	{
+		const TSharedPtr<FComponentVisualizer> RootComponentVisualizer = MakeShareable(new FNCellRootComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
+		RootComponentVisualizer->OnRegister();
 	
-	const TSharedPtr<FComponentVisualizer> PinComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
-	GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), PinComponentVisualizer);
-	PinComponentVisualizer->OnRegister();
+		const TSharedPtr<FComponentVisualizer> PinComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), PinComponentVisualizer);
+		PinComponentVisualizer->OnRegister();
+	}
 
 	// Register Customizations
 	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
