@@ -17,9 +17,11 @@ class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 	N_IMPLEMENT_SETTINGS(UNActorPoolsSettings);
 
 public:
+#if WITH_EDITOR	
 	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
 	
+
 	virtual FText GetSectionText() const override
 	{
 		const FText SectionText =  FText::FromString(TEXT("Actor Pools"));
@@ -30,6 +32,7 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Actor Pools."));
 		return SectionDescription;
 	}
+#endif	
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
