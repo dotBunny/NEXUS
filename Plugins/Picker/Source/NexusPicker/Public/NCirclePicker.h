@@ -42,6 +42,8 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle, then projects it to the world.
@@ -59,6 +61,7 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -86,6 +89,7 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
 	/**
 	 * Generates a random point inside or on the perimeter of a circle, then projects it to the world.
@@ -103,6 +107,7 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -132,6 +137,7 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+		N_IMPLEMENT_VLOG_CIRCLE()
 		
 	}
 	/**
@@ -151,6 +157,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED
@@ -182,6 +189,7 @@ public:
 		}
 
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
 	/**
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state, then projects it to the world.
@@ -201,6 +209,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// ASSERT

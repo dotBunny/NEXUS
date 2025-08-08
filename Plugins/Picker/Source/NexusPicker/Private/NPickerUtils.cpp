@@ -3,6 +3,8 @@
 
 #include "NPickerUtils.h"
 
+DEFINE_LOG_CATEGORY(LogNexusPicker);
+
 FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
 
 FVector FNPickerUtils::DefaultProjection = FVector(0, 0, -500.f);
