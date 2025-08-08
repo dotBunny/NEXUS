@@ -56,6 +56,7 @@ public:
 					FNRandom::Deterministic.FloatRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+		
 		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
 	/**

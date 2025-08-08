@@ -24,6 +24,7 @@ public:
 	FORCEINLINE static void NextPointOn(FVector& OutLocation, const USplineComponent* SplineComponent)
 	{
 		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::Deterministic.FloatRange(0, SplineComponent->Duration));
+		N_IMPLEMENT_VLOG_SPLINE()
 	}
 
 	/**
@@ -39,6 +40,8 @@ public:
 	{
 		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::Deterministic.FloatRange(0, SplineComponent->Duration));
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
+		
 	}
 	
 	/**
@@ -51,6 +54,7 @@ public:
 	FORCEINLINE static void RandomPointOn(FVector& OutLocation, const USplineComponent* SplineComponent)
 	{
 		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::NonDeterministic.FRandRange(0, SplineComponent->Duration));
+		N_IMPLEMENT_VLOG_SPLINE()
 	}
 
 	/**
@@ -66,6 +70,7 @@ public:
 	{
 		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::NonDeterministic.FRandRange(0, SplineComponent->Duration));
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
 	}
 	
 	/**
@@ -80,6 +85,7 @@ public:
 	{
 		const FRandomStream RandomStream(Seed);
 		OutLocation = SplineComponent->GetWorldLocationAtTime(RandomStream.FRandRange(0, SplineComponent->Duration));
+		N_IMPLEMENT_VLOG_SPLINE()
 	}
 
 	/**
@@ -96,6 +102,7 @@ public:
 	{
 		RandomOneShotPointOn(Seed, OutLocation, SplineComponent);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
 	}
 	
 	/**
@@ -111,6 +118,7 @@ public:
 		const FRandomStream RandomStream(Seed);
 		OutLocation = SplineComponent->GetWorldLocationAtTime(RandomStream.FRandRange(0, SplineComponent->Duration));
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_SPLINE()
 	}
 
 	/**
@@ -128,6 +136,7 @@ public:
 	{
 		RandomTrackedPointOn(Seed, OutLocation, SplineComponent);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
 	}
 
 	/**
