@@ -30,5 +30,5 @@ protected:
 
 private:
 	UPROPERTY()
-	UAsyncEditorDelay* Parent;
+	TObjectPtr<UAsyncEditorDelay> Parent;
 };
