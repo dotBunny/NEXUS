@@ -22,8 +22,9 @@ EDataValidationResult UEngineContentValidator::ValidateLoadedAsset_Implementatio
 	{
 		FNFixersUtils::AddResponse(Context, Settings->EngineContentChange,
 			FText::FromString(TEXT("Engine content changes should be heavily scrutinized before commiting. They can be easily overwritten during upgrades or other verification processes.")));
-			
-		Result = EDataValidationResult::Invalid;
+
+		
+		Result = FNFixersUtils::GetResult(Settings->EngineContentChange);
 	}
 	return Result;
 }

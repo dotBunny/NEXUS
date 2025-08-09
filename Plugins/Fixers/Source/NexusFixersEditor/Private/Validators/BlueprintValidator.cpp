@@ -39,7 +39,7 @@ EDataValidationResult UBlueprintValidator::ValidateLoadedAsset_Implementation(co
 					{
 						FNFixersUtils::AddResponse(Context, Settings->BlueprintEmptyTick,
 			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.")));
-						Result = EDataValidationResult::Invalid;
+						Result = FNFixersUtils::GetResult(Settings->BlueprintEmptyTick);
 					}
 				}
 			}
@@ -52,10 +52,9 @@ EDataValidationResult UBlueprintValidator::ValidateLoadedAsset_Implementation(co
 					if (IsMultiPinPureNode(PureNode))
 					{
 						FNFixersUtils::AddResponse(Context, Settings->BlueprintMultiPinPureNode,
-						FText::Join(
-										FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle),
+						FText::Join(FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle),
 										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output."))));
-						Result = EDataValidationResult::Invalid;
+						Result = FNFixersUtils::GetResult(Settings->BlueprintMultiPinPureNode);
 					}
 				}
 			}
