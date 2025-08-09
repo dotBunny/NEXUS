@@ -9,6 +9,16 @@
 #include "NEditorUtils.h"
 #include "NFixersEditorSettings.generated.h"
 
+
+UENUM(BlueprintType)
+enum ENValidatorStrictness : uint8
+{
+	NVS_Disable	= 0 			UMETA(DisplayName = "Disabled"),
+	NVS_Warning = 1				UMETA(DisplayName = "Warning"),
+	NVS_Error = 2				UMETA(DisplayName = "Error"),
+	NVS_Message = 3				UMETA(DisplayName = "Message")
+};
+
 UCLASS(config = NexusEditor, defaultconfig)
 class UNFixersEditorSettings : public UDeveloperSettings
 {
@@ -36,9 +46,13 @@ public:
 	
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Empty Tick")
-	bool bBlueprintEmptyTick = true;
+	TEnumAsByte<ENValidatorStrictness> BlueprintEmptyTick = NVS_Error;
+	
 	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Multi-Pin Pure Node")
-	bool bBlueprintMultiPinPureNode = true;
+	TEnumAsByte<ENValidatorStrictness> BlueprintMultiPinPureNode = NVS_Warning;
+
+	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Engine: Content Change")
+	TEnumAsByte<ENValidatorStrictness> EngineContentChange = NVS_Warning;
 
 	UPROPERTY(EditAnywhere, config, Category = "Validator Ignores", DisplayName = "Assets")
 	TArray<FSoftObjectPath> IgnoredAssets;

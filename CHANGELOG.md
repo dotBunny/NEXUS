@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `NEngineContentValidator` throws a configurable warning/error when any content inside of the `Engine` folder is saved.
+- VLOG support for all pickers.
 - [[#31](https://github.com/dotBunny/NEXUS/issues/31)] Added watermark option to `NSamplesDisplayActor`. 
 - [[#45](https://github.com/dotBunny/NEXUS/issues/45)] Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
 - [[#47](https://github.com/dotBunny/NEXUS/issues/47)] Add update channel support to the framework.
@@ -20,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [[#48](https://github.com/dotBunny/NEXUS/issues/48)] Use `HideCategories` instead of using a layout customizer pattern.  
 - Corrected comparison link at bottom of `CHANGELOG`.
 - Renamed `InstanceObjects` to `DelayedEditorTask` types.
+- Validators now have a combined configuration / strictness level in `Project Settings`.
+- Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
 
 ## [0.1.1] - 2025-08-01
 
