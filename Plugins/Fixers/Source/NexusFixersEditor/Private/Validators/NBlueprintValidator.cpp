@@ -1,13 +1,12 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Validators/BlueprintValidator.h"
+#include "Validators/NBlueprintValidator.h"
 #include "K2Node_Event.h"
 #include "NFixersEditorSettings.h"
 #include "NFixersUtils.h"
-#include "Misc/DataValidation.h"
 
-bool UBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
+bool UNBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
 	if (UNFixersEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
@@ -16,7 +15,7 @@ bool UBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InAs
 	return InObject && InObject->IsA<UBlueprint>();
 }
 
-EDataValidationResult UBlueprintValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
+EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
 {
 	static const FName EventTickName(TEXT("ReceiveTick"));
 	const UNFixersEditorSettings* Settings = UNFixersEditorSettings::Get();
@@ -63,7 +62,7 @@ EDataValidationResult UBlueprintValidator::ValidateLoadedAsset_Implementation(co
 	return Result;
 }
 
-bool UBlueprintValidator::IsEmptyTick(const UK2Node_Event* EventNode)
+bool UNBlueprintValidator::IsEmptyTick(const UK2Node_Event* EventNode)
 {
 	if (EventNode->IsAutomaticallyPlacedGhostNode()) return false; // Ghost nodes aren't real nodes
 
@@ -71,7 +70,7 @@ bool UBlueprintValidator::IsEmptyTick(const UK2Node_Event* EventNode)
     return ExecThenPin && ExecThenPin->LinkedTo.IsEmpty();
 }
 
-bool UBlueprintValidator::IsMultiPinPureNode(UK2Node* PureNode)
+bool UNBlueprintValidator::IsMultiPinPureNode(UK2Node* PureNode)
 {
 	int PinConnectionCount = 0;
 	for (UEdGraphPin* Pin : PureNode->Pins)

@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed `InstanceObjects` to `DelayedEditorTask` types.
 - Validators now have a combined configuration / strictness level in `Project Settings`.
 - Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
+- Properly renamed validators with N prefix.
 
 ## [0.1.1] - 2025-08-01
 

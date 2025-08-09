@@ -4,13 +4,13 @@
 #pragma once
 
 #include "EditorValidatorBase.h"
-#include "BlueprintValidator.generated.h"
+#include "NBlueprintValidator.generated.h"
 
 class UK2Node;
 class UK2Node_Event;
 
 UCLASS()
-class UBlueprintValidator : public UEditorValidatorBase
+class UNBlueprintValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
 	

@@ -1,11 +1,11 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Validators/EngineContentValidator.h"
+#include "Validators/NEngineContentValidator.h"
 #include "NFixersEditorSettings.h"
 #include "NFixersUtils.h"
 
-bool UEngineContentValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
+bool UNEngineContentValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
 	if (UNFixersEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
@@ -14,7 +14,7 @@ bool UEngineContentValidator::CanValidateAsset_Implementation(const FAssetData& 
 	return InObject && InAssetData.GetSoftObjectPath().ToString().StartsWith("/Engine/");
 }
 
-EDataValidationResult UEngineContentValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
+EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
 {
 	const UNFixersEditorSettings* Settings = UNFixersEditorSettings::Get();
 	EDataValidationResult Result = EDataValidationResult::Valid;

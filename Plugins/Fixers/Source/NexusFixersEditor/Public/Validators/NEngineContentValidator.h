@@ -4,13 +4,13 @@
 #pragma once
 
 #include "EditorValidatorBase.h"
-#include "EngineContentValidator.generated.h"
+#include "NEngineContentValidator.generated.h"
 
 class UK2Node;
 class UK2Node_Event;
 
 UCLASS()
-class UEngineContentValidator : public UEditorValidatorBase
+class UNEngineContentValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
 	
