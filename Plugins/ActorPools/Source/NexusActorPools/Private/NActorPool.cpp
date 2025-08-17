@@ -154,27 +154,12 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
 	// Handle change of actor pooling counts
 	Settings.MinimumActorCount = InNewSettings.MinimumActorCount;
+	if (InNewSettings.MaximumActorCount > Settings.MaximumActorCount)
+	{
+		InActors.Reserve(InNewSettings.MaximumActorCount);
+		OutActors.Reserve(InNewSettings.MinimumActorCount);
+	}
 	Settings.MaximumActorCount = InNewSettings.MaximumActorCount;
-	Settings.bAllowCreateMoreObjects = InNewSettings.bAllowCreateMoreObjects;
-	if (Settings.MaximumActorCount == -1)
-	{
-		if (Settings.bAllowCreateMoreObjects)
-		{
-			const int NewSize = Settings.MinimumActorCount * 2;
-			InActors.Reserve(NewSize);
-			OutActors.Reserve(NewSize);
-		}
-		else
-		{
-			InActors.Reserve(Settings.MinimumActorCount);
-			OutActors.Reserve(Settings.MinimumActorCount);
-		}
-	}
-	else
-	{
-		InActors.Reserve(Settings.MaximumActorCount);
-		OutActors.Reserve(Settings.MaximumActorCount);
-	}
 
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;

@@ -23,15 +23,18 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 	GENERATED_BODY()
 
 public:
-
+	/**
+	 *  When the [NActorPool](actor-pool.md) is being filled during creation, what is the number of prewarmed `AActor`s that should be created, either syncronously or divided across a number of frames.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
-	int MinimumActorCount = 10; // TODO: Set this to 10? when we have figured out the npc issue
+	int MinimumActorCount = 10;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	int MaximumActorCount = 100;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	int CreateObjectsPerTick = -1;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
-	bool bAllowCreateMoreObjects = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	TEnumAsByte<ENActorPoolStrategy> Strategy = ENActorPoolStrategy::APS_Create;
 

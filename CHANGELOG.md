@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
 - Properly renamed validators with N prefix.
 
+### Removed
+
+- `bAllowCreateMoreObjects` became obselete on `FNActorPoolSettings`.
+
 ## [0.1.1] - 2025-08-01
 
 ### Changed

@@ -8,7 +8,7 @@
 #include "NPooledActor.generated.h"
 
 /**
- * An actor base which support utilizing an ActorPool.
+ * An actor base which supports utilizing an ActorPool.
  */
 UCLASS(Config = Game, Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
 class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem

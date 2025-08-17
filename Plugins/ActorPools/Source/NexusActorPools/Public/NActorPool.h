@@ -93,6 +93,7 @@ public:
 
 	int GetInCount() const { return InActors.Num(); };
 	int GetOutCount() const { return OutActors.Num(); };
+	
 	FNActorPoolSettings& GetSettings() { return Settings; };
 	
 	/**
