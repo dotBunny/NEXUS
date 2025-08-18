@@ -85,7 +85,7 @@ public:
 	/**
 	 * The in-level component reference for usage with the APSD_Spline for Distribution.
 	 */
-	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor))
+	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides))
 	FComponentReference SplineLevelReference;
 
 	/**

@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Validators now have a combined configuration / strictness level in `Project Settings`.
 - Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
 - Properly renamed validators with N prefix.
+- `SplineLevelReference` will only be visible when `APSD_Spline` is selected as the `Distribution` on `UNActorPoolSpawnerComponent`.
+- `ReturnMoveLocation` will only be editable on `FNActorPoolSettings` when `bReturnMoveToLocation` is flagged.
 
 ### Removed
 

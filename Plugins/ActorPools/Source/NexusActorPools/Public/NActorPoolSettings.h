@@ -44,7 +44,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	bool bReturnMoveToLocation = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (EditCondition = "bReturnMoveToLocation"))
 	FVector ReturnMoveLocation = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
