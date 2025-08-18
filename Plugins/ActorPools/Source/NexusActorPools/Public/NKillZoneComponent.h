@@ -41,11 +41,11 @@ protected:
 	/**
 	 * Should static/station actors be ignored?
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bDontDestroyStaticActors = true;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, DisplayName="Ignore Static Actors")
+	bool bIgnoreStaticActors = true;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	bool bDontDestroyNonInterfacedActors = false;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, DisplayName="Ignore Non-INActorPoolItem Actors")
+	bool bIgnoreNonInterfacedActors = false;
 	
 private:
 	int KillCount = 0;

@@ -37,7 +37,7 @@ void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
-	if (bDontDestroyStaticActors && !OtherActor->IsRootComponentMovable()) return;
+	if (bIgnoreStaticActors && !OtherActor->IsRootComponentMovable()) return;
 
 	// Check if actor pool, return to pool
 	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
@@ -64,7 +64,7 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		return;
 	}
 
-	if (bDontDestroyNonInterfacedActors)
+	if (bIgnoreNonInterfacedActors)
 	{
 		return;
 	}
