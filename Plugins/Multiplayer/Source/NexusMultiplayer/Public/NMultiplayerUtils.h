@@ -31,4 +31,9 @@ public:
 	{
 		return World->GetAuthGameMode() != nullptr;
 	}
+
+	FORCEINLINE static bool IsClient()
+	{
+		return GIsClient;
+	}
 };
