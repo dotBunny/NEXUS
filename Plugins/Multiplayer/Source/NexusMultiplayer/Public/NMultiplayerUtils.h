@@ -26,4 +26,11 @@ public:
 	{
 		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
 	}
+
+	FORCEINLINE static bool IsWorldAuthority()
+	{
+		// TODO: Lotta safety here		
+		if (GEngine == nullptr || GEngine->GetWorld() == nullptr) return false;
+		return GEngine->GetWorld()->GetAuthGameMode() != nullptr;
+	}
 };
