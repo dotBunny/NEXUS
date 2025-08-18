@@ -27,10 +27,8 @@ public:
 		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
 	}
 
-	FORCEINLINE static bool IsWorldAuthority()
+	FORCEINLINE static bool IsWorldAuthority(const UWorld* World)
 	{
-		// TODO: Lotta safety here		
-		if (GEngine == nullptr || GEngine->GetWorld() == nullptr) return false;
-		return GEngine->GetWorld()->GetAuthGameMode() != nullptr;
+		return World->GetAuthGameMode() != nullptr;
 	}
 };
