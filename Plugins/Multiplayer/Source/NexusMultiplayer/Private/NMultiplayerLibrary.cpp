@@ -89,9 +89,7 @@ bool UNMultiplayerLibrary::HasGameStateAuthority(UObject* WorldContextObject)
 {
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
-		const AGameStateBase* GameState = World->GetGameState();
-		if (GameState == nullptr) return false;
-		return GameState->GetLocalRole() == ROLE_Authority;
+		return FNMultiplayerUtils::HasGameStateAuthority(World);
 	}
 	return true;
 }
@@ -99,6 +97,20 @@ bool UNMultiplayerLibrary::HasGameStateAuthority(UObject* WorldContextObject)
 bool UNMultiplayerLibrary::HasGameStateAuthorityExec(UObject* WorldContextObject)
 {
 	return HasGameStateAuthority(WorldContextObject);
+}
+
+bool UNMultiplayerLibrary::HasWorldAuthority(UObject* WorldContextObject)
+{
+	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
+	{
+		return FNMultiplayerUtils::HasWorldAuthority(World);
+	}
+	return true;
+}
+
+bool UNMultiplayerLibrary::HasWorldAuthorityExec(UObject* WorldContextObject)
+{
+	return HasWorldAuthority(WorldContextObject);
 }
 
 bool UNMultiplayerLibrary::IsServerExec(UObject* WorldContextObject)

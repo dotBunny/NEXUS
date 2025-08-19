@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "GameFramework/GameStateBase.h"
 #include "Macros/NWorldMacros.h"
 
 class ALevelInstance;
@@ -27,9 +28,16 @@ public:
 		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
 	}
 
-	FORCEINLINE static bool IsWorldAuthority(const UWorld* World)
+	FORCEINLINE static bool HasWorldAuthority(const UWorld* World)
 	{
 		return World->GetAuthGameMode() != nullptr;
+	}
+
+	FORCEINLINE static bool HasGameStateAuthority(const UWorld* World)
+	{
+		const AGameStateBase* GameState = World->GetGameState();
+		if (GameState == nullptr) return false;
+		return GameState->GetLocalRole() == ROLE_Authority;
 	}
 
 	FORCEINLINE static bool IsClient()
