@@ -37,6 +37,12 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 
 bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings Settings)
 {
+	if (ActorClass == nullptr)
+	{
+		N_LOG(Log, TEXT("[NActorPoolSubsystem] Unable to create actor pool for null ActorClass)"));
+		return false;
+	}
+	
 	if (!ActorPools.Contains(ActorClass))
 	{
 		// #RawPointer - I did try to have this as a UObject, however I was not able to resolve behavioral differences

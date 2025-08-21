@@ -11,6 +11,7 @@
 - [[#47](https://github.com/dotBunny/NEXUS/issues/47)] Add update channel support to the framework.
 - Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
 - Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
+- Add safety check when creating actor pools that we are not getting passed a nullptr.
   
 ### Changed
 
