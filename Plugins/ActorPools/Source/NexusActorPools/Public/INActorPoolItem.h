@@ -24,9 +24,6 @@ enum ENActorOperationalState : uint8
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
- * @note Any scaling should be done on the RootComponent of the Actor for it to be effectively used when pooling. This
- *		 interface should NEVER be implemented in Blueprint as the Execute/Implementation methods are never called; this
- *		 exists so that BP can reference the
  */
 UINTERFACE(BlueprintType)
 class NEXUSACTORPOOLS_API UNActorPoolItem : public UInterface
@@ -45,6 +42,11 @@ class NEXUSACTORPOOLS_API INActorPoolItem
 public:
 
 	void InitializeActorPoolItem(FNActorPool* OwnerPool);
+
+	/**
+	 * Is the given Actor attached to a Actor Pool?
+	 * @return true/false if properly attached to a pool
+	 */
 	bool IsAttachedToActorPool() const;
 
 	/**

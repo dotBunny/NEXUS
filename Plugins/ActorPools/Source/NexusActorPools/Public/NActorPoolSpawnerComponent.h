@@ -38,7 +38,9 @@ enum ENActorPoolSpawnerDistribution : uint8
 	APSD_Spline			UMETA(DisplayName = "Spline")
 };
 
-// TODO: Toggle option to be determinisitc?
+/**
+ * A fundamental spawning component which will interact with the UNActorPoolSubsystem to periodically spawn defined AActors in predefined distributions (shapes).
+ */
 UCLASS(meta = (BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSACTORPOOLS_API UNActorPoolSpawnerComponent : public USceneComponent

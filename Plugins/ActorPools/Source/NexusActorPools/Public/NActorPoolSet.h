@@ -12,9 +12,15 @@ struct NEXUSACTORPOOLS_API FNActorPoolDefinition
 {
 	GENERATED_BODY()
 
+	/**
+	 * The Actor to create a pool for.
+	 */
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ActorClass;
 
+	/**
+	 * The created Actor Pool's settings.
+	 */
 	UPROPERTY(EditAnywhere)
 	FNActorPoolSettings Settings;
 };

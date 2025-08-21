@@ -7,6 +7,7 @@
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NCoreMinimal.h"
+#include "Macros/NFlagsMacros.h"
 
 #if WITH_EDITOR
 int FNActorPool::ActorPoolTicket = 0;
@@ -174,10 +175,9 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 		UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
 	}
 	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
-	Settings.bSpawnSweepBeforeSettingLocation = InNewSettings.bSpawnSweepBeforeSettingLocation;
-	Settings.bReturnMoveToLocation = InNewSettings.bReturnMoveToLocation;
+	Settings.Flags = InNewSettings.Flags;
 
-	Settings.ReturnMoveLocation = InNewSettings.ReturnMoveLocation;
+	Settings.StorageLocation = InNewSettings.StorageLocation;
 }
 
 bool FNActorPool::ApplyStrategy()
@@ -230,7 +230,9 @@ void FNActorPool::CreateActor()
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
 	SpawnInfo.ObjectFlags |= RF_Transient;
-	SpawnInfo.bDeferConstruction = Settings.bDeferConstruction;
+
+	
+	SpawnInfo.bDeferConstruction = Settings.HasFlag_DeferConstruction();
 
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -250,7 +252,7 @@ void FNActorPool::CreateActor()
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
 		ActorItem->InitializeActorPoolItem(this);
 
-		if (Settings.bDeferConstruction)
+		if (SpawnInfo.bDeferConstruction)
 		{
 			ActorItem->OnDeferredConstruction();
 			CreatedActor->FinishSpawning(DefaultTransform);
@@ -261,7 +263,7 @@ void FNActorPool::CreateActor()
 	}
 	else
 	{
-		if (Settings.bDeferConstruction && Settings.bShouldFinishSpawning)
+		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
 		{
 			CreatedActor->FinishSpawning(DefaultTransform);
 		}
@@ -282,13 +284,13 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	{
 		Actor->SetActorTransform(
 			FTransform(InRotation, InPosition + HalfHeightOffset, TemplateScale),
-			Settings.bSpawnSweepBeforeSettingLocation, nullptr, ETeleportType::ResetPhysics);
+			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	else
 	{
 		Actor->SetActorTransform(
 			FTransform(InRotation, InPosition, TemplateScale),
-			Settings.bSpawnSweepBeforeSettingLocation, nullptr, ETeleportType::ResetPhysics);
+			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
@@ -316,9 +318,9 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 void FNActorPool::ApplyReturnState(AActor* Actor) const
 {
 	// Move to storage location
-	if (Settings.bReturnMoveToLocation)
+	if (Settings.HasFlag_ReturnToStorageLocation())
 	{
-		Actor->SetActorLocation(Settings.ReturnMoveLocation, false, nullptr, ETeleportType::ResetPhysics);
+		Actor->SetActorLocation(Settings.StorageLocation, false, nullptr, ETeleportType::ResetPhysics);
 	}
 
 	Actor->SetActorTickEnabled(false);

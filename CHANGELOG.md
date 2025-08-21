@@ -11,7 +11,7 @@
 - [[#47](https://github.com/dotBunny/NEXUS/issues/47)] Add update channel support to the framework.
 - Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
 - Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
-- Add safety check when creating actor pools that we are not getting passed a nullptr.
+- Add safety check when creating actor pools that we are not getting passed a `nullptr`.
   
 ### Changed
 
@@ -24,10 +24,16 @@
 - `SplineLevelReference` will only be visible when `APSD_Spline` is selected as the `Distribution` on `UNActorPoolSpawnerComponent`.
 - `ReturnMoveLocation` will only be editable on `FNActorPoolSettings` when `bReturnMoveToLocation` is flagged.
 - Renamed `bDontDestroyStaticActors` / `bDontDestroyNonInterfacedActors` to `bIgnoreStaticActors` / `bIgnoreNonInterfacedActors`.
+- `FNActorPoolSettings` now uses a bitmask `Flags` configuration option instead of a long list of boolean flags.
 
 ### Removed
 
 - `bAllowCreateMoreObjects` became obselete on `FNActorPoolSettings`.
+
+### Core Redirects
+```ini
++PropertyRedirects=(OldName="/Script/NexusActorPools.NActorPoolSettings.ReturnMoveLocation",NewName="/Script/NexusActorPools.NActorPoolSettings.StorageLocation")
+```
 
 ## [0.1.1] - 2025-08-01
 
