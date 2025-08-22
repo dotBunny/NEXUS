@@ -49,10 +49,16 @@ public:
 	bool bAlwaysShowFrameRateAndMemory = true;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers", meta = (DisplayName = "Line Thickness", Tooltip = "The thickness of debug lines that are drawn."))
-	float DebugLineThickness = 2.0f;
+	float DebugLineThickness = 1.25f;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers", meta = (DisplayName = "Circle Sides", Tooltip = "The number of lines used to draw a debug circle."))
 	int DebugCircleSides = 64;
+
+	UPROPERTY(EditAnywhere, config, Category = "Visualizers", DisplayName = "Distribution: Outer Color")
+	FColor DistributionOuterColor = FColor(255,0,88);
+	
+	UPROPERTY(EditAnywhere, config, Category = "Visualizers", DisplayName = "Distribution: Inner Color")
+	FColor DistributionInnerColor = FColor(150,0,89);
 
 	UPROPERTY(VisibleAnywhere, Config, Category = "Updates", meta = (DisplayName = "Last Checked"))
 	FDateTime UpdatesLastChecked = FDateTime(2025, 7, 12);

@@ -14,6 +14,7 @@
 - Add safety check when creating actor pools that we are not getting passed a `nullptr`.
 - `INActorPoolItem` now has a dynamic multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
 - `UNActorPoolLibrary` supporting methods to bind to `INActorPoolItem` delegate.
+- Configurable distribution inner & outer visualizer colors in `Editor Preferences > NEXUS > Core (User)`
   
 ### Changed
 

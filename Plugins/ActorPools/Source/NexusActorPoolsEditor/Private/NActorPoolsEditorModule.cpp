@@ -20,17 +20,20 @@ void FNActorPoolsEditorModule::StartupModule()
 
 void FNActorPoolsEditorModule::ShutdownModule()
 {
-	//GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
+	if (GUnrealEd)
+	{
+		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
+	}
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
-
-	// Visualizers
+	
 	if (GUnrealEd)
 	{
 		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShareable(new FNActorPoolSpawnerComponentVisualizer());
