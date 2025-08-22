@@ -9,11 +9,11 @@ ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) 
 	Display = nullptr;
 	
 #if WITH_EDITORONLY_DATA
-	if (bHideBillboard)
+	if (bHideBillboard && GetSpriteComponent() != nullptr)
 	{
 		GetSpriteComponent()->SetVisibility(false);
 	}
-	if (bHideName)
+	if (bHideName && TestName != nullptr)
 	{
 		TestName->SetVisibility(false);
 	}

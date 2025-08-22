@@ -30,6 +30,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_GreyDark"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_White"));
 
+
 	// Create Components
 	NoticeDecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
 	NoticeDecalComponent->bAutoActivate = false;
@@ -463,6 +464,9 @@ void ANSamplesDisplayActor::CreateTitlePanelInstances() const
 
 void ANSamplesDisplayActor::UpdateDescription()
 {
+	// Headless server
+	if (DescriptionTextComponent == nullptr) return;
+	
 	// Setup Line Spacing
 	FString ParagraphSpacingMarkup = TEXT("");
 	for (int i = 0; i < ParagraphSpacing + 1; i++)
@@ -623,6 +627,9 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 
 void ANSamplesDisplayActor::UpdateNotice()
 {
+	// Headless server
+	if (NoticeTextComponent == nullptr) return;
+	
 	NoticeDecalComponent->SetRelativeTransform(FTransform(
 			FRotator(-90.f, 0.f, 0.f),
 			FVector((Depth * 100.f) + NoticeDepth, 0.f , 0.f),
@@ -671,6 +678,9 @@ void ANSamplesDisplayActor::UpdateNotice()
 
 void ANSamplesDisplayActor::UpdateSpotlight() const
 {
+	// Headless server
+	if (SpotlightComponent == nullptr) return;
+	
 	SpotlightComponent->SetRelativeLocationAndRotation(
 			FVector(FMath::Max(Depth, 2.5f) * 100.f, 0.f, FMath::Max(Height, 2.5f) * 100.f),
 			FRotator(-135.f, 0.f , 0.f));
@@ -710,6 +720,9 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 
 void ANSamplesDisplayActor::UpdateTitleText() const
 {
+	// Headless server
+	if (TitleTextComponent == nullptr) return;
+	
 	// Title Text
 	if (!TitleText.IsEmpty())
 	{
