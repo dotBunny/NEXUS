@@ -12,7 +12,8 @@
 - Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
 - Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
 - Add safety check when creating actor pools that we are not getting passed a `nullptr`.
-- `INActorPoolItem` now has a native multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
+- `INActorPoolItem` now has a dynamic multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
+- `UNActorPoolLibrary` supporting methods to bind to `INActorPoolItem` delegate.
   
 ### Changed
 
