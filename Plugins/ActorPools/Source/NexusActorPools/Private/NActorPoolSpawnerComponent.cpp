@@ -8,6 +8,7 @@
 #include "NCoreMinimal.h"
 #include "NSpherePicker.h"
 #include "NSplinePicker.h"
+#include "Components/SplineComponent.h"
 
 UNActorPoolSpawnerComponent::UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -38,7 +39,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 
 	// Create / validate pools
 	TemplateCount = Templates.Num();
-	for (int i = 0; i < TemplateCount; i++)
+	for (int32 i = 0; i < TemplateCount; i++)
 	{
 		check(Templates[i].Template);
 
@@ -75,8 +76,8 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 			// We have a name and should look for the component based off that
 			TArray<USplineComponent*> FoundSplineComponents;
 			this->GetOwner()->GetComponents<USplineComponent>(FoundSplineComponents, true);
-			const int FoundCount = FoundSplineComponents.Num();
-			for (int i = 0; i < FoundCount; i++)
+			const int32 FoundCount = FoundSplineComponents.Num();
+			for (int32 i = 0; i < FoundCount; i++)
 			{
 				if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
 				{
@@ -120,10 +121,10 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const FVector Origin = this->GetComponentLocation() + Offset;
 
-	for (int i = 0; i < Count; i++)
+	for (int32 i = 0; i < Count; i++)
 	{
 		FVector SpawnLocation = Origin;
-		int RandomIndex = 0;
+		int32 RandomIndex = 0;
 		if (TemplateCount > 1)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);

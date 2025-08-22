@@ -8,6 +8,7 @@
 #include "NCoreMinimal.h"
 #include "NActorPoolSubsystem.generated.h"
 
+class UNActorPoolSet;
 class UNActorPoolSpawnerComponent;
 
 UCLASS()
@@ -20,27 +21,56 @@ class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools",
-		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor"))
 	/**
 	 * Gets an actor from a given pool, creating a pool as necessary.
 	 *
-	 * @notes This does not trigger any events on the given actor, it does not activate them in anyway.
+	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
-	 * @return ReturnedActor The returned actor.
+	 * @param ReturnedActor The returned actor.
 	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools",
+		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor"))
 	void GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
 
+	/**
+	 * Gets an actor from a given pool, creating a pool as necessary.
+	 *
+	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
+	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
+	 * @return The returned actor.
+	 */
 	template<typename T>
 	T* GetActor(TSubclassOf<AActor> ActorClass);
 
+	/**
+	* Spawns an actor from a given pool, creating a pool as necessary.
+	*
+	* @param ActorClass The class of the actor which you would like to get from the actor pool.
+	* @param Position The world position to spawn the actor at.
+	* @param Rotation The world rotation to apply to the spawned actor.
+	* @param SpawnedActor The returned actor.
+	*/
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor"))
 	void SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
 
+	/**
+	* Spawns an actor from a given pool, creating a pool as necessary.
+	*
+	* @param ActorClass The class of the actor which you would like to get from the actor pool.
+	* @param Position The world position to spawn the actor at.
+	* @param Rotation The world rotation to apply to the spawned actor.
+	* @return SpawnedActor The spawned actor.
+	*/
 	template<typename T>
 	T* SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation);
 
+	/**
+	 * Attempts to return an Actor to its owning pool.
+	 * @note If the returned actor does not belong in a pool, it may be destroyed, in that case it will return true.
+	 * @param Actor The target actor to return to a pool.
+	 * @return true/false if the Actor was returned to a pool.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	bool ReturnActor(AActor* Actor);
 
@@ -55,15 +85,35 @@ public:
 	virtual void Tick(float DeltaTime) final override;
 	//End UTickableWorldSubsystem
 
+	/**
+	 * Create an actor pool for the provided Actor class, if one does not already exist.
+	 * @param ActorClass The class of the actor which you would like to create a pool for.
+	 * @param Settings  The settings to apply to the created pool.
+	 * @return true/false if a new pool was created.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	bool CreateActorPool(TSubclassOf<AActor> ActorClass, FNActorPoolSettings Settings);
 
+	/**
+	 * Does the given Actor class have a pool already created?
+	 * @param ActorClass The class of the actor which you would like to check for a pool.
+	 * @return true/false if a pool already exists.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	bool HasActorPool(const TSubclassOf<AActor>& ActorClass) const { return ActorPools.Contains(ActorClass); }
-	
+
+	/**
+	 * Apply a preconfigured ActorPoolSet, creating the defined pools.
+	 * @param ActorPoolSet  The ActorPoolSet to evaluate.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
+	/**
+	 * Get the raw actor pool itself for a given Actor class.
+	 * @param ActorClass The class of the actor which you would like to access a pool for.
+	 * @return The raw-pointer to the pool, or nullptr if it was not found.
+	 */
 	FNActorPool* GetActorPool(const TSubclassOf<AActor> ActorClass) const { return ActorPools.FindRef(ActorClass); }
 
 private:

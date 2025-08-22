@@ -92,7 +92,7 @@ protected:
 	TSoftObjectPtr<UNCell> Sidecar = nullptr;
 
 	UPROPERTY(VisibleInstanceOnly)
-	int CellJunctionNextIdentifier = 0;
+	int32 CellJunctionNextIdentifier = 0;
 	
 private:
 	bool bActorDirty = false;

@@ -10,7 +10,7 @@
 
 N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_TEST_CONTEXT_EDITOR)
 {
-	constexpr int TestSize = 1000;
+	constexpr int32 TestSize = 1000;
 	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
 	{
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass());
@@ -19,7 +19,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 		//TEST
 		{
 			N_TEST_TIMER_SCOPE(Warm_Actor_1000, 40.0f)
-			Pool.Warm(TestSize);
+			Pool.Prewarm(TestSize);
 		}
 			
 		Pool.Clear();

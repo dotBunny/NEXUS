@@ -49,7 +49,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 		{
 			TArray<FString> Lines;
 			Response->GetContentAsString().ParseIntoArrayLines(Lines, true);
-			for (int i = Lines.Num() - 1; i >= 0; i--)
+			for (int32 i = Lines.Num() - 1; i >= 0; i--)
 			{
 				if (Lines[i].StartsWith(TEXT("#define N_VERSION_NUMBER")))
 				{

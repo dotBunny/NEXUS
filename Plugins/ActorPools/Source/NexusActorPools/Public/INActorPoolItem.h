@@ -4,10 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NActorPool.h"
 #include "NActorPoolSettings.h"
 #include "NActorPoolsSettings.h"
 #include "INActorPoolItem.generated.h"
+
+class FNActorPool;
 
 /**
  * The operational state of an Actor.
@@ -21,6 +22,8 @@ enum ENActorOperationalState : uint8
 	AOS_Disabled		UMETA(DisplayName = "Disabled"),
 	AOS_Destroyed		UMETA(DisplayName = "Destroyed")
 };
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, TEnumAsByte<ENActorOperationalState> OldState, TEnumAsByte<ENActorOperationalState> NewState);
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
@@ -65,23 +68,36 @@ public:
 	/**
 	 * Called on the Actor when it has been created by an Actor Pool.
 	 */
-	virtual void OnCreatedByActorPool() { ActorOperationalState = AOS_Created; };
+	virtual void OnCreatedByActorPool() { SetActorOperationalState(AOS_Created); };
 
 	/**
 	 * Called after the Actor has been placed back in the Actor Pool, and its settings have been applied.
 	 */
-	virtual void OnReturnToActorPool() { ActorOperationalState = AOS_Disabled; };
+	virtual void OnReturnToActorPool() { SetActorOperationalState(ActorOperationalState); };
 
 	/**
 	 * Called after the Actor has been spawned from the Actor Pool, and its settings have been applied.
 	 */
-	virtual void OnSpawnedFromActorPool() { ActorOperationalState = AOS_Enabled; };
+	virtual void OnSpawnedFromActorPool() { SetActorOperationalState(AOS_Enabled); };
 
 	/**
 	 * Called during the deferred construction process for the Actor.
 	 */
 	virtual void OnDeferredConstruction() { };
 
+	/**
+	 * Set the ActorOperationalState of the INActorPoolItem (Actor) calling the change delegate as needed.
+	 * @note Will ignore if NewState is the same as ActorOperationalState
+	 * @param NewState The state to change too.
+	 */
+	void SetActorOperationalState(ENActorOperationalState NewState);
+	
+	/**
+	 * Delegate fired after a transition has occurred in the operational state.
+	 * @note Multicast delegates are heavy and should only be used when necessary.
+	 */
+	FOnActorOperationalStateChangedDelegate OnActorOperationalStateChanged;
+	
 private:
 	/**
 	 * Was this actor created by an ActorPool?
@@ -90,7 +106,7 @@ private:
 
 	/**
 	 * Does this actor require a unique construction path.
-	 * @remark This will trigger OnDeferredConstruction.
+	 * @note This will trigger OnDeferredConstruction.
 
 	 */
 	bool bRequiresDeferredConstruction = false;

@@ -16,8 +16,8 @@ public:
 	static FBox CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings);
 	static FNRawMesh CalculateConvexHull(ULevel* InLevel, const FNCellHullGenerationSettings& Settings);
 	
-	static int GetNCellActorCountFromLevel(const ULevel* Level);
-	static int GetNCellActorCountFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
+	static int32 GetNCellActorCountFromLevel(const ULevel* Level);
+	static int32 GetNCellActorCountFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 
 	static ANCellActor* GetNCellActorFromLevel(const ULevel* Level);
 	static ANCellActor* GetNCellActorFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);

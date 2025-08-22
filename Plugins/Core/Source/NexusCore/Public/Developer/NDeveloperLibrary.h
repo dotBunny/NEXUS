@@ -16,7 +16,7 @@ class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Count", Category = "NEXUS|Developer")
-	static int GetCurrentObjectCount() { return FNDeveloperUtils::GetCurrentObjectCount(); };
+	static int32 GetCurrentObjectCount() { return FNDeveloperUtils::GetCurrentObjectCount(); };
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Create UObject Snapshot", Category = "NEXUS|Developer")
 	static FNObjectSnapshot CreateObjectSnapshot() { return FNObjectSnapshotUtils::Snapshot(); }

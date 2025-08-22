@@ -10,7 +10,7 @@
 #include "Macros/NFlagsMacros.h"
 
 #if WITH_EDITOR
-int FNActorPool::ActorPoolTicket = 0;
+int32 FNActorPool::ActorPoolTicket = 0;
 #endif
 
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
@@ -240,7 +240,7 @@ void FNActorPool::CreateActor()
 	// Create actual actor
 	AActor* CreatedActor = World->SpawnActorAbsolute(Template, DefaultTransform, SpawnInfo);
 
-	// Ensure the actor is not garbage collected
+	// Ensure the actor is not garbage collected, pool itself will clean up.
 	CreatedActor->AddToRoot();
 
 #if WITH_EDITOR
@@ -341,7 +341,7 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 
 void FNActorPool::Clear(const bool bForceDestroy)
 {
-	for (int i = InActors.Num() - 1; i >= 0; i--)
+	for (int32 i = InActors.Num() - 1; i >= 0; i--)
 	{
 		check(InActors[i] != nullptr);
 		if (InActors[i]->IsPendingKillPending())
@@ -354,7 +354,7 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			InActors[i]->Destroy();
 		}
 	}
-	for (int i = OutActors.Num() - 1; i >= 0; i--)
+	for (int32 i = OutActors.Num() - 1; i >= 0; i--)
 	{
 		check(OutActors[i] != nullptr);
 
@@ -375,16 +375,16 @@ void FNActorPool::Clear(const bool bForceDestroy)
 void FNActorPool::Fill()
 {
 	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
-	for (int i = InActors.Num(); i < Settings.MinimumActorCount; i++)
+	for (int32 i = InActors.Num(); i < Settings.MinimumActorCount; i++)
 	{
 		CreateActor();
 	}
 }
 
-void FNActorPool::Warm(const int Count)
+void FNActorPool::Prewarm(const int32 Count)
 {
-	N_LOG(Log, TEXT("[FNActorPool::Warm] Warming pool %s with %i items."), *Template->GetName(), Count)
-	for (int i = 0; i < Count; i++)
+	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
+	for (int32 i = 0; i < Count; i++)
 	{
 		CreateActor();
 	}
@@ -392,11 +392,11 @@ void FNActorPool::Warm(const int Count)
 
 void FNActorPool::Tick()
 {
-	if (const int TotalActors = InActors.Num() + OutActors.Num();
+	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
-		const int SpawnCountThisTick = FMath::Min((Settings.MinimumActorCount - TotalActors), Settings.CreateObjectsPerTick);
-		for (int i = 0; i < SpawnCountThisTick; i++)
+		const int32 SpawnCountThisTick = FMath::Min((Settings.MinimumActorCount - TotalActors), Settings.CreateObjectsPerTick);
+		for (int32 i = 0; i < SpawnCountThisTick; i++)
 		{
 			CreateActor();
 		}

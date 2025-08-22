@@ -25,10 +25,10 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
-	int GetKillCount() const { return KillCount; }
+	int32 GetKillCount() const { return KillCount; }
 	
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
-	void SetKillCount(const int NewKillCount) { KillCount = NewKillCount; }
+	void SetKillCount(const int32 NewKillCount) { KillCount = NewKillCount; }
 
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
 	void ResetKillCount() { KillCount = 0; }
@@ -48,6 +48,6 @@ protected:
 	bool bIgnoreNonInterfacedActors = false;
 	
 private:
-	int KillCount = 0;
+	int32 KillCount = 0;
 	UNActorPoolSubsystem* ActorPoolSubsystem;
 };

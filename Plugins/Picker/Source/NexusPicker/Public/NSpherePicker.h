@@ -232,7 +232,7 @@ public:
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @notes Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
+	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.
@@ -268,7 +268,7 @@ public:
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @notes Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
+	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.

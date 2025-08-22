@@ -10,7 +10,7 @@
 class NEXUSCORE_API FNObjectSnapshotUtils
 {
 public:
-	static int TakeTicket() { return ++SnapshotTicket; }
+	static int32 TakeTicket() { return ++SnapshotTicket; }
 	static FNObjectSnapshot Snapshot();
 	static FNObjectSnapshotDiff Diff(FNObjectSnapshot OldSnapshot, FNObjectSnapshot NewSnapshot, bool bRemoveKnownLeaks = false);
 	static void RemoveKnownLeaks(FNObjectSnapshotDiff& Diff);

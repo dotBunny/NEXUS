@@ -25,7 +25,7 @@ N_TEST(FNActorPoolTests_Strategy_Create, "NEXUS::UnitTests::NActorPools::Strateg
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(10);
-		for (int i = 0; i < 10; i++)
+		for (int32 i = 0; i < 10; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -34,9 +34,9 @@ N_TEST(FNActorPoolTests_Strategy_Create, "NEXUS::UnitTests::NActorPools::Strateg
 		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
 		
 		// Check the created actors for unique pointers
-		for (int i = 0; i < 10; i++)
+		for (int32 i = 0; i < 10; i++)
 		{
-			for (int j = 0; j < 10; j++)
+			for (int32 j = 0; j < 10; j++)
 			{
 				if (i == j) continue;
 				if (Actors[i] == Actors[j])
@@ -66,7 +66,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited, "NEXUS::UnitTests::NActorPools::
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(10);
-		for (int i = 0; i < 10; i++)
+		for (int32 i = 0; i < 10; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -75,14 +75,14 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited, "NEXUS::UnitTests::NActorPools::
 		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
 		
 		// Check the created actors for unique pointers
-		for (int i = 0; i < 2; i++)
+		for (int32 i = 0; i < 2; i++)
 		{
 			if (Actors[i] == nullptr)
 			{
 				ADD_ERROR("An invalid Actor pointer was returned where expected.")
 			}
 		}
-		for (int i = 2; i < 10; i++)
+		for (int32 i = 2; i < 10; i++)
 		{
 			if (Actors[i] != nullptr)
 			{
@@ -109,7 +109,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, "NEXUS::UnitTests::NActorPo
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(5);
-		for (int i = 0; i < 5; i++)
+		for (int32 i = 0; i < 5; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -150,7 +150,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPoo
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(5);
-		for (int i = 0; i < 5; i++)
+		for (int32 i = 0; i < 5; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -195,7 +195,7 @@ N_TEST(FNActorPoolTests_Strategy_Fixed, "NEXUS::UnitTests::NActorPools::Strategy
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(3);
-		for (int i = 0; i < 3; i++)
+		for (int32 i = 0; i < 3; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -228,7 +228,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, "NEXUS::UnitTests::NActorPoo
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(2);
-		for (int i = 0; i < 2; i++)
+		for (int32 i = 0; i < 2; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
@@ -269,7 +269,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, "NEXUS::UnitTests::NActorPool
 		// Create some actors
 		TArray<AActor*> Actors;
 		Actors.Reserve(3);
-		for (int i = 0; i < 3; i++)
+		for (int32 i = 0; i < 3; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}

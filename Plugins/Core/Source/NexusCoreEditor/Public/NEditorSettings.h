@@ -48,7 +48,7 @@ public:
 	bool bUpdatesCheck = true;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Frequency (Days)")
-	int UpdatesFrequency = 7;
+	int32 UpdatesFrequency = 7;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel" )
 	TEnumAsByte<ENUpdatesChannel> UpdatesChannel = NUC_GithubMain;
@@ -64,6 +64,6 @@ public:
 	FString UpdatesCustomUpdateURI = TEXT("");
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=")
-	int UpdatesIgnoreVersion = N_VERSION_NUMBER;
+	int32 UpdatesIgnoreVersion = N_VERSION_NUMBER;
 #endif
 };

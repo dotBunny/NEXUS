@@ -23,7 +23,7 @@ struct NEXUSCORE_API FNRawMesh
 
 	/**
 	 * Ordered shape edge definition.
-	 * @remark The indices are ordered, so 1/2/3 for a triangle. This is NOT looped, therefore you must close the loop if line drawing.
+	 * @note The indices are ordered, so 1/2/3 for a triangle. This is NOT looped, therefore you must close the loop if line drawing.
 	 */
 	UPROPERTY(VisibleAnywhere)
 	TArray<FNRawMeshLoop> Loops;
@@ -37,7 +37,7 @@ struct NEXUSCORE_API FNRawMesh
 	bool IsEqual(const FNRawMesh& Other) const
 	{
 		if (Loops.Num() != Other.Loops.Num()) return false;
-		for (int i = 0; i < Loops.Num(); i++)
+		for (int32 i = 0; i < Loops.Num(); i++)
 		{
 			if (!Loops[i].IsEqual(Other.Loops[i])) return false;
 		}

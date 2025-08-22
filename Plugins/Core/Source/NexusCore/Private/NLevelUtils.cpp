@@ -27,7 +27,7 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 		ObjectLibrary->LoadAssetDataFromPath(PathRoot);
 		ObjectLibrary->GetAssetDataList(AssetDataArray);
 
-		const int Count = AssetDataArray.Num();
+		const int32 Count = AssetDataArray.Num();
 		for (int32 i = 0; i < Count; ++i)
 		{
 			ReturnArray.Add(AssetDataArray[i].AssetName.ToString());

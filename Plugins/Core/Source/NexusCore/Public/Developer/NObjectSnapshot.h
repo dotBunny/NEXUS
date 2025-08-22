@@ -13,7 +13,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 
 	FNObjectSnapshot() = default;
 	
-	explicit FNObjectSnapshot(const int Count)
+	explicit FNObjectSnapshot(const int32 Count)
 		: Ticket(-1)
 		, CapturedObjectCount(0)
 	{
@@ -21,10 +21,10 @@ struct NEXUSCORE_API FNObjectSnapshot
 	}
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	int Ticket = -1;
+	int32 Ticket = -1;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	int CapturedObjectCount = 0;
+	int32 CapturedObjectCount = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<FNObjectSnapshotEntry> CapturedObjects;

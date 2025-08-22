@@ -10,7 +10,7 @@ class FNEditorInputProcessor;
 
 /**
  * NEXUS: Core Editor Module
- * @remark Loads during PostEngineInit
+ * @note Loads during PostEngineInit
  */
 class FNCoreEditorModule final : public IModuleInterface
 {

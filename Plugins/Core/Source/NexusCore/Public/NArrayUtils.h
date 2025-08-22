@@ -21,10 +21,10 @@ public:
 
 	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
 	{
-		const int Count = Objects.Num();
+		const int32 Count = Objects.Num();
 		TArray<TStrongObjectPtr<UObject>> Pinned;
 		Pinned.SetNumUninitialized(Count);
-		for (int i = 0; i < Count; ++i)
+		for (int32 i = 0; i < Count; ++i)
 		{
 			Pinned[i] = Objects[i].Pin();
 		}
@@ -34,10 +34,10 @@ public:
 	template<typename T>
 	FORCEINLINE static TArray<T> PinAllAs(TArray<TWeakObjectPtr<UObject>> Objects)
 	{
-		const int Count  = Objects.Num();
+		const int32 Count  = Objects.Num();
 		TArray<T> PinnedObjects;
 		PinnedObjects.SetNumUninitialized(Count);
-		for (int i = 0; i < Count; ++i)
+		for (int32 i = 0; i < Count; ++i)
 		{
 			PinnedObjects[i] = static_cast<T>(Objects[i].Pin().Get());
 		}

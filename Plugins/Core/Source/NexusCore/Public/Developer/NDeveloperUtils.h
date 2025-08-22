@@ -6,5 +6,5 @@
 class FNDeveloperUtils
 {
 public:
-	FORCEINLINE static int GetCurrentObjectCount() { return GUObjectArray.GetObjectArrayNumMinusAvailable(); }
+	FORCEINLINE static int32 GetCurrentObjectCount() { return GUObjectArray.GetObjectArrayNumMinusAvailable(); }
 };

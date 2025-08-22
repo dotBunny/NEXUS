@@ -45,7 +45,7 @@ public:
 	
 	/**
 	 * Is the editor controlled by a user?
-	 * @remark Attempts to represent if it is safe to do things that need a fully initialized editor.
+	 * @note Attempts to represent if it is safe to do things that need a fully initialized editor.
 	 */
 	FORCEINLINE static bool IsUserControlled()
 	{
@@ -54,13 +54,13 @@ public:
 
 	/**
 	 * Register an <code>UDeveloperSettings</code> object with the Unreal Editor.
-	* @remarks Keys off SectionName
+	* @notes Keys off SectionName
 	 */
 	static void RegisterSettings(UDeveloperSettings* SettingsObject);
 
 	/**
 	 * Unregister an <code>UDeveloperSettings</code> object with the Unreal Editor.
-	 * @remarks Keys off SectionName
+	 * @notes Keys off SectionName
 	 */
 	static void UnregisterSettings(const UDeveloperSettings* SettingsObject);
 

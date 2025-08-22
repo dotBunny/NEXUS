@@ -12,14 +12,14 @@ struct NEXUSCORE_API FNRawMeshLoop
 
 	FNRawMeshLoop() = default;
 
-	FNRawMeshLoop(const int A, const int B, const int C)
+	FNRawMeshLoop(const int32 A, const int32 B, const int32 C)
 	{
 		Indices.Add(A);
 		Indices.Add(B);
 		Indices.Add(C);
 	};
 
-	FNRawMeshLoop(const int A, const int B, const int C, const int32 D)
+	FNRawMeshLoop(const int32 A, const int B, const int C, const int32 D)
 	{
 		Indices.Add(A);
 		Indices.Add(B);

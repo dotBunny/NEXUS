@@ -60,7 +60,7 @@ public:
 			if (FNObjectSnapshotDiff GCDiff = FNObjectSnapshotUtils::Diff(PreSnapshot, GCSnapshot, true);
 				GCDiff.AddedCount > 0)
 			{
-				for (int i = 0; i < GCDiff.AddedCount; i++)
+				for (int32 i = 0; i < GCDiff.AddedCount; i++)
 				{
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *GCDiff.Added[i].ToString()));
 				}
@@ -71,7 +71,7 @@ public:
 			if (FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(PreSnapshot, PostSnapshot, true);
 				Diff.AddedCount > 0)
 			{
-				for (int i = 0; i < Diff.AddedCount; i++)
+				for (int32 i = 0; i < Diff.AddedCount; i++)
 				{
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *Diff.Added[i].ToString()));
 				}

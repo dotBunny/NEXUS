@@ -12,6 +12,7 @@
 - Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
 - Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
 - Add safety check when creating actor pools that we are not getting passed a `nullptr`.
+- `INActorPoolItem` now has a native multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
   
 ### Changed
 
@@ -22,9 +23,9 @@
 - Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
 - Properly renamed validators with N prefix.
 - `SplineLevelReference` will only be visible when `APSD_Spline` is selected as the `Distribution` on `UNActorPoolSpawnerComponent`.
-- `ReturnMoveLocation` will only be editable on `FNActorPoolSettings` when `bReturnMoveToLocation` is flagged.
 - Renamed `bDontDestroyStaticActors` / `bDontDestroyNonInterfacedActors` to `bIgnoreStaticActors` / `bIgnoreNonInterfacedActors`.
 - `FNActorPoolSettings` now uses a bitmask `Flags` configuration option instead of a long list of boolean flags.
+- Clarified all `int` to `int32` to standardize with Unreals platform defs.
 
 ### Removed
 

@@ -3,6 +3,7 @@
 
 #include "INActorPoolItem.h"
 #include "NActorPoolSubsystem.h"
+#include "NActorPool.h"
 #include "NCoreMinimal.h"
 
 void INActorPoolItem::InitializeActorPoolItem(FNActorPool* OwnerPool)
@@ -29,4 +30,16 @@ bool INActorPoolItem::ReturnToActorPool()
 	}
 	N_LOG(Log, TEXT("[INActorPoolItem::ReturnToActorPool] Unable to return %s to a valid Actor Pool."), *Actor->GetName());
 	return false;
+}
+
+void INActorPoolItem::SetActorOperationalState(const ENActorOperationalState NewState)
+{
+	if (NewState == ActorOperationalState)
+	{
+		return;
+	}
+	const ENActorOperationalState PreviousState = NewState;
+	ActorOperationalState = NewState;
+	
+	OnActorOperationalStateChanged.Broadcast(PreviousState, NewState);
 }

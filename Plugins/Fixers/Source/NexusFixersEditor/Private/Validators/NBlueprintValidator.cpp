@@ -72,7 +72,7 @@ bool UNBlueprintValidator::IsEmptyTick(const UK2Node_Event* EventNode)
 
 bool UNBlueprintValidator::IsMultiPinPureNode(UK2Node* PureNode)
 {
-	int PinConnectionCount = 0;
+	int32 PinConnectionCount = 0;
 	for (UEdGraphPin* Pin : PureNode->Pins)
 	{
 		//if we're an output pin and we have a connection in the graph - this counts.

@@ -48,7 +48,7 @@ private:
 	 * @param Char - The <code>TCHAR</code> to parse into it's numeric value
 	 * @return the parsed value
 	 */
-	static int HexToInteger(const TCHAR Char);
+	static int32 HexToInteger(const TCHAR Char);
 
 	/**
 	 * Removes all <i>non-valid</i> characters from the provided <code>seed</code>.

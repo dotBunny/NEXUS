@@ -4,16 +4,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "UObject/UObjectGlobals.h"
 #include "NActorPoolSettings.h"
 #include "NActorPoolSubsystem.h"
-#include "Templates/Tuple.h"
 #include "Collections/NWeightedIntegerArray.h"
-#include "Components/SplineComponent.h"
 #include "NActorPoolSpawnerComponent.generated.h"
 
 class UActorPoolSubsystem;
+class USplineComponent;
 
 USTRUCT(BlueprintType)
 struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
@@ -25,7 +22,7 @@ struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 	UPROPERTY(EditInstanceOnly)
 	FNActorPoolSettings Settings;
 	UPROPERTY(EditInstanceOnly)
-	int Weight = 1;
+	int32 Weight = 1;
 };
 
 UENUM(BlueprintType)
@@ -100,7 +97,7 @@ public:
 	 * The number of items to spawn at any given spawn event.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Count = 1;
+	int32 Count = 1;
 
 	/**
 	 * Should we randomize the seed on begin play?
@@ -112,7 +109,7 @@ public:
 	 * Seed used when determining what to pull from the weighted list.
 	 */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	int Seed = 0;
+	int32 Seed = 0;
 
 	explicit UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer);
 
@@ -147,6 +144,6 @@ private:
 	bool bIsNetAuthority = false;
 	float TimeSinceSpawned = 0.f;
 	UNActorPoolSubsystem* Manager = nullptr;
-	int TemplateCount = 0;
+	int32 TemplateCount = 0;
 	USplineComponent* CachedSplineComponent = nullptr;
 };

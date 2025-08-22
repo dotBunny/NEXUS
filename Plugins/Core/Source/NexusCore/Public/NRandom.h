@@ -13,7 +13,7 @@ class NEXUSCORE_API FNRandom
 public:
 	/**
 	 * A deterministic random number generator.
-	 * @remark It is SUPER important that values are called from this in a deterministic order.
+	 * @note It is SUPER important that values are called from this in a deterministic order.
 	 */
 	static FNMersenneTwister Deterministic;
 	/**

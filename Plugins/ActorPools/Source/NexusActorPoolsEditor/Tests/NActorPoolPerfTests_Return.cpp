@@ -10,15 +10,15 @@
 
 N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return", N_TEST_CONTEXT_EDITOR)
 {
-	constexpr int TestSize = 1000;
+	constexpr int32 TestSize = 1000;
 	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
 	{
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass());
-		Pool.Warm(TestSize);
+		Pool.Prewarm(TestSize);
 		
 		TArray<AActor*> Actors;
 		Actors.Reserve(TestSize);
-		for (int i = 0; i < TestSize; i++)
+		for (int32 i = 0; i < TestSize; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
 		}
@@ -26,7 +26,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(Return_Actor_1000, 2.0f)
-			for (int i = 0; i < TestSize; i++)
+			for (int32 i = 0; i < TestSize; i++)
 			{
 				Pool.Return(Actors[i]);
 			}

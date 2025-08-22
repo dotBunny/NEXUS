@@ -9,7 +9,7 @@
 
 /**
  * The data only representation of a NCellActor and its details.
- * @remark The UNCell is effectively a side-car file to NCellActor.
+ * @note The UNCell is effectively a side-car file to NCellActor.
  */
 UCLASS(DisplayName = "NCell")
 class NEXUSPROCGEN_API UNCell : public UDataAsset
