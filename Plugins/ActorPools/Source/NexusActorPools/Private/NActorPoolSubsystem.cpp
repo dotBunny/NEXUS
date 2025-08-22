@@ -75,6 +75,9 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 {
+	// Ensure we aren't doing anything we shouldnt be.
+	if (ActorPool->GetSettings().HasFlag_ServerOnly() && !GetWorld()->GetAuthGameMode()) return;
+	
 	TickableActorPools.Add(ActorPool);
 	bHasTickableActorPools = (TickableActorPools.Num() > 0);
 }

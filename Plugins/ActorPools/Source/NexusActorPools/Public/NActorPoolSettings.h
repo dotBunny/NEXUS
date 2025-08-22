@@ -41,8 +41,12 @@ enum class ENActorPoolFlags : uint8
 	 * @note This is not used by INActorPoolItems, they have a method which is called for logic to be applied before FinishSpawning is called.
 	 */
 	APF_ShouldFinishSpawning = 1 << 3			UMETA(DisplayName = "Should Finish Spawning"),
+	/**
+	 * Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked.
+	 */
+	APF_ServerOnly = 1 << 4				UMETA(DisplayName = "Server Only"),
 	
-	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning
+	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning | APF_ServerOnly
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
@@ -68,6 +72,10 @@ public:
 	bool HasFlag_SweepBeforeSettingLocation() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_SweepBeforeSettingLocation);
+	}
+	bool HasFlag_ServerOnly() const
+	{
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ServerOnly);
 	}
 	
 	/**

@@ -125,7 +125,24 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 
 bool FNActorPool::Return(AActor* Actor)
 {
+	if (Actor == nullptr)
+	{
+		N_LOG(Warning, TEXT("[FNActorPool::Return] Attempting to return a null actor."));
+		return false;
+	}
+	
 	ApplyReturnState(Actor);
+
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode())
+	{
+		if (bImplementsInterface)
+		{
+			(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
+		}
+		return true;
+	}
+	
 
 	// We have to manage the position a bit based on the strategy.
 	switch (Settings.Strategy)
@@ -182,6 +199,11 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 
 bool FNActorPool::ApplyStrategy()
 {
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode())
+	{
+		return false;
+	}
+	
 	switch (Settings.Strategy)
 	{
 	case APS_Create:
@@ -227,6 +249,9 @@ bool FNActorPool::ApplyStrategy()
 
 void FNActorPool::CreateActor()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return;
+	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
 	SpawnInfo.ObjectFlags |= RF_Transient;
@@ -374,6 +399,9 @@ void FNActorPool::Clear(const bool bForceDestroy)
 
 void FNActorPool::Fill()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return;
+	
 	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
 	for (int32 i = InActors.Num(); i < Settings.MinimumActorCount; i++)
 	{
@@ -383,6 +411,9 @@ void FNActorPool::Fill()
 
 void FNActorPool::Prewarm(const int32 Count)
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return;
+	
 	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
 	for (int32 i = 0; i < Count; i++)
 	{
@@ -392,6 +423,9 @@ void FNActorPool::Prewarm(const int32 Count)
 
 void FNActorPool::Tick()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return;
+	
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
