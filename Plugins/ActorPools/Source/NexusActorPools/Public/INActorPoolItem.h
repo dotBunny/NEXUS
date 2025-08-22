@@ -43,11 +43,11 @@ class NEXUSACTORPOOLS_API INActorPoolItem
 	GENERATED_BODY()
 
 public:
-
+	
 	void InitializeActorPoolItem(FNActorPool* OwnerPool);
 
 	/**
-	 * Is the given Actor attached to a Actor Pool?
+	 * Is the given Actor attached to an Actor Pool?
 	 * @return true/false if properly attached to a pool
 	 */
 	bool IsAttachedToActorPool() const;
@@ -73,7 +73,7 @@ public:
 	/**
 	 * Called after the Actor has been placed back in the Actor Pool, and its settings have been applied.
 	 */
-	virtual void OnReturnToActorPool() { SetActorOperationalState(ActorOperationalState); };
+	virtual void OnReturnToActorPool() { SetActorOperationalState(AOS_Disabled); };
 
 	/**
 	 * Called after the Actor has been spawned from the Actor Pool, and its settings have been applied.
@@ -87,7 +87,8 @@ public:
 
 	/**
 	 * Set the ActorOperationalState of the INActorPoolItem (Actor) calling the change delegate as needed.
-	 * @note Will ignore if NewState is the same as ActorOperationalState
+	 * @note There are very few use cases for invoking this method, think twice before using it.
+	 * @note Will ignore if NewState is the same as ActorOperationalState.
 	 * @param NewState The state to change too.
 	 */
 	void SetActorOperationalState(ENActorOperationalState NewState);
