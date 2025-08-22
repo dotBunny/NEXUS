@@ -48,9 +48,9 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	NoticeTextComponent->HorizontalAlignment = EHTA_Center;
 	NoticeTextComponent->VerticalAlignment = EVRTA_TextCenter;
 	
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> TextMaterial(TEXT("/Engine/EngineMaterials/DefaultTextMaterialOpaque"));
-	static ConstructorHelpers::FObjectFinder<UFont> TextFont(TEXT("/Engine/EngineFonts/RobotoDistanceField"));
 
+
+	
 	
 	
 	TitleTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Title"));
@@ -58,17 +58,25 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	
 	DescriptionTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Description"));
 	DescriptionTextComponent->SetupAttachment(PartRoot);
-	if (TextFont.Succeeded())
+
+	// These get stripped on servers
+	if (!GIsServer)
 	{
-		TitleTextComponent->SetFont(TextFont.Object);
-		DescriptionTextComponent->SetFont(TextFont.Object);
-		NoticeTextComponent->SetFont(TextFont.Object);
-	}
-	if (TextMaterial.Succeeded())
-	{
-		TitleTextComponent->SetMaterial(0, TextMaterial.Object);
-		DescriptionTextComponent->SetMaterial(0, TextMaterial.Object);
-		NoticeTextComponent->SetMaterial(0, TextMaterial.Object);
+		static ConstructorHelpers::FObjectFinder<UFont> TextFont(TEXT("/Engine/EngineFonts/RobotoDistanceField"), LOAD_NoWarn);
+		if (TextFont.Succeeded())
+		{
+			TitleTextComponent->SetFont(TextFont.Object);
+			DescriptionTextComponent->SetFont(TextFont.Object);
+			NoticeTextComponent->SetFont(TextFont.Object);
+		}
+	
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> TextMaterial(TEXT("/Engine/EngineMaterials/DefaultTextMaterialOpaque"), LOAD_NoWarn);
+		if (TextMaterial.Succeeded())
+		{
+			TitleTextComponent->SetMaterial(0, TextMaterial.Object);
+			DescriptionTextComponent->SetMaterial(0, TextMaterial.Object);
+			NoticeTextComponent->SetMaterial(0, TextMaterial.Object);
+		}
 	}
 	
 	SpotlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spotlight"));

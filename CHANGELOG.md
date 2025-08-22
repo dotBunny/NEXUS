@@ -15,7 +15,10 @@
 - `INActorPoolItem` now has a dynamic multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
 - `UNActorPoolLibrary` supporting methods to bind to `INActorPoolItem` delegate.
 - Configurable distribution inner & outer visualizer colors in `Editor Preferences > NEXUS > Core (User)`
-  
+
+### Fixed
+- `ANSamplesDisplayActor` no longer causes headless servers to crash.
+
 ### Changed
 
 - [[#48](https://github.com/dotBunny/NEXUS/issues/48)] Use `HideCategories` instead of using a layout customizer pattern.  
