@@ -183,8 +183,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	}
 	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
 	Settings.Flags = InNewSettings.Flags;
-
-	Settings.StorageLocation = InNewSettings.StorageLocation;
+	Settings.DefaultTransform = InNewSettings.DefaultTransform;
 }
 
 bool FNActorPool::ApplyStrategy()
@@ -331,10 +330,10 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 
 void FNActorPool::ApplyReturnState(AActor* Actor) const
 {
-	// Move to storage location
+	// Move to a storage location
 	if (Settings.HasFlag_ReturnToStorageLocation())
 	{
-		Actor->SetActorLocation(Settings.StorageLocation, false, nullptr, ETeleportType::ResetPhysics);
+		Actor->SetActorLocation(Settings.DefaultTransform.GetLocation(), false, nullptr, ETeleportType::ResetPhysics);
 	}
 
 	Actor->SetActorTickEnabled(false);

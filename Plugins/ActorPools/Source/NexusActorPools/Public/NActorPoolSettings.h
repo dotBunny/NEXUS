@@ -80,19 +80,19 @@ public:
 	/**
 	 * When the pool is being filled during creation, what is the number of prewarmed Actor`s that should be created, either synchronously or divided across a number of frames.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
 	int32 MinimumActorCount = 10;
 
 	/**
 	 * The number of pooled Actors that a pool can use/have. This is tied more to the Strategy being used for what happens when the pool has to create new Actors.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
 	int32 MaximumActorCount = 100;
 
 	/**
 	 * Throttles the number of Actors that can be created per tick. This can be useful to spread the cost of warming a pool up across multiple frames (-1 for unlimited). 
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="-1", ClampMax="500", UIMin="-1", UIMax="500", SliderExponent = 1))
 	int32 CreateObjectsPerTick = -1;
 
 	/**
@@ -106,15 +106,9 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
 	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::APF_DefaultSettings);
-
+	
 	/**
-	 * The location to move an Actor when it is returned to the pool for later reuse (if enabled). This also gets applied to newly created Actors as well.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
-	FVector StorageLocation = FVector::ZeroVector;
-
-	/**
-	 * The default applied transform when creating an actor, including the base assumption that the AActor's root component is not scaled.
+	 * The default applied transform when creating an actor, with the location component being used as the storage location when an actor is returned to the pool, and the scale applied when spawned.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
