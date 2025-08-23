@@ -6,9 +6,11 @@
 
 - `NEngineContentValidator` throws a configurable severity when any content inside of the `Engine` folder is saved.
 - VLOG support for all pickers.
-- [[#31](https://github.com/dotBunny/NEXUS/issues/31)] Added watermark option to `NSamplesDisplayActor`. 
-- [[#45](https://github.com/dotBunny/NEXUS/issues/45)] Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
-- [[#47](https://github.com/dotBunny/NEXUS/issues/47)] Add update channel support to the framework.
+- [#64](https://github.com/dotBunny/NEXUS/issues/64) - Utilize `DefaultTransform` option on `FNActorPoolSettings` as the return location and the scale when spawning.
+- [#63](https://github.com/dotBunny/NEXUS/issues/63) Add `ServerOnly` flag by default to `FNActorPoolSettings`.
+- [#31](https://github.com/dotBunny/NEXUS/issues/31) Added watermark option to `NSamplesDisplayActor`. 
+- [#45](https://github.com/dotBunny/NEXUS/issues/45) Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
+- [#47](https://github.com/dotBunny/NEXUS/issues/47) Add update channel support to the framework.
 - Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
 - Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
 - Add safety check when creating actor pools that we are not getting passed a `nullptr`.
