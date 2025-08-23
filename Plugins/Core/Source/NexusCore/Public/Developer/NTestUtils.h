@@ -23,6 +23,9 @@ public:
 
 		// Start play
 		const FURL URL;
+		UGameInstance* TestGameInstance = NewObject<UGameInstance>(GEngine);
+		World->SetGameInstance(TestGameInstance);
+		World->SetGameMode(URL);
 		World->InitializeActorsForPlay(URL);
 		World->BeginPlay();
 
@@ -42,6 +45,7 @@ public:
 		World->EndPlay(EEndPlayReason::Quit);
 		GEngine->DestroyWorldContext(World);
 		World->DestroyWorld(bInformEngineOfWorld);
+		TestGameInstance->ConditionalBeginDestroy();
 	}
 	
 	FORCEINLINE static void WorldTestChecked(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bShouldGarbageCollect = true)
