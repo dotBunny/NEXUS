@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NActorPool.h"
 #include "NActorPoolSettings.h"
 #include "NActorPoolsSettings.h"
 #include "INActorPoolItem.generated.h"
@@ -23,7 +24,8 @@ enum ENActorOperationalState : uint8
 	AOS_Destroyed		UMETA(DisplayName = "Destroyed")
 };
 
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, TEnumAsByte<ENActorOperationalState> OldState, TEnumAsByte<ENActorOperationalState> NewState);
+// TODO: Check if we can make this const
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, const ENActorOperationalState OldState, const ENActorOperationalState NewState);
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
@@ -60,9 +62,12 @@ public:
 	/**
 	 * Get the ActorPoolSettings used to determine how the ActorPool should be setup for this Actor.
 	 */
-	virtual FNActorPoolSettings& GetActorPoolSettings() {
-		static FNActorPoolSettings DefaultSettings = UNActorPoolsSettings::Get()->DefaultSettings;
-		return DefaultSettings;
+	virtual const FNActorPoolSettings& GetActorPoolSettings() {
+		if (OwningActorPool != nullptr)
+		{
+			return OwningActorPool->GetSettings();
+		}
+		return UNActorPoolsSettings::Get()->DefaultSettings;
 	};
 
 	/**
@@ -90,9 +95,23 @@ public:
 	 * @note There are very few use cases for invoking this method, think twice before using it.
 	 * @note Will ignore if NewState is the same as ActorOperationalState.
 	 * @param NewState The state to change too.
+	 * @return Was a change made?
 	 */
-	void SetActorOperationalState(ENActorOperationalState NewState);
+	bool SetActorOperationalState(ENActorOperationalState NewState);
+
+	/**
+	 * Returns the current state of the INActorPoolItem.
+	 * @return The current state.
+	 */
+	ENActorOperationalState GetCurrentActorOperationalState() const { return CurrentActorOperationalState; };
+
+	/**
+	 * Returns the previous state of the INActorPoolItem.
+	 * @return The previous state.
+	 */
+	ENActorOperationalState GetPreviousActorOperationalState() const { return PreviousActorOperationalState; };
 	
+
 	/**
 	 * Delegate fired after a transition has occurred in the operational state.
 	 * @note Multicast delegates are heavy and should only be used when necessary.
@@ -120,5 +139,10 @@ private:
 	/**
 	 * The known operational state of the Actor.
 	 */
-	ENActorOperationalState ActorOperationalState = AOS_Undefined;
+	ENActorOperationalState CurrentActorOperationalState = AOS_Undefined;
+
+	/**	 
+	 * The previous operational state of the Actor.
+	 */
+	ENActorOperationalState PreviousActorOperationalState = AOS_Undefined;
 };

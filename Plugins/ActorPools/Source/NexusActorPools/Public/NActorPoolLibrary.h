@@ -21,7 +21,7 @@ public:
 	
 	/**
 	 * An inconvenient way to bind to the OnActorOperationalStateChanged delegate on an INActorPoolItem.
-	 * @note The function definition should be Function(ENActorOperationalState OldState, ENActorOperationalState NewState).
+	 * @note The function definition should be Function(const ENActorOperationalState OldState, const ENActorOperationalState NewState).
 	 * @param Actor The target Actor which implements the INActorPoolItem interface.
 	 * @param Object The UObject to bind to.
 	 * @param FunctionName The function name to bind to.

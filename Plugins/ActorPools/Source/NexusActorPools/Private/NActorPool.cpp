@@ -7,7 +7,6 @@
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NCoreMinimal.h"
-#include "Macros/NFlagsMacros.h"
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
@@ -45,7 +44,6 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	// The ActorPool system requires that the root component of its actors be used to determine the physics settings.
 	if (RootComponent != nullptr)
 	{
-		TemplateScale = RootComponent->GetRelativeScale3D();
 		if (const UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(RootComponent))
 		{
 			if (PrimitiveComponent->BodyInstance.bSimulatePhysics)
@@ -125,6 +123,9 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 
 bool FNActorPool::Return(AActor* Actor)
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return true;
+	
 	if (Actor == nullptr)
 	{
 		N_LOG(Warning, TEXT("[FNActorPool::Return] Attempting to return a null actor."));
@@ -132,17 +133,6 @@ bool FNActorPool::Return(AActor* Actor)
 	}
 	
 	ApplyReturnState(Actor);
-
-	// Ensure the pool is a stub when WorldAuthority is flagged.
-	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode())
-	{
-		if (bImplementsInterface)
-		{
-			(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
-		}
-		return true;
-	}
-	
 
 	// We have to manage the position a bit based on the strategy.
 	switch (Settings.Strategy)
@@ -199,10 +189,8 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 
 bool FNActorPool::ApplyStrategy()
 {
-	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode())
-	{
-		return false;
-	}
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode()) return false;
 	
 	switch (Settings.Strategy)
 	{
@@ -263,7 +251,8 @@ void FNActorPool::CreateActor()
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	// Create actual actor
-	AActor* CreatedActor = World->SpawnActorAbsolute(Template, DefaultTransform, SpawnInfo);
+	//World->SpawnActor(Template, Settings.StorageLocation, FRotator::ZeroRotator, SpawnInfo);
+	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
 
 	// Ensure the actor is not garbage collected, pool itself will clean up.
 	CreatedActor->AddToRoot();
@@ -280,7 +269,7 @@ void FNActorPool::CreateActor()
 		if (SpawnInfo.bDeferConstruction)
 		{
 			ActorItem->OnDeferredConstruction();
-			CreatedActor->FinishSpawning(DefaultTransform);
+			CreatedActor->FinishSpawning(Settings.DefaultTransform);
 		}
 		ActorItem->OnCreatedByActorPool();
 		ApplyReturnState(CreatedActor);
@@ -290,7 +279,7 @@ void FNActorPool::CreateActor()
 	{
 		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
 		{
-			CreatedActor->FinishSpawning(DefaultTransform);
+			CreatedActor->FinishSpawning(Settings.DefaultTransform);
 		}
 		ApplyReturnState(CreatedActor);
 	}
@@ -308,13 +297,13 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	if (bHasHalfHeight)
 	{
 		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition + HalfHeightOffset, TemplateScale),
+			FTransform(InRotation, InPosition + HalfHeightOffset, Settings.DefaultTransform.GetScale3D()),
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	else
 	{
 		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition, TemplateScale),
+			FTransform(InRotation, InPosition, Settings.DefaultTransform.GetScale3D()),
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	

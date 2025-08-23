@@ -32,14 +32,17 @@ bool INActorPoolItem::ReturnToActorPool()
 	return false;
 }
 
-void INActorPoolItem::SetActorOperationalState(const ENActorOperationalState NewState)
+bool INActorPoolItem::SetActorOperationalState(const ENActorOperationalState NewState)
 {
-	if (NewState == ActorOperationalState)
+	if (NewState == CurrentActorOperationalState)
 	{
-		return;
+		return false;
 	}
-	const ENActorOperationalState PreviousState = NewState;
-	ActorOperationalState = NewState;
+
 	
-	OnActorOperationalStateChanged.Broadcast(PreviousState, NewState);
+	PreviousActorOperationalState = CurrentActorOperationalState;
+	CurrentActorOperationalState = NewState;
+	
+	OnActorOperationalStateChanged.Broadcast(PreviousActorOperationalState, CurrentActorOperationalState);
+	return true;
 }

@@ -8,8 +8,7 @@
 
 UENUM(BlueprintType)
 enum ENActorPoolStrategy : uint8
-{
-	
+{	
 	// Create AActor as needed.
 	APS_Create				UMETA(DisplayName = "Create"),
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
@@ -113,4 +112,10 @@ public:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FVector StorageLocation = FVector::ZeroVector;
+
+	/**
+	 * The default applied transform when creating an actor, including the base assumption that the AActor's root component is not scaled.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
 };

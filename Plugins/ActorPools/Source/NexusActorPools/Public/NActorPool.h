@@ -111,11 +111,7 @@ public:
 	
 
 private:
-	/**
-	 * The default applied transform when creating an actor, including the base assumption that the AActor's root component is not scaled.
-	 */
-	const FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
-	
+
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);
 	void PostInitialize();
 
@@ -129,8 +125,7 @@ private:
 	TArray<TObjectPtr<AActor>> OutActors;
 
 	TSubclassOf<AActor> Template;
-	FVector TemplateScale = FVector(1, 1, 1);
-
+	
 	bool bHasHalfHeight;
 	double HalfHeight;
 	FVector HalfHeightOffset;

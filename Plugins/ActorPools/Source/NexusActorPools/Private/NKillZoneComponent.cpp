@@ -45,8 +45,11 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	{
 		if (!ActorItem->ReturnToActorPool())
 		{
-			// The intent is still to destroy
-			OtherActor->Destroy();
+			if (!ActorItem->GetActorPoolSettings().HasFlag_ServerOnly())
+			{
+				// The intent is still to destroy
+				OtherActor->Destroy();
+			}
 			KillCount++;
 			return;
 		}

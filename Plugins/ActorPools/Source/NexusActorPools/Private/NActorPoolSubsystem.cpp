@@ -75,7 +75,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 {
-	// Ensure we aren't doing anything we shouldnt be.
+	// Don't add a stub pool to be ticked.
 	if (ActorPool->GetSettings().HasFlag_ServerOnly() && !GetWorld()->GetAuthGameMode()) return;
 	
 	TickableActorPools.Add(ActorPool);
