@@ -38,7 +38,6 @@ bool INActorPoolItem::SetActorOperationalState(const ENActorOperationalState New
 	{
 		return false;
 	}
-
 	
 	PreviousActorOperationalState = CurrentActorOperationalState;
 	CurrentActorOperationalState = NewState;

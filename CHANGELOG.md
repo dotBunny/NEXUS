@@ -37,6 +37,7 @@
 ### Removed
 
 - `bAllowCreateMoreObjects` became obselete on `FNActorPoolSettings`.
+- Extra `bRequiresDeferredConstruction` on `FNActorPool`, replaced with flag.
 
 ### Core Redirects
 ```ini

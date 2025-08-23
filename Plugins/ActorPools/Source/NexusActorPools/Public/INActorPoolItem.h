@@ -24,7 +24,6 @@ enum ENActorOperationalState : uint8
 	AOS_Destroyed		UMETA(DisplayName = "Destroyed")
 };
 
-// TODO: Check if we can make this const
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, const ENActorOperationalState OldState, const ENActorOperationalState NewState);
 
 /**
@@ -123,13 +122,6 @@ private:
 	 * Was this actor created by an ActorPool?
 	 */
 	bool bIsAttachedToActorPool = false;
-
-	/**
-	 * Does this actor require a unique construction path.
-	 * @note This will trigger OnDeferredConstruction.
-
-	 */
-	bool bRequiresDeferredConstruction = false;
 	
 	/**
 	 * A reference to the ActorPool that created the Actor.
