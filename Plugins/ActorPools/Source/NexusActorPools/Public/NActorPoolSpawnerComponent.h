@@ -48,67 +48,67 @@ public:
 	/**
 	 * Is the component going to Spawn enemies when ticked?
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bSpawningEnabled = true;
 	
 	/**
 	 * Should the spawner only spawn on servers, ignoring itself on client-only.
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bServerAuthoritative = true;
 
 	/**
 	 * The rate at which things should be spawned.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	float SpawnRate = 0.5f;
 
 	/**
 	 * Offset from the component location to treat as the origin when calculating a position to spawn an actor.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector Offset = FVector::Zero();
 
 	/**
 	* How should the point be chosen where things are spawned.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	TEnumAsByte<ENActorPoolSpawnerDistribution> Distribution = ENActorPoolSpawnerDistribution::APSD_Point;
 
 	/**
 	* How should the point be chosen where things are spawned.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
 
 	/**
 	 * The in-level component reference for usage with the APSD_Spline for Distribution.
 	 */
-	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides))
+	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
 
 	/**
 	 * If you want to reference a Spline in a BP with the ActorPoolSpawner, you will need to enter its name here and it will be linked during BeginPlay.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FName SplineComponentName;
 
 	/**
 	 * The number of items to spawn at any given spawn event.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	int32 Count = 1;
 
 	/**
 	 * Should we randomize the seed on begin play?
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bRandomizeSeed = false;
 
 	/**
 	 * Seed used when determining what to pull from the weighted list.
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	int32 Seed = 0;
 
 	explicit UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer);
@@ -137,7 +137,7 @@ public:
 	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange; }
 
 protected:
-	UPROPERTY(EditInstanceOnly, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"))
+	UPROPERTY(EditInstanceOnly, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")
 	TArray<FNActorPoolSpawnerTemplate> Templates;
 private:
 	FNWeightedIntegerArray WeightedIndices;

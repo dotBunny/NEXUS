@@ -32,13 +32,13 @@ protected:
 	 * What phase of the components lifecycle should the references be linked.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
-	TEnumAsByte<ENActorComponentLifecycleStart> LinkPhase = ENActorComponentLifecycleStart::BeginPlay;
+	TEnumAsByte<ENActorComponentLifecycleStart> LinkPhase = ENActorComponentLifecycleStart::ACLS_BeginPlay;
 
 	/**
 	 * What phase of the components lifecycle should the references be broken.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
-	TEnumAsByte<ENActorComponentLifecycleEnd> BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
+	TEnumAsByte<ENActorComponentLifecycleEnd> BreakPhase = ENActorComponentLifecycleEnd::ACLE_EndPlay;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
 	TArray<TEnumAsByte<ENDynamicReference>> References;
