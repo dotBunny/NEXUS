@@ -33,6 +33,7 @@
 - Renamed `bDontDestroyStaticActors` / `bDontDestroyNonInterfacedActors` to `bIgnoreStaticActors` / `bIgnoreNonInterfacedActors`.
 - `FNActorPoolSettings` now uses a bitmask `Flags` configuration option instead of a long list of boolean flags.
 - Clarified all `int` to `int32` to standardize with Unreals platform defs.
+- Disabled `Automatically Set Usage in Editor` flag on `M_NDebug`, `M_NDebugText` and `M_NWireframe` materials.
 
 ### Removed
 
