@@ -22,8 +22,8 @@ public:
 	void RegisterReference(ENDynamicReference InType, AActor* InActor);
 	
 	void UnregisterReference(ENDynamicReference InType, AActor* InActor);
-
-	UFUNCTION(BlueprintCallable)
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Dynamic References")
 	TArray<AActor*>& GetReferences(const ENDynamicReference InType)
 	{
 		return ReferenceMap[InType];
