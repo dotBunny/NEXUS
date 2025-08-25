@@ -7,7 +7,13 @@
 #include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
+#include "Selection.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
+#include "Components/SceneCaptureComponent2D.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Kismet/KismetRenderingLibrary.h"
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
@@ -56,6 +62,13 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputGesture());
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_CaptureSelectedCamera,
+	"NCore.Tools.CaptureSelectedCamera",
+	LOCTEXT("Command_Tools_CaptureSelectedCamera", "Capture Selected Camera"),
+	LOCTEXT("Command_Tools_CaptureSelectedCamera_Desc", "Capture the selected camera to the screenshots folder."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CaptureSelectedCamera"),
+	EUserInterfaceActionType::Button, FInputGesture());
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
 	
@@ -80,7 +93,6 @@ void FNEditorCommands::RegisterCommands()
 		FCanExecuteAction());
 
 
-
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
 			"NCore.Node.ExternalDocumentation",
 			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
@@ -92,13 +104,16 @@ void FNEditorCommands::RegisterCommands()
 
 	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
 
 
 	CommandList_Tools = MakeShareable(new FUICommandList);
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
+	CommandList_Tools->MapAction(Get().CommandInfo_Tools_CaptureSelectedCamera,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnCaptureSelectedCamera),
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::CaptureSelectedCamera_CanExecute));
 }
 
 void FNEditorCommands::OnHelpOverwatch()
@@ -131,9 +146,117 @@ void FNEditorCommands::OnToolsLeakCheck()
 	UNLeakTestDelayedEditorTask::Create();
 }
 
-bool FNEditorCommands::OnToolsLeakCheck_CanExecute()
+bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 {
 	return true;
+}
+
+void FNEditorCommands::OnCaptureSelectedCamera()
+{
+
+	for (FSelectionIterator SelectedActor(GEditor->GetSelectedActorIterator()); SelectedActor; ++SelectedActor)
+	{
+		if (ACameraActor* CameraActor = Cast<ACameraActor>(*SelectedActor))
+		{
+
+
+			// Generate filename with timestamp
+			FString Timestamp = FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"));
+			FString FileName = FString::Printf(TEXT("%s_Capture_%s.png"),  *CameraActor->GetName(), *Timestamp);
+			FString FilePath = FPaths::ProjectSavedDir() / TEXT("Screenshots") / FileName;
+            
+			// Create directory if it doesn't exist
+			FString Directory = FPaths::GetPath(FilePath);
+			if (!FPaths::DirectoryExists(Directory))
+			{
+				IFileManager::Get().MakeDirectory(*Directory, true);
+			}
+
+
+			
+			// Create a temporary render target
+			UTextureRenderTarget2D* RenderTarget = NewObject<UTextureRenderTarget2D>();
+			RenderTarget->InitAutoFormat(1920, 1080);
+			RenderTarget->UpdateResourceImmediate(true);
+			
+
+			// Create a temporary scene capture component
+			USceneCaptureComponent2D* SceneCapture = NewObject<USceneCaptureComponent2D>();
+			SceneCapture->TextureTarget = RenderTarget;
+			SceneCapture->bCaptureEveryFrame = false;;
+    
+			// Copy camera settings
+			if (UCameraComponent* CameraComponent = CameraActor->GetCameraComponent())
+			{
+				SceneCapture->FOVAngle = CameraComponent->FieldOfView;
+				SceneCapture->OrthoWidth = CameraComponent->OrthoWidth;
+				SceneCapture->ProjectionType = CameraComponent->ProjectionMode;
+				//SceneCapture->Rati = CameraComponent->AspectRatio;
+        
+				// Copy post process settings
+				SceneCapture->PostProcessSettings = CameraComponent->PostProcessSettings;
+				SceneCapture->PostProcessBlendWeight = CameraComponent->PostProcessBlendWeight;
+			}
+
+			// Set the capture location and rotation to match the camera
+			SceneCapture->SetWorldLocationAndRotation(
+				CameraActor->GetActorLocation(),
+				CameraActor->GetActorRotation()
+			);
+
+			// Capture the scene
+			SceneCapture->CaptureScene();
+
+			// Export to file
+			UKismetRenderingLibrary::ExportRenderTarget(
+				CameraActor->GetWorld(),
+				RenderTarget,
+				FPaths::ProjectSavedDir() / TEXT("Screenshots"),
+				FileName
+			);
+
+			RenderTarget->ConditionalBeginDestroy();
+			SceneCapture->ConditionalBeginDestroy();
+
+			
+			UE_LOG(LogTemp, Log, TEXT("Camera view captured to: %s"), *FilePath);
+
+			// if (!Camera)
+			// {
+			// 	return;
+			// }
+			//
+			// // Get the current viewport camera and temporarily switch to our camera
+			// if (UWorld* World = Camera->GetWorld())
+			// {
+			// 	// Set the view target to our camera
+			// 	if (APlayerController* PC = World->GetFirstPlayerController())
+			// 	{
+			// 		PC->SetViewTarget(Camera);
+   //          
+			// 		// Take high resolution screenshot
+			// 		FString Command = FString::Printf(TEXT("HighResShot %d"), 1);
+			// 		GEngine->Exec(World, *Command);
+   //          
+			// 		UE_LOG(LogTemp, Log, TEXT("High resolution screenshot taken from camera: %s"), *Camera->GetName());
+			// 	}
+			// }
+
+		}
+	}
+}
+
+bool FNEditorCommands::CaptureSelectedCamera_CanExecute()
+{
+	
+	for (FSelectionIterator SelectedActor(GEditor->GetSelectedActorIterator()); SelectedActor; ++SelectedActor)
+	{
+		if (Cast<ACameraActor>(*SelectedActor))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 void FNEditorCommands::OnNodeExternalDocumentation()
@@ -145,7 +268,7 @@ void FNEditorCommands::OnNodeExternalDocumentation()
 	FPlatformProcess::LaunchURL(*FNMetaUtils::GetExternalDocumentationUnsafe(Node),nullptr, nullptr);
 }
 
-bool FNEditorCommands::OnNodeExternalDocumentation_CanExecute()
+bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
 {
 	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
 	if (Editor == nullptr) return false;
@@ -179,6 +302,7 @@ void FNEditorCommands::BuildMenus()
 		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
+		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_CaptureSelectedCamera, Commands.CommandList_Tools);
 	}
 	
 	// Help Menu Submenu
