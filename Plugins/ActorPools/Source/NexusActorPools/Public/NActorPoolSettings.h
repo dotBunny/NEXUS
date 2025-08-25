@@ -43,7 +43,11 @@ enum class ENActorPoolFlags : uint8
 	/**
 	 * Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked.
 	 */
-	APF_ServerOnly = 1 << 4				UMETA(DisplayName = "Server Only"),
+	APF_ServerOnly = 1 << 4						UMETA(DisplayName = "Server Only"),
+	/**
+	 * Broadcast destroy event on the Actor through the operational change state delegate.
+	 */
+	APF_BroadcastDestroy = 1 << 5				UMETA(DisplayName = "Broadcast Destroy"),
 	
 	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning | APF_ServerOnly
 };
@@ -75,6 +79,10 @@ public:
 	bool HasFlag_ServerOnly() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ServerOnly);
+	}
+	bool HasFlag_BroadcastDestroy() const
+	{
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_BroadcastDestroy);
 	}
 	
 	/**

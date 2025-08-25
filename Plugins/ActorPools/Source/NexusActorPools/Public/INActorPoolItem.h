@@ -75,6 +75,11 @@ public:
 	virtual void OnCreatedByActorPool() { SetActorOperationalState(AOS_Created); };
 
 	/**
+	 * Called on the Actor when it has been destroyed by an Actor Pool.
+	 */
+	virtual void OnDestroyedByActorPool() { SetActorOperationalState(AOS_Destroyed); };
+
+	/**
 	 * Called after the Actor has been placed back in the Actor Pool, and its settings have been applied.
 	 */
 	virtual void OnReturnToActorPool() { SetActorOperationalState(AOS_Disabled); };

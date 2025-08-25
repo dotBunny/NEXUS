@@ -362,6 +362,11 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			continue;
 		}
 		InActors[i]->RemoveFromRoot();
+		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
+		{
+			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(InActors[i]);
+			ActorItem->OnDestroyedByActorPool();
+		}
 		if (bForceDestroy)
 		{
 			InActors[i]->Destroy();
@@ -376,6 +381,12 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			continue;
 		}
 		OutActors[i]->RemoveFromRoot();
+		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
+		{
+			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OutActors[i]);
+			ActorItem->OnDestroyedByActorPool();
+		}
+		
 		if (bForceDestroy)
 		{
 			OutActors[i]->Destroy();
