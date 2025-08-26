@@ -4,6 +4,7 @@
 #include "NEditorCommands.h"
 
 #include "BlueprintEditor.h"
+#include "ImageUtils.h"
 #include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
@@ -151,100 +152,91 @@ bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 	return true;
 }
 
+UE_DISABLE_OPTIMIZATION
+
 void FNEditorCommands::OnCaptureSelectedCamera()
 {
-
+	const int CaptureWidth = 1920;
+	const int CaptureHeight = 1080;
+	
+	const FString FileDirectory = FPaths::ProjectSavedDir() / TEXT("Screenshots") / TEXT("NEXUS");
+	if (!FPaths::DirectoryExists(FileDirectory))
+	{
+		IFileManager::Get().MakeDirectory(*FileDirectory, true);
+	}
+	
 	for (FSelectionIterator SelectedActor(GEditor->GetSelectedActorIterator()); SelectedActor; ++SelectedActor)
 	{
-		if (ACameraActor* CameraActor = Cast<ACameraActor>(*SelectedActor))
+		if (const ACameraActor* CameraActor = Cast<ACameraActor>(*SelectedActor))
 		{
+			FString FileName = FString::Printf(TEXT("%s_Capture_%s.png"),
+				*CameraActor->GetName(), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S")));
+			FString FilePath = FPaths::Combine(FileDirectory, *FileName);
 
-
-			// Generate filename with timestamp
-			FString Timestamp = FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"));
-			FString FileName = FString::Printf(TEXT("%s_Capture_%s.png"),  *CameraActor->GetName(), *Timestamp);
-			FString FilePath = FPaths::ProjectSavedDir() / TEXT("Screenshots") / FileName;
-            
-			// Create directory if it doesn't exist
-			FString Directory = FPaths::GetPath(FilePath);
-			if (!FPaths::DirectoryExists(Directory))
-			{
-				IFileManager::Get().MakeDirectory(*Directory, true);
-			}
-
-
+			UWorld* World = CameraActor->GetWorld();
 			
-			// Create a temporary render target
-			UTextureRenderTarget2D* RenderTarget = NewObject<UTextureRenderTarget2D>();
-			RenderTarget->InitAutoFormat(1920, 1080);
+			UTextureRenderTarget2D* RenderTarget = NewObject<UTextureRenderTarget2D>(World);
+			RenderTarget->bAutoGenerateMips = false;
+			RenderTarget->ClearColor = FLinearColor::Black;
+			RenderTarget->RenderTargetFormat = RTF_RGBA32f;
+			RenderTarget->InitAutoFormat(CaptureWidth, CaptureHeight);
 			RenderTarget->UpdateResourceImmediate(true);
 			
-
-			// Create a temporary scene capture component
-			USceneCaptureComponent2D* SceneCapture = NewObject<USceneCaptureComponent2D>();
+			USceneCaptureComponent2D* SceneCapture = NewObject<USceneCaptureComponent2D>(World);
+			SceneCapture->CaptureSource	= SCS_FinalToneCurveHDR;
+			SceneCapture->CompositeMode = SCCM_Overwrite;
 			SceneCapture->TextureTarget = RenderTarget;
-			SceneCapture->bCaptureEveryFrame = false;;
-    
-			// Copy camera settings
-			if (UCameraComponent* CameraComponent = CameraActor->GetCameraComponent())
+			SceneCapture->bCaptureEveryFrame = false;
+			SceneCapture->bCaptureOnMovement = false;
+			SceneCapture->MaxViewDistanceOverride = -1.0f;
+			SceneCapture->DetailMode = DM_Epic;
+			SceneCapture->bAutoActivate = true;
+			SceneCapture->bAlwaysPersistRenderingState = true;
+
+			
+			//SceneCapture->bCaptureEveryFrame = true;
+			
+			SceneCapture->SetWorldLocationAndRotation(CameraActor->GetActorLocation(),CameraActor->GetActorRotation());
+			if (const UCameraComponent* CameraComponent = CameraActor->GetCameraComponent())
 			{
 				SceneCapture->FOVAngle = CameraComponent->FieldOfView;
 				SceneCapture->OrthoWidth = CameraComponent->OrthoWidth;
 				SceneCapture->ProjectionType = CameraComponent->ProjectionMode;
-				//SceneCapture->Rati = CameraComponent->AspectRatio;
-        
-				// Copy post process settings
 				SceneCapture->PostProcessSettings = CameraComponent->PostProcessSettings;
 				SceneCapture->PostProcessBlendWeight = CameraComponent->PostProcessBlendWeight;
 			}
 
-			// Set the capture location and rotation to match the camera
-			SceneCapture->SetWorldLocationAndRotation(
-				CameraActor->GetActorLocation(),
-				CameraActor->GetActorRotation()
-			);
-
-			// Capture the scene
+			// Render
 			SceneCapture->CaptureScene();
 
-			// Export to file
-			UKismetRenderingLibrary::ExportRenderTarget(
-				CameraActor->GetWorld(),
-				RenderTarget,
-				FPaths::ProjectSavedDir() / TEXT("Screenshots"),
-				FileName
-			);
+			FRenderTarget* RenderTargetResource = RenderTarget->GameThread_GetRenderTargetResource();
+			TArray<FLinearColor> LinearPixels;
+			RenderTargetResource->ReadLinearColorPixels(LinearPixels);
 
-			RenderTarget->ConditionalBeginDestroy();
-			SceneCapture->ConditionalBeginDestroy();
+			// Scale
+			TArray<FColor> Pixels;
+			Pixels.Reserve(LinearPixels.Num());
+			for (int i = 0; i < LinearPixels.Num(); ++i)
+			{
+				Pixels.Add(LinearPixels[i].ToFColor(false));
+			}
+			
+			// Build PNG data
+			TArray64<uint8> CompressedData;
+			FImageUtils::PNGCompressImageArray(CaptureWidth, CaptureHeight, Pixels, CompressedData);
+			FFileHelper::SaveArrayToFile(CompressedData, *FilePath);
 
 			
-			UE_LOG(LogTemp, Log, TEXT("Camera view captured to: %s"), *FilePath);
-
-			// if (!Camera)
-			// {
-			// 	return;
-			// }
-			//
-			// // Get the current viewport camera and temporarily switch to our camera
-			// if (UWorld* World = Camera->GetWorld())
-			// {
-			// 	// Set the view target to our camera
-			// 	if (APlayerController* PC = World->GetFirstPlayerController())
-			// 	{
-			// 		PC->SetViewTarget(Camera);
-   //          
-			// 		// Take high resolution screenshot
-			// 		FString Command = FString::Printf(TEXT("HighResShot %d"), 1);
-			// 		GEngine->Exec(World, *Command);
-   //          
-			// 		UE_LOG(LogTemp, Log, TEXT("High resolution screenshot taken from camera: %s"), *Camera->GetName());
-			// 	}
-			// }
-
+			// Cleanup
+			RenderTarget->ConditionalBeginDestroy();
+			SceneCapture->ConditionalBeginDestroy();
+			
+			NE_LOG(Log, TEXT("Captured %s"), *FileName);
 		}
 	}
 }
+
+UE_ENABLE_OPTIMIZATION
 
 bool FNEditorCommands::CaptureSelectedCamera_CanExecute()
 {
