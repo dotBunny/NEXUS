@@ -4,17 +4,10 @@
 #include "NEditorCommands.h"
 
 #include "BlueprintEditor.h"
-#include "ImageUtils.h"
 #include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
-#include "Selection.h"
-#include "Camera/CameraActor.h"
-#include "Camera/CameraComponent.h"
-#include "Components/SceneCaptureComponent2D.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
-#include "Engine/TextureRenderTarget2D.h"
-#include "Kismet/KismetRenderingLibrary.h"
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
@@ -63,13 +56,6 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputGesture());
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_CaptureSelectedCamera,
-	"NCore.Tools.CaptureSelectedCamera",
-	LOCTEXT("Command_Tools_CaptureSelectedCamera", "Capture Selected Camera"),
-	LOCTEXT("Command_Tools_CaptureSelectedCamera_Desc", "Capture the selected camera to the screenshots folder."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CaptureSelectedCamera"),
-	EUserInterfaceActionType::Button, FInputGesture());
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
 	
@@ -112,9 +98,6 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
-	CommandList_Tools->MapAction(Get().CommandInfo_Tools_CaptureSelectedCamera,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnCaptureSelectedCamera),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::CaptureSelectedCamera_CanExecute));
 }
 
 void FNEditorCommands::OnHelpOverwatch()
@@ -150,105 +133,6 @@ void FNEditorCommands::OnToolsLeakCheck()
 bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 {
 	return true;
-}
-
-UE_DISABLE_OPTIMIZATION
-
-void FNEditorCommands::OnCaptureSelectedCamera()
-{
-	const int CaptureWidth = 1920;
-	const int CaptureHeight = 1080;
-	
-	const FString FileDirectory = FPaths::ProjectSavedDir() / TEXT("Screenshots") / TEXT("NEXUS");
-	if (!FPaths::DirectoryExists(FileDirectory))
-	{
-		IFileManager::Get().MakeDirectory(*FileDirectory, true);
-	}
-	
-	for (FSelectionIterator SelectedActor(GEditor->GetSelectedActorIterator()); SelectedActor; ++SelectedActor)
-	{
-		if (const ACameraActor* CameraActor = Cast<ACameraActor>(*SelectedActor))
-		{
-			FString FileName = FString::Printf(TEXT("%s_Capture_%s.png"),
-				*CameraActor->GetName(), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S")));
-			FString FilePath = FPaths::Combine(FileDirectory, *FileName);
-
-			UWorld* World = CameraActor->GetWorld();
-			
-			UTextureRenderTarget2D* RenderTarget = NewObject<UTextureRenderTarget2D>(World);
-			RenderTarget->bAutoGenerateMips = false;
-			RenderTarget->ClearColor = FLinearColor::Black;
-			RenderTarget->RenderTargetFormat = RTF_RGBA32f;
-			RenderTarget->InitAutoFormat(CaptureWidth, CaptureHeight);
-			RenderTarget->UpdateResourceImmediate(true);
-			
-			USceneCaptureComponent2D* SceneCapture = NewObject<USceneCaptureComponent2D>(World);
-			SceneCapture->CaptureSource	= SCS_FinalToneCurveHDR;
-			SceneCapture->CompositeMode = SCCM_Overwrite;
-			SceneCapture->TextureTarget = RenderTarget;
-			SceneCapture->bCaptureEveryFrame = false;
-			SceneCapture->bCaptureOnMovement = false;
-			SceneCapture->MaxViewDistanceOverride = -1.0f;
-			SceneCapture->DetailMode = DM_Epic;
-			SceneCapture->bAutoActivate = true;
-			SceneCapture->bAlwaysPersistRenderingState = true;
-
-			
-			//SceneCapture->bCaptureEveryFrame = true;
-			
-			SceneCapture->SetWorldLocationAndRotation(CameraActor->GetActorLocation(),CameraActor->GetActorRotation());
-			if (const UCameraComponent* CameraComponent = CameraActor->GetCameraComponent())
-			{
-				SceneCapture->FOVAngle = CameraComponent->FieldOfView;
-				SceneCapture->OrthoWidth = CameraComponent->OrthoWidth;
-				SceneCapture->ProjectionType = CameraComponent->ProjectionMode;
-				SceneCapture->PostProcessSettings = CameraComponent->PostProcessSettings;
-				SceneCapture->PostProcessBlendWeight = CameraComponent->PostProcessBlendWeight;
-			}
-
-			// Render
-			SceneCapture->CaptureScene();
-
-			FRenderTarget* RenderTargetResource = RenderTarget->GameThread_GetRenderTargetResource();
-			TArray<FLinearColor> LinearPixels;
-			RenderTargetResource->ReadLinearColorPixels(LinearPixels);
-
-			// Scale
-			TArray<FColor> Pixels;
-			Pixels.Reserve(LinearPixels.Num());
-			for (int i = 0; i < LinearPixels.Num(); ++i)
-			{
-				Pixels.Add(LinearPixels[i].ToFColor(false));
-			}
-			
-			// Build PNG data
-			TArray64<uint8> CompressedData;
-			FImageUtils::PNGCompressImageArray(CaptureWidth, CaptureHeight, Pixels, CompressedData);
-			FFileHelper::SaveArrayToFile(CompressedData, *FilePath);
-
-			
-			// Cleanup
-			RenderTarget->ConditionalBeginDestroy();
-			SceneCapture->ConditionalBeginDestroy();
-			
-			NE_LOG(Log, TEXT("Captured %s"), *FileName);
-		}
-	}
-}
-
-UE_ENABLE_OPTIMIZATION
-
-bool FNEditorCommands::CaptureSelectedCamera_CanExecute()
-{
-	
-	for (FSelectionIterator SelectedActor(GEditor->GetSelectedActorIterator()); SelectedActor; ++SelectedActor)
-	{
-		if (Cast<ACameraActor>(*SelectedActor))
-		{
-			return true;
-		}
-	}
-	return false;
 }
 
 void FNEditorCommands::OnNodeExternalDocumentation()
@@ -294,7 +178,6 @@ void FNEditorCommands::BuildMenus()
 		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
-		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_CaptureSelectedCamera, Commands.CommandList_Tools);
 	}
 	
 	// Help Menu Submenu

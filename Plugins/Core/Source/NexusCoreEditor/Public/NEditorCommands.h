@@ -31,7 +31,6 @@ public:
 
 	TSharedPtr<FUICommandList> CommandList_Tools;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_CaptureSelectedCamera; 
 
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
@@ -41,10 +40,6 @@ public:
 	
 	static void OnToolsLeakCheck();
 	static bool ToolsLeakCheck_CanExecute();
-
-	static void OnCaptureSelectedCamera();
-	static bool CaptureSelectedCamera_CanExecute();
-
 	
 	static void OnNodeExternalDocumentation();
 	static bool NodeExternalDocumentation_CanExecute();
