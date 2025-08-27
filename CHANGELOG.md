@@ -4,19 +4,21 @@
 
 ### Added
 
-- `NEngineContentValidator` throws a configurable severity when any content inside of the `Engine` folder is saved.
+- `NEngineContentValidator` throws configurable severity when any content inside the `Engine` folder is saved.
 - VLOG support for all pickers.
-- [#64](https://github.com/dotBunny/NEXUS/issues/64) - Utilize `DefaultTransform` option on `FNActorPoolSettings` as the return location and the scale when spawning.
+- [#65](https://github.com/dotBunny/NEXUS/issues/65) Option to automatically profile multiplayer test clients and standalone server.
+- [#64](https://github.com/dotBunny/NEXUS/issues/64) Utilize `DefaultTransform` option on `FNActorPoolSettings` as the return location and the scale when spawning.
 - [#63](https://github.com/dotBunny/NEXUS/issues/63) Add `ServerOnly` flag by default to `FNActorPoolSettings`.
-- [#31](https://github.com/dotBunny/NEXUS/issues/31) Added watermark option to `NSamplesDisplayActor`. 
+- [#31](https://github.com/dotBunny/NEXUS/issues/31) Added a watermark option to `NSamplesDisplayActor`. 
 - [#45](https://github.com/dotBunny/NEXUS/issues/45) Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
 - [#47](https://github.com/dotBunny/NEXUS/issues/47) Add update channel support to the framework.
-- Ability to determine if game is running inside of a multiplayer test via both utility and blueprint library methods.
-- Support to programatically allow/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
+- Ability to determine if a game is running inside a multiplayer test via both utility and blueprint library methods.
+- Support programatically allowing/disallow config files to be staged via `FNEditorUtils::AllowConfigFileForStaging` and `FNEditorUtils::DisallowConfigFileForStaging`.
 - Add safety check when creating actor pools that we are not getting passed a `nullptr`.
-- `INActorPoolItem` now has a dynamic multi-cast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
+- `INActorPoolItem` now has a dynamic multicast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
 - `UNActorPoolLibrary` supporting methods to bind to `INActorPoolItem` delegate.
 - Configurable distribution inner & outer visualizer colors in `Editor Preferences > NEXUS > Core (User)`
+- Add `External` tool section to Unreal default `Tools > Profile` menu with `NetworkProfiler` when present.
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
@@ -24,21 +26,22 @@
 ### Changed
 
 - [[#48](https://github.com/dotBunny/NEXUS/issues/48)] Use `HideCategories` instead of using a layout customizer pattern.  
-- Corrected comparison link at bottom of `CHANGELOG`.
+- Corrected a comparison link at bottom of `CHANGELOG`.
 - Renamed `InstanceObjects` to `DelayedEditorTask` types.
 - Validators now have a combined configuration / strictness level in `Project Settings`.
-- Performance testing framework now has an option to use `GCScopeGaurd` when doing measured tests.
-- Properly renamed validators with N prefix.
+- Performance testing framework can now use `GCScopeGaurd` when doing measured tests.
+- Properly renamed validators with the N prefix.
 - `SplineLevelReference` will only be visible when `APSD_Spline` is selected as the `Distribution` on `UNActorPoolSpawnerComponent`.
 - Renamed `bDontDestroyStaticActors` / `bDontDestroyNonInterfacedActors` to `bIgnoreStaticActors` / `bIgnoreNonInterfacedActors`.
 - `FNActorPoolSettings` now uses a bitmask `Flags` configuration option instead of a long list of boolean flags.
-- Clarified all `int` to `int32` to standardize with Unreals platform defs.
+- Clarified all `int` to `int32` to standardize with Unreal platform definitions.
 - Disabled `Automatically Set Usage in Editor` flag on `M_NDebug`, `M_NDebugText` and `M_NWireframe` materials.
+- General spelling and grammar fixes to `CHANGELOG.md`.
 
 ### Removed
 
-- `bAllowCreateMoreObjects` became obselete on `FNActorPoolSettings`.
-- Extra `bRequiresDeferredConstruction` on `FNActorPool`, replaced with flag.
+- `bAllowCreateMoreObjects` became obsolete on `FNActorPoolSettings`.
+- Extra `bRequiresDeferredConstruction` on `FNActorPool`, replaced with a flag.
 
 ### Core Redirects
 ```ini

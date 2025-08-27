@@ -31,6 +31,7 @@ public:
 
 	TSharedPtr<FUICommandList> CommandList_Tools;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
+	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
 
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
@@ -40,6 +41,10 @@ public:
 	
 	static void OnToolsLeakCheck();
 	static bool ToolsLeakCheck_CanExecute();
+
+	static void OnToolsProfileNetworkProfiler();
+	static bool ToolsProfileNetworkProfiler_CanExecute();
+	
 	
 	static void OnNodeExternalDocumentation();
 	static bool NodeExternalDocumentation_CanExecute();

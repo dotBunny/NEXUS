@@ -256,3 +256,19 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 #endif
 	return false;
 }
+
+FString FNEditorUtils::GetEngineBinariesPath()
+{
+	FString EnginePath = FPaths::Combine(FPaths::EngineDir(),"Binaries");
+	if (FPaths::DirectoryExists(EnginePath))
+	{
+		return EnginePath;
+	}
+	EnginePath = FPaths::Combine(FPaths::EngineDir(),"Engine","Binaries");
+	if (FPaths::DirectoryExists(EnginePath))
+	{
+		return EnginePath;
+	}
+	NE_LOG(Error, TEXT("[FNEditorUtils::GetEngineBinariesPath] Failed to find Engine Binaries directory"));
+	return FPaths::EngineDir();
+}

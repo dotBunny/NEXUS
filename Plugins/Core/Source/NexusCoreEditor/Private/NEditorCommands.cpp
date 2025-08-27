@@ -56,6 +56,15 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputGesture());
+
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
+	"NCore.Tools.Profile.NetworkProfiler",
+	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network"),
+	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
+	FSlateIcon(FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Profiler.Tab")),
+	EUserInterfaceActionType::Button, FInputGesture());
+	
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
 	
@@ -98,6 +107,9 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
+	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
+	FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler),
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsProfileNetworkProfiler_CanExecute));
 }
 
 void FNEditorCommands::OnHelpOverwatch()
@@ -133,6 +145,25 @@ void FNEditorCommands::OnToolsLeakCheck()
 bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 {
 	return true;
+}
+
+void FNEditorCommands::OnToolsProfileNetworkProfiler()
+{
+	const FString ExecutablePath = FNEditorUtils::GetEngineBinariesPath() + "/DotNet/NetworkProfiler.exe";
+	constexpr bool bLaunchDetached = true;
+	constexpr bool bLaunchHidden = false;
+	constexpr bool bLaunchReallyHidden = false;
+	const FProcHandle ProcHandle = FPlatformProcess::CreateProc(*ExecutablePath, TEXT(""), bLaunchDetached,
+		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
+	if (!ProcHandle.IsValid())
+	{
+		NE_LOG(Warning, TEXT("Unable to launch NetworkProfiler."));
+	}
+}
+
+bool FNEditorCommands::ToolsProfileNetworkProfiler_CanExecute()
+{
+	return FPaths::FileExists(FNEditorUtils::GetEngineBinariesPath() + "/DotNet/NetworkProfiler.exe");
 }
 
 void FNEditorCommands::OnNodeExternalDocumentation()
@@ -178,6 +209,19 @@ void FNEditorCommands::BuildMenus()
 		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
+	}
+
+	
+	// Add in NetworkProfiler menu option if its present
+	if (ToolsProfileNetworkProfiler_CanExecute())
+	{
+		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
+		{
+			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
+			ExternalMenu.Label = LOCTEXT("NLevelEditorToolsExternal", "External");
+
+			ExternalMenu.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_Profile_NetworkProfiler, Commands.CommandList_Tools);
+		}
 	}
 	
 	// Help Menu Submenu

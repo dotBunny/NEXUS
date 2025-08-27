@@ -137,4 +137,6 @@ public:
 	static void ReplaceAppIcon(FSlateImageBrush* Icon);
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 	static bool ReplaceWindowIcon(const FString& IconPath);
+
+	static FString GetEngineBinariesPath();
 };
