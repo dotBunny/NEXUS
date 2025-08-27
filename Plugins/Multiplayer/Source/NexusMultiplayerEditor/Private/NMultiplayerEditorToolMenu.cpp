@@ -67,6 +67,7 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
 		const FString MultiplayerFlag = FString::Printf(TEXT(" -%s"), TEXT("NMultiplayerTest"));
+		const FString NetworkProfileFlag = TEXT(" networkprofiler=true");
 	
 		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
 		PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
@@ -76,10 +77,20 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 		FObjectDuplicationParameters DuplicationParams(PlaySessionRequest.EditorPlaySettings, GetTransientPackage());
 		PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
 
-		// Overrides
+		// Build out Server parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters = Settings->ServerParameters;
+		if (Settings->bServerGenerateNetworkProfile)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(NetworkProfileFlag);
+		}
 		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(MultiplayerFlag);
+
+		// Build out Client parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters = Settings->ClientParameters;
+		if (Settings->bClientGenerateNetworkProfile)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(NetworkProfileFlag);
+		}
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(MultiplayerFlag);
 		
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);

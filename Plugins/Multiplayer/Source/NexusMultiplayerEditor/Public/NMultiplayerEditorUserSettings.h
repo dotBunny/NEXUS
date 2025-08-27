@@ -40,17 +40,23 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Count", Tooltip = "The number of clients to spawn."))
 	int ClientCount = 2;
 
+	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Generate Network Profile", Tooltip = "Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
+	bool bClientGenerateNetworkProfile = false;
+	
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Parmeters", Tooltip = "Additional parameters to pass to the client being launched."))
 	FString ClientParameters = "";
-	
-	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Parmeters", Tooltip = "Additional parameters to pass to the server being launched."))
-	FString ServerParameters = "";
 
+	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Generate Network Profile", Tooltip = "Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
+	bool bServerGenerateNetworkProfile = false;
+	
 	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Dedicated Server", Tooltip = "Spawns a dedicated server and clients."))
 	bool bUseDedicatedServer = true;
 
 	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Spawn Seperate Server", Tooltip = "This is a rarely used option that will launch a separate server (possibly hidden in-process depending on RunUnderOneProcess) even if the net mode does not require a server (such as Standalone). If the net mode requires a server (such as Client) a server will be launched for you (regardless of this setting)."))
 	bool bSpawnSeparateServer = false;
+
+	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Parmeters", Tooltip = "Additional parameters to pass to the server being launched."))
+	FString ServerParameters = "";
 
 #endif // WITH_EDITORONLY_DATA
 };
