@@ -43,7 +43,7 @@ public:
 	static bool ToolsLeakCheck_CanExecute();
 
 	static void OnToolsProfileNetworkProfiler();
-	static bool ToolsProfileNetworkProfiler_CanExecute();
+	static bool HasToolsProfileNetworkProfiler();
 	
 	
 	static void OnNodeExternalDocumentation();

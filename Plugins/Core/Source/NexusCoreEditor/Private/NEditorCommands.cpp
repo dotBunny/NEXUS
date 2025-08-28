@@ -108,8 +108,7 @@ void FNEditorCommands::RegisterCommands()
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
-	FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsProfileNetworkProfiler_CanExecute));
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
 
 void FNEditorCommands::OnHelpOverwatch()
@@ -161,9 +160,8 @@ void FNEditorCommands::OnToolsProfileNetworkProfiler()
 	}
 }
 
-bool FNEditorCommands::ToolsProfileNetworkProfiler_CanExecute()
+bool FNEditorCommands::HasToolsProfileNetworkProfiler()
 {
-	
 	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
@@ -214,7 +212,7 @@ void FNEditorCommands::BuildMenus()
 
 	
 	// Add in NetworkProfiler menu option if its present
-	if (ToolsProfileNetworkProfiler_CanExecute())
+	if (HasToolsProfileNetworkProfiler())
 	{
 		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
 		{
