@@ -49,7 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the client being launched."))
 	FString ClientParameters = "";
 	
-	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Generate Network Profile", Tooltip = "This setting has no effect if option is turned on for clients. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
+	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (EditCondition="!bClientGenerateNetworkProfile", EditConditionHides, DisplayName = "Generate Network Profile", Tooltip = "This setting has no effect if option is turned on for clients. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
 	bool bServerGenerateNetworkProfile = false;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (DisplayName = "Dedicated Server", Tooltip = "Spawn a dedicated server for use by the clients."))
