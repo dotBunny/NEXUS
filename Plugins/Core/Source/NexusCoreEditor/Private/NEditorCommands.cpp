@@ -149,7 +149,7 @@ bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 
 void FNEditorCommands::OnToolsProfileNetworkProfiler()
 {
-	const FString ExecutablePath = FNEditorUtils::GetEngineBinariesPath() + "/DotNet/NetworkProfiler.exe";
+	const FString ExecutablePath = FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe");
 	constexpr bool bLaunchDetached = true;
 	constexpr bool bLaunchHidden = false;
 	constexpr bool bLaunchReallyHidden = false;
@@ -163,7 +163,8 @@ void FNEditorCommands::OnToolsProfileNetworkProfiler()
 
 bool FNEditorCommands::ToolsProfileNetworkProfiler_CanExecute()
 {
-	return FPaths::FileExists(FNEditorUtils::GetEngineBinariesPath() + "/DotNet/NetworkProfiler.exe");
+	
+	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
 void FNEditorCommands::OnNodeExternalDocumentation()
