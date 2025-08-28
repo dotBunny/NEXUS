@@ -32,6 +32,10 @@ public:
 	{
 		return World->GetAuthGameMode() != nullptr;
 	}
+	FORCEINLINE static bool HasWorldAuthority(const UWorld& World)
+	{
+		return World.GetAuthGameMode() != nullptr;
+	}
 
 	FORCEINLINE static bool HasGameStateAuthority(const UWorld* World)
 	{
