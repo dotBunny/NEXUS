@@ -66,7 +66,7 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 	{
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
-		const FString MultiplayerFlag = FString::Printf(TEXT(" -%s"), TEXT("NMultiplayerTest"));
+		const FString MultiplayerFlag = TEXT(" -NMultiplayerTest");
 		const FString NetworkProfileFlag = TEXT(" networkprofiler=true");
 	
 		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
@@ -77,6 +77,9 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 		FObjectDuplicationParameters DuplicationParams(PlaySessionRequest.EditorPlaySettings, GetTransientPackage());
 		PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
 
+		// Straight copies
+		PlaySessionRequest.EditorPlaySettings->SetClientWindowSize(Settings->ClientWindowSize);
+		
 		// Build out Server parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters = Settings->ServerParameters;
 		if (Settings->bServerGenerateNetworkProfile)

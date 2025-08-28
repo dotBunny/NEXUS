@@ -20,6 +20,21 @@ class NEXUSCOREEDITOR_API FNEditorUtils
 {
 public:
 	/**
+	 * Get the current editor map name.
+	 */
+	FORCEINLINE static FString GetCurrentMapName()
+	{
+		return GEditor->GetEditorWorldContext().World()->GetMapName();
+	}
+
+	/**
+	 * Get the current editor map full path.
+	 */
+	FORCEINLINE static FString GetCurrentMapFullPath()
+	{
+		return GEditor->GetEditorWorldContext().World()->GetName();
+	}
+	/**
 	 * Is in PIE mode.
 	 */
 	FORCEINLINE static bool IsPlayInEditor()
