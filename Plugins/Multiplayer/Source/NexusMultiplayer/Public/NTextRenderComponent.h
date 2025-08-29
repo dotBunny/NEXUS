@@ -39,15 +39,21 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable, DisplayName="Set From Text (Server)", Category = "NEXUS|Multiplayer")
 	void Server_SetFromText(const FText& NewValue);
 	
-	UFUNCTION(BlueprintCallable, DisplayName="Set From Name (World Authority)", Category = "NEXUS|Multiplayer")
-	void WorldAuthority_SetFromName(const FName& NewValue);
+	UFUNCTION(BlueprintCallable, DisplayName="Set From Name", Category = "NEXUS|Multiplayer")
+	void SetFromName(const FName& NewValue);
 
-	UFUNCTION(BlueprintCallable, DisplayName="Set From String (World Authority)", Category = "NEXUS|Multiplayer")
-	void WorldAuthority_SetFromString(const FString& NewValue);
+	UFUNCTION(BlueprintCallable, DisplayName="Set From String", Category = "NEXUS|Multiplayer")
+	void SetFromString(const FString& NewValue);
 
-	UFUNCTION(BlueprintCallable, DisplayName="Set From Text (World Authority)",  Category = "NEXUS|Multiplayer")
-	void WorldAuthority_SetFromText(const FText& NewValue);
+	UFUNCTION(BlueprintCallable, DisplayName="Set From Text",  Category = "NEXUS|Multiplayer")
+	void SetFromText(const FText& NewValue);
 
+	/**
+	 * Allow Clients to use RPCs to change text.
+	 */
+	UPROPERTY(BlueprintReadWrite)
+	bool bAllowRPC = false;
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnTextChanged OnTextChanged;	
 };

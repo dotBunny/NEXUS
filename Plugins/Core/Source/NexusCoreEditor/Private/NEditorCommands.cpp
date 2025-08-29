@@ -60,9 +60,9 @@ void FNEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
 	"NCore.Tools.Profile.NetworkProfiler",
-	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network"),
+	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
 	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
-	FSlateIcon(FSlateIcon(FAppStyle::Get().GetStyleSetName(), "Profiler.Tab")),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
 	EUserInterfaceActionType::Button, FInputGesture());
 	
 	

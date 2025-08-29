@@ -33,11 +33,10 @@ void UNTextRenderComponent::OnRep_TextValue()
 	OnTextChanged.Broadcast(CachedValue);
 }
 
-void UNTextRenderComponent::WorldAuthority_SetFromName(const FName& NewValue)
+void UNTextRenderComponent::SetFromName(const FName& NewValue)
 {
 	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
-		N_LOG(Warning, TEXT("NO AUTHORITY"))
 		return;
 	}
 	
@@ -52,11 +51,10 @@ void UNTextRenderComponent::WorldAuthority_SetFromName(const FName& NewValue)
 	OnTextChanged.Broadcast(CachedValue);
 }
 
-void UNTextRenderComponent::WorldAuthority_SetFromString(const FString& NewValue)
+void UNTextRenderComponent::SetFromString(const FString& NewValue)
 {
 	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
-		N_LOG(Warning, TEXT("NO AUTHORITY"))
 		return;
 	}
 
@@ -71,11 +69,10 @@ void UNTextRenderComponent::WorldAuthority_SetFromString(const FString& NewValue
 	OnTextChanged.Broadcast(CachedValue);
 }
 
-void UNTextRenderComponent::WorldAuthority_SetFromText(const FText& NewValue)
+void UNTextRenderComponent::SetFromText(const FText& NewValue)
 {
 	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
-		N_LOG(Warning, TEXT("NO AUTHORITY"))
 		return;
 	}
 	
@@ -91,15 +88,18 @@ void UNTextRenderComponent::WorldAuthority_SetFromText(const FText& NewValue)
 
 void UNTextRenderComponent::Server_SetFromName_Implementation(const FName& NewValue)
 {
-	WorldAuthority_SetFromName(NewValue);
+	if (!bAllowRPC) return;
+	SetFromName(NewValue);
 }
 
 void UNTextRenderComponent::Server_SetFromString_Implementation(const FString& NewValue)
 {
-	WorldAuthority_SetFromString(NewValue);
+	if (!bAllowRPC) return;
+	SetFromString(NewValue);
 }
 
 void UNTextRenderComponent::Server_SetFromText_Implementation(const FText& NewValue)
 {
-	WorldAuthority_SetFromText(NewValue);
+	if (!bAllowRPC) return;
+	SetFromText(NewValue);
 }

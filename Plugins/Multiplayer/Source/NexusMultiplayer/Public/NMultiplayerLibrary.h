@@ -45,6 +45,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, DisplayName = "? Has World Authority", Category = "NEXUS|Multiplayer", meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool HasWorldAuthorityExec(UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Host", Category = "NEXUS|Multiplayer", meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
+	static bool IsServer(UObject* WorldContextObject);
 	
 	UFUNCTION(BlueprintCallable, DisplayName = "? Is Host", Category = "NEXUS|Multiplayer", meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue"))
 	static bool IsServerExec(UObject* WorldContextObject);

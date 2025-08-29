@@ -43,9 +43,4 @@ public:
 		if (GameState == nullptr) return false;
 		return GameState->GetLocalRole() == ROLE_Authority;
 	}
-
-	FORCEINLINE static bool IsClient()
-	{
-		return GIsClient;
-	}
 };

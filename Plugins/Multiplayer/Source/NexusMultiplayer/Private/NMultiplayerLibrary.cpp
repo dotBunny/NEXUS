@@ -39,6 +39,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 	
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
+		// Not the server, sorry can't kick
 		const AGameModeBase* GameMode = World->GetAuthGameMode();
 		if (GameMode == nullptr || GameMode->GameSession == nullptr)
 		{
@@ -113,10 +114,15 @@ bool UNMultiplayerLibrary::HasWorldAuthorityExec(UObject* WorldContextObject)
 	return HasWorldAuthority(WorldContextObject);
 }
 
+bool UNMultiplayerLibrary::IsServer(UObject* WorldContextObject)
+{
+	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+	return World ? (World->GetNetMode() != NM_Client) : false;
+}
+
 bool UNMultiplayerLibrary::IsServerExec(UObject* WorldContextObject)
 {
-	UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-	return World ? (World->GetNetMode() != NM_Client) : false;
+	return IsServer(WorldContextObject);
 }
 
 bool UNMultiplayerLibrary::IsMultiplayerTest()
