@@ -19,6 +19,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
+					"NetCore",
 					"Projects"
 				]
 			);

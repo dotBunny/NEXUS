@@ -37,6 +37,7 @@
 - Clarified all `int` to `int32` to standardize with Unreal platform definitions.
 - Disabled `Automatically Set Usage in Editor` flag on `M_NDebug`, `M_NDebugText` and `M_NWireframe` materials.
 - General spelling and grammar fixes to `CHANGELOG.md`.
+- Altered `NSamplesDisplayActor` to support replication.
 
 ### Removed
 
@@ -54,6 +55,7 @@
 
 - Resolves issues with `Shipping` build configuration (accidental reference to `FunctionalTesting` modules in `Core`).
 - Resolves issues with `Shipping` build configuration for `NSamplesDisplayActor`, in shipping builds the test portions will not function.
+- Replaced `NTextRenderActor` functionality with `NTextRenderComponent` functionality.
 
 ## [0.1.0] - 2025-07-31
 

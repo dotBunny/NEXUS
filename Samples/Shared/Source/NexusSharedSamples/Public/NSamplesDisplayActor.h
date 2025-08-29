@@ -34,7 +34,7 @@ enum class ESampleTestResult : uint8
  * @notes Yes, we did rebuild/nativize Epic's content display blueprint!
  */
 UCLASS(BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
-	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics, Networking, Replication))
+	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
 	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
