@@ -16,7 +16,7 @@
 
 class USpotLightComponent;
 
-#define N_TIMER_DRAW_THICKNESS 0.35f
+#define N_TIMER_DRAW_THICKNESS 1.f
 
 UENUM(BlueprintType)
 enum class ESampleTestResult : uint8
