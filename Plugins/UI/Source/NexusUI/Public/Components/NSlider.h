@@ -18,7 +18,7 @@ public:
 	/**
 	 * Set the value of the <code>USlider</code> without triggering exposed event bindings.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)")
 	void SetValue_NoBroadcast(const float NewValue);
 
 private:

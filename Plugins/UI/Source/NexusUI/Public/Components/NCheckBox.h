@@ -18,13 +18,13 @@ public:
 	/**
 	 * Set the checked state of the <code>UCheckBox</code> without triggering exposed event bindings.	 
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Is Checked (No Broadcast)")
 	void SetIsChecked_NoBroadcast(const bool bNewValue);
 
 	/**
 	 * Set the checked state of the <code>UCheckBox</code> without triggering exposed event bindings.	 
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Chcked State (No Broadcast)")
 	void SetCheckedState_NoBroadcast(const ECheckBoxState NewState);
 	
 private:
