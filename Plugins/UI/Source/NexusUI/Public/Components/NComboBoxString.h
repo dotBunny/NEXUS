@@ -7,7 +7,7 @@
 #include "NComboBoxString.generated.h"
 
 /**
- * A wrapper around the <code>UNCheckBox</code> class to allow for setting the checked state without broadcasting events.
+ * A wrapper around the <code>UComboBoxString</code> class to allow for setting the selected option without broadcasting events.
  */
 UCLASS()
 class NEXUSUI_API UNComboBoxString final : public UComboBoxString
