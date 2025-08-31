@@ -3,12 +3,15 @@
 
 #include "NSamplesDisplayActor.h"
 #include "NColor.h"
+#include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
+
+TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -47,11 +50,6 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	NoticeTextComponent->SetWorldSize(24.f);
 	NoticeTextComponent->HorizontalAlignment = EHTA_Center;
 	NoticeTextComponent->VerticalAlignment = EVRTA_TextCenter;
-	
-
-
-	
-	
 	
 	TitleTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Title"));
 	TitleTextComponent->SetupAttachment(PartRoot);
@@ -212,6 +210,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		ShadowBoxTop->SetMaterial(1, MaterialWhite.Object);
 	}
 
+	// Watermark Mesh
 	Watermark = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Branding"));
 	Watermark->SetupAttachment(PartRoot);
 	Watermark->SetMobility(EComponentMobility::Static);
@@ -222,6 +221,15 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		Watermark->SetStaticMesh(BrandingMesh.Object);
 		Watermark->SetMaterial(0, MaterialWhite.Object);
 	}
+	
+	// Screenshot Camera
+	ScreenshotCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ScreenshotCamera"));
+	ScreenshotCameraComponent->SetupAttachment(RootComponent);
+	ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
+	ScreenshotCameraComponent->SetRelativeLocation(FVector(610.f, 0.f, 325.f));
+	ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
+	ScreenshotCameraComponent->AspectRatio = 1.777778;
+	ScreenshotCameraComponent->bConstrainAspectRatio = true;
 }
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
@@ -236,7 +244,18 @@ void ANSamplesDisplayActor::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
 	}
+
+	// Add to list of known displays so we can move between them easily.
+	KnownDisplays.Add(this);
 	Super::BeginPlay();
+}
+
+void ANSamplesDisplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Remove me from the list.
+	KnownDisplays.Remove(this);
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void ANSamplesDisplayActor::Rebuild()

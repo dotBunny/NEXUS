@@ -14,6 +14,7 @@
 #include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
+class UCameraComponent;
 class USpotLightComponent;
 
 #define N_TIMER_DRAW_THICKNESS 1.f
@@ -37,6 +38,8 @@ UCLASS(BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Naviga
 	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
+	friend class ANSamplesPawn;
+	
 	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
 	DECLARE_DELEGATE_TwoParams(FOnTestFinishEventSignature, ESampleTestResult TestResult, const FString& Message)
 	
@@ -45,8 +48,11 @@ class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 	explicit ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+
+	static TArray<ANSamplesDisplayActor*> KnownDisplays;
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
@@ -426,6 +432,13 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
 	FText CachedDescription;
+	
+	// SCREENSHOT
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Screenshot", DisplayName = "Camera")
+	TObjectPtr<UCameraComponent> ScreenshotCameraComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Screenshot", DisplayName = "Override Name")
+	FText ScreenshotCameraName;
 	
 private:
 	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
