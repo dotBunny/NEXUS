@@ -11,13 +11,8 @@
 
 
 /**
- * A Blueprint Function Library that provides utilities for picking points inside or on a Sphere.
- * 
- * This library exposes functionality from the FNSpherePicker class to blueprints, allowing for:
- * - Deterministic point selection (via Next functions)
- * - Random point selection (with various seeding methods)
- * - Projection capabilities for point placement
- * - Point validation within a Sphere
+ * Provides various functions for generating points inside or on the surface of a sphere using different
+ * random generation strategies (deterministic, non-deterministic, seeded).
  */
 UCLASS()
 class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
@@ -28,14 +23,13 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Will always return the same point for identical input parameters.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO)", Category = "NEXUS|Picker|Sphere")
 	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -44,13 +38,12 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Will always return the same point for identical input parameters.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
 	static FVector NextPointInsideOrOnSimple(const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -59,7 +52,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -69,7 +61,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -79,7 +71,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -88,7 +79,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnSimpleProjected(const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -102,14 +93,13 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
-	 * Uses the non-deterministic random generator for true randomness.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO)", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -118,13 +108,12 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
-	 * Uses the non-deterministic random generator for true randomness.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomPointInsideOrOnSimple(const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -133,7 +122,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -143,7 +131,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -153,7 +141,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -162,7 +149,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnSimpleProjected(const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -175,7 +162,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
-	 * Useful for one-time random point generation with reproducible results.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
@@ -183,7 +169,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -192,14 +178,13 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
-	 * Useful for one-time random point generation with reproducible results.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomOneShotPointInsideOrOnSimple(const int32 Seed, const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -208,7 +193,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
@@ -219,7 +203,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -229,7 +213,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
@@ -239,7 +222,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -252,7 +235,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation with different results.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
@@ -260,7 +242,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO)", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -269,14 +251,13 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation with different results.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
 	static FVector RandomTrackedPointInsideOrOnSimple(UPARAM(ref)int32& Seed, const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -285,8 +266,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
-	 * Updates the seed value to enable sequential random point generation with different results.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
@@ -297,7 +276,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (Inside Or On)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -308,8 +287,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
-	 * Updates the seed value to enable sequential random point generation with different results.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
@@ -319,7 +296,7 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnSimpleProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
