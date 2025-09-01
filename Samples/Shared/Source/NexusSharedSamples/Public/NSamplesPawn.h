@@ -24,8 +24,8 @@ class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 
 protected:
 
-	void OnNextCamera();
-	void OnPreviousCamera();
+	void OnNextDisplay();
+	void OnPreviousDisplay();
 	void OnToggleHUD();
 	void OnScreenshot();
 	void OnReturnToPawn();

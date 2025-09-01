@@ -20,9 +20,9 @@ ANSamplesPawn::ANSamplesPawn(const FObjectInitializer& ObjectInitializer) : Supe
 
 void ANSamplesPawn::BeginPlay()
 {
-	InputComponent->BindKey(EKeys::Tab, IE_Released, this, &ANSamplesPawn::OnNextCamera);
-	InputComponent->BindKey(EKeys::LeftBracket, IE_Released, this, &ANSamplesPawn::OnPreviousCamera);
-	InputComponent->BindKey(EKeys::RightBracket, IE_Released, this, &ANSamplesPawn::OnNextCamera);
+	InputComponent->BindKey(EKeys::Tab, IE_Released, this, &ANSamplesPawn::OnNextDisplay);
+	InputComponent->BindKey(EKeys::LeftBracket, IE_Released, this, &ANSamplesPawn::OnPreviousDisplay);
+	InputComponent->BindKey(EKeys::RightBracket, IE_Released, this, &ANSamplesPawn::OnNextDisplay);
 	InputComponent->BindKey(EKeys::BackSpace, IE_Released, this, &ANSamplesPawn::OnToggleHUD);
 	InputComponent->BindKey(EKeys::F12, IE_Released, this, &ANSamplesPawn::OnScreenshot);
 	InputComponent->BindKey(EKeys::Backslash, IE_Released, this, &ANSamplesPawn::OnReturnToPawn);
@@ -44,7 +44,7 @@ void ANSamplesPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANSamplesPawn::OnNextCamera()
+void ANSamplesPawn::OnNextDisplay()
 {
 	const int CameraCount = ANSamplesDisplayActor::KnownDisplays.Num();
 	if (CameraCount == 0) return;
@@ -57,7 +57,7 @@ void ANSamplesPawn::OnNextCamera()
 	ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
 }
 
-void ANSamplesPawn::OnPreviousCamera()
+void ANSamplesPawn::OnPreviousDisplay()
 {
 	const int CameraCount = ANSamplesDisplayActor::KnownDisplays.Num();
 	if (CameraCount == 0) return;

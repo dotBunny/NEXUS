@@ -28,7 +28,7 @@ void ANSamplesHUD::DrawHUD()
 		// Calculate background size
 		float OutHeight;
 		float OutWidth;
-		GetTextSize(FString::Printf(TEXT("Screenshot Multiplier (%i): -/+"), ScreenshotMultiplier), OutWidth, OutHeight, Font, TextScale);
+		GetTextSize(FString::Printf(TEXT("Screenshot Multiplier (%i): -/="), ScreenshotMultiplier), OutWidth, OutHeight, Font, TextScale);
 		float InstructionWidth = OutWidth;
 		GetTextSize(CurrentCameraName, OutWidth, OutHeight, Font, TextScale);
 		float CalculatedTextWidth = OutWidth;
@@ -56,7 +56,7 @@ void ANSamplesHUD::DrawHUD()
 				"Select Pawn: Backslash\n"
 				"Toggle HUD: Backspace\n"
 				"Screenshot: F12\n"
-				"Screenshot Multiplier (%i): -/+"),
+				"Screenshot Multiplier (%i): -/="),
 				*CurrentCameraName,
 				ScreenshotMultiplier);
 		
