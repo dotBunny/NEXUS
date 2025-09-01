@@ -10,13 +10,8 @@
 #include "NBoxPickerLibrary.generated.h"
 
 /**
- * A Blueprint Function Library that provides utilities for picking points inside or on an axis-aligned FBox.
- * 
- * This library exposes functionality from the FNBoxPicker class to blueprints, allowing for:
- * - Deterministic point selection (via Next functions)
- * - Random point selection (with various seeding methods)
- * - Projection capabilities for point placement
- * - Point validation within a FBox
+ * Provides various functions for generating points inside or on the surface of a FBox using different
+ * random generation strategies (deterministic, non-deterministic, seeded).
  */
 UCLASS()
 class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
@@ -33,7 +28,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
 	 * @return A point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (IO)", Category = "NEXUS|Picker|Box")
 	static FVector NextPointInsideOrOn(const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
 		FVector ReturnLocation;
@@ -41,7 +36,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets the next deterministic point inside or on a FBox and projects it onto the ground.
+	 * Gets the next deterministic point inside or on a FBox and projects it in the given direction.
 	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -51,7 +46,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (IO)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -66,7 +61,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (IO) [Simple]", Category = "NEXUS|Picker|Box")
 	static FVector NextPointInsideOrOnSimple(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -74,7 +69,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets the next deterministic point inside or on a FBox and projects it onto the ground.
+	 * Gets the next deterministic point inside or on a FBox and projects it in the given direction.
 	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -83,7 +78,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnSimpleProjected(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -102,7 +97,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (IO)", Category = "NEXUS|Picker|Box")
 	static FVector RandomPointInsideOrOn(const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
 		FVector ReturnLocation;
@@ -110,7 +105,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox and projects it onto the ground.
+	 * Gets a random point inside or on a FBox and projects it in the given direction.
 	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -120,7 +115,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (IO)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -135,7 +130,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point (IO) [Simple]", Category = "NEXUS|Picker|Box")
 	static FVector RandomPointInsideOrOnSimple(const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -143,7 +138,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox and projects it onto the ground.
+	 * Gets a random point inside or on a FBox and projects it in the given direction.
 	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -152,7 +147,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnSimpleProjected(const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -172,7 +167,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Box")
 	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
 		FVector ReturnLocation;
@@ -180,7 +175,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox using a one-shot seed and projects it onto the ground.
+	 * Gets a random point inside or on a FBox using a one-shot seed and projects it in the given direction.
 	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
@@ -191,7 +186,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -207,7 +202,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point (IO) [Simple]", Category = "NEXUS|Picker|Box")
 	static FVector RandomOneShotPointInsideOrOnSimple(const int32 Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -215,7 +210,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox using a one-shot seed and projects it onto the ground.
+	 * Gets a random point inside or on a FBox using a one-shot seed and projects it in the given direction.
 	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
@@ -225,7 +220,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random One-Shot Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -246,7 +241,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (IO)", Category = "NEXUS|Picker|Box")
 	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
 		FVector ReturnLocation;
@@ -254,7 +249,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox using a tracked seed and projects it onto the ground.
+	 * Gets a random point inside or on a FBox using a tracked seed and projects it in the given direction.
 	 * The seed is incremented each time this function is called.
 	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
@@ -266,7 +261,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (Inside Or On)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (IO)", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -285,7 +280,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box")
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point (IO) [Simple]", Category = "NEXUS|Picker|Box")
 	static FVector RandomTrackedPointInsideOrOnSimple(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& Dimensions)
 	{
 		FVector ReturnLocation;
@@ -293,7 +288,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		return ReturnLocation;
 	}
 	/**
-	 * Gets a random point inside or on a FBox using a tracked seed and projects it onto the ground.
+	 * Gets a random point inside or on a FBox using a tracked seed and projects it in the given direction.
 	 * The seed is incremented each time this function is called.
 	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
@@ -304,7 +299,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the trace check.
 	 * @return A random grounded point that is inside or on the FBox.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (Inside Or On) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Random Tracked Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Box", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnSimpleProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const FBox& Dimensions,
 		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{

@@ -10,8 +10,8 @@
 #include "NCirclePickerLibrary.generated.h"
 
 /**
- * Blueprint function library providing access to circle picker functionality.
- * Exposes FNCirclePicker methods for use in Blueprints with a simplified interface.
+ * Provides various functions for generating points in the plane of a circle using different
+ * random generation strategies (deterministic, non-deterministic, seeded).
  */
 UCLASS()
 class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
