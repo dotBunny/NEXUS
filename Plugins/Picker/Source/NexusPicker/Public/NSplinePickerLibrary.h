@@ -10,8 +10,8 @@
 #include "NSplinePickerLibrary.generated.h"
 
 /**
- * Blueprint function library providing access to spline picker functionality.
- * Exposes FNSplinePicker methods for use in Blueprints with a simplified interface.
+ * Provides various functions for generating points along a USplineComponent spline using different
+ * random generation strategies (deterministic, non-deterministic, seeded).
  */
 UCLASS()
 class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
@@ -20,7 +20,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point on a spline.
-	 * Uses the deterministic random generator to ensure reproducible results.
 	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
@@ -35,7 +34,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point on a spline, then projects it to the world.
-	 * The point is projected in the given direction until it hits something in the world.
 	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @param WorldContextObject Object that provides access to the world.
@@ -54,7 +52,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline.
-	 * Uses the non-deterministic random generator for true randomness.
 	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
@@ -69,7 +66,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline, then projects it to the world.
-	 * The point is projected in the given direction until it hits something in the world.
 	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @param WorldContextObject Object that provides access to the world.
@@ -88,7 +84,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline using a provided seed.
-	 * Useful for one-time random point generation with reproducible results.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param SplineComponent The spline component to generate points on.
@@ -104,7 +99,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline using a provided seed, then projects it to the world.
-	 * The point is projected in the given direction until it hits something in the world.
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param SplineComponent The spline component to generate points on.
@@ -124,7 +118,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation.
 	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param SplineComponent The spline component to generate points on.
@@ -140,8 +133,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point on a spline while tracking the random seed state, then projects it to the world.
-	 * Updates the seed value to enable sequential random point generation.
-	 * The point is projected in the given direction until it hits something in the world.
 	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param SplineComponent The spline component to generate points on.
