@@ -18,7 +18,8 @@
 - `INActorPoolItem` now has a dynamic multicast delegate (`OnActorOperationalStateChanged`) that fires when changing states.
 - `UNActorPoolLibrary` supporting methods to bind to `INActorPoolItem` delegate.
 - Configurable distribution inner & outer visualizer colors in `Editor Preferences > NEXUS > Core (User)`
-- Add `External` tool section to Unreal default `Tools > Profile` menu with `NetworkProfiler` when present.
+- `External` tool section to Unreal default `Tools > Profile` menu with `NetworkProfiler` when present.
+- Samples content now contains `ANSamplesHUD` and `ANSamplesPawn` to support making documentation easier.
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
@@ -38,6 +39,8 @@
 - Disabled `Automatically Set Usage in Editor` flag on `M_NDebug`, `M_NDebugText` and `M_NWireframe` materials.
 - General spelling and grammar fixes to `CHANGELOG.md`.
 - Altered `NSamplesDisplayActor` to support replication.
+- `Inside or On` abbreviated to `IO`.
+- Miscellaneous fixes and tweaks to support rolling out documentation.
 
 ### Removed
 

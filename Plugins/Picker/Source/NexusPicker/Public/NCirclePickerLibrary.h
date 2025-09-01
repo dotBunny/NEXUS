@@ -28,7 +28,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point (Inside Or On)", Category = "NEXUS|Picker|Circle")
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point (IO)", Category = "NEXUS|Picker|Circle")
 	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
@@ -49,7 +49,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point Projected (Inside Or On)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point Projected (IO)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
 	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
 		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -68,7 +68,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point (Inside Or On)", Category = "NEXUS|Picker|Circle")
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point (IO)", Category = "NEXUS|Picker|Circle")
 	static FVector RandomPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
@@ -89,7 +89,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point Projected (Inside Or On)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Point Projected (IO)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
 		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -109,7 +109,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point (Inside Or On)", Category = "NEXUS|Picker|Circle")
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Circle")
 	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
@@ -131,7 +131,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point Projected (Inside Or On)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
 		UObject* WorldContextObject = nullptr, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -151,7 +151,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point (Inside Or On)", Category = "NEXUS|Picker|Circle")
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point (IO)", Category = "NEXUS|Picker|Circle")
 	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator)
 	{
 		FVector ReturnLocation;
@@ -174,7 +174,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point Projected (Inside Or On)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Random Tracked Point Projected (IO)", Category = "NEXUS|Picker|Circle", meta = (WorldContext = "WorldContextObject"))
 	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator Rotation = FRotator::ZeroRotator,
 		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
