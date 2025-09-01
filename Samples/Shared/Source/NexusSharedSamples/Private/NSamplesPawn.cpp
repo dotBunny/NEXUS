@@ -81,37 +81,22 @@ void ANSamplesPawn::OnToggleHUD()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void ANSamplesPawn::OnScreenshot()
 {
-
-	const FString Folder = *(FPaths::ProjectSavedDir() + TEXT("Screenshots/NEXUS/"));
-	IFileManager::Get().MakeDirectory(*Folder);
-
-	FDateTime DateTime = FDateTime::Now();
-	const FString TimeStamp = FString::Printf(TEXT("%04d%02d%02d_%02d%02d%02d"),
-		DateTime.GetYear(),
-		DateTime.GetMonth(),
-		DateTime.GetDay(),
-		DateTime.GetHour(),
-		DateTime.GetMinute(),
-		DateTime.GetSecond()
-	);
-	const FString FilePath = Folder + TEXT("Screenshot_") + TimeStamp + TEXT(".png");
 	FVector2D ViewportSize;
 	GEngine->GameViewport->GetViewportSize(ViewportSize);
+	GIsHighResScreenshot = true;
 	
 	if (ResolutionMultiplier != 1)
 	{
-		GIsHighResScreenshot = true;
 		GScreenshotResolutionX = ViewportSize.X * ResolutionMultiplier;
 		GScreenshotResolutionY = ViewportSize.Y * ResolutionMultiplier;
 	}
 	else
 	{
-		GIsHighResScreenshot = false;
 		GScreenshotResolutionX = ViewportSize.X;
 		GScreenshotResolutionY = ViewportSize.Y;
 	}
 	
-	FScreenshotRequest::RequestScreenshot(FilePath, false, false);
+	FScreenshotRequest::RequestScreenshot(false);
 }
 
 void ANSamplesPawn::OnReturnToPawn()

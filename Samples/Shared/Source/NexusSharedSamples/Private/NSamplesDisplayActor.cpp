@@ -226,7 +226,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	ScreenshotCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ScreenshotCamera"));
 	ScreenshotCameraComponent->SetupAttachment(RootComponent);
 	ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
-	ScreenshotCameraComponent->SetRelativeLocation(FVector(610.f, 0.f, 325.f));
+	ScreenshotCameraComponent->SetRelativeLocation(FVector(755.f, 0.f, 300.f));
 	ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
 	ScreenshotCameraComponent->AspectRatio = 1.777778;
 	ScreenshotCameraComponent->bConstrainAspectRatio = true;
