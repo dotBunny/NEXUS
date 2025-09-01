@@ -37,6 +37,8 @@ FLinearColor FNColor::GetLinearColor(const ENColor& Color)
 		return NexusBlack;
 	case NC_NexusPink:
 		return NexusPink;
+	case NC_HalfBlack:
+		return HalfBlack;
 	case NC_Pink:
 		break;
 	}

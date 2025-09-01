@@ -8,6 +8,7 @@
 #include "NSamplesPawn.generated.h"
 
 class UWidgetInteractionComponent;
+class ANSamplesDisplayActor;
 
 /**
  * A pawn used in the NEXUS samples that has a few extra bits on it.
@@ -34,6 +35,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	TObjectPtr<UWidgetInteractionComponent> WidgetInteraction;
 private:
+
+	void ChangeView(ANSamplesDisplayActor* DisplayActor);
 	int CameraIndex = -1;
 	int ResolutionMultiplier = 1;
 };

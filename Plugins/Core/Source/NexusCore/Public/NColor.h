@@ -26,7 +26,9 @@ enum ENColor : uint8
 	NC_NexusDarkBlue		UMETA(DisplayName = "NEXUS: Dark Blue"),
 	NC_NexusLightBlue		UMETA(DisplayName = "NEXUS: Light Blue"),
 	NC_NexusBlack			UMETA(DisplayName = "NEXUS: Black"),
-	NC_NexusPink			UMETA(DisplayName = "NEXUS: Pink")
+	NC_NexusPink			UMETA(DisplayName = "NEXUS: Pink"),
+
+	NC_HalfBlack			UMETA(DisplayName = "Half Black")
 };
 
 /**
@@ -52,4 +54,6 @@ public:
 	static constexpr FLinearColor NexusLightBlue =FLinearColor(0.29296875f, 0.4375f, 0.7578125f, 1.f);
 	static constexpr FLinearColor NexusBlack = FLinearColor(0.f,0.f,0.00390625f, 1.f);
 	static constexpr FLinearColor NexusPink = FLinearColor(0.6328125f,0.4609375f,0.8671875f, 1.f);
+
+	static constexpr FLinearColor HalfBlack = FLinearColor(0.f,0.f,0.f, 0.5f);
 };

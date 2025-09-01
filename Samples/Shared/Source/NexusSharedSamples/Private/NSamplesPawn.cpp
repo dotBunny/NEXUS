@@ -28,6 +28,8 @@ void ANSamplesPawn::BeginPlay()
 	InputComponent->BindKey(EKeys::Backslash, IE_Released, this, &ANSamplesPawn::OnReturnToPawn);
 	InputComponent->BindKey(EKeys::Hyphen, IE_Released, this, &ANSamplesPawn::OnResolutionDecrease);
 	InputComponent->BindKey(EKeys::Equals, IE_Released, this, &ANSamplesPawn::OnResolutionIncrease);
+
+	ChangeView(nullptr);
 	
 	Super::BeginPlay();
 }
@@ -52,12 +54,7 @@ void ANSamplesPawn::OnNextCamera()
 	{
 		CameraIndex = 0;
 	}
-	ANSamplesDisplayActor* TargetCamera = ANSamplesDisplayActor::KnownDisplays[CameraIndex];
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController == nullptr) return;
-
-	PlayerController->SetViewTargetWithBlend(TargetCamera);
-
+	ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
 }
 
 void ANSamplesPawn::OnPreviousCamera()
@@ -70,11 +67,7 @@ void ANSamplesPawn::OnPreviousCamera()
 	{
 		CameraIndex = CameraCount - 1;
 	}
-	ANSamplesDisplayActor* TargetCamera = ANSamplesDisplayActor::KnownDisplays[CameraIndex];
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController == nullptr) return;
-
-	PlayerController->SetViewTargetWithBlend(TargetCamera);
+	ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
@@ -85,6 +78,7 @@ void ANSamplesPawn::OnToggleHUD()
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
+// ReSharper disable once CppMemberFunctionMayBeConst
 void ANSamplesPawn::OnScreenshot()
 {
 
@@ -101,23 +95,28 @@ void ANSamplesPawn::OnScreenshot()
 		DateTime.GetSecond()
 	);
 	const FString FilePath = Folder + TEXT("Screenshot_") + TimeStamp + TEXT(".png");
-
-	// TODO Set resolution size based on current ?
-
-
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+	
+	if (ResolutionMultiplier != 1)
+	{
+		GIsHighResScreenshot = true;
+		GScreenshotResolutionX = ViewportSize.X * ResolutionMultiplier;
+		GScreenshotResolutionY = ViewportSize.Y * ResolutionMultiplier;
+	}
+	else
+	{
+		GIsHighResScreenshot = false;
+		GScreenshotResolutionX = ViewportSize.X;
+		GScreenshotResolutionY = ViewportSize.Y;
+	}
 	
 	FScreenshotRequest::RequestScreenshot(FilePath, false, false);
-// GIsHighResScreenshot = true;
-// GScreenshotResolutionX = 3000;
-// GScreenshotResolutionY = 2000;
-
 }
 
 void ANSamplesPawn::OnReturnToPawn()
 {
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController == nullptr) return;
-	PlayerController->SetViewTargetWithBlend(this);
+	ChangeView(nullptr);
 }
 
 void ANSamplesPawn::OnResolutionIncrease()
@@ -133,6 +132,29 @@ void ANSamplesPawn::OnResolutionDecrease()
 	if (ResolutionMultiplier < 1) ResolutionMultiplier = 1;
 	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
 	HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+}
 
+void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)
+{
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (PlayerController == nullptr) return;
+	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(PlayerController->GetHUD());
 	
+	// No display, go back to pawn
+	if (DisplayActor == nullptr)
+	{
+		PlayerController->SetViewTargetWithBlend(this);
+		HUD->SetCurrentCameraName(TEXT("Pawn"));
+		return;
+	}
+	
+	PlayerController->SetViewTargetWithBlend(DisplayActor);
+	if (!DisplayActor->ScreenshotCameraName.IsEmpty())
+	{
+		HUD->SetCurrentCameraName(DisplayActor->ScreenshotCameraName.ToString());
+	}
+	else
+	{
+		HUD->SetCurrentCameraName(DisplayActor->GetName());
+	}
 }

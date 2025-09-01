@@ -13,34 +13,53 @@ void ANSamplesHUD::Tick(float DeltaSeconds)
 
 void ANSamplesHUD::DrawHUD()
 {
+
 	Super::DrawHUD();
 
 	if (bHideHUD) return;
 	
 	if (Canvas)
 	{
-		// Example: Draw text to the screen
-		FString CameraName = TEXT("BP_NSamples_Test");
-		FVector2D TextPosition(Canvas->SizeX * 0.5f, Canvas->SizeY * 0.1f); // Center top
-		FLinearColor TextColor = FLinearColor::White;
-		UFont* HudFont = GEngine->GetSmallFont(); // Get a default font
+		if (Font == nullptr)
+		{
+			Font = GEngine->GetMediumFont();
+		}
 
-		// Adjust position for text centering
-		float Width;
-		float Height;
-		GetTextSize(CameraName, Width, Height, HudFont);
-		TextPosition.X -= Width * 0.5f;
+		// Calculate background size
+		float OutHeight;
+		float OutWidth;
+		GetTextSize(FString::Printf(TEXT("Screenshot Multiplier (%i): -/+"), ScreenshotMultiplier), OutWidth, OutHeight, Font, TextScale);
+		float InstructionWidth = OutWidth;
+		GetTextSize(CurrentCameraName, OutWidth, OutHeight, Font, TextScale);
+		float CalculatedTextWidth = OutWidth;
+		if (InstructionWidth > CalculatedTextWidth)
+		{
+			CalculatedTextWidth = InstructionWidth;
+		}
+		const float CalculatedTextHeight = OutHeight * 8;
 
-		DrawText(CameraName, TextColor, TextPosition.X, TextPosition.Y, HudFont);
+		// Text position
+		const FVector2D TextPosition(ScreenSafeZone, ScreenSafeZone);
+		
+		// Render Background
+		FVector2D RectPosition = TextPosition;
+		RectPosition.X -= BackgroundPadding;
+		RectPosition.Y -= BackgroundPadding;
+		DrawRect(BackgroundColor, RectPosition.X, RectPosition.Y,
+			CalculatedTextWidth + (BackgroundPadding * 2), CalculatedTextHeight + (BackgroundPadding * 2));
+
+		// Render Text
+		const FString DebugText = FString::Printf(
+			TEXT("%s\n\n"
+				"Next Display: Tab, }\n"
+				"Previous Display: {\n"
+				"Select Pawn: Backslash\n"
+				"Toggle HUD: Backspace\n"
+				"Screenshot: F12\n"
+				"Screenshot Multiplier (%i): -/+"),
+				*CurrentCameraName,
+				ScreenshotMultiplier);
+		
+		DrawText(DebugText, TextColor, TextPosition.X, TextPosition.Y, Font, TextScale);
 	}
-
-
-	/* TODO: Keys on screen
-	 * Next Camera: Tab / Right Bracket
-	 * Previous Camera: Left Bracket
-	 * Toggle HUD: Backslash
-	 * Screenshot: F12
-	 *
-	 * -/+ to increase multiplier
-	 */
 }
