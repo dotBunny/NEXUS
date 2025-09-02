@@ -172,16 +172,18 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;
 
-	// Update based on if we should tick
-	
+	// Update based on if we should tick - test usually dont have a access to the system to timeslice
 	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
-	if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
+	if (System != nullptr)
 	{
-		UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
-	}
-	else if(InNewSettings.CreateObjectsPerTick > 0 && !System->HasTickableActorPool(this))
-	{
-		UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
+		if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
+		{
+			UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
+		}
+		else if(InNewSettings.CreateObjectsPerTick > 0 && !System->HasTickableActorPool(this))
+		{
+			UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
+		}
 	}
 
 	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
