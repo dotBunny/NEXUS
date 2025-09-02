@@ -108,7 +108,8 @@ public:
 	 * @note This does not count actors that have been spawned and are considered 'out'.
 	 */
 	bool IsEmpty() const { return InActors.IsEmpty(); };
-	
+
+	bool IsStubMode() const { return bStubMode; };
 
 private:
 
@@ -127,6 +128,7 @@ private:
 	TSubclassOf<AActor> Template;
 	
 	bool bHasHalfHeight;
+	bool bStubMode = false;
 	double HalfHeight;
 	FVector HalfHeightOffset;
 
