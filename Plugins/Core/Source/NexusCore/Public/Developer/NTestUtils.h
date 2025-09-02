@@ -32,14 +32,15 @@ public:
 		// Execute Test
 
 		// ReSharper disable once CppTooWideScope
-		TOptional<FGCScopeGuard> GCGuard;
 		if (bDisableGarbageCollection)
 		{
-			GCGuard.Emplace();
+			FGCScopeGuard Guard;
+			TestFunctionality(World);
 		}
-
-		TestFunctionality(World);
-		
+		else
+		{
+			TestFunctionality(World);
+		}
 
 		// Cleanup world
 		World->EndPlay(EEndPlayReason::Quit);
