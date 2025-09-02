@@ -184,9 +184,15 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 		{
 			UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
 		}
+		
+		Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
+	}
+	else
+	{
+		// Because we have no system we need to create normally.
+		Settings.CreateObjectsPerTick = -1;
 	}
 
-	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
 	Settings.Flags = InNewSettings.Flags;
 	Settings.DefaultTransform = InNewSettings.DefaultTransform;
 }
