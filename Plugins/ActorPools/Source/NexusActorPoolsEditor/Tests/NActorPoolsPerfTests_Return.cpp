@@ -10,6 +10,9 @@
 
 N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return", N_TEST_CONTEXT_EDITOR)
 {
+	// PRE GC FORCE
+	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+	
 	constexpr int32 TestSize = 1000;
 	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
 	{
@@ -25,7 +28,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 
 		// TEST
 		{
-			N_TEST_TIMER_SCOPE(Return_Actor_1000, 2.0f)
+			N_TEST_TIMER_SCOPE(Return_Actor_1000, 2.f)
 			for (int32 i = 0; i < TestSize; i++)
 			{
 				Pool.Return(Actors[i]);
@@ -34,7 +37,9 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 
 		Pool.Clear();
 	}, true);
-	
+
+	// POST GC FORCE
+	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 }
 
 #endif //WITH_TESTS

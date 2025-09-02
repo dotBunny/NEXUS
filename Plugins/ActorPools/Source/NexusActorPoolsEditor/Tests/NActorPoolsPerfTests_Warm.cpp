@@ -10,11 +10,13 @@
 
 N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_TEST_CONTEXT_EDITOR)
 {
+	// PRE GC FORCE
+	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+	
 	constexpr int32 TestSize = 1000;
 	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
 	{
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass());
-		Pool.Fill();
 
 		//TEST
 		{
@@ -24,6 +26,9 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 			
 		Pool.Clear();
 	}, true);
+
+	// POST GC FORCE
+	CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 }
 
 #endif //WITH_TESTS

@@ -24,6 +24,7 @@
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
 - `FNActorPool` will properly timeslice their strategies.
+- `FGCScopeGuard` guards like a boss during tests now.
 
 ### Changed
 
@@ -42,6 +43,7 @@
 - Altered `NSamplesDisplayActor` to support replication.
 - `Inside or On` abbreviated to `IO`.
 - Miscellaneous fixes and tweaks to support rolling out documentation.
+- Optimized `FNActorPool` to use a cached `IsStubMode()` for clients using a server-only pool.
 
 ### Removed
 
