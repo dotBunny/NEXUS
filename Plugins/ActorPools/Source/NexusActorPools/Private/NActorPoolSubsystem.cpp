@@ -88,6 +88,11 @@ void UNActorPoolSubsystem::RemoveTickableActorPool(FNActorPool* ActorPool)
 	bHasTickableActorPools = (TickableActorPools.Num() > 0);
 }
 
+bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
+{
+	return TickableActorPools.Contains(ActorPool);
+}
+
 void UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
 {
 	ReturnedActor = GetActor<AActor>(ActorClass);

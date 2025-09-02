@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "Macros/NWorldMacros.h"
 
 class ALevelInstance;
@@ -42,5 +43,22 @@ public:
 		const AGameStateBase* GameState = World->GetGameState();
 		if (GameState == nullptr) return false;
 		return GameState->GetLocalRole() == ROLE_Authority;
+	}
+
+	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
+	{
+		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();;
+	}
+
+	FORCEINLINE static APawn* GetPawnFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
+	{
+		for (const auto PlayerState : World->GetGameState()->PlayerArray)
+		{
+			if (PlayerState->GetPlayerId() == PlayerIdentifier)
+			{
+				return PlayerState->GetPawn();
+			}
+		}
+		return nullptr;
 	}
 };

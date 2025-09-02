@@ -173,14 +173,17 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	Settings.Strategy = InNewSettings.Strategy;
 
 	// Update based on if we should tick
-	if (Settings.CreateObjectsPerTick && !InNewSettings.CreateObjectsPerTick)
+	
+	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
+	if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
 	{
 		UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
 	}
-	else if (!Settings.CreateObjectsPerTick && InNewSettings.CreateObjectsPerTick)
+	else if(InNewSettings.CreateObjectsPerTick > 0 && !System->HasTickableActorPool(this))
 	{
 		UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
 	}
+
 	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
 	Settings.Flags = InNewSettings.Flags;
 	Settings.DefaultTransform = InNewSettings.DefaultTransform;
@@ -428,7 +431,7 @@ void FNActorPool::Tick()
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
-		const int32 SpawnCountThisTick = FMath::Min((Settings.MinimumActorCount - TotalActors), Settings.CreateObjectsPerTick);
+		const int32 SpawnCountThisTick = FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors));
 		for (int32 i = 0; i < SpawnCountThisTick; i++)
 		{
 			CreateActor();

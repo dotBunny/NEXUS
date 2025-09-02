@@ -119,6 +119,7 @@ public:
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
+	bool HasTickableActorPool(FNActorPool* ActorPool) const;
 
 	TMap<UClass*, FNActorPool*> ActorPools;
 	TArray<FNActorPool*> TickableActorPools;

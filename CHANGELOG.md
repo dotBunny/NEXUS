@@ -23,6 +23,7 @@
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
+- `FNActorPool` will properly timeslice their strategies.
 
 ### Changed
 
