@@ -53,6 +53,6 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 
 	FString ToString() const
 	{
-		return Name;
+		return Name + " (" + FString::FromInt(RefCount) + ")";
 	}
 };

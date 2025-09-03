@@ -41,8 +41,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 	FString ToDetailedString()
 	{
-
-		TStringBuilder<512> StringBuilder;
+		FStringBuilderBase StringBuilder;
 
 		StringBuilder.Appendf(TEXT("Captured Object Count: %d\n"), CapturedObjectCount);
 
@@ -65,7 +64,28 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		}
 
 		return StringBuilder.ToString();
-		
+	}
 
+	void DumpToLog()
+	{
+		N_LOG(Log, TEXT(" %s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects"), CapturedObjectCount));
+
+		N_LOG(Log, TEXT("Added (%d):"), AddedCount);
+		for (const FNObjectSnapshotEntry& Entry : Added)
+		{
+			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+		}
+
+		N_LOG(Log, TEXT("Maintained (%d):"), MaintainedCount);
+		for (const FNObjectSnapshotEntry& Entry : Maintained)
+		{
+			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+		}
+
+		N_LOG(Log, TEXT("Removed (%d):"), RemovedCount);
+		for (const FNObjectSnapshotEntry& Entry : Removed)
+		{
+			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+		}
 	}
 };

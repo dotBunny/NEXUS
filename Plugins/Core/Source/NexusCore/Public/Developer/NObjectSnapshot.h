@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NCoreMinimal.h"
 #include "NObjectSnapshotEntry.h"
 #include "NObjectSnapshot.generated.h"
 
@@ -32,5 +33,25 @@ struct NEXUSCORE_API FNObjectSnapshot
 	FString ToString() const
 	{
 		return FString::Printf(TEXT("Captured %i Objects"), CapturedObjectCount);
+	}
+
+	FString ToDetailedString() const
+	{
+		FStringBuilderBase StringBuilder;
+		StringBuilder.Appendf(TEXT("Captured %i Objects\n"), CapturedObjectCount);
+		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
+		{
+			StringBuilder.Appendf(TEXT("%s"), *Entry.ToString());
+		}
+		return StringBuilder.ToString();
+	}
+
+	void DumpToLog()
+	{
+		N_LOG(Log, TEXT(" %s"), *FString::Printf(TEXT("[FNObjectSnapshot::DumpToLog] Captured %i Objects"), CapturedObjectCount));
+		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
+		{
+			N_LOG(Log, TEXT("%s"), *Entry.ToString());
+		}
 	}
 };
