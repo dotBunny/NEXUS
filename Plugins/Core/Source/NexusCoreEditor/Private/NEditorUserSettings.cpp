@@ -70,6 +70,8 @@ void UNEditorUserSettings::ApplySpaceToPan() const
 	if (FNEditorUtils::IsUserControlled())
 	{
 		const FNCoreEditorModule& CoreEditorModule = FModuleManager::GetModuleChecked<FNCoreEditorModule>("NexusCoreEditor");
-		CoreEditorModule.GetInputProcessor()->bCachedPanSetting = bSpaceToPan;
+		FNEditorInputProcessor* InputProcessor = CoreEditorModule.GetInputProcessor();
+		InputProcessor->bCachedGraphNavigationSpaceToPan = bGraphNavigationSpaceToPan;
+		InputProcessor->CachedGraphNavigationPanSpeedMultiplier = GraphNavigationPanSpeedMultiplier;
 	}
 }

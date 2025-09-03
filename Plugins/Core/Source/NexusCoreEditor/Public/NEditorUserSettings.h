@@ -39,8 +39,11 @@ public:
 
 #if WITH_EDITORONLY_DATA
 public:
-	UPROPERTY(EditAnywhere, config,  Category = "Graphs", meta = (DisplayName = "Space To Pan", Tooltip = "While holding space down, left click and drag to pan the foreground graph."))
-	bool bSpaceToPan = true;
+	UPROPERTY(EditAnywhere, config,  Category = "Graph Navigation", meta = (DisplayName = "Space To Pan", Tooltip = "While holding space down, left click and drag to pan the foreground graph."))
+	bool bGraphNavigationSpaceToPan = true;
+
+	UPROPERTY(EditAnywhere, config,  Category = "Graph Navigation", meta = (DisplayName = "Pan Speed Multiplier", Tooltip = "The multiplier applied when dragging with the Space To Pan feature."))
+	float GraphNavigationPanSpeedMultiplier = 1.0f;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Editor Performance", meta = (DisplayName = "Initial Editor Maximum FPS", Tooltip = "Limit the frame rate of editor, keeping our GPUs quiet and cool. Setting this to 0 will use the default engine value."))
 	float EditorFrameRateLimit = 60.0f;

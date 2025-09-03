@@ -33,7 +33,8 @@ public:
 	bool IsMiddleMouseButtonDown() const;
 	bool IsAnyMouseButtonDown() const;
 
-	bool bCachedPanSetting;
+	bool bCachedGraphNavigationSpaceToPan;
+	float CachedGraphNavigationPanSpeedMultiplier;
 	
 
 private:

@@ -67,16 +67,15 @@ bool FNEditorInputProcessor::HandleKeyUpEvent(FSlateApplication& SlateApp, const
 
 bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (bCachedPanSetting && bSpaceBar && bLeftMouse)
+	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse)
 	{
 		if (FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor(); Editor != nullptr)
 		{
-			
 			// Move The Graph
 			FVector2D ViewLocation;
 			float ViewZoom;
 			Editor->GetViewLocation(ViewLocation, ViewZoom);
-  			ViewLocation += -MouseEvent.GetCursorDelta();
+  			ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
 			Editor->SetViewLocation(ViewLocation, ViewZoom);
 			return true;
 		}
