@@ -39,13 +39,13 @@ public:
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Warning Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown."))
-	int32 DeveloperObjectCountWarningThreshold = 2500;
+	int32 DeveloperObjectCountWarningThreshold = 10000;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Capture Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a capture should be taken."))
-	int32 DeveloperObjectCountCaptureThreshold = 3000;
+	int32 DeveloperObjectCountCaptureThreshold = 15000;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Compare Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done."))
-	int32 DeveloperObjectCountCompareThreshold = 4000;
+	int32 DeveloperObjectCountCompareThreshold = 20000;
 };
