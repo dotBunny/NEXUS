@@ -11,9 +11,8 @@
 void UNDeveloperSubsystem::Tick(float DeltaTime)
 {
 	const int ObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
-	const int Difference = ObjectCount - BaseObjectCount;
-
-	if (Difference < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
+	
+	if (ObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
 	{
 		bPassedObjectCountWarningThreshold = false;
 		bPassedObjectCountCaptureThreshold = false;
@@ -22,14 +21,14 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	
-	if (Difference >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
+	if (ObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
 		N_LOG(Warning, TEXT("[NDeveloperSubsystem::Tick] Object count warning threshold exceeded: %d objects"), ObjectCount);
 		bPassedObjectCountWarningThreshold = true;
 		return;
 	}
 	
-	if (Difference >= ObjectCountCaptureThreshold && !bPassedObjectCountCaptureThreshold)
+	if (ObjectCount >= ObjectCountCaptureThreshold && !bPassedObjectCountCaptureThreshold)
 	{
 		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
 
@@ -42,7 +41,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	
-	if (Difference >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
+	if (ObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
@@ -57,18 +56,34 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	}
 }
 
-void UNDeveloperSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+void UNDeveloperSubsystem::PostInitialize()
 {
-	Super::OnWorldBeginPlay(InWorld);
-
-	// Load Settings
 	const UNCoreSettings* Settings = UNCoreSettings::Get();
 
 	ObjectCountWarningThreshold = Settings->DeveloperObjectCountWarningThreshold;
 	ObjectCountCaptureThreshold = Settings->DeveloperObjectCountCaptureThreshold;
 	ObjectCountCompareThreshold = Settings->DeveloperObjectCountCompareThreshold;
 	
+	Super::PostInitialize();
+}
+
+void UNDeveloperSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+{
+	Super::OnWorldBeginPlay(InWorld);
+	
 	BaseObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
-	N_LOG(Log, TEXT("[NDeveloperSubsystem::OnWorldBeginPlay] Reporting for duty! Watching %i objects and counting - Warning @ %i | Capture @ %i | Compare @ %i"),
-		BaseObjectCount, ObjectCountWarningThreshold, ObjectCountCaptureThreshold, ObjectCountCompareThreshold);
+	const int32 WarningCount = BaseObjectCount + ObjectCountWarningThreshold;
+	const int32 CaptureCount = BaseObjectCount + ObjectCountCaptureThreshold;
+	const int32 CompareCount = BaseObjectCount + ObjectCountCompareThreshold;
+	
+	N_LOG(Log, TEXT("[NDeveloperSubsystem::OnWorldBeginPlay] Reporting for duty! Watching %i objects and counting - Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)"),
+		BaseObjectCount,
+		WarningCount, ObjectCountWarningThreshold,
+		CaptureCount, ObjectCountCaptureThreshold,
+		CompareCount, ObjectCountCompareThreshold);
+
+	// Cache our updated thresholds
+	ObjectCountWarningThreshold = WarningCount;
+	ObjectCountCaptureThreshold = CaptureCount;
+	ObjectCountCompareThreshold = CompareCount;
 }

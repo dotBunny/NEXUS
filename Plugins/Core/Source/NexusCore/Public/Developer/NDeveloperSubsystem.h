@@ -20,6 +20,7 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 #endif	
 	
 	virtual void Tick(float DeltaTime) override;
+	virtual void PostInitialize() override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 private:
