@@ -29,6 +29,13 @@ struct NEXUSCORE_API FNObjectSnapshot
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<FNObjectSnapshotEntry> CapturedObjects;
+
+	void Reset()
+	{
+		Ticket = -1;
+		CapturedObjectCount = 0;
+		CapturedObjects.Empty();
+	}
 	
 	FString ToString() const
 	{
