@@ -25,6 +25,7 @@
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
 - `FNActorPool` will properly timeslice their strategies.
 - `FGCScopeGuard` guards like a boss during tests now.
+- Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc).
 
 ### Changed
 

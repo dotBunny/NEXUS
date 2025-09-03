@@ -69,18 +69,24 @@ bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, c
 {
 	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse)
 	{
-		if (FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor(); Editor != nullptr)
+		if (FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
+			Editor != nullptr)
 		{
-			// Move The Graph
-			FVector2D ViewLocation;
-			float ViewZoom;
-			Editor->GetViewLocation(ViewLocation, ViewZoom);
-  			ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
-			Editor->SetViewLocation(ViewLocation, ViewZoom);
-			return true;
-		}
 
-		// TODO? Designer?
+			// Handle the traditional blueprint editor
+			if (Editor->IsBlueprintEditor())
+			{
+				// Move The Graph
+				FVector2D ViewLocation;
+				float ViewZoom;
+				Editor->GetViewLocation(ViewLocation, ViewZoom);
+				ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
+				Editor->SetViewLocation(ViewLocation, ViewZoom);
+				return true;
+			}
+			//const FName& TypeName = Editor->GetEditingAssetTypeName();
+			
+		}
 	}
 	return false;
 }
