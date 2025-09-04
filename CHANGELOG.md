@@ -20,6 +20,7 @@
 - Configurable distribution inner & outer visualizer colors in `Editor Preferences > NEXUS > Core (User)`
 - `External` tool section to Unreal default `Tools > Profile` menu with `NetworkProfiler` when present.
 - Samples content now contains `ANSamplesHUD` and `ANSamplesPawn` to support making documentation easier.
+- `UNDeveloperSubsystem` in non-release builds allowing for monitoring of object counts and providing details.
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
