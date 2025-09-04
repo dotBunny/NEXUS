@@ -29,6 +29,8 @@ void UNDeveloperSubsystem::SetBaseline()
 		ObjectCountWarningThreshold, Settings->DeveloperObjectCountWarningThreshold,
 		ObjectCountSnapshotThreshold, Settings->DeveloperObjectCountSnapshotThreshold,
 		ObjectCountCompareThreshold, Settings->DeveloperObjectCountCompareThreshold);
+
+	bBaselineSet = true;
 }
 
 void UNDeveloperSubsystem::Tick(float DeltaTime)

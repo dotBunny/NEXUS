@@ -35,7 +35,7 @@ public:
 #endif	
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Object Monitoring",
-	meta=(ToolTip="Monitor the number of UObjects and respond accordingly."))
+	meta=(ToolTip="Monitor the number of UObjects and respond accordingly. You still must call UNDeveloperSubsystem::SetBaseline!"))
 	bool bDeveloperObjectMonitoring = false;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Warning Threshold",
