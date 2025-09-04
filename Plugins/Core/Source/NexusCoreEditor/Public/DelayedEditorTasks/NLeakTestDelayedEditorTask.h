@@ -5,6 +5,7 @@
 
 #include "EditorUtilityLibrary.h"
 #include "NCoreEditorMinimal.h"
+#include "NCoreSettings.h"
 #include "NDelayedEditorTask.h"
 #include "Developer/NObjectSnapshot.h"
 #include "Developer/NObjectSnapshotUtils.h"
@@ -24,7 +25,8 @@ public:
 		
 		DelayedMechanism->Complete.AddDynamic(LeakTestObject, &UNLeakTestDelayedEditorTask::Execute);
 		LeakTestObject->BeforeSnapshot = FNObjectSnapshotUtils::Snapshot();
-		DelayedMechanism->Start(5.f, 100);
+		
+		DelayedMechanism->Start(UNCoreSettings::Get()->LeakCheckTime, 100);
 	}
 	
 private:
@@ -34,18 +36,19 @@ private:
 	void Execute()
 	{
 		const FNObjectSnapshot AfterSnapshot = FNObjectSnapshotUtils::Snapshot();
-
-		// Process
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(BeforeSnapshot, AfterSnapshot, true);
+		
 		if (Diff.AddedCount > 0)
 		{
-			NE_LOG(Error, TEXT("[FNEditorCommands::OnToolsLeakCheck] %s"), *Diff.ToDetailedString());
+			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
+			FString::Printf(TEXT("NEXUS_LeakCheck_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+			N_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] Adds detected! COMPARE written to %s."), *DumpFilePath);
 		}
 		else
 		{
 			NE_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] %s"), *Diff.ToString());
 		}
-
 		Release();
 	}
 };

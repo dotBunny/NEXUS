@@ -28,6 +28,10 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 			Snapshot.CapturedObjects.Add(FNObjectSnapshotEntry(Objects[i]));
 			Snapshot.CapturedObjectCount++;
 		}
+		else
+		{
+			Snapshot.UntrackedObjectCount++;
+		}
 	}
 
 	// Send it back
@@ -38,6 +42,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 {
 	FNObjectSnapshotDiff Diff;
 
+
 	if (OldSnapshot.Ticket > NewSnapshot.Ticket)
 	{
 		const FNObjectSnapshot TempSnapshot = OldSnapshot;
@@ -46,6 +51,8 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		N_LOG(Warning, TEXT("[FNObjectSnapshotUtils::Diff] OldSnapshot was actually newer then NewSnapshot. Swapping."))
 	}
 
+	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;
+	Diff.UntrackedObjectCountB = NewSnapshot.UntrackedObjectCount;
 	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
 	
 	// If we check what has been maintained or removed, that leaves whats left in the array as having been added.

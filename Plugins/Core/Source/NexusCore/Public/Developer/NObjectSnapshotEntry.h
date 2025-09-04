@@ -12,28 +12,32 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	GENERATED_BODY()
 
 	FNObjectSnapshotEntry() = default;
+	~FNObjectSnapshotEntry()
+	{
+		ObjectPtr = nullptr;
+	}
 	
 	explicit FNObjectSnapshotEntry(const FUObjectItem& Item)
 	{
 		RefCount = Item.GetRefCount();
 		SerialNumber = Item.GetSerialNumber();
+		bIsGarbage = Item.IsGarbage();
+		bIsRoot = Item.IsRootSet();
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
-		ObjectPtr = static_cast<UObject*>(Item.Object);
+		if (UObject* Object = static_cast<UObject*>(Item.Object))
 #else
-		ObjectPtr = static_cast<UObject*>(Item.GetObject());
-#endif		
-
-		bRooted = Item.IsRootSet();
-		
-		if (ObjectPtr)
+		if (UObject* Object = static_cast<UObject*>(Item.GetObject()))
+#endif
 		{
-			Name = ObjectPtr->GetFName().ToString();
-			FullName = ObjectPtr->GetFullName();
+			ObjectPtr = Object;
+			Name = Object->GetFName().ToString();
+			FullName = Object->GetFullName();
 		}
 		else
 		{
-			Name = TEXT("N/A");
+			Name = Item.GetObject()->GetFName().ToString();
 			FullName = Name;
+			ObjectPtr = nullptr;
 		}
 	}
 
@@ -49,12 +53,15 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		// Check serial next?
 		return SerialNumber == Other.SerialNumber;
 	}
-
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	bool bRooted = false;
 	
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TObjectPtr<UObject> ObjectPtr;
+	bool bIsRoot = false;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	bool bIsGarbage = false;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TWeakObjectPtr<UObject> ObjectPtr;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 SerialNumber = -1;
@@ -70,14 +77,6 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	
 	FString ToString() const
 	{
-		if (bRooted)
-		{
-			return "(" + FString::FromInt(RefCount) + ") [R] " + FullName;
-		}
-		return "(" + FString::FromInt(RefCount) + ") " + FullName;
-	}
-	FString ToMarkdownTableRow() const
-	{
-		return "| " + FString::FromInt(RefCount) + " | " + FullName + " |";
+		return FString::Printf(TEXT("(%i)%hs%hs    %s"), RefCount, bIsRoot ? " [R]" : "    ", bIsGarbage ? " [G]" : "    ", *FullName);
 	}
 };

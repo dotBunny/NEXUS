@@ -15,8 +15,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 	FNObjectSnapshot() = default;
 	
 	explicit FNObjectSnapshot(const int32 Count)
-		: Ticket(-1)
-		, CapturedObjectCount(0)
+		: Ticket(-1), CapturedObjectCount(0), UntrackedObjectCount(0)
 	{
 		CapturedObjects.Reserve(Count);
 	}
@@ -28,24 +27,29 @@ struct NEXUSCORE_API FNObjectSnapshot
 	int32 CapturedObjectCount = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 UntrackedObjectCount = 0;
+	
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<FNObjectSnapshotEntry> CapturedObjects;
 
 	void Reset()
 	{
 		Ticket = -1;
 		CapturedObjectCount = 0;
+		UntrackedObjectCount = 0;
 		CapturedObjects.Empty();
 	}
 	
 	FString ToString() const
 	{
-		return FString::Printf(TEXT("Captured %i Objects"), CapturedObjectCount);
+		return FString::Printf(TEXT("Captured %i Objects (%i Untracked)"), CapturedObjectCount, UntrackedObjectCount);
 	}
 
 	FString ToDetailedString() const
 	{
 		FStringBuilderBase StringBuilder;
-		StringBuilder.Appendf(TEXT("Captured %i Objects\n"), CapturedObjectCount);
+		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Untracked)\n"), CapturedObjectCount, UntrackedObjectCount);
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
 			StringBuilder.Appendf(TEXT("  %s\n"), *Entry.ToString());
@@ -55,7 +59,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 
 	void DumpToLog()
 	{
-		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshot::DumpToLog] Captured %i Objects"), CapturedObjectCount));
+		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshot::DumpToLog] Captured %i Objects (%i Untracked)"), CapturedObjectCount, UntrackedObjectCount));
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
 			N_LOG(Log, TEXT("  %s"), *Entry.ToString());

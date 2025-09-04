@@ -14,6 +14,12 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	FNObjectSnapshotDiff() = default;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 UntrackedObjectCountA = 0;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 UntrackedObjectCountB = 0;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 ChangeCount = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
@@ -39,7 +45,8 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 	FString ToString() const
 	{
-		return FString::Printf(TEXT("Total %i (%i Changes) - Added %i / Maintained %i / Removed %i"), ObjectCount, ChangeCount, AddedCount, MaintainedCount, RemovedCount);
+		return FString::Printf(TEXT("Total %i (%i Changes | %i Previously Untracked | %i Currently Untracked) - Added %i / Maintained %i / Removed %i"),
+			ObjectCount, ChangeCount, UntrackedObjectCountA, UntrackedObjectCountB, AddedCount, MaintainedCount, RemovedCount);
 	}
 
 	FString ToDetailedString()
@@ -47,6 +54,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		FStringBuilderBase StringBuilder;
 
 		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
+		StringBuilder.Appendf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB);
 		
 		StringBuilder.Appendf(TEXT("Added (%d):\n"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
@@ -72,6 +80,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	void DumpToLog()
 	{
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
+		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB));
 		
 		N_LOG(Log, TEXT("Added (%i):"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
