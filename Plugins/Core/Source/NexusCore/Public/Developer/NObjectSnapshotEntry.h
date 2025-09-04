@@ -65,4 +65,8 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	{
 		return "(" + FString::FromInt(RefCount) + ") " + FullName;
 	}
+	FString ToMarkdownTableRow() const
+	{
+		return "| " + FString::FromInt(RefCount) + " | " + FullName + " |";
+	}
 };

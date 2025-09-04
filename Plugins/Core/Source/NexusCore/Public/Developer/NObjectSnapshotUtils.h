@@ -14,6 +14,8 @@ public:
 	static FNObjectSnapshot Snapshot();
 	static FNObjectSnapshotDiff Diff(FNObjectSnapshot OldSnapshot, FNObjectSnapshot NewSnapshot, bool bRemoveKnownLeaks = false);
 	static void RemoveKnownLeaks(FNObjectSnapshotDiff& Diff);
+	static void SnapshotToDisk();
+	
 private:
 	static int32 SnapshotTicket;
 };

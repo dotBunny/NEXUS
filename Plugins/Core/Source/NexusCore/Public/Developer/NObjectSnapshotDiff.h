@@ -14,7 +14,10 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	FNObjectSnapshotDiff() = default;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	int32 CapturedObjectCount = 0;
+	int32 ChangeCount = 0;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	int32 ObjectCount = 0;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TArray<FNObjectSnapshotEntry> Added;
@@ -36,15 +39,15 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 	FString ToString() const
 	{
-		return FString::Printf(TEXT("Added: %d, Maintained: %d, Removed: %d"), AddedCount, MaintainedCount, RemovedCount);
+		return FString::Printf(TEXT("Total %i (%i Changes) - Added %i / Maintained %i / Removed %i"), ObjectCount, ChangeCount, AddedCount, MaintainedCount, RemovedCount);
 	}
 
 	FString ToDetailedString()
 	{
 		FStringBuilderBase StringBuilder;
 
-		StringBuilder.Appendf(TEXT("Captured Object Count: %d\n"), CapturedObjectCount);
-
+		StringBuilder.Appendf(TEXT("Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
+		
 		StringBuilder.Appendf(TEXT("Added (%d):\n"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
 		{
@@ -66,23 +69,53 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		return StringBuilder.ToString();
 	}
 
+	FString ToMarkdown()
+	{
+		FStringBuilderBase StringBuilder;
+
+		StringBuilder.Appendf(TEXT("# Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
+
+		StringBuilder.Appendf(TEXT("## Added (%d):\n"), AddedCount);
+		StringBuilder.Append(TEXT("|Ref Count|Full Name\n|:--|:--|\n"));
+		for (const FNObjectSnapshotEntry& Entry : Added)
+		{
+			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToMarkdownTableRow());
+		}
+		
+		StringBuilder.Appendf(TEXT("## Maintained (%d):\n"), MaintainedCount);
+		StringBuilder.Append(TEXT("|Row|Ref Count|Full Name\n|:--|:--|\n"));
+		for (const FNObjectSnapshotEntry& Entry : Maintained)
+		{
+			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToMarkdownTableRow());
+		}
+		
+		StringBuilder.Appendf(TEXT("## Removed (%d):\n"), RemovedCount);
+		StringBuilder.Append(TEXT("|Ref Count|Full Name\n|:--|:--|\n"));
+		for (const FNObjectSnapshotEntry& Entry : Removed)
+		{
+			StringBuilder.Appendf(TEXT("|%i%s\n"), *Entry.ToMarkdownTableRow());
+		}
+
+		return StringBuilder.ToString();
+	}
+
 	void DumpToLog()
 	{
-		N_LOG(Log, TEXT(" %s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects"), CapturedObjectCount));
-
-		N_LOG(Log, TEXT("Added (%d):"), AddedCount);
+		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
+		
+		N_LOG(Log, TEXT("Added (%i):"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
 		{
 			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
 		}
 
-		N_LOG(Log, TEXT("Maintained (%d):"), MaintainedCount);
+		N_LOG(Log, TEXT("Maintained (%i):"), MaintainedCount);
 		for (const FNObjectSnapshotEntry& Entry : Maintained)
 		{
 			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
 		}
 
-		N_LOG(Log, TEXT("Removed (%d):"), RemovedCount);
+		N_LOG(Log, TEXT("Removed (%i):"), RemovedCount);
 		for (const FNObjectSnapshotEntry& Entry : Removed)
 		{
 			N_LOG(Log, TEXT("  %s"), *Entry.ToString());

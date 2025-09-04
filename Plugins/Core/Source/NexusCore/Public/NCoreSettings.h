@@ -5,6 +5,7 @@
 
 
 #include "NSettingsUtils.h"
+#include "Developer/NDeveloperLibrary.h"
 #include "Macros/NSettingsMacros.h"
 #include "NCoreSettings.generated.h"
 
@@ -41,9 +42,13 @@ public:
 	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown."))
 	int32 DeveloperObjectCountWarningThreshold = 25000;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Capture Threshold",
-	meta=(ToolTip="The number of added UObjects to a world when a capture should be taken."))
-	int32 DeveloperObjectCountCaptureThreshold = 30000;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Snapshot Threshold",
+	meta=(ToolTip="The number of added UObjects to a world when a snapshot should be taken. This snapshot will be compared with later if the counts exceed the compare threshold."))
+	int32 DeveloperObjectCountSnapshotThreshold = 30000;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Save Capture",
+		meta=(ToolTip="Should the capture data be saved to the project's logs folder? Saving the capture to disk is not required to compare, the snapshot will be stored in memory."))
+	bool bDeveloperObjectCountCaptureOutput = false;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Compare Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done."))

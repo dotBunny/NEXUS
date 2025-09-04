@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 
 UENUM(BlueprintType)
-enum class ENAxis : uint8
+enum ENAxis : uint8
 {
 	None = 0,
 	X = 1,
