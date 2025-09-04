@@ -18,9 +18,11 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 #else
  	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, false)
 #endif	
+
+	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer")
+	void SetBaseline();
 	
 	virtual void Tick(float DeltaTime) override;
-	virtual void PostInitialize() override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 private:
