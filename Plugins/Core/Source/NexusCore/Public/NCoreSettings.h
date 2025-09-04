@@ -33,19 +33,19 @@ public:
 	}
 #endif	
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Object Monitoring",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Object Monitoring",
 	meta=(ToolTip="Monitor the number of UObjects and respond accordingly."))
 	bool bDeveloperObjectMonitoring = false;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Warning Threshold",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Warning Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown."))
 	int32 DeveloperObjectCountWarningThreshold = 10000;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Capture Threshold",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Capture Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a capture should be taken."))
 	int32 DeveloperObjectCountCaptureThreshold = 15000;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer", DisplayName ="Compare Threshold",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Compare Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done."))
 	int32 DeveloperObjectCountCompareThreshold = 20000;
 };
