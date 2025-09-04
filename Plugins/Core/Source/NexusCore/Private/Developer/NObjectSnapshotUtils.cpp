@@ -8,6 +8,7 @@
 #include "Runtime/Launch/Resources/Version.h"
 
 int32 FNObjectSnapshotUtils::SnapshotTicket = 0;
+FNObjectSnapshot FNObjectSnapshotUtils::CachedSnapshot;
 
 FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
@@ -139,4 +140,33 @@ void FNObjectSnapshotUtils::SnapshotToDisk()
 	FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
 	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::SnapshotToDisk] SNAPSHOT written to %s."), *DumpFilePath);
+}
+
+void FNObjectSnapshotUtils::ClearCachedSnapshot()
+{
+	CachedSnapshot.Reset();
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::ClearCachedSnapshot] Cached snapshot CLEARED."));
+	
+}
+
+void FNObjectSnapshotUtils::CacheSnapshot()
+{
+	CachedSnapshot = Snapshot();
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CacheSnapshot] SNAPSHOT cached for future compare."));
+}
+
+void FNObjectSnapshotUtils::CompareSnapshotToDisk()
+{
+	if (CachedSnapshot.Ticket == -1)
+	{
+		return;
+	}
+	const FNObjectSnapshot CompareSnapshot = Snapshot();
+	FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CachedSnapshot, CompareSnapshot, false);
+
+	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
+	FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+	FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CompareSnapshotToDisk] COMPARE written to %s."), *DumpFilePath);
 }

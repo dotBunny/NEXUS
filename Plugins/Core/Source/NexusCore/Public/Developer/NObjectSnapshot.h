@@ -53,19 +53,6 @@ struct NEXUSCORE_API FNObjectSnapshot
 		return StringBuilder.ToString();
 	}
 
-	FString ToMarkdown() const
-	{
-		FStringBuilderBase StringBuilder;
-		StringBuilder.Appendf(TEXT("# Captured %i Objects\n"), CapturedObjectCount);
-		
-		StringBuilder.Append(TEXT("|Ref Count|Full Name\n|:--|:--|\n"));
-		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
-		{
-			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToMarkdownTableRow());
-		}
-		return StringBuilder.ToString();
-	}
-
 	void DumpToLog()
 	{
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshot::DumpToLog] Captured %i Objects"), CapturedObjectCount));

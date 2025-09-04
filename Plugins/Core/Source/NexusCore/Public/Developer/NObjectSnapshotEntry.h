@@ -23,6 +23,8 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		ObjectPtr = static_cast<UObject*>(Item.GetObject());
 #endif		
 
+		bRooted = Item.IsRootSet();
+		
 		if (ObjectPtr)
 		{
 			Name = ObjectPtr->GetFName().ToString();
@@ -49,9 +51,14 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	}
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	bool bRooted = false;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	TObjectPtr<UObject> ObjectPtr;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 SerialNumber = -1;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 RefCount = -1;
 
@@ -63,6 +70,10 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	
 	FString ToString() const
 	{
+		if (bRooted)
+		{
+			return "(" + FString::FromInt(RefCount) + ") [R] " + FullName;
+		}
 		return "(" + FString::FromInt(RefCount) + ") " + FullName;
 	}
 	FString ToMarkdownTableRow() const

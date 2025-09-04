@@ -69,36 +69,6 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		return StringBuilder.ToString();
 	}
 
-	FString ToMarkdown()
-	{
-		FStringBuilderBase StringBuilder;
-
-		StringBuilder.Appendf(TEXT("# Captured %i Objects (%i Changes)\n"), ObjectCount, ChangeCount);
-
-		StringBuilder.Appendf(TEXT("## Added (%d):\n"), AddedCount);
-		StringBuilder.Append(TEXT("|Ref Count|Full Name\n|:--|:--|\n"));
-		for (const FNObjectSnapshotEntry& Entry : Added)
-		{
-			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToMarkdownTableRow());
-		}
-		
-		StringBuilder.Appendf(TEXT("## Maintained (%d):\n"), MaintainedCount);
-		StringBuilder.Append(TEXT("|Row|Ref Count|Full Name\n|:--|:--|\n"));
-		for (const FNObjectSnapshotEntry& Entry : Maintained)
-		{
-			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToMarkdownTableRow());
-		}
-		
-		StringBuilder.Appendf(TEXT("## Removed (%d):\n"), RemovedCount);
-		StringBuilder.Append(TEXT("|Ref Count|Full Name\n|:--|:--|\n"));
-		for (const FNObjectSnapshotEntry& Entry : Removed)
-		{
-			StringBuilder.Appendf(TEXT("|%i%s\n"), *Entry.ToMarkdownTableRow());
-		}
-
-		return StringBuilder.ToString();
-	}
-
 	void DumpToLog()
 	{
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));

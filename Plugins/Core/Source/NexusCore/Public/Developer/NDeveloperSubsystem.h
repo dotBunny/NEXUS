@@ -6,38 +6,7 @@
 #include "NCoreSettings.h"
 #include "NObjectSnapshot.h"
 #include "Macros/NSubsystemMacros.h"
-#include "HAL/IConsoleManager.h"
 #include "NDeveloperSubsystem.generated.h"
-
-// #CONSOLE
-namespace NConsoleCommands::Developer
-{
-	inline FAutoConsoleCommandWithWorldAndArgs Snapshot(
-		TEXT("N.Developer.Snapshot"),
-		TEXT("Take a snapshot of the currently known objects and save to the projects log folder."),
-		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda(
-			[](const TArray<FString>& Args, UWorld* World)
-			{
-				FNObjectSnapshotUtils::SnapshotToDisk();
-			}
-		),
-	ECVF_Cheat // Optional flags
-	);
-
-	inline FAutoConsoleCommandWithWorldAndArgs ForceGarbageCollection(
-		TEXT("N.Developer.CollectGarbage"),
-		TEXT("Forces a garbage collection pass."),
-		FConsoleCommandWithWorldAndArgsDelegate::CreateLambda(
-			[](const TArray<FString>& Args, UWorld* World)
-			{
-				CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-			}
-		),
-	ECVF_Cheat // Optional flags
-	);
-}
-
-
 
 UCLASS()
 class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
