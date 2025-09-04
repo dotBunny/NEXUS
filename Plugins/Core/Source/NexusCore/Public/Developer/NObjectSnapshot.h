@@ -48,7 +48,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 		StringBuilder.Appendf(TEXT("Captured %i Objects\n"), CapturedObjectCount);
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
-			StringBuilder.Appendf(TEXT("%s"), *Entry.ToString());
+			StringBuilder.Appendf(TEXT("%s\n"), *Entry.ToString());
 		}
 		return StringBuilder.ToString();
 	}

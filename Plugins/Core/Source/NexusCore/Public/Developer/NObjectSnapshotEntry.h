@@ -26,6 +26,12 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		if (ObjectPtr)
 		{
 			Name = ObjectPtr->GetFName().ToString();
+			FullName = ObjectPtr->GetFullName();
+		}
+		else
+		{
+			Name = TEXT("N/A");
+			FullName = Name;
 		}
 	}
 
@@ -48,11 +54,15 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	int32 SerialNumber = -1;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 RefCount = -1;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	FString Name;
-
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	FString FullName;
+	
 	FString ToString() const
 	{
-		return Name + " (" + FString::FromInt(RefCount) + ")";
+		return "(" + FString::FromInt(RefCount) + ") " + FullName;
 	}
 };
