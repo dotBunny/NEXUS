@@ -128,6 +128,13 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 
+		// Remove ChaosEventRelay (physics world) entry (will have a _# in its name)
+		if (Entry.Name.StartsWith(TEXT("ChaosEventRelay")))
+		{
+			Diff.Added.RemoveAt(i, EAllowShrinking::No);
+			Diff.AddedCount--;
+		}
+		
 		// Remove Niagara Component Pool entry (will have a _# in its name)
 		if (Entry.Name.StartsWith(TEXT("NiagaraComponentPool")))
 		{
