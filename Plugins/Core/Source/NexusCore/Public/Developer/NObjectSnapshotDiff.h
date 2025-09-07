@@ -49,7 +49,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 			ObjectCount, ChangeCount, UntrackedObjectCountA, UntrackedObjectCountB, AddedCount, MaintainedCount, RemovedCount);
 	}
 
-	FString ToDetailedString()
+	FString ToDetailedString() const
 	{
 		FStringBuilderBase StringBuilder;
 
@@ -77,7 +77,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		return StringBuilder.ToString();
 	}
 
-	void DumpToLog()
+	void DumpToLog() const
 	{
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB));
