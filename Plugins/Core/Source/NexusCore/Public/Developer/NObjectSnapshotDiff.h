@@ -80,7 +80,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 	void DumpToLog() const
 	{
 		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
-		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects\n"), UntrackedObjectCountA, UntrackedObjectCountB));
+		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects"), UntrackedObjectCountA, UntrackedObjectCountB));
 		
 		N_LOG(Log, TEXT("Added (%i):"), AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
