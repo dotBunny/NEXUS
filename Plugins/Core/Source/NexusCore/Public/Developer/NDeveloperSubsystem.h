@@ -14,7 +14,7 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 	GENERATED_BODY()
 
 #if UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST	
-	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, UNCoreSettings::Get()->bDeveloperObjectMonitoring)
+	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, UNCoreSettings::Get()->bDeveloperSubsystemEnabled)
 #else
  	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, false)
 #endif	
