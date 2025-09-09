@@ -5,8 +5,8 @@
 
 #include "EditorUtilityLibrary.h"
 #include "NCoreEditorMinimal.h"
-#include "NCoreSettings.h"
 #include "NDelayedEditorTask.h"
+#include "NEditorUserSettings.h"
 #include "Developer/NObjectSnapshot.h"
 #include "Developer/NObjectSnapshotUtils.h"
 #include "NLeakTestDelayedEditorTask.generated.h"
@@ -26,7 +26,7 @@ public:
 		DelayedMechanism->Complete.AddDynamic(LeakTestObject, &UNLeakTestDelayedEditorTask::Execute);
 		LeakTestObject->BeforeSnapshot = FNObjectSnapshotUtils::Snapshot();
 		
-		DelayedMechanism->Start(UNCoreSettings::Get()->LeakCheckTime, 100);
+		DelayedMechanism->Start(UNEditorUserSettings::Get()->LeakCheckTime, 100);
 	}
 	
 private:

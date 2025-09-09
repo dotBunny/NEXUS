@@ -56,7 +56,4 @@ public:
 	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done.",
 		EditCondition="bDeveloperSubsystemEnabled"))
 	int32 DeveloperObjectCountCompareThreshold = 40000;
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Leak Check", DisplayName ="Duration", meta=(ToolTip="How long should the leak check run doing its capture."))
-	float LeakCheckTime = 30.f;
 };
