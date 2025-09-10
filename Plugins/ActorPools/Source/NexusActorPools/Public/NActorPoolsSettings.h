@@ -34,6 +34,10 @@ public:
 	}
 #endif	
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Stats Tracking",
+		meta=(ToolTip="Should the stat group (NActorPools) be populated? (when available)"))
+	bool bTrackStats = true;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
 	FNActorPoolSettings DefaultSettings;

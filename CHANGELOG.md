@@ -22,6 +22,7 @@
 - `External` tool section to Unreal default `Tools > Profile` menu with `NetworkProfiler` when present.
 - Samples content now contains `ANSamplesHUD` and `ANSamplesPawn` to support making documentation easier.
 - `UNDeveloperSubsystem` in non-release builds allowing for monitoring of object counts and providing details.
+- `stats NActorPools` command to show stats (if tracking enabled).
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.

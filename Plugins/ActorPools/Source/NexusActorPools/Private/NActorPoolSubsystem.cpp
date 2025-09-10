@@ -6,6 +6,7 @@
 #include "NActorPool.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
+#include "NActorPoolStats.h"
 #include "NCoreMinimal.h"
 
 void UNActorPoolSubsystem::Deinitialize()
@@ -18,20 +19,51 @@ void UNActorPoolSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
+void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+	bStatsEnabled = UNActorPoolsSettings::Get()->bTrackStats;
+}
+
 bool UNActorPoolSubsystem::IsTickable() const
 {
-	return bHasTickableActorPools || bHasTickableSpawners;
+	return bStatsEnabled || bHasTickableActorPools || bHasTickableSpawners;
 }
 
 void UNActorPoolSubsystem::Tick(float DeltaTime)
 {
-	for (FNActorPool* Pool : TickableActorPools)
+	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_ActorPoolSubsystemTick, bStatsEnabled);
+	
+	if (bStatsEnabled)
 	{
-		Pool->Tick();
+		SET_DWORD_STAT(STAT_ActorPoolCount, ActorPools.Num())
+		SET_DWORD_STAT(STAT_InActors, 0)
+		SET_DWORD_STAT(STAT_OutActors, 0)
 	}
-	for (UNActorPoolSpawnerComponent* Spawner : TickableSpawners)
+
+	if (bHasTickableActorPools)
 	{
-		Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+		for (FNActorPool* Pool : TickableActorPools)
+		{
+			Pool->Tick();
+		}
+	}
+
+	if (bHasTickableSpawners)
+	{
+		for (UNActorPoolSpawnerComponent* Spawner : TickableSpawners)
+		{
+			Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+		}
+	}
+
+	if (bStatsEnabled)
+	{
+		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
+		{
+			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetInCount())
+			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetOutCount())
+		}
 	}
 }
 

@@ -81,6 +81,7 @@ public:
 
 	//~UTickableWorldSubsystem
 	virtual void Deinitialize() final override;
+	virtual void Initialize(FSubsystemCollectionBase& Collection) final override;
 	virtual bool IsTickable() const final override;
 	virtual void Tick(float DeltaTime) final override;
 	//End UTickableWorldSubsystem
@@ -128,6 +129,7 @@ private:
 	bool bHasTickableActorPools;
 	bool bHasTickableSpawners;
 	bool bDestroyUnknownReturnedActors = true;
+	bool bStatsEnabled = false;
 
 };
 
