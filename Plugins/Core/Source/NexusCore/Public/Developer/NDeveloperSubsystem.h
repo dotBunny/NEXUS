@@ -19,7 +19,8 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
  	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, false)
 #endif	
 
-	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer")
+	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/#setting-a-baseline"))
 	void SetBaseline();
 	
 	virtual void Tick(float DeltaTime) override;

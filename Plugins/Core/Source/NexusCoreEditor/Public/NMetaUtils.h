@@ -7,25 +7,25 @@
 		FName FNMetaUtils::Name ## Key = FName(TEXT(#MetaKey));
 #define N_IMPLEMENT_META_TYPE_HEADER(Name) \
 	public: \
-		static bool Has ## Name(UEdGraphNode* Node) { return HasKey(Node, Name ## Key); } \
-		static FString Get ## Name(UEdGraphNode* Node) { return GetData(Node, Name ## Key); } \
-		static FString Get ## Name##Unsafe(UEdGraphNode* Node) { return GetDataUnsafe(Node, Name ## Key); } \
-		static bool TryGet## Name(UEdGraphNode* Node, FString& OutValue) { return TryGetData(Node, Name ## Key, OutValue);  }; \
+		static bool Has ## Name(UEdGraphNode* Node) { return FNMetaUtils::HasKey(Node, Name ## Key); } \
+		static FString Get ## Name(UEdGraphNode* Node) { return FNMetaUtils::GetData(Node, Name ## Key); } \
+		static FString Get ## Name##Unsafe(UEdGraphNode* Node) { return FNMetaUtils::GetDataUnsafe(Node, Name ## Key); } \
+		static bool TryGet## Name(UEdGraphNode* Node, FString& OutValue) { return FNMetaUtils::TryGetData(Node, Name ## Key, OutValue);  }; \
 \
-		static bool Has ## Name(UScriptStruct* ScriptStruct) { return HasKey(ScriptStruct, Name ## Key); } \
-		static FString Get ## Name(UScriptStruct* ScriptStruct) { return GetData(ScriptStruct, Name ## Key); } \
-		static FString Get ## Name##Unsafe(UScriptStruct* ScriptStruct) { return GetDataUnsafe(ScriptStruct, Name ## Key); } \
-		static bool TryGet## Name(UScriptStruct* ScriptStruct, FString& OutValue) { return TryGetData(ScriptStruct, Name ## Key, OutValue);  }; \
+		static bool Has ## Name(UScriptStruct* ScriptStruct) { return FNMetaUtils::HasKey(ScriptStruct, Name ## Key); } \
+		static FString Get ## Name(UScriptStruct* ScriptStruct) { return FNMetaUtils::GetData(ScriptStruct, Name ## Key); } \
+		static FString Get ## Name##Unsafe(UScriptStruct* ScriptStruct) { return FNMetaUtils::GetDataUnsafe(ScriptStruct, Name ## Key); } \
+		static bool TryGet## Name(UScriptStruct* ScriptStruct, FString& OutValue) { return FNMetaUtils::TryGetData(ScriptStruct, Name ## Key, OutValue);  }; \
 \
-		static bool Has ## Name(UStruct* Struct) { return HasKey(Struct, Name ## Key); } \
-		static FString Get ## Name(UStruct* Struct) { return GetData(Struct, Name ## Key); } \
-		static FString Get ## Name##Unsafe(UStruct* Struct) { return GetDataUnsafe(Struct, Name ## Key); } \
-		static bool TryGet## Name(UStruct* Struct, FString& OutValue) { return TryGetData(Struct, Name ## Key, OutValue);  }; \
+		static bool Has ## Name(UStruct* Struct) { return FNMetaUtils::HasKey(Struct, Name ## Key); } \
+		static FString Get ## Name(UStruct* Struct) { return FNMetaUtils::GetData(Struct, Name ## Key); } \
+		static FString Get ## Name##Unsafe(UStruct* Struct) { return FNMetaUtils::GetDataUnsafe(Struct, Name ## Key); } \
+		static bool TryGet## Name(UStruct* Struct, FString& OutValue) { return FNMetaUtils::TryGetData(Struct, Name ## Key, OutValue);  }; \
 \
-		static bool Has ## Name(UClass* Class) { return HasKey(Class, Name ## Key); } \
-		static FString Get ## Name(UClass* Class) { return GetData(Class, Name ## Key); } \
-		static FString Get ## Name##Unsafe(UClass* Class) { return GetDataUnsafe(Class, Name ## Key); } \
-		static bool TryGet## Name(UClass* Class, FString& OutValue) { return TryGetData(Class, Name ## Key, OutValue);  }; \
+		static bool Has ## Name(UClass* Class) { return FNMetaUtils::HasKey(Class, Name ## Key); } \
+		static FString Get ## Name(UClass* Class) { return FNMetaUtils::GetData(Class, Name ## Key); } \
+		static FString Get ## Name##Unsafe(UClass* Class) { return FNMetaUtils::GetDataUnsafe(Class, Name ## Key); } \
+		static bool TryGet## Name(UClass* Class, FString& OutValue) { return FNMetaUtils::TryGetData(Class, Name ## Key, OutValue);  }; \
 	private: \
 		static FName Name ## Key;
 
@@ -57,5 +57,5 @@ public:
 	static FString GetDataUnsafe(const UStruct* Struct, const FName& Key);
 	static FString GetDataUnsafe(const UClass* Class, const FName& Key);
 
-	N_IMPLEMENT_META_TYPE_HEADER(ExternalDocumentation);
+	N_IMPLEMENT_META_TYPE_HEADER(ExternalDocumentation)
 };

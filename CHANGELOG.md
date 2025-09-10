@@ -46,6 +46,8 @@
 - `Inside or On` abbreviated to `IO`.
 - Miscellaneous fixes and tweaks to support rolling out documentation.
 - Optimized `FNActorPool` to use a cached `IsStubMode()` for clients using a server-only pool.
+- Moved `Leak Check` duration setting to user level preference.
+- Clearly defined usage of `FNMetaUtils` static methods in helper macros.
 
 ### Removed
 
