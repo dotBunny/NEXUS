@@ -61,6 +61,7 @@
 ### Core Redirects
 ```ini
 +PropertyRedirects=(OldName="/Script/NexusActorPools.NActorPoolSettings.ReturnMoveLocation",NewName="/Script/NexusActorPools.NActorPoolSettings.StorageLocation")
++PackageRedirects=(OldName="/NexusMaterialLibrary/",NewName="/NexusBlockout/MaterialLibrary",MatchSubstring=true)
 ```
 
 ## [0.1.1] - 2025-08-01
