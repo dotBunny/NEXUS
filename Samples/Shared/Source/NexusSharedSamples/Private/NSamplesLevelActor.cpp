@@ -57,7 +57,7 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 	DemoName->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
 	DemoName->WorldSize = DemoTextSize;
 	DemoName->SetText(DemoText);
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DemoNameMaterialAsset(TEXT("/NexusMaterialLibrary/Debug/MI_NDebugText_Blue"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DemoNameMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebugText_Blue"));
 	if (DemoNameMaterialAsset.Succeeded())
 	{
 		DemoName->SetMaterial(0, DemoNameMaterialAsset.Object);
@@ -83,7 +83,7 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 		WallSouth->SetStaticMesh(WallMeshAsset.Object);
 		WallWest->SetStaticMesh(WallMeshAsset.Object);
 		
-		static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialAsset(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_Grey"));
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebug_Grey"));
 		if (WallMaterialAsset.Succeeded())
 		{
 			WallNorth->SetMaterial(0, WallMaterialAsset.Object);

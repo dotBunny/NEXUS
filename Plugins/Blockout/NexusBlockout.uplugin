@@ -1,0 +1,31 @@
+{
+	"FileVersion": 3,
+	"Version": 2,
+	"VersionName": "0.1.1",
+	"FriendlyName": "NEXUS: Blockout",
+	"Description": "A collection of useful content for blocking out a level or two early in development.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/blockout/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusBlockout",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

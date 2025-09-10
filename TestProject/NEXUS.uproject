@@ -23,15 +23,15 @@
 			"Enabled": true
 		},
 		{
+			"Name": "NexusBlockout",
+			"Enabled": true
+		},		
+		{
 			"Name": "NexusDynamicReferences",
 			"Enabled": true
 		},
 		{
 			"Name": "NexusFixers",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusMaterialLibrary",
 			"Enabled": true
 		},
 		{
@@ -51,11 +51,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferencesSamples",
+			"Name": "NexusBlockoutSamples",
 			"Enabled": true
-		},
+		},			
 		{
-			"Name": "NexusMaterialLibrarySamples",
+			"Name": "NexusDynamicReferencesSamples",
 			"Enabled": true
 		},
 		{

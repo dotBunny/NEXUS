@@ -51,6 +51,7 @@
 - Optimized `FNActorPool` to use a cached `IsStubMode()` for clients using a server-only pool.
 - Moved `Leak Check` duration setting to user level preference.
 - Clearly defined usage of `FNMetaUtils` static methods in helper macros.
+- `NEXUS: Material Library` renamed to `NEXUS: Blockout`.
 
 ### Removed
 
