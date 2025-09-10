@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.0] - ???
+## [0.2.0] - 2025-09-29
 
 ### Added
 
@@ -9,6 +9,7 @@
 - [#65](https://github.com/dotBunny/NEXUS/issues/65) Option to automatically profile multiplayer test clients and standalone server.
 - [#64](https://github.com/dotBunny/NEXUS/issues/64) Utilize `DefaultTransform` option on `FNActorPoolSettings` as the return location and the scale when spawning.
 - [#63](https://github.com/dotBunny/NEXUS/issues/63) Add `ServerOnly` flag by default to `FNActorPoolSettings`.
+- [#62](https://github.com/dotBunny/NEXUS/issues/62) Added support for nesting `UNActorPoolSet`.
 - [#31](https://github.com/dotBunny/NEXUS/issues/31) Added a watermark option to `NSamplesDisplayActor`. 
 - [#45](https://github.com/dotBunny/NEXUS/issues/45) Configurable default `NActorPool` settings via project settings (`Projct Settings > Nexus > Actor Pools`).
 - [#47](https://github.com/dotBunny/NEXUS/issues/47) Add update channel support to the framework.
@@ -27,6 +28,7 @@
 - `FNActorPool` will properly timeslice their strategies.
 - `FGCScopeGuard` guards like a boss during tests now.
 - Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc).
+- `UNActorPoolSpawnerComponent` will properly now allow BP editing of some variables.
 
 ### Changed
 

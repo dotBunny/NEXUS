@@ -41,7 +41,11 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	TemplateCount = Templates.Num();
 	for (int32 i = 0; i < TemplateCount; i++)
 	{
-		check(Templates[i].Template);
+		if (Templates[i].Template == nullptr)
+		{
+			N_LOG(Warning, TEXT("[NActorPoolSpawnerComponent] Invalid template at index %d, skipping."), i);
+			continue;
+		}
 
 		// Ensure actor pool is made, reuse if exists
 		Manager->CreateActorPool(Templates[i].Template, Templates[i].Settings);
@@ -116,7 +120,7 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 
 void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
-	if (!bSpawningEnabled && !bIgnoreSpawningFlag) return;
+	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
 	
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const FVector Origin = this->GetComponentLocation() + Offset;

@@ -59,18 +59,46 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
-	for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
+	if (ActorPoolSet->NestedSets.Num() == 0)
 	{
-		if (ActorPools.Contains(Definition.ActorClass))
+		// Optimized fast path for if the APS is not using nested sets.
+		for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
 		{
-			N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
-				*Definition.ActorClass->GetName());
+			if (ActorPools.Contains(Definition.ActorClass))
+			{
+				N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
+					*Definition.ActorClass->GetName());
+			}
+			else
+			{
+				CreateActorPool(Definition.ActorClass, Definition.Settings);
+			}			
 		}
-		else
-		{
-			CreateActorPool(Definition.ActorClass, Definition.Settings);
-		}			
+		return;
 	}
+
+	// We are going to evaluate and ensure that we are only operating on unique actor pool sets
+	TArray<UNActorPoolSet*> OutActorPoolSets;
+	if (ActorPoolSet->TryGetUniqueSets(OutActorPoolSets))
+	{
+		for (const UNActorPoolSet* Set : OutActorPoolSets)
+		{
+			N_LOG(Warning, TEXT("%s"), *Set->GetFName().ToString());
+			for (const FNActorPoolDefinition& Definition : Set->ActorPools)
+			{
+				if (ActorPools.Contains(Definition.ActorClass))
+				{
+					N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] [NESTED] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
+						*Definition.ActorClass->GetName());
+				}
+				else
+				{
+					CreateActorPool(Definition.ActorClass, Definition.Settings);
+				}			
+			}
+		}
+	}
+	
 }
 
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)

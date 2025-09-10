@@ -17,11 +17,11 @@ struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> Template;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	FNActorPoolSettings Settings;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	int32 Weight = 1;
 };
 
@@ -48,13 +48,13 @@ public:
 	/**
 	 * Is the component going to Spawn enemies when ticked?
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bSpawningEnabled = true;
 	
 	/**
 	 * Should the spawner only spawn on servers, ignoring itself on client-only.
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bServerAuthoritative = true;
 
 	/**
@@ -84,7 +84,7 @@ public:
 	/**
 	 * The in-level component reference for usage with the APSD_Spline for Distribution.
 	 */
-	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
 
 	/**
@@ -108,7 +108,7 @@ public:
 	/**
 	 * Seed used when determining what to pull from the weighted list.
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	int32 Seed = 0;
 
 	explicit UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer);
@@ -137,7 +137,7 @@ public:
 	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange; }
 
 protected:
-	UPROPERTY(EditInstanceOnly, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")
 	TArray<FNActorPoolSpawnerTemplate> Templates;
 private:
 	FNWeightedIntegerArray WeightedIndices;
