@@ -35,10 +35,10 @@ public:
 	}
 
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "AppIcon Path", meta=(ToolTip="Replaces the UnrealEditor AppIcon style, can be in SVG or image format. A restart of the editor is required for it to take effect."))
+	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "AppIcon Path", meta=(ToolTip="Replaces the Starship AppIcon style, can be in SVG or image format. A restart of the editor is required for it to take effect."))
 	FString ProjectAppIconPath;
 
-	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Window Icon Path", meta=(ToolTip="Replaces the UnrealEditor window icon at a platform level. This should simply be the path to the file WITHOUT any extension. The extension will be determined by the platform, thus all resources should have the same base name, and be located in the same folder. A restart of the editor is required for it to take effect."))
+	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "Window Icon Path", meta=(ToolTip="Replaces the Unreal Editor window icon at a platform level. This should simply be the path to the file WITHOUT any extension. The extension will be determined by the platform, thus all resources should have the same base name, and be located in the same folder. A restart of the editor is required for it to take effect."))
 	FString ProjectWindowIconPath;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World"))
