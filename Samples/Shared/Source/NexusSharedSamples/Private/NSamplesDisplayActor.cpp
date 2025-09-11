@@ -25,13 +25,13 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	PartRoot->SetMobility(EComponentMobility::Static);
 
 	// Create Materials
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebug_Grey"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
 	if (MaterialGrey.Succeeded())
 	{
 		DisplayMaterialInterface = MaterialGrey.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebug_GreyDark"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebug_White"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_GreyDark"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_White"));
 
 
 	// Create Components

@@ -83,7 +83,7 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 		WallSouth->SetStaticMesh(WallMeshAsset.Object);
 		WallWest->SetStaticMesh(WallMeshAsset.Object);
 		
-		static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/Debug/MI_NDebug_Grey"));
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
 		if (WallMaterialAsset.Succeeded())
 		{
 			WallNorth->SetMaterial(0, WallMaterialAsset.Object);
