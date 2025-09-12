@@ -28,6 +28,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, co
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-item/">NEXUS.Docs</a>
  */
 UINTERFACE(BlueprintType)
 class NEXUSACTORPOOLS_API UNActorPoolItem : public UInterface
@@ -37,7 +38,7 @@ class NEXUSACTORPOOLS_API UNActorPoolItem : public UInterface
 
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
- * @note Any scaling should be done on the RootComponent of the Actor for it to be effectively used when pooling.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-item/">NEXUS.Docs</a>
  */
 class NEXUSACTORPOOLS_API INActorPoolItem
 {

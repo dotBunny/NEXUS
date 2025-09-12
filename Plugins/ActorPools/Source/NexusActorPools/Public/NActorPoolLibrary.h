@@ -34,7 +34,7 @@ public:
 	}
 
 	/**
-	 * Removes all bindings for the given Object to the OnActorOperationalStateChanged delegate.	 
+	 * Removes all bindings for the given Object to the OnActorOperationalStateChanged delegate.
 	 * @param Actor The target Actor which implements the INActorPoolItem interface.
 	 * @param Object The UObject to have its matched bindings removed.
 	 */

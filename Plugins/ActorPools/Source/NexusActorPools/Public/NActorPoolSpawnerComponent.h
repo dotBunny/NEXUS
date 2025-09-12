@@ -118,17 +118,27 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	/**
+	 * Initiate a spawn call for the component, ignoring any timers.
+	 * @param bIgnoreSpawningFlag Should the internal spawning flag state be ignored?
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#spawn"))
 	void Spawn(bool bIgnoreSpawningFlag = false);
 
+	/**
+	 * Disables the component's internal flag to stop any spawning from occuring.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Disable Spawning", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
 	void DisableSpawning()
 	{
 		bSpawningEnabled = false;
 	}
-	
+
+	/**
+	 * Enables the component's internal flag to allow spawning to occur (on by default).
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Enable Spawning", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#enable-spawning"))
 	void EnableSpawning()

@@ -27,18 +27,17 @@ public:
 
 	/**
 	 * Gets an actor from a given pool, creating a pool as necessary.
-	 *
 	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
 	 * @param ReturnedActor The returned actor.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools",
-		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor"))
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Pools",
+		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor",
+		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actor"))
 	void GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
 
 	/**
 	 * Gets an actor from a given pool, creating a pool as necessary.
-	 *
 	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
 	 * @return The returned actor.
@@ -48,19 +47,18 @@ public:
 
 	/**
 	* Spawns an actor from a given pool, creating a pool as necessary.
-	*
 	* @param ActorClass The class of the actor which you would like to get from the actor pool.
 	* @param Position The world position to spawn the actor at.
 	* @param Rotation The world rotation to apply to the spawned actor.
 	* @param SpawnedActor The returned actor.
 	*/
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools",
-		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor"))
+	UFUNCTION(BlueprintCallable, DisplayName="Spawn Actor", Category = "NEXUS|Actor Pools",
+		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
+		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
 	void SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
 
 	/**
 	* Spawns an actor from a given pool, creating a pool as necessary.
-	*
 	* @param ActorClass The class of the actor which you would like to get from the actor pool.
 	* @param Position The world position to spawn the actor at.
 	* @param Rotation The world rotation to apply to the spawned actor.
@@ -75,7 +73,8 @@ public:
 	 * @param Actor The target actor to return to a pool.
 	 * @return true/false if the Actor was returned to a pool.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Return Actor", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-actor"))
 	bool ReturnActor(AActor* Actor);
 
 	void RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
@@ -96,7 +95,8 @@ public:
 	 * @param Settings  The settings to apply to the created pool.
 	 * @return true/false if a new pool was created.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Create Actor Pool", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#create-actor-pool"))
 	bool CreateActorPool(TSubclassOf<AActor> ActorClass, FNActorPoolSettings Settings);
 
 	/**
@@ -104,14 +104,16 @@ public:
 	 * @param ActorClass The class of the actor which you would like to check for a pool.
 	 * @return true/false if a pool already exists.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Has Actor Pool", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#has-actor-pool"))
 	bool HasActorPool(const TSubclassOf<AActor>& ActorClass) const { return ActorPools.Contains(ActorClass); }
 
 	/**
 	 * Apply a preconfigured ActorPoolSet, creating the defined pools.
 	 * @param ActorPoolSet  The ActorPoolSet to evaluate.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Apply ActorPoolSet", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#apply-actorpoolset"))
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
 	/**

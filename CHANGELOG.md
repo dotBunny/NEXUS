@@ -52,6 +52,7 @@
 - Moved `Leak Check` duration setting to user level preference.
 - Clearly defined usage of `FNMetaUtils` static methods in helper macros.
 - `NEXUS: Material Library` renamed to `NEXUS: Blockout`.
+- External documentation now supports comma delimited multiple entries.
 
 ### Removed
 

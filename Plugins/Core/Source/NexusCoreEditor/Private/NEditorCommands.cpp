@@ -171,7 +171,14 @@ void FNEditorCommands::OnNodeExternalDocumentation()
 	if (Editor == nullptr) return;
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return;
-	FPlatformProcess::LaunchURL(*FNMetaUtils::GetExternalDocumentationUnsafe(Node),nullptr, nullptr);
+
+	// Split the data so you can have multiple URIs in the data
+	TArray<FString> OutURIs;
+	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
+	for (int i = 0; i < OutURIs.Num(); i++)
+	{
+		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
+	}
 }
 
 bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
