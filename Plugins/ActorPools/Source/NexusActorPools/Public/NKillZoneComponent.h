@@ -11,7 +11,8 @@
 class UNActorPoolSubsystem;
 
 /**
- * A classic kill plane implementation with support for pooled actors.
+ * A kill plane implementation built to automatically pool properly configured AActor upon overlap.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/">NEXUS.Docs</a>
  */
 UCLASS(meta = (BlueprintSpawnableComponent))
 class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
@@ -24,13 +25,19 @@ public:
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Get Kill Count", Category = "NEXUS|Actor Pools",
+		meta=(ToolTip="Gets the internal counter tracking the number of AActors the component has killed.",
+		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#get-kill-count"))
 	int32 GetKillCount() const { return KillCount; }
 	
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Set Kill Count", Category = "NEXUS|Actor Pools",
+		meta=(ToolTip="Sets the internal counter tracking the number of AActors the component has killed.",
+		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#set-kill-count"))
 	void SetKillCount(const int32 NewKillCount) { KillCount = NewKillCount; }
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Reset Kill Count", Category = "NEXUS|Actor Pools",
+		meta=(ToolTip="Resets the internal counter tracking the number of AActors the component has killed to 0.",
+		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/#reset-kill-count"))
 	void ResetKillCount() { KillCount = 0; }
 
 	UFUNCTION()

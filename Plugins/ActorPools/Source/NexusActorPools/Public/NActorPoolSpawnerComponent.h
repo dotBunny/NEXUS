@@ -37,6 +37,7 @@ enum ENActorPoolSpawnerDistribution : uint8
 
 /**
  * A fundamental spawning component which will interact with the UNActorPoolSubsystem to periodically spawn defined AActors in predefined distributions (shapes).
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/">NEXUS.Docs</a>
  */
 UCLASS(meta = (BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
@@ -117,16 +118,19 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Spawn", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#spawn"))
 	void Spawn(bool bIgnoreSpawningFlag = false);
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	UFUNCTION(BlueprintCallable, DisplayName="Disable Spawning", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
 	void DisableSpawning()
 	{
 		bSpawningEnabled = false;
 	}
-
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	
+	UFUNCTION(BlueprintCallable, DisplayName="Enable Spawning", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#enable-spawning"))
 	void EnableSpawning()
 	{
 		bSpawningEnabled = true;
