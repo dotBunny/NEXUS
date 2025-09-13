@@ -68,13 +68,13 @@ public:
 	}
 
 	/**
-	 * Register an <code>UDeveloperSettings</code> object with the Unreal Editor.
+	 * Register an UDeveloperSettings object with the Unreal Editor.
 	* @notes Keys off SectionName
 	 */
 	static void RegisterSettings(UDeveloperSettings* SettingsObject);
 
 	/**
-	 * Unregister an <code>UDeveloperSettings</code> object with the Unreal Editor.
+	 * Unregister an UDeveloperSettings object with the Unreal Editor.
 	 * @notes Keys off SectionName
 	 */
 	static void UnregisterSettings(const UDeveloperSettings* SettingsObject);

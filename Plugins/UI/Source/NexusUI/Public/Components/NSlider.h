@@ -7,7 +7,7 @@
 #include "NSlider.generated.h"
 
 /**
- * A wrapper around the <code>USlider</code> class to allow for setting the value without broadcasting events.
+ * A wrapper around the USlider class to allow for setting the value without broadcasting events.
  */
 UCLASS()
 class NEXUSUI_API UNSlider final : public USlider
@@ -16,19 +16,19 @@ class NEXUSUI_API UNSlider final : public USlider
 	
 public:
 	/**
-	 * Set the value of the <code>USlider</code> without triggering exposed event bindings.
+	 * Set the value of the USlider without triggering exposed event bindings.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)")
 	void SetValue_NoBroadcast(const float NewValue);
 
 private:
 	/**
-	 * Cached value of the <code>OnValueChanged</code> used to prevent it from being called when setting the value.
+	 * Cached value of the OnValueChanged used to prevent it from being called when setting the value.
 	 */
 	FOnFloatValueChangedEvent CachedOnValueChanged;
 
 	/**
-	 * Empty <code>OnValueChanged</code> event used to swap in for the <code>CachedOnValueChanged</code> to prevent it from being called.
+	 * Empty OnValueChanged event used to swap in for the CachedOnValueChanged to prevent it from being called.
 	 */
 	static FOnFloatValueChangedEvent EmptyValueChanged;
 };

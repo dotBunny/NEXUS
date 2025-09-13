@@ -49,7 +49,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	}
 
 	/**
-	 * Get a random value from the array creating an instance <code>FRandomStream</code> from the <code>Seed</code>.	 
+	 * Get a random value from the array creating an instance FRandomStream from the Seed.	 
 	 */
 	int32 RandomOneShotValue(const int Seed) const
 	{
@@ -58,8 +58,8 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	};
 
 	/**
-	 * Get a random value from the array creating an instance <code>FRandomStream</code> from the <code>Seed</code>;
-	 * additionally settings the <code>Seed</code> with the mutated seed.	 
+	 * Get a random value from the array creating an instance FRandomStream from the Seed;
+	 * additionally settings the Seed with the mutated seed.	 
 	 */
 	int RandomTrackedValue(int32& Seed) const
 	{

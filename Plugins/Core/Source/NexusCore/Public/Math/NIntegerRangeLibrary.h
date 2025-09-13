@@ -8,7 +8,7 @@
 #include "NIntegerRangeLibrary.generated.h"
 
 /**
- * A Blueprint function library for working with <code>FNIntegerRange</code>.
+ * A Blueprint function library for working with FNIntegerRange.
  */
 UCLASS()
 class NEXUSCORE_API UNIntegerRangeLibrary : public UBlueprintFunctionLibrary

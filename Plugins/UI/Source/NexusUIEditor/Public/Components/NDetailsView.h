@@ -7,7 +7,7 @@
 #include "NDetailsView.generated.h"
 
 /**
- * A wrapper around the <code>UDetailsView</code> class to expose the internal <code>OnPropertyValueChanged</code> delegate.
+ * A wrapper around the UDetailsView class to expose the internal OnPropertyValueChanged delegate.
  */
 UCLASS()
 class NEXUSUIEDITOR_API UNDetailsView final : public UDetailsView
@@ -15,8 +15,8 @@ class NEXUSUIEDITOR_API UNDetailsView final : public UDetailsView
 	GENERATED_BODY()
 public:
 	/**
-	 * Get a reference to the internal <code>OnPropertyValueChanged</code> on the <code>UDetailsView</code>.
-	 * @return Delegate holder for the <code>OnPropertyValueChanged</code> event.
+	 * Get a reference to the internal OnPropertyValueChanged on the UDetailsView.
+	 * @return Delegate holder for the OnPropertyValueChanged event.
 	 */
 	FOnPropertyValueChanged* GetOnPropertyValueChangedRef()
 	{

@@ -8,7 +8,7 @@
 #include "NDoubleRangeLibrary.generated.h"
 
 /**
- * A Blueprint function library for working with <code>FNDoubleRange</code>.
+ * A Blueprint function library for working with FNDoubleRange.
  */
 UCLASS()
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary

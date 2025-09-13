@@ -8,7 +8,7 @@
 #include "NIntegerRange.generated.h"
 
 /**
- * An <code>int32</code> based range structure.
+ * An int32 based range structure.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNIntegerRange
