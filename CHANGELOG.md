@@ -23,6 +23,7 @@
 - Samples content now contains `ANSamplesHUD` and `ANSamplesPawn` to support making documentation easier.
 - `UNDeveloperSubsystem` in non-release builds allowing for monitoring of object counts and providing details.
 - `stats NActorPools` command to show stats (if tracking enabled).
+- Manual `AddReference` / `RemoveReference` access on `UNDynamicReferencesSubsystem`.
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.

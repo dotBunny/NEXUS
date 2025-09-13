@@ -11,6 +11,7 @@ void FNDynamicReferencesModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNDynamicReferencesModule, OnPostEngineInit);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNDynamicReferencesModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusDynamicReferencesSamples")

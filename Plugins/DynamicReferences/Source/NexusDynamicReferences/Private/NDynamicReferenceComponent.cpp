@@ -6,12 +6,6 @@
 
 void UNDynamicReferenceComponent::BeginPlay()
 {
-	for (TArray<AActor*>& ReferencedActors = UNDynamicReferenceSubsystem::Get(GetWorld())->GetReferences(ENDynamicReference::NDR_Item_L);
-		AActor*& Actor : ReferencedActors)
-	{
-		
-	}
-	
 	if (LinkPhase == ENActorComponentLifecycleStart::ACLS_BeginPlay)
 	{
 		// Register the references with the subsystem
@@ -59,7 +53,7 @@ void UNDynamicReferenceComponent::Register()
 		for (int i = 0; i < ReferenceCount; i++)
 		{
 			if (References[i] == NDR_None) continue;
-			Subsystem->RegisterReference(References[i], Owner);
+			Subsystem->AddReference(References[i], Owner);
 		}
 	}
 }
@@ -74,7 +68,7 @@ void UNDynamicReferenceComponent::Unregister()
 		for (int i = 0; i < ReferenceCount; i++)
 		{
 			if (References[i] == NDR_None) continue;
-			Subsystem->UnregisterReference(References[i], Owner);
+			Subsystem->RemoveReference(References[i], Owner);
 		}
 	}
 }
