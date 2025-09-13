@@ -90,7 +90,7 @@ public:
 	//End UTickableWorldSubsystem
 
 	/**
-	 * Create an actor pool for the provided Actor class, if one does not already exist.
+	 * Create an actor pool for the provided Actor class; if one does not already exist.
 	 * @param ActorClass The class of the actor which you would like to create a pool for.
 	 * @param Settings  The settings to apply to the created pool.
 	 * @return true/false if a new pool was created.
@@ -130,6 +130,7 @@ private:
 
 	TMap<UClass*, FNActorPool*> ActorPools;
 	TArray<FNActorPool*> TickableActorPools;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNActorPoolSpawnerComponent*> TickableSpawners;
 	
 	bool bHasTickableActorPools;
@@ -144,7 +145,7 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 {
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject, however I was not able to resolve behavioral differences
+		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);
@@ -161,7 +162,7 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 {
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject, however I was not able to resolve behavioral differences
+		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);

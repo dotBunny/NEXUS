@@ -158,7 +158,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPoo
 		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 5)
 		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
 
-		// Lets test that it recycles the last actor
+		// Test that it recycles the last actor
 		AActor* FirstLastActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
 		if (FirstLastActor == nullptr)
 		{
@@ -169,7 +169,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPoo
 			ADD_ERROR("The first recycled actor was not the last actor, this is unexpected.")
 		}
 
-		// Should be the same cause we just reuse the last
+		// Should be the same because we just reuse the last
 		AActor* LastActorAgain = Pool.Spawn(FVector::Zero() + FVector(100*11, 0,0), FRotator::ZeroRotator);
 		if (FirstLastActor != LastActorAgain)
 		{
@@ -278,7 +278,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, "NEXUS::UnitTests::NActorPool
 		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
 
 		
-		// Lets test that it recycles the last actor
+		// Test that it recycles the last actor
 		AActor* FirstLastActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
 		if (FirstLastActor == nullptr)
 		{

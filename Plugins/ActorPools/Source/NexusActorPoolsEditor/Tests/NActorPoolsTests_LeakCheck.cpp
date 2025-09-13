@@ -40,7 +40,7 @@ N_TEST(FNActorPoolTests_LeakCheck, "NEXUS::UnitTests::NActorPools::LeakCheck::Fo
 		Pool.Fill();
 		Pool.Clear(true);
 	
-		// Force destroy tells the actors to be destroyed, it doesn't mean we actually will have them destoryed unless..
+		// Force destroy tells the actors to be destroyed; it doesn't mean we actually will have them cleaned up unless we do a GC pass
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		const int32 PostClearObjects = FNDeveloperUtils::GetCurrentObjectCount();
 		

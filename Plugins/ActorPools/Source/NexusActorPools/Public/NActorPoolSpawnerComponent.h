@@ -28,11 +28,15 @@ struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 UENUM(BlueprintType)
 enum ENActorPoolSpawnerDistribution : uint8
 {
+	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	
 	APSD_Point			UMETA(DisplayName = "Point"),
 	APSD_Radius			UMETA(DisplayName = "Radius"),
 	APSD_Sphere			UMETA(DisplayName = "Sphere"),
 	APSD_Box			UMETA(DisplayName = "Box"),
 	APSD_Spline			UMETA(DisplayName = "Spline")
+
+	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 };
 
 /**
@@ -53,7 +57,7 @@ public:
 	bool bSpawningEnabled = true;
 	
 	/**
-	 * Should the spawner only spawn on servers, ignoring itself on client-only.
+	 * Should the spawner only spawn on servers, ignoring itself on client-only?
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bServerAuthoritative = true;
@@ -71,25 +75,25 @@ public:
 	FVector Offset = FVector::Zero();
 
 	/**
-	* How should the point be chosen where things are spawned.
+	* The distribution method used to choose where things are spawned.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	TEnumAsByte<ENActorPoolSpawnerDistribution> Distribution = ENActorPoolSpawnerDistribution::APSD_Point;
 
 	/**
-	* How should the point be chosen where things are spawned.
+	* The dimensional input to the distribution method.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
 
 	/**
-	 * The in-level component reference for usage with the APSD_Spline for Distribution.
+	 * The in-level component reference for usage with the Spline distribution method.
 	 */
 	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
 
 	/**
-	 * If you want to reference a Spline in a BP with the ActorPoolSpawner, you will need to enter its name here and it will be linked during BeginPlay.
+	 * If you want to reference a Spline in a BP with the ActorPoolSpawner, you will need to enter its name here, and it will be linked during BeginPlay.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FName SplineComponentName;
@@ -101,7 +105,7 @@ public:
 	int32 Count = 1;
 
 	/**
-	 * Should we randomize the seed on begin play?
+	 * Should we randomize the seed on BeginPlay?
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bRandomizeSeed = false;
@@ -157,7 +161,10 @@ private:
 	FNWeightedIntegerArray WeightedIndices;
 	bool bIsNetAuthority = false;
 	float TimeSinceSpawned = 0.f;
+	
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	UNActorPoolSubsystem* Manager = nullptr;
 	int32 TemplateCount = 0;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	USplineComponent* CachedSplineComponent = nullptr;
 };

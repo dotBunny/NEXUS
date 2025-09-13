@@ -8,7 +8,9 @@
 
 UENUM(BlueprintType)
 enum ENActorPoolStrategy : uint8
-{	
+{
+	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	
 	// Create AActor as needed.
 	APS_Create				UMETA(DisplayName = "Create"),
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
@@ -23,6 +25,8 @@ enum ENActorPoolStrategy : uint8
 	APS_FixedRecycleFirst	UMETA(DisplayName = "Fixed Availability, Recycle First"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior.
 	APS_FixedRecycleLast	UMETA(DisplayName = "Fixed Availability, Recycle Last")
+
+	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 };
 
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
@@ -54,7 +58,7 @@ enum class ENActorPoolFlags : uint8
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
 /**
- * A Blueprint-compatible struct that defines configuration parameters for managing object pooling inside of a FNActorPool.
+ * A Blueprint-compatible struct that defines configuration parameters for managing object pooling inside a FNActorPool.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/">NEXUS.Docs</a>
  */
 USTRUCT(BlueprintType)

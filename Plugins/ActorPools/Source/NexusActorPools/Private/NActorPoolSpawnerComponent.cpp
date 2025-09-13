@@ -32,7 +32,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		return;
 	}
 
-	// Register with pool system so it will handle ticking the component
+	// Register with the management system so it will handle ticking the component
 	Manager = UNActorPoolSubsystem::Get(GetWorld());
 	Manager->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
@@ -50,7 +50,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		// Ensure actor pool is made, reuse if exists
 		Manager->CreateActorPool(Templates[i].Template, Templates[i].Settings);
 
-		// Add to weighted list
+		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
 

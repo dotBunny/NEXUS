@@ -63,5 +63,7 @@ protected:
 	
 private:
 	int32 KillCount = 0;
+	
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	UNActorPoolSubsystem* ActorPoolSubsystem;
 };

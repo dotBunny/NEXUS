@@ -19,7 +19,7 @@ struct NEXUSACTORPOOLS_API FNActorPoolDefinition
 	TSubclassOf<AActor> ActorClass;
 
 	/**
-	 * The created Actor Pool's settings.
+	 * The Actor Pool's settings.
 	 */
 	UPROPERTY(EditAnywhere)
 	FNActorPoolSettings Settings;

@@ -77,7 +77,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject, however I was not able to resolve behavioral differences
+		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
 		ActorPools.Add(ActorClass, Pool);

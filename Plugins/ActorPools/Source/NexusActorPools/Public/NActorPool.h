@@ -98,7 +98,7 @@ public:
 	const FNActorPoolSettings& GetSettings() const { return Settings; };
 	
 	/**
-	 * Does the ActorPool's Template have a cached half height?
+	 * Does the ActorPool's Template have a cached half-height?
 	 * @note This is useful for finding the midpoint to spawn characters.
 	 */
 	bool HasHalfHeight() const { return bHasHalfHeight; };

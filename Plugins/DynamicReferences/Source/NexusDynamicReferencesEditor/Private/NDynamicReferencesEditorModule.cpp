@@ -17,6 +17,7 @@ void FNDynamicReferencesEditorModule::ShutdownModule()
 	FNDynamicReferencesEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNDynamicReferencesEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

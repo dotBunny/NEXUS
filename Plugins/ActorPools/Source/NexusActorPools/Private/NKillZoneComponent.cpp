@@ -59,7 +59,7 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		return;
 	}
 
-	// Check if we have a pool for this Actor, but it just doesnt implement the interface
+	// Check if we have a pool for this Actor, but it just doesn't implement the interface
 	if (ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
 	{
 		ActorPoolSubsystem->ReturnActor(OtherActor);

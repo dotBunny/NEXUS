@@ -72,7 +72,7 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 
 void FNActorPool::PostInitialize()
 {
-	// Cache half height of the item	
+	// Cache half-height of the item	
 	if (const APawn* Pawn = Cast<APawn>(Template->GetDefaultObject()))
 	{
 		HalfHeight = Pawn->GetDefaultHalfHeight();
@@ -177,7 +177,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	Settings.Strategy = InNewSettings.Strategy;
 	Settings.DefaultTransform = InNewSettings.DefaultTransform;
 	
-	// Update based on if we should tick - test usually dont have a access to the system to timeslice
+	// Update based on if we should tick - test usually don't have access to the system to time-slice
 	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
 	if (System != nullptr)
 	{
@@ -266,7 +266,7 @@ void FNActorPool::CreateActor()
 	//World->SpawnActor(Template, Settings.StorageLocation, FRotator::ZeroRotator, SpawnInfo);
 	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
 
-	// Ensure the actor is not garbage collected, pool itself will clean up.
+	// Ensure the actor is not garbage collected, the pool itself will clean up.
 	CreatedActor->AddToRoot();
 
 #if WITH_EDITOR
@@ -302,7 +302,7 @@ void FNActorPool::CreateActor()
 
 void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const
 {
-	// Set network flag first -- Thanks Nick!	
+	// Set the network flag first -- Thanks Nick!	
 	Actor->SetNetDormancy(DORM_Awake);
 
 	// Set Actor Location And Rotation

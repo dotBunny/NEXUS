@@ -60,7 +60,7 @@ public:
 	bool ReturnToActorPool();
 
 	/**
-	 * Get the ActorPoolSettings used to determine how the ActorPool should be setup for this Actor.
+	 * Get the ActorPoolSettings used to determine how the ActorPool should be set up for this Actor.
 	 */
 	virtual const FNActorPoolSettings& GetActorPoolSettings() {
 		if (OwningActorPool != nullptr)
