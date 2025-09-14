@@ -24,6 +24,7 @@
 - `UNDeveloperSubsystem` in non-release builds allowing for monitoring of object counts and providing details.
 - `stats NActorPools` command to show stats (if tracking enabled).
 - Manual `AddReference` / `RemoveReference` access on `UNDynamicReferencesSubsystem`.
+- Custom `cpp.hint` file in the plugin folder to mitigate Visual Studio's parser from incorrectly flagging UE macros as not found.
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
