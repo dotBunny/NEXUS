@@ -9,7 +9,7 @@
 
 /**
  * A specialized AActor base-class designed to work seamlessly with a FNActorPool.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor/">NEXUS.Docs</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor/">ANPooledActor</a>
  */
 UCLASS(Config = Game, Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
 class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem

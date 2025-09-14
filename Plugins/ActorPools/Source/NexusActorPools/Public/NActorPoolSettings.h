@@ -59,7 +59,7 @@ ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
 /**
  * A Blueprint-compatible struct that defines configuration parameters for managing object pooling inside a FNActorPool.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/">NEXUS.Docs</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/">FNActorPoolSettings</a>
  */
 USTRUCT(BlueprintType)
 struct NEXUSACTORPOOLS_API FNActorPoolSettings

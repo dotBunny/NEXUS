@@ -10,7 +10,7 @@
 
 /**
  * A locator system that maintains a map that organizes actors into predefined categories defined by ENDynamicReference.
- * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-reference-subsystem/">NEXUS.Docs</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-reference-subsystem/">UNDynamicReferenceSubsystem</a>
  */
 UCLASS(BlueprintType)
 class NEXUSDYNAMICREFERENCES_API UNDynamicReferenceSubsystem : public UWorldSubsystem
