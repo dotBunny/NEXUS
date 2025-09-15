@@ -23,5 +23,9 @@ class UNCoreLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	
+	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode From Selection", Category = "NEXUS|Core")
+	static EWindowMode::Type GetWindowModeFromSelection(const FString& Selection);
+
+	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections", Category = "NEXUS|Core")
+	static TArray<FString> GetWindowModeSelections();
 };

@@ -8,6 +8,7 @@
 
 /**
  * A wrapper around the UDetailsView class to expose the internal OnPropertyValueChanged delegate.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/details-view/">UNDetailsView</a> 
  */
 UCLASS()
 class NEXUSUIEDITOR_API UNDetailsView final : public UDetailsView
