@@ -45,6 +45,16 @@ FString UNSettingsLibrary::GetSelectionFromDisplayResolution(const FIntPoint Res
 	return FString::Printf(TEXT("%ix%i"), Resolution.X, Resolution.Y);
 }
 
+FIntPoint UNSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
+{
+	TArray<FString> Resolution;
+	Selection.ParseIntoArray(Resolution, TEXT("x"));
+	return FIntPoint(
+		FCString::Atoi(*Resolution[0]),
+		FCString::Atoi(*Resolution[1])
+		);
+}
+
 TArray<FString> UNSettingsLibrary::GetSupportedDisplayResolutions()
 {
 	TArray<FIntPoint> AllResolutions;

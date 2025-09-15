@@ -25,6 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Display Resolution", Category = "NEXUS|Core|Settings")
 	static FString GetSelectionFromDisplayResolution(FIntPoint Resolution);
 
+	UFUNCTION(BlueprintCallable, DisplayName="Get Display Resolution From Selection", Category = "NEXUS|Core|Settings")
+	static FIntPoint GetDisplayResolutionFromSelection(const FString& Selection);
+	
 	UFUNCTION(BlueprintCallable, DisplayName="Get Supported Display Resolutions", Category = "NEXUS|Core|Settings")
 	static TArray<FString>GetSupportedDisplayResolutions();
 };
