@@ -11,7 +11,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/check-box/">UNCheckBox</a>
  */
 UCLASS()
-class NEXUSUI_API UNCheckBox final : public UCheckBox
+class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()
 	

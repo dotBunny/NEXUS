@@ -11,7 +11,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/spin-box/">UNSpinBox</a>
  */
 UCLASS()
-class NEXUSUI_API UNSpinBox final : public USpinBox
+class NEXUSUI_API UNSpinBox : public USpinBox
 {
 	GENERATED_BODY()
 

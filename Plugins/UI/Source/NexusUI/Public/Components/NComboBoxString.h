@@ -11,7 +11,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/">UNComboBoxString</a>
  */
 UCLASS()
-class NEXUSUI_API UNComboBoxString final : public UComboBoxString
+class NEXUSUI_API UNComboBoxString : public UComboBoxString
 {
 	GENERATED_BODY()
 	

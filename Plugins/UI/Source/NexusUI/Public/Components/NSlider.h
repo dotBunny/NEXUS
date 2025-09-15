@@ -11,7 +11,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slider/">UNSlider</a>
  */
 UCLASS()
-class NEXUSUI_API UNSlider final : public USlider
+class NEXUSUI_API UNSlider : public USlider
 {
 	GENERATED_BODY()
 	
