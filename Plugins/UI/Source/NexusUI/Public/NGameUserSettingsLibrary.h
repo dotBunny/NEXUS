@@ -53,11 +53,11 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get Supported Display Resolutions", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static TArray<FString> GetSupportedDisplayResolutions();
 	
-	UFUNCTION(BlueprintCallable, DisplayName="Initialize DisplayMode Selector", Category = "NEXUS|User Interface|Game User Settings|Video")
-	static void InitializeDisplayModeComboBox(UNComboBoxString* ComboBox);
+	UFUNCTION(BlueprintCallable, DisplayName="Initialize WindowMode Selector (NComboBoxString)", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static void InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
-	UFUNCTION(BlueprintCallable, DisplayName="Initialize Display Resolution Selector", Category = "NEXUS|User Interface|Game User Settings|Video")
-	static void InitializeDisplayResolutionComboBox(UNComboBoxString* ComboBox);
+	UFUNCTION(BlueprintCallable, DisplayName="Initialize Display Resolution Selector (NComboBoxString)", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static void InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 private:
 	

@@ -9,18 +9,23 @@
 
 TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 	NSLOCTEXT("NexusUI", "FullscreenDisplayModeLabel", "Fullscreen"),
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX			
 	NSLOCTEXT("NexusUI", "FullscreenWindowDisplayModeLabel", "Fullscreen Window"),
 	NSLOCTEXT("NexusUI", "WindowedDisplayModeLabel", "Windowed")
+#endif	
 };
 
 TArray<FString> UNGameUserSettingsLibrary::DisplayModeLabels = {
 	DisplayModeTexts[0].ToString(),
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
 	DisplayModeTexts[1].ToString(),
 	DisplayModeTexts[2].ToString()
+#endif	
 };
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FString& Selection)
 {
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
 	if (DisplayModeLabels[2].Compare(Selection) == 0)
 	{
 		return EWindowMode::Type::Windowed;
@@ -30,10 +35,14 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FStri
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
+#else
+	return EWindowMode::Type::Fullscreen;
+#endif
 }
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& Selection)
 {
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
 	if (Selection.EqualTo(DisplayModeTexts[2]))
 	{
 		return EWindowMode::Type::Windowed;
@@ -43,6 +52,9 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
+#else
+	return EWindowMode::Type::Fullscreen;
+#endif	
 }
 
 FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
@@ -57,6 +69,7 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 
 FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
 {
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
@@ -66,10 +79,14 @@ FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWind
 	default:
 		return DisplayModeLabels[0];
 	}
+#else
+	return DisplayModeLabels[0];
+#endif	
 }
 
 FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
 {
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
@@ -79,6 +96,9 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 	default:
 		return DisplayModeTexts[0];
 	}
+#else
+	return DisplayModeLabels[0];
+#endif
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
@@ -113,23 +133,29 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 	return MoveTemp(SupportedResolutions);
 }
 
-void UNGameUserSettingsLibrary::InitializeDisplayModeComboBox(UNComboBoxString* ComboBox)
+void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
 	ComboBox->ClearOptions();
 	for (auto& Label : DisplayModeLabels)
 	{
 		ComboBox->AddOption(Label);
 	}
-	ComboBox->SetSelectedOption_NoBroadcast(GetSelectionStringFromCurrentWindowMode());
+	if (bSelectCurrent)
+	{
+		ComboBox->SetSelectedOption_NoBroadcast(GetSelectionStringFromCurrentWindowMode());
+	}
 }
 
-void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBox(UNComboBoxString* ComboBox)
+void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
 	ComboBox->ClearOptions();
 	for (auto& Resolution : GetSupportedDisplayResolutions())
 	{
 		ComboBox->AddOption(Resolution);
 	}
-	ComboBox->SetSelectedOption_NoBroadcast(GetSelectionFromCurrentDisplayResolution());
+	if (bSelectCurrent)
+	{
+		ComboBox->SetSelectedOption_NoBroadcast(GetSelectionFromCurrentDisplayResolution());
+	}
 }
 
