@@ -2,7 +2,7 @@
 
 UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptySelectionChanged;
 
-void UNComboBoxString::SetSelectedOption_NoBroadcast(FString Option)
+void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 {
 	if (!GetSelectedOption().Equals(Option))
 	{
