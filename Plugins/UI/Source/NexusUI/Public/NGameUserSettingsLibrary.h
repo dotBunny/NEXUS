@@ -8,17 +8,26 @@
 
 #include "NGameUserSettingsLibrary.generated.h"
 
+class UNComboBoxString;
+
 UCLASS()
 class UNGameUserSettingsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
+	
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode From Selection (String)", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static EWindowMode::Type GetWindowModeFromString(const FString& Selection);
 
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode From Selection (Text)", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static EWindowMode::Type GetWindowModeFromText(const FText& Selection);
+
+	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static FString& GetSelectionStringFromCurrentWindowMode();
+
+	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static FText& GetSelectionTextFromCurrentWindowMode();
 	
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static FString& GetSelectionStringFromWindowMode(EWindowMode::Type Mode);
@@ -32,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections (Text)", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static TArray<FText>& GetWindowModeTextSelections() { return DisplayModeTexts; };
 
+	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Current Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static FString GetSelectionFromCurrentDisplayResolution();
+	
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From Display Resolution", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static FString GetSelectionFromDisplayResolution(FIntPoint Resolution);
 
@@ -40,6 +52,12 @@ public:
 	
 	UFUNCTION(BlueprintCallable, DisplayName="Get Supported Display Resolutions", Category = "NEXUS|User Interface|Game User Settings|Video")
 	static TArray<FString> GetSupportedDisplayResolutions();
+	
+	UFUNCTION(BlueprintCallable, DisplayName="Initialize DisplayMode Selector", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static void InitializeDisplayModeComboBox(UNComboBoxString* ComboBox);
+
+	UFUNCTION(BlueprintCallable, DisplayName="Initialize Display Resolution Selector", Category = "NEXUS|User Interface|Game User Settings|Video")
+	static void InitializeDisplayResolutionComboBox(UNComboBoxString* ComboBox);
 
 private:
 	

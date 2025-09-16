@@ -9,9 +9,14 @@ void UNSlider::SetValue_NoBroadcast(const float NewValue)
 {
 	if (GetValue() != NewValue)
 	{
+		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
+		bShouldBroadcastState = false;
 		CachedOnValueChanged = OnValueChanged;
 		OnValueChanged = EmptyValueChanged;
+		
 		SetValue(NewValue);
+
 		OnValueChanged = CachedOnValueChanged;
+		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

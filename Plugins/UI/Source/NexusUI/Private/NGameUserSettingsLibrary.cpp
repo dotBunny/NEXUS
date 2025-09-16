@@ -2,6 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NGameUserSettingsLibrary.h"
+
+#include "Components/NComboBoxString.h"
+#include "GameFramework/GameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
@@ -42,6 +45,16 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 	return EWindowMode::Type::Fullscreen;
 }
 
+FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
+{
+	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+}
+
+FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
+{
+	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+}
+
 FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
 {
 	switch(Mode)
@@ -66,6 +79,11 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 	default:
 		return DisplayModeTexts[0];
 	}
+}
+
+FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
+{
+	return GetSelectionFromDisplayResolution(GEngine->GetGameUserSettings()->GetScreenResolution());
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntPoint Resolution)
@@ -93,5 +111,25 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 		SupportedResolutions.Add(FString::Printf(TEXT("%dx%d"), Resolution.X, Resolution.Y));
 	}
 	return MoveTemp(SupportedResolutions);
+}
+
+void UNGameUserSettingsLibrary::InitializeDisplayModeComboBox(UNComboBoxString* ComboBox)
+{
+	ComboBox->ClearOptions();
+	for (auto& Label : DisplayModeLabels)
+	{
+		ComboBox->AddOption(Label);
+	}
+	ComboBox->SetSelectedOption_NoBroadcast(GetSelectionStringFromCurrentWindowMode());
+}
+
+void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBox(UNComboBoxString* ComboBox)
+{
+	ComboBox->ClearOptions();
+	for (auto& Resolution : GetSupportedDisplayResolutions())
+	{
+		ComboBox->AddOption(Resolution);
+	}
+	ComboBox->SetSelectedOption_NoBroadcast(GetSelectionFromCurrentDisplayResolution());
 }
 
