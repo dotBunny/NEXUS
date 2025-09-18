@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "NSplinePicker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
-#include "Macros/NWorldMacros.h"
 #include "NSplinePickerLibrary.generated.h"
 
 /**
@@ -21,7 +20,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point on a spline.
-	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
@@ -36,9 +34,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point on a spline, then projects it to the world.
-	 * 
-	 * @param SplineComponent The spline component to generate points on..
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param SplineComponent The spline component to generate points on.
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -55,7 +52,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline.
-	 * 
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
@@ -70,9 +66,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline, then projects it to the world.
-	 * 
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -88,7 +83,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline using a provided seed.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
@@ -104,10 +98,9 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -123,7 +116,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a random point on a spline while tracking the random seed state.
-	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
@@ -139,10 +131,9 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point on a spline while tracking the random seed state, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -159,7 +150,6 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
 	 * Uses the N_PICKER_TOLERANCE defined in NPickerUtils.h for proximity checking.
-	 * 
 	 * @param SplineComponent The spline component to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is on the spline within the tolerance, false otherwise.

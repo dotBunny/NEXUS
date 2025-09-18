@@ -23,7 +23,6 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
@@ -42,13 +41,12 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle, then projects it to the world.
 	 * The point is projected in the given direction until it hits something in the world.
-	 * 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
-	 * @param WorldContextObject Object that provides access to the world.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param WorldContextObject Object that provides the context of which world to operate in.
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -65,7 +63,6 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point inside or on the perimeter of a circle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
@@ -84,13 +81,12 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point inside or on the perimeter of a circle, then projects it to the world.
 	 * The point is projected in the given direction until it hits something in the world.
-	 * 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
-	 * @param WorldContextObject Object that provides access to the world.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param WorldContextObject Object that provides the context of which world to operate in.
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -107,7 +103,6 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -127,14 +122,13 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed, then projects it to the world.
 	 * The point is projected in the given direction until it hits something in the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
-	 * @param WorldContextObject Object that provides access to the world.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param WorldContextObject Object that provides the context of which world to operate in.
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -151,7 +145,6 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -172,14 +165,13 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
 	 * The point is projected in the given direction until it hits something in the world.
-	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation Optional rotation to apply to the circle plane (default is ZeroRotator).
-	 * @param WorldContextObject Object that provides access to the world.
-	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
+	 * @param WorldContextObject Object that provides the context of which world to operate in.
+	 * @param Projection Direction and distance for the line trace (default is down 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
@@ -196,7 +188,6 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Checks if a point is inside or on the perimeter of a circle.
-	 * 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).

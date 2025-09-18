@@ -22,7 +22,6 @@ public:
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -45,9 +44,9 @@ public:
 
 		N_IMPLEMENT_VLOG_CIRCLE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -69,7 +68,6 @@ public:
 	/**
 	 * Generates a random point inside or on the perimeter of a circle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -91,9 +89,9 @@ public:
 		}
 		N_IMPLEMENT_VLOG_CIRCLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the perimeter of a circle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -115,7 +113,6 @@ public:
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
@@ -140,9 +137,9 @@ public:
 		N_IMPLEMENT_VLOG_CIRCLE()
 		
 	}
+
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.

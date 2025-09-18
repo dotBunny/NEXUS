@@ -87,7 +87,7 @@ NEXUSPICKER_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusPicker, Log, All);
 			Origin + Rotation.RotateVector(FVector(VerticesVariable##ExtentX, -VerticesVariable##ExtentY, 0)) \
 		};
 
-// Not a super fan of using segments
+// Not a superfan of using segments
 #define N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, VerticesVariable, Color) \
 		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[0], VerticesVariable[1], Color, TEXT("")); \
 		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[1], VerticesVariable[2], Color, TEXT("")); \

@@ -23,7 +23,6 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Gets the next deterministic point inside or on the FBox.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
@@ -37,9 +36,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets the next deterministic point inside or on the FBox and projects it in the given direction.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
@@ -57,9 +56,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::NextPointInsideOrOnProjected(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets the next deterministic point inside or on the FBox.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A point that is inside or on the FBox.
@@ -72,9 +71,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::NextPointInsideOrOnSimple(ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets the next deterministic point inside or on the FBox and projects it in the given direction.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
 	 * @param WorldContextObject Object that provides access to the world.
@@ -96,7 +95,6 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Gets a random point inside or on the FBox.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
@@ -110,9 +108,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox and projects it in the given direction.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
 	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
@@ -130,9 +128,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomPointInsideOrOnProjected(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
 	 * @return A random point that is inside or on the FBox.
@@ -145,9 +143,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomPointInsideOrOnSimple(ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox and projects it in the given direction.
-	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
 	 * @param WorldContextObject Object that provides access to the world.
@@ -169,7 +167,6 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Gets a random point inside or on the FBox using a one-shot seed.
-	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -184,9 +181,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a one-shot seed and projects it in the given direction.
-	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -205,9 +202,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomOneShotPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;	
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a one-shot seed.
-	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -221,9 +218,9 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomOneShotPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a one-shot seed and projects it in the given direction.
-	 * 
 	 * @param Seed The seed value to use for the random number generation.
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -247,7 +244,6 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Gets a random point inside or on the FBox using a tracked seed.
 	 * The seed is incremented each time this function is called.
-	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -262,10 +258,10 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a tracked seed and projects it in the given direction.
 	 * The seed is incremented each time this function is called.
-	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
@@ -286,10 +282,10 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a tracked seed.
 	 * The seed is incremented each time this function is called.
-	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -303,10 +299,10 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 		FNBoxPicker::RandomTrackedPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Dimensions);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Gets a random point inside or on the FBox using a tracked seed and projects it in the given direction.
 	 * The seed is incremented each time this function is called.
-	 * 
 	 * @param Seed The seed value used for random number generation. Will be incremented after use.
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
@@ -330,7 +326,6 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Checks if a point is inside or on the FBox.
-	 * 
 	 * @param Origin      The center point of the FBox.
 	 * @param Dimensions  The dimensions of the FBox.
 	 * @param Point       The point to check.

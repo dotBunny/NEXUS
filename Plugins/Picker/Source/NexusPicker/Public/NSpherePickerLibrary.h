@@ -24,7 +24,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
@@ -40,7 +39,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
@@ -55,7 +53,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
@@ -75,7 +72,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @param WorldContextObject Object that provides context for accessing the world.
@@ -98,7 +94,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
@@ -114,7 +109,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
@@ -129,7 +123,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
@@ -147,9 +140,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomPointInsideOrOnProjected(ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @param WorldContextObject Object that provides context for accessing the world.
@@ -171,7 +164,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -186,9 +178,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -202,9 +194,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -223,9 +215,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomOneShotPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
 		return ReturnLocation;	
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -248,7 +240,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -263,9 +254,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumRadius, MaximumRadius);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -279,9 +270,9 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 		FNSpherePicker::RandomTrackedPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Radius);
 		return ReturnLocation;
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -303,7 +294,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -327,7 +317,6 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @param Point The point to check.

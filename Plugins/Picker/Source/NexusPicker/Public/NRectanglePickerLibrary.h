@@ -23,7 +23,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
 	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
@@ -41,7 +40,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle using simple dimensions.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
 	 * @param Rotation The rotation of the rectangle around its center.
@@ -58,7 +56,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
 	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
@@ -82,7 +79,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle using simple dimensions, then projects it onto a surface in the world.
 	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
 	 * @param Rotation The rotation of the rectangle around its center.
@@ -106,7 +102,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
 	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
@@ -124,7 +119,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
 	 * @param Rotation The rotation of the rectangle around its center.
@@ -141,7 +135,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
 	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
@@ -164,7 +157,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions, then projects it onto a surface in the world.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
 	 * @param Rotation The rotation of the rectangle around its center.
@@ -188,7 +180,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using a provided seed.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
@@ -207,7 +198,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a provided seed.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
@@ -225,7 +215,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using a provided seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
@@ -249,7 +238,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a provided seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
@@ -274,7 +262,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using a tracked seed.
-	 * 
 	 * @param Seed The random seed to use and modify (passed by reference).
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
@@ -293,7 +280,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a tracked seed.
-	 * 
 	 * @param Seed The random seed to use and modify (passed by reference).
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
@@ -311,7 +297,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using a tracked seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use and modify (passed by reference).
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
@@ -335,7 +320,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a tracked seed, then projects it onto a surface in the world.
-	 * 
 	 * @param Seed The random seed to use and modify (passed by reference).
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
@@ -360,7 +344,6 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Checks whether a given point is inside or on the boundary of a rectangle.
-	 * 
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
 	 * @param Rotation The rotation of the rectangle around its center.

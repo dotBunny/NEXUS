@@ -12,6 +12,7 @@ void FNPickerModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNPickerModule, OnPostEngineInit);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNPickerModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusPickerSamples")

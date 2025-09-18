@@ -3,7 +3,6 @@
 
 #include "NTextRenderComponent.h"
 
-#include "NCoreMinimal.h"
 #include "NMultiplayerUtils.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
