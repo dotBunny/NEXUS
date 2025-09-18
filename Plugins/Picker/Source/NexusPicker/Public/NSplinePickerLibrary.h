@@ -12,6 +12,7 @@
 /**
  * Provides various functions for generating points along a USplineComponent spline using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/spline/">UNSplinePickerLibrary</a>
  */
 UCLASS()
 class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
@@ -24,7 +25,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point (On)", Category = "NEXUS|Picker|Spline")
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#next-point-io"))
 	static FVector NextPointOn(const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
@@ -35,18 +37,19 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a deterministic point on a spline, then projects it to the world.
 	 * 
-	 * @param SplineComponent The spline component to generate points on.
-	 * @param WorldContextObject Object that provides access to the world.
+	 * @param SplineComponent The spline component to generate points on..
 	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point Projected (On)", Category = "NEXUS|Picker|Spline", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Next Point Projected (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#next-point-projected-on"))
 	static FVector NextPointOnProjected(const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+		const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
+		
 		FVector ReturnLocation;
-		FNSplinePicker::NextPointOnProjected(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
+		FNSplinePicker::NextPointOnProjected(ReturnLocation, SplineComponent, SplineComponent->GetWorld(), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -56,7 +59,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point (On)", Category = "NEXUS|Picker|Spline")
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-point-on"))
 	static FVector RandomPointOn(const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
@@ -68,17 +72,17 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * Generates a random point on a spline, then projects it to the world.
 	 * 
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param WorldContextObject Object that provides access to the world.
 	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point Projected (On)", Category = "NEXUS|Picker|Spline", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Point Projected (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-point-projected-on"))
 	static FVector RandomPointOnProjected(const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+		const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomPointOnProjected(ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
+		FNSplinePicker::RandomPointOnProjected(ReturnLocation, SplineComponent, SplineComponent->GetWorld(), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -89,7 +93,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Point (On)", Category = "NEXUS|Picker|Spline")
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Point (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-point-projected-on"))
 	static FVector RandomOneShotPointOn(const int32 Seed, const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
@@ -102,17 +107,17 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param WorldContextObject Object that provides access to the world.
 	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Point Projected (On)", Category = "NEXUS|Picker|Spline", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random One-Shot Point Projected (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-one-shot-point-projected-on"))
 	static FVector RandomOneShotPointOnProjected(const int32 Seed, const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+		const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomOneShotPointOnProjected(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
+		FNSplinePicker::RandomOneShotPointOnProjected(Seed, ReturnLocation, SplineComponent, SplineComponent->GetWorld(), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 
@@ -123,7 +128,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param SplineComponent The spline component to generate points on.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Point (On)", Category = "NEXUS|Picker|Spline")
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Point (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-tracked-point-on"))
 	static FVector RandomTrackedPointOn(UPARAM(ref)int32& Seed, const USplineComponent* SplineComponent)
 	{
 		FVector ReturnLocation;
@@ -136,17 +142,17 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	 * 
 	 * @param Seed The random seed to use and update.
 	 * @param SplineComponent The spline component to generate points on.
-	 * @param WorldContextObject Object that provides access to the world.
 	 * @param Projection Direction and distance for the line trace (default is downward 500 units).
 	 * @param CollisionChannel The collision channel to use for tracing (default is WorldStatic).
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Point Projected (On)", Category = "NEXUS|Picker|Spline", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Spline: Random Tracked Point Projected (On)", Category = "NEXUS|Picker|Spline",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/spline/#random-tracked-point-projected-on"))
 	static FVector RandomTrackedPointOnProjected(UPARAM(ref)int32& Seed, const USplineComponent* SplineComponent,
-		UObject* WorldContextObject, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+		const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
 		FVector ReturnLocation;
-		FNSplinePicker::RandomTrackedPointOnProjected(Seed, ReturnLocation, SplineComponent, N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
+		FNSplinePicker::RandomTrackedPointOnProjected(Seed, ReturnLocation, SplineComponent, SplineComponent->GetWorld(), Projection, CollisionChannel);
 		return ReturnLocation;
 	}
 

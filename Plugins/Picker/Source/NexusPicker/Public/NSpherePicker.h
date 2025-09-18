@@ -10,6 +10,7 @@
 /** 
  * Provides various functions for generating points inside or on the surface of a sphere using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/">FNSpherePicker</a>
  */
 class NEXUSPICKER_API FNSpherePicker
 {

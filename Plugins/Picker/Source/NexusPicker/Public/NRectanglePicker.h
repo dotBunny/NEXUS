@@ -10,6 +10,7 @@
 /**
  * Provides various functions for generating points the plane of a rectangle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/">FNRectanglePicker</a>
  */
 class NEXUSPICKER_API FNRectanglePicker
 {

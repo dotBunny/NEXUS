@@ -13,6 +13,7 @@
 /**
  * Provides various functions for generating points inside or on the surface of a sphere using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/">UNSpherePickerLibrary</a>
  */
 UCLASS()
 class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
@@ -29,7 +30,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO)", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point-io"))
 	static FVector NextPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -43,7 +45,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point-io"))
 	static FVector NextPointInsideOrOnSimple(const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -61,7 +64,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point-projected-io"))
 	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -79,7 +83,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point-projected-io"))
 	static FVector NextPointInsideOrOnSimpleProjected(const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -99,7 +104,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO)", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-point-io"))
 	static FVector RandomPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -113,7 +119,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-point-io"))
 	static FVector RandomPointInsideOrOnSimple(const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -131,7 +138,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-point-projected-io"))
 	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -149,7 +157,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-point-projected-io"))
 	static FVector RandomPointInsideOrOnSimpleProjected(const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -169,7 +178,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-one-shot-point-io"))
 	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -184,7 +194,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-one-shot-point-io"))
 	static FVector RandomOneShotPointInsideOrOnSimple(const int32 Seed, const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -203,7 +214,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-one-shot-point-projected-io"))
 	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -222,7 +234,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random One-Shot Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-one-shot-point-projected-io"))
 	static FVector RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -242,7 +255,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO)", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO)", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-tracked-point-io"))
 	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		FVector ReturnLocation;
@@ -257,7 +271,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param Radius The radius of the sphere.
 	 * @return The generated point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere")
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-tracked-point-io"))
 	static FVector RandomTrackedPointInsideOrOnSimple(UPARAM(ref)int32& Seed, const FVector& Origin, const float Radius)
 	{
 		FVector ReturnLocation;
@@ -276,7 +291,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO)", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-tracked-point-projected-io"))
 	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float MinimumRadius, const float MaximumRadius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{
@@ -296,7 +312,8 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 	 * @param CollisionChannel The collision channel to use for the line trace.
 	 * @return The generated and projected point location.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject"))
+	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Random Tracked Projected Point (IO) [Simple]", Category = "NEXUS|Picker|Sphere", meta = (WorldContext = "WorldContextObject",
+		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#random-tracked-point-projected-io"))
 	static FVector RandomTrackedPointInsideOrOnSimpleProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const float Radius,
 		UObject* WorldContextObject, FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
 	{

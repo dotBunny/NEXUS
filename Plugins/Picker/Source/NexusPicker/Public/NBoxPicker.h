@@ -8,8 +8,9 @@
 #include "NRandom.h"
 
 /**
- * Provides various functions for generating points inside or on the surface of a FBox using different
+ * Provides various functions for generating points inside or on the surface of the FBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/box/">FNBoxPicker</a>
  */
 class NEXUSPICKER_API FNBoxPicker
 {
@@ -18,7 +19,7 @@ public:
 	// NEXT POINT
 
 	/**
-	 * Generates a deterministic point inside or on the surface of a FBox.
+	 * Generates a deterministic point inside or on the surface of the FBox.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * 
 	 * @param OutLocation [out] The generated point location.
@@ -45,7 +46,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
-	 * Generates a deterministic point inside or on the surface of a FBox.
+	 * Generates a deterministic point inside or on the surface of the FBox.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * 
 	 * @param OutLocation [out] The generated point location.
@@ -63,7 +64,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
-	 * Generates a deterministic point inside or on the surface of a FBox.
+	 * Generates a deterministic point inside or on the surface of the FBox.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * 
 	 * @param OutLocation [out] The generated point location.
@@ -80,7 +81,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
-	 * Generates a deterministic point inside or on the surface of a FBox, then projects it to the world.
+	 * Generates a deterministic point inside or on the surface of the FBox, then projects it to the world.
 	 * 
 	 * @param OutLocation [out] The generated and grounded point location.
 	 * @param Origin The center point of the FBox.
@@ -99,7 +100,7 @@ public:
 	// RANDOM POINT
 
 	/**
-	 * Generates a random point inside or on the surface of a FBox.
+	 * Generates a random point inside or on the surface of the FBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * 
 	 * @param OutLocation [out] The generated point location.
@@ -126,7 +127,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox, then projects it to the world.
+	 * Generates a random point inside or on the surface of the FBox, then projects it to the world.
 	 * 
 	 * @param OutLocation [out] The generated and grounded point location.
 	 * @param Origin The center point of the FBox.
@@ -143,7 +144,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox.
+	 * Generates a random point inside or on the surface of the FBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * 
 	 * @param OutLocation [out] The generated point location.
@@ -158,7 +159,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox, then projects it to the world.
+	 * Generates a random point inside or on the surface of the FBox, then projects it to the world.
 	 * 
 	 * @param OutLocation [out] The generated and grounded point location.
 	 * @param Origin The center point of the FBox.
@@ -177,7 +178,7 @@ public:
 	// RANDOM ONE-SHOT POINT
 	
 	/**
-	 * Generates a random point inside or on the surface of a FBox using a provided seed.
+	 * Generates a random point inside or on the surface of the FBox using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
 	 * 
 	 * @param Seed The random seed to use.
@@ -207,7 +208,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox using a provided seed, then projects it to the world.	 
+	 * Generates a random point inside or on the surface of the FBox using a provided seed, then projects it to the world.	 
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and grounded point location.
@@ -226,7 +227,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox using a provided seed.
+	 * Generates a random point inside or on the surface of the FBox using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
 	 * 
 	 * @param Seed The random seed to use.
@@ -244,7 +245,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox using a provided seed, then projects it to the world.	 
+	 * Generates a random point inside or on the surface of the FBox using a provided seed, then projects it to the world.	 
 	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and grounded point location.
@@ -266,7 +267,7 @@ public:
 	// RANDOM TRACKED POINT
 
 	/**
-	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state.
+	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
@@ -298,7 +299,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state, then grounds it to the world.
+	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state, then grounds it to the world.
 	 * Updates the seed value to enable sequential random point generation.	
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
@@ -318,7 +319,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state.
+	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
@@ -337,7 +338,7 @@ public:
 		N_IMPLEMENT_VLOG_BOX_SIMPLE()
 	}
 	/**
-	 * Generates a random point inside or on the surface of a FBox while tracking the random seed state, then grounds it to the world.
+	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state, then grounds it to the world.
 	 * Updates the seed value to enable sequential random point generation.	
 	 * 
 	 * @param Seed [in,out] The random seed to use and update.
@@ -359,7 +360,7 @@ public:
 	// ASSERT
 
 	/**
-	 * Checks if a point is inside or on the surface of a FBox.
+	 * Checks if a point is inside or on the surface of the FBox.
 	 * 
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.

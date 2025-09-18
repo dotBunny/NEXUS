@@ -10,7 +10,7 @@
 /**
  * Provides various functions for generating points in the plane of a circle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- *
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">FNCirclePicker</a>
  * @note There are no simple variants to these methods as it wouldn't change the computation.
  */
 class NEXUSPICKER_API FNCirclePicker

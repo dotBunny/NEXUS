@@ -10,6 +10,7 @@
 /**
  * Provides various functions for generating points along a USplineComponent spline using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/spline/">FNSplinePicker</a>
  */
 class NEXUSPICKER_API FNSplinePicker
 {
