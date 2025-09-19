@@ -56,6 +56,7 @@
 - `NEXUS: Material Library` renamed to `NEXUS: Blockout`.
 - External documentation now supports comma delimited multiple entries.
 
+
 ### Removed
 
 - `bAllowCreateMoreObjects` became obsolete on `FNActorPoolSettings`.
@@ -66,6 +67,12 @@
 +PropertyRedirects=(OldName="/Script/NexusActorPools.NActorPoolSettings.ReturnMoveLocation",NewName="/Script/NexusActorPools.NActorPoolSettings.StorageLocation")
 +PackageRedirects=(OldName="/NexusMaterialLibrary/",NewName="/NexusBlockout/MaterialLibrary/",MatchSubstring=true)
 ```
+
+### Experimental
+
+- `NEXUS: Developer Console` renamed to `NEXUS: Developer Menu` still not functioning stub.
+- `NEXUS: ProcGen` has some intial structural work done, but is still not functioanl.
+
 
 ## [0.1.1] - 2025-08-01
 

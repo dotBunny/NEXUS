@@ -1,13 +1,13 @@
 {
 	"FileVersion": 3,
-	"Version": 1,
-	"VersionName": "0.1.0",
-	"FriendlyName": "NEXUS: Developer Console",
+	"Version": 3,
+	"VersionName": "0.2.0",
+	"FriendlyName": "NEXUS: Developer Menu",
 	"Description": "A visual developer console.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://docs.google.com/document/d/12IpriZXgPKLbOO80c9wkD5uY-Q_9e2lagb-SIDg31Bk/?tab=t.3b8cw14gn6t",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"EnabledByDefault": false,
@@ -16,12 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "NexusDeveloperConsole",
+			"Name": "NexusDeveloperMenu",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "NexusDeveloperConsoleEditor",
+			"Name": "NexusDeveloperMenuEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
@@ -41,5 +41,5 @@
 			"Enabled": true
 		}
 	],
-	"IsExperimentalVersion": false
+	"IsExperimentalVersion": true
 }

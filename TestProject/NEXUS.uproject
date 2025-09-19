@@ -25,7 +25,7 @@
 		{
 			"Name": "NexusBlockout",
 			"Enabled": true
-		},		
+		},
 		{
 			"Name": "NexusDynamicReferences",
 			"Enabled": true
@@ -53,7 +53,7 @@
 		{
 			"Name": "NexusBlockoutSamples",
 			"Enabled": true
-		},			
+		},
 		{
 			"Name": "NexusDynamicReferencesSamples",
 			"Enabled": true
@@ -80,6 +80,10 @@
 		},
 		{
 			"Name": "NexusProcGenSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDeveloperMenu",
 			"Enabled": true
 		}
 	],

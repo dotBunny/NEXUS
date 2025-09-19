@@ -9,10 +9,10 @@
 /**
  * NEXUS: Developer Console Module
  */
-class FNDeveloperConsoleModule final : public IModuleInterface
+class FNDeveloperMenuModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
 	void OnPostEngineInit();
 	
-	N_IMPLEMENT_MODULE(FNDeveloperConsoleModule, "NexusDeveloperConsole")
+	N_IMPLEMENT_MODULE(FNDeveloperMenuModule, "NexusDeveloperMenu")
 };

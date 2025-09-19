@@ -3,32 +3,31 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class NexusDeveloperConsoleEditor : ModuleRules
+	public class NexusDeveloperMenu : ModuleRules
 	{
-		public NexusDeveloperConsoleEditor(ReadOnlyTargetRules Target) : base(Target)
+		public NexusDeveloperMenu(ReadOnlyTargetRules Target) : base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 			PublicDependencyModuleNames.AddRange(
 				[
 					"Core",
-					"DataValidation", 
-					"UnrealEd"
+					"CoreUObject",
+					"Engine"
 				]
 			);
 
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
-					"Projects",
-					"UnrealEd"
+					"Projects"
 				]
 			);
-
+			
 			// NEXUS
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperConsole"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
-			ShortName = "NexusDeveloperConsoleEditor";						
+			ShortName = "NexusDeveloperMenu";						
 		}
 	}
 }
