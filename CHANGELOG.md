@@ -1,6 +1,23 @@
 # Changelog
 
-## 0.2.0 - 2025-09-19
+## [0.3.0] - ?
+
+### Added
+
+
+### Fixed
+
+
+
+### Changed
+
+
+
+### Removed
+
+
+
+## [0.2.0] - 2025-09-19
 
 ### Added
 
@@ -95,5 +112,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.3.0]: https://github.com/dotBunny/NEXUS/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/dotBunny/NEXUS/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/dotBunny/NEXUS/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dotBunny/NEXUS/releases/tag/v0.1.0
