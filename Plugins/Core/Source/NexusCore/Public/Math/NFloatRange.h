@@ -8,7 +8,7 @@
 #include "NFloatRange.generated.h"
 
 /**
- * A float based range structure.
+ * A float-based range structure.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNFloatRange

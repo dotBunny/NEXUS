@@ -8,6 +8,10 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NDeveloperSubsystem.generated.h"
 
+/**
+ * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/">UNDeveloperSubsystem</a>
+ */
 UCLASS()
 class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 {

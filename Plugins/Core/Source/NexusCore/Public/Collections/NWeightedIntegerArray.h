@@ -6,7 +6,7 @@
 #include "NRandom.h"
 
 /**
- * An array of integers that are proportionally weighted in entry count.
+ * An array of integers that are proportionally weighted in the entry count.
  */
 struct NEXUSCORE_API FNWeightedIntegerArray
 {

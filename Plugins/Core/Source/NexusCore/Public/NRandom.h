@@ -17,7 +17,7 @@ public:
 	 */
 	static FNMersenneTwister Deterministic;
 	/**
-	 * A non-deterministic random number generator that can be used at anytime.
+	 * A non-deterministic random number generator that can be used at any time.
 	 */
 	static FRandomStream NonDeterministic;
 };

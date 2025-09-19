@@ -23,8 +23,3 @@ struct NEXUSCOREEDITOR_API HNEdgeComponentVisProxy final : public HComponentVisP
 	int32 StartIndex;
 	int32 EndIndex;
 };
-
-/*	ResizeUpDown,
-ResizeSouthEast,
-
-ResizeSouthWest,*/

@@ -63,15 +63,15 @@ int FNSeedGenerator::HexToInteger(const TCHAR Char)
 bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 {
 	// Sanitize
-	FString ParsedSeed = SanitizeHexSeed(InHexSeed);
-	int SeedLength = ParsedSeed.Len();
+	const FString ParsedSeed = SanitizeHexSeed(InHexSeed);
+	const int SeedLength = ParsedSeed.Len();
 
 	if (SeedLength == 0 || SeedLength == 1)
 	{
 		return false;
 	}
 
-	// Check that we have equal number of sets
+	// Check that we have an equal number of sets
 	if (SeedLength % 2 != 0)
 	{
 		return false;
@@ -141,10 +141,10 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 	for (int i = 0; i < ParsedSeed.Len(); i += 2)
 	{
 		// Get our two hexadecimal characters in the series
-		TCHAR CachedLeftCharacter = ParsedSeed[i];
-		TCHAR CachedRightCharacter = ParsedSeed[i + 1];
+		const TCHAR CachedLeftCharacter = ParsedSeed[i];
+		const TCHAR CachedRightCharacter = ParsedSeed[i + 1];
 
-		// Double check them (why?)
+		// Double-check them (why?)
 		if (TChar<TCHAR>::IsHexDigit(CachedLeftCharacter) && TChar<TCHAR>::IsHexDigit(CachedRightCharacter))
 		{
 			NewSeed = (NewSeed * 256) + (HexToInteger(CachedRightCharacter) + (HexToInteger(CachedLeftCharacter) * 16));

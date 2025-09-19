@@ -5,6 +5,10 @@
 
 #include "Framework/Application/IInputProcessor.h"
 
+/**
+ * An editor-focused IInputProcessor tracking the state of standard modifier keys and other defined keys.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/input-processor/">FNEditorInputProcessor</a>
+ */
 class NEXUSCOREEDITOR_API FNEditorInputProcessor : public IInputProcessor
 {
 public:

@@ -2,7 +2,6 @@
 
 #include "BlueprintEditor.h"
 #include "NEditorUserSettings.h"
-#include "WidgetBlueprintEditorUtils.h"
 
 bool FNEditorInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {

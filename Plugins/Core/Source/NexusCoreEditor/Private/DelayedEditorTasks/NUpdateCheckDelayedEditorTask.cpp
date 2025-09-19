@@ -26,7 +26,7 @@ void UNUpdateCheckDelayedEditorTask::Create()
 		return;
 	}
 
-	// Ok fine, lets actually do the update, but let's wait a bit
+	// Ok, fine, let's actually do the update, but let's wait a bit
 	UAsyncEditorDelay* DelayedMechanism = CreateDelayMechanism();
 	UNUpdateCheckDelayedEditorTask* UpdateObject = NewObject<UNUpdateCheckDelayedEditorTask>(DelayedMechanism);
 	UpdateObject->Lock(DelayedMechanism);
@@ -43,7 +43,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 	HttpRequest->SetTimeout(5.0f);
 	HttpRequest->AppendToHeader(TEXT("UpdateURI"), GetUpdateURI());
     
-	HttpRequest->OnProcessRequestComplete().BindLambda([](FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+	HttpRequest->OnProcessRequestComplete().BindLambda([](const FHttpRequestPtr& Request, const FHttpResponsePtr& Response, const bool bWasSuccessful)
 	{
 		if (bWasSuccessful && Response.IsValid())
 		{

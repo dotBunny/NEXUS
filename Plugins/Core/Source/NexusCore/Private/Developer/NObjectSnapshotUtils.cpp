@@ -55,7 +55,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 	Diff.UntrackedObjectCountB = NewSnapshot.UntrackedObjectCount;
 	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
 	
-	// If we check what has been maintained or removed, that leaves whats left in the array as having been added.
+	// If we check what has been maintained or removed, that leaves what's left in the array as having been added.
 	for (int OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
 	{
 		FNObjectSnapshotEntry& EntryA = OldSnapshot.CapturedObjects[OldIndex];
@@ -84,7 +84,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		}
 	}
 
-	// Whats left is added
+	// What's left is added
 	for (int i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
 	{
 		Diff.Added.Add(NewSnapshot.CapturedObjects[i]);

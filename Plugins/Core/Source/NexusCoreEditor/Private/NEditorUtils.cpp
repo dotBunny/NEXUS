@@ -12,9 +12,9 @@
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
 #ifdef UNICODE
-#define SENDMESSAGE  SendMessageW
+#define SEND_MESSAGE  SendMessageW
 #else
-#define SENDMESSAGE  SendMessageA
+#define SEND_MESSAGE  SendMessageA
 #endif // !UNICODE
 #endif
 
@@ -109,6 +109,8 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 		*FPaths::GetBaseFilename(InPath), BPTYPE_Normal, BlueprintClass, BlueprintGeneratedClass);
 
 	FAssetRegistryModule::AssetCreated(Blueprint);
+	
+	// ReSharper disable once CppExpressionWithoutSideEffects
 	Blueprint->MarkPackageDirty();
 
 	return Blueprint;
@@ -228,19 +230,20 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 {
 #if PLATFORM_WINDOWS
 	const FString FinalPath = FString::Printf(TEXT("%s.ico"), *IconPath);
+	// ReSharper disable CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
 	if (FPaths::FileExists(FinalPath))
 	{
-		Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
+		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
 		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
-			GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
+		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
 		
 		if (hIcon)
 		{
 			// Set the large icon (Alt+Tab, taskbar)
-			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
         
 			// Set the small icon (window title bar)
-			SENDMESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
         
 			// Also set it for the window class
 			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
@@ -250,6 +253,7 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 		NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s."), *FinalPath);
 		return false;
 	}
+	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
 	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] %s Not Found."), *FinalPath);
 #else
 	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform."));

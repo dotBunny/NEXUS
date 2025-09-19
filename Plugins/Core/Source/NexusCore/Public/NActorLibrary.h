@@ -30,7 +30,7 @@ public:
 	 * @return True if both arrays contain the same set of actors (regardless of order), false otherwise.
 	 * 
 	 * @note This function checks if both arrays have the same length and contain the same actor references,
-	 *       regardless of their order in the arrays. Each actor in array A must-have exactly one matching
+	 *       regardless of their order in the arrays. Each actor in array A must only have exactly one matching
 	 *       actor in array B, and vice versa.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor")

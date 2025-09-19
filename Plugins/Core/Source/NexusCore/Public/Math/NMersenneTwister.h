@@ -11,7 +11,7 @@
 
 /**
  * Mersenne Twister based FRandomStream-like API with some extras!
- * Implements the std::mt19937_64 engine to produce high quality uint64 random numbers.
+ * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
  */
 class NEXUSCORE_API FNMersenneTwister
 {
@@ -123,7 +123,7 @@ public:
 		FVector::FReal L;
 		do
 		{
-			// Check random vectors in the unit sphere so result is statistically uniform.
+			// Check random vectors in the unit sphere so the result is statistically uniform.
 			Result.X = Float() * 2.f - 1.f;
 			Result.Y = Float() * 2.f - 1.f;
 			Result.Z = Float() * 2.f - 1.f;
@@ -183,7 +183,6 @@ private:
 	/**
  	*  Single instance of the 64-bit Mersenne Twister pseudo random engine
  	*/
-	// TODO: mutable?
 	std::mt19937_64 Engine;
 
 	/**

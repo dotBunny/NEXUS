@@ -13,12 +13,14 @@
 
 void FNEditorCommands::RegisterCommands()
 {
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,
-	"NCore.Help.OpenOverwatch",
+	// ReSharper disable StringLiteralTypo
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,"NCore.Help.OpenOverwatch",
 	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
 	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
 	EUserInterfaceActionType::Button, FInputGesture());
+	// ReSharper restore StringLiteralTypo
+	
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
@@ -111,6 +113,7 @@ void FNEditorCommands::RegisterCommands()
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
 
+// ReSharper disable once IdentifierTypo
 void FNEditorCommands::OnHelpOverwatch()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/1"),nullptr, nullptr);

@@ -96,7 +96,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 			FVector Normal = FVector::CrossProduct(V2 - V1, V3 - V1).GetSafeNormal();
 			FVector CenterToVertex = (V1 - Center).GetSafeNormal();
 
-			// This should have been the other way :?
+			// This should have been the other way?
 			if (FVector::DotProduct(Normal, CenterToVertex) > 0)
 			{
 				DynamicMesh.ReverseTriOrientation(TriangleID);

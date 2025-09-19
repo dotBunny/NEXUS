@@ -8,7 +8,7 @@
 #include "NDoubleRange.generated.h"
 
 /**
- * A double based range structure.
+ * A double-based range structure.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNDoubleRange

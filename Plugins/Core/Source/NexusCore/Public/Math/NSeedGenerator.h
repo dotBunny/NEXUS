@@ -9,8 +9,8 @@ public:
 
 	/**
 	 * Determine if the provided seed is <i>valid</i>.
-	 * @param InHexSeed - The FString to check if it is a valid
-	 * @return an indicator of the seeds validity
+	 * @param InHexSeed - The FString to check if it is valid
+	 * @return an indicator of the seeds' validity
 	 */
 	static bool IsValidHexSeed(const FString& InHexSeed);
 
@@ -44,8 +44,8 @@ public:
 private:
 
 	/**
-	 * Returns the integer value of provided hexadecimal character.
-	 * @param Char - The TCHAR to parse into it's numeric value
+	 * Returns the integer value of the provided hexadecimal character.
+	 * @param Char - The character to parse into it's numeric value
 	 * @return the parsed value
 	 */
 	static int32 HexToInteger(const TCHAR Char);
@@ -53,7 +53,7 @@ private:
 	/**
 	 * Removes all <i>non-valid</i> characters from the provided seed.
 	 * @param InHexSeed - The FString input seed
-	 * @return a cleaned up version of the provided seed
+	 * @return a cleaned-up version of the provided seed
 	 */
 	static FString SanitizeHexSeed(const FString& InHexSeed);
 };
