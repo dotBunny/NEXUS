@@ -5,7 +5,7 @@
 
 #include "NCoreMinimal.h"
 
-class NEXUSCORE_API FNMethodScopeTimer
+class FNMethodScopeTimer
 {
 public:
 	explicit FNMethodScopeTimer(const FString& InName) : Name(InName), StartTime(FPlatformTime::Seconds())
@@ -19,6 +19,7 @@ public:
 		
 		N_LOG(Log, TEXT("[FNMethodScopeTimer] %s took: %f ms"), *Name, DurationMs);
 	}
+
 private:
 	FString Name;
 	double StartTime;

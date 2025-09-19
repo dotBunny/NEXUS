@@ -11,7 +11,7 @@
 
 ### Changed
 
-
+- Exposed `FNMethodScopeTimer` for external linking/usage.
 
 ### Removed
 
