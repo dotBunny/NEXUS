@@ -12,6 +12,7 @@ void FNActorPoolsModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNActorPoolsModule, OnPostEngineInit);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNActorPoolsModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusActorPoolsSamples")

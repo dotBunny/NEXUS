@@ -8,7 +8,7 @@
 #include "NFloatRangeLibrary.generated.h"
 
 /**
- * A Blueprint function library for working with <code>FNFloatRange</code>.
+ * A Blueprint function library for working with FNFloatRange.
  */
 UCLASS()
 class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
@@ -52,7 +52,7 @@ class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value In Sub-Range (Float)",  Category = "Nexus|Core|Range")
-	static float RandomOneShotValueInSubRange(const FNFloatRange& Range, int Seed, float MinimumValue, float MaximumValue)
+	static float RandomOneShotValueInSubRange(const FNFloatRange& Range, int32 Seed, float MinimumValue, float MaximumValue)
 	{
 		return Range.RandomOneShotValueInSubRange(Seed, MinimumValue, MaximumValue);
 	}

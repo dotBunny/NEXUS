@@ -3,13 +3,13 @@
 
 #include "NActorPool.h"
 #include "INActorPoolItem.h"
+#include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NCoreMinimal.h"
 
-FNActorPoolSettings FNActorPool::DefaultSettings = FNActorPoolSettings();
 #if WITH_EDITOR
-int FNActorPool::ActorPoolTicket = 0;
+int32 FNActorPool::ActorPoolTicket = 0;
 #endif
 
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
@@ -22,7 +22,7 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	}
 	else
 	{
-		UpdateSettings(DefaultSettings);
+		UpdateSettings(UNActorPoolsSettings::Get()->DefaultSettings);
 	}
 	PostInitialize();
 }
@@ -44,7 +44,6 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	// The ActorPool system requires that the root component of its actors be used to determine the physics settings.
 	if (RootComponent != nullptr)
 	{
-		TemplateScale = RootComponent->GetRelativeScale3D();
 		if (const UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(RootComponent))
 		{
 			if (PrimitiveComponent->BodyInstance.bSimulatePhysics)
@@ -73,7 +72,7 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 
 void FNActorPool::PostInitialize()
 {
-	// Cache half height of the item	
+	// Cache half-height of the item	
 	if (const APawn* Pawn = Cast<APawn>(Template->GetDefaultObject()))
 	{
 		HalfHeight = Pawn->GetDefaultHalfHeight();
@@ -124,6 +123,15 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 
 bool FNActorPool::Return(AActor* Actor)
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return true;
+	
+	if (Actor == nullptr)
+	{
+		N_LOG(Warning, TEXT("[FNActorPool::Return] Attempting to return a null actor."));
+		return false;
+	}
+	
 	ApplyReturnState(Actor);
 
 	// We have to manage the position a bit based on the strategy.
@@ -152,51 +160,50 @@ bool FNActorPool::Return(AActor* Actor)
 
 void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
+	// Ingest flags - and update cached flags
+	Settings.Flags = InNewSettings.Flags;
+	bStubMode = Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode();
+	
 	// Handle change of actor pooling counts
 	Settings.MinimumActorCount = InNewSettings.MinimumActorCount;
+	if (InNewSettings.MaximumActorCount > Settings.MaximumActorCount)
+	{
+		InActors.Reserve(InNewSettings.MaximumActorCount);
+		OutActors.Reserve(InNewSettings.MinimumActorCount);
+	}
 	Settings.MaximumActorCount = InNewSettings.MaximumActorCount;
-	Settings.bAllowCreateMoreObjects = InNewSettings.bAllowCreateMoreObjects;
-	if (Settings.MaximumActorCount == -1)
-	{
-		if (Settings.bAllowCreateMoreObjects)
-		{
-			const int NewSize = Settings.MinimumActorCount * 2;
-			InActors.Reserve(NewSize);
-			OutActors.Reserve(NewSize);
-		}
-		else
-		{
-			InActors.Reserve(Settings.MinimumActorCount);
-			OutActors.Reserve(Settings.MinimumActorCount);
-		}
-	}
-	else
-	{
-		InActors.Reserve(Settings.MaximumActorCount);
-		OutActors.Reserve(Settings.MaximumActorCount);
-	}
 
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;
-
-	// Update based on if we should tick
-	if (Settings.CreateObjectsPerTick && !InNewSettings.CreateObjectsPerTick)
+	Settings.DefaultTransform = InNewSettings.DefaultTransform;
+	
+	// Update based on if we should tick - test usually don't have access to the system to time-slice
+	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
+	if (System != nullptr)
 	{
-		UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
+		if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
+		{
+			UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
+		}
+		else if(InNewSettings.CreateObjectsPerTick > 0 && !System->HasTickableActorPool(this))
+		{
+			UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
+		}
+		
+		Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
 	}
-	else if (!Settings.CreateObjectsPerTick && InNewSettings.CreateObjectsPerTick)
+	else
 	{
-		UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
+		// Because we have no system we need to create normally.
+		Settings.CreateObjectsPerTick = -1;
 	}
-	Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
-	Settings.bSpawnSweepBeforeSettingLocation = InNewSettings.bSpawnSweepBeforeSettingLocation;
-	Settings.bReturnMoveToLocation = InNewSettings.bReturnMoveToLocation;
-
-	Settings.ReturnMoveLocation = InNewSettings.ReturnMoveLocation;
 }
 
 bool FNActorPool::ApplyStrategy()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return false;
+	
 	switch (Settings.Strategy)
 	{
 	case APS_Create:
@@ -242,18 +249,24 @@ bool FNActorPool::ApplyStrategy()
 
 void FNActorPool::CreateActor()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return;
+	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
 	SpawnInfo.ObjectFlags |= RF_Transient;
-	SpawnInfo.bDeferConstruction = Settings.bDeferConstruction;
+
+	
+	SpawnInfo.bDeferConstruction = Settings.HasFlag_DeferConstruction();
 
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	// Create actual actor
-	AActor* CreatedActor = World->SpawnActorAbsolute(Template, DefaultTransform, SpawnInfo);
+	//World->SpawnActor(Template, Settings.StorageLocation, FRotator::ZeroRotator, SpawnInfo);
+	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
 
-	// Ensure the actor is not garbage collected
+	// Ensure the actor is not garbage collected, the pool itself will clean up.
 	CreatedActor->AddToRoot();
 
 #if WITH_EDITOR
@@ -265,10 +278,10 @@ void FNActorPool::CreateActor()
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
 		ActorItem->InitializeActorPoolItem(this);
 
-		if (Settings.bDeferConstruction)
+		if (SpawnInfo.bDeferConstruction)
 		{
 			ActorItem->OnDeferredConstruction();
-			CreatedActor->FinishSpawning(DefaultTransform);
+			CreatedActor->FinishSpawning(Settings.DefaultTransform);
 		}
 		ActorItem->OnCreatedByActorPool();
 		ApplyReturnState(CreatedActor);
@@ -276,9 +289,9 @@ void FNActorPool::CreateActor()
 	}
 	else
 	{
-		if (Settings.bDeferConstruction && Settings.bShouldFinishSpawning)
+		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
 		{
-			CreatedActor->FinishSpawning(DefaultTransform);
+			CreatedActor->FinishSpawning(Settings.DefaultTransform);
 		}
 		ApplyReturnState(CreatedActor);
 	}
@@ -289,21 +302,21 @@ void FNActorPool::CreateActor()
 
 void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const
 {
-	// Set network flag first -- Thanks Nick!	
+	// Set the network flag first -- Thanks Nick!	
 	Actor->SetNetDormancy(DORM_Awake);
 
 	// Set Actor Location And Rotation
 	if (bHasHalfHeight)
 	{
 		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition + HalfHeightOffset, TemplateScale),
-			Settings.bSpawnSweepBeforeSettingLocation, nullptr, ETeleportType::ResetPhysics);
+			FTransform(InRotation, InPosition + HalfHeightOffset, Settings.DefaultTransform.GetScale3D()),
+			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	else
 	{
 		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition, TemplateScale),
-			Settings.bSpawnSweepBeforeSettingLocation, nullptr, ETeleportType::ResetPhysics);
+			FTransform(InRotation, InPosition, Settings.DefaultTransform.GetScale3D()),
+			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 	}
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
@@ -330,10 +343,10 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 
 void FNActorPool::ApplyReturnState(AActor* Actor) const
 {
-	// Move to storage location
-	if (Settings.bReturnMoveToLocation)
+	// Move to a storage location
+	if (Settings.HasFlag_ReturnToStorageLocation())
 	{
-		Actor->SetActorLocation(Settings.ReturnMoveLocation, false, nullptr, ETeleportType::ResetPhysics);
+		Actor->SetActorLocation(Settings.DefaultTransform.GetLocation(), false, nullptr, ETeleportType::ResetPhysics);
 	}
 
 	Actor->SetActorTickEnabled(false);
@@ -354,7 +367,7 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 
 void FNActorPool::Clear(const bool bForceDestroy)
 {
-	for (int i = InActors.Num() - 1; i >= 0; i--)
+	for (int32 i = InActors.Num() - 1; i >= 0; i--)
 	{
 		check(InActors[i] != nullptr);
 		if (InActors[i]->IsPendingKillPending())
@@ -362,12 +375,17 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			continue;
 		}
 		InActors[i]->RemoveFromRoot();
+		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
+		{
+			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(InActors[i]);
+			ActorItem->OnDestroyedByActorPool();
+		}
 		if (bForceDestroy)
 		{
 			InActors[i]->Destroy();
 		}
 	}
-	for (int i = OutActors.Num() - 1; i >= 0; i--)
+	for (int32 i = OutActors.Num() - 1; i >= 0; i--)
 	{
 		check(OutActors[i] != nullptr);
 
@@ -376,6 +394,12 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			continue;
 		}
 		OutActors[i]->RemoveFromRoot();
+		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
+		{
+			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OutActors[i]);
+			ActorItem->OnDestroyedByActorPool();
+		}
+		
 		if (bForceDestroy)
 		{
 			OutActors[i]->Destroy();
@@ -387,17 +411,23 @@ void FNActorPool::Clear(const bool bForceDestroy)
 
 void FNActorPool::Fill()
 {
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return;
+	
 	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
-	for (int i = InActors.Num(); i < Settings.MinimumActorCount; i++)
+	for (int32 i = InActors.Num(); i < Settings.MinimumActorCount; i++)
 	{
 		CreateActor();
 	}
 }
 
-void FNActorPool::Warm(const int Count)
+void FNActorPool::Prewarm(const int32 Count)
 {
-	N_LOG(Log, TEXT("[FNActorPool::Warm] Warming pool %s with %i items."), *Template->GetName(), Count)
-	for (int i = 0; i < Count; i++)
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return;
+	
+	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
+	for (int32 i = 0; i < Count; i++)
 	{
 		CreateActor();
 	}
@@ -405,11 +435,14 @@ void FNActorPool::Warm(const int Count)
 
 void FNActorPool::Tick()
 {
-	if (const int TotalActors = InActors.Num() + OutActors.Num();
+	// Ensure the pool is a stub when WorldAuthority is flagged.
+	if (bStubMode) return;
+	
+	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
-		const int SpawnCountThisTick = FMath::Min((Settings.MinimumActorCount - TotalActors), Settings.CreateObjectsPerTick);
-		for (int i = 0; i < SpawnCountThisTick; i++)
+		const int32 SpawnCountThisTick = FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors));
+		for (int32 i = 0; i < SpawnCountThisTick; i++)
 		{
 			CreateActor();
 		}

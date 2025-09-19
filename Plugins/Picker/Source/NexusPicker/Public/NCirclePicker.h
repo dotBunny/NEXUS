@@ -10,7 +10,7 @@
 /**
  * Provides various functions for generating points in the plane of a circle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
- *
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">FNCirclePicker</a>
  * @note There are no simple variants to these methods as it wouldn't change the computation.
  */
 class NEXUSPICKER_API FNCirclePicker
@@ -22,7 +22,6 @@ public:
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -42,10 +41,12 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -59,6 +60,7 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -66,7 +68,6 @@ public:
 	/**
 	 * Generates a random point inside or on the perimeter of a circle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -86,10 +87,11 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the perimeter of a circle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -103,6 +105,7 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -110,7 +113,6 @@ public:
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the circle.
@@ -132,11 +134,12 @@ public:
 		{
 			OutLocation = Origin + Rotation.RotateVector(FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f));
 		}
+		N_IMPLEMENT_VLOG_CIRCLE()
 		
 	}
+
 	/**
 	 * Generates a random point inside or on the perimeter of a circle using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the circle.
@@ -151,6 +154,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED
@@ -182,6 +186,7 @@ public:
 		}
 
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_CIRCLE()
 	}
 	/**
 	 * Generates a random point inside or on the perimeter of a circle while tracking the random seed state, then projects it to the world.
@@ -201,6 +206,7 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
 	}
 
 	// ASSERT

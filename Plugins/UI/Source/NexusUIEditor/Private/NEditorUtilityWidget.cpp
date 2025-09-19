@@ -6,7 +6,6 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
 
 void UNEditorUtilityWidget::NativeConstruct()

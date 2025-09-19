@@ -8,6 +8,7 @@
 
 /**
  * A runtime-unique controlling object that maintains a pool of spawned actors.
+ * @note Not thread-safe, must be used on the game thread due to creating actors.
  */
 class NEXUSACTORPOOLS_API FNActorPool
 {
@@ -30,7 +31,7 @@ public:
 
 	/**
 	 * Clear and destroy the contents of the ActorPool, both actors in and out of the pool.
-	 * @param bForceDestroy Should the Actors be forcibly destroyed when the pool is cleared.
+	 * @param bForceDestroy Should the Actors be forcibly destroyed when the pool is cleared?
 	 */
 	void Clear(const bool bForceDestroy = false);
 
@@ -42,7 +43,7 @@ public:
 	/**
 	* Warm the pool with actors, regardless of settings.
 	*/
-	void Warm(int Count);
+	void Prewarm(int32 Count);
 
 	/**
 	 * Get an actor from the pool, not invoking any of the events attached with regular spawning of an actor.
@@ -66,7 +67,7 @@ public:
 	AActor* Spawn(const FVector& Position, const FRotator& Rotation);
 
 	/**
-	 * A managed-tick for the ActorPool, which creates delayed number of actors and other maintenance.
+	 * A managed-tick for the ActorPool, which creates a delayed number of actors and other maintenance.
 	 */
 	void Tick();
 
@@ -83,20 +84,21 @@ public:
 	bool DoesSupportInterface() const { return bImplementsInterface; }
 
 	/**
-	 * Get the calculated half height of the ActorPool's Template.
+	 * Get the calculated half-height of the ActorPool's Template.
 	 */
 	double GetHalfHeight() const { return HalfHeight; };
 	/**
-	 * Get the calculated half height of the ActorPool's Template as an offset vector.
+	 * Get the calculated half-height of the ActorPool's Template as an offset vector.
 	 */
 	FVector GetHalfHeightOffset() const { return HalfHeightOffset; };
 
-	int GetInCount() const { return InActors.Num(); };
-	int GetOutCount() const { return OutActors.Num(); };
-	FNActorPoolSettings& GetSettings() { return Settings; };
+	int32 GetInCount() const { return InActors.Num(); };
+	int32 GetOutCount() const { return OutActors.Num(); };
+
+	const FNActorPoolSettings& GetSettings() const { return Settings; };
 	
 	/**
-	 * Does the ActorPool's Template have a cached half height?
+	 * Does the ActorPool's Template have a cached half-height?
 	 * @note This is useful for finding the midpoint to spawn characters.
 	 */
 	bool HasHalfHeight() const { return bHasHalfHeight; };
@@ -106,18 +108,16 @@ public:
 	 * @note This does not count actors that have been spawned and are considered 'out'.
 	 */
 	bool IsEmpty() const { return InActors.IsEmpty(); };
-	
+
+	bool IsStubMode() const { return bStubMode; };
 
 private:
-
-	const FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
-	static FNActorPoolSettings DefaultSettings;
 
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);
 	void PostInitialize();
 
 	/**
-	 * An array of Actors considered pool in the ActorPool, which can be used for Get/Spawn requests.
+	 * An array of Actors considered pooled in the ActorPool, which can be used for Get/Spawn requests.
 	 */
 	TArray<TObjectPtr<AActor>> InActors;
 	/**
@@ -126,9 +126,9 @@ private:
 	TArray<TObjectPtr<AActor>> OutActors;
 
 	TSubclassOf<AActor> Template;
-	FVector TemplateScale = FVector(1, 1, 1);
-
+	
 	bool bHasHalfHeight;
+	bool bStubMode = false;
 	double HalfHeight;
 	FVector HalfHeightOffset;
 
@@ -143,7 +143,7 @@ private:
 
 #if WITH_EDITOR
 	FString Name;
-	static int ActorPoolTicket;
+	static int32 ActorPoolTicket;
 #endif
 	bool bImplementsInterface = false;
 

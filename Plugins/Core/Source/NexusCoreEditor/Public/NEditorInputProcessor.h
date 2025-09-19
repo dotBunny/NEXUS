@@ -5,6 +5,10 @@
 
 #include "Framework/Application/IInputProcessor.h"
 
+/**
+ * An editor-focused IInputProcessor tracking the state of standard modifier keys and other defined keys.
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/editor-types/input-processor/">FNEditorInputProcessor</a>
+ */
 class NEXUSCOREEDITOR_API FNEditorInputProcessor : public IInputProcessor
 {
 public:
@@ -21,20 +25,74 @@ public:
 	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override { };
 	virtual const TCHAR* GetDebugName() const override { return TEXT("FNEditorInputProcessor"); }
 
+	/**
+	 * Is the left shift-key pressed?
+	 * @return true/false the key is pressed on the keyboard.
+	 */
 	bool IsLeftShiftDown() const;
+
+	/**
+	 * Is the right shift-key pressed?
+	 * @return true/false the key is pressed on the keyboard.
+	 */
 	bool IsRightShiftDown() const;
+
+	/**
+	 * Is either shift-key pressed?
+	 * @return true/false either key is pressed on the keyboard.
+	 */	
 	bool IsShiftDown() const;
+
+	/**
+	 * Is the left control-key pressed?
+	 * @return true/false the key is pressed on the keyboard.
+	 */
 	bool IsLeftControlDown() const;
+
+	/**
+	 * Is the right control-key pressed?
+	 * @return true/false the key is pressed on the keyboard.
+	 */	
 	bool IsRightControlDown() const;
+
+	/**
+	 * Is either shift-key pressed?
+	 * @return true/false either key is pressed on the keyboard.
+	 */	
 	bool IsControlDown() const;
+
+	/**
+	 * Is the space bar pressed?
+	 * @return true/false the key is pressed on the keyboard.
+	 */		
 	bool IsSpaceBarDown() const;
+
+	/**
+	 * Is the left mouse-button pressed?
+	 * @return true/false the mouse-button is pressed.
+	 */	
 	bool IsLeftMouseButtonDown() const;
+
+	/**
+	 * Is the right mouse-button pressed?
+	 * @return true/false the mouse-button is pressed.
+	 */		
 	bool IsRightMouseButtonDown() const;
+
+	/**
+	 * Is the middle mouse-button pressed?
+	 * @return true/false the mouse-button is pressed.
+	 */	
 	bool IsMiddleMouseButtonDown() const;
+
+	/**
+	 * Is any mouse-button pressed?
+	 * @return true/false any of the three mouse-buttons are pressed.
+	 */	
 	bool IsAnyMouseButtonDown() const;
 
-	bool bCachedPanSetting;
-	
+	bool bCachedGraphNavigationSpaceToPan;
+	float CachedGraphNavigationPanSpeedMultiplier;
 
 private:
 

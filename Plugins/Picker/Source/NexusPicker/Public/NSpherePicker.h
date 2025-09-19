@@ -5,10 +5,12 @@
 
 #include "CoreMinimal.h"
 #include "NRandom.h"
+#include "NPickerUtils.h"
 
 /** 
  * Provides various functions for generating points inside or on the surface of a sphere using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/">FNSpherePicker</a>
  */
 class NEXUSPICKER_API FNSpherePicker
 {
@@ -19,7 +21,6 @@ public:
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -28,10 +29,11 @@ public:
 	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		OutLocation = Origin + (FNRandom::Deterministic.VRand() * FNRandom::Deterministic.FloatRange(MinimumRadius, MaximumRadius));
+		N_IMPLEMENT_VLOG_SPHERE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -44,11 +46,12 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -56,10 +59,11 @@ public:
 	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const float Radius)
 	{
 		OutLocation = Origin + (FNRandom::Deterministic.VRand() * Radius);
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -71,6 +75,7 @@ public:
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Radius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -78,7 +83,6 @@ public:
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -87,10 +91,11 @@ public:
 	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * FNRandom::NonDeterministic.FRandRange(MinimumRadius, MaximumRadius));
+		N_IMPLEMENT_VLOG_SPHERE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
@@ -103,11 +108,12 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -115,10 +121,11 @@ public:
 	FORCEINLINE static void RandomPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const float Radius)
 	{
 		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * Radius);
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -130,6 +137,7 @@ public:
 	{
 		RandomPointInsideOrOnSimple(OutLocation, Origin, Radius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -137,7 +145,6 @@ public:
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
@@ -148,10 +155,11 @@ public:
 	{
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
+		N_IMPLEMENT_VLOG_SPHERE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
@@ -165,11 +173,12 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
@@ -179,10 +188,11 @@ public:
 	{
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * Radius);
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
@@ -195,14 +205,14 @@ public:
 	{
 		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Radius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED POINT
 	
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation.
-	 * 
+	 * Updates the seed value to enable sequential random point generation. 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
@@ -214,12 +224,13 @@ public:
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_SPHERE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @notes Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
-	 * 
+	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
@@ -233,11 +244,12 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the sphere.
@@ -248,12 +260,13 @@ public:
 		const FRandomStream RandomStream(Seed);
 		OutLocation = Origin + (RandomStream.VRand() * Radius);
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @notes Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
-	 * 
+	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the sphere.
@@ -266,13 +279,13 @@ public:
 	{
 		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Radius);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
 	}
 
 	// ASSERT
 	
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
-	 * 
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
 	 * @param Point The point to check.

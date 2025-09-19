@@ -9,7 +9,7 @@
 class NEXUSCORE_API FNTestUtils
 {
 public:
-	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality)
+	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
 		// Create World
 		constexpr bool bInformEngineOfWorld = false;
@@ -23,16 +23,30 @@ public:
 
 		// Start play
 		const FURL URL;
+		UGameInstance* TestGameInstance = NewObject<UGameInstance>(GEngine);
+		World->SetGameInstance(TestGameInstance);
+		World->SetGameMode(URL);
 		World->InitializeActorsForPlay(URL);
 		World->BeginPlay();
 
 		// Execute Test
-		TestFunctionality(World);
+
+		// ReSharper disable once CppTooWideScope
+		if (bDisableGarbageCollection)
+		{
+			FGCScopeGuard Guard;
+			TestFunctionality(World);
+		}
+		else
+		{
+			TestFunctionality(World);
+		}
 
 		// Cleanup world
 		World->EndPlay(EEndPlayReason::Quit);
 		GEngine->DestroyWorldContext(World);
 		World->DestroyWorld(bInformEngineOfWorld);
+		TestGameInstance->ConditionalBeginDestroy();
 	}
 	
 	FORCEINLINE static void WorldTestChecked(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bShouldGarbageCollect = true)
@@ -51,7 +65,7 @@ public:
 			if (FNObjectSnapshotDiff GCDiff = FNObjectSnapshotUtils::Diff(PreSnapshot, GCSnapshot, true);
 				GCDiff.AddedCount > 0)
 			{
-				for (int i = 0; i < GCDiff.AddedCount; i++)
+				for (int32 i = 0; i < GCDiff.AddedCount; i++)
 				{
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *GCDiff.Added[i].ToString()));
 				}
@@ -62,7 +76,7 @@ public:
 			if (FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(PreSnapshot, PostSnapshot, true);
 				Diff.AddedCount > 0)
 			{
-				for (int i = 0; i < Diff.AddedCount; i++)
+				for (int32 i = 0; i < Diff.AddedCount; i++)
 				{
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *Diff.Added[i].ToString()));
 				}

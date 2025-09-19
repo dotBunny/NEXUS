@@ -17,7 +17,7 @@ enum ENToggle : int8
 };
 
 /**
- * A utility class for operating on <code>ENToggle</code>.
+ * A utility class for operating on ENToggle.
  */
 class NEXUSCORE_API FNToggle
 {

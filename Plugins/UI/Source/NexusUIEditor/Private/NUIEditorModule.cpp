@@ -18,6 +18,7 @@ void FNUIEditorModule::ShutdownModule()
 	FNUIEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNUIEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

@@ -8,6 +8,7 @@
 #include "NCoreMinimal.h"
 #include "NSpherePicker.h"
 #include "NSplinePicker.h"
+#include "Components/SplineComponent.h"
 
 UNActorPoolSpawnerComponent::UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -31,21 +32,25 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		return;
 	}
 
-	// Register with pool system so it will handle ticking the component
+	// Register with the management system so it will handle ticking the component
 	Manager = UNActorPoolSubsystem::Get(GetWorld());
 	Manager->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
 
 	// Create / validate pools
 	TemplateCount = Templates.Num();
-	for (int i = 0; i < TemplateCount; i++)
+	for (int32 i = 0; i < TemplateCount; i++)
 	{
-		check(Templates[i].Template);
+		if (Templates[i].Template == nullptr)
+		{
+			N_LOG(Warning, TEXT("[NActorPoolSpawnerComponent] Invalid template at index %d, skipping."), i);
+			continue;
+		}
 
 		// Ensure actor pool is made, reuse if exists
 		Manager->CreateActorPool(Templates[i].Template, Templates[i].Settings);
 
-		// Add to weighted list
+		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
 
@@ -75,8 +80,8 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 			// We have a name and should look for the component based off that
 			TArray<USplineComponent*> FoundSplineComponents;
 			this->GetOwner()->GetComponents<USplineComponent>(FoundSplineComponents, true);
-			const int FoundCount = FoundSplineComponents.Num();
-			for (int i = 0; i < FoundCount; i++)
+			const int32 FoundCount = FoundSplineComponents.Num();
+			for (int32 i = 0; i < FoundCount; i++)
 			{
 				if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
 				{
@@ -115,15 +120,15 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 
 void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
-	if (!bSpawningEnabled && !bIgnoreSpawningFlag) return;
+	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
 	
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const FVector Origin = this->GetComponentLocation() + Offset;
 
-	for (int i = 0; i < Count; i++)
+	for (int32 i = 0; i < Count; i++)
 	{
 		FVector SpawnLocation = Origin;
-		int RandomIndex = 0;
+		int32 RandomIndex = 0;
 		if (TemplateCount > 1)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);

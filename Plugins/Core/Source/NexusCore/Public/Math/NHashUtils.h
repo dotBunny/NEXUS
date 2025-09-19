@@ -10,7 +10,7 @@ class NEXUSCORE_API FNHashUtils
 {
 public:
 	/**
-	* Create a hash <code>uint64</code> from a given <code>FString</code> using the <code>dbj2</code> algorithm.
+	* Create a hash uint64 from a given FString using the dbj2 algorithm.
 	*/
 	static uint64 dbj2(const FString& InString);
 };

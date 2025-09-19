@@ -7,18 +7,20 @@
 #include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
-#include "InstanceObjects/NLeakTestInstanceObject.h"
+#include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
 void FNEditorCommands::RegisterCommands()
 {
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,
-	"NCore.Help.OpenOverwatch",
+	// ReSharper disable StringLiteralTypo
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,"NCore.Help.OpenOverwatch",
 	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
 	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
 	EUserInterfaceActionType::Button, FInputGesture());
+	// ReSharper restore StringLiteralTypo
+	
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
@@ -56,6 +58,15 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputGesture());
+
+
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
+	"NCore.Tools.Profile.NetworkProfiler",
+	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
+	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
+	EUserInterfaceActionType::Button, FInputGesture());
+	
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
 	
@@ -80,7 +91,6 @@ void FNEditorCommands::RegisterCommands()
 		FCanExecuteAction());
 
 
-
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
 			"NCore.Node.ExternalDocumentation",
 			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
@@ -92,15 +102,18 @@ void FNEditorCommands::RegisterCommands()
 
 	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
 
 
 	CommandList_Tools = MakeShareable(new FUICommandList);
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
+	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
 
+// ReSharper disable once IdentifierTypo
 void FNEditorCommands::OnHelpOverwatch()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/1"),nullptr, nullptr);
@@ -128,12 +141,31 @@ void FNEditorCommands::OnHelpDocumentation()
 
 void FNEditorCommands::OnToolsLeakCheck()
 {
-	UNLeakTestInstanceObject::Create();
+	UNLeakTestDelayedEditorTask::Create();
 }
 
-bool FNEditorCommands::OnToolsLeakCheck_CanExecute()
+bool FNEditorCommands::ToolsLeakCheck_CanExecute()
 {
 	return true;
+}
+
+void FNEditorCommands::OnToolsProfileNetworkProfiler()
+{
+	const FString ExecutablePath = FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe");
+	constexpr bool bLaunchDetached = true;
+	constexpr bool bLaunchHidden = false;
+	constexpr bool bLaunchReallyHidden = false;
+	const FProcHandle ProcHandle = FPlatformProcess::CreateProc(*ExecutablePath, TEXT(""), bLaunchDetached,
+		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
+	if (!ProcHandle.IsValid())
+	{
+		NE_LOG(Warning, TEXT("Unable to launch NetworkProfiler."));
+	}
+}
+
+bool FNEditorCommands::HasToolsProfileNetworkProfiler()
+{
+	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
 void FNEditorCommands::OnNodeExternalDocumentation()
@@ -142,10 +174,17 @@ void FNEditorCommands::OnNodeExternalDocumentation()
 	if (Editor == nullptr) return;
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return;
-	FPlatformProcess::LaunchURL(*FNMetaUtils::GetExternalDocumentationUnsafe(Node),nullptr, nullptr);
+
+	// Split the data so you can have multiple URIs in the data
+	TArray<FString> OutURIs;
+	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
+	for (int i = 0; i < OutURIs.Num(); i++)
+	{
+		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
+	}
 }
 
-bool FNEditorCommands::OnNodeExternalDocumentation_CanExecute()
+bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
 {
 	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
 	if (Editor == nullptr) return false;
@@ -179,6 +218,19 @@ void FNEditorCommands::BuildMenus()
 		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
+	}
+
+	
+	// Add in NetworkProfiler menu option if its present
+	if (HasToolsProfileNetworkProfiler())
+	{
+		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
+		{
+			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
+			ExternalMenu.Label = LOCTEXT("NLevelEditorToolsExternal", "External");
+
+			ExternalMenu.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_Profile_NetworkProfiler, Commands.CommandList_Tools);
+		}
 	}
 	
 	// Help Menu Submenu

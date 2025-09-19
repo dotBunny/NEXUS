@@ -7,7 +7,6 @@
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorUtils.h"
 #include "UnrealEdGlobals.h"
-#include "Customizations/NActorPoolSpawnerComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NModuleMacros.h"
 #include "Interfaces/IPluginManager.h"
@@ -21,43 +20,26 @@ void FNActorPoolsEditorModule::StartupModule()
 
 void FNActorPoolsEditorModule::ShutdownModule()
 {
-
-	//GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
-
-	// Unregister customizations
-	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
+	if (GUnrealEd)
 	{
-		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-		PropertyModule.UnregisterCustomClassLayout(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
-
-		PropertyModule.NotifyCustomizationModuleChanged();
+		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
-	
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
-
-	// Visualizers
+	
 	if (GUnrealEd)
 	{
 		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShareable(new FNActorPoolSpawnerComponentVisualizer());
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
 	}
-	
-	// Register Customizations
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-
-	PropertyModule.RegisterCustomClassLayout(UNActorPoolSpawnerComponent::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FNActorPoolSpawnerComponentCustomization::MakeInstance));
-
-	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 IMPLEMENT_MODULE(FNActorPoolsEditorModule, NexusActorPoolsEditor)

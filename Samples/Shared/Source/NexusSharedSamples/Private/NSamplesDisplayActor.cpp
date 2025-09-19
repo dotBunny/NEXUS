@@ -3,12 +3,15 @@
 
 #include "NSamplesDisplayActor.h"
 #include "NColor.h"
+#include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Kismet/KismetMaterialLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
+
+TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -22,13 +25,14 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	PartRoot->SetMobility(EComponentMobility::Static);
 
 	// Create Materials
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_Grey"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
 	if (MaterialGrey.Succeeded())
 	{
 		DisplayMaterialInterface = MaterialGrey.Object;
 	}
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_GreyDark"));
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusMaterialLibrary/Debug/MI_NDebug_White"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_GreyDark"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_White"));
+
 
 	// Create Components
 	NoticeDecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
@@ -47,27 +51,30 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	NoticeTextComponent->HorizontalAlignment = EHTA_Center;
 	NoticeTextComponent->VerticalAlignment = EVRTA_TextCenter;
 	
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> TextMaterial(TEXT("/Engine/EngineMaterials/DefaultTextMaterialOpaque"));
-	static ConstructorHelpers::FObjectFinder<UFont> TextFont(TEXT("/Engine/EngineFonts/RobotoDistanceField"));
-
-	
-	
 	TitleTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Title"));
 	TitleTextComponent->SetupAttachment(PartRoot);
 	
 	DescriptionTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Description"));
 	DescriptionTextComponent->SetupAttachment(PartRoot);
-	if (TextFont.Succeeded())
+
+	// These get stripped on servers
+	if (!GIsServer)
 	{
-		TitleTextComponent->SetFont(TextFont.Object);
-		DescriptionTextComponent->SetFont(TextFont.Object);
-		NoticeTextComponent->SetFont(TextFont.Object);
-	}
-	if (TextMaterial.Succeeded())
-	{
-		TitleTextComponent->SetMaterial(0, TextMaterial.Object);
-		DescriptionTextComponent->SetMaterial(0, TextMaterial.Object);
-		NoticeTextComponent->SetMaterial(0, TextMaterial.Object);
+		static ConstructorHelpers::FObjectFinder<UFont> TextFont(TEXT("/Engine/EngineFonts/RobotoDistanceField"), LOAD_NoWarn);
+		if (TextFont.Succeeded())
+		{
+			TitleTextComponent->SetFont(TextFont.Object);
+			DescriptionTextComponent->SetFont(TextFont.Object);
+			NoticeTextComponent->SetFont(TextFont.Object);
+		}
+	
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> TextMaterial(TEXT("/Engine/EngineMaterials/DefaultTextMaterialOpaque"), LOAD_NoWarn);
+		if (TextMaterial.Succeeded())
+		{
+			TitleTextComponent->SetMaterial(0, TextMaterial.Object);
+			DescriptionTextComponent->SetMaterial(0, TextMaterial.Object);
+			NoticeTextComponent->SetMaterial(0, TextMaterial.Object);
+		}
 	}
 	
 	SpotlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spotlight"));
@@ -202,6 +209,27 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		ShadowBoxTop->SetMaterial(0, MaterialWhite.Object);
 		ShadowBoxTop->SetMaterial(1, MaterialWhite.Object);
 	}
+
+	// Watermark Mesh
+	Watermark = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Branding"));
+	Watermark->SetupAttachment(PartRoot);
+	Watermark->SetMobility(EComponentMobility::Static);
+	Watermark->SetCollisionProfileName(FName("NoCollision"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh>BrandingMesh(TEXT("/NexusSharedSamples/SM_NSamples_NEXUS"));
+	if (BrandingMesh.Succeeded())
+	{
+		Watermark->SetStaticMesh(BrandingMesh.Object);
+		Watermark->SetMaterial(0, MaterialWhite.Object);
+	}
+	
+	// Screenshot Camera
+	ScreenshotCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ScreenshotCamera"));
+	ScreenshotCameraComponent->SetupAttachment(RootComponent);
+	ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
+	ScreenshotCameraComponent->SetRelativeLocation(FVector(755.f, 0.f, 300.f));
+	ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
+	ScreenshotCameraComponent->AspectRatio = 1.777778;
+	ScreenshotCameraComponent->bConstrainAspectRatio = true;
 }
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
@@ -216,7 +244,18 @@ void ANSamplesDisplayActor::BeginPlay()
 	{
 		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
 	}
+
+	// Add to list of known displays so we can move between them easily.
+	KnownDisplays.Add(this);
 	Super::BeginPlay();
+}
+
+void ANSamplesDisplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// Remove me from the list.
+	KnownDisplays.Remove(this);
+	
+	Super::EndPlay(EndPlayReason);
 }
 
 void ANSamplesDisplayActor::Rebuild()
@@ -257,6 +296,7 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateTitleText();
 	UpdateDescription();
 	UpdateCollisions();
+	UpdateWatermark();
 }
 
 UActorComponent* ANSamplesDisplayActor::GetComponentInstance(TSubclassOf<UActorComponent> ComponentClass)
@@ -303,15 +343,18 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		if (Height >= 2.f)
 		{
 			// Traditional Display
-			CreateScalablePanelInstances(FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector), Height);
-			CreateScalablePanelInstances(FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector), Depth);
+			MainPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector);
+			CreateScalablePanelInstances(MainPanelTransform, Height);
+			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector);
+			CreateScalablePanelInstances(FloorPanelTransform, Depth);
 		}
 		else
 		{
-			
 			// Floor
-			CreateScalablePanelInstances(FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector), 1.f, true);
-			CreateScalablePanelInstances(FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector), Depth);
+			MainPanelTransform = FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector);
+			CreateScalablePanelInstances(MainPanelTransform, 1.f, true);
+			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector); 
+			CreateScalablePanelInstances(FloorPanelTransform, Depth);
 		}
 	}
 	else
@@ -321,9 +364,10 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		{
 			Height = 2.f;
 		}
-		
-		CreateScalablePanelInstances(FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector), Height);
-		CreateScalablePanelInstances(FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector), 2.f, false);
+		FloorPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector);
+		CreateScalablePanelInstances(FloorPanelTransform, Height);
+		MainPanelTransform = FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector);
+		CreateScalablePanelInstances(MainPanelTransform, 2.f, false);
 	}
 }
 
@@ -447,6 +491,9 @@ void ANSamplesDisplayActor::CreateTitlePanelInstances() const
 
 void ANSamplesDisplayActor::UpdateDescription()
 {
+	// Headless server
+	if (DescriptionTextComponent == nullptr) return;
+	
 	// Setup Line Spacing
 	FString ParagraphSpacingMarkup = TEXT("");
 	for (int i = 0; i < ParagraphSpacing + 1; i++)
@@ -596,6 +643,7 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 			PanelCurve->SetMaterial(0, DisplayMaterial);
 			PanelSide->SetMaterial(0, DisplayMaterial);
 			PanelCurveEdge->SetMaterial(1, DisplayMaterial);
+			Watermark->SetMaterial(0, DisplayMaterial);
 		}
 	}
 	if (DisplayMaterial != nullptr)
@@ -606,6 +654,9 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 
 void ANSamplesDisplayActor::UpdateNotice()
 {
+	// Headless server
+	if (NoticeTextComponent == nullptr) return;
+	
 	NoticeDecalComponent->SetRelativeTransform(FTransform(
 			FRotator(-90.f, 0.f, 0.f),
 			FVector((Depth * 100.f) + NoticeDepth, 0.f , 0.f),
@@ -654,6 +705,9 @@ void ANSamplesDisplayActor::UpdateNotice()
 
 void ANSamplesDisplayActor::UpdateSpotlight() const
 {
+	// Headless server
+	if (SpotlightComponent == nullptr) return;
+	
 	SpotlightComponent->SetRelativeLocationAndRotation(
 			FVector(FMath::Max(Depth, 2.5f) * 100.f, 0.f, FMath::Max(Height, 2.5f) * 100.f),
 			FRotator(-135.f, 0.f , 0.f));
@@ -693,6 +747,9 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 
 void ANSamplesDisplayActor::UpdateTitleText() const
 {
+	// Headless server
+	if (TitleTextComponent == nullptr) return;
+	
 	// Title Text
 	if (!TitleText.IsEmpty())
 	{
@@ -766,6 +823,8 @@ void ANSamplesDisplayActor::UpdateCollisions() const
 		ShadowBoxSide->SetCollisionProfileName(FName("BlockAll"));
 		ShadowBoxTop->SetCollisionProfileName(FName("BlockAll"));
 		ShadowBoxRound->SetCollisionProfileName(FName("BlockAll"));
+		
+		Watermark->SetCollisionProfileName(FName("BlockAll"));
 	}
 	else
 	{
@@ -782,6 +841,8 @@ void ANSamplesDisplayActor::UpdateCollisions() const
 		ShadowBoxSide->SetCollisionProfileName(FName("NoCollision"));
 		ShadowBoxTop->SetCollisionProfileName(FName("NoCollision"));
 		ShadowBoxRound->SetCollisionProfileName(FName("NoCollision"));
+
+		Watermark->SetCollisionProfileName(FName("NoCollision"));
 	}
 }
 
@@ -789,6 +850,34 @@ void ANSamplesDisplayActor::UpdateTestComponents()
 {
 	// Reset our SceneRoot
 	RootComponent = SceneRoot;
+}
+
+void ANSamplesDisplayActor::UpdateWatermark() const
+{
+	if (!bWatermarkEnabled)
+	{
+		Watermark->SetVisibility(false);
+		return;
+	}
+
+	Watermark->SetRelativeTransform(MainPanelTransform);
+	if (Height < 2.f)
+	{
+		FVector NewLocation = Watermark->GetRelativeLocation();
+		NewLocation += FVector(Depth * 50, 0, 9);
+		Watermark->SetRelativeLocation(NewLocation);
+		FRotator NewRotation = Watermark->GetRelativeRotation();
+		NewRotation.Pitch += 180.f;
+		Watermark->SetRelativeRotation(NewRotation);
+	}
+	else
+	{
+		FVector NewLocation = Watermark->GetRelativeLocation();
+		NewLocation += FVector(9, 0, 100 + (Height * 50));
+		Watermark->SetRelativeLocation(NewLocation);
+	}
+	Watermark->SetWorldScale3D(FVector(1, WatermarkScale, WatermarkScale));
+	Watermark->SetVisibility(true);
 }
 
 void ANSamplesDisplayActor::DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const

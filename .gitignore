@@ -87,6 +87,7 @@ TestProject/.vsconfig
 
 # Lock Files
 *~lock~
+*.blend1
 
 # Build Configuration
 !TestProject/Saved/UnrealBuildTool/BuildConfiguration.xml

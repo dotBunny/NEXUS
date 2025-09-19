@@ -7,35 +7,39 @@
 #include "NComboBoxString.generated.h"
 
 /**
- * A wrapper around the <code>UNCheckBox</code> class to allow for setting the checked state without broadcasting events.
+ * A wrapper around the UComboBoxString class to allow for setting the selected option without broadcasting events.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/">UNComboBoxString</a>
  */
 UCLASS()
-class NEXUSUI_API UNComboBoxString final : public UComboBoxString
+class NEXUSUI_API UNComboBoxString : public UComboBoxString
 {
 	GENERATED_BODY()
 	
 public:
-
 	/**
-	 * Sets the selected option of the <code>UComboBoxString</code> without triggering exposed event bindings.	 
+	 * Sets the selected option of the UComboBoxString without triggering exposed event bindings.
+	 * @param Option The new option's text.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Selected Option (No Broadcast)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/#set-selected-option-no-broadcast"))
 	void SetSelectedOption_NoBroadcast(FString Option);
 
 	/**
-	 * Sets the selected option by index of the <code>UComboBoxString</code> without triggering exposed event bindings.	 
+	 * Sets the selected option by index of the UComboBoxString without triggering exposed event bindings.	 
+	 * @param Index The new option's index.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Selected Index (No Broadcast)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/#set-selected-index-no-broadcast"))
 	void SetSelectedIndex_NoBroadcast(const int32 Index);
 
 private:
 	/**
-	 * Cached value of the <code>OnSelectionChanged</code> used to prevent it from being called when setting the value.
+	 * Cached value of the OnSelectionChanged used to prevent it from being called when setting the value.
 	 */
 	FOnSelectionChangedEvent CachedOnSelectionChanged;
 
 	/**
-	 * Empty <code>OnSelectionChanged</code> event used to swap in for the <code>CachedOnSelectionChanged</code> to prevent it from being called.
+	 * Empty OnSelectionChanged event used to swap in for the CachedOnSelectionChanged to prevent it from being called.
 	 */
 	static FOnSelectionChangedEvent EmptySelectionChanged;
 };

@@ -23,15 +23,15 @@
 			"Enabled": true
 		},
 		{
+			"Name": "NexusBlockout",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusDynamicReferences",
 			"Enabled": true
 		},
 		{
 			"Name": "NexusFixers",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusMaterialLibrary",
 			"Enabled": true
 		},
 		{
@@ -51,11 +51,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferencesSamples",
+			"Name": "NexusBlockoutSamples",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusMaterialLibrarySamples",
+			"Name": "NexusDynamicReferencesSamples",
 			"Enabled": true
 		},
 		{
@@ -72,6 +72,18 @@
 		},
 		{
 			"Name": "NexusMultiplayerSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusProcGen",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusProcGenSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDeveloperMenu",
 			"Enabled": true
 		}
 	],

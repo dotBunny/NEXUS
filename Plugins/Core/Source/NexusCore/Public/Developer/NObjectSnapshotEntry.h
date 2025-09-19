@@ -12,20 +12,32 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 	GENERATED_BODY()
 
 	FNObjectSnapshotEntry() = default;
+	~FNObjectSnapshotEntry()
+	{
+		ObjectPtr = nullptr;
+	}
 	
 	explicit FNObjectSnapshotEntry(const FUObjectItem& Item)
 	{
 		RefCount = Item.GetRefCount();
 		SerialNumber = Item.GetSerialNumber();
+		bIsGarbage = Item.IsGarbage();
+		bIsRoot = Item.IsRootSet();
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
-		ObjectPtr = static_cast<UObject*>(Item.Object);
+		if (UObject* Object = static_cast<UObject*>(Item.Object))
 #else
-		ObjectPtr = static_cast<UObject*>(Item.GetObject());
-#endif		
-
-		if (ObjectPtr)
+		if (UObject* Object = static_cast<UObject*>(Item.GetObject()))
+#endif
 		{
-			Name = ObjectPtr->GetFName().ToString();
+			ObjectPtr = Object;
+			Name = Object->GetFName().ToString();
+			FullName = Object->GetFullName();
+		}
+		else
+		{
+			Name = Item.GetObject()->GetFName().ToString();
+			FullName = Name;
+			ObjectPtr = nullptr;
 		}
 	}
 
@@ -41,18 +53,30 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		// Check serial next?
 		return SerialNumber == Other.SerialNumber;
 	}
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	bool bIsRoot = false;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
-	TObjectPtr<UObject> ObjectPtr;
+	bool bIsGarbage = false;
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	TWeakObjectPtr<UObject> ObjectPtr;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 SerialNumber = -1;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	int32 RefCount = -1;
+
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	FString Name;
-
+	
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	FString FullName;
+	
 	FString ToString() const
 	{
-		return Name;
+		return FString::Printf(TEXT("(%i)%hs%hs    %s"), RefCount, bIsRoot ? " [R]" : "    ", bIsGarbage ? " [G]" : "    ", *FullName);
 	}
 };

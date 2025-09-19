@@ -9,6 +9,7 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
+// ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class NEXUSUIEDITOR_API FNUIEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusUI", "NUIEditorStyle")

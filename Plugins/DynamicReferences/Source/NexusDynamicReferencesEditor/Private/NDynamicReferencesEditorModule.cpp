@@ -2,9 +2,6 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NDynamicReferencesEditorModule.h"
-
-#include "NDynamicReferencesComponentCustomization.h"
-#include "NDynamicReferenceComponent.h"
 #include "NDynamicReferencesEditorStyle.h"
 #include "NEditorUtils.h"
 #include "Interfaces/IPluginManager.h"
@@ -17,29 +14,16 @@ void FNDynamicReferencesEditorModule::StartupModule()
 
 void FNDynamicReferencesEditorModule::ShutdownModule()
 {
-	// Unregister customizations
-	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
-	{
-		FPropertyEditorModule& PropertyModule = FModuleManager::GetModuleChecked<FPropertyEditorModule>("PropertyEditor");
-		PropertyModule.UnregisterCustomClassLayout(UNDynamicReferenceComponent::StaticClass()->GetFName());
-		PropertyModule.NotifyCustomizationModuleChanged();
-	}
-
 	FNDynamicReferencesEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNDynamicReferencesEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	// Configure Style
 	FNDynamicReferencesEditorStyle::Initialize();
-	
-	// Register Customizations
-	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
-	PropertyModule.RegisterCustomClassLayout(UNDynamicReferenceComponent::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FNDynamicReferencesComponentCustomization::MakeInstance));
-	PropertyModule.NotifyCustomizationModuleChanged();
 }
 
 IMPLEMENT_MODULE(FNDynamicReferencesEditorModule, NexusDynamicReferencesEditor)

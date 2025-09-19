@@ -6,7 +6,7 @@
 
 FString FNMetaUtils::EmptyString = TEXT("");
 
-N_IMPLEMENT_META_TYPE(ExternalDocumentation, DocsURL);
+N_IMPLEMENT_META_TYPE(ExternalDocumentation, DocsURL)
 
 bool FNMetaUtils::HasKey(UEdGraphNode* Node, const FName& Key)
 {

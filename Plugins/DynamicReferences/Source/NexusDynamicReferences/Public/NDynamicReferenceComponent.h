@@ -7,8 +7,13 @@
 #include "Types/NActorComponentLifecycle.h"
 #include "NDynamicReferenceComponent.generated.h"
 
+/**
+ * A component which registers and unregisters the owning AActor with the UNDynamicReferencesSubsystem for future lookup.
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-reference-component/">UNDynamicReferenceComponent</a>
+ */
 UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="Dynamic Reference",
-	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."))
+	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."),
+	HideCategories=(Tags, Activation, Cooking, AssetUserData, Navigation))
 class NEXUSDYNAMICREFERENCES_API UNDynamicReferenceComponent : public UActorComponent
 {
 	GENERATED_BODY()
@@ -28,16 +33,16 @@ public:
 
 protected:
 	/**
-	 * What phase of the components lifecycle should the references be linked.
+	 * What phase of the component's lifecycle should the references be linked?
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
-	TEnumAsByte<ENActorComponentLifecycleStart> LinkPhase = ENActorComponentLifecycleStart::BeginPlay;
+	TEnumAsByte<ENActorComponentLifecycleStart> LinkPhase = ENActorComponentLifecycleStart::ACLS_BeginPlay;
 
 	/**
-	 * What phase of the components lifecycle should the references be broken.
+	 * What phase of the component's lifecycle should the references be broken?
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
-	TEnumAsByte<ENActorComponentLifecycleEnd> BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
+	TEnumAsByte<ENActorComponentLifecycleEnd> BreakPhase = ENActorComponentLifecycleEnd::ACLE_EndPlay;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
 	TArray<TEnumAsByte<ENDynamicReference>> References;

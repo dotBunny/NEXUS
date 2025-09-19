@@ -37,7 +37,7 @@ void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
-	if (bDontDestroyStaticActors && !OtherActor->IsRootComponentMovable()) return;
+	if (bIgnoreStaticActors && !OtherActor->IsRootComponentMovable()) return;
 
 	// Check if actor pool, return to pool
 	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
@@ -45,8 +45,11 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	{
 		if (!ActorItem->ReturnToActorPool())
 		{
-			// The intent is still to destroy
-			OtherActor->Destroy();
+			if (!ActorItem->GetActorPoolSettings().HasFlag_ServerOnly())
+			{
+				// The intent is still to destroy
+				OtherActor->Destroy();
+			}
 			KillCount++;
 			return;
 		}
@@ -56,7 +59,7 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		return;
 	}
 
-	// Check if we have a pool for this Actor, but it just doesnt implement the interface
+	// Check if we have a pool for this Actor, but it just doesn't implement the interface
 	if (ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
 	{
 		ActorPoolSubsystem->ReturnActor(OtherActor);
@@ -64,7 +67,7 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		return;
 	}
 
-	if (bDontDestroyNonInterfacedActors)
+	if (bIgnoreNonInterfacedActors)
 	{
 		return;
 	}

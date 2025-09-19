@@ -5,17 +5,17 @@
 
 bool UNActorLibrary::IsSameActors(const TArray<AActor*>& A, const TArray<AActor*>& B)
 {
-	const int Length = A.Num();
+	const int32 Length = A.Num();
 	if (Length != B.Num()) return false;
 	
 	TArray<bool> FindCache;
 	FindCache.Reserve(Length);
 	FindCache.AddDefaulted(Length);
 	
-	for (int i = 0; i < Length; i++)
+	for (int32 i = 0; i < Length; i++)
 	{
 		bool Found = false;
-		for (int j = 0; j < Length; j++)
+		for (int32 j = 0; j < Length; j++)
 		{
 			if (FindCache[j]) continue;
 			if (A[i] == B[j])

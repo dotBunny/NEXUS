@@ -56,5 +56,5 @@
 		SpriteComponent->bReceivesDecals = false; \
 	}
 #else
-#define N_WORLD_ICON_IMPLEMENTATION(PackagePath)
+#define N_WORLD_ICON_IMPLEMENTATION(PackagePath, AttachPoint, bIsStatic)
 #endif // WITH_EDITORONLY_DATA

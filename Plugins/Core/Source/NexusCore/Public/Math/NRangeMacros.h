@@ -26,7 +26,7 @@
 	{ \
 		return RandomStream.RandRange(Minimum, Maximum); \
 	} \
-	inline Type RandomOneShotValue(int Seed) const \
+	inline Type RandomOneShotValue(int32 Seed) const \
 	{ \
 		const FRandomStream RandomStream(Seed); \
 		return RandomStream.RandRange(Minimum, Maximum); \
@@ -50,7 +50,7 @@
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
 		return RandomStream.RandRange(MinimumValue, MaximumValue); \
 	} \
-	inline Type RandomOneShotValueInSubRange(int Seed, Type MinimumValue, Type MaximumValue) const \
+	inline Type RandomOneShotValueInSubRange(int32 Seed, Type MinimumValue, Type MaximumValue) const \
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \

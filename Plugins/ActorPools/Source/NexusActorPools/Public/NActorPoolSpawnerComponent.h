@@ -4,43 +4,47 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "UObject/UObjectGlobals.h"
 #include "NActorPoolSettings.h"
 #include "NActorPoolSubsystem.h"
-#include "Templates/Tuple.h"
 #include "Collections/NWeightedIntegerArray.h"
-#include "Components/SplineComponent.h"
 #include "NActorPoolSpawnerComponent.generated.h"
 
 class UActorPoolSubsystem;
+class USplineComponent;
 
 USTRUCT(BlueprintType)
 struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> Template;
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditAnywhere)
 	FNActorPoolSettings Settings;
-	UPROPERTY(EditInstanceOnly)
-	int Weight = 1;
+	UPROPERTY(EditAnywhere)
+	int32 Weight = 1;
 };
 
 UENUM(BlueprintType)
 enum ENActorPoolSpawnerDistribution : uint8
 {
+	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	
 	APSD_Point			UMETA(DisplayName = "Point"),
 	APSD_Radius			UMETA(DisplayName = "Radius"),
 	APSD_Sphere			UMETA(DisplayName = "Sphere"),
 	APSD_Box			UMETA(DisplayName = "Box"),
 	APSD_Spline			UMETA(DisplayName = "Spline")
+
+	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 };
 
-// TODO: Toggle option to be determinisitc?
-
-UCLASS(meta = (BlueprintSpawnableComponent))
+/**
+ * A fundamental spawning component which will interact with the UNActorPoolSubsystem to periodically spawn defined AActors in predefined distributions (shapes).
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/">UNActorPoolSpawnerComponent</a>
+ */
+UCLASS(meta = (BlueprintSpawnableComponent),
+	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSACTORPOOLS_API UNActorPoolSpawnerComponent : public USceneComponent
 {
 	GENERATED_BODY()
@@ -49,68 +53,68 @@ public:
 	/**
 	 * Is the component going to Spawn enemies when ticked?
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bSpawningEnabled = true;
 	
 	/**
-	 * Should the spawner only spawn on servers, ignoring itself on client-only.
+	 * Should the spawner only spawn on servers, ignoring itself on client-only?
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bServerAuthoritative = true;
 
 	/**
 	 * The rate at which things should be spawned.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	float SpawnRate = 0.5f;
 
 	/**
 	 * Offset from the component location to treat as the origin when calculating a position to spawn an actor.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector Offset = FVector::Zero();
 
 	/**
-	* How should the point be chosen where things are spawned.
+	* The distribution method used to choose where things are spawned.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	TEnumAsByte<ENActorPoolSpawnerDistribution> Distribution = ENActorPoolSpawnerDistribution::APSD_Point;
 
 	/**
-	* How should the point be chosen where things are spawned.
+	* The dimensional input to the distribution method.
 	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
 
 	/**
-	 * The in-level component reference for usage with the APSD_Spline for Distribution.
+	 * The in-level component reference for usage with the Spline distribution method.
 	 */
-	UPROPERTY(EditInstanceOnly, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor))
+	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
 
 	/**
-	 * If you want to reference a Spline in a BP with the ActorPoolSpawner, you will need to enter its name here and it will be linked during BeginPlay.
+	 * If you want to reference a Spline in a BP with the ActorPoolSpawner, you will need to enter its name here, and it will be linked during BeginPlay.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FName SplineComponentName;
 
 	/**
 	 * The number of items to spawn at any given spawn event.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Count = 1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
+	int32 Count = 1;
 
 	/**
-	 * Should we randomize the seed on begin play?
+	 * Should we randomize the seed on BeginPlay?
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	bool bRandomizeSeed = false;
 
 	/**
 	 * Seed used when determining what to pull from the weighted list.
 	 */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
-	int Seed = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
+	int32 Seed = 0;
 
 	explicit UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer);
 
@@ -118,16 +122,29 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	/**
+	 * Initiate a spawn call for the component, ignoring any timers.
+	 * @param bIgnoreSpawningFlag Should the internal spawning flag state be ignored?
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Spawn", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#spawn"))
 	void Spawn(bool bIgnoreSpawningFlag = false);
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	/**
+	 * Disables the component's internal flag to stop any spawning from occuring.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Disable Spawning", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
 	void DisableSpawning()
 	{
 		bSpawningEnabled = false;
 	}
 
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor Pools")
+	/**
+	 * Enables the component's internal flag to allow spawning to occur (on by default).
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Enable Spawning", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#enable-spawning"))
 	void EnableSpawning()
 	{
 		bSpawningEnabled = true;
@@ -138,13 +155,16 @@ public:
 	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange; }
 
 protected:
-	UPROPERTY(EditInstanceOnly, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"))
+	UPROPERTY(EditAnywhere, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")
 	TArray<FNActorPoolSpawnerTemplate> Templates;
 private:
 	FNWeightedIntegerArray WeightedIndices;
 	bool bIsNetAuthority = false;
 	float TimeSinceSpawned = 0.f;
+	
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	UNActorPoolSubsystem* Manager = nullptr;
-	int TemplateCount = 0;
+	int32 TemplateCount = 0;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	USplineComponent* CachedSplineComponent = nullptr;
 };

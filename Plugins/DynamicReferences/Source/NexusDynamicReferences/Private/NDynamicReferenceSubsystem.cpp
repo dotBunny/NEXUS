@@ -15,12 +15,12 @@ void UNDynamicReferenceSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-void UNDynamicReferenceSubsystem::RegisterReference(ENDynamicReference InType, AActor* InActor)
+void UNDynamicReferenceSubsystem::AddReference(const ENDynamicReference InType, AActor* InActor)
 {
 	ReferenceMap[InType].AddUnique(InActor);
 }
 
-void UNDynamicReferenceSubsystem::UnregisterReference(ENDynamicReference InType, AActor* InActor)
+void UNDynamicReferenceSubsystem::RemoveReference(const ENDynamicReference InType, AActor* InActor)
 {
 	ReferenceMap[InType].Remove(InActor);
 }

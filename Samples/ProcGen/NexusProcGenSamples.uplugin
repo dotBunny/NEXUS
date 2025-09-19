@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 3,
+	"VersionName": "0.2.0",
+	"FriendlyName": "NEXUS Samples: Procedural Generation",
+	"Description": "Sample content for the NEXUS: ProcGen plugin.",
+	"Category": "NEXUS Samples",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "NexusSharedSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusProcGen",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusBlockout",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": true
+}

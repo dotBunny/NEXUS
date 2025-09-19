@@ -14,9 +14,10 @@
 #include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
+class UCameraComponent;
 class USpotLightComponent;
 
-#define N_TIMER_DRAW_THICKNESS 0.35f
+#define N_TIMER_DRAW_THICKNESS 1.f
 
 UENUM(BlueprintType)
 enum class ESampleTestResult : uint8
@@ -29,14 +30,16 @@ enum class ESampleTestResult : uint8
 	Succeeded
 };
 
-
 /**
  * A display used in NEXUS demonstration levels
- * @remarks Yes, we did rebuild/nativize Epic's content display blueprint!
+ * @notes Yes, we did rebuild/nativize Epic's content display blueprint!
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
+	friend class ANSamplesPawn;
+	
 	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
 	DECLARE_DELEGATE_TwoParams(FOnTestFinishEventSignature, ESampleTestResult TestResult, const FString& Message)
 	
@@ -45,8 +48,11 @@ class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 	explicit ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+
+	static TArray<ANSamplesDisplayActor*> KnownDisplays;
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
@@ -174,6 +180,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Color")
 	TEnumAsByte<ENColor> DescriptionColor = NC_White;
 
+	// WATERMARK
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Enabled")
+	bool bWatermarkEnabled = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Scale")
+	float WatermarkScale = 2.25f;
+	
 	// SPOTLIGHT
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
 	bool bSpotlightEnabled = false;
@@ -420,6 +433,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
 	FText CachedDescription;
 	
+	// SCREENSHOT
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Screenshot", DisplayName = "Camera")
+	TObjectPtr<UCameraComponent> ScreenshotCameraComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Screenshot", DisplayName = "Override Name")
+	FText ScreenshotCameraName;
+	
 private:
 	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
 
@@ -437,6 +457,7 @@ private:
 	void UpdateTitleText() const;
 	void UpdateCollisions() const;
 	void UpdateTestComponents();
+	void UpdateWatermark() const;
 
 	void DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const;
 
@@ -484,6 +505,8 @@ private:
 	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxTop;
 	UPROPERTY()
 	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxRound;
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> Watermark;
 	
 
 	UPROPERTY()
@@ -509,6 +532,8 @@ private:
 	FTimerHandle TimerHandle;
 
 
+	FTransform MainPanelTransform;
+	FTransform FloorPanelTransform;
 	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 	
 	int CheckPassCount = 0;

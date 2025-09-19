@@ -6,14 +6,14 @@
 #include "NRandom.h"
 
 /**
- * An array of integers that are proportionally weighted in entry count.
+ * An array of integers that are proportionally weighted in the entry count.
  */
 struct NEXUSCORE_API FNWeightedIntegerArray
 {
 	/**
 	 * Add a value to the array, with an optional weight/count.
 	 */
-	void Add(const int Value, const int Weight = 1);
+	void Add(const int32 Value, const int32 Weight = 1);
 
 	/**
 	 * Empty the existing array.
@@ -23,18 +23,18 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	/**
 	 * Remove a value from the array.
 	 */
-	void Remove(const int Value);
+	void Remove(const int32 Value);
 
 	/**
 	 * Remove a value from the array, with an optional count limit.
 	 */
-	void RemoveSome(const int Value, int Limit = 1);
+	void RemoveSome(const int32 Value, int32 Limit = 1);
 
 	/**
 	 * Get the next deterministic value from the array.
 	 * @return Uses FNRandom::Deterministic
 	 */
-	int NextValue() const
+	int32 NextValue() const
 	{
 		return Data[FNRandom::Deterministic.IntegerRange(0, CachedCount)];
 	};
@@ -43,23 +43,23 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	 * Get a random value from the array.
 	 * @return Uses FNRandom::NonDeterministic
 	 */
-	int RandomValue() const
+	int32 RandomValue() const
 	{
 		return Data[FNRandom::NonDeterministic.RandRange(0, CachedCount)];
 	}
 
 	/**
-	 * Get a random value from the array creating an instance <code>FRandomStream</code> from the <code>Seed</code>.	 
+	 * Get a random value from the array creating an instance FRandomStream from the Seed.	 
 	 */
-	int RandomOneShotValue(const int Seed) const
+	int32 RandomOneShotValue(const int Seed) const
 	{
 		const FRandomStream RandomStream(Seed);
 		return Data[RandomStream.RandRange(0, CachedCount)];
 	};
 
 	/**
-	 * Get a random value from the array creating an instance <code>FRandomStream</code> from the <code>Seed</code>;
-	 * additionally settings the <code>Seed</code> with the mutated seed.	 
+	 * Get a random value from the array creating an instance FRandomStream from the Seed;
+	 * additionally settings the Seed with the mutated seed.	 
 	 */
 	int RandomTrackedValue(int32& Seed) const
 	{

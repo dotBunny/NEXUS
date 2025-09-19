@@ -4,15 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NWorldUtils.h"
 #include "Components/SceneComponent.h"
+#include "GameFramework/GameStateBase.h"
+#include "GameFramework/PlayerState.h"
 #include "Macros/NWorldMacros.h"
 
 class ALevelInstance;
+
 /**
- * A collection of utility methods for multiplayer type things.
+ * A handful of methods meant to support the building logic that works in multiplayer scenarios.
+ * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">FNMultiplayerUtils</a>
  */
-class NEXUSMULTIPLAYER_API FNMultiplayerUtils
+class FNMultiplayerUtils
 {
 public:
 	FORCEINLINE static void ServerTravel(const UObject *WorldContextObject, const FString& InURL, const bool bAbsolute = true, const bool bShouldSkipGameNotify = false)
@@ -21,5 +24,66 @@ public:
 		{
 			World->ServerTravel(InURL, bAbsolute, bShouldSkipGameNotify);
 		}
+	}
+
+	/**
+	 * Is the current session created from the MultiplayerTest editor command?
+	 * @return true/false if it is.
+	 */	
+	FORCEINLINE static bool IsMultiplayerTest()
+	{
+		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
+	}
+
+	/**
+	 * Does the current callstack have World authority?
+	 * @remark Developer preference, use this to determine if logic is operating on the host.
+	 * @param World The world to check.
+	 * @return true/false if authority is found.
+	 */		
+	FORCEINLINE static bool HasWorldAuthority(const UWorld* World)
+	{
+		return World->GetAuthGameMode() != nullptr;
+	}
+
+	/**
+	 * Does the current callstack have World authority?
+	 * @remark Developer preference, use this to determine if logic is operating on the host.
+	 * @param World The world to check.
+	 * @return true/false if authority is found.
+	 */		
+	FORCEINLINE static bool HasWorldAuthority(const UWorld& World)
+	{
+		return World.GetAuthGameMode() != nullptr;
+	}
+
+	/**
+	 * Does the current callstack have GameState authority?
+	 * @remark One of many ways to check if the logic is being operated on the host/server.
+	 * @param World The world to check.
+	 * @return true/false if authority is found.
+	 */
+	FORCEINLINE static bool HasGameStateAuthority(const UWorld* World)
+	{
+		const AGameStateBase* GameState = World->GetGameState();
+		if (GameState == nullptr) return false;
+		return GameState->GetLocalRole() == ROLE_Authority;
+	}
+	
+	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
+	{
+		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();;
+	}
+
+	FORCEINLINE static APawn* GetPawnFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
+	{
+		for (const auto PlayerState : World->GetGameState()->PlayerArray)
+		{
+			if (PlayerState->GetPlayerId() == PlayerIdentifier)
+			{
+				return PlayerState->GetPawn();
+			}
+		}
+		return nullptr;
 	}
 };

@@ -8,7 +8,7 @@
 #include "NDoubleRangeLibrary.generated.h"
 
 /**
- * A Blueprint function library for working with <code>FNDoubleRange</code>.
+ * A Blueprint function library for working with FNDoubleRange.
  */
 UCLASS()
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
@@ -52,7 +52,7 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 	}
 
 	UFUNCTION(BlueprintCallable, DisplayName="Random One Shot Value In Sub-Range (Double)",  Category = "Nexus|Core|Range")
-	static double RandomOneShotValueInSubRange(const FNDoubleRange& Range, int Seed, double MinimumValue, double MaximumValue)
+	static double RandomOneShotValueInSubRange(const FNDoubleRange& Range, int32 Seed, double MinimumValue, double MaximumValue)
 	{
 		return Range.RandomOneShotValueInSubRange(Seed, MinimumValue, MaximumValue);
 	}

@@ -7,34 +7,39 @@
 #include "NCheckBox.generated.h"
 
 /**
- * A wrapper around the <code>UNCheckBox</code> class to allow for setting the checked state without broadcasting events.
+ * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/check-box/">UNCheckBox</a>
  */
 UCLASS()
-class NEXUSUI_API UNCheckBox final : public UCheckBox
+class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()
 	
 public:
 	/**
-	 * Set the checked state of the <code>UCheckBox</code> without triggering exposed event bindings.	 
+	 * Sets if the UCheckBox is checked without triggering exposed event bindings.
+	 * @param bNewValue The new value.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set IsChecked (No Broadcast)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/check-box/#set-ischecked-no-broadcast"))
 	void SetIsChecked_NoBroadcast(const bool bNewValue);
 
 	/**
-	 * Set the checked state of the <code>UCheckBox</code> without triggering exposed event bindings.	 
+	 * Set the checked state of the UCheckBox without triggering exposed event bindings.	
+	 * @param NewState The new value.
 	 */
-	UFUNCTION(BlueprintCallable, Category="Widget")
+	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Checked State (No Broadcast)",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/check-box/#set-checkedstate-no-broadcast"))
 	void SetCheckedState_NoBroadcast(const ECheckBoxState NewState);
 	
 private:
 	/**
-	 * Cached value of the <code>OnStateChanged</code> used to prevent it from being called when setting the value.
+	 * Cached value of the OnStateChanged used to prevent it from being called when setting the value.
 	 */
 	FOnCheckBoxComponentStateChanged CachedOnStateChanged;
 
 	/**
-	 * Empty <code>OnStateChanged</code> event used to swap in for the <code>CachedOnStateChanged</code> to prevent it from being called.
+	 * Empty OnStateChanged event used to swap in for the CachedOnStateChanged to prevent it from being called.
 	 */
 	static FOnCheckBoxComponentStateChanged EmptyStateChanged;
 };

@@ -12,6 +12,7 @@ void FNMultiplayerModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNMultiplayerModule, OnPostEngineInit);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNMultiplayerModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusMultiplayerSamples")

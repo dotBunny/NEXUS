@@ -9,9 +9,9 @@
 TArray<int32> FNRawMesh::GetFlatIndices()
 {
 	TArray<int32> ReturnData;
-	const int LoopCount = Loops.Num();
+	const int32 LoopCount = Loops.Num();
 	ReturnData.Reserve(LoopCount*3);
-	for (int i = 0; i < LoopCount; i++)
+	for (int32 i = 0; i < LoopCount; i++)
 	{
 		for (int j = 0; j < Loops[i].Indices.Num(); j++)
 		{
@@ -96,7 +96,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 			FVector Normal = FVector::CrossProduct(V2 - V1, V3 - V1).GetSafeNormal();
 			FVector CenterToVertex = (V1 - Center).GetSafeNormal();
 
-			// This should have been the other way :?
+			// This should have been the other way?
 			if (FVector::DotProduct(Normal, CenterToVertex) > 0)
 			{
 				DynamicMesh.ReverseTriOrientation(TriangleID);

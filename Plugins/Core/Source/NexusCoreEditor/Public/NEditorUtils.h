@@ -20,6 +20,21 @@ class NEXUSCOREEDITOR_API FNEditorUtils
 {
 public:
 	/**
+	 * Get the current editor map name.
+	 */
+	FORCEINLINE static FString GetCurrentMapName()
+	{
+		return GEditor->GetEditorWorldContext().World()->GetMapName();
+	}
+
+	/**
+	 * Get the current editor map full path.
+	 */
+	FORCEINLINE static FString GetCurrentMapFullPath()
+	{
+		return GEditor->GetEditorWorldContext().World()->GetName();
+	}
+	/**
 	 * Is in PIE mode.
 	 */
 	FORCEINLINE static bool IsPlayInEditor()
@@ -45,7 +60,7 @@ public:
 	
 	/**
 	 * Is the editor controlled by a user?
-	 * @remark Attempts to represent if it is safe to do things that need a fully initialized editor.
+	 * @note Attempts to represent if it is safe to do things that need a fully initialized editor.
 	 */
 	FORCEINLINE static bool IsUserControlled()
 	{
@@ -53,14 +68,14 @@ public:
 	}
 
 	/**
-	 * Register an <code>UDeveloperSettings</code> object with the Unreal Editor.
-	* @remarks Keys off SectionName
+	 * Register a UDeveloperSettings object with the Unreal Editor.
+	* @notes Keys off SectionName
 	 */
 	static void RegisterSettings(UDeveloperSettings* SettingsObject);
 
 	/**
-	 * Unregister an <code>UDeveloperSettings</code> object with the Unreal Editor.
-	 * @remarks Keys off SectionName
+	 * Unregister a UDeveloperSettings object with the Unreal Editor.
+	 * @notes Keys off SectionName
 	 */
 	static void UnregisterSettings(const UDeveloperSettings* SettingsObject);
 
@@ -132,8 +147,11 @@ public:
 	}
 	
 	static void DisallowConfigFileFromStaging(const FString& Config);
+	static void AllowConfigFileForStaging(const FString& Config);
 	
 	static void ReplaceAppIcon(FSlateImageBrush* Icon);
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 	static bool ReplaceWindowIcon(const FString& IconPath);
+
+	static FString GetEngineBinariesPath();
 };

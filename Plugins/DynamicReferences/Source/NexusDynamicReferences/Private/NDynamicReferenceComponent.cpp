@@ -6,8 +6,7 @@
 
 void UNDynamicReferenceComponent::BeginPlay()
 {
-
-	if (LinkPhase == ENActorComponentLifecycleStart::BeginPlay)
+	if (LinkPhase == ENActorComponentLifecycleStart::ACLS_BeginPlay)
 	{
 		// Register the references with the subsystem
 		Register();
@@ -18,7 +17,7 @@ void UNDynamicReferenceComponent::BeginPlay()
 
 void UNDynamicReferenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::EndPlay)
+	if (BreakPhase == ENActorComponentLifecycleEnd::ACLE_EndPlay)
 	{
 		Unregister();
 	}
@@ -27,7 +26,7 @@ void UNDynamicReferenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 
 void UNDynamicReferenceComponent::InitializeComponent()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::InitializeComponent)
+	if (LinkPhase == ENActorComponentLifecycleStart::ACLS_InitializeComponent)
 	{
 		Register();
 	}
@@ -36,7 +35,7 @@ void UNDynamicReferenceComponent::InitializeComponent()
 
 void UNDynamicReferenceComponent::UninitializeComponent()
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::UninitializeComponent)
+	if (BreakPhase == ENActorComponentLifecycleEnd::ACLE_UninitializeComponent)
 	{
 		// Unregister the references with the subsystem
 		Unregister();
@@ -54,7 +53,7 @@ void UNDynamicReferenceComponent::Register()
 		for (int i = 0; i < ReferenceCount; i++)
 		{
 			if (References[i] == NDR_None) continue;
-			Subsystem->RegisterReference(References[i], Owner);
+			Subsystem->AddReference(References[i], Owner);
 		}
 	}
 }
@@ -69,7 +68,7 @@ void UNDynamicReferenceComponent::Unregister()
 		for (int i = 0; i < ReferenceCount; i++)
 		{
 			if (References[i] == NDR_None) continue;
-			Subsystem->UnregisterReference(References[i], Owner);
+			Subsystem->RemoveReference(References[i], Owner);
 		}
 	}
 }

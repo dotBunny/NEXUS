@@ -10,6 +10,7 @@
 /**
  * Provides various functions for generating points the plane of a rectangle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
+ * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/">FNRectanglePicker</a>
  */
 class NEXUSPICKER_API FNRectanglePicker
 {
@@ -20,7 +21,6 @@ public:
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum width and height of the rectangle (X and Y values, inner bound).
@@ -56,10 +56,12 @@ public:
 					FNRandom::Deterministic.FloatRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+		
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum width and height of the rectangle (X and Y values, inner bound).
@@ -73,11 +75,12 @@ public:
 	{
 		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The width and height of the rectangle (X and Y values).
@@ -101,11 +104,11 @@ public:
 				FNRandom::Deterministic.FloatRange(-ExtentY, ExtentY),
 				0.f));
 		}
-		
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
+
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The width and height of the rectangle (X and Y values).
@@ -118,6 +121,7 @@ public:
 	{
 		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM POINT
@@ -125,7 +129,6 @@ public:
 	/**
 	 * Generates a random point inside or on the plane of a rectangle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum width and height of the rectangle (X and Y values, inner bound).
@@ -161,10 +164,12 @@ public:
 					FNRandom::NonDeterministic.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum width and height of the rectangle (X and Y values, inner bound).
@@ -178,11 +183,12 @@ public:
 	{
 		RandomPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * 
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The width and height of the rectangle (X and Y values).
@@ -206,11 +212,11 @@ public:
 			FNRandom::NonDeterministic.FRandRange(-ExtentY, ExtentY),
 				0.f));
 		}
-		
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle, then projects it to the world.
-	 * 
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The width and height of the rectangle (X and Y values).
@@ -223,6 +229,7 @@ public:
 	{
 		RandomPointInsideOrOnSimple(OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM ONE-SHOT POINT
@@ -230,7 +237,6 @@ public:
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
@@ -269,10 +275,11 @@ public:
 					RandomStream.FRandRange(MinimumExtentY, MaximumExtentY),
 					0.f));
 		}
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed, then projects it to the world.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
@@ -287,11 +294,12 @@ public:
 	{
 		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed.
 	 * Useful for one-time random point generation with reproducible results.
-	 * 
 	 * @param Seed The random seed to use.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
@@ -317,7 +325,10 @@ public:
 			RandomStream.FRandRange(-ExtentY, ExtentY),
 			0.f));
 		}
+
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle using a provided seed, then projects it to the world.
 	 * 
@@ -334,6 +345,7 @@ public:
 	{
 		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// RANDOM TRACKED POINT
@@ -341,7 +353,6 @@ public:
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
@@ -380,11 +391,12 @@ public:
 					0.f));
 		}
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_RECTANGLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
@@ -399,11 +411,12 @@ public:
 	{
 		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated point location.
 	 * @param Origin The center point of the rectangle.
@@ -431,11 +444,12 @@ public:
 		}
 		
 		Seed = RandomStream.GetCurrentSeed();
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 	}
+
 	/**
 	 * Generates a random point inside or on the plane of a rectangle while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
-	 * 
 	 * @param Seed [in,out] The random seed to use and update.
 	 * @param OutLocation [out] The generated and projected point location.
 	 * @param Origin The center point of the rectangle.
@@ -449,14 +463,14 @@ public:
 	{
 		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Dimensions, Rotation);
 		N_IMPLEMENT_PICKER_PROJECTION()
+		N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 	}
 
 	// ASSERT
 	
 	/**
 	 * Checks if a point is inside or on the plane of a rectangle.
-	 * Takes into account the rotation of the rectangle if any.
-	 * 
+	 * Takes into account the rotation of the rectangle, if any.
 	 * @param Origin The center point of the rectangle.
 	 * @param Dimensions The width and height of the rectangle (X and Y values).
 	 * @param Rotation The rotation of the rectangle around its center.

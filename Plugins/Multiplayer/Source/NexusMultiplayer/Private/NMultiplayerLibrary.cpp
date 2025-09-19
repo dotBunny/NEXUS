@@ -4,6 +4,7 @@
 #include "NMultiplayerLibrary.h"
 
 #include "NCoreMinimal.h"
+#include "NMultiplayerUtils.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
@@ -38,6 +39,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 	
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
+		// Not the server, sorry can't kick
 		const AGameModeBase* GameMode = World->GetAuthGameMode();
 		if (GameMode == nullptr || GameMode->GameSession == nullptr)
 		{
@@ -88,9 +90,7 @@ bool UNMultiplayerLibrary::HasGameStateAuthority(UObject* WorldContextObject)
 {
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
-		const AGameStateBase* GameState = World->GetGameState();
-		if (GameState == nullptr) return false;
-		return GameState->GetLocalRole() == ROLE_Authority;
+		return FNMultiplayerUtils::HasGameStateAuthority(World);
 	}
 	return true;
 }
@@ -100,8 +100,37 @@ bool UNMultiplayerLibrary::HasGameStateAuthorityExec(UObject* WorldContextObject
 	return HasGameStateAuthority(WorldContextObject);
 }
 
+bool UNMultiplayerLibrary::HasWorldAuthority(UObject* WorldContextObject)
+{
+	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
+	{
+		return FNMultiplayerUtils::HasWorldAuthority(World);
+	}
+	return true;
+}
+
+bool UNMultiplayerLibrary::HasWorldAuthorityExec(UObject* WorldContextObject)
+{
+	return HasWorldAuthority(WorldContextObject);
+}
+
+bool UNMultiplayerLibrary::IsServer(UObject* WorldContextObject)
+{
+	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+	return World ? (World->GetNetMode() != NM_Client) : false;
+}
+
 bool UNMultiplayerLibrary::IsServerExec(UObject* WorldContextObject)
 {
-	UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-	return World ? (World->GetNetMode() != NM_Client) : false;
+	return IsServer(WorldContextObject);
+}
+
+bool UNMultiplayerLibrary::IsMultiplayerTest()
+{
+	return FNMultiplayerUtils::IsMultiplayerTest();
+}
+
+bool UNMultiplayerLibrary::IsMultiplayerTestExec()
+{
+	return FNMultiplayerUtils::IsMultiplayerTest();
 }

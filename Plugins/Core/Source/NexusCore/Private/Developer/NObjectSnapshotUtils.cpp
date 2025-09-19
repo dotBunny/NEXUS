@@ -8,6 +8,7 @@
 #include "Runtime/Launch/Resources/Version.h"
 
 int32 FNObjectSnapshotUtils::SnapshotTicket = 0;
+FNObjectSnapshot FNObjectSnapshotUtils::CachedSnapshot;
 
 FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
@@ -27,6 +28,10 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 			Snapshot.CapturedObjects.Add(FNObjectSnapshotEntry(Objects[i]));
 			Snapshot.CapturedObjectCount++;
 		}
+		else
+		{
+			Snapshot.UntrackedObjectCount++;
+		}
 	}
 
 	// Send it back
@@ -37,6 +42,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 {
 	FNObjectSnapshotDiff Diff;
 
+
 	if (OldSnapshot.Ticket > NewSnapshot.Ticket)
 	{
 		const FNObjectSnapshot TempSnapshot = OldSnapshot;
@@ -45,10 +51,11 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		N_LOG(Warning, TEXT("[FNObjectSnapshotUtils::Diff] OldSnapshot was actually newer then NewSnapshot. Swapping."))
 	}
 
-	// Calculate before we start chopping things up
-	Diff.CapturedObjectCount = NewSnapshot.CapturedObjectCount - OldSnapshot.CapturedObjectCount;
-
-	// If we check what has been maintained or removed, that leaves whats left in the array as having been added.
+	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;
+	Diff.UntrackedObjectCountB = NewSnapshot.UntrackedObjectCount;
+	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
+	
+	// If we check what has been maintained or removed, that leaves what's left in the array as having been added.
 	for (int OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
 	{
 		FNObjectSnapshotEntry& EntryA = OldSnapshot.CapturedObjects[OldIndex];
@@ -77,7 +84,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		}
 	}
 
-	// Whats left is added
+	// What's left is added
 	for (int i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
 	{
 		Diff.Added.Add(NewSnapshot.CapturedObjects[i]);
@@ -87,6 +94,11 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 	Diff.AddedCount = Diff.Added.Num();
 	Diff.RemovedCount = Diff.Removed.Num();
 	Diff.MaintainedCount = Diff.Maintained.Num();
+
+	
+	// Calculate before we start chopping things up
+	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
+
 
 	if (bRemoveKnownLeaks)
 	{
@@ -116,6 +128,13 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 
+		// Remove ChaosEventRelay (physics world) entry (will have a _# in its name)
+		if (Entry.Name.StartsWith(TEXT("ChaosEventRelay")))
+		{
+			Diff.Added.RemoveAt(i, EAllowShrinking::No);
+			Diff.AddedCount--;
+		}
+		
 		// Remove Niagara Component Pool entry (will have a _# in its name)
 		if (Entry.Name.StartsWith(TEXT("NiagaraComponentPool")))
 		{
@@ -123,4 +142,45 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 	}
+}
+
+void FNObjectSnapshotUtils::SnapshotToDisk()
+{
+	const FNObjectSnapshot Snapshot = FNObjectSnapshotUtils::Snapshot();
+
+	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
+		FString::Printf(TEXT("NEXUS_SnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+
+	FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::SnapshotToDisk] SNAPSHOT written to %s."), *DumpFilePath);
+}
+
+void FNObjectSnapshotUtils::ClearCachedSnapshot()
+{
+	CachedSnapshot.Reset();
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::ClearCachedSnapshot] Cached snapshot CLEARED."));
+	
+}
+
+void FNObjectSnapshotUtils::CacheSnapshot()
+{
+	CachedSnapshot = Snapshot();
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CacheSnapshot] SNAPSHOT cached for future compare."));
+}
+
+void FNObjectSnapshotUtils::CompareSnapshotToDisk()
+{
+	if (CachedSnapshot.Ticket == -1)
+	{
+		return;
+	}
+	const FNObjectSnapshot CompareSnapshot = Snapshot();
+	FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CachedSnapshot, CompareSnapshot, false);
+
+	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
+	FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+	FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+
+	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CompareSnapshotToDisk] COMPARE written to %s."), *DumpFilePath);
 }
