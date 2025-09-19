@@ -20,6 +20,7 @@ void FNMultiplayerEditorModule::ShutdownModule()
 	FNMultiplayerEditorStyle::Shutdown();
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNMultiplayerEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

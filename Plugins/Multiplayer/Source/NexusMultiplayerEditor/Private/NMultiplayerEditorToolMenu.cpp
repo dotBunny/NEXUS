@@ -67,6 +67,7 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
 		const FString MultiplayerFlag = TEXT(" -NMultiplayerTest");
+		// ReSharper disable once StringLiteralTypo
 		const FString NetworkProfileFlag = TEXT(" networkprofiler=true");
 	
 		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
