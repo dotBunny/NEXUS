@@ -1,9 +1,10 @@
 # Changelog
 
-## [0.3.0] - ?
+## [0.2.1] - ?
 
 ### Added
 
+- Native calls to fill arrays with results of `NMersenneTwister` methods.
 
 ### Fixed
 
@@ -12,10 +13,11 @@
 ### Changed
 
 - Exposed `FNMethodScopeTimer` for external linking/usage.
+- Optimized some `NMersenneTwister` distribution calls.
 
 ### Removed
 
-
+- Internal distribution resets in the `NMersenneTwister`.
 
 ## [0.2.0] - 2025-09-19
 

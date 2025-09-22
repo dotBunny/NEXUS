@@ -28,35 +28,60 @@ public:
 
 	/**
 	 * Set seed of the FMersenneTwister.
-	 * @param Seed - The seed to initialize the engine with
-	 **/
+	 * @param Seed The seed to initialize the engine with
+	 */
 	void Initialize(const uint64 Seed);
 	
 	/**
 	 * Returns a pseudo random bool value based on chance (0-1 roll), if the result is included.
-	 * @param Chance - The 0-1 percent chance of success
+	 * @param Chance The 0-1 percent chance of success
 	 * @return a psuedo random bool
 	 */
 	bool Bias(const float Chance);
 
 	/**
+	 * Returns an array of pseudo random bool value based on chance (0-1 roll), if the result is included.
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param Chance The 0-1 percent chance of success
+	 * @param StartIndex The index to start writing at.
+	 */
+	void Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex = 0);
+
+	/**
 	 * Returns a pseudo random uniformly distributed bool value.
 	 * @return a pseudo random bool
-	 **/
+	 */
 	bool Bool();
+
+	/**
+	 * Returns an array of pseudo random bool values based on a coin-flip.
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex = 0);
 
 	/**
 	 * Returns a pseudo random double between 0 and 1.
 	 * @return a pseudo random double
-	 **/
+	 */
 	double Double();
 
 	/**
+	 * Returns an array of pseudo random double between 0 and 1.
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex = 0);
+	
+	/**
 	 * Generate a random double between minimum and maximum.
-	 * @param MinimumValue - The lowest possible value
-	 * @param MaximumValue - The highest possible value
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random double
-	 **/
+	 */
 	float DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
 	FORCEINLINE float RandRange(const double MinimumValue = MIN_flt, const double MaximumValue = MAX_flt)
 	{
@@ -64,17 +89,35 @@ public:
 	}
 
 	/**
+	 * Returns an array of pseudo random double values between the MinimumValue and MaximumValue (inclusive).
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
+	
+	/**
 	 * Returns a pseudo random float between 0 and 1.
 	 * @return a pseudo random float
-	 **/
+	 */
 	float Float();
 
 	/**
+	 * Returns an array of pseudo random float between 0 and 1.
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex = 0);
+
+	/**
 	 * Generate a random float between minimum and maximum.
-	 * @param MinimumValue - The lowest possible value
-	 * @param MaximumValue - The highest possible value
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random float
-	 **/
+	 */
 	float FloatRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt);
 	FORCEINLINE float RandRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt)
 	{
@@ -82,11 +125,21 @@ public:
 	}
 
 	/**
+	 * Returns an array of pseudo random float values between the MinimumValue and MaximumValue (inclusive).
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
+
+	/**
 	* Generate a pseudo random integer between minimum and maximum.
-	* @param MinimumValue - The lowest possible value
-	* @param MaximumValue - The highest possible value
+	* @param MinimumValue The lowest possible value.
+	* @param MaximumValue The highest possible value.
 	* @return a pseudo random integer
-	**/
+	*/
 	int IntegerRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32);
 	FORCEINLINE float RandRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32)
 	{
@@ -94,18 +147,37 @@ public:
 	}
 
 	/**
+	 * Returns an array of pseudo random integer values between the MinimumValue and MaximumValue (inclusive).
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
+
+	/**
 	* Generate a pseudo random unsigned integer between minimum and maximum.
-	* @param MinimumValue - The lowest possible value
-	* @param MaximumValue - The highest possible value
+	* @param MinimumValue The lowest possible value.
+	* @param MaximumValue The highest possible value.
 	* @return a pseudo random unsigned integer
-	**/
+	*/
 	uint32 UnsignedIntegerRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32);
 	FORCEINLINE float RandRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32)
 	{
 		return UnsignedIntegerRange(MinimumValue, MaximumValue);
 	}
 
-	
+	/**
+	 * Returns an array of pseudo random unsigned integer values between the MinimumValue and MaximumValue (inclusive).
+	 * @param OutArray A pre-allocated array to fill with the results.
+	 * @param Count The number of results to generate.
+	 * @param MinimumValue The lowest possible value.
+	 * @param MaximumValue The highest possible value.
+	 * @param StartIndex The index to start writing at.
+	 */
+	void UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count,const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32, const int32 StartIndex = 0);
+
 	/**
 	 * Generate a pseudo random normalized FVector.
 	 * @return A normalized random FVector.
@@ -136,7 +208,7 @@ public:
 	/**
 	 * Returns the number of times the FMersenneTwister has been called since the seed has been set.
 	 * @return the number of times the FMersenneTwister has been called
-	 **/
+	 */
 	uint32 GetCallCounter() const
 	{
 		return this->CallCounter;
@@ -145,7 +217,7 @@ public:
 	/**
 	 * Returns the seed that was last set.
 	 * @return the last set seed
-	 **/
+	 */
 	uint64 GetInitialSeed() const
 	{
 		return this->InitialSeed;
@@ -184,26 +256,16 @@ private:
  	*  Single instance of the 64-bit Mersenne Twister pseudo random engine
  	*/
 	std::mt19937_64 Engine;
-
+	
 	/**
-	 * Real distribution probability function
+	 * Maintained a real float distribution probability function, explicitly used for 0-1.
 	 */
-	std::uniform_real_distribution<float> FloatRangeDistribution;
-
+	std::uniform_real_distribution<float> PersistentFloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
+	
 	/**
-	 * Real distribution probability function
+	 * Maintained a real double distribution probability function, explicitly used for 0-1.
 	 */
-	std::uniform_real_distribution<double> DoubleRangeDistribution;
-
-	/**
-	 * Uniform distribution probability function
-	 */
-	std::uniform_int_distribution<int> IntegerRangeDistribution;
-
-	/**
-	 * Uniform unsigned distribution probability function
-	 */
-	std::uniform_int_distribution<uint32> UnsignedIntegerRangeDistribution;
+	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
 	/**
 	 * Last seed set on the Mersenne Twister
