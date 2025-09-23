@@ -1,6 +1,24 @@
 # Changelog
 
-## 0.2.0 - 2025-09-19
+## [0.2.1] - ?
+
+### Added
+
+- Native calls to fill arrays with results of `NMersenneTwister` methods.
+- Additional blockout shapes for torus' and some larger cuboids.
+
+### Changed
+
+- Exposed `FNMethodScopeTimer` for external linking/usage.
+- Optimized some `NMersenneTwister` distribution calls.
+- Explicit `ManualStop` option to both `FNTestScopeTimer` and `FNTestScopeTimer`.
+- Clarified flags for Actor Pools created during tests.
+
+### Removed
+
+- Internal distribution resets in the `NMersenneTwister`.
+
+## [0.2.0] - 2025-09-19
 
 ### Added
 
@@ -28,7 +46,7 @@
 
 ### Fixed
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
-- `FNActorPool` will properly timeslice their strategies.
+- `FNActorPool` will properly time-slice their strategies.
 - `FGCScopeGuard` guards like a boss during tests now.
 - Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc).
 - `UNActorPoolSpawnerComponent` will properly now allow BP editing of some variables.
@@ -95,5 +113,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.1]: https://github.com/dotBunny/NEXUS/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/dotBunny/NEXUS/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/dotBunny/NEXUS/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/dotBunny/NEXUS/releases/tag/v0.1.0

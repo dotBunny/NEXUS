@@ -11,8 +11,7 @@ bool FNMersenneTwister::Bias(const float Chance)
 	{
 		return false;
 	}
-
-	// If it's inclusive we nailed it
+	
 	if (this->Float() <= Chance)
 	{
 		return true;
@@ -21,106 +20,159 @@ bool FNMersenneTwister::Bias(const float Chance)
 	return false;
 }
 
+void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(0.0, 1.0);
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		if (Distribution(this->Engine) <= Chance)
+		{
+			OutArray[i] = true;
+		}
+		else
+		{
+			OutArray[i] = false;
+		}
+	}
+	this->CallCounter += Count;
+}
+
 bool FNMersenneTwister::Bool()
 {
 	const bool bPseudoRandomValue = this->BooleanDistribution(this->Engine);
 	this->CallCounter++;
-	this->BooleanDistribution.reset();
-
 	return bPseudoRandomValue;
+}
+
+void FNMersenneTwister::Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = this->BooleanDistribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 double FNMersenneTwister::Double()
 {
-	this->DoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
-	const double PseudoRandomValue = this->DoubleRangeDistribution(this->Engine);
+	const double PseudoRandomValue = this->PersistentDoubleRangeDistribution(this->Engine);
 	this->CallCounter++;
-	
-	// TODO: Might not need this if were constantly setting the distribution
-	this->DoubleRangeDistribution.reset();
-
 	return PseudoRandomValue;
+}
+
+void FNMersenneTwister::Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = this->PersistentDoubleRangeDistribution(this->Engine);
+	}
+	this->CallCounter += Count;
+}
+
+void FNMersenneTwister::DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue,
+	const double MaximumValue, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	std::uniform_real_distribution<double> Distribution = std::uniform_real_distribution<double>(MinimumValue, MaximumValue);
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = Distribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 float FNMersenneTwister::Float()
 {
-	this->FloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
-	const float PseudoRandomValue = this->FloatRangeDistribution(this->Engine);
+	const float PseudoRandomValue = this->PersistentFloatRangeDistribution(this->Engine);
 	this->CallCounter++;
-
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->FloatRangeDistribution.reset();
-
 	return PseudoRandomValue;
+}
+
+void FNMersenneTwister::Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = this->PersistentFloatRangeDistribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 float FNMersenneTwister::FloatRange(const float MinimumValue, const float MaximumValue)
 {
-	this->FloatRangeDistribution = std::uniform_real_distribution<float>(MinimumValue, MaximumValue);
-
-	const float PseudoRandomValue = this->FloatRangeDistribution(this->Engine);
+	const float PseudoRandomValue = std::uniform_real_distribution<float>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->FloatRangeDistribution.reset();
-
 	return PseudoRandomValue;
 }
 
 float FNMersenneTwister::DoubleRange(const double MinimumValue, const double MaximumValue)
 {
-	this->DoubleRangeDistribution = std::uniform_real_distribution<double>(MinimumValue, MaximumValue);
-
-	const double PseudoRandomValue = this->DoubleRangeDistribution(this->Engine);
+	const double PseudoRandomValue = std::uniform_real_distribution<double>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->DoubleRangeDistribution.reset();
-
 	return PseudoRandomValue;
+}
+
+void FNMersenneTwister::FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue,
+	const float MaximumValue, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(MinimumValue, MaximumValue);
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = Distribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 int FNMersenneTwister::IntegerRange(const int MinimumValue, const int MaximumValue)
 {
-	this->IntegerRangeDistribution = std::uniform_int_distribution<int>(MinimumValue, MaximumValue);
-
-	const int PseudoRandomValue = this->IntegerRangeDistribution(this->Engine);
+	const int PseudoRandomValue = std::uniform_int_distribution<int>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->IntegerRangeDistribution.reset();
-
 	return PseudoRandomValue;
+}
+
+void FNMersenneTwister::IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue,
+	const int32 MaximumValue, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	std::uniform_int_distribution<int32> Distribution = std::uniform_int_distribution<int32>(MinimumValue, MaximumValue);
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = Distribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 uint32 FNMersenneTwister::UnsignedIntegerRange(const uint32 MinimumValue, const uint32 MaximumValue)
 {
-	this->UnsignedIntegerRangeDistribution = std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue);
-
-	const uint32 PseudoRandomValue = this->UnsignedIntegerRangeDistribution(this->Engine);
+	const uint32 PseudoRandomValue =  std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->UnsignedIntegerRangeDistribution.reset();
-
 	return PseudoRandomValue;
+}
+
+void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count, const uint32 MinimumValue,
+	const uint32 MaximumValue, const int32 StartIndex)
+{
+	const int ActualCount = StartIndex + Count;
+	std::uniform_int_distribution<uint32> Distribution = std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue);
+	for (int i = StartIndex; i < ActualCount; i++)
+	{
+		OutArray[i] = Distribution(this->Engine);
+	}
+	this->CallCounter += Count;
 }
 
 FVector FNMersenneTwister::VectorNormalized()
 {
-	this->FloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
 	const FVector PseudoRandomValue = FVector(
-		this->FloatRangeDistribution(this->Engine),
-		this->FloatRangeDistribution(this->Engine),
-		this->FloatRangeDistribution(this->Engine)
+		this->PersistentFloatRangeDistribution(this->Engine),
+		this->PersistentFloatRangeDistribution(this->Engine),
+		this->PersistentFloatRangeDistribution(this->Engine)
 	);
 	this->CallCounter += 3;
-
-
-	// TODO: Might not need this if were constantly setting the distribution
-	this->FloatRangeDistribution.reset();
-
 	return PseudoRandomValue;
 }
 

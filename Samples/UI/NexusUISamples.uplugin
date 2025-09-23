@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 3,
-	"VersionName": "0.2.0",
+	"Version": 4,
+	"VersionName": "0.2.1",
 	"FriendlyName": "NEXUS Samples: UI",
 	"Description": "Sample content for the NEXUS: UI plugin.",
 	"Category": "NEXUS Samples",

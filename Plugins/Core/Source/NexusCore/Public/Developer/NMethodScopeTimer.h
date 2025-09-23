@@ -5,21 +5,32 @@
 
 #include "NCoreMinimal.h"
 
-class NEXUSCORE_API FNMethodScopeTimer
+class FNMethodScopeTimer
 {
 public:
-	explicit FNMethodScopeTimer(const FString& InName) : Name(InName), StartTime(FPlatformTime::Seconds())
+	explicit FNMethodScopeTimer(const FString& InName) : Name(InName), StartTime(FPlatformTime::Seconds()), EndTime(0)
 	{
 	}
-    
+
+	void ManualStop()
+	{
+		if (!bStopped)
+		{
+			EndTime = FPlatformTime::Seconds();
+			bStopped = true;
+		}
+	}
+	 
 	~FNMethodScopeTimer()
 	{
-		const double EndTime = FPlatformTime::Seconds();
+		ManualStop();
 		const double DurationMs = (EndTime - StartTime) * 1000.0;
-		
 		N_LOG(Log, TEXT("[FNMethodScopeTimer] %s took: %f ms"), *Name, DurationMs);
 	}
+
 private:
+	bool bStopped = false;
 	FString Name;
 	double StartTime;
+	double EndTime;
 };

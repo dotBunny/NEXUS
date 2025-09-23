@@ -16,7 +16,9 @@ N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, "NEXUS::UnitTests::NActorPoo
 	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
 	{
 		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
-		FNActorPool Pool = FNActorPool(World, AActor::StaticClass());
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::APF_ReturnToStorageLocation | ENActorPoolFlags::APF_DeferConstruction | ENActorPoolFlags::APF_ShouldFinishSpawning);
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 		
 		const int32 PostPoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
