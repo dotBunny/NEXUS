@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 3,
-	"VersionName": "0.2.0",
+	"Version": 4,
+	"VersionName": "0.2.1",
 	"FriendlyName": "NEXUS: Developer Menu",
 	"Description": "A visual developer console.",
 	"Category": "NEXUS",
