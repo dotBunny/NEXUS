@@ -9,27 +9,36 @@ class FNTestScopeTimer
 {
 public:
 	explicit FNTestScopeTimer(const FString& InName, const float MaxDurationMs = MAX_FLT, const bool bUseNamedEvent = true)
-		: Name(InName), MaxDuration(MaxDurationMs), StartTime(FPlatformTime::Seconds())
+		: Name(InName), MaxDuration(MaxDurationMs), StartTime(FPlatformTime::Seconds()), EndTime(0)
 	{
 		bNamedEvent = bUseNamedEvent;
 		if (bNamedEvent)
 		{
-			
+			UE_LOG(LogTemp, Log, TEXT("[%s] BEGIN"), *Name);
 			FPlatformMisc::BeginNamedEvent(FColor::Blue, *Name);
+		}
+	}
+
+	void ManualStop()
+	{
+		if (!bStopped)
+		{
+			if (bNamedEvent)
+			{
+				FPlatformMisc::EndNamedEvent();
+				UE_LOG(LogTemp, Log, TEXT("[%s] END"), *Name);
+			}
+			EndTime = FPlatformTime::Seconds();
+			bStopped = true;
 		}
 	}
 	
 	~FNTestScopeTimer()
 	{
-		if (bNamedEvent)
-		{
-			UE_LOG(LogTemp, Log, TEXT("[%s] END"), *Name);
-			FPlatformMisc::EndNamedEvent();
-		}
-		const double EndTime = FPlatformTime::Seconds();
-		const double DurationMs = (EndTime - StartTime) * 1000.0;
-		
-		if (DurationMs >= MaxDuration)
+		ManualStop();
+
+		if (const double DurationMs = (EndTime - StartTime) * 1000.0;
+			DurationMs >= MaxDuration)
 		{
 			ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
 		}
@@ -41,7 +50,9 @@ public:
 
 private:
 	bool bNamedEvent = true;
+	bool bStopped = false;
 	FString Name;
 	double MaxDuration;
 	double StartTime;
+	double EndTime;
 };
