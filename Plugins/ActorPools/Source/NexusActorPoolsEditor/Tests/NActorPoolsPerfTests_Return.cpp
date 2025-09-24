@@ -37,7 +37,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 			}
 			
 			// Explicitly stop the timer
-			Timer.ManualStop();
+			NTestTimer.ManualStop();
 		}
 
 		Pool.Clear();
