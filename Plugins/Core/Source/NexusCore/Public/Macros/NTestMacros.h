@@ -94,4 +94,4 @@
 
 #define N_TEST_TIMER_SCOPE(Name, MaxDuration)\
 	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\
-	FNTestScopeTimer Timer(TEXT(#Name),MaxDuration);
+	FNTestScopeTimer NTestTimer(TEXT(#Name),MaxDuration);

@@ -1,6 +1,16 @@
 # Changelog
 
-## [0.2.1] - ?
+## [0.2.2] - 2025-09-24
+
+### Added
+- `FNActorPoolSettings::Flags` now has a defaulted `APF_SetNetDormancy` flag.
+
+### Changed
+
+- Optimized `FNActorPool` actor creation to quarter the costs in Editor and Development builds.
+- `FNActorPool::CreateActor` now takes an optional count to support bulk creation.
+
+## [0.2.1] - 2025-09-23
 
 ### Added
 

@@ -52,8 +52,12 @@ enum class ENActorPoolFlags : uint8
 	 * Broadcast destroy event on the Actor through the operational change state delegate.
 	 */
 	APF_BroadcastDestroy = 1 << 5				UMETA(DisplayName = "Broadcast Destroy"),
+	/**
+	 * Should an Actor's network dormancy be updated based on state?
+	 */
+	APF_SetNetDormancy = 1 << 6					UMETA(DisplayName = "Set Net Dormancy"),
 	
-	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning | APF_ServerOnly
+	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning | APF_ServerOnly | APF_SetNetDormancy
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
@@ -68,29 +72,33 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 
 public:
 
-	bool HasFlag_DeferConstruction() const
+	FORCEINLINE bool HasFlag_DeferConstruction() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_DeferConstruction);
 	}
-	bool HasFlag_ShouldFinishSpawning() const
+	FORCEINLINE bool HasFlag_ShouldFinishSpawning() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ShouldFinishSpawning);
 	}
-	bool HasFlag_ReturnToStorageLocation() const
+	FORCEINLINE bool HasFlag_ReturnToStorageLocation() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ReturnToStorageLocation);
 	}
-	bool HasFlag_SweepBeforeSettingLocation() const
+	FORCEINLINE bool HasFlag_SweepBeforeSettingLocation() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_SweepBeforeSettingLocation);
 	}
-	bool HasFlag_ServerOnly() const
+	FORCEINLINE bool HasFlag_ServerOnly() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ServerOnly);
 	}
-	bool HasFlag_BroadcastDestroy() const
+	FORCEINLINE bool HasFlag_BroadcastDestroy() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_BroadcastDestroy);
+	}
+	FORCEINLINE bool HasFlag_SetNetDormancy() const
+	{
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_SetNetDormancy);
 	}
 	
 	/**

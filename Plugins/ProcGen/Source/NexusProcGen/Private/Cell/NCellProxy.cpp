@@ -77,7 +77,7 @@ void ANCellProxy::CreateLevelInstance()
 	LevelInstance->SetWorldAsset(NCell->World);
 
 #if WITH_EDITOR
-	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()));
+	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif
 }
 

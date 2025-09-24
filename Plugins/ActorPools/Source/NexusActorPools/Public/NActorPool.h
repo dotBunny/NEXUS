@@ -133,7 +133,7 @@ private:
 	FVector HalfHeightOffset;
 
 	bool ApplyStrategy();
-	void CreateActor();
+	void CreateActor(const int32 Count = 1);
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;

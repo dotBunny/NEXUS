@@ -169,7 +169,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	if (InNewSettings.MaximumActorCount > Settings.MaximumActorCount)
 	{
 		InActors.Reserve(InNewSettings.MaximumActorCount);
-		OutActors.Reserve(InNewSettings.MinimumActorCount);
+		OutActors.Reserve(InNewSettings.MaximumActorCount);
 	}
 	Settings.MaximumActorCount = InNewSettings.MaximumActorCount;
 
@@ -247,63 +247,73 @@ bool FNActorPool::ApplyStrategy()
 	}
 }
 
-void FNActorPool::CreateActor()
+void FNActorPool::CreateActor(const int32 Count)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
-	SpawnInfo.ObjectFlags |= RF_Transient;
-
-	
+	SpawnInfo.ObjectFlags |= RF_Transient & RF_MarkAsRootSet; // AddToRoot - Pool will manage lifecycle
 	SpawnInfo.bDeferConstruction = Settings.HasFlag_DeferConstruction();
-
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	// Reserve space for the new actors
+	if (Count > 1)
+	{
+		InActors.Reserve(InActors.Num() + Count);
+		OutActors.Reserve(OutActors.Num() + Count);
+	}
 	
-	// Create actual actor
-	//World->SpawnActor(Template, Settings.StorageLocation, FRotator::ZeroRotator, SpawnInfo);
-	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
-
-	// Ensure the actor is not garbage collected, the pool itself will clean up.
-	CreatedActor->AddToRoot();
-
 #if WITH_EDITOR
-	CreatedActor->SetActorLabel(FString::Printf(TEXT("%s__%i"), *this->Name, (InActors.Num() + OutActors.Num())));
+	int32 LabelNumber = (InActors.Num() + OutActors.Num());
 #endif
-	
-	if (bImplementsInterface)
-	{
-		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
-		ActorItem->InitializeActorPoolItem(this);
 
-		if (SpawnInfo.bDeferConstruction)
-		{
-			ActorItem->OnDeferredConstruction();
-			CreatedActor->FinishSpawning(Settings.DefaultTransform);
-		}
-		ActorItem->OnCreatedByActorPool();
-		ApplyReturnState(CreatedActor);
-		ActorItem->OnReturnToActorPool();
-	}
-	else
+	// Create actual actors
+	for (int i = 0; i < Count; i++)
 	{
-		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
+#if WITH_EDITOR
+		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);
+		SpawnInfo.InitialActorLabel = Label;
+#endif
+
+		AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
+
+		if (bImplementsInterface)
 		{
-			CreatedActor->FinishSpawning(Settings.DefaultTransform);
+			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
+			ActorItem->InitializeActorPoolItem(this);
+
+			if (SpawnInfo.bDeferConstruction)
+			{
+				ActorItem->OnDeferredConstruction();
+				CreatedActor->FinishSpawning(Settings.DefaultTransform);
+			}
+			ActorItem->OnCreatedByActorPool();
+			ApplyReturnState(CreatedActor);
+			ActorItem->OnReturnToActorPool();
 		}
-		ApplyReturnState(CreatedActor);
-	}
+		else
+		{
+			if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
+			{
+				CreatedActor->FinishSpawning(Settings.DefaultTransform);
+			}
+			ApplyReturnState(CreatedActor);
+		}
 	
-	InActors.Add(CreatedActor);
+		InActors.Add(CreatedActor);
+	}
 }
-
 
 void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const
 {
-	// Set the network flag first -- Thanks Nick!	
-	Actor->SetNetDormancy(DORM_Awake);
+	// Set the network flag first -- Thanks Nick!
+	if (Settings.HasFlag_SetNetDormancy())
+	{
+		Actor->SetNetDormancy(DORM_Awake);
+	}
 
 	// Set Actor Location And Rotation
 	if (bHasHalfHeight)
@@ -321,7 +331,6 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
 	
-
 	if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(Actor->GetRootComponent()))
 	{
 		PrimitiveComponent->ResetSceneVelocity();
@@ -362,7 +371,11 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 		PrimitiveComponent->MarkRenderStateDirty();
 	}
 	Actor->SetActorEnableCollision(false);
-	Actor->SetNetDormancy(DORM_Initial);
+
+	if (Settings.HasFlag_SetNetDormancy())
+	{
+		Actor->SetNetDormancy(DORM_Initial);
+	}
 }
 
 void FNActorPool::Clear(const bool bForceDestroy)
@@ -415,10 +428,7 @@ void FNActorPool::Fill()
 	if (bStubMode) return;
 	
 	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
-	for (int32 i = InActors.Num(); i < Settings.MinimumActorCount; i++)
-	{
-		CreateActor();
-	}
+	CreateActor(Settings.MinimumActorCount - InActors.Num());
 }
 
 void FNActorPool::Prewarm(const int32 Count)
@@ -427,10 +437,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	if (bStubMode) return;
 	
 	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
-	for (int32 i = 0; i < Count; i++)
-	{
-		CreateActor();
-	}
+	CreateActor(Count);
 }
 
 void FNActorPool::Tick()
@@ -441,10 +448,6 @@ void FNActorPool::Tick()
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
-		const int32 SpawnCountThisTick = FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors));
-		for (int32 i = 0; i < SpawnCountThisTick; i++)
-		{
-			CreateActor();
-		}
+		CreateActor(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
 	}
 }
