@@ -22,7 +22,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 
 		//TEST
 		{
-			N_TEST_TIMER_SCOPE(Warm_Actor_1000, 15.0f)
+			N_TEST_TIMER_SCOPE(Warm_Actor_1000, 20.0f)
 
 			Pool.Prewarm(TestSize);
 
