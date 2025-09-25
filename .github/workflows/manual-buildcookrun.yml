@@ -19,15 +19,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Get Branch Settings
+        id: settings
+        run: |
+          $json = Get-Content .github/branch.json | ConvertFrom-Json
+          $ue-installation = $json.ue-installation
+          echo "::set-output name=ue-installation::$ue-installation"
+        shell: powershell
+
       - name: Clean workspace
         uses: ./.github/actions/workspace-clean
 
       - name: Build project
         uses: ./.github/actions/build-project
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue-installation }}
 
       - name: Run UAT
         uses: ./.github/actions/ue-uat
         with:
+          ue-installation: ${{ steps.settings.outputs.ue-installation }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=${{ inputs.configuration }} -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
     

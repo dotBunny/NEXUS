@@ -2,10 +2,9 @@ name: 'Run UAT'
 description: 'Runs the defined command with UAT'
 
 inputs:
-  ue-uat:
-    description: 'The path to the RunUAT.bat'
-    default: 'C:\Program Files\Epic Games\UE_5.6\Engine\Build\BatchFiles\RunUAT.bat'
-    required: false
+  ue-installation:
+    description: 'Path to UE installation'
+    required: true
   command:
     description: 'The primary command to run with UAT'
     required: true    
@@ -24,7 +23,7 @@ runs:
     - name: RunUAT
       shell: powershell
       run: |
-        & "${{ inputs.ue-uat }}" ${{ inputs.command }} -project="${{ github.workspace }}\TestProject\NEXUS.uproject" ${{ inputs.additional-arguments }}
+        & "${{ inputs.ue-installation }}\Engine\Build\BatchFiles\RunUAT.bat" ${{ inputs.command }} -project="${{ github.workspace }}\TestProject\NEXUS.uproject" ${{ inputs.additional-arguments }}
     - name: Remove UAT Matcher
       shell: powershell
       run: |

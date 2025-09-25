@@ -26,15 +26,26 @@ jobs:
         with:
           clean: ${{ inputs.clean }}
 
+      - name: Get Branch Settings
+        id: settings
+        run: |
+          $json = Get-Content .github/branch.json | ConvertFrom-Json
+          $ue-installation = $json.ue-installation
+          echo "::set-output name=ue-installation::$ue-installation"
+        shell: powershell
+
       - name: Clean workspace
         uses: ./.github/actions/workspace-clean
 
       - name: Build project
         uses: ./.github/actions/build-project 
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue-installation }}
 
       - name: Run manual tests
         uses: ./.github/actions/ue-cmd-tests
         with:
+          ue-installation: ${{ steps.settings.outputs.ue-installation }}
           tests: '${{ inputs.tests }}'
 
       - name: Parse UE log

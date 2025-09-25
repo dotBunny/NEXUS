@@ -2,10 +2,9 @@ name: 'Run Tests'
 description: 'Runs defined unit tests via the UnrealEditor-Cmd.exe'
 
 inputs:
-  ue-cmd:
-    description: 'The path to the UnrealEditor-Cmd.exe'
-    default: 'C:\Program Files\Epic Games\UE_5.6\Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
-    required: false
+  ue-installation:
+    description: 'Path to UE installation'
+    required: true
   tests:
     description: 'The test name prefix/category'
     required: true    
@@ -39,7 +38,7 @@ runs:
         foreach ($arg in $CommandArgs) {        
             Write-Output "ARG: $arg"
         }
-        & "${{ inputs.ue-cmd }}" $CommandArgs
+        & "${{ inputs.ue-installation }}\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" $CommandArgs
     - name: Check Results
       shell: powershell
       run: |
