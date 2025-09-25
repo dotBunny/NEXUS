@@ -5,7 +5,6 @@
 
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
-#include "NCoreEditorMinimal.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
@@ -151,16 +150,6 @@ void FNProcGenEditorCommands::NCellAddActor()
 {
 	if (UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
-		if (FNEditorUtils::IsUnsavedWorld(CurrentWorld))
-		{
-			FMessageDialog::Open(EAppMsgCategory::Error, EAppMsgType::Type::Ok,
-				FText::FromString(TEXT("You need to save the world/map that you are working in before creating a NCellActor.")),
-				FText::FromString(TEXT("NEXUS: ProcGen")));
-			
-			NE_LOG(Error, TEXT("Unable to add NCellActor to an unsaved world."))
-			return;
-		}
-		
 		ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
 		FNProcGenEditorUtils::SaveNCell(CurrentWorld, SpawnedActor);
 	}
