@@ -15,8 +15,8 @@ jobs:
         id: settings
         run: |
           $json = Get-Content .github/branch.json | ConvertFrom-Json
-          $ue-installation = $json.ue-installation
-          echo "::set-output name=ue-installation::$ue-installation"
+          $ue = $json.installation
+          echo "::set-output name=ue::$ue"
         shell: powershell
 
       - name: Clean workspace
@@ -25,12 +25,12 @@ jobs:
       - name: Build project
         uses: ./.github/actions/build-project
         with:
-          ue-installation: ${{ steps.settings.outputs.ue-installation }}
+          ue-installation: ${{ steps.settings.outputs.ue }}
 
       - name: Run functional tests
         uses: ./.github/actions/ue-cmd-tests
         with:
-          ue-installation: ${{ steps.settings.outputs.ue-installation }}
+          ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Functional Tests'
 
       - name: Parse UE log
