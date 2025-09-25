@@ -57,7 +57,8 @@ void FNProcGenEditorUtils::SaveNCell(UWorld* World, ANCellActor* CellActor)
 	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World);
 	if (UpdateNCell(Cell, CellActor))
 	{
-		// Need to tell the cell its dirty so it gets saved to disk
+		// Need to tell the cell it's dirty so it gets saved to disk
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		Cell->MarkPackageDirty();
 		UEditorAssetLibrary::SaveLoadedAsset(Cell);
 	}
