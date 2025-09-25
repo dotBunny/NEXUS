@@ -26,35 +26,35 @@ void FNProcGenEditorCommands::RegisterCommands()
 		LOCTEXT("Command_NCell_CalculateAll", "Calculate All"),
 		LOCTEXT("Command_NCell_CalculateAll_Tooltip", "Calculate all data related to the cell."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellCalculateBounds,
 		"NProcGen.NCell.CalculateBounds",
 		LOCTEXT("Command_NCell_CalculateBounds", "Calculate Bounds"),
 		LOCTEXT("Command_NCell_CalculateBounds_Tooltip", "Calculate bounds for the cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateBounds"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellCalculateHull,
 		"NProcGen.NCell.CalculateHull",
 		LOCTEXT("Command_NCell_CalculateHull", "Calculate Hull"),
 		LOCTEXT("Command_NCell_CalculateHull_Tooltip", "Calculate convex hull for the cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellResetCell,
 		"NProcGen.NCell.ResetCell",
 		LOCTEXT("Command_NCell_ResetCell", "Reset Cell"),
 		LOCTEXT("Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellRemoveActor,
 		"NProcGen.NCell.RemoveActor",
 		LOCTEXT("Command_NCell_RemoveActor", "Remove Actor"),
 		LOCTEXT("Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.RemoveNCellActor"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
 	CommandList_NCell = MakeShareable(new FUICommandList);
@@ -87,14 +87,14 @@ FExecuteAction::CreateStatic(&OnNCellRemoveActor),
 		LOCTEXT("Command_NCellJunction_AddComponent", "Add Component"),
 		LOCTEXT("Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"), // TODO: Create icon
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellJunctionSelectComponent,
 	"NProcGen.NCellJunction.SelectComponent",
 	LOCTEXT("Command_NCellJunction_SelectComponent", "Select Component"),
 	LOCTEXT("Command_NCellJunction_SelectComponent_Tooltip", "Select a NCellJunction in the level."),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"), // TODO: Create icon
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
 	CommandList_NCellJunction = MakeShareable(new FUICommandList);

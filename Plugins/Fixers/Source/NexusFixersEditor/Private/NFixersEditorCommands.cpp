@@ -13,14 +13,14 @@ void FNFixersEditorCommands::RegisterCommands()
 		LOCTEXT("Command_NFixers_PoseAsset", "Outdated PoseAsset Source Animations"),
 		LOCTEXT("Command_NFixers_BulkOperations", "Find and fix any PoseAssets in the selected content with out-of-date source animations."),
 		FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext,
 		"NFixers.BulkOperations.PoseAsset.OutOfDateAnimationSource.NoContext",
 		LOCTEXT("Command_NFixers_PoseAsset", "Outdated PoseAsset Source Animations"),
 		LOCTEXT("Command_NFixers_BulkOperations_NoContext", "Find and fix any PoseAssets in the game content with out-of-date source animations."),
 		FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 	CommandList_BulkOperations = MakeShareable(new FUICommandList);
 	

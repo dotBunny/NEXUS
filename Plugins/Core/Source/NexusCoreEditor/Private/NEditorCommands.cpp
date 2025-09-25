@@ -18,7 +18,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
 	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
 	
 
@@ -27,7 +27,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Help_OpenBugReport", "Issues"),
 	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
@@ -35,21 +35,21 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Help_OpenBugReport", "Report a Bug"),
 	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub repository's bug report form in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.ReportABug"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Roadmap,
 		"NCore.Help.OpenRoadmap",
 		LOCTEXT("Command_Help_OpenBugReport", "Roadmap"),
 		LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitOnlineLearning"),
-		EUserInterfaceActionType::Button, FInputGesture());	
+		EUserInterfaceActionType::Button, FInputChord());	
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
 		"NCore.Help.OpenDocumentation",
 		LOCTEXT("Command_Help_OpenDocumentation", "Documentation"),
 		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
@@ -57,7 +57,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck", "Leak Check"),
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
@@ -65,7 +65,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
 	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 	
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
@@ -96,7 +96,7 @@ void FNEditorCommands::RegisterCommands()
 			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
 			LOCTEXT("Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-			EUserInterfaceActionType::Button, FInputGesture());
+			EUserInterfaceActionType::Button, FInputChord());
 
 	CommandList_Node = MakeShareable(new FUICommandList);
 
