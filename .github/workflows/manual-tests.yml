@@ -30,7 +30,8 @@ jobs:
         id: settings
         run: |
           $json = Get-Content .github/branch.json | ConvertFrom-Json
-          echo "ue=$json.installation" >> $GITHUB_OUTPUT
+          $installation = $json.installation
+          echo "ue=$installation" >> $GITHUB_OUTPUT
         shell: powershell
 
       - name: Clean workspace
