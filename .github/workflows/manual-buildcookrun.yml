@@ -23,8 +23,8 @@ jobs:
         id: settings
         run: |
           $json = Get-Content .github/branch.json | ConvertFrom-Json
-          $ue-installation = $json.ue-installation
-          echo "::set-output name=ue-installation::$ue-installation"
+          $installation = $json.installation
+          echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
 
       - name: Clean workspace
@@ -33,12 +33,12 @@ jobs:
       - name: Build project
         uses: ./.github/actions/build-project
         with:
-          ue-installation: ${{ steps.settings.outputs.ue-installation }}
+          ue-installation: ${{ steps.settings.outputs.ue }}
 
       - name: Run UAT
         uses: ./.github/actions/ue-uat
         with:
-          ue-installation: ${{ steps.settings.outputs.ue-installation }}
+          ue-installation: ${{ steps.settings.outputs.ue }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=${{ inputs.configuration }} -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
     
