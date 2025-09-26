@@ -5,10 +5,11 @@
 
 #include "NCellJunctionDetails.h"
 #include "NCellRootDetails.h"
+//#include "PCGDataAsset.h"
 #include "NCell.generated.h"
 
 /**
- * The data only representation of a NCellActor and its details.
+ * The data-only representation of a NCellActor and its details.
  * @note The UNCell is effectively a side-car file to NCellActor.
  */
 UCLASS(DisplayName = "NCell")
@@ -28,6 +29,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
+
+	/**
+	 * TODO: Explicit data structure populated to work with PCG
+	 */
+	//UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "PCG", meta = (NoResetToDefault))
+	//FPCGDataCollection DataCollection;
 
 private:
 

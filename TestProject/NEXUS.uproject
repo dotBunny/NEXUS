@@ -85,6 +85,10 @@
 		{
 			"Name": "NexusDeveloperMenu",
 			"Enabled": true
+		},
+		{
+			"Name": "AIAssistant",
+			"Enabled": true
 		}
 	],
 	"AdditionalPluginDirectories": [
