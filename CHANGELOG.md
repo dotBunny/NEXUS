@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] - ???
+
+### Changed
+
+- Allow adding multiple `UNCellJunctionComponent` to a single parent.
+
+
+### Fixed
+
+- Selecting the `NCellActor` no longer adds it to the current selection, instead clearing and making it the sole selected.
+
+
 ## [0.2.2] - 2025-09-24
 
 ### Added

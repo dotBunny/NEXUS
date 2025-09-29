@@ -296,9 +296,9 @@ void FNProcGenEditorCommands::OnNCellJunctionAddComponent()
 		AActor* Actor = Cast<AActor>( *SelectedActor );
 		if (!Actor) continue;
 		
-		Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
-		if (OutComponents.Num() == 0)
-		{
+		//Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
+		//if (OutComponents.Num() == 0)
+		//{
 			UNCellJunctionComponent* NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
 				UNCellJunctionComponent::StaticClass(), true, FTransform::Identity, false));
 			
@@ -309,7 +309,7 @@ void FNProcGenEditorCommands::OnNCellJunctionAddComponent()
 
 			SelectComponents.Add(NewComponent);
 			bNeedsRefresh = true;
-		}
+		//}
 	}
 
 	// Refresh the details panel if needed
@@ -326,23 +326,23 @@ void FNProcGenEditorCommands::OnNCellJunctionAddComponent()
 bool FNProcGenEditorCommands::OnNCellJunctionAddComponent_CanExecute()
 {
 	if (GEditor->GetSelectedActorCount() == 0) return false;
-	
-	TArray<UNCellJunctionComponent*> OutComponents;
-	bool bFoundSpot = false;
-	
-	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
-	{
-		AActor* Actor = Cast<AActor>( *SelectedActor );
-		if (!Actor) continue;
-
-		Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
-
-		if (OutComponents.Num() == 0)
-		{
-			bFoundSpot = true;
-		}
-	}
-	return bFoundSpot;
+	return true;
+	// TArray<UNCellJunctionComponent*> OutComponents;
+	// bool bFoundSpot = false;
+	//
+	// for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	// {
+	// 	AActor* Actor = Cast<AActor>( *SelectedActor );
+	// 	if (!Actor) continue;
+	//
+	// 	Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
+	//
+	// 	if (OutComponents.Num() == 0)
+	// 	{
+	// 		bFoundSpot = true;
+	// 	}
+	// }
+	// return bFoundSpot;
 }
 
 void FNProcGenEditorCommands::OnNCellJunctionSelectComponent(UNCellJunctionComponent* Junction)

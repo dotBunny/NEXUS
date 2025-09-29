@@ -80,7 +80,7 @@ protected:
 	 * This is something that needs to be turned off when we spawn
 	 */
 	UPROPERTY(EditInstanceOnly)
-	TObjectPtr<AActor> LevelEditorInstance;
+	TArray<TObjectPtr<AActor>> EditorOnlyActors;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNCellRootComponent> CellRoot;

@@ -23,8 +23,12 @@ FString UNCellJunctionComponent::GetJunctionName() const
 	{
 		ReturnString.Append(" > ");
 		ReturnString.Append(Parent->GetName());
-		
 	}
+
+	// Get actual name of component
+	ReturnString.Append(" > ");
+	ReturnString.Append(GetName());
+	
 	return ReturnString;
 }
 #endif // WITH_EDITOR
