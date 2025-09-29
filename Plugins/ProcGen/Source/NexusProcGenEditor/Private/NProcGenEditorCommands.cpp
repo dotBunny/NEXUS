@@ -86,14 +86,14 @@ FExecuteAction::CreateStatic(&OnNCellRemoveActor),
 		"NProcGen.NCellJunction.AddComponent",
 		LOCTEXT("Command_NCellJunction_AddComponent", "Add Component"),
 		LOCTEXT("Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
-		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"), // TODO: Create icon
+		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellJunctionSelectComponent,
 	"NProcGen.NCellJunction.SelectComponent",
 	LOCTEXT("Command_NCellJunction_SelectComponent", "Select Component"),
 	LOCTEXT("Command_NCellJunction_SelectComponent_Tooltip", "Select a NCellJunction in the level."),
-	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"), // TODO: Create icon
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
@@ -272,6 +272,7 @@ void FNProcGenEditorCommands::OnNCellRemoveActor()
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 	ANCellActor* CellActor = FNProcGenUtils::GetNCellActorFromWorld(CurrentWorld, true);
 	CellActor->Destroy();
+	// ReSharper disable once CppExpressionWithoutSideEffects
 	CurrentWorld->MarkPackageDirty();
 	
 	// Need to destroy the sidecar.
@@ -328,22 +329,6 @@ bool FNProcGenEditorCommands::OnNCellJunctionAddComponent_CanExecute()
 {
 	if (GEditor->GetSelectedActorCount() == 0) return false;
 	return true;
-	// TArray<UNCellJunctionComponent*> OutComponents;
-	// bool bFoundSpot = false;
-	//
-	// for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
-	// {
-	// 	AActor* Actor = Cast<AActor>( *SelectedActor );
-	// 	if (!Actor) continue;
-	//
-	// 	Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
-	//
-	// 	if (OutComponents.Num() == 0)
-	// 	{
-	// 		bFoundSpot = true;
-	// 	}
-	// }
-	// return bFoundSpot;
 }
 
 void FNProcGenEditorCommands::OnNCellJunctionSelectComponent(UNCellJunctionComponent* Junction)

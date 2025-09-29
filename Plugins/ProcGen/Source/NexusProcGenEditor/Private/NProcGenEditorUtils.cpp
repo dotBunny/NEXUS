@@ -72,6 +72,14 @@ bool FNProcGenEditorUtils::UpdateNCell(UNCell* Cell, ANCellActor* CellActor)
 {
 	bool bUpdatedCellData = false;
 
+	// Ensure CellActor Name
+	FString CellActorName = TEXT("NCellActor__");
+	CellActorName.Append( FPackageName::GetShortName(CellActor->GetWorld()->GetOutermost()->GetName()));
+	if (!CellActor->GetActorLabel().Equals(CellActorName))
+	{
+		CellActor->SetActorLabel(CellActorName);
+	}
+	
 	// Update Our Cell Overall Data (in the level, not copied at this point)
 	if (CellActor->CellRoot->Details.BoundsSettings.bCalculateOnSave)
 	{

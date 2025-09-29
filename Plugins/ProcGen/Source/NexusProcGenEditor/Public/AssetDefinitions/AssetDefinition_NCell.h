@@ -6,7 +6,6 @@
 #include "AssetDefinitionDefault.h"
 #include "NColor.h"
 #include "Cell/NCell.h"
-#include "Macros/NEditorAssetMacros.h"
 #include "AssetDefinition_NCell.generated.h"
 
 /**
