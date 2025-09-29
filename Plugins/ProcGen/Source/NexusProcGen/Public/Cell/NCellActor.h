@@ -38,14 +38,13 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 		SetRootComponent(CellRoot);
 
 		// Lock it down
-#if WITH_EDITOR		
+#if WITH_EDITOR
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
+		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
 #endif		
 		
 		RootComponent->Mobility = EComponentMobility::Static;
-		
-		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
 	}
 public:
 	bool IsActorDirty() const { return bActorDirty; }
