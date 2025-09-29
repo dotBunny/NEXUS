@@ -38,5 +38,5 @@ public:
 		return Rotation.RotateVector(InLocation) + Offset;
 	}
 	
-	static FVector2D GetWorldSize(const ENCellJunctionSize& Size);
+	static FVector2D GetWorldSize2D(const ENCellJunctionSize2D& Size);
 };

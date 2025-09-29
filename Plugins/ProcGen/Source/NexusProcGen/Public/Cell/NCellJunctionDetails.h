@@ -15,7 +15,7 @@ enum class ENCellJunctionType : uint8
 
 // Maybe sockets should be 3d? so its a plug type nature so something cane blend better?
 UENUM()
-enum class ENCellJunctionSize : uint8
+enum class ENCellJunctionSize2D : uint8
 {
 	NCJS_1x1 = 0 UMETA(DisplayName = "1x1"),
 	NCJS_1x2 = 1 UMETA(DisplayName = "1x2"),
@@ -34,6 +34,7 @@ enum class ENCellJunctionSize : uint8
 	NCJS_4x4 = 14 UMETA(DisplayName = "4x4"),
 };
 
+
 USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellJunctionDetails
 {
@@ -43,7 +44,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	ENCellJunctionType Type = ENCellJunctionType::NCJT_TwoWaySocket;
 
 	UPROPERTY(EditInstanceOnly)
-	ENCellJunctionSize Size = ENCellJunctionSize::NCJS_1x1;
+	ENCellJunctionSize2D Size = ENCellJunctionSize2D::NCJS_2x1;
 	
 	UPROPERTY(VisibleAnywhere)
 	FVector RootRelativeLocation = FVector::ZeroVector;

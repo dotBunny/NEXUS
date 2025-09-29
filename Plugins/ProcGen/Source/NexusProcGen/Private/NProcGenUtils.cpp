@@ -4,6 +4,7 @@
 #include "NProcGenUtils.h"
 #include "NProcGenComponent.h"
 #include "NArrayUtils.h"
+#include "NProcGenSettings.h"
 #include "NProcGenVolume.h"
 #include "Chaos/Convex.h"
 
@@ -231,44 +232,49 @@ TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromWorld(const UWorl
 	return Result;
 }
 
-#define N_JUNCTION_SIZE(X,Y) \
-	static const FVector2D CellJunctionSize_##X##x##Y = FVector2D(X*300, Y*300); \
-	return CellJunctionSize_##X##x##Y;
+#define N_JUNCTION_SIZE(XUnit,YUnit,ZUnit) \
+	static const FVector2D CellJunctionSize_##XUnit##x##YUnit##x##ZUnit = FVector(XUnit*Settings->UnitSize.X, YUnit*Settings->UnitSize.Y, ZUnit*Settings->UnitSize.Z); \
+	return CellJunctionSize_##XUnit##x##YUnit##x##ZUnit;
 
-FVector2D FNProcGenUtils::GetWorldSize(const ENCellJunctionSize& Size)
+#define N_JUNCTION_SIZE_2D(XUnit,YUnit) \
+	static const FVector2D CellJunctionSize2D_##XUnit##x##YUnit = FVector2D(XUnit*Settings->UnitSize.X, YUnit*Settings->UnitSize.Y); \
+	return CellJunctionSize2D_##XUnit##x##YUnit;
+
+FVector2D FNProcGenUtils::GetWorldSize2D(const ENCellJunctionSize2D& Size)
 {
+	static const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	switch (Size)
 	{
-	case ENCellJunctionSize::NCJS_1x1:
-		N_JUNCTION_SIZE(1,1)
-	case ENCellJunctionSize::NCJS_1x2:
-		N_JUNCTION_SIZE(1,2)
-	case ENCellJunctionSize::NCJS_1x3:
-		N_JUNCTION_SIZE(1,3)
-	case ENCellJunctionSize::NCJS_1x4:
-		N_JUNCTION_SIZE(1,4)
-	case ENCellJunctionSize::NCJS_2x1:
-		N_JUNCTION_SIZE(2,1)
-	case ENCellJunctionSize::NCJS_2x3:
-		N_JUNCTION_SIZE(2,3)
-	case ENCellJunctionSize::NCJS_2x4:
-		N_JUNCTION_SIZE(2,4)
-	case ENCellJunctionSize::NCJS_3x1:
-		N_JUNCTION_SIZE(3,1)
-	case ENCellJunctionSize::NCJS_3x2:
-		N_JUNCTION_SIZE(3,2)
-	case ENCellJunctionSize::NCJS_3x3:
-		N_JUNCTION_SIZE(3,3)
-	case ENCellJunctionSize::NCJS_3x4:
-		N_JUNCTION_SIZE(3,4)
-	case ENCellJunctionSize::NCJS_4x1:
-		N_JUNCTION_SIZE(4,1)
-	case ENCellJunctionSize::NCJS_4x2:
-		N_JUNCTION_SIZE(4,2)
-	case ENCellJunctionSize::NCJS_4x3:
-		N_JUNCTION_SIZE(4,3)
-	case ENCellJunctionSize::NCJS_4x4:
-		N_JUNCTION_SIZE(4,4)
+	case ENCellJunctionSize2D::NCJS_1x1:
+		N_JUNCTION_SIZE_2D(1,1)
+	case ENCellJunctionSize2D::NCJS_1x2:
+		N_JUNCTION_SIZE_2D(1,2)
+	case ENCellJunctionSize2D::NCJS_1x3:
+		N_JUNCTION_SIZE_2D(1,3)
+	case ENCellJunctionSize2D::NCJS_1x4:
+		N_JUNCTION_SIZE_2D(1,4)
+	case ENCellJunctionSize2D::NCJS_2x1:
+		N_JUNCTION_SIZE_2D(2,1)
+	case ENCellJunctionSize2D::NCJS_2x3:
+		N_JUNCTION_SIZE_2D(2,3)
+	case ENCellJunctionSize2D::NCJS_2x4:
+		N_JUNCTION_SIZE_2D(2,4)
+	case ENCellJunctionSize2D::NCJS_3x1:
+		N_JUNCTION_SIZE_2D(3,1)
+	case ENCellJunctionSize2D::NCJS_3x2:
+		N_JUNCTION_SIZE_2D(3,2)
+	case ENCellJunctionSize2D::NCJS_3x3:
+		N_JUNCTION_SIZE_2D(3,3)
+	case ENCellJunctionSize2D::NCJS_3x4:
+		N_JUNCTION_SIZE_2D(3,4)
+	case ENCellJunctionSize2D::NCJS_4x1:
+		N_JUNCTION_SIZE_2D(4,1)
+	case ENCellJunctionSize2D::NCJS_4x2:
+		N_JUNCTION_SIZE_2D(4,2)
+	case ENCellJunctionSize2D::NCJS_4x3:
+		N_JUNCTION_SIZE_2D(4,3)
+	case ENCellJunctionSize2D::NCJS_4x4:
+		N_JUNCTION_SIZE_2D(4,4)
 	}
 	return FVector2D::Zero();
 }

@@ -25,7 +25,7 @@ FString UNCellJunctionComponent::GetJunctionName() const
 		ReturnString.Append(Parent->GetName());
 	}
 
-	// Get actual name of component
+	// Get actual name of the component
 	ReturnString.Append(" > ");
 	ReturnString.Append(GetName());
 	
@@ -61,7 +61,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const FVector Location =  FNVectorUtils::RotateAndOffsetVector(this->Details.RootRelativeLocation, RootRotation, RootLocation);
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	
-	const FVector2D Size = FNProcGenUtils::GetWorldSize(Details.Size);
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.Size);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
@@ -73,14 +73,14 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	switch (Details.Type)
 	{
 	case ENCellJunctionType::NCJT_TwoWaySocket:
-		FVector TwoWayPointA = Location + (Rotation.Vector() * 100.0f);
-		FVector TwoWayPointB = Location + (Rotation.Vector() * -100.0f);
+		const FVector TwoWayPointA = Location + (Rotation.Vector() * 50.0f);
+		const FVector TwoWayPointB = Location + (Rotation.Vector() * -50.0f);
 		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_World);
 		PDI->DrawPoint(TwoWayPointA, FLinearColor::Green, 10.0f, SDPG_World);
 		PDI->DrawPoint(TwoWayPointB, FLinearColor::Green, 10.0f, SDPG_World);
 		break;
 	case ENCellJunctionType::NCJT_OneWaySocket:
-		const FVector OneWayPoint = Location + (Rotation.Vector() * 100.0f);
+		const FVector OneWayPoint = Location + (Rotation.Vector() * 50.0f);
 		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_World);
 		PDI->DrawPoint(OneWayPoint, FLinearColor::Green, 10.0f, SDPG_World);
 		break;
@@ -89,7 +89,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 void UNCellJunctionComponent::OnRegister()
 {
-	// Is this part of a level instance
+	// Is this part of a level instance?
 	if (ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this))
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
@@ -135,7 +135,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		// There should be no root rotation as we haven't been spawned.
 		FRotator StartRotator = GetComponentRotation();
 
-		// Lets not go crazy
+		// Let us not go crazy
 		StartRotator.Normalize();
 		
 		FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
@@ -166,6 +166,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		// Have we made changes, let the people know!
 		if (bHasMadeChanges)
 		{
+			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
 		}
 	}
