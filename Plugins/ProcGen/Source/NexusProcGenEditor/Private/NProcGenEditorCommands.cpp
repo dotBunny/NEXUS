@@ -193,6 +193,7 @@ bool FNProcGenEditorCommands::NCellAddActor_CanShow()
 
 void FNProcGenEditorCommands::NCellSelectActor()
 {
+	GEditor->SelectNone(false, true);
 	GEditor->SelectActor(FNProcGenEditorUtils::GetNCellActorFromCurrentWorld(),
 		true, true, true, true);
 }
