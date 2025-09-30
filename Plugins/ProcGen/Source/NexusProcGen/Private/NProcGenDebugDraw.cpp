@@ -6,8 +6,23 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-void FNProcGenDebugDraw::DrawRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
-	const float Width, const float Height, const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
+
+void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
+	const FRotator& Rotation, const TArray<FVector2D>& Points, FLinearColor Color, const float Radius,  const ENAxis Axis,
+	ESceneDepthPriorityGroup Priority)
+{
+	const int PointCount = Points.Num();
+	for (int i = 0; i < PointCount; i++)
+	{
+		
+		
+		//DrawCircle(PDI, WorldCenter, X, Y, Color, Radius, 32, false, Priority, 1.0f);
+	}
+	//FRotationMatrix(Rotator).GetScaledAxis(EAxis::X), FRotationMatrix(Rotator).GetScaledAxis(EAxis::Y),
+}
+
+void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
+                                               const float Width, const float Height, const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
 {
 	const float HalfWidth = Width * 0.5f;
 	const float HalfHeight = Height * 0.5f;

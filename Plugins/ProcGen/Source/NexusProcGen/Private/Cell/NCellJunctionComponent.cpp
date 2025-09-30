@@ -7,6 +7,7 @@
 #include "Cell/NCellRootComponent.h"
 #include "NLevelUtils.h"
 #include "NProcGenDebugDraw.h"
+#include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
@@ -57,17 +58,18 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
-	
 	const FVector Location =  FNVectorUtils::RotateAndOffsetVector(this->Details.RootRelativeLocation, RootRotation, RootLocation);
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
-	
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.Size);
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.Size, Settings->UnitSize);
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetWorldUnitPoints2D(Details.Size, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
 		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 	
-	FNProcGenDebugDraw::DrawRectangle(PDI, Location, JunctionRotator, Size.X, Size.Y, FLinearColor::Green);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Location, JunctionRotator, Size.X, Size.Y, FLinearColor::Green);
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  FLinearColor::Green);
 
 	// We're going to draw some lines to show possible connections
 	switch (Details.Type)
@@ -131,6 +133,17 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;
+		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+		const FVector SnappingInterval = FVector(Settings->UnitSize.X * 0.5f, Settings->UnitSize.Y * 0.5f, Settings->UnitSize.Z * 0.5f);
+
+		// Local component location to unit sizes
+		const FVector StartLocation = GetComponentLocation();
+		if (const FVector GridLocation = FNVectorUtils::SnapToGrid(StartLocation, SnappingInterval);
+			StartLocation != GridLocation)
+		{
+			bHasMadeChanges = true;
+			SetWorldLocation(GridLocation);
+		}
 		
 		// There should be no root rotation as we haven't been spawned.
 		FRotator StartRotator = GetComponentRotation();

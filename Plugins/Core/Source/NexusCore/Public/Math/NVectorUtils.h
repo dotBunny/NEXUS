@@ -33,5 +33,12 @@ public:
 	{
 		return Rotation.RotateVector(WorldVector - WorldPoint) + WorldPoint;
 	}
-	
+
+	FORCEINLINE static FVector SnapToGrid(const FVector& Location, const FVector& GridSize)
+	{
+		return FVector(
+			FMath::GridSnap(Location.X, GridSize.X),
+			FMath::GridSnap(Location.Y, GridSize.Y),
+			FMath::GridSnap(Location.Z, GridSize.Z));
+	}
 };

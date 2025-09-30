@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NProcGenSettings.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionDetails.h"
 
@@ -37,6 +38,7 @@ public:
 	{
 		return Rotation.RotateVector(InLocation) + Offset;
 	}
-	
-	static FVector2D GetWorldSize2D(const ENCellJunctionSize2D& Size);
+
+	static TArray<FVector2D> GetWorldUnitPoints2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize);
+	static FVector2D GetWorldSize2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize);
 };

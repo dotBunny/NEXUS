@@ -9,8 +9,12 @@ struct FNRawMesh;
 class NEXUSPROCGEN_API FNProcGenDebugDraw
 {
 public:
-
-	static void DrawRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
+	
+	static void DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
+		const TArray<FVector2D>& Points, FLinearColor Color,  const float Radius = 10.0f,
+		const ENAxis Axis = ENAxis::Z, ESceneDepthPriorityGroup Priority = SDPG_World);	
+	
+	static void DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
 		const float Width, const float Height, FLinearColor Color,
 		const ENAxis Axis = ENAxis::Z, ESceneDepthPriorityGroup Priority = SDPG_World);
 	
