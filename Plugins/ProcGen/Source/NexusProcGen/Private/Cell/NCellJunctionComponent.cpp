@@ -134,18 +134,17 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	{
 		bool bHasMadeChanges = false;
 		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-		
-		// Local component location to unit sizes
-		const FVector StartLocation = GetComponentLocation();
-		const FVector LocationDelta = Details.RootRelativeLocation - StartLocation;
 
-		// TODO: This occurs after a move of the transform so theres no good way of doing this here, we need to do it somewhere else?
-		if (FVector OutLocation; FNVectorUtils::TrySnapToGrid(StartLocation, OutLocation,
-			Settings->UnitSize, 10000, Settings->UnitSize * 0.5f))
+
+		// LOCATION
+		if (const FVector GridLocation = FNVectorUtils::GetClosestGridLocation(GetComponentLocation(), Settings->UnitSize, Settings->UnitSize * 0.5f);
+			GridLocation != Details.RootRelativeLocation)
 		{
+			Details.RootRelativeLocation = GridLocation;
 			bHasMadeChanges = true;
-			SetWorldLocation(OutLocation);
 		}
+
+		// ROTATOR
 		
 		// There should be no root rotation as we haven't been spawned.
 		FRotator StartRotator = GetComponentRotation();
@@ -161,14 +160,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 			SetWorldRotation(FinalRotator);
 			bHasMadeChanges = true;
 		}
-		
-		// Update component cache
-		if (const FVector ComponentLocation = GetComponentLocation();
-			ComponentLocation != Details.RootRelativeLocation)
-		{
-			Details.RootRelativeLocation = ComponentLocation;
-			bHasMadeChanges = true;
-		}
+	
 		
 		// Update our rotation
 		const FNCardinalRotation CardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
