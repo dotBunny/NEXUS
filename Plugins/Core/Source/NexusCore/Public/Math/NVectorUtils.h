@@ -34,7 +34,7 @@ public:
 		return Rotation.RotateVector(WorldVector - WorldPoint) + WorldPoint;
 	}
 	
-	FORCEINLINE static FVector GetClosestGridLocation(const FVector& Location, const FVector& GridSize)
+	FORCEINLINE static FVector GetClosestGridIntersection(const FVector& Location, const FVector& GridSize)
 	{
 		return FVector(
 			FMath::RoundToInt(Location.X / GridSize.X) * GridSize.X,

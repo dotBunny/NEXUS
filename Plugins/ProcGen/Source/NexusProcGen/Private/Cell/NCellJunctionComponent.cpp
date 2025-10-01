@@ -138,13 +138,11 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	const UNCellRootComponent* RootComponent = FNCellRegistry::GetRootComponentFromLevel(GetComponentLevel());
 	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UNCellJunctionComponent::OnTransformUpdated - %s @ %s"), *GetJunctionName(), *GetComponentLocation().ToString());
-		
 		bool bHasMadeChanges = false;
 		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 		
 		// LOCATION
-		if (const FVector GridLocation = FNVectorUtils::GetClosestGridLocation(GetComponentLocation(), Settings->UnitSize);
+		if (const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(GetComponentLocation(), Settings->UnitSize);
 			GridLocation != Details.RootRelativeLocation)
 		{
 			Details.RootRelativeLocation = GridLocation;
