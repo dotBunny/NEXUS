@@ -35,7 +35,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Unit Size",
 		meta=(ToolTip="What is the base unit sized when operating on our grid?"))
-	FVector UnitSize = FVector(100.f, 100.f, 100.f);
+	FVector UnitSize = FVector(50.f, 50.f, 50.f);
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))

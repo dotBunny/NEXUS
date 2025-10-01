@@ -58,7 +58,13 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
+	
 	const FVector Location =  FNVectorUtils::RotateAndOffsetVector(this->Details.RootRelativeLocation, RootRotation, RootLocation);
+
+	// Draw unit spot
+	PDI->DrawPoint(RootLocation, FLinearColor::Red, 10.0f, SDPG_World);
+	PDI->DrawPoint(Location, FLinearColor::Green, 10.0f, SDPG_World);
+	
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.Size, Settings->UnitSize);
@@ -132,12 +138,13 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	const UNCellRootComponent* RootComponent = FNCellRegistry::GetRootComponentFromLevel(GetComponentLevel());
 	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("UNCellJunctionComponent::OnTransformUpdated - %s @ %s"), *GetJunctionName(), *GetComponentLocation().ToString());
+		
 		bool bHasMadeChanges = false;
 		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-
-
+		
 		// LOCATION
-		if (const FVector GridLocation = FNVectorUtils::GetClosestGridLocation(GetComponentLocation(), Settings->UnitSize, Settings->UnitSize * 0.5f);
+		if (const FVector GridLocation = FNVectorUtils::GetClosestGridLocation(GetComponentLocation(), Settings->UnitSize);
 			GridLocation != Details.RootRelativeLocation)
 		{
 			Details.RootRelativeLocation = GridLocation;

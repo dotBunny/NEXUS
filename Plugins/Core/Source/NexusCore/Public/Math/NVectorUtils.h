@@ -34,16 +34,12 @@ public:
 		return Rotation.RotateVector(WorldVector - WorldPoint) + WorldPoint;
 	}
 	
-	FORCEINLINE static FVector GetClosestGridLocation(const FVector& Location, const FVector& GridSize,  const FVector& SnapOffset = FVector::ZeroVector)
+	FORCEINLINE static FVector GetClosestGridLocation(const FVector& Location, const FVector& GridSize)
 	{
-		const FVector BasePosition = Location - SnapOffset;
-		
-		const FVector BaseSnappedPosition = FVector(
-			FMath::RoundToInt(BasePosition.X / GridSize.X) * GridSize.X,
-			FMath::RoundToInt(BasePosition.Y / GridSize.Y) * GridSize.Y,
-			FMath::RoundToInt(BasePosition.Z / GridSize.Z) * GridSize.Z
+		return FVector(
+			FMath::RoundToInt(Location.X / GridSize.X) * GridSize.X,
+			FMath::RoundToInt(Location.Y / GridSize.Y) * GridSize.Y,
+			FMath::RoundToInt(Location.Z / GridSize.Z) * GridSize.Z
 		);
-
-		return BaseSnappedPosition + SnapOffset;
 	}
 };
