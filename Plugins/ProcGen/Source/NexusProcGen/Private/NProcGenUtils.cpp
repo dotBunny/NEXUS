@@ -242,6 +242,7 @@ TArray<FVector2D> FNProcGenUtils::GetWorldUnitPoints2D(const ENCellJunctionSize2
 	
 	TArray<FVector2D> Points;
 
+	// TODO:
 	// This is based on a center point expanding out, not a grid starting point.
 	switch (Size)
 	{

@@ -33,12 +33,38 @@ public:
 	{
 		return Rotation.RotateVector(WorldVector - WorldPoint) + WorldPoint;
 	}
-
-	FORCEINLINE static FVector SnapToGrid(const FVector& Location, const FVector& GridSize)
+	
+	FORCEINLINE static bool TrySnapToGrid(const FVector& Location, FVector& OutLocation, const FVector& GridSize,
+		const float SnapDistanceSquared = 10000.f, const FVector& SnapOffset = FVector::ZeroVector)
 	{
-		return FVector(
-			FMath::GridSnap(Location.X, GridSize.X),
-			FMath::GridSnap(Location.Y, GridSize.Y),
-			FMath::GridSnap(Location.Z, GridSize.Z));
+		// Assign default output (unsnapped)
+		OutLocation = Location;
+
+		// Remove any offset prior to calculations
+		const FVector BasePosition = Location - SnapOffset;
+		
+		const FVector BaseSnappedPosition = FVector(
+			FMath::RoundToInt(BasePosition.X / GridSize.X) * GridSize.X,
+			FMath::RoundToInt(BasePosition.Y / GridSize.Y) * GridSize.Y,
+			FMath::RoundToInt(BasePosition.Z / GridSize.Z) * GridSize.Z
+		);
+		
+		FVector SnappedDelta = FVector(
+			Location.X - BaseSnappedPosition.X,
+			Location.Y - BaseSnappedPosition.Y,
+			Location.Z - BaseSnappedPosition.Z);
+
+		UE_LOG(LogTemp, Warning, TEXT("SnappedDelta: %s"), *SnappedDelta.ToString())
+		
+		
+		// if (FVector::DistSquared(BaseSnappedPosition, Location) < SnapDistanceSquared)
+		// {
+		// 	UE_LOG(LogTemp, Log, TEXT("SnapToGrid: %f :  %s -> %s"),
+		// 		FVector::DistSquared(Location, FinalPosition), *Location.ToString(), *FinalPosition.ToString());
+		// 	OutLocation = FinalPosition;
+		// 	return true;
+		// }
+		//
+		return false;
 	}
 };

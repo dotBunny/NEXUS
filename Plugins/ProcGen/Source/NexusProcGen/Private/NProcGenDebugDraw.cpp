@@ -9,16 +9,27 @@
 
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
 	const FRotator& Rotation, const TArray<FVector2D>& Points, FLinearColor Color, const float Radius,  const ENAxis Axis,
-	ESceneDepthPriorityGroup Priority)
+	const ESceneDepthPriorityGroup Priority)
 {
+	
 	const int PointCount = Points.Num();
 	for (int i = 0; i < PointCount; i++)
 	{
-		
-		
-		//DrawCircle(PDI, WorldCenter, X, Y, Color, Radius, 32, false, Priority, 1.0f);
+		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, Points[i].Y, 0.0f), WorldCenter, Rotation);
+		switch (Axis)
+		{
+		case X:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, false, Priority, 1.0f);
+			break;
+		case Y:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, false, Priority, 1.0f);
+			break;
+		default:
+		case Z:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, false, Priority, 1.0f);
+			break;
+		}
 	}
-	//FRotationMatrix(Rotator).GetScaledAxis(EAxis::X), FRotationMatrix(Rotator).GetScaledAxis(EAxis::Y),
 }
 
 void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,

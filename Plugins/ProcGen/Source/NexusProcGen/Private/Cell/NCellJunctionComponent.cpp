@@ -134,15 +134,17 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	{
 		bool bHasMadeChanges = false;
 		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-		const FVector SnappingInterval = FVector(Settings->UnitSize.X * 0.5f, Settings->UnitSize.Y * 0.5f, Settings->UnitSize.Z * 0.5f);
-
+		
 		// Local component location to unit sizes
 		const FVector StartLocation = GetComponentLocation();
-		if (const FVector GridLocation = FNVectorUtils::SnapToGrid(StartLocation, SnappingInterval);
-			StartLocation != GridLocation)
+		const FVector LocationDelta = Details.RootRelativeLocation - StartLocation;
+
+		// TODO: This occurs after a move of the transform so theres no good way of doing this here, we need to do it somewhere else?
+		if (FVector OutLocation; FNVectorUtils::TrySnapToGrid(StartLocation, OutLocation,
+			Settings->UnitSize, 10000, Settings->UnitSize * 0.5f))
 		{
 			bHasMadeChanges = true;
-			SetWorldLocation(GridLocation);
+			SetWorldLocation(OutLocation);
 		}
 		
 		// There should be no root rotation as we haven't been spawned.
@@ -187,6 +189,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 
 void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
+	// Bad patching has shown a bad ref here
 	N_WORLD_ICON_CLEANUP()
 }
 
