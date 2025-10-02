@@ -6,6 +6,7 @@
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
+class FNProcGenEditorUndo;
 /**
  * NEXUS: Procedural Content Generation Editor Module
  */
@@ -17,4 +18,7 @@ class FNProcGenEditorModule final : public IModuleInterface
 	void OnPostEngineInit();
 	
 	N_IMPLEMENT_MODULE(FNProcGenEditorModule, "NexusProcGenEditor")
+
+private:
+	FNProcGenEditorUndo* UndoHandler = nullptr;
 };

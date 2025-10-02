@@ -23,6 +23,7 @@
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "NProcGenEditorCommands.h"
 #include "NProcGenEditorToolMenu.h"
+#include "NProcGenEditorUndo.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenVolume.h"
 #include "UnrealEdGlobals.h"
@@ -56,10 +57,23 @@ void FNProcGenEditorModule::ShutdownModule()
 	}
 	
 	FNProcGenEditorStyle::Shutdown();
+
+	// Remove Undo handler
+	if (UndoHandler != nullptr)
+	{
+		delete UndoHandler;
+		UndoHandler = nullptr;
+	}
 }
 
 void FNProcGenEditorModule::OnPostEngineInit()
 {
+	// Initialize Undo Handler
+	if (UndoHandler == nullptr)
+	{
+		UndoHandler = new FNProcGenEditorUndo();
+	}
+	
 	// Configure Style
 	FNProcGenEditorStyle::Initialize();
 	

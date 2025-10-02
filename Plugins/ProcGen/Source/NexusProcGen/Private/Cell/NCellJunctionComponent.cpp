@@ -153,21 +153,9 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		
 		// There should be no root rotation as we haven't been spawned.
 		FRotator StartRotator = GetComponentRotation();
-
-		// Let us not go crazy
 		StartRotator.Normalize();
-		
 		FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
 		FinalRotator.Normalize();
-		
-		if (StartRotator != FinalRotator)
-		{
-			SetWorldRotation(FinalRotator);
-			bHasMadeChanges = true;
-		}
-	
-		
-		// Update our rotation
 		const FNCardinalRotation CardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
 		if (!Details.RootRelativeCardinalRotation.IsEqual(CardinalRotation))
 		{
