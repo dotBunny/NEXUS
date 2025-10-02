@@ -39,6 +39,10 @@ public:
 		return Rotation.RotateVector(InLocation) + Offset;
 	}
 
-	static TArray<FVector2D> GetWorldUnitPoints2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize);
-	static FVector2D GetWorldSize2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize);
+	FORCEINLINE static FVector2D GetWorldSize2D(const FIntVector2& Units, const FVector& UnitSize)
+	{
+		return FVector2D(Units.X*UnitSize.X, Units.Y*UnitSize.Y);
+	}
+
+	static TArray<FVector2D> GetWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize);
 };

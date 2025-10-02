@@ -232,98 +232,60 @@ TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromWorld(const UWorl
 	return Result;
 }
 
-
-
-
-TArray<FVector2D> FNProcGenUtils::GetWorldUnitPoints2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize)
+TArray<FVector2D> FNProcGenUtils::GetWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize)
 {
 	static const float HalfX = UnitSize.X * 0.5f;
 	static const float HalfY = UnitSize.Y * 0.5f;
-	
+	const int PointCount = Units.X * Units.Y;
+
 	TArray<FVector2D> Points;
+	Points.Reserve(PointCount);
 
-	// TODO:
-	// This is based on a center point expanding out, not a grid starting point.
-	switch (Size)
-	{
-	case ENCellJunctionSize2D::NCJS_1x1:
-		Points.Reserve(1);
-		Points.Add(FVector2D(0, 0));
-		break;
-	case ENCellJunctionSize2D::NCJS_1x2: 
-		Points.Reserve(2);
-		Points.Add(FVector2D(0, HalfY));
-		Points.Add(FVector2D(0, -HalfY));
-		break;
-	case ENCellJunctionSize2D::NCJS_1x3: 
-		Points.Reserve(3);
-		Points.Add(FVector2D(0, UnitSize.Y));
-		Points.Add(FVector2D(0, 0));
-		Points.Add(FVector2D(0, -UnitSize.Y));
-		break;
-	case ENCellJunctionSize2D::NCJS_1x4:
-		Points.Reserve(4);
-		Points.Add(FVector2D(0, UnitSize.Y + HalfY));
-		Points.Add(FVector2D(0,HalfY));
-		Points.Add(FVector2D(0,-HalfY));
-		Points.Add(FVector2D(0, -(UnitSize.Y + HalfY)));
-		break;
-		
-	case ENCellJunctionSize2D::NCJS_2x1:
-		Points.Reserve(2);
-		Points.Add(FVector2D(HalfX, 0));
-		Points.Add(FVector2D(-HalfX, 0));
-		break;
-
-	}
+	//
+	// for (int x = 0; x < Points2D.X; x++)
+	// {
+	// 	for (int y = 0; y < Points2D.Y; y++)
+	// 	{
+	// 		Points.Add(FVector2D)
+	// 	}
+	// }
+	//
+	//
+	//
+	// // TODO:
+	// // This is based on a center point expanding out, not a grid starting point.
+	// switch (Size)
+	// {
+	// case ENCellJunctionSize2D::NCJS_1x1:
+	// 	Points.Reserve(1);
+	// 	Points.Add(FVector2D(0, 0));
+	// 	break;
+	// case ENCellJunctionSize2D::NCJS_1x2: 
+	// 	Points.Reserve(2);
+	// 	Points.Add(FVector2D(0, HalfY));
+	// 	Points.Add(FVector2D(0, -HalfY));
+	// 	break;
+	// case ENCellJunctionSize2D::NCJS_1x3: 
+	// 	Points.Reserve(3);
+	// 	Points.Add(FVector2D(0, UnitSize.Y));
+	// 	Points.Add(FVector2D(0, 0));
+	// 	Points.Add(FVector2D(0, -UnitSize.Y));
+	// 	break;
+	// case ENCellJunctionSize2D::NCJS_1x4:
+	// 	Points.Reserve(4);
+	// 	Points.Add(FVector2D(0, UnitSize.Y + HalfY));
+	// 	Points.Add(FVector2D(0,HalfY));
+	// 	Points.Add(FVector2D(0,-HalfY));
+	// 	Points.Add(FVector2D(0, -(UnitSize.Y + HalfY)));
+	// 	break;
+	// 	
+	// case ENCellJunctionSize2D::NCJS_2x1:
+	// 	Points.Reserve(2);
+	// 	Points.Add(FVector2D(HalfX, 0));
+	// 	Points.Add(FVector2D(-HalfX, 0));
+	// 	break;
+	//
+	// }
 
 	return MoveTemp(Points);
-}
-
-#define N_JUNCTION_SIZE(XUnit,YUnit,ZUnit) \
-	static const FVector2D CellJunctionSize_##XUnit##x##YUnit##x##ZUnit = FVector(XUnit*UnitSize.X, YUnit*UnitSize.Y, ZUnit*UnitSize.Z); \
-	return CellJunctionSize_##XUnit##x##YUnit##x##ZUnit;
-
-#define N_JUNCTION_SIZE_2D(XUnit,YUnit) \
-	static const FVector2D CellJunctionSize2D_##XUnit##x##YUnit = FVector2D(XUnit*UnitSize.X, YUnit*UnitSize.Y); \
-	return CellJunctionSize2D_##XUnit##x##YUnit;
-
-FVector2D FNProcGenUtils::GetWorldSize2D(const ENCellJunctionSize2D& Size, const FVector& UnitSize)
-{
-	switch (Size)
-	{
-	case ENCellJunctionSize2D::NCJS_1x1:
-		N_JUNCTION_SIZE_2D(1,1)
-	case ENCellJunctionSize2D::NCJS_1x2:
-		N_JUNCTION_SIZE_2D(1,2)
-	case ENCellJunctionSize2D::NCJS_1x3:
-		N_JUNCTION_SIZE_2D(1,3)
-	case ENCellJunctionSize2D::NCJS_1x4:
-		N_JUNCTION_SIZE_2D(1,4)
-	case ENCellJunctionSize2D::NCJS_2x1:
-		N_JUNCTION_SIZE_2D(2,1)
-	case ENCellJunctionSize2D::NCJS_2x2:
-		N_JUNCTION_SIZE_2D(2,2)
-	case ENCellJunctionSize2D::NCJS_2x3:
-		N_JUNCTION_SIZE_2D(2,3)
-	case ENCellJunctionSize2D::NCJS_2x4:
-		N_JUNCTION_SIZE_2D(2,4)
-	case ENCellJunctionSize2D::NCJS_3x1:
-		N_JUNCTION_SIZE_2D(3,1)
-	case ENCellJunctionSize2D::NCJS_3x2:
-		N_JUNCTION_SIZE_2D(3,2)
-	case ENCellJunctionSize2D::NCJS_3x3:
-		N_JUNCTION_SIZE_2D(3,3)
-	case ENCellJunctionSize2D::NCJS_3x4:
-		N_JUNCTION_SIZE_2D(3,4)
-	case ENCellJunctionSize2D::NCJS_4x1:
-		N_JUNCTION_SIZE_2D(4,1)
-	case ENCellJunctionSize2D::NCJS_4x2:
-		N_JUNCTION_SIZE_2D(4,2)
-	case ENCellJunctionSize2D::NCJS_4x3:
-		N_JUNCTION_SIZE_2D(4,3)
-	case ENCellJunctionSize2D::NCJS_4x4:
-		N_JUNCTION_SIZE_2D(4,4)
-	}
-	return FVector2D::Zero();
 }

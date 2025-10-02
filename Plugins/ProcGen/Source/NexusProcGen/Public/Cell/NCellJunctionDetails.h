@@ -13,32 +13,6 @@ enum class ENCellJunctionType : uint8
 	NCJT_OneWaySocket = 1 UMETA(DisplayName = "One Way Socket"),
 };
 
-// Maybe sockets should be 3d? so its a plug type nature so something cane blend better?
-UENUM()
-enum class ENCellJunctionSize2D : uint8
-{
-	NCJS_1x1 = 0 UMETA(DisplayName = "1x1"),
-	NCJS_1x2 = 1 UMETA(DisplayName = "1x2"),
-	NCJS_1x3 = 2 UMETA(DisplayName = "1x3"),
-	NCJS_1x4 = 3 UMETA(DisplayName = "1x4"),
-
-	NCJS_2x1 = 4 UMETA(DisplayName = "2x1"),
-	NCJS_2x2 = 6 UMETA(DisplayName = "2x2"),
-	NCJS_2x3 = 7 UMETA(DisplayName = "2x3"),
-	NCJS_2x4 = 8 UMETA(DisplayName = "2x4"),
-
-	NCJS_3x1 = 9 UMETA(DisplayName = "3x1"),
-	NCJS_3x2 = 10 UMETA(DisplayName = "3x2"),
-	NCJS_3x3 = 11 UMETA(DisplayName = "3x3"),
-	NCJS_3x4 = 12 UMETA(DisplayName = "3x4"),
-
-	NCJS_4x1 = 13 UMETA(DisplayName = "4x1"),
-	NCJS_4x2 = 14 UMETA(DisplayName = "4x2"),
-	NCJS_4x3 = 15 UMETA(DisplayName = "4x3"),
-	NCJS_4x4 = 16 UMETA(DisplayName = "4x4"),
-};
-
-
 USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellJunctionDetails
 {
@@ -48,7 +22,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	ENCellJunctionType Type = ENCellJunctionType::NCJT_TwoWaySocket;
 
 	UPROPERTY(EditInstanceOnly)
-	ENCellJunctionSize2D Size = ENCellJunctionSize2D::NCJS_2x1;
+	FIntVector2 UnitSize = FIntVector2(4, 2);
 	
 	UPROPERTY(VisibleAnywhere)
 	FVector RootRelativeLocation = FVector::ZeroVector;
@@ -70,7 +44,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 		return
 			InstanceIdentifier == Other.InstanceIdentifier &&
 			Type == Other.Type &&
-			Size == Other.Size &&
+			UnitSize == Other.UnitSize &&
 			RootRelativeLocation == Other.RootRelativeLocation &&
 			RootRelativeCardinalRotation.IsEqual(Other.RootRelativeCardinalRotation);
 	}

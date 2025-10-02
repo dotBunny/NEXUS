@@ -61,14 +61,10 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	
 	const FVector Location =  FNVectorUtils::RotateAndOffsetVector(this->Details.RootRelativeLocation, RootRotation, RootLocation);
 
-	// Draw unit spot
-	PDI->DrawPoint(RootLocation, FLinearColor::Red, 10.0f, SDPG_World);
-	PDI->DrawPoint(Location, FLinearColor::Green, 10.0f, SDPG_World);
-	
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.Size, Settings->UnitSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetWorldUnitPoints2D(Details.Size, Settings->UnitSize);
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->UnitSize);
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetWorldPoints2D(Details.UnitSize, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
