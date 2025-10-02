@@ -44,5 +44,5 @@ public:
 		return FVector2D(Units.X*UnitSize.X, Units.Y*UnitSize.Y);
 	}
 
-	static TArray<FVector2D> GetWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize);
+	static TArray<FVector2D> GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize);
 };

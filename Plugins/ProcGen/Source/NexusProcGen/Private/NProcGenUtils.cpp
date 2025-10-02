@@ -232,60 +232,25 @@ TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromWorld(const UWorl
 	return Result;
 }
 
-TArray<FVector2D> FNProcGenUtils::GetWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize)
+TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize)
 {
-	static const float HalfX = UnitSize.X * 0.5f;
-	static const float HalfY = UnitSize.Y * 0.5f;
-	const int PointCount = Units.X * Units.Y;
-
 	TArray<FVector2D> Points;
-	Points.Reserve(PointCount);
+	Points.Reserve( Units.X * Units.Y);
+	const double UsableWidth = ((Units.X * UnitSize.X) - UnitSize.X);
+	const double UsableHeight = ((Units.Y * UnitSize.Y) - UnitSize.Y);
+	const double WidthStart = -(UsableWidth * 0.5f);
+	const double HeightStart = -(UsableHeight * 0.5f);
 
-	//
-	// for (int x = 0; x < Points2D.X; x++)
-	// {
-	// 	for (int y = 0; y < Points2D.Y; y++)
-	// 	{
-	// 		Points.Add(FVector2D)
-	// 	}
-	// }
-	//
-	//
-	//
-	// // TODO:
-	// // This is based on a center point expanding out, not a grid starting point.
-	// switch (Size)
-	// {
-	// case ENCellJunctionSize2D::NCJS_1x1:
-	// 	Points.Reserve(1);
-	// 	Points.Add(FVector2D(0, 0));
-	// 	break;
-	// case ENCellJunctionSize2D::NCJS_1x2: 
-	// 	Points.Reserve(2);
-	// 	Points.Add(FVector2D(0, HalfY));
-	// 	Points.Add(FVector2D(0, -HalfY));
-	// 	break;
-	// case ENCellJunctionSize2D::NCJS_1x3: 
-	// 	Points.Reserve(3);
-	// 	Points.Add(FVector2D(0, UnitSize.Y));
-	// 	Points.Add(FVector2D(0, 0));
-	// 	Points.Add(FVector2D(0, -UnitSize.Y));
-	// 	break;
-	// case ENCellJunctionSize2D::NCJS_1x4:
-	// 	Points.Reserve(4);
-	// 	Points.Add(FVector2D(0, UnitSize.Y + HalfY));
-	// 	Points.Add(FVector2D(0,HalfY));
-	// 	Points.Add(FVector2D(0,-HalfY));
-	// 	Points.Add(FVector2D(0, -(UnitSize.Y + HalfY)));
-	// 	break;
-	// 	
-	// case ENCellJunctionSize2D::NCJS_2x1:
-	// 	Points.Reserve(2);
-	// 	Points.Add(FVector2D(HalfX, 0));
-	// 	Points.Add(FVector2D(-HalfX, 0));
-	// 	break;
-	//
-	// }
+	for (int i = 0; i < Units.X; i++)
+	{
+		for ( int y = 0; y < Units.Y; y++)
+		{
+			Points.Add(FVector2D(WidthStart + (i * UnitSize.X), HeightStart + (y * UnitSize.Y)));
+		}
+	}
+
+
+	
 
 	return MoveTemp(Points);
 }
