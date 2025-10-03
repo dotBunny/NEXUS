@@ -23,6 +23,9 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	UPROPERTY(VisibleAnywhere)
 	FBox Bounds;
 
+	UPROPERTY(VisibleAnywhere)
+	FBox UnitBounds;
+
 	UPROPERTY(EditAnywhere)
 	FNRotationConstraint RotationConstraints;
 
@@ -31,10 +34,7 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	
 	UPROPERTY(VisibleAnywhere)
 	FNRawMesh Hull;
-
-	UPROPERTY(EditAnywhere)
-	FBox UnitExtents;
-
+	
 	UPROPERTY(EditAnywhere)
 	FLinearColor ProxyColor = FNColor::NexusDarkBlue;
 
@@ -46,9 +46,12 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 
 	bool IsEqual(const FNCellRootDetails& Other) const
 	{
-		return ProxyColor == Other.ProxyColor && Bounds == Other.Bounds && UnitExtents == Other.UnitExtents &&
-			BoundsSettings.Equals(Other.BoundsSettings) &&  HullSettings.Equals(Other.HullSettings) && Hull.IsEqual(Other.Hull) &&
-			RotationConstraints.IsEqual(Other.RotationConstraints);
+		return ProxyColor == Other.ProxyColor
+		&& Bounds == Other.Bounds
+		&& BoundsSettings.Equals(Other.BoundsSettings)
+		&& HullSettings.Equals(Other.HullSettings)
+		&& Hull.IsEqual(Other.Hull)
+		&& RotationConstraints.IsEqual(Other.RotationConstraints);
 	}
 };
 

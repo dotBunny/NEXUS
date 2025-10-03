@@ -41,3 +41,38 @@ TArray<FVector> FNVectorUtils::OffsetVectors(const TArray<FVector>& Vectors, con
 	
 	return MoveTemp(ModifiedVertices);
 }
+
+FVector FNVectorUtils::GetFurthestGridIntersection(const FVector& Location, const FVector& GridSize)
+{
+
+	FVector Size =  FVector(Location.X / GridSize.X, Location.Y / GridSize.Y,Location.Z / GridSize.Z);
+	
+	if (Size.X < 0)
+	{
+		Size.X = FMath::FloorToInt(Size.X);
+	}
+	else
+	{
+		Size.X = FMath::CeilToInt(Size.X);
+	}
+
+	if (Size.Y < 0)
+	{
+		Size.Y = FMath::FloorToInt(Size.Y);
+	}
+	else
+	{
+		Size.Y = FMath::CeilToInt(Size.Y);
+	}
+	
+	if (Size.Z < 0)
+	{
+		Size.Z = FMath::FloorToInt(Size.Z);
+	}
+	else
+	{
+		Size.Z = FMath::CeilToInt(Size.Z);
+	}
+	
+	return MoveTemp(Size);
+}

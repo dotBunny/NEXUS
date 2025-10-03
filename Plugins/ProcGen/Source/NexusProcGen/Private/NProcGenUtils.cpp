@@ -4,7 +4,6 @@
 #include "NProcGenUtils.h"
 #include "NProcGenComponent.h"
 #include "NArrayUtils.h"
-#include "NProcGenSettings.h"
 #include "NProcGenVolume.h"
 #include "Chaos/Convex.h"
 
@@ -33,6 +32,7 @@ FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBounds
 
 	return LevelBounds;
 }
+
 
 FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullGenerationSettings& Settings)
 {

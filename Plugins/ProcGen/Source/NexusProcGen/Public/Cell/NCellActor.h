@@ -64,6 +64,8 @@ public:
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override;
 	virtual bool ShouldExport() override { return false; } // Stops Copy/Paste/Cut/Duplicate
 	int32 GetCellJunctionNextIdentifier() { return CellJunctionNextIdentifier++; }
+	virtual void PostRegisterAllComponents() override;
+	
 #endif	
 
 	void CalculateBounds();

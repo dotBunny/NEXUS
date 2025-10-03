@@ -59,8 +59,9 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	
 	bool Equals(const FNCellHullGenerationSettings& Other) const
 	{
-		return bCalculateOnSave == Other.bCalculateOnSave &&
-			bIncludeNonColliding == Other.bIncludeNonColliding &&
-			bIncludeEditorOnly == Other.bIncludeEditorOnly;
+		return bCalculateOnSave == Other.bCalculateOnSave
+		&& bIncludeNonColliding == Other.bIncludeNonColliding
+		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);;
 	}
 };

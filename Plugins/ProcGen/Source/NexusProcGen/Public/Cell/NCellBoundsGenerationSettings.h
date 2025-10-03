@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "NArrayUtils.h"
 
 #include "NCellBoundsGenerationSettings.generated.h"
 
@@ -15,7 +16,7 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
-
+	
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_BoundsIgnore" };
 
@@ -23,6 +24,8 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 
 	bool Equals(const FNCellBoundsGenerationSettings& Other) const
 	{
-		return bCalculateOnSave == Other.bCalculateOnSave && bIncludeNonColliding == Other.bIncludeNonColliding;
+		return bCalculateOnSave == Other.bCalculateOnSave
+		&& bIncludeNonColliding == Other.bIncludeNonColliding
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);;
 	}
 };

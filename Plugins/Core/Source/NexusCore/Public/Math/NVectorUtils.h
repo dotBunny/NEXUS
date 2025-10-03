@@ -42,4 +42,7 @@ public:
 			FMath::RoundToInt(Location.Z / GridSize.Z) * GridSize.Z
 		);
 	}
+
+	static FVector GetFurthestGridIntersection(const FVector& Location, const FVector& GridSize);
+	
 };

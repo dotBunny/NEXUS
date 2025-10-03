@@ -4,6 +4,7 @@
 #include "Cell/NCellActor.h"
 
 #include "NCoreMinimal.h"
+#include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 
 #if WITH_EDITOR
@@ -35,9 +36,30 @@ void ANCellActor::InitializeFromProxy()
 	OnInitializedFromProxy.Broadcast();
 }
 
+void ANCellActor::PostRegisterAllComponents()
+{
+	Super::PostRegisterAllComponents();
+	if (CellRoot == nullptr)
+	{
+		N_LOG(Warning, TEXT("[ANCellActor::PostRegisterAllComponents] No linked cell root component found, linking."));
+		CellRoot = GetComponentByClass<UNCellRootComponent>();
+		if (CellRoot == nullptr)
+		{
+			N_LOG(Error, TEXT("[ANCellActor::PostRegisterAllComponents] Unable to link UNCellRootComponent."));
+		}
+	}
+}
+
 void ANCellActor::CalculateBounds()
 {
 	CellRoot->Details.Bounds = FNProcGenUtils::CalculatePlayableBounds(GetLevel(), CellRoot->Details.BoundsSettings);
+
+	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+
+	CellRoot->Details.UnitBounds = FBox(
+				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),
+				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Max, UnitSize));
+	
 	SetActorDirty();
 }
 
