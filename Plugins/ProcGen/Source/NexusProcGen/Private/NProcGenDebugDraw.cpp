@@ -6,7 +6,6 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
 	const FRotator& Rotation, const TArray<FVector2D>& Points, FLinearColor Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)
@@ -19,14 +18,14 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		switch (Axis)
 		{
 		case X:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, 1.0);
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
 			break;
 		case Y:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, 1.0f);
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
 			break;
 		default:
 		case Z:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, 1.0f);
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
 			break;
 		}
 	}
@@ -66,10 +65,10 @@ void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, con
 	TopRight = FNVectorUtils::RotatedAroundPivot(WorldCenter + TopRight, WorldCenter, Rotation);
 	
 	PDI->AddReserveLines(SDPG_World, 4, false, false);
-	PDI->DrawLine(BottomLeft, BottomRight, Color, Priority, 1.0f);
-	PDI->DrawLine(BottomRight, TopRight, Color, Priority, 1.0f);
-	PDI->DrawLine(TopRight, TopLeft, Color, Priority, 1.0f);
-	PDI->DrawLine(TopLeft, BottomLeft, Color, Priority, 1.0f);
+	PDI->DrawLine(BottomLeft, BottomRight, Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(BottomRight, TopRight, Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(TopRight, TopLeft, Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(TopLeft, BottomLeft, Color, Priority, PDI_LINE_THICKNESS);
 }
 
 void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)

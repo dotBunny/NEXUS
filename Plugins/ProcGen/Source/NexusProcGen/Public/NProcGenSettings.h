@@ -40,5 +40,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell Settings", DisplayName ="Junction Unit Size",
+		meta=(ToolTip="What is unit size used for junctions, this differs from the base UnitSize as it is center-based on the grid point."))
+	FVector JunctionUnitSize = FVector(50.f, 50.f, 50.f);
 	
 };

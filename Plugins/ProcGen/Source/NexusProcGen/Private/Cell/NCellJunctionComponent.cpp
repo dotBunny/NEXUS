@@ -63,8 +63,8 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->UnitSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->UnitSize);
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->JunctionUnitSize);
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->JunctionUnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
@@ -77,16 +77,13 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	switch (Details.Type)
 	{
 	case ENCellJunctionType::NCJT_TwoWaySocket:
-		const FVector TwoWayPointA = Location + (Rotation.Vector() * 50.0f);
-		const FVector TwoWayPointB = Location + (Rotation.Vector() * -50.0f);
-		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_World);
-		PDI->DrawPoint(TwoWayPointA, FLinearColor::Green, 10.0f, SDPG_World);
-		PDI->DrawPoint(TwoWayPointB, FLinearColor::Green, 10.0f, SDPG_World);
+		const FVector TwoWayPointA = Location + (Rotation.Vector() * Settings->JunctionUnitSize.X);
+		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Settings->JunctionUnitSize.X);
+		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
 		break;
 	case ENCellJunctionType::NCJT_OneWaySocket:
-		const FVector OneWayPoint = Location + (Rotation.Vector() * 50.0f);
-		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_World);
-		PDI->DrawPoint(OneWayPoint, FLinearColor::Green, 10.0f, SDPG_World);
+		const FVector OneWayPoint = Location + (Rotation.Vector() * Settings->JunctionUnitSize.X);
+		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
 		break;
 	}
 }

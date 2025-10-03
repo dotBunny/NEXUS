@@ -41,7 +41,7 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 #if WITH_EDITOR
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
-		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
+		//N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
 #endif		
 		
 		RootComponent->Mobility = EComponentMobility::Static;
@@ -97,5 +97,5 @@ private:
 	bool bActorDirty = false;
 	bool bSpawnedFromProxy = false;
 
-	N_WORLD_ICON_HEADER()
+	//N_WORLD_ICON_HEADER()
 };
