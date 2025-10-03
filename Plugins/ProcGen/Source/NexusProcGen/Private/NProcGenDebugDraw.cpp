@@ -3,6 +3,7 @@
 
 #include "NProcGenDebugDraw.h"
 
+#include "NProcGenUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
@@ -31,44 +32,32 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 	}
 }
 
-void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
-                                               const float Width, const float Height, const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
+void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
+	const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
 {
-	const float HalfWidth = Width * 0.5f;
-	const float HalfHeight = Height * 0.5f;
-
-	// Common case UP
-	FVector TopLeft = FVector(-HalfWidth,0,HalfHeight);
-	FVector BottomLeft = FVector(-HalfWidth,0,-HalfHeight);
-	FVector BottomRight = FVector(HalfWidth,0,-HalfHeight);
-	FVector TopRight = FVector(HalfWidth,0,HalfHeight);
-
-	if (Axis == ENAxis::X)
-	{
-		TopLeft = FVector(HalfHeight, 0, -HalfWidth);
-		BottomLeft = FVector(-HalfHeight, 0, -HalfWidth);
-		BottomRight = FVector(-HalfHeight, 0, HalfWidth);
-		TopRight = FVector(HalfHeight, 0, HalfWidth);
-	}
-	else if (Axis == ENAxis::Y)
-	{
-		TopLeft = FVector(HalfWidth,HalfHeight,0);
-		BottomLeft = FVector(HalfWidth,-HalfHeight,0);
-		BottomRight = FVector(-HalfWidth,-HalfHeight,0);
-		TopRight = FVector(-HalfWidth,HalfHeight, 0);
-	}
-	
-	// Rotate the points around the center
-	TopLeft = FNVectorUtils::RotatedAroundPivot(WorldCenter + TopLeft, WorldCenter, Rotation);
-	BottomLeft = FNVectorUtils::RotatedAroundPivot(WorldCenter + BottomLeft, WorldCenter, Rotation);
-	BottomRight = FNVectorUtils::RotatedAroundPivot(WorldCenter + BottomRight, WorldCenter, Rotation);
-	TopRight = FNVectorUtils::RotatedAroundPivot(WorldCenter + TopRight, WorldCenter, Rotation);
-	
 	PDI->AddReserveLines(SDPG_World, 4, false, false);
-	PDI->DrawLine(BottomLeft, BottomRight, Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(BottomRight, TopRight, Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(TopRight, TopLeft, Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(TopLeft, BottomLeft, Color, Priority, PDI_LINE_THICKNESS);
+	
+	PDI->DrawLine(Points[1], Points[2], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[2], Points[3], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[3], Points[0], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[0], Points[1], Color, Priority, PDI_LINE_THICKNESS);
+}
+
+void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PDI, const FVector& Location,
+	const FRotator& Rotation, const ENCellJunctionType& Type, const float Length)
+{
+	switch (Type)
+	{
+	case ENCellJunctionType::NCJT_TwoWaySocket:
+		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
+		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
+		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
+		break;
+	case ENCellJunctionType::NCJT_OneWaySocket:
+		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
+		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
+		break;
+	}
 }
 
 void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)

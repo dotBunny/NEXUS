@@ -24,7 +24,7 @@
 #endif
 
 #if WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_IMPLEMENTATION(PackagePath, AttachPoint, bIsStatic) \
+#define N_WORLD_ICON_IMPLEMENTATION(PackagePath, AttachPoint, bIsStatic, Scale) \
 	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite")); \
 	if (!IsRunningCommandlet() && (SpriteComponent != nullptr)) \
 	{ \
@@ -48,7 +48,7 @@
 		SpriteComponent->SetVisibleFlag(true); \
 		SpriteComponent->AttachToComponent(AttachPoint, FAttachmentTransformRules::KeepRelativeTransform); \
 		SpriteComponent->SetRelativeLocation(FVector::ZeroVector); \
-		SpriteComponent->SetRelativeScale3D(FVector(0.5f, 0.5f, 0.5f)); \
+		SpriteComponent->SetRelativeScale3D(FVector(Scale, Scale, Scale)); \
 		if(bIsStatic) { \
 			SpriteComponent->Mobility = EComponentMobility::Static; \
 		} \
@@ -56,5 +56,5 @@
 		SpriteComponent->bReceivesDecals = false; \
 	}
 #else
-#define N_WORLD_ICON_IMPLEMENTATION(PackagePath, AttachPoint, bIsStatic)
+#define N_WORLD_ICON_IMPLEMENTATION(PackagePath, AttachPoint, bIsStatic, Scale)
 #endif // WITH_EDITORONLY_DATA

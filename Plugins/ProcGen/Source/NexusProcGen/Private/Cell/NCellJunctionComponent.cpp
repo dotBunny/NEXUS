@@ -69,23 +69,19 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
 		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+
+	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Location, JunctionRotator, Size.X, Size.Y, FLinearColor::Green);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, FLinearColor::Green);
 	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  FLinearColor::Green);
 
-	// We're going to draw some lines to show possible connections
-	switch (Details.Type)
-	{
-	case ENCellJunctionType::NCJT_TwoWaySocket:
-		const FVector TwoWayPointA = Location + (Rotation.Vector() * Settings->JunctionUnitSize.X);
-		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Settings->JunctionUnitSize.X);
-		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
-		break;
-	case ENCellJunctionType::NCJT_OneWaySocket:
-		const FVector OneWayPoint = Location + (Rotation.Vector() * Settings->JunctionUnitSize.X);
-		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
-		break;
-	}
+	const float LineLength = Settings->JunctionUnitSize.X * 0.25f;
+
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, Rotation, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], Rotation, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], Rotation, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], Rotation, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], Rotation, Details.Type, LineLength);
 }
 
 void UNCellJunctionComponent::OnRegister()
@@ -163,6 +159,13 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 			MarkPackageDirty();
 		}
 	}
+}
+
+
+void UNCellJunctionComponent::PostEditImport()
+{
+	// Forces the instance identifier
+	Details.InstanceIdentifier = -1;
 }
 
 void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)

@@ -248,9 +248,44 @@ TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Un
 			Points.Add(FVector2D(WidthStart + (i * UnitSize.X), HeightStart + (y * UnitSize.Y)));
 		}
 	}
-
-
-	
-
 	return MoveTemp(Points);
 }
+
+TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(const FVector& WorldCenter, const FRotator& Rotation,
+	const float Width, const float Height, const ENAxis Axis)
+{
+	const float HalfWidth = Width * 0.5f;
+	const float HalfHeight = Height * 0.5f;
+
+	TArray<FVector> ReturnPositions;
+	ReturnPositions.Reserve(4);
+
+	// Common case UP
+	ReturnPositions.Add(FVector(-HalfWidth,0,HalfHeight)); // TL
+	ReturnPositions.Add(FVector(-HalfWidth,0,-HalfHeight)); // BL
+	ReturnPositions.Add(FVector(HalfWidth,0,-HalfHeight)); // BR
+	ReturnPositions.Add(FVector(HalfWidth,0,HalfHeight)); // TR
+	
+	if (Axis == ENAxis::X)
+	{
+		ReturnPositions[0] = FVector(HalfHeight, 0, -HalfWidth);
+		ReturnPositions[1] = FVector(-HalfHeight, 0, -HalfWidth);
+		ReturnPositions[2] = FVector(-HalfHeight, 0, HalfWidth);
+		ReturnPositions[3] = FVector(HalfHeight, 0, HalfWidth);
+	}
+	else if (Axis == ENAxis::Y)
+	{
+		ReturnPositions[0] = FVector(HalfWidth,HalfHeight,0);
+		ReturnPositions[1] = FVector(HalfWidth,-HalfHeight,0);
+		ReturnPositions[2] = FVector(-HalfWidth,-HalfHeight,0);
+		ReturnPositions[3] = FVector(-HalfWidth,HalfHeight, 0);
+	}
+	
+	ReturnPositions[0] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[0], WorldCenter, Rotation);
+	ReturnPositions[1] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[1], WorldCenter, Rotation);
+	ReturnPositions[2] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[2], WorldCenter, Rotation);
+	ReturnPositions[3] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[3], WorldCenter, Rotation);
+
+	return MoveTemp(ReturnPositions);
+}
+

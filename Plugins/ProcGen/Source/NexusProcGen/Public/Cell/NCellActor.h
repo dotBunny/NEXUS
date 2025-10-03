@@ -5,8 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "NCellRootComponent.h"
-#include "Components/BillboardComponent.h"
-#include "Macros/NActorMacros.h"
 #include "NCellActor.generated.h"
 
 class UNCellJunctionComponent;
@@ -41,7 +39,6 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 #if WITH_EDITOR
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
-		//N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
 #endif		
 		
 		RootComponent->Mobility = EComponentMobility::Static;
@@ -96,6 +93,4 @@ protected:
 private:
 	bool bActorDirty = false;
 	bool bSpawnedFromProxy = false;
-
-	//N_WORLD_ICON_HEADER()
 };

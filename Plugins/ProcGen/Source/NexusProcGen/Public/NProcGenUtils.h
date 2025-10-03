@@ -3,9 +3,8 @@
 
 #pragma once
 
-#include "NProcGenSettings.h"
 #include "Cell/NCellActor.h"
-#include "Cell/NCellJunctionDetails.h"
+#include "Math/NVectorUtils.h"
 
 class ANProcGenVolume;
 class UNProcGenComponent;
@@ -45,4 +44,7 @@ public:
 	}
 
 	static TArray<FVector2D> GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize);
+
+	static TArray<FVector> GetCenteredWorldCornerPoints2D(const FVector& WorldCenter, const FRotator& Rotation, const float Width, const float Height, const ENAxis Axis = ENAxis::Z);
+	
 };

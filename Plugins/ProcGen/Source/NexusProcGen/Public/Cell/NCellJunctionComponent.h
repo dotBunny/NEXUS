@@ -40,7 +40,7 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 		TransformUpdated.AddUObject(this, &UNCellJunctionComponent::OnTransformUpdated);
 #endif // WITH_EDITOR
 
-		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false)
+		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
 	}
 
 public:
@@ -54,8 +54,11 @@ public:
 
 #if WITH_EDITOR
 	FString GetJunctionName() const;
-	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+
+	virtual void PostEditImport() override;
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
