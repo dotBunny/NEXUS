@@ -69,6 +69,9 @@ void FNProcGenEditorToolMenu::Register()
 				{
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_NCell);
 					MenuBuilder.SetSearchable(false); // Life's to short to search this menu.
+					MenuBuilder.BeginSection("NCellExtensions_Asset", LOCTEXT("NCellExtensions_AssetSection", "Asset"));
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_NCellCaptureThumbnail);
+					MenuBuilder.EndSection();
 					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", LOCTEXT("NCellExtensions_CalculateSection", "Calculate"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_NCellCalculateAll);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_NCellCalculateBounds);

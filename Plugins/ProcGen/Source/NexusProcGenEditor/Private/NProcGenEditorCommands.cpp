@@ -3,6 +3,7 @@
 
 #include "NProcGenEditorCommands.h"
 
+#include "AssetViewUtils.h"
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
 #include "FileHelpers.h"
@@ -15,12 +16,20 @@
 #include "NProcGenUtils.h"
 #include "NUIEditorStyle.h"
 #include "Selection.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
 void FNProcGenEditorCommands::RegisterCommands()
 {
 	// Build NCell Command Info
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellCaptureThumbnail,
+			"NProcGen.NCell.CaptureThumbnail",
+			LOCTEXT("Command_NCell_CaptureThumbnail", "Capture Thumbnail"),
+			LOCTEXT("Command_NCell_CaptureThumbnail_Tooltip", "Captures the active viewport (minus widgets) as the thumbnail for the level containing the NCell."),
+			FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
+			EUserInterfaceActionType::Button, FInputChord());
+	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_NCellCalculateAll,
 		"NProcGen.NCell.CalculateAll",
 		LOCTEXT("Command_NCell_CalculateAll", "Calculate All"),
@@ -61,6 +70,10 @@ void FNProcGenEditorCommands::RegisterCommands()
 
 	// Map NCell Actions
 
+	CommandList_NCell->MapAction(Get().CommandInfo_NCellCaptureThumbnail,
+		FExecuteAction::CreateStatic(&OnNCellCaptureThumbnail),
+		FCanExecuteAction::CreateStatic(&OnNCellCaptureThumbnail_CanExecute));
+	
 	CommandList_NCell->MapAction(Get().CommandInfo_NCellCalculateAll,
 		FExecuteAction::CreateStatic(&OnNCellCalculateAll),
 		FCanExecuteAction::CreateStatic(&OnNCellCalculateAll_CanExecute));
@@ -298,20 +311,17 @@ void FNProcGenEditorCommands::OnNCellJunctionAddComponent()
 		AActor* Actor = Cast<AActor>( *SelectedActor );
 		if (!Actor) continue;
 		
-		//Actor->GetComponents(UNCellJunctionComponent::StaticClass(), OutComponents, true);
-		//if (OutComponents.Num() == 0)
-		//{
-			UNCellJunctionComponent* NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
-				UNCellJunctionComponent::StaticClass(), true, FTransform::Identity, false));
-			
-			
-			NewComponent->AttachToComponent(Actor->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
-			Actor->AddInstanceComponent(NewComponent);
-			NewComponent->RegisterComponent();
+		UNCellJunctionComponent* NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
+			UNCellJunctionComponent::StaticClass(), true, FTransform::Identity, false));
+		
+		
+		NewComponent->AttachToComponent(Actor->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+		Actor->AddInstanceComponent(NewComponent);
+		NewComponent->RegisterComponent();
 
-			SelectComponents.Add(NewComponent);
-			bNeedsRefresh = true;
-		//}
+		SelectComponents.Add(NewComponent);
+		bNeedsRefresh = true;
+
 	}
 
 	// Refresh the details panel if needed
@@ -340,6 +350,37 @@ void FNProcGenEditorCommands::OnNCellJunctionSelectComponent(UNCellJunctionCompo
 bool FNProcGenEditorCommands::OnNCellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction)
 {
 	return true;
+}
+
+void FNProcGenEditorCommands::OnNCellCaptureThumbnail()
+{
+	if (FViewport* Viewport = GEditor->GetActiveViewport();
+		ensure(GCurrentLevelEditingViewportClient) && ensure(Viewport) )
+	{
+		FLevelEditorViewportClient* OldViewportClient = GCurrentLevelEditingViewportClient;
+		GCurrentLevelEditingViewportClient = nullptr;
+		Viewport->Draw();
+
+		if (const UWorld* World = FNEditorUtils::GetCurrentWorld();
+			World != nullptr)
+		{
+			TArray<FAssetData> SelectedAssets;
+			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+			FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(World));
+			SelectedAssets.Emplace(AssetData);
+			
+			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
+		}
+
+		GCurrentLevelEditingViewportClient = OldViewportClient;
+		Viewport->Draw();
+	}
+}
+
+bool FNProcGenEditorCommands::OnNCellCaptureThumbnail_CanExecute()
+{
+	const UWorld* World = FNEditorUtils::GetCurrentWorld();
+	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
 }
 
 #undef LOCTEXT_NAMESPACE

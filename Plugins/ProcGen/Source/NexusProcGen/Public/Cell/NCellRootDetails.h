@@ -19,7 +19,7 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	
 	UPROPERTY(EditAnywhere)
 	FNCellBoundsGenerationSettings BoundsSettings;
-	
+	 
 	UPROPERTY(VisibleAnywhere)
 	FBox Bounds;
 

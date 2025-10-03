@@ -132,7 +132,7 @@ public:
 	FORCEINLINE static bool IsUnsavedWorld(const UWorld* World)
 	{
 		if (World == nullptr) return true;
-		const UPackage* Package = World->GetPackage();
+		const UPackage* Package =  World->GetPackage();
 		if (Package == nullptr || Package->GetFileSize() == 0) return true;
 		return !FPackageName::DoesPackageExist(Package->GetName());
 	}

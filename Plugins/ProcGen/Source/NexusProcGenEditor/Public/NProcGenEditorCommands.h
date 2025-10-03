@@ -62,9 +62,13 @@ public:
 
 	static void OnNCellJunctionSelectComponent(UNCellJunctionComponent* Junction);
 	static bool OnNCellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction);
+
+	static void OnNCellCaptureThumbnail();
+	static bool OnNCellCaptureThumbnail_CanExecute();
 	
 	TSharedPtr<FUICommandList> CommandList_NCell;
-	
+
+	TSharedPtr<FUICommandInfo> CommandInfo_NCellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateAll;
 	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateBounds;
 	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateHull;

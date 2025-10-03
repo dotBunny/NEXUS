@@ -21,6 +21,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"AssetDefinition",
+					"AssetTools",
 					"Chaos",
 					"CoreUObject",
 					"EditorFramework",
