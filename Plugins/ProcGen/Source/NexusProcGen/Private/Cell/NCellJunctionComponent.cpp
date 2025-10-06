@@ -71,17 +71,19 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 
 	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
+
+	const FLinearColor Color = GetColor();
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, FLinearColor::Green);
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  FLinearColor::Green);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  Color);
 
 	const float LineLength = Settings->JunctionUnitSize.X * 0.25f;
 
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, Rotation, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], Rotation, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], Rotation, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], Rotation, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], Rotation, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, Rotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], Rotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], Rotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], Rotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], Rotation, Color, Details.Type, LineLength);
 }
 
 void UNCellJunctionComponent::OnRegister()
@@ -119,6 +121,20 @@ void UNCellJunctionComponent::OnUnregister()
 	}
 	FNCellRegistry::UnregisterJunctionComponent(this);
 	Super::OnUnregister();
+}
+
+FLinearColor UNCellJunctionComponent::GetColor() const
+{
+	switch (Details.Requirements)
+	{
+	case ENCellJunctionRequirements::CJR_AllowBlocking:
+		return FNColor::GreenMid;
+	case ENCellJunctionRequirements::CJR_AllowEmpty:
+		return FNColor::GreenDark;
+	case ENCellJunctionRequirements::CJR_Required:
+	default:
+		return FNColor::GreenLight;
+	}
 }
 
 #if WITH_EDITOR
@@ -172,6 +188,7 @@ void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
 	// Bad patching has shown a bad ref here
 	N_WORLD_ICON_CLEANUP()
+	
 }
 
 #endif // WITH_EDITOR

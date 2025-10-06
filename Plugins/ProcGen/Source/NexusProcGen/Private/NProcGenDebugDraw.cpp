@@ -8,7 +8,7 @@
 #include "Types/NRawMesh.h"
 
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
-	const FRotator& Rotation, const TArray<FVector2D>& Points, FLinearColor Color, const float Radius,  const ENAxis Axis,
+	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)
 {
 	
@@ -33,7 +33,7 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 }
 
 void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
-	const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
+	const FLinearColor& Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
 {
 	PDI->AddReserveLines(SDPG_World, 4, false, false);
 	
@@ -44,18 +44,18 @@ void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, con
 }
 
 void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PDI, const FVector& Location,
-	const FRotator& Rotation, const ENCellJunctionType& Type, const float Length)
+	const FRotator& Rotation, const FLinearColor& Color, const ENCellJunctionType& Type, const float Length)
 {
 	switch (Type)
 	{
-	case ENCellJunctionType::NCJT_TwoWaySocket:
+	case ENCellJunctionType::CJT_TwoWaySocket:
 		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
 		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
-		PDI->DrawLine(TwoWayPointA, TwoWayPointB, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
+		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
 		break;
-	case ENCellJunctionType::NCJT_OneWaySocket:
+	case ENCellJunctionType::CJT_OneWaySocket:
 		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
-		PDI->DrawLine(Location, OneWayPoint, FLinearColor::Green, SDPG_Foreground, PDI_LINE_THICKNESS);
+		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
 		break;
 	}
 }

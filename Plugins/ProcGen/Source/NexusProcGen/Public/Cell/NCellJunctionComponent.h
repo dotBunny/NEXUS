@@ -52,6 +52,8 @@ public:
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 
+	FLinearColor GetColor() const;
+
 #if WITH_EDITOR
 	FString GetJunctionName() const;
 

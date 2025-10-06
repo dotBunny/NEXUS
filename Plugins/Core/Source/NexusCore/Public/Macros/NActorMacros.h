@@ -14,7 +14,7 @@
 
 #if WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_CLEANUP() \
-	if (SpriteComponent != nullptr) \
+	if (SpriteComponent != nullptr && !SpriteComponent->IsBeingDestroyed()) \
 	{ \
 		SpriteComponent->DestroyComponent(); \
 		SpriteComponent = nullptr; \
