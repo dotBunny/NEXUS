@@ -41,7 +41,7 @@ runs:
           Write-Output "" >> $markdownPath
           Write-Output "## Tests" >> $markdownPath
           Write-Output "" >> $markdownPath
-          Write-Output "| **Test** | **Identifier**| **Result** | **Warnings** | **Errors** | **Duration** | **Timer**" >> $markdownPath
+          Write-Output "| **Test** | **Duration (s)** | **Result** | **Warnings** | **Errors** | **Identifier** | **Timer (ms)** |" >> $markdownPath
           Write-Output "| --- | --- | --- | --- | --- | --- | --- |" >> $markdownPath
           foreach ($test in $json.tests) 
           {
@@ -76,7 +76,7 @@ runs:
               
               }
 
-              Write-Output "| <strong>$test_fullTestPath</strong> | <code>$test_identifier</code> | $test_state | $test_warnings | $test_errors | $test_duration | $test_timer |" >> $markdownPath
+              Write-Output "| <code>$test_fullTestPath</code> | $test_duration | $test_state | $test_warnings | $test_errors | $test_identifier | $test_timer |" >> $markdownPath
           }
         }
         else
