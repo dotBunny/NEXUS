@@ -77,7 +77,7 @@ runs:
                 $event_message_timer_start = $event_message_id_end + 1
                 $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
                
-                if(![string]::IsNullOrEmpty($test_identifier) && ![string]::IsNullOrEmpty($test_timer))
+                if($test_timer -match '^\d+$')
                 {
                   $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
                   $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
