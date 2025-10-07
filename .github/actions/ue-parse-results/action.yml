@@ -4,15 +4,21 @@ description: 'Parses the TestResults file and adds to the summary.'
 runs:
   using: "composite"
   steps:    
-    - name: Create markdown version of results
+    - name: Create markdown version of results and simplified CSV
       shell: powershell
       run: |
         $jsonPath = "${{ github.workspace }}\Staging\TestResults\index.json"
         $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
+        $performancePath = "${{ github.workspace }}\Staging\TestResults\performance.csv"
         if (Test-Path -Path $markdownPath)
         {
           Remove-Item -Path "$markdownPath" -Force 
         }
+        if (Test-Path -Path $performancePath)
+        {
+          Remove-Item -Path "$performancePath" -Force 
+        }        
+
         if (Test-Path -Path $jsonPath)
         {
           Write-Output "Processing results from '$jsonPath' ..."
@@ -71,9 +77,12 @@ runs:
                 $event_message_timer_start = $event_message_id_end + 1
                 $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
                
-                $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
-                $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
-              
+                if(![string]::IsNullOrEmpty($test_identifier) && ![string]::IsNullOrEmpty($test_timer))
+                {
+                  $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
+                  $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
+                  Write-Output "$test_identifier,$test_timer" >> $performancePath
+                }
               }
 
               Write-Output "| <code>$test_fullTestPath</code> | $test_duration | $test_state | $test_warnings | $test_errors | $test_identifier | $test_timer |" >> $markdownPath
