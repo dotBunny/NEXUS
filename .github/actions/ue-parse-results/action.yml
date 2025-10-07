@@ -68,7 +68,7 @@ runs:
 
                 $event_message_id_end = $event_message.IndexOf(']')
 
-                $event_message_timer_start = event_message_id_end + 1
+                $event_message_timer_start = $event_message_id_end + 1
                 $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
                
                 $test_identifier = $event_message.Substring(1, $event_message_id_end)
