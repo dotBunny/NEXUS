@@ -41,8 +41,8 @@ runs:
           Write-Output "" >> $markdownPath
           Write-Output "## Tests" >> $markdownPath
           Write-Output "" >> $markdownPath
-          Write-Output "| **Test** | **Result** | **Warnings** | **Errors** | **Duration** |" >> $markdownPath
-          Write-Output "| --- | --- | --- | --- | --- |" >> $markdownPath
+          Write-Output "| **Test** | **Identifier**| **Result** | **Warnings** | **Errors** | **Duration** | **Timer**" >> $markdownPath
+          Write-Output "| --- | --- | --- | --- | --- | --- | --- |" >> $markdownPath
           foreach ($test in $json.tests) 
           {
               $test_fullTestPath = $test.fullTestPath.Replace(".", "::").Replace("Project::Functional Tests::", "")
@@ -59,7 +59,24 @@ runs:
               $test_warnings = $test.warnings
               $test_errors = $test.errors
               $test_duration = [Math]::Round($test.duration, 6)
-              Write-Output "| <code>$test_fullTestPath</code> | $test_state | $test_warnings | $test_errors | $test_duration |" >> $markdownPath
+
+              $test_identifier = "N/A"
+              $test_timer = "N/A"
+              if ($test.entries[0].event.type -eq "Info")
+              {
+                $event_message = $test.entries[0].event.message
+
+                $event_message_id_end = $event_message.IndexOf(']')
+
+                $event_message_timer_start = event_message_id_end + 1
+                $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
+               
+                $test_identifier = $event_message.Substring(1, $event_message_id_end)
+                $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
+              
+              }
+
+              Write-Output "| <strong>$test_fullTestPath</strong> | <code>$test_identifier</code> | $test_state | $test_warnings | $test_errors | $test_duration | $test_timer |" >> $markdownPath
           }
         }
         else
