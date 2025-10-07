@@ -22,8 +22,14 @@ struct NEXUSCORE_API FNRawMesh
 	TArray<FVector> Vertices;
 
 	/**
-	 * Ordered shape edge definition.
-	 * @note The indices are ordered, so 1/2/3 for a triangle. This is NOT looped, therefore you must close the loop if line drawing.
+	 * The relative center of the mesh.
+	 */
+	UPROPERTY(VisibleAnywhere)
+	FVector Center = FVector::ZeroVector;
+
+	/**
+	 * Ordered shape-edge definition.
+	 * @note The indices are ordered, so 1/2/3 for a triangle. This is NOT looped; therefore, you must close the loop if line drawing.
 	 */
 	UPROPERTY(VisibleAnywhere)
 	TArray<FNRawMeshLoop> Loops;

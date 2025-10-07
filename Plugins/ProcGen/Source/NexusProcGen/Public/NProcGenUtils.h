@@ -6,8 +6,8 @@
 #include "Cell/NCellActor.h"
 #include "Math/NVectorUtils.h"
 
-class ANProcGenVolume;
-class UNProcGenComponent;
+class UNOrganComponent;
+class ANOrganVolume;
 struct FNRawMesh;
 
 class NEXUSPROCGEN_API FNProcGenUtils
@@ -16,17 +16,17 @@ public:
 	static FBox CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings);
 	static FNRawMesh CalculateConvexHull(ULevel* InLevel, const FNCellHullGenerationSettings& Settings);
 	
-	static int32 GetNCellActorCountFromLevel(const ULevel* Level);
-	static int32 GetNCellActorCountFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
+	static int32 GetCellActorCountFromLevel(const ULevel* Level);
+	static int32 GetCellActorCountFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 
-	static ANCellActor* GetNCellActorFromLevel(const ULevel* Level);
-	static ANCellActor* GetNCellActorFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
+	static ANCellActor* GetCellActorFromLevel(const ULevel* Level);
+	static ANCellActor* GetCellActorFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 
-	static TArray<UNProcGenComponent*> GetNProcGenComponentsFromLevel(const ULevel* InLevel);
-	static TArray<UNProcGenComponent*> GetNProcGenComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
+	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* InLevel);
+	static TArray<UNOrganComponent*> GetOrganComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 	
-	static TArray<ANProcGenVolume*> GetNProcGenVolumesFromLevel(const ULevel* InLevel);
-	static TArray<ANProcGenVolume*> GetNProcGenVolumesFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
+	static TArray<ANOrganVolume*> GetOrganVolumesFromLevel(const ULevel* InLevel);
+	static TArray<ANOrganVolume*> GetOrganVolumesFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 	
 	FORCEINLINE static FBox CreateRotatedBox(const FBox& InBox, const FRotator& Rotation, const FVector& Offset)
 	{

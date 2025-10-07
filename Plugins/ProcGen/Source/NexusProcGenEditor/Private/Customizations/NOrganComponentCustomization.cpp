@@ -1,21 +1,21 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 
-#include "Customizations/NProcGenComponentCustomization.h"
+#include "Customizations/NOrganComponentCustomization.h"
 
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
-#include "NProcGenComponent.h"
+#include "Organ/NOrganComponent.h"
 #include "Organ/NOrganGenerator.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
-TSharedRef<IDetailCustomization> FNProcGenComponentCustomization::MakeInstance()
+TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 {
-	return MakeShareable(new FNProcGenComponentCustomization());
+	return MakeShareable(new FNOrganComponentCustomization());
 }
 
-void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
+void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
 	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("NProcGen Actions"),
 		FText::GetEmpty(), ECategoryPriority::Important);
@@ -35,9 +35,9 @@ void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Det
 			.VAlign(VAlign_Fill)
 			[
 				SNew(SButton)
-				.OnClicked(this, &FNProcGenComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
+				.OnClicked(this, &FNOrganComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
 				.ToolTipText(FText::FromString("Generate content for volume and contained volumes."))
-				.Visibility(this, &FNProcGenComponentCustomization::GenerateButtonVisible)
+				.Visibility(this, &FNOrganComponentCustomization::GenerateButtonVisible)
 				[
 					SNew(SHorizontalBox)
 					+SHorizontalBox::Slot()
@@ -66,8 +66,8 @@ void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Det
 			.VAlign(VAlign_Fill)
 			[
 				SNew(SButton)
-				.OnClicked(this, &FNProcGenComponentCustomization::OnCancelClicked, ObjectsBeingCustomized)
-				.Visibility(this, &FNProcGenComponentCustomization::CancelButtonVisible)
+				.OnClicked(this, &FNOrganComponentCustomization::OnCancelClicked, ObjectsBeingCustomized)
+				.Visibility(this, &FNOrganComponentCustomization::CancelButtonVisible)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
@@ -97,9 +97,9 @@ void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Det
 			[
 				SNew(SButton)
 				.VAlign(VAlign_Center)
-				.OnClicked(this, &FNProcGenComponentCustomization::OnCleanupClicked, ObjectsBeingCustomized)
+				.OnClicked(this, &FNOrganComponentCustomization::OnCleanupClicked, ObjectsBeingCustomized)
 				.ToolTipText(FText::FromString("Cleans up generated content."))
-				.Visibility(this, &FNProcGenComponentCustomization::CleanupButtonVisible)
+				.Visibility(this, &FNOrganComponentCustomization::CleanupButtonVisible)
 				[
 					SNew(STextBlock)
 					.Font(IDetailLayoutBuilder::GetDetailFont())
@@ -113,9 +113,9 @@ void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Det
 			[
 				SNew(SButton)
 				.VAlign(VAlign_Center)
-				.OnClicked(this, &FNProcGenComponentCustomization::OnRefreshClicked, ObjectsBeingCustomized)
+				.OnClicked(this, &FNOrganComponentCustomization::OnRefreshClicked, ObjectsBeingCustomized)
 				.ToolTipText(FText::FromString("Cleanup previously generated content and generate it again."))
-				.Visibility(this, &FNProcGenComponentCustomization::RefreshButtonVisible)
+				.Visibility(this, &FNOrganComponentCustomization::RefreshButtonVisible)
 				[
 					SNew(STextBlock)
 					.Font(IDetailLayoutBuilder::GetDetailFont())
@@ -125,10 +125,9 @@ void FNProcGenComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Det
 		];
 }
 
-FReply FNProcGenComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<UObject>> Objects)
+FReply FNOrganComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<UObject>> Objects)
 {
-
-	// Create our generation graph
+	// Create our generation graph / container
 	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
 
 	// Add components to the generation context
@@ -136,7 +135,7 @@ FReply FNProcGenComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<
 	{
 		if (UObject* Object = WeakObject.Get())
 		{
-			if (UNProcGenComponent* Component = Cast<UNProcGenComponent>(Object))
+			if (UNOrganComponent* Component = Cast<UNOrganComponent>(Object))
 			{
 				OrganGenerator->AddToContext(Component);
 			}
@@ -152,37 +151,37 @@ FReply FNProcGenComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<
 	return FReply::Handled();
 }
 
-FReply FNProcGenComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object)
+FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	return FReply::Handled();
 }
 
-FReply FNProcGenComponentCustomization::OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object)
+FReply FNOrganComponentCustomization::OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	return FReply::Handled();
 }
 
-FReply FNProcGenComponentCustomization::OnRefreshClicked(TArray<TWeakObjectPtr<UObject>> Object)
+FReply FNOrganComponentCustomization::OnRefreshClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	return FReply::Handled();
 }
 
-EVisibility FNProcGenComponentCustomization::GenerateButtonVisible() const
+EVisibility FNOrganComponentCustomization::GenerateButtonVisible() const
 {
 	return EVisibility::Visible;
 }
 
-EVisibility FNProcGenComponentCustomization::CancelButtonVisible() const
+EVisibility FNOrganComponentCustomization::CancelButtonVisible() const
 {
 	return EVisibility::Collapsed;
 }
 
-EVisibility FNProcGenComponentCustomization::CleanupButtonVisible() const
+EVisibility FNOrganComponentCustomization::CleanupButtonVisible() const
 {
 	return EVisibility::Visible;
 }
 
-EVisibility FNProcGenComponentCustomization::RefreshButtonVisible() const
+EVisibility FNOrganComponentCustomization::RefreshButtonVisible() const
 {
 	return EVisibility::Visible;
 }

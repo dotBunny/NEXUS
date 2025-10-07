@@ -77,13 +77,15 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	// So we need to process it
 	if (bProcessMesh)
 	{
-		// Calculate mesh center
-		FVector Center = FVector::ZeroVector;
-		for (int32 VertexID : DynamicMesh.VertexIndicesItr())
+		// Calculate mesh center if we need too?
+		if (Center == FVector::ZeroVector)
 		{
-			Center += DynamicMesh.GetVertex(VertexID);
+			for (int32 VertexID : DynamicMesh.VertexIndicesItr())
+			{
+				Center += DynamicMesh.GetVertex(VertexID);
+			}
+			Center /= DynamicMesh.VertexCount();
 		}
-		Center /= DynamicMesh.VertexCount();
 
 		// Check and flip triangles if needed
 		for (const int32 TriangleID : DynamicMesh.TriangleIndicesItr())
@@ -117,13 +119,12 @@ bool FNRawMesh::CheckConvex()
 		return false;
 	}
 
-	FVector Center = FVector::ZeroVector;
+	Center = FVector::ZeroVector;
 	for (const FVector& Vertex : Vertices)
 	{
 		Center += Vertex;
 	}
 	Center /= Vertices.Num();
-	// TODO: Do we want to actually cache the center position?
 
 	for (int32 i = 0; i < Loops.Num(); i++)
 	{

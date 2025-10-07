@@ -283,7 +283,7 @@ bool FNProcGenEditorCommands::OnNCellResetCell_CanExecute()
 void FNProcGenEditorCommands::OnNCellRemoveActor()
 {
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
-	ANCellActor* CellActor = FNProcGenUtils::GetNCellActorFromWorld(CurrentWorld, true);
+	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
 	CellActor->Destroy();
 	// ReSharper disable once CppExpressionWithoutSideEffects
 	CurrentWorld->MarkPackageDirty();

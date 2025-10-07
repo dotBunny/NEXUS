@@ -110,7 +110,7 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	}
 
 	AActor* ReturnActor = InActors.Pop();
-	OutActors.Add(ReturnActor); // TODO: Maybe we could optimize the out actors array to match the actual counts?
+	OutActors.Add(ReturnActor);
 	ApplySpawnState(ReturnActor, Position, Rotation);
 	
 	if (bImplementsInterface)

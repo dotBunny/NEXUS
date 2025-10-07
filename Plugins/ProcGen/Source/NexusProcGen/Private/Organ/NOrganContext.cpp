@@ -4,7 +4,7 @@
 #include "Organ/NOrganContext.h"
 
 #include "NCoreMinimal.h"
-#include "Organ/NOrganProcGenComponentContext.h"
+#include "Organ/NOrganComponentContext.h"
 
 void FNOrganContext::Reset()
 {

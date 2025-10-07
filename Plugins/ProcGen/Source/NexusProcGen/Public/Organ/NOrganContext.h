@@ -4,8 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NOrganProcGenComponentContext.h"
-#include "NProcGenComponent.h"
+#include "NOrganComponentContext.h"
 
 class NEXUSPROCGEN_API FNOrganContext
 {
@@ -15,5 +14,5 @@ public:
 	
 	void OutputLockedContext();
 	
-	TMap<UNProcGenComponent*, FNOrganProcGenComponentContext> Components;
+	TMap<UNOrganComponent*, FNOrganComponentContext> Components;
 };

@@ -98,7 +98,7 @@ void UAssetDefinition_NCell::OnAssetRenamed(const FAssetData& AssetData, const F
 
 void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPreSaveContext ObjectPreSaveContext)
 {
-	ANCellActor* CellActor = FNProcGenUtils::GetNCellActorFromWorld(World, true);
+	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromWorld(World, true);
 
 	// We don't have a cell actor, get out of here!
 	if (CellActor == nullptr) return;

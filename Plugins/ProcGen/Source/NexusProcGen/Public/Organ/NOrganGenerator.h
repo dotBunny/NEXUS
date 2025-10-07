@@ -6,8 +6,8 @@
 #include "NOrganContext.h"
 #include "NOrganGenerator.generated.h"
 
+class UNOrganComponent;
 class FNOrganGraph;
-class UNProcGenComponent;
 
 UCLASS(ClassGroup=(Nexus), DisplayName = "NOrgan Generator")
 class NEXUSPROCGEN_API UNOrganGenerator : public UObject
@@ -18,7 +18,7 @@ class NEXUSPROCGEN_API UNOrganGenerator : public UObject
 	
 public:
 	void Generate();
-	bool AddToContext(UNProcGenComponent* Component);
+	bool AddToContext(UNOrganComponent* Component) const;
 	void LockContext();
 	
 	FNOrganGraph* GetGraph() const { return Graph; }

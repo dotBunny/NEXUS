@@ -4,18 +4,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NProcGenComponent.generated.h"
+#include "NOrganComponent.generated.h"
 
 struct FNCellSetEntry;
 class UNCell;
 class UNCellSet;
 
 UENUM(Blueprintable)
-enum class ENProcGenTrigger : uint8
+enum class ENOrganGenerationTrigger : uint8
 {
-	GenerateOnLoad    UMETA(ToolTip = "Generates only when the component is loaded into the level."),
-	GenerateOnDemand  UMETA(ToolTip = "Generates only when requested (e.g. via Blueprint)."),
-	GenerateAtRuntime UMETA(ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
+	OGT_GenerateOnLoad    UMETA(ToolTip = "Generates only when the component is loaded into the level."),
+	OGT_GenerateOnDemand  UMETA(ToolTip = "Generates only when requested (e.g. via Blueprint)."),
+	OGT_GenerateAtRuntime UMETA(ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
 };
 
 
@@ -23,7 +23,7 @@ enum class ENProcGenTrigger : uint8
 
 
 UCLASS(ClassGroup=(Nexus), DisplayName = "NProcGen Component")
-class NEXUSPROCGEN_API UNProcGenComponent : public UActorComponent
+class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {
 	friend class NOrganGenerator;
 	
@@ -37,7 +37,7 @@ public:
 	int Seed = 42;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Settings, meta = (DisplayPriority = 200))
-	ENProcGenTrigger GenerationTrigger = ENProcGenTrigger::GenerateOnLoad;
+	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OGT_GenerateOnLoad;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<UNCellSet> CellSet;
@@ -45,7 +45,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 
-	FString GetDebugLabel();
+	FString GetDebugLabel() const;
 
 protected:
 	TMap<TObjectPtr<UNCell>, FNCellSetEntry> GetCellMap() const;

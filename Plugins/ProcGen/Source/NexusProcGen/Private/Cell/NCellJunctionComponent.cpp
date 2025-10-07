@@ -94,7 +94,7 @@ void UNCellJunctionComponent::OnRegister()
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
 
-	ANCellActor* Actor = FNProcGenUtils::GetNCellActorFromLevel(GetComponentLevel());
+	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(GetComponentLevel());
 #if WITH_EDITOR
 	// Whilst in the editor we want to make sure that we uniquely identify our junctions
 	if (Details.InstanceIdentifier == -1)
@@ -114,7 +114,7 @@ void UNCellJunctionComponent::OnRegister()
 
 void UNCellJunctionComponent::OnUnregister()
 {
-	ANCellActor* Actor = FNProcGenUtils::GetNCellActorFromLevel(GetComponentLevel());
+	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(GetComponentLevel());
 	if (Actor != nullptr && Actor->CellJunctions.Contains(Details.InstanceIdentifier))
 	{
 		Actor->CellJunctions.Remove(Details.InstanceIdentifier);

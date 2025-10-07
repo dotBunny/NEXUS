@@ -17,7 +17,7 @@ bool FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld()
 {
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
-		return FNProcGenUtils::GetNCellActorFromWorld(CurrentWorld, true) != nullptr;
+		return FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true) != nullptr;
 	}
 	return false;
 }
@@ -26,7 +26,7 @@ ANCellActor* FNProcGenEditorUtils::GetNCellActorFromCurrentWorld()
 {
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
-		return FNProcGenUtils::GetNCellActorFromWorld(CurrentWorld, true);
+		return FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
 	}
 	return nullptr;
 }
@@ -44,7 +44,7 @@ void FNProcGenEditorUtils::SaveNCell(UWorld* World, ANCellActor* CellActor)
 {
 	if (CellActor == nullptr)
 	{
-		CellActor = FNProcGenUtils::GetNCellActorFromWorld(World, true);
+		CellActor = FNProcGenUtils::GetCellActorFromWorld(World, true);
 	}
 
 	// Last chance

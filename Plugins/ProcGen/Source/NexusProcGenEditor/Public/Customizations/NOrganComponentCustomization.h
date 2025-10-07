@@ -4,7 +4,7 @@
 
 #include "IDetailCustomization.h"
 
-class FNProcGenComponentCustomization final : public IDetailCustomization
+class FNOrganComponentCustomization final : public IDetailCustomization
 {
 public:
 	static TSharedRef<IDetailCustomization> MakeInstance();

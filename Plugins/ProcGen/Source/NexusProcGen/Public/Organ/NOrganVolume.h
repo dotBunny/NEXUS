@@ -1,0 +1,22 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+#include "GameFramework/Volume.h"
+#include "NOrganVolume.generated.h"
+
+class UNOrganComponent;
+
+UCLASS(BlueprintType, DisplayName = "NOrgan Volume", HideCategories=(Tags, Activation, Cooking,
+	AssetUserData, Navigation, Actor, Input))
+class NEXUSPROCGEN_API ANOrganVolume : public AVolume
+{
+	GENERATED_BODY()
+
+public:
+	ANOrganVolume(const FObjectInitializer& ObjectInitializer);
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Nexus")
+	TObjectPtr<UNOrganComponent> OrganComponent;
+};

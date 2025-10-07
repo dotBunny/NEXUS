@@ -2,10 +2,10 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NProcGenUtils.h"
-#include "NProcGenComponent.h"
 #include "NArrayUtils.h"
-#include "NProcGenVolume.h"
+#include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
+#include "Organ/NOrganComponent.h"
 
 
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
@@ -103,7 +103,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	return Mesh;
 }
 
-int FNProcGenUtils::GetNCellActorCountFromLevel(const ULevel* Level)
+int FNProcGenUtils::GetCellActorCountFromLevel(const ULevel* Level)
 {
 	int Count = 0;
 	for (auto ActorIt = Level->Actors.CreateConstIterator(); ActorIt; ++ActorIt )
@@ -116,7 +116,7 @@ int FNProcGenUtils::GetNCellActorCountFromLevel(const ULevel* Level)
 	return Count;
 }
 
-int FNProcGenUtils::GetNCellActorCountFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
+int FNProcGenUtils::GetCellActorCountFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
 {
 	int Count = 0;
 	for (const ULevel* Level : World->GetLevels())
@@ -133,7 +133,7 @@ int FNProcGenUtils::GetNCellActorCountFromWorld(const UWorld* World, const bool 
 	return Count;
 }
 
-ANCellActor* FNProcGenUtils::GetNCellActorFromLevel(const ULevel* Level)
+ANCellActor* FNProcGenUtils::GetCellActorFromLevel(const ULevel* Level)
 {
 	if (Level == nullptr) return nullptr;
 	for (auto ActorIt = Level->Actors.CreateConstIterator(); ActorIt; ++ActorIt )
@@ -146,7 +146,7 @@ ANCellActor* FNProcGenUtils::GetNCellActorFromLevel(const ULevel* Level)
 	return nullptr;
 }
 
-ANCellActor* FNProcGenUtils::GetNCellActorFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
+ANCellActor* FNProcGenUtils::GetCellActorFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
 {
 	if (World == nullptr ) return nullptr;
 	for (const ULevel* Level : World->GetLevels())
@@ -163,17 +163,17 @@ ANCellActor* FNProcGenUtils::GetNCellActorFromWorld(const UWorld* World, const b
 	return nullptr;
 }
 
-TArray<UNProcGenComponent*> FNProcGenUtils::GetNProcGenComponentsFromLevel(const ULevel* InLevel)
+TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromLevel(const ULevel* InLevel)
 {
-	TArray<UNProcGenComponent*> Result;
+	TArray<UNOrganComponent*> Result;
 	if (InLevel == nullptr) return Result;
     
 	for (auto ActorIt = InLevel->Actors.CreateConstIterator(); ActorIt; ++ActorIt)
 	{
 		if (const AActor* Actor = ActorIt->Get())
 		{
-			TArray<UNProcGenComponent*> Components;
-			Actor->GetComponents<UNProcGenComponent>(Components);
+			TArray<UNOrganComponent*> Components;
+			Actor->GetComponents<UNOrganComponent>(Components);
 			Result.Append(Components);
 		}
 	}
@@ -182,16 +182,16 @@ TArray<UNProcGenComponent*> FNProcGenUtils::GetNProcGenComponentsFromLevel(const
 
 }
 
-TArray<UNProcGenComponent*> FNProcGenUtils::GetNProcGenComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels)
+TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels)
 {
-	TArray<UNProcGenComponent*> Result;
+	TArray<UNOrganComponent*> Result;
 	if (World == nullptr) return Result;
     
 	for (const ULevel* Level : World->GetLevels())
 	{
 		if (bIgnoreInstancedLevels && Level->IsInstancedLevel()) continue;
         
-		TArray<UNProcGenComponent*> LevelComponents = GetNProcGenComponentsFromLevel(Level);
+		TArray<UNOrganComponent*> LevelComponents = GetOrganComponentsFromLevel(Level);
 		Result.Append(LevelComponents);
 	}
     
@@ -199,23 +199,23 @@ TArray<UNProcGenComponent*> FNProcGenUtils::GetNProcGenComponentsFromWorld(const
 
 }
 
-TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromLevel(const ULevel* InLevel)
+TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromLevel(const ULevel* InLevel)
 {
-	TArray<ANProcGenVolume*> Result;
+	TArray<ANOrganVolume*> Result;
 	if (InLevel == nullptr) return Result;
 	for (auto ActorIt = InLevel->Actors.CreateConstIterator(); ActorIt; ++ActorIt )
 	{
-		if (ActorIt->IsA<ANProcGenVolume>())
+		if (ActorIt->IsA<ANOrganVolume>())
 		{
-			Result.Add(Cast<ANProcGenVolume>(ActorIt->Get()));
+			Result.Add(Cast<ANOrganVolume>(ActorIt->Get()));
 		}
 	}
 	return Result;
 }
 
-TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromWorld(const UWorld* World, bool bIgnoreInstancedLevels)
+TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromWorld(const UWorld* World, bool bIgnoreInstancedLevels)
 {
-	TArray<ANProcGenVolume*> Result;
+	TArray<ANOrganVolume*> Result;
 	if (World == nullptr ) return Result;
 	
 	for (const ULevel* Level : World->GetLevels())
@@ -223,9 +223,9 @@ TArray<ANProcGenVolume*> FNProcGenUtils::GetNProcGenVolumesFromWorld(const UWorl
 		if (bIgnoreInstancedLevels && Level->IsInstancedLevel()) continue;
 		for (auto ActorIt = Level->Actors.CreateConstIterator(); ActorIt; ++ActorIt )
 		{
-			if (ActorIt->IsA<ANProcGenVolume>())
+			if (ActorIt->IsA<ANOrganVolume>())
 			{
-				Result.Add(Cast<ANProcGenVolume>(ActorIt->Get()));
+				Result.Add(Cast<ANOrganVolume>(ActorIt->Get()));
 			}
 		}
 	}

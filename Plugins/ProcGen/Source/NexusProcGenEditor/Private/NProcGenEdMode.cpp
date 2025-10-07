@@ -58,7 +58,7 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 	
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld(); CurrentWorld != nullptr)
 	{
-		NCellActor = FNProcGenUtils::GetNCellActorFromWorld(CurrentWorld, true);
+		NCellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
 		if (NCellActor != nullptr)
 		{
 			UNCellRootComponent* RootComponent = NCellActor->GetCellRoot();

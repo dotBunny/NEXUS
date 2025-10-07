@@ -176,6 +176,14 @@ FVector FNMersenneTwister::VectorNormalized()
 	return PseudoRandomValue;
 }
 
+FVector FNMersenneTwister::Vector(const float MinimumRange, const float MaximumRange)
+{
+	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(MinimumRange, MaximumRange);
+	const FVector PseudoRandomValue = FVector(Distribution(this->Engine), Distribution(this->Engine), Distribution(this->Engine));
+	this->CallCounter += 3;
+	return PseudoRandomValue;
+}
+
 void FNMersenneTwister::Initialize(const uint64 Seed)
 {
 	this->InitialSeed = Seed;

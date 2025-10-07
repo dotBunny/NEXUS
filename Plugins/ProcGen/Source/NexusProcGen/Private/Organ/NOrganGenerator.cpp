@@ -5,7 +5,8 @@
 
 #include "NCoreMinimal.h"
 #include "NProcGenUtils.h"
-#include "Organ/NOrganProcGenComponentContext.h"
+#include "Organ/NOrganComponent.h"
+#include "Organ/NOrganComponentContext.h"
 
 UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -32,7 +33,7 @@ void UNOrganGenerator::Generate()
 	}
 }
 
-bool UNOrganGenerator::AddToContext(UNProcGenComponent* Component)
+bool UNOrganGenerator::AddToContext(UNOrganComponent* Component) const
 {
 	if (bIsContextLocked)
 	{
@@ -43,33 +44,31 @@ bool UNOrganGenerator::AddToContext(UNProcGenComponent* Component)
 	// Find/Add context for the component
 	if (!Context->Components.Contains(Component))
 	{
-		Context->Components.Add(Component, FNOrganProcGenComponentContext(Component));
+		Context->Components.Add(Component, FNOrganComponentContext(Component));
 	}
-	FNOrganProcGenComponentContext* WorkingContext = Context->Components.Find(Component);
+	FNOrganComponentContext* WorkingContext = Context->Components.Find(Component);
 	WorkingContext->Reset();
 
 
 	// We're going to capture all the other components in the level
-	TArray<UNProcGenComponent*> LevelComponents = FNProcGenUtils::GetNProcGenComponentsFromLevel(Component->GetComponentLevel());
+	TArray<UNOrganComponent*> LevelComponents = FNProcGenUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
 
-	// need to figre out what volumes are inside of other volumes and build them innard outward
-	
+	// We will handle ordering when we lock the context of generation
 	if (Component->IsVolumeBased())
 	{
 		// Look at volume, search for sub volumes to add context too? order matters?
 		AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
 		FBoxSphereBounds ComponentVolumeBounds = ComponentVolume->GetBounds();
-		for (UNProcGenComponent* OtherComponent : LevelComponents)
+		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component)
 			{
 				continue;
 			}
 
-			AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
-			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
-			
-			if (ComponentVolumeBounds.BoxesIntersect(ComponentVolumeBounds, OtherVolumeBounds))
+			const AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
+			if (FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
+				ComponentVolumeBounds.BoxesIntersect(ComponentVolumeBounds, OtherVolumeBounds))
 			{
 				WorkingContext->OtherComponents.AddUnique(OtherComponent);
 			}

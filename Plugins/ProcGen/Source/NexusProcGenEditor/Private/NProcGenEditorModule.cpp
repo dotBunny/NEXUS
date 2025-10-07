@@ -19,15 +19,14 @@
 #include "Cell/NCellProxy.h"
 #include "Customizations/NCellProxyCustomization.h"
 #include "Cell/NCellRootComponent.h"
-#include "NProcGenComponent.h"
+#include "Organ/NOrganComponent.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "NProcGenEditorCommands.h"
 #include "NProcGenEditorToolMenu.h"
 #include "NProcGenEditorUndo.h"
 #include "NProcGenEdMode.h"
-#include "NProcGenVolume.h"
 #include "UnrealEdGlobals.h"
-#include "Customizations/NProcGenComponentCustomization.h"
+#include "Customizations/NOrganComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
 
 void FNProcGenEditorModule::StartupModule()
@@ -51,7 +50,7 @@ void FNProcGenEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellActor::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName());
-		PropertyModule.UnregisterCustomClassLayout(UNProcGenComponent::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName());
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
@@ -121,8 +120,8 @@ void FNProcGenEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName(),
 			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellRootComponentCustomization::MakeInstance));
 
-	PropertyModule.RegisterCustomClassLayout(UNProcGenComponent::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FNProcGenComponentCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
 }
