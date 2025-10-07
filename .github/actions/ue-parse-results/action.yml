@@ -77,11 +77,16 @@ runs:
                 $event_message_timer_start = $event_message_id_end + 1
                 $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
                
+                $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
+                $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
                 if($test_timer -match '^\d+$')
+                {    
+                  Write-Output "$device,${{ github.sha }},$test.dateTime,$test_identifier,$test_timer" >> $performancePath
+                }
+                else
                 {
-                  $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
-                  $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start)
-                  Write-Output "$test_identifier,$test_timer" >> $performancePath
+                  $test_identifier = "N/A"
+                  $test_timer = "N/A"
                 }
               }
 
