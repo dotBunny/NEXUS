@@ -3,7 +3,7 @@
 	"Version": 5,
 	"VersionName": "0.2.2",
 	"FriendlyName": "NEXUS: Procedural Generation",
-	"Description": "An opinionated collection of procedural generation techniques and tools.",
+	"Description": "A procedural generation system focused on creating dynamic gameplay-focused spaces.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
