@@ -7,6 +7,7 @@
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
+- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
 
 
 ### Fixed

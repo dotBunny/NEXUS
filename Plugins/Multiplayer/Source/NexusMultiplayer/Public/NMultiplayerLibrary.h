@@ -125,7 +125,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if the world is not operating in NM_Client mode.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "Is Host", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Server", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-server"))
 	static bool IsServer(UObject* WorldContextObject);
 
@@ -134,7 +134,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if the world is not operating in NM_Client mode.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "? Is Host", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, DisplayName = "? Is Server", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-server"))
 	static bool IsServerExec(UObject* WorldContextObject);
 
