@@ -2,7 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Organ/NOrganVolume.h"
-#include "Organ/NOrganComponent.h"
+
 #include "Components/BrushComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(NOrganVolume)

@@ -13,6 +13,7 @@
 #include "NEditorUtils.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
+#include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "NUIEditorStyle.h"
 #include "Selection.h"

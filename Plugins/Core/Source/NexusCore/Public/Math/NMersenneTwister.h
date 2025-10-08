@@ -273,7 +273,7 @@ private:
 	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
 	/**
-	 * Last seed set on the Mersenne Twister.
+	 * The last seed set on the Mersenne Twister.
 	 */
 	uint64 InitialSeed;
 

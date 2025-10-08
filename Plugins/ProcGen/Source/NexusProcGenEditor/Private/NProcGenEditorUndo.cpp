@@ -5,7 +5,7 @@
 
 #include "NProcGenEditorUtils.h"
 #include "Cell/NCellJunctionComponent.h"
-#include "Cell/NCellRegistry.h"
+#include "NProcGenRegistry.h"
 
 void FNProcGenEditorUndo::PostUndo(bool bSuccess)
 {
@@ -19,7 +19,7 @@ void FNProcGenEditorUndo::PostRedo(bool bSuccess)
 
 void FNProcGenEditorUndo::UpdateKnownJunctions()
 {
-	for (const auto Junction : FNCellRegistry::GetJunctionComponents())
+	for (const auto Junction : FNProcGenRegistry::GetCellJunctionComponents())
 	{
 		// We want to make sure our relative calculations are updated in this situation
 		Junction->OnTransformUpdated(nullptr, EUpdateTransformFlags::None, ETeleportType::None);

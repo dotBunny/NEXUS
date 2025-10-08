@@ -5,6 +5,7 @@
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
+#include "NCoreMinimal.h"
 #include "Organ/NOrganComponent.h"
 #include "Organ/NOrganGenerator.h"
 
@@ -144,7 +145,7 @@ FReply FNOrganComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<UO
 
 	// Do some preprocessing, figure out order of generation, no more context can be added after this
 	OrganGenerator->LockContext();
-
+	
 	// Add generation context to...
 	OrganGenerator->Generate();
 	

@@ -4,17 +4,17 @@
 #include "NProcGenEditorValidator.h"
 
 #include "AssetDefinitions/AssetDefinition_NCell.h"
-#include "AssetDefinitions/AssetDefinition_NCellSet.h"
+#include "AssetDefinitions/AssetDefinition_NTissue.h"
 #include "Cell/NCellActor.h"
 #include "Misc/DataValidation.h"
 
 
 class UNCell;
-class UNCellSet;
+class UNTissue;
 
 bool UNProcGenEditorValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
-	return InObject && (InObject->IsA<UWorld>() || InObject->IsA<UNCell>() || InObject->IsA<UNCellSet>());
+	return InObject && (InObject->IsA<UWorld>() || InObject->IsA<UNCell>() || InObject->IsA<UNTissue>());
 }
 
 EDataValidationResult UNProcGenEditorValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
@@ -29,9 +29,9 @@ EDataValidationResult UNProcGenEditorValidator::ValidateLoadedAsset_Implementati
 		return UAssetDefinition_NCell::ValidateAsset(InAssetData, InAsset, Context);
 	}
 
-	if (InAsset->IsA<UNCellSet>())
+	if (InAsset->IsA<UNTissue>())
 	{
-		return UAssetDefinition_NCellSet::ValidateAsset(InAssetData, InAsset, Context);
+		return UAssetDefinition_NTissue::ValidateAsset(InAssetData, InAsset, Context);
 	}
 	
 	return  EDataValidationResult::NotValidated;

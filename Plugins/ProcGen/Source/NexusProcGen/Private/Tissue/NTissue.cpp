@@ -1,13 +1,13 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Cell/NCellSet.h"
+#include "Tissue/NTissue.h"
 #include "Cell/NCell.h"
 
-void UNCellSet::BuildCellMap(UNCellSet* CellSet, TMap<TObjectPtr<UNCell>, FNCellSetEntry>& OutCellMap, TArray<UNCellSet*>& OutProcessedSets)
+void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets)
 {
 	// Base level entries
-	for (FNCellSetEntry Entry : CellSet->Entries)
+	for (FNTissueEntry Entry : Tissue->Cells)
 	{
 		if (!OutCellMap.Find(Entry.Cell.Get()))
 		{
@@ -20,13 +20,13 @@ void UNCellSet::BuildCellMap(UNCellSet* CellSet, TMap<TObjectPtr<UNCell>, FNCell
 	}
 
 	// Additional Set Recursion
-	for (UNCellSet* ChildCellSet : CellSet->AdditionalSets)
+	for (UNTissue* Additional : Tissue->AdditionalTissue)
 	{
-		if (OutProcessedSets.Contains(CellSet)) continue;
+		if (OutProcessedSets.Contains(Tissue)) continue;
 
 		// Add before recursion to stop double
-		OutProcessedSets.Add(CellSet);
+		OutProcessedSets.Add(Tissue);
 		
-		BuildCellMap(ChildCellSet, OutCellMap, OutProcessedSets);
+		BuildTissueMap(Additional, OutCellMap, OutProcessedSets);
 	}
 }

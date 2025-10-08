@@ -3,7 +3,7 @@
 
 #include "Cell/NCellJunctionComponent.h"
 
-#include "Cell/NCellRegistry.h"
+#include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NLevelUtils.h"
 #include "NProcGenDebugDraw.h"
@@ -54,7 +54,7 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
-	const UNCellRootComponent* RootComponent = FNCellRegistry::GetRootComponentFromLevel(GetComponentLevel());
+	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
@@ -108,7 +108,7 @@ void UNCellJunctionComponent::OnRegister()
 		Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
 	}
 	
-	FNCellRegistry::RegisterJunctionComponent(this);
+	FNProcGenRegistry::RegisterCellJunctionComponent(this);
 	Super::OnRegister();
 }
 
@@ -119,7 +119,7 @@ void UNCellJunctionComponent::OnUnregister()
 	{
 		Actor->CellJunctions.Remove(Details.InstanceIdentifier);
 	}
-	FNCellRegistry::UnregisterJunctionComponent(this);
+	FNProcGenRegistry::UnregisterCellJunctionComponent(this);
 	Super::OnUnregister();
 }
 
@@ -140,7 +140,7 @@ FLinearColor UNCellJunctionComponent::GetColor() const
 #if WITH_EDITOR
 void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
-	const UNCellRootComponent* RootComponent = FNCellRegistry::GetRootComponentFromLevel(GetComponentLevel());
+	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
 	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;

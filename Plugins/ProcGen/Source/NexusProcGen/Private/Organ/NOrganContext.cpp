@@ -14,12 +14,11 @@ void FNOrganContext::Reset()
 void FNOrganContext::OutputLockedContext()
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
-
-	Builder.Append(TEXT("\nFNOrganContext\n"));
-
-	Builder.Append(TEXT("\tComponents (%s)\n"));
+	Builder.Append(TEXT("\n[FNOrganContext]\n"));
+	Builder.Appendf(TEXT("\tComponents (%i)\n"), Components.Num());
 	for (auto Pair : Components)
 	{
+		// Source of generation graph
 		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Pair.Value.SourceComponent->GetDebugLabel());
 		for (auto Pair2 : Pair.Value.OtherComponents)
 		{

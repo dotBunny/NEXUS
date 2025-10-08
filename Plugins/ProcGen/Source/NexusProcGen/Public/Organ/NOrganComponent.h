@@ -6,23 +6,22 @@
 #include "CoreMinimal.h"
 #include "NOrganComponent.generated.h"
 
-struct FNCellSetEntry;
+struct FNTissueEntry;
 class UNCell;
-class UNCellSet;
+class UNTissue;
 
-UENUM(Blueprintable)
+UENUM(BlueprintType)
 enum class ENOrganGenerationTrigger : uint8
 {
-	OGT_GenerateOnLoad    UMETA(ToolTip = "Generates only when the component is loaded into the level."),
-	OGT_GenerateOnDemand  UMETA(ToolTip = "Generates only when requested (e.g. via Blueprint)."),
-	OGT_GenerateAtRuntime UMETA(ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
+	OGT_GenerateOnLoad    UMETA(DisplayName="Generate On Load", ToolTip = "Generates only when the component is loaded into the level."),
+	OGT_GenerateOnDemand  UMETA(DisplayName="Generate On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint)."),
+	OGT_GenerateAtRuntime UMETA(DisplayName="Generate At Runtime", ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
 };
-
 
 // TODO: Need to get size from parent volume? or whatever its on?
 
-
-UCLASS(ClassGroup=(Nexus), DisplayName = "NProcGen Component")
+UCLASS(ClassGroup=(Nexus), DisplayName = "NProcGen Component", HideCategories=(Tags, Activation, Cooking,
+	AssetUserData, Navigation, Actor, Input))
 class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {
 	friend class NOrganGenerator;
@@ -40,13 +39,17 @@ public:
 	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OGT_GenerateOnLoad;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UNCellSet> CellSet;
+	TArray<TObjectPtr<UNTissue>> Tissues;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 
 	FString GetDebugLabel() const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, float DepthBias = 0.f) const;
+
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
 
 protected:
-	TMap<TObjectPtr<UNCell>, FNCellSetEntry> GetCellMap() const;
+	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
 };

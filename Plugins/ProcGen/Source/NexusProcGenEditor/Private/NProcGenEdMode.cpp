@@ -6,12 +6,13 @@
 #include "CanvasTypes.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
-#include "Cell/NCellRegistry.h"
+#include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
+#include "Organ/NOrganComponent.h"
 
 const FEditorModeID FNProcGenEdMode::Identifier = TEXT("NProcGenEdMode");
 const FText FNProcGenEdMode::DirtyMessage = FText::FromString("Dirty NCellActor");
@@ -83,10 +84,10 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 	bHasDirtyActors = false;
 	
 	// Iterate all roots and draw their bounds
-	if (FNCellRegistry::HasRootComponents())
+	if (FNProcGenRegistry::HasRootComponents())
 	{
 		
-		for (const auto RootComponent : FNCellRegistry::GetRootComponents())
+		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
 			RootComponent->DrawDebugPDI(PDI); // We cant use caching because we are drawing ALL fo the possible roots
@@ -101,9 +102,9 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			}
 		}
 	}
-	if (FNCellRegistry::HasJunctionComponents())
+	if (FNProcGenRegistry::HasJunctionComponents())
 	{
-		for (const auto JunctionComponent : FNCellRegistry::GetJunctionComponents())
+		for (const auto JunctionComponent : FNProcGenRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
 			JunctionComponent->DrawDebugPDI(PDI);

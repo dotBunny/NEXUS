@@ -4,7 +4,7 @@
 #include "NProcGenEditorToolMenu.h"
 
 #include "Cell/NCellJunctionComponent.h"
-#include "Cell/NCellRegistry.h"
+#include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorCommands.h"
 #include "NProcGenEditorUtils.h"
@@ -136,7 +136,7 @@ void FNProcGenEditorToolMenu::Register()
 					MenuBuilder.SetSearchable(false); // Life's to short to search this menu.
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_NCellJunctionAddComponent);
 					MenuBuilder.BeginSection("NCellJunctionExtensions_Section", LOCTEXT("NCellJunctionExtensions_Section", "Select Junction"));
-					TArray<UNCellJunctionComponent*> Junctions = FNCellRegistry::GetJunctionsComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
+					TArray<UNCellJunctionComponent*> Junctions = FNProcGenRegistry::GetCellJunctionsComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
 					for (auto Junction : Junctions)
 					{
 						FText JunctionName = FText::FromString(Junction->GetJunctionName());

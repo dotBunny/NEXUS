@@ -4,12 +4,12 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "NCellSet.generated.h"
+#include "NTissue.generated.h"
 
 class UNCell;
 
 USTRUCT()
-struct NEXUSPROCGEN_API FNCellSetEntry
+struct NEXUSPROCGEN_API FNTissueEntry
 {
 	GENERATED_BODY()
 
@@ -27,20 +27,21 @@ struct NEXUSPROCGEN_API FNCellSetEntry
 };
 
 /**
- * A collection of NCellNodes
+ * A collection of NCells
+ * @remark Can think of this as a definition of multiple cell types used with tissue.
  */
 UCLASS()
-class NEXUSPROCGEN_API UNCellSet : public UDataAsset
+class NEXUSPROCGEN_API UNTissue : public UDataAsset
 {
 	GENERATED_BODY()
 
 public:
 	
-	static void BuildCellMap(UNCellSet* CellSet, TMap<TObjectPtr<UNCell>, FNCellSetEntry>& OutCellMap, TArray<UNCellSet*>& OutProcessedSets);
+	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets);
 	
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{Cell}"))
-	TArray<FNCellSetEntry> Entries;
+	TArray<FNTissueEntry> Cells;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UNCellSet>> AdditionalSets;
+	TArray<TObjectPtr<UNTissue>> AdditionalTissue;
 };

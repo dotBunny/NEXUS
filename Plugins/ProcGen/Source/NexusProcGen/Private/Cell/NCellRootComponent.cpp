@@ -2,7 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Cell/NCellRootComponent.h"
-#include "Cell/NCellRegistry.h"
+#include "NProcGenRegistry.h"
 #include "NLevelUtils.h"
 #include "NProcGenDebugDraw.h"
 #include "NProcGenUtils.h"
@@ -48,13 +48,13 @@ void UNCellRootComponent::OnRegister()
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
-	FNCellRegistry::RegisterRootComponent(this);
+	FNProcGenRegistry::RegisterCellRootComponent(this);
 	Super::OnRegister();
 }
 
 void UNCellRootComponent::OnUnregister()
 {
-	FNCellRegistry::UnregisterRootComponent(this);
+	FNProcGenRegistry::UnregisterCellRootComponent(this);
 	Super::OnUnregister();
 }
 
