@@ -131,7 +131,7 @@ bool FNProcGenEditorCommands::NProcGenEdMode_CanExecute()
 bool FNProcGenEditorCommands::NProcGenEdMode_CanShow()
 {
 	if (FNProcGenEdMode::IsActive()) return false;
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::NCellActorEditHullMode()
@@ -190,7 +190,7 @@ void FNProcGenEditorCommands::NCellAddActor()
 		}
 		
 		ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
-		FNProcGenEditorUtils::SaveNCell(CurrentWorld, SpawnedActor);
+		FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
 	}
 }
 
@@ -208,7 +208,7 @@ bool FNProcGenEditorCommands::NCellAddActor_CanShow()
 void FNProcGenEditorCommands::NCellSelectActor()
 {
 	GEditor->SelectNone(false, true);
-	GEditor->SelectActor(FNProcGenEditorUtils::GetNCellActorFromCurrentWorld(),
+	GEditor->SelectActor(FNProcGenEditorUtils::GetCellActorFromCurrentWorld(),
 		true, true, true, true);
 }
 
@@ -233,35 +233,35 @@ void FNProcGenEditorCommands::OnNCellCalculateAll()
 
 bool FNProcGenEditorCommands::OnNCellCalculateAll_CanExecute()
 {
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::OnNCellCalculateBounds()
 {
-	ANCellActor* CellActor = FNProcGenEditorUtils::GetNCellActorFromCurrentWorld();
+	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateBounds();
 }
 
 bool FNProcGenEditorCommands::OnNCellCalculateBounds_CanExecute()
 {
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::OnNCellCalculateHull()
 {
-	ANCellActor* CellActor = FNProcGenEditorUtils::GetNCellActorFromCurrentWorld();
+	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateHull();
 }
 
 bool FNProcGenEditorCommands::OnNCellCalculateHull_CanExecute()
 {
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::OnNCellResetCell()
 {
 	// Get the cell actor
-	ANCellActor* CellActor = FNProcGenEditorUtils::GetNCellActorFromCurrentWorld();
+	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CellRoot->Reset();
 
 	// Get the cell
@@ -270,7 +270,7 @@ void FNProcGenEditorCommands::OnNCellResetCell()
 	Cell->Junctions.Empty();
 
 	// Update the data
-	FNProcGenEditorUtils::UpdateNCell(Cell, CellActor);
+	FNProcGenEditorUtils::UpdateCell(Cell, CellActor);
 
 	// Flag the actor as dirty
 	CellActor->SetActorDirty();
@@ -278,7 +278,7 @@ void FNProcGenEditorCommands::OnNCellResetCell()
 
 bool FNProcGenEditorCommands::OnNCellResetCell_CanExecute()
 {
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::OnNCellRemoveActor()
@@ -299,7 +299,7 @@ void FNProcGenEditorCommands::OnNCellRemoveActor()
 
 bool FNProcGenEditorCommands::OnNCellRemoveActor_CanExecute()
 {
-	return FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld();
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::OnNCellJunctionAddComponent()

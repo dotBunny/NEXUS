@@ -12,8 +12,10 @@
 #include "NProcGenUtils.h"
 #include "Selection.h"
 #include "Engine/Level.h"
+#include "Macros/NFlagsMacros.h"
+#include "Organ/NOrganVolume.h"
 
-bool FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld()
+bool FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld()
 {
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
@@ -22,7 +24,7 @@ bool FNProcGenEditorUtils::IsNCellActorPresentInCurrentWorld()
 	return false;
 }
 
-ANCellActor* FNProcGenEditorUtils::GetNCellActorFromCurrentWorld()
+ANCellActor* FNProcGenEditorUtils::GetCellActorFromCurrentWorld()
 {
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
@@ -31,7 +33,7 @@ ANCellActor* FNProcGenEditorUtils::GetNCellActorFromCurrentWorld()
 	return nullptr;
 }
 
-bool FNProcGenEditorUtils::IsNCellActorSelected()
+bool FNProcGenEditorUtils::IsCellActorSelected()
 {
 	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
 	{
@@ -40,7 +42,54 @@ bool FNProcGenEditorUtils::IsNCellActorSelected()
 	return false;
 }
 
-void FNProcGenEditorUtils::SaveNCell(UWorld* World, ANCellActor* CellActor)
+TArray<ANCellActor*> FNProcGenEditorUtils::GetSelectedCellActors()
+{
+	TArray<ANCellActor*> Result;
+	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	{
+		if (ANCellActor* TestActor = Cast<ANCellActor>( *SelectedActor )) Result.Add(TestActor);
+	}
+	return MoveTemp(Result);
+}
+
+bool FNProcGenEditorUtils::IsOrganVolumeSelected()
+{
+	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	{
+		if (Cast<ANOrganVolume>( *SelectedActor )) return true;
+	}
+	return false;
+}
+
+TArray<ANOrganVolume*> FNProcGenEditorUtils::GetSelectedOrganVolumes()
+{
+	TArray<ANOrganVolume*> Result;
+	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	{
+		if (ANOrganVolume* TestVolume = Cast<ANOrganVolume>( *SelectedActor )) Result.Add(TestVolume);
+	}
+	return MoveTemp(Result);
+}
+
+ENProcGenSelectionFlags FNProcGenEditorUtils::GetSelectionFlags()
+{
+	uint8 Flags = 0;
+	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	{
+		if (Cast<ANCellActor>( *SelectedActor ))
+		{
+			N_FLAGS_ADD(Flags, PGSF_CellActor);
+		}
+		
+		if (Cast<ANOrganVolume>( *SelectedActor ))
+		{
+			N_FLAGS_ADD(Flags, PGSF_OrganVolume);
+		}
+	}
+	return static_cast<ENProcGenSelectionFlags>(Flags);
+}
+
+void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 {
 	if (CellActor == nullptr)
 	{
@@ -55,7 +104,7 @@ void FNProcGenEditorUtils::SaveNCell(UWorld* World, ANCellActor* CellActor)
 	}
 	
 	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World);
-	if (UpdateNCell(Cell, CellActor))
+	if (UpdateCell(Cell, CellActor))
 	{
 		// Need to tell the cell it's dirty so it gets saved to disk
 		// ReSharper disable once CppExpressionWithoutSideEffects
@@ -68,7 +117,7 @@ void FNProcGenEditorUtils::SaveNCell(UWorld* World, ANCellActor* CellActor)
 	}
 }
 
-bool FNProcGenEditorUtils::UpdateNCell(UNCell* Cell, ANCellActor* CellActor)
+bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 {
 	bool bUpdatedCellData = false;
 

@@ -46,7 +46,6 @@ public:
 
 	FString GetDebugLabel() const;
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, float DepthBias = 0.f) const;
-
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 

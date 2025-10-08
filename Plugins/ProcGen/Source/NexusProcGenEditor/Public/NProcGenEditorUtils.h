@@ -5,18 +5,30 @@
 
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
+#include "Organ/NOrganVolume.h"
 
 class UNCell;
+
+enum ENProcGenSelectionFlags : uint8
+{
+	PGSF_None = 0,
+	PGSF_CellActor = 1 << 0,
+	PGSF_OrganVolume = 1 << 1,
+};
 
 class NEXUSPROCGENEDITOR_API FNProcGenEditorUtils
 {
 public:
-	static bool IsNCellActorPresentInCurrentWorld();
-	static ANCellActor* GetNCellActorFromCurrentWorld();
-	static bool IsNCellActorSelected();
+	static bool IsCellActorPresentInCurrentWorld();
+	static ANCellActor* GetCellActorFromCurrentWorld();
+	static bool IsCellActorSelected();
+	static TArray<ANCellActor*> GetSelectedCellActors();
+	static bool IsOrganVolumeSelected();
+	static TArray<ANOrganVolume*> GetSelectedOrganVolumes();
+	static ENProcGenSelectionFlags GetSelectionFlags();
 	
-	static void SaveNCell(UWorld* World, ANCellActor* CellActor = nullptr);
-	static bool UpdateNCell(UNCell* Cell, ANCellActor* CellActor);
+	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr);
+	static bool UpdateCell(UNCell* Cell, ANCellActor* CellActor);
 
 	FORCEINLINE static bool EffectsGeneratedData(const AActor* ContextActor)
 	{

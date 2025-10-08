@@ -9,10 +9,11 @@
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
+#include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
-#include "Organ/NOrganComponent.h"
 
 const FEditorModeID FNProcGenEdMode::Identifier = TEXT("NProcGenEdMode");
 const FText FNProcGenEdMode::DirtyMessage = FText::FromString("Dirty NCellActor");
@@ -86,11 +87,10 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 	// Iterate all roots and draw their bounds
 	if (FNProcGenRegistry::HasRootComponents())
 	{
-		
 		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
-			RootComponent->DrawDebugPDI(PDI); // We cant use caching because we are drawing ALL fo the possible roots
+			RootComponent->DrawDebugPDI(PDI); // We can't use caching because we are drawing ALL of the possible roots
 
 			// Notice ON Dirty
 			if (const ANCellActor* CellActor = Cast<ANCellActor>(RootComponent->GetOwner()))
@@ -110,6 +110,16 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			JunctionComponent->DrawDebugPDI(PDI);
 		}	
 	}
+
+	// Selection-specific drawing options
+	const ENProcGenSelectionFlags Flags = FNProcGenEditorUtils::GetSelectionFlags();
+	if (N_FLAGS_HAS(Flags, PGSF_OrganVolume))
+	{
+		TArray<ANOrganVolume*> SelectedOrganVolumes = FNProcGenEditorUtils::GetSelectedOrganVolumes();
+
+		// TODO: Make organ and figure out what to draw!
+	}
+	
 	FEdMode::Render(View, Viewport, PDI);
 }
 
@@ -130,7 +140,6 @@ void FNProcGenEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* 
 	}
 	else if (bAutoBoundsDisabled)
 	{
-
 		Canvas->DrawShadowedText(10,MessageOffset, AutoBoundsMessage, GEngine->GetSmallFont(), FLinearColor::White);
 		MessageOffset += MessageSpacing;	
 	}

@@ -168,7 +168,7 @@ bool FNProcGenEditorToolMenu::ShowNCellEditMode()
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 	if (!FNProcGenEdMode::IsActive()) return false;
 	
-	return FNProcGenEditorUtils::IsNCellActorSelected();
+	return FNProcGenEditorUtils::IsCellActorSelected();
 }
 
 bool FNProcGenEditorToolMenu::ShowNCellDropdown()

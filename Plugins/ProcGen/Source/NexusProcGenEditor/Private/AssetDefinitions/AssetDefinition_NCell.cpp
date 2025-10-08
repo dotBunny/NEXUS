@@ -104,7 +104,7 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 	if (CellActor == nullptr) return;
 
 	// Create or get our package for the world
-	FNProcGenEditorUtils::SaveNCell(World, CellActor);
+	FNProcGenEditorUtils::SaveCell(World, CellActor);
 }
 
 EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
