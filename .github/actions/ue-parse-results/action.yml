@@ -95,3 +95,33 @@ runs:
         {
           Write-Output "No results found at '$jsonPath'."
         }
+
+    - name: Update Google Sheet
+      shell: powershell
+      run: |
+        # Requires PSGSuite module to be installed into Powershell
+        # Install-Module -Name PSGSuite
+        $credPath = "C:\Credentials\ue-nexus-framework.json"
+        $performancePath = "${{ github.workspace }}\Staging\TestResults\performance.csv"
+        if (Test-Path -Path $credPath -and Test-Path -Path $performancePath)
+        {
+          Write-Output "Connecting to Google ..."
+          Connect-GServiceAccount -CredentialFile $credPath
+          $spreadsheetId = "1gewwNvzmDqStY64Eafix6gMC8lQEn1LGqnDDGWfdyP0"
+          $data = Import-Csv -Path $performancePath -Header 'timestamp', 'sha', 'device', 'id', 'time'
+          foreach ($row in $data) {
+            $dataToInsert = @(
+                $row."timestamp"
+                $row."sha"
+                $row."device"
+                $row."time"
+            )
+            Write-Output "Adding entry for $($row."id")"
+            Add-GSSheetRow -SpreadsheetId $spreadsheetId -SheetName $($row."id") -Values $dataToInsert
+          }
+          Disconnect-GService
+        }
+        else
+        {
+          Write-Output "No credentials found at '$credPath' or no performance data found at '$performancePath'."
+        }
