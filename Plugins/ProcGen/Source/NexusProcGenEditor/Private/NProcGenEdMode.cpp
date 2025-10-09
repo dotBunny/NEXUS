@@ -14,6 +14,7 @@
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
+#include "Organ/NOrganGenerator.h"
 
 const FEditorModeID FNProcGenEdMode::Identifier = TEXT("NProcGenEdMode");
 const FText FNProcGenEdMode::DirtyMessage = FText::FromString("Dirty NCellActor");
@@ -29,6 +30,17 @@ FBox FNProcGenEdMode::CachedBounds;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
 
+FNProcGenEdMode::~FNProcGenEdMode()
+{
+	if (OrganGenerator != nullptr)
+	{
+		OrganGenerator->Reset();
+		OrganGenerator->RemoveFromRoot();
+		OrganGenerator->ConditionalBeginDestroy();
+		OrganGenerator = nullptr;
+	}
+}
+
 void FNProcGenEdMode::Enter()
 {
 	// Initialize cached values
@@ -40,6 +52,10 @@ void FNProcGenEdMode::Enter()
 	CachedBoundsVertices.Empty();
 
 	bCanTick = true;
+
+	// Create our temp organ generator to use with any selections
+	OrganGenerator = NewObject<UNOrganGenerator>();
+	OrganGenerator->AddToRoot();
 	
 	FEdMode::Enter();
 }
@@ -48,6 +64,16 @@ void FNProcGenEdMode::Exit()
 {
 	NCellActor = nullptr;
 	bCanTick = false;
+
+	// Remove our temp organ generator
+	if (OrganGenerator != nullptr)
+	{
+		OrganGenerator->Reset();
+		OrganGenerator->RemoveFromRoot();
+		OrganGenerator->ConditionalBeginDestroy();
+		OrganGenerator = nullptr;
+	}
+	
 	FEdMode::Exit();
 }
 
@@ -116,8 +142,14 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 	if (N_FLAGS_HAS(Flags, PGSF_OrganVolume))
 	{
 		TArray<ANOrganVolume*> SelectedOrganVolumes = FNProcGenEditorUtils::GetSelectedOrganVolumes();
+		for (const ANOrganVolume* OrganVolume : SelectedOrganVolumes)
+		{
+			OrganGenerator->Reset();
+			OrganGenerator->AddToContext(OrganVolume->OrganComponent);
+			OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
 
-		// TODO: Make organ and figure out what to draw!
+			// TODO: Make organ and figure out what to draw!
+		}
 	}
 	
 	FEdMode::Render(View, Viewport, PDI);

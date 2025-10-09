@@ -17,8 +17,13 @@ class NEXUSPROCGEN_API UNOrganGenerator : public UObject
 	UNOrganGenerator(const FObjectInitializer& ObjectInitializer);
 	
 public:
+	void Reset() const;
 	void Generate();
 	bool AddToContext(UNOrganComponent* Component) const;
+
+	/**
+	 * Lock the context added to the generator and figure out all the generation dependencies and order.
+	 */
 	void LockContext();
 	
 	FNOrganGraph* GetGraph() const { return Graph; }

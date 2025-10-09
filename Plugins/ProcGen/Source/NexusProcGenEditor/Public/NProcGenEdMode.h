@@ -7,6 +7,8 @@
 #include "EdMode.h"
 #include "Cell/NCellActor.h"
 
+class UNOrganGenerator;
+
 class FNProcGenEdMode final : public FEdMode
 {
 public:
@@ -33,6 +35,7 @@ public:
 	const static FText AutoBoundsMessage;
 	const static FText AutoHullMessage;
 
+	virtual ~FNProcGenEdMode() override;
 	virtual void Enter() override;
 	virtual void Exit() override;
 	virtual void Tick(FEditorViewportClient* ViewportClient, float DeltaTime) override;
@@ -48,6 +51,7 @@ private:
 	static TArray<FVector> CachedBoundsVertices;
 	static ANCellActor* NCellActor;
 	static ENCellEdMode NCellEdMode;
+	TObjectPtr<UNOrganGenerator> OrganGenerator;
 	bool bCanTick = false;
 	bool bHasDirtyActors = false;
 	bool bAutoBoundsDisabled = false;

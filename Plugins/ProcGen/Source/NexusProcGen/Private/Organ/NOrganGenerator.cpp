@@ -13,6 +13,14 @@ UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) 
 	Context = new FNOrganContext();
 }
 
+void UNOrganGenerator::Reset() const
+{
+	if (Context != nullptr)
+	{
+		Context->Reset();
+	}
+}
+
 void UNOrganGenerator::BeginDestroy()
 {
 	if (Context != nullptr)
@@ -82,7 +90,6 @@ void UNOrganGenerator::LockContext()
 	bIsContextLocked = true;
 
 	// TODO: We need to figure out the generation order
-	
 
 	Context->OutputLockedContext();
 }
