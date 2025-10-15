@@ -10,9 +10,15 @@ class NEXUSPROCGEN_API FNOrganContext
 {
 public:
 	void Reset();
-
+	bool IsLocked() const { return bIsLocked; }
+	void LockAndPreprocess();
 	
-	void OutputLockedContext();
+	bool AddOrganComponent(UNOrganComponent* Component);
+	
+	void OutputToLog();
 	
 	TMap<UNOrganComponent*, FNOrganComponentContext> Components;
+	
+private:
+	bool bIsLocked = false;
 };

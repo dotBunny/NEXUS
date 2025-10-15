@@ -7,6 +7,7 @@
 #include "EdMode.h"
 #include "Cell/NCellActor.h"
 
+class FNOrganContext;
 class UNOrganGenerator;
 
 class FNProcGenEdMode final : public FEdMode
