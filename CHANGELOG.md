@@ -2,6 +2,10 @@
 
 ## [0.3.0] - ???
 
+### Added
+
+- Automatic `UNActorPoolSet` loading configurable in project `Actor Pool Settings`
+
 ### Changed
 
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.

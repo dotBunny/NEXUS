@@ -22,7 +22,33 @@ void UNActorPoolSubsystem::Deinitialize()
 void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	bStatsEnabled = UNActorPoolsSettings::Get()->bTrackStats;
+	
+	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
+	bStatsEnabled = Settings->bTrackStats;
+	
+	// Check if we have anything to automatically load
+	if (Settings->AlwaysCreateSets.Num() == 0) return;
+	
+	// Check if we have any ignores
+	if (Settings->IgnoreWorldPrefixes.Num() > 0)
+	{
+		bool bShouldIgnoreLevel = false;
+		const FString WorldName = this->GetWorld()->GetName();
+		for (auto& LevelPrefix : Settings->IgnoreWorldPrefixes)
+		{
+			if (WorldName.StartsWith(LevelPrefix))
+			{
+				N_LOG(Log, TEXT("[NActorPoolSubsystem] Ignoring level %s due to prefix match (%s)."), *WorldName, *LevelPrefix);
+				bShouldIgnoreLevel = true;
+			}
+		}
+		if (bShouldIgnoreLevel) return;
+	}
+	
+	for (auto& Set : Settings->AlwaysCreateSets)
+	{
+		ApplyActorPoolSet(Set.Get());
+	}
 }
 
 bool UNActorPoolSubsystem::IsTickable() const
