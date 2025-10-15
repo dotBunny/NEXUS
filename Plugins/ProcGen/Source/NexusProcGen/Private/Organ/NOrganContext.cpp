@@ -96,7 +96,6 @@ Log          LogNexus                  		Source: Organ_Partial
 Log          LogNexus                  			Intersects: Organ_Main
 	*/
 	
-	
 	for (auto& Pair : Components)
 	{
 		FNOrganComponentContext&  ComponentContext = Pair.Value;
@@ -105,11 +104,18 @@ Log          LogNexus                  			Intersects: Organ_Main
 		{
 			UNOrganComponent* OtherOrganComponent = ComponentContext.IntersectComponents[i];
 		}
+
+
 		
 	}
+
+	// Step 1 - If it contains nothing it can be generated first
+
+	
 	
 	// Figure out who is inside of who?
 	
+
 	// Itterate through 'base' organs, the other components are all the ones that intersect
 	
 	
