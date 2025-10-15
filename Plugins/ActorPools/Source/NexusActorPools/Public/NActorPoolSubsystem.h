@@ -128,6 +128,7 @@ private:
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
 	bool HasTickableActorPool(FNActorPool* ActorPool) const;
 
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<UClass*, FNActorPool*> ActorPools;
 	TArray<FNActorPool*> TickableActorPools;
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer

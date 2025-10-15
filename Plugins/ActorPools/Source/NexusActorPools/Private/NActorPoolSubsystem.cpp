@@ -141,7 +141,6 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 	{
 		for (const UNActorPoolSet* Set : OutActorPoolSets)
 		{
-			N_LOG(Warning, TEXT("%s"), *Set->GetFName().ToString());
 			for (const FNActorPoolDefinition& Definition : Set->ActorPools)
 			{
 				if (ActorPools.Contains(Definition.ActorClass))
