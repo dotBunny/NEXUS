@@ -5,6 +5,7 @@
 
 #include "NCoreMinimal.h"
 #include "NProcGenUtils.h"
+#include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponentContext.h"
 
 void FNOrganContext::Reset()
@@ -49,11 +50,20 @@ bool FNOrganContext::AddOrganComponent(UNOrganComponent* Component)
 			}
 
 			const AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
-			if (FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
-				ComponentVolumeBounds.BoxesIntersect(ComponentVolumeBounds, OtherVolumeBounds))
+			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
+			
+			// Check for intersection of any type
+			if (FBoxSphereBounds::BoxesIntersect(ComponentVolumeBounds, OtherVolumeBounds))
 			{
 				AddOrganComponent(OtherComponent);
-				WorkingContext->OtherComponents.AddUnique(OtherComponent);
+				WorkingContext->IntersectComponents.AddUnique(OtherComponent);
+			}
+			
+			// Check for full containment
+			if (FNBoundsUtils::IsBoundsContainedInBounds(OtherVolumeBounds, ComponentVolumeBounds))
+			{
+				AddOrganComponent(OtherComponent);
+				WorkingContext->ContainedComponents.AddUnique(OtherComponent);
 			}
 		}
 	}
@@ -66,15 +76,34 @@ void FNOrganContext::LockAndPreprocess()
 	
 	// TODO: Figure out ordering now
 	
+	/* 
+Log          LogNexus                  [FNOrganContext] LOCKED
+Log          LogNexus                  	Components (4)
+Log          LogNexus                  		Source: Organ_Main
+Log          LogNexus                  			Intersects: Organ_Sub
+Log          LogNexus                  			Intersects: Organ_Partial
+Log          LogNexus                  			Intersects: Organ_Sub_Sub
+Log          LogNexus                  			Contains: Organ_Sub
+Log          LogNexus                  			Contains: Organ_Sub_Sub
+Log          LogNexus                  		Source: Organ_Sub
+Log          LogNexus                  			Intersects: Organ_Main
+Log          LogNexus                  			Intersects: Organ_Sub_Sub
+Log          LogNexus                  			Contains: Organ_Sub_Sub
+Log          LogNexus                  		Source: Organ_Sub_Sub
+Log          LogNexus                  			Intersects: Organ_Main
+Log          LogNexus                  			Intersects: Organ_Sub
+Log          LogNexus                  		Source: Organ_Partial
+Log          LogNexus                  			Intersects: Organ_Main
+	*/
 	
-	// Loop through each base (really there should only ever be one, but here we are)
+	
 	for (auto& Pair : Components)
 	{
 		FNOrganComponentContext&  ComponentContext = Pair.Value;
-		const int ChildCount = ComponentContext.OtherComponents.Num();
+		const int ChildCount = ComponentContext.IntersectComponents.Num();
 		for (int i = 0; i < ChildCount; i++)
 		{
-			UNOrganComponent* OtherOrganComponent = ComponentContext.OtherComponents[i];
+			UNOrganComponent* OtherOrganComponent = ComponentContext.IntersectComponents[i];
 		}
 		
 	}
@@ -109,9 +138,13 @@ void FNOrganContext::OutputToLog()
 	{
 		// Source of generation graph
 		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Pair.Value.SourceComponent->GetDebugLabel());
-		for (auto Pair2 : Pair.Value.OtherComponents)
+		for (auto Pair2 : Pair.Value.IntersectComponents)
 		{
-			Builder.Appendf(TEXT("\t\t\tOtherComponent: %s\n"), *Pair2->GetDebugLabel());
+			Builder.Appendf(TEXT("\t\t\tIntersects: %s\n"), *Pair2->GetDebugLabel());
+		}
+		for (auto Pair2 : Pair.Value.ContainedComponents)
+		{
+			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *Pair2->GetDebugLabel());
 		}
 	}
 

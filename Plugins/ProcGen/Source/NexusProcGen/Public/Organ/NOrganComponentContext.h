@@ -14,5 +14,7 @@ public:
 	void Reset();
 	
 	UNOrganComponent* SourceComponent;
-	TArray<UNOrganComponent*> OtherComponents;
+	TArray<UNOrganComponent*> IntersectComponents;
+	TArray<UNOrganComponent*> ContainedComponents;
+	
 };
