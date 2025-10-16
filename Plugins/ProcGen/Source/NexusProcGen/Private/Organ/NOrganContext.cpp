@@ -36,12 +36,12 @@ bool FNOrganContext::AddOrganComponent(UNOrganComponent* Component)
 	// We're going to capture all the other components in the level
 	TArray<UNOrganComponent*> LevelComponents = FNProcGenUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
 
-	// We will handle ordering when we lock the context of generation
+	// We will handle ordering when we lock the context of the generation
 	if (Component->IsVolumeBased())
 	{
 		// Look at volume, search for sub volumes to add context too? order matters?
-		AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
-		FBoxSphereBounds ComponentVolumeBounds = ComponentVolume->GetBounds();
+		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
+		const FBoxSphereBounds ComponentVolumeBounds = ComponentVolume->GetBounds();
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component)
@@ -96,34 +96,74 @@ Log          LogNexus                  		Source: Organ_Partial
 Log          LogNexus                  			Intersects: Organ_Main
 	*/
 	
+	// Create a separate list of components that we will operate on, and clear out.
+	int GenerationOrderIndex = 0;
+	GenerationOrder.Add(TArray<UNOrganComponent*>());
+	
+	TArray<UNOrganComponent*> PossibleComponents;
+	TArray<UNOrganComponent*> ProcessedComponents;
 	for (auto& Pair : Components)
 	{
-		FNOrganComponentContext&  ComponentContext = Pair.Value;
-		const int ChildCount = ComponentContext.IntersectComponents.Num();
-		for (int i = 0; i < ChildCount; i++)
-		{
-			UNOrganComponent* OtherOrganComponent = ComponentContext.IntersectComponents[i];
-		}
-
-
-		
+		PossibleComponents.AddUnique(Pair.Key);
 	}
 
-	// Step 1 - If it contains nothing it can be generated first
-
+	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
+	for (auto& Pair : Components)
+	{
+		if (FNOrganComponentContext& ComponentContext = Pair.Value; 
+			ComponentContext.ContainedComponents.Num() == 0)
+		{
+			PossibleComponents.Remove(Pair.Key);
+			ProcessedComponents.Add(Pair.Key);
+			GenerationOrder[0].Add(Pair.Key);
+		}
+	}
 	
+	// Evaluate if we should bump the generation order
+	if (GenerationOrder[0].Num() > 0 && PossibleComponents.Num() > 0)
+	{
+		GenerationOrder.Add(TArray<UNOrganComponent*>());
+		GenerationOrderIndex = 1;
+	}
 	
-	// Figure out who is inside of who?
-	
-
-	// Itterate through 'base' organs, the other components are all the ones that intersect
-	
-	
-	
-	// look at all children
-	// figure out who is nested in who
-	
-	
+	while (PossibleComponents.Num() > 0)
+	{
+		// We need to track the processed components per generation iteration, so if we process this loop, it needs
+		// to ensure that anything that required it bumps to the next iteration.
+		TArray<UNOrganComponent*> PhaseProcessed;
+		
+		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
+		{
+			UNOrganComponent* Component = PossibleComponents[i];
+			FNOrganComponentContext* ComponentContext = Components.Find(Component);
+			
+			// Check its contains against our 
+			bool bAllContainsProcessed = true;
+			for (auto ContainedComponent : ComponentContext->ContainedComponents)
+			{
+				if (!ProcessedComponents.Contains(ContainedComponent) || 
+					PhaseProcessed.Contains(ContainedComponent))
+				{
+					bAllContainsProcessed = false;
+				}
+			}
+			
+			if (bAllContainsProcessed)
+			{
+				PhaseProcessed.Add(Component);
+				GenerationOrder[GenerationOrderIndex].Add(Component);
+				PossibleComponents.Remove(Component);
+				ProcessedComponents.Add(Component);
+			}
+		}
+		
+		// Evaluate if we should bump the generation order
+		if (GenerationOrder[GenerationOrderIndex].Num() > 0 && PossibleComponents.Num() > 0)
+		{
+			GenerationOrder.Add(TArray<UNOrganComponent*>());
+			GenerationOrderIndex++;
+		}
+	}
 }
 
 void FNOrganContext::OutputToLog()
@@ -152,6 +192,17 @@ void FNOrganContext::OutputToLog()
 		{
 			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *Pair2->GetDebugLabel());
 		}
+	}
+	
+	Builder.Appendf(TEXT("\tGeneration Order (%i)\n"), GenerationOrder.Num());
+	for (int i = 0; i < GenerationOrder.Num(); i++)
+	{
+		Builder.Appendf(TEXT("\t\tPhase (%i)\n"), i);
+		for (auto Component : GenerationOrder[i])
+		{
+			Builder.Appendf(TEXT("\t\t\t%s\n"), *Component->GetDebugLabel());
+		}
+		Builder.Append("\n");
 	}
 
 	N_LOG(Log, TEXT("%s"), Builder.ToString());

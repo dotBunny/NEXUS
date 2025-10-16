@@ -11,4 +11,5 @@ FNOrganComponentContext::FNOrganComponentContext(UNOrganComponent* InSourceCompo
 void FNOrganComponentContext::Reset()
 {
 	IntersectComponents.Empty();
+	ContainedComponents.Empty();
 }

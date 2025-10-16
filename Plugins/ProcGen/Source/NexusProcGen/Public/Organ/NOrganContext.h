@@ -18,6 +18,7 @@ public:
 	void OutputToLog();
 	
 	TMap<UNOrganComponent*, FNOrganComponentContext> Components;
+	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 	
 private:
 	bool bIsLocked = false;
