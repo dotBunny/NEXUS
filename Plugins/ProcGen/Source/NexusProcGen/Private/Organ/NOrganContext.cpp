@@ -74,32 +74,10 @@ void FNOrganContext::LockAndPreprocess()
 {
 	bIsLocked = true;
 	
-	// TODO: Figure out ordering now
-	
-	/* 
-Log          LogNexus                  [FNOrganContext] LOCKED
-Log          LogNexus                  	Components (4)
-Log          LogNexus                  		Source: Organ_Main
-Log          LogNexus                  			Intersects: Organ_Sub
-Log          LogNexus                  			Intersects: Organ_Partial
-Log          LogNexus                  			Intersects: Organ_Sub_Sub
-Log          LogNexus                  			Contains: Organ_Sub
-Log          LogNexus                  			Contains: Organ_Sub_Sub
-Log          LogNexus                  		Source: Organ_Sub
-Log          LogNexus                  			Intersects: Organ_Main
-Log          LogNexus                  			Intersects: Organ_Sub_Sub
-Log          LogNexus                  			Contains: Organ_Sub_Sub
-Log          LogNexus                  		Source: Organ_Sub_Sub
-Log          LogNexus                  			Intersects: Organ_Main
-Log          LogNexus                  			Intersects: Organ_Sub
-Log          LogNexus                  		Source: Organ_Partial
-Log          LogNexus                  			Intersects: Organ_Main
-	*/
-	
-	// Create a separate list of components that we will operate on, and clear out.
+	// Create a separate list of components that we will operate on and clear out.
 	int GenerationOrderIndex = 0;
+	GenerationOrder.Empty();
 	GenerationOrder.Add(TArray<UNOrganComponent*>());
-	
 	TArray<UNOrganComponent*> PossibleComponents;
 	TArray<UNOrganComponent*> ProcessedComponents;
 	for (auto& Pair : Components)
@@ -137,7 +115,7 @@ Log          LogNexus                  			Intersects: Organ_Main
 			UNOrganComponent* Component = PossibleComponents[i];
 			FNOrganComponentContext* ComponentContext = Components.Find(Component);
 			
-			// Check its contains against our 
+			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
 			for (auto ContainedComponent : ComponentContext->ContainedComponents)
 			{
@@ -180,17 +158,16 @@ void FNOrganContext::OutputToLog()
 	}
 	
 	Builder.Appendf(TEXT("\tComponents (%i)\n"), Components.Num());
-	for (auto Pair : Components)
+	for (auto Component : Components)
 	{
-		// Source of generation graph
-		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Pair.Value.SourceComponent->GetDebugLabel());
-		for (auto Pair2 : Pair.Value.IntersectComponents)
+		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Component.Value.SourceComponent->GetDebugLabel());
+		for (const auto IntersectComponent : Component.Value.IntersectComponents)
 		{
-			Builder.Appendf(TEXT("\t\t\tIntersects: %s\n"), *Pair2->GetDebugLabel());
+			Builder.Appendf(TEXT("\t\t\tIntersects: %s\n"), *IntersectComponent->GetDebugLabel());
 		}
-		for (auto Pair2 : Pair.Value.ContainedComponents)
+		for (const auto ContainedComponent : Component.Value.ContainedComponents)
 		{
-			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *Pair2->GetDebugLabel());
+			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *ContainedComponent->GetDebugLabel());
 		}
 	}
 	
@@ -198,7 +175,7 @@ void FNOrganContext::OutputToLog()
 	for (int i = 0; i < GenerationOrder.Num(); i++)
 	{
 		Builder.Appendf(TEXT("\t\tPhase (%i)\n"), i);
-		for (auto Component : GenerationOrder[i])
+		for (const auto Component : GenerationOrder[i])
 		{
 			Builder.Appendf(TEXT("\t\t\t%s\n"), *Component->GetDebugLabel());
 		}
