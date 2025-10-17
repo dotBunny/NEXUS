@@ -9,6 +9,7 @@
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NPrimitiveDrawingUtils.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "ScreenPass.h"
@@ -165,6 +166,10 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 				for (int p = 0; p < Order[i].Num(); p++)
 				{
 					// TODO: this should be gradient?
+					FString Label = FString::Printf(TEXT("%i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
+					FNPrimitiveDrawingUtils::DrawString(PDI, Label,
+						Order[i][p]->GetDebugLocation(), FRotator::ZeroRotator, FLinearColor::White);
+					
 					Order[i][p]->DrawDebugPDI(PDI, FLinearColor::White);
 				}
 			}
@@ -205,29 +210,5 @@ void FNProcGenEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* 
 		MessageOffset += MessageSpacing;	
 	}
 	
-	if (OrganGenerator->IsLocked())
-	{
-		const FMatrix& WorldToView = View->ViewMatrices.GetViewMatrix();
-		const FMatrix& ViewToProj = View->ViewMatrices.GetProjectionMatrix();
-		
-		
-
-		
-		TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
-		for (int i = 0; i < Order.Num(); i++)
-		{
-			for (int p = 0; p < Order[i].Num(); p++)
-			{
-				// FVector2D ScreenPos;
-				// if (View->ProjectWorldToScreen(
-				// 	Order[i][p]->GetDebugLocation(),View->UnconstrainedViewRect, ViewToProj, ScreenPos))
-				// {
-				// 	
-				// 	Canvas->DrawShadowedText(ScreenPos.X, ScreenPos.Y, FText::FromString(Order[i][p]->GetDebugLabel()), GEngine->GetSmallFont(), FLinearColor::White);
-				// }
-				// UE_LOG(LogTemp, Log, TEXT("ScreenPos: %f, %f"), ScreenPos.X, ScreenPos.Y);
-			}
-		}
-	}
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }
