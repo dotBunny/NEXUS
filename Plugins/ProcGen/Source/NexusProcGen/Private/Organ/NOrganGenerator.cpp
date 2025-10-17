@@ -52,9 +52,5 @@ bool UNOrganGenerator::AddToContext(UNOrganComponent* Component) const
 void UNOrganGenerator::LockContext()
 {
 	Context->LockAndPreprocess();
-
-	// TODO: We need to figure out the generation order
-
-	Context->OutputToLog();
 }
 

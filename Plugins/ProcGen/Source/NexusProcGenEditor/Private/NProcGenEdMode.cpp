@@ -11,6 +11,7 @@
 #include "NEditorUtils.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
+#include "ScreenPass.h"
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
@@ -142,14 +143,36 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 	if (N_FLAGS_HAS(Flags, PGSF_OrganVolume))
 	{
 		TArray<ANOrganVolume*> SelectedOrganVolumes = FNProcGenEditorUtils::GetSelectedOrganVolumes();
-		for (const ANOrganVolume* OrganVolume : SelectedOrganVolumes)
-		{
-			OrganGenerator->Reset();
-			OrganGenerator->AddToContext(OrganVolume->OrganComponent);
-			OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
 
-			// TODO: Make organ and figure out what to draw!
+		// Ensure we only process organ selection when it has changed.
+		if (const uint32 NewSelectedOrganHash = FNArrayUtils::GetPointersHash(SelectedOrganVolumes); 
+			NewSelectedOrganHash != PreviousSelectedOrganHash)
+		{
+			for (const ANOrganVolume* OrganVolume : SelectedOrganVolumes)
+			{
+				OrganGenerator->Reset();
+				OrganGenerator->AddToContext(OrganVolume->OrganComponent);
+				OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
+			}
+			PreviousSelectedOrganHash = NewSelectedOrganHash;
 		}
+		
+		if (OrganGenerator->IsLocked())
+		{
+			TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
+			for (int i = 0; i < Order.Num(); i++)
+			{
+				for (int p = 0; p < Order[i].Num(); p++)
+				{
+					// TODO: this should be gradient?
+					Order[i][p]->DrawDebugPDI(PDI, FLinearColor::White);
+				}
+			}
+		}
+	}
+	else if ( OrganGenerator->IsLocked())
+	{
+		OrganGenerator->Reset();
 	}
 	
 	FEdMode::Render(View, Viewport, PDI);
@@ -180,6 +203,31 @@ void FNProcGenEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* 
 
 		Canvas->DrawShadowedText(10,MessageOffset, AutoHullMessage, GEngine->GetSmallFont(), FLinearColor::White);
 		MessageOffset += MessageSpacing;	
+	}
+	
+	if (OrganGenerator->IsLocked())
+	{
+		const FMatrix& WorldToView = View->ViewMatrices.GetViewMatrix();
+		const FMatrix& ViewToProj = View->ViewMatrices.GetProjectionMatrix();
+		
+		
+
+		
+		TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
+		for (int i = 0; i < Order.Num(); i++)
+		{
+			for (int p = 0; p < Order[i].Num(); p++)
+			{
+				// FVector2D ScreenPos;
+				// if (View->ProjectWorldToScreen(
+				// 	Order[i][p]->GetDebugLocation(),View->UnconstrainedViewRect, ViewToProj, ScreenPos))
+				// {
+				// 	
+				// 	Canvas->DrawShadowedText(ScreenPos.X, ScreenPos.Y, FText::FromString(Order[i][p]->GetDebugLabel()), GEngine->GetSmallFont(), FLinearColor::White);
+				// }
+				// UE_LOG(LogTemp, Log, TEXT("ScreenPos: %f, %f"), ScreenPos.X, ScreenPos.Y);
+			}
+		}
 	}
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 }

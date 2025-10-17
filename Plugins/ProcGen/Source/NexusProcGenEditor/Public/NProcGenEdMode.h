@@ -57,4 +57,6 @@ private:
 	bool bHasDirtyActors = false;
 	bool bAutoBoundsDisabled = false;
 	bool bAutoHullDisabled = false;
+	
+	uint32 PreviousSelectedOrganHash = 0;
 };

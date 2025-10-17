@@ -20,11 +20,15 @@ public:
 	void Reset() const;
 	void Generate();
 	bool AddToContext(UNOrganComponent* Component) const;
-
+	bool IsLocked() const { return Context->IsLocked(); }
 	/**
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
 	 */
 	void LockContext();
+	TArray<TArray<UNOrganComponent*>>& GetGenerationOrder() const
+	{
+		return Context->GenerationOrder;
+	}
 	
 	FNOrganGraph* GetGraph() const { return Graph; }
 

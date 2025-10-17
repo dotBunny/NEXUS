@@ -13,6 +13,11 @@ FString UNOrganComponent::GetDebugLabel() const
 	return GetOwner()->GetActorNameOrLabel();
 }
 
+FVector UNOrganComponent::GetDebugLocation() const
+{
+	return GetOwner()->GetActorLocation();
+}
+
 void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, const float DepthBias) const
 {
 	// TODO: this needs to get called when you have a organ selected, it should iterate the contained organs and color them specifically with less bias, lighter color?

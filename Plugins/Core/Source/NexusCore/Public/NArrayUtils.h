@@ -32,6 +32,17 @@ public:
 		}
 		return true;
 	}
+	
+	template<typename T>
+	FORCEINLINE static uint32 GetPointersHash(TArray<T*> Elements)
+	{
+		uint32 Hash = 0;
+		for (T* Element : Elements)
+		{
+			Hash ^= GetTypeHash(Element);
+		}
+		return Hash;
+	}
 
 	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
 	{
