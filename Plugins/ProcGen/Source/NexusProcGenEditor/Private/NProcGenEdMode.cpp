@@ -112,6 +112,10 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 {
 	bHasDirtyActors = false;
 	
+	FString Test = TEXT("ABCDEFGHIJKL MNOPQRSTUVWXYZ\nABC\n123456790\n-[]()");
+	FNPrimitiveDrawingUtils::DrawString(PDI, Test, FVector(0.f, 0.f, 500.f), FRotator::ZeroRotator, FLinearColor::White);
+					
+	
 	// Iterate all roots and draw their bounds
 	if (FNProcGenRegistry::HasRootComponents())
 	{
@@ -168,7 +172,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 					// TODO: this should be gradient?
 					FString Label = FString::Printf(TEXT("%i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
 					FNPrimitiveDrawingUtils::DrawString(PDI, Label,
-						Order[i][p]->GetDebugLocation(), FRotator::ZeroRotator, FLinearColor::White);
+					 	Order[i][p]->GetDebugLocation(), Order[i][p]->GetDebugRotation(), FLinearColor::White);
 					
 					Order[i][p]->DrawDebugPDI(PDI, FLinearColor::White);
 				}

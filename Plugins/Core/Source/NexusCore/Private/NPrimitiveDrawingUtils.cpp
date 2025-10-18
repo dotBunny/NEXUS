@@ -7,31 +7,61 @@ TArray<TArray<FVector2D>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FVecto
 
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
-	FRotator Rotation, FLinearColor ForegroundColor, float Scale)
+	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale)
 {
+	
+	// TODO: Add orientation / left / right / center  based?
+	
 	// Ensure our glyphs are created
 	if (Glyphs.Num() == 0) GenerateGlyphs();
+	
+	const float WorkingScale = Scale * 25;
+
 
 	// Reserve some room, assuming an average of 5 lines per character
 	TArray<TCHAR>& Characters = String.GetCharArray();
 	PDI->AddReserveLines(SDPG_World, 5 * Characters.Num());
 	FVector CurrentPosition = Position;
-	
+	int LineIndex = 0;
+	const float LineHeight = ((4 + 2) * WorkingScale) * -1;
+	const FVector CharacterPostOffset = FVector(-4 * WorkingScale, 0.f, 0.f);
+	const FVector CharacterOffset = FVector(-3 * WorkingScale, 0.f, 0.f);
 	
 	for (const auto Character : Characters)
 	{
-		const int GlyphIndex = CharToGlyphIndex(Character);
-
-		// if response is -1 space
-		// if response is -2 new line
-		// -3 tab? 4 spaces over
-		
-		TArray<FVector2D>& Points = Glyphs[GlyphIndex];
-		for (int i = 0; i < Points.Num(); i += 2)
+		switch (const int GlyphIndex = CharToGlyphIndex(Character))
 		{
-
-			// Rotate points with offset in position
-			//PDI->DrawLine()
+		case -4: // String terminator, stop now
+			return;
+		case -3: // Tab (4-spaces)
+			CurrentPosition = Position + (CharacterOffset * 4);
+			break;
+		case -2: // New Line
+			LineIndex++;
+			CurrentPosition = Position + FVector(0.f, LineHeight * LineIndex, 0.f);
+			break;
+		case -1: // Space
+			CurrentPosition += CharacterOffset;
+			break;
+		default:
+			TArray<FVector2D>& Points = Glyphs[GlyphIndex];
+			const int PointCount = Points.Num();
+			for (int i = 0; i < PointCount; i += 2)
+			{
+				// Scale our points and bring them into 3D
+				FVector StartPoint = CurrentPosition + FVector((Points[i].X * -1) * WorkingScale, Points[i].Y * WorkingScale, 0.f);
+				FVector EndPoint = CurrentPosition + FVector((Points[i + 1].X * -1) * WorkingScale, Points[i + 1].Y * WorkingScale, 0.f);
+			
+				
+				// Rotate points around base origin w/ rotation
+				StartPoint = Position + Rotation.RotateVector(StartPoint - Position);
+				EndPoint = Position + Rotation.RotateVector(EndPoint - Position);
+				
+				// Rotate points with offset in position
+				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, 2.f);
+			}
+			CurrentPosition += CharacterPostOffset;
+			break;
 		}
 	}
 }
@@ -42,7 +72,7 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 	// It should consist of paired points which will be used to draw the corresponding lines.
 
 	Glyphs.Empty();
-	Glyphs.Reserve(42);
+	Glyphs.Reserve(50);
 	
 	// Undefined
 	Glyphs.Add(TArray {
@@ -258,9 +288,15 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 
 		FVector2D(2,2),
 		FVector2D(3,3),
+		
+		FVector2D(3,3),
+		FVector2D(3,4),
 
 		FVector2D(2,2),
-		FVector2D(3,1)
+		FVector2D(3,1),
+		
+		FVector2D(3,1),
+		FVector2D(3,0)
 	});
 
 	// C
@@ -668,12 +704,62 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FVector2D(2,0),
 		FVector2D(1,0)
 	});
+	
+	// _
+	Glyphs.Add(TArray {
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// : TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// @ TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// ! TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// # TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// + TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// & TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
+	
+	// * TODO
+	Glyphs.Add(TArray { 
+		FVector2D(0,0),
+		FVector2D(3,0)
+	});
 }
 
 int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 {
 	switch (Character)
 	{
+	case '\0':
+		return -4;
 	case '\t':
 		return -3;
 	case '\r':
@@ -681,6 +767,8 @@ int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 		return -2;
 	case ' ':
 		return -1;
+		
+	// Numbers
 	case '0':
 		return 1;
 	case '1':
@@ -702,6 +790,7 @@ int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 	case '9':
 		return 10;	
 	
+	// Alpha
 	case 'a':
 	case 'A':
 		return 11;
@@ -781,6 +870,7 @@ int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 	case 'Z':
 		return 36;
 
+	// Additional Characters
 	case '-':
 		return 37;
 	case '[':
@@ -790,7 +880,24 @@ int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 	case '(':
 		return 40;
 	case ')':
-		return 41;		
+		return 41;
+	case '_':
+		return 42;
+	case ':':
+		return 43;
+	case '@':
+		return 44;
+		
+	case '!':
+		return 45;
+	case '#':
+		return 46;
+	case '+':
+		return 47;	
+	case '&':
+		return 48;
+	case '*':
+		return 49;	
 		
 	default:
 		return 0;
