@@ -11,4 +11,5 @@ public:
 private:
 	static void GenerateGlyphs();
 	static TArray<TArray<FVector2D>> Glyphs;
+	static int CharToGlyphIndex(char Character);
 };
