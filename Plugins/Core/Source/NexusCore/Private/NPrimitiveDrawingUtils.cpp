@@ -7,7 +7,8 @@ TArray<TArray<FVector2D>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FVecto
 
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
-	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const float Thickness)
+	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const ENDrawStringAlignment Alignment,
+	const float Thickness)
 {
 	
 	// TODO: Add orientation / left / right / center  based?
