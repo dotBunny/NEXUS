@@ -112,8 +112,8 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 {
 	bHasDirtyActors = false;
 	
-	FString Test = TEXT("ABCDEFGHIJKL MNOPQRSTUVWXYZ\nABC\n123456790\n-[]()");
-	FNPrimitiveDrawingUtils::DrawString(PDI, Test, FVector(0.f, 0.f, 500.f), FRotator::ZeroRotator, FLinearColor::White);
+	FString Test = TEXT("ABCDEFGHIJKL MNOPQRSTUVWXYZ\nABC\n123456790\n-[]():\t@+#");
+	FNPrimitiveDrawingUtils::DrawString(PDI, Test, FVector(0.f, 500.f, 500.f), FRotator::ZeroRotator, FLinearColor::White);
 					
 	
 	// Iterate all roots and draw their bounds

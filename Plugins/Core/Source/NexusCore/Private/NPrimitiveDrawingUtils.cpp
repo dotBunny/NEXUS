@@ -7,16 +7,16 @@ TArray<TArray<FVector2D>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FVecto
 
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
-	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale)
+	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const float Thickness)
 {
 	
 	// TODO: Add orientation / left / right / center  based?
 	
 	// Ensure our glyphs are created
 	if (Glyphs.Num() == 0) GenerateGlyphs();
-	
-	const float WorkingScale = Scale * 25;
 
+	// Setup the working scale to multiply our glyph points by
+	const float WorkingScale = Scale * 25;
 
 	// Reserve some room, assuming an average of 5 lines per character
 	TArray<TCHAR>& Characters = String.GetCharArray();
@@ -34,7 +34,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 		case -4: // String terminator, stop now
 			return;
 		case -3: // Tab (4-spaces)
-			CurrentPosition = Position + (CharacterOffset * 4);
+			CurrentPosition = CurrentPosition + (CharacterPostOffset * 4);
 			break;
 		case -2: // New Line
 			LineIndex++;
@@ -51,14 +51,13 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 				// Scale our points and bring them into 3D
 				FVector StartPoint = CurrentPosition + FVector((Points[i].X * -1) * WorkingScale, Points[i].Y * WorkingScale, 0.f);
 				FVector EndPoint = CurrentPosition + FVector((Points[i + 1].X * -1) * WorkingScale, Points[i + 1].Y * WorkingScale, 0.f);
-			
 				
 				// Rotate points around base origin w/ rotation
 				StartPoint = Position + Rotation.RotateVector(StartPoint - Position);
 				EndPoint = Position + Rotation.RotateVector(EndPoint - Position);
 				
 				// Rotate points with offset in position
-				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, 2.f);
+				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, Thickness);
 			}
 			CurrentPosition += CharacterPostOffset;
 			break;
@@ -711,46 +710,79 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FVector2D(3,0)
 	});
 	
-	// : TODO
-	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
+	// :
+	Glyphs.Add(TArray {
+		FVector2D(1, 0.5f),
+		FVector2D(2, 0.5f),
+
+		FVector2D(2, 0.5f),
+		FVector2D(2, 1.5f),
+
+		FVector2D(2, 1.5f),
+		FVector2D(1, 1.5f),
+
+		FVector2D(1, 1.5f),
+		FVector2D(1, 0.5f),
+
+		FVector2D(1, 2.5f),
+		FVector2D(2, 2.5f),
+
+		FVector2D(2, 2.5f),
+		FVector2D(2, 3.5f),
+
+		FVector2D(2, 3.5f),
+		FVector2D(1, 3.5f),
+
+		FVector2D(1, 3.5f),
+		FVector2D(1, 2.5f),
 	});
 	
-	// @ TODO
+	// @
 	Glyphs.Add(TArray { 
+		FVector2D(3,0),
 		FVector2D(0,0),
-		FVector2D(3,0)
+
+		FVector2D(0,0),
+		FVector2D(0,4),
+
+		FVector2D(0,4),
+		FVector2D(3,4),
+
+		FVector2D(3,4),
+		FVector2D(3,1),
+
+		FVector2D(3,1),
+		FVector2D(1,1),
+
+		FVector2D(1,1),
+		FVector2D(1,3),
+
+		FVector2D(1,3),
+		FVector2D(2,3)
+	});
+
+	// #
+	Glyphs.Add(TArray {
+		FVector2D(1,3.5f),
+		FVector2D(1,0.5f),
+
+		FVector2D(2,3.5f),
+		FVector2D(2,0.5f),
+		
+		FVector2D(0.5f,1.5f),
+		FVector2D(2.5f,1.5f),
+
+		FVector2D(0.5f,2.5f),
+		FVector2D(2.5f,2.5f)
 	});
 	
-	// ! TODO
+	// +
 	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
-	});
-	
-	// # TODO
-	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
-	});
-	
-	// + TODO
-	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
-	});
-	
-	// & TODO
-	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
-	});
-	
-	// * TODO
-	Glyphs.Add(TArray { 
-		FVector2D(0,0),
-		FVector2D(3,0)
+		FVector2D(0,2),
+		FVector2D(3,2),
+		
+		FVector2D(1.5f,3.5f),
+		FVector2D(1.5f,0.5f)
 	});
 }
 
@@ -887,17 +919,10 @@ int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
 		return 43;
 	case '@':
 		return 44;
-		
-	case '!':
-		return 45;
 	case '#':
-		return 46;
+		return 45;
 	case '+':
-		return 47;	
-	case '&':
-		return 48;
-	case '*':
-		return 49;	
+		return 46;	
 		
 	default:
 		return 0;

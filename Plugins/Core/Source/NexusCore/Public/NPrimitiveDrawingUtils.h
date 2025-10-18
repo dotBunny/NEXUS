@@ -7,9 +7,10 @@ class NEXUSCORE_API FNPrimitiveDrawingUtils
 {
 	friend class FNCoreModule;
 public:
-	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation, FLinearColor ForegroundColor, float Scale = 1);
+	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation, FLinearColor ForegroundColor, float Scale = 1, float Thickness = 8.f);
 private:
-	static void GenerateGlyphs();
-	static TArray<TArray<FVector2D>> Glyphs;
 	static int CharToGlyphIndex(TCHAR Character);
+	static void GenerateGlyphs();
+
+	static TArray<TArray<FVector2D>> Glyphs;
 };
