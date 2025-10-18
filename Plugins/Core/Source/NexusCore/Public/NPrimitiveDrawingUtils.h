@@ -5,8 +5,9 @@
 
 class NEXUSCORE_API FNPrimitiveDrawingUtils
 {
+	friend class FNCoreModule;
 public:
-	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, FVector Position, FRotator Rotation, FLinearColor ForegroundColor, float Scale = 1, bool bBackground = false, FLinearColor BackgroundColor = FLinearColor::Black);
+	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, FVector Position, FRotator Rotation, FLinearColor ForegroundColor, float Scale = 1);
 private:
 	static void GenerateGlyphs();
 	static TArray<TArray<FVector2D>> Glyphs;
