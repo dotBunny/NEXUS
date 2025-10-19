@@ -180,8 +180,11 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 
 	// '
 	Glyphs[44] = TArray {
-		FNPrimitiveDrawStringPoint(-1,2),
-		FNPrimitiveDrawStringPoint(-1,-1)
+		FNPrimitiveDrawStringPoint(-1,1),
+		FNPrimitiveDrawStringPoint(-1,0),
+
+		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(0,-1)
 	};
 		
 	// -
