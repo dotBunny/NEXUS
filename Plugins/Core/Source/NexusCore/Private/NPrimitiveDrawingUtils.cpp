@@ -54,8 +54,10 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 			CurrentPosition += CharacterOffset;
 			break;
 		default:
+
 			TArray<FNPrimitiveDrawStringPoint>& Points = Glyphs[GlyphIndex];
 			const int PointCount = Points.Num();
+			
 			for (int i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
@@ -69,6 +71,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 				// Rotate points with offset in position
 				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, Thickness);
 			}
+			
 			CurrentPosition += CharacterPostOffset;
 			break;
 		}

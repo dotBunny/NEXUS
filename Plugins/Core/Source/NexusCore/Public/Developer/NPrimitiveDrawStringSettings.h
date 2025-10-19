@@ -13,7 +13,6 @@ enum class ENPrimitiveDrawStringAlignment : uint8
 	PDSA_Right				UMETA(DisplayName = "Right"),
 };
 
-
 UENUM()
 enum class ENPrimitiveDrawStringPivot: uint8
 {
