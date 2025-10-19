@@ -2,14 +2,13 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Developer/NPrimitiveDrawingUtils.h"
-#include "Developer/NPrimitiveDrawStringSettings.h"
 
 TArray<TArray<FNPrimitiveDrawStringPoint>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FNPrimitiveDrawStringPoint>>();
 bool FNPrimitiveDrawingUtils::bHasGeneratedGlyphs = false;
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
-	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const ENPrimitiveDrawStringAlignment Alignment,
-	const ENPrimitiveDrawStringPivot Pivot, const float LineHeight, const float Thickness)
+	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale,
+	const float LineHeight, const ENPrimitiveDrawStringDirection LineDirection, const float Thickness)
 {
 	// Ensure our glyphs are created
 	if (!bHasGeneratedGlyphs) GenerateGlyphs();
@@ -24,11 +23,19 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 
 	FVector CurrentPosition = Position;
 	int LineIndex = 0;
-	const float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
+	
+	// We need to adjust the line height to reflect our line direction
+	float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
+	if (LineDirection == ENPrimitiveDrawStringDirection::PDSLD_Up)
+	{
+		WorkingLineHeight *= -1;
+	}
+	
 	const FVector CharacterPostOffset = FVector(0.f, 8 * WorkingScale,  0.f);
 	const FVector CharacterOffset = FVector(0.f, 6 * WorkingScale, 0.f);
+	
 	const UE::Math::TRotationMatrix<double> RotationMatrix = UE::Math::TRotationMatrix(Rotation);
-	bool bNeedsRotation = Rotation != FRotator::ZeroRotator;
+	const bool bNeedsRotation = Rotation != FRotator::ZeroRotator;
 	
 	for (const auto Character : Characters)
 	{

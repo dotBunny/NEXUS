@@ -11,24 +11,23 @@ struct FNPrimitiveDrawStringPoint
 	int8 Y;
 };
 
+UENUM()
+enum class ENPrimitiveDrawStringDirection: uint8
+{
+	PDSLD_Down			UMETA(DisplayName = "Down"),
+	PDSLD_Up			UMETA(DisplayName = "Up"),
+};
+
 class NEXUSCORE_API FNPrimitiveDrawingUtils
 {
 	friend class FNCoreModule;
 
 public:
-
-	FORCEINLINE static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation)
-	{
-		DrawString(PDI, String, Position, Rotation, UNCoreSettings::Get()->PrimitiveDrawStringSettings);
-	}
-	FORCEINLINE static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation, const FNPrimitiveDrawStringSettings& Settings)
-	{
-		DrawString(PDI, String, Position, Rotation, Settings.ForegroundColor, Settings.Scale, Settings.Alignment, Settings.Pivot, Settings.LineHeight, Settings.Thickness);
-	}
-
-	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation,
-		FLinearColor ForegroundColor, float Scale = 1, const ENPrimitiveDrawStringAlignment Alignment = ENPrimitiveDrawStringAlignment::PDSA_Left,
-		const ENPrimitiveDrawStringPivot Pivot = ENPrimitiveDrawStringPivot::PDSP_TopLeft, float LineHeight = 2.f, float Thickness = 8.f);
+	
+	static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, 
+		const FVector& Position, const FRotator& Rotation, FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, 
+		float LineHeight = 2.f, const ENPrimitiveDrawStringDirection LineDirection = ENPrimitiveDrawStringDirection::PDSLD_Down, 
+		float Thickness = 8.f);
 	
 private:
 	static bool bHasGeneratedGlyphs;
