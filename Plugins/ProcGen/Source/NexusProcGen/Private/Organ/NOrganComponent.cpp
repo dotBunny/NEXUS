@@ -13,14 +13,24 @@ FString UNOrganComponent::GetDebugLabel() const
 	return GetOwner()->GetActorNameOrLabel();
 }
 
-FVector UNOrganComponent::GetDebugLocation() const
+FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 {
-	return GetOwner()->GetActorLocation();
-}
-
-FRotator UNOrganComponent::GetDebugRotation() const
-{
-	return FRotator(0,90, -90);
+	FNPositionRotation PositionRotation;
+	const AActor* Owner = GetOwner();
+	
+	if (IsVolumeBased())
+	{
+		const AVolume* Volume = Cast<AVolume>(Owner);
+		const FBox VolumeBox = Volume->GetBounds().GetBox();
+		PositionRotation.Position = FVector(VolumeBox.Min.X, VolumeBox.Min.Y, VolumeBox.Max.Z);
+	}
+	else
+	{
+		PositionRotation.Position = Owner->GetActorLocation();
+		PositionRotation.Rotation = Owner->GetActorRotation();
+	}
+	
+	return MoveTemp(PositionRotation);
 }
 
 void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, const float DepthBias) const

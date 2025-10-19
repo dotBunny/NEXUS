@@ -14,7 +14,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 	// Ensure our glyphs are created
 	if (!bHasGeneratedGlyphs) GenerateGlyphs();
 
-	// Setup the working scale to multiply our glyph points by
+	// Calculate the working scale to multiply our glyph points by
 	const float WorkingScale = Scale * 12; // Our pseudo font-size
 
 	// Reserve some room, assuming an average of 5 lines per character
@@ -25,9 +25,10 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 	FVector CurrentPosition = Position;
 	int LineIndex = 0;
 	const float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
-	const FVector CharacterPostOffset = FVector(-8 * WorkingScale, 0.f, 0.f);
-	const FVector CharacterOffset = FVector(-6 * WorkingScale, 0.f, 0.f);
+	const FVector CharacterPostOffset = FVector(0.f, 8 * WorkingScale,  0.f);
+	const FVector CharacterOffset = FVector(0.f, 6 * WorkingScale, 0.f);
 	const UE::Math::TRotationMatrix<double> RotationMatrix = UE::Math::TRotationMatrix(Rotation);
+	bool bNeedsRotation = Rotation != FRotator::ZeroRotator;
 	
 	for (const auto Character : Characters)
 	{
@@ -41,7 +42,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 		case 10: // New Line
 		case 13:
 			LineIndex++;
-			CurrentPosition = Position + FVector(0.f, WorkingLineHeight * LineIndex, 0.f);
+			CurrentPosition = Position + FVector(0.f, 0.f, WorkingLineHeight * LineIndex);
 			break;
 		case 32: // Space
 			CurrentPosition += CharacterOffset;
@@ -63,12 +64,15 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 			for (int i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
-				FVector StartPoint = CurrentPosition + FVector(Points[i].X * WorkingScale, Points[i].Y * WorkingScale, 0.f);
-				FVector EndPoint = CurrentPosition + FVector(Points[i + 1].X * WorkingScale, Points[i + 1].Y * WorkingScale, 0.f);
+				FVector StartPoint = CurrentPosition + FVector(0.f, Points[i].X * WorkingScale, Points[i].Y * WorkingScale);
+				FVector EndPoint = CurrentPosition + FVector(0.f, Points[i + 1].X * WorkingScale, Points[i + 1].Y * WorkingScale);
 				
 				// Rotate points around base origin w/ rotation
-				StartPoint = Position + RotationMatrix.TransformVector(StartPoint - Position);
-				EndPoint = Position + RotationMatrix.TransformVector(EndPoint - Position);
+				if (bNeedsRotation)
+				{
+					StartPoint = Position + RotationMatrix.TransformVector(StartPoint - Position);
+					EndPoint = Position + RotationMatrix.TransformVector(EndPoint - Position);
+				}
 				
 				// Rotate points with offset in position
 				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, Thickness);
@@ -96,112 +100,112 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 		
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 		FNPrimitiveDrawStringPoint(0, 0),
 
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 		FNPrimitiveDrawStringPoint(0, 0),
 	};
 	Glyphs.Shrink();
 
 	// #
 	Glyphs[35] = TArray {
-		FNPrimitiveDrawStringPoint(-2,7),
-		FNPrimitiveDrawStringPoint(-2,1),
+		FNPrimitiveDrawStringPoint(2,7),
+		FNPrimitiveDrawStringPoint(2,1),
 
-		FNPrimitiveDrawStringPoint(-4,7),
-		FNPrimitiveDrawStringPoint(-4,1),
+		FNPrimitiveDrawStringPoint(4,7),
+		FNPrimitiveDrawStringPoint(4,1),
 		
-		FNPrimitiveDrawStringPoint(-1,3),
-		FNPrimitiveDrawStringPoint(-5,3),
+		FNPrimitiveDrawStringPoint(1,3),
+		FNPrimitiveDrawStringPoint(5,3),
 
-		FNPrimitiveDrawStringPoint(-1,5),
-		FNPrimitiveDrawStringPoint(-5,5)
+		FNPrimitiveDrawStringPoint(1,5),
+		FNPrimitiveDrawStringPoint(5,5)
 	};
 
 	// '
 	Glyphs[39] = TArray {
-		FNPrimitiveDrawStringPoint(-2,8),
-		FNPrimitiveDrawStringPoint(-2,6)
+		FNPrimitiveDrawStringPoint(2,8),
+		FNPrimitiveDrawStringPoint(2,6)
 	};
 	
 	// (
 	Glyphs[40] = TArray {
-		FNPrimitiveDrawStringPoint(-4,8),
-		FNPrimitiveDrawStringPoint(-2,8),
+		FNPrimitiveDrawStringPoint(4,8),
+		FNPrimitiveDrawStringPoint(2,8),
 
-		FNPrimitiveDrawStringPoint(-2,8),
+		FNPrimitiveDrawStringPoint(2,8),
 		FNPrimitiveDrawStringPoint(0,6),
 
 		FNPrimitiveDrawStringPoint(0,6),
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0)
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0)
 	};
 
 	// )
 	Glyphs[41] = TArray {
-		FNPrimitiveDrawStringPoint(-2,8),
-		FNPrimitiveDrawStringPoint(-4,8),
+		FNPrimitiveDrawStringPoint(2,8),
+		FNPrimitiveDrawStringPoint(4,8),
 
-		FNPrimitiveDrawStringPoint(-4,8),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(4,8),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,6),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,6),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4, 0),
-		FNPrimitiveDrawStringPoint(-2,0)
+		FNPrimitiveDrawStringPoint(4, 0),
+		FNPrimitiveDrawStringPoint(2,0)
 	};
 	
 	// +
 	Glyphs[43] = TArray { 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,4),
 		
-		FNPrimitiveDrawStringPoint(-3,7),
-		FNPrimitiveDrawStringPoint(-3,1)
+		FNPrimitiveDrawStringPoint(3,7),
+		FNPrimitiveDrawStringPoint(3,1)
 	};
 
 	// '
 	Glyphs[44] = TArray {
-		FNPrimitiveDrawStringPoint(-1,1),
-		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(1,1),
+		FNPrimitiveDrawStringPoint(1,0),
 
-		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(1,0),
 		FNPrimitiveDrawStringPoint(0,-1)
 	};
 		
 	// -
 	Glyphs[45] = TArray {
-		FNPrimitiveDrawStringPoint(-2,4),
-		FNPrimitiveDrawStringPoint(-4,4)
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(4,4)
 	};
 
 	// .
 	Glyphs[46] = TArray {
 		FNPrimitiveDrawStringPoint(0,1),
-		FNPrimitiveDrawStringPoint(-1,1),
+		FNPrimitiveDrawStringPoint(1,1),
 
-		FNPrimitiveDrawStringPoint(-1,1),
-		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(1,1),
+		FNPrimitiveDrawStringPoint(1,0),
 
-		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(1,0),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
@@ -210,8 +214,8 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 
 	// Forward slash
 	Glyphs[47] = TArray {
-		FNPrimitiveDrawStringPoint(-1,0),
-		FNPrimitiveDrawStringPoint(-7,8),
+		FNPrimitiveDrawStringPoint(1,0),
+		FNPrimitiveDrawStringPoint(7,8),
 	};
 	
 	// 0
@@ -220,27 +224,27 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 		
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 		FNPrimitiveDrawStringPoint(0, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 		FNPrimitiveDrawStringPoint(0, 0)
 	};
 
 	// 1
 	Glyphs[49] = TArray {
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 		
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-3,8),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,8),
 
-		FNPrimitiveDrawStringPoint(-3,8),
+		FNPrimitiveDrawStringPoint(3,8),
 		FNPrimitiveDrawStringPoint(0,6)
 	};
 
@@ -250,43 +254,43 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,6),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 	};
 
 	// 3
 	Glyphs[51] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 		FNPrimitiveDrawStringPoint(0,0),
 
-		FNPrimitiveDrawStringPoint(-2,4),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(6,4),
 	};
 
 	// 4
 	Glyphs[52] = TArray{
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,4),
 	};
 
 	// 5
@@ -295,45 +299,45 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,4),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
 		FNPrimitiveDrawStringPoint(0,8),
 		
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// 6
 	Glyphs[54] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,4),
 		FNPrimitiveDrawStringPoint(0,4)
 	};
 
 	// 7
 	Glyphs[55] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,0)
 	};
 
@@ -343,16 +347,16 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 		FNPrimitiveDrawStringPoint(0, 0),
 
 		FNPrimitiveDrawStringPoint(0, 4),
-		FNPrimitiveDrawStringPoint(-6, 4)
+		FNPrimitiveDrawStringPoint(6, 4)
 	};
 
 	// 9
@@ -361,70 +365,70 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 
 	// :
 	Glyphs[58] = TArray {
-		FNPrimitiveDrawStringPoint(-2, 1),
-		FNPrimitiveDrawStringPoint(-4, 1),
+		FNPrimitiveDrawStringPoint(2, 1),
+		FNPrimitiveDrawStringPoint(4, 1),
 
-		FNPrimitiveDrawStringPoint(-4, 1),
-		FNPrimitiveDrawStringPoint(-4, 3),
+		FNPrimitiveDrawStringPoint(4, 1),
+		FNPrimitiveDrawStringPoint(4, 3),
 
-		FNPrimitiveDrawStringPoint(-4, 3),
-		FNPrimitiveDrawStringPoint(-2, 3),
+		FNPrimitiveDrawStringPoint(4, 3),
+		FNPrimitiveDrawStringPoint(2, 3),
 
-		FNPrimitiveDrawStringPoint(-2, 3),
-		FNPrimitiveDrawStringPoint(-2, 1),
+		FNPrimitiveDrawStringPoint(2, 3),
+		FNPrimitiveDrawStringPoint(2, 1),
 
-		FNPrimitiveDrawStringPoint(-2, 5),
-		FNPrimitiveDrawStringPoint(-4, 5),
+		FNPrimitiveDrawStringPoint(2, 5),
+		FNPrimitiveDrawStringPoint(4, 5),
 
-		FNPrimitiveDrawStringPoint(-4, 5),
-		FNPrimitiveDrawStringPoint(-4, 7),
+		FNPrimitiveDrawStringPoint(4, 5),
+		FNPrimitiveDrawStringPoint(4, 7),
 
-		FNPrimitiveDrawStringPoint(-4, 7),
-		FNPrimitiveDrawStringPoint(-2, 7),
+		FNPrimitiveDrawStringPoint(4, 7),
+		FNPrimitiveDrawStringPoint(2, 7),
 
-		FNPrimitiveDrawStringPoint(-2, 7),
-		FNPrimitiveDrawStringPoint(-2, 5),
+		FNPrimitiveDrawStringPoint(2, 7),
+		FNPrimitiveDrawStringPoint(2, 5),
 	};
 	
 	// @
 	Glyphs[64] = TArray { 
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-2,2),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(2,2),
 
-		FNPrimitiveDrawStringPoint(-2,2),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6)
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6)
 	};
 	
 	// A
@@ -433,118 +437,118 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 		
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
 		FNPrimitiveDrawStringPoint(0, 4),
-		FNPrimitiveDrawStringPoint(-6, 4)
+		FNPrimitiveDrawStringPoint(6, 4)
 	};
 	
 	// B
 	Glyphs[66] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-4,4),
+		FNPrimitiveDrawStringPoint(4,4),
 
-		FNPrimitiveDrawStringPoint(-4,4),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(4,4),
+		FNPrimitiveDrawStringPoint(6,6),
 		
-		FNPrimitiveDrawStringPoint(-6,6),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,6),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-4,4),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,4),
+		FNPrimitiveDrawStringPoint(6,2),
 		
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// C
 	Glyphs[67] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// D
 	Glyphs[68] = TArray {
-		FNPrimitiveDrawStringPoint(-4,8),
+		FNPrimitiveDrawStringPoint(4,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,8),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(4,8),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,6),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,6),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-4,0)
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(4,0)
 	};
 
 	// E
 	Glyphs[69] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-4,4)
+		FNPrimitiveDrawStringPoint(4,4)
 	};
 
 	// F
 	Glyphs[70] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-4,4)
+		FNPrimitiveDrawStringPoint(4,4)
 	};
 
 	// G
 	Glyphs[71] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,4)
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,4)
 	};
 
 	// H
@@ -552,40 +556,40 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 		
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,0),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 
 	// I
 	Glyphs[73] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-3, 8),
-		FNPrimitiveDrawStringPoint(-3, 0),
+		FNPrimitiveDrawStringPoint(3, 8),
+		FNPrimitiveDrawStringPoint(3, 0),
 		
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 	};
 
 	// J
 	Glyphs[74] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 		FNPrimitiveDrawStringPoint(0,2),
 	};
 
@@ -595,19 +599,19 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-4,4),
+		FNPrimitiveDrawStringPoint(4,4),
 
-		FNPrimitiveDrawStringPoint(-4,4),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(4,4),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,6),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,6),
+		FNPrimitiveDrawStringPoint(6,8),
 		
-		FNPrimitiveDrawStringPoint(-4,4),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,4),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// L
@@ -616,7 +620,7 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// M
@@ -625,13 +629,13 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-3,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FNPrimitiveDrawStringPoint(-3,4),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 	
 	// N
@@ -640,10 +644,10 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// O
@@ -652,12 +656,12 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 	
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 		FNPrimitiveDrawStringPoint(0, 0)
 	};
 
@@ -667,12 +671,12 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 4),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 4),
 
-		FNPrimitiveDrawStringPoint(-6, 4),
+		FNPrimitiveDrawStringPoint(6, 4),
 		FNPrimitiveDrawStringPoint(0, 4)
 	};
 
@@ -682,16 +686,16 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 	
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
+		FNPrimitiveDrawStringPoint(6, 0),
 		FNPrimitiveDrawStringPoint(0, 0),
 
-		FNPrimitiveDrawStringPoint(-6, 0),
-		FNPrimitiveDrawStringPoint(-4, 2)
+		FNPrimitiveDrawStringPoint(6, 0),
+		FNPrimitiveDrawStringPoint(4, 2)
 	};
 
 	// R
@@ -700,43 +704,43 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0, 8),
 
 		FNPrimitiveDrawStringPoint(0, 8),
-		FNPrimitiveDrawStringPoint(-6, 8),
+		FNPrimitiveDrawStringPoint(6, 8),
 
-		FNPrimitiveDrawStringPoint(-6, 8),
-		FNPrimitiveDrawStringPoint(-6, 4),
+		FNPrimitiveDrawStringPoint(6, 8),
+		FNPrimitiveDrawStringPoint(6, 4),
 
-		FNPrimitiveDrawStringPoint(-6, 4),
+		FNPrimitiveDrawStringPoint(6, 4),
 		FNPrimitiveDrawStringPoint(0, 4),
 
 		FNPrimitiveDrawStringPoint(0, 4),
-		FNPrimitiveDrawStringPoint(-6, 0)
+		FNPrimitiveDrawStringPoint(6, 0)
 	};
 
 	// S
 	Glyphs[83] = TArray {
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 		FNPrimitiveDrawStringPoint(0,0)
 	};
 
 	// T
 	Glyphs[84] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-3,8),
-		FNPrimitiveDrawStringPoint(-3,0)
+		FNPrimitiveDrawStringPoint(3,8),
+		FNPrimitiveDrawStringPoint(3,0)
 	};
 
 	// U
@@ -745,19 +749,19 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// V
 	Glyphs[86] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-3,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// W
@@ -766,109 +770,109 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-3,3),
+		FNPrimitiveDrawStringPoint(3,3),
 
-		FNPrimitiveDrawStringPoint(-3,3),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// X
 	Glyphs[88] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// Y
 	Glyphs[89] = TArray {
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-3,4),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FNPrimitiveDrawStringPoint(-3,4),
+		FNPrimitiveDrawStringPoint(3,4),
 		FNPrimitiveDrawStringPoint(0,8),
 
-		FNPrimitiveDrawStringPoint(-3,4),
-		FNPrimitiveDrawStringPoint(-6,8)
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(6,8)
 	};
 
 	// Z
 	Glyphs[90] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// [
 	Glyphs[91] = TArray {
-		FNPrimitiveDrawStringPoint(-4,8),
+		FNPrimitiveDrawStringPoint(4,8),
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,8),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-4,0)
+		FNPrimitiveDrawStringPoint(4,0)
 	};
 
 	//  Backslash
 	Glyphs[92] = TArray {
 		FNPrimitiveDrawStringPoint(0,8),
-		FNPrimitiveDrawStringPoint(-7,0),
+		FNPrimitiveDrawStringPoint(7,0),
 	};
 
 	// ]
 	Glyphs[93] = TArray {
-		FNPrimitiveDrawStringPoint(-2,8),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(2,8),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,8),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,8),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-2,0)
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(2,0)
 	};
 
 	// _
 	Glyphs[95] = TArray {
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 
 	// a
 	Glyphs[97] = TArray {
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 
 	// b
@@ -877,96 +881,96 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 		FNPrimitiveDrawStringPoint(0,4)
 	};
 
 	// c
 	Glyphs[99] = TArray {
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-6,6)
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(6,6)
 	};
 
 	// d
 	Glyphs[100] = TArray {
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,8),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,8),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 
 	// e
 	Glyphs[101] = TArray {
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(6,2),
 		FNPrimitiveDrawStringPoint(0,2)
 	};
 
@@ -976,48 +980,48 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,6),
 
 		FNPrimitiveDrawStringPoint(0,6),
-		FNPrimitiveDrawStringPoint(-2,8),
+		FNPrimitiveDrawStringPoint(2,8),
 
-		FNPrimitiveDrawStringPoint(-2,8),
-		FNPrimitiveDrawStringPoint(-4,8),
+		FNPrimitiveDrawStringPoint(2,8),
+		FNPrimitiveDrawStringPoint(4,8),
 
-		FNPrimitiveDrawStringPoint(-4,8),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(4,8),
+		FNPrimitiveDrawStringPoint(6,6),
 
 		FNPrimitiveDrawStringPoint(0,3),
-		FNPrimitiveDrawStringPoint(-3,3)
+		FNPrimitiveDrawStringPoint(3,3)
 	};
 	
 	// g
 	Glyphs[103] = TArray {
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
 		FNPrimitiveDrawStringPoint(0,2),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,-3),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,-3),
 		
-		FNPrimitiveDrawStringPoint(-6,-3),
-		FNPrimitiveDrawStringPoint(-2,-3),
+		FNPrimitiveDrawStringPoint(6,-3),
+		FNPrimitiveDrawStringPoint(2,-3),
 
-		FNPrimitiveDrawStringPoint(-2,-3),
+		FNPrimitiveDrawStringPoint(2,-3),
 		FNPrimitiveDrawStringPoint(0,-1),
 	};
 	
@@ -1027,59 +1031,59 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,8),
 		
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 	
 	// i
 	Glyphs[105] = TArray {
-		FNPrimitiveDrawStringPoint(-3,7),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(3,7),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-3,5),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(3,5),
 
-		FNPrimitiveDrawStringPoint(-3,5),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(3,5),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-3,7),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(3,7),
 
-		FNPrimitiveDrawStringPoint(-3,4),
-		FNPrimitiveDrawStringPoint(-3,0)
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,0)
 	};
 	
 	// j
 	Glyphs[106] = TArray {
 
-		FNPrimitiveDrawStringPoint(-3,7),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(3,7),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-3,5),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(3,5),
 
-		FNPrimitiveDrawStringPoint(-3,5),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(3,5),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-3,7),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(3,7),
 		
-		FNPrimitiveDrawStringPoint(-3,4),
-		FNPrimitiveDrawStringPoint(-3,-1),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,-1),
 
-		FNPrimitiveDrawStringPoint(-3,-1),
-		FNPrimitiveDrawStringPoint(-2,-2),
+		FNPrimitiveDrawStringPoint(3,-1),
+		FNPrimitiveDrawStringPoint(2,-2),
 
-		FNPrimitiveDrawStringPoint(-2,-2),
-		FNPrimitiveDrawStringPoint(-1,-2),
+		FNPrimitiveDrawStringPoint(2,-2),
+		FNPrimitiveDrawStringPoint(1,-2),
 
 		
 	};
@@ -1090,25 +1094,25 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-4,2),
+		FNPrimitiveDrawStringPoint(4,2),
 
-		FNPrimitiveDrawStringPoint(-4,2),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(4,2),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-2,2),
-		FNPrimitiveDrawStringPoint(-4,4),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(4,4),
 
-		FNPrimitiveDrawStringPoint(-4,4),
-		FNPrimitiveDrawStringPoint(-4,6)
+		FNPrimitiveDrawStringPoint(4,4),
+		FNPrimitiveDrawStringPoint(4,6)
 	};
 
 	// l
 	Glyphs[108] = TArray {
-		FNPrimitiveDrawStringPoint(-3,8),
-		FNPrimitiveDrawStringPoint(-3,1),
+		FNPrimitiveDrawStringPoint(3,8),
+		FNPrimitiveDrawStringPoint(3,1),
 				
-		FNPrimitiveDrawStringPoint(-3,1),
-		FNPrimitiveDrawStringPoint(-4,0)
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(4,0)
 	};
 	
 	// m
@@ -1117,19 +1121,19 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-3,4),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FNPrimitiveDrawStringPoint(-3,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 	
 	// n
@@ -1138,39 +1142,39 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,6),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 	
 	// o
 	Glyphs[111] = TArray {
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
@@ -1180,24 +1184,24 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 	// p
 	Glyphs[112] = TArray {
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,4),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,4),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
@@ -1207,28 +1211,28 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 	// q
 	Glyphs[113] = TArray {
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,4),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(6,4),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
 		FNPrimitiveDrawStringPoint(0,2),
 
-		FNPrimitiveDrawStringPoint(-6,-2),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(6,-2),
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 	
 	// r
@@ -1237,55 +1241,55 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-4,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(4,6),
 
-		FNPrimitiveDrawStringPoint(-4,6),
-		FNPrimitiveDrawStringPoint(-6,4)
+		FNPrimitiveDrawStringPoint(4,6),
+		FNPrimitiveDrawStringPoint(6,4)
 	};
 	
 	// s
 	Glyphs[115] = TArray {
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-3,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-5,1),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(5,1),
 
-		FNPrimitiveDrawStringPoint(-5,1),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(5,1),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,3),
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,3),
 		
-		FNPrimitiveDrawStringPoint(-6,3),
-		FNPrimitiveDrawStringPoint(-5,4),
+		FNPrimitiveDrawStringPoint(6,3),
+		FNPrimitiveDrawStringPoint(5,4),
 
-		FNPrimitiveDrawStringPoint(-5,4),
+		FNPrimitiveDrawStringPoint(5,4),
 		FNPrimitiveDrawStringPoint(0,4),
 
 		FNPrimitiveDrawStringPoint(0,4),
 		FNPrimitiveDrawStringPoint(0,5),
 
 		FNPrimitiveDrawStringPoint(0,5),
-		FNPrimitiveDrawStringPoint(-2,6),
+		FNPrimitiveDrawStringPoint(2,6),
 
-		FNPrimitiveDrawStringPoint(-2,6),
-		FNPrimitiveDrawStringPoint(-5,6),
+		FNPrimitiveDrawStringPoint(2,6),
+		FNPrimitiveDrawStringPoint(5,6),
 
-		FNPrimitiveDrawStringPoint(-5,6),
-		FNPrimitiveDrawStringPoint(-6,5)
+		FNPrimitiveDrawStringPoint(5,6),
+		FNPrimitiveDrawStringPoint(6,5)
 	};
 	
 	// t
 	Glyphs[116] = TArray {
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-3,8),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,8),
 
-		FNPrimitiveDrawStringPoint(-1,4),
-		FNPrimitiveDrawStringPoint(-5,4)
+		FNPrimitiveDrawStringPoint(1,4),
+		FNPrimitiveDrawStringPoint(5,4)
 	};
 	
 	// u
@@ -1294,25 +1298,25 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,2),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,2),
 
-		FNPrimitiveDrawStringPoint(-6,2),
-		FNPrimitiveDrawStringPoint(-6,6)
+		FNPrimitiveDrawStringPoint(6,2),
+		FNPrimitiveDrawStringPoint(6,6)
 	};
 	
 	// v
 	Glyphs[118] = TArray {
 		FNPrimitiveDrawStringPoint(0,6),
-		FNPrimitiveDrawStringPoint(-3,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FNPrimitiveDrawStringPoint(-3,0),
-		FNPrimitiveDrawStringPoint(-6,6)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(6,6)
 	};
 	
 	// w
@@ -1321,28 +1325,28 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-2,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FNPrimitiveDrawStringPoint(-2,0),
-		FNPrimitiveDrawStringPoint(-3,2),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(3,2),
 		
-		FNPrimitiveDrawStringPoint(-3,2),
-		FNPrimitiveDrawStringPoint(-4,0),
+		FNPrimitiveDrawStringPoint(3,2),
+		FNPrimitiveDrawStringPoint(4,0),
 
-		FNPrimitiveDrawStringPoint(-4,0),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(4,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
-		FNPrimitiveDrawStringPoint(-6,0),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,0),
+		FNPrimitiveDrawStringPoint(6,6),
 	};
 	
 	// x
 	Glyphs[120] = TArray {
 		FNPrimitiveDrawStringPoint(0,6),
-		FNPrimitiveDrawStringPoint(-6,0),
+		FNPrimitiveDrawStringPoint(6,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,6)
+		FNPrimitiveDrawStringPoint(6,6)
 	};
 	
 	// y
@@ -1351,34 +1355,34 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(0,2),
 
 		FNPrimitiveDrawStringPoint(0,2),
-		FNPrimitiveDrawStringPoint(-2, 0),
+		FNPrimitiveDrawStringPoint(2, 0),
 
-		FNPrimitiveDrawStringPoint(-2, 0),
-		FNPrimitiveDrawStringPoint(-4, 0),
+		FNPrimitiveDrawStringPoint(2, 0),
+		FNPrimitiveDrawStringPoint(4, 0),
 
-		FNPrimitiveDrawStringPoint(-4, 0),
-		FNPrimitiveDrawStringPoint(-6, 2),
+		FNPrimitiveDrawStringPoint(4, 0),
+		FNPrimitiveDrawStringPoint(6, 2),
 
-		FNPrimitiveDrawStringPoint(-6, 6),
-		FNPrimitiveDrawStringPoint(-6, -2),
+		FNPrimitiveDrawStringPoint(6, 6),
+		FNPrimitiveDrawStringPoint(6, -2),
 
-		FNPrimitiveDrawStringPoint(-6, -2),
-		FNPrimitiveDrawStringPoint(-3, -3),
+		FNPrimitiveDrawStringPoint(6, -2),
+		FNPrimitiveDrawStringPoint(3, -3),
 
-		FNPrimitiveDrawStringPoint(-3, -3),
+		FNPrimitiveDrawStringPoint(3, -3),
 		FNPrimitiveDrawStringPoint(0, -1)
 	};
 	
 	// z
 	Glyphs[122] = TArray {
 		FNPrimitiveDrawStringPoint(0,6),
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,6),
 
-		FNPrimitiveDrawStringPoint(-6,6),
+		FNPrimitiveDrawStringPoint(6,6),
 		FNPrimitiveDrawStringPoint(0,0),
 
 		FNPrimitiveDrawStringPoint(0,0),
-		FNPrimitiveDrawStringPoint(-6,0)
+		FNPrimitiveDrawStringPoint(6,0)
 	};
 	
 	// Flag that we have generated at this point.

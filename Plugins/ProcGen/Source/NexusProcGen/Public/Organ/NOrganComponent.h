@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
 struct FNTissueEntry;
@@ -45,8 +46,8 @@ public:
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 
 	FString GetDebugLabel() const;
-	FVector GetDebugLocation() const;
-	FRotator GetDebugRotation() const;
+	FNPositionRotation GetDebugLabelPositionRotation() const;
+	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, float DepthBias = 0.f) const;
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
