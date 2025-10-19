@@ -48,7 +48,7 @@ struct FNPrimitiveDrawStringSettings
 	float Thickness = 8.f;
 
 	UPROPERTY()
-	float LineHeight = 2.f;
+	float LineHeight = 4.f;
 
 	// TODO: Implement
 	UPROPERTY()
