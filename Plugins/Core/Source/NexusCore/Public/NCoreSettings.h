@@ -3,9 +3,9 @@
 
 #pragma once
 
-
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
+#include "Developer/NPrimitiveDrawStringSettings.h"
 #include "NCoreSettings.generated.h"
 
 UCLASS(Config=NexusGame, defaultconfig)
@@ -55,4 +55,8 @@ public:
 	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done.",
 		EditCondition="bDeveloperSubsystemEnabled"))
 	int32 DeveloperObjectCountCompareThreshold = 40000;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Primitive Drawing Utils", DisplayName ="Draw String Settings",
+		meta=(ToolTip="The default settings used when invoking DrawString."))
+	FNPrimitiveDrawStringSettings PrimitiveDrawStringSettings;
 };

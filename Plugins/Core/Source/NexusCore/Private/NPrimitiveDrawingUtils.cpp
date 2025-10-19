@@ -1,36 +1,45 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NPrimitiveDrawingUtils.h"
+#include "Developer/NPrimitiveDrawingUtils.h"
 
-TArray<TArray<FVector2D>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FVector2D>>();
+#include "Developer/NMethodScopeTimer.h"
+#include "Developer/NPrimitiveDrawStringSettings.h"
 
+TArray<TArray<FNPrimitiveDrawStringPoint>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FNPrimitiveDrawStringPoint>>();
+bool FNPrimitiveDrawingUtils::bHasGeneratedGlyphs = false;
+
+// TODO: Has Dot? could build for point draw? instead of the drawing circles
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
-	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const ENDrawStringAlignment Alignment,
-	const float Thickness)
+	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const ENPrimitiveDrawStringAlignment Alignment,
+	const ENPrimitiveDrawStringPivot Pivot, const float LineHeight, const float Thickness)
 {
+	// TODO: Timer
+	FNMethodScopeTimer GlyphTimer(FString::Printf(TEXT("FNPrimitiveDrawingUtils::DrawString(%s)"), *String));
 	
 	// TODO: Add orientation / left / right / center  based?
 	
 	// Ensure our glyphs are created
-	if (Glyphs.Num() == 0) GenerateGlyphs();
+	if (!bHasGeneratedGlyphs) GenerateGlyphs();
 
 	// Setup the working scale to multiply our glyph points by
 	const float WorkingScale = Scale * 25;
 
 	// Reserve some room, assuming an average of 5 lines per character
 	TArray<TCHAR>& Characters = String.GetCharArray();
-	PDI->AddReserveLines(SDPG_World, 5 * Characters.Num());
+
+	PDI->AddReserveLines(SDPG_World, 6 * Characters.Num(), false, true);
+
 	FVector CurrentPosition = Position;
 	int LineIndex = 0;
-	const float LineHeight = ((4 + 2) * WorkingScale) * -1;
+	const float WorkingLineHeight = ((4 + LineHeight) * WorkingScale) * -1;
 	const FVector CharacterPostOffset = FVector(-4 * WorkingScale, 0.f, 0.f);
 	const FVector CharacterOffset = FVector(-3 * WorkingScale, 0.f, 0.f);
 	
 	for (const auto Character : Characters)
 	{
-		switch (const int GlyphIndex = CharToGlyphIndex(Character))
+		switch (const int GlyphIndex = GetGlyphIndex(Character))
 		{
 		case -4: // String terminator, stop now
 			return;
@@ -39,19 +48,19 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 			break;
 		case -2: // New Line
 			LineIndex++;
-			CurrentPosition = Position + FVector(0.f, LineHeight * LineIndex, 0.f);
+			CurrentPosition = Position + FVector(0.f, WorkingLineHeight * LineIndex, 0.f);
 			break;
 		case -1: // Space
 			CurrentPosition += CharacterOffset;
 			break;
 		default:
-			TArray<FVector2D>& Points = Glyphs[GlyphIndex];
+			TArray<FNPrimitiveDrawStringPoint>& Points = Glyphs[GlyphIndex];
 			const int PointCount = Points.Num();
 			for (int i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
-				FVector StartPoint = CurrentPosition + FVector((Points[i].X * -1) * WorkingScale, Points[i].Y * WorkingScale, 0.f);
-				FVector EndPoint = CurrentPosition + FVector((Points[i + 1].X * -1) * WorkingScale, Points[i + 1].Y * WorkingScale, 0.f);
+				FVector StartPoint = CurrentPosition + FVector(Points[i].X  * WorkingScale, Points[i].Y * WorkingScale, 0.f);
+				FVector EndPoint = CurrentPosition + FVector(Points[i + 1].X * WorkingScale, Points[i + 1].Y * WorkingScale, 0.f);
 				
 				// Rotate points around base origin w/ rotation
 				StartPoint = Position + Rotation.RotateVector(StartPoint - Position);
@@ -68,6 +77,8 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 
 void FNPrimitiveDrawingUtils::GenerateGlyphs()
 {
+	FNMethodScopeTimer GlyphTimer("FNPrimitiveDrawingUtils::GenerateGlyphs");
+	
 	// A glyph is based off a 3(w)x4(h) bottom-left oriented grid.
 	// It should consist of paired points which will be used to draw the corresponding lines.
 
@@ -76,718 +87,721 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 	
 	// Undefined
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 		
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 0),
-		FVector2D(0, 0),
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(0, 0),
 
-		FVector2D(0, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 4),
-		FVector2D(0, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(0, 0),
 	});
 
 	// 0
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 		
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 0),
-		FVector2D(0, 0),
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(0, 0),
 
-		FVector2D(3, 4),
-		FVector2D(0, 0)
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(0, 0)
 	});
 
 	// 1
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 		
-		FVector2D(1.5f,0),
-		FVector2D(1.5f,4),
+		FNPrimitiveDrawStringPoint(1.5f,0),
+		FNPrimitiveDrawStringPoint(1.5f,4),
 
-		FVector2D(1.5f,4),
-		FVector2D(0,3)
+		FNPrimitiveDrawStringPoint(1.5f,4),
+		FNPrimitiveDrawStringPoint(0,3)
 	});
 
 	// 2
 	Glyphs.Add(TArray {
-		FVector2D(0,3),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,3),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,3),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,3),
 
-		FVector2D(3,3),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 	});
 
 	// 3
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(1,2),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(1,2),
+		FNPrimitiveDrawStringPoint(3,2),
 	});
 
 	// 4
 	Glyphs.Add(TArray{
-		FVector2D(3,0),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(0,4),
-		FVector2D(0,2),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,2),
 
-		FVector2D(0,2),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(3,2),
 	});
 
 	// 5
 	Glyphs.Add(TArray {
-		FVector2D(0,1),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,1),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,2),
 
-		FVector2D(3,2),
-		FVector2D(0,2),
+		FNPrimitiveDrawStringPoint(3,2),
+		FNPrimitiveDrawStringPoint(0,2),
 
-		FVector2D(0,2),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(0,4),
 		
-		FVector2D(0,4),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// 6
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,2),
 
-		FVector2D(3,2),
-		FVector2D(0,2)
+		FNPrimitiveDrawStringPoint(3,2),
+		FNPrimitiveDrawStringPoint(0,2)
 	});
 
 	// 7
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(0,0)
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,0)
 	});
 
 	// 8
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 0),
-		FVector2D(0, 0),
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(0, 0),
 
-		FVector2D(0, 2),
-		FVector2D(3, 2)
+		FNPrimitiveDrawStringPoint(0, 2),
+		FNPrimitiveDrawStringPoint(3, 2)
 	});
 
 	// 9
 	Glyphs.Add(TArray {
-		FVector2D(0,1),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,1),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,2),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,2),
 
-		FVector2D(0,2),
-		FVector2D(3,2)
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(3,2)
 	});
 	
 	// A
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 		
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(0, 2),
-		FVector2D(3, 2)
+		FNPrimitiveDrawStringPoint(0, 2),
+		FNPrimitiveDrawStringPoint(3, 2)
 	});
 	
 	// B
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(0,2),
-		FVector2D(2,2),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(2,2),
 
-		FVector2D(2,2),
-		FVector2D(3,3),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(3,3),
 		
-		FVector2D(3,3),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(2,2),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(3,1),
 		
-		FVector2D(3,1),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 
 	// C
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 
 	// D
 	Glyphs.Add(TArray {
-		FVector2D(2,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(2,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FVector2D(2,4),
-		FVector2D(3,3),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(3,3),
 
-		FVector2D(3,3),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(3,1),
 
-		FVector2D(3,1),
-		FVector2D(2,0)
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(2,0)
 	});
 
 	// E
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(0,2),
-		FVector2D(2,2)
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(2,2)
 	});
 
 	// F
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,2),
-		FVector2D(2,2)
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(2,2)
 	});
 
 	// G
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,2),
 
-		FVector2D(3,2),
-		FVector2D(2,2)
+		FNPrimitiveDrawStringPoint(3,2),
+		FNPrimitiveDrawStringPoint(2,2)
 	});
 
 	// H
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 		
-		FVector2D(3,4),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(0,2),
-		FVector2D(3,2)
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(3,2)
 	});
 
 	// I
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(1.5f, 4),
-		FVector2D(1.5f, 0),
+		FNPrimitiveDrawStringPoint(1.5f, 4),
+		FNPrimitiveDrawStringPoint(1.5f, 0),
 		
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 	});
 
 	// J
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,1),
 
-		FVector2D(3,1),
-		FVector2D(2,0),
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FVector2D(2,0),
-		FVector2D(1,0),
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(1,0),
 
-		FVector2D(1,0),
-		FVector2D(0,1),
+		FNPrimitiveDrawStringPoint(1,0),
+		FNPrimitiveDrawStringPoint(0,1),
 	});
 
 	// K
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,2),
-		FVector2D(2,2),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(2,2),
 
-		FVector2D(2,2),
-		FVector2D(3,3),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(3,3),
 
-		FVector2D(3,3),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(3,4),
 		
-		FVector2D(2,2),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(2,2),
+		FNPrimitiveDrawStringPoint(3,1),
 
-		FVector2D(3,1),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 
 	// L
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 
 	// M
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(1.5f,2),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(1.5f,2),
 
-		FVector2D(1.5f,2),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(1.5f,2),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 	
 	// N
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// O
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 	
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 0),
-		FVector2D(0, 0)
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(0, 0)
 	});
 
 	// P
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 2),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 2),
 
-		FVector2D(3, 2),
-		FVector2D(0, 2)
+		FNPrimitiveDrawStringPoint(3, 2),
+		FNPrimitiveDrawStringPoint(0, 2)
 	});
 
 	// Q
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 	
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 0),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 0),
 
-		FVector2D(3, 0),
-		FVector2D(0, 0),
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(0, 0),
 
-		FVector2D(3, 0),
-		FVector2D(2, 1)
+		FNPrimitiveDrawStringPoint(3, 0),
+		FNPrimitiveDrawStringPoint(2, 1)
 	});
 
 	// R
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(0, 4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0, 4),
 
-		FVector2D(0, 4),
-		FVector2D(3, 4),
+		FNPrimitiveDrawStringPoint(0, 4),
+		FNPrimitiveDrawStringPoint(3, 4),
 
-		FVector2D(3, 4),
-		FVector2D(3, 2),
+		FNPrimitiveDrawStringPoint(3, 4),
+		FNPrimitiveDrawStringPoint(3, 2),
 
-		FVector2D(3, 2),
-		FVector2D(0, 2),
+		FNPrimitiveDrawStringPoint(3, 2),
+		FNPrimitiveDrawStringPoint(0, 2),
 
-		FVector2D(0, 2),
-		FVector2D(3, 0)
+		FNPrimitiveDrawStringPoint(0, 2),
+		FNPrimitiveDrawStringPoint(3, 0)
 	});
 
 	// S
 	Glyphs.Add(TArray {
-		FVector2D(3,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,2),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,2),
 
-		FVector2D(0,2),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(3,2),
 
-		FVector2D(3,2),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(3,2),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(0,0)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(0,0)
 	});
 
 	// T
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(1.5f,4),
-		FVector2D(1.5f,0)
+		FNPrimitiveDrawStringPoint(1.5f,4),
+		FNPrimitiveDrawStringPoint(1.5f,0)
 	});
 
 	// U
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// V
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(1.5f,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(1.5f,0),
 
-		FVector2D(1.5f,0),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(1.5f,0),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// W
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(1.5f,1.5f),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(1.5f,1.5f),
 
-		FVector2D(1.5f,1.5f),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(1.5f,1.5f),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// X
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(0,0),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// Y
 	Glyphs.Add(TArray {
-		FVector2D(1.5f,0),
-		FVector2D(1.5f,2),
+		FNPrimitiveDrawStringPoint(1.5f,0),
+		FNPrimitiveDrawStringPoint(1.5f,2),
 
-		FVector2D(1.5f,2),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(1.5f,2),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(1.5f,2),
-		FVector2D(3,4)
+		FNPrimitiveDrawStringPoint(1.5f,2),
+		FNPrimitiveDrawStringPoint(3,4)
 	});
 
 	// Z
 	Glyphs.Add(TArray {
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 
 	
 	// -
 	Glyphs.Add(TArray {
-		FVector2D(1,2),
-		FVector2D(2,2)
+		FNPrimitiveDrawStringPoint(1,2),
+		FNPrimitiveDrawStringPoint(2,2)
 	});
 
 	// [
 	Glyphs.Add(TArray {
-		FVector2D(2,4),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(2,0)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(2,0)
 	});
 
 	// ]
 	Glyphs.Add(TArray {
-		FVector2D(1,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(1,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,0),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,0),
 
-		FVector2D(3,0),
-		FVector2D(1,0)
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(1,0)
 	});
 
 	// (
 	Glyphs.Add(TArray {
-		FVector2D(2,4),
-		FVector2D(1,4),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(1,4),
 
-		FVector2D(1,4),
-		FVector2D(0,3),
+		FNPrimitiveDrawStringPoint(1,4),
+		FNPrimitiveDrawStringPoint(0,3),
 
-		FVector2D(0,3),
-		FVector2D(0,1),
+		FNPrimitiveDrawStringPoint(0,3),
+		FNPrimitiveDrawStringPoint(0,1),
 
-		FVector2D(0,1),
-		FVector2D(1,0),
+		FNPrimitiveDrawStringPoint(0,1),
+		FNPrimitiveDrawStringPoint(1,0),
 
-		FVector2D(1,0),
-		FVector2D(2,0)
+		FNPrimitiveDrawStringPoint(1,0),
+		FNPrimitiveDrawStringPoint(2,0)
 	});
 
 	// )
 	Glyphs.Add(TArray {
-		FVector2D(1,4),
-		FVector2D(2,4),
+		FNPrimitiveDrawStringPoint(1,4),
+		FNPrimitiveDrawStringPoint(2,4),
 
-		FVector2D(2,4),
-		FVector2D(3,3),
+		FNPrimitiveDrawStringPoint(2,4),
+		FNPrimitiveDrawStringPoint(3,3),
 
-		FVector2D(3,3),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(3,3),
+		FNPrimitiveDrawStringPoint(3,1),
 
-		FVector2D(3,1),
-		FVector2D(2,0),
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(2,0),
 
-		FVector2D(2,0),
-		FVector2D(1,0)
+		FNPrimitiveDrawStringPoint(2,0),
+		FNPrimitiveDrawStringPoint(1,0)
 	});
 	
 	// _
 	Glyphs.Add(TArray {
-		FVector2D(0,0),
-		FVector2D(3,0)
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(3,0)
 	});
 	
 	// :
 	Glyphs.Add(TArray {
-		FVector2D(1, 0.5f),
-		FVector2D(2, 0.5f),
+		FNPrimitiveDrawStringPoint(1, 0.5f),
+		FNPrimitiveDrawStringPoint(2, 0.5f),
 
-		FVector2D(2, 0.5f),
-		FVector2D(2, 1.5f),
+		FNPrimitiveDrawStringPoint(2, 0.5f),
+		FNPrimitiveDrawStringPoint(2, 1.5f),
 
-		FVector2D(2, 1.5f),
-		FVector2D(1, 1.5f),
+		FNPrimitiveDrawStringPoint(2, 1.5f),
+		FNPrimitiveDrawStringPoint(1, 1.5f),
 
-		FVector2D(1, 1.5f),
-		FVector2D(1, 0.5f),
+		FNPrimitiveDrawStringPoint(1, 1.5f),
+		FNPrimitiveDrawStringPoint(1, 0.5f),
 
-		FVector2D(1, 2.5f),
-		FVector2D(2, 2.5f),
+		FNPrimitiveDrawStringPoint(1, 2.5f),
+		FNPrimitiveDrawStringPoint(2, 2.5f),
 
-		FVector2D(2, 2.5f),
-		FVector2D(2, 3.5f),
+		FNPrimitiveDrawStringPoint(2, 2.5f),
+		FNPrimitiveDrawStringPoint(2, 3.5f),
 
-		FVector2D(2, 3.5f),
-		FVector2D(1, 3.5f),
+		FNPrimitiveDrawStringPoint(2, 3.5f),
+		FNPrimitiveDrawStringPoint(1, 3.5f),
 
-		FVector2D(1, 3.5f),
-		FVector2D(1, 2.5f),
+		FNPrimitiveDrawStringPoint(1, 3.5f),
+		FNPrimitiveDrawStringPoint(1, 2.5f),
 	});
 	
 	// @
 	Glyphs.Add(TArray { 
-		FVector2D(3,0),
-		FVector2D(0,0),
+		FNPrimitiveDrawStringPoint(3,0),
+		FNPrimitiveDrawStringPoint(0,0),
 
-		FVector2D(0,0),
-		FVector2D(0,4),
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0,4),
 
-		FVector2D(0,4),
-		FVector2D(3,4),
+		FNPrimitiveDrawStringPoint(0,4),
+		FNPrimitiveDrawStringPoint(3,4),
 
-		FVector2D(3,4),
-		FVector2D(3,1),
+		FNPrimitiveDrawStringPoint(3,4),
+		FNPrimitiveDrawStringPoint(3,1),
 
-		FVector2D(3,1),
-		FVector2D(1,1),
+		FNPrimitiveDrawStringPoint(3,1),
+		FNPrimitiveDrawStringPoint(1,1),
 
-		FVector2D(1,1),
-		FVector2D(1,3),
+		FNPrimitiveDrawStringPoint(1,1),
+		FNPrimitiveDrawStringPoint(1,3),
 
-		FVector2D(1,3),
-		FVector2D(2,3)
+		FNPrimitiveDrawStringPoint(1,3),
+		FNPrimitiveDrawStringPoint(2,3)
 	});
 
 	// #
 	Glyphs.Add(TArray {
-		FVector2D(1,3.5f),
-		FVector2D(1,0.5f),
+		FNPrimitiveDrawStringPoint(1,3.5f),
+		FNPrimitiveDrawStringPoint(1,0.5f),
 
-		FVector2D(2,3.5f),
-		FVector2D(2,0.5f),
+		FNPrimitiveDrawStringPoint(2,3.5f),
+		FNPrimitiveDrawStringPoint(2,0.5f),
 		
-		FVector2D(0.5f,1.5f),
-		FVector2D(2.5f,1.5f),
+		FNPrimitiveDrawStringPoint(0.5f,1.5f),
+		FNPrimitiveDrawStringPoint(2.5f,1.5f),
 
-		FVector2D(0.5f,2.5f),
-		FVector2D(2.5f,2.5f)
+		FNPrimitiveDrawStringPoint(0.5f,2.5f),
+		FNPrimitiveDrawStringPoint(2.5f,2.5f)
 	});
 	
 	// +
 	Glyphs.Add(TArray { 
-		FVector2D(0,2),
-		FVector2D(3,2),
+		FNPrimitiveDrawStringPoint(0,2),
+		FNPrimitiveDrawStringPoint(3,2),
 		
-		FVector2D(1.5f,3.5f),
-		FVector2D(1.5f,0.5f)
+		FNPrimitiveDrawStringPoint(1.5f,3.5f),
+		FNPrimitiveDrawStringPoint(1.5f,0.5f)
 	});
+
+	// Flag that we have generated at this point.
+	bHasGeneratedGlyphs = true;
 }
 
-int FNPrimitiveDrawingUtils::CharToGlyphIndex(const TCHAR Character)
+int FNPrimitiveDrawingUtils::GetGlyphIndex(const TCHAR Character)
 {
 	switch (Character)
 	{

@@ -9,10 +9,10 @@
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
-#include "NPrimitiveDrawingUtils.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "ScreenPass.h"
+#include "Developer/NPrimitiveDrawingUtils.h"
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
@@ -112,9 +112,8 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 {
 	bHasDirtyActors = false;
 	
-	FString Test = TEXT("ABCDEFGHIJKL MNOPQRSTUVWXYZ\nABC\n123456790\n-[]():\t@+#");
-	FNPrimitiveDrawingUtils::DrawString(PDI, Test, FVector(0.f, 500.f, 500.f), FRotator::ZeroRotator, FLinearColor::White);
-					
+	FString Test = TEXT("ABCDEFGHIJKL MNOPQRSTUVWXYZ\nABC\n123456790\n-[]():\t@+#\nabc def ghi jkl mno pqr stu vwx yz\nABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	FNPrimitiveDrawingUtils::DrawString(PDI, Test, FVector(0.f, 500.f, 500.f), FRotator::ZeroRotator);
 	
 	// Iterate all roots and draw their bounds
 	if (FNProcGenRegistry::HasRootComponents())

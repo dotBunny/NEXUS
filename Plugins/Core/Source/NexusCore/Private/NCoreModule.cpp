@@ -3,7 +3,7 @@
 
 #include "NCoreModule.h"
 #include "NCoreMinimal.h"
-#include "NPrimitiveDrawingUtils.h"
+#include "Developer/NPrimitiveDrawingUtils.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
