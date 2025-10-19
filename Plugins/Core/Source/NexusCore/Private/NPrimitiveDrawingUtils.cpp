@@ -7,14 +7,10 @@
 TArray<TArray<FNPrimitiveDrawStringPoint>> FNPrimitiveDrawingUtils::Glyphs = TArray<TArray<FNPrimitiveDrawStringPoint>>();
 bool FNPrimitiveDrawingUtils::bHasGeneratedGlyphs = false;
 
-// TODO: Has Dot? could build for point draw? instead of the drawing circles
-
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
 	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const ENPrimitiveDrawStringAlignment Alignment,
 	const ENPrimitiveDrawStringPivot Pivot, const float LineHeight, const float Thickness)
 {
-	// TODO: Add orientation / left / right / center  based?
-	
 	// Ensure our glyphs are created
 	if (!bHasGeneratedGlyphs) GenerateGlyphs();
 
@@ -130,6 +126,12 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(-1,5),
 		FNPrimitiveDrawStringPoint(-5,5)
 	};
+
+	// '
+	Glyphs[39] = TArray {
+		FNPrimitiveDrawStringPoint(-2,8),
+		FNPrimitiveDrawStringPoint(-2,6)
+	};
 	
 	// (
 	Glyphs[40] = TArray {
@@ -175,11 +177,38 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 		FNPrimitiveDrawStringPoint(-3,7),
 		FNPrimitiveDrawStringPoint(-3,1)
 	};
+
+	// '
+	Glyphs[44] = TArray {
+		FNPrimitiveDrawStringPoint(-1,2),
+		FNPrimitiveDrawStringPoint(-1,-1)
+	};
 		
 	// -
 	Glyphs[45] = TArray {
 		FNPrimitiveDrawStringPoint(-2,4),
 		FNPrimitiveDrawStringPoint(-4,4)
+	};
+
+	// .
+	Glyphs[46] = TArray {
+		FNPrimitiveDrawStringPoint(0,1),
+		FNPrimitiveDrawStringPoint(-1,1),
+
+		FNPrimitiveDrawStringPoint(-1,1),
+		FNPrimitiveDrawStringPoint(-1,0),
+
+		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(0,0),
+
+		FNPrimitiveDrawStringPoint(0,0),
+		FNPrimitiveDrawStringPoint(0,1)
+	};
+
+	// Forward slash
+	Glyphs[47] = TArray {
+		FNPrimitiveDrawStringPoint(-1,0),
+		FNPrimitiveDrawStringPoint(-7,8),
 	};
 	
 	// 0
@@ -786,6 +815,12 @@ void FNPrimitiveDrawingUtils::GenerateGlyphs()
 
 		FNPrimitiveDrawStringPoint(0,0),
 		FNPrimitiveDrawStringPoint(-4,0)
+	};
+
+	//  Backslash
+	Glyphs[92] = TArray {
+		FNPrimitiveDrawStringPoint(0,8),
+		FNPrimitiveDrawStringPoint(-7,0),
 	};
 
 	// ]

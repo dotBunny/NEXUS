@@ -14,6 +14,7 @@ struct FNPrimitiveDrawStringPoint
 class NEXUSCORE_API FNPrimitiveDrawingUtils
 {
 	friend class FNCoreModule;
+
 public:
 
 	FORCEINLINE static void DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position, const FRotator& Rotation)

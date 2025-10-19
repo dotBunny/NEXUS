@@ -5,6 +5,7 @@
 
 #include "NPrimitiveDrawStringSettings.generated.h"
 
+// TODO: Implement
 UENUM()
 enum class ENPrimitiveDrawStringAlignment : uint8
 {
@@ -13,6 +14,7 @@ enum class ENPrimitiveDrawStringAlignment : uint8
 	PDSA_Right				UMETA(DisplayName = "Right"),
 };
 
+// TODO: Implement
 UENUM()
 enum class ENPrimitiveDrawStringPivot: uint8
 {
@@ -34,9 +36,11 @@ struct FNPrimitiveDrawStringSettings
 	UPROPERTY()
 	FLinearColor ForegroundColor = FLinearColor::White;
 
+	// TODO: Implement
 	UPROPERTY()
 	bool bDrawBackground = false;
 	
+	// TODO: Implement
 	UPROPERTY()
 	FLinearColor BackgroundColor = FLinearColor::White;
 	
@@ -46,9 +50,11 @@ struct FNPrimitiveDrawStringSettings
 	UPROPERTY()
 	float LineHeight = 2.f;
 
+	// TODO: Implement
 	UPROPERTY()
 	ENPrimitiveDrawStringAlignment Alignment = ENPrimitiveDrawStringAlignment::PDSA_Left;
 
+	// TODO: Implement
 	UPROPERTY()
 	ENPrimitiveDrawStringPivot Pivot = ENPrimitiveDrawStringPivot::PDSP_TopLeft;
 };
