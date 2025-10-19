@@ -7,14 +7,8 @@
 
 struct FNPrimitiveDrawStringPoint
 {
-	float X;
-	float Y;
-	
-	FNPrimitiveDrawStringPoint(const float X, const float Y)
-	{
-		this->X = X * -1;
-		this->Y = Y;
-	}
+	int8 X;
+	int8 Y;
 };
 
 class NEXUSCORE_API FNPrimitiveDrawingUtils
@@ -37,7 +31,6 @@ public:
 	
 private:
 	static bool bHasGeneratedGlyphs;
-	static int GetGlyphIndex(TCHAR Character);
 	static void GenerateGlyphs();
 	
 	static TArray<TArray<FNPrimitiveDrawStringPoint>> Glyphs;
