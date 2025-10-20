@@ -5,6 +5,8 @@
 ### Added
 
 - Automatic `UNActorPoolSet` loading configurable in project `Actor Pool Settings`
+- Glyph based `FNPrimitiveFont` supporting rendering `FString` through `PDI` (`FNPrimitiveDrawingUtils::DrawString`) and other drawing interfaces (`FNDrawDebugHelpers::DrawDebugString`).
+- Support for `FNDrawDebugHelpers::DrawDebugString` via `UNDeveloperLibrary::DrawDebugString`.
 
 ### Changed
 

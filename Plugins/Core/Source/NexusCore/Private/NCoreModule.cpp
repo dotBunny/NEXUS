@@ -3,7 +3,7 @@
 
 #include "NCoreModule.h"
 #include "NCoreMinimal.h"
-#include "Developer/NPrimitiveDrawingUtils.h"
+#include "NPrimitiveFont.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -11,8 +11,8 @@ void FNCoreModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusCore")
 
-	// Generate our PDI glyphs as we initialize the module. 
-	FNPrimitiveDrawingUtils::GenerateGlyphs();
+	// Initialize our font glyphs
+	FNPrimitiveFont::Initialize();
 }
 
 IMPLEMENT_MODULE(FNCoreModule, NexusCore)
