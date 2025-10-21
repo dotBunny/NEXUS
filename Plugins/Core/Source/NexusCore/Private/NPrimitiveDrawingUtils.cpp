@@ -6,7 +6,8 @@
 
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
                                          const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale,
-                                         const float LineHeight, const float Thickness, const bool bInvertLineFeed)
+                                         const float LineHeight, const float Thickness,
+                                         const bool bInvertLineFeed, const bool bDrawBelowPosition)
 {
 	// Ensure our glyphs are created
 	if (!FNPrimitiveFont::IsInitialized())
@@ -21,13 +22,17 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 	TArray<TCHAR>& Characters = String.GetCharArray();
 
 	PDI->AddReserveLines(SDPG_World, 6 * Characters.Num(), false, true);
-
-	FVector CurrentPosition = Position;
-	int LineIndex = 0;
 	
 	float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
-
-	// Make it stack up, if inverted
+	FVector BasePosition = Position;
+	if (bDrawBelowPosition)
+	{
+		BasePosition += FVector(0.f, 0.f, WorkingLineHeight);
+	}
+	FVector CurrentPosition = BasePosition;
+	int LineIndex = 0;
+	
+	// Make it stack up if inverted
 	if (bInvertLineFeed)
 	{
 		WorkingLineHeight *= -1;
@@ -49,7 +54,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 		case 10: // New Line
 		case 13:
 			LineIndex++;
-			CurrentPosition = Position + FVector(0.f, 0.f, WorkingLineHeight * LineIndex);
+			CurrentPosition = BasePosition + FVector(0.f, 0.f, WorkingLineHeight * LineIndex);
 			break;
 		case 32: // Space
 			CurrentPosition += CharacterOffset;
@@ -77,8 +82,8 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 				// Rotate points around base origin w/ rotation
 				if (bNeedsRotation)
 				{
-					StartPoint = Position + RotationMatrix.TransformVector(StartPoint - Position);
-					EndPoint = Position + RotationMatrix.TransformVector(EndPoint - Position);
+					StartPoint = BasePosition + RotationMatrix.TransformVector(StartPoint - BasePosition);
+					EndPoint = BasePosition + RotationMatrix.TransformVector(EndPoint - BasePosition);
 				}
 				
 				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, Thickness);

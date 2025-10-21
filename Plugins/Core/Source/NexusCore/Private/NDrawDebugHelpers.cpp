@@ -8,7 +8,7 @@
 
 void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String, const FVector& Position,
 	const FRotator& Rotation, const bool bPersistentLines, const float LifeTime, const uint8 DepthPriority, const FLinearColor ForegroundColor,
-	const float Scale, const float LineHeight, const float Thickness, const bool bInvertLineFeed)
+	const float Scale, const float LineHeight, const float Thickness, const bool bInvertLineFeed, const bool bDrawBelowPosition)
 {
 #if ENABLE_DRAW_DEBUG
 	if (GEngine->GetNetMode(InWorld) != NM_DedicatedServer)
@@ -45,12 +45,16 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 			// Reserve some room, assuming an average of 5 lines per character
 			TArray<TCHAR>& Characters = String.GetCharArray();
 
-			FVector CurrentPosition = Position;
+			float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
+			FVector BasePosition = Position;
+			if (bDrawBelowPosition)
+			{
+				BasePosition += FVector(0.f, 0.f, WorkingLineHeight);
+			}
+			FVector CurrentPosition = BasePosition;
 			int LineIndex = 0;
 			
-			float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
-
-			// Make it stack up, if inverted
+			// Make it stack up if inverted
 			if (bInvertLineFeed)
 			{
 				WorkingLineHeight *= -1;
@@ -72,7 +76,7 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 				case 10: // New Line
 				case 13:
 					LineIndex++;
-					CurrentPosition = Position + FVector(0.f, 0.f, WorkingLineHeight * LineIndex);
+					CurrentPosition = BasePosition + FVector(0.f, 0.f, WorkingLineHeight * LineIndex);
 					break;
 				case 32: // Space
 					CurrentPosition += CharacterOffset;
@@ -100,8 +104,8 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 						// Rotate points around base origin w/ rotation
 						if (bNeedsRotation)
 						{
-							StartPoint = Position + RotationMatrix.TransformVector(StartPoint - Position);
-							EndPoint = Position + RotationMatrix.TransformVector(EndPoint - Position);
+							StartPoint = BasePosition + RotationMatrix.TransformVector(StartPoint - BasePosition);
+							EndPoint = BasePosition + RotationMatrix.TransformVector(EndPoint - BasePosition);
 						}
 						
 						// Draw line
