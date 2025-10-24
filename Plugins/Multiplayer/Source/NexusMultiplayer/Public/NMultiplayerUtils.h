@@ -69,19 +69,43 @@ public:
 		if (GameState == nullptr) return false;
 		return GameState->GetLocalRole() == ROLE_Authority;
 	}
+
+	FORCEINLINE static int32 GetFirstPlayerIdentifier(const UWorld* World)
+	{
+		if (const AGameStateBase* GameState = World->GetGameState();
+			GameState->PlayerArray.Num() > 0)
+		{
+			return GameState->PlayerArray[0]->GetPlayerId();
+		}
+		return 0;
+	}
 	
 	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
 	{
-		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();;
+		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();
 	}
 
 	FORCEINLINE static APawn* GetPawnFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
-		for (const auto PlayerState : World->GetGameState()->PlayerArray)
+		for (const AGameStateBase* GameState = World->GetGameState();
+			const auto PlayerState : GameState->PlayerArray)
 		{
 			if (PlayerState->GetPlayerId() == PlayerIdentifier)
 			{
 				return PlayerState->GetPawn();
+			}
+		}
+		return nullptr;
+	}
+
+	FORCEINLINE static AActor* GetPlayerControllerFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
+	{
+		for (const AGameStateBase* GameState = World->GetGameState();
+			const auto PlayerState : GameState->PlayerArray)
+		{
+			if (PlayerState->GetPlayerId() == PlayerIdentifier)
+			{
+				return PlayerState->GetPlayerController();
 			}
 		}
 		return nullptr;
