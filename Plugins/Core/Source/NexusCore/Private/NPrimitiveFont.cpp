@@ -8,7 +8,7 @@ TArray<TArray<FNPrimitiveFontPoint>> FNPrimitiveFont::Glyphs = TArray<TArray<FNP
 
 TArray<FNPrimitiveFontPoint>& FNPrimitiveFont::GetGlyph(const char InChar)
 {
-	if (InChar < 0 || InChar > 125) return Glyphs[0];
+	if (InChar < 32 || InChar > 126) return Glyphs[0];
 	return Glyphs[InChar];
 }
 
@@ -18,7 +18,7 @@ void FNPrimitiveFont::Initialize()
 	
 	// A glyph is based off a 6(w)x8(h) bottom-left oriented grid.
 	// It should consist of paired points which will be used to draw the corresponding lines.
-	Glyphs.AddZeroed(126);
+	Glyphs.AddZeroed(127);
 	
 	// Replace null with unknown-character as we'll use it.
 	Glyphs[0] = TArray {
@@ -89,6 +89,8 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(5,5)
 	};
 
+	// TODO: 36 $ 
+	
 	// %
 	Glyphs[37] = TArray {
 		FNPrimitiveFontPoint(0,0),
@@ -200,6 +202,8 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(4, 0),
 		FNPrimitiveFontPoint(2,0)
 	};
+
+	// TODO: 42 *
 	
 	// +
 	Glyphs[43] = TArray { 
@@ -435,6 +439,8 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(2, 5)
 	};
 
+	// TODO: 59 ;
+
 	// <
 	Glyphs[60] = TArray { 
 		FNPrimitiveFontPoint(5,7),
@@ -461,6 +467,8 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(5,4),
 		FNPrimitiveFontPoint(1,1)
 	};	
+
+	// TODO: 63 ?
 	
 	// @
 	Glyphs[64] = TArray { 
@@ -903,6 +911,8 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,0)
 	};
 
+	// TODO: 96 `
+	
 	// a
 	Glyphs[97] = TArray {
 		FNPrimitiveFontPoint(6,0),
@@ -1440,11 +1450,17 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(6,0)
 	};
 
+	// TODO: 123 {
+
 	// |
 	Glyphs[124] = TArray {
 		FNPrimitiveFontPoint(3,0),
 		FNPrimitiveFontPoint(3,8)
 	};
+
+	// TODO: 125 }
+
+	// TODO: 126 ~
 	
 	// Flag that we have generated at this point.
 	bIsInitialized = true;
