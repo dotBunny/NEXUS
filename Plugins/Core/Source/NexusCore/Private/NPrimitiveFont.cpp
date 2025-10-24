@@ -329,8 +329,35 @@ void FNPrimitiveFont::Initialize()
 		FNPrimitiveFontPoint(2, 7),
 
 		FNPrimitiveFontPoint(2, 7),
-		FNPrimitiveFontPoint(2, 5),
+		FNPrimitiveFontPoint(2, 5)
 	};
+
+	// <
+	Glyphs[60] = TArray { 
+		FNPrimitiveFontPoint(5,7),
+		FNPrimitiveFontPoint(1,4),
+
+		FNPrimitiveFontPoint(1,4),
+		FNPrimitiveFontPoint(5,1)
+	};
+
+	// =
+	Glyphs[61] = TArray { 
+		FNPrimitiveFontPoint(0,5),
+		FNPrimitiveFontPoint(6,5),
+
+		FNPrimitiveFontPoint(0,3),
+		FNPrimitiveFontPoint(6,3)
+	};
+	
+	// >
+	Glyphs[62] = TArray { 
+		FNPrimitiveFontPoint(1,7),
+		FNPrimitiveFontPoint(5,4),
+		
+		FNPrimitiveFontPoint(5,4),
+		FNPrimitiveFontPoint(1,1)
+	};	
 	
 	// @
 	Glyphs[64] = TArray { 
@@ -1308,6 +1335,12 @@ void FNPrimitiveFont::Initialize()
 
 		FNPrimitiveFontPoint(0,0),
 		FNPrimitiveFontPoint(6,0)
+	};
+
+	// |
+	Glyphs[124] = TArray {
+		FNPrimitiveFontPoint(3,0),
+		FNPrimitiveFontPoint(3,8)
 	};
 	
 	// Flag that we have generated at this point.

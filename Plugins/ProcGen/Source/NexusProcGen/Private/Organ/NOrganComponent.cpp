@@ -33,13 +33,15 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 	return MoveTemp(PositionRotation);
 }
 
-void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, const float DepthBias) const
+void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
-	// TODO: this needs to get called when you have a organ selected, it should iterate the contained organs and color them specifically with less bias, lighter color?
 	if (IsVolumeBased())
 	{
-		const AVolume* Volume = Cast<AVolume>(GetOwner());
-		DrawWireBox(PDI,  Volume->GetBounds().GetBox(), Color, SDPG_World, 2.f, DepthBias);
+		const AActor* Owner = GetOwner();
+		FTransform BoxTransform = Owner->GetLevelTransform();
+		const auto Box =  Cast<AVolume>(GetOwner())->GetBounds().GetBox();
+		BoxTransform.SetLocation( Owner->GetActorLocation() );
+		DrawBox( PDI, BoxTransform.ToMatrixWithScale(), Box.GetExtent(), GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World );
 	}
 	else
 	{

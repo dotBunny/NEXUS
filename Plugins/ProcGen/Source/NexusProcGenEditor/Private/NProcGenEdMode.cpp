@@ -164,12 +164,13 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			{
 				for (int p = 0; p < Order[i].Num(); p++)
 				{
-					FString Label = FString::Printf(TEXT("%i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
+					Order[i][p]->DrawDebugPDI(PDI);
+					
+					FString Label = FString::Printf(TEXT(" %i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
+
 					FNPositionRotation LabelOrientation = Order[i][p]->GetDebugLabelPositionRotation();
 					FNPrimitiveDrawingUtils::DrawString(PDI, Label,
 					 	LabelOrientation.Position, LabelOrientation.Rotation, FLinearColor::White);
-					
-					Order[i][p]->DrawDebugPDI(PDI, FLinearColor::White);
 				}
 			}
 		}

@@ -48,7 +48,7 @@ public:
 	FString GetDebugLabel() const;
 	FNPositionRotation GetDebugLabelPositionRotation() const;
 	
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor Color, float DepthBias = 0.f) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 
