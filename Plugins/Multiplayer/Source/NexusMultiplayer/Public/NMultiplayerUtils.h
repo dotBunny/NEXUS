@@ -13,7 +13,7 @@ class ALevelInstance;
 
 /**
  * A handful of methods meant to support the building logic that works in multiplayer scenarios.
- * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">FNMultiplayerUtils</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">UNMultiplayerLibrary</a>
  */
 class FNMultiplayerUtils
 {
@@ -82,7 +82,22 @@ public:
 		if (GameState == nullptr) return false;
 		return GameState->GetLocalRole() == ROLE_Authority;
 	}
-	
+
+	/**
+	 * Get a player's unique identifier from the APlayerController.
+	 * @param PlayerController The target APlayerController to use when querying for the player identification number.
+	 * @return The player's identifier.
+	 */
+	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
+	{
+		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();
+	}
+
+	/**
+	 * Get the first player's unique identifier.
+	 * @param World The world to check.
+	 * @return The player's identifier.
+	 */
 	FORCEINLINE static int32 GetFirstPlayerIdentifier(const UWorld* World)
 	{
 		if (const AGameStateBase* GameState = World->GetGameState();
@@ -93,11 +108,12 @@ public:
 		return 0;
 	}
 	
-	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
-	{
-		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();
-	}
-
+	/**
+	 * Get the APawn for the given player's unique identifier.
+	 * @param World The world to check.
+	 * @param PlayerIdentifier The target identifier to query for.
+	 * @return If found, APawn, or nullptr.
+	 */
 	FORCEINLINE static APawn* GetPawnFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
 		for (const AGameStateBase* GameState = World->GetGameState();
@@ -111,6 +127,12 @@ public:
 		return nullptr;
 	}
 
+	/**
+	 * Get the AActor for the given player's unique identifier.
+	 * @param World The world to check.
+	 * @param PlayerIdentifier The target identifier to query for.
+	 * @return If found, AActor, or nullptr.
+	 */
 	FORCEINLINE static AActor* GetPlayerControllerFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
 	{
 		for (const AGameStateBase* GameState = World->GetGameState();

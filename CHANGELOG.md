@@ -7,6 +7,7 @@
 - Automatic `UNActorPoolSet` loading configurable in project `Actor Pool Settings`
 - Glyph based `FNPrimitiveFont` supporting rendering `FString` through `PDI` (`FNPrimitiveDrawingUtils::DrawString`) and other drawing interfaces (`FNDrawDebugHelpers::DrawDebugString`).
 - Support for `FNDrawDebugHelpers::DrawDebugString` via `UNDeveloperLibrary::DrawDebugString`.
+- `UNMultiplayerLibrary` exposing `FNMultiplayerUtils` support for `PlayerIdentifier`.
 
 ### Changed
 
@@ -16,11 +17,9 @@
 - The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
 
-
 ### Fixed
 
 - Selecting the `NCellActor` no longer adds it to the current selection, instead clearing and making it the sole selected.
-
 
 ## [0.2.2] - 2025-09-24
 
