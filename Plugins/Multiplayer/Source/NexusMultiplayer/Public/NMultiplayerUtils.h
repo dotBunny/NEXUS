@@ -70,6 +70,19 @@ public:
 		return GameState->GetLocalRole() == ROLE_Authority;
 	}
 
+	/**
+	* Does the current callstack have GameState authority?
+	* @remark One of many ways to check if the logic is being operated on the host/server.
+	* @param World The world to check.
+	* @return true/false if authority is found.
+	*/
+	FORCEINLINE static bool HasGameStateAuthority(const UWorld& World)
+	{
+		const AGameStateBase* GameState = World.GetGameState();
+		if (GameState == nullptr) return false;
+		return GameState->GetLocalRole() == ROLE_Authority;
+	}
+	
 	FORCEINLINE static int32 GetFirstPlayerIdentifier(const UWorld* World)
 	{
 		if (const AGameStateBase* GameState = World->GetGameState();
