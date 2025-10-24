@@ -8,4 +8,12 @@ public: \
 	static const Type* Get() \
 	{ \
 		return GetDefault<Type>(); \
+	} \
+	static Type* GetMutable() { \
+		static Type* MutableInstance; \
+		if (MutableInstance == nullptr) \
+		{ \
+			MutableInstance = GetMutableDefault<Type>(); \
+		} \
+		return MutableInstance; \
 	}
