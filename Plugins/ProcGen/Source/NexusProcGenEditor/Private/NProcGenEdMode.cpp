@@ -148,12 +148,13 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		if (const uint32 NewSelectedOrganHash = FNArrayUtils::GetPointersHash(SelectedOrganVolumes); 
 			NewSelectedOrganHash != PreviousSelectedOrganHash)
 		{
+			OrganGenerator->Reset();
 			for (const ANOrganVolume* OrganVolume : SelectedOrganVolumes)
 			{
-				OrganGenerator->Reset();
 				OrganGenerator->AddToContext(OrganVolume->OrganComponent);
-				OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
 			}
+			OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
+			
 			PreviousSelectedOrganHash = NewSelectedOrganHash;
 		}
 		

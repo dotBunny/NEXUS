@@ -182,23 +182,6 @@ TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromLevel(const ULev
 
 }
 
-TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels)
-{
-	TArray<UNOrganComponent*> Result;
-	if (World == nullptr) return Result;
-    
-	for (const ULevel* Level : World->GetLevels())
-	{
-		if (bIgnoreInstancedLevels && Level->IsInstancedLevel()) continue;
-        
-		TArray<UNOrganComponent*> LevelComponents = GetOrganComponentsFromLevel(Level);
-		Result.Append(LevelComponents);
-	}
-    
-	return Result;
-
-}
-
 TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromLevel(const ULevel* InLevel)
 {
 	TArray<ANOrganVolume*> Result;

@@ -58,7 +58,6 @@ TArray<UNOrganComponent*> FNProcGenRegistry::GetOrganComponentsFromLevel(const U
 	return MoveTemp(OrganComponents);
 }
 
-
 UNCellRootComponent* FNProcGenRegistry::GetCellRootComponentFromLevel(const ULevel* Level)
 {
 	for (UNCellRootComponent* RootComponent : GetCellRootComponents())
@@ -84,6 +83,15 @@ bool FNProcGenRegistry::HasJunctionComponents()
 bool FNProcGenRegistry::HasOrganComponents()
 {
 	return Organs.Num() > 0;
+}
+
+bool FNProcGenRegistry::HasOrganComponentsInWorld(const UWorld* World)
+{
+	for (const UNOrganComponent* Component : GetOrganComponents())
+	{
+		if (Component->GetWorld() == World) return true;
+	}
+	return false;
 }
 
 bool FNProcGenRegistry::RegisterCellRootComponent(UNCellRootComponent* Component)

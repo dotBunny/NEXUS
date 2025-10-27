@@ -24,7 +24,9 @@ public:
 	static bool IsCellActorSelected();
 	static TArray<ANCellActor*> GetSelectedCellActors();
 	static bool IsOrganVolumeSelected();
+	static bool IsOrganComponentPresentInCurrentWorld();
 	static TArray<ANOrganVolume*> GetSelectedOrganVolumes();
+	static TArray<UNOrganComponent*> GetSelectedOrganComponents();
 	static ENProcGenSelectionFlags GetSelectionFlags();
 	
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr);

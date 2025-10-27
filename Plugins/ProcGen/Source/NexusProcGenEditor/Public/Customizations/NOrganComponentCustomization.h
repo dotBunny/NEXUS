@@ -10,7 +10,7 @@ public:
 	static TSharedRef<IDetailCustomization> MakeInstance();
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 protected:
-	FReply OnGenerateClicked(TArray<TWeakObjectPtr<UObject>> Objects);
+	FReply OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects);
 	FReply OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object);
 	FReply OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object);
 	FReply OnRefreshClicked(TArray<TWeakObjectPtr<UObject>> Object);

@@ -9,6 +9,7 @@
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Selection.h"
 #include "Engine/Level.h"
@@ -61,6 +62,15 @@ bool FNProcGenEditorUtils::IsOrganVolumeSelected()
 	return false;
 }
 
+bool FNProcGenEditorUtils::IsOrganComponentPresentInCurrentWorld()
+{
+	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	{
+		return FNProcGenRegistry::HasOrganComponentsInWorld(CurrentWorld);
+	}
+	return false;
+}
+
 TArray<ANOrganVolume*> FNProcGenEditorUtils::GetSelectedOrganVolumes()
 {
 	TArray<ANOrganVolume*> Result;
@@ -69,6 +79,19 @@ TArray<ANOrganVolume*> FNProcGenEditorUtils::GetSelectedOrganVolumes()
 		if (ANOrganVolume* TestVolume = Cast<ANOrganVolume>( *SelectedActor )) Result.Add(TestVolume);
 	}
 	return MoveTemp(Result);
+}
+
+TArray<UNOrganComponent*> FNProcGenEditorUtils::GetSelectedOrganComponents()
+{
+	TArray<UNOrganComponent*> Components;
+	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
+	{
+		if (const ANOrganVolume* Organ = Cast<ANOrganVolume>( *SelectedActor ))
+		{
+			Components.Add(Organ->GetOrganComponent());
+		}
+	}
+	return MoveTemp(Components);
 }
 
 ENProcGenSelectionFlags FNProcGenEditorUtils::GetSelectionFlags()

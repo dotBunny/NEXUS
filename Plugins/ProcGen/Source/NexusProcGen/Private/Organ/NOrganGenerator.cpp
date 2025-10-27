@@ -3,14 +3,51 @@
 
 #include "Organ/NOrganGenerator.h"
 
-#include "NCoreMinimal.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Organ/NOrganComponentContext.h"
 
 UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	Context = new FNOrganContext();
+}
+
+UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects)
+{
+	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	
+	for (TWeakObjectPtr<UObject> WeakObject : Objects)
+	{
+		if (UObject* Object = WeakObject.Get())
+		{
+			if (UNOrganComponent* Component = Cast<UNOrganComponent>(Object))
+			{
+				OrganGenerator->AddToContext(Component);
+			}
+		}
+	}
+	
+	return OrganGenerator;
+}
+
+UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<UNOrganComponent*>& Components)
+{
+	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	
+	for (const auto Component : Components)
+	{
+		OrganGenerator->AddToContext(Component);
+	}
+	
+	return OrganGenerator;
+}
+
+UNOrganGenerator* UNOrganGenerator::CreateInstance(UNOrganComponent* BaseComponent)
+{
+	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	
+	OrganGenerator->AddToContext(BaseComponent);
+	
+	return OrganGenerator;
 }
 
 void UNOrganGenerator::Reset() const

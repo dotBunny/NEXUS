@@ -22,6 +22,7 @@ public:
 	static bool HasRootComponents();
 	static bool HasJunctionComponents();
 	static bool HasOrganComponents();
+	static bool HasOrganComponentsInWorld(const UWorld* World);
 	
 	static bool RegisterCellRootComponent(UNCellRootComponent* Component);
 	static bool RegisterCellJunctionComponent(UNCellJunctionComponent* Component);

@@ -126,27 +126,9 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 		];
 }
 
-FReply FNOrganComponentCustomization::OnGenerateClicked(TArray<TWeakObjectPtr<UObject>> Objects)
+FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
-	// Create our generation graph / container
-	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
-
-	// Add components to the generation context
-	for (TWeakObjectPtr<UObject> WeakObject : Objects)
-	{
-		if (UObject* Object = WeakObject.Get())
-		{
-			if (UNOrganComponent* Component = Cast<UNOrganComponent>(Object))
-			{
-				OrganGenerator->AddToContext(Component);
-			}
-		}
-	}
-
-	// Do some preprocessing, figure out order of generation, no more context can be added after this
-	OrganGenerator->LockContext();
-	
-	// Add generation context to...
+	UNOrganGenerator* OrganGenerator = UNOrganGenerator::CreateInstance(Objects);
 	OrganGenerator->Generate();
 	
 	return FReply::Handled();

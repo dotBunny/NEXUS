@@ -23,7 +23,6 @@ public:
 	static ANCellActor* GetCellActorFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 
 	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* InLevel);
-	static TArray<UNOrganComponent*> GetOrganComponentsFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 	
 	static TArray<ANOrganVolume*> GetOrganVolumesFromLevel(const ULevel* InLevel);
 	static TArray<ANOrganVolume*> GetOrganVolumesFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);

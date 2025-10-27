@@ -14,9 +14,13 @@ class NEXUSPROCGEN_API UNOrganGenerator : public UObject
 {
 	GENERATED_BODY()
 
-	UNOrganGenerator(const FObjectInitializer& ObjectInitializer);
+	explicit UNOrganGenerator(const FObjectInitializer& ObjectInitializer);
 	
 public:
+	static UNOrganGenerator* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects);
+	static UNOrganGenerator* CreateInstance(const TArray<UNOrganComponent*>& Components);
+	static UNOrganGenerator* CreateInstance(UNOrganComponent* BaseComponent);
+	
 	void Reset() const;
 	void Generate();
 	bool AddToContext(UNOrganComponent* Component) const;

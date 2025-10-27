@@ -16,6 +16,8 @@ class NEXUSPROCGEN_API ANOrganVolume : public AVolume
 public:
 	explicit ANOrganVolume(const FObjectInitializer& ObjectInitializer);
 	
+	UNOrganComponent* GetOrganComponent() const { return OrganComponent; }
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Nexus")
 	TObjectPtr<UNOrganComponent> OrganComponent;
 };
