@@ -18,13 +18,13 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem
 
 public:
 	
-	bool RegisterNCellActor(ANCellActor* NCellActor);
-	bool UnregisterNCellActor(ANCellActor* NCellActor);
+	bool RegisterCellActor(ANCellActor* CellActor);
+	bool UnregisterCellActor(ANCellActor* CellActor);
 
-	bool RegisterNCellProxy(ANCellProxy* NCellProxy);
-	bool UnregisterNCellProxy(ANCellProxy* NCellProxy);
+	bool RegisterCellProxy(ANCellProxy* CellProxy);
+	bool UnregisterCellProxy(ANCellProxy* CellProxy);
 
 private:	
-	TArray<ANCellActor*> KnownNCellActors;
-	TArray<ANCellProxy*> KnownNCellProxies;
+	TArray<ANCellActor*> KnownCellActors;
+	TArray<ANCellProxy*> KnownCellProxies;
 };

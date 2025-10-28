@@ -34,13 +34,14 @@ public:
 		return Context->GenerationOrder;
 	}
 	
+	// TODO: Do we expose this?
 	FNOrganGraph* GetGraph() const { return Graph; }
 
 protected:
 	virtual void BeginDestroy() override;
 
 private:
-	FNOrganGraph* Graph;
-	FNOrganContext* Context;
+	FNOrganGraph* Graph = nullptr;
+	FNOrganContext* Context = nullptr;
 	bool bIsContextLocked;
 };

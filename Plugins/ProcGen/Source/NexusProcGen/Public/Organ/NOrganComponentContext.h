@@ -16,5 +16,4 @@ public:
 	UNOrganComponent* SourceComponent;
 	TArray<UNOrganComponent*> IntersectComponents;
 	TArray<UNOrganComponent*> ContainedComponents;
-	
 };

@@ -14,7 +14,6 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 
 	N_IMPLEMENT_SETTINGS(UNProcGenSettings);
 
-public:
 #if WITH_EDITOR
 
 	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
@@ -33,6 +32,7 @@ public:
 
 #endif	
 
+public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Unit Size",
 		meta=(ToolTip="What is the base unit sized when operating on our grid?"))
 	FVector UnitSize = FVector(50.f, 50.f, 50.f);

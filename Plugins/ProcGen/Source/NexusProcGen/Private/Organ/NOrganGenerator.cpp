@@ -5,6 +5,7 @@
 
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
+#include "Organ/NOrganGraph.h"
 
 UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -64,7 +65,18 @@ void UNOrganGenerator::BeginDestroy()
 	{
 		Context->Reset();
 		delete Context;
+
+		Context = nullptr;
 	}
+	
+	if (Graph != nullptr)
+	{
+		Graph->Reset();
+		delete Graph;
+		
+		Graph = nullptr;
+	}
+
 	UObject::BeginDestroy();
 }
 
@@ -77,7 +89,17 @@ void UNOrganGenerator::Generate()
 		Context->LockAndPreprocess();
 	}
 	
-	// TODO: Do
+	// TODO: We shouldnt have a graph, but maybe we do?
+	if (Graph != nullptr)
+	{
+		Graph->Reset();
+		delete Graph;
+	}
+	
+	// Build out our new graph
+	Graph = new FNOrganGraph(Context);
+	
+	Graph->UnlockTasks();
 }
 
 bool UNOrganGenerator::AddToContext(UNOrganComponent* Component) const
