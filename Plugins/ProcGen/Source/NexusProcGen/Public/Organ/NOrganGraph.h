@@ -5,12 +5,12 @@
 
 #include "CoreMinimal.h"
 
-class FNOrganContext;
+class FNOrganGeneratorContext;
 
 class NEXUSPROCGEN_API FNOrganGraph
 {
 public:
-	explicit FNOrganGraph(FNOrganContext* Context);
+	explicit FNOrganGraph(FNOrganGeneratorContext* Context);
 	
 	void UnlockTasks();
 	
@@ -21,7 +21,7 @@ public:
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
 	
 private:
-	FNOrganContext* RootContext;
+
 	TArray<FGraphEventArray> PassTasks;
 	FGraphEventRef FinalizeTask;
 	

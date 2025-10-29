@@ -9,7 +9,7 @@
 
 UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = new FNOrganContext();
+	Context = new FNOrganGeneratorContext();
 }
 
 UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects)

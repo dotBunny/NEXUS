@@ -3,28 +3,33 @@
 
 #include "Organ/NOrganGraph.h"
 
-#include "Organ/NOrganContext.h"
+#include "Organ/NOrganGeneratorContext.h"
 #include "Organ/NOrganGraphFinalizeTask.h"
 #include "Organ/NOrganGraphTask.h"
 
-FNOrganGraph::FNOrganGraph(FNOrganContext* Context)
+FNOrganGraph::FNOrganGraph(FNOrganGeneratorContext* Context)
 {
 	bTasksUnlocked = false;
 	
-	// Assign the base level context to the graph
-	RootContext = Context;
+	
+	// TODO: Generate NOrganGraphContext?
+	
 	
 	// Build out processing tasks
-	for (auto Pass : RootContext->GenerationOrder)
+	for (auto Pass : Context->GenerationOrder)
 	{
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
+			// Create component context
+			FNOrganGeneratorContextMap* ContextMap = Context->Components.Find(Component);
+			FNOrganGraphTaskContext* ContextPtr = new FNOrganGraphTaskContext(ContextMap);
+			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGraphTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
-				.ConstructAndHold(RootContext->Components.Find(Component)); // ConstructAndDispatchWhenReady
+				.ConstructAndHold(ContextPtr); // ConstructAndDispatchWhenReady
 			
 			Tasks.Add(OrganTask);
 		}
@@ -64,6 +69,5 @@ void FNOrganGraph::WaitForTasks()
 
 void FNOrganGraph::Reset()
 {
-	RootContext = nullptr;
 	bTasksUnlocked = false;
 }

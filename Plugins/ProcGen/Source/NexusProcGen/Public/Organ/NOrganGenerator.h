@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NOrganContext.h"
+#include "NOrganGeneratorContext.h"
 #include "NOrganGenerator.generated.h"
 
 class UNOrganComponent;
@@ -42,6 +42,6 @@ protected:
 
 private:
 	FNOrganGraph* Graph = nullptr;
-	FNOrganContext* Context = nullptr;
+	FNOrganGeneratorContext* Context = nullptr;
 	bool bIsContextLocked;
 };

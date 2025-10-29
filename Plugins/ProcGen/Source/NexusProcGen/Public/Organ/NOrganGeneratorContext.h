@@ -4,9 +4,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NOrganComponentContext.h"
 
-class NEXUSPROCGEN_API FNOrganContext
+
+class UNOrganComponent;
+
+struct NEXUSPROCGEN_API FNOrganGeneratorContextMap
+{
+	UNOrganComponent* SourceComponent;
+	TArray<UNOrganComponent*> IntersectComponents;
+	TArray<UNOrganComponent*> ContainedComponents;
+};
+
+/**
+ * Game-thread context of the entire generation process.
+ */
+class NEXUSPROCGEN_API FNOrganGeneratorContext
 {
 public:
 	void Reset();
@@ -17,8 +29,11 @@ public:
 	
 	void OutputToLog();
 	
-	TMap<UNOrganComponent*, FNOrganComponentContext> Components;
+	TMap<UNOrganComponent*, FNOrganGeneratorContextMap> Components;
+	
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
+	
+
 	
 private:
 	bool bIsLocked = false;

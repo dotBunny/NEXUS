@@ -5,7 +5,7 @@
 
 #include "Async/TaskGraphInterfaces.h"
 
-class FNOrganComponentContext;
+class FNOrganGeneratorComponentMap;
 
 struct FNOrganGraphFinalizeTask
 {

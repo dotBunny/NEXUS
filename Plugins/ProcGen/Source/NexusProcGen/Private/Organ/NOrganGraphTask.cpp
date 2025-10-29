@@ -3,9 +3,9 @@
 
 #include "Organ/NOrganGraphTask.h"
 
-FNOrganGraphTask::FNOrganGraphTask(FNOrganComponentContext* InContext)
+FNOrganGraphTask::FNOrganGraphTask(FNOrganGraphTaskContext* ContextPtr)
 {
-	Context = InContext;
+	Context = ContextPtr;
 }
 
 void FNOrganGraphTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)

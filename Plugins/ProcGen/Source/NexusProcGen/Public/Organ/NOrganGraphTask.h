@@ -3,14 +3,12 @@
 
 #pragma once
 
+#include "NOrganGraphTaskContext.h"
 #include "Async/TaskGraphInterfaces.h"
-
-class FNOrganComponentContext;
 
 struct FNOrganGraphTask
 {
-public:
-	explicit FNOrganGraphTask(FNOrganComponentContext* InContext);
+	explicit FNOrganGraphTask(FNOrganGraphTaskContext* ContextPtr);
     
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphTask, STATGROUP_TaskGraphTasks); }
     
@@ -20,5 +18,5 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	FNOrganComponentContext* Context;
+	FNOrganGraphTaskContext* Context;
 };
