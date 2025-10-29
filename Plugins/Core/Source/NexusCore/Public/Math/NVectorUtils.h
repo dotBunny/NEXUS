@@ -20,13 +20,17 @@ enum ENAxis : uint8
 class NEXUSCORE_API FNVectorUtils
 {
 public:
-	FORCEINLINE static FVector RotateAndOffsetVector(const FVector& Vector, const FRotator& Rotation, const FVector& Offset)
+	FORCEINLINE static FVector TransformPoint(const FVector& Point, const FVector& Origin, const FRotator& Rotation)
 	{
-		return Rotation.RotateVector(Vector) + Offset;
+		return Origin + Rotation.RotateVector(Point);
 	}
-	static TArray<FVector> RotateAndOffsetVectors(const TArray<FVector>& Vectors, const FRotator& Rotation, const FVector& Offset);
-	static TArray<FVector> RotateVectors(const TArray<FVector>& Vectors, const FRotator& Rotation);
-	static TArray<FVector> OffsetVectors(const TArray<FVector>& Vectors, const FVector& Offset);
+	FORCEINLINE static FVector RotateAndOffsetPoint(const FVector& Point, const FRotator& Rotation, const FVector& Offset)
+	{
+		return Rotation.RotateVector(Point) + Offset;
+	}
+	static TArray<FVector> RotateAndOffsetPoints(const TArray<FVector>& Points, const FRotator& Rotation, const FVector& Offset);
+	static TArray<FVector> RotatePoints(const TArray<FVector>& Vectors, const FRotator& Rotation);
+	static TArray<FVector> OffsetPoints(const TArray<FVector>& Vectors, const FVector& Offset);
 
 
 	static FVector RotatedAroundPivot(const FVector& WorldVector, const FVector& WorldPoint, const FRotator& Rotation)

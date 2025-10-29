@@ -95,7 +95,7 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 			const FVector Offset = RootComponent->GetOffsetLocation();
 
 			// We only update them during tick
-			CachedHullVertices = FNVectorUtils::RotateAndOffsetVectors(RootComponent->Details.Hull.Vertices, Rotation, Offset);
+			CachedHullVertices = FNVectorUtils::RotateAndOffsetPoints(RootComponent->Details.Hull.Vertices, Rotation, Offset);
 			CachedBounds = FNProcGenUtils::CreateRotatedBox(RootComponent->Details.Bounds, Rotation, Offset);
 			CachedBoundsVertices = FNBoxUtils::GetVertices(CachedBounds);
 

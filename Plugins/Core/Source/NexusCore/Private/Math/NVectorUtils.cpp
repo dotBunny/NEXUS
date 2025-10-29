@@ -3,12 +3,12 @@
 
 #include "Math/NVectorUtils.h"
 
-TArray<FVector> FNVectorUtils::RotateAndOffsetVectors(const TArray<FVector>& Vectors, const FRotator& Rotation, const FVector& Offset)
+TArray<FVector> FNVectorUtils::RotateAndOffsetPoints(const TArray<FVector>& Points, const FRotator& Rotation, const FVector& Offset)
 {
 	TArray<FVector> ModifiedVertices;
-	ModifiedVertices.Reserve(Vectors.Num());
+	ModifiedVertices.Reserve(Points.Num());
 		
-	for (const FVector& Vertex : Vectors)
+	for (const FVector& Vertex : Points)
 	{
 		ModifiedVertices.Add(Rotation.RotateVector(Vertex) + Offset);
 	}
@@ -16,7 +16,7 @@ TArray<FVector> FNVectorUtils::RotateAndOffsetVectors(const TArray<FVector>& Vec
 	return MoveTemp(ModifiedVertices);
 }
 
-TArray<FVector> FNVectorUtils::RotateVectors(const TArray<FVector>& Vectors, const FRotator& Rotation)
+TArray<FVector> FNVectorUtils::RotatePoints(const TArray<FVector>& Vectors, const FRotator& Rotation)
 {
 	TArray<FVector> ModifiedVertices;
 	ModifiedVertices.Reserve(Vectors.Num());
@@ -29,7 +29,7 @@ TArray<FVector> FNVectorUtils::RotateVectors(const TArray<FVector>& Vectors, con
 	return MoveTemp(ModifiedVertices);
 }
 
-TArray<FVector> FNVectorUtils::OffsetVectors(const TArray<FVector>& Vectors, const FVector& Offset)
+TArray<FVector> FNVectorUtils::OffsetPoints(const TArray<FVector>& Vectors, const FVector& Offset)
 {
 	TArray<FVector> ModifiedVertices;
 	ModifiedVertices.Reserve(Vectors.Num());

@@ -36,6 +36,7 @@ void FNRawMesh::ConvertToTriangles()
 			Loops[i].Indices.RemoveAt(3);
 		}
 	}
+	CheckConvex();
 }
 
 FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)

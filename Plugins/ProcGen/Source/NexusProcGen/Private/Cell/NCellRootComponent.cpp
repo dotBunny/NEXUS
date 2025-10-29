@@ -75,7 +75,7 @@ void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	// We need a version that has zero reliance on the EdMode tool
 	const FBox RotatedBounds = GetOffsetBounds();
-	const TArray<FVector> RotatedVertices = FNVectorUtils::RotateAndOffsetVectors(this->Details.Hull.Vertices, GetOffsetRotator(), GetOffsetLocation());
+	const TArray<FVector> RotatedVertices = FNVectorUtils::RotateAndOffsetPoints(this->Details.Hull.Vertices, GetOffsetRotator(), GetOffsetLocation());
 	DrawDebugPDI(PDI, RotatedBounds, FLinearColor::Red, RotatedVertices, FLinearColor::Blue);
 }
 

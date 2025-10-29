@@ -62,7 +62,7 @@ void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PD
 
 void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)
 {
-	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetVectors(Mesh.Vertices, Rotation, Offset);
+	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Mesh.Vertices, Rotation, Offset);
 	DrawDashedRawMesh(PDI, Mesh, WorldVertices, Color, DashSize, Priority);
 }
 

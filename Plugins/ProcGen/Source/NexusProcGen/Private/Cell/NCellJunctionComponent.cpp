@@ -59,12 +59,12 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
 	
-	const FVector Location =  FNVectorUtils::RotateAndOffsetVector(this->Details.RootRelativeLocation, RootRotation, RootLocation);
+	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.RootRelativeLocation, RootRotation, RootLocation);
 
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->JunctionUnitSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->JunctionUnitSize);
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->UnitSize);
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	const FRotator JunctionRotator = (Rotation.Quaternion() *
@@ -77,7 +77,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
 	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  Color);
 
-	const float LineLength = Settings->JunctionUnitSize.X * 0.25f;
+	const float LineLength = Settings->UnitSize.X * 0.25f;
 
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, Rotation, Color, Details.Type, LineLength);
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], Rotation, Color, Details.Type, LineLength);

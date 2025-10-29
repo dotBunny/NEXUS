@@ -39,6 +39,7 @@ struct NEXUSCORE_API FNRawMesh
 	void ConvertToTriangles();
 	
 	bool IsConvex() const { return bIsConvex; }
+	bool HasQuads() const { return bHasQuads; }
 
 	bool IsEqual(const FNRawMesh& Other) const
 	{
