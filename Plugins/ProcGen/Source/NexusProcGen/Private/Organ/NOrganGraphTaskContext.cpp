@@ -5,5 +5,7 @@
 
 FNOrganGraphTaskContext::FNOrganGraphTaskContext(FNOrganGeneratorContextMap* GeneratorContextMap)
 {
-	// TODO PARSE THE GENERATOR CONTEXT
+	// TODO: PARSE THE GENERATOR CONTEXT
+	// - build out all available tissue set information
+	// - size of the organ/ world space/  etc
 }

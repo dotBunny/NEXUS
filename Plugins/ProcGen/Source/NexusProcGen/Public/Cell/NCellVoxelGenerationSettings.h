@@ -4,10 +4,10 @@
 #pragma once
 
 #include "NArrayUtils.h"
-#include "NCellBoundsGenerationSettings.generated.h"
+#include "NCellVoxelGenerationSettings.generated.h"
 
 USTRUCT(BlueprintType)
-struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
+struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 {
 	GENERATED_BODY()
 
@@ -16,16 +16,18 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
-	
+
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { "NCELL_BoundsIgnore" };
+	bool bIncludeEditorOnly = false;
 
-	// TODO: Padding to surfaces ? character height
+	UPROPERTY(EditAnywhere)
+	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };
 
-	bool Equals(const FNCellBoundsGenerationSettings& Other) const
+	bool Equals(const FNCellVoxelGenerationSettings& Other) const
 	{
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
-		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);;
+		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };
