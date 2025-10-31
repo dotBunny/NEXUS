@@ -32,7 +32,7 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 
 #endif	
 
-	//TODO: junctions are based on the mid point, and draw from that dunno if we need to rethink that drawing because of voxel.
+	//TODO: junctions are based on the mid-point, and draw from that dunno if we need to rethink that drawing because of voxel.
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Unit Size",
 		meta=(ToolTip="What is the base unit sized when operating on our grid?"))

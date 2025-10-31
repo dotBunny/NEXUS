@@ -5,12 +5,13 @@
 
 #include "NCellBoundsGenerationSettings.h"
 #include "NCellHullGenerationSettings.h"
+#include "NCellVoxelGenerationSettings.h"
 #include "NColor.h"
 #include "Types/NRawMesh.h"
 #include "Types/NRotationConstraint.h"
+#include "NCellVoxelData.h"
 
 #include "NCellRootDetails.generated.h"
-
 
 USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellRootDetails
@@ -38,6 +39,12 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	UPROPERTY(EditAnywhere)
 	FLinearColor ProxyColor = FNColor::NexusDarkBlue;
 
+	UPROPERTY(EditAnywhere)
+	FNCellVoxelGenerationSettings VoxelSettings;
+	
+	UPROPERTY(EditAnywhere)
+	FNCellVoxelData VoxelData;
+	
 	bool CopyTo(FNCellRootDetails& Other) const
 	{
 		Other = *this;

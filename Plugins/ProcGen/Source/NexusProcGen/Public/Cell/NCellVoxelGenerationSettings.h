@@ -21,7 +21,7 @@ struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 	bool bIncludeEditorOnly = false;
 
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };
+	TArray<FName> ActorIgnoreTags = { "NCELL_VoxelIgnore" };
 
 	bool Equals(const FNCellVoxelGenerationSettings& Other) const
 	{
