@@ -52,6 +52,13 @@ void FNProcGenEditorCommands::RegisterCommands()
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateVoxelData,
+		"NProcGen.NCell.CalculateVoxelData",
+		LOCTEXT("Command_NCell_CalculateVoxelData", "Calculate Voxel Data"),
+		LOCTEXT("Command_NCell_CalculateVoxelData_Tooltip", "Calculate voxel data for the cell."),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateVoxelData"),
+		EUserInterfaceActionType::Button, FInputChord());
+	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellResetCell,
 		"NProcGen.NCell.ResetCell",
 		LOCTEXT("Command_NCell_ResetCell", "Reset Cell"),
@@ -86,6 +93,10 @@ void FNProcGenEditorCommands::RegisterCommands()
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateHull,
 	FExecuteAction::CreateStatic(&CellCalculateHull),
 	FCanExecuteAction::CreateStatic(&CellCalculateHull_CanExecute));
+	
+	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateVoxelData,
+FExecuteAction::CreateStatic(&CellCalculateVoxelData),
+	FCanExecuteAction::CreateStatic(&CellCalculateVoxelData_CanExecute));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellResetCell,
 	FExecuteAction::CreateStatic(&CellResetCell),
@@ -280,6 +291,17 @@ void FNProcGenEditorCommands::CellCalculateHull()
 }
 
 bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()
+{
+	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
+}
+
+void FNProcGenEditorCommands::CellCalculateVoxelData()
+{
+	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
+	CellActor->CalculateVoxelData();
+}
+
+bool FNProcGenEditorCommands::CellCalculateVoxelData_CanExecute()
 {
 	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }

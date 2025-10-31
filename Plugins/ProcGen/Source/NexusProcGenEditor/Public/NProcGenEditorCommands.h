@@ -54,6 +54,9 @@ public:
 	static void CellCalculateHull();
 	static bool CellCalculateHull_CanExecute();
 	
+	static void CellCalculateVoxelData();
+	static bool CellCalculateVoxelData_CanExecute();
+	
 	static void CellResetCell();
 	static bool CellResetCell_CanExecute();
 	
@@ -77,6 +80,7 @@ public:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateBounds;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateHull;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateVoxelData;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
 	

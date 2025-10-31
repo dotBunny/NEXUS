@@ -29,7 +29,7 @@ void FNProcGenEditorToolMenu::Register()
 				FOnGetContent::CreateLambda([]()
 				{
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Organ);
-					MenuBuilder.SetSearchable(false); // Life's to short to search this menu.
+					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					
 					MenuBuilder.BeginSection("NOrganExtensions_SelectSection", LOCTEXT("NOrganExtensions_SelectSection", "Select Organ"));
 					TArray<UNOrganComponent*> OrganComponents = FNProcGenRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
@@ -111,19 +111,24 @@ void FNProcGenEditorToolMenu::Register()
 				FOnGetContent::CreateLambda([]()
 				{
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Cell);
-					MenuBuilder.SetSearchable(false); // Life's to short to search this menu.
+					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
+					
 					MenuBuilder.BeginSection("NCellExtensions_Asset", LOCTEXT("NCellExtensions_AssetSection", "Asset"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCaptureThumbnail);
 					MenuBuilder.EndSection();
+					
 					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", LOCTEXT("NCellExtensions_CalculateSection", "Calculate"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateAll);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateBounds);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateHull);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateVoxelData);
 					MenuBuilder.EndSection();
+					
 					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", LOCTEXT("NCellExtensions_CleanupSection", "Cleanup"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellResetCell);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellRemoveActor);
 					MenuBuilder.EndSection();
+					
 					return MenuBuilder.MakeWidget();
 				}),
 			LOCTEXT("NCellExtensions_Label", "Cell"),
@@ -176,7 +181,7 @@ void FNProcGenEditorToolMenu::Register()
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_CellJunction);
 
 				
-					MenuBuilder.SetSearchable(false); // Life's to short to search this menu.
+					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellJunctionAddComponent);
 					MenuBuilder.BeginSection("NCellJunctionExtensions_Section", LOCTEXT("NCellJunctionExtensions_Section", "Select Junction"));
 					TArray<UNCellJunctionComponent*> Junctions = FNProcGenRegistry::GetCellJunctionsComponentsFromLevel(FNEditorUtils::GetCurrentLevel());

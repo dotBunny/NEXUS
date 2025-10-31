@@ -32,5 +32,21 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<uint8> Data;
 	
-	N_IMPLEMENT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
+	FORCEINLINE static ENCellVoxel ParseElement(const uint8 Value)
+	{
+		return static_cast<ENCellVoxel>(Value);
+	}
+	
+	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
+	
+	bool IsEqual(const FNCellVoxelData& Other) const
+	{
+		if (SizeX != Other.SizeX || SizeY != Other.SizeY || SizeZ != Other.SizeZ) return false;
+		const int Count = SizeX * SizeY * SizeZ;
+		for (int i = 0; i < Count; i++)
+		{
+			if (Data[i] != Other.Data[i]) return false;
+		}
+		return true;
+	}
 };

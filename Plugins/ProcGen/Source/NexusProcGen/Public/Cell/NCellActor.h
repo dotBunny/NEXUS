@@ -70,6 +70,7 @@ public:
 
 	void CalculateBounds();
 	void CalculateHull();
+	void CalculateVoxelData();
 	
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }
 	

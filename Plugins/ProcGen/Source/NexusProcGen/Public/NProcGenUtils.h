@@ -15,6 +15,7 @@ class NEXUSPROCGEN_API FNProcGenUtils
 public:
 	static FBox CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings);
 	static FNRawMesh CalculateConvexHull(ULevel* InLevel, const FNCellHullGenerationSettings& Settings);
+	static FNCellVoxelData CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings);
 	
 	static int32 GetCellActorCountFromLevel(const ULevel* Level);
 	static int32 GetCellActorCountFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);

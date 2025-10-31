@@ -68,3 +68,9 @@ void ANCellActor::CalculateHull()
 	CellRoot->Details.Hull = FNProcGenUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
 	SetActorDirty();
 }
+
+void ANCellActor::CalculateVoxelData()
+{
+	CellRoot->Details.VoxelData = FNProcGenUtils::CalculateVoxelData(GetLevel(), CellRoot->Details.VoxelSettings);
+	SetActorDirty();
+}

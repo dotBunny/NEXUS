@@ -58,6 +58,8 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 		&& BoundsSettings.Equals(Other.BoundsSettings)
 		&& HullSettings.Equals(Other.HullSettings)
 		&& Hull.IsEqual(Other.Hull)
+		&& VoxelSettings.Equals(Other.VoxelSettings)
+		&& VoxelData.IsEqual(Other.VoxelData)
 		&& RotationConstraints.IsEqual(Other.RotationConstraints);
 	}
 };

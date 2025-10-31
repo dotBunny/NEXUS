@@ -103,6 +103,13 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	return Mesh;
 }
 
+FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
+{
+	FNCellVoxelData ReturnData;
+	
+	return MoveTemp(ReturnData);
+}
+
 int FNProcGenUtils::GetCellActorCountFromLevel(const ULevel* Level)
 {
 	int Count = 0;

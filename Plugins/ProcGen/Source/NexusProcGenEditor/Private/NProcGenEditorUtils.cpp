@@ -163,6 +163,11 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		CellActor->CalculateHull();
 	}
 	
+	if (CellActor->CellRoot->Details.VoxelSettings.bCalculateOnSave)
+	{
+		CellActor->CalculateVoxelData();
+	}
+
 	// Apply actor root data to the NCell root cache
 	if (!CellActor->CellRoot->Details.IsEqual(Cell->Root))
 	{
