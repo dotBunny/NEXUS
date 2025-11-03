@@ -208,6 +208,21 @@ void FNProcGenEditorToolMenu::Register()
 		);
 		NCellJunctionDropdownMenu.StyleNameOverride = "CalloutToolbar";
 		NexusSection.AddEntry(NCellJunctionDropdownMenu);
+		
+		// Toggle Drawing Voxel Data
+		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
+			"NCellActor_DrawVoxelData",
+			FUIAction(
+				FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellActorToggleDrawVoxelData),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowDrawVoxels)),
+				LOCTEXT("Command_NCellActor_DrawVoxelData", "Draw Voxel Data"),
+				LOCTEXT("Command_NCellActor_DrawVoxelData_Tooltip", "Toggle drawing calculated voxel data for the NCell."),
+				TAttribute<FSlateIcon>::Create(
+					TAttribute<FSlateIcon>::FGetter::CreateStatic(
+				&FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon)));
+		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 	}
 }
 
@@ -219,18 +234,25 @@ bool FNProcGenEditorToolMenu::ShowCellEditMode()
 	return FNProcGenEditorUtils::IsCellActorSelected();
 }
 
+bool FNProcGenEditorToolMenu::ShowDrawVoxels()
+{
+	if (FNEditorUtils::IsPlayInEditor()) return false;
+	if (!FNProcGenEdMode::IsActive()) return false;
+	return true;
+}
+
 bool FNProcGenEditorToolMenu::ShowCellDropdown()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
-	return FNProcGenEdMode::IsActive() && FNProcGenEdMode::HasNCellActor();
+	return FNProcGenEdMode::IsActive() && FNProcGenEdMode::HasCellActor();
 }
 
 bool FNProcGenEditorToolMenu::ShowCellJunctionDropdown()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
-	return FNProcGenEdMode::IsActive() && FNProcGenEdMode::HasNCellActor();
+	return FNProcGenEdMode::IsActive() && FNProcGenEdMode::HasCellActor();
 }
 
 bool FNProcGenEditorToolMenu::ShowOrganDropdown()

@@ -19,11 +19,11 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	// We need to draw the base wireframes
 	if (!FNProcGenEdMode::IsActive())
 	{
-		CellRootComponent->DrawDebugPDI(PDI);
+		CellRootComponent->DrawDebugPDI(PDI, FNProcGenEdMode::GetCellVoxelMode());
 	}
 	else
 	{
-		if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Bounds)
+		if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 		{
 			const FBox Bounds = FNProcGenEdMode::GetCachedBounds();
 			const TArray<FVector> BoundsVertices = FNProcGenEdMode::GetCachedBoundsVertices();
@@ -37,7 +37,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			PDI->SetHitProxy(nullptr);
 	
 		}
-		else if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Hull)
+		else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
 		{
 			const TArray<FVector> WorldVertices = FNProcGenEdMode::GetCachedHullVertices();
 			const int VertCount = WorldVertices.Num();
@@ -59,11 +59,11 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 		{
 			UNCellRootComponent* IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
 			const HNIndexComponentVisProxy* Proxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
-			if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Bounds)
+			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 			{
 				return EditBoundsVertex(IndexComponent, Proxy->Index);
 			}
-			if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Hull)
+			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
 			{
 				return EditHullVertex(IndexComponent, Proxy->Index);
 			}

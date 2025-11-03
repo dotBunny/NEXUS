@@ -3,6 +3,7 @@
 
 #pragma once
 #include "Cell/NCellJunctionDetails.h"
+#include "Cell/NCellVoxelData.h"
 #include "Math/NVectorUtils.h"
 
 #define PDI_LINE_THICKNESS 1.5f
@@ -29,4 +30,7 @@ public:
 
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
+	
+	static void DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
+	static void DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 };

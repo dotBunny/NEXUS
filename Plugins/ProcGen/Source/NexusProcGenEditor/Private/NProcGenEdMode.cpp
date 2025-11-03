@@ -23,13 +23,14 @@ const FText FNProcGenEdMode::AutoBoundsMessage = FText::FromString("NCell Bounds
 const FText FNProcGenEdMode::AutoBoundsHullMessage = FText::FromString("NCell Bounds and Hull not calculated on save.");
 const FText FNProcGenEdMode::AutoHullMessage = FText::FromString("NCell Hull not calculated on save.");
 
-ANCellActor* FNProcGenEdMode::NCellActor = nullptr;
-FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::NCellEdMode = NCell_Bounds;
+ANCellActor* FNProcGenEdMode::CellActor = nullptr;
+FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = CEM_Bounds;
 TArray<FVector> FNProcGenEdMode::CachedHullVertices;
 FLinearColor FNProcGenEdMode::CachedHullColor = FColor::Blue;
 FBox FNProcGenEdMode::CachedBounds;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
+FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = CVM_None;
 
 FNProcGenEdMode::~FNProcGenEdMode()
 {
@@ -45,7 +46,7 @@ FNProcGenEdMode::~FNProcGenEdMode()
 void FNProcGenEdMode::Enter()
 {
 	// Initialize cached values
-	NCellActor = nullptr;
+	CellActor = nullptr;
 	CachedHullVertices.Empty();
 	CachedHullColor = FColor::Blue;
 	CachedBounds = FBox(ForceInit);
@@ -63,7 +64,7 @@ void FNProcGenEdMode::Enter()
 
 void FNProcGenEdMode::Exit()
 {
-	NCellActor = nullptr;
+	CellActor = nullptr;
 	bCanTick = false;
 
 	// Remove our temp organ generator
@@ -83,14 +84,14 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 	if (bCanTick == false) return;
 	
 	// Cache if we have a NCellActor setup
-	NCellActor = nullptr;
+	CellActor = nullptr;
 	
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld(); CurrentWorld != nullptr)
 	{
-		NCellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
-		if (NCellActor != nullptr)
+		CellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (CellActor != nullptr)
 		{
-			UNCellRootComponent* RootComponent = NCellActor->GetCellRoot();
+			UNCellRootComponent* RootComponent = CellActor->GetCellRoot();
 			const FRotator Rotation = RootComponent->GetOffsetRotator();;
 			const FVector Offset = RootComponent->GetOffsetLocation();
 
@@ -117,12 +118,12 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
-			RootComponent->DrawDebugPDI(PDI); // We can't use caching because we are drawing ALL of the possible roots
+			RootComponent->DrawDebugPDI(PDI, GetCellVoxelMode()); // We can't use caching because we are drawing ALL of the possible roots
 
 			// Notice ON Dirty
-			if (const ANCellActor* CellActor = Cast<ANCellActor>(RootComponent->GetOwner()))
+			if (const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner()))
 			{
-				if (CellActor->IsActorDirty())
+				if (Actor->IsActorDirty())
 				{
 					bHasDirtyActors = true;
 				}

@@ -58,6 +58,10 @@ TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 	Style.Set("Command.ProGenEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
 	Style.Set("Command.ProGenEd.CalculateHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateHull"), Icon16x16));
 	Style.Set("Command.ProGenEd.CalculateVoxelData", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateVoxelData"), Icon16x16));
+	Style.Set("Command.ProGenEd.Voxel", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel"), Icon16x16));
+	Style.Set("Command.ProGenEd.Voxel.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Selected"), Icon16x16));
+	Style.Set("Command.ProGenEd.Voxel.Points", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points"), Icon16x16));
+	
 	Style.Set("Command.ProGenEd.Pin", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Pin"), Icon16x16));
 
 	return StyleRef;

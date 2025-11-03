@@ -107,6 +107,12 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 {
 	FNCellVoxelData ReturnData;
 	
+	// TODO: Calculate voxel data for the actor?
+	
+	ReturnData.Resize(10,10, 10);
+	ReturnData.SetData(0,0,0, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
+	ReturnData.SetData(9,9,9, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
+	
 	return MoveTemp(ReturnData);
 }
 

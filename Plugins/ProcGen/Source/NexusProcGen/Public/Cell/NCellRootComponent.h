@@ -29,8 +29,8 @@ class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 public:
 	FORCEINLINE ANCellActor* GetNCellActor() const;
 	
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode) const;
 
 	FRotator GetOffsetRotator() const;
 	FVector GetOffsetLocation() const;

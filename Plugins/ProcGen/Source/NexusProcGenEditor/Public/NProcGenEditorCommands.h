@@ -33,7 +33,10 @@ public:
 	static FSlateIcon CellActorEditHullMode_GetIcon();
 	static void CellActorEditBoundsMode();
 	static FSlateIcon CellActorEditBoundsMode_GetIcon();
-
+	
+	static void CellActorToggleDrawVoxelData();
+	static FSlateIcon CellActorToggleDrawVoxelData_GetIcon();
+	
 	static void CellAddActor();
 	static bool CellAddActor_CanExecute();
 	static bool CellAddActor_CanShow();

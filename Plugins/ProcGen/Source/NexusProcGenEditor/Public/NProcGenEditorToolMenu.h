@@ -8,6 +8,7 @@ class FNProcGenEditorToolMenu
 public:
 	static void Register();
 	static bool ShowCellEditMode();
+	static bool ShowDrawVoxels();
 	static bool ShowCellDropdown();
 	static bool ShowCellJunctionDropdown();
 	static bool ShowOrganDropdown();

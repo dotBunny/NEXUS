@@ -15,8 +15,14 @@ class FNProcGenEdMode final : public FEdMode
 public:
 	enum ENCellEdMode : uint8
 	{
-		NCell_Bounds = 0,
-		NCell_Hull = 1
+		CEM_Bounds = 0,
+		CEM_Hull = 1
+	};
+	enum ENCellVoxelMode : uint8
+	{
+		CVM_None = 0,
+		CVM_Grid = 1,
+		CVM_Points = 2
 	};
 
 	static FBox GetCachedBounds() { return CachedBounds; }	
@@ -24,11 +30,15 @@ public:
 	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
 	static const FLinearColor& GetCachedHullColor() { return CachedHullColor; }
 	static const TArray<FVector>& GetCachedHullVertices() { return CachedHullVertices; }
-	static ANCellActor* GetNCellActor() { return NCellActor; }
-	static ENCellEdMode GetNCellEdMode() { return NCellEdMode; }
-	static bool HasNCellActor() { return NCellActor != nullptr; }
+	static ANCellActor* GetCellActor() { return CellActor; }
+	static ENCellEdMode GetCellEdMode() { return CellEdMode; }
+	
+	static ENCellVoxelMode GetCellVoxelMode() { return CellVoxelMode; }
+	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
+	
+	static bool HasCellActor() { return CellActor != nullptr; }
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
-	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { NCellEdMode = InCellEdMode; }
+	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { CellEdMode = InCellEdMode; }
 	
 	const static FEditorModeID Identifier;
 	const static FText DirtyMessage;
@@ -50,8 +60,9 @@ private:
 	static FBox CachedBounds;
 	static FLinearColor CachedBoundsColor;
 	static TArray<FVector> CachedBoundsVertices;
-	static ANCellActor* NCellActor;
-	static ENCellEdMode NCellEdMode;
+	static ANCellActor* CellActor;
+	static ENCellEdMode CellEdMode;
+	static ENCellVoxelMode CellVoxelMode;
 	TObjectPtr<UNOrganGenerator> OrganGenerator;
 	bool bCanTick = false;
 	bool bHasDirtyActors = false;
