@@ -32,6 +32,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<uint8> Data;
 	
+	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
+	
 	FORCEINLINE static ENCellVoxel ParseElement(const uint8 Value)
 	{
 		return static_cast<ENCellVoxel>(Value);
@@ -41,8 +43,6 @@ private:
 	{
 		return static_cast<uint8>(Value);
 	}
-	
-	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
 	
 	bool IsEqual(const FNCellVoxelData& Other) const
 	{

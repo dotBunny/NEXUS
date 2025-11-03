@@ -88,6 +88,10 @@ public: \
 	FORCEINLINE void SetData(const IndexType& Index, const DataType& NewValue) \
 	{ \
 		DataArray[Index] = NewValue; \
+	} \
+	FORCEINLINE size_t GetCount() const \
+	{ \
+		return DataArray.Num(); \
 	}
 
 #define N_IMPLEMENT_FLAT_3D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
@@ -181,4 +185,8 @@ public: \
 	FORCEINLINE void SetData(const IndexType& Index, const DataType& NewValue) \
 	{ \
 		DataArray[Index] = NewValue; \
+	} \
+	FORCEINLINE size_t GetCount() const \
+	{ \
+		return DataArray.Num(); \
 	}

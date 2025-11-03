@@ -94,4 +94,20 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
 	// Draw Points toggle?
+
+	const size_t PointCount = VoxelData.GetCount();
+	for (int i = 0; i < PointCount; i++)
+	{
+		const ENCellVoxel PointData = FNCellVoxelData::ParseElement(VoxelData.GetData(i));
+		if (PointData == ENCellVoxel::CVD_Empty)
+		{
+			continue;
+		}
+		
+		// TODO : REverse raw index to xyz ? make function
+		
+		
+		
+		//DrawSphere(PDI, VoxelData.GetPoint(i), 2, FLinearColor::Red, SDPG_World, PDI_LINE_THICKNESS);
+	}
 }
