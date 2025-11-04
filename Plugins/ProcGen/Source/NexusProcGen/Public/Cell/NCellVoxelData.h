@@ -47,11 +47,13 @@ private:
 	bool IsEqual(const FNCellVoxelData& Other) const
 	{
 		if (SizeX != Other.SizeX || SizeY != Other.SizeY || SizeZ != Other.SizeZ) return false;
+		
 		const int Count = SizeX * SizeY * SizeZ;
 		for (int i = 0; i < Count; i++)
 		{
 			if (Data[i] != Other.Data[i]) return false;
 		}
+		
 		return true;
 	}
 };

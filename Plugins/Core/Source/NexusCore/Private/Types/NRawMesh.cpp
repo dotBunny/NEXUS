@@ -24,24 +24,28 @@ TArray<int32> FNRawMesh::GetFlatIndices()
 void FNRawMesh::ConvertToTriangles()
 {
 	// Early out
-	if (!CheckQuads()) return;
+	
+	if (!CheckNonTris())
+	{
+		return;
+	}
 	for (int i = Loops.Num() - 1; i >= 0;  i--)
 	{
 		if (Loops[i].IsQuad())
 		{
-			// We need to break apart the quad
-			Loops.Insert(FNRawMeshLoop(Loops[i].Indices[2], Loops[i].Indices[3],Loops[i].Indices[0]), i+1 );
-
-			// Remove extra
-			Loops[i].Indices.RemoveAt(3);
+			Loops.Insert(FNRawMeshLoop(Loops[i].Indices[1], Loops[i].Indices[2],Loops[i].Indices[3]), i+1);
+			Loops.Insert(FNRawMeshLoop(Loops[i].Indices[0], Loops[i].Indices[1],Loops[i].Indices[3]), i+1);
+			
+			Loops.RemoveAt(i);
 		}
+		
+		// TODO: we could add support to convert out the ngon shapes
 	}
-	CheckConvex();
 }
 
 FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 {
-	if (CheckQuads())
+	if (CheckNonTris())
 	{
 		N_LOG(Error, TEXT("[FNRawMesh::CreateDynamicMesh] Mesh contains quads, a FDynamicMesh cannot have quads. Please consider using FNRawMesh::ConvertToTriangles."));
 		return nullptr;
@@ -117,8 +121,11 @@ bool FNRawMesh::CheckConvex()
 {
 	if (Vertices.Num() == 0 || Loops.Num() == 0)
 	{
+		N_LOG(Warning, TEXT("[FNRawMesh::CheckConvex] No vertices or loops found."));
 		return false;
 	}
+	
+	
 
 	Center = FVector::ZeroVector;
 	for (const FVector& Vertex : Vertices)
@@ -129,7 +136,7 @@ bool FNRawMesh::CheckConvex()
 
 	for (int32 i = 0; i < Loops.Num(); i++)
 	{
-		if (Loops[i].Indices.Num() == 3)
+		if (Loops[i].IsTriangle())
 		{
 			FVector V1 = Vertices[Loops[i].Indices[0]];
 			FVector V2 = Vertices[Loops[i].Indices[1]];
@@ -143,7 +150,7 @@ bool FNRawMesh::CheckConvex()
 				return false;
 			}
 		}
-		else if (Loops[i].Indices.Num() == 4)
+		else if (Loops[i].IsQuad())
 		{
 			FVector V1 = Vertices[Loops[i].Indices[0]];
 			FVector V2 = Vertices[Loops[i].Indices[1]];
@@ -164,18 +171,19 @@ bool FNRawMesh::CheckConvex()
 		}
 		else
 		{
-			N_LOG(Warning, TEXT("[FNRawMesh::CheckConvex] Loop %d is not a triangle or quad, cannot determine convexity."), i);
+			N_LOG(Warning, TEXT("[FNRawMesh::CheckConvex] Loop %d is an NGon, cannot determine convexity."), i);
 			return false;
 		}
 	}
 	return true;
 }
-bool FNRawMesh::CheckQuads()
+
+bool FNRawMesh::CheckNonTris()
 {
 	const int LoopCount = Loops.Num();
 	for (int i = 0; i < LoopCount; i++)
 	{
-		if (Loops[i].IsQuad())
+		if (Loops[i].Indices.Num() != 3)
 		{
 			return true;
 		}

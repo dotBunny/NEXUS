@@ -21,11 +21,11 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 	TArray<FName> ActorIgnoreTags = { "NCELL_BoundsIgnore" };
 
 	// TODO: Padding to surfaces ? character height
-
 	bool Equals(const FNCellBoundsGenerationSettings& Other) const
 	{
+
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
-		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);;
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };

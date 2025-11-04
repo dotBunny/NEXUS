@@ -47,6 +47,12 @@ public: \
 	{ \
 		return Index.X + (Index.Y * SizeX); \
 	} \
+	FORCEINLINE TTuple<IndexType, IndexType> GetInverseIndex(const IndexType Index) \
+	{ \
+		const IndexType X = FMath::Modulo(Index, SizeX); \
+		const IndexType Y = FMath::Modulo(((Index - X)/SizeX), SizeY); \
+		return TTuple<IndexType, IndexType>(X,Y); \
+	} \
 	\
 	FORCEINLINE DataType GetData(const int32 X, const int32 Y) const \
 	{ \
@@ -145,6 +151,13 @@ public: \
 		return Index.X + (Index.Y * SizeX) + (Index.Z * SizeX * SizeY); \
 	} \
 	\
+	FORCEINLINE TTuple<IndexType, IndexType, IndexType> GetInverseIndex(const IndexType Index) \
+	{ \
+		const IndexType X = FMath::Modulo(Index, SizeX); \
+		const IndexType Y = FMath::Modulo(((Index - X)/SizeX), SizeY); \
+		const IndexType Z = (Index-X -SizeX*Y)/(SizeX*SizeY); \
+		return TTuple<IndexType,IndexType, IndexType>(X,Y, Z); \
+	} \
 	FORCEINLINE DataType GetData(const int32 X, const int32 Y, const int32 Z) const \
 	{ \
 		return DataArray[GetIndex(X, Y, Z)]; \

@@ -12,6 +12,7 @@ USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMesh
 {
 	friend class FNProcGenUtils;
+	friend class FNCellRootComponentVisualizer;
 	
 	GENERATED_BODY()
 
@@ -39,7 +40,7 @@ struct NEXUSCORE_API FNRawMesh
 	void ConvertToTriangles();
 	
 	bool IsConvex() const { return bIsConvex; }
-	bool HasQuads() const { return bHasQuads; }
+	bool HasNonTris() const { return bHasNonTris; }
 
 	bool IsEqual(const FNRawMesh& Other) const
 	{
@@ -48,25 +49,34 @@ struct NEXUSCORE_API FNRawMesh
 		{
 			if (!Loops[i].IsEqual(Other.Loops[i])) return false;
 		}
-		return Vertices == Other.Vertices &&
-			bIsConvex == Other.bIsConvex;
+		return Vertices == Other.Vertices 
+			&& bIsConvex == Other.bIsConvex 
+			&& bHasNonTris == Other.bHasNonTris 
+			&& bIsChaosGenerated == Other.bIsChaosGenerated;
 	}
 	
 	void Validate()
 	{
+		if (bIsChaosGenerated)
+		{
+			return;
+		}
 		bIsConvex = CheckConvex();
-		bHasQuads = CheckQuads();
+		bHasNonTris = CheckNonTris();
 	}
 
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false);
 	
 private:
 	bool CheckConvex();
-	bool CheckQuads();
+	bool CheckNonTris();
 	
 	UPROPERTY(VisibleAnywhere)
 	bool bIsConvex = false;
+	
+	UPROPERTY(VisibleAnywhere)
+	bool bIsChaosGenerated = false;
 
 	UPROPERTY(VisibleAnywhere)
-	bool bHasQuads = false;
+	bool bHasNonTris = false;
 };

@@ -48,6 +48,10 @@ public:
 	void SetActorDirty()
 	{
 		bActorDirty = true;
+		
+		// We need to mark the outer package (level) dirty for the actor
+		// ReSharper disable once CppExpressionWithoutSideEffects
+		MarkPackageDirty();
 	}
 	bool WasSpawnedFromProxy() const { return bSpawnedFromProxy; }
 

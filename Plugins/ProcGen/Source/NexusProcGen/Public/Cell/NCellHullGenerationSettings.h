@@ -56,12 +56,11 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	
 
 	// TODO: Padding to surfaces ? character height
-	
 	bool Equals(const FNCellHullGenerationSettings& Other) const
 	{
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
-		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);;
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };

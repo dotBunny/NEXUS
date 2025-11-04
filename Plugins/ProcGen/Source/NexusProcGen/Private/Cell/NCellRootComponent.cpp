@@ -9,7 +9,6 @@
 #include "Math/NVectorUtils.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
-
 FRotator UNCellRootComponent::GetOffsetRotator() const
 {
 	if (LevelInstance != nullptr)
@@ -32,10 +31,9 @@ FBox UNCellRootComponent::GetOffsetBounds() const
 {
 	if (LevelInstance != nullptr)
 	{
-		//return FNProcGenUtils::OffsetBox(
 		return FNProcGenUtils::CreateRotatedBox(
-		this->Details.Bounds,
-			LevelInstance->GetActorRotation(),
+			this->Details.Bounds, 
+			LevelInstance->GetActorRotation(), 
 			LevelInstance->GetActorLocation());
 	}
 	return this->Details.Bounds;
@@ -43,7 +41,7 @@ FBox UNCellRootComponent::GetOffsetBounds() const
 
 void UNCellRootComponent::OnRegister()
 {
-	// Is this part of a level instance
+	// Is this part of a level instance?
 	if (ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this))
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
@@ -63,13 +61,10 @@ ANCellActor* UNCellRootComponent::GetNCellActor() const
 	return Cast<ANCellActor>(GetOwner());
 }
 
-
 void UNCellRootComponent::Reset()
 {
 	Details = FNCellRootDetails();
 }
-
-
 
 void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const
 {
@@ -77,7 +72,6 @@ void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8
 	const FBox RotatedBounds = GetOffsetBounds();
 	const TArray<FVector> RotatedVertices = FNVectorUtils::RotateAndOffsetPoints(this->Details.Hull.Vertices, GetOffsetRotator(), GetOffsetLocation());
 	
-
 	DrawDebugPDI(PDI, RotatedBounds, FLinearColor::Red, RotatedVertices, FLinearColor::Blue, DrawVoxelMode);
 }
 

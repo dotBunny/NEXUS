@@ -3,6 +3,7 @@
 
 #include "NProcGenUtils.h"
 #include "NArrayUtils.h"
+#include "NCoreMinimal.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
 #include "Organ/NOrganComponent.h"
@@ -97,9 +98,13 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 		Mesh.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));	
 	}
 	
-	// Mark as a convex mesh
+	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
+	//Mesh.ConvertToTriangles();
+	//Mesh.Validate();
+	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
-	Mesh.ConvertToTriangles();
+	Mesh.bHasNonTris = Mesh.CheckNonTris();
+	
 	return Mesh;
 }
 
@@ -108,6 +113,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	FNCellVoxelData ReturnData;
 	
 	// TODO: Calculate voxel data for the actor?
+	// - needs to account for not zero origin ? in data?
 	
 	ReturnData.Resize(10,10, 10);
 	ReturnData.SetData(0,0,0, static_cast<uint8>(ENCellVoxel::CVD_Occupied));

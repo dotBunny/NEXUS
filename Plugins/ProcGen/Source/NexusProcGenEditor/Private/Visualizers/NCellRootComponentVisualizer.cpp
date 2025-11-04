@@ -107,6 +107,9 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		return false;
 	case EM_HullVertex:
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
+		RootComponent->Details.Hull.bIsChaosGenerated = false;
+		RootComponent->GetNCellActor()->SetActorDirty();
+		
 		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
 		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
 		RootComponent->Details.Hull.Validate();
@@ -114,21 +117,20 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		{
 			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;
 		}
-		else
-		{
-			RootComponent->GetNCellActor()->SetActorDirty();
-		}
+		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
 	case EM_BoundsVertex:
 		RootComponent->Details.BoundsSettings.bCalculateOnSave = false;
 		if (VertexIndex == 0)
 		{
 			RootComponent->Details.Bounds.Min += DeltaTranslate;
+			
 		}
 		else
 		{
 			RootComponent->Details.Bounds.Max += DeltaTranslate;
 		}
+		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
 	default:
 		return false;

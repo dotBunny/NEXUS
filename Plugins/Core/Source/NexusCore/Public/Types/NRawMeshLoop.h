@@ -44,6 +44,11 @@ struct NEXUSCORE_API FNRawMeshLoop
 	{
 		return Indices.Num() == 4;
 	}
+	
+	bool IsNgon() const
+	{
+		return Indices.Num() > 4;
+	}
 
 	bool IsTriangle() const
 	{

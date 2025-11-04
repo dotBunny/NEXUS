@@ -56,10 +56,13 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 		return ProxyColor == Other.ProxyColor
 		&& Bounds == Other.Bounds
 		&& BoundsSettings.Equals(Other.BoundsSettings)
+		
 		&& HullSettings.Equals(Other.HullSettings)
 		&& Hull.IsEqual(Other.Hull)
+		
 		&& VoxelSettings.Equals(Other.VoxelSettings)
 		&& VoxelData.IsEqual(Other.VoxelData)
+		
 		&& RotationConstraints.IsEqual(Other.RotationConstraints);
 	}
 };
