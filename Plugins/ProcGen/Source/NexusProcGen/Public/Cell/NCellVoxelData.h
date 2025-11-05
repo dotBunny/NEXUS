@@ -34,12 +34,12 @@ private:
 	
 	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
 	
-	FORCEINLINE static ENCellVoxel ParseElement(const uint8 Value)
+	FORCEINLINE static ENCellVoxel ParseFlag(const uint8 Value)
 	{
 		return static_cast<ENCellVoxel>(Value);
 	}
 	
-	FORCEINLINE static uint8 ConvertElement(const ENCellVoxel Value)
+	FORCEINLINE static uint8 SetFlag(const ENCellVoxel Value)
 	{
 		return static_cast<uint8>(Value);
 	}

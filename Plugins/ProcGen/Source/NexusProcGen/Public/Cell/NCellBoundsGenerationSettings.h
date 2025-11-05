@@ -27,7 +27,6 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 	// TODO: Padding to surfaces ? character height
 	bool Equals(const FNCellBoundsGenerationSettings& Other) const
 	{
-
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly

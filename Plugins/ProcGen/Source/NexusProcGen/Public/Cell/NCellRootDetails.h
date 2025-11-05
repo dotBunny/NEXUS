@@ -26,6 +26,9 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 
 	UPROPERTY(VisibleAnywhere)
 	FBox UnitBounds;
+	
+	UPROPERTY(VisibleAnywhere)
+	FVector UnitSize;
 
 	UPROPERTY(EditAnywhere)
 	FNRotationConstraint RotationConstraints;
@@ -55,7 +58,10 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	{
 		return ProxyColor == Other.ProxyColor
 		&& Bounds == Other.Bounds
-		&& BoundsSettings.Equals(Other.BoundsSettings)
+		&& BoundsSettings.Equals(Other.BoundsSettings) 
+		
+		&& UnitBounds == Other.UnitBounds 
+		&& UnitSize == Other.UnitSize
 		
 		&& HullSettings.Equals(Other.HullSettings)
 		&& Hull.IsEqual(Other.Hull)

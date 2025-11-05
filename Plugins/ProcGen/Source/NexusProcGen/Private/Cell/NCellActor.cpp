@@ -60,6 +60,12 @@ void ANCellActor::CalculateBounds()
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Max, UnitSize));
 	
+	
+	CellRoot->Details.UnitSize = FVector(
+		FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.X) + FMath::Abs(CellRoot->Details.UnitBounds.Max.X)),
+	FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.Y) + FMath::Abs(CellRoot->Details.UnitBounds.Max.Y)),
+	FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.Z) + FMath::Abs(CellRoot->Details.UnitBounds.Max.Z)));
+	
 	SetActorDirty();
 }
 

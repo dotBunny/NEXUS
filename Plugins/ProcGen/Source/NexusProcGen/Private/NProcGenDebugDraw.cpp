@@ -98,7 +98,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 	const size_t PointCount = VoxelData.GetCount();
 	for (int i = 0; i < PointCount; i++)
 	{
-		const ENCellVoxel PointData = FNCellVoxelData::ParseElement(VoxelData.GetData(i));
+		const ENCellVoxel PointData = FNCellVoxelData::ParseFlag(VoxelData.GetData(i));
 		if (PointData == ENCellVoxel::CVD_Empty)
 		{
 			continue;

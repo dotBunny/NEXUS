@@ -47,6 +47,27 @@ public:
 		);
 	}
 
-	static FVector GetFurthestGridIntersection(const FVector& Location, const FVector& GridSize);
+	FORCEINLINE static FVector GetFurthestGridIntersection(const FVector& Location, const FVector& GridSize)
+	{
+		return FVector(
+		GetCrunchedGridUnit(Location.X, GridSize.X),
+		GetCrunchedGridUnit(Location.Y, GridSize.Y),
+		GetCrunchedGridUnit(Location.Z, GridSize.Z));
+	}
+	
+	FORCEINLINE static int GetCrunchedGridUnit(const double& Value, const double& Size)
+	{
+		if (const double RawValue = Value / Size; 
+			!FMath::IsNearlyZero(RawValue))
+		{
+			if (const int CrunchedValue = RawValue; 
+				FMath::IsNearlyEqual(RawValue, CrunchedValue))
+			{
+				return CrunchedValue;
+			}
+			return FMath::CeilToInt(RawValue);
+		}
+		return 0;
+	}
 	
 };

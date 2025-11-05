@@ -2,11 +2,14 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NProcGenUtils.h"
+
+#include "KismetTraceUtils.h"
 #include "NArrayUtils.h"
 #include "NProcGenSettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganComponent.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGen"
@@ -140,70 +143,129 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
 {
 	
+	// TODO: We probably could use the voxel data to actually generate the overall bounds to avoid the double parse of the actors in the level
 	FNCellVoxelData ReturnData;
 	
 	if (InLevel)
 	{
-		// TODO: Pass in existing?
-		FNCellBoundsGenerationSettings BoundsSettings;
-		BoundsSettings.ActorIgnoreTags = Settings.ActorIgnoreTags;
-		BoundsSettings.bIncludeNonColliding = Settings.bIncludeNonColliding;
-		BoundsSettings.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
-		
-		const FBox Bounds = CalculatePlayableBounds(InLevel, BoundsSettings);
+		// Settings
+		const UWorld* World = InLevel->GetWorld();
 		const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+		const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
 		const FVector HalfUnitSize = UnitSize * 0.5f;
+		
 		const FVector FudgeHalfUnitSize = UnitSize * 0.5f;
 		
+		// STEP 1 - Specific Bounds
+		FBox Bounds(ForceInit);
+		const int32 NumActors = InLevel->Actors.Num();
+		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_Bounds", "Build Voxel World"));
+		BoundsTask.MakeDialog(false);
+		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
+		{
+			const AActor* Actor = InLevel->Actors[ActorIndex];
+			BoundsTask.EnterProgressFrame(1);
+
+			if (Actor && Actor->IsLevelBoundsRelevant())
+			{
+				// Ignore Tags
+				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+				if (ActorBox.IsValid)
+				{
+					Bounds+= ActorBox;
+				}
+			}
+		}
 		ReturnData.Origin = Bounds.Min;
 		
 		const FBox UnitBounds = FBox(
 					FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
 					FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
 		
-		const size_t SizeX = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-		const size_t SizeY = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-		const size_t SizeZ = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Z));	
+		const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
+		const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
+		const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
 		
+		// Setup array
 		ReturnData.Resize(SizeX, SizeY, SizeZ);
-		
-		const UWorld* World = InLevel->GetWorld();
 		const size_t Count = ReturnData.GetCount();
-		FScopedSlowTask TraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData", "Calculate Voxel Data"));
-		TraceTask.MakeDialog(false);
 		
-		FlushPersistentDebugLines(World);
-		TArray<FHitResult> OutHits;
 		FCollisionShape BoxShape = FCollisionShape::MakeBox(FudgeHalfUnitSize);
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
-	
+		
+		// STEP 2 - Broad Trace
+		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_BroadTrace", "Broad Trace"));
+		BroadTraceTask.MakeDialog(false);
+		
+		// DEBUG
+		FlushPersistentDebugLines(World);
+		
+		// Origin
+		DrawDebugPoint(World, ReturnData.Origin, 10.f, FColor::Green, true, 0.f, 2.0f);
+		
+		// Min/Max
+		DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
+		DrawDebugPoint(World, ReturnData.Origin + ((FVector(SizeX-1, SizeY-1, SizeZ-1) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
+		
+		// Axis
+		for (int x = 0; x < SizeX; x++)
+		{
+			DrawDebugPoint(World, ReturnData.Origin + ((FVector(x, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Red, true, 0.f, 2.0f);
+		}
+		for (int x = 0; x < SizeY; x++)
+		{
+			DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, x, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Green, true, 0.f, 2.0f);
+		}
+		for (int x = 0; x < SizeZ; x++)
+		{
+			DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, x) * UnitSize) + HalfUnitSize), 10.f, FColor::Blue, true, 0.f, 2.0f);
+		}
+		
 		// We iterate over the array by axis to minimize inverse calculations
+		FHitResult SingleHit;
+		TArray<TTuple<int, int, int>> FollowUpVoxels;
 		for (int x = 0; x < SizeX; x++)
 		{
 			for (int y = 0; y < SizeY; y++)
 			{
 				for (int z = 0; z < SizeZ; z++)
 				{
-					TraceTask.EnterProgressFrame(1);
-					DrawDebugPoint(World, ReturnData.Origin, 5.f, FColor::Yellow, true);
+					BroadTraceTask.EnterProgressFrame(1);
 					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 					
-					//static const FName BoxTraceMultiName(TEXT("BoxTraceMulti"));
-					//FCollisionQueryParams Params = ConfigureCollisionParams(BoxTraceMultiName, bTraceComplex, ActorsToIgnore, bIgnoreSelf, WorldContextObject);
-					const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic;
-					bool const bHit = World ? World->SweepMultiByChannel(OutHits, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+					// Initial box cast which will look for anything that touches the edges, we need to go back and do line casts because this creates occupation on the edge
+					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+					DrawDebugBoxTraceSingle(World, VoxelCenter, VoxelCenter, FudgeHalfUnitSize, FRotator::ZeroRotator, EDrawDebugTrace::Type::Persistent, bHit, SingleHit, FLinearColor::Yellow, FLinearColor::Red, -1.f);
 					
 					if (bHit)
 					{
-						DrawDebugBox(World, VoxelCenter, HalfUnitSize, FColor::Red, true, 0.5f, 0, 2.0f);
+						// TODO: Do we set this event?
+						ReturnData.SetData(ReturnData.GetIndex(x,y,z), 1);
+						
+						// Flag voxel for follow up
+						FollowUpVoxels.Add(TTuple<int, int, int>(x, y, z));
 					}
-					else
-					{
-						//DrawDebugBox(World, VoxelCenter, HalfUnitSize, FColor::Red, true, 0.5f, 0, 2.0f);
-					}
-				
 				}
 			}
+		}
+		
+		// NEXT PHASE is to actually refine the queries for the current hits
+		TArray<FHitResult> OutHits;
+		const int FollowUpCount = FollowUpVoxels.Num();
+		
+		// STEP 3 - Followup Traces
+		FScopedSlowTask RefinedTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_FollowUpTrace", "Refined Trace"));
+		RefinedTraceTask.MakeDialog(false);
+		for (int i = 0; i < FollowUpCount; i++)
+		{
+			RefinedTraceTask.EnterProgressFrame(1);
+			auto [x,y,z] = FollowUpVoxels[i];
+			
+			FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+			
+			// TODO: Figure out how we wanna do this? edges? 
+			// - trace outward in ? see if hit point is inside / what about neighbours?
 		}
 	}
 	

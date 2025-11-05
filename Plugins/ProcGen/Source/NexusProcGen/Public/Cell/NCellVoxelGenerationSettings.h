@@ -23,12 +23,16 @@ struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_VoxelIgnore" };
+	
+	UPROPERTY(EditAnywhere)
+	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 
 	bool Equals(const FNCellVoxelGenerationSettings& Other) const
 	{
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
+		&& CollisionChannel == Other.CollisionChannel
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };
