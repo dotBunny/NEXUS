@@ -3,20 +3,29 @@
 
 #include "NProcGenUtils.h"
 #include "NArrayUtils.h"
-#include "NCoreMinimal.h"
+#include "NProcGenSettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "Organ/NOrganComponent.h"
 
+#define LOCTEXT_NAMESPACE "NexusProcGen"
 
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
 	if (InLevel)
 	{
-		for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+		const int32 NumActors = InLevel->Actors.Num();
+		FScopedSlowTask Task = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculatePlayableBounds", "Calculate Playable Bounds"));
+		Task.MakeDialog(false);
+	
+		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 		{
+			
 			const AActor* Actor = InLevel->Actors[ActorIndex];
+			Task.EnterProgressFrame(1);
+	
 			if (Actor && Actor->IsLevelBoundsRelevant())
 			{
 				// Ignore Tags
@@ -42,11 +51,17 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	
 	if (InLevel)
 	{
+		
 		FVector BoxVertices[8];
 		const int32 NumActors = InLevel->Actors.Num();
+		
+		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
+		ActorTask.MakeDialog(false);
+		
 		Vertices.Reserve(NumActors * 8);
 		for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
 		{
+			ActorTask.EnterProgressFrame(1);
 			const AActor* Actor = InLevel->Actors[ActorIndex];
 			if (Actor && Actor->IsLevelBoundsRelevant())
 			{
@@ -79,21 +94,35 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
 	Chaos::FConvex::FAABB3Type OutLocalBounds;
 
+	FScopedSlowTask ChaosTask = FScopedSlowTask(2, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Chaos", "Calculate Convex Hull - Chaos"));
+	ChaosTask.MakeDialog(false);
+	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
+	ChaosTask.EnterProgressFrame(1);
+	
+	
 	
 	// Construct FVector Vertices
 	const int VerticesCount = OutVertices.Num();
+	const int IndicesCount = OutFaceIndices.Num();
+	
+	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
+	BuildTask.MakeDialog(false);
+	
 	Mesh.Vertices.Reserve(VerticesCount);
 	for (int i = 0; i < VerticesCount; i++)
 	{
+		BuildTask.EnterProgressFrame(1);
 		Mesh.Vertices.Add(FVector(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]));
 	}
 
 	// Build Loops
-	const int IndicesCount = OutFaceIndices.Num();
+	
 	Mesh.Loops.Reserve(IndicesCount);
 	for (int i = 0; i < IndicesCount; i++)
 	{
+		BuildTask.EnterProgressFrame(1);
+		
 		// Right now we are 
 		Mesh.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));	
 	}
@@ -110,14 +139,73 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 
 FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
 {
+	
 	FNCellVoxelData ReturnData;
 	
-	// TODO: Calculate voxel data for the actor?
-	// - needs to account for not zero origin ? in data?
+	if (InLevel)
+	{
+		// TODO: Pass in existing?
+		FNCellBoundsGenerationSettings BoundsSettings;
+		BoundsSettings.ActorIgnoreTags = Settings.ActorIgnoreTags;
+		BoundsSettings.bIncludeNonColliding = Settings.bIncludeNonColliding;
+		BoundsSettings.bIncludeEditorOnly = Settings.bIncludeEditorOnly;
+		
+		const FBox Bounds = CalculatePlayableBounds(InLevel, BoundsSettings);
+		const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+		const FVector HalfUnitSize = UnitSize * 0.5f;
+		const FVector FudgeHalfUnitSize = UnitSize * 0.5f;
+		
+		ReturnData.Origin = Bounds.Min;
+		
+		const FBox UnitBounds = FBox(
+					FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
+					FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
+		
+		const size_t SizeX = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
+		const size_t SizeY = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
+		const size_t SizeZ = FMath::FloorToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Z));	
+		
+		ReturnData.Resize(SizeX, SizeY, SizeZ);
+		
+		const UWorld* World = InLevel->GetWorld();
+		const size_t Count = ReturnData.GetCount();
+		FScopedSlowTask TraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData", "Calculate Voxel Data"));
+		TraceTask.MakeDialog(false);
+		
+		FlushPersistentDebugLines(World);
+		TArray<FHitResult> OutHits;
+		FCollisionShape BoxShape = FCollisionShape::MakeBox(FudgeHalfUnitSize);
+		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 	
-	ReturnData.Resize(10,10, 10);
-	ReturnData.SetData(0,0,0, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
-	ReturnData.SetData(9,9,9, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
+		// We iterate over the array by axis to minimize inverse calculations
+		for (int x = 0; x < SizeX; x++)
+		{
+			for (int y = 0; y < SizeY; y++)
+			{
+				for (int z = 0; z < SizeZ; z++)
+				{
+					TraceTask.EnterProgressFrame(1);
+					DrawDebugPoint(World, ReturnData.Origin, 5.f, FColor::Yellow, true);
+					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+					
+					//static const FName BoxTraceMultiName(TEXT("BoxTraceMulti"));
+					//FCollisionQueryParams Params = ConfigureCollisionParams(BoxTraceMultiName, bTraceComplex, ActorsToIgnore, bIgnoreSelf, WorldContextObject);
+					const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic;
+					bool const bHit = World ? World->SweepMultiByChannel(OutHits, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+					
+					if (bHit)
+					{
+						DrawDebugBox(World, VoxelCenter, HalfUnitSize, FColor::Red, true, 0.5f, 0, 2.0f);
+					}
+					else
+					{
+						//DrawDebugBox(World, VoxelCenter, HalfUnitSize, FColor::Red, true, 0.5f, 0, 2.0f);
+					}
+				
+				}
+			}
+		}
+	}
 	
 	return MoveTemp(ReturnData);
 }
@@ -291,3 +379,4 @@ TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(const FVector& Wo
 	return MoveTemp(ReturnPositions);
 }
 
+#undef LOCTEXT_NAMESPACE

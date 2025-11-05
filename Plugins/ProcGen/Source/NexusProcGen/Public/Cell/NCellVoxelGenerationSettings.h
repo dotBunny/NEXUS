@@ -17,7 +17,8 @@ struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
 
-	UPROPERTY(EditAnywhere)
+	// TODO: Implement
+	UPROPERTY(EditAnywhere) 
 	bool bIncludeEditorOnly = false;
 
 	UPROPERTY(EditAnywhere)

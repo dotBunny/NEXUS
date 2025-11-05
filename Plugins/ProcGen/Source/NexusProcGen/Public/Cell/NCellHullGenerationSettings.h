@@ -28,6 +28,7 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
 
+	// TODO: Implement
 	UPROPERTY(EditAnywhere)
 	bool bIncludeEditorOnly = false;
 

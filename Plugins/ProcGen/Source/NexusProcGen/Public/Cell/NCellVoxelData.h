@@ -56,4 +56,7 @@ private:
 		
 		return true;
 	}
+	
+	UPROPERTY(VisibleAnywhere)
+	FVector Origin;
 };

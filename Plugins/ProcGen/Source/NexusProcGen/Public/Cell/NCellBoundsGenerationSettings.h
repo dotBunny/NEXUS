@@ -17,6 +17,10 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
 	
+	// TODO: Implement
+	UPROPERTY(EditAnywhere)
+	bool bIncludeEditorOnly = false;
+	
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_BoundsIgnore" };
 
@@ -26,6 +30,7 @@ struct NEXUSPROCGEN_API FNCellBoundsGenerationSettings
 
 		return bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
+		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };
