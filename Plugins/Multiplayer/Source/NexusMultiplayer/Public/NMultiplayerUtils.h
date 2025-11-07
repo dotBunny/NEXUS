@@ -145,4 +145,22 @@ public:
 		}
 		return nullptr;
 	}
+
+	/**
+	 * Get the APlayerState for the given player's unique identifier.
+	 * @param World The world to check.
+	 * @param PlayerIdentifier The target identifier to query for.
+	 * @return If found, APlayerState, or nullptr.
+	 */
+	FORCEINLINE static APlayerState* GetPlayerStateFromPlayerIdentifier(const UWorld* World, const int32 PlayerIdentifier)
+	{
+		for (const auto PlayerState : World->GetGameState()->PlayerArray)
+		{
+			if (PlayerState->GetPlayerId() == PlayerIdentifier)
+			{
+				return PlayerState;
+			}
+		}
+		return nullptr;
+	}
 };

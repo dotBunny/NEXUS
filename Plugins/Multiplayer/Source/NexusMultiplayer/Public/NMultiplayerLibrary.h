@@ -211,6 +211,23 @@ public:
 		}
 		return nullptr;
 	}
+	
+	/**
+	 * Get the APlayerState for the given player's unique identifier.
+	 * @param WorldContextObject An object to get the UWorld from.
+	 * @param PlayerIdentifier The target identifier to query for.
+	 * @return If found, APlayerState, or nullptr.
+	 */	
+	UFUNCTION(BlueprintCallable, DisplayName = "Get PlayerState From PlayerIdentifier", Category = "NEXUS|Multiplayer",
+		meta = (WorldContext = "WorldContextObject", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#get-playerstate-from-playeridentifier"))
+	static APlayerState* GetPlayerStateFromPlayerIdentifier(UObject* WorldContextObject, const int32 PlayerIdentifier)
+	{
+		if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
+		{
+			return FNMultiplayerUtils::GetPlayerStateFromPlayerIdentifier(World, PlayerIdentifier);
+		}
+		return nullptr;
+	}
 
 	/**
 	 * An explicit check that the network mode of the world is not NM_Client, thus either a listen server (w/ client) or a dedicated server.	 
