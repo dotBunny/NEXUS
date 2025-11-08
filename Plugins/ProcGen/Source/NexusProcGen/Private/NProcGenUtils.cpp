@@ -11,6 +11,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganComponent.h"
+#include "Runtime/Experimental/Chaos/Private/Chaos/PhysicsObjectInternal.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGen"
 
@@ -193,6 +194,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		
 		FCollisionShape BoxShape = FCollisionShape::MakeBox(FudgeHalfUnitSize);
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
+		FCollisionObjectQueryParams ObjectParams = FCollisionObjectQueryParams(CollisionChannel);
+	
 		
 		// STEP 2 - Broad Trace
 		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_BroadTrace", "Broad Trace"));
@@ -202,29 +205,31 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		FlushPersistentDebugLines(World);
 		
 		// Origin
-		DrawDebugPoint(World, ReturnData.Origin, 10.f, FColor::Green, true, 0.f, 2.0f);
+		//DrawDebugPoint(World, ReturnData.Origin, 10.f, FColor::Green, true, 0.f, 2.0f);
 		
 		// Min/Max
-		DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
-		DrawDebugPoint(World, ReturnData.Origin + ((FVector(SizeX-1, SizeY-1, SizeZ-1) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
-		
-		// Axis
-		for (int x = 0; x < SizeX; x++)
-		{
-			DrawDebugPoint(World, ReturnData.Origin + ((FVector(x, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Red, true, 0.f, 2.0f);
-		}
-		for (int x = 0; x < SizeY; x++)
-		{
-			DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, x, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Green, true, 0.f, 2.0f);
-		}
-		for (int x = 0; x < SizeZ; x++)
-		{
-			DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, x) * UnitSize) + HalfUnitSize), 10.f, FColor::Blue, true, 0.f, 2.0f);
-		}
+		// DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
+		// DrawDebugPoint(World, ReturnData.Origin + ((FVector(SizeX-1, SizeY-1, SizeZ-1) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
+		//
+		// // Axis
+		// for (int x = 0; x < SizeX; x++)
+		// {
+		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(x, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Red, true, 0.f, 2.0f);
+		// }
+		// for (int x = 0; x < SizeY; x++)
+		// {
+		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, x, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Green, true, 0.f, 2.0f);
+		// }
+		// for (int x = 0; x < SizeZ; x++)
+		// {
+		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, x) * UnitSize) + HalfUnitSize), 10.f, FColor::Blue, true, 0.f, 2.0f);
+		// }
 		
 		// We iterate over the array by axis to minimize inverse calculations
-		FHitResult SingleHit;
-		TArray<TTuple<int, int, int>> FollowUpVoxels;
+
+		TArray<FVector> RayEndPoints;
+		TArray<FHitResult> ObjectHits;
+		
 		for (int x = 0; x < SizeX; x++)
 		{
 			for (int y = 0; y < SizeY; y++)
@@ -234,38 +239,53 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 					BroadTraceTask.EnterProgressFrame(1);
 					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 					
-					// Initial box cast which will look for anything that touches the edges, we need to go back and do line casts because this creates occupation on the edge
-					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
-					DrawDebugBoxTraceSingle(World, VoxelCenter, VoxelCenter, FudgeHalfUnitSize, FRotator::ZeroRotator, EDrawDebugTrace::Type::Persistent, bHit, SingleHit, FLinearColor::Yellow, FLinearColor::Red, -1.f);
-					
-					if (bHit)
+					// Create Rays
+					RayEndPoints.Empty();
+					GetVoxelTestRayEndPoints(VoxelCenter, Bounds, RayEndPoints);
+			
+					bool bIsInside = false;
+					for (int j = 0; j < 26; j++)
 					{
-						// TODO: Do we set this event?
-						ReturnData.SetData(ReturnData.GetIndex(x,y,z), 1);
-						
-						// Flag voxel for follow up
-						FollowUpVoxels.Add(TTuple<int, int, int>(x, y, z));
+						bool bHitObjects =  World->LineTraceMultiByObjectType(ObjectHits, RayEndPoints[j], VoxelCenter, ObjectParams, Params);
+						//DrawDebugLineTraceMulti(World, RayEndPoints[j], VoxelCenter, EDrawDebugTrace::Persistent, bFollowupHit, RayHits, FLinearColor::Yellow, FLinearColor::Red, -1.f);
+						if (bHitObjects)
+						{
+							
+							// We've hit objects from the outside of the bounds inward, which now means we need to 
+							// determine if we are inside one of them.
+							
+							const int Hits = ObjectHits.Num();
+							if (Hits == 0) continue; // No hits, void
+							
+							for (int  k = 0; k < Hits; k++)
+							{
+								
+								
+								// We need to now see if we are just passing through or not
+								if (ObjectHits[k].PenetrationDepth > 0)
+								{
+									//UE_LOG(LogTemp, Warning, TEXT("PENETRACTION Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
+								}
+								
+								
+								//UE_LOG(LogTemp, Warning, TEXT("Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
+							}
+							
+							
+							if (FMath::Modulo(ObjectHits.Num(), 2) != 0)
+							{
+								bIsInside = true;
+							}
+						}
+					}
+			
+					if (bIsInside)
+					{
+						// Outside
+						DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 2.0f);
 					}
 				}
 			}
-		}
-		
-		// NEXT PHASE is to actually refine the queries for the current hits
-		TArray<FHitResult> OutHits;
-		const int FollowUpCount = FollowUpVoxels.Num();
-		
-		// STEP 3 - Followup Traces
-		FScopedSlowTask RefinedTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_FollowUpTrace", "Refined Trace"));
-		RefinedTraceTask.MakeDialog(false);
-		for (int i = 0; i < FollowUpCount; i++)
-		{
-			RefinedTraceTask.EnterProgressFrame(1);
-			auto [x,y,z] = FollowUpVoxels[i];
-			
-			FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-			
-			// TODO: Figure out how we wanna do this? edges? 
-			// - trace outward in ? see if hit point is inside / what about neighbours?
 		}
 	}
 	
@@ -439,6 +459,209 @@ TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(const FVector& Wo
 	ReturnPositions[3] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[3], WorldCenter, Rotation);
 
 	return MoveTemp(ReturnPositions);
+}
+
+void FNProcGenUtils::GetVoxelTestRayEndPoints(const FVector& WorldCenter, const FBox& LevelBounds, TArray<FVector>& OutPositions )
+{
+	/** Directional Vectors (26)
+	 TOP			MIDDLE				BOTTOM
+	 0 - 1 - 2		9 -  10 -  11		17 -  18 -  19
+	 |       |		|           |		|           |
+	 3   8   4		12    X    13		20    25    21
+	 |       |		|		    |		|		    |
+	 5 - 6 - 7		14 - 15 -  16		22 -  23 -  24
+	 */
+	FVector IntersectionPoint;
+	FBox ExpendedBounds = LevelBounds.ExpandBy(10.f);
+	
+	
+	// TOP LOOP
+	
+	FVector Top_0 = (WorldCenter + FVector(1,-1, 1)) - WorldCenter;
+	Top_0.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_0, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_1 = (WorldCenter + FVector(1,0, 1)) - WorldCenter;
+	Top_1.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_1, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_2 = (WorldCenter + FVector(1,1, 1)) - WorldCenter;
+	Top_2.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_2, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_3 = (WorldCenter + FVector(0,-1, 1)) - WorldCenter;
+	Top_3.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_3, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_8 = (WorldCenter + FVector::UpVector) - WorldCenter;
+	Top_8.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_8, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_4 =  (WorldCenter + FVector(0,1, 1)) - WorldCenter;
+	Top_4.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_4, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_5 =  (WorldCenter + FVector(-1,-1, 1)) - WorldCenter;
+	Top_5.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_5, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_6 = (WorldCenter + FVector(-1,0, 1)) - WorldCenter;
+	Top_6.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_6, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Top_7 = (WorldCenter + FVector(-1,1, 1)) - WorldCenter;
+	Top_7.Normalize();
+	if (RayAABBIntersection(WorldCenter, Top_7, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	
+	// MIDDLE
+	FVector Middle_9 = (WorldCenter + FVector(1,-1, 0)) - WorldCenter;
+	Middle_9.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_9, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_10 = (WorldCenter + FVector(1,0, 0)) - WorldCenter;
+	Middle_10.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_10, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_11 = (WorldCenter + FVector(1,1, 0)) - WorldCenter;
+	Middle_11.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_11, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_12 = (WorldCenter + FVector::LeftVector) - WorldCenter;
+	Middle_12.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_12, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_13 =  (WorldCenter + FVector::RightVector) - WorldCenter;
+	Middle_13.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_13, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_14 =  (WorldCenter + FVector(-1,-1, 0)) - WorldCenter;
+	Middle_14.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_14, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_15 = (WorldCenter + FVector(-1,0, 0)) - WorldCenter;
+	Middle_15.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_15, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Middle_16 = (WorldCenter + FVector(-1,1, 0)) - WorldCenter;
+	Middle_16.Normalize();
+	if (RayAABBIntersection(WorldCenter, Middle_16, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	// BOTTOM LOOP
+	
+	FVector Bottom_17 = (WorldCenter + FVector(1,-1, -1)) - WorldCenter;
+	Bottom_17.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_17, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_18 = (WorldCenter + FVector(1,0, -1)) - WorldCenter;
+	Bottom_18.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_18, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_19 = (WorldCenter + FVector(1,1, -1)) - WorldCenter;
+	Bottom_19.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_19, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_20 = (WorldCenter + FVector(0,-1, -1)) - WorldCenter;
+	Bottom_20.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_20, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_25 = (WorldCenter + FVector::DownVector) - WorldCenter;
+	Bottom_25.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_25, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_21 =  (WorldCenter + FVector(0,1, -1)) - WorldCenter;
+	Bottom_21.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_21, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_22 =  (WorldCenter + FVector(-1,-1, -1)) - WorldCenter;
+	Bottom_22.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_22, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_23 = (WorldCenter + FVector(-1,0, -1)) - WorldCenter;
+	Bottom_23.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_23, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
+	
+	FVector Bottom_24 = (WorldCenter + FVector(-1,1, -1)) - WorldCenter;
+	Bottom_24.Normalize();
+	if (RayAABBIntersection(WorldCenter, Bottom_24, ExpendedBounds, IntersectionPoint))
+	{
+		OutPositions.Add(IntersectionPoint);
+	}
 }
 
 #undef LOCTEXT_NAMESPACE
