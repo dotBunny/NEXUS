@@ -192,7 +192,6 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		ReturnData.Resize(SizeX, SizeY, SizeZ);
 		const size_t Count = ReturnData.GetCount();
 		
-		FCollisionShape BoxShape = FCollisionShape::MakeBox(FudgeHalfUnitSize);
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 		FCollisionObjectQueryParams ObjectParams = FCollisionObjectQueryParams(CollisionChannel);
 	
@@ -228,7 +227,12 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		// We iterate over the array by axis to minimize inverse calculations
 
 		TArray<FVector> RayEndPoints;
+		FHitResult SingleHit;
 		TArray<FHitResult> ObjectHits;
+		FVector HitActorLocation;
+		FVector HitActorExtents;
+		FCollisionShape BoxShape = FCollisionShape::MakeBox(FudgeHalfUnitSize);
+		
 		
 		for (int x = 0; x < SizeX; x++)
 		{
@@ -236,8 +240,18 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 			{
 				for (int z = 0; z < SizeZ; z++)
 				{
+					const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
 					BroadTraceTask.EnterProgressFrame(1);
 					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+					
+					
+					// Standard Overlap Check
+					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+					if (bHit)
+					{
+						// We're going to early assume on this
+						ReturnData.SetData(VoxelIndex, 1);
+					}
 					
 					// Create Rays
 					RayEndPoints.Empty();
@@ -259,13 +273,20 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 							
 							for (int  k = 0; k < Hits; k++)
 							{
+								AActor* HitActor = ObjectHits[k].GetActor();
 								
-								
-								// We need to now see if we are just passing through or not
-								if (ObjectHits[k].PenetrationDepth > 0)
+								// We want to rule out quickly if we are no longer in the bounds of an object
+								HitActor->GetActorBounds(true, HitActorLocation, HitActorExtents);
+								if (FBox HitActorBox = FBox(HitActorLocation - HitActorExtents, HitActorLocation + HitActorExtents); 
+									!HitActorBox.IsInsideOrOn(VoxelCenter))
 								{
-									//UE_LOG(LogTemp, Warning, TEXT("PENETRACTION Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
+									continue;
 								}
+								
+								// Now we know that were inside of it we need to do some calculations to see if we are 
+								// actually inside its meshes triangles
+								
+								
 								
 								
 								//UE_LOG(LogTemp, Warning, TEXT("Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
