@@ -28,7 +28,7 @@ N_TEST_CRITICAL(FNProcGenTests_CellVoxelData_Uniform, "NEXUS::UnitTests::NProcGe
 	// TEST
 	{
 		CHECK_EQUALS(TEXT("Expected 1000 flat array count."), VoxelData.GetCount(), static_cast<SIZE_T>(1000));
-		CHECK_EQUALS(TEXT("Expected 9,9,9 to be occupied when read from flat array."), VoxelData.GetData(999),  FNCellVoxelData::SetFlag(ENCellVoxel::CVD_Occupied))
+		CHECK_EQUALS(TEXT("Expected 9,9,9 to be occupied when read from flat array."), VoxelData.GetData(999),  static_cast<uint8>(ENCellVoxel::CVD_Occupied))
 		
 		auto InverseLastIndex = VoxelData.GetInverseIndex(999);
 		auto [InverseX, InverseY, InverseZ] = InverseLastIndex;
@@ -37,7 +37,7 @@ N_TEST_CRITICAL(FNProcGenTests_CellVoxelData_Uniform, "NEXUS::UnitTests::NProcGe
 		CHECK_EQUALS(TEXT("InverseLastIndex:Z expected 9"), InverseZ, 9)
 		
 		const uint8 AlteredData = VoxelData.GetData(MidX, MidY, MidZ);
-		CHECK_EQUALS(TEXT("Expected round tripped altered data to match."), AlteredData,  FNCellVoxelData::SetFlag(ENCellVoxel::CVD_Occupied))
+		CHECK_EQUALS(TEXT("Expected round tripped altered data to match."), AlteredData, static_cast<uint8>(ENCellVoxel::CVD_Occupied))
 	}
 }
 

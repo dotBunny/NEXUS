@@ -71,6 +71,9 @@ public:
 		return true;
 	}
 	
-	constexpr static size_t RayTestNumber = 26;
-	static void GetVoxelTestRayEndPoints(const FVector& WorldCenter, const FBox& LevelBounds, TArray<FVector>& OutPositions);
+	constexpr static size_t VoxelQueryPointCount = 26;
+	
+	static void GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions);
+	
+	static void GetVoxelQueryLevelBoundsEndPoints(const FVector& WorldCenter, const FBox& LevelBounds, TArray<FVector>& OutPositions);
 };

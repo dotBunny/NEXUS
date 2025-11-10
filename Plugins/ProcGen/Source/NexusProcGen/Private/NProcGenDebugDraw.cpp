@@ -98,14 +98,23 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 	const size_t PointCount = VoxelData.GetCount();
 	for (int i = 0; i < PointCount; i++)
 	{
-		const ENCellVoxel PointData = FNCellVoxelData::ParseFlag(VoxelData.GetData(i));
-		if (PointData == ENCellVoxel::CVD_Empty)
+		
+		
+		
+		
+		if (N_FLAGS_HAS(static_cast<uint8>(ENCellVoxel::CVD_Occupied), VoxelData.GetData(i)))
 		{
-			continue;
+			//DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 0.f);
 		}
 		
+		// const ENCellVoxel PointData = FNCellVoxelData::FlagFromValue(VoxelData.GetData(i));
+		// if (PointData == ENCellVoxel::CVD_Empty)
+		// {
+		// 	continue;
+		// }
+		//
 		// TODO : REverse raw index to xyz ? make function
-		
+		// DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 0.f);
 		
 		
 		//DrawSphere(PDI, VoxelData.GetPoint(i), 2, FLinearColor::Red, SDPG_World, PDI_LINE_THICKNESS);
