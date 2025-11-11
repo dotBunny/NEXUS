@@ -233,7 +233,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		
 		// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
 		FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
-		
+		TArray<uint32> SurroundingIndices;
 		
 		for (int x = 0; x < SizeX; x++)
 		{
@@ -250,14 +250,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
 					if (bHit)
 					{
-						DrawDebugPoint(World, VoxelCenter, 5.f, FColor::Blue, true, 0.f, 0.5f);
-						
 						ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
-						
-						// TODO: We should now ... do a bunch more tests???
-						// - check if this is inside doing the multi line trace?
 					}
-					
 					
 					//
 					// // Create Rays

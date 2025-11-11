@@ -3,6 +3,7 @@
 
 #include "NProcGenDebugDraw.h"
 
+#include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
@@ -87,36 +88,54 @@ void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const F
 
 void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
-	// TODO: Optimized draw process
+	const size_t PointCount = VoxelData.GetCount();
+	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+	const FVector UnitSize = Settings->UnitSize;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	const FVector BaseOffset = VoxelData.Origin + Offset;
 	
+	for (int i = 0; i < PointCount; i++)
+	{
+		auto [x,y,z] = VoxelData.GetInverseIndex(i);
+		const FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+			
+		// TODO: Rotation needs to actually rotated to the nearest grid???
+		const FVector VoxelMin = VoxelCenter - HalfUnitSize;
+		const FVector VoxelMax = VoxelCenter + HalfUnitSize;
+		
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+		{
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_Foreground );
+		}
+		else
+		{
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Green, SDPG_Foreground );
+		}
+	}
 }
 
 void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
-	// Draw Points toggle?
-
 	const size_t PointCount = VoxelData.GetCount();
+	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+	const FVector UnitSize = Settings->UnitSize;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	const FVector BaseOffset = VoxelData.Origin + Offset;
+	
 	for (int i = 0; i < PointCount; i++)
 	{
+		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		
+		// TODO: Rotation needs to actually rotated to the nearest grid???
+		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 		
-		
-		
-		if (N_FLAGS_HAS(static_cast<uint8>(ENCellVoxel::CVD_Occupied), VoxelData.GetData(i)))
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
 		{
-			//DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 0.f);
+			PDI->DrawPoint(VoxelCenter, FColor::Blue, 5.f, SDPG_Foreground);
 		}
-		
-		// const ENCellVoxel PointData = FNCellVoxelData::FlagFromValue(VoxelData.GetData(i));
-		// if (PointData == ENCellVoxel::CVD_Empty)
-		// {
-		// 	continue;
-		// }
-		//
-		// TODO : REverse raw index to xyz ? make function
-		// DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 0.f);
-		
-		
-		//DrawSphere(PDI, VoxelData.GetPoint(i), 2, FLinearColor::Red, SDPG_World, PDI_LINE_THICKNESS);
+		else
+		{
+			PDI->DrawPoint(VoxelCenter, FColor::Green, 5.f, SDPG_Foreground);
+		}
 	}
 }

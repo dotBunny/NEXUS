@@ -294,6 +294,7 @@ void FNProcGenEditorCommands::CellCalculateAll()
 {
 	CellCalculateBounds();
 	CellCalculateHull();
+	CellCalculateVoxelData();
 }
 
 bool FNProcGenEditorCommands::CellCalculateAll_CanExecute()

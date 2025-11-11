@@ -31,11 +31,7 @@ public: \
 		Data = MoveTemp(NewData); \
 	} \
 	\
-	FORCEINLINE IndexType GetIndex(const int32 X, const int32 Y) const \
-	{ \
-		return X + (Y * SizeX); \
-	} \
-	FORCEINLINE IndexType GetIndex(const uint32 X, const uint32 Y) const \
+	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y) const \
 	{ \
 		return X + (Y * SizeX); \
 	} \
@@ -47,18 +43,14 @@ public: \
 	{ \
 		return Index.X + (Index.Y * SizeX); \
 	} \
-	FORCEINLINE TTuple<IndexType, IndexType> GetInverseIndex(const IndexType Index) \
+	FORCEINLINE TTuple<IndexType, IndexType> GetInverseIndex(const IndexType Index) const \
 	{ \
 		const IndexType X = FMath::Modulo(Index, SizeX); \
 		const IndexType Y = FMath::Modulo(((Index - X)/SizeX), SizeY); \
 		return TTuple<IndexType, IndexType>(X,Y); \
 	} \
 	\
-	FORCEINLINE DataType GetData(const int32 X, const int32 Y) const \
-	{ \
-		return DataArray[GetIndex(X, Y)]; \
-	} \
-	FORCEINLINE DataType GetData(const uint32 X, const uint32 Y) const \
+	FORCEINLINE DataType GetData(const IndexType X, const IndexType Y) const \
 	{ \
 		return DataArray[GetIndex(X, Y)]; \
 	} \
@@ -75,11 +67,7 @@ public: \
 		return DataArray[Index]; \
 	} \
 	\
-	FORCEINLINE void SetData(const int32 X, const int32 Y, const DataType& NewValue) \
-	{ \
-		DataArray[GetIndex(X, Y)] = NewValue; \
-	} \
-	FORCEINLINE void SetData(const uint32 X, const uint32 Y, const DataType& NewValue) \
+	FORCEINLINE void SetData(const IndexType X, const IndexType Y, const DataType& NewValue) \
 	{ \
 		DataArray[GetIndex(X, Y)] = NewValue; \
 	} \
@@ -95,9 +83,41 @@ public: \
 	{ \
 		DataArray[Index] = NewValue; \
 	} \
+	\
 	FORCEINLINE size_t GetCount() const \
 	{ \
 		return DataArray.Num(); \
+	} \
+	\
+	FORCEINLINE void GetSurroundingIndices(const IndexType Index, TArray<IndexType>& OutIndices) const \
+	{ \
+		auto [x,y] = GetInverseIndex(Index); \
+		GetSurroundingIndices(x,y, OutIndices); \
+	} \
+	void GetSurroundingIndices(const IndexType X, const IndexType Y, TArray<IndexType>& OutIndices) const \
+	{ \
+		const bool bCanXSubtract = X > 0; \
+		const uint32 XMinus = (X - 1); \
+		const bool bCanXAdd = X < (SizeX - 1); \
+		const uint32 XAdd = X + 1; \
+		const bool bCanYSubtract = Y > 0; \
+		const uint32 YMinus = (Y - 1); \
+		const bool bCanYAdd = Y < (SizeY - 1); \
+		const uint32 YAdd = (Y + 1); \
+		if (bCanXSubtract) \
+		{ \
+			OutIndices.Add(GetIndex(XMinus, Y)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XMinus, YAdd)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XMinus, YMinus)); \
+		} \
+		if (bCanXAdd) \
+		{ \
+			OutIndices.Add(GetIndex(XAdd, Y)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XAdd, YAdd)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XAdd, YMinus)); \
+		} \
+		if (bCanYSubtract) OutIndices.Add(GetIndex(X, YMinus)); \
+		if (bCanYAdd) OutIndices.Add(GetIndex(X, YAdd)); \
 	}
 
 #define N_IMPLEMENT_FLAT_3D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
@@ -134,11 +154,7 @@ public: \
 		Data = MoveTemp(NewData); \
 	} \
 	\
-	FORCEINLINE IndexType GetIndex(const int32 X, const int32 Y, const int32 Z) const \
-	{ \
-		return X + (Y * SizeX) + (Z * SizeX * SizeY); \
-	} \
-	FORCEINLINE IndexType GetIndex(const uint32 X, const uint32 Y, const uint32 Z) const \
+	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y, const IndexType Z) const \
 	{ \
 		return X + (Y * SizeX) + (Z * SizeX * SizeY); \
 	} \
@@ -150,19 +166,15 @@ public: \
 	{ \
 		return Index.X + (Index.Y * SizeX) + (Index.Z * SizeX * SizeY); \
 	} \
-	\
-	FORCEINLINE TTuple<IndexType, IndexType, IndexType> GetInverseIndex(const IndexType Index) \
+	FORCEINLINE TTuple<IndexType, IndexType, IndexType> GetInverseIndex(const IndexType Index) const \
 	{ \
 		const IndexType X = FMath::Modulo(Index, SizeX); \
 		const IndexType Y = FMath::Modulo(((Index - X)/SizeX), SizeY); \
 		const IndexType Z = (Index-X -SizeX*Y)/(SizeX*SizeY); \
 		return TTuple<IndexType,IndexType, IndexType>(X,Y, Z); \
 	} \
-	FORCEINLINE DataType GetData(const int32 X, const int32 Y, const int32 Z) const \
-	{ \
-		return DataArray[GetIndex(X, Y, Z)]; \
-	} \
-	FORCEINLINE DataType GetData(const uint32 X, const uint32 Y, const uint32 Z) const \
+	\
+	FORCEINLINE DataType GetData(const IndexType X, const IndexType Y, const IndexType Z) const \
 	{ \
 		return DataArray[GetIndex(X, Y, Z)]; \
 	} \
@@ -179,11 +191,7 @@ public: \
 		return DataArray[Index]; \
 	} \
 	\
-	FORCEINLINE void SetData(const int32 X, const int32 Y, const int32 Z, const DataType& NewValue) \
-	{ \
-		DataArray[GetIndex(X, Y, Z)] = NewValue; \
-	} \
-	FORCEINLINE void SetData(const uint32 X, const uint32 Y, const uint32 Z, const DataType& NewValue) \
+	FORCEINLINE void SetData(const IndexType X, const IndexType Y, const IndexType Z, const DataType& NewValue) \
 	{ \
 		DataArray[GetIndex(X, Y, Z)] = NewValue; \
 	} \
@@ -199,7 +207,85 @@ public: \
 	{ \
 		DataArray[Index] = NewValue; \
 	} \
+	\
 	FORCEINLINE size_t GetCount() const \
 	{ \
 		return DataArray.Num(); \
+	} \
+	\
+	FORCEINLINE void GetSurroundingIndices(const IndexType Index, TArray<IndexType>& OutIndices) const \
+	{ \
+		auto [x,y,z] = GetInverseIndex(Index); \
+		GetSurroundingIndices(x,y,z, OutIndices); \
+	} \
+	void GetSurroundingIndices(const IndexType X, const IndexType Y, const IndexType Z, TArray<IndexType>& OutIndices) const \
+	{ \
+		const bool bCanXSubtract = X > 0; \
+		const uint32 XMinus = (X - 1); \
+		const bool bCanXAdd = X < (SizeX - 1); \
+		const uint32 XAdd = X + 1; \
+		const bool bCanYSubtract = Y > 0; \
+		const uint32 YMinus = (Y - 1); \
+		const bool bCanYAdd = Y < (SizeY - 1); \
+		const uint32 YAdd = (Y + 1); \
+		const bool bCanZSubtract = Z > 0; \
+		const uint32 ZMinus = (Z - 1); \
+		const bool bCanZAdd = Z < (SizeZ - 1); \
+		const uint32 ZAdd = (Z + 1); \
+		if (bCanXSubtract) \
+		{ \
+			OutIndices.Add(GetIndex(XMinus, Y, Z)); \
+			if (bCanYAdd) \
+			{ \
+				OutIndices.Add(GetIndex(XMinus, YAdd, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YAdd, ZAdd)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YAdd, ZMinus)); \
+			} \
+			if (bCanYSubtract) \
+			{ \
+				OutIndices.Add(GetIndex(XMinus, YMinus, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YMinus, ZAdd)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YMinus, ZMinus)); \
+			} \
+		} \
+		if (bCanXAdd) \
+		{ \
+			OutIndices.Add(GetIndex(XAdd, Y, Z)); \
+			if (bCanYAdd) \
+			{ \
+				OutIndices.Add(GetIndex(XAdd, YAdd, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YAdd, ZAdd)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YAdd, ZMinus)); \
+			} \
+			if (bCanYSubtract) \
+			{ \
+				OutIndices.Add(GetIndex(XAdd, YMinus, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YMinus, ZAdd)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YMinus, ZMinus)); \
+			} \
+		} \
+		if (bCanYSubtract) \
+		{ \
+			OutIndices.Add(GetIndex(X, YMinus, Z)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YMinus, ZAdd)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YMinus, ZMinus)); \
+		} \
+		if (bCanYAdd) \
+		{ \
+			OutIndices.Add(GetIndex(X, YAdd, Z)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YAdd, ZAdd)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YAdd, ZMinus)); \
+		} \
+		if (bCanZSubtract) \
+		{ \
+			OutIndices.Add(GetIndex(X, Y, ZMinus)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZMinus)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZMinus)); \
+		} \
+		if (bCanZAdd) \
+		{ \
+			OutIndices.Add(GetIndex(X, Y, ZAdd)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZAdd)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZAdd)); \
+		} \
 	}

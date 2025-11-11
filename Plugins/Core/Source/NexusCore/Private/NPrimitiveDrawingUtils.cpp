@@ -7,7 +7,8 @@
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
                                          const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale,
                                          const float LineHeight, const float Thickness,
-                                         const bool bInvertLineFeed, const bool bDrawBelowPosition)
+                                         const bool bInvertLineFeed, const bool bDrawBelowPosition, 
+                                         const ESceneDepthPriorityGroup DepthPriorityGroup)
 {
 	// Ensure our glyphs are created
 	if (!FNPrimitiveFont::IsInitialized())
@@ -86,7 +87,7 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 					EndPoint = BasePosition + RotationMatrix.TransformVector(EndPoint - BasePosition);
 				}
 				
-				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, SDPG_World, Thickness);
+				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, DepthPriorityGroup, Thickness);
 			}
 
 			// Offset the position to get ready for the next character
