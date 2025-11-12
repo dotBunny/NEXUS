@@ -77,6 +77,16 @@ void ANCellActor::CalculateHull()
 
 void ANCellActor::CalculateVoxelData()
 {
+	if (!CellRoot->Details.VoxelSettings.bUseVoxelData)
+	{
+		if (CellRoot->Details.VoxelData.GetCount() != 0)
+		{
+			CellRoot->Details.VoxelData = FNCellVoxelData();
+			SetActorDirty();
+		}
+		return;
+	}
+	
 	CellRoot->Details.VoxelData = FNProcGenUtils::CalculateVoxelData(GetLevel(), CellRoot->Details.VoxelSettings);
 	SetActorDirty();
 }

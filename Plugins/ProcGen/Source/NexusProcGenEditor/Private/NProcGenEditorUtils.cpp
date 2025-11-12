@@ -158,7 +158,6 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		CellActor->SetActorLabel(CellActorName);
 	}
 	
-	
 	// STEP 2 - Calculate Bounds
 	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step2", "Cell Bounds ..."));
 	// Update Our Cell Overall Data (in the level, not copied at this point)
@@ -180,6 +179,13 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	{
 		CellActor->CalculateVoxelData();
 	}
+	
+	// STEP 4A - Clear Data If Not Suppose To Be There
+	if (!CellActor->CellRoot->Details.VoxelSettings.bUseVoxelData && CellActor->CellRoot->Details.VoxelData.GetCount() != 0)
+	{
+		CellActor->CellRoot->Details.VoxelData = FNCellVoxelData();
+		CellActor->SetActorDirty();
+	}
 
 	// STEP 5 - Apply actor root data to the NCell root cache
 	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step5", "Apply Actor Root Data ..."));
@@ -188,7 +194,6 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		CellActor->CellRoot->Details.CopyTo(Cell->Root);
 		bUpdatedCellData = true;
 	}
-
 	
 	// STEP 6 - Clean up Junction Data
 	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step6", "Clean Up Junction Data ..."));

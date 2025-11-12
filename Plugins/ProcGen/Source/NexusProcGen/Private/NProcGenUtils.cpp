@@ -3,15 +3,11 @@
 
 #include "NProcGenUtils.h"
 
-#include "KismetTraceUtils.h"
 #include "NArrayUtils.h"
 #include "NProcGenSettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
-#include "Kismet/KismetSystemLibrary.h"
-#include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganComponent.h"
-#include "Runtime/Experimental/Chaos/Private/Chaos/PhysicsObjectInternal.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGen"
 
@@ -30,8 +26,12 @@ FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBounds
 			const AActor* Actor = InLevel->Actors[ActorIndex];
 			Task.EnterProgressFrame(1);
 	
+			
 			if (Actor && Actor->IsLevelBoundsRelevant())
 			{
+				// Check Editor Only
+				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+				
 				// Ignore Tags
 				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
 				
@@ -69,6 +69,9 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 			const AActor* Actor = InLevel->Actors[ActorIndex];
 			if (Actor && Actor->IsLevelBoundsRelevant())
 			{
+				// Check Editor Only
+				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+				
 				// Ignore Tags
 				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
 				
@@ -154,9 +157,10 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
 		const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
 		const FVector HalfUnitSize = UnitSize * 0.5f;
+		TArray<const AActor*> IgnoredActors;
 		
 		
-		// STEP 1 - Specific Bounds
+		// STEP 1 - Specific Bounds / Ignore Actors
 		FBox Bounds(ForceInit);
 		const int32 NumActors = InLevel->Actors.Num();
 		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_Bounds", "Build Voxel World"));
@@ -169,12 +173,26 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 			if (Actor && Actor->IsLevelBoundsRelevant())
 			{
 				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags))
+				{
+					IgnoredActors.Add(Actor);
+					continue;
+				}
+				
+				// Check Editor Only
+				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly)
+				{
+					IgnoredActors.Add(Actor);
+					continue;
+				}
+					
 				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
 				if (ActorBox.IsValid)
 				{
 					Bounds+= ActorBox;
 				}
+				
+				
 			}
 		}
 		ReturnData.Origin = Bounds.Min;
@@ -192,6 +210,9 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		const size_t Count = ReturnData.GetCount();
 		
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
+		Params.AddIgnoredActors(IgnoredActors);
+		
+		
 		FCollisionObjectQueryParams ObjectParams = FCollisionObjectQueryParams(CollisionChannel);
 	
 		
@@ -200,28 +221,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		BroadTraceTask.MakeDialog(false);
 		
 		// DEBUG
-		FlushPersistentDebugLines(World);
-		
-		// Origin
-		//DrawDebugPoint(World, ReturnData.Origin, 10.f, FColor::Green, true, 0.f, 2.0f);
-		
-		// Min/Max
-		// DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
-		// DrawDebugPoint(World, ReturnData.Origin + ((FVector(SizeX-1, SizeY-1, SizeZ-1) * UnitSize) + HalfUnitSize), 10.f, FColor::Yellow, true, 0.f, 2.0f);
-		//
-		// // Axis
-		// for (int x = 0; x < SizeX; x++)
-		// {
-		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(x, 0, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Red, true, 0.f, 2.0f);
-		// }
-		// for (int x = 0; x < SizeY; x++)
-		// {
-		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, x, 0) * UnitSize) + HalfUnitSize), 10.f, FColor::Green, true, 0.f, 2.0f);
-		// }
-		// for (int x = 0; x < SizeZ; x++)
-		// {
-		// 	DrawDebugPoint(World, ReturnData.Origin + ((FVector(0, 0, x) * UnitSize) + HalfUnitSize), 10.f, FColor::Blue, true, 0.f, 2.0f);
-		// }
+		//FlushPersistentDebugLines(World);
 		
 		// We iterate over the array by axis to minimize inverse calculations
 
@@ -244,7 +244,6 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 					const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
 					BroadTraceTask.EnterProgressFrame(1);
 					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-					
 					
 					// Standard Overlap Check
 					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;

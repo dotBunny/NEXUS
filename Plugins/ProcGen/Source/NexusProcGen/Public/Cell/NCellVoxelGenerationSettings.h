@@ -10,14 +10,16 @@ USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	bool bUseVoxelData = false;
 
 	UPROPERTY(EditAnywhere)
 	bool bCalculateOnSave = true;
 
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
-
-	// TODO: Implement
+	
 	UPROPERTY(EditAnywhere) 
 	bool bIncludeEditorOnly = false;
 
@@ -29,7 +31,8 @@ struct NEXUSPROCGEN_API FNCellVoxelGenerationSettings
 
 	bool Equals(const FNCellVoxelGenerationSettings& Other) const
 	{
-		return bCalculateOnSave == Other.bCalculateOnSave
+		return bUseVoxelData == Other.bUseVoxelData 
+		&& bCalculateOnSave == Other.bCalculateOnSave
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly
 		&& CollisionChannel == Other.CollisionChannel

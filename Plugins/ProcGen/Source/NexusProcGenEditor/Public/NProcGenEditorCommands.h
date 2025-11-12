@@ -60,6 +60,19 @@ public:
 	static void CellCalculateVoxelData();
 	static bool CellCalculateVoxelData_CanExecute();
 	
+	static void CellToggleBoundsCalculateOnSave();
+	static bool CellToggleBoundsCalculateOnSave_CanExecute();
+	static bool CellToggleBoundsCalculateOnSave_IsActionChecked();
+	static void CellToggleHullCalculateOnSave();
+	static bool CellToggleHullCalculateOnSave_CanExecute();
+	static bool CellToggleHullCalculateOnSave_IsActionChecked();
+	static void CellToggleVoxelCalculateOnSave();
+	static bool CellToggleVoxelCalculateOnSave_CanExecute();
+	static bool CellToggleVoxelCalculateOnSave_IsActionChecked();
+	static void CellToggleVoxelData();
+	static bool CellToggleVoxelData_CanExecute();
+	static bool CellToggleVoxelData_IsActionChecked();
+	
 	static void CellResetCell();
 	static bool CellResetCell_CanExecute();
 	
@@ -86,6 +99,12 @@ public:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateVoxelData;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
+	
+	
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
 	
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerate;

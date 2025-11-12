@@ -100,44 +100,6 @@ void FNProcGenEditorToolMenu::Register()
 						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellActor"));
 		NexusSection.AddEntry(NCellActor_SelectButton);
 		
-		// NCell Dropdown
-		FToolMenuEntry NCellDropdownMenu = FToolMenuEntry::InitComboButton(
-			"NCellExtensions_Button",
-			FUIAction(
-				FExecuteAction(),
-				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
-				FIsActionChecked(),
-				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellDropdown)),
-				FOnGetContent::CreateLambda([]()
-				{
-					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Cell);
-					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
-					
-					MenuBuilder.BeginSection("NCellExtensions_Asset", LOCTEXT("NCellExtensions_AssetSection", "Asset"));
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCaptureThumbnail);
-					MenuBuilder.EndSection();
-					
-					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", LOCTEXT("NCellExtensions_CalculateSection", "Calculate"));
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateAll);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateBounds);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateHull);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateVoxelData);
-					MenuBuilder.EndSection();
-					
-					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", LOCTEXT("NCellExtensions_CleanupSection", "Cleanup"));
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellResetCell);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellRemoveActor);
-					MenuBuilder.EndSection();
-					
-					return MenuBuilder.MakeWidget();
-				}),
-			LOCTEXT("NCellExtensions_Label", "Cell"),
-			LOCTEXT("NCellExtensions_ToolTip", "Making procedural content easier since 2017."),
-			FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "ClassIcon.NCellActor")
-		);
-		NCellDropdownMenu.StyleNameOverride = "CalloutToolbar";
-		NexusSection.AddEntry(NCellDropdownMenu);
-
 		// Display EditMode toggle buttons
 		FToolMenuEntry NCellActor_EditBoundsMode = FToolMenuEntry::InitToolBarButton(
 					"NCellActor_EditBoundsMode",
@@ -167,6 +129,51 @@ void FNProcGenEditorToolMenu::Register()
 				&FNProcGenEditorCommands::CellActorEditHullMode_GetIcon)));
 		NCellActor_EditHullMode.StyleNameOverride = "Toolbar.BackplateRight";
 		NexusSection.AddEntry(NCellActor_EditHullMode);
+		
+		// NCell Dropdown
+		FToolMenuEntry NCellDropdownMenu = FToolMenuEntry::InitComboButton(
+			"NCellExtensions_Button",
+			FUIAction(
+				FExecuteAction(),
+				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellDropdown)),
+				FOnGetContent::CreateLambda([]()
+				{
+					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Cell);
+					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
+					
+					MenuBuilder.BeginSection("NCellExtensions_Asset", LOCTEXT("NCellExtensions_AssetSection", "Asset"));
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCaptureThumbnail);
+					MenuBuilder.EndSection();
+					
+					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", LOCTEXT("NCellExtensions_CalculateSection", "Calculate"));
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateAll);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateBounds);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateHull);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateVoxelData);
+					MenuBuilder.EndSection();
+					
+					MenuBuilder.BeginSection("NCellExtensions_QuickSettings", LOCTEXT("NCellExtensions_QuickSettings", "Quick Settings"));
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleBoundsCalculateOnSave);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleHullCalculateOnSave);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleVoxelCalculateOnSave);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleVoxelData);
+					MenuBuilder.EndSection();
+					
+					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", LOCTEXT("NCellExtensions_CleanupSection", "Cleanup"));
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellResetCell);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellRemoveActor);
+					MenuBuilder.EndSection();
+					
+					return MenuBuilder.MakeWidget();
+				}),
+			LOCTEXT("NCellExtensions_Label", "Cell"),
+			LOCTEXT("NCellExtensions_ToolTip", "Making procedural content easier since 2017."),
+			FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "ClassIcon.NCellActor")
+		);
+		NCellDropdownMenu.StyleNameOverride = "CalloutToolbar";
+		NexusSection.AddEntry(NCellDropdownMenu);
 		
 		// NCellJunction Dropdown
 		FToolMenuEntry NCellJunctionDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -238,6 +245,7 @@ bool FNProcGenEditorToolMenu::ShowDrawVoxels()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 	if (!FNProcGenEdMode::IsActive()) return false;
+	if (!FNProcGenRegistry::HasRootComponents()) return false;
 	return true;
 }
 
