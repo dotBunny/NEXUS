@@ -24,7 +24,7 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
-
+	
 	static void ProcGenEdMode();
 	static bool ProcGenEdMode_CanExecute();
 	static bool ProcGenEdMode_CanShow();
@@ -33,6 +33,8 @@ public:
 	static FSlateIcon CellActorEditHullMode_GetIcon();
 	static void CellActorEditBoundsMode();
 	static FSlateIcon CellActorEditBoundsMode_GetIcon();
+	static void CellActorEditVoxelMode();
+	static FSlateIcon CellActorEditVoxelMode_GetIcon();
 	
 	static void CellActorToggleDrawVoxelData();
 	static FSlateIcon CellActorToggleDrawVoxelData_GetIcon();

@@ -22,12 +22,14 @@ const FText FNProcGenEdMode::DirtyMessage = FText::FromString("Dirty NCellActor"
 const FText FNProcGenEdMode::AutoBoundsMessage = FText::FromString("NCell Bounds not calculated on save.");
 const FText FNProcGenEdMode::AutoBoundsHullMessage = FText::FromString("NCell Bounds and Hull not calculated on save.");
 const FText FNProcGenEdMode::AutoHullMessage = FText::FromString("NCell Hull not calculated on save.");
+const FText FNProcGenEdMode::AutoVoxelMessage = FText::FromString("NCell Voxel not calculated on save.");
 
 ANCellActor* FNProcGenEdMode::CellActor = nullptr;
 FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = CEM_Bounds;
 TArray<FVector> FNProcGenEdMode::CachedHullVertices;
 FLinearColor FNProcGenEdMode::CachedHullColor = FColor::Blue;
 FBox FNProcGenEdMode::CachedBounds;
+FNCellVoxelData FNProcGenEdMode::CachedVoxelData;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
 FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = CVM_None;
@@ -50,6 +52,7 @@ void FNProcGenEdMode::Enter()
 	CachedHullVertices.Empty();
 	CachedHullColor = FColor::Blue;
 	CachedBounds = FBox(ForceInit);
+	CachedVoxelData = FNCellVoxelData();
 	CachedBoundsColor = FColor::Red;
 	CachedBoundsVertices.Empty();
 
@@ -99,9 +102,13 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 			CachedHullVertices = FNVectorUtils::RotateAndOffsetPoints(RootComponent->Details.Hull.Vertices, Rotation, Offset);
 			CachedBounds = FNProcGenUtils::CreateRotatedBox(RootComponent->Details.Bounds, Rotation, Offset);
 			CachedBoundsVertices = FNBoxUtils::GetVertices(CachedBounds);
+			CachedVoxelData = RootComponent->Details.VoxelData;
 
 			bAutoBoundsDisabled = !RootComponent->Details.BoundsSettings.bCalculateOnSave;
 			bAutoHullDisabled = !RootComponent->Details.HullSettings.bCalculateOnSave;
+			
+			// Only show a message if we have set it to use voxel data
+			bAutoVoxelDisabled = (!RootComponent->Details.VoxelSettings.bCalculateOnSave && RootComponent->Details.VoxelSettings.bUseVoxelData);
 		}
 	}
 	
@@ -210,6 +217,12 @@ void FNProcGenEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* 
 	{
 
 		Canvas->DrawShadowedText(10,MessageOffset, AutoHullMessage, GEngine->GetSmallFont(), FLinearColor::White);
+		MessageOffset += MessageSpacing;	
+	}
+	else if (bAutoVoxelDisabled)
+	{
+
+		Canvas->DrawShadowedText(10,MessageOffset, AutoVoxelMessage, GEngine->GetSmallFont(), FLinearColor::White);
 		MessageOffset += MessageSpacing;	
 	}
 	

@@ -99,7 +99,7 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		const FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 			
-		// TODO: Rotation needs to actually rotated to the nearest grid???
+		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		const FVector VoxelMin = VoxelCenter - HalfUnitSize;
 		const FVector VoxelMax = VoxelCenter + HalfUnitSize;
 		
@@ -126,7 +126,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		
-		// TODO: Rotation needs to actually rotated to the nearest grid???
+		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
 		
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))

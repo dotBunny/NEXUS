@@ -97,7 +97,7 @@ void FNProcGenEditorToolMenu::Register()
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellSelectActor_CanShow)),
 						LOCTEXT("Command_NCell_SelectActor", "Select Actor"),
 						LOCTEXT("Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
-						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellActor"));
+						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellActor.Selected"));
 		NexusSection.AddEntry(NCellActor_SelectButton);
 		
 		// Display EditMode toggle buttons
@@ -115,6 +115,7 @@ void FNProcGenEditorToolMenu::Register()
 						&FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon)));
 		NCellActor_EditBoundsMode.StyleNameOverride = "Toolbar.BackplateLeft";
 		NexusSection.AddEntry(NCellActor_EditBoundsMode);
+		
 		FToolMenuEntry NCellActor_EditHullMode = FToolMenuEntry::InitToolBarButton(
 			"NCellActor_EditHullMode",
 			FUIAction(
@@ -127,8 +128,23 @@ void FNProcGenEditorToolMenu::Register()
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNProcGenEditorCommands::CellActorEditHullMode_GetIcon)));
-		NCellActor_EditHullMode.StyleNameOverride = "Toolbar.BackplateRight";
+		NCellActor_EditHullMode.StyleNameOverride = "Toolbar.BackplateCenter";
 		NexusSection.AddEntry(NCellActor_EditHullMode);
+		
+		FToolMenuEntry NCellActor_EditVoxelMode = FToolMenuEntry::InitToolBarButton(
+	"NCellActor_EditVoxelMode",
+	FUIAction(
+		FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellActorEditVoxelMode),
+		FCanExecuteAction(),
+		FIsActionChecked(),
+		FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellEditMode)),
+		LOCTEXT("Command_NCellActor_EditVoxelMode", "Edit Voxels"),
+		LOCTEXT("Command_NCellActor_EditVoxelMode_Tooltip", "Edit the voxel points of the NCell."),
+		TAttribute<FSlateIcon>::Create(
+			TAttribute<FSlateIcon>::FGetter::CreateStatic(
+		&FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon)));
+		NCellActor_EditVoxelMode.StyleNameOverride = "Toolbar.BackplateRight";
+		NexusSection.AddEntry(NCellActor_EditVoxelMode);
 		
 		// NCell Dropdown
 		FToolMenuEntry NCellDropdownMenu = FToolMenuEntry::InitComboButton(

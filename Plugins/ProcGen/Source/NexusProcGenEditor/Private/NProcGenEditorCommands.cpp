@@ -85,7 +85,7 @@ void FNProcGenEditorCommands::RegisterCommands()
 		"NProcGen.NCell.ToggleVoxelData",
 		LOCTEXT("Command_NCell_ToggleVoxelData", "Use Voxel Data w/ Cell"),
 		LOCTEXT("Command_NCell_ToggleVoxelData_Tooltip", "Should voxel data be generated and associated to this cell?"),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Selected"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellResetCell,
@@ -106,7 +106,6 @@ void FNProcGenEditorCommands::RegisterCommands()
 	CommandList_Cell = MakeShareable(new FUICommandList);
 
 	// Map NCell Actions
-
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCaptureThumbnail,
 		FExecuteAction::CreateStatic(&CellCaptureThumbnail),
 		FCanExecuteAction::CreateStatic(&CellCaptureThumbnail_CanExecute));
@@ -240,6 +239,20 @@ FSlateIcon FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon()
 	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds");
 }
 
+void FNProcGenEditorCommands::CellActorEditVoxelMode()
+{
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Voxel);
+}
+
+FSlateIcon FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon()
+{
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Voxel)
+	{
+		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+	}
+	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
+}
+
 void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
 {
 	switch (FNProcGenEdMode::GetCellVoxelMode())
@@ -260,11 +273,11 @@ FSlateIcon FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon()
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
 		case FNProcGenEdMode::ENCellVoxelMode::CVM_Grid:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Selected");
+			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
 		case FNProcGenEdMode::ENCellVoxelMode::CVM_Points:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
+			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
 		default:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel");
+			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
 	}
 }
 
