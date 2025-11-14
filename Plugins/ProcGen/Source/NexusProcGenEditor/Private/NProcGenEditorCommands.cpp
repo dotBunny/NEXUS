@@ -370,6 +370,7 @@ bool FNProcGenEditorCommands::CellCalculateAll_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateBounds()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateBounds();
 }
@@ -381,6 +382,7 @@ bool FNProcGenEditorCommands::CellCalculateBounds_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateHull()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateHull", "Calculate Cell Hull"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateHull();
 }
@@ -392,6 +394,7 @@ bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateVoxelData()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateVoxel", "Calculate Voxel Data"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateVoxelData();
 }
@@ -405,11 +408,13 @@ bool FNProcGenEditorCommands::CellCalculateVoxelData_CanExecute()
 
 void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleBoundsCalculateOnSave", "Toggle Calculate Bounds On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
 			Actor != nullptr)
 		{
+			Actor->Modify();
 			Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave;
 			Actor->SetActorDirty();
 		}
@@ -436,11 +441,13 @@ bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleHullCalculateOnSave", "Toggle Calculate Hull On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
 			Actor != nullptr)
 		{
+			Actor->Modify();
 			Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
 			Actor->SetActorDirty();
 		}
@@ -467,11 +474,13 @@ bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleVoxelCalculateOnSave", "Toggle Calculate Voxel On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
 			Actor != nullptr)
 		{
+			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave;
 			Actor->SetActorDirty();
 		}
@@ -498,11 +507,13 @@ bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleVoxelData()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleUseVoxelData", "Use Voxel Data"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
 			Actor != nullptr)
 		{
+			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData = !Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
 			
 			// Clear it here if someone uses the menu option
@@ -535,8 +546,10 @@ bool FNProcGenEditorCommands::CellToggleVoxelData_IsActionChecked()
 
 void FNProcGenEditorCommands::CellResetCell()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellResetCell", "Reset Cell"));
 	// Get the cell actor
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
+	CellActor->Modify();
 	CellActor->CellRoot->Reset();
 
 	// Get the cell
@@ -558,6 +571,7 @@ bool FNProcGenEditorCommands::CellResetCell_CanExecute()
 
 void FNProcGenEditorCommands::CellRemoveActor()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellRemoveActor", "Remove Cell Actor"));
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
 	CellActor->Destroy();
@@ -579,6 +593,7 @@ bool FNProcGenEditorCommands::CellRemoveActor_CanExecute()
 
 void FNProcGenEditorCommands::CellJunctionAddComponent()
 {
+	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellJunctionAddComponent", "Add Junction Component"));
 	TArray<UNCellJunctionComponent*> OutComponents;
 	TArray<UNCellJunctionComponent*> SelectComponents;
 	bool bNeedsRefresh = false;
@@ -590,7 +605,7 @@ void FNProcGenEditorCommands::CellJunctionAddComponent()
 		UNCellJunctionComponent* NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
 			UNCellJunctionComponent::StaticClass(), true, FTransform::Identity, false));
 		
-		
+		Actor->Modify();
 		NewComponent->AttachToComponent(Actor->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 		Actor->AddInstanceComponent(NewComponent);
 		NewComponent->RegisterComponent();
@@ -655,7 +670,6 @@ void FNProcGenEditorCommands::CellCaptureThumbnail()
 			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 			FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(World));
 			SelectedAssets.Emplace(AssetData);
-			
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
 		}
 

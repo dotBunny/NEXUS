@@ -8,6 +8,8 @@
 #include "ComponentVisProxies/NEdgeComponentVisProxy.h"
 #include "ComponentVisProxies/NIndexComponentVisProxy.h"
 
+#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
+
 void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
 	// First we check that we indeed have an actor component
@@ -134,27 +136,32 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 {
 	uint8 Data = Component->Details.VoxelData.GetData(Index);
 	
-	bool bChanged = false;
+	// Handle Occupied
 	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
 	{
+		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Empty", "Set Voxel Empty"));
+		Component->Modify();
 		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
 		Component->Details.VoxelData.SetData(Index, Data);
-		bChanged = true;
+		Component->Details.VoxelSettings.bCalculateOnSave = false;
+		Component->GetNCellActor()->SetActorDirty();
+		return true;
 	}
-	else if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty)))
+	
+	// Handle Empty
+	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty)))
 	{
+		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Occupied", "Set Voxel Occupied"));
+		Component->Modify();
 		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
 		Component->Details.VoxelData.SetData(Index, Data);
-		bChanged = true;
-	}
-	
-	if (bChanged)
-	{
 		Component->Details.VoxelSettings.bCalculateOnSave = false;
 		Component->GetNCellActor()->SetActorDirty();
+		return true;
 	}
+	
 	return true;
 }
 
@@ -170,14 +177,14 @@ void FNCellRootComponentVisualizer::EndEditing()
 bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* ViewportClient, FViewport* Viewport, FVector& DeltaTranslate, FRotator& DeltaRotate, FVector& DeltaScale)
 {
 	if (RootComponent == nullptr) return false;
-	switch (CurrentEditMode)
+	
+	if (CurrentEditMode == EM_HullVertex)
 	{
-	case EM_None:
-		return false;
-	case EM_HullVertex:
+		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
+	
+		RootComponent->Modify();
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
 		RootComponent->Details.Hull.bIsChaosGenerated = false;
-		RootComponent->GetNCellActor()->SetActorDirty();
 		
 		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
 		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
@@ -188,12 +195,17 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		}
 		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
-	case EM_BoundsVertex:
+	}
+	
+	if (CurrentEditMode == EM_BoundsVertex)
+	{
+		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
+	
+		RootComponent->Modify();
 		RootComponent->Details.BoundsSettings.bCalculateOnSave = false;
 		if (VertexIndex == 0)
 		{
 			RootComponent->Details.Bounds.Min += DeltaTranslate;
-			
 		}
 		else
 		{
@@ -201,9 +213,9 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		}
 		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
-	default:
-		return false;
 	}
+	
+	return false;
 }
 
 bool FNCellRootComponentVisualizer::HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
@@ -242,3 +254,5 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 		return false;
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -6,6 +6,9 @@
 #include "NCoreMinimal.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
+#include "Cell/NCell.h"
+#include "Cell/NCellJunctionComponent.h"
+#include "Commandlets/GatherTextCommandletBase.h"
 
 #if WITH_EDITOR
 void ANCellActor::PostEditMove(bool bFinished)
@@ -50,8 +53,40 @@ void ANCellActor::PostRegisterAllComponents()
 	}
 }
 
+bool ANCellActor::HasDifferencesFromSidecar() const
+{
+	// If we don't have a side-car, we are naturally dirty.
+	if (Sidecar == nullptr) 
+	{
+		return true;
+	}
+	
+	if (CellRoot == nullptr) return false;
+	
+	// Check Cell Root First
+	if (!CellRoot->Details.IsEqual(Sidecar->Root))
+	{
+		return true;
+	}
+	
+	// Junctions Check
+	if (Sidecar->Junctions.Num() != CellJunctions.Num())
+	{
+		return true;
+	}
+	for (auto Pair : CellJunctions)
+	{
+		if (!Sidecar->Junctions.Contains(Pair.Key)) return true;
+		if (!Sidecar->Junctions[Pair.Key].IsEqual(Pair.Value.Get()->Details)) return true;
+	}
+				
+	return false;
+}
+
 void ANCellActor::CalculateBounds()
 {
+	CellRoot->Modify();
+	
 	CellRoot->Details.Bounds = FNProcGenUtils::CalculatePlayableBounds(GetLevel(), CellRoot->Details.BoundsSettings);
 
 	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
@@ -71,6 +106,7 @@ void ANCellActor::CalculateBounds()
 
 void ANCellActor::CalculateHull()
 {
+	CellRoot->Modify();
 	CellRoot->Details.Hull = FNProcGenUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
 	SetActorDirty();
 }
@@ -81,12 +117,14 @@ void ANCellActor::CalculateVoxelData()
 	{
 		if (CellRoot->Details.VoxelData.GetCount() != 0)
 		{
+			CellRoot->Modify();
 			CellRoot->Details.VoxelData = FNCellVoxelData();
 			SetActorDirty();
 		}
 		return;
 	}
 	
+	CellRoot->Modify();
 	CellRoot->Details.VoxelData = FNProcGenUtils::CalculateVoxelData(GetLevel(), CellRoot->Details.VoxelSettings);
 	SetActorDirty();
 }

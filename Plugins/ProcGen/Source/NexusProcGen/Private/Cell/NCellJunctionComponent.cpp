@@ -99,12 +99,15 @@ void UNCellJunctionComponent::OnRegister()
 	// Whilst in the editor we want to make sure that we uniquely identify our junctions
 	if (Details.InstanceIdentifier == -1)
 	{
+		Actor->Modify();
 		Details.InstanceIdentifier = Actor->GetCellJunctionNextIdentifier();
+		
 		Actor->SetActorDirty();
 	}
 #endif
 	if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
 	{
+		Actor->Modify();
 		Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
 	}
 	

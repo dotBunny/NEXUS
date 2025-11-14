@@ -6,15 +6,18 @@
 #include "NProcGenEditorUtils.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
+#include "Cell/NCell.h"
 
 void FNProcGenEditorUndo::PostUndo(bool bSuccess)
 {
 	UpdateKnownJunctions();
+	CompareAgainstSidecar();
 }
 
 void FNProcGenEditorUndo::PostRedo(bool bSuccess)
 {
 	UpdateKnownJunctions();
+	CompareAgainstSidecar();
 }
 
 void FNProcGenEditorUndo::UpdateKnownJunctions()
@@ -26,8 +29,22 @@ void FNProcGenEditorUndo::UpdateKnownJunctions()
 	}
 }
 
+void FNProcGenEditorUndo::CompareAgainstSidecar()
+{
+	for (const auto Root : FNProcGenRegistry::GetCellRootComponents())
+	{
+		// Do not process undo on proxy-based actors
+		if (ANCellActor* CellActor = Root->GetNCellActor(); 
+			CellActor != nullptr && !CellActor->WasSpawnedFromProxy()) 
+		{
+			CellActor->Modify();
+			CellActor->SetActorDirty(CellActor->HasDifferencesFromSidecar());
+		}
+	}
+}
+
 bool FNProcGenEditorUndo::MatchesContext(const FTransactionContext& InContext,
-	const TArray<TPair<UObject*, FTransactionObjectEvent>>& TransactionObjectContexts) const
+                                         const TArray<TPair<UObject*, FTransactionObjectEvent>>& TransactionObjectContexts) const
 {
 	for (const auto Pair : TransactionObjectContexts)
 	{

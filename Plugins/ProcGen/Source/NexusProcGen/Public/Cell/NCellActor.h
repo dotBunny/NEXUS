@@ -20,9 +20,11 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 	friend class UAssetDefinition_NCell;
 	friend class FNProcGenEditorUtils;
 	friend class FNProcGenEditorCommands;
+	friend class FNProcGenEditorUndo;
 	friend class FDebugRenderSceneProxy;
 	friend class UNCellDebugDrawComponent;
 	friend class UNCellJunctionComponent;
+	
 	
 	GENERATED_BODY()
 	
@@ -45,13 +47,27 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 	}
 public:
 	bool IsActorDirty() const { return bActorDirty; }
-	void SetActorDirty()
+	void SetActorDirty(const bool bIsDirty = true)
 	{
-		bActorDirty = true;
-		
-		// We need to mark the outer package (level) dirty for the actor
-		// ReSharper disable once CppExpressionWithoutSideEffects
-		MarkPackageDirty();
+		if (bIsDirty)
+		{
+			if (!bActorDirty)
+			{
+				// We need to mark the outer package (level) dirty for the actor
+
+				// ReSharper disable once CppExpressionWithoutSideEffects
+				MarkPackageDirty();
+				bActorDirty = true;
+			}
+		}
+		else
+		{
+			if (bActorDirty)
+			{
+				// We cant actually unmark a package (without saving?) so we just get rid of our flag.
+				bActorDirty = false;
+			}
+		}
 	}
 	bool WasSpawnedFromProxy() const { return bSpawnedFromProxy; }
 
@@ -69,6 +85,7 @@ public:
 	virtual bool ShouldExport() override { return false; } // Stops Copy/Paste/Cut/Duplicate
 	int32 GetCellJunctionNextIdentifier() { return CellJunctionNextIdentifier++; }
 	virtual void PostRegisterAllComponents() override;
+	bool HasDifferencesFromSidecar() const;
 	
 #endif	
 

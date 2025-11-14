@@ -11,4 +11,5 @@ protected:
 	virtual void PostRedo(bool bSuccess) override;
 private:
 	static void UpdateKnownJunctions();
+	static void CompareAgainstSidecar();
 };

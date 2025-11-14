@@ -183,6 +183,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	// STEP 4A - Clear Data If Not Suppose To Be There
 	if (!CellActor->CellRoot->Details.VoxelSettings.bUseVoxelData && CellActor->CellRoot->Details.VoxelData.GetCount() != 0)
 	{
+		CellActor->Modify();
 		CellActor->CellRoot->Details.VoxelData = FNCellVoxelData();
 		CellActor->SetActorDirty();
 	}
@@ -191,6 +192,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step5", "Apply Actor Root Data ..."));
 	if (!CellActor->CellRoot->Details.IsEqual(Cell->Root))
 	{
+		CellActor->Modify();
 		CellActor->CellRoot->Details.CopyTo(Cell->Root);
 		bUpdatedCellData = true;
 	}

@@ -106,8 +106,6 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 
 			bAutoBoundsDisabled = !RootComponent->Details.BoundsSettings.bCalculateOnSave;
 			bAutoHullDisabled = !RootComponent->Details.HullSettings.bCalculateOnSave;
-			
-			// Only show a message if we have set it to use voxel data
 			bAutoVoxelDisabled = (!RootComponent->Details.VoxelSettings.bCalculateOnSave && RootComponent->Details.VoxelSettings.bUseVoxelData);
 		}
 	}
