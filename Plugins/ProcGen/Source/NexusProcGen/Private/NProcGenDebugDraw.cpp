@@ -89,6 +89,8 @@ void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const F
 void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
 	const size_t PointCount = VoxelData.GetCount();
+	if (PointCount == 0) return;
+	
 	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
 	const FVector UnitSize = Settings->UnitSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
@@ -117,6 +119,8 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
 	const size_t PointCount = VoxelData.GetCount();
+	if (PointCount == 0) return;
+	
 	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
 	const FVector UnitSize = Settings->UnitSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
@@ -128,6 +132,16 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 		
 		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+		
+		
+		// Represent origin as a box
+		if (x == 0 && y == 0 && z == 0)
+		{
+			const FVector VoxelMin = VoxelCenter - HalfUnitSize;
+			const FVector VoxelMax = VoxelCenter + HalfUnitSize;
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Yellow, SDPG_Foreground );
+		}
+		
 		
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
 		{

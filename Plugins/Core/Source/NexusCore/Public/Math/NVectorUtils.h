@@ -57,6 +57,8 @@ public:
 	
 	FORCEINLINE static int GetCrunchedGridUnit(const double& Value, const double& Size)
 	{
+		if (FMath::IsNearlyZero(Value)) return 0;
+		
 		if (const double RawValue = Value / Size; 
 			!FMath::IsNearlyZero(RawValue))
 		{

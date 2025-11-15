@@ -5,6 +5,8 @@
 
 #include "NArrayUtils.h"
 #include "NCellJunctionBlockerActor.h"
+#include "NCellVoxelData.h"
+#include "Math/NVoxelUtils.h"
 #include "Types/NCardinalRotation.h"
 #include "NCellJunctionDetails.generated.h"
 
@@ -39,6 +41,9 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	
 	UPROPERTY(EditInstanceOnly)
 	FIntVector2 UnitSize = FIntVector2(4, 2);
+	
+	UPROPERTY(EditInstanceOnly)
+	FNVoxelCoordinate VoxelOrigin;
 	
 	UPROPERTY(VisibleAnywhere)
 	FVector RootRelativeLocation = FVector::ZeroVector;

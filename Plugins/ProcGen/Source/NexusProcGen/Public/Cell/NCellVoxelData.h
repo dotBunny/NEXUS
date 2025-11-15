@@ -4,6 +4,7 @@
 #pragma once
 #include "Macros/NArrayMacros.h"
 #include "Macros/NFlagsMacros.h"
+#include "Math/NVoxelUtils.h"
 
 #include "NCellVoxelData.generated.h"
 
@@ -22,18 +23,12 @@ struct NEXUSPROCGEN_API FNCellVoxelData
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	uint32 SizeX = 0;
-	
-	UPROPERTY(VisibleAnywhere)
-	uint32 SizeY = 0; 
-	
-	UPROPERTY(VisibleAnywhere)
-	uint32 SizeZ = 0;
+	FNVoxelCoordinate Size;
 	
 	UPROPERTY(VisibleAnywhere)
 	TArray<uint8> Data;
 	
-	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, SizeX, SizeY, SizeZ)
+	N_IMPLEMENT_FLAT_3D_ARRAY(uint32, uint8, Data, Size.X, Size.Y, Size.Z)
 	
 	FORCEINLINE static ENCellVoxel FlagFromValue(const uint8 Value)
 	{
@@ -68,9 +63,9 @@ private:
 	
 	bool IsEqual(const FNCellVoxelData& Other) const
 	{
-		if (SizeX != Other.SizeX || SizeY != Other.SizeY || SizeZ != Other.SizeZ) return false;
+		if (Size.X != Other.Size.X || Size.Y != Other.Size.Y || Size.Z != Other.Size.Z) return false;
 		
-		const int Count = SizeX * SizeY * SizeZ;
+		const int Count = Size.X * Size.Y * Size.Z;
 		for (int i = 0; i < Count; i++)
 		{
 			if (Data[i] != Other.Data[i]) return false;
