@@ -4,7 +4,9 @@
 #include "NProcGenUtils.h"
 
 #include "NArrayUtils.h"
+#include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
 #include "Organ/NOrganComponent.h"
@@ -195,6 +197,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 				
 			}
 		}
+		
+		// Determine the Voxel origin adjustment
 		ReturnData.Origin = Bounds.Min;
 		
 		const FBox UnitBounds = FBox(

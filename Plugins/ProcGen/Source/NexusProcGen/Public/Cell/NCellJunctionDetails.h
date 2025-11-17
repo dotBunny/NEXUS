@@ -42,9 +42,6 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(EditInstanceOnly)
 	FIntVector2 UnitSize = FIntVector2(4, 2);
 	
-	UPROPERTY(EditInstanceOnly)
-	FNVoxelCoordinate VoxelOrigin;
-	
 	UPROPERTY(VisibleAnywhere)
 	FVector RootRelativeLocation = FVector::ZeroVector;
 
