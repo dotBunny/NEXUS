@@ -154,18 +154,9 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		if (const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->UnitSize);
 			GridLocation != Details.RootRelativeLocation)
 		{
+			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
 			Details.RootRelativeLocation = GridLocation;
-			
-			// TODO: Figure our the voxel origin from the grid location?
-			
-			// Need to account for hte offset based on objects being less then the original 0,0,0.
-			// FIntVector3 RawVoxelOrigin = FIntVector3(
-			// 	FNVectorUtils::GetCrunchedGridUnit(GridLocation.X, Settings->UnitSize.X),
-			// 	FNVectorUtils::GetCrunchedGridUnit(GridLocation.Y, Settings->UnitSize.Y),
-			// 	FNVectorUtils::GetCrunchedGridUnit(GridLocation.Z, Settings->UnitSize.Z));
-			//
-			// Details.VoxelOrigin = FNVoxelCoordinate(RawVoxelOrigin.X, RawVoxelOrigin.Y, RawVoxelOrigin.Z);
-			Details.VoxelOrigin = FNVoxelCoordinate();
+
 			bHasMadeChanges = true;
 		}
 
