@@ -16,6 +16,7 @@ runs:
               $foundError++
             }
             if ($line.Contains("Warning: ")) {
+              if($line.EndsWith("LogToolMenus: Warning: Menu section not found: 'Compile' for insert: 'EditorPerf'")) { continue }
               Write-Host "::warning ::$line"
               $foundWarning++
             }
