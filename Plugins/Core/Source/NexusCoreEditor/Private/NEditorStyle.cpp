@@ -17,6 +17,7 @@ TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 	Style.Set("Command.LeakCheck", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_LeakCheck"), Icon16x16));
 	Style.Set("Command.ProjectLevels", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_ProjectLevels"), Icon16x16));
 	Style.Set("Command.Visualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Visualizer"), Icon16x16));
+	Style.Set("Command.OpenDiscordInviteLink", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_OpenDiscordInviteLink"), Icon16x16));
 	
 	return StyleRef;
 }

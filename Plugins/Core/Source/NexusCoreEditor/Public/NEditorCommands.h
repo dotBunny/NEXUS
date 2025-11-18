@@ -20,6 +20,7 @@ public:
 	virtual void RegisterCommands() override;
 	
 	TSharedPtr<FUICommandList> CommandList_Help;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
 	// ReSharper disable once IdentifierTypo
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
@@ -38,6 +39,7 @@ public:
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
 	static void OnHelpBugReport();
+	static void OnHelpDiscord();
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
 	

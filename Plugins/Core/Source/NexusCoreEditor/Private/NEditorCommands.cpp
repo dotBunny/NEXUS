@@ -29,6 +29,12 @@ void FNEditorCommands::RegisterCommands()
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
 	EUserInterfaceActionType::Button, FInputChord());
 
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Discord,
+	"NCore.Help.OpenDiscord",
+	LOCTEXT("Command_Help_OpenDiscord", "Discord"),
+	LOCTEXT("Command_Help_OpenDiscord_Desc", "Opens the Discord (dotBunny Support) invite link in your browser."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.OpenDiscordInviteLink"),
+	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
 	"NCore.Help.OpenBugReport",
@@ -69,6 +75,10 @@ void FNEditorCommands::RegisterCommands()
 	
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
+	
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Discord,
+	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDiscord),
+	FCanExecuteAction());
 	
 	CommandList_Help->MapAction(Get().CommandInfo_Help_BugReport,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpBugReport),
@@ -127,6 +137,11 @@ void FNEditorCommands::OnHelpIssues()
 void FNEditorCommands::OnHelpBugReport()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://github.com/dotBunny/NEXUS/issues/new/choose"),nullptr, nullptr);
+}
+
+void FNEditorCommands::OnHelpDiscord()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://discord.gg/2M9HczHanW"),nullptr, nullptr);
 }
 
 void FNEditorCommands::OnHelpRoadmap()
@@ -301,6 +316,7 @@ void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 
 	FToolMenuSection& SupportSection = Menu->FindOrAddSection("Support");
 	SupportSection.Label = LOCTEXT("NHelp_Support", "Support");
+	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Discord, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_BugReport, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Issues, Commands.CommandList_Help);
 }
