@@ -8,11 +8,21 @@ runs:
       shell: powershell
       run: |
         $logContent = Get-Content -Path "${{ github.workspace }}\TestProject\Saved\Logs\NEXUS.log"
+        $foundError = 0
+        $foundWarning = 0
         foreach ($line in $logContent) {
             if ($line.Contains("Error: ")) {
               Write-Host "::error ::$line"
+              $foundError++
             }
             if ($line.Contains("Warning: ")) {
               Write-Host "::warning ::$line"
+              $foundWarning++
             }
           }
+        if ($foundError -gt 0) {
+          exit 1
+        }
+        if ($foundWarning -gt 0) {
+          exit 1
+        }
