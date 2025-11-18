@@ -75,5 +75,5 @@ private:
 	}
 	
 	UPROPERTY(VisibleAnywhere)
-	FVector Origin;
+	FVector Origin = FVector::ZeroVector;
 };

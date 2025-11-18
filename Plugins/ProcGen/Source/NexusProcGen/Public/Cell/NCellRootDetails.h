@@ -28,7 +28,7 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	FBox UnitBounds;
 	
 	UPROPERTY(VisibleAnywhere)
-	FVector UnitSize;
+	FVector UnitSize = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere)
 	FNRotationConstraint RotationConstraints;
