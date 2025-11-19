@@ -3,6 +3,7 @@
 
 #include "Cell/NCellJunctionComponent.h"
 
+#include "NCoreMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NLevelUtils.h"
@@ -55,6 +56,7 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
+	if (RootComponent == nullptr) return;
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
@@ -94,22 +96,38 @@ void UNCellJunctionComponent::OnRegister()
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
 
-	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(GetComponentLevel());
+	
 #if WITH_EDITOR
-	// Whilst in the editor we want to make sure that we uniquely identify our junctions
-	if (Details.InstanceIdentifier == -1)
+	const ULevel* Level = GetComponentLevel();
+	
+	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
+	if (RootComponent == nullptr)
 	{
-		Actor->Modify();
-		Details.InstanceIdentifier = Actor->GetCellJunctionNextIdentifier();
+		N_LOG(Error, TEXT("[UNCellJunctionComponent::OnRegister] No NCellRootComponent found for level %s, removing added NCellJunctionComponent next update."), *Level->GetName())
+		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+		{
+			this->DestroyComponent();
+		}));
+	}
+	
+	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(Level);
+	if (Actor != nullptr && !Actor->WasSpawnedFromProxy())
+	{
+		// Whilst in the editor we want to make sure that we uniquely identify our junctions
+		if (Details.InstanceIdentifier == -1)
+		{
+			Actor->Modify();
+			Details.InstanceIdentifier = Actor->GetCellJunctionNextIdentifier();
 		
-		Actor->SetActorDirty();
+			Actor->SetActorDirty();
+		}
+		if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
+		{
+			Actor->Modify();
+			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
+		}
 	}
 #endif
-	if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
-	{
-		Actor->Modify();
-		Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
-	}
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);
 	Super::OnRegister();
