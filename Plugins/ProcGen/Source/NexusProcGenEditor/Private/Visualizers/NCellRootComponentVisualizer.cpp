@@ -60,12 +60,16 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			}
 			
 			const FNCellVoxelData CachedData = FNProcGenEdMode::GetCachedVoxelData();
+			if (!CachedData.IsValid())
+			{
+				return;
+			}
+
 			const size_t PointCount = CachedData.GetCount();
 			const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
 			const FVector UnitSize = Settings->UnitSize;
 			const FVector HalfUnitSize = UnitSize * 0.5f;
 			const FVector BaseOffset = CachedData.Origin;
-	
 			for (int i = 0; i < PointCount; i++)
 			{
 				auto [x,y,z] = CachedData.GetInverseIndex(i);

@@ -120,11 +120,11 @@ void FNProcGenEditorToolMenu::Register()
 			"NCellActor_EditHullMode",
 			FUIAction(
 				FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellActorEditHullMode),
-				FCanExecuteAction(),
+				FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellActorEditHullMode_CanExecute),
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellEditMode)),
 				LOCTEXT("Command_NCellActor_EditHullMode", "Edit Hull"),
-				LOCTEXT("Command_NCellActor_EditHullMode_Tooltip", "Edit the hull vertices of the NCell."),
+				LOCTEXT("Command_NCellActor_EditHullMode_Tooltip", "Edit the hull vertices of the NCell (requires a tri-based hull)."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNProcGenEditorCommands::CellActorEditHullMode_GetIcon)));

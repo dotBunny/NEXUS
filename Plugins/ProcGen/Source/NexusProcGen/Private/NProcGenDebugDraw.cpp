@@ -118,6 +118,8 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 
 void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
 {
+	if (!VoxelData.IsValid()) return;
+	
 	const size_t PointCount = VoxelData.GetCount();
 	if (PointCount == 0) return;
 	

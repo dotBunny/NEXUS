@@ -17,6 +17,15 @@
 #include "Math/NVectorUtils.h"
 #include "Organ/NOrganGenerator.h"
 
+void FNProcGenEdMode::ProtectCellEdMode()
+{
+	if (CellActor != nullptr && CellActor->GetCellRoot()->Details.Hull.HasNonTris() && 
+		GetCellEdMode() == CEM_Hull)
+	{
+		SetCellEdMode(CEM_Bounds);
+	}
+}
+
 const FEditorModeID FNProcGenEdMode::Identifier = TEXT("NProcGenEdMode");
 const FText FNProcGenEdMode::DirtyMessage = FText::FromString("Dirty NCellActor");
 const FText FNProcGenEdMode::AutoBoundsMessage = FText::FromString("NCell Bounds not calculated on save.");

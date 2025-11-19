@@ -216,6 +216,15 @@ void FNProcGenEditorCommands::CellActorEditHullMode()
 	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Hull);
 }
 
+bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
+{
+	const ULevel* Level = FNEditorUtils::GetCurrentLevel();
+	if (Level == nullptr) return false;
+
+	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
+	return !RootComponent->Details.Hull.HasNonTris();
+}
+
 FSlateIcon FNProcGenEditorCommands::CellActorEditHullMode_GetIcon()
 {
 	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Hull)
@@ -385,6 +394,8 @@ void FNProcGenEditorCommands::CellCalculateHull()
 	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateHull", "Calculate Cell Hull"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateHull();
+	
+	FNProcGenEdMode::ProtectCellEdMode();
 }
 
 bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()

@@ -73,6 +73,10 @@ private:
 		
 		return true;
 	}
+	bool IsValid() const
+	{
+		return Size.X > 0 && Size.Y > 0 && Size.Z > 0;
+	}
 	
 	UPROPERTY(VisibleAnywhere)
 	FVector Origin = FVector::ZeroVector;

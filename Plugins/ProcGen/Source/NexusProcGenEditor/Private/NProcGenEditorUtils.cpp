@@ -9,6 +9,7 @@
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Selection.h"
@@ -171,6 +172,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	if (CellActor->CellRoot->Details.HullSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateHull();
+		FNProcGenEdMode::ProtectCellEdMode();
 	}
 	
 	// STEP 4 - Calculate Voxel Data

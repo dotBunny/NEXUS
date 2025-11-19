@@ -30,6 +30,7 @@ public:
 	static bool ProcGenEdMode_CanShow();
 
 	static void CellActorEditHullMode();	
+	static bool CellActorEditHullMode_CanExecute();	
 	static FSlateIcon CellActorEditHullMode_GetIcon();
 	static void CellActorEditBoundsMode();
 	static FSlateIcon CellActorEditBoundsMode_GetIcon();

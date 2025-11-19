@@ -26,6 +26,7 @@ public:
 		CVM_Points = 2
 	};
 
+	
 	static FBox GetCachedBounds() { return CachedBounds; }	
 	static const FLinearColor& GetCachedBoundsColor() { return CachedBoundsColor; }
 	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
@@ -34,6 +35,8 @@ public:
 	static const TArray<FVector>& GetCachedHullVertices() { return CachedHullVertices; }
 	static ANCellActor* GetCellActor() { return CellActor; }
 	static ENCellEdMode GetCellEdMode() { return CellEdMode; }
+	static void ProtectCellEdMode();
+	
 	
 	static ENCellVoxelMode GetCellVoxelMode() { return CellVoxelMode; }
 	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
