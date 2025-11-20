@@ -5,7 +5,7 @@
 
 #include "AssetDefinitionDefault.h"
 #include "NColor.h"
-#include "Tissue/NTissue.h"
+#include "Cell/NTissue.h"
 #include "Macros/NEditorAssetMacros.h"
 #include "AssetDefinition_NTissue.generated.h"
 

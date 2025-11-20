@@ -28,6 +28,8 @@
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
+#include "Organ/NBoneComponent.h"
+#include "Visualizers/NBoneComponentVisualizer.h"
 
 void FNProcGenEditorModule::StartupModule()
 {
@@ -38,8 +40,12 @@ void FNProcGenEditorModule::ShutdownModule()
 {
 	FEditorModeRegistry::Get().UnregisterMode(FNProcGenEdMode::Identifier);
 
-	//GUnrealEd->UnregisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName());
-	//GUnrealEd->UnregisterComponentVisualizer(UNCellPinComponent::StaticClass()->GetFName());
+	if (GUnrealEd)
+	{
+		GUnrealEd->UnregisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName());
+	}
 
 	// Unregister customizations
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
@@ -106,9 +112,13 @@ void FNProcGenEditorModule::OnPostEngineInit()
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
 	
-		const TSharedPtr<FComponentVisualizer> PinComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
-		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), PinComponentVisualizer);
-		PinComponentVisualizer->OnRegister();
+		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), JunctionComponentVisualizer);
+		JunctionComponentVisualizer->OnRegister();
+		
+		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShareable(new FNBoneComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName(), BoneComponentVisualizer);
+		BoneComponentVisualizer->OnRegister();
 	}
 
 	// Register Customizations

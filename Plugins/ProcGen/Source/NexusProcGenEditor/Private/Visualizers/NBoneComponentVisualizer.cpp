@@ -4,7 +4,7 @@
 #include "Visualizers/NBoneComponentVisualizer.h"
 
 #include "NProcGenEdMode.h"
-#include "Bone/NBoneComponent.h"
+#include "Organ/NBoneComponent.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 

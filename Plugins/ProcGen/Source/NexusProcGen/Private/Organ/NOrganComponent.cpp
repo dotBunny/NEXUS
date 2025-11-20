@@ -6,7 +6,7 @@
 #include "NCoreMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Cell/NCell.h"
-#include "Tissue/NTissue.h"
+#include "Cell/NTissue.h"
 
 FString UNOrganComponent::GetDebugLabel() const
 {
