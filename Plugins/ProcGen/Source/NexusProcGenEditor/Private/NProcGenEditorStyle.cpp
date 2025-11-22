@@ -34,6 +34,8 @@ TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 	// NBoneComponent
 	Style.Set("ClassIcon.NBoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NBoneComponent",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
+	Style.Set("ClassIcon.NBoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NBoneActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NBoneComponent"), Icon128x128));
 	
 	// NProcGenVolume/NProcGenComponent
 	Style.Set("ClassIcon.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon16x16));

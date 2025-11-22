@@ -5,9 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "Cell/NCellJunctionDetails.h"
+#include "Macros/NActorMacros.h"
 #include "Types/NCardinalRotation.h"
 #include "NBoneComponent.generated.h"
-
 
 // Bones will be anchors for junctions
 // need to add something like a 'organExclusion' ? for the actual space
@@ -18,9 +18,11 @@ class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
+	explicit UNBoneComponent(const FObjectInitializer& ObjectInitializer);
 public:
 	
 #if WITH_EDITOR
+	virtual void OnRegister() override;
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 #endif // WITH_EDITOR
 	
@@ -37,5 +39,8 @@ public:
 
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::CJR_Required;
+	
+private:
+	N_WORLD_ICON_HEADER()
 };
 	
