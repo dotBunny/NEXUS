@@ -8,9 +8,11 @@
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
+#include "Selection.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
+#include "Organ/NBoneActor.h"
 
 
 UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -30,6 +32,14 @@ void UNBoneComponent::OnRegister()
 		N_LOG(Error, TEXT("[UNBoneComponent::OnRegister] You cannot place bones in a level where an NCellRootComponent is defined."), *Level->GetName())
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 		{
+			if (AActor* Actor = this->GetOwner(); Actor != nullptr)
+			{
+				if (ANBoneActor* BoneActor = Cast<ANBoneActor>(Actor); BoneActor != nullptr)
+				{
+					BoneActor->Destroy();
+					return;
+				}
+			}
 			this->DestroyComponent();
 		}));
 	}
