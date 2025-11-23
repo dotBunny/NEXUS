@@ -8,7 +8,6 @@
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
-#include "Selection.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
