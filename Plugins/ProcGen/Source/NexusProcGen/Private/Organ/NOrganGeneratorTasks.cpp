@@ -1,13 +1,13 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Organ/NOrganGraph.h"
+#include "Organ/NOrganGeneratorTasks.h"
 
 #include "Organ/NOrganGeneratorContext.h"
-#include "Organ/NOrganGraphFinalizeTask.h"
-#include "Organ/NOrganGraphTask.h"
+#include "Organ/NOrganGeneratorFinalizeTask.h"
+#include "Organ/NOrganGeneratorTask.h"
 
-FNOrganGraph::FNOrganGraph(FNOrganGeneratorContext* Context)
+FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNOrganGenerator* Generator, FNOrganGeneratorContext* Context)
 {
 	bTasksUnlocked = false;
 	
@@ -23,10 +23,10 @@ FNOrganGraph::FNOrganGraph(FNOrganGeneratorContext* Context)
 		{
 			// Create component context
 			FNOrganGeneratorContextMap* ContextMap = Context->Components.Find(Component);
-			FNOrganGraphTaskContext* ContextPtr = new FNOrganGraphTaskContext(ContextMap);
+			FNOrganGeneratorTaskContext* ContextPtr = new FNOrganGeneratorTaskContext(ContextMap);
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
-			FGraphEventRef OrganTask = TGraphTask<FNOrganGraphTask>::CreateTask(
+			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
 				.ConstructAndHold(ContextPtr); // ConstructAndDispatchWhenReady
@@ -38,11 +38,11 @@ FNOrganGraph::FNOrganGraph(FNOrganGeneratorContext* Context)
 		PassTasks.Add(Tasks);
 	};
 	
-	// Create our finalizer task
-	FinalizeTask = TGraphTask<FNOrganGraphFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::AnyNormalThreadNormalTask).ConstructAndHold();
+	// Create our finalizer task on main thread
+	FinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
 }
 
-void FNOrganGraph::UnlockTasks()
+void FNOrganGeneratorTasks::UnlockTasks()
 {
 	// Start running the tasks
 	for (const auto Tasks : PassTasks)
@@ -57,7 +57,7 @@ void FNOrganGraph::UnlockTasks()
 	bTasksUnlocked = true;
 }
 
-void FNOrganGraph::WaitForTasks()
+void FNOrganGeneratorTasks::WaitForTasks()
 {
 	if (!bTasksUnlocked)
 	{
@@ -67,7 +67,7 @@ void FNOrganGraph::WaitForTasks()
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 
-void FNOrganGraph::Reset()
+void FNOrganGeneratorTasks::Reset()
 {
 	bTasksUnlocked = false;
 }

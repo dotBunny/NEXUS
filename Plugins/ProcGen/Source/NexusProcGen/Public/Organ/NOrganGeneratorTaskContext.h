@@ -6,8 +6,8 @@
 struct FNOrganGeneratorContextMap;
 class UNOrganComponent;
 
-class FNOrganGraphTaskContext
+class FNOrganGeneratorTaskContext
 {
 public:
-	FNOrganGraphTaskContext(FNOrganGeneratorContextMap* GeneratorContextMap);
+	FNOrganGeneratorTaskContext(FNOrganGeneratorContextMap* GeneratorContextMap);
 };

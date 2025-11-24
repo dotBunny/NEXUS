@@ -3,6 +3,7 @@
 
 #include "NProcGenSubsystem.h"
 #include "NCoreMinimal.h"
+#include "Organ/NOrganGenerator.h"
 
 bool UNProcGenSubsystem::RegisterCellActor(ANCellActor* CellActor)
 {
@@ -53,4 +54,26 @@ bool UNProcGenSubsystem::UnregisterCellProxy(ANCellProxy* CellProxy)
 	N_LOG(Log, TEXT("[UNProcGenSubsystem::UnregisterNCellProxy] NCellProxy unregistered."));
 	KnownCellProxies.RemoveSwap(CellProxy);
 	return true;
+}
+
+void UNProcGenSubsystem::Tick(float DeltaTime)
+{
+	
+}
+
+bool UNProcGenSubsystem::IsTickable() const
+{
+	if (ActiveGenerators.Num() > 0) return true;
+	return false;
+}
+
+void UNProcGenSubsystem::BuildGenerator(UNOrganGenerator* OrganGenerator)
+{
+	ActiveGenerators.AddUnique(OrganGenerator);
+	OrganGenerator->StartBuild(this);
+}
+
+void UNProcGenSubsystem::OnFinishedBuild(UNOrganGenerator* OrganGenerator)
+{
+	ActiveGenerators.Remove(OrganGenerator);
 }

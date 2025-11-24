@@ -3,18 +3,20 @@
 
 #pragma once
 
+#include "NOrganGeneratorTaskContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
-class FNOrganGeneratorComponentMap;
-
-struct FNOrganGraphFinalizeTask
+struct FNOrganGeneratorTask
 {
-public:
+	explicit FNOrganGeneratorTask(FNOrganGeneratorTaskContext* ContextPtr);
     
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphTask, STATGROUP_TaskGraphTasks); }
     
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
     
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
+
+private:
+	FNOrganGeneratorTaskContext* Context;
 };

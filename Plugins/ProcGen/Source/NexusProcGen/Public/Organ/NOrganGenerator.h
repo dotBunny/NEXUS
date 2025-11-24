@@ -7,11 +7,15 @@
 #include "NOrganGenerator.generated.h"
 
 class UNOrganComponent;
-class FNOrganGraph;
+class FNOrganGeneratorTasks;
 
 UCLASS(ClassGroup=(Nexus), DisplayName = "NOrgan Generator")
 class NEXUSPROCGEN_API UNOrganGenerator : public UObject
 {
+	friend class UNProcGenSubsystem;
+	friend class UNProcGenEditorSubsystem;
+	friend struct FNOrganGeneratorFinalizeTask;
+	
 	GENERATED_BODY()
 
 	explicit UNOrganGenerator(const FObjectInitializer& ObjectInitializer);
@@ -22,7 +26,7 @@ public:
 	static UNOrganGenerator* CreateInstance(UNOrganComponent* BaseComponent);
 	
 	void Reset() const;
-	void Generate();
+	void StartBuild(UObject* Caller);
 	bool AddToContext(UNOrganComponent* Component) const;
 	bool IsLocked() const { return Context->IsLocked(); }
 	/**
@@ -35,13 +39,17 @@ public:
 	}
 	
 	// TODO: Do we expose this?
-	FNOrganGraph* GetGraph() const { return Graph; }
+	
 
 protected:
 	virtual void BeginDestroy() override;
-
+	void FinishBuild();
+	FNOrganGeneratorTasks* GetTasks() const { return Tasks; }
+	
 private:
-	FNOrganGraph* Graph = nullptr;
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	TObjectPtr<UObject> ExecuteCaller = nullptr;
+	FNOrganGeneratorTasks* Tasks = nullptr;
 	FNOrganGeneratorContext* Context = nullptr;
 	bool bIsContextLocked;
 };

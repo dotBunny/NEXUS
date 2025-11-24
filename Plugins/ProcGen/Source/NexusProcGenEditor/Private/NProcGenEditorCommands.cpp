@@ -11,9 +11,11 @@
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenEditorSubsystem.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
+#include "NProcGenSubsystem.h"
 #include "NProcGenUtils.h"
 #include "NUIEditorStyle.h"
 #include "Selection.h"
@@ -335,9 +337,8 @@ bool FNProcGenEditorCommands::CellAddActor_CanShow()
 
 void FNProcGenEditorCommands::OrganGenerate()
 {
-	// Create generator
-	UNOrganGenerator* Generator = UNOrganGenerator::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents());
-	Generator->Generate();
+	UNProcGenEditorSubsystem::Get()->BuildGenerator(
+		UNOrganGenerator::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
 }
 
 bool FNProcGenEditorCommands::OrganGenerate_CanExecute()

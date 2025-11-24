@@ -31,8 +31,8 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bIncludeEditorOnly = false;
 
-	UPROPERTY(EditAnywhere)
-	EBuildMethod BuildMethod = EBuildMethod::ConvexHull3Simplified;
+	UPROPERTY(VisibleAnywhere)
+	EBuildMethod BuildMethod = EBuildMethod::Original;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };

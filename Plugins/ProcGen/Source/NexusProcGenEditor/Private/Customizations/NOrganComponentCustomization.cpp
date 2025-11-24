@@ -6,6 +6,7 @@
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "NCoreMinimal.h"
+#include "NProcGenEditorSubsystem.h"
 #include "Organ/NOrganComponent.h"
 #include "Organ/NOrganGenerator.h"
 
@@ -128,9 +129,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
-	UNOrganGenerator* OrganGenerator = UNOrganGenerator::CreateInstance(Objects);
-	OrganGenerator->Generate();
-	
+	UNProcGenEditorSubsystem::Get()->BuildGenerator(UNOrganGenerator::CreateInstance(Objects));
 	return FReply::Handled();
 }
 

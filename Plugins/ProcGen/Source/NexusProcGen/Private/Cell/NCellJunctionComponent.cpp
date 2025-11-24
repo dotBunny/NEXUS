@@ -210,9 +210,7 @@ void UNCellJunctionComponent::PostEditImport()
 
 void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 {
-	// Bad patching has shown a bad ref here
-	N_WORLD_ICON_CLEANUP()
-	
+	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
 }
 
 #endif // WITH_EDITOR

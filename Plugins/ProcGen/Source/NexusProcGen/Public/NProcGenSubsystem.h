@@ -6,6 +6,8 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenSubsystem.generated.h"
 
+class UNOrganGenerator;
+class FNOrganGeneratorTasks;
 class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;
@@ -23,8 +25,18 @@ public:
 
 	bool RegisterCellProxy(ANCellProxy* CellProxy);
 	bool UnregisterCellProxy(ANCellProxy* CellProxy);
-
+	
+	virtual void Tick(float DeltaTime) override;
+	virtual bool IsTickable() const override;
+	
+	void BuildGenerator(UNOrganGenerator* OrganGenerator);
+	void OnFinishedBuild(UNOrganGenerator* OrganGenerator);
+	
 private:	
+	
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
+	TArray<UNOrganGenerator*> ActiveGenerators;
+	
 	TArray<ANCellActor*> KnownCellActors;
 	TArray<ANCellProxy*> KnownCellProxies;
 };
