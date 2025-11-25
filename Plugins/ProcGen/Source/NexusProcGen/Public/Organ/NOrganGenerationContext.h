@@ -8,7 +8,7 @@
 
 class UNOrganComponent;
 
-struct NEXUSPROCGEN_API FNOrganGeneratorContextMap
+struct NEXUSPROCGEN_API FNOrganGenerationContextMap
 {
 	UNOrganComponent* SourceComponent;
 	TArray<UNOrganComponent*> IntersectComponents;
@@ -18,7 +18,7 @@ struct NEXUSPROCGEN_API FNOrganGeneratorContextMap
 /**
  * Game-thread context of the entire generation process.
  */
-class NEXUSPROCGEN_API FNOrganGeneratorContext
+class NEXUSPROCGEN_API FNOrganGenerationContext
 {
 public:
 	void Reset();
@@ -29,11 +29,9 @@ public:
 	
 	void OutputToLog();
 	
-	TMap<UNOrganComponent*, FNOrganGeneratorContextMap> Components;
+	TMap<UNOrganComponent*, FNOrganGenerationContextMap> Components;
 	
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
-	
-
 	
 private:
 	bool bIsLocked = false;

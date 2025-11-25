@@ -1,23 +1,23 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
 
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Organ/NOrganGeneratorTasks.h"
+#include "Generation/NOrganGeneratorTasks.h"
 
-UNOrganGenerator::UNOrganGenerator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = new FNOrganGeneratorContext();
+	Context = new FNOrganGenerationContext();
 	
 	// A generator should never be deleted
 	this->AddToRoot();
 }
 
-UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects)
 {
-	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
@@ -33,9 +33,9 @@ UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<TWeakObjectPtr<U
 	return OrganGenerator;
 }
 
-UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<UNOrganComponent*>& Components)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components)
 {
-	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	
 	for (const auto Component : Components)
 	{
@@ -45,16 +45,16 @@ UNOrganGenerator* UNOrganGenerator::CreateInstance(const TArray<UNOrganComponent
 	return OrganGenerator;
 }
 
-UNOrganGenerator* UNOrganGenerator::CreateInstance(UNOrganComponent* BaseComponent)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent)
 {
-	UNOrganGenerator* OrganGenerator = NewObject<UNOrganGenerator>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	
 	OrganGenerator->AddToContext(BaseComponent);
 	
 	return OrganGenerator;
 }
 
-void UNOrganGenerator::Reset() const
+void UNProcGenOperation::Reset() const
 {
 	if (Context != nullptr)
 	{
@@ -62,7 +62,7 @@ void UNOrganGenerator::Reset() const
 	}
 }
 
-void UNOrganGenerator::BeginDestroy()
+void UNProcGenOperation::BeginDestroy()
 {
 	this->RemoveFromRoot();
 	
@@ -86,13 +86,13 @@ void UNOrganGenerator::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UNOrganGenerator::FinishBuild()
+void UNProcGenOperation::FinishBuild()
 {
 	
 	// TODO: Not great but allows us to go both ways and its not frequent
 	if (ExecuteCaller->IsValidLowLevel())
 	{
-		if (UFunction* Function = ExecuteCaller->FindFunction(TEXT("OnFinishedBuild")))
+		if (UFunction* Function = ExecuteCaller->FindFunction(TEXT("OnOperationFinished")))
 		{
 			ExecuteCaller->ProcessEvent(Function, this);
 		}
@@ -105,7 +105,7 @@ void UNOrganGenerator::FinishBuild()
 }
 
 
-void UNOrganGenerator::StartBuild(UObject* Caller)
+void UNProcGenOperation::StartBuild(UObject* Caller)
 {
 	// Cache our caller
 	ExecuteCaller = Caller;
@@ -132,13 +132,13 @@ void UNOrganGenerator::StartBuild(UObject* Caller)
 	
 }
 
-bool UNOrganGenerator::AddToContext(UNOrganComponent* Component) const
+bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const
 {
 	return Context->AddOrganComponent(Component);
 }
 
 
-void UNOrganGenerator::LockContext()
+void UNProcGenOperation::LockContext()
 {
 	Context->LockAndPreprocess();
 }

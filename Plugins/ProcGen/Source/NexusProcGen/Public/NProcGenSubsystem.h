@@ -6,7 +6,7 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenSubsystem.generated.h"
 
-class UNOrganGenerator;
+class UNProcGenOperation;
 class FNOrganGeneratorTasks;
 class ANCellProxy;
 class ANCellActor;
@@ -29,13 +29,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
 	
-	void BuildGenerator(UNOrganGenerator* OrganGenerator);
-	void OnFinishedBuild(UNOrganGenerator* OrganGenerator);
+	void StartOperation(UNProcGenOperation* Operation);
+	void OnOperationFinished(UNProcGenOperation* Operation);
+	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+	
 	
 private:	
 	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNOrganGenerator*> ActiveGenerators;
+	TArray<UNProcGenOperation*> KnownOperations;
 	
 	TArray<ANCellActor*> KnownCellActors;
 	TArray<ANCellProxy*> KnownCellProxies;

@@ -5,10 +5,8 @@
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
-#include "NCoreMinimal.h"
 #include "NProcGenEditorSubsystem.h"
-#include "Organ/NOrganComponent.h"
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
@@ -129,7 +127,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
-	UNProcGenEditorSubsystem::Get()->BuildGenerator(UNOrganGenerator::CreateInstance(Objects));
+	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects));
 	return FReply::Handled();
 }
 

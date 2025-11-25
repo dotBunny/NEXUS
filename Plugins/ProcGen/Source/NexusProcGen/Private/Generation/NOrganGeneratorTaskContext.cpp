@@ -1,9 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Organ/NOrganGeneratorTaskContext.h"
+#include "Generation/NOrganGeneratorTaskContext.h"
 
-FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(FNOrganGeneratorContextMap* GeneratorContextMap)
+FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap)
 {
 	// TODO: PARSE THE GENERATOR CONTEXT
 	// - build out all available tissue set information

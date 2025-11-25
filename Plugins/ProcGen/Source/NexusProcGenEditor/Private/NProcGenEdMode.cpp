@@ -15,7 +15,7 @@
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
 
 void FNProcGenEdMode::ProtectCellEdMode()
 {
@@ -68,7 +68,7 @@ void FNProcGenEdMode::Enter()
 	bCanTick = true;
 
 	// Create our temp organ generator to use with any selections
-	OrganGenerator = NewObject<UNOrganGenerator>();
+	OrganGenerator = NewObject<UNProcGenOperation>();
 	OrganGenerator->AddToRoot();
 	
 	FEdMode::Enter();

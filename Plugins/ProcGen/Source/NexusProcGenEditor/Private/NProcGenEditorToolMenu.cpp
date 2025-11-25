@@ -61,6 +61,9 @@ void FNProcGenEditorToolMenu::Register()
 		NOrganDropdownMenu.StyleNameOverride = "CalloutToolbar";
 		NexusSection.AddEntry(NOrganDropdownMenu);
 
+		S
+		FToolMenuEntry NProcGenEdMode_Operation = FToolMenuEntry::InitWidget()
+		
 		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
 		const FToolMenuEntry NProcGenEdMode_Button = FToolMenuEntry::InitToolBarButton(
 					"NProcGenEdMode_Button",

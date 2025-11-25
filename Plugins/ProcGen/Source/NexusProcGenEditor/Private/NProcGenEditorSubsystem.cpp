@@ -1,14 +1,14 @@
 ﻿#include "NProcGenEditorSubsystem.h"
 
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
 
-void UNProcGenEditorSubsystem::BuildGenerator(UNOrganGenerator* OrganGenerator)
+void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
-	ActiveGenerators.AddUnique(OrganGenerator);
-	OrganGenerator->StartBuild(this);
+	KnownOperations.AddUnique(Operation);
+	Operation->StartBuild(this);
 }
 
-void UNProcGenEditorSubsystem::OnFinishedBuild(UNOrganGenerator* OrganGenerator)
+void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation)
 {
-	ActiveGenerators.Remove(OrganGenerator);
+	KnownOperations.Remove(Operation);
 }

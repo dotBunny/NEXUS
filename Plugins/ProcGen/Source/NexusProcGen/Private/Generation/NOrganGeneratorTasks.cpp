@@ -1,13 +1,13 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Organ/NOrganGeneratorTasks.h"
+#include "Generation/NOrganGeneratorTasks.h"
 
-#include "Organ/NOrganGeneratorContext.h"
-#include "Organ/NOrganGeneratorFinalizeTask.h"
-#include "Organ/NOrganGeneratorTask.h"
+#include "Organ/NOrganGenerationContext.h"
+#include "Generation/NOrganGeneratorFinalizeUnsafeTask.h"
+#include "Generation/NOrganGeneratorTask.h"
 
-FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNOrganGenerator* Generator, FNOrganGeneratorContext* Context)
+FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOrganGenerationContext* Context)
 {
 	bTasksUnlocked = false;
 	
@@ -22,7 +22,7 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNOrganGenerator* Generator, FNOrga
 		for (const auto Component : Pass)
 		{
 			// Create component context
-			FNOrganGeneratorContextMap* ContextMap = Context->Components.Find(Component);
+			FNOrganGenerationContextMap* ContextMap = Context->Components.Find(Component);
 			FNOrganGeneratorTaskContext* ContextPtr = new FNOrganGeneratorTaskContext(ContextMap);
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
@@ -39,7 +39,7 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNOrganGenerator* Generator, FNOrga
 	};
 	
 	// Create our finalizer task on main thread
-	FinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
+	FinalizeTask = TGraphTask<FNOrganGeneratorFinalizeUnsafeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
 }
 
 void FNOrganGeneratorTasks::UnlockTasks()

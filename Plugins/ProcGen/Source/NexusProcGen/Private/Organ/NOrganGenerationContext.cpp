@@ -1,20 +1,20 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Organ/NOrganGeneratorContext.h"
+#include "Organ/NOrganGenerationContext.h"
 
 #include "NCoreMinimal.h"
 #include "NProcGenUtils.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
-void FNOrganGeneratorContext::Reset()
+void FNOrganGenerationContext::Reset()
 {
 	Components.Empty();
 	bIsLocked = false;
 }
 
-bool FNOrganGeneratorContext::AddOrganComponent(UNOrganComponent* Component)
+bool FNOrganGenerationContext::AddOrganComponent(UNOrganComponent* Component)
 {
 	if (IsLocked())
 	{
@@ -28,8 +28,8 @@ bool FNOrganGeneratorContext::AddOrganComponent(UNOrganComponent* Component)
 		return true;
 	}
 	
-	Components.Add(Component, FNOrganGeneratorContextMap());
-	FNOrganGeneratorContextMap* WorkingContext = Components.Find(Component);
+	Components.Add(Component, FNOrganGenerationContextMap());
+	FNOrganGenerationContextMap* WorkingContext = Components.Find(Component);
 	WorkingContext->SourceComponent = Component;
 
 	// We're going to capture all the other components in the level
@@ -69,7 +69,7 @@ bool FNOrganGeneratorContext::AddOrganComponent(UNOrganComponent* Component)
 	return true;
 }
 
-void FNOrganGeneratorContext::LockAndPreprocess()
+void FNOrganGenerationContext::LockAndPreprocess()
 {
 	bIsLocked = true;
 	
@@ -87,7 +87,7 @@ void FNOrganGeneratorContext::LockAndPreprocess()
 	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
 	for (auto& Pair : Components)
 	{
-		if (FNOrganGeneratorContextMap& ComponentContext = Pair.Value; 
+		if (FNOrganGenerationContextMap& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
 			PossibleComponents.Remove(Pair.Key);
@@ -112,7 +112,7 @@ void FNOrganGeneratorContext::LockAndPreprocess()
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNOrganGeneratorContextMap* ComponentContext = Components.Find(Component);
+			FNOrganGenerationContextMap* ComponentContext = Components.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
@@ -143,7 +143,7 @@ void FNOrganGeneratorContext::LockAndPreprocess()
 	}
 }
 
-void FNOrganGeneratorContext::OutputToLog()
+void FNOrganGenerationContext::OutputToLog()
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
 	Builder.Append(TEXT("\n[FNOrganContext]"));

@@ -6,7 +6,7 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
 
-class UNOrganGenerator;
+class UNProcGenOperation;
 
 UCLASS()
 class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem, public FTickableGameObject
@@ -16,7 +16,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	
 	virtual void Tick(float DeltaTime) override
 	{
-		if (LastFrameNumberWeTicked == GFrameCounter || ActiveGenerators.Num() == 0)
+		if (LastFrameNumberWeTicked == GFrameCounter || KnownOperations.Num() == 0)
 			return;
 		
 		
@@ -33,12 +33,14 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual bool IsTickableWhenPaused() const override{ return true; }
 	virtual bool IsTickableInEditor() const override { return true; }
 	
-	void BuildGenerator(UNOrganGenerator* OrganGenerator);
-	auto OnFinishedBuild(UNOrganGenerator* OrganGenerator) -> void;
+	void StartOperation(UNProcGenOperation* Operation);
+	void OnOperationFinished(UNProcGenOperation* Operation);
+	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+
 
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNOrganGenerator*> ActiveGenerators;
+	TArray<UNProcGenOperation*> KnownOperations;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };

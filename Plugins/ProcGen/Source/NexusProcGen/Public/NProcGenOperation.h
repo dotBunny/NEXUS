@@ -3,27 +3,27 @@
 
 #pragma once
 
-#include "NOrganGeneratorContext.h"
-#include "NOrganGenerator.generated.h"
+#include "Organ/NOrganGenerationContext.h"
+#include "NProcGenOperation.generated.h"
 
 class UNOrganComponent;
 class FNOrganGeneratorTasks;
 
 UCLASS(ClassGroup=(Nexus), DisplayName = "NOrgan Generator")
-class NEXUSPROCGEN_API UNOrganGenerator : public UObject
+class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 {
 	friend class UNProcGenSubsystem;
 	friend class UNProcGenEditorSubsystem;
-	friend struct FNOrganGeneratorFinalizeTask;
+	friend struct FNOrganGeneratorFinalizeUnsafeTask;
 	
 	GENERATED_BODY()
 
-	explicit UNOrganGenerator(const FObjectInitializer& ObjectInitializer);
+	explicit UNProcGenOperation(const FObjectInitializer& ObjectInitializer);
 	
 public:
-	static UNOrganGenerator* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects);
-	static UNOrganGenerator* CreateInstance(const TArray<UNOrganComponent*>& Components);
-	static UNOrganGenerator* CreateInstance(UNOrganComponent* BaseComponent);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects);
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components);
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent);
 	
 	void Reset() const;
 	void StartBuild(UObject* Caller);
@@ -50,6 +50,6 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UObject> ExecuteCaller = nullptr;
 	FNOrganGeneratorTasks* Tasks = nullptr;
-	FNOrganGeneratorContext* Context = nullptr;
+	FNOrganGenerationContext* Context = nullptr;
 	bool bIsContextLocked;
 };

@@ -15,12 +15,11 @@
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
-#include "NProcGenSubsystem.h"
 #include "NProcGenUtils.h"
 #include "NUIEditorStyle.h"
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
@@ -337,8 +336,8 @@ bool FNProcGenEditorCommands::CellAddActor_CanShow()
 
 void FNProcGenEditorCommands::OrganGenerate()
 {
-	UNProcGenEditorSubsystem::Get()->BuildGenerator(
-		UNOrganGenerator::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
+	UNProcGenEditorSubsystem::Get()->StartOperation(
+		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
 }
 
 bool FNProcGenEditorCommands::OrganGenerate_CanExecute()

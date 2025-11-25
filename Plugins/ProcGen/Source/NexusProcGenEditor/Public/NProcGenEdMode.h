@@ -7,8 +7,8 @@
 #include "EdMode.h"
 #include "Cell/NCellActor.h"
 
-class FNOrganGeneratorContext;
-class UNOrganGenerator;
+class FNOrganGenerationContext;
+class UNProcGenOperation;
 
 class FNProcGenEdMode final : public FEdMode
 {
@@ -70,7 +70,7 @@ private:
 	static ANCellActor* CellActor;
 	static ENCellEdMode CellEdMode;
 	static ENCellVoxelMode CellVoxelMode;
-	TObjectPtr<UNOrganGenerator> OrganGenerator;
+	TObjectPtr<UNProcGenOperation> OrganGenerator;
 	bool bCanTick = false;
 	bool bHasDirtyActors = false;
 	bool bAutoBoundsDisabled = false;

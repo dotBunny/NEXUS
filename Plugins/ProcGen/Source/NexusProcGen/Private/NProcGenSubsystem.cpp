@@ -3,7 +3,8 @@
 
 #include "NProcGenSubsystem.h"
 #include "NCoreMinimal.h"
-#include "Organ/NOrganGenerator.h"
+#include "NProcGenOperation.h"
+#include "NProcGenOperation.h"
 
 bool UNProcGenSubsystem::RegisterCellActor(ANCellActor* CellActor)
 {
@@ -63,17 +64,17 @@ void UNProcGenSubsystem::Tick(float DeltaTime)
 
 bool UNProcGenSubsystem::IsTickable() const
 {
-	if (ActiveGenerators.Num() > 0) return true;
+	if (KnownOperations.Num() > 0) return true;
 	return false;
 }
 
-void UNProcGenSubsystem::BuildGenerator(UNOrganGenerator* OrganGenerator)
+void UNProcGenSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
-	ActiveGenerators.AddUnique(OrganGenerator);
-	OrganGenerator->StartBuild(this);
+	KnownOperations.AddUnique(Operation);
+	Operation->StartBuild(this);
 }
 
-void UNProcGenSubsystem::OnFinishedBuild(UNOrganGenerator* OrganGenerator)
+void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation)
 {
-	ActiveGenerators.Remove(OrganGenerator);
+	KnownOperations.Remove(Operation);
 }

@@ -5,21 +5,22 @@
 
 #include "Async/TaskGraphInterfaces.h"
 
-class UNOrganGenerator;
+class UNProcGenOperation;
 class FNOrganGeneratorComponentMap;
 
-struct FNOrganGeneratorFinalizeTask
+struct FNOrganGeneratorFinalizeUnsafeTask
 {
 public:
 	
-	explicit FNOrganGeneratorFinalizeTask(UNOrganGenerator* OrganGenerator);
+	explicit FNOrganGeneratorFinalizeUnsafeTask(UNProcGenOperation* OrganGenerator);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
     
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
     
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
+
 private:
-	UNOrganGenerator* Generator;
+	UNProcGenOperation* Operation;
 };

@@ -5,13 +5,13 @@
 
 #include "CoreMinimal.h"
 
-class UNOrganGenerator;
-class FNOrganGeneratorContext;
+class UNProcGenOperation;
+class FNOrganGenerationContext;
 
 class NEXUSPROCGEN_API FNOrganGeneratorTasks
 {
 public:
-	explicit FNOrganGeneratorTasks(UNOrganGenerator* Generator, FNOrganGeneratorContext* Context);
+	explicit FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOrganGenerationContext* Context);
 	
 	void UnlockTasks();
 	
