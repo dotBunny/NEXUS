@@ -11,10 +11,11 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"Blutility",
 					"Core",
 					"DataValidation",
 					"RHI",
-					"UnrealEd"
+					"UnrealEd",
 				]
 			);
 
@@ -34,7 +35,9 @@ namespace UnrealBuildTool.Rules
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
+					"UMG",
+					"UMGEditor",
+					"UnrealEd"
 				]
 			);
 			

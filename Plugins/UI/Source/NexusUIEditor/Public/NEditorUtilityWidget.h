@@ -49,6 +49,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 
+
 private:
 	UFUNCTION()
 	void DelayedConstructTask();
