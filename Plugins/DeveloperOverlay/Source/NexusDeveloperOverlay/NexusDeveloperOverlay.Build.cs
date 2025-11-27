@@ -3,31 +3,34 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class NexusDeveloperMenu : ModuleRules
+	public class NexusDeveloperOverlay : ModuleRules
 	{
-		public NexusDeveloperMenu(ReadOnlyTargetRules Target) : base(Target)
+		public NexusDeveloperOverlay(ReadOnlyTargetRules Target) : base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"CommonUI",
 					"Core",
 					"CoreUObject",
-					"Engine"
+					"Engine",
+					"UMG"
 				]
 			);
 
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
+					"DeveloperSettings",
 					"Projects"
 				]
 			);
 			
 			// NEXUS
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
 
-			ShortName = "NexusDeveloperMenu";						
+			ShortName = "NexusDeveloperOverlay";						
 		}
 	}
 }

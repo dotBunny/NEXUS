@@ -3,9 +3,9 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class NexusDeveloperMenuEditor : ModuleRules
+	public class NexusDeveloperOverlayEditor : ModuleRules
 	{
-		public NexusDeveloperMenuEditor(ReadOnlyTargetRules Target) : base(Target)
+		public NexusDeveloperOverlayEditor(ReadOnlyTargetRules Target) : base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -26,9 +26,9 @@ namespace UnrealBuildTool.Rules
 			);
 
 			// NEXUS
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperMenu"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperOverlay"]);
 
-			ShortName = "NexusDeveloperMenuEditor";						
+			ShortName = "NexusDeveloperOverlayEditor";						
 		}
 	}
 }

@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "NUserWidget.h"
-#include "NProcGenSystemWidget.generated.h"
+#include "NDeveloperOverlayWidget.h"
+#include "NProcGenDeveloperOverlayWidget.generated.h"
 
 UCLASS(BlueprintType)
-class UNProcGenSystemWidget : public UNUserWidget
+class UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
 };

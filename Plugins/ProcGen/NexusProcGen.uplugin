@@ -33,15 +33,23 @@
 	],
 	"Plugins": [
 		{
-			"Name": "NexusCore",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusUI",
+			"Name": "CommonUI",
 			"Enabled": true
 		},
 		{
 			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDeveloperOverlay",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
 			"Enabled": true
 		}
 	],

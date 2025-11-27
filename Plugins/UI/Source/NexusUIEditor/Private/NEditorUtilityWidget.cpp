@@ -8,6 +8,31 @@
 #include "EditorUtilityWidgetBlueprint.h"
 #include "NCoreEditorMinimal.h"
 
+// THIS IS MEANT TO make future template based EUW's possible?
+void UNEditorUtilityWidget::CreateFromWidget(UClass* WidgetClass)
+{
+	const FString TemplatePath = FString::Printf(TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'"));
+	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
+	if (TemplateWidget == nullptr)
+	{
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to load template blueprint. (%s)"), *TemplatePath)
+	}
+	
+	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateWidget))
+	{
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
+		UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
+		
+		UtilityWidget->BaseWidgetClass = WidgetClass;
+		UtilityWidget->PinTemplate(EditorWidget);
+	}
+	else
+	{
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
+	}
+}
+
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -46,6 +71,11 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	else
 	{
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::DelayedConstructTask] Unable to update tab details as no template is pinned. (%s)"), *GetName())
+	}
+
+	if (BaseWidgetClass != nullptr)
+	{
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::NativeOnInitialized] Attempting to add base widget to EUW"), *BaseWidgetClass->GetName())
 	}
 
 	// We need a render to happen so this can be updated

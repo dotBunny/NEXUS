@@ -15,9 +15,14 @@
 UCLASS()
 class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
 {
+	static TCHAR* WidgetTemplate;
+	
 	GENERATED_BODY()
 
 public:
+	
+	static void CreateFromWidget(UClass* WidgetClass);
+	
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
 	virtual FText GetTabDisplayText() const { return FText::FromString(TEXT("NEditorUtilityWidget")); }
 
@@ -46,9 +51,11 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	
-	UPROPERTY(BlueprintReadOnly);
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UClass> BaseWidgetClass;
 
 private:
 	UFUNCTION()

@@ -9,7 +9,7 @@
 /**
  * NEXUS: Developer Console Editor Module
  */
-class FNDeveloperMenuEditorModule final : public IModuleInterface
+class FNDeveloperOverlayEditorModule final : public IModuleInterface
 {
-	N_IMPLEMENT_MODULE(FNDeveloperMenuEditorModule, "NexusDeveloperMenuEditor")
+	N_IMPLEMENT_MODULE(FNDeveloperOverlayEditorModule, "NexusDeveloperOverlayEditor")
 };

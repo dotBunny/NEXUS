@@ -4,12 +4,12 @@
 #pragma once
 
 #include "NEditorUtilityWidget.h"
-#include "NProcGenSystemEditorUtilityWidget.generated.h"
+#include "NProcGenEditorUtilityWidget.generated.h"
 
 class UMenuAnchor;
 
 UCLASS()
-class UNProcGenSystemEditorUtilityWidget : public UNEditorUtilityWidget
+class UNProcGenEditorUtilityWidget : public UNEditorUtilityWidget
 {
 	GENERATED_BODY()
 
@@ -25,7 +25,7 @@ public:
 	static FText FullLabel;
 	static FText Tooltip;
 
-	static UNProcGenSystemEditorUtilityWidget* Instance;
+	static UNProcGenEditorUtilityWidget* Instance;
 
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const override { return TabIcon.GetIcon(); }
 	virtual FText GetTabDisplayText() const override { return TabDisplayText;  }

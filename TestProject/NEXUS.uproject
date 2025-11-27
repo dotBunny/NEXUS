@@ -83,7 +83,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperMenu",
+			"Name": "NexusDeveloperOverlay",
 			"Enabled": true
 		},
 		{

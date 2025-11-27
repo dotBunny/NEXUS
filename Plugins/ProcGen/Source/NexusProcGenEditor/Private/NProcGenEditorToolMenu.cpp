@@ -7,6 +7,7 @@
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorCommands.h"
+#include "NProcGenEditorUtilityWidget.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 
@@ -14,6 +15,7 @@
 
 void FNProcGenEditorToolMenu::Register()
 {
+	// Level Tools
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User"))
 	{
 		FToolMenuSection& NexusSection = Menu->FindOrAddSection("NEXUS");
@@ -247,6 +249,11 @@ void FNProcGenEditorToolMenu::Register()
 				&FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon)));
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 	}
+
+	// Editor Utility Window  TEMPT move this to a windows sub menu
+	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
+	FToolMenuSection&  WindowsSection = WindowsMenu->FindOrAddSection("NEXUS.Windows", LOCTEXT("Menus.Windows", "NEXUS Windows"));
+	UNProcGenEditorUtilityWidget::AddEntryToToolMenu(WindowsSection);
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()

@@ -7,12 +7,12 @@
 #include "Modules/ModuleInterface.h"
 
 /**
- * NEXUS: Developer Console Module
+ * NEXUS: Developer Overlay Module
  */
-class FNDeveloperMenuModule final : public IModuleInterface
+class FNDeveloperOverlayModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
 	void OnPostEngineInit();
 	
-	N_IMPLEMENT_MODULE(FNDeveloperMenuModule, "NexusDeveloperMenu")
+	N_IMPLEMENT_MODULE(FNDeveloperOverlayModule, "NexusDeveloperOverlay")
 };

@@ -2,8 +2,8 @@
 	"FileVersion": 3,
 	"Version": 5,
 	"VersionName": "0.2.2",
-	"FriendlyName": "NEXUS: Developer Menu",
-	"Description": "A visual developer console.",
+	"FriendlyName": "NEXUS: Developer Overlay",
+	"Description": "A visual developer overlay and menu system.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
@@ -16,12 +16,12 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "NexusDeveloperMenu",
+			"Name": "NexusDeveloperOverlay",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		},
 		{
-			"Name": "NexusDeveloperMenuEditor",
+			"Name": "NexusDeveloperOverlayEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
@@ -32,6 +32,10 @@
 		}
 	],
 	"Plugins": [
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
 		{
 			"Name": "NexusCore",
 			"Enabled": true

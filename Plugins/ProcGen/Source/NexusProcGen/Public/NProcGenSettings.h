@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NProcGenDeveloperOverlayWidget.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NProcGenSettings.generated.h"
@@ -41,4 +42,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	TSubclassOf<UNProcGenDeveloperOverlayWidget> DeveloperOverlayWidget;
 };
