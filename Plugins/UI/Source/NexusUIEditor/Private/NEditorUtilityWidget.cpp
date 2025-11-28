@@ -11,9 +11,10 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
 
-TArray<UNEditorUtilityWidget*> UNEditorUtilityWidget:: KnownEditorUtilityWidgets;
+TMap<FName, UNEditorUtilityWidget*> UNEditorUtilityWidget:: KnownEditorUtilityWidgets;
 
-UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget)
+// TODO: Handle icon  / tab display name? 
+UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(const TSubclassOf<UUserWidget> ContentWidget, const FName NameOverride)
 {
 	const FString TemplatePath = FString::Printf(TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'"));
 	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
@@ -34,8 +35,12 @@ UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUser
 			UtilityWidget->PinTemplate(EditorWidget);
 			if (ContentWidget != nullptr)
 			{
-				// Create widget
-				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget,  MakeUniqueObjectName(UtilityWidget, ContentWidget, FName(TEXT("EUWContentWidget"))));
+				FName ObjectName = NameOverride;
+				if (ObjectName == NAME_None)
+				{
+					ObjectName = MakeUniqueObjectName(UtilityWidget, ContentWidget, FName(TEXT("EUWContentWidget")));
+				}
+				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget, ObjectName);
 				
 				// Add to container
 				UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(UtilityWidget->WidgetTree->RootWidget);
@@ -57,23 +62,14 @@ UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUser
 	return nullptr;
 }
 
-UE_DISABLE_OPTIMIZATION
-bool UNEditorUtilityWidget::HasEditorUtilityWidgetOf(TSubclassOf<UNEditorUtilityWidget> WidgetClass)
+bool UNEditorUtilityWidget::HasEditorUtilityWidgetByName(const FName Name)
 {
-	for (const auto KnownWidget : KnownEditorUtilityWidgets)
-	{
-		// TODO: Need to figure out hwo to tell if it is the one we want
-		
-	}
-	return false;
+	return KnownEditorUtilityWidgets.Contains(Name);
 }
-UE_ENABLE_OPTIMIZATION
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	KnownEditorUtilityWidgets.Add(this);
 
 	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
@@ -95,7 +91,15 @@ void UNEditorUtilityWidget::NativeDestruct()
 
 	UnpinTemplate();
 	
-	KnownEditorUtilityWidgets.Remove(this);
+
+	if (BaseWidget != nullptr)
+	{
+		KnownEditorUtilityWidgets.Remove(BaseWidget->GetFName());
+	}
+	else
+	{
+		KnownEditorUtilityWidgets.Remove(GetFName());
+	}
 	
 	Super::NativeDestruct();
 }
@@ -104,8 +108,15 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	// Will do its own checks
-	//BuildContentFromWidget();
+	// We register a frame later as the base widget data has been set at that point
+	if (BaseWidget != nullptr)
+	{
+		KnownEditorUtilityWidgets.Add(BaseWidget->GetFName(), this);
+	}
+	else
+	{
+		KnownEditorUtilityWidgets.Add(GetFName(), this);
+	}
 	
 	if (PinnedTemplate != nullptr)
 	{

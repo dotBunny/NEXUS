@@ -6,6 +6,8 @@
 
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "NUIEditorStyle.h"
+#include "Textures/SlateIcon.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -20,11 +22,15 @@ class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
 	GENERATED_BODY()
 
 public:
-	static UNEditorUtilityWidget* CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget);
-	static bool HasEditorUtilityWidgetOf(TSubclassOf<UNEditorUtilityWidget> WidgetClass);
+	/// TODO: GetOrCreateFromWidget
+	/// TODO: GetEditorUtilityWidgetOf
+	/// TODO: Add title / icon? 
+	static UNEditorUtilityWidget* CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget, FName NameOverride = NAME_None);
+	static bool HasEditorUtilityWidgetByName(FName Name);
 	
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
-	virtual FText GetTabDisplayText() const { return FText::FromString(TEXT("NEditorUtilityWidget")); }
+	//virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TabIcon.GetIcon(); }
+	virtual FText GetTabDisplayText() const { return TabDisplayText; }
 
 	void PinTemplate(UEditorUtilityWidgetBlueprint* Template)
 	{
@@ -56,13 +62,18 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UUserWidget> BaseWidget = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly)
+	FText TabDisplayText = FText::FromString(TEXT("NEditorUtilityWidget"));
+	
+	// UPROPERTY(BlueprintReadOnly)
+	// FSlateIcon TabIcon = FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.SelectActor");
 
 private:
 	UFUNCTION()
 	void DelayedConstructTask();
 	void UpdateEditorTab(const FName& InTaName) const;
 	
-	static TArray<UNEditorUtilityWidget*> KnownEditorUtilityWidgets;
-	
+	static TMap<FName, UNEditorUtilityWidget*> KnownEditorUtilityWidgets;
 };
 

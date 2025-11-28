@@ -313,12 +313,12 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 		
 		WidgetClass = TemplateWidget->GeneratedClass;
 	}
-	UNEditorUtilityWidget::CreateFromWidget(WidgetClass);
+	UNEditorUtilityWidget::CreateFromWidget(WidgetClass, FName("NProcGenEditorUtilityWindow"));
 }
 
 bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
 {
-	return !UNEditorUtilityWidget::HasEditorUtilityWidgetOf(UNProcGenDeveloperOverlayWidget::StaticClass());
+	return !UNEditorUtilityWidget::HasEditorUtilityWidgetByName(FName("NProcGenEditorUtilityWindow"));
 }
 
 #undef LOCTEXT_NAMESPACE
