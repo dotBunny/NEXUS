@@ -6,7 +6,7 @@
 #include "NDeveloperOverlayWidget.h"
 #include "NProcGenDeveloperOverlayWidget.generated.h"
 
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, Abstract)
 class UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()

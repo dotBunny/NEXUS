@@ -6,10 +6,12 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "EditorUtilityWidgetComponents.h"
 #include "NCoreEditorMinimal.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanel.h"
 
-// THIS IS MEANT TO make future template based EUW's possible?
-void UNEditorUtilityWidget::CreateFromWidget(UClass* WidgetClass)
+void UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget)
 {
 	const FString TemplatePath = FString::Printf(TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'"));
 	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
@@ -22,10 +24,29 @@ void UNEditorUtilityWidget::CreateFromWidget(UClass* WidgetClass)
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-		UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
-		
-		UtilityWidget->BaseWidgetClass = WidgetClass;
-		UtilityWidget->PinTemplate(EditorWidget);
+
+		if (UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget); 
+			UtilityWidget != nullptr)
+		{
+			UtilityWidget->PinTemplate(EditorWidget);
+			if (ContentWidget != nullptr)
+			{
+				// Create widget
+				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget,  MakeUniqueObjectName(UtilityWidget, ContentWidget, FName(TEXT("EUWContentWidget"))));
+				
+				// Add to container
+				UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(UtilityWidget->WidgetTree->RootWidget);
+				EditorScrollBox->AddChild(UtilityWidget->BaseWidget);
+			}
+			else
+			{
+				NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to find content widget to use for template."), *TemplatePath)
+			}
+		}
+		else
+		{
+			NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
+		}
 	}
 	else
 	{
@@ -64,6 +85,9 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
+	// Will do its own checks
+	//BuildContentFromWidget();
+	
 	if (PinnedTemplate != nullptr)
 	{
 		UpdateEditorTab(PinnedTemplate->GetRegistrationName());
@@ -71,11 +95,6 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	else
 	{
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::DelayedConstructTask] Unable to update tab details as no template is pinned. (%s)"), *GetName())
-	}
-
-	if (BaseWidgetClass != nullptr)
-	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::NativeOnInitialized] Attempting to add base widget to EUW"), *BaseWidgetClass->GetName())
 	}
 
 	// We need a render to happen so this can be updated

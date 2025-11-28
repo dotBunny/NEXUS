@@ -13,6 +13,8 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
+
+	
 	N_IMPLEMENT_SETTINGS(UNProcGenSettings);
 
 #if WITH_EDITOR
@@ -35,14 +37,15 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 
 	//TODO: junctions are based on the mid-point, and draw from that dunno if we need to rethink that drawing because of voxel.
 public:
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Unit Size",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Unit Size",
 		meta=(ToolTip="What is the base unit sized when operating on our grid?"))
 	FVector UnitSize = FVector(50.f, 50.f, 50.f);
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName ="Player Size",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget (Override)",
+		meta=(ToolTip="Override the default (/NexusProcGen/WB_NProcGenDeveloperOverlay) widget used for the developer overlay."))
 	TSubclassOf<UNProcGenDeveloperOverlayWidget> DeveloperOverlayWidget;
 };

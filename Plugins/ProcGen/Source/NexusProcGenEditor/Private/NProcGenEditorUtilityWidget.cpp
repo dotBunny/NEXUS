@@ -5,6 +5,8 @@
 #include "NProcGenEditorStyle.h"
 #include "NProcGenSettings.h"
 
+// TODO: Move to MENU system
+
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
 FText UNProcGenEditorUtilityWidget::Label = LOCTEXT("NProcGenSystemEditorUtilityWidget_Open", "Open NProcGenSystem Window");
@@ -20,8 +22,15 @@ void UNProcGenEditorUtilityWidget::CreateWidget(const FToolMenuContext& InContex
 
 void UNProcGenEditorUtilityWidget::CreateWidget()
 {
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	CreateFromWidget(Settings->DeveloperOverlayWidget.Get()->GetClass());
+	TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
+	if (WidgetClass == nullptr)
+	{
+		const FString TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"));
+		UWidgetBlueprint* TemplateWidget = LoadObject<UWidgetBlueprint>(nullptr, TemplatePath);
+		
+		WidgetClass = TemplateWidget->GeneratedClass;
+	}
+	CreateFromWidget(WidgetClass);
 }
 
 bool UNProcGenEditorUtilityWidget::CreateWidget_CanExecute(const FToolMenuContext& InContext)

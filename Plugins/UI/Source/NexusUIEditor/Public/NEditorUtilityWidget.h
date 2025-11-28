@@ -20,8 +20,7 @@ class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
 	GENERATED_BODY()
 
 public:
-	
-	static void CreateFromWidget(UClass* WidgetClass);
+	static void CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget);
 	
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
 	virtual FText GetTabDisplayText() const { return FText::FromString(TEXT("NEditorUtilityWidget")); }
@@ -55,10 +54,12 @@ protected:
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UClass> BaseWidgetClass;
+	TObjectPtr<UUserWidget> BaseWidget = nullptr;
 
 private:
 	UFUNCTION()
 	void DelayedConstructTask();
 	void UpdateEditorTab(const FName& InTaName) const;
+	
 };
+
