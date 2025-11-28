@@ -25,8 +25,8 @@ public:
 	/// TODO: GetOrCreateFromWidget
 	/// TODO: GetEditorUtilityWidgetOf
 	/// TODO: Add title / icon? 
-	static UNEditorUtilityWidget* CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget, FName NameOverride = NAME_None);
-	static bool HasEditorUtilityWidgetByName(FName Name);
+	static UNEditorUtilityWidget* GetOrCreate(const FName UniqueIdentifier, TSubclassOf<UUserWidget> ContentWidget, const FText& InitialTabDisplayText);
+	static bool HasEditorUtilityWidget(FName Identifier);
 	
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
 	//virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TabIcon.GetIcon(); }
@@ -66,8 +66,13 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	FText TabDisplayText = FText::FromString(TEXT("NEditorUtilityWidget"));
 	
-	// UPROPERTY(BlueprintReadOnly)
-	// FSlateIcon TabIcon = FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.SelectActor");
+	UPROPERTY(BlueprintReadOnly)
+	FString TabIconStyle;
+	
+	UPROPERTY(BlueprintReadOnly)
+	FString TabIconName;
+	
+	FSlateIcon TabIcon;
 
 private:
 	UFUNCTION()

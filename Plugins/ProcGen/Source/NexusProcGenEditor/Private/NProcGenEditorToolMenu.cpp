@@ -313,12 +313,14 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 		
 		WidgetClass = TemplateWidget->GeneratedClass;
 	}
-	UNEditorUtilityWidget::CreateFromWidget(WidgetClass, FName("NProcGenEditorUtilityWindow"));
+	UNEditorUtilityWidget::GetOrCreate(FName("NProcGenEditorUtilityWindow"),
+		WidgetClass, 
+		FText::FromString("NEXUS: ProcGen"));
 }
 
 bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
 {
-	return !UNEditorUtilityWidget::HasEditorUtilityWidgetByName(FName("NProcGenEditorUtilityWindow"));
+	return !UNEditorUtilityWidget::HasEditorUtilityWidget(FName("NProcGenEditorUtilityWindow"));
 }
 
 #undef LOCTEXT_NAMESPACE

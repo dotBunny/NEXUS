@@ -14,33 +14,52 @@
 TMap<FName, UNEditorUtilityWidget*> UNEditorUtilityWidget:: KnownEditorUtilityWidgets;
 
 // TODO: Handle icon  / tab display name? 
-UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(const TSubclassOf<UUserWidget> ContentWidget, const FName NameOverride)
+UNEditorUtilityWidget* UNEditorUtilityWidget::GetOrCreate(const FName UniqueIdentifier, const TSubclassOf<UUserWidget> ContentWidget, const FText& InitialTabDisplayText)
 {
-	const FString TemplatePath = FString::Printf(TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'"));
+	if (UniqueIdentifier == NAME_None)
+	{
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] A proper Identifier must be provided for the EUW."))
+		return nullptr;
+	}
+	
+	if (HasEditorUtilityWidget(UniqueIdentifier))
+	{
+		return KnownEditorUtilityWidgets[UniqueIdentifier];
+	}
+	
+
+	// Looks like we need to make it
+	const FString TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'");
 	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
 	if (TemplateWidget == nullptr)
 	{
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to load template blueprint. (%s)"), *TemplatePath)
 	}
+
+	// TODO: Need to create a copy of the widget/ and give it a different name
+	
+	// // Need to duplicate the base
+	// UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(),
+	// 	MakeUniqueObjectName(TemplateWidget->GetOutermost(), TemplateWidget->GeneratedClass, NameOverride));
+	// TemplateDuplicate->SetFlags(RF_Transactional);
 	
 	// TODO: We might need to duplicate the template object? as it seems to add to it...need a second window to test
 	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateWidget))
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
+		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTabWithId(EditorWidget, UniqueIdentifier);
 
 		if (UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget); 
 			UtilityWidget != nullptr)
 		{
 			UtilityWidget->PinTemplate(EditorWidget);
+			UtilityWidget->TabDisplayText = InitialTabDisplayText;
+			
 			if (ContentWidget != nullptr)
 			{
-				FName ObjectName = NameOverride;
-				if (ObjectName == NAME_None)
-				{
-					ObjectName = MakeUniqueObjectName(UtilityWidget, ContentWidget, FName(TEXT("EUWContentWidget")));
-				}
-				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget, ObjectName);
+
+				// TODO: Should Identifier Get _Widget
+				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget, UniqueIdentifier);
 				
 				// Add to container
 				UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(UtilityWidget->WidgetTree->RootWidget);
@@ -62,9 +81,9 @@ UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(const TSubclassOf
 	return nullptr;
 }
 
-bool UNEditorUtilityWidget::HasEditorUtilityWidgetByName(const FName Name)
+bool UNEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 {
-	return KnownEditorUtilityWidgets.Contains(Name);
+	return KnownEditorUtilityWidgets.Contains(Identifier);
 }
 
 void UNEditorUtilityWidget::NativeConstruct()
@@ -133,6 +152,9 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::UpdateEditorTab(const FName& InRegisteredName) const
 {
+	// TODO: Not updating anymore
+	NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::UpdateEditorTab] Updating tab details for %s"), *InRegisteredName.ToString())
+	
 	if (const TSharedPtr<SDockTab> Tab = FGlobalTabmanager::Get()->FindExistingLiveTab(InRegisteredName))
 	{
 		Tab.Get()->SetTabIcon(GetTabDisplayIcon());
