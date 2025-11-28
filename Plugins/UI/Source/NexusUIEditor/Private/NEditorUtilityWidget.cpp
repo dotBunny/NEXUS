@@ -11,7 +11,9 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
 
-void UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget)
+TArray<UNEditorUtilityWidget*> UNEditorUtilityWidget:: KnownEditorUtilityWidgets;
+
+UNEditorUtilityWidget* UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWidget)
 {
 	const FString TemplatePath = FString::Printf(TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetTemplate.EUW_NWidgetTemplate'"));
 	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
@@ -20,6 +22,7 @@ void UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWid
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to load template blueprint. (%s)"), *TemplatePath)
 	}
 	
+	// TODO: We might need to duplicate the template object? as it seems to add to it...need a second window to test
 	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateWidget))
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
@@ -42,21 +45,35 @@ void UNEditorUtilityWidget::CreateFromWidget(TSubclassOf<UUserWidget> ContentWid
 			{
 				NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to find content widget to use for template."), *TemplatePath)
 			}
+			return UtilityWidget;
 		}
-		else
-		{
-			NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
-		}
+	
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
 	}
 	else
 	{
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
 	}
+	return nullptr;
 }
+
+UE_DISABLE_OPTIMIZATION
+bool UNEditorUtilityWidget::HasEditorUtilityWidgetOf(TSubclassOf<UNEditorUtilityWidget> WidgetClass)
+{
+	for (const auto KnownWidget : KnownEditorUtilityWidgets)
+	{
+		// TODO: Need to figure out hwo to tell if it is the one we want
+		
+	}
+	return false;
+}
+UE_ENABLE_OPTIMIZATION
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	
+	KnownEditorUtilityWidgets.Add(this);
 
 	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
@@ -77,6 +94,8 @@ void UNEditorUtilityWidget::NativeDestruct()
 	}
 
 	UnpinTemplate();
+	
+	KnownEditorUtilityWidgets.Remove(this);
 	
 	Super::NativeDestruct();
 }

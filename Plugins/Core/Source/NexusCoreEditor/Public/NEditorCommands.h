@@ -56,4 +56,5 @@ public:
 	static void BuildMenus();
 	static void FillHelpSubMenu(UToolMenu* Menu);
 	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
+	static NEXUSCOREEDITOR_API FToolMenuSection& GetEditorUtilitiesMenuSection();
 };

@@ -12,4 +12,8 @@ public:
 	static bool ShowCellDropdown();
 	static bool ShowCellJunctionDropdown();
 	static bool ShowOrganDropdown();
+	
+	
+	static void CreateEditorUtilityWindow();
+	static bool CreateEditorUtilityWindow_CanExecute();
 };

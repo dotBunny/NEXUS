@@ -304,6 +304,13 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
+FToolMenuSection& FNEditorCommands::GetEditorUtilitiesMenuSection()
+{
+	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
+	FToolMenuSection&  WindowsSection = WindowsMenu->FindOrAddSection("NEXUS.Windows", LOCTEXT("Menus.Windows", "NEXUS Windows"));
+	return WindowsSection;
+}
+
 void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 {
 	const FNEditorCommands Commands = FNEditorCommands::Get();

@@ -3,13 +3,17 @@
 
 #include "NProcGenEditorToolMenu.h"
 
+#include "NEditorCommands.h"
+#include "NEditorUtilityWidget.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
+#include "NProcGenDeveloperOverlayWidget.h"
 #include "NProcGenEditorCommands.h"
-#include "NProcGenEditorUtilityWidget.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
+#include "NProcGenSettings.h"
+#include "WidgetBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
@@ -41,7 +45,7 @@ void FNProcGenEditorToolMenu::Register()
 						
 						MenuBuilder.AddMenuEntry(
 							OrganName,
-							FText::Format(NSLOCTEXT("NexusProcGenEditor", "SelectNOrganComponent", "Select {0}"), OrganName),
+							FText::Format(LOCTEXT("NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent, Organ),
 								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent_CanExecute, Organ),
@@ -216,7 +220,7 @@ void FNProcGenEditorToolMenu::Register()
 						
 						MenuBuilder.AddMenuEntry(
 							JunctionName,
-							FText::Format(NSLOCTEXT("NexusProcGenEditor", "SelectNCellJunctionComponent", "Select {0}"), JunctionName),
+							FText::Format(LOCTEXT("SelectNCellJunctionComponent", "Select {0}"), JunctionName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent, Junction),
 								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent_CanExecute, Junction),
@@ -250,10 +254,18 @@ void FNProcGenEditorToolMenu::Register()
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 	}
 
-	// Editor Utility Window  TEMPT move this to a windows sub menu
-	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-	FToolMenuSection&  WindowsSection = WindowsMenu->FindOrAddSection("NEXUS.Windows", LOCTEXT("Menus.Windows", "NEXUS Windows"));
-	UNProcGenEditorUtilityWidget::AddEntryToToolMenu(WindowsSection);
+	// EUW Entry
+	FToolMenuSection& MenuSection = FNEditorCommands::GetEditorUtilitiesMenuSection();
+	FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry("NEXUS.ProcGen.System",  
+		LOCTEXT("NProcGenSystemEditorUtilityWidget_OpenFull", "NProcGenSystem"),
+		LOCTEXT("NProcGenSystemEditorUtilityWidget_Tip", "Opens the NProcGenSystem Window inside of an editor tab."),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen"),
+FUIAction(
+FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow),
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute),
+		FIsActionChecked(),
+		FIsActionButtonVisible()));
+	MenuSection.AddEntry(Entry);
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()
@@ -289,6 +301,24 @@ bool FNProcGenEditorToolMenu::ShowCellJunctionDropdown()
 bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 {
 	return FNProcGenEdMode::IsActive() && FNProcGenRegistry::HasOrganComponents();
+}
+
+void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
+{
+	TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
+	if (WidgetClass == nullptr)
+	{
+		const FString TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"));
+		UWidgetBlueprint* TemplateWidget = LoadObject<UWidgetBlueprint>(nullptr, TemplatePath);
+		
+		WidgetClass = TemplateWidget->GeneratedClass;
+	}
+	UNEditorUtilityWidget::CreateFromWidget(WidgetClass);
+}
+
+bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
+{
+	return !UNEditorUtilityWidget::HasEditorUtilityWidgetOf(UNProcGenDeveloperOverlayWidget::StaticClass());
 }
 
 #undef LOCTEXT_NAMESPACE
