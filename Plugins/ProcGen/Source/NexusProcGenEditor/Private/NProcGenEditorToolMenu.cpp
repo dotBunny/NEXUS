@@ -13,6 +13,7 @@
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenSettings.h"
+#include "NWidgetEditorUtilityWidget.h"
 #include "WidgetBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
@@ -313,14 +314,14 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 		
 		WidgetClass = TemplateWidget->GeneratedClass;
 	}
-	UNEditorUtilityWidget::GetOrCreate(FName("NProcGenEditorUtilityWindow"),
+	UNWidgetEditorUtilityWidget::GetOrCreate(FName("NProcGenEditorUtilityWindow"),
 		WidgetClass, 
 		FText::FromString("NEXUS: ProcGen"));
 }
 
 bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
 {
-	return !UNEditorUtilityWidget::HasEditorUtilityWidget(FName("NProcGenEditorUtilityWindow"));
+	return !UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(FName("NProcGenEditorUtilityWindow"));
 }
 
 #undef LOCTEXT_NAMESPACE

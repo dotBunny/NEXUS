@@ -20,3 +20,5 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 	// We are always going to draw this
 	BoneComponent->DrawDebugPDI(PDI);
 }
+
+#undef LOCTEXT_NAMESPACE
