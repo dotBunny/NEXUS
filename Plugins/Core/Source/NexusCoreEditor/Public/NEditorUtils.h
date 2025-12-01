@@ -162,5 +162,5 @@ public:
 
 	static FString GetEngineBinariesPath();
 	
-	static void UpdateNomadTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label);
+	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label);
 };

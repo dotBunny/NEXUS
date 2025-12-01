@@ -5,6 +5,7 @@
 #include "BlueprintEditor.h"
 #include "ISettingsModule.h"
 #include "KismetCompilerModule.h"
+#include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
@@ -266,8 +267,9 @@ FString FNEditorUtils::GetEngineBinariesPath()
 	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
 }
 
-void FNEditorUtils::UpdateNomadTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label)
+void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label)
 {
+	// Check Globals
 	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
 	{
 		if (Icon.IsSet())
@@ -281,5 +283,25 @@ void FNEditorUtils::UpdateNomadTab(const FName& TabIdentifier, const TAttribute<
 		}
 		return;
 	}
+	
+	// Check Level Editor
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			if (Icon.IsSet())
+			{
+				ActiveTab.Get()->SetTabIcon(Icon);
+			}
+		
+			if (!Label.IsEmpty())
+			{
+				ActiveTab.Get()->SetLabel(Label);
+			}
+			return;
+		}
+	}
+	
 	NE_LOG(Warning, TEXT("[FNEditorUtils::UpdateTab] Unable to update tab details as tab does not exist. (%s)"), *TabIdentifier.ToString())
 }

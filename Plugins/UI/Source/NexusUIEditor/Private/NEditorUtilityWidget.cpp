@@ -42,7 +42,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 {
 	if (PinnedTemplate != nullptr)
 	{
-		FNEditorUtils::UpdateNomadTab(PinnedTemplate->GetRegistrationName(), GetTabDisplayIcon(), GetTabDisplayText());
+		FNEditorUtils::UpdateTab(PinnedTemplate->GetRegistrationName(), GetTabDisplayIcon(), GetTabDisplayText());
 	}
 	else
 	{
