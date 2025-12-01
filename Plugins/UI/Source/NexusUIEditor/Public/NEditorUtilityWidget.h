@@ -6,6 +6,7 @@
 
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "INWidgetTabDetails.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -13,14 +14,11 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
 UCLASS()
-class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
+class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetTabDetails
 {
 	GENERATED_BODY()
 
 public:
-	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
-	virtual FText GetTabDisplayText() const { return FText::FromString(TEXT("NEditorUtilityWidget")); }
-
 	void PinTemplate(UEditorUtilityWidgetBlueprint* Template)
 	{
 		PinnedTemplate = Template;
@@ -51,8 +49,4 @@ protected:
 
 	UFUNCTION()
 	virtual void DelayedConstructTask();
-	
-private:
-
-	void UpdateEditorTab(const FName& InTaName) const;
 };

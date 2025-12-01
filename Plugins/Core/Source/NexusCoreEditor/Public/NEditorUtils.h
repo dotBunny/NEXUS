@@ -161,4 +161,6 @@ public:
 	static bool ReplaceWindowIcon(const FString& IconPath);
 
 	static FString GetEngineBinariesPath();
+	
+	static void UpdateNomadTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label);
 };

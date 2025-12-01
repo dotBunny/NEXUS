@@ -5,33 +5,49 @@
 
 
 #include "EditorUtilityWidget.h"
-#include "EditorUtilityWidgetBlueprint.h"
 #include "NEditorUtilityWidget.h"
-#include "NUIEditorStyle.h"
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
-// TODO : restore old, rename to wrapper?
+// TODO : restore old
 
-/**
- * An extension on the UEditorUtilityWidget providing additional functionality around customization and appearance.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
- */
 UCLASS()
 class NEXUSUIEDITOR_API UNWidgetEditorUtilityWidget : public UNEditorUtilityWidget
 {
 	GENERATED_BODY()
 
 public:
-	/// TODO: GetOrCreateFromWidget
-	/// TODO: GetEditorUtilityWidgetOf
-	/// TODO: Add title / icon? 
-	static UNWidgetEditorUtilityWidget* GetOrCreate(const FName Identifier, TSubclassOf<UUserWidget> ContentWidget, const FText& InitialTabDisplayText);
+	static UNWidgetEditorUtilityWidget* GetOrCreate(const FName Identifier, TSubclassOf<UUserWidget> ContentWidget, const FText& TabDisplayText = FText::GetEmpty(), const FName& TabIconStyle = TEXT(""), const FString& TabIconName = TEXT(""));
 	
 	static bool HasEditorUtilityWidget(FName Identifier);
 	
-
-	virtual FText GetTabDisplayText() const override { return TabDisplayText; }
+	virtual FText GetTabDisplayText() const override
+	{
+		if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetails>())
+		{
+			const INWidgetTabDetails* TabDetails = Cast<INWidgetTabDetails>(BaseWidget);
+			return TabDetails->GetTabDisplayText();
+		}
+		return TabDisplayText;
+	}
+	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() override
+	{
+		if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetails>())
+		{
+			INWidgetTabDetails* TabDetails = Cast<INWidgetTabDetails>(BaseWidget);
+			return TabDetails->GetTabDisplayIcon();
+		}
+		
+		if (!TabIcon.IsSet() && !TabIconStyle.IsNone() && TabIconName.Len() > 0)
+		{
+			TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
+		}
+		if (TabIcon.IsSet())
+		{
+			return TabIcon.GetIcon();
+		}
+		return TAttribute<const FSlateBrush*>();
+	}
 
 protected:
 	
@@ -45,15 +61,14 @@ protected:
 	FText TabDisplayText = FText::FromString(TEXT("NEditorUtilityWidget"));
 	
 	UPROPERTY(BlueprintReadOnly)
-	FString TabIconStyle;
+	FName TabIconStyle;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FString TabIconName;
-	FSlateIcon TabIcon;
 
 private:
 	virtual void DelayedConstructTask() override;
-	
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownEditorUtilityWidgets;
+	FSlateIcon TabIcon;
 };
 

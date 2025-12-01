@@ -12,47 +12,52 @@
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
 
-// TODO: Handle icon  / tab display name? 
-UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const TSubclassOf<UUserWidget> ContentWidget, const FText& InitialTabDisplayText)
+UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const TSubclassOf<UUserWidget> ContentWidget, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
 {
 	if (Identifier == NAME_None)
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] A proper Identifier must be provided for the EUW."))
+		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] A proper Identifier must be provided for the EUW."))
 		return nullptr;
 	}
 	
+	// Return existing
 	if (HasEditorUtilityWidget(Identifier))
 	{
 		return KnownEditorUtilityWidgets[Identifier];
 	}
 	
-
 	// Looks like we need to make it
 	const FString TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
 	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
 	if (TemplateWidget == nullptr)
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to load template blueprint. (%s)"), *TemplatePath)
+		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to load template blueprint. (%s)"), *TemplatePath)
 	}
 
-	// TODO: Need to create a copy of the widget/ and give it a different name
-	
-	// // Need to duplicate the base
+	// Need to duplicate the base
 	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
-		//MakeUniqueObjectName(TemplateWidget->GetOutermost(), TemplateWidget->GeneratedClass));
-	TemplateDuplicate->SetFlags(RF_Transient);
+	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
-	// TODO: We might need to duplicate the template object? as it seems to add to it...need a second window to test
 	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
 	{
+		// Check the Nomad flag is set so that we can access by ID
+		if (!EditorWidget->ShouldSpawnAsNomadTab())
+		{
+			NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] The wrapping widget must have Class Settings -> Settings -> Spawn As Nomad Tab checked (%s)"), *TemplatePath);
+			return nullptr;
+		}
+		
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-
 		if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
 			UtilityWidget != nullptr)
 		{
 			UtilityWidget->PinTemplate(EditorWidget);
-			UtilityWidget->TabDisplayText = InitialTabDisplayText;
+
+			// Assign defaults
+			UtilityWidget->TabDisplayText = TabDisplayText;
+			UtilityWidget->TabIconStyle = TabIconStyle;
+			UtilityWidget->TabIconName = TabIconName;
 			
 			if (ContentWidget != nullptr)
 			{
@@ -62,16 +67,16 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 			}
 			else
 			{
-				NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to find content widget to use for template."), *TemplatePath)
+				NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to find content widget to use for template."), *TemplatePath)
 			}
 			return UtilityWidget;
 		}
 	
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
+		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
 	}
 	else
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::CreateFromWidget] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
+		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
 	}
 	return nullptr;
 }
@@ -80,7 +85,6 @@ bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 {
 	return KnownEditorUtilityWidgets.Contains(Identifier);
 }
-
 
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()

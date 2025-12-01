@@ -265,3 +265,21 @@ FString FNEditorUtils::GetEngineBinariesPath()
 {
 	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
 }
+
+void FNEditorUtils::UpdateNomadTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label)
+{
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		if (Icon.IsSet())
+		{
+			ActiveTab.Get()->SetTabIcon(Icon);
+		}
+		
+		if (!Label.IsEmpty())
+		{
+			ActiveTab.Get()->SetLabel(Label);
+		}
+		return;
+	}
+	NE_LOG(Warning, TEXT("[FNEditorUtils::UpdateTab] Unable to update tab details as tab does not exist. (%s)"), *TabIdentifier.ToString())
+}

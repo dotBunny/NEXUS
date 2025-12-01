@@ -316,7 +316,7 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 	}
 	UNWidgetEditorUtilityWidget::GetOrCreate(FName("NProcGenEditorUtilityWindow"),
 		WidgetClass, 
-		FText::FromString("NEXUS: ProcGen"));
+		FText::FromString("NEXUS: ProcGen"), FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
 }
 
 bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()

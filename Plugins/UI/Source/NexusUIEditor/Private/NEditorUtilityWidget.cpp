@@ -7,6 +7,7 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "NCoreEditorMinimal.h"
+#include "NEditorUtils.h"
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
@@ -41,7 +42,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 {
 	if (PinnedTemplate != nullptr)
 	{
-		UpdateEditorTab(PinnedTemplate->GetRegistrationName());
+		FNEditorUtils::UpdateNomadTab(PinnedTemplate->GetRegistrationName(), GetTabDisplayIcon(), GetTabDisplayText());
 	}
 	else
 	{
@@ -51,34 +52,3 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	// We need a render to happen so this can be updated
 	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();
 }
-
-UE_DISABLE_OPTIMIZATION
-void UNEditorUtilityWidget::UpdateEditorTab(const FName& InRegisteredName) const
-{
-	
-	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(InRegisteredName))
-	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::UpdateEditorTab] Updating Active tab. (%s)"), *InRegisteredName.ToString())
-		
-		ActiveTab.Get()->SetTabIcon(GetTabDisplayIcon());
-		ActiveTab.Get()->SetLabel(GetTabDisplayText());
-		return;
-	}
-	
-	
-	FString NonActiveName = InRegisteredName.ToString();
-	NonActiveName = NonActiveName.Replace(TEXT("_ActiveTab"), TEXT(" "));
-	
-	const TSharedRef<FGlobalTabmanager>& TabManager = FGlobalTabmanager::Get();
-	
-	if (const TSharedPtr<SDockTab> NonActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(FName(NonActiveName)))
-	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::UpdateEditorTab] Updating Non-Active tab. (%s)"), *NonActiveName)
-		NonActiveTab.Get()->SetTabIcon(GetTabDisplayIcon());
-		NonActiveTab.Get()->SetLabel(GetTabDisplayText());
-		return;
-	}
-	
-	NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::UpdateEditorTab] Unable to update tab details as tab does not exist. (%s)"), *InRegisteredName.ToString())
-}
-UE_ENABLE_OPTIMIZATION
