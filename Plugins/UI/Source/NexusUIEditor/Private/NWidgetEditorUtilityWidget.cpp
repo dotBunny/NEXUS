@@ -40,13 +40,6 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	
 	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
 	{
-		// Check the Nomad flag is set so that we can access by ID
-		if (!EditorWidget->ShouldSpawnAsNomadTab())
-		{
-			NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] The wrapping widget must have Class Settings -> Settings -> Spawn As Nomad Tab checked (%s)"), *TemplatePath);
-			return nullptr;
-		}
-		
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
 		if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
