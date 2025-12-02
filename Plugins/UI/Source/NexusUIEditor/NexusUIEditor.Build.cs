@@ -24,6 +24,7 @@ namespace UnrealBuildTool.Rules
 				[			
 					"BlueprintGraph",
 					"CoreUObject",
+					"DeveloperSettings",
 					"Engine",
 					"LevelEditor",
 					"Projects",

@@ -10,6 +10,7 @@
 #include "NWidgetEditorUtilityWidget.generated.h"
 
 // TODO : restore old
+// TODO: EUW menu registration name
 
 UCLASS()
 class NEXUSUIEDITOR_API UNWidgetEditorUtilityWidget : public UNEditorUtilityWidget
@@ -51,9 +52,7 @@ public:
 
 protected:
 	
-	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
 	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UUserWidget> BaseWidget = nullptr;

@@ -12,6 +12,8 @@
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	
+	// TODO: Add to NEditorUtilityWidgetUserSettings
 
 	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
@@ -32,6 +34,12 @@ void UNEditorUtilityWidget::NativeDestruct()
 	}
 
 	UnpinTemplate();
+	
+	// TODO: Remove from to NEditorUtilityWidgetUserSettings 
+	if (!IsEngineExitRequested())
+	{
+		
+	}
 	
 	Super::NativeDestruct();
 }

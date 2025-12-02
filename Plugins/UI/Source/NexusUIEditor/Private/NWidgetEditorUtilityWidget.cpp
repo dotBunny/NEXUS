@@ -79,16 +79,8 @@ bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 	return KnownEditorUtilityWidgets.Contains(Identifier);
 }
 
-
-void UNWidgetEditorUtilityWidget::NativeConstruct()
-{
-	// TODO: Add to NUIEditorUserSettings construction list
-	Super::NativeConstruct();
-}
-
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	// TODO: Remove from to NUIEditorUserSettings construction list ? if not tear down?
 	if (BaseWidget != nullptr)
 	{
 		KnownEditorUtilityWidgets.Remove(BaseWidget->GetFName());
