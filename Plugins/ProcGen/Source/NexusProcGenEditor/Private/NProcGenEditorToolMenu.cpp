@@ -306,16 +306,18 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
-	TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
-	if (WidgetClass == nullptr)
-	{
-		const FString TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"));
-		UWidgetBlueprint* TemplateWidget = LoadObject<UWidgetBlueprint>(nullptr, TemplatePath);
-		
-		WidgetClass = TemplateWidget->GeneratedClass;
-	}
-	UNWidgetEditorUtilityWidget::GetOrCreate(FName("NProcGenEditorUtilityWindow"),
-		WidgetClass, 
+	// TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
+	// if (WidgetClass == nullptr)
+	// {
+	// 	const FString TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"));
+	// 	UWidgetBlueprint* TemplateWidget = LoadObject<UWidgetBlueprint>(nullptr, TemplatePath);
+	// 	
+	// 	WidgetClass = TemplateWidget->GeneratedClass;
+	// }
+
+	UNWidgetEditorUtilityWidget::GetOrCreate(
+		FName("NProcGenEditorUtilityWindow"), // Define our Identifier
+		TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"), 
 		FText::FromString("NEXUS: ProcGen"), FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
 }
 

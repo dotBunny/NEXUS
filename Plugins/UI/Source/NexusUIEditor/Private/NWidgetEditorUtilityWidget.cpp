@@ -5,14 +5,12 @@
 
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "EditorUtilityWidgetComponents.h"
 #include "NCoreEditorMinimal.h"
-#include "Blueprint/WidgetTree.h"
-#include "Components/CanvasPanel.h"
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
+const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
 
-UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const TSubclassOf<UUserWidget> ContentWidget, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
+UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
 {
 	if (Identifier == NAME_None)
 	{
@@ -27,8 +25,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	}
 	
 	// Looks like we need to make it
-	const FString TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
-	UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
+	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
 	if (TemplateWidget == nullptr)
 	{
 		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to load template blueprint. (%s)"), *TemplatePath)
@@ -42,26 +39,18 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
+		
+		// We dont want these tracked
+		EditorUtilitySubsystem->LoadedUIs.Remove(Widget);
+		
 		if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
 			UtilityWidget != nullptr)
 		{
 			UtilityWidget->PinTemplate(EditorWidget);
 
-			// Assign defaults
-			UtilityWidget->TabDisplayText = TabDisplayText;
-			UtilityWidget->TabIconStyle = TabIconStyle;
-			UtilityWidget->TabIconName = TabIconName;
-			
-			if (ContentWidget != nullptr)
-			{
-				UtilityWidget->BaseWidget = UtilityWidget->WidgetTree->ConstructWidget(ContentWidget, Identifier);
-				UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(UtilityWidget->WidgetTree->RootWidget);
-				EditorScrollBox->AddChild(UtilityWidget->BaseWidget);
-			}
-			else
-			{
-				NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to find content widget to use for template."), *TemplatePath)
-			}
+			const FNEditorUtilityWidgetUserSettingsPayload Payload = CreatePayload(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
+			UtilityWidget->RestoreFromUserSettingsPayload(Identifier, Payload);
+		
 			return UtilityWidget;
 		}
 	
@@ -81,15 +70,7 @@ bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	if (BaseWidget != nullptr)
-	{
-		KnownEditorUtilityWidgets.Remove(BaseWidget->GetFName());
-	}
-	else
-	{
-		KnownEditorUtilityWidgets.Remove(GetFName());
-	}
-	
+	KnownEditorUtilityWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
 }
 
@@ -98,14 +79,6 @@ void UNWidgetEditorUtilityWidget::NativeDestruct()
 void UNWidgetEditorUtilityWidget::DelayedConstructTask()
 {
 	// We register a frame later as the base widget data has been set at that point
-	if (BaseWidget != nullptr)
-	{
-		KnownEditorUtilityWidgets.Add(BaseWidget->GetFName(), this);
-	}
-	else
-	{
-		KnownEditorUtilityWidgets.Add(GetFName(), this);
-	}
-	
+	KnownEditorUtilityWidgets.Add(WidgetIdentifier, this);
 	Super::DelayedConstructTask();
 }

@@ -7,6 +7,7 @@
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "INWidgetTabDetails.h"
+#include "NEditorUtilityWidgetUserSettings.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -33,8 +34,12 @@ public:
 			PinnedTemplate = nullptr;
 		}
 	}
+	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetUserSettingsPayload Payload) { OnRestoreFromUserSettingsPayload(Identifier, Payload); };
 	
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldSerializeWidget = true;
+	
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
@@ -42,11 +47,49 @@ protected:
 	FVector2D UnitScale = FVector2D::One();	
 
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
+	virtual void NativeDestruct() override;	
+	
+	virtual FNEditorUtilityWidgetUserSettingsPayload GetUserSettingsPayload() { return OnGetUserSettingsPayload(); };
+	
+	virtual FName GetTabIdentifier()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetRegistrationName();
+		}
+		return GetFName();
+	}
+	virtual FName GetUserSettingsIdentifier()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetRegistrationName();
+		}
+		return GetFName();
+	}
+	virtual FString GetUserSettingsTemplate()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetFullName();
+		}
+		return GetFullName();
+	}
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnRestoreFromUserSettingsPayload(FName& Identifier, FNEditorUtilityWidgetUserSettingsPayload& Payload);
+	
+	UFUNCTION(BlueprintImplementableEvent)
+	FNEditorUtilityWidgetUserSettingsPayload OnGetUserSettingsPayload();
 	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 
 	UFUNCTION()
 	virtual void DelayedConstructTask();
+	
+	void OnTabClosed(TSharedRef<SDockTab> Tab);
+
+private:
+	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

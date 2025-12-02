@@ -3,7 +3,7 @@
 
 #include "NUIEditorModule.h"
 
-#include "NEditorUtilityWidgetUserSettings.h"
+#include "NEditorUtilityWidgetLoadTask.h"
 #include "NEditorUtils.h"
 #include "NUIEditorStyle.h"
 #include "Interfaces/IPluginManager.h"
@@ -13,6 +13,7 @@ void FNUIEditorModule::StartupModule()
 {
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNUIEditorModule, OnPostEngineInit);
 }
+
 
 void FNUIEditorModule::ShutdownModule()
 {
@@ -25,7 +26,7 @@ void FNUIEditorModule::OnPostEngineInit()
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNUIEditorStyle::Initialize();
-	UNEditorUtilityWidgetUserSettings::OnPostEngineInit();
+	UNEditorUtilityWidgetLoadTask::Create();
 }
 
 IMPLEMENT_MODULE(FNUIEditorModule, NexusUIEditor)

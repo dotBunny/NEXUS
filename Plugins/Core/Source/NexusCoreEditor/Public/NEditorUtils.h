@@ -162,5 +162,12 @@ public:
 
 	static FString GetEngineBinariesPath();
 	
-	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label);
+	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
+	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
+	
+	static bool IsEditorShuttingDown()
+	{
+		return IsEngineExitRequested();
+	}
+
 };

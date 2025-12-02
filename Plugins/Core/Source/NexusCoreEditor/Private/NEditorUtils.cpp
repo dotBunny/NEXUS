@@ -267,7 +267,32 @@ FString FNEditorUtils::GetEngineBinariesPath()
 	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
 }
 
-void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label)
+void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
+{
+	// Check Globals
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		if (OnTabClosedCallback.IsBound())
+		{
+			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+		}
+		return;
+	}
+	
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			if (OnTabClosedCallback.IsBound())
+			{
+				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+			}
+		}
+	}
+}
+
+void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals
 	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
@@ -280,6 +305,11 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 		if (!Label.IsEmpty())
 		{
 			ActiveTab.Get()->SetLabel(Label);
+		}
+		
+		if (OnTabClosedCallback.IsBound())
+		{
+			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 		}
 		return;
 	}
@@ -298,6 +328,11 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 			if (!Label.IsEmpty())
 			{
 				ActiveTab.Get()->SetLabel(Label);
+			}
+			
+			if (OnTabClosedCallback.IsBound())
+			{
+				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 			}
 			return;
 		}
