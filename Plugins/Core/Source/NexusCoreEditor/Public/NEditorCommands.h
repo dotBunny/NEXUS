@@ -5,6 +5,16 @@
 
 #include "NEditorStyle.h"
 
+struct FNWindowCommandInfo
+{
+	FName Identifier;
+	FText DisplayName;
+	FText Tooltip;
+	FExecuteAction Execute;
+	FCanExecuteAction CanExecute;
+	FSlateIcon Icon;
+};
+
 class FNEditorCommands final : public TCommands<FNEditorCommands>
 {
 public:
@@ -56,5 +66,11 @@ public:
 	static void BuildMenus();
 	static void FillHelpSubMenu(UToolMenu* Menu);
 	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
-	static NEXUSCOREEDITOR_API FToolMenuSection& GetEditorUtilitiesMenuSection();
+	
+	static void FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu);
+	NEXUSCOREEDITOR_API static void AddWindowCommand(FNWindowCommandInfo CommandInfo);
+	NEXUSCOREEDITOR_API static void RemoveWindowCommand(FName Identifier);
+
+private:
+	static TMap<FName, FNWindowCommandInfo> WindowActions;
 };

@@ -11,6 +11,8 @@
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
+TMap<FName, FNWindowCommandInfo> FNEditorCommands::WindowActions;
+
 void FNEditorCommands::RegisterCommands()
 {
 	// ReSharper disable StringLiteralTypo
@@ -226,6 +228,17 @@ void FNEditorCommands::BuildMenus()
 			);
 	}
 	
+	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
+	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
+	LevelEditorSection.AddSubMenu(
+			"NEXUS",
+			LOCTEXT("NWindows", "NEXUS"),
+			LOCTEXT("NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
+			FNewToolMenuDelegate::CreateStatic(&FillNexusWindowsMenu, true),
+			false,
+			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+		);
+	
 	// Tools Menu
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
@@ -304,11 +317,37 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
-FToolMenuSection& FNEditorCommands::GetEditorUtilitiesMenuSection()
+void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-	FToolMenuSection&  WindowsSection = WindowsMenu->FindOrAddSection("NEXUS.Windows", LOCTEXT("Menus.Windows", "NEXUS Windows"));
-	return WindowsSection;
+	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", LOCTEXT("Windows", ""));
+	for (auto WindowCommand : WindowActions)
+	{
+		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
+			FIsActionChecked(), FIsActionButtonVisible());
+		WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
+			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
+			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+	}
+}
+
+void FNEditorCommands::AddWindowCommand(FNWindowCommandInfo CommandInfo)
+{
+	if (!WindowActions.Contains(CommandInfo.Identifier))
+	{
+		WindowActions.Add(CommandInfo.Identifier, CommandInfo);
+	}
+	else
+	{
+		WindowActions[CommandInfo.Identifier] = CommandInfo;
+	}
+}
+
+void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
+{
+	if (WindowActions.Contains(Identifier))
+	{
+		WindowActions.Remove(Identifier);
+	}
 }
 
 void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)

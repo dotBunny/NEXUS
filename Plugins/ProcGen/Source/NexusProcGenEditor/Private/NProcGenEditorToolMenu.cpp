@@ -256,17 +256,14 @@ void FNProcGenEditorToolMenu::Register()
 	}
 
 	// EUW Entry
-	FToolMenuSection& MenuSection = FNEditorCommands::GetEditorUtilitiesMenuSection();
-	FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry("NEXUS.ProcGen.System",  
-		LOCTEXT("NProcGenSystemEditorUtilityWidget_OpenFull", "NProcGenSystem"),
-		LOCTEXT("NProcGenSystemEditorUtilityWidget_Tip", "Opens the NProcGenSystem Window inside of an editor tab."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen"),
-FUIAction(
-FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow),
-		FCanExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute),
-		FIsActionChecked(),
-		FIsActionButtonVisible()));
-	MenuSection.AddEntry(Entry);
+	FNWindowCommandInfo EditorWindow = FNWindowCommandInfo();
+	EditorWindow.Identifier = "NProcGenSystem";
+	EditorWindow.DisplayName = LOCTEXT("NProcGenSystem_EUW_DisplayName", "ProcGen System");
+	EditorWindow.Tooltip = LOCTEXT("NProcGenSystem_EUW_DisplayName", "Opens the NProcGenSystem Window inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
+	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
+	EditorWindow.CanExecute = FCanExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute);
+	FNEditorCommands::AddWindowCommand(EditorWindow);
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()
