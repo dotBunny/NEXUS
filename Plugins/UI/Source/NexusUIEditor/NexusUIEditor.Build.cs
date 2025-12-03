@@ -26,6 +26,7 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"DeveloperSettings",
 					"Engine",
+					"EditorSubsystem",
 					"LevelEditor",
 					"Projects",
 					"ScriptableEditorWidgets",

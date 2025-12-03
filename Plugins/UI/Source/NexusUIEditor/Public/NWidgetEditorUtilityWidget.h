@@ -69,14 +69,14 @@ public:
 		return WidgetIdentifier;
 	}
 
-	virtual FNEditorUtilityWidgetUserSettingsPayload GetUserSettingsPayload() override
+	virtual FNEditorUtilityWidgetPayload GetUserSettingsPayload() override
 	{
 		return CreatePayload(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
 	}
 	
-	static FNEditorUtilityWidgetUserSettingsPayload CreatePayload(const FString& WidgetBlueprint, const FText& TabDisplayText, const FName& TabIconStyle, const FString& TabIconName)
+	static FNEditorUtilityWidgetPayload CreatePayload(const FString& WidgetBlueprint, const FText& TabDisplayText, const FName& TabIconStyle, const FString& TabIconName)
 	{
-		FNEditorUtilityWidgetUserSettingsPayload Payload;
+		FNEditorUtilityWidgetPayload Payload;
 		
 		Payload.Strings.Add(WidgetBlueprint);
 		Payload.Strings.Add(TabDisplayText.ToString());
@@ -91,7 +91,7 @@ public:
 		return TemplatePath;
 	}
 
-	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetUserSettingsPayload Payload) override
+	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetPayload Payload) override
 	{
 		WidgetIdentifier = Identifier;
 		WidgetBlueprint = Payload.Strings[0];

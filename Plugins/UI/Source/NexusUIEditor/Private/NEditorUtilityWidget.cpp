@@ -6,7 +6,7 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "NEditorUtilityWidgetUserSettings.h"
+#include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
 
 void UNEditorUtilityWidget::NativeConstruct()
@@ -42,7 +42,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
 	if (bShouldSerializeWidget)
 	{
-		UNEditorUtilityWidgetUserSettings::GetMutable()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetUserSettingsPayload());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetUserSettingsPayload());
 	}
 	
 	// We need a render to happen so this can be updated
@@ -53,6 +53,6 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (bShouldSerializeWidget && !IsEngineExitRequested())
 	{
-		UNEditorUtilityWidgetUserSettings::GetMutable()->UnregisterWidget(GetUserSettingsIdentifier());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->UnregisterWidget(GetUserSettingsIdentifier());
 	}
 }

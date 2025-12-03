@@ -7,7 +7,7 @@
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "INWidgetTabDetails.h"
-#include "NEditorUtilityWidgetUserSettings.h"
+#include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -34,7 +34,7 @@ public:
 			PinnedTemplate = nullptr;
 		}
 	}
-	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetUserSettingsPayload Payload) { OnRestoreFromUserSettingsPayload(Identifier, Payload); };
+	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetPayload Payload) { OnRestoreFromUserSettingsPayload(Identifier, Payload); };
 	
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -49,7 +49,7 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;	
 	
-	virtual FNEditorUtilityWidgetUserSettingsPayload GetUserSettingsPayload() { return OnGetUserSettingsPayload(); };
+	virtual FNEditorUtilityWidgetPayload GetUserSettingsPayload() { return OnGetUserSettingsPayload(); };
 	
 	virtual FName GetTabIdentifier()
 	{
@@ -77,10 +77,10 @@ protected:
 	}
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	void OnRestoreFromUserSettingsPayload(FName& Identifier, FNEditorUtilityWidgetUserSettingsPayload& Payload);
+	void OnRestoreFromUserSettingsPayload(FName& Identifier, FNEditorUtilityWidgetPayload& Payload);
 	
 	UFUNCTION(BlueprintImplementableEvent)
-	FNEditorUtilityWidgetUserSettingsPayload OnGetUserSettingsPayload();
+	FNEditorUtilityWidgetPayload OnGetUserSettingsPayload();
 	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;

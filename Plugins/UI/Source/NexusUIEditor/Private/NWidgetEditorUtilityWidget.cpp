@@ -3,8 +3,6 @@
 
 #include "NWidgetEditorUtilityWidget.h"
 
-#include "EditorUtilitySubsystem.h"
-#include "EditorUtilityWidgetBlueprint.h"
 #include "NCoreEditorMinimal.h"
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
@@ -24,43 +22,49 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 		return KnownEditorUtilityWidgets[Identifier];
 	}
 	
-	// Looks like we need to make it
-	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
-	if (TemplateWidget == nullptr)
-	{
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to load template blueprint. (%s)"), *TemplatePath)
-	}
-
-	// Need to duplicate the base
-	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
-	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
-	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
-	{
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-		
-		// We dont want these tracked
-		EditorUtilitySubsystem->LoadedUIs.Remove(Widget);
-		
-		if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
-			UtilityWidget != nullptr)
-		{
-			UtilityWidget->PinTemplate(EditorWidget);
-
-			const FNEditorUtilityWidgetUserSettingsPayload Payload = CreatePayload(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
-			UtilityWidget->RestoreFromUserSettingsPayload(Identifier, Payload);
-		
-			return UtilityWidget;
-		}
+	const FNEditorUtilityWidgetPayload Payload = CreatePayload(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
+	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithPayload(TemplatePath, Identifier, Payload);
+	return Cast<UNWidgetEditorUtilityWidget>(Widget);
 	
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
-	}
-	else
-	{
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
-	}
-	return nullptr;
+	//
+	// // Looks like we need to make it
+	// const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
+	// if (TemplateWidget == nullptr)
+	// {
+	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to load template blueprint. (%s)"), *TemplatePath)
+	// }
+	//
+	// // Need to duplicate the base
+	// UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
+	// TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
+	//
+	// if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
+	// {
+	// 	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+	// 	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
+	// 	
+	// 	// We dont want these tracked
+	// 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	// 	BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
+	// 	
+	// 	if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
+	// 		UtilityWidget != nullptr)
+	// 	{
+	// 		UtilityWidget->PinTemplate(EditorWidget);
+	//
+	// 		UtilityWidget->RestoreFromUserSettingsPayload(Identifier, Payload);
+	// 	
+	// 		return UtilityWidget;
+	// 	}
+	//
+	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
+	// }
+	// else
+	// {
+	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
+	// }
+	// return nullptr;
 }
 
 bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
