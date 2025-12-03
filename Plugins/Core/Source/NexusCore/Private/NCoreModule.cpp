@@ -13,6 +13,8 @@ void FNCoreModule::StartupModule()
 
 	// Initialize our font glyphs
 	FNPrimitiveFont::Initialize();
+	
+	N_LOG("NEXUS Version %s", *FString::Printf(TEXT("%i.%i.%i"), N_VERSION_MAJOR, N_VERSION_MINOR, N_VERSION_PATCH));
 }
 
 IMPLEMENT_MODULE(FNCoreModule, NexusCore)

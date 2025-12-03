@@ -7,6 +7,9 @@
 
 NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexus, Log, All);
 
+
+#define N_FUNCTION_NAME ANSI_TO_TCHAR(__FUNCTION__)
+
 #define N_LOG_VERY_VERBOSE(Format, ...) \
 	UE_LOG(LogNexus, VeryVerbose, TEXT(Format),  ##__VA_ARGS__)
 #define N_LOG_VERBOSE(Format, ...) \

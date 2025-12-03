@@ -48,14 +48,14 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	
 	if (ObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
-		N_LOG_WARNING("[UNDeveloperSubsystem::Tick] Object count WARNING threshold met with %d objects.", ObjectCount);
+		N_LOG_WARNING("Object count WARNING threshold met with %d objects.", ObjectCount);
 		bPassedObjectCountWarningThreshold = true;
 		return;
 	}
 	
 	if (ObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
 	{
-		N_LOG_ERROR("[UNDeveloperSubsystem::Tick] Object count SNAPSHOT threshold met with %d objects.", ObjectCount);
+		N_LOG_ERROR("Object count SNAPSHOT threshold met with %d objects.", ObjectCount);
 		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
 		if (bShouldOutputSnapshot)
 		{
@@ -63,7 +63,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 				FString::Printf(TEXT("NEXUS_Snapshot_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			FFileHelper::SaveStringToFile(CaptureSnapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 			
-			N_LOG_ERROR("[UNDeveloperSubsystem::Tick] SNAPSHOT written to %s.", *DumpFilePath);
+			N_LOG_ERROR("Object count SNAPSHOT written to %s.", *DumpFilePath);
 		}
 		bPassedObjectCountSnapshotThreshold = true;
 		return;
@@ -72,7 +72,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	if (ObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
-		N_LOG_ERROR("[UNDeveloperSubsystem::Tick] Object count COMPARE threshold met with %d objects.", ObjectCount);
+		N_LOG_ERROR("Object count COMPARE threshold met with %d objects.", ObjectCount);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
@@ -81,7 +81,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 		FString::Printf(TEXT("NEXUS_Compare_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 		
-		N_LOG_ERROR("[UNDeveloperSubsystem::Tick] COMPARE written to %s.", *DumpFilePath);
+		N_LOG_ERROR("Object count COMPARE written to %s.", *DumpFilePath);
 		bPassedObjectCountCompareThreshold = true;
 	}
 }

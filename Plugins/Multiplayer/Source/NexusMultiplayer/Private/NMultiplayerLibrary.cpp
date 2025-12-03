@@ -32,7 +32,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 {
 	if (PlayerState != nullptr && PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
-		N_LOG_WARNING("[UNMultiplayerLibrary::KickPlayer] Unable to kick host.")
+		N_LOG_ERROR("You are unable to kick the host.")
 		return false;
 	}
 	

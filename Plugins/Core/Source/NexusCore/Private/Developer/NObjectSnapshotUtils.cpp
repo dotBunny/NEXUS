@@ -48,7 +48,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		const FNObjectSnapshot TempSnapshot = OldSnapshot;
 		OldSnapshot = NewSnapshot;
 		NewSnapshot = TempSnapshot;
-		N_LOG_WARNING("[FNObjectSnapshotUtils::Diff] OldSnapshot was actually newer then NewSnapshot. Swapping.")
+		N_LOG_VERY_VERBOSE("The provided OldSnapshot was actually newer then NewSnapshot; swapping for comparison purposes.")
 	}
 
 	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;

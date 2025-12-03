@@ -121,11 +121,9 @@ bool FNRawMesh::CheckConvex()
 {
 	if (Vertices.Num() == 0 || Loops.Num() == 0)
 	{
-		N_LOG_WARNING("[FNRawMesh::CheckConvex] No vertices or loops found.");
+		N_LOG_WARNING("No vertices or loops were found in the FNRawMesh when checking if it was convex.");
 		return false;
 	}
-	
-	
 
 	Center = FVector::ZeroVector;
 	for (const FVector& Vertex : Vertices)
@@ -171,7 +169,7 @@ bool FNRawMesh::CheckConvex()
 		}
 		else
 		{
-			N_LOG_WARNING("[FNRawMesh::CheckConvex] Loop %d is an NGon, cannot determine convexity.", i);
+			N_LOG_WARNING("Loop %d is an NGon; unable to determine if the FNRawMesh is convex.", i);
 			return false;
 		}
 	}
