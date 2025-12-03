@@ -44,10 +44,10 @@ public: \
 		} \
 		if(bIsDirty) \
 		{ \
-			N_LOG(Warning, TEXT("[%s] Updating plugin definition."), TEXT(PluginName)) \
+			N_LOG_WARNING("[%s] Updating plugin definition.", TEXT(PluginName)) \
 			if (FText FailReason; !Plugin->UpdateDescriptor(UpdatedDescriptor, FailReason)) \
 			{ \
-				N_LOG(Warning, TEXT("[%s] Failed to update plugin descriptor: %s"), TEXT(PluginName), *FailReason.ToString()) \
+				N_LOG_WARNING("[%s] Failed to update plugin descriptor: %s", TEXT(PluginName), *FailReason.ToString()) \
 			} \
 		} \
 	}

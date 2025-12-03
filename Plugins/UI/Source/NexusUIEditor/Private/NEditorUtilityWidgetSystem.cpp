@@ -18,7 +18,7 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
 	if (TemplateWidget == nullptr)
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::CreateWithPayload] Unable to load template blueprint. (%s)"), *InTemplate)
+		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::CreateWithPayload] Unable to load template blueprint. (%s)", *InTemplate)
 		return nullptr;
 	}
 			
@@ -75,13 +75,13 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 		// Sanity check
 		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
 		{
-			NE_LOG(Error, TEXT("[UNEditorUtilityWidgetSystem::RegisterWidget] Index count invalid, clearing cache."))
+			NE_LOG_ERROR("[UNEditorUtilityWidgetSystem::RegisterWidget] Index count invalid, clearing cache.")
 			Clear();
 		}
 	}
 	else
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::RegisterWidget] Widget with identifier %s already registered, updating payload only."), *Identifier.ToString());
+		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::RegisterWidget] Widget with identifier %s already registered, updating payload only.", *Identifier.ToString());
 		WidgetStates[WorkingIndex] = WidgetState;
 	}
 	
@@ -102,7 +102,7 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	}
 	else
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::UnregisterWidget] Unable to find widget with identifier %s"), *Identifier.ToString());
+		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::UnregisterWidget] Unable to find widget with identifier %s", *Identifier.ToString());
 	}
 }
 
@@ -116,6 +116,6 @@ void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, con
 	}
 	else
 	{
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidgetSystem::UpdatePayload] Unable to find widget with identifier %s"), *Identifier.ToString());
+		NE_LOG_ERROR("[UNEditorUtilityWidgetSystem::UpdatePayload] Unable to find widget with identifier %s", *Identifier.ToString());
 	}
 }

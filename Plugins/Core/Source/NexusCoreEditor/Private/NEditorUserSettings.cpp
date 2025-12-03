@@ -39,14 +39,14 @@ void UNEditorUserSettings::ApplyEditorFrameRateLimit()
 {
 	if (FNEditorUtils::IsUserControlled())
 	{
-		NE_LOG(Log, TEXT("[UNEditorUserSettings::ApplyEditorFrameRateLimit] Attempting to apply framerate limit of: %f"), EditorFrameRateLimit);
+		NE_LOG("[UNEditorUserSettings::ApplyEditorFrameRateLimit] Attempting to apply framerate limit of: %f", EditorFrameRateLimit);
 
 		GEngine->SetMaxFPS(EditorFrameRateLimit);
 		GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
 
 		// Check results as it doesn't always stick.
 		EditorFrameRateLimit = GEngine->GetMaxFPS();
-		NE_LOG(Log, TEXT("[UNEditorUserSettings::ApplyEditorFrameRateLimit] *NEW* GEngine::MaxFPS: %f AND GameUserSettings::FrameRateLimit: %f"),
+		NE_LOG("[UNEditorUserSettings::ApplyEditorFrameRateLimit] *NEW* GEngine::MaxFPS: %f AND GameUserSettings::FrameRateLimit: %f",
 			EditorFrameRateLimit, GEngine->GameUserSettings->GetFrameRateLimit());
 	}
 }

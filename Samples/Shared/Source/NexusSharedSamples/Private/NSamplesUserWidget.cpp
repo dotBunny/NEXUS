@@ -52,7 +52,7 @@ void UNSamplesUserWidget::NativeConstruct()
 	}
 	else
 	{
-		N_LOG(Warning, TEXT("[UNSamplesUserWidget::NativeConstruct] Unsupported widget type: %s"), *MonitoredWidget->GetName())
+		N_LOG_WARNING("[UNSamplesUserWidget::NativeConstruct] Unsupported widget type: %s", *MonitoredWidget->GetName())
 	}
 }
 
@@ -82,7 +82,7 @@ void UNSamplesUserWidget::UpdateCurrentValue()
 	}
 	else
 	{
-		N_LOG(Warning, TEXT("[UNSamplesUserWidget::UpdateCurrentValue] Unsupported widget type: %s"), *MonitoredWidget->GetName())
+		N_LOG_WARNING("[UNSamplesUserWidget::UpdateCurrentValue] Unsupported widget type: %s", *MonitoredWidget->GetName())
 	}
 }
 

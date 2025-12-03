@@ -98,7 +98,7 @@ bool FNProcGenRegistry::RegisterCellRootComponent(UNCellRootComponent* Component
 {
 	if (CellRoots.Contains(Component))
 	{
-		N_LOG(Log, TEXT("[FNCellRegistry::RegisterRootComponent] UNCellRootComponent already registered, this can occur when using undo."));
+		N_LOG("[FNCellRegistry::RegisterRootComponent] UNCellRootComponent already registered, this can occur when using undo.");
 		return false;
 	}
 
@@ -110,7 +110,7 @@ bool FNProcGenRegistry::RegisterCellJunctionComponent(UNCellJunctionComponent* C
 {
 	if (CellJunctions.Contains(Component))
 	{
-		N_LOG(Log, TEXT("[FNCellRegistry::RegisterJunctionComponent] UNCellJunctionComponent already registered, this can occur when using undo."));
+		N_LOG("[FNCellRegistry::RegisterJunctionComponent] UNCellJunctionComponent already registered, this can occur when using undo.");
 		return false;
 	}
 
@@ -122,7 +122,7 @@ bool FNProcGenRegistry::RegisterOrganComponent(UNOrganComponent* Organ)
 {
 	if (Organs.Contains(Organ))
 	{
-		N_LOG(Warning, TEXT("[FNCellRegistry::RegisterOrganComponent] UNOrganComponent already registered."));
+		N_LOG_WARNING("[FNCellRegistry::RegisterOrganComponent] UNOrganComponent already registered.");
 		return false;
 	}
 
@@ -134,7 +134,7 @@ bool FNProcGenRegistry::UnregisterCellRootComponent(UNCellRootComponent* Compone
 {
 	if (!CellRoots.Contains(Component))
 	{
-		N_LOG(Warning, TEXT("[FNCellRegistry::UnregisterRootComponent] UNCellRootComponent not registered."));
+		N_LOG_WARNING("[FNCellRegistry::UnregisterRootComponent] UNCellRootComponent not registered.");
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool FNProcGenRegistry::UnregisterCellJunctionComponent(UNCellJunctionComponent*
 {
 	if (!CellJunctions.Contains(Component))
 	{
-		N_LOG(Warning, TEXT("[FNCellRegistry::UnregisterPinComponent] UNCellPinComponent not registered."));
+		N_LOG_WARNING("[FNCellRegistry::UnregisterPinComponent] UNCellPinComponent not registered.");
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool FNProcGenRegistry::UnregisterOrganComponent(UNOrganComponent* Organ)
 {
 	if (!Organs.Contains(Organ))
 	{
-		N_LOG(Warning, TEXT("[FNCellRegistry::UnregisterOrganComponent] UNOrganComponent not registered."));
+		N_LOG_WARNING("[FNCellRegistry::UnregisterOrganComponent] UNOrganComponent not registered.");
 		return false;
 	}
 

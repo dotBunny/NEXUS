@@ -16,7 +16,7 @@ void ANCellActor::PostEditMove(bool bFinished)
 	// Do not allow the cell to be moved in the editor
 	if (GetActorLocation() != FVector::ZeroVector)
 	{
-		N_LOG(Log, TEXT("[ANCellActor::PostEditMove] Resetting cell location/rotation/scale."));
+		N_LOG("[ANCellActor::PostEditMove] Resetting cell location/rotation/scale.");
 		CellRoot->SetWorldLocationAndRotationNoPhysics(FVector::ZeroVector, FRotator::ZeroRotator);
 		CellRoot->SetWorldScale3D(FVector::OneVector);
 	}
@@ -44,11 +44,11 @@ void ANCellActor::PostRegisterAllComponents()
 	Super::PostRegisterAllComponents();
 	if (CellRoot == nullptr)
 	{
-		N_LOG(Warning, TEXT("[ANCellActor::PostRegisterAllComponents] No linked cell root component found, linking."));
+		N_LOG_WARNING("[ANCellActor::PostRegisterAllComponents] No linked cell root component found, linking.");
 		CellRoot = GetComponentByClass<UNCellRootComponent>();
 		if (CellRoot == nullptr)
 		{
-			N_LOG(Error, TEXT("[ANCellActor::PostRegisterAllComponents] Unable to link UNCellRootComponent."));
+			N_LOG_ERROR("[ANCellActor::PostRegisterAllComponents] Unable to link UNCellRootComponent.");
 		}
 	}
 }

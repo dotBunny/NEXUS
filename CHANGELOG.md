@@ -16,6 +16,7 @@
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
 - The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
+- `N_LOG` and `NE_LOG` macros were changed to specify the verbosity by macro (`N_LOG_WARNING`, `N_LOG_ERROR`, etc.).
 
 ### Fixed
 

@@ -45,7 +45,7 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	}
 	else
 	{
-		N_LOG(Log, TEXT("[UNOrganComponent::DrawDebugPDI] %s is not volume based and is unable to draw."), *this->GetDebugLabel())
+		N_LOG("[UNOrganComponent::DrawDebugPDI] %s is not volume based and is unable to draw.", *this->GetDebugLabel())
 	}
 }
 
@@ -72,7 +72,7 @@ TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 	}
 	for (const auto& Set : ReferencedTissues)
 	{
-		N_LOG(Log, TEXT("[UNOrganComponent::GetTissueMap] %s References UNTissue: %s"), *this->GetName(), *Set->GetName())
+		N_LOG("[UNOrganComponent::GetTissueMap] %s References UNTissue: %s", *this->GetName(), *Set->GetName())
 	}
 	return MoveTemp(TissueMap);
 }

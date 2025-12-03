@@ -21,10 +21,10 @@ void FNCoreEditorModule::StartupModule()
 	
 	if (!FNEditorUtils::IsUserControlled())
 	{
-		NE_LOG(Log, TEXT("[FNCoreEditorModule::StartupModule] Framework initializing in an automated environment; some functionality will be ignored."));
+		NE_LOG("[FNCoreEditorModule::StartupModule] Framework initializing in an automated environment; some functionality will be ignored.");
 	}
 
-	NE_LOG(Log, TEXT("[FNCoreEditorModule::StartupModule] Initializing ..."));
+	NE_LOG("[FNCoreEditorModule::StartupModule] Initializing ...");
 	
 	UNEditorSettings::Register();
 	UNEditorUserSettings::Register();

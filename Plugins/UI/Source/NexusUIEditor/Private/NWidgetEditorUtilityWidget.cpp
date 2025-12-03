@@ -16,7 +16,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 {
 	if (Identifier == NAME_None)
 	{
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] A proper Identifier must be provided for the EUW."))
+		NE_LOG_ERROR("[UNEditorUtilityWidget::GetOrCreate] A proper Identifier must be provided for the EUW.")
 		return nullptr;
 	}
 	
@@ -178,7 +178,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		}
 		else
 		{
-			NE_LOG(Warning, TEXT("[UNWidgetEditorUtilityWidget::RestoreWidgetState] Unable to find content widget to use for template."), *TemplatePath)
+			NE_LOG_WARNING("[UNWidgetEditorUtilityWidget::RestoreWidgetState] Unable to find content widget to use for template.", *TemplatePath)
 		}
 	}
 

@@ -128,7 +128,7 @@ bool FNActorPool::Return(AActor* Actor)
 	
 	if (Actor == nullptr)
 	{
-		N_LOG(Warning, TEXT("[FNActorPool::Return] Attempting to return a null actor."));
+		N_LOG_WARNING("[FNActorPool::Return] Attempting to return a null actor.");
 		return false;
 	}
 	
@@ -427,7 +427,7 @@ void FNActorPool::Fill()
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
+	N_LOG("[FNActorPool::Fill] Filling pool %s to %i items.", *Template->GetName(), Settings.MinimumActorCount)
 	CreateActor(Settings.MinimumActorCount - InActors.Num());
 }
 
@@ -436,7 +436,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
+	N_LOG("[FNActorPool::Prewarm] Warming pool %s with %i items.", *Template->GetName(), Count)
 	CreateActor(Count);
 }
 

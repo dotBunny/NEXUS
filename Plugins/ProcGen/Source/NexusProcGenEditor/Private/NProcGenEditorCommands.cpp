@@ -303,17 +303,17 @@ void FNProcGenEditorCommands::CellAddActor()
 			switch (Choice)
 			{
 			case EAppReturnType::No:
-				NE_LOG(Error, TEXT("Unable to add NCellActor to an unsaved world."))
+				NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
 				return;
 			case EAppReturnType::Yes:
 				if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
 				{
-					NE_LOG(Error, TEXT("Unable to add NCellActor to an unsaved world."))
+					NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
 					return;
 				}
 				break;
 			default:
-				NE_LOG(Error, TEXT("Unable to add NCellActor to an unsaved world."))
+				NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
 				return;
 			}
 		}

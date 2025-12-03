@@ -28,7 +28,7 @@ void UNBoneComponent::OnRegister()
 	if (const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level); 
 		RootComponent != nullptr)
 	{
-		N_LOG(Error, TEXT("[UNBoneComponent::OnRegister] You cannot place bones in a level where an NCellRootComponent is defined."), *Level->GetName())
+		N_LOG_ERROR("[UNBoneComponent::OnRegister] You cannot place bones in a level where an NCellRootComponent is defined.", *Level->GetName())
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 		{
 			if (AActor* Actor = this->GetOwner(); Actor != nullptr)

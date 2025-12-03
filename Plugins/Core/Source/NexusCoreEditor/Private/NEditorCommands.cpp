@@ -176,7 +176,7 @@ void FNEditorCommands::OnToolsProfileNetworkProfiler()
 		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
 	if (!ProcHandle.IsValid())
 	{
-		NE_LOG(Warning, TEXT("Unable to launch NetworkProfiler."));
+		NE_LOG_WARNING("Unable to launch NetworkProfiler.");
 	}
 }
 

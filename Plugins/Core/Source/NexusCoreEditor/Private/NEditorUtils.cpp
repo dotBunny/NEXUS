@@ -84,20 +84,20 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 	
 	if (StaticLoadObject(UObject::StaticClass(), nullptr, *InPath))
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::CreateBlueprint] Blueprint already exists at %s"), *InPath);
+		NE_LOG_WARNING("[FNEditorUtils::CreateBlueprint] Blueprint already exists at %s", *InPath);
 		return nullptr;
 	}
 
 	if (!FKismetEditorUtilities::CanCreateBlueprintOfClass(InParentClass))
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::CreateBlueprint] Cannot create blueprint of class %s"), *InParentClass->GetName());
+		NE_LOG_ERROR("[FNEditorUtils::CreateBlueprint] Cannot create blueprint of class %s", *InParentClass->GetName());
 		return nullptr;
 	}
 
 	UPackage* Package = CreatePackage(*InPath);
 	if (Package == nullptr)
 	{
-		NE_LOG(Error, TEXT("FNEditorUtils::CreateBlueprint] Failed to create package at %s"), *InPath);
+		NE_LOG_ERROR("FNEditorUtils::CreateBlueprint] Failed to create package at %s", *InPath);
 		return nullptr;
 	}
 
@@ -127,7 +127,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	
 	if (!GConfig->IsReadyForUse())
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		NE_LOG_WARNING("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready.");
 		return;
 	}
 
@@ -138,14 +138,14 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	else
 	{
 		GConfig->AddNewBranch(ProjectDefaultGamePath);
-		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+		NE_LOG("[FNEditorUtils::DisallowConfigFileFromStaging] Creating branch for missing ini: %s.", *ProjectDefaultGamePath);
 	}
 	
 	TArray<FString> DisallowedConfigFiles;
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to load project DefaultGame.ini."))
+		NE_LOG_ERROR("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to load project DefaultGame.ini.")
 		return;
 	}
 	
@@ -154,7 +154,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	{
 		DisallowedConfigFiles.Add(RelativeConfig);
 		ProjectDefaultGameConfig->SetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
-		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+		NE_LOG("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s", *ProjectDefaultGamePath);
 
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
@@ -170,7 +170,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	
 	if (!GConfig->IsReadyForUse())
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		NE_LOG_WARNING("[FNEditorUtils::AllowConfigFileForStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready.");
 		return;
 	}
 
@@ -181,14 +181,14 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	else
 	{
 		GConfig->AddNewBranch(ProjectDefaultGamePath);
-		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+		NE_LOG("[FNEditorUtils::AllowConfigFileForStaging] Creating branch for missing ini: %s.", *ProjectDefaultGamePath);
 	}
 	
 	TArray<FString> AllowedConfigFiles;
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to load project DefaultGame.ini."))
+		NE_LOG_ERROR("[FNEditorUtils::AllowConfigFileForStaging] Unable to load project DefaultGame.ini.")
 		return;
 	}
 	
@@ -197,7 +197,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	{
 		AllowedConfigFiles.Add(RelativeConfig);
 		ProjectDefaultGameConfig->SetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
-		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+		NE_LOG("[FNEditorUtils::AllowConfigFileForStaging] Updating DefaultGame.ini to DisallowConfig: %s", *ProjectDefaultGamePath);
 
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
@@ -252,13 +252,13 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
 			return true;
 		}
-		NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s."), *FinalPath);
+		NE_LOG_WARNING("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s.", *FinalPath);
 		return false;
 	}
 	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] %s Not Found."), *FinalPath);
+	NE_LOG_WARNING("[FNEditorUtils::ReplaceWindowIcon] %s Not Found.", *FinalPath);
 #else
-	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform."));
+	NE_WARNING("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform.");
 #endif
 	return false;
 }
@@ -339,7 +339,7 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 		}
 	}
 	
-	NE_LOG(Warning, TEXT("[FNEditorUtils::UpdateTab] Unable to update tab details as tab does not exist. (%s)"), *TabIdentifier.ToString())
+	NE_LOG_WARNING("[FNEditorUtils::UpdateTab] Unable to update tab details as tab does not exist. (%s)", *TabIdentifier.ToString())
 }
 
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)

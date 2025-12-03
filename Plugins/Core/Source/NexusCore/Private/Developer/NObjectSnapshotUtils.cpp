@@ -48,7 +48,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		const FNObjectSnapshot TempSnapshot = OldSnapshot;
 		OldSnapshot = NewSnapshot;
 		NewSnapshot = TempSnapshot;
-		N_LOG(Warning, TEXT("[FNObjectSnapshotUtils::Diff] OldSnapshot was actually newer then NewSnapshot. Swapping."))
+		N_LOG_WARNING("[FNObjectSnapshotUtils::Diff] OldSnapshot was actually newer then NewSnapshot. Swapping.")
 	}
 
 	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;
@@ -153,20 +153,20 @@ void FNObjectSnapshotUtils::SnapshotToDisk()
 
 	FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
-	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::SnapshotToDisk] SNAPSHOT written to %s."), *DumpFilePath);
+	N_LOG("[FNObjectSnapshotUtils::SnapshotToDisk] SNAPSHOT written to %s.", *DumpFilePath);
 }
 
 void FNObjectSnapshotUtils::ClearCachedSnapshot()
 {
 	CachedSnapshot.Reset();
-	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::ClearCachedSnapshot] Cached snapshot CLEARED."));
+	N_LOG("[FNObjectSnapshotUtils::ClearCachedSnapshot] Cached snapshot CLEARED.");
 	
 }
 
 void FNObjectSnapshotUtils::CacheSnapshot()
 {
 	CachedSnapshot = Snapshot();
-	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CacheSnapshot] SNAPSHOT cached for future compare."));
+	N_LOG("[FNObjectSnapshotUtils::CacheSnapshot] SNAPSHOT cached for future compare.");
 }
 
 void FNObjectSnapshotUtils::CompareSnapshotToDisk()
@@ -182,5 +182,5 @@ void FNObjectSnapshotUtils::CompareSnapshotToDisk()
 	FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 	FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
-	N_LOG(Log, TEXT("[FNObjectSnapshotUtils::CompareSnapshotToDisk] COMPARE written to %s."), *DumpFilePath);
+	N_LOG("[FNObjectSnapshotUtils::CompareSnapshotToDisk] COMPARE written to %s.", *DumpFilePath);
 }

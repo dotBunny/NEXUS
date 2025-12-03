@@ -125,7 +125,7 @@ void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 	// Last chance
 	if (CellActor == nullptr)
 	{
-		NE_LOG(Warning, TEXT("[FNProcGenEditorUtils::SaveNCell] No NCellActor found in the world when trying to save NCell."));
+		NE_LOG_WARNING("[FNProcGenEditorUtils::SaveNCell] No NCellActor found in the world when trying to save NCell.");
 		return;
 	}
 	
@@ -139,7 +139,7 @@ void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 	}
 	else
 	{
-		NE_LOG(Log, TEXT("[FNProcGenEditorUtils::SaveNCell] No updates made."));
+		NE_LOG("[FNProcGenEditorUtils::SaveNCell] No updates made.");
 	}
 }
 
@@ -249,7 +249,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		// We changed it, make sure the level is known dirty too.
 		if (!CellActor->MarkPackageDirty())
 		{
-			NE_LOG(Warning, TEXT("[FNProcGenEditorUtils::UpdateNCell] Failed to mark package dirty for CellActor in %s."), *CellActor->GetWorld()->GetName());
+			NE_LOG_WARNING("[FNProcGenEditorUtils::UpdateNCell] Failed to mark package dirty for CellActor in %s.", *CellActor->GetWorld()->GetName());
 		}
 		bUpdatedCellData = true;
 	}

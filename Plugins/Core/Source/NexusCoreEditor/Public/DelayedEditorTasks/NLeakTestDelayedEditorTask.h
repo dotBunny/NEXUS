@@ -43,11 +43,11 @@ private:
 			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 			FString::Printf(TEXT("NEXUS_LeakCheck_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
-			N_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] Adds detected! COMPARE written to %s."), *DumpFilePath);
+			NE_LOG("[FNEditorCommands::OnToolsLeakCheck] Adds detected! COMPARE written to %s.", *DumpFilePath);
 		}
 		else
 		{
-			NE_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] %s"), *Diff.ToString());
+			NE_LOG("[FNEditorCommands::OnToolsLeakCheck] %s", *Diff.ToString());
 		}
 		Release();
 	}

@@ -28,7 +28,7 @@ bool INActorPoolItem::ReturnToActorPool()
 		}
 		return Actor->GetWorld()->GetSubsystem<UNActorPoolSubsystem>()->ReturnActor(Actor);
 	}
-	N_LOG(Log, TEXT("[INActorPoolItem::ReturnToActorPool] Unable to return %s to a valid Actor Pool."), *Actor->GetName());
+	N_LOG("[INActorPoolItem::ReturnToActorPool] Unable to return %s to a valid Actor Pool.", *Actor->GetName());
 	return false;
 }
 

@@ -103,7 +103,7 @@ void UNCellJunctionComponent::OnRegister()
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
 	if (RootComponent == nullptr)
 	{
-		N_LOG(Error, TEXT("[UNCellJunctionComponent::OnRegister] No NCellRootComponent found for level %s, removing added NCellJunctionComponent next update."), *Level->GetName())
+		N_LOG_ERROR("[UNCellJunctionComponent::OnRegister] No NCellRootComponent found for level %s, removing added NCellJunctionComponent next update.", *Level->GetName())
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 		{
 			this->DestroyComponent();

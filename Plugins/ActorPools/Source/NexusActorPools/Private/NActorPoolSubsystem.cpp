@@ -38,7 +38,7 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		{
 			if (WorldName.StartsWith(LevelPrefix))
 			{
-				N_LOG(Log, TEXT("[NActorPoolSubsystem] Ignoring level %s due to prefix match (%s)."), *WorldName, *LevelPrefix);
+				N_LOG("[NActorPoolSubsystem] Ignoring level %s due to prefix match (%s).", *WorldName, *LevelPrefix);
 				bShouldIgnoreLevel = true;
 			}
 		}
@@ -97,7 +97,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 {
 	if (ActorClass == nullptr)
 	{
-		N_LOG(Log, TEXT("[NActorPoolSubsystem] Unable to create actor pool for null ActorClass)"));
+		N_LOG("[NActorPoolSubsystem] Unable to create actor pool for null ActorClass)");
 		return false;
 	}
 	
@@ -107,8 +107,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
 		ActorPools.Add(ActorClass, Pool);
-		N_LOG(Log,
-			TEXT("[NActorPoolSubsystem] Creating a new pool via CreateActorPool for %s (%s), raising the total pool count to %i."),
+		N_LOG("[NActorPoolSubsystem] Creating a new pool via CreateActorPool for %s (%s), raising the total pool count to %i.",
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return true;
 	}
@@ -124,7 +123,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 		{
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
-				N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
+				N_LOG("[UNActorPoolSubsystem::ApplyActorPoolSet] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored.",
 					*Definition.ActorClass->GetName());
 			}
 			else
@@ -145,7 +144,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 			{
 				if (ActorPools.Contains(Definition.ActorClass))
 				{
-					N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] [NESTED] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
+					N_LOG("[UNActorPoolSubsystem::ApplyActorPoolSet] [NESTED] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored.",
 						*Definition.ActorClass->GetName());
 				}
 				else
@@ -197,7 +196,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 	}
 	if (bDestroyUnknownReturnedActors)
 	{
-		N_LOG(Log, TEXT("[UNActorPoolSubsystem::ReturnActor] Destroying unknown actor sent to pooling system: %s"),
+		N_LOG("[UNActorPoolSubsystem::ReturnActor] Destroying unknown actor sent to pooling system: %s",
 			*Actor->GetPathName());
 		return Actor->Destroy();
 	}

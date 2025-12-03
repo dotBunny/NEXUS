@@ -80,6 +80,6 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	}
 	else
 	{
-		N_LOG(Warning, TEXT("[UNKillZoneComponent::OnOverlapBegin] Actor is rooted, cannot destroy: %s"), *OtherActor->GetName())
+		N_LOG_WARNING("[UNKillZoneComponent::OnOverlapBegin] Actor is rooted, cannot destroy: %s", *OtherActor->GetName())
 	}
 }

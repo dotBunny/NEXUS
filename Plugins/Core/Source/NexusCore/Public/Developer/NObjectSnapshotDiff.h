@@ -79,25 +79,25 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 	void DumpToLog() const
 	{
-		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
-		N_LOG(Log, TEXT("%s"), *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects"), UntrackedObjectCountA, UntrackedObjectCountB));
+		N_LOG("%s", *FString::Printf(TEXT("[FNObjectSnapshotDiff::DumpToLog] Captured %i Objects (%i Changes)"), ObjectCount, ChangeCount));
+		N_LOG("%s", *FString::Printf(TEXT("Previously %i Untracked Objects | Currently %i Untracked Objects"), UntrackedObjectCountA, UntrackedObjectCountB));
 		
-		N_LOG(Log, TEXT("Added (%i):"), AddedCount);
+		N_LOG("Added (%i):", AddedCount);
 		for (const FNObjectSnapshotEntry& Entry : Added)
 		{
-			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+			N_LOG("  %s", *Entry.ToString());
 		}
 
-		N_LOG(Log, TEXT("Maintained (%i):"), MaintainedCount);
+		N_LOG("Maintained (%i):", MaintainedCount);
 		for (const FNObjectSnapshotEntry& Entry : Maintained)
 		{
-			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+			N_LOG("  %s", *Entry.ToString());
 		}
 
-		N_LOG(Log, TEXT("Removed (%i):"), RemovedCount);
+		N_LOG("Removed (%i):", RemovedCount);
 		for (const FNObjectSnapshotEntry& Entry : Removed)
 		{
-			N_LOG(Log, TEXT("  %s"), *Entry.ToString());
+			N_LOG("  %s", *Entry.ToString());
 		}
 	}
 };

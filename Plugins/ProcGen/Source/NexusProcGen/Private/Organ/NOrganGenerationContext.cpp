@@ -18,7 +18,7 @@ bool FNOrganGenerationContext::AddOrganComponent(UNOrganComponent* Component)
 {
 	if (IsLocked())
 	{
-		N_LOG(Warning, TEXT("[FNOrganContext::AddToContext] Attempted to add context from a UNProcGenComponent when the Context has been locked."))
+		N_LOG_WARNING("[FNOrganContext::AddToContext] Attempted to add context from a UNProcGenComponent when the Context has been locked.")
 		return false;
 	}
 	
@@ -181,6 +181,6 @@ void FNOrganGenerationContext::OutputToLog()
 		Builder.Append("\n");
 	}
 
-	N_LOG(Log, TEXT("%s"), Builder.ToString());
+	N_LOG("%s", Builder.ToString());
 }
 

@@ -43,7 +43,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	{
 		if (Templates[i].Template == nullptr)
 		{
-			N_LOG(Warning, TEXT("[NActorPoolSpawnerComponent] Invalid template at index %d, skipping."), i);
+			N_LOG_WARNING("[NActorPoolSpawnerComponent] Invalid template at index %d, skipping.", i);
 			continue;
 		}
 
@@ -93,8 +93,8 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		if (CachedSplineComponent == nullptr)
 		{
 			Distribution = APSD_Point;
-			N_LOG(Warning,
-				TEXT("[NActorPoolSpawnerComponent] Unable to find SplineComponent to use for distribution on %s. Reverting to spawn at point."),
+			N_LOG_WARNING(
+				"[NActorPoolSpawnerComponent] Unable to find SplineComponent to use for distribution on %s. Reverting to spawn at point.",
 				*this->GetOwner()->GetName());
 
 		}

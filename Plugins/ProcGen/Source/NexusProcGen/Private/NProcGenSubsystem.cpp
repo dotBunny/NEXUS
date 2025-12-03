@@ -10,11 +10,11 @@ bool UNProcGenSubsystem::RegisterCellActor(ANCellActor* CellActor)
 {
 	if (KnownCellActors.Contains(CellActor))
 	{
-		N_LOG(Warning, TEXT("[UNProcGenSubsystem::RegisterNCellActor] NCellActor already registered."));
+		N_LOG_WARNING("[UNProcGenSubsystem::RegisterNCellActor] NCellActor already registered.");
 		return false;
 	}
 
-	N_LOG(Log, TEXT("[UNProcGenSubsystem::RegisterNCellActor] NCellActor registered."));
+	N_LOG("[UNProcGenSubsystem::RegisterNCellActor] NCellActor registered.");
 	KnownCellActors.Add(CellActor);
 	return true;
 }
@@ -23,11 +23,11 @@ bool UNProcGenSubsystem::UnregisterCellActor(ANCellActor* CellActor)
 {
 	if (!KnownCellActors.Contains(CellActor))
 	{
-		N_LOG(Warning, TEXT("[UNProcGenSubsystem::UnregisterNCellActor] NCellActor not registered."));
+		N_LOG_WARNING("[UNProcGenSubsystem::UnregisterNCellActor] NCellActor not registered.");
 		return false;
 	}
 
-	N_LOG(Log, TEXT("[UNProcGenSubsystem::UnregisterNCellActor] NCellActor unregistered."));
+	N_LOG("[UNProcGenSubsystem::UnregisterNCellActor] NCellActor unregistered.");
 	KnownCellActors.RemoveSwap(CellActor);
 	return true;
 }
@@ -36,11 +36,11 @@ bool UNProcGenSubsystem::RegisterCellProxy(ANCellProxy* CellProxy)
 {
 	if (KnownCellProxies.Contains(CellProxy))
 	{
-		N_LOG(Warning, TEXT("[UNProcGenSubsystem::RegisterNCellProxy] NCellProxy already registered."));
+		N_LOG_WARNING("[UNProcGenSubsystem::RegisterNCellProxy] NCellProxy already registered.");
 		return false;
 	}
 
-	N_LOG(Log, TEXT("[UNProcGenSubsystem::RegisterNCellActor] NCellProxy registered."));
+	N_LOG("[UNProcGenSubsystem::RegisterNCellActor] NCellProxy registered.");
 	KnownCellProxies.Add(CellProxy);
 	return true;
 }
@@ -49,10 +49,10 @@ bool UNProcGenSubsystem::UnregisterCellProxy(ANCellProxy* CellProxy)
 {
 	if (!KnownCellProxies.Contains(CellProxy))
 	{
-		N_LOG(Warning, TEXT("[UNProcGenSubsystem::UnregisterNCellProxy] NCellProxy not registered."));
+		N_LOG_WARNING("[UNProcGenSubsystem::UnregisterNCellProxy] NCellProxy not registered.");
 		return false;
 	}
-	N_LOG(Log, TEXT("[UNProcGenSubsystem::UnregisterNCellProxy] NCellProxy unregistered."));
+	N_LOG("[UNProcGenSubsystem::UnregisterNCellProxy] NCellProxy unregistered.");
 	KnownCellProxies.RemoveSwap(CellProxy);
 	return true;
 }
