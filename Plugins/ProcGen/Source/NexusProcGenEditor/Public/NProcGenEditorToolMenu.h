@@ -5,6 +5,7 @@
 
 class FNProcGenEditorToolMenu
 {
+	static FName EditorUtilityWindowName;
 public:
 	static void Register();
 	static bool ShowCellEditMode();
@@ -15,5 +16,5 @@ public:
 	
 	
 	static void CreateEditorUtilityWindow();
-	static bool CreateEditorUtilityWindow_CanExecute();
+	static bool HasEditorUtilityWindow();
 };

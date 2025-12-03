@@ -323,10 +323,20 @@ void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu
 	for (auto WindowCommand : WindowActions)
 	{
 		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
-			FIsActionChecked(), FIsActionButtonVisible());
-		WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
+			WindowCommand.Value.IsChecked, FIsActionButtonVisible());
+		
+		if (WindowCommand.Value.IsChecked.IsBound())
+		{
+			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
+			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
+			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
+		}
+		else
+		{
+			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
 			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
 			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+		}
 	}
 }
 

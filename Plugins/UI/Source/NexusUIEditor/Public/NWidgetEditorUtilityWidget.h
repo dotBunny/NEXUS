@@ -19,6 +19,7 @@ public:
 	static UNWidgetEditorUtilityWidget* GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText = FText::GetEmpty(), const FName& TabIconStyle = TEXT(""), const FString& TabIconName = TEXT(""));
 	
 	static bool HasEditorUtilityWidget(FName Identifier);
+	static UNWidgetEditorUtilityWidget* GetEditorUtilityWidget(FName Identifier);
 	
 	virtual FText GetTabDisplayText() const override;
 	

@@ -360,3 +360,25 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 		}
 	}
 }
+
+void FNEditorUtils::FocusTab(const FName& TabIdentifier)
+{
+	// Check Globals
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		ActiveTab->ActivateInParent(SetDirectly);
+		ActiveTab->FlashTab();
+		return;
+	}
+	
+	// Check Level Editor
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			ActiveTab->ActivateInParent(SetDirectly);
+			ActiveTab->FlashTab();
+		}
+	}
+}

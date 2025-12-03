@@ -16,6 +16,8 @@
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
+FName FNProcGenEditorToolMenu::EditorUtilityWindowName = FName("NProcGenEditorUtilityWindow");
+
 void FNProcGenEditorToolMenu::Register()
 {
 	// Level Tools
@@ -255,12 +257,15 @@ void FNProcGenEditorToolMenu::Register()
 
 	// EUW Entry
 	FNWindowCommandInfo EditorWindow = FNWindowCommandInfo();
+	
 	EditorWindow.Identifier = "NProcGenSystem";
 	EditorWindow.DisplayName = LOCTEXT("NProcGenSystem_EUW_DisplayName", "ProcGen System");
 	EditorWindow.Tooltip = LOCTEXT("NProcGenSystem_EUW_DisplayName", "Opens the NProcGenSystem Window inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
+	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
-	EditorWindow.CanExecute = FCanExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute);
+	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
+	
 	FNEditorCommands::AddWindowCommand(EditorWindow);
 }
 
@@ -314,15 +319,15 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 	}
 
 	UNWidgetEditorUtilityWidget::GetOrCreate(
-		FName("NProcGenEditorUtilityWindow"), 
+		EditorUtilityWindowName, 
 		TemplatePath, 
 		FText::FromString("NEXUS: ProcGen"), 
 		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
 }
 
-bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
+bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
-	return !UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(FName("NProcGenEditorUtilityWindow"));
+	return UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(EditorUtilityWindowName);
 }
 
 #undef LOCTEXT_NAMESPACE

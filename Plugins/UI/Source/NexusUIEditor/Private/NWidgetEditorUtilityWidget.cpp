@@ -6,6 +6,7 @@
 #include "EditorUtilityWidgetComponents.h"
 #include "NCoreEditorMinimal.h"
 #include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtils.h"
 #include "Blueprint/WidgetTree.h"
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
@@ -19,11 +20,14 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 		return nullptr;
 	}
 	
-	// Return existing
-	if (HasEditorUtilityWidget(Identifier))
+	// Return existing and flash it
+	if (UNWidgetEditorUtilityWidget* ExistingWidget = GetEditorUtilityWidget(Identifier); 
+		ExistingWidget != nullptr)
 	{
-		return KnownEditorUtilityWidgets[Identifier];
+		FNEditorUtils::FocusTab(ExistingWidget->GetTabIdentifier());
+		return ExistingWidget;
 	}
+	
 
 	FNWidgetState WidgetState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
 	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
@@ -33,6 +37,15 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 {
 	return KnownEditorUtilityWidgets.Contains(Identifier);
+}
+
+UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(const FName Identifier)
+{
+	if (KnownEditorUtilityWidgets.Contains(Identifier))
+	{
+		return KnownEditorUtilityWidgets[Identifier];
+	}
+	return nullptr;
 }
 
 FText UNWidgetEditorUtilityWidget::GetTabDisplayText() const

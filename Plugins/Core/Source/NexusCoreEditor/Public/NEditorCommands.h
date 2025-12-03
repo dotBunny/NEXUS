@@ -12,6 +12,7 @@ struct FNWindowCommandInfo
 	FText Tooltip;
 	FExecuteAction Execute;
 	FCanExecuteAction CanExecute;
+	FIsActionChecked IsChecked;
 	FSlateIcon Icon;
 };
 
