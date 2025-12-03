@@ -4,7 +4,6 @@
 #include "NProcGenEditorToolMenu.h"
 
 #include "NEditorCommands.h"
-#include "NEditorUtilityWidget.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
@@ -14,7 +13,6 @@
 #include "NProcGenEdMode.h"
 #include "NProcGenSettings.h"
 #include "NWidgetEditorUtilityWidget.h"
-#include "WidgetBlueprint.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
@@ -303,19 +301,23 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
-	// TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
-	// if (WidgetClass == nullptr)
-	// {
-	// 	const FString TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"));
-	// 	UWidgetBlueprint* TemplateWidget = LoadObject<UWidgetBlueprint>(nullptr, TemplatePath);
-	// 	
-	// 	WidgetClass = TemplateWidget->GeneratedClass;
-	// }
+	// Default value
+	FString TemplatePath = TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'");
+	
+	// Evaluate override
+	if (TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget; 
+		WidgetClass != nullptr)
+	{
+		FString PathName = WidgetClass->GetPathName();
+		PathName.RemoveFromEnd("_C");
+		TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName);
+	}
 
 	UNWidgetEditorUtilityWidget::GetOrCreate(
-		FName("NProcGenEditorUtilityWindow"), // Define our Identifier
-		TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'"), 
-		FText::FromString("NEXUS: ProcGen"), FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
+		FName("NProcGenEditorUtilityWindow"), 
+		TemplatePath, 
+		FText::FromString("NEXUS: ProcGen"), 
+		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
 }
 
 bool FNProcGenEditorToolMenu::CreateEditorUtilityWindow_CanExecute()
