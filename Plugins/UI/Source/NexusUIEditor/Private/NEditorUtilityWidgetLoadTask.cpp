@@ -22,7 +22,7 @@ void UNEditorUtilityWidgetLoadTask::Execute()
 	{
 		const TArray<FName> IdentifiersCopy = System->Identifiers;
 		const TArray<FString> TemplatesCopy = System->Templates;
-		const TArray<FNEditorUtilityWidgetPayload> PayloadsCopy = System->Payloads;
+		TArray<FNWidgetState> WidgetStatesCopy = System->WidgetStates;
 		
 		System->Clear();
 
@@ -30,7 +30,7 @@ void UNEditorUtilityWidgetLoadTask::Execute()
 		
 		for (int i = 0; i < Count; i++)
 		{
-			UNEditorUtilityWidgetSystem::CreateWithPayload(TemplatesCopy[i], IdentifiersCopy[i], PayloadsCopy[i]);
+			UNEditorUtilityWidgetSystem::CreateWithState(TemplatesCopy[i], IdentifiersCopy[i], WidgetStatesCopy[i]);
 		}
 		
 		System->SaveConfig();

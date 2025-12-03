@@ -13,7 +13,7 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
-UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithPayload(const FString& InTemplate, const FName& InIdentifier, const FNEditorUtilityWidgetPayload& Payload)
+UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
 {
 	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
 	if (TemplateWidget == nullptr)
@@ -43,14 +43,25 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithPayload(const FStr
 			UtilityWidget != nullptr)
 		{
 			UtilityWidget->PinTemplate(EditorWidget);
-			UtilityWidget->RestoreFromUserSettingsPayload(Identifier, Payload);
+			if (UtilityWidget->Implements<UNWidgetStateProvider>())
+			{
+				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(UtilityWidget); 
+					StateProvider != nullptr)
+				{
+					StateProvider->RestoreWidgetState(UtilityWidget, Identifier, WidgetState);
+				}
+				else
+				{
+					INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(UtilityWidget, Identifier, WidgetState);
+				}
+			}
 			return UtilityWidget;
 		}
 	}
 	return nullptr;
 }
 
-void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const FString& Template, const FNEditorUtilityWidgetPayload& Payload)
+void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
 	// Check for already registered
 	if (int32 WorkingIndex = GetIdentifierIndex(Identifier); 
@@ -58,7 +69,7 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 	{
 		// Add our items
 		WorkingIndex = Identifiers.Add(Identifier);
-		const int32 PayloadIndexCheck = Payloads.Add(Payload);
+		const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState);
 		const int32 TemplateIndexCheck = Templates.Add(Template);
 		
 		// Sanity check
@@ -71,7 +82,7 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 	else
 	{
 		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::RegisterWidget] Widget with identifier %s already registered, updating payload only."), *Identifier.ToString());
-		Payloads[WorkingIndex] = Payload;
+		WidgetStates[WorkingIndex] = WidgetState;
 	}
 	
 	SaveConfig();
@@ -85,7 +96,7 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	{
 		Identifiers.RemoveAt(WorkingIndex);
 		Templates.RemoveAt(WorkingIndex);
-		Payloads.RemoveAt(WorkingIndex);
+		WidgetStates.RemoveAt(WorkingIndex);
 		
 		SaveConfig();
 	}
@@ -95,12 +106,12 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	}
 }
 
-void UNEditorUtilityWidgetSystem::UpdatePayload(const FName& Identifier, const FNEditorUtilityWidgetPayload& Payload)
+void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
 {
 	if (const int32 WorkingIndex = GetIdentifierIndex(Identifier); 
 		WorkingIndex != INDEX_NONE)
 	{
-		Payloads[WorkingIndex] = Payload;
+		WidgetStates[WorkingIndex] = WidgetState;
 		SaveConfig();
 	}
 	else

@@ -6,8 +6,8 @@
 
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "INWidgetTabDetails.h"
-#include "NEditorUtilityWidgetSystem.h"
+#include "INWidgetStateProvider.h"
+#include "INWidgetTabDetailsProvider.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -15,11 +15,16 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
 UCLASS()
-class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetTabDetails
+class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetTabDetailsProvider, public INWidgetStateProvider
 {
 	GENERATED_BODY()
 
 public:
+	static const FString WidgetState_WidgetBlueprint;
+	static const FString WidgetState_TabDisplayText;
+	static const FString WidgetState_TabIconStyle;
+	static const FString WidgetState_TabIconName;
+	
 	void PinTemplate(UEditorUtilityWidgetBlueprint* Template)
 	{
 		PinnedTemplate = Template;
@@ -34,8 +39,7 @@ public:
 			PinnedTemplate = nullptr;
 		}
 	}
-	virtual void RestoreFromUserSettingsPayload(FName Identifier, FNEditorUtilityWidgetPayload Payload) { OnRestoreFromUserSettingsPayload(Identifier, Payload); };
-	
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bShouldSerializeWidget = true;
@@ -49,8 +53,6 @@ protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;	
 	
-	virtual FNEditorUtilityWidgetPayload GetUserSettingsPayload() { return OnGetUserSettingsPayload(); };
-	
 	virtual FName GetTabIdentifier()
 	{
 		if (PinnedTemplate != nullptr)
@@ -59,6 +61,7 @@ protected:
 		}
 		return GetFName();
 	}
+	
 	virtual FName GetUserSettingsIdentifier()
 	{
 		if (PinnedTemplate != nullptr)
@@ -67,6 +70,7 @@ protected:
 		}
 		return GetFName();
 	}
+	
 	virtual FString GetUserSettingsTemplate()
 	{
 		if (PinnedTemplate != nullptr)
@@ -75,12 +79,6 @@ protected:
 		}
 		return GetFullName();
 	}
-	
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnRestoreFromUserSettingsPayload(FName& Identifier, FNEditorUtilityWidgetPayload& Payload);
-	
-	UFUNCTION(BlueprintImplementableEvent)
-	FNEditorUtilityWidgetPayload OnGetUserSettingsPayload();
 	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;

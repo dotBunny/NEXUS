@@ -9,6 +9,11 @@
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
 
+const FString UNEditorUtilityWidget::WidgetState_WidgetBlueprint = TEXT("NWidget_WidgetBlueprint");
+const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_TabDisplayText");
+const FString UNEditorUtilityWidget::WidgetState_TabIconStyle = TEXT("NWidget_TabIconStyle");
+const FString UNEditorUtilityWidget::WidgetState_TabIconName = TEXT("NWidget_TabIconName");
+
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -30,7 +35,6 @@ void UNEditorUtilityWidget::NativeDestruct()
 	UnpinTemplate();
 
 	Super::NativeDestruct();
-	
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -43,7 +47,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
 	if (bShouldSerializeWidget)
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetUserSettingsPayload());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
 	}
 	
 	// We need a render to happen so this can be updated

@@ -4,16 +4,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "INWidgetTabDetails.generated.h"
+#include "INWidgetTabDetailsProvider.generated.h"
 
 UINTERFACE(BlueprintType)
-class NEXUSUI_API UNWidgetTabDetails : public UInterface
+class NEXUSUI_API UNWidgetTabDetailsProvider : public UInterface
 {
 	GENERATED_BODY()
 };
 
 
-class NEXUSUI_API INWidgetTabDetails
+class NEXUSUI_API INWidgetTabDetailsProvider
 {
 	GENERATED_BODY()
 

@@ -3,7 +3,10 @@
 
 #include "NWidgetEditorUtilityWidget.h"
 
+#include "EditorUtilityWidgetComponents.h"
 #include "NCoreEditorMinimal.h"
+#include "NEditorUtilityWidgetSystem.h"
+#include "Blueprint/WidgetTree.h"
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
@@ -21,55 +24,151 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	{
 		return KnownEditorUtilityWidgets[Identifier];
 	}
-	
-	
-	const FNEditorUtilityWidgetPayload Payload = CreatePayload(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
-	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithPayload(TemplatePath, Identifier, Payload);
+
+	FNWidgetState WidgetState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
+	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
 	return Cast<UNWidgetEditorUtilityWidget>(Widget);
-	
-	//
-	// // Looks like we need to make it
-	// const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, TemplatePath);
-	// if (TemplateWidget == nullptr)
-	// {
-	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to load template blueprint. (%s)"), *TemplatePath)
-	// }
-	//
-	// // Need to duplicate the base
-	// UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
-	// TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
-	//
-	// if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
-	// {
-	// 	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-	// 	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-	// 	
-	// 	// We dont want these tracked
-	// 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-	// 	BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
-	// 	
-	// 	if (UNWidgetEditorUtilityWidget* UtilityWidget = Cast<UNWidgetEditorUtilityWidget>(Widget); 
-	// 		UtilityWidget != nullptr)
-	// 	{
-	// 		UtilityWidget->PinTemplate(EditorWidget);
-	//
-	// 		UtilityWidget->RestoreFromUserSettingsPayload(Identifier, Payload);
-	// 	
-	// 		return UtilityWidget;
-	// 	}
-	//
-	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Unable to cast to UNEditorUtilityWidget. (%s)"), *TemplatePath)
-	// }
-	// else
-	// {
-	// 	NE_LOG(Error, TEXT("[UNEditorUtilityWidget::GetOrCreate] Template is not a UEditorUtilityWidgetBlueprint. (%s)"), *TemplatePath)
-	// }
-	// return nullptr;
 }
 
 bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 {
 	return KnownEditorUtilityWidgets.Contains(Identifier);
+}
+
+FText UNWidgetEditorUtilityWidget::GetTabDisplayText() const
+{
+	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetailsProvider>())
+	{
+		const INWidgetTabDetailsProvider* TabDetails = Cast<INWidgetTabDetailsProvider>(BaseWidget);
+		return TabDetails->GetTabDisplayText();
+	}
+	return TabDisplayText;
+}
+
+FSlateIcon UNWidgetEditorUtilityWidget::GetTabDisplayIcon()
+{
+	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetailsProvider>())
+	{
+		INWidgetTabDetailsProvider* TabDetails = Cast<INWidgetTabDetailsProvider>(BaseWidget);
+		return TabDetails->GetTabDisplayIcon();
+	}
+		
+	if (!TabIcon.IsSet() && !TabIconStyle.IsNone() && TabIconName.Len() > 0)
+	{
+		TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
+	}
+	return TabIcon;
+}
+
+TAttribute<const FSlateBrush*> UNWidgetEditorUtilityWidget::GetTabDisplayBrush()
+{
+	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetailsProvider>())
+	{
+		INWidgetTabDetailsProvider* TabDetails = Cast<INWidgetTabDetailsProvider>(BaseWidget);
+		return TabDetails->GetTabDisplayBrush();
+	}
+		
+	if (!TabIcon.IsSet() && !TabIconStyle.IsNone() && TabIconName.Len() > 0)
+	{
+		TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
+	}
+	if (TabIcon.IsSet())
+	{
+		return TabIcon.GetIcon();
+	}
+	return TAttribute<const FSlateBrush*>();
+}
+
+FNWidgetState UNWidgetEditorUtilityWidget::GetWidgetState(UObject* BlueprintWidget)
+{
+	FNWidgetState BaseState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
+	FNWidgetState BlueprintState = Execute_OnGetWidgetStateEvent(BlueprintWidget);
+	BaseState.OverlayState(BlueprintState, false);
+		
+	// Add in child data that WILL NOT override parent keys
+	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetStateProvider>())
+	{
+		FNWidgetState ChildWidgetState;
+		if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
+			StateProvider != nullptr)
+		{
+			ChildWidgetState = StateProvider->GetWidgetState(BaseWidget);
+		}
+		else
+		{
+			ChildWidgetState = Execute_OnGetWidgetStateEvent(BaseWidget);
+		}
+		BaseState.OverlayState(ChildWidgetState, false);
+	}
+	
+	return BaseState;
+}
+
+FNWidgetState UNWidgetEditorUtilityWidget::CreateWidgetState(const FString& WidgetBlueprint,
+	const FText& TabDisplayText, const FName& TabIconStyle, const FString& TabIconName)
+{
+	FNWidgetState WidgetState;
+		
+	WidgetState.AddString(WidgetState_WidgetBlueprint, WidgetBlueprint);
+	WidgetState.AddString(WidgetState_TabDisplayText, TabDisplayText.ToString());
+	WidgetState.AddString(WidgetState_TabIconStyle, TabIconStyle.ToString());
+	WidgetState.AddString(WidgetState_TabIconName, TabIconName);
+		
+	return WidgetState;
+}
+
+void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState)
+{
+	// Cache all our state objects
+	WidgetIdentifier = Identifier;
+	TabDisplayText = FText::FromString(WidgetState.GetString(WidgetState_TabDisplayText));
+	TabIconStyle = FName(WidgetState.GetString(WidgetState_TabIconStyle));
+	TabIconName = WidgetState.GetString(WidgetState_TabIconName);
+	Execute_OnRestoreWidgetStateEvent(BlueprintWidget, Identifier, WidgetState);
+	
+	FString NewWidgetBlueprint = WidgetState.GetString(WidgetState_WidgetBlueprint);
+	if (WidgetBlueprint != NewWidgetBlueprint)
+	{
+		// We already have a base widget, but this is changing it for some odd reason?
+		if (BaseWidget != nullptr)
+		{
+			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
+			EditorScrollBox->RemoveChild(BaseWidget);
+			WidgetTree->RemoveWidget(BaseWidget);
+			BaseWidget = nullptr;
+			WidgetBlueprint = TEXT("");
+		}
+		
+		const UWidgetBlueprint* ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
+		const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
+		if (ContentWidget != nullptr)
+		{
+			BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
+			WidgetBlueprint = NewWidgetBlueprint;
+			
+			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
+			EditorScrollBox->AddChild(BaseWidget);
+			
+			// Pass WidgetState Along
+			if (BaseWidget->Implements<UNWidgetStateProvider>())
+			{
+				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
+					StateProvider != nullptr)
+				{
+					StateProvider->RestoreWidgetState(BaseWidget, Identifier, WidgetState);
+				}
+				else
+				{
+					Execute_OnRestoreWidgetStateEvent(BaseWidget, Identifier, WidgetState);
+				}
+			}
+		}
+		else
+		{
+			NE_LOG(Warning, TEXT("[UNWidgetEditorUtilityWidget::RestoreWidgetState] Unable to find content widget to use for template."), *TemplatePath)
+		}
+	}
+
 }
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
