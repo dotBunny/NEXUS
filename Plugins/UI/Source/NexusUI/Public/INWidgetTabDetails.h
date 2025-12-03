@@ -19,6 +19,7 @@ class NEXUSUI_API INWidgetTabDetails
 
 public:
 	
-	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() { return TAttribute<const FSlateBrush*>(); }
+	virtual FSlateIcon GetTabDisplayIcon() { return FSlateIcon(); }
+	virtual TAttribute<const FSlateBrush*> GetTabDisplayBrush() { return TAttribute<const FSlateBrush*>(); }
 	virtual FText GetTabDisplayText() const { return FText::GetEmpty(); }
 };

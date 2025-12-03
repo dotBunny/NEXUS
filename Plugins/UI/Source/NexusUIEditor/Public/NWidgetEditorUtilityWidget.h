@@ -37,12 +37,27 @@ public:
 		}
 		return TabDisplayText;
 	}
-	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() override
+	
+	virtual FSlateIcon GetTabDisplayIcon() override
 	{
 		if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetails>())
 		{
 			INWidgetTabDetails* TabDetails = Cast<INWidgetTabDetails>(BaseWidget);
 			return TabDetails->GetTabDisplayIcon();
+		}
+		
+		if (!TabIcon.IsSet() && !TabIconStyle.IsNone() && TabIconName.Len() > 0)
+		{
+			TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
+		}
+		return TabIcon;
+	}
+	virtual TAttribute<const FSlateBrush*> GetTabDisplayBrush() override
+	{
+		if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetTabDetails>())
+		{
+			INWidgetTabDetails* TabDetails = Cast<INWidgetTabDetails>(BaseWidget);
+			return TabDetails->GetTabDisplayBrush();
 		}
 		
 		if (!TabIcon.IsSet() && !TabIconStyle.IsNone() && TabIconName.Len() > 0)

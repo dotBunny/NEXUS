@@ -3,6 +3,7 @@
 
 #include "NEditorUtils.h"
 #include "BlueprintEditor.h"
+#include "IBlutilityModule.h"
 #include "ISettingsModule.h"
 #include "KismetCompilerModule.h"
 #include "LevelEditor.h"
@@ -339,4 +340,23 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 	}
 	
 	NE_LOG(Warning, TEXT("[FNEditorUtils::UpdateTab] Unable to update tab details as tab does not exist. (%s)"), *TabIdentifier.ToString())
+}
+
+void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
+{
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+		
+	const TArray< TSharedRef<FWorkspaceItem> >& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
+	
+	for (const TSharedRef<FWorkspaceItem>& Child : Children)
+	{
+		if (Child->GetFName() == WidgetIdentifier)
+		{
+			Child->AsSpawnerEntry()->SetDisplayName(Label);
+			if (Icon.IsSet())
+			{
+				Child->AsSpawnerEntry()->SetIcon(Icon);
+			}
+		}
+	}
 }

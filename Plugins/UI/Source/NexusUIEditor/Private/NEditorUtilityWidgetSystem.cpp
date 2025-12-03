@@ -18,7 +18,7 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithPayload(const FStr
 	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
 	if (TemplateWidget == nullptr)
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetLoadTask::Execute] Unable to load template blueprint. (%s)"), *InTemplate)
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::CreateWithPayload] Unable to load template blueprint. (%s)"), *InTemplate)
 		return nullptr;
 	}
 			
@@ -38,7 +38,6 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithPayload(const FStr
 		// We dont want these tracked
 		IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
 		BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
-				
 				
 		if (UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget); 
 			UtilityWidget != nullptr)
@@ -65,13 +64,13 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 		// Sanity check
 		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
 		{
-			NE_LOG(Error, TEXT("[UNEditorUtilityWidgetUserSettings::RegisterWidget] Index count invalid, clearing cache."))
+			NE_LOG(Error, TEXT("[UNEditorUtilityWidgetSystem::RegisterWidget] Index count invalid, clearing cache."))
 			Clear();
 		}
 	}
 	else
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetUserSettings::RegisterWidget] Widget with identifier %s already registered, updating payload only."), *Identifier.ToString());
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::RegisterWidget] Widget with identifier %s already registered, updating payload only."), *Identifier.ToString());
 		Payloads[WorkingIndex] = Payload;
 	}
 	
@@ -92,7 +91,7 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	}
 	else
 	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetUserSettings::UnregisterWidget] Unable to find widget with identifier %s"), *Identifier.ToString());
+		NE_LOG(Warning, TEXT("[UNEditorUtilityWidgetSystem::UnregisterWidget] Unable to find widget with identifier %s"), *Identifier.ToString());
 	}
 }
 
@@ -106,6 +105,6 @@ void UNEditorUtilityWidgetSystem::UpdatePayload(const FName& Identifier, const F
 	}
 	else
 	{
-		NE_LOG(Error, TEXT("[UNEditorUtilityWidgetUserSettings::UpdatePayload] Unable to find widget with identifier %s"), *Identifier.ToString());
+		NE_LOG(Error, TEXT("[UNEditorUtilityWidgetSystem::UpdatePayload] Unable to find widget with identifier %s"), *Identifier.ToString());
 	}
 }

@@ -37,7 +37,8 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	FNEditorUtils::UpdateTab(GetTabIdentifier(), GetTabDisplayIcon(), GetTabDisplayText(), OnTabClosedCallback);
+	FNEditorUtils::UpdateTab(GetTabIdentifier(), GetTabDisplayBrush(), GetTabDisplayText(), OnTabClosedCallback);
+	FNEditorUtils::UpdateWorkspaceItem(GetTabIdentifier(), GetTabDisplayText(), GetTabDisplayIcon());
 	
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
 	if (bShouldSerializeWidget)
