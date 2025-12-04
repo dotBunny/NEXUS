@@ -3,8 +3,8 @@
 
 #include "Organ/NBoneComponent.h"
 
-#include "NCoreMinimal.h"
 #include "NProcGenDebugDraw.h"
+#include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
@@ -12,7 +12,6 @@
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
-
 
 UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -28,7 +27,7 @@ void UNBoneComponent::OnRegister()
 	if (const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level); 
 		RootComponent != nullptr)
 	{
-		N_LOG_ERROR("[UNBoneComponent::OnRegister] You cannot place bones in a level where an NCellRootComponent is defined.", *Level->GetName())
+		UE_LOG(LogNexusProcGen, Error, TEXT("You cannot place UNBoneComponent in a ULevel(%s) where an NCellRootComponent is defined; removing next update."), *Level->GetName())
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 		{
 			if (AActor* Actor = this->GetOwner(); Actor != nullptr)

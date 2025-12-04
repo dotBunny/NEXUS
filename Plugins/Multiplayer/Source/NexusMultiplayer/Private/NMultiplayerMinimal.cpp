@@ -1,6 +1,6 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#pragma once
+#include "NMultiplayerMinimal.h"
 
-NEXUSCOREEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCoreEditor, Log, All);
+DEFINE_LOG_CATEGORY(LogNexusMultiplayer);

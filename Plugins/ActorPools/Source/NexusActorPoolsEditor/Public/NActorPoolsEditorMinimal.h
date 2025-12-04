@@ -3,4 +3,6 @@
 
 #pragma once
 
-NEXUSCOREEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCoreEditor, Log, All);
+#include "CoreMinimal.h"
+
+DECLARE_LOG_CATEGORY_EXTERN(LogNexusActorPoolsEditor, Log, All);

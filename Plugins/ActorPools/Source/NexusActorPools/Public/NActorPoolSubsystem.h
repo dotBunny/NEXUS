@@ -5,7 +5,7 @@
 
 #include "Macros/NSubsystemMacros.h"
 #include "NActorPool.h"
-#include "NCoreMinimal.h"
+#include "NActorPoolsMinimal.h"
 #include "NActorPoolSubsystem.generated.h"
 
 class UNActorPoolSet;
@@ -150,7 +150,7 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);
-		N_LOG("[UNActorPoolSubsystem::GetActor] Creating a new pool in GetActor for %s (%s), raising the total pool count to %i.",
+		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::GetActor] Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return Cast<T>(NewPool->Get());
 	}
@@ -166,7 +166,7 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);
-		N_LOG("[UNActorPoolSubsystem::SpawnActor] Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i.",
+		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::SpawnActor] Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return Cast<T>(NewPool->Spawn(Position, Rotation));
 	}

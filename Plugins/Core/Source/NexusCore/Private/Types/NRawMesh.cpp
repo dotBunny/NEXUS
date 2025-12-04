@@ -47,7 +47,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 {
 	if (CheckNonTris())
 	{
-		N_LOG_ERROR("[FNRawMesh::CreateDynamicMesh] Mesh contains quads, a FDynamicMesh cannot have quads. Please consider using FNRawMesh::ConvertToTriangles.");
+		UE_LOG(LogNexusCore, Error, TEXT("The FNRawMesh contains non-triangular geometry; a FDynamicMesh must be triangulated."));
 		return nullptr;
 	}
 
@@ -121,7 +121,7 @@ bool FNRawMesh::CheckConvex()
 {
 	if (Vertices.Num() == 0 || Loops.Num() == 0)
 	{
-		N_LOG_WARNING("No vertices or loops were found in the FNRawMesh when checking if it was convex.");
+		UE_LOG(LogNexusCore, Warning, TEXT("No vertices or loops were found in the FNRawMesh when checking if it was convex."));
 		return false;
 	}
 
@@ -169,7 +169,7 @@ bool FNRawMesh::CheckConvex()
 		}
 		else
 		{
-			N_LOG_WARNING("Loop %d is an NGon; unable to determine if the FNRawMesh is convex.", i);
+			UE_LOG(LogNexusCore, Warning, TEXT("Loop(%d) is an NGon (more then 3 vertices); unable to determine if the FNRawMesh is convex."), i);
 			return false;
 		}
 	}

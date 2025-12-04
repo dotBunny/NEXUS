@@ -2,7 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NProcGenSubsystem.h"
-#include "NCoreMinimal.h"
+#include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellProxy.h"
@@ -11,10 +11,10 @@ bool UNProcGenSubsystem::RegisterCellActor(ANCellActor* CellActor)
 {
 	if (KnownCellActors.Contains(CellActor))
 	{
-		N_LOG_WARNING("Failed to register NCellActor (%s) as it is already registered.", *CellActor->GetName());
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellActor(%s) as it is already registered."), *CellActor->GetName());
 		return false;
 	}
-	N_LOG_VERY_VERBOSE("Registered NCellActor (%s)", *CellActor->GetName());
+	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Registered ANCellActor(%s)."), *CellActor->GetName());
 	KnownCellActors.Add(CellActor);
 	return true;
 }
@@ -23,10 +23,10 @@ bool UNProcGenSubsystem::UnregisterCellActor(ANCellActor* CellActor)
 {
 	if (!KnownCellActors.Contains(CellActor))
 	{
-		N_LOG_WARNING("Failed to find NCellActor (%s) when attempting to unregister it.", *CellActor->GetName());
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellActor(%s) when attempting to unregister it."), *CellActor->GetName());
 		return false;
 	}
-	N_LOG_VERY_VERBOSE("Unregistered NCellActor (%s).", *CellActor->GetName());
+	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Unregistered ANCellActor(%s)."), *CellActor->GetName());
 	KnownCellActors.RemoveSwap(CellActor);
 	return true;
 }
@@ -35,10 +35,10 @@ bool UNProcGenSubsystem::RegisterCellProxy(ANCellProxy* CellProxy)
 {
 	if (KnownCellProxies.Contains(CellProxy))
 	{
-		N_LOG_WARNING("Failed to register NCellProxy (%s) as it is already registered.", *CellProxy->GetName());
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellProxy(%s) as it is already registered."), *CellProxy->GetName());
 		return false;
 	}
-	N_LOG_VERY_VERBOSE("Registered NCellProxy (%s).", *CellProxy->GetName());
+	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Registered ANCellProxy(%s)."), *CellProxy->GetName());
 	KnownCellProxies.Add(CellProxy);
 	return true;
 }
@@ -47,10 +47,10 @@ bool UNProcGenSubsystem::UnregisterCellProxy(ANCellProxy* CellProxy)
 {
 	if (!KnownCellProxies.Contains(CellProxy))
 	{
-		N_LOG_WARNING("Failed to find NCellProxy (%s) when attempting to unregister it.", *CellProxy->GetName());
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellProxy(%s) when attempting to unregister it."), *CellProxy->GetName());
 		return false;
 	}
-	N_LOG_VERY_VERBOSE("Unregistered NCellProxy (%s).", *CellProxy->GetName());
+	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Unregistered ANCellProxy(%s)."), *CellProxy->GetName());
 	KnownCellProxies.RemoveSwap(CellProxy);
 	return true;
 }

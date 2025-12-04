@@ -4,9 +4,9 @@
 #include "NWidgetEditorUtilityWidget.h"
 
 #include "EditorUtilityWidgetComponents.h"
-#include "NCoreEditorMinimal.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
+#include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
@@ -16,7 +16,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 {
 	if (Identifier == NAME_None)
 	{
-		NE_LOG_ERROR("[UNEditorUtilityWidget::GetOrCreate] A proper Identifier must be provided for the EUW.")
+		UE_LOG(LogNexusUIEditor, Error, TEXT("A proper Identifier(NAME_None) must be provided for a UNWidgetEditorUtilityWidget to be created."))
 		return nullptr;
 	}
 	
@@ -178,10 +178,9 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		}
 		else
 		{
-			NE_LOG_WARNING("[UNWidgetEditorUtilityWidget::RestoreWidgetState] Unable to find content widget to use for template.", *TemplatePath)
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
 		}
 	}
-
 }
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()

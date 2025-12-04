@@ -43,10 +43,6 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 		BoxTransform.SetLocation( Owner->GetActorLocation() );
 		DrawBox( PDI, BoxTransform.ToMatrixWithScale(), Box.GetExtent(), GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World );
 	}
-	else
-	{
-		N_LOG("[UNOrganComponent::DrawDebugPDI] %s is not volume based and is unable to draw.", *this->GetDebugLabel())
-	}
 }
 
 void UNOrganComponent::OnRegister()
@@ -65,14 +61,9 @@ TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 {
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
 	TArray<UNTissue*> ReferencedTissues;
-
 	for (auto Tissue : Tissues)
 	{
 		UNTissue::BuildTissueMap(Tissue, TissueMap, ReferencedTissues);
-	}
-	for (const auto& Set : ReferencedTissues)
-	{
-		N_LOG("[UNOrganComponent::GetTissueMap] %s References UNTissue: %s", *this->GetName(), *Set->GetName())
 	}
 	return MoveTemp(TissueMap);
 }

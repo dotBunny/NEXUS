@@ -5,10 +5,10 @@
 
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
-#include "NCoreEditorMinimal.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
@@ -125,21 +125,17 @@ void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 	// Last chance
 	if (CellActor == nullptr)
 	{
-		NE_LOG_WARNING("[FNProcGenEditorUtils::SaveNCell] No NCellActor found in the world when trying to save NCell.");
+		UE_LOG(LogNexusProcGenEditor, Warning, TEXT("No ANCellActor found in the world when trying to save UNCell."));
 		return;
 	}
-	
-	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World);
-	if (UpdateCell(Cell, CellActor))
+
+	if (UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World); 
+		UpdateCell(Cell, CellActor))
 	{
 		// Need to tell the cell it's dirty so it gets saved to disk
 		// ReSharper disable once CppExpressionWithoutSideEffects
 		Cell->MarkPackageDirty();
 		UEditorAssetLibrary::SaveLoadedAsset(Cell);
-	}
-	else
-	{
-		NE_LOG("[FNProcGenEditorUtils::SaveNCell] No updates made.");
 	}
 }
 
@@ -249,7 +245,8 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		// We changed it, make sure the level is known dirty too.
 		if (!CellActor->MarkPackageDirty())
 		{
-			NE_LOG_WARNING("[FNProcGenEditorUtils::UpdateNCell] Failed to mark package dirty for CellActor in %s.", *CellActor->GetWorld()->GetName());
+			UE_LOG(LogNexusProcGenEditor, Warning, TEXT("Failed to mark UPackage dirty for ANCellActor(%s) in UWorld(%s) when updating UNCell(%s)."), 
+				*CellActor->GetName(), *CellActor->GetWorld()->GetName(), *Cell->GetName());
 		}
 		bUpdatedCellData = true;
 	}

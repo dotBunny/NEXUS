@@ -3,11 +3,11 @@
 
 #include "Cell/NCellJunctionComponent.h"
 
-#include "NCoreMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NLevelUtils.h"
 #include "NProcGenDebugDraw.h"
+#include "NProcGenMinimal.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "LevelInstance/LevelInstanceActor.h"
@@ -103,7 +103,7 @@ void UNCellJunctionComponent::OnRegister()
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
 	if (RootComponent == nullptr)
 	{
-		N_LOG_ERROR("[UNCellJunctionComponent::OnRegister] No NCellRootComponent found for level %s, removing added NCellJunctionComponent next update.", *Level->GetName())
+		UE_LOG(LogNexusProcGen, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update."), *Level->GetName())
 		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 		{
 			this->DestroyComponent();

@@ -3,7 +3,7 @@
 
 #include "NProcGenRegistry.h"
 
-#include "NCoreMinimal.h"
+#include "NProcGenMinimal.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellRootComponent.h"
 #include "Organ/NOrganComponent.h"
@@ -98,7 +98,7 @@ bool FNProcGenRegistry::RegisterCellRootComponent(UNCellRootComponent* Component
 {
 	if (CellRoots.Contains(Component))
 	{
-		N_LOG("[FNCellRegistry::RegisterRootComponent] UNCellRootComponent already registered, this can occur when using undo.");
+		UE_LOG(LogNexusProcGen, Verbose, TEXT("Failed to register UNCellRootComponent(%s) as it is already registered; this can occur when using undo!"), *Component->GetOwner()->GetName());
 		return false;
 	}
 
@@ -110,7 +110,7 @@ bool FNProcGenRegistry::RegisterCellJunctionComponent(UNCellJunctionComponent* C
 {
 	if (CellJunctions.Contains(Component))
 	{
-		N_LOG("[FNCellRegistry::RegisterJunctionComponent] UNCellJunctionComponent already registered, this can occur when using undo.");
+		UE_LOG(LogNexusProcGen, Verbose, TEXT("Failed to register UNCellJunctionComponent(%s) as it is already registered; this can occur when using undo!"), *Component->GetOwner()->GetName());
 		return false;
 	}
 
@@ -122,7 +122,7 @@ bool FNProcGenRegistry::RegisterOrganComponent(UNOrganComponent* Organ)
 {
 	if (Organs.Contains(Organ))
 	{
-		N_LOG_WARNING("[FNCellRegistry::RegisterOrganComponent] UNOrganComponent already registered.");
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register UNOrganComponent(%s) as it is already registered"), *Organ->GetOwner()->GetName());
 		return false;
 	}
 
@@ -134,7 +134,7 @@ bool FNProcGenRegistry::UnregisterCellRootComponent(UNCellRootComponent* Compone
 {
 	if (!CellRoots.Contains(Component))
 	{
-		N_LOG_WARNING("[FNCellRegistry::UnregisterRootComponent] UNCellRootComponent not registered.");
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find UNCellRootComponent(%s) when attempting to unregister it."), *Component->GetOwner()->GetName());
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool FNProcGenRegistry::UnregisterCellJunctionComponent(UNCellJunctionComponent*
 {
 	if (!CellJunctions.Contains(Component))
 	{
-		N_LOG_WARNING("[FNCellRegistry::UnregisterPinComponent] UNCellPinComponent not registered.");
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find UNCellJunctionComponent(%s) when attempting to unregister it."), *Component->GetOwner()->GetName());
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool FNProcGenRegistry::UnregisterOrganComponent(UNOrganComponent* Organ)
 {
 	if (!Organs.Contains(Organ))
 	{
-		N_LOG_WARNING("[FNCellRegistry::UnregisterOrganComponent] UNOrganComponent not registered.");
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find UNOrganComponent(%s) when attempting to unregister it."), *Organ->GetOwner()->GetName());
 		return false;
 	}
 

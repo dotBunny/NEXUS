@@ -7,10 +7,10 @@
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
 #include "FileHelpers.h"
-#include "NCoreEditorMinimal.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorSubsystem.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
@@ -303,17 +303,17 @@ void FNProcGenEditorCommands::CellAddActor()
 			switch (Choice)
 			{
 			case EAppReturnType::No:
-				NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
+				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
 				return;
 			case EAppReturnType::Yes:
 				if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
 				{
-					NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
+					UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
 					return;
 				}
 				break;
 			default:
-				NE_LOG_ERROR("Unable to add NCellActor to an unsaved world.")
+				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
 				return;
 			}
 		}

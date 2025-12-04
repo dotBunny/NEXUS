@@ -24,7 +24,7 @@ void UNDeveloperSubsystem::SetBaseline()
 	ObjectCountCompareThreshold = BaseObjectCount + Settings->DeveloperObjectCountCompareThreshold;
 	bShouldOutputSnapshot = Settings->bDeveloperObjectCountCaptureOutput;
 	
-	N_LOG("[UNDeveloperSubsystem::SetBaseline] Watching %i objects and counting: Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)",
+	UE_LOG(LogNexusCore, Log, TEXT("Watching UObjects(%i). Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)."),
 		BaseObjectCount,
 		ObjectCountWarningThreshold, Settings->DeveloperObjectCountWarningThreshold,
 		ObjectCountSnapshotThreshold, Settings->DeveloperObjectCountSnapshotThreshold,
@@ -48,14 +48,14 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	
 	if (ObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
-		N_LOG_WARNING("Object count WARNING threshold met with %d objects.", ObjectCount);
+		UE_LOG(LogNexusCore, Warning, TEXT("The UObject count warning threshold has been met met with %d/%d objects."), ObjectCount, ObjectCountWarningThreshold);
 		bPassedObjectCountWarningThreshold = true;
 		return;
 	}
 	
 	if (ObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
 	{
-		N_LOG_ERROR("Object count SNAPSHOT threshold met with %d objects.", ObjectCount);
+		UE_LOG(LogNexusCore, Error, TEXT("The UObject count snapshot threshold has been met with %d/%d objects."), ObjectCount, ObjectCountSnapshotThreshold);
 		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
 		if (bShouldOutputSnapshot)
 		{
@@ -63,7 +63,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 				FString::Printf(TEXT("NEXUS_Snapshot_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			FFileHelper::SaveStringToFile(CaptureSnapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 			
-			N_LOG_ERROR("Object count SNAPSHOT written to %s.", *DumpFilePath);
+			UE_LOG(LogNexusCore, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
 		}
 		bPassedObjectCountSnapshotThreshold = true;
 		return;
@@ -72,7 +72,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	if (ObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
-		N_LOG_ERROR("Object count COMPARE threshold met with %d objects.", ObjectCount);
+		UE_LOG(LogNexusCore, Error, TEXT("Object count compare threshold met with %d objects."), ObjectCount);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
@@ -81,7 +81,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 		FString::Printf(TEXT("NEXUS_Compare_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 		
-		N_LOG_ERROR("Object count COMPARE written to %s.", *DumpFilePath);
+		UE_LOG(LogNexusCore, Error, TEXT("Object count comparison written to %s."), *DumpFilePath);
 		bPassedObjectCountCompareThreshold = true;
 	}
 }

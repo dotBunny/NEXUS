@@ -176,7 +176,7 @@ void FNEditorCommands::OnToolsProfileNetworkProfiler()
 		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
 	if (!ProcHandle.IsValid())
 	{
-		NE_LOG_WARNING("Unable to launch NetworkProfiler.");
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to launch NetworkProfiler."))
 	}
 }
 

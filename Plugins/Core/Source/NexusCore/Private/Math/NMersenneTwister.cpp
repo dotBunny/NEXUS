@@ -188,6 +188,6 @@ void FNMersenneTwister::Initialize(const uint64 Seed)
 {
 	this->InitialSeed = Seed;
 	this->Engine.seed(Seed);
-	N_LOG("[FNMersenneTwister::Initialize] Seed set to %llu", Seed);
+	UE_LOG(LogNexusCore, VeryVerbose, TEXT("Initialized FNMersenneTwister(%llu)."), Seed);
 	this->CallCounter = 0;
 }

@@ -3,9 +3,9 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "IBlutilityModule.h"
-#include "NCoreEditorMinimal.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
+#include "NUIEditorMinimal.h"
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -18,7 +18,7 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
 	if (TemplateWidget == nullptr)
 	{
-		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::CreateWithPayload] Unable to load template blueprint. (%s)", *InTemplate)
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to create a UNEditorUtilityWidget as the provided UBlueprint(%s) was unable to load."), *InTemplate)
 		return nullptr;
 	}
 			
@@ -75,13 +75,13 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 		// Sanity check
 		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
 		{
-			NE_LOG_ERROR("[UNEditorUtilityWidgetSystem::RegisterWidget] Index count invalid, clearing cache.")
+			UE_LOG(LogNexusUIEditor, Error, TEXT("Sanity check of the known registered widgets's arrays shows inconsistencies; data will be cleared."))
 			Clear();
 		}
 	}
 	else
 	{
-		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::RegisterWidget] Widget with identifier %s already registered, updating payload only.", *Identifier.ToString());
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("A widget is already registered for Identifier(%s); updating cached state only."), *Identifier.ToString());
 		WidgetStates[WorkingIndex] = WidgetState;
 	}
 	
@@ -102,7 +102,7 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	}
 	else
 	{
-		NE_LOG_WARNING("[UNEditorUtilityWidgetSystem::UnregisterWidget] Unable to find widget with identifier %s", *Identifier.ToString());
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Failed to unregister widget(%s); no registered widget was found."), *Identifier.ToString());
 	}
 }
 
@@ -116,6 +116,6 @@ void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, con
 	}
 	else
 	{
-		NE_LOG_ERROR("[UNEditorUtilityWidgetSystem::UpdatePayload] Unable to find widget with identifier %s", *Identifier.ToString());
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
 	}
 }

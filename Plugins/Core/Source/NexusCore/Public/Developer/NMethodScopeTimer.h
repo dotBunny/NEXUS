@@ -25,7 +25,7 @@ public:
 	{
 		ManualStop();
 		const double DurationMs = (EndTime - StartTime) * 1000.0;
-		N_LOG("[FNMethodScopeTimer] %s took: %f ms", *Name, DurationMs);
+		UE_LOG(LogNexusCore, Log, TEXT("FNMethodScopeTimer(%s) took %f ms", *Name, DurationMs);
 	}
 
 private:

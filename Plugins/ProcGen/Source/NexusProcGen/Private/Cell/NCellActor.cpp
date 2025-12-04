@@ -3,12 +3,11 @@
 
 #include "Cell/NCellActor.h"
 
-#include "NCoreMinimal.h"
+#include "NProcGenMinimal.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
-#include "Commandlets/GatherTextCommandletBase.h"
 
 #if WITH_EDITOR
 void ANCellActor::PostEditMove(bool bFinished)
@@ -16,7 +15,7 @@ void ANCellActor::PostEditMove(bool bFinished)
 	// Do not allow the cell to be moved in the editor
 	if (GetActorLocation() != FVector::ZeroVector)
 	{
-		N_LOG("[ANCellActor::PostEditMove] Resetting cell location/rotation/scale.");
+		UE_LOG(LogNexusProcGen, Verbose, TEXT("Resetting cell location/rotation/scale as it cannot be moved from origin."));
 		CellRoot->SetWorldLocationAndRotationNoPhysics(FVector::ZeroVector, FRotator::ZeroRotator);
 		CellRoot->SetWorldScale3D(FVector::OneVector);
 	}
@@ -44,11 +43,11 @@ void ANCellActor::PostRegisterAllComponents()
 	Super::PostRegisterAllComponents();
 	if (CellRoot == nullptr)
 	{
-		N_LOG_WARNING("[ANCellActor::PostRegisterAllComponents] No linked cell root component found, linking.");
+		UE_LOG(LogNexusProcGen, Warning, TEXT("No linked UNCellRootComponent found for the ANCellActor, attempting to find one on the AActor."));
 		CellRoot = GetComponentByClass<UNCellRootComponent>();
 		if (CellRoot == nullptr)
 		{
-			N_LOG_ERROR("[ANCellActor::PostRegisterAllComponents] Unable to link UNCellRootComponent.");
+			UE_LOG(LogNexusProcGen, Error, TEXT("Unable to find a UNCellRootComponent for ANCellActor when attempting to find one."));
 		}
 	}
 }

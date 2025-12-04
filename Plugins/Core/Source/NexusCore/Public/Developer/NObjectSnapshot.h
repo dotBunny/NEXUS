@@ -59,10 +59,11 @@ struct NEXUSCORE_API FNObjectSnapshot
 
 	void DumpToLog()
 	{
-		N_LOG("%s", *FString::Printf(TEXT("[FNObjectSnapshot::DumpToLog] Captured %i Objects (%i Untracked)"), CapturedObjectCount, UntrackedObjectCount));
+		UE_LOG(LogNexusCore, Log, TEXT("[FNObjectSnapshot]"));
+		UE_LOG(LogNexusCore, Log, TEXT("Captured %i Objects (%i Untracked)"), CapturedObjectCount, UntrackedObjectCount);
 		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
 		{
-			N_LOG("  %s", *Entry.ToString());
+			UE_LOG(LogNexusCore, Log, TEXT("  %s"), *Entry.ToString());
 		}
 	}
 };

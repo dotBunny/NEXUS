@@ -3,7 +3,7 @@
 
 #include "NMultiplayerLibrary.h"
 
-#include "NCoreMinimal.h"
+#include "NMultiplayerMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
@@ -32,7 +32,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 {
 	if (PlayerState != nullptr && PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
-		N_LOG_ERROR("You are unable to kick the host.")
+		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."))
 		return false;
 	}
 	

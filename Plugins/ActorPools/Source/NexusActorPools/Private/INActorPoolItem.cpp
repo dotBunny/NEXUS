@@ -4,7 +4,6 @@
 #include "INActorPoolItem.h"
 #include "NActorPoolSubsystem.h"
 #include "NActorPool.h"
-#include "NCoreMinimal.h"
 
 void INActorPoolItem::InitializeActorPoolItem(FNActorPool* OwnerPool)
 {
@@ -28,7 +27,7 @@ bool INActorPoolItem::ReturnToActorPool()
 		}
 		return Actor->GetWorld()->GetSubsystem<UNActorPoolSubsystem>()->ReturnActor(Actor);
 	}
-	N_LOG("[INActorPoolItem::ReturnToActorPool] Unable to return %s to a valid Actor Pool.", *Actor->GetName());
+	UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL or non-AActor to an FNActorPool."))
 	return false;
 }
 

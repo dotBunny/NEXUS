@@ -3,7 +3,7 @@
 
 #include "Organ/NOrganGenerationContext.h"
 
-#include "NCoreMinimal.h"
+#include "NProcGenMinimal.h"
 #include "NProcGenUtils.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
@@ -18,7 +18,7 @@ bool FNOrganGenerationContext::AddOrganComponent(UNOrganComponent* Component)
 {
 	if (IsLocked())
 	{
-		N_LOG_WARNING("[FNOrganContext::AddToContext] Attempted to add context from a UNProcGenComponent when the Context has been locked.")
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Attempted to add additional context from a UNOrganComponent when the FNOrganGenerationContext has already been locked."))
 		return false;
 	}
 	
@@ -181,6 +181,6 @@ void FNOrganGenerationContext::OutputToLog()
 		Builder.Append("\n");
 	}
 
-	N_LOG("%s", Builder.ToString());
+	UE_LOG(LogNexusProcGen, Log, TEXT("%s"), Builder.ToString());
 }
 

@@ -1,7 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NActorPoolStats.h"
+#include "NActorPoolsMinimal.h"
+
+DEFINE_LOG_CATEGORY(LogNexusActorPools);
 
 DEFINE_STAT(STAT_ActorPoolSubsystemTick)
 DEFINE_STAT(STAT_ActorPoolCount)

@@ -80,6 +80,6 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	}
 	else
 	{
-		N_LOG_WARNING("Attempted to destroy a root set Actor (%s) via the UNKillZoneComponent, not going to happen.", *OtherActor->GetName())
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behaviour has been ignored."), *OtherActor->GetName())
 	}
 }

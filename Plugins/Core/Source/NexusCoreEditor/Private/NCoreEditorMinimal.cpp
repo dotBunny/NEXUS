@@ -3,4 +3,4 @@
 
 #include "NCoreEditorMinimal.h"
 
-DEFINE_LOG_CATEGORY(LogNexusEditor);
+DEFINE_LOG_CATEGORY(LogNexusCoreEditor);

@@ -21,10 +21,8 @@ void FNCoreEditorModule::StartupModule()
 	
 	if (!FNEditorUtils::IsUserControlled())
 	{
-		NE_LOG("[FNCoreEditorModule::StartupModule] Framework initializing in an automated environment; some functionality will be ignored.");
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Framework initializing in an automated environment; some functionality will be ignored."));
 	}
-
-	NE_LOG("[FNCoreEditorModule::StartupModule] Initializing ...");
 	
 	UNEditorSettings::Register();
 	UNEditorUserSettings::Register();
@@ -76,7 +74,7 @@ void FNCoreEditorModule::OnPostEngineInit()
 			}
 			else
 			{
-				UE_LOG(LogNexusEditor, Warning, TEXT("[FNCoreEditorModule::OnPostEngineInit] Unable to find proposed project icon at %s."), *FullPath);
+				UE_LOG(LogNexusCoreEditor, Warning, TEXT("[FNCoreEditorModule::OnPostEngineInit] Unable to find proposed project icon at %s."), *FullPath);
 			}
 			
 			// Register the window delegate to make sure our windows get changed, this will change the loading window as well as an indicator of success.

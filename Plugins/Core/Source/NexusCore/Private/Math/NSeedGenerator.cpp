@@ -110,7 +110,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 uint64 FNSeedGenerator::SeedFromText(const FString& InSeed)
 {
 	const uint64 Seed = FNHashUtils::dbj2(InSeed);
-	N_LOG("[FNSeedGenerator::SeedFromText] Created seed (%llu) from string (%s).", Seed, *InSeed);
+	UE_LOG(LogNexusCore, Log, TEXT("Created uint64 seed(%llu) from string(%s)."), Seed, *InSeed);
 	return Seed;
 }
 
@@ -122,15 +122,14 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 
 	if (SeedLength == 0 || SeedLength == 1)
 	{
-		N_LOG_WARNING("The parsed (%s) seed (%s) length (%i) was below any possible valid value.",
-			   *ParsedSeed, *InHexSeed, SeedLength);
+		UE_LOG(LogNexusCore, Warning, TEXT("The parsed(%s) seed(%s) length(%i) was below any possible valid value; returning 0."), *ParsedSeed, *InHexSeed, SeedLength);
 		return 0;
 	}
 	// Safety Pad
 	if (SeedLength % 2 != 0)
 	{
 		ParsedSeed.InsertAt(0, '0');
-		N_LOG_VERBOSE("The seed (%s) was padded at the start; making it a valid hexadecimal seed.", *ParsedSeed);
+		UE_LOG(LogNexusCore, Verbose, TEXT("The seed(%s) has been padded at the start; making it a valid hexadecimal seed."), *ParsedSeed);
 	}
 
 	// Generate our actual unit value, with shifting
@@ -148,7 +147,7 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 		}
 	}
 
-	N_LOG_VERY_VERBOSE("Generated seed (%llu) from %s.", NewSeed, *ParsedSeed);
+	UE_LOG(LogNexusCore, VeryVerbose, TEXT("Generated uint64 seed(%llu) from %s."), NewSeed, *ParsedSeed);
 	return NewSeed;
 }
 

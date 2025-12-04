@@ -12,12 +12,12 @@ bool FNRawMeshUtils::DoesIntersect(FNRawMesh& LeftMesh, const FVector& LeftOrigi
 {
 	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
 	{
-		N_LOG_WARNING("No loops were found in the provided FNRawMeshes, unable to determine if there is intersection.")
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."))
 		return false;
 	}
 	if (LeftMesh.HasNonTris() || RightMesh.HasNonTris())
 	{
-		N_LOG_ERROR("One or both of the provided FNRawMeshes has non triangle based geometry, this is not supported for intersection checks.");
+		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection checks."));
 		return false;
 	}
 	
