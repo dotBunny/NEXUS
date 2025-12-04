@@ -48,6 +48,7 @@ NEXUSCOREEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusEditor, Log, All);
 	UE_VLOG(LogNexusEditor, Fatal, TEXT(Format), ##__VA_ARGS__)
 
 // Conditional Visual Logger
+// ReSharper disable IdentifierTypo
 #define NE_CVLOG_VERY_VERBOSE(Condition, Format, ...) \
 	UE_CVLOG(Condition, LogNexusEditor, VeryVerbose, TEXT(Format), ##__VA_ARGS__)
 #define NE_CVLOG_VERBOSE(Condition, Format, ...) \
@@ -60,3 +61,4 @@ NEXUSCOREEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusEditor, Log, All);
 	UE_CVLOG(Condition, LogNexusEditor, Error, TEXT(Format), ##__VA_ARGS__)
 #define NE_CVLOG_FATAL(Condition, Format, ...) \
 	UE_CVLOG(Condition, LogNexusEditor, Fatal, TEXT(Format), ##__VA_ARGS__)
+// ReSharper restore IdentifierTypo
