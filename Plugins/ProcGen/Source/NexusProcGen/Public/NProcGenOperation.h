@@ -9,6 +9,17 @@
 class UNOrganComponent;
 class FNOrganGeneratorTasks;
 
+UENUM(BlueprintType)
+enum ENProcGenOperationState : uint8
+{
+	PGOS_None = 0		UMETA(DisplayName="None"),
+	PGOS_Registered		UMETA(DisplayName="Registered"),
+	PGOS_Started		UMETA(DisplayName="Started"),
+	PGOS_Updated		UMETA(DisplayName="Updated"),
+	PGOS_Finished		UMETA(DisplayName="Finished"),
+	PGOS_Unregistered	UMETA(DisplayName="Unregistered")
+};
+
 UCLASS(ClassGroup=(Nexus), DisplayName = "NOrgan Generator")
 class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 {
@@ -21,9 +32,9 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	explicit UNProcGenOperation(const FObjectInitializer& ObjectInitializer);
 	
 public:
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects);
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components);
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FName ObjectName = NAME_None);
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FName ObjectName = NAME_None);
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FName ObjectName = NAME_None);
 	
 	void Reset() const;
 	void StartBuild(UObject* Caller);

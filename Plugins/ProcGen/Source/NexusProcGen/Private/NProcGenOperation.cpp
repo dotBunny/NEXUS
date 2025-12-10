@@ -3,6 +3,7 @@
 
 #include "NProcGenOperation.h"
 
+#include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
 #include "Generation/NOrganGeneratorTasks.h"
@@ -13,11 +14,13 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	
 	// A generator should never be deleted
 	this->AddToRoot();
+	
+	FNProcGenRegistry::RegisterOperation(this);
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FName ObjectName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
@@ -33,9 +36,9 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FName ObjectName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
 	
 	for (const auto Component : Components)
 	{
@@ -45,9 +48,9 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FName ObjectName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
 	
 	OrganGenerator->AddToContext(BaseComponent);
 	
@@ -82,6 +85,7 @@ void UNProcGenOperation::BeginDestroy()
 		Tasks = nullptr;
 	}
 
+	FNProcGenRegistry::UnregisterOperation(this);
 	
 	Super::BeginDestroy();
 }

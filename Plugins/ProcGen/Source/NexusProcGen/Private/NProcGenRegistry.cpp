@@ -12,6 +12,9 @@ TArray<UNCellRootComponent*> FNProcGenRegistry::CellRoots;
 TArray<UNCellJunctionComponent*> FNProcGenRegistry::CellJunctions;
 TArray<UNOrganComponent*> FNProcGenRegistry::Organs;
 
+TArray<UNProcGenOperation*> FNProcGenRegistry::Operations;
+FOnNProcGenOperationStateChanged FNProcGenRegistry::OnOperationStateChanged;
+
 TArray<UNCellJunctionComponent*> FNProcGenRegistry::GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted)
 {
 	TArray<UNCellJunctionComponent*> JunctionComponents;
@@ -94,6 +97,11 @@ bool FNProcGenRegistry::HasOrganComponentsInWorld(const UWorld* World)
 	return false;
 }
 
+bool FNProcGenRegistry::HasOperations()
+{
+	return Operations.Num() > 0;
+}
+
 bool FNProcGenRegistry::RegisterCellRootComponent(UNCellRootComponent* Component)
 {
 	if (CellRoots.Contains(Component))
@@ -130,6 +138,20 @@ bool FNProcGenRegistry::RegisterOrganComponent(UNOrganComponent* Organ)
 	return true;
 }
 
+bool FNProcGenRegistry::RegisterOperation(UNProcGenOperation* Operation)
+{
+	if (Operations.Contains(Operation))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register UNProcGenOperation(%s) as it is already registered"), *Operation->GetName());
+		return false;
+	}
+
+	Operations.Add(Operation);
+	
+	NotifyOfStateChange(Operation, PGOS_Registered);
+	return true;
+}
+
 bool FNProcGenRegistry::UnregisterCellRootComponent(UNCellRootComponent* Component)
 {
 	if (!CellRoots.Contains(Component))
@@ -163,5 +185,18 @@ bool FNProcGenRegistry::UnregisterOrganComponent(UNOrganComponent* Organ)
 	}
 
 	Organs.RemoveSwap(Organ);
+	return true;
+}
+
+bool FNProcGenRegistry::UnregisterOperation(UNProcGenOperation* Operation)
+{
+	if (!Operations.Contains(Operation))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find UNProcGenOperation(%s) when attempting to unregister it."), *Operation->GetName());
+		return false;
+	}
+
+	Operations.RemoveSwap(Operation);
+	NotifyOfStateChange(Operation, PGOS_Registered);
 	return true;
 }

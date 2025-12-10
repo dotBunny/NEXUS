@@ -70,6 +70,7 @@ private:
 	static ANCellActor* CellActor;
 	static ENCellEdMode CellEdMode;
 	static ENCellVoxelMode CellVoxelMode;
+	
 	TObjectPtr<UNProcGenOperation> OrganGenerator;
 	bool bCanTick = false;
 	bool bHasDirtyActors = false;

@@ -3,8 +3,6 @@
 
 #include "NPickerUtils.h"
 
-DEFINE_LOG_CATEGORY(LogNexusPicker);
-
 FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
 
 bool FNPickerUtils::bVisualLoggingEnabled = true;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NPickerMinimal.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
 

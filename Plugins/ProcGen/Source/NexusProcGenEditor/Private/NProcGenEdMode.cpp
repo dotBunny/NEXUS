@@ -68,7 +68,9 @@ void FNProcGenEdMode::Enter()
 	bCanTick = true;
 
 	// Create our temp organ generator to use with any selections
-	OrganGenerator = NewObject<UNProcGenOperation>();
+	OrganGenerator = NewObject<UNProcGenOperation>(
+		GetTransientPackage(), UNProcGenOperation::StaticClass(), TEXT("NProcGenEdModeOperation"));
+	
 	OrganGenerator->AddToRoot();
 	
 	FEdMode::Enter();
