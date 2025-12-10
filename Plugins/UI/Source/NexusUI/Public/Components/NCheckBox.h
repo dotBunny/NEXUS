@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NUINamespace.h"
 #include "Components/CheckBox.h"
 #include "NCheckBox.generated.h"
 
@@ -10,10 +11,14 @@
  * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/check-box/">UNCheckBox</a>
  */
-UCLASS()
+UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()
+	
+#if WITH_EDITOR
+	virtual const FText GetPaletteCategory() override {  return NEXUS::UI::Editor::PaletteCategory; }
+#endif // WITH_EDITOR
 	
 public:
 	/**

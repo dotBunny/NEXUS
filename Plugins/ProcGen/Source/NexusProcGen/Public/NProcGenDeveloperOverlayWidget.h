@@ -6,8 +6,14 @@
 #include "NDeveloperOverlayWidget.h"
 #include "NProcGenDeveloperOverlayWidget.generated.h"
 
+class UNListView;
+
 UCLASS(BlueprintType, Abstract)
 class UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
+	
+protected:	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UNListView> OperationsList;	
 };

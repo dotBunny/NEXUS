@@ -5,9 +5,10 @@
 
 #include "CommonListView.h"
 #include "INListViewEntry.h"
+#include "NUINamespace.h"
 #include "NListView.generated.h"
 
-UCLASS(BlueprintType, Blueprintable)
+UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
 /**
  * A wrapper around the UComboListView class to allow for calls to an interface on the entry elements. 
  **/
@@ -15,6 +16,10 @@ class NEXUSUI_API UNListView : public UCommonListView
 {
 	GENERATED_BODY()
 
+#if WITH_EDITOR
+	virtual const FText GetPaletteCategory() override {  return NEXUS::UI::Editor::PaletteCategory; }
+#endif // WITH_EDITOR
+	
 public:
 	
 	UFUNCTION(BlueprintCallable)

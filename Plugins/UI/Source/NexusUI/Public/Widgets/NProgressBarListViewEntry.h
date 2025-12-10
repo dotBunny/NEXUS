@@ -3,16 +3,15 @@
 
 #pragma once
 
-#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "Blueprint/UserWidget.h"
-#include "NTextListViewEntry.generated.h"
+#include "NProgressBarListViewEntry.generated.h"
 
+class UProgressBar;
 class UCommonTextBlock;
-class UCommonBorder;
 
 UCLASS(BlueprintType, Blueprintable, HideDropdown)
-class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
+class NEXUSUI_API UNProgressBarListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
 
@@ -22,16 +21,22 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
 	
-	UFUNCTION(BlueprintCallable)
-	void SetText(const FText NewText) const
-	{
-		Text->SetText(NewText);
-	}
-	
 protected:	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UCommonTextBlock> Text;
+	TObjectPtr<UNListView> ChildProgressListView;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UProgressBar> ProgressBar;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> LeftText;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> CenterText;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> RightText;
 };

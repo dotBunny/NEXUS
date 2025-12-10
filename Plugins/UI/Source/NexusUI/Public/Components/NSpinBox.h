@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NUINamespace.h"
 #include "Components/SpinBox.h"
 #include "NSpinBox.generated.h"
 
@@ -10,12 +11,15 @@
  * A wrapper around the USpinBox class to allow for setting the value without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/spin-box/">UNSpinBox</a>
  */
-UCLASS()
+UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSpinBox : public USpinBox
 {
 	GENERATED_BODY()
-
 	
+#if WITH_EDITOR
+	virtual const FText GetPaletteCategory() override {  return NEXUS::UI::Editor::PaletteCategory; }
+#endif // WITH_EDITOR	
+
 public:
 	/**
 	 * Set the value of the USpinBox without triggering exposed event bindings.
