@@ -5,13 +5,13 @@
 
 #include "INListViewEntry.h"
 #include "Blueprint/UserWidget.h"
-#include "NProgressBarListViewEntry.generated.h"
+#include "NProcGenOperationListViewEntry.generated.h"
 
 class UProgressBar;
 class UCommonTextBlock;
 
 UCLASS(BlueprintType, Blueprintable, HideDropdown)
-class NEXUSUI_API UNProgressBarListViewEntry : public UUserWidget, public INListViewEntry
+class NEXUSPROCGEN_API UNProcGenOperationListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
 
@@ -20,6 +20,8 @@ class NEXUSUI_API UNProgressBarListViewEntry : public UUserWidget, public INList
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
+	
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	
 protected:	
 	UPROPERTY(BlueprintReadOnly)

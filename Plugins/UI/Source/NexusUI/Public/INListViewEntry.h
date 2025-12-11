@@ -14,7 +14,7 @@ class NEXUSUI_API UNListViewEntry : public UUserObjectListEntry
 	GENERATED_BODY()
 };
 
-class INListViewEntry : public IUserObjectListEntry
+class NEXUSUI_API INListViewEntry : public IUserObjectListEntry
 {
 	GENERATED_BODY()
 public:	

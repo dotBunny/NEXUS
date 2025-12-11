@@ -197,6 +197,6 @@ bool FNProcGenRegistry::UnregisterOperation(UNProcGenOperation* Operation)
 	}
 
 	Operations.RemoveSwap(Operation);
-	NotifyOfStateChange(Operation, PGOS_Registered);
+	NotifyOfStateChange(Operation, PGOS_Unregistered);
 	return true;
 }

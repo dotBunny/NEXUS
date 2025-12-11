@@ -15,7 +15,10 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	// A generator should never be deleted
 	this->AddToRoot();
 	
-	FNProcGenRegistry::RegisterOperation(this);
+	if (!this->IsTemplate())
+	{
+		FNProcGenRegistry::RegisterOperation(this);
+	}
 }
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FName ObjectName)
@@ -85,7 +88,10 @@ void UNProcGenOperation::BeginDestroy()
 		Tasks = nullptr;
 	}
 
-	FNProcGenRegistry::UnregisterOperation(this);
+	if (!this->IsTemplate())
+	{
+		FNProcGenRegistry::UnregisterOperation(this);
+	}
 	
 	Super::BeginDestroy();
 }
