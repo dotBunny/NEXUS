@@ -68,8 +68,8 @@ void FNProcGenEdMode::Enter()
 	bCanTick = true;
 
 	// Create our temp organ generator to use with any selections
-	OrganGenerator = NewObject<UNProcGenOperation>(
-		GetTransientPackage(), UNProcGenOperation::StaticClass(), TEXT("NProcGenEdModeOperation"));
+	OrganGenerator = NewObject<UNProcGenOperation>();
+	OrganGenerator->DisplayName = FText::FromString(TEXT("Editor Mode"));
 	
 	OrganGenerator->AddToRoot();
 	

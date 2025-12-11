@@ -21,9 +21,18 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FName ObjectName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	if (DisplayName.IsEmpty())
+	{
+		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+	}
+	else
+	{
+		OrganGenerator->DisplayName = DisplayName;
+	}
+	
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
@@ -39,9 +48,17 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FName ObjectName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	if (DisplayName.IsEmpty())
+	{
+		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+	}
+	else
+	{
+		OrganGenerator->DisplayName = DisplayName;
+	}
 	
 	for (const auto Component : Components)
 	{
@@ -51,9 +68,17 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FName ObjectName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>(GetTransientPackage(), StaticClass(), ObjectName);
+	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	if (DisplayName.IsEmpty())
+	{
+		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+	}
+	else
+	{
+		OrganGenerator->DisplayName = DisplayName;
+	}
 	
 	OrganGenerator->AddToContext(BaseComponent);
 	
@@ -146,7 +171,6 @@ bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const
 {
 	return Context->AddOrganComponent(Component);
 }
-
 
 void UNProcGenOperation::LockContext()
 {

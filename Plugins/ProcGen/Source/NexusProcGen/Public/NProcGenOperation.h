@@ -25,6 +25,7 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 {
 	friend class UNProcGenSubsystem;
 	friend class UNProcGenEditorSubsystem;
+	friend class FNProcGenEdMode;
 	friend struct FNOrganGeneratorFinalizeUnsafeTask;
 	
 	GENERATED_BODY()
@@ -32,14 +33,19 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	explicit UNProcGenOperation(const FObjectInitializer& ObjectInitializer);
 	
 public:
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FName ObjectName = NAME_None);
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FName ObjectName = NAME_None);
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FName ObjectName = NAME_None);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FText& DisplayName = FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FText& DisplayName = FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FText& DisplayName= FText::GetEmpty());
 	
 	void Reset() const;
 	void StartBuild(UObject* Caller);
 	bool AddToContext(UNOrganComponent* Component) const;
 	bool IsLocked() const { return Context->IsLocked(); }
+	
+	
+	int GetTaskCount();
+	int GetCompletedTaskCount();
+	
 	/**
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
 	 */
@@ -49,13 +55,18 @@ public:
 		return Context->GenerationOrder;
 	}
 	
+	const FText& GetDisplayName() const { return DisplayName; }
+	
 	// TODO: Do we expose this?
+	
+	
 	
 
 protected:
 	virtual void BeginDestroy() override;
 	void FinishBuild();
 	FNOrganGeneratorTasks* GetTasks() const { return Tasks; }
+
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
@@ -63,4 +74,6 @@ private:
 	FNOrganGeneratorTasks* Tasks = nullptr;
 	FNOrganGenerationContext* Context = nullptr;
 	bool bIsContextLocked;
+	FText DisplayName;
+
 };

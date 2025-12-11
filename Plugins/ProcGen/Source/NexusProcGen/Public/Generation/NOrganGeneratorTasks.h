@@ -20,6 +20,7 @@ public:
 	void Reset();
 
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
+
 	
 private:
 

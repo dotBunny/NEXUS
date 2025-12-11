@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "NProcGenOperationListViewEntry.generated.h"
 
+class UNProcGenOperation;
 class UProgressBar;
 class UCommonTextBlock;
 
@@ -15,15 +16,20 @@ class NEXUSPROCGEN_API UNProcGenOperationListViewEntry : public UUserWidget, pub
 {
 	GENERATED_BODY()
 
+	
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
 	
+	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	
+	void Reset() const;
+	
 protected:	
+	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
 	
@@ -41,4 +47,8 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
+
+private:
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	TObjectPtr<UNProcGenOperation> Operation = nullptr;	
 };
