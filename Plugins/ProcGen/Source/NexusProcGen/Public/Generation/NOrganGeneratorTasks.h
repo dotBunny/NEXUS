@@ -22,6 +22,11 @@ public:
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
 
 	
+	int GetTotalPasses() const;
+	
+	int GetCompletedPasses();
+	
+	
 private:
 
 	TArray<FGraphEventArray> PassTasks;

@@ -38,7 +38,7 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOr
 		PassTasks.Add(Tasks);
 	};
 	
-	// Create our finalizer task on main thread
+	// Create our finalizer task on the main thread
 	FinalizeTask = TGraphTask<FNOrganGeneratorFinalizeUnsafeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
 }
 
@@ -70,4 +70,33 @@ void FNOrganGeneratorTasks::WaitForTasks()
 void FNOrganGeneratorTasks::Reset()
 {
 	bTasksUnlocked = false;
+}
+
+int FNOrganGeneratorTasks::GetTotalPasses() const
+{
+	return PassTasks.Num();
+}
+
+int FNOrganGeneratorTasks::GetCompletedPasses()
+{
+	int CompletedPasses = 0;
+	for (auto Pass : PassTasks)
+	{
+		bool bPassComplete = true;
+		for (const FGraphEventRef& Task : Pass)
+		{
+			if (!Task->IsComplete())
+			{
+				bPassComplete = false;
+				break;
+			}
+		}
+		if (!bPassComplete)
+		{
+			break;
+		}
+		CompletedPasses++;
+	}
+	
+	return CompletedPasses;
 }
