@@ -100,3 +100,21 @@ int FNOrganGeneratorTasks::GetCompletedPasses()
 	
 	return CompletedPasses;
 }
+
+FIntVector2 FNOrganGeneratorTasks::GetTaskStatus() const
+{
+	int TotalTasks = 0;
+	int CompletedTasks = 0;
+	for (auto Pass : PassTasks)
+	{
+		for (const FGraphEventRef& Task : Pass)
+		{
+			if (Task->IsComplete())
+			{
+				CompletedTasks++;
+			}
+			TotalTasks++;
+		}
+	}
+	return FIntVector2(CompletedTasks, TotalTasks);
+}

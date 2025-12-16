@@ -13,8 +13,8 @@ FNOrganGeneratorFinalizeUnsafeTask::FNOrganGeneratorFinalizeUnsafeTask(UNProcGen
 
 void FNOrganGeneratorFinalizeUnsafeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	FPlatformProcess::Sleep(5.0f); 
-	
+//	FPlatformProcess::Sleep(5.0f); 
+// Dont sleep on main thread K thnx	
 	
 	Operation->FinishBuild();
 }

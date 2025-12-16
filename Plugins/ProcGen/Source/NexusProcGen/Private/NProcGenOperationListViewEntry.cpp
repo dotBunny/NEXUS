@@ -8,7 +8,8 @@ void UNProcGenOperationListViewEntry::NativeDestruct()
 {
 	if (Operation != nullptr && Operation->IsValidLowLevel())
 	{
-		Operation->OnDisplayMessageChanged.RemoveDynamic(this, &UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged);
+		Operation->OnDisplayMessageChanged.RemoveDynamic(this, &UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged);\
+		Operation->OnTasksChanged.RemoveDynamic(this, &UNProcGenOperationListViewEntry::OnOperationTasksChanged);
 	}
 	Operation = nullptr;
 	Super::NativeDestruct();
@@ -19,6 +20,7 @@ void UNProcGenOperationListViewEntry::NativeOnListItemObjectSet(UObject* ListIte
 	INListViewEntry::NativeOnListItemObjectSet(ListItemObject);
 	Operation = Cast<UNProcGenOperation>(ListItemObject);
 	Operation->OnDisplayMessageChanged.AddDynamic(this, &UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged);
+	Operation->OnTasksChanged.AddDynamic(this, &UNProcGenOperationListViewEntry::OnOperationTasksChanged);
 	Reset();
 }
 
@@ -29,7 +31,8 @@ void UNProcGenOperationListViewEntry::Reset() const
 	if (Operation != nullptr)
 	{
 		LeftText->SetText(Operation->GetDisplayName());
-		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), 0, 0))); // Todo tasks?
+		const FIntVector2 Tasks = Operation->GetCachedTasksStatus();
+		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Tasks.X, Tasks.Y)));
 		CenterText->SetText(FText::FromString(Operation->GetDisplayMessage()));
 	}
 	else
@@ -44,4 +47,9 @@ void UNProcGenOperationListViewEntry::Reset() const
 void UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged(const FString& NewDisplayMessage)
 {
 	CenterText->SetText(FText::FromString(NewDisplayMessage));
+}
+
+void UNProcGenOperationListViewEntry::OnOperationTasksChanged(const int CompletedTasks, const int TotalTasks)
+{
+	RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), CompletedTasks, TotalTasks)));
 }

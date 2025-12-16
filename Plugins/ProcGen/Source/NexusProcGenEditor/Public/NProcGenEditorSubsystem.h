@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NProcGenOperation.h"
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
 
@@ -19,8 +20,10 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 		if (LastFrameNumberWeTicked == GFrameCounter || KnownOperations.Num() == 0)
 			return;
 		
-		
-		// TODO: Logic
+		for (const auto Operation : KnownOperations)
+		{
+			Operation->Tick();
+		}
 		
 		LastFrameNumberWeTicked = GFrameCounter;
 	}

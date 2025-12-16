@@ -3,6 +3,7 @@
 
 #include "NProcGenOperation.h"
 
+#include "NProcGenMinimal.h"
 #include "NProcGenNamespace.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
@@ -33,6 +34,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
 	
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
@@ -60,6 +62,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
 	
 	for (const auto Component : Components)
 	{
@@ -80,6 +83,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
 	
 	OrganGenerator->AddToContext(BaseComponent);
 	
@@ -98,6 +102,7 @@ void UNProcGenOperation::SetDisplayMessage(FString NewDisplayMessage)
 {
 	if (!DisplayMessage.Equals(NewDisplayMessage))
 	{
+		UE_LOG(LogNexusProcGen, Log, TEXT("[%s] DisplayMessage('%s' to '%s')"), *DisplayName.ToString(), *DisplayMessage,  *NewDisplayMessage);
 		DisplayMessage = NewDisplayMessage;
 		OnDisplayMessageChanged.Broadcast(DisplayMessage);
 	}
@@ -131,6 +136,19 @@ void UNProcGenOperation::BeginDestroy()
 	Super::BeginDestroy();
 }
 
+void UNProcGenOperation::Tick()
+{
+	if (Tasks == nullptr) return;
+	if (const FIntVector2 Status = Tasks->GetTaskStatus(); 
+		Status.Y != CachedTotalTasks || Status.X != CachedCompletedTasks)
+	{
+		CachedTotalTasks = Status.Y;
+		CachedCompletedTasks = Status.X;
+
+		OnTasksChanged.Broadcast(CachedCompletedTasks, CachedTotalTasks);
+	}
+}
+
 void UNProcGenOperation::FinishBuild()
 {
 	
@@ -148,7 +166,6 @@ void UNProcGenOperation::FinishBuild()
 	// Were going to delete this object
 	ConditionalBeginDestroy();
 }
-
 
 void UNProcGenOperation::StartBuild(UObject* Caller)
 {

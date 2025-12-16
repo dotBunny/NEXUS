@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
 
 class UNOrganComponent;
@@ -48,6 +49,8 @@ private:
 	
 	static void NotifyOfStateChange(UNProcGenOperation* Operation, ENProcGenOperationState NewState)
 	{
+		// We don't have a display name at registration, so the log for registration is done manually
+		UE_CLOG(NewState !=ENProcGenOperationState::PGOS_Registered, LogNexusProcGen, Log, TEXT("[%s] Changed State(%s)"), *Operation->GetDisplayName().ToString(), *UNProcGenOperation::GetStringFromState(NewState));
 		OnOperationStateChanged.Broadcast(Operation, NewState);
 	}
 

@@ -51,6 +51,10 @@ protected:
 	UFUNCTION()
 	void OnOperationDisplayMessageChanged(const FString& NewDisplayMessage);
 
+	UFUNCTION()
+	void OnOperationTasksChanged(const int CompletedTasks, const int TotalTasks);
+	
+	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UNProcGenOperation> Operation = nullptr;	

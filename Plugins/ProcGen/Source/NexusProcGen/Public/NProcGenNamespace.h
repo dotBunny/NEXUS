@@ -9,3 +9,12 @@ namespace NEXUS::ProcGen::DisplayMessages
 	const FString BuildingTaskGraph = TEXT("Building Task Graph");
 	const FString StartingTasks = TEXT("Starting Tasks");
 }
+namespace NEXUS::ProcGen::States
+{
+	const FString None = TEXT("None");
+	const FString Registered = TEXT("Registered");
+	const FString Started = TEXT("Started");
+	const FString Updated = TEXT("Updated");
+	const FString Finished = TEXT("Finished");
+	const FString Unregistered = TEXT("Unregistered");
+}

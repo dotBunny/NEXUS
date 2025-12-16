@@ -57,7 +57,10 @@ bool UNProcGenSubsystem::UnregisterCellProxy(ANCellProxy* CellProxy)
 
 void UNProcGenSubsystem::Tick(float DeltaTime)
 {
-	
+	for (const auto Operation : KnownOperations)
+	{
+		Operation->Tick();
+	}
 }
 
 bool UNProcGenSubsystem::IsTickable() const

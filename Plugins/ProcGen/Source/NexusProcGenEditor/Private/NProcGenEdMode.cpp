@@ -10,6 +10,7 @@
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
 #include "NPrimitiveDrawingUtils.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "Macros/NFlagsMacros.h"
@@ -70,6 +71,7 @@ void FNProcGenEdMode::Enter()
 	// Create our temp organ generator to use with any selections
 	OrganGenerator = NewObject<UNProcGenOperation>();
 	OrganGenerator->DisplayName = FText::FromString(TEXT("Editor Mode"));
+	UE_LOG(LogNexusProcGenEditor, Log, TEXT("Created new UNProcGenOperation(Editor Mode)"));
 	
 	OrganGenerator->AddToRoot();
 	

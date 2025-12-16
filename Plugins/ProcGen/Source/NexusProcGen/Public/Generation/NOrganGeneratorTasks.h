@@ -23,8 +23,9 @@ public:
 
 	
 	int GetTotalPasses() const;
-	
 	int GetCompletedPasses();
+	
+	FIntVector2 GetTaskStatus() const;
 	
 	
 private:
