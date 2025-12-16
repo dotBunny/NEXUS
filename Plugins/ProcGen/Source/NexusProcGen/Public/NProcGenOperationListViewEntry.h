@@ -47,6 +47,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
+	
+	UFUNCTION()
+	void OnOperationDisplayMessageChanged(const FString& NewDisplayMessage);
 
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject

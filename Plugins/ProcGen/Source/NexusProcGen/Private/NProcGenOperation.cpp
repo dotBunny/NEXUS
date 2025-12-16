@@ -3,6 +3,7 @@
 
 #include "NProcGenOperation.h"
 
+#include "NProcGenNamespace.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
@@ -93,6 +94,15 @@ void UNProcGenOperation::Reset() const
 	}
 }
 
+void UNProcGenOperation::SetDisplayMessage(FString NewDisplayMessage)
+{
+	if (!DisplayMessage.Equals(NewDisplayMessage))
+	{
+		DisplayMessage = NewDisplayMessage;
+		OnDisplayMessageChanged.Broadcast(DisplayMessage);
+	}
+}
+
 void UNProcGenOperation::BeginDestroy()
 {
 	this->RemoveFromRoot();
@@ -145,13 +155,14 @@ void UNProcGenOperation::StartBuild(UObject* Caller)
 	// Cache our caller
 	ExecuteCaller = Caller;
 	
-	// Ensure that we have locked context, and done the preprocess.
+	// Ensure that we have locked context and done the preprocessing.
 	if (!Context->IsLocked())
 	{
 		Context->LockAndPreprocess();
+		SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 	}
 	
-	// TODO: We shouldnt have a graph, but maybe we do?
+	// TODO: We shouldn't have a graph, but maybe we do?
 	if (Tasks != nullptr)
 	{
 		Tasks->Reset();
@@ -159,10 +170,11 @@ void UNProcGenOperation::StartBuild(UObject* Caller)
 	}
 	
 	// Build out our new graph
+	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
 	Tasks = new FNOrganGeneratorTasks(this, Context);
 	
 	// Add callback to tasks?
-	
+	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
 	Tasks->UnlockTasks();
 	
 }
@@ -175,5 +187,6 @@ bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const
 void UNProcGenOperation::LockContext()
 {
 	Context->LockAndPreprocess();
+	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 }
 

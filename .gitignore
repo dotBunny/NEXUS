@@ -83,6 +83,7 @@ TestProject/DerivedDataCache/*
 TestProject/Saved/*
 TestProject/Build/*
 TestProject/.vsconfig
+TestProject/NEXUS.unrealvs
 *.DotSettings.user
 
 # Lock Files

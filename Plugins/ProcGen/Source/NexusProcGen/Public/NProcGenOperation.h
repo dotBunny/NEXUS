@@ -20,6 +20,11 @@ enum ENProcGenOperationState : uint8
 	PGOS_Unregistered	UMETA(DisplayName="Unregistered")
 };
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationDisplayMessageChanged, const FString&, NewMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnNProcGenOperationTasksChanged, const int, NewTotalTasks, const int, NewCompletedTasks);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationPercentageChanged, const float, NewPercentage);
+
 UCLASS(ClassGroup=(Nexus), DisplayName = "NOrgan Generator")
 class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 {
@@ -42,10 +47,6 @@ public:
 	bool AddToContext(UNOrganComponent* Component) const;
 	bool IsLocked() const { return Context->IsLocked(); }
 	
-	
-	int GetTaskCount();
-	int GetCompletedTaskCount();
-	
 	/**
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
 	 */
@@ -55,12 +56,13 @@ public:
 		return Context->GenerationOrder;
 	}
 	
+	
 	const FText& GetDisplayName() const { return DisplayName; }
+	const FString& GetDisplayMessage() const { return DisplayMessage; }
+	void SetDisplayMessage(FString NewDisplayMessage);
 	
-	// TODO: Do we expose this?
-	
-	
-	
+	UPROPERTY(BlueprintAssignable)
+	FOnNProcGenOperationDisplayMessageChanged OnDisplayMessageChanged;
 
 protected:
 	virtual void BeginDestroy() override;
@@ -75,5 +77,5 @@ private:
 	FNOrganGenerationContext* Context = nullptr;
 	bool bIsContextLocked;
 	FText DisplayName;
-
+	FString DisplayMessage;
 };
