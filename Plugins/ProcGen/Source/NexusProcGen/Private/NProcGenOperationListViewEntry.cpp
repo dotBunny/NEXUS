@@ -26,14 +26,25 @@ void UNProcGenOperationListViewEntry::NativeOnListItemObjectSet(UObject* ListIte
 
 void UNProcGenOperationListViewEntry::Reset() const
 {
-	ProgressBar->SetPercent(0.f);
+	
 	
 	if (Operation != nullptr)
 	{
 		LeftText->SetText(Operation->GetDisplayName());
 		const FIntVector2 Tasks = Operation->GetCachedTasksStatus();
-		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Tasks.X, Tasks.Y)));
 		CenterText->SetText(FText::FromString(Operation->GetDisplayMessage()));
+
+		if (Tasks.Y != 0)
+		{
+			RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), Tasks.X, Tasks.Y)));
+			ProgressBar->SetPercent((static_cast<float>(Tasks.X)/Tasks.Y));
+		}
+		else
+		{
+			RightText->SetText(FText::GetEmpty());
+			ProgressBar->SetPercent(1.f);
+		}
+		
 	}
 	else
 	{
@@ -41,6 +52,7 @@ void UNProcGenOperationListViewEntry::Reset() const
 		RightText->SetText(FText::GetEmpty());
 		
 		CenterText->SetText(FText::GetEmpty());
+		ProgressBar->SetPercent(1.f);
 	}
 }
 
@@ -51,5 +63,14 @@ void UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged(const FSt
 
 void UNProcGenOperationListViewEntry::OnOperationTasksChanged(const int CompletedTasks, const int TotalTasks)
 {
-	RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), CompletedTasks, TotalTasks)));
+	if (TotalTasks != 0)
+	{
+		RightText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), CompletedTasks, TotalTasks)));
+		ProgressBar->SetPercent(static_cast<float>(CompletedTasks)/TotalTasks);
+	}
+	else
+	{
+		RightText->SetText(FText::GetEmpty());
+		ProgressBar->SetPercent(1.f);
+	}
 }
