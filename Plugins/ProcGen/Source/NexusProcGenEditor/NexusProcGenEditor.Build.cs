@@ -15,7 +15,7 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"DataValidation",
 					"RHI",
-					"UnrealEd",
+					"UnrealEd"
 				]
 			);
 
@@ -44,7 +44,7 @@ namespace UnrealBuildTool.Rules
 			
 			
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusProcGen"]);
+			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusProcGen"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusUIEditor", "NexusProcGen"]);
 
 			ShortName = "NexusProcGenEditor";						

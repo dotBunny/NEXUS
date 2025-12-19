@@ -16,6 +16,7 @@
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
 - The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
+- Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 
 ### Fixed
 

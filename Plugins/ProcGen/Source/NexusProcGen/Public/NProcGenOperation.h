@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NProcGenNamespace.h"
+#include "Math/NSeedGenerator.h"
 #include "Organ/NOrganGenerationContext.h"
 #include "NProcGenOperation.generated.h"
 
@@ -57,13 +58,16 @@ public:
 		}		
 	}
 	
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FText& DisplayName = FText::GetEmpty());
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FText& DisplayName = FText::GetEmpty());
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FText& DisplayName= FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName = FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName = FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName= FText::GetEmpty());
 	
 	void Reset() const;
 	void StartBuild(UObject* Caller);
+	
+	void SetSeedOnContext(const FString& NewSeed) const;
 	bool AddToContext(UNOrganComponent* Component) const;
+	
 	bool IsLocked() const { return Context->IsLocked(); }
 	
 	/**

@@ -23,7 +23,7 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FText& DisplayName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FString& Seed, const FText& DisplayName)
 {
 	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
@@ -34,7 +34,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
+	OrganGenerator->SetSeedOnContext(Seed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
 	
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
@@ -51,7 +52,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FText& DisplayName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed, const FText& DisplayName)
 {
 	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
@@ -62,7 +63,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
+	OrganGenerator->SetSeedOnContext(Seed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
 	
 	for (const auto Component : Components)
 	{
@@ -72,7 +74,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	return OrganGenerator;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FText& DisplayName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed, const FText& DisplayName)
 {
 	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
@@ -83,7 +85,9 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	{
 		OrganGenerator->DisplayName = DisplayName;
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s)"), *OrganGenerator->DisplayName.ToString())
+	OrganGenerator->SetSeedOnContext(Seed);
+	
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
 	
 	OrganGenerator->AddToContext(BaseComponent);
 	
@@ -161,8 +165,6 @@ void UNProcGenOperation::FinishBuild()
 		}
 	}
 	
-	UE_LOG(LogTemp, Warning, TEXT("Organ Generator Finished Build"));
-	
 	// Were going to delete this object
 	ConditionalBeginDestroy();
 }
@@ -193,7 +195,18 @@ void UNProcGenOperation::StartBuild(UObject* Caller)
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
 	Tasks->UnlockTasks();
-	
+}
+
+void UNProcGenOperation::SetSeedOnContext(const FString& NewSeed) const
+{
+	if (Context->IsLocked())
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to set the friendly seed on FNOrganGenerationContext when it has already been locked."));
+	}
+	else
+	{
+		Context->FriendlySeed = NewSeed;
+	}
 }
 
 bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const

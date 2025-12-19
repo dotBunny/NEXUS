@@ -9,5 +9,5 @@ class UNOrganComponent;
 class FNOrganGeneratorTaskContext
 {
 public:
-	FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap);
+	FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap, uint64 TaskSeed);
 };

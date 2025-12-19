@@ -32,6 +32,7 @@ public:
 	TMap<UNOrganComponent*, FNOrganGenerationContextMap> Components;
 	
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
+	FString FriendlySeed;
 	
 private:
 	bool bIsLocked = false;

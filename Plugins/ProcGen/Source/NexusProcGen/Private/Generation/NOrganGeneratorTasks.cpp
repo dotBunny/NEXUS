@@ -3,9 +3,12 @@
 
 #include "Generation/NOrganGeneratorTasks.h"
 
+#include "NProcGenMinimal.h"
 #include "Organ/NOrganGenerationContext.h"
 #include "Generation/NOrganGeneratorFinalizeUnsafeTask.h"
 #include "Generation/NOrganGeneratorTask.h"
+#include "Math/NMersenneTwister.h"
+#include "Math/NSeedGenerator.h"
 
 FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOrganGenerationContext* Context)
 {
@@ -14,6 +17,11 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOr
 	
 	// TODO: Generate NOrganGraphContext?
 	
+	// Convert our friendly seed to something more appropriate
+	const uint64 BaseSeed = FNSeedGenerator::SeedFromString(Context->FriendlySeed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->FriendlySeed, BaseSeed);
+	
+	FNMersenneTwister BaseGenerator(BaseSeed);
 	
 	// Build out processing tasks
 	for (auto Pass : Context->GenerationOrder)
@@ -23,7 +31,9 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOr
 		{
 			// Create component context
 			FNOrganGenerationContextMap* ContextMap = Context->Components.Find(Component);
-			FNOrganGeneratorTaskContext* ContextPtr = new FNOrganGeneratorTaskContext(ContextMap);
+			
+			// Create individual organ generator context object
+			FNOrganGeneratorTaskContext* ContextPtr = new FNOrganGeneratorTaskContext(ContextMap, BaseGenerator.UnsignedInteger64());
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(

@@ -228,6 +228,14 @@ public:
 		return this->InitialSeed;
 	}
 
+	
+	uint64 UnsignedInteger64()
+	{
+		const uint64 PseudoRandomValue = PersistentUnsignedInteger64Distribution(this->Get());
+		this->CallCounter++;
+		return PseudoRandomValue;
+	}
+	
 	/**
 	 * Returns the seed that was last set as a hexadecimal FString.
 	 * @return the last set seed.
@@ -272,6 +280,11 @@ private:
 	 */
 	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
+	/**
+	 * Maintained a real unsigned 64-bit integer distribution probability function.
+	 */
+	std::uniform_int_distribution<uint64> PersistentUnsignedInteger64Distribution = std::uniform_int_distribution<uint64>(MIN_uint64, MAX_uint64);
+	
 	/**
 	 * The last seed set on the Mersenne Twister.
 	 */

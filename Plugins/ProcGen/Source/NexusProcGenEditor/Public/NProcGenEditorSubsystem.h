@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NEditorUtils.h"
 #include "NProcGenOperation.h"
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
@@ -17,9 +18,6 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	
 	virtual void Tick(float DeltaTime) override
 	{
-		if (LastFrameNumberWeTicked == GFrameCounter || KnownOperations.Num() == 0)
-			return;
-		
 		for (const auto Operation : KnownOperations)
 		{
 			Operation->Tick();
@@ -28,6 +26,17 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 		LastFrameNumberWeTicked = GFrameCounter;
 	}
 	
+	virtual bool IsTickable() const override
+	{
+		if (!HasKnownOperation() || 
+			LastFrameNumberWeTicked == GFrameCounter ||
+			FNEditorUtils::IsEditorShuttingDown())
+		{
+			return false;
+		}
+		
+		return true;
+	}
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Always; }
 	virtual TStatId GetStatId() const override
 	{
@@ -39,7 +48,6 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	void StartOperation(UNProcGenOperation* Operation);
 	void OnOperationFinished(UNProcGenOperation* Operation);
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
-
 
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer

@@ -3,7 +3,7 @@
 
 #include "Generation/NOrganGeneratorTaskContext.h"
 
-FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap)
+FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap, uint64 TaskSeed)
 {
 	// TODO: PARSE THE GENERATOR CONTEXT
 	// - build out all available tissue set information

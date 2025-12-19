@@ -4,6 +4,7 @@
 #include "Math/NSeedGenerator.h"
 
 #include "NCoreMinimal.h"
+#include "NRandom.h"
 #include "Math/BigInt.h"
 #include "Math/NHashUtils.h"
 
@@ -86,6 +87,20 @@ uint64 FNSeedGenerator::RandomSeed()
 	return static_cast<uint64>(FMath::Rand()) << 32 | static_cast<uint64>(FMath::Rand());
 }
 
+FString FNSeedGenerator::RandomFriendlySeed(const uint8 BlockCount, const uint8 BlockLength)
+{
+	FString ReturnSeed;
+	for (uint8 i = 0; i < BlockCount; i++)
+	{
+		ReturnSeed.Append(RandomFriendlySeedBlock(BlockLength));
+		if (i < (BlockCount - 1))
+		{
+			ReturnSeed.Append(TEXT("-"));
+		}
+	}
+	return MoveTemp(ReturnSeed);
+}
+
 FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 {
 	FString Builder;
@@ -107,7 +122,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 	return Builder;
 }
 
-uint64 FNSeedGenerator::SeedFromText(const FString& InSeed)
+uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 {
 	const uint64 Seed = FNHashUtils::dbj2(InSeed);
 	UE_LOG(LogNexusCore, Log, TEXT("Created uint64 seed(%llu) from string(%s)."), Seed, *InSeed);
@@ -184,4 +199,15 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 	}
 
 	return FancySeed;
+}
+
+
+FString FNSeedGenerator::RandomFriendlySeedBlock(const uint8 Length)
+{
+	FString ReturnBlock;
+	for (uint8 i = 0; i < Length; i++)
+	{
+		ReturnBlock.AppendChar(FNRandom::NonDeterministic.RandRange(TEXT('a'), TEXT('z')));
+	}
+	return MoveTemp(ReturnBlock);
 }

@@ -29,7 +29,7 @@ public:
 	
 	
 private:
-
+	
 	TArray<FGraphEventArray> PassTasks;
 	FGraphEventRef FinalizeTask;
 	
