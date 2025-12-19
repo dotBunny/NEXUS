@@ -146,17 +146,23 @@ uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 
 uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 {
-	// Get rid of the dashes
-	FString TempSeed = InSeed;
-	TempSeed.ReplaceInline(TEXT("-"), TEXT(""));
-	
 	uint64 Seed = 0;
 	
 	// We're going to go in reverse as we use it as a multiplier
 	uint8 Multiplier = 0;
-	for (int32 i = TempSeed.Len() - 1; i >= 0; i--)
+	for (int32 i = InSeed.Len() - 1; i >= 0; i--)
 	{
-		const uint8 Value = static_cast<uint8>(TempSeed[i] - 97);
+		uint8 CharacterValue = InSeed[i];
+		
+		// Move uppercase to lowercase region
+		if (CharacterValue >= 65 && CharacterValue <= 90)
+		{
+			CharacterValue += 32;
+		}
+		// Ensure we are only dealing with lowercase digits
+		if (CharacterValue < 97|| CharacterValue > 122) continue;
+
+		const uint8 ParsedValue = static_cast<uint8>(CharacterValue - 97);
 		
 		uint64 FactorialMultiplier = 1;
 		for (int f = 0; f < Multiplier; f++)
@@ -164,12 +170,9 @@ uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 			FactorialMultiplier *= 10;
 		}
 		Multiplier++;
-		
-		Seed += (Value * FactorialMultiplier);
-		
-		
+		Seed += (ParsedValue * FactorialMultiplier);
 	}
-	return Seed;
+	return MoveTemp(Seed);
 }
 
 uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
