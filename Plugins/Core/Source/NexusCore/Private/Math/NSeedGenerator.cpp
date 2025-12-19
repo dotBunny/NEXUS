@@ -84,18 +84,34 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 
 uint64 FNSeedGenerator::RandomSeed()
 {
-	return static_cast<uint64>(FMath::Rand()) << 32 | static_cast<uint64>(FMath::Rand());
+	return static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt()) << 32 | static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt());
 }
 
-FString FNSeedGenerator::RandomFriendlySeed(const uint8 BlockCount, const uint8 BlockLength)
+FString FNSeedGenerator::RandomFriendlySeed()
 {
 	FString ReturnSeed;
-	for (uint8 i = 0; i < BlockCount; i++)
+	
+	TArray<uint8> Digits;
+	Digits.Reserve(23); // Max possible
+	uint64 TempSeed = RandomSeed();;
+	do
 	{
-		ReturnSeed.Append(RandomFriendlySeedBlock(BlockLength));
-		if (i < (BlockCount - 1))
+		Digits.Insert(TempSeed % 10, 0);  // Insert at front to maintain order
+		TempSeed /= 10;
+	} while (TempSeed > 0);
+	
+	// Front pad digits
+	while (Digits.Num() < 20)
+	{
+		Digits.Insert(0, 0); 
+	}
+	
+	for (uint32 i = 0; i < 20; i++)
+	{
+		ReturnSeed.AppendChar(97 + Digits[i]);
+		if (i == 4 || i == 9 || i == 14)
 		{
-			ReturnSeed.Append(TEXT("-"));
+			ReturnSeed.AppendChar('-');
 		}
 	}
 	return MoveTemp(ReturnSeed);
@@ -125,6 +141,34 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 {
 	const uint64 Seed = FNHashUtils::dbj2(InSeed);
+	return Seed;
+}
+
+uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
+{
+	// Get rid of the dashes
+	FString TempSeed = InSeed;
+	TempSeed.ReplaceInline(TEXT("-"), TEXT(""));
+	
+	uint64 Seed = 0;
+	
+	// We're going to go in reverse as we use it as a multiplier
+	uint8 Multiplier = 0;
+	for (int32 i = TempSeed.Len() - 1; i >= 0; i--)
+	{
+		const uint8 Value = static_cast<uint8>(TempSeed[i] - 97);
+		
+		uint64 FactorialMultiplier = 1;
+		for (int f = 0; f < Multiplier; f++)
+		{
+			FactorialMultiplier *= 10;
+		}
+		Multiplier++;
+		
+		Seed += (Value * FactorialMultiplier);
+		
+		
+	}
 	return Seed;
 }
 
@@ -197,15 +241,4 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 	}
 
 	return FancySeed;
-}
-
-
-FString FNSeedGenerator::RandomFriendlySeedBlock(const uint8 Length)
-{
-	FString ReturnBlock;
-	for (uint8 i = 0; i < Length; i++)
-	{
-		ReturnBlock.AppendChar(FNRandom::NonDeterministic.RandRange(TEXT('a'), TEXT('z')));
-	}
-	return MoveTemp(ReturnBlock);
 }

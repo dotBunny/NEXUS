@@ -18,7 +18,7 @@ FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOr
 	// TODO: Generate NOrganGraphContext?
 	
 	// Convert our friendly seed to something more appropriate
-	const uint64 BaseSeed = FNSeedGenerator::SeedFromString(Context->FriendlySeed);
+	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->FriendlySeed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->FriendlySeed, BaseSeed);
 	
 	FNMersenneTwister BaseGenerator(BaseSeed);

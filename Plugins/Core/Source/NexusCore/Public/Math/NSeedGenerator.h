@@ -21,12 +21,10 @@ public:
 	static uint64 RandomSeed();
 
 	/**
-	 * Returns a friendly seed with a specified number of blocks and block length.
-	 * @param BlockCount - The number of blocks to generate
-	 * @param BlockLength - The length of each block
+	 * Returns a valid pseudo random friendly seed.
 	 * @return A friendly seed string
 	 */
-	static FString RandomFriendlySeed(uint8 BlockCount = 3, uint8 BlockLength = 5);
+	static FString RandomFriendlySeed();
 
 	/**
 	 * Returns a <i>valid</i> numeric seed to be used with the FNMersenneTwister.
@@ -35,6 +33,8 @@ public:
 	 */
 	static uint64 SeedFromString(const FString& InSeed);
 
+	static uint64 SeedFromFriendlySeed(const FString& InSeed);
+	
 	/**
 	 * Returns a <i>valid</i> numeric seed to be used with the FNMersenneTwister.
 	 * @param InHexSeed - The desired hexadecimal FString to parse
@@ -64,12 +64,5 @@ private:
 	 * @return a cleaned-up version of the provided seed
 	 */
 	static FString SanitizeHexSeed(const FString& InHexSeed);
-
-	/**
-	 * Generate a random block of lowercase alpha characters to use with friendly seeds.
-	 * @param Length The number of characters to generate.
-	 * @return The readable block of characters.
-	 */
-	FORCEINLINE static FString RandomFriendlySeedBlock(uint8 Length);
 	
 };
