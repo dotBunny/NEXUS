@@ -125,7 +125,6 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 {
 	const uint64 Seed = FNHashUtils::dbj2(InSeed);
-	UE_LOG(LogNexusCore, Log, TEXT("Created uint64 seed(%llu) from string(%s)."), Seed, *InSeed);
 	return Seed;
 }
 
@@ -162,7 +161,6 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 		}
 	}
 
-	UE_LOG(LogNexusCore, VeryVerbose, TEXT("Generated uint64 seed(%llu) from %s."), NewSeed, *ParsedSeed);
 	return NewSeed;
 }
 
