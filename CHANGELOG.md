@@ -21,6 +21,7 @@
 ### Fixed
 
 - Selecting the `NCellActor` no longer adds it to the current selection, instead clearing and making it the sole selected.
+- Tickable subsystems with conditional ticks now properly respect their conditional tick settings.
 
 ### Removed
 
