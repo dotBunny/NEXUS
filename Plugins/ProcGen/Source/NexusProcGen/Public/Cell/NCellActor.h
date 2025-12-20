@@ -28,7 +28,7 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 	
 	GENERATED_BODY()
 	
-	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
+	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
 	{
 		PrimaryActorTick.bCanEverTick = false;
 		PrimaryActorTick.bStartWithTickEnabled = false;

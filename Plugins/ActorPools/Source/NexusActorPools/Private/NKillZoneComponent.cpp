@@ -6,7 +6,6 @@
 #include "Components/BoxComponent.h"
 #include "INActorPoolItem.h"
 #include "NActorPoolSubsystem.h"
-#include "NCoreMinimal.h"
 
 UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -39,9 +38,9 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 {
 	if (bIgnoreStaticActors && !OtherActor->IsRootComponentMovable()) return;
 
-	// Check if actor pool, return to pool
-	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
-	if (ActorItem != nullptr)
+	// Check if in an actor pool, return to the pool
+	if (INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor); 
+		ActorItem != nullptr)
 	{
 		if (!ActorItem->ReturnToActorPool())
 		{
