@@ -26,4 +26,5 @@ protected:
 	
 private:
 	FDelegateHandle OperationsStatusChangedDelegateHandle;
+	static bool ShouldShowOperation(const FName& OperationName);
 };

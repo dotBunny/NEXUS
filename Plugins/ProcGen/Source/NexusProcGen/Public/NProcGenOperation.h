@@ -107,7 +107,7 @@ private:
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;
-	
+
 	int CachedTotalTasks = 0;
 	int CachedCompletedTasks = 0;
 };
