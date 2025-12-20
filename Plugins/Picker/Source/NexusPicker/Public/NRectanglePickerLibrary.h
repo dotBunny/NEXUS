@@ -14,7 +14,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/">UNRectanglePickerLibrary</a>
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Rectangle Picker Library")
 class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

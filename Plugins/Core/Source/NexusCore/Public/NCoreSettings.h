@@ -7,7 +7,7 @@
 #include "Macros/NSettingsMacros.h"
 #include "NCoreSettings.generated.h"
 
-UCLASS(Config=NexusGame, defaultconfig)
+UCLASS(DisplayName = "NEXUS: Core Settings", Config=NexusGame, defaultconfig)
 class NEXUSCORE_API UNCoreSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

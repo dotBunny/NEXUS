@@ -11,7 +11,7 @@
  * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/check-box/">UNCheckBox</a>
  */
-UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "NEXUS: CheckBox", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()

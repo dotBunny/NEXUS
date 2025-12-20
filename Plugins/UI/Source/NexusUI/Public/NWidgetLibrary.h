@@ -13,7 +13,7 @@
  * @class UNWidgetLibrary
  * @brief A utility class providing functions NWidget types.
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Widget Library")
 class UNWidgetLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

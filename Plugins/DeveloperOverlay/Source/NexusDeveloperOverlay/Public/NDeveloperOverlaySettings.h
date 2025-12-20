@@ -7,7 +7,7 @@
 #include "Macros/NSettingsMacros.h"
 #include "NDeveloperOverlaySettings.generated.h"
 
-UCLASS(Config=NexusGame, defaultconfig)
+UCLASS(DisplayName = "NEXUS: Developer Overlay Settings", Config=NexusGame, defaultconfig)
 class NEXUSDEVELOPEROVERLAY_API UNDeveloperOverlaySettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

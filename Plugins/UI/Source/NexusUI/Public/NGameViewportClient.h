@@ -14,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnToggleWorldRenderingDelegate, bo
  * A viewport with some base functionality added.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-viewport-client/">UNGameViewportClient</a>
  */
-UCLASS(BlueprintType)
+UCLASS(DisplayName = "NEXUS: Game Viewport Client", BlueprintType)
 class NEXUSUI_API UNGameViewportClient : public UCommonGameViewportClient
 {
 	GENERATED_BODY()

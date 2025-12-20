@@ -12,7 +12,7 @@
 class ALevelInstance;
 class UNCell;
 
-UCLASS(ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
+UCLASS(DisplayName = "NEXUS: Cell Junction Component", ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 {

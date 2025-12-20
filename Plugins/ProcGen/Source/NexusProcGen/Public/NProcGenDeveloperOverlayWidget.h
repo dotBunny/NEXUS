@@ -10,7 +10,7 @@ enum ENProcGenOperationState : uint8;
 class UNProcGenOperation;
 class UNListView;
 
-UCLASS(BlueprintType, Abstract)
+UCLASS(DisplayName = "NEXUS: ProcGen Developer Overlay Widget", BlueprintType, Abstract)
 class UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()

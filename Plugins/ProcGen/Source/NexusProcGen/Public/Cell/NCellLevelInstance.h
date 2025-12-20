@@ -9,7 +9,7 @@
 
 //DECLARE_MULTICAST_DELEGATE_OneParam(FOnNCellLevelLoaded, ANCellActor* NCellActor);
 
-UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, DisplayName = "NCell LevelInstance")
+UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, DisplayName = "NEXUS: Cell LevelInstance")
 class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 {
 	GENERATED_BODY()

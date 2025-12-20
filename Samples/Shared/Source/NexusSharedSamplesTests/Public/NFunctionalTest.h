@@ -9,7 +9,7 @@
 #include "NFunctionalTest.generated.h"
 
 
-UCLASS(MinimalAPI, BlueprintType)
+UCLASS(DisplayName = "NEXUS: Functional Test", MinimalAPI, BlueprintType)
 class ANFunctionalTest : public AFunctionalTest
 {
 	GENERATED_BODY()

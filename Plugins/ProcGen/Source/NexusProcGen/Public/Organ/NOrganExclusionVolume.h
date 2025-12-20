@@ -6,7 +6,7 @@
 #include "GameFramework/Volume.h"
 #include "NOrganExclusionVolume.generated.h"
 
-UCLASS(BlueprintType, DisplayName = "NOrgan Exclusion Volume", HideCategories=(Tags, Activation, Cooking,
+UCLASS(BlueprintType, DisplayName = "NEXUS: Organ Exclusion Volume", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))
 class NEXUSPROCGEN_API ANOrganExclusionVolume : public AVolume
 {

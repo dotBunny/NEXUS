@@ -29,9 +29,11 @@ TSharedRef<FSlateStyleSet> FNActorPoolsEditorStyle::Create()
 	Style.Set("ClassIcon.NActorPoolSpawnerComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NActorPoolSpawnerComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NActorPoolSpawnerComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NActorPoolSpawnerComponent"), Icon128x128));
 
-	// NKillZoneComponent
+	// NKillZoneComponent / NKillZoneActor
 	Style.Set("ClassIcon.NKillZoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon16x16));
 	Style.Set("ClassThumbnail.NKillZoneComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon128x128));
+	Style.Set("ClassIcon.NKillZoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NKillZoneActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NKillZoneComponent"), Icon128x128));
 	
 	return StyleRef;
 }

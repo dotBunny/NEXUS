@@ -13,7 +13,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/spline/">UNSplinePickerLibrary</a>
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Spline Picker Library")
 class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

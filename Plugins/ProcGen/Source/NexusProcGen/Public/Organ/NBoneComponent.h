@@ -12,7 +12,7 @@
 // Bones will be anchors for junctions
 // need to add something like a 'organExclusion' ? for the actual space
 
-UCLASS(ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
+UCLASS(DisplayName = "NEXUS: Bone Component", ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
 {

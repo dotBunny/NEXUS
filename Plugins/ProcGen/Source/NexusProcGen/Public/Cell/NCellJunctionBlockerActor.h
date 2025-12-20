@@ -7,7 +7,7 @@
 #include "NCellJunctionBlockerActor.generated.h"
 
 
-UCLASS(DisplayName = "NCell Junction Blocker Actor")
+UCLASS(DisplayName = "NEXUS: Cell Junction Blocker Actor")
 class NEXUSPROCGEN_API ANCellJunctionBlockerActor : public AActor
 {
 	GENERATED_BODY()

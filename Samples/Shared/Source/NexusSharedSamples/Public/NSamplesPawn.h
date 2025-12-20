@@ -13,7 +13,7 @@ class ANSamplesDisplayActor;
 /**
  * A pawn used in the NEXUS samples that has a few extra bits on it.
  */
-UCLASS(Config = Game)
+UCLASS(DisplayName = "NEXUS: Samples Pawn", Config = Game)
 class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 {
 	GENERATED_BODY()

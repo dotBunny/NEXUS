@@ -10,7 +10,7 @@
 /**
  * A Blueprint function library for working with FNFloatRange.
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Float Range Library")
 class NEXUSCORE_API UNFloatRangeLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

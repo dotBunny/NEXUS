@@ -12,7 +12,7 @@
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
  * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/">UNDeveloperSubsystem</a>
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Developer Subsystem")
 class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()

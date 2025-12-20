@@ -16,7 +16,7 @@
  * callable from both C++ and Blueprint contexts, providing common operations
  * related to Actor manipulation, comparison, and management.
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Actor Library")
 class UNActorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

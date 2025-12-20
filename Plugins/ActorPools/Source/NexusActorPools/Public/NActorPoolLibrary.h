@@ -12,7 +12,7 @@
  * A small collection of functionality to help with connecting Blueprints to the native INActorPoolItem interface.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-library/>UNActorPoolLibrary</a>
  */
-UCLASS()
+UCLASS(DisplayName = "NEXUS: Actor Pool Library")
 class UNActorPoolLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

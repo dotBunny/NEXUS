@@ -5,20 +5,21 @@
 
 #include "CoreMinimal.h"
 #include "NKillZoneComponent.h"
-#include "NKillZoneVolume.generated.h"
+#include "NKillZoneActor.generated.h"
 
 /**
- * A specialized AVolume base-class designed as a killzone for actors.
+ * A specialized AActor base-class designed as a killzone for actors.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/killzone-volume/">ANKillZoneVolume</a>
  */
-UCLASS()
-class NEXUSACTORPOOLS_API ANKillZoneVolume : public AVolume
+UCLASS(DisplayName = "NEXUS: KillZone Actor")
+class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 {
 	GENERATED_BODY()
 	
-	explicit ANKillZoneVolume(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
+	explicit ANKillZoneActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
 	{
 		KillZoneComponent = CreateDefaultSubobject<UNKillZoneComponent>(TEXT("KillZone"));
+		SetRootComponent(KillZoneComponent);
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
 	

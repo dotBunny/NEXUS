@@ -11,7 +11,7 @@
 class UCommonTextBlock;
 class UCommonBorder;
 
-UCLASS(BlueprintType, Blueprintable, HideDropdown)
+UCLASS(DisplayName = "NEXUS: Text ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()

@@ -11,7 +11,7 @@
  * A wrapper around the UComboBoxString class to allow for setting the selected option without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/">UNComboBoxString</a>
  */
-UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "NEXUS: ComboBox (String)", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNComboBoxString : public UComboBoxString
 {
 	GENERATED_BODY()

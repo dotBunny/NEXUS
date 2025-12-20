@@ -17,7 +17,7 @@ class UDynamicMeshComponent;
  * A light-weight representation of the NCell+Level spawned into the world during generation.
  * It can be easily removed, but also converted into the actual prefab.
  */
-UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, DisplayName = "NCell Proxy")
+UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, DisplayName = "NEXUS: Cell Proxy")
 class NEXUSPROCGEN_API ANCellProxy : public AActor
 {
 	friend class UNCellActorFactory;

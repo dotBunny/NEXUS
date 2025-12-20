@@ -10,7 +10,7 @@
 #include "Macros/NSettingsMacros.h"
 #include "NActorPoolsSettings.generated.h"
 
-UCLASS(Config=NexusGame, defaultconfig)
+UCLASS(DisplayName = "NEXUS: Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

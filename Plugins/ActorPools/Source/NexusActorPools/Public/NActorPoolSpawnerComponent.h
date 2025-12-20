@@ -43,7 +43,7 @@ enum ENActorPoolSpawnerDistribution : uint8
  * A fundamental spawning component which will interact with the UNActorPoolSubsystem to periodically spawn defined AActors in predefined distributions (shapes).
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/">UNActorPoolSpawnerComponent</a>
  */
-UCLASS(meta = (BlueprintSpawnableComponent),
+UCLASS(DisplayName = "NEXUS: Actor Pool Spawner Component", meta = (BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSACTORPOOLS_API UNActorPoolSpawnerComponent : public USceneComponent
 {

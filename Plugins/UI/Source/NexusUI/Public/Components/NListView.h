@@ -8,7 +8,7 @@
 #include "NUINamespace.h"
 #include "NListView.generated.h"
 
-UCLASS(ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "NEXUS: ListView", ClassGroup = UI, meta = (Category = "NEXUS"))
 /**
  * A wrapper around the UComboListView class to allow for calls to an interface on the entry elements. 
  **/
