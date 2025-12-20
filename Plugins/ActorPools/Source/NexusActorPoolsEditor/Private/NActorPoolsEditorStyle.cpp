@@ -11,11 +11,10 @@ N_IMPLEMENT_EDITOR_STYLE(FNActorPoolsEditorStyle)
 TSharedRef<FSlateStyleSet> FNActorPoolsEditorStyle::Create()
 {
 	N_IMPLEMENT_EDITOR_STYLE_CREATE
-
-
+	
 	// NPooledActor
 	Style.Set("ClassIcon.NPooledActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon16x16));
-	Style.Set("ClassThumbnail.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon128x128));
+	Style.Set("ClassThumbnail.NPooledActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon128x128));
 
 	// NActorPool
 	Style.Set("ClassIcon.NActorPool", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NActorPool"), Icon16x16));
