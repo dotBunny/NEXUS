@@ -8,11 +8,11 @@
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Generation/NOrganGeneratorTasks.h"
+#include "Generation/NProcGenOperationTaskGraph.h"
 
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = new FNOrganGenerationContext();
+	Context = new FNProcGenOperationContext();
 	
 	// A generator should never be deleted
 	this->AddToRoot();
@@ -124,12 +124,12 @@ void UNProcGenOperation::BeginDestroy()
 		Context = nullptr;
 	}
 	
-	if (Tasks != nullptr)
+	if (Graph != nullptr)
 	{
-		Tasks->Reset();
-		delete Tasks;
+		Graph->Reset();
+		delete Graph;
 		
-		Tasks = nullptr;
+		Graph = nullptr;
 	}
 
 	if (!this->IsTemplate())
@@ -142,8 +142,9 @@ void UNProcGenOperation::BeginDestroy()
 
 void UNProcGenOperation::Tick()
 {
-	if (Tasks == nullptr) return;
-	if (const FIntVector2 Status = Tasks->GetTaskStatus(); 
+	if (Graph == nullptr) return;
+	
+	if (const FIntVector2 Status = Graph->GetTaskStatus(); 
 		Status.Y != CachedTotalTasks || Status.X != CachedCompletedTasks)
 	{
 		CachedTotalTasks = Status.Y;
@@ -182,19 +183,19 @@ void UNProcGenOperation::StartBuild(UObject* Caller)
 	}
 	
 	// TODO: We shouldn't have a graph, but maybe we do?
-	if (Tasks != nullptr)
+	if (Graph != nullptr)
 	{
-		Tasks->Reset();
-		delete Tasks;
+		Graph->Reset();
+		delete Graph;
 	}
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
-	Tasks = new FNOrganGeneratorTasks(this, Context);
+	Graph = new FNProcGenOperationTaskGraph(this, Context);
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
-	Tasks->UnlockTasks();
+	Graph->UnlockTasks();
 }
 
 void UNProcGenOperation::SetSeedOnContext(const FString& NewSeed) const

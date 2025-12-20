@@ -3,11 +3,14 @@
 
 #pragma once
 
-struct FNOrganGenerationContextMap;
+struct FNOrganGenerationContext;
 class UNOrganComponent;
 
 class FNOrganGeneratorTaskContext
 {
+	friend struct FNOrganGeneratorTask;
 public:
-	FNOrganGeneratorTaskContext(FNOrganGenerationContextMap* GeneratorContextMap, uint64 TaskSeed);
+	FNOrganGeneratorTaskContext(FNOrganGenerationContext* GeneratorContextMap, uint64 TaskSeed);
+protected:
+	uint64 Seed;
 };

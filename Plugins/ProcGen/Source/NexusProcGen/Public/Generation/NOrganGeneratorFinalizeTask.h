@@ -3,16 +3,16 @@
 
 #pragma once
 
+#include "NOrganGeneratorTaskContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 class UNProcGenOperation;
 class FNOrganGeneratorComponentMap;
 
-struct FNOrganGeneratorFinalizeUnsafeTask
+struct FNOrganGeneratorFinalizeTask
 {
 public:
-	
-	explicit FNOrganGeneratorFinalizeUnsafeTask(UNProcGenOperation* OrganGenerator);
+	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, FNOrganGeneratorTaskContext* ContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
     
@@ -23,4 +23,5 @@ public:
 
 private:
 	UNProcGenOperation* Operation;
+	FNOrganGeneratorTaskContext* Context;
 };

@@ -7,7 +7,7 @@
 #include "NProcGenSubsystem.generated.h"
 
 class UNProcGenOperation;
-class FNOrganGeneratorTasks;
+class FNProcGenOperationTaskGraph;
 class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;
@@ -28,6 +28,7 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	
 	void StartOperation(UNProcGenOperation* Operation);
 	void OnOperationFinished(UNProcGenOperation* Operation);

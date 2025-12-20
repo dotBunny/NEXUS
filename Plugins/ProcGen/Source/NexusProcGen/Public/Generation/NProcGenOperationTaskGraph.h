@@ -6,12 +6,12 @@
 #include "CoreMinimal.h"
 
 class UNProcGenOperation;
-class FNOrganGenerationContext;
+class FNProcGenOperationContext;
 
-class NEXUSPROCGEN_API FNOrganGeneratorTasks
+class NEXUSPROCGEN_API FNProcGenOperationTaskGraph
 {
 public:
-	explicit FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOrganGenerationContext* Context);
+	explicit FNProcGenOperationTaskGraph(UNProcGenOperation* Generator, FNProcGenOperationContext* Context);
 	
 	void UnlockTasks();
 	
@@ -26,11 +26,11 @@ public:
 	int GetCompletedPasses();
 	
 	FIntVector2 GetTaskStatus() const;
-	
-	
+
 private:
 	
 	TArray<FGraphEventArray> PassTasks;
+	
 	FGraphEventRef FinalizeTask;
 	
 	bool bTasksUnlocked = false;

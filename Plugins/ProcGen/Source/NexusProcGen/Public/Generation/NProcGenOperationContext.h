@@ -8,7 +8,7 @@
 
 class UNOrganComponent;
 
-struct NEXUSPROCGEN_API FNOrganGenerationContextMap
+struct NEXUSPROCGEN_API FNOrganGenerationContext
 {
 	UNOrganComponent* SourceComponent;
 	TArray<UNOrganComponent*> IntersectComponents;
@@ -18,7 +18,7 @@ struct NEXUSPROCGEN_API FNOrganGenerationContextMap
 /**
  * Game-thread context of the entire generation process.
  */
-class NEXUSPROCGEN_API FNOrganGenerationContext
+class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
 	void Reset();
@@ -29,8 +29,7 @@ public:
 	
 	void OutputToLog();
 	
-	TMap<UNOrganComponent*, FNOrganGenerationContextMap> Components;
-	
+	TMap<UNOrganComponent*, FNOrganGenerationContext> Components;
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 	FString FriendlySeed;
 	

@@ -5,11 +5,11 @@
 
 #include "NProcGenNamespace.h"
 #include "Math/NSeedGenerator.h"
-#include "Organ/NOrganGenerationContext.h"
+#include "Generation/NProcGenOperationContext.h"
 #include "NProcGenOperation.generated.h"
 
 class UNOrganComponent;
-class FNOrganGeneratorTasks;
+class FNProcGenOperationTaskGraph;
 
 UENUM(BlueprintType)
 enum ENProcGenOperationState : uint8
@@ -32,7 +32,9 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	friend class UNProcGenSubsystem;
 	friend class UNProcGenEditorSubsystem;
 	friend class FNProcGenEdMode;
-	friend struct FNOrganGeneratorFinalizeUnsafeTask;
+	
+	friend struct FNOrganGeneratorFinalizeTask;
+	friend struct FNProcGenOperationFinalizeTask;
 	
 	GENERATED_BODY()
 
@@ -95,15 +97,15 @@ protected:
 	void Tick();
 	virtual void BeginDestroy() override;
 	void FinishBuild();
-	FNOrganGeneratorTasks* GetTasks() const { return Tasks; }
+	FNProcGenOperationTaskGraph* GetGraph() const { return Graph; }
 
 	
 private:
 	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UObject> ExecuteCaller = nullptr;
-	FNOrganGeneratorTasks* Tasks = nullptr;
-	FNOrganGenerationContext* Context = nullptr;
+	FNProcGenOperationTaskGraph* Graph = nullptr;
+	FNProcGenOperationContext* Context = nullptr;
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;

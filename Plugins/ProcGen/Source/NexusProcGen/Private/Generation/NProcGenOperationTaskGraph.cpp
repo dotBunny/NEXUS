@@ -1,58 +1,74 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NOrganGeneratorTasks.h"
+#include "Generation/NProcGenOperationTaskGraph.h"
 
 #include "NProcGenMinimal.h"
-#include "Organ/NOrganGenerationContext.h"
-#include "Generation/NOrganGeneratorFinalizeUnsafeTask.h"
+
+#include "Generation/NProcGenOperationContext.h"
+#include "Generation/NOrganGeneratorFinalizeTask.h"
 #include "Generation/NOrganGeneratorTask.h"
+#include "Generation/NProcGenOperationFinalizeTask.h"
+
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
 
-FNOrganGeneratorTasks::FNOrganGeneratorTasks(UNProcGenOperation* Generator, FNOrganGenerationContext* Context)
+FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Generator, FNProcGenOperationContext* Context)
 {
+	// Ensure tasks are unlocked
 	bTasksUnlocked = false;
-	
-	
-	// TODO: Generate NOrganGraphContext?
 	
 	// Convert our friendly seed to something more appropriate
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->FriendlySeed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->FriendlySeed, BaseSeed);
-	
 	FNMersenneTwister BaseGenerator(BaseSeed);
-	
-	// Build out processing tasks
+	uint32 SubTaskIndex = 0;
+	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
+		
+		//SubTasks.Add(TArray<FGraphEventArray>());
+		
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
+			// SubTasks[SubTaskIndex].Add(()
+			//
+			// (TArray<FGraphEventArray>());
 			// Create component context
-			FNOrganGenerationContextMap* ContextMap = Context->Components.Find(Component);
+			FNOrganGenerationContext* ContextMap = Context->Components.Find(Component);
 			
 			// Create individual organ generator context object
 			FNOrganGeneratorTaskContext* ContextPtr = new FNOrganGeneratorTaskContext(ContextMap, BaseGenerator.UnsignedInteger64());
+			
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
 				.ConstructAndHold(ContextPtr); // ConstructAndDispatchWhenReady
-			
 			Tasks.Add(OrganTask);
+			
+			// Create a task to finalize the previous organ task on the main thread
+			FGraphEventArray SubTasks;
+			SubTasks.Add(OrganTask);
+			FGraphEventRef OrganFinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&SubTasks, 
+				ENamedThreads::GameThread)
+				.ConstructAndHold(Generator, ContextPtr);
+			Tasks.Add(OrganFinalizeTask);
 		}
+		
+		SubTaskIndex++;
 
 		/// Ensure we track a passes tasks
 		PassTasks.Add(Tasks);
 	};
 	
 	// Create our finalizer task on the main thread
-	FinalizeTask = TGraphTask<FNOrganGeneratorFinalizeUnsafeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
+	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
 }
 
-void FNOrganGeneratorTasks::UnlockTasks()
+void FNProcGenOperationTaskGraph::UnlockTasks()
 {
 	// Start running the tasks
 	for (const auto Tasks : PassTasks)
@@ -67,7 +83,7 @@ void FNOrganGeneratorTasks::UnlockTasks()
 	bTasksUnlocked = true;
 }
 
-void FNOrganGeneratorTasks::WaitForTasks()
+void FNProcGenOperationTaskGraph::WaitForTasks()
 {
 	if (!bTasksUnlocked)
 	{
@@ -77,17 +93,17 @@ void FNOrganGeneratorTasks::WaitForTasks()
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 
-void FNOrganGeneratorTasks::Reset()
+void FNProcGenOperationTaskGraph::Reset()
 {
 	bTasksUnlocked = false;
 }
 
-int FNOrganGeneratorTasks::GetTotalPasses() const
+int FNProcGenOperationTaskGraph::GetTotalPasses() const
 {
 	return PassTasks.Num();
 }
 
-int FNOrganGeneratorTasks::GetCompletedPasses()
+int FNProcGenOperationTaskGraph::GetCompletedPasses()
 {
 	int CompletedPasses = 0;
 	for (auto Pass : PassTasks)
@@ -111,7 +127,7 @@ int FNOrganGeneratorTasks::GetCompletedPasses()
 	return CompletedPasses;
 }
 
-FIntVector2 FNOrganGeneratorTasks::GetTaskStatus() const
+FIntVector2 FNProcGenOperationTaskGraph::GetTaskStatus() const
 {
 	int TotalTasks = 0;
 	int CompletedTasks = 0;

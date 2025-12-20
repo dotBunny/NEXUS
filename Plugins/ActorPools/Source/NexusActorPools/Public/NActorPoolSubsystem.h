@@ -86,6 +86,7 @@ public:
 	virtual void Deinitialize() final override;
 	virtual void Initialize(FSubsystemCollectionBase& Collection) final override;
 	virtual bool IsTickable() const final override;
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	virtual void Tick(float DeltaTime) final override;
 	//End UTickableWorldSubsystem
 

@@ -30,7 +30,8 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual bool IsTickable() const override { return bBaselineSet; };
-
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
 private:
 	bool bPassedObjectCountWarningThreshold = false;
 	bool bPassedObjectCountSnapshotThreshold = false;
