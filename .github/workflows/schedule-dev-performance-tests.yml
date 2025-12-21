@@ -1,15 +1,17 @@
-name: Functional Tests
-run-name: Functional Tests (Tests.Nexus)
+﻿name: Performance Tests (DEV)
+run-name: DEV.Performance
 
 on:  
   schedule:
     - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy
 
 jobs:
-  FunctionalTests:
+  PerfTests:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: dev
 
       - name: Get Branch Settings
         id: settings
@@ -27,11 +29,11 @@ jobs:
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
 
-      - name: Run functional tests
+      - name: Run performance tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-          tests: 'Functional Tests'
+          tests: 'Performance Tests'
 
       - name: Parse UE log
         if: always()
@@ -45,7 +47,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-functional-tests-${{ github.run_number }}'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
