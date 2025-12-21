@@ -32,9 +32,6 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
-			// SubTasks[SubTaskIndex].Add(()
-			//
-			// (TArray<FGraphEventArray>());
 			// Create component context
 			FNOrganGenerationContext* ContextMap = Context->Components.Find(Component);
 			
