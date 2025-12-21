@@ -22,5 +22,6 @@ namespace NEXUS::ProcGen::States
 
 namespace NEXUS::ProcGen::Operations
 {
+	const FName Main = FName("NProcGenMainOperation");
 	const FName EditorMode = FName("NProcGenEditorModeOperation");
 }
