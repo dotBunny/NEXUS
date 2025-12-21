@@ -1,9 +1,9 @@
-name: Functional Tests
-run-name: FunctionalTests
+name: \[D\] Functional Tests
+run-name: DISPATCH.FunctionalTests @ ${{ github.event.workflow_run.head_branch }}
 
 on:
   workflow_run:
-    workflows: ["Unit Tests"]
+    workflows: ["[P] Unit Tests"]
     types:
       - completed
 
@@ -12,6 +12,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Get Branch Settings
         id: settings

@@ -1,5 +1,5 @@
-name: Unit Tests
-run-name: Unit Tests (NEXUS.UnitTests)
+name: \[P\] Unit Tests
+run-name: PUSH.UnitTests (NEXUS.UnitTests)
 
 on:
   push:
