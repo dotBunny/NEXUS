@@ -1,4 +1,4 @@
-name: M BuildCookRun
+name: Manual BuildCookRun
 run-name: MANUAL.BuildCookRun (${{ inputs.configuration }})
 
 on:  
