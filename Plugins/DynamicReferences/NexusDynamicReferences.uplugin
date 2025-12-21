@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 5,
-	"VersionName": "0.2.2",
+	"Version": 6,
+	"VersionName": "0.2.3",
 	"FriendlyName": "NEXUS: Dynamic References",
 	"Description": "Method for referring to runtime Actors without knowing them.",
 	"Category": "NEXUS",

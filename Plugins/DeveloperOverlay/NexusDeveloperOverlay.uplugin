@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 5,
-	"VersionName": "0.2.2",
+	"Version": 6,
+	"VersionName": "0.2.3",
 	"FriendlyName": "NEXUS: Developer Overlay",
 	"Description": "A visual developer overlay and menu system.",
 	"Category": "NEXUS",
