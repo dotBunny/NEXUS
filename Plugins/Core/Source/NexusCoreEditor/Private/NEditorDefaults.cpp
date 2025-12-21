@@ -29,7 +29,7 @@ const FPlacementCategoryInfo* FNEditorDefaults::GetPlacementCategory()
 			FSlateIcon(Style->GetStyleSetName(), "NEXUS.Icon"),
 			PlacementModeCategoryHandle,
 			TEXT("NEXUS"),
-			911 // Determines where the category shows up in the list with respect to the others.
+			42 // Determines where the category shows up in the list with respect to the others.
 		);
 
 		Info.ShortDisplayName = NSLOCTEXT("NexusCoreEditor", "PlacementCategoryShortName", "NEXUS");
