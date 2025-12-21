@@ -1,5 +1,5 @@
 name: Functional Tests
-run-name: DISPATCH.FunctionalTests @ ${{ github.event.workflow_run.head_branch }}
+run-name: DISPATCH.FunctionalTests (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
