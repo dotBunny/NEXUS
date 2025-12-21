@@ -1,9 +1,9 @@
-name: \[D\] BuildCookRun (Shipping)
+name: '[D] BuildCookRun (Shipping)'
 run-name: DISPATCH.BuildCookRun.Shipping (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
-    workflows: ["[D] BuildCookRun (Development)"]
+    workflows: ['[D] BuildCookRun (Development)']
     types:
       - completed
 
