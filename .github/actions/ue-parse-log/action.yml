@@ -17,6 +17,7 @@ runs:
             }
             if ($line.Contains("Warning: ")) {
               if($line.EndsWith("LogToolMenus: Warning: Menu section not found: 'Compile' for insert: 'EditorPerf'")) { continue }
+              if($line.Contains("LogStreaming: Warning: Failed to read file '../../../Engine/")) { continue }
               Write-Host "::warning ::$line"
               $foundWarning++
             }
