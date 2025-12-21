@@ -34,6 +34,8 @@ void UNSamplesUserWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	if (MonitoredWidget == nullptr) return;
+	
 	if (MonitoredWidget->IsA<UCheckBox>())
 	{
 		BindCheckbox();
@@ -52,7 +54,8 @@ void UNSamplesUserWidget::NativeConstruct()
 	}
 	else
 	{
-		N_LOG(Warning, TEXT("[UNSamplesUserWidget::NativeConstruct] Unsupported widget type: %s"), *MonitoredWidget->GetName())
+		UE_LOG(LogNexusCore, Warning, TEXT("Unable to bind to unsupported widget type(%s) to UNSamplesUserWidget; clearing reference to avoid further messages."), *MonitoredWidget->GetName())
+		MonitoredWidget = nullptr;
 	}
 }
 
@@ -64,6 +67,8 @@ void UNSamplesUserWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaT
 
 void UNSamplesUserWidget::UpdateCurrentValue()
 {
+	if (MonitoredWidget == nullptr) return;
+	
 	if (MonitoredWidget->IsA<UCheckBox>())
 	{
 		UpdateCurrentValueFromCheckbox();
@@ -82,7 +87,8 @@ void UNSamplesUserWidget::UpdateCurrentValue()
 	}
 	else
 	{
-		N_LOG(Warning, TEXT("[UNSamplesUserWidget::UpdateCurrentValue] Unsupported widget type: %s"), *MonitoredWidget->GetName())
+		UE_LOG(LogNexusCore, Warning, TEXT("Unable to monitor widget via UNSamplesUserWidget due to an unsupported type(%s); clearing reference to avoid further messages."), *MonitoredWidget->GetName())
+		MonitoredWidget = nullptr;
 	}
 }
 

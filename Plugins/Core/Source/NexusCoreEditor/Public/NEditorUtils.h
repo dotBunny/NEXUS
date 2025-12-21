@@ -129,7 +129,14 @@ public:
 		return nullptr;
 	}
 
-
+	FORCEINLINE static bool IsUnsavedWorld(const UWorld* World)
+	{
+		if (World == nullptr) return true;
+		const UPackage* Package =  World->GetPackage();
+		if (Package == nullptr || Package->GetFileSize() == 0) return true;
+		return !FPackageName::DoesPackageExist(Package->GetName());
+	}
+	
 	static TArray<FString> GetSelectedContentBrowserPaths()
 	{
 		TArray<FString> SelectedPaths;
@@ -154,4 +161,15 @@ public:
 	static bool ReplaceWindowIcon(const FString& IconPath);
 
 	static FString GetEngineBinariesPath();
+	
+	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
+	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
+	static void FocusTab(const FName& TabIdentifier);
+	
+	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
+	
+	static bool IsEditorShuttingDown()
+	{
+		return IsEngineExitRequested();
+	}
 };

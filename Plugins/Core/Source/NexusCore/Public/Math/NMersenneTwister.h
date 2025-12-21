@@ -7,8 +7,6 @@
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "NSeedGenerator.h"
 
-// TODO: Create non-distributed number versions
-
 /**
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
@@ -28,14 +26,14 @@ public:
 
 	/**
 	 * Set seed of the FMersenneTwister.
-	 * @param Seed The seed to initialize the engine with
+	 * @param Seed The seed to initialize the engine with.
 	 */
 	void Initialize(const uint64 Seed);
 	
 	/**
 	 * Returns a pseudo random bool value based on chance (0-1 roll), if the result is included.
 	 * @param Chance The 0-1 percent chance of success
-	 * @return a psuedo random bool
+	 * @return a pseudo random bool.
 	 */
 	bool Bias(const float Chance);
 
@@ -50,7 +48,7 @@ public:
 
 	/**
 	 * Returns a pseudo random uniformly distributed bool value.
-	 * @return a pseudo random bool
+	 * @return a pseudo random bool.
 	 */
 	bool Bool();
 
@@ -64,7 +62,7 @@ public:
 
 	/**
 	 * Returns a pseudo random double between 0 and 1.
-	 * @return a pseudo random double
+	 * @return a pseudo random double.
 	 */
 	double Double();
 
@@ -80,7 +78,7 @@ public:
 	 * Generate a random double between minimum and maximum.
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
-	 * @return a pseudo random double
+	 * @return a pseudo random double.
 	 */
 	float DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
 	FORCEINLINE float RandRange(const double MinimumValue = MIN_flt, const double MaximumValue = MAX_flt)
@@ -100,7 +98,7 @@ public:
 	
 	/**
 	 * Returns a pseudo random float between 0 and 1.
-	 * @return a pseudo random float
+	 * @return a pseudo random float.
 	 */
 	float Float();
 
@@ -116,7 +114,7 @@ public:
 	 * Generate a random float between minimum and maximum.
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
-	 * @return a pseudo random float
+	 * @return a pseudo random float.
 	 */
 	float FloatRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt);
 	FORCEINLINE float RandRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt)
@@ -138,7 +136,7 @@ public:
 	* Generate a pseudo random integer between minimum and maximum.
 	* @param MinimumValue The lowest possible value.
 	* @param MaximumValue The highest possible value.
-	* @return a pseudo random integer
+	* @return a pseudo random integer.
 	*/
 	int IntegerRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32);
 	FORCEINLINE float RandRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32)
@@ -160,7 +158,7 @@ public:
 	* Generate a pseudo random unsigned integer between minimum and maximum.
 	* @param MinimumValue The lowest possible value.
 	* @param MaximumValue The highest possible value.
-	* @return a pseudo random unsigned integer
+	* @return a pseudo random unsigned integer.
 	*/
 	uint32 UnsignedIntegerRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32);
 	FORCEINLINE float RandRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32)
@@ -179,12 +177,19 @@ public:
 	void UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count,const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32, const int32 StartIndex = 0);
 
 	/**
-	 * Generate a pseudo random normalized FVector.
+	 * Generate a pseudo random normalized FVector (0-1).
 	 * @return A normalized random FVector.
 	 */
-	// TODO: Can this replace VRand? We should profile performance!
-	FVector VectorNormalized(); 
+	FVector VectorNormalized();
 
+	/**
+	 * Generates a pseudo random FVector using the provided ranges.
+	 * @param MinimumRange The minimum X, Y, Z range.
+	 * @param MaximumRange  The maximum X, Y, Z range.
+	 * @return The random FVector.
+	 */
+	FVector Vector(const float MinimumRange = MIN_flt, const float MaximumRange = MAX_flt);
+	
 	/**
 	 * Generate a pseudo random normalized FVector.
 	 * @return A normalized random FVector.
@@ -207,7 +212,7 @@ public:
 	
 	/**
 	 * Returns the number of times the FMersenneTwister has been called since the seed has been set.
-	 * @return the number of times the FMersenneTwister has been called
+	 * @return the number of times the FMersenneTwister has been called.
 	 */
 	uint32 GetCallCounter() const
 	{
@@ -216,16 +221,24 @@ public:
 
 	/**
 	 * Returns the seed that was last set.
-	 * @return the last set seed
+	 * @return the last set seed.
 	 */
 	uint64 GetInitialSeed() const
 	{
 		return this->InitialSeed;
 	}
 
+	
+	uint64 UnsignedInteger64()
+	{
+		const uint64 PseudoRandomValue = PersistentUnsignedInteger64Distribution(this->Get());
+		this->CallCounter++;
+		return PseudoRandomValue;
+	}
+	
 	/**
 	 * Returns the seed that was last set as a hexadecimal FString.
-	 * @return the last set seed
+	 * @return the last set seed.
 	 */
 	FString GetSeedAsString() const
 	{
@@ -243,7 +256,7 @@ public:
 private:
 
 	/**
-	 * Bernoulli distribution probability function
+	 * Bernoulli distribution probability function.
 	 */
 	std::bernoulli_distribution BooleanDistribution{0.5};
 
@@ -253,7 +266,7 @@ private:
 	uint32 CallCounter; 
 
 	/**
- 	*  Single instance of the 64-bit Mersenne Twister pseudo random engine
+ 	*  Single instance of the 64-bit Mersenne Twister pseudo random engine.
  	*/
 	std::mt19937_64 Engine;
 	
@@ -261,20 +274,25 @@ private:
 	 * Maintained a real float distribution probability function, explicitly used for 0-1.
 	 */
 	std::uniform_real_distribution<float> PersistentFloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
-	
+
 	/**
 	 * Maintained a real double distribution probability function, explicitly used for 0-1.
 	 */
 	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
 	/**
-	 * Last seed set on the Mersenne Twister
+	 * Maintained a real unsigned 64-bit integer distribution probability function.
+	 */
+	std::uniform_int_distribution<uint64> PersistentUnsignedInteger64Distribution = std::uniform_int_distribution<uint64>(MIN_uint64, MAX_uint64);
+	
+	/**
+	 * The last seed set on the Mersenne Twister.
 	 */
 	uint64 InitialSeed;
 
 	/***
 	 * Returns the reference to the FMersenneTwister engine.
-	 * @return a reference to the class
+	 * @return a reference to the class.
 	 */
 	std::mt19937_64& Get()
 	{
@@ -285,7 +303,7 @@ private:
 
 	/**
 	 * Overloaded Assignment
-	 * @return the Mersenne Twister
+	 * @return the Mersenne Twister.
 	 */
 	FNMersenneTwister& operator=(FNMersenneTwister const&) = delete;
 };

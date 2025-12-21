@@ -5,6 +5,7 @@
 
 #include "NProcGenEditorStyle.h"
 
+class UNOrganComponent;
 class UNCellJunctionComponent;
 
 DECLARE_DELEGATE_OneParam( FNCellJunctionDelegate, UNCellJunctionComponent* );
@@ -23,56 +24,95 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
+	
+	static void ProcGenEdMode();
+	static bool ProcGenEdMode_CanExecute();
+	static bool ProcGenEdMode_CanShow();
 
-	static void NProcGenEdMode();
-	static bool NProcGenEdMode_CanExecute();
-	static bool NProcGenEdMode_CanShow();
+	static void CellActorEditHullMode();	
+	static bool CellActorEditHullMode_CanExecute();	
+	static FSlateIcon CellActorEditHullMode_GetIcon();
+	static void CellActorEditBoundsMode();
+	static FSlateIcon CellActorEditBoundsMode_GetIcon();
+	static void CellActorEditVoxelMode();
+	static FSlateIcon CellActorEditVoxelMode_GetIcon();
+	
+	static void CellActorToggleDrawVoxelData();
+	static FSlateIcon CellActorToggleDrawVoxelData_GetIcon();
+	
+	static void CellAddActor();
+	static bool CellAddActor_CanExecute();
+	static bool CellAddActor_CanShow();
+	
+	static void OrganGenerate();
+	static bool OrganGenerate_CanExecute();
 
-	static void NCellActorEditHullMode();	
-	static FSlateIcon NCellActorEditHullMode_GetIcon();
-	static void NCellActorEditBoundsMode();
-	static FSlateIcon NCellActorEditBoundsMode_GetIcon();
+	static void CellSelectActor();
+	static bool CellSelectActor_CanExecute();
+	static bool CellSelectActor_CanShow();
+	
+	static void CellCalculateAll();
+	static bool CellCalculateAll_CanExecute();
+	
+	static void CellCalculateBounds();
+	static bool CellCalculateBounds_CanExecute();
+	
+	static void CellCalculateHull();
+	static bool CellCalculateHull_CanExecute();
+	
+	static void CellCalculateVoxelData();
+	static bool CellCalculateVoxelData_CanExecute();
+	
+	static void CellToggleBoundsCalculateOnSave();
+	static bool CellToggleBoundsCalculateOnSave_CanExecute();
+	static bool CellToggleBoundsCalculateOnSave_IsActionChecked();
+	static void CellToggleHullCalculateOnSave();
+	static bool CellToggleHullCalculateOnSave_CanExecute();
+	static bool CellToggleHullCalculateOnSave_IsActionChecked();
+	static void CellToggleVoxelCalculateOnSave();
+	static bool CellToggleVoxelCalculateOnSave_CanExecute();
+	static bool CellToggleVoxelCalculateOnSave_IsActionChecked();
+	static void CellToggleVoxelData();
+	static bool CellToggleVoxelData_CanExecute();
+	static bool CellToggleVoxelData_IsActionChecked();
+	
+	static void CellResetCell();
+	static bool CellResetCell_CanExecute();
+	
+	static void CellRemoveActor();
+	static bool CellRemoveActor_CanExecute();
 
-	static void NCellAddActor();
-	static bool NCellAddActor_CanExecute();
-	static bool NCellAddActor_CanShow();
+	static void CellJunctionAddComponent();
+	static bool CellJunctionAddComponent_CanExecute();
 
-	static void NCellSelectActor();
-	static bool NCellSelectActor_CanExecute();
-	static bool NCellSelectActor_CanShow();
+	static void CellJunctionSelectComponent(UNCellJunctionComponent* Junction);
+	static bool CellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction);
+	
+	static void OrganSelectComponent(UNOrganComponent* Organ);
+	static bool OrganSelectComponent_CanExecute(UNOrganComponent* Organ);
+
+	static void CellCaptureThumbnail();
+	static bool CellCaptureThumbnail_CanExecute();
+	
+	TSharedPtr<FUICommandList> CommandList_Cell;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateBounds;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateHull;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateVoxelData;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
 	
 	
-	static void OnNCellCalculateAll();
-	static bool OnNCellCalculateAll_CanExecute();
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
 	
-	static void OnNCellCalculateBounds();
-	static bool OnNCellCalculateBounds_CanExecute();
+	TSharedPtr<FUICommandList> CommandList_Organ;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerate;
 	
-	static void OnNCellCalculateHull();
-	static bool OnNCellCalculateHull_CanExecute();
-	
-	static void OnNCellResetCell();
-	static bool OnNCellResetCell_CanExecute();
-	
-	static void OnNCellRemoveActor();
-	static bool OnNCellRemoveActor_CanExecute();
-
-	static void OnNCellJunctionAddComponent();
-	static bool OnNCellJunctionAddComponent_CanExecute();
-
-	static void OnNCellJunctionSelectComponent(UNCellJunctionComponent* Junction);
-	static bool OnNCellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction);
-	
-	TSharedPtr<FUICommandList> CommandList_NCell;
-	
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateAll;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateBounds;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellCalculateHull;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellResetCell;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellRemoveActor;
-
-
-	TSharedPtr<FUICommandList> CommandList_NCellJunction;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellJunctionAddComponent;
-	TSharedPtr<FUICommandInfo> CommandInfo_NCellJunctionSelectComponent;
+	TSharedPtr<FUICommandList> CommandList_CellJunction;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionSelectComponent;
 };

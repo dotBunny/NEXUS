@@ -4,8 +4,11 @@
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "Cell/NCellRootComponent.h"
 #include "NProcGenEdMode.h"
+#include "NProcGenSettings.h"
 #include "ComponentVisProxies/NEdgeComponentVisProxy.h"
 #include "ComponentVisProxies/NIndexComponentVisProxy.h"
+
+#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
 
 void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
@@ -19,11 +22,11 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	// We need to draw the base wireframes
 	if (!FNProcGenEdMode::IsActive())
 	{
-		CellRootComponent->DrawDebugPDI(PDI);
+		CellRootComponent->DrawDebugPDI(PDI, FNProcGenEdMode::GetCellVoxelMode());
 	}
 	else
 	{
-		if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Bounds)
+		if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 		{
 			const FBox Bounds = FNProcGenEdMode::GetCachedBounds();
 			const TArray<FVector> BoundsVertices = FNProcGenEdMode::GetCachedBoundsVertices();
@@ -37,7 +40,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			PDI->SetHitProxy(nullptr);
 	
 		}
-		else if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Hull)
+		else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
 		{
 			const TArray<FVector> WorldVertices = FNProcGenEdMode::GetCachedHullVertices();
 			const int VertCount = WorldVertices.Num();
@@ -46,6 +49,46 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 				PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
 				PDI->DrawPoint(WorldVertices[i], FNProcGenEdMode::GetCachedHullColor(), PointSize, SDPG_Foreground);
 				PDI->SetHitProxy(nullptr);
+			}
+		}
+		else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Voxel)
+		{
+			// Forcibly disable drawing of the voxel Mode
+			if (FNProcGenEdMode::GetCellVoxelMode() != FNProcGenEdMode::ENCellVoxelMode::CVM_None)
+			{
+				FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_None);
+			}
+			
+			const FNCellVoxelData CachedData = FNProcGenEdMode::GetCachedVoxelData();
+			if (!CachedData.IsValid())
+			{
+				return;
+			}
+
+			const size_t PointCount = CachedData.GetCount();
+			const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+			const FVector UnitSize = Settings->UnitSize;
+			const FVector HalfUnitSize = UnitSize * 0.5f;
+			const FVector BaseOffset = CachedData.Origin;
+			for (int i = 0; i < PointCount; i++)
+			{
+				auto [x,y,z] = CachedData.GetInverseIndex(i);
+		
+				// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
+				FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+		
+				if (N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+				{
+					PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
+					PDI->DrawPoint(VoxelCenter, FColor::Blue, PointSize, SDPG_Foreground);
+					PDI->SetHitProxy(nullptr);
+				}
+				else
+				{
+					PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
+					PDI->DrawPoint(VoxelCenter, FColor::Green, PointSize, SDPG_Foreground);
+					PDI->SetHitProxy(nullptr);
+				}
 			}
 		}
 	}
@@ -59,13 +102,17 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 		{
 			UNCellRootComponent* IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
 			const HNIndexComponentVisProxy* Proxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
-			if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Bounds)
+			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 			{
 				return EditBoundsVertex(IndexComponent, Proxy->Index);
 			}
-			if (FNProcGenEdMode::GetNCellEdMode() == FNProcGenEdMode::NCell_Hull)
+			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
 			{
 				return EditHullVertex(IndexComponent, Proxy->Index);
+			}
+			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Voxel)
+			{\
+				return ToggleVoxelPoint(IndexComponent, Proxy->Index);
 			}
 			return false;
 		}
@@ -89,6 +136,39 @@ bool FNCellRootComponentVisualizer::EditBoundsVertex(UNCellRootComponent* Compon
 	return true;
 }
 
+bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Component, const int32 Index)
+{
+	uint8 Data = Component->Details.VoxelData.GetData(Index);
+	
+	// Handle Occupied
+	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+	{
+		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Empty", "Set Voxel Empty"));
+		Component->Modify();
+		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
+		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
+		Component->Details.VoxelData.SetData(Index, Data);
+		Component->Details.VoxelSettings.bCalculateOnSave = false;
+		Component->GetNCellActor()->SetActorDirty();
+		return true;
+	}
+	
+	// Handle Empty
+	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty)))
+	{
+		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Occupied", "Set Voxel Occupied"));
+		Component->Modify();
+		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
+		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
+		Component->Details.VoxelData.SetData(Index, Data);
+		Component->Details.VoxelSettings.bCalculateOnSave = false;
+		Component->GetNCellActor()->SetActorDirty();
+		return true;
+	}
+	
+	return true;
+}
+
 void FNCellRootComponentVisualizer::EndEditing()
 {
 	// Should validate that the new positions are convex if hull?
@@ -101,12 +181,15 @@ void FNCellRootComponentVisualizer::EndEditing()
 bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* ViewportClient, FViewport* Viewport, FVector& DeltaTranslate, FRotator& DeltaRotate, FVector& DeltaScale)
 {
 	if (RootComponent == nullptr) return false;
-	switch (CurrentEditMode)
+	
+	if (CurrentEditMode == EM_HullVertex)
 	{
-	case EM_None:
-		return false;
-	case EM_HullVertex:
+		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
+	
+		RootComponent->Modify();
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
+		RootComponent->Details.Hull.bIsChaosGenerated = false;
+		
 		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
 		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
 		RootComponent->Details.Hull.Validate();
@@ -114,12 +197,15 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		{
 			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;
 		}
-		else
-		{
-			RootComponent->GetNCellActor()->SetActorDirty();
-		}
+		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
-	case EM_BoundsVertex:
+	}
+	
+	if (CurrentEditMode == EM_BoundsVertex)
+	{
+		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
+	
+		RootComponent->Modify();
 		RootComponent->Details.BoundsSettings.bCalculateOnSave = false;
 		if (VertexIndex == 0)
 		{
@@ -129,10 +215,11 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		{
 			RootComponent->Details.Bounds.Max += DeltaTranslate;
 		}
+		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
-	default:
-		return false;
 	}
+	
+	return false;
 }
 
 bool FNCellRootComponentVisualizer::HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
@@ -171,3 +258,5 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 		return false;
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

@@ -3,52 +3,67 @@
 
 #include "NProcGenDebugDraw.h"
 
+#include "NProcGenSettings.h"
+#include "NProcGenUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-void FNProcGenDebugDraw::DrawRectangle(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
-	const float Width, const float Height, const FLinearColor Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
+void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
+	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
+	const ESceneDepthPriorityGroup Priority)
 {
-	const float HalfWidth = Width * 0.5f;
-	const float HalfHeight = Height * 0.5f;
-
-	// Common case UP
-	FVector TopLeft = FVector(-HalfWidth,0,HalfHeight);
-	FVector BottomLeft = FVector(-HalfWidth,0,-HalfHeight);
-	FVector BottomRight = FVector(HalfWidth,0,-HalfHeight);
-	FVector TopRight = FVector(HalfWidth,0,HalfHeight);
-
-	if (Axis == ENAxis::X)
-	{
-		TopLeft = FVector(HalfHeight, 0, -HalfWidth);
-		BottomLeft = FVector(-HalfHeight, 0, -HalfWidth);
-		BottomRight = FVector(-HalfHeight, 0, HalfWidth);
-		TopRight = FVector(HalfHeight, 0, HalfWidth);
-	}
-	else if (Axis == ENAxis::Y)
-	{
-		TopLeft = FVector(HalfWidth,HalfHeight,0);
-		BottomLeft = FVector(HalfWidth,-HalfHeight,0);
-		BottomRight = FVector(-HalfWidth,-HalfHeight,0);
-		TopRight = FVector(-HalfWidth,HalfHeight, 0);
-	}
 	
-	// Rotate the points around the center
-	TopLeft = FNVectorUtils::RotatedAroundPivot(WorldCenter + TopLeft, WorldCenter, Rotation);
-	BottomLeft = FNVectorUtils::RotatedAroundPivot(WorldCenter + BottomLeft, WorldCenter, Rotation);
-	BottomRight = FNVectorUtils::RotatedAroundPivot(WorldCenter + BottomRight, WorldCenter, Rotation);
-	TopRight = FNVectorUtils::RotatedAroundPivot(WorldCenter + TopRight, WorldCenter, Rotation);
-	
+	const int PointCount = Points.Num();
+	for (int i = 0; i < PointCount; i++)
+	{
+		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, 0.0f, Points[i].Y), WorldCenter, Rotation);
+		switch (Axis)
+		{
+		case X:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+			break;
+		case Y:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+			break;
+		default:
+		case Z:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+			break;
+		}
+	}
+}
+
+void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
+	const FLinearColor& Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
+{
 	PDI->AddReserveLines(SDPG_World, 4, false, false);
-	PDI->DrawLine(BottomLeft, BottomRight, Color, Priority, 1.0f);
-	PDI->DrawLine(BottomRight, TopRight, Color, Priority, 1.0f);
-	PDI->DrawLine(TopRight, TopLeft, Color, Priority, 1.0f);
-	PDI->DrawLine(TopLeft, BottomLeft, Color, Priority, 1.0f);
+	
+	PDI->DrawLine(Points[1], Points[2], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[2], Points[3], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[3], Points[0], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[0], Points[1], Color, Priority, PDI_LINE_THICKNESS);
+}
+
+void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PDI, const FVector& Location,
+	const FRotator& Rotation, const FLinearColor& Color, const ENCellJunctionType& Type, const float Length)
+{
+	switch (Type)
+	{
+	case ENCellJunctionType::CJT_TwoWaySocket:
+		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
+		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
+		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
+		break;
+	case ENCellJunctionType::CJT_OneWaySocket:
+		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
+		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
+		break;
+	}
 }
 
 void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)
 {
-	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetVectors(Mesh.Vertices, Rotation, Offset);
+	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Mesh.Vertices, Rotation, Offset);
 	DrawDashedRawMesh(PDI, Mesh, WorldVertices, Color, DashSize, Priority);
 }
 
@@ -71,4 +86,72 @@ void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const F
 	}
 }
 
+void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
+{
+	const size_t PointCount = VoxelData.GetCount();
+	if (PointCount == 0) return;
+	
+	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+	const FVector UnitSize = Settings->UnitSize;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	const FVector BaseOffset = VoxelData.Origin + Offset;
+	
+	for (int i = 0; i < PointCount; i++)
+	{
+		auto [x,y,z] = VoxelData.GetInverseIndex(i);
+		const FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+			
+		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
+		const FVector VoxelMin = VoxelCenter - HalfUnitSize;
+		const FVector VoxelMax = VoxelCenter + HalfUnitSize;
+		
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+		{
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_Foreground );
+		}
+		else
+		{
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Green, SDPG_Foreground );
+		}
+	}
+}
 
+void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation)
+{
+	if (!VoxelData.IsValid()) return;
+	
+	const size_t PointCount = VoxelData.GetCount();
+	if (PointCount == 0) return;
+	
+	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+	const FVector UnitSize = Settings->UnitSize;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	const FVector BaseOffset = VoxelData.Origin + Offset;
+	
+	for (int i = 0; i < PointCount; i++)
+	{
+		auto [x,y,z] = VoxelData.GetInverseIndex(i);
+		
+		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
+		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+		
+		
+		// Represent origin as a box
+		if (x == 0 && y == 0 && z == 0)
+		{
+			const FVector VoxelMin = VoxelCenter - HalfUnitSize;
+			const FVector VoxelMax = VoxelCenter + HalfUnitSize;
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Yellow, SDPG_Foreground );
+		}
+		
+		
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+		{
+			PDI->DrawPoint(VoxelCenter, FColor::Blue, 5.f, SDPG_Foreground);
+		}
+		else
+		{
+			PDI->DrawPoint(VoxelCenter, FColor::Green, 5.f, SDPG_Foreground);
+		}
+	}
+}

@@ -11,6 +11,7 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"Blutility",
 					"Core",
 					"DataValidation",
 					"RHI",
@@ -21,6 +22,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"AssetDefinition",
+					"AssetTools",
 					"Chaos",
 					"CoreUObject",
 					"EditorFramework",
@@ -33,14 +35,16 @@ namespace UnrealBuildTool.Rules
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
+					"UMG",
+					"UMGEditor",
+					"UnrealEd"
 				]
 			);
 			
 			
 			
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusProcGen"]);
+			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusProcGen"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusUIEditor", "NexusProcGen"]);
 
 			ShortName = "NexusProcGenEditor";						

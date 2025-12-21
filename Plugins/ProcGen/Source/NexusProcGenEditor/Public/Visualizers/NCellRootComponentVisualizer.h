@@ -31,6 +31,7 @@ private:
 	const float PointSize = 12.0f;
 	bool EditHullVertex(UNCellRootComponent* Component, int32 Index);
 	bool EditBoundsVertex(UNCellRootComponent* Component, int32 Index);
+	static bool ToggleVoxelPoint(UNCellRootComponent* Component, int32 Index);
 	
 	EEditMode CurrentEditMode = EEditMode::EM_None;
 

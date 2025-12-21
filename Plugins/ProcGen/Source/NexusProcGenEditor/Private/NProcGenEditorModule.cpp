@@ -13,21 +13,29 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "UObject/ObjectSaveContext.h"
 #include "EditorModeRegistry.h"
+#include "IPlacementModeModule.h"
+#include "NEditorDefaults.h"
 #include "Customizations/NCellRootComponentCustomization.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
 #include "Cell/NCellProxy.h"
 #include "Customizations/NCellProxyCustomization.h"
 #include "Cell/NCellRootComponent.h"
-#include "NProcGenComponent.h"
+#include "Organ/NOrganComponent.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "NProcGenEditorCommands.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorToolMenu.h"
+#include "NProcGenEditorUndo.h"
 #include "NProcGenEdMode.h"
-#include "NProcGenVolume.h"
 #include "UnrealEdGlobals.h"
-#include "Customizations/NProcGenComponentCustomization.h"
+#include "Customizations/NOrganComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
+#include "Macros/NEditorModuleMacros.h"
+#include "Organ/NBoneActor.h"
+#include "Organ/NBoneComponent.h"
+#include "Organ/NOrganVolume.h"
+#include "Visualizers/NBoneComponentVisualizer.h"
 
 void FNProcGenEditorModule::StartupModule()
 {
@@ -38,8 +46,12 @@ void FNProcGenEditorModule::ShutdownModule()
 {
 	FEditorModeRegistry::Get().UnregisterMode(FNProcGenEdMode::Identifier);
 
-	//GUnrealEd->UnregisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName());
-	//GUnrealEd->UnregisterComponentVisualizer(UNCellPinComponent::StaticClass()->GetFName());
+	if (GUnrealEd)
+	{
+		GUnrealEd->UnregisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName());
+		GUnrealEd->UnregisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName());
+	}
 
 	// Unregister customizations
 	if (FModuleManager::Get().IsModuleLoaded("PropertyEditor"))
@@ -50,16 +62,31 @@ void FNProcGenEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellActor::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName());
-		PropertyModule.UnregisterCustomClassLayout(UNProcGenComponent::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName());
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
 	
+	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
+	
 	FNProcGenEditorStyle::Shutdown();
+
+	// Remove Undo handler
+	if (UndoHandler != nullptr)
+	{
+		delete UndoHandler;
+		UndoHandler = nullptr;
+	}
 }
 
 void FNProcGenEditorModule::OnPostEngineInit()
 {
+	// Initialize Undo Handler
+	if (UndoHandler == nullptr)
+	{
+		UndoHandler = new FNProcGenEditorUndo();
+	}
+	
 	// Configure Style
 	FNProcGenEditorStyle::Initialize();
 	
@@ -93,9 +120,13 @@ void FNProcGenEditorModule::OnPostEngineInit()
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
 	
-		const TSharedPtr<FComponentVisualizer> PinComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
-		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), PinComponentVisualizer);
-		PinComponentVisualizer->OnRegister();
+		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), JunctionComponentVisualizer);
+		JunctionComponentVisualizer->OnRegister();
+		
+		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShareable(new FNBoneComponentVisualizer());
+		GUnrealEd->RegisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName(), BoneComponentVisualizer);
+		BoneComponentVisualizer->OnRegister();
 	}
 
 	// Register Customizations
@@ -107,10 +138,41 @@ void FNProcGenEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNCellRootComponent::StaticClass()->GetFName(),
 			FOnGetDetailCustomizationInstance::CreateStatic(&FNCellRootComponentCustomization::MakeInstance));
 
-	PropertyModule.RegisterCustomClassLayout(UNProcGenComponent::StaticClass()->GetFName(),
-		FOnGetDetailCustomizationInstance::CreateStatic(&FNProcGenComponentCustomization::MakeInstance));
+	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
+	
+	// Handle Placement Definitions
+	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
+	{
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+		*ANBoneActor::StaticClass(),
+		FAssetData(ANBoneActor::StaticClass()),
+		NAME_None,
+		NAME_None,
+		TOptional<FLinearColor>(),
+		TOptional<int32>(),
+		NSLOCTEXT("NexusProcGenEditor", "NBoneActorPlacement", "Bone Actor"))));
+		
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+		*ANOrganVolume::StaticClass(),
+		FAssetData(ANOrganVolume::StaticClass()),
+		NAME_None,
+		NAME_None,
+		TOptional<FLinearColor>(),
+		TOptional<int32>(),
+		NSLOCTEXT("NexusProcGenEditor", "NOrganVolumePlacement", "Organ Volume"))));
+		
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+			*ANCellJunctionBlockerActor::StaticClass(),
+			FAssetData(ANCellJunctionBlockerActor::StaticClass()),
+			NAME_None,
+			NAME_None,
+			TOptional<FLinearColor>(),
+			TOptional<int32>(),
+			NSLOCTEXT("NexusProcGenEditor", "NCellJunctionBlockerActorPlacement", "Cell Junction Blocker Actor"))));
+	}
 }
 
 IMPLEMENT_MODULE(FNProcGenEditorModule, NexusProcGenEditor)

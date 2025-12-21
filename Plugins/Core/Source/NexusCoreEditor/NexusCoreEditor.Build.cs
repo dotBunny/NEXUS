@@ -14,6 +14,7 @@ namespace UnrealBuildTool.Rules
 					"Blutility",
 					"Core",
 					"DataValidation", 
+					"PlacementMode",
 					"ScriptableEditorWidgets",
 					"UnrealEd"
 				]

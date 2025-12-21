@@ -4,12 +4,13 @@
 #pragma once
 
 #include "InputCoreTypes.h"
+#include "NActorPoolSet.h"
 #include "NActorPoolSettings.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NActorPoolsSettings.generated.h"
 
-UCLASS(Config=NexusGame, defaultconfig)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
@@ -41,4 +42,12 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
 	FNActorPoolSettings DefaultSettings;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Initialization", DisplayName="Always Create",
+		meta=(ToolTip="Always create the outlined actor pool sets when a world is created."))
+	TArray<TSoftObjectPtr<UNActorPoolSet>> AlwaysCreateSets;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes", 
+		meta=(Tooltop="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
+	TArray<FString> IgnoreWorldPrefixes;
 };

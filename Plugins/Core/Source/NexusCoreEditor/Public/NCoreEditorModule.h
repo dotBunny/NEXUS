@@ -24,8 +24,8 @@ public:
 	
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
 	void ApplyWindowIcon(float Time) const;
+
 private:
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
 	FDelegateHandle WindowIconDelegateHandle;
-	//int count = 0;
 };

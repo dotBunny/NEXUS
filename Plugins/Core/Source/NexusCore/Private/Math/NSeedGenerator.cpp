@@ -4,6 +4,7 @@
 #include "Math/NSeedGenerator.h"
 
 #include "NCoreMinimal.h"
+#include "NRandom.h"
 #include "Math/BigInt.h"
 #include "Math/NHashUtils.h"
 
@@ -83,7 +84,37 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 
 uint64 FNSeedGenerator::RandomSeed()
 {
-	return static_cast<uint64>(FMath::Rand()) << 32 | static_cast<uint64>(FMath::Rand());
+	return static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt()) << 32 | static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt());
+}
+
+FString FNSeedGenerator::RandomFriendlySeed()
+{
+	FString ReturnSeed;
+	
+	TArray<uint8> Digits;
+	Digits.Reserve(23); // Max possible
+	uint64 TempSeed = RandomSeed();;
+	do
+	{
+		Digits.Insert(TempSeed % 10, 0);  // Insert at front to maintain order
+		TempSeed /= 10;
+	} while (TempSeed > 0);
+	
+	// Front pad digits
+	while (Digits.Num() < 20)
+	{
+		Digits.Insert(0, 0); 
+	}
+	
+	for (uint32 i = 0; i < 20; i++)
+	{
+		ReturnSeed.AppendChar(97 + Digits[i]);
+		if (i == 4 || i == 9 || i == 14)
+		{
+			ReturnSeed.AppendChar('-');
+		}
+	}
+	return MoveTemp(ReturnSeed);
 }
 
 FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
@@ -107,11 +138,41 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 	return Builder;
 }
 
-uint64 FNSeedGenerator::SeedFromText(const FString& InSeed)
+uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 {
 	const uint64 Seed = FNHashUtils::dbj2(InSeed);
-	N_LOG(Log, TEXT("[FNSeedGenerator::SeedFromText] Created seed (%llu) from string (%s)."), Seed, *InSeed);
 	return Seed;
+}
+
+uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
+{
+	uint64 Seed = 0;
+	
+	// We're going to go in reverse as we use it as a multiplier
+	uint8 Multiplier = 0;
+	for (int32 i = InSeed.Len() - 1; i >= 0; i--)
+	{
+		uint8 CharacterValue = InSeed[i];
+		
+		// Move uppercase to lowercase region
+		if (CharacterValue >= 65 && CharacterValue <= 90)
+		{
+			CharacterValue += 32;
+		}
+		// Ensure we are only dealing with lowercase digits
+		if (CharacterValue < 97|| CharacterValue > 122) continue;
+
+		const uint8 ParsedValue = static_cast<uint8>(CharacterValue - 97);
+		
+		uint64 FactorialMultiplier = 1;
+		for (int f = 0; f < Multiplier; f++)
+		{
+			FactorialMultiplier *= 10;
+		}
+		Multiplier++;
+		Seed += (ParsedValue * FactorialMultiplier);
+	}
+	return MoveTemp(Seed);
 }
 
 uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
@@ -122,18 +183,14 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 
 	if (SeedLength == 0 || SeedLength == 1)
 	{
-		N_LOG(Warning,
-			   TEXT("[FNSeedGenerator::SeedFromHex] The parsed (%s) seed (%s) length (%i) was below any possible valid value."),
-			   *ParsedSeed, *InHexSeed, SeedLength);
+		UE_LOG(LogNexusCore, Warning, TEXT("The parsed(%s) seed(%s) length(%i) was below any possible valid value; returning 0."), *ParsedSeed, *InHexSeed, SeedLength);
 		return 0;
 	}
 	// Safety Pad
 	if (SeedLength % 2 != 0)
 	{
 		ParsedSeed.InsertAt(0, '0');
-		N_LOG(Warning,
-			   TEXT("[FNSeedGenerator::SeedFromHex] The seed (%s) was padded at the start; making it a valid hexadecimal seed."),
-			   *ParsedSeed);
+		UE_LOG(LogNexusCore, Verbose, TEXT("The seed(%s) has been padded at the start; making it a valid hexadecimal seed."), *ParsedSeed);
 	}
 
 	// Generate our actual unit value, with shifting
@@ -151,7 +208,6 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 		}
 	}
 
-	N_LOG(Log, TEXT("[FNSeedGenerator::SeedFromHex] Generated seed (%llu) from %s."), NewSeed, *ParsedSeed);
 	return NewSeed;
 }
 

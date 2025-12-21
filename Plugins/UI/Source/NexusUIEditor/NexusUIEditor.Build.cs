@@ -24,7 +24,9 @@ namespace UnrealBuildTool.Rules
 				[			
 					"BlueprintGraph",
 					"CoreUObject",
+					"DeveloperSettings",
 					"Engine",
+					"EditorSubsystem",
 					"LevelEditor",
 					"Projects",
 					"ScriptableEditorWidgets",
@@ -38,6 +40,8 @@ namespace UnrealBuildTool.Rules
 			);
 
 			// NEXUS
+			
+			PublicDependencyModuleNames.AddRange(["NexusUI"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor"]);
 
 			ShortName = "NexusUIEditor";						

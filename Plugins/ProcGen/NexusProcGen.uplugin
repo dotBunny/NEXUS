@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
-	"Version": 5,
-	"VersionName": "0.2.2",
+	"Version": 6,
+	"VersionName": "0.2.3",
 	"FriendlyName": "NEXUS: Procedural Generation",
-	"Description": "An opinionated collection of procedural generation techniques and tools.",
+	"Description": "A procedural generation system focused on creating dynamic gameplay-focused spaces.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
@@ -33,15 +33,23 @@
 	],
 	"Plugins": [
 		{
-			"Name": "NexusCore",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusUI",
+			"Name": "CommonUI",
 			"Enabled": true
 		},
 		{
 			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusDeveloperOverlay",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
 			"Enabled": true
 		}
 	],

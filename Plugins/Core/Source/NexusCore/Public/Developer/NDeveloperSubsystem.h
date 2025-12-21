@@ -12,7 +12,7 @@
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
  * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/">UNDeveloperSubsystem</a>
  */
-UCLASS()
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Subsystem")
 class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
@@ -30,7 +30,8 @@ class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual bool IsTickable() const override { return bBaselineSet; };
-
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
 private:
 	bool bPassedObjectCountWarningThreshold = false;
 	bool bPassedObjectCountSnapshotThreshold = false;

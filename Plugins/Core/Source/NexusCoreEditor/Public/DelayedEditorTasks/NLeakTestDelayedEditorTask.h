@@ -43,11 +43,11 @@ private:
 			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 			FString::Printf(TEXT("NEXUS_LeakCheck_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
-			N_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] Adds detected! COMPARE written to %s."), *DumpFilePath);
+			UE_LOG(LogNexusCoreEditor, Warning, TEXT("UObject leak detected; comparison written to %s."), *DumpFilePath);
 		}
 		else
 		{
-			NE_LOG(Log, TEXT("[FNEditorCommands::OnToolsLeakCheck] %s"), *Diff.ToString());
+			UE_LOG(LogNexusCoreEditor, Log, TEXT("No measurable UObject leak was detected. %s"), *Diff.ToString());
 		}
 		Release();
 	}

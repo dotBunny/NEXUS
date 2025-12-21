@@ -5,15 +5,13 @@
 
 #include "CoreMinimal.h"
 #include "NCellRootComponent.h"
-#include "Components/BillboardComponent.h"
-#include "Macros/NActorMacros.h"
 #include "NCellActor.generated.h"
 
 class UNCellJunctionComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInitializedFromProxy);
 
-UCLASS(NotPlaceable, HideDropdown, Hidden, DisplayName = "NCell Actor", HideCategories=(Tags, Activation, Cooking,
+UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "Cell Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
 	Collision, Networking, Replication))
 class NEXUSPROCGEN_API ANCellActor : public AActor
@@ -22,13 +20,15 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 	friend class UAssetDefinition_NCell;
 	friend class FNProcGenEditorUtils;
 	friend class FNProcGenEditorCommands;
+	friend class FNProcGenEditorUndo;
 	friend class FDebugRenderSceneProxy;
 	friend class UNCellDebugDrawComponent;
 	friend class UNCellJunctionComponent;
 	
+	
 	GENERATED_BODY()
 	
-	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
+	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
 	{
 		PrimaryActorTick.bCanEverTick = false;
 		PrimaryActorTick.bStartWithTickEnabled = false;
@@ -38,20 +38,36 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 		SetRootComponent(CellRoot);
 
 		// Lock it down
-#if WITH_EDITOR		
+#if WITH_EDITOR
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
 #endif		
 		
 		RootComponent->Mobility = EComponentMobility::Static;
-		
-		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellActor", RootComponent, true)
 	}
 public:
 	bool IsActorDirty() const { return bActorDirty; }
-	void SetActorDirty()
+	void SetActorDirty(const bool bIsDirty = true)
 	{
-		bActorDirty = true;
+		if (bIsDirty)
+		{
+			if (!bActorDirty)
+			{
+				// We need to mark the outer package (level) dirty for the actor
+
+				// ReSharper disable once CppExpressionWithoutSideEffects
+				MarkPackageDirty();
+				bActorDirty = true;
+			}
+		}
+		else
+		{
+			if (bActorDirty)
+			{
+				// We cant actually unmark a package (without saving?) so we just get rid of our flag.
+				bActorDirty = false;
+			}
+		}
 	}
 	bool WasSpawnedFromProxy() const { return bSpawnedFromProxy; }
 
@@ -68,10 +84,14 @@ public:
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override;
 	virtual bool ShouldExport() override { return false; } // Stops Copy/Paste/Cut/Duplicate
 	int32 GetCellJunctionNextIdentifier() { return CellJunctionNextIdentifier++; }
+	virtual void PostRegisterAllComponents() override;
+	bool HasDifferencesFromSidecar() const;
+	
 #endif	
 
 	void CalculateBounds();
 	void CalculateHull();
+	void CalculateVoxelData();
 	
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }
 	
@@ -80,7 +100,7 @@ protected:
 	 * This is something that needs to be turned off when we spawn
 	 */
 	UPROPERTY(EditInstanceOnly)
-	TObjectPtr<AActor> LevelEditorInstance;
+	TArray<TObjectPtr<AActor>> EditorOnlyActors;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNCellRootComponent> CellRoot;
@@ -97,6 +117,4 @@ protected:
 private:
 	bool bActorDirty = false;
 	bool bSpawnedFromProxy = false;
-
-	N_WORLD_ICON_HEADER()
 };

@@ -1,5 +1,34 @@
 # Changelog
 
+## [0.2.3] - 2025-12-21
+
+### Added
+
+- Automatic `UNActorPoolSet` loading configurable in project `Actor Pool Settings`
+- Glyph based `FNPrimitiveFont` supporting rendering `FString` through `PDI` (`FNPrimitiveDrawingUtils::DrawString`) and other drawing interfaces (`FNDrawDebugHelpers::DrawDebugString`).
+- Support for `FNDrawDebugHelpers::DrawDebugString` via `UNDeveloperLibrary::DrawDebugString`.
+- `UNMultiplayerLibrary` exposing `FNMultiplayerUtils` support for `PlayerIdentifier`.
+
+### Changed
+
+- Altered GitHub actions to dispatch tests based on initial Unit test.
+- Allow adding multiple `UNCellJunctionComponent` to a single parent.
+- `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
+- The `NCellActor` will rename itself to reflect the map name that it creates data for.
+- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
+- `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
+- Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
+
+
+### Fixed
+
+- Selecting the `NCellActor` no longer adds it to the current selection, instead clearing and making it the sole selected.
+- Tickable subsystems with conditional ticks now properly respect their conditional tick settings.
+
+### Removed
+
+- `N_LOG` and `NE_LOG` macros were removed in favor of using the base `UE_LOG` macro, providing better integration IDE's UE tooling.
+
 ## [0.2.2] - 2025-09-24
 
 ### Added

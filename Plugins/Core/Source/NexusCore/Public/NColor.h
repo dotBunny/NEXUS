@@ -13,6 +13,10 @@ enum ENColor : uint8
 	NC_BlueMid				UMETA(DisplayName = "Mid Blue"),
 	NC_BlueDark				UMETA(DisplayName = "Dark Blue"),
 
+	NC_GreenLight			UMETA(DisplayName = "Light Green"),
+	NC_GreenMid				UMETA(DisplayName = "Mid Green"),
+	NC_GreenDark			UMETA(DisplayName = "Dark Green"),
+
 	NC_GreyLight			UMETA(DisplayName = "Light Grey"),
 	NC_GreyDark				UMETA(DisplayName = "Dark Grey"),
 	
@@ -44,6 +48,12 @@ public:
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
 	static constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
 	static constexpr FLinearColor BlueLight = FLinearColor(0.1019607843137255f, 0.8f, 0.9333333333333333f, 1.0f);
+
+
+	static constexpr FLinearColor GreenDark = FLinearColor(0.0352941176470588f, 0.2009803921568627f, 0.0450980392156863f, 1.0f);
+	static constexpr FLinearColor GreenMid = FLinearColor(0.1607843137254902f, 0.5254901960784314f, 0.1254901960784314, 1.0f);
+	static constexpr FLinearColor GreenLight = FLinearColor(0.1019607843137255f, 0.9f, 0.1019607843137255f, 1.0f);
+
 	static constexpr FLinearColor Pink = FLinearColor(0.8196078431372549f, 0.3529411764705882f, 0.8941176470588235f, 1.0f);
 	static constexpr FLinearColor GreyLight = FLinearColor(0.123264f, 0.123264f, 0.123264f, 1.0f);
 	static constexpr FLinearColor GreyDark = FLinearColor(0.029514f, 0.029514f, 0.029514f, 1.0f);

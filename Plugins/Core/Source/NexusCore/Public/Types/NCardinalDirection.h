@@ -33,22 +33,22 @@
 UENUM()
 enum class ENCardinalDirection : uint8
 {
-	NCD_North					UMETA(DisplayName = "North"),
-	NCD_NorthNorthEast			UMETA(DisplayName = "North North East"),
-	NCD_NorthEast				UMETA(DisplayName = "North East"),
-	NCD_EastNorthEast			UMETA(DisplayName = "East North East"),
-	NCD_East					UMETA(DisplayName = "East"),
-	NCD_EastSouthEast			UMETA(DisplayName = "East South East"),
-	NCD_SouthEast				UMETA(DisplayName = "South East"),
-	NCD_SouthSouthEast			UMETA(DisplayName = "South South East"),
-	NCD_South					UMETA(DisplayName = "South"),
-	NCD_SouthSouthWest			UMETA(DisplayName = "South South West"),
-	NCD_SouthWest				UMETA(DisplayName = "South West"),
-	NCD_WestSouthWest			UMETA(DisplayName = "West South West"),
-	NCD_West					UMETA(DisplayName = "West"),
-	NCD_WestNorthWest 			UMETA(DisplayName = "West North West"),
-	NCD_NorthWest 				UMETA(DisplayName = "North West"),
-	NCD_NorthNorthWest 			UMETA(DisplayName = "North North West"),
+	CD_North					UMETA(DisplayName = "North"),
+	CD_NorthNorthEast			UMETA(DisplayName = "North North East"),
+	CD_NorthEast				UMETA(DisplayName = "North East"),
+	CD_EastNorthEast			UMETA(DisplayName = "East North East"),
+	CD_East						UMETA(DisplayName = "East"),
+	CD_EastSouthEast			UMETA(DisplayName = "East South East"),
+	CD_SouthEast				UMETA(DisplayName = "South East"),
+	CD_SouthSouthEast			UMETA(DisplayName = "South South East"),
+	CD_South					UMETA(DisplayName = "South"),
+	CD_SouthSouthWest			UMETA(DisplayName = "South South West"),
+	CD_SouthWest				UMETA(DisplayName = "South West"),
+	CD_WestSouthWest			UMETA(DisplayName = "West South West"),
+	CD_West						UMETA(DisplayName = "West"),
+	CD_WestNorthWest 			UMETA(DisplayName = "West North West"),
+	CD_NorthWest 				UMETA(DisplayName = "North West"),
+	CD_NorthNorthWest 			UMETA(DisplayName = "North North West"),
 };
 
 class FNCardinalDirectionUtils
@@ -74,138 +74,138 @@ public:
 	{
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_NORTH))
 		{
-			return ENCardinalDirection::NCD_North;
+			return ENCardinalDirection::CD_North;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_NORTH_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_NorthNorthEast;
+			return ENCardinalDirection::CD_NorthNorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_NorthEast;
+			return ENCardinalDirection::CD_NorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_EAST_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_EastNorthEast;
+			return ENCardinalDirection::CD_EastNorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_EAST))
 		{
-			return ENCardinalDirection::NCD_East;
+			return ENCardinalDirection::CD_East;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_EAST_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_EastSouthEast;
+			return ENCardinalDirection::CD_EastSouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_SouthEast;
+			return ENCardinalDirection::CD_SouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_SOUTH_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_SouthSouthEast;
+			return ENCardinalDirection::CD_SouthSouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_SOUTH))
 		{
-			return ENCardinalDirection::NCD_South;
+			return ENCardinalDirection::CD_South;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_SOUTH_SOUTH_WEST))
 		{
-			return ENCardinalDirection::NCD_SouthSouthWest;
+			return ENCardinalDirection::CD_SouthSouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_SOUTH_WEST))
 		{
-			return ENCardinalDirection::NCD_SouthWest;
+			return ENCardinalDirection::CD_SouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_WEST_SOUTH_WEST))
 		{
-			return ENCardinalDirection::NCD_WestSouthWest;
+			return ENCardinalDirection::CD_WestSouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_WEST))
 		{
-			return ENCardinalDirection::NCD_West;
+			return ENCardinalDirection::CD_West;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_WEST_NORTH_WEST))
 		{
-			return ENCardinalDirection::NCD_WestNorthWest;
+			return ENCardinalDirection::CD_WestNorthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_NORTH_WEST))
 		{
-			return ENCardinalDirection::NCD_NorthWest;
+			return ENCardinalDirection::CD_NorthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, N_CARDINAL_NORTH_NORTH_WEST))
 		{
-			return ENCardinalDirection::NCD_NorthNorthWest;
+			return ENCardinalDirection::CD_NorthNorthWest;
 		}
-		return ENCardinalDirection::NCD_North;
+		return ENCardinalDirection::CD_North;
 	}
 
 	static ENCardinalDirection ToCardinalDirectionNormalized(const float NormalizedAngle)
 	{
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_NORTH))
 		{
-			return ENCardinalDirection::NCD_North;
+			return ENCardinalDirection::CD_North;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_NORTH_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_NorthNorthEast;
+			return ENCardinalDirection::CD_NorthNorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_NorthEast;
+			return ENCardinalDirection::CD_NorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_EAST_NORTH_EAST))
 		{
-			return ENCardinalDirection::NCD_EastNorthEast;
+			return ENCardinalDirection::CD_EastNorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_EAST))
 		{
-			return ENCardinalDirection::NCD_East;
+			return ENCardinalDirection::CD_East;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_EAST_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_EastSouthEast;
+			return ENCardinalDirection::CD_EastSouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_SouthEast;
+			return ENCardinalDirection::CD_SouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_SOUTH_SOUTH_EAST))
 		{
-			return ENCardinalDirection::NCD_SouthSouthEast;
+			return ENCardinalDirection::CD_SouthSouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_SOUTH) || FMath::IsNearlyEqual(NormalizedAngle, -N_CARDINAL_SOUTH))
 		{
-			return ENCardinalDirection::NCD_South;
+			return ENCardinalDirection::CD_South;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_SOUTH_SOUTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_SouthSouthWest;
+			return ENCardinalDirection::CD_SouthSouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_SOUTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_SouthWest;
+			return ENCardinalDirection::CD_SouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_WEST_SOUTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_WestSouthWest;
+			return ENCardinalDirection::CD_WestSouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_West;
+			return ENCardinalDirection::CD_West;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_WEST_NORTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_WestNorthWest;
+			return ENCardinalDirection::CD_WestNorthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_NORTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_NorthWest;
+			return ENCardinalDirection::CD_NorthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, N_CARDINAL_NORTH_NORTH_WEST_NORMALIZED))
 		{
-			return ENCardinalDirection::NCD_NorthNorthWest;
+			return ENCardinalDirection::CD_NorthNorthWest;
 		}
-		return ENCardinalDirection::NCD_North;
+		return ENCardinalDirection::CD_North;
 
 	}
 	
@@ -213,37 +213,37 @@ public:
 	{
 		switch (CardinalDirection)
 		{
-		case ENCardinalDirection::NCD_North:
+		case ENCardinalDirection::CD_North:
 			return N_CARDINAL_NORTH;
-		case ENCardinalDirection::NCD_NorthNorthEast:
+		case ENCardinalDirection::CD_NorthNorthEast:
 			return N_CARDINAL_NORTH_NORTH_EAST;
-		case ENCardinalDirection::NCD_NorthEast:
+		case ENCardinalDirection::CD_NorthEast:
 			return N_CARDINAL_NORTH_EAST;
-		case ENCardinalDirection::NCD_EastNorthEast:
+		case ENCardinalDirection::CD_EastNorthEast:
 			return N_CARDINAL_EAST_NORTH_EAST;
-		case ENCardinalDirection::NCD_East:
+		case ENCardinalDirection::CD_East:
 			return N_CARDINAL_EAST;
-		case ENCardinalDirection::NCD_EastSouthEast:
+		case ENCardinalDirection::CD_EastSouthEast:
 			return N_CARDINAL_EAST_SOUTH_EAST;
-		case ENCardinalDirection::NCD_SouthEast:
+		case ENCardinalDirection::CD_SouthEast:
 			return N_CARDINAL_SOUTH_EAST;
-		case ENCardinalDirection::NCD_SouthSouthEast:
+		case ENCardinalDirection::CD_SouthSouthEast:
 			return N_CARDINAL_SOUTH_SOUTH_EAST;
-		case ENCardinalDirection::NCD_South:
+		case ENCardinalDirection::CD_South:
 			return N_CARDINAL_SOUTH;
-		case ENCardinalDirection::NCD_SouthSouthWest:
+		case ENCardinalDirection::CD_SouthSouthWest:
 			return N_CARDINAL_SOUTH_SOUTH_WEST;
-		case ENCardinalDirection::NCD_SouthWest:
+		case ENCardinalDirection::CD_SouthWest:
 			return N_CARDINAL_SOUTH_WEST;
-		case ENCardinalDirection::NCD_WestSouthWest:
+		case ENCardinalDirection::CD_WestSouthWest:
 			return N_CARDINAL_WEST_SOUTH_WEST;
-		case ENCardinalDirection::NCD_West:
+		case ENCardinalDirection::CD_West:
 			return N_CARDINAL_WEST;
-		case ENCardinalDirection::NCD_WestNorthWest:
+		case ENCardinalDirection::CD_WestNorthWest:
 			return N_CARDINAL_WEST_NORTH_WEST;
-		case ENCardinalDirection::NCD_NorthWest:
+		case ENCardinalDirection::CD_NorthWest:
 			return N_CARDINAL_NORTH_WEST;
-		case ENCardinalDirection::NCD_NorthNorthWest:
+		case ENCardinalDirection::CD_NorthNorthWest:
 			return N_CARDINAL_NORTH_NORTH_WEST;
 		}
 		return N_CARDINAL_NORTH
@@ -254,37 +254,37 @@ public:
 	{
 		switch (CardinalDirection)
 		{
-		case ENCardinalDirection::NCD_SouthSouthWest:
+		case ENCardinalDirection::CD_SouthSouthWest:
 			return N_CARDINAL_SOUTH_SOUTH_WEST_NORMALIZED;			
-		case ENCardinalDirection::NCD_SouthWest:
+		case ENCardinalDirection::CD_SouthWest:
 			return N_CARDINAL_SOUTH_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_WestSouthWest:
+		case ENCardinalDirection::CD_WestSouthWest:
 			return N_CARDINAL_WEST_SOUTH_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_West:
+		case ENCardinalDirection::CD_West:
 			return N_CARDINAL_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_WestNorthWest:
+		case ENCardinalDirection::CD_WestNorthWest:
 			return N_CARDINAL_WEST_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_NorthWest:
+		case ENCardinalDirection::CD_NorthWest:
 			return N_CARDINAL_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_NorthNorthWest:
+		case ENCardinalDirection::CD_NorthNorthWest:
 			return N_CARDINAL_NORTH_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::NCD_North:
+		case ENCardinalDirection::CD_North:
 			return N_CARDINAL_NORTH;
-		case ENCardinalDirection::NCD_NorthNorthEast:
+		case ENCardinalDirection::CD_NorthNorthEast:
 			return N_CARDINAL_NORTH_NORTH_EAST;
-		case ENCardinalDirection::NCD_NorthEast:
+		case ENCardinalDirection::CD_NorthEast:
 			return N_CARDINAL_NORTH_EAST;
-		case ENCardinalDirection::NCD_EastNorthEast:
+		case ENCardinalDirection::CD_EastNorthEast:
 			return N_CARDINAL_EAST_NORTH_EAST;
-		case ENCardinalDirection::NCD_East:
+		case ENCardinalDirection::CD_East:
 			return N_CARDINAL_EAST;
-		case ENCardinalDirection::NCD_EastSouthEast:
+		case ENCardinalDirection::CD_EastSouthEast:
 			return N_CARDINAL_EAST_SOUTH_EAST;
-		case ENCardinalDirection::NCD_SouthEast:
+		case ENCardinalDirection::CD_SouthEast:
 			return N_CARDINAL_SOUTH_EAST;
-		case ENCardinalDirection::NCD_SouthSouthEast:
+		case ENCardinalDirection::CD_SouthSouthEast:
 			return N_CARDINAL_SOUTH_SOUTH_EAST;
-		case ENCardinalDirection::NCD_South:
+		case ENCardinalDirection::CD_South:
 			return N_CARDINAL_SOUTH;
 
 		}

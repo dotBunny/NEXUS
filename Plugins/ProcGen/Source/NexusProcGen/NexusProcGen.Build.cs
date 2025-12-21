@@ -11,10 +11,12 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"CommonUI",
 					"Core",
 					"CoreUObject",
 					"Engine",
-					"GeometryCore"
+					"GeometryCore",
+					"UMG"
 				]
 			);
 
@@ -22,6 +24,7 @@ namespace UnrealBuildTool.Rules
 		[
 					"Chaos",
 					"CoreUObject",
+					"DeveloperSettings",					
 					"Engine",
 					"GeometryFramework",
 					"Projects"
@@ -29,8 +32,8 @@ namespace UnrealBuildTool.Rules
 			);
 			
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperOverlay", "NexusUI"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperOverlay", "NexusUI"]);
 
 			ShortName = "NexusProcGen";						
 		}

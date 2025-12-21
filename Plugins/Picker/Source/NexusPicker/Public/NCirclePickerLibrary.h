@@ -15,7 +15,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">UNCirclePickerLibrary</a>
  * @note There are no simple variants to these methods as it wouldn't change the computation.
  */
-UCLASS()
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Circle Picker Library")
 class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

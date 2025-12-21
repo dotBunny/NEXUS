@@ -37,14 +37,12 @@ public:
 	{
 		ManualStop();
 
-		if (const double DurationMs = (EndTime - StartTime) * 1000.0;
-			DurationMs >= MaxDuration)
+		const double DurationMs = (EndTime - StartTime) * 1000.0;
+		INFO(FString::Printf(TEXT("[%s] %f ms"), *Name, DurationMs));
+		
+		if (DurationMs >= MaxDuration)
 		{
 			ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
-		}
-		else
-		{
-			INFO(FString::Printf(TEXT("[%s] %f ms"), *Name, DurationMs));
 		}
 	}
 

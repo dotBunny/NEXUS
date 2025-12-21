@@ -6,7 +6,7 @@
 #include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
-#include "NCoreMinimal.h"
+#include "NActorPoolsMinimal.h"
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
@@ -110,7 +110,7 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	}
 
 	AActor* ReturnActor = InActors.Pop();
-	OutActors.Add(ReturnActor); // TODO: Maybe we could optimize the out actors array to match the actual counts?
+	OutActors.Add(ReturnActor);
 	ApplySpawnState(ReturnActor, Position, Rotation);
 	
 	if (bImplementsInterface)
@@ -128,7 +128,7 @@ bool FNActorPool::Return(AActor* Actor)
 	
 	if (Actor == nullptr)
 	{
-		N_LOG(Warning, TEXT("[FNActorPool::Return] Attempting to return a null actor."));
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL reference to a FNActorPool."));
 		return false;
 	}
 	
@@ -427,7 +427,7 @@ void FNActorPool::Fill()
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	N_LOG(Log, TEXT("[FNActorPool::Fill] Filling pool %s to %i items."), *Template->GetName(), Settings.MinimumActorCount)
+	UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items."), *Template->GetName(), Settings.MinimumActorCount)
 	CreateActor(Settings.MinimumActorCount - InActors.Num());
 }
 
@@ -436,7 +436,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	N_LOG(Log, TEXT("[FNActorPool::Prewarm] Warming pool %s with %i items."), *Template->GetName(), Count)
+	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count)
 	CreateActor(Count);
 }
 

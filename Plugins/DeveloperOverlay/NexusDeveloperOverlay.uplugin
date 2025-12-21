@@ -1,0 +1,49 @@
+{
+	"FileVersion": 3,
+	"Version": 6,
+	"VersionName": "0.2.3",
+	"FriendlyName": "NEXUS: Developer Overlay",
+	"Description": "A visual developer overlay and menu system.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusDeveloperOverlay",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusDeveloperOverlayEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": true
+}

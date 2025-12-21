@@ -14,7 +14,7 @@ ANSamplesPawn::ANSamplesPawn(const FObjectInitializer& ObjectInitializer) : Supe
 	WidgetInteraction->bTickInEditor = true;
 	WidgetInteraction->bShowDebug = false;
 	WidgetInteraction->InteractionDistance = 1000.0;
-	WidgetInteraction->InteractionSource = EWidgetInteractionSource::Mouse; // TODO: We could change this if using Controller?
+	WidgetInteraction->InteractionSource = EWidgetInteractionSource::Mouse;
 	WidgetInteraction->SetupAttachment(RootComponent);
 }
 

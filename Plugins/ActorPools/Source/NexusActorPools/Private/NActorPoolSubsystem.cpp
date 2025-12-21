@@ -6,8 +6,6 @@
 #include "NActorPool.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
-#include "NActorPoolStats.h"
-#include "NCoreMinimal.h"
 
 void UNActorPoolSubsystem::Deinitialize()
 {
@@ -22,7 +20,33 @@ void UNActorPoolSubsystem::Deinitialize()
 void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	bStatsEnabled = UNActorPoolsSettings::Get()->bTrackStats;
+	
+	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
+	bStatsEnabled = Settings->bTrackStats;
+	
+	// Check if we have anything to automatically load
+	if (Settings->AlwaysCreateSets.Num() == 0) return;
+	
+	// Check if we have any ignores
+	if (Settings->IgnoreWorldPrefixes.Num() > 0)
+	{
+		bool bShouldIgnoreLevel = false;
+		const FString WorldName = this->GetWorld()->GetName();
+		for (auto& LevelPrefix : Settings->IgnoreWorldPrefixes)
+		{
+			if (WorldName.StartsWith(LevelPrefix))
+			{
+				UE_LOG(LogNexusActorPools, Verbose, TEXT("The UWorld(%s) name matches the ignore prefix (%s); skipping UNActorPoolSets set to always create."), *WorldName, *LevelPrefix);
+				bShouldIgnoreLevel = true;
+			}
+		}
+		if (bShouldIgnoreLevel) return;
+	}
+	
+	for (auto& Set : Settings->AlwaysCreateSets)
+	{
+		ApplyActorPoolSet(Set.Get());
+	}
 }
 
 bool UNActorPoolSubsystem::IsTickable() const
@@ -71,7 +95,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 {
 	if (ActorClass == nullptr)
 	{
-		N_LOG(Log, TEXT("[NActorPoolSubsystem] Unable to create actor pool for null ActorClass)"));
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Unable to create FNActorPool for NULL AActor class."));
 		return false;
 	}
 	
@@ -81,9 +105,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
 		FNActorPool* Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
 		ActorPools.Add(ActorClass, Pool);
-		N_LOG(Log,
-			TEXT("[NActorPoolSubsystem] Creating a new pool via CreateActorPool for %s (%s), raising the total pool count to %i."),
-			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		UE_LOG(LogNexusActorPools, Verbose, TEXT("Creating a new FNActorPool(%s) in UWorld(%s), raising the total pool count to %i."), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return true;
 	}
 	return false;
@@ -98,8 +120,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 		{
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
-				N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
-					*Definition.ActorClass->GetName());
+				UE_LOG(LogNexusActorPools, Warning, TEXT("Attempting to create a new FNActorPool via UNActorPoolSet that already exists (%s); ignored."), *Definition.ActorClass->GetName());
 			}
 			else
 			{
@@ -115,12 +136,11 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 	{
 		for (const UNActorPoolSet* Set : OutActorPoolSets)
 		{
-			N_LOG(Warning, TEXT("%s"), *Set->GetFName().ToString());
 			for (const FNActorPoolDefinition& Definition : Set->ActorPools)
 			{
 				if (ActorPools.Contains(Definition.ActorClass))
 				{
-					N_LOG(Log, TEXT("[UNActorPoolSubsystem::ApplyActorPoolSet] [NESTED] Attempting to create a new ActorPool via ActorPoolSet that already exists (%s), ignored."),
+					UE_LOG(LogNexusActorPools, Warning, TEXT("Attempting to create a new FNActorPool via a nested UNActorPoolSet that already exists (%s); ignored."),
 						*Definition.ActorClass->GetName());
 				}
 				else
@@ -172,8 +192,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 	}
 	if (bDestroyUnknownReturnedActors)
 	{
-		N_LOG(Log, TEXT("[UNActorPoolSubsystem::ReturnActor] Destroying unknown actor sent to pooling system: %s"),
-			*Actor->GetPathName());
+		UE_LOG(LogNexusActorPools, Verbose, TEXT("Attempting to destroy an unknown AActor(%s)) set to the UNActorPoolSubsystem."), *Actor->GetPathName());
 		return Actor->Destroy();
 	}
 	return false;

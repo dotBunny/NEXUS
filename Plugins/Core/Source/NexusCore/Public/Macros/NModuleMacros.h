@@ -44,10 +44,10 @@ public: \
 		} \
 		if(bIsDirty) \
 		{ \
-			N_LOG(Warning, TEXT("[%s] Updating plugin definition."), TEXT(PluginName)) \
+			UE_LOG(LogNexusCore, Verbose, TEXT("Updating plugin(%s) definition."), TEXT(PluginName)) \
 			if (FText FailReason; !Plugin->UpdateDescriptor(UpdatedDescriptor, FailReason)) \
 			{ \
-				N_LOG(Warning, TEXT("[%s] Failed to update plugin descriptor: %s"), TEXT(PluginName), *FailReason.ToString()) \
+				UE_LOG(LogNexusCore, Error, TEXT("Failed to update plugin(%s) descriptor: %s"), TEXT(PluginName), *FailReason.ToString()) \
 			} \
 		} \
 	}

@@ -6,7 +6,7 @@
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
 {
-	ANCellActor* CellActor = FNProcGenUtils::GetNCellActorFromLevel(GetLoadedLevel());
+	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromLevel(GetLoadedLevel());
 	CellActor->InitializeFromProxy();
 	
 	Super::OnLevelInstanceLoaded();

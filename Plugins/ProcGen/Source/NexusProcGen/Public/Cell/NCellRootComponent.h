@@ -11,7 +11,7 @@ class ALevelInstance;
 class ANCellActor;
 class UNCell;
 
-UCLASS(HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
+UCLASS(ClassGroup="NEXUS", DisplayName = "Cell Root Component", HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 {
 	friend class ANCellActor;
@@ -29,8 +29,8 @@ class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 public:
 	FORCEINLINE ANCellActor* GetNCellActor() const;
 	
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode) const;
 
 	FRotator GetOffsetRotator() const;
 	FVector GetOffsetLocation() const;

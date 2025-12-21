@@ -3,8 +3,10 @@
 
 #include "NEditorUtils.h"
 #include "BlueprintEditor.h"
+#include "IBlutilityModule.h"
 #include "ISettingsModule.h"
 #include "KismetCompilerModule.h"
+#include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
@@ -73,29 +75,23 @@ bool FNEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSele
 
 UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass)
 {
-
-	///We need a new object instead of the CDO
-	// auto* BPFactory = NewObject<UBlueprintFactory>(GetTransientPackage());
-	// BPFactory->ParentClass = InParentClass;
-
-
 	
 	if (StaticLoadObject(UObject::StaticClass(), nullptr, *InPath))
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::CreateBlueprint] Blueprint already exists at %s"), *InPath);
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to create a new UBlueprint as one already exists at the provided path(%s)."), *InPath);
 		return nullptr;
 	}
 
 	if (!FKismetEditorUtilities::CanCreateBlueprintOfClass(InParentClass))
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::CreateBlueprint] Cannot create blueprint of class %s"), *InParentClass->GetName());
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to create a UBlueprint from UClass(%s)."), *InParentClass->GetName());
 		return nullptr;
 	}
 
 	UPackage* Package = CreatePackage(*InPath);
 	if (Package == nullptr)
 	{
-		NE_LOG(Error, TEXT("FNEditorUtils::CreateBlueprint] Failed to create package at %s"), *InPath);
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Failed to create UPackage(%s) to be used with new UBlueprint; stopping creation."), *InPath);
 		return nullptr;
 	}
 
@@ -125,7 +121,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	
 	if (!GConfig->IsReadyForUse())
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to modify the DefaultGame.ini to disallow Config(%s) from staging due to the GConfig not being ready for use."), *Config);
 		return;
 	}
 
@@ -136,14 +132,14 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	else
 	{
 		GConfig->AddNewBranch(ProjectDefaultGamePath);
-		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+		UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Creating missing branch(%s) in GConfig for Config(%s)"), *ProjectDefaultGamePath, *Config);
 	}
 	
 	TArray<FString> DisallowedConfigFiles;
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Unable to load project DefaultGame.ini."))
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to disallow Config(%s)."), *Config);
 		return;
 	}
 	
@@ -152,7 +148,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	{
 		DisallowedConfigFiles.Add(RelativeConfig);
 		ProjectDefaultGameConfig->SetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
-		NE_LOG(Log, TEXT("[FNEditorUtils::DisallowConfigFileFromStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Updating DefaultGame.ini to disallow relative Config(%s)"), *RelativeConfig);
 
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
@@ -168,7 +164,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	
 	if (!GConfig->IsReadyForUse())
 	{
-		NE_LOG(Warning, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to modify the DefaultGame.ini due to the GConfig not being ready."));
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to modify the DefaultGame.ini to allow Config(%s) from staging due to the GConfig not being ready for use."), *Config);
 		return;
 	}
 
@@ -179,14 +175,14 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	else
 	{
 		GConfig->AddNewBranch(ProjectDefaultGamePath);
-		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Creating branch for missing ini: %s."), *ProjectDefaultGamePath);
+		UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Creating missing branch(%s) in GConfig for Config(%s)"), *ProjectDefaultGamePath, *Config);
 	}
 	
 	TArray<FString> AllowedConfigFiles;
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		NE_LOG(Error, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Unable to load project DefaultGame.ini."))
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to alllow Config(%s)."), *Config);
 		return;
 	}
 	
@@ -195,7 +191,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	{
 		AllowedConfigFiles.Add(RelativeConfig);
 		ProjectDefaultGameConfig->SetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
-		NE_LOG(Log, TEXT("[FNEditorUtils::AllowConfigFileForStaging] Updating DefaultGame.ini to DisallowConfig: %s"), *ProjectDefaultGamePath);
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Updating DefaultGame.ini to allow relative Config(%s)"), *RelativeConfig);
 
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
@@ -210,7 +206,7 @@ void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 	}
 	else
 	{
-		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIconSVG] Unable to replace icon."));
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateVectorImageBrush override."));
 	}
 }
 
@@ -222,7 +218,7 @@ void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 	}
 	else
 	{
-		UE_LOG(LogNexusEditor, Warning, TEXT("[FNEditorUtils::ReplaceAppIcon] Unable to replace icon."));
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateImageBrush override."));
 	}
 }
 
@@ -250,13 +246,13 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
 			return true;
 		}
-		NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Failed to load icon from %s."), *FinalPath);
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it failed to load."), *FinalPath);
 		return false;
 	}
 	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] %s Not Found."), *FinalPath);
+	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it could not be found."), *FinalPath);
 #else
-	NE_LOG(Warning, TEXT("[FNEditorUtils::ReplaceWindowIcon] Not supported on this platform."));
+	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Replacing the operating system icon for the Unreal Editor application is not supported on this platform."));
 #endif
 	return false;
 }
@@ -264,4 +260,121 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 FString FNEditorUtils::GetEngineBinariesPath()
 {
 	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
+}
+
+void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
+{
+	// Check Globals
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		if (OnTabClosedCallback.IsBound())
+		{
+			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+		}
+		return;
+	}
+	
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			if (OnTabClosedCallback.IsBound())
+			{
+				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+			}
+		}
+	}
+}
+
+void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
+{
+	// Check Globals
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		if (Icon.IsSet())
+		{
+			ActiveTab.Get()->SetTabIcon(Icon);
+		}
+		
+		if (!Label.IsEmpty())
+		{
+			ActiveTab.Get()->SetLabel(Label);
+		}
+		
+		if (OnTabClosedCallback.IsBound())
+		{
+			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+		}
+		return;
+	}
+	
+	// Check Level Editor
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			if (Icon.IsSet())
+			{
+				ActiveTab.Get()->SetTabIcon(Icon);
+			}
+		
+			if (!Label.IsEmpty())
+			{
+				ActiveTab.Get()->SetLabel(Label);
+			}
+			
+			if (OnTabClosedCallback.IsBound())
+			{
+				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+			}
+			return;
+		}
+	}
+	
+	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to update SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
+}
+
+void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
+{
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+		
+	const TArray< TSharedRef<FWorkspaceItem> >& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
+	
+	for (const TSharedRef<FWorkspaceItem>& Child : Children)
+	{
+		if (Child->GetFName() == WidgetIdentifier)
+		{
+			Child->AsSpawnerEntry()->SetDisplayName(Label);
+			if (Icon.IsSet())
+			{
+				Child->AsSpawnerEntry()->SetIcon(Icon);
+			}
+		}
+	}
+}
+
+void FNEditorUtils::FocusTab(const FName& TabIdentifier)
+{
+	// Check Globals
+	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	{
+		ActiveTab->ActivateInParent(SetDirectly);
+		ActiveTab->FlashTab();
+		return;
+	}
+	
+	// Check Level Editor
+	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
+	{
+		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
+		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		{
+			ActiveTab->ActivateInParent(SetDirectly);
+			ActiveTab->FlashTab();
+			return;
+		}
+	}
+	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to focus SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
 }

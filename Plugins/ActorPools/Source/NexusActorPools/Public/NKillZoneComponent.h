@@ -14,7 +14,7 @@ class UNActorPoolSubsystem;
  * A kill plane implementation built to automatically pool properly configured AActor upon overlap.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/">UNKillZoneComponent</a>
  */
-UCLASS(meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup="NEXUS", DisplayName = "KillZone Component", meta = (BlueprintSpawnableComponent))
 class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
 {
 	GENERATED_BODY()

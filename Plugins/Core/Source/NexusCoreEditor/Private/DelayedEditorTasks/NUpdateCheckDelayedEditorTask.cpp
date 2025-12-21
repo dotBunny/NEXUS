@@ -54,7 +54,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 				if (Lines[i].StartsWith(TEXT("#define N_VERSION_NUMBER")))
 				{
 					const FString VersionNumber = Lines[i].Replace(TEXT("#define N_VERSION_NUMBER"), TEXT("")).TrimStartAndEnd();
-					NE_LOG(Log, TEXT("[UNUpdateCheckInstanceObject::Execute] Found remote version: %s"), *VersionNumber);
+					UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Found remote plugin version(%s)."), *VersionNumber);
 
 					if (VersionNumber.IsNumeric())
 					{
@@ -73,7 +73,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 
 							if (DialogResponse == EAppReturnType::Yes)
 							{
-								NE_LOG(Log, TEXT("[UNUpdateCheckInstanceObject::Execute] Opening browser for new version: %i"), VersionNumberActual);
+								UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Opening browser for new plugin version(%i)."), VersionNumberActual);
 								FPlatformProcess::LaunchURL(*Request->GetHeader(TEXT("UpdateURI")),nullptr, nullptr);
 							}
 							else
@@ -81,7 +81,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 								UNEditorSettings* EditorSettings = UNEditorSettings::GetMutable();
 								EditorSettings->UpdatesIgnoreVersion = VersionNumberActual;
 								EditorSettings->SaveConfig();
-								NE_LOG(Log, TEXT("[UNUpdateCheckInstanceObject::Execute] Ignoring version %i"), VersionNumberActual);
+								UE_LOG(LogNexusCoreEditor, Log, TEXT("Ignoring plugin version (%i)."), VersionNumberActual);
 							}
 						}
 					}

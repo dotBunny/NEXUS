@@ -19,7 +19,7 @@ struct NEXUSCORE_API FNRawMeshLoop
 		Indices.Add(C);
 	};
 
-	FNRawMeshLoop(const int32 A, const int B, const int C, const int32 D)
+	FNRawMeshLoop(const int32 A, const int32 B, const int32 C, const int32 D)
 	{
 		Indices.Add(A);
 		Indices.Add(B);
@@ -43,6 +43,11 @@ struct NEXUSCORE_API FNRawMeshLoop
 	bool IsQuad() const
 	{
 		return Indices.Num() == 4;
+	}
+	
+	bool IsNgon() const
+	{
+		return Indices.Num() > 4;
 	}
 
 	bool IsTriangle() const

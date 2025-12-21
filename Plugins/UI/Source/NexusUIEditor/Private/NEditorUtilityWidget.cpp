@@ -6,12 +6,21 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "NCoreEditorMinimal.h"
+#include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtils.h"
+
+const FString UNEditorUtilityWidget::WidgetState_WidgetBlueprint = TEXT("NWidget_WidgetBlueprint");
+const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_TabDisplayText");
+const FString UNEditorUtilityWidget::WidgetState_TabIconStyle = TEXT("NWidget_TabIconStyle");
+const FString UNEditorUtilityWidget::WidgetState_TabIconName = TEXT("NWidget_TabIconName");
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
+	// Bind our default behaviour
+	OnTabClosedCallback.BindUObject(this, &UNEditorUtilityWidget::OnTabClosed);
+	
 	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
 	DelayedConstructTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
@@ -20,18 +29,11 @@ void UNEditorUtilityWidget::NativeConstruct()
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
-	if (PinnedTemplate != nullptr)
-	{
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		EditorUtilitySubsystem->UnregisterTabByID(PinnedTemplate->GetRegistrationName());
-	}
-	else
-	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::NativeDestruct] Unable to unregister tab correctly as no template is pinned. (%s)"), *GetName())
-	}
-
-	UnpinTemplate();
+	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+	EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
 	
+	UnpinTemplate();
+
 	Super::NativeDestruct();
 }
 
@@ -39,24 +41,23 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	if (PinnedTemplate != nullptr)
+	FNEditorUtils::UpdateTab(GetTabIdentifier(), GetTabDisplayBrush(), GetTabDisplayText(), OnTabClosedCallback);
+	FNEditorUtils::UpdateWorkspaceItem(GetTabIdentifier(), GetTabDisplayText(), GetTabDisplayIcon());
+	
+	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
+	if (bShouldSerializeWidget)
 	{
-		UpdateEditorTab(PinnedTemplate->GetRegistrationName());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
 	}
-	else
-	{
-		NE_LOG(Warning, TEXT("[UNEditorUtilityWidget::DelayedConstructTask] Unable to update tab details as no template is pinned. (%s)"), *GetName())
-	}
-
+	
 	// We need a render to happen so this can be updated
 	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();
 }
 
-void UNEditorUtilityWidget::UpdateEditorTab(const FName& InRegisteredName) const
+void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (const TSharedPtr<SDockTab> Tab = FGlobalTabmanager::Get()->FindExistingLiveTab(InRegisteredName))
+	if (bShouldSerializeWidget && !IsEngineExitRequested())
 	{
-		Tab.Get()->SetTabIcon(GetTabDisplayIcon());
-		Tab.Get()->SetLabel(GetTabDisplayText());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->UnregisterWidget(GetUserSettingsIdentifier());
 	}
 }

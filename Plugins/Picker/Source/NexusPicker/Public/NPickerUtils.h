@@ -6,8 +6,6 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
-NEXUSPICKER_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusPicker, Log, All);
-
 #define N_PICKER_TOLERANCE 0.01f
 
 #define N_VLOG_PICKER_INNER_COLOR FColor::Black

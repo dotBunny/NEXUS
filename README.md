@@ -4,7 +4,6 @@
 
 A battle-tested collection of game-ready plugins for Unreal Engine. The **NEXUS** Framework offers commonly used patterns and opinionated solutions for various areas of game development.
 
-
 ## Getting Started
 
 Go read the [documentation](https://nexus-framework.com)! **\</fullstop\>**

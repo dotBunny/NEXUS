@@ -3,8 +3,7 @@
 
 #include "NMultiplayerLibrary.h"
 
-#include "NCoreMinimal.h"
-#include "NMultiplayerUtils.h"
+#include "NMultiplayerMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
@@ -33,7 +32,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 {
 	if (PlayerState != nullptr && PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
-		N_LOG(Warning, TEXT("[UNMultiplayerLibrary::KickPlayer] Unable to kick host."))
+		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."))
 		return false;
 	}
 	
@@ -55,7 +54,7 @@ bool UNMultiplayerLibrary::HasRemotePlayers(UObject* WorldContextObject)
 {
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
-		AGameModeBase* GameMode = World->GetAuthGameMode();
+		const AGameModeBase* GameMode = World->GetAuthGameMode();
 		if (GameMode == nullptr || GameMode->GameSession == nullptr)
 		{
 			return false;
@@ -69,68 +68,4 @@ bool UNMultiplayerLibrary::HasRemotePlayers(UObject* WorldContextObject)
 		}
 	}
 	return false;
-}
-
-bool UNMultiplayerLibrary::HasRemotePlayersExec(UObject* WorldContextObject)
-{
-	return HasRemotePlayers(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::HasLocalPlayersOnly(UObject* WorldContextObject)
-{
-	return !HasRemotePlayers(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::HasLocalPlayersOnlyExec(UObject* WorldContextObject)
-{
-	return HasLocalPlayersOnly(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::HasGameStateAuthority(UObject* WorldContextObject)
-{
-	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
-	{
-		return FNMultiplayerUtils::HasGameStateAuthority(World);
-	}
-	return true;
-}
-
-bool UNMultiplayerLibrary::HasGameStateAuthorityExec(UObject* WorldContextObject)
-{
-	return HasGameStateAuthority(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::HasWorldAuthority(UObject* WorldContextObject)
-{
-	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
-	{
-		return FNMultiplayerUtils::HasWorldAuthority(World);
-	}
-	return true;
-}
-
-bool UNMultiplayerLibrary::HasWorldAuthorityExec(UObject* WorldContextObject)
-{
-	return HasWorldAuthority(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::IsServer(UObject* WorldContextObject)
-{
-	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-	return World ? (World->GetNetMode() != NM_Client) : false;
-}
-
-bool UNMultiplayerLibrary::IsServerExec(UObject* WorldContextObject)
-{
-	return IsServer(WorldContextObject);
-}
-
-bool UNMultiplayerLibrary::IsMultiplayerTest()
-{
-	return FNMultiplayerUtils::IsMultiplayerTest();
-}
-
-bool UNMultiplayerLibrary::IsMultiplayerTestExec()
-{
-	return FNMultiplayerUtils::IsMultiplayerTest();
 }

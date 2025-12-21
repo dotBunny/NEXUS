@@ -80,6 +80,29 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
 				]
 		];
+	auto OnVoxelNoCalcWarning = [CellRoot]
+	{
+		if (CellRoot->Details.VoxelSettings.bCalculateOnSave)
+		{
+			return EVisibility::Hidden;
+		}
+		return EVisibility::Visible;
+	};
+	NexusCategory.AddCustomRow(LOCTEXT("Validation", "Alerts"))
+		.Visibility( TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateLambda(OnVoxelNoCalcWarning)))
+		.WholeRowContent()
+		[
+			SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				.VAlign(VAlign_Center)
+				.AutoWidth()
+				[
+					SNew(STextBlock)
+						//.TextStyle(&FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold"))
+						.Text(LOCTEXT("VoxelNoCalc", "- The NCell Voxel Data is not calculated on save."))
+						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
+				]
+		];
 }
 
 #undef LOCTEXT_NAMESPACE

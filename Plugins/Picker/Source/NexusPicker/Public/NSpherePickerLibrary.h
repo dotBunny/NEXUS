@@ -15,7 +15,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/">UNSpherePickerLibrary</a>
  */
-UCLASS()
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Sphere Picker Library")
 class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

@@ -11,6 +11,8 @@
 
 #define LOCTEXT_NAMESPACE "NexusEditor"
 
+TMap<FName, FNWindowCommandInfo> FNEditorCommands::WindowActions;
+
 void FNEditorCommands::RegisterCommands()
 {
 	// ReSharper disable StringLiteralTypo
@@ -18,7 +20,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
 	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
 	
 
@@ -27,29 +29,35 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Help_OpenBugReport", "Issues"),
 	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Discord,
+	"NCore.Help.OpenDiscord",
+	LOCTEXT("Command_Help_OpenDiscord", "Discord"),
+	LOCTEXT("Command_Help_OpenDiscord_Desc", "Opens the Discord (dotBunny Support) invite link in your browser."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.OpenDiscordInviteLink"),
+	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
 	"NCore.Help.OpenBugReport",
 	LOCTEXT("Command_Help_OpenBugReport", "Report a Bug"),
 	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub repository's bug report form in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.ReportABug"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Roadmap,
 		"NCore.Help.OpenRoadmap",
 		LOCTEXT("Command_Help_OpenBugReport", "Roadmap"),
 		LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitOnlineLearning"),
-		EUserInterfaceActionType::Button, FInputGesture());	
+		EUserInterfaceActionType::Button, FInputChord());	
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
 		"NCore.Help.OpenDocumentation",
 		LOCTEXT("Command_Help_OpenDocumentation", "Documentation"),
 		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-		EUserInterfaceActionType::Button, FInputGesture());
+		EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
@@ -57,7 +65,7 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_LeakCheck", "Leak Check"),
 	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
@@ -65,10 +73,14 @@ void FNEditorCommands::RegisterCommands()
 	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
 	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
-	EUserInterfaceActionType::Button, FInputGesture());
+	EUserInterfaceActionType::Button, FInputChord());
 	
 	
 	CommandList_Help = MakeShareable(new FUICommandList);
+	
+	CommandList_Help->MapAction(Get().CommandInfo_Help_Discord,
+	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDiscord),
+	FCanExecuteAction());
 	
 	CommandList_Help->MapAction(Get().CommandInfo_Help_BugReport,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpBugReport),
@@ -96,7 +108,7 @@ void FNEditorCommands::RegisterCommands()
 			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
 			LOCTEXT("Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-			EUserInterfaceActionType::Button, FInputGesture());
+			EUserInterfaceActionType::Button, FInputChord());
 
 	CommandList_Node = MakeShareable(new FUICommandList);
 
@@ -129,6 +141,11 @@ void FNEditorCommands::OnHelpBugReport()
 	FPlatformProcess::LaunchURL(TEXT("https://github.com/dotBunny/NEXUS/issues/new/choose"),nullptr, nullptr);
 }
 
+void FNEditorCommands::OnHelpDiscord()
+{
+	FPlatformProcess::LaunchURL(TEXT("https://discord.gg/2M9HczHanW"),nullptr, nullptr);
+}
+
 void FNEditorCommands::OnHelpRoadmap()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://github.com/orgs/dotBunny/projects/6/views/2"),nullptr, nullptr);
@@ -159,7 +176,7 @@ void FNEditorCommands::OnToolsProfileNetworkProfiler()
 		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
 	if (!ProcHandle.IsValid())
 	{
-		NE_LOG(Warning, TEXT("Unable to launch NetworkProfiler."));
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to launch NetworkProfiler."))
 	}
 }
 
@@ -210,6 +227,17 @@ void FNEditorCommands::BuildMenus()
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
 			);
 	}
+	
+	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
+	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
+	LevelEditorSection.AddSubMenu(
+			"NEXUS",
+			LOCTEXT("NWindows", "NEXUS"),
+			LOCTEXT("NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
+			FNewToolMenuDelegate::CreateStatic(&FillNexusWindowsMenu, true),
+			false,
+			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+		);
 	
 	// Tools Menu
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
@@ -289,6 +317,49 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
+void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu)
+{
+	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", LOCTEXT("Windows", ""));
+	for (auto WindowCommand : WindowActions)
+	{
+		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
+			WindowCommand.Value.IsChecked, FIsActionButtonVisible());
+		
+		if (WindowCommand.Value.IsChecked.IsBound())
+		{
+			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
+			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
+			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
+		}
+		else
+		{
+			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
+			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
+			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+		}
+	}
+}
+
+void FNEditorCommands::AddWindowCommand(FNWindowCommandInfo CommandInfo)
+{
+	if (!WindowActions.Contains(CommandInfo.Identifier))
+	{
+		WindowActions.Add(CommandInfo.Identifier, CommandInfo);
+	}
+	else
+	{
+		WindowActions[CommandInfo.Identifier] = CommandInfo;
+	}
+}
+
+void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
+{
+	if (WindowActions.Contains(Identifier))
+	{
+		WindowActions.Remove(Identifier);
+	}
+}
+
 void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 {
 	const FNEditorCommands Commands = FNEditorCommands::Get();
@@ -301,6 +372,7 @@ void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 
 	FToolMenuSection& SupportSection = Menu->FindOrAddSection("Support");
 	SupportSection.Label = LOCTEXT("NHelp_Support", "Support");
+	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Discord, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_BugReport, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Issues, Commands.CommandList_Help);
 }

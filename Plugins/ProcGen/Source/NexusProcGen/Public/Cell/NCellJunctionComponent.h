@@ -12,7 +12,7 @@
 class ALevelInstance;
 class UNCell;
 
-UCLASS(ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
+UCLASS(ClassGroup="NEXUS", DisplayName = "Cell Junction Component", ClassGroup=(Nexus), meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 {
@@ -40,7 +40,7 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 		TransformUpdated.AddUObject(this, &UNCellJunctionComponent::OnTransformUpdated);
 #endif // WITH_EDITOR
 
-		N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false)
+		N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
 	}
 
 public:
@@ -52,10 +52,15 @@ public:
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 
+	FLinearColor GetColor() const;
+
 #if WITH_EDITOR
 	FString GetJunctionName() const;
-	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+
+	virtual void PostEditImport() override;
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;

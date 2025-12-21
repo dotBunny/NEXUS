@@ -19,6 +19,31 @@ public:
 		}) != nullptr;
 	}
 
+	template<typename T>
+	FORCEINLINE static bool IsSameOrderedValues(const TArray<T>& Left, const TArray<T>& Right)
+	{
+		if (Left.Num() != Right.Num())
+		{
+			return false;
+		}
+		for (int32 i = 0; i < Left.Num(); i++)
+		{
+			if (Left[i] != Right[i]) return false;
+		}
+		return true;
+	}
+	
+	template<typename T>
+	FORCEINLINE static uint32 GetPointersHash(TArray<T*> Elements)
+	{
+		uint32 Hash = 0;
+		for (T* Element : Elements)
+		{
+			Hash ^= GetTypeHash(Element);
+		}
+		return Hash;
+	}
+
 	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
 	{
 		const int32 Count = Objects.Num();

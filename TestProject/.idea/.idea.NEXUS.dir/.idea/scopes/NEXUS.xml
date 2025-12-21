@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="NEXUS" pattern="file:Source//*&amp;&amp;!file:Source/ThirdParty//*&amp;&amp;!file:Source/Runtime//*&amp;&amp;!file:Source/Programs//*&amp;&amp;!file:Source/Editor//*&amp;&amp;!file:Source/Developer//*" />
+</component>

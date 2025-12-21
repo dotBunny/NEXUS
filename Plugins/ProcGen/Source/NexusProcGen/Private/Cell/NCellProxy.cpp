@@ -50,7 +50,7 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	bCanPlayFromHere = 0;
 #endif
 	
-	N_WORLD_ICON_IMPLEMENTATION("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false)
+	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
 void ANCellProxy::CreateLevelInstance()

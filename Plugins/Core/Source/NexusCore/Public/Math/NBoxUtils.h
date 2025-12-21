@@ -12,4 +12,5 @@ class NEXUSCORE_API FNBoxUtils
 {
 public:
 	static TArray<FVector> GetVertices(const FBox& Box);
+	
 };

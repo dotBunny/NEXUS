@@ -6,6 +6,8 @@
 
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "INWidgetStateProvider.h"
+#include "INWidgetTabDetailsProvider.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
@@ -13,14 +15,16 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
 UCLASS()
-class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
+class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetTabDetailsProvider, public INWidgetStateProvider
 {
 	GENERATED_BODY()
 
 public:
-	virtual TAttribute<const FSlateBrush*> GetTabDisplayIcon() const { return TAttribute<const FSlateBrush*>(); }
-	virtual FText GetTabDisplayText() const { return FText::FromString(TEXT("NEditorUtilityWidget")); }
-
+	static const FString WidgetState_WidgetBlueprint;
+	static const FString WidgetState_TabDisplayText;
+	static const FString WidgetState_TabIconStyle;
+	static const FString WidgetState_TabIconName;
+	
 	void PinTemplate(UEditorUtilityWidgetBlueprint* Template)
 	{
 		PinnedTemplate = Template;
@@ -35,8 +39,11 @@ public:
 			PinnedTemplate = nullptr;
 		}
 	}
-	
+
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bShouldSerializeWidget = true;
+	
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
@@ -44,13 +51,43 @@ protected:
 	FVector2D UnitScale = FVector2D::One();	
 
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
+	virtual void NativeDestruct() override;	
+	
+	virtual FName GetTabIdentifier()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetRegistrationName();
+		}
+		return GetFName();
+	}
+	
+	virtual FName GetUserSettingsIdentifier()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetRegistrationName();
+		}
+		return GetFName();
+	}
+	
+	virtual FString GetUserSettingsTemplate()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetFullName();
+		}
+		return GetFullName();
+	}
 	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 
-private:
 	UFUNCTION()
-	void DelayedConstructTask();
-	void UpdateEditorTab(const FName& InTaName) const;
+	virtual void DelayedConstructTask();
+	
+	void OnTabClosed(TSharedRef<SDockTab> Tab);
+
+private:
+	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

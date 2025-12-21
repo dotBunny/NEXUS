@@ -3,4 +3,4 @@
 
 #include "NCoreMinimal.h"
 
-DEFINE_LOG_CATEGORY(LogNexus);
+DEFINE_LOG_CATEGORY(LogNexusCore);

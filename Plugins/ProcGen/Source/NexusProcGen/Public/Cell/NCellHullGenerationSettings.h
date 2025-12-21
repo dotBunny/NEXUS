@@ -27,12 +27,12 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 
 	UPROPERTY(EditAnywhere)
 	bool bIncludeNonColliding = false;
-
+	
 	UPROPERTY(EditAnywhere)
 	bool bIncludeEditorOnly = false;
 
-	UPROPERTY(EditAnywhere)
-	EBuildMethod BuildMethod = EBuildMethod::ConvexHull3Simplified;
+	UPROPERTY(VisibleAnywhere)
+	EBuildMethod BuildMethod = EBuildMethod::Original;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };
@@ -56,11 +56,11 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	
 
 	// TODO: Padding to surfaces ? character height
-	
 	bool Equals(const FNCellHullGenerationSettings& Other) const
 	{
-		return bCalculateOnSave == Other.bCalculateOnSave &&
-			bIncludeNonColliding == Other.bIncludeNonColliding &&
-			bIncludeEditorOnly == Other.bIncludeEditorOnly;
+		return bCalculateOnSave == Other.bCalculateOnSave
+		&& bIncludeNonColliding == Other.bIncludeNonColliding
+		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
+		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);
 	}
 };

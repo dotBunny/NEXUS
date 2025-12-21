@@ -2,9 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Fixers/NPoseAssetFixer.h"
-#include "NCoreEditorMinimal.h"
 #include "EditorUtilityLibrary.h"
 #include "NEditorUtils.h"
+#include "NFixersEditorMinimal.h"
 #include "PackageTools.h"
 #include "Animation/PoseAsset.h"
 #include "AssetRegistry/AssetRegistryModule.h"
@@ -31,7 +31,6 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	{
 		MainTask.EnterProgressFrame(1,LOCTEXT("FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting ..."));
 		PoseAssets = UEditorUtilityLibrary::GetSelectedAssetsOfClass(UPoseAsset::StaticClass());
-		NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Finding all PoseAssets from selection ..."));
 		SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
 		for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 		{
@@ -42,7 +41,6 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	{
 		MainTask.EnterProgressFrame(1,LOCTEXT("FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting Everything ..."));
 		SelectedPaths = { TEXT("/Game") };
-		NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Finding all PoseAssets in Game ..."));
 	}
 	const int PathCount = SelectedPaths.Num();
 
@@ -56,11 +54,9 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		ScanTask.EnterProgressFrame(1, FText::Format(LOCTEXT("FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Item", "Scanning {0}"), FText::FromString(SelectedPaths[i])));
 		if (!EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
 		{
-			NE_LOG(Warning, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Directory %s does not exist!"), *SelectedPaths[i]);
 			continue;
 		}
 
-		NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Scanning %s ..."), *SelectedPaths[i]);
 		for (FString AssetPath : EditorAssetSubsystem->ListAssets(SelectedPaths[i], true))
 		{
 			FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(AssetPath));
@@ -72,7 +68,6 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			}
 		}
 	}
-	NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Found %i PoseAssets"), PoseAssets.Num());
 
 	// Step 3 - Process Poses
 	MainTask.EnterProgressFrame(1, LOCTEXT("FindAndFix_PoseAssets_OutOfDateAnimationSource_Step3", "Processing ..."));
@@ -85,7 +80,7 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		
 		FixTask.EnterProgressFrame(1, FText::Format(LOCTEXT("OutOfDateAnimationSource_Fix_Item", "Processing {0}"), FText::FromString(PoseAssets[i]->GetName())));
 
-		NE_LOG(Log, TEXT("Processing %s"), *PoseAsset->GetName());
+		UE_LOG(LogNexusFixersEditor, Log, TEXT("Updating out-of-date UPose(%s)."), *PoseAsset->GetName());
 		
 		if (PoseAsset->SourceAnimation != nullptr)
 		{
@@ -102,6 +97,7 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != PoseAsset->SourceAnimation->GetDataModel()->GenerateGuid())
 			{
 				PoseAsset->UpdatePoseFromAnimation(PoseAsset->SourceAnimation);
+				// ReSharper disable once CppExpressionWithoutSideEffects
 				PoseAsset->MarkPackageDirty();
 				EditorAssetSubsystem->SaveLoadedAsset(PoseAsset);
 				ProblemsFixed++;
@@ -114,13 +110,11 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			break;
 		}
 	}
-	NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Fixed %i Problems."), ProblemsFixed);
+	UE_LOG(LogNexusFixersEditor, Log, TEXT("Fixed %i out-of-date UPose assets."), ProblemsFixed);
 
 	// Step 4 - Cleanup
 	MainTask.EnterProgressFrame(1, LOCTEXT("FindAndFix_PoseAssets_OutOfDateAnimationSource_Step4", "Cleanup ..."));
 	UPackageTools::UnloadPackages(CleanupPackages);
-	
-	NE_LOG(Log, TEXT("[FNPoseAssetFixer::OutOfDateAnimationSource] Done."));
 }
 
 bool FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute()

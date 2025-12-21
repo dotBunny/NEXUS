@@ -6,11 +6,13 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenSubsystem.generated.h"
 
+class UNProcGenOperation;
+class FNProcGenOperationTaskGraph;
 class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;
 
-UCLASS()
+UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Subsystem")
 class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
@@ -18,13 +20,26 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem
 
 public:
 	
-	bool RegisterNCellActor(ANCellActor* NCellActor);
-	bool UnregisterNCellActor(ANCellActor* NCellActor);
+	bool RegisterCellActor(ANCellActor* CellActor);
+	bool UnregisterCellActor(ANCellActor* CellActor);
 
-	bool RegisterNCellProxy(ANCellProxy* NCellProxy);
-	bool UnregisterNCellProxy(ANCellProxy* NCellProxy);
-
+	bool RegisterCellProxy(ANCellProxy* CellProxy);
+	bool UnregisterCellProxy(ANCellProxy* CellProxy);
+	
+	virtual void Tick(float DeltaTime) override;
+	virtual bool IsTickable() const override;
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
+	void StartOperation(UNProcGenOperation* Operation);
+	void OnOperationFinished(UNProcGenOperation* Operation);
+	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+	
+	
 private:	
-	TArray<ANCellActor*> KnownNCellActors;
-	TArray<ANCellProxy*> KnownNCellProxies;
+	
+	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
+	TArray<UNProcGenOperation*> KnownOperations;
+	
+	TArray<ANCellActor*> KnownCellActors;
+	TArray<ANCellProxy*> KnownCellProxies;
 };
