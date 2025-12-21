@@ -93,15 +93,14 @@ public:
 	FOnNProcGenOperationTasksChanged OnTasksChanged;
 
 	FIntVector2 GetCachedTasksStatus() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
+
 protected:
 	void Tick();
 	virtual void BeginDestroy() override;
 	void FinishBuild();
 	FNProcGenOperationTaskGraph* GetGraph() const { return Graph; }
-
 	
 private:
-	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UObject> ExecuteCaller = nullptr;
 	FNProcGenOperationTaskGraph* Graph = nullptr;
