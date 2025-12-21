@@ -1,17 +1,17 @@
-name: Functional Tests (DEV)
-run-name: DEV.FunctionalTests
+name: Functional Tests
+run-name: FunctionalTests
 
-on:  
-  schedule:
-    - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy
+on:
+  workflow_run:
+    workflows: ["Unit Tests"]
+    types:
+      - completed
 
 jobs:
   FunctionalTests:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Get Branch Settings
         id: settings

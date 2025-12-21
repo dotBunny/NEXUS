@@ -3,7 +3,7 @@ run-name: MAIN.Performance
 
 on:  
   schedule:
-    - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy
+    - cron: '0 9 * * *' # 4:00 AM EST - Farm Not Busy
 
 jobs:
   PerfTests:
