@@ -1,4 +1,4 @@
-name: '[P] Unit Tests'
+name: Unit Tests
 run-name: PUSH.UnitTests (NEXUS.UnitTests)
 
 on:

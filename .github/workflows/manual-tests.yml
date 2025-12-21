@@ -1,4 +1,4 @@
-name: '[M] Tests'
+name: M Tests
 run-name: MANUAL.Tests (${{ inputs.tests }}) 
 
 on:
