@@ -1,4 +1,4 @@
-﻿name: \[S\] Performance Tests (DEV)
+﻿name: '[S] Performance Tests (DEV)'
 run-name: SCHEDULE.PerformanceTests (DEV)
 
 on:  

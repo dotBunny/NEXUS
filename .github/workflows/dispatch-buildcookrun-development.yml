@@ -1,9 +1,9 @@
-name: \[D\] BuildCookRun (Development)
+name: '[D] BuildCookRun (Development)'
 run-name: DISPATCH.BuildCookRun.Development (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
-    workflows: ["Functional Tests"]
+    workflows: ['[D] Functional Tests']
     types:
       - completed
 
