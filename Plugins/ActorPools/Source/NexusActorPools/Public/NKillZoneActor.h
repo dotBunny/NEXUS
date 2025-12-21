@@ -11,7 +11,7 @@
  * A specialized AActor base-class designed as a killzone for actors.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/killzone-volume/">ANKillZoneVolume</a>
  */
-UCLASS(DisplayName = "NEXUS: KillZone Actor")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "KillZone Actor")
 class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 {
 	GENERATED_BODY()

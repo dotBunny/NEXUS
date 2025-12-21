@@ -6,6 +6,7 @@
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
+class FPlacementModeID;
 /**
  * NEXUS: Actor Pools Editor Module
  */
@@ -15,5 +16,9 @@ class FNActorPoolsEditorModule final : public IModuleInterface
 	virtual void ShutdownModule() override;
 	
 	void OnPostEngineInit();
+	
 	N_IMPLEMENT_MODULE(FNActorPoolsEditorModule, "NexusActorPoolsEditor")
+
+private:
+	TArray<TOptional<FPlacementModeID>> PlacementActors;
 };

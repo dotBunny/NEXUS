@@ -11,7 +11,7 @@
  * A component which registers and unregisters the owning AActor with the UNDynamicReferencesSubsystem for future lookup.
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-reference-component/">UNDynamicReferenceComponent</a>
  */
-UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="NEXUS: Dynamic Reference Component",
+UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="Dynamic Reference Component",
 	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."),
 	HideCategories=(Tags, Activation, Cooking, AssetUserData, Navigation))
 class NEXUSDYNAMICREFERENCES_API UNDynamicReferenceComponent : public UActorComponent

@@ -30,7 +30,7 @@ struct NEXUSPROCGEN_API FNTissueEntry
  * A collection of NCells
  * @remark Can think of this as a definition of multiple cell types used with tissue.
  */
-UCLASS(DisplayName = "NEXUS: Tissue")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Tissue")
 class NEXUSPROCGEN_API UNTissue : public UDataAsset
 {
 	GENERATED_BODY()

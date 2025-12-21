@@ -10,7 +10,7 @@
 /**
  * A Blueprint function library for working with FNIntegerRange.
  */
-UCLASS(DisplayName = "NEXUS: Integer Range Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Integer Range Library")
 class NEXUSCORE_API UNIntegerRangeLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

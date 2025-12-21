@@ -11,7 +11,7 @@
  * A wrapper around the USpinBox class to allow for setting the value without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/spin-box/">UNSpinBox</a>
  */
-UCLASS(DisplayName = "NEXUS: SpinBox", ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "SpinBox", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSpinBox : public USpinBox
 {
 	GENERATED_BODY()

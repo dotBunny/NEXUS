@@ -14,7 +14,7 @@
  * A small collection of functionality to wrap the usage of developer tools.
  * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-library/">UNDeveloperLibrary</a>
  */
-UCLASS(DisplayName = "NEXUS: Developer Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Developer Library")
 class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

@@ -11,7 +11,7 @@ class ALevelInstance;
 class ANCellActor;
 class UNCell;
 
-UCLASS(DisplayName = "NEXUS: Cell Root Component", HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
+UCLASS(ClassGroup="NEXUS", DisplayName = "Cell Root Component", HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 {
 	friend class ANCellActor;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "IPlacementModeModule.h"
 
 /**
  * A collection of default values to use within the Nexus Editor modules.
@@ -33,4 +34,12 @@ public:
 		const FName CategoryName = TEXT("NEXUS");
 		return CategoryName;
 	}
+
+
+	/**
+	 * 
+	 * Gets the placement category for NEXUS related AActors.
+	 * @return The qualified placement category for NEXUS related AActors.
+	 */
+	static const FPlacementCategoryInfo* GetPlacementCategory();
 };

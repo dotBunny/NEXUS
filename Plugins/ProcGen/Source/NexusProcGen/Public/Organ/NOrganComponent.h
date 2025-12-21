@@ -21,7 +21,7 @@ enum class ENOrganGenerationTrigger : uint8
 
 // TODO: Need to get size from parent volume? or whatever its on?
 
-UCLASS(ClassGroup=(Nexus), DisplayName = "NEXUS: Organ Component", HideCategories=(Tags, Activation, Cooking,
+UCLASS(ClassGroup="NEXUS", DisplayName = "Organ Component", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))
 class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {

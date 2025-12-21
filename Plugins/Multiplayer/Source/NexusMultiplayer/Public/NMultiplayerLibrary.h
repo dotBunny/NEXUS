@@ -15,7 +15,7 @@ class APlayerState;
  * A handful of methods meant to support the building logic that works in multiplayer scenarios.
  * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">UNMultiplayerLibrary</a>
  */
-UCLASS(DisplayName = "NEXUS: Multiplayer Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Multiplayer Library")
 class NEXUSMULTIPLAYER_API UNMultiplayerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

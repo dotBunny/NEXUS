@@ -6,6 +6,7 @@
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
+class FPlacementModeID;
 class FNProcGenEditorUndo;
 /**
  * NEXUS: Procedural Content Generation Editor Module
@@ -21,4 +22,5 @@ class FNProcGenEditorModule final : public IModuleInterface
 
 private:
 	FNProcGenEditorUndo* UndoHandler = nullptr;
+	TArray<TOptional<FPlacementModeID>> PlacementActors;
 };

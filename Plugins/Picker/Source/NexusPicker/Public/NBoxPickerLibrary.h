@@ -14,7 +14,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/box/">UNBoxPickerLibrary</a>
  */
-UCLASS(DisplayName = "NEXUS: Box Picker Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Box Picker Library")
 class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

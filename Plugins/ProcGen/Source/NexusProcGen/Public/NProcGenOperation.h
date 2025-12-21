@@ -26,7 +26,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationDisplayMessageCh
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnNProcGenOperationTasksChanged, const int, CompletedTasks, const int, TotalTasks);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationPercentageChanged, const float, NewPercentage);
 
-UCLASS(ClassGroup=(Nexus), DisplayName = "NEXUS: ProcGen Operation")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Operation")
 class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 {
 	friend class UNProcGenSubsystem;

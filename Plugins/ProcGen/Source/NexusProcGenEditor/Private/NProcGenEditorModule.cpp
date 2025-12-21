@@ -13,6 +13,8 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include "UObject/ObjectSaveContext.h"
 #include "EditorModeRegistry.h"
+#include "IPlacementModeModule.h"
+#include "NEditorDefaults.h"
 #include "Customizations/NCellRootComponentCustomization.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
@@ -22,13 +24,17 @@
 #include "Organ/NOrganComponent.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "NProcGenEditorCommands.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorToolMenu.h"
 #include "NProcGenEditorUndo.h"
 #include "NProcGenEdMode.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
 #include "Editor/UnrealEdEngine.h"
+#include "Macros/NEditorModuleMacros.h"
+#include "Organ/NBoneActor.h"
 #include "Organ/NBoneComponent.h"
+#include "Organ/NOrganVolume.h"
 #include "Visualizers/NBoneComponentVisualizer.h"
 
 void FNProcGenEditorModule::StartupModule()
@@ -60,6 +66,8 @@ void FNProcGenEditorModule::ShutdownModule()
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
+	
+	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	
 	FNProcGenEditorStyle::Shutdown();
 
@@ -134,6 +142,37 @@ void FNProcGenEditorModule::OnPostEngineInit()
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
 	PropertyModule.NotifyCustomizationModuleChanged();
+	
+	// Handle Placement Definitions
+	if (const FPlacementCategoryInfo* Info = FNEditorDefaults::GetPlacementCategory())
+	{
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+		*ANBoneActor::StaticClass(),
+		FAssetData(ANBoneActor::StaticClass()),
+		NAME_None,
+		NAME_None,
+		TOptional<FLinearColor>(),
+		TOptional<int32>(),
+		NSLOCTEXT("NexusProcGenEditor", "NBoneActorPlacement", "Bone Actor"))));
+		
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+		*ANOrganVolume::StaticClass(),
+		FAssetData(ANOrganVolume::StaticClass()),
+		NAME_None,
+		NAME_None,
+		TOptional<FLinearColor>(),
+		TOptional<int32>(),
+		NSLOCTEXT("NexusProcGenEditor", "NOrganVolumePlacement", "Organ Volume"))));
+		
+		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
+			*ANCellJunctionBlockerActor::StaticClass(),
+			FAssetData(ANCellJunctionBlockerActor::StaticClass()),
+			NAME_None,
+			NAME_None,
+			TOptional<FLinearColor>(),
+			TOptional<int32>(),
+			NSLOCTEXT("NexusProcGenEditor", "NCellJunctionBlockerActorPlacement", "Cell Junction Blocker Actor"))));
+	}
 }
 
 IMPLEMENT_MODULE(FNProcGenEditorModule, NexusProcGenEditor)

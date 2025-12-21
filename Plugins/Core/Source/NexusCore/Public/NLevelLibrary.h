@@ -7,7 +7,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NLevelLibrary.generated.h"
 
-UCLASS(DisplayName = "NEXUS: Level Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Level Library")
 class UNLevelLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

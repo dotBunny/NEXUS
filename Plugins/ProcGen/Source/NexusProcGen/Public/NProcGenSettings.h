@@ -8,7 +8,7 @@
 #include "Macros/NSettingsMacros.h"
 #include "NProcGenSettings.generated.h"
 
-UCLASS(DisplayName = "NEXUS: ProcGen Settings", Config=NexusGame, defaultconfig)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame, defaultconfig)
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()

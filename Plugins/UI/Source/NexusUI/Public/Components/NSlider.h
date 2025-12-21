@@ -11,7 +11,7 @@
  * A wrapper around the USlider class to allow for setting the value without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slider/">UNSlider</a>
  */
-UCLASS(DisplayName = "NEXUS: Slider", ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "Slider", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSlider : public USlider
 {
 	GENERATED_BODY()

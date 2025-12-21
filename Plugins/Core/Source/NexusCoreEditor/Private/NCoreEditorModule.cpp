@@ -45,7 +45,6 @@ void FNCoreEditorModule::OnPostEngineInit()
 	FNEditorUtils::AllowConfigFileForStaging("DefaultNexusGame");
 	
 	UNEditorUserSettings::OnPostEngineInit();
-	
 	FNEditorStyle::Initialize();
 
 	if (FSlateApplication::IsInitialized())

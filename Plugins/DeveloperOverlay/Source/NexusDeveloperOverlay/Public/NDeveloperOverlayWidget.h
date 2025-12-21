@@ -15,7 +15,7 @@ class UButton;
 
 class UCommonTextBlock;
 
-UCLASS(DisplayName = "NEXUS: Developer Overlay Widget", Abstract, Blueprintable)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay Widget", Abstract, Blueprintable)
 class NEXUSDEVELOPEROVERLAY_API UNDeveloperOverlayWidget :  public UCommonUserWidget
 {
 	GENERATED_BODY()

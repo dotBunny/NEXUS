@@ -10,7 +10,7 @@
 /**
  * A Blueprint function library for working with FNDoubleRange.
  */
-UCLASS(DisplayName = "NEXUS: Double Range Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Double Range Library")
 class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
