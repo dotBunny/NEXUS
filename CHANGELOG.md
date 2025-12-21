@@ -11,7 +11,7 @@
 
 ### Changed
 
-- Altered GitHub actions to dispatch tests based on initial Unit test.
+- Altered GitHub actions to dispatch tests based on initial Unit test, as well as fixed up additional warnings thrown by EGS UE.
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
@@ -152,6 +152,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.3]: https://github.com/dotBunny/NEXUS/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dotBunny/NEXUS/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/dotBunny/NEXUS/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/dotBunny/NEXUS/compare/v0.1.1...v0.2.0
