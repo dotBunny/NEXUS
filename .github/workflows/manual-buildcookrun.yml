@@ -1,4 +1,5 @@
-name: Manual BuildCookRun
+name: \[M\] BuildCookRun
+run-name: MANUAL.BuildCookRun (${{ inputs.configuration }})
 
 on:  
   workflow_dispatch:

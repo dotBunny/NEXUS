@@ -1,5 +1,5 @@
-﻿name: Performance Tests (DEV)
-run-name: DEV.Performance
+﻿name: \[S\] Performance Tests (DEV)
+run-name: SCHEDULE.PerformanceTests (DEV)
 
 on:  
   schedule:

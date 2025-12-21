@@ -1,9 +1,9 @@
-name: BuildCookRun (Shipping)
-run-name: BuildCookRun.Shipping
+name: \[D\] BuildCookRun (Shipping)
+run-name: DISPATCH.BuildCookRun.Shipping (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
-    workflows: ["BuildCookRun (Development)"]
+    workflows: ["[D] BuildCookRun (Development)"]
     types:
       - completed
 
@@ -12,6 +12,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Get Branch Settings
         id: settings

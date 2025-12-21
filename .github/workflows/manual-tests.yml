@@ -1,5 +1,5 @@
-name: Manual Tests
-run-name: Manual Tests (${{ inputs.tests }})
+name: \[M\] Tests
+run-name: MANUAL.Tests (${{ inputs.tests }}) 
 
 on:
   workflow_dispatch:

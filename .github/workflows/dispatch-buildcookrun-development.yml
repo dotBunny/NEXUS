@@ -1,5 +1,5 @@
-name: BuildCookRun (Development)
-run-name: BuildCookRun.Development
+name: \[D\] BuildCookRun (Development)
+run-name: DISPATCH.BuildCookRun.Development (${{ github.event.workflow_run.head_branch }})
 
 on:
   workflow_run:
@@ -12,6 +12,8 @@ jobs:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Get Branch Settings
         id: settings
