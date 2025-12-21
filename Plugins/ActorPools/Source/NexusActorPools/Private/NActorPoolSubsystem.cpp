@@ -120,7 +120,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 		{
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
-				UE_LOG(LogNexusActorPools, Warning, TEXT("Attempting to create a new FNActorPool via UNActorPoolSet that already exists (%s); ignored."), *Definition.ActorClass->GetName());
+				UE_LOG(LogNexusActorPools, Log, TEXT("Attempting to create a new FNActorPool(%s) via UNActorPoolSet that already exists; ignored."), *Definition.ActorClass->GetName());
 			}
 			else
 			{
@@ -140,7 +140,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 			{
 				if (ActorPools.Contains(Definition.ActorClass))
 				{
-					UE_LOG(LogNexusActorPools, Warning, TEXT("Attempting to create a new FNActorPool via a nested UNActorPoolSet that already exists (%s); ignored."),
+					UE_LOG(LogNexusActorPools, Log, TEXT("Attempting to create a new FNActorPool(%s) via a nested UNActorPoolSet that already exists; ignored."),
 						*Definition.ActorClass->GetName());
 				}
 				else

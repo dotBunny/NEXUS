@@ -71,6 +71,7 @@ void ANFunctionalTest::CleanUp()
 
 void ANFunctionalTest::OnFinishTest(ESampleTestResult TestResult, const FString& Message)
 {
+	// TODO: There is some parsing logic on GitHub to look for `[identifier]time` and a time beside it for individualized timers
 	switch (TestResult)
 	{
 	case ESampleTestResult::Default:

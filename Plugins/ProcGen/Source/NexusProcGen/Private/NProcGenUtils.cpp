@@ -4,12 +4,12 @@
 #include "NProcGenUtils.h"
 
 #include "NArrayUtils.h"
-#include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
 #include "Organ/NOrganComponent.h"
+#include "Misc/ScopedSlowTask.h"
 
 #define LOCTEXT_NAMESPACE "NexusProcGen"
 

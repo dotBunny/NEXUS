@@ -68,24 +68,28 @@ runs:
 
               $test_identifier = "N/A"
               $test_timer = "N/A"
+
               if ($test.entries[0].event.type -eq "Info")
               {
                 $test_timestamp = $test.dateTime
                 $event_message = $test.entries[0].event.message
                 $event_message_id_end = $event_message.IndexOf(']') + 1
-                $event_message_timer_start = $event_message_id_end + 1
-                $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
-                $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
-                $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start).Trim()
-                $test_timer_double = 0
-                if([double]::TryParse($test_timer, [ref]$test_timer_double))
-                {    
-                  Write-Output "$test_timestamp,${{ github.sha }},$device,$test_identifier,$test_timer" >> $performancePath
-                }
-                else
+                if($event_message_id_end -ge 2)
                 {
-                  $test_identifier = "N/A"
-                  $test_timer = "N/A"
+                  $event_message_timer_start = $event_message_id_end + 1
+                  $event_message_time_end = $event_message.IndexOf(' ', $event_message_timer_start)
+                  $test_identifier = $event_message.Substring(1, $event_message_id_end - 2)
+                  $test_timer = $event_message.Substring($event_message_timer_start, $event_message_time_end - $event_message_timer_start).Trim()
+                  $test_timer_double = 0
+                  if([double]::TryParse($test_timer, [ref]$test_timer_double))
+                  {    
+                    Write-Output "$test_timestamp,${{ github.sha }},$device,$test_identifier,$test_timer" >> $performancePath
+                  }
+                  else
+                  {
+                    $test_identifier = "N/A"
+                    $test_timer = "N/A"
+                  }
                 }
               }
               Write-Output "| <code>$test_fullTestPath</code> | $test_duration | $test_state | $test_warnings | $test_errors | $test_identifier | $test_timer |" >> $markdownPath

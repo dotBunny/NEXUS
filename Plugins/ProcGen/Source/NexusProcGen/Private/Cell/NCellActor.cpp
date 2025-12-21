@@ -28,16 +28,6 @@ bool ANCellActor::CanDeleteSelectedActor(FText& OutReason) const
 	return false;	
 }
 
-#endif // WITH_EDITOR
-
-void ANCellActor::InitializeFromProxy()
-{
-	bSpawnedFromProxy = true;
-
-	// Callback
-	OnInitializedFromProxy.Broadcast();
-}
-
 void ANCellActor::PostRegisterAllComponents()
 {
 	Super::PostRegisterAllComponents();
@@ -51,6 +41,7 @@ void ANCellActor::PostRegisterAllComponents()
 		}
 	}
 }
+
 
 bool ANCellActor::HasDifferencesFromSidecar() const
 {
@@ -81,6 +72,17 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 				
 	return false;
 }
+
+#endif // WITH_EDITOR
+
+void ANCellActor::InitializeFromProxy()
+{
+	bSpawnedFromProxy = true;
+
+	// Callback
+	OnInitializedFromProxy.Broadcast();
+}
+
 
 void ANCellActor::CalculateBounds()
 {
