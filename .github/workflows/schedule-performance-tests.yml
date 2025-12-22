@@ -47,7 +47,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-dev'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
@@ -106,7 +106,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-main'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
