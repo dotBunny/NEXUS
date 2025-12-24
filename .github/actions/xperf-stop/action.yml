@@ -15,3 +15,8 @@ runs:
       run: |
         Write-Output "Stopping and saving session  ..."
         & "xperf.exe" -d ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl
+    - name: CollectPDBs
+      shell: powershell
+      run: |
+        Write-Output "Collecting PDBs ..."
+        Copy-Item -Path "${{ github.workspace }}\TestProject\Binaries\Win64\*.pdb" -Destination "${{ github.workspace }}\Staging\PDBs\" -Recurse
