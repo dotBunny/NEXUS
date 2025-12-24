@@ -18,4 +18,4 @@ runs:
       shell: powershell
       run: |
         Write-Output "Starting recording  ..."
-        & "xperf.exe" -start ${{ inputs.etl-session-name }} -f ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl
+        & "xperf.exe" -start ${{ inputs.etl-session-name }} -on PROC_THREAD+LOADER+INTERRUPT+DPC+DISPATCHER+FILE_IO+FILE_IO_INIT+PROFILE -f ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl

@@ -42,6 +42,7 @@ jobs:
           tests: 'Performance Tests'
 
       - name: Stop performance recording
+        if: always()
         uses: ./.github/actions/xperf-stop
 
       - name: Parse UE log
