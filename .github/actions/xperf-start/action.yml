@@ -8,5 +8,4 @@ runs:
       shell: powershell
       run: |
         Write-Output "Starting recording  ..."
-        & "xperf.exe" -on PROC_THREAD+LOADER+INTERRUPT+DPC+DISPATCHER+PROFILE
-    
+        & "xperf.exe" -on PROC_THREAD+LOADER+INTERRUPT+DPC+DISPATCHER+PROFILE -stackwalk PROFILE 
