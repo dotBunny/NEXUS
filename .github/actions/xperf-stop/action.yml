@@ -2,16 +2,16 @@ name: 'Xperf Stop Recording'
 description: 'Stop sample recording of metrics by session'
 
 inputs:
-  etl-session-name:
-    description: 'Session name for recording'
+  etl-file-name:
+    description: 'Path to saved ETL file'
     required: true
     default: 'NPerformanceTests'
 
 runs:
   using: "composite"
   steps:    
-    - name: XPerfStart
+    - name: XperfStop
       shell: powershell
       run: |
-        Write-Output "Starting recording  ..."
-        & "xperf.exe" -stop ${{ inputs.etl-session-name }}
+        Write-Output "Stopping and saving session  ..."
+        & "xperf.exe" -d ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl

@@ -32,9 +32,7 @@ jobs:
 
       - name: Start performance recording
         uses: ./.github/actions/xperf-start
-        with:
-          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-dev         
-
+       
       - name: Run performance tests
         uses: ./.github/actions/ue-cmd-tests
         with:
@@ -44,6 +42,9 @@ jobs:
       - name: Stop performance recording
         if: always()
         uses: ./.github/actions/xperf-stop
+        with:
+          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-dev         
+
 
       - name: Parse UE log
         if: always()
@@ -99,9 +100,7 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
 
       - name: Start performance recording
-        uses: ./.github/actions/xperf-start
-        with:
-          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-main     
+        uses: ./.github/actions/xperf-start 
 
       - name: Run performance tests
         uses: ./.github/actions/ue-cmd-tests
@@ -111,6 +110,8 @@ jobs:
 
       - name: Stop performance recording
         uses: ./.github/actions/xperf-stop
+        with:
+          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-main     
 
       - name: Parse UE log
         if: always()
