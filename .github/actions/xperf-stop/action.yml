@@ -1,0 +1,17 @@
+name: 'Xperf Stop Recording'
+description: 'Stop sample recording of metrics by session'
+
+inputs:
+  etl-session-name:
+    description: 'Session name for recording'
+    required: true
+    default: 'NPerformanceTests'
+
+runs:
+  using: "composite"
+  steps:    
+    - name: XPerfStart
+      shell: powershell
+      run: |
+        Write-Output "Starting recording  ..."
+        & "xperf.exe" -stop ${{ inputs.etl-session-name }}

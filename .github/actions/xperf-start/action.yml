@@ -1,0 +1,21 @@
+name: 'Xperf Start Recording'
+description: 'Start sample recording of metrics.'
+
+inputs:
+  etl-file-name:
+    description: 'Path to saved ETL file'
+    required: true
+    default: 'NPerformanceTests'
+  etl-session-name:
+    description: 'Session name for recording'
+    required: true
+    default: 'NPerformanceTests'
+
+runs:
+  using: "composite"
+  steps:    
+    - name: XPerfStart
+      shell: powershell
+      run: |
+        Write-Output "Starting recording  ..."
+        & "xperf.exe" -start ${{ inputs.etl-session-name }} -f ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl
