@@ -4,6 +4,7 @@ run-name: SCHEDULE.PerformanceTests
 on:  
   schedule:
     - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy
+  workflow_dispatch:
 
 jobs:
   DevPerformanceTests:
@@ -29,11 +30,21 @@ jobs:
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
 
+      - name: Start performance recording
+        uses: ./.github/actions/xperf-start
+       
       - name: Run performance tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Performance Tests'
+
+      - name: Stop performance recording
+        if: always()
+        uses: ./.github/actions/xperf-stop
+        with:
+          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-dev         
+
 
       - name: Parse UE log
         if: always()
@@ -47,7 +58,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-dev'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
@@ -88,11 +99,19 @@ jobs:
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
 
+      - name: Start performance recording
+        uses: ./.github/actions/xperf-start 
+
       - name: Run performance tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Performance Tests'
+
+      - name: Stop performance recording
+        uses: ./.github/actions/xperf-stop
+        with:
+          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-main     
 
       - name: Parse UE log
         if: always()
@@ -106,7 +125,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-main'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary

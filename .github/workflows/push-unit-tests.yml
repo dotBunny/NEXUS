@@ -9,6 +9,7 @@ on:
       - 'Samples/**/Content/**'
       - 'TestProject/Content/**'
       - 'TestProject/Source/**'
+  workflow_dispatch:      
 
 jobs:
   Smoke:
