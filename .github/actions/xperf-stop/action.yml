@@ -15,8 +15,9 @@ runs:
       run: |
         Write-Output "Stopping and saving session  ..."
         & "xperf.exe" -d ${{ github.workspace }}\Staging\${{ inputs.etl-file-name }}.etl
-    - name: CollectPDBs
+    - name: Symbols
       shell: powershell
       run: |
-        Write-Output "Collecting PDBs ..."
-        Copy-Item -Path "${{ github.workspace }}\TestProject\Binaries\Win64\*.pdb" -Destination "${{ github.workspace }}\Staging\PDBs\" -Recurse
+        Write-Output "Collecting Symbols ..."
+        New-Item -Path "${{ github.workspace }}\Staging\" -Name "Symbols" -ItemType "Directory"  
+        Copy-Item -Path "${{ github.workspace }}\TestProject\Binaries\Win64\*.pdb" -Destination "${{ github.workspace }}\Staging\Symbols\" -Recurse
