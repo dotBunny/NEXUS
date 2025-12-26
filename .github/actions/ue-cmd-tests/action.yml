@@ -7,7 +7,12 @@ inputs:
     required: true
   tests:
     description: 'The test name prefix/category'
-    required: true    
+    required: true
+  trace:
+    type: boolean
+    description: 'Enable tracing with Unreal Insights'
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -33,7 +38,12 @@ runs:
           { 
             $CommandArgs += '-ExecCmds="Automation RunTest Tests.Nexus;Quit"'          
           }
-        }        
+        }  
+        if(${{ inputs.trace }} == 'true')
+        {
+          Write-Output "w/ Tracing"
+          $CommandArgs += '-tracefile=${{ github.workspace }}\Staging\Trace.utrace'
+        }     
         Write-Output "Starting Process ..."
         foreach ($arg in $CommandArgs) {        
             Write-Output "ARG: $arg"
