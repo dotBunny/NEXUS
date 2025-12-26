@@ -11,7 +11,7 @@ inputs:
   trace:
     type: boolean
     description: 'Enable tracing with Unreal Insights'
-    required: false
+    required: true
     default: false
 
 runs:
