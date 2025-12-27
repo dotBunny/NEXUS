@@ -39,7 +39,7 @@ runs:
             $CommandArgs += '-ExecCmds="Automation RunTest Tests.Nexus;Quit"'          
           }
         }  
-        if(${{ inputs.trace }} == 'true')
+        if(${{ inputs.trace }})
         {
           Write-Output "w/ Tracing"
           $CommandArgs += '-tracefile=${{ github.workspace }}\Staging\Trace.utrace'
