@@ -9,7 +9,7 @@ class FNTestScopeTimer
 {
 public:
 	explicit FNTestScopeTimer(const FString& InName, const float MaxDurationMs = MAX_FLT, const bool bUseNamedEvent = true)
-		: Name(InName), MaxDuration(MaxDurationMs), StartTime(FPlatformTime::Seconds()), EndTime(0)
+		: Name(InName), MaxDuration(MaxDurationMs), EndTime(0)
 	{
 		bNamedEvent = bUseNamedEvent;
 		if (bNamedEvent)
@@ -17,18 +17,21 @@ public:
 			UE_LOG(LogTemp, Log, TEXT("[%s] BEGIN"), *Name);
 			FPlatformMisc::BeginNamedEvent(FColor::Blue, *Name);
 		}
+		
+		// Manually set start-time after logging 
+		StartTime =  FPlatformTime::Seconds();
 	}
 
 	void ManualStop()
 	{
 		if (!bStopped)
 		{
+			EndTime = FPlatformTime::Seconds();
 			if (bNamedEvent)
 			{
 				FPlatformMisc::EndNamedEvent();
 				UE_LOG(LogTemp, Log, TEXT("[%s] END"), *Name);
 			}
-			EndTime = FPlatformTime::Seconds();
 			bStopped = true;
 		}
 	}
