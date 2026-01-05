@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 6,
-	"VersionName": "0.2.3",
+	"Version": 7,
+	"VersionName": "0.2.4",
 	"FriendlyName": "NEXUS: Actor Pools",
 	"Description": "Generalized pooling system for Actors.",
 	"Category": "NEXUS",

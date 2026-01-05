@@ -59,7 +59,14 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 					if (VersionNumber.IsNumeric())
 					{
 						const int32 VersionNumberActual = FCString::Atoi(*VersionNumber);
-						const UNEditorSettings* Settings = UNEditorSettings::Get();
+						UNEditorSettings* Settings = UNEditorSettings::GetMutable();
+						
+						// Check for a previously saved ignored version, and bump it up to current
+						if (Settings->UpdatesIgnoreVersion < N_VERSION_NUMBER)
+						{
+							Settings->UpdatesIgnoreVersion = N_VERSION_NUMBER;
+							Settings->SaveConfig();
+						}
 					
 						if (VersionNumberActual > Settings->UpdatesIgnoreVersion)
 						{

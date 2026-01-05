@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 6,
-	"VersionName": "0.2.3",
+	"Version": 7,
+	"VersionName": "0.2.4",
 	"FriendlyName": "NEXUS Samples: Procedural Generation",
 	"Description": "Sample content for the NEXUS: ProcGen plugin.",
 	"Category": "NEXUS Samples",

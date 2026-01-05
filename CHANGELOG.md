@@ -5,7 +5,9 @@
 ### Fixed
 
 - Exposed all log categories for external reference.
-- Resolved TEXT() macro not being completed in `FNMethodScopeTimer`.
+- Optimized accuracy of `FNMethodScopeTimer` as well as fixed TEXT() macro not being closed.
+- Removed some unnecessary TODOs.
+- Update detection now bumps ignored version to the installed version if its greater then the saved version.
 
 ## [0.2.3] - 2025-12-21
 
