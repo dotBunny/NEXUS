@@ -13,8 +13,6 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 #if ENABLE_DRAW_DEBUG
 	if (GEngine->GetNetMode(InWorld) != NM_DedicatedServer)
 	{
-		// TODO: Check r.EnableDrawDebugHelpers?
-		
 		// Find the appropriate batching component
 		ULineBatchComponent* LineBatcher = nullptr;
 		if (InWorld)
