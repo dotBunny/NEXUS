@@ -5,4 +5,4 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusActorPoolsEditor, Log, All);
+NEXUSACTORPOOLSEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusActorPoolsEditor, Log, All);

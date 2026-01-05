@@ -3,4 +3,4 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusProcGen, Log, All);
+NEXUSPROCGEN_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusProcGen, Log, All);
