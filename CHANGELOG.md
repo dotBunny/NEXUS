@@ -2,12 +2,22 @@
 
 ## [0.2.4] - 2026-01-06
 
+### Added
+
+- `FNTestUtils::PrePerformanceTest()` and `FNTestUtils::PostPerformanceTest()` for reusable performance testing steps.
+
+### Changed
+
+- Update detection now bumps ignored version to the installed version if its greater then the saved version.
+- Exposed all log categories for external reference.
+
 ### Fixed
 
-- Exposed all log categories for external reference.
-- Optimized accuracy of `FNMethodScopeTimer` as well as fixed TEXT() macro not being closed.
-- Removed some unnecessary TODOs.
-- Update detection now bumps ignored version to the installed version if its greater then the saved version.
+- Accuracy of `FNMethodScopeTimer` improved, as well as fixed TEXT() macro not being closed.
+
+### Removed
+
+- Unnecessary TODOs in non-experimental plugins.
 
 ## [0.2.3] - 2025-12-21
 
@@ -28,7 +38,6 @@
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
 - Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 - Lowered warning level to `Log` when creating a new `FNActorPool` that already exists in a nested `UNActorPoolSet`.
-
 
 ### Fixed
 
