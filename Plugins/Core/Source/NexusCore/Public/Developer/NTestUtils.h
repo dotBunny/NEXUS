@@ -9,6 +9,25 @@
 class NEXUSCORE_API FNTestUtils
 {
 public:
+	
+	FORCEINLINE static void PrePerformanceTest()
+	{
+		// Ensure that stack walking is initialized prior to performance testing to avoid library loading
+		FPlatformStackWalk::InitStackWalking();
+	
+		// Force garbage collection to ensure a clean slate for performance testing
+		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+		
+		// Force the logs to be written to disk prior to the operation
+		GLog->Flush();
+	}
+	
+	FORCEINLINE static void PostPerformanceTest()
+	{
+		// Force garbage collection to ensure the next test is already prepared / faster
+		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+	}
+	
 	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
 		// Create World

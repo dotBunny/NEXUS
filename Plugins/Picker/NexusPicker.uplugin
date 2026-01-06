@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 6,
-	"VersionName": "0.2.3",
+	"Version": 7,
+	"VersionName": "0.2.4",
 	"FriendlyName": "NEXUS: Picker",
 	"Description": "Selection functionality for points and other items.",
 	"Category": "NEXUS",

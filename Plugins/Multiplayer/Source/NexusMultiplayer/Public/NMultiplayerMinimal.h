@@ -3,4 +3,4 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusMultiplayer, Log, All);
+NEXUSMULTIPLAYER_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusMultiplayer, Log, All);

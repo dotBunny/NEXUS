@@ -3,4 +3,4 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusUIEditor, Log, All);
+NEXUSUIEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusUIEditor, Log, All);

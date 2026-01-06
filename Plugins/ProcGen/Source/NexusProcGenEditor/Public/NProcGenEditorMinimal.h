@@ -3,4 +3,4 @@
 
 #pragma once
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusProcGenEditor, Log, All);
+NEXUSPROCGENEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusProcGenEditor, Log, All);

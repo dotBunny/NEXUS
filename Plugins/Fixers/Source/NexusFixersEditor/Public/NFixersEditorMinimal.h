@@ -5,4 +5,4 @@
 
 #include "CoreMinimal.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusFixersEditor, Log, All);
+NEXUSFIXERSEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusFixersEditor, Log, All);
