@@ -19,8 +19,8 @@ class NEXUSPROCGEN_API UNCellRootComponent : public USceneComponent
 	GENERATED_BODY()
 	
 	explicit UNCellRootComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get())
+		: LevelInstance(nullptr)
 	{
-		LevelInstance = nullptr;
 		PrimaryComponentTick.bCanEverTick = false;
 		PrimaryComponentTick.bStartWithTickEnabled = false;
 		bAutoActivate = 0;
