@@ -18,6 +18,7 @@ runs:
             if ($line.Contains("Warning: ")) {
               if($line.EndsWith("LogToolMenus: Warning: Menu section not found: 'Compile' for insert: 'EditorPerf'")) { continue }
               if($line.Contains("LogStreaming: Warning: Failed to read file '../../../Engine/")) { continue }
+              if($line.Contains("HTTP request timed out after 3.00 seconds URL=https://www.google.com")) { continue }
               Write-Host "::warning ::$line"
               $foundWarning++
             }
