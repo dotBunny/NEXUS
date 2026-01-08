@@ -3,7 +3,7 @@ run-name: PUSH.UnitTests (NEXUS.UnitTests)
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "main" ]
     paths:
       - 'Plugins/**/Source/**'
       - 'Samples/**/Content/**'

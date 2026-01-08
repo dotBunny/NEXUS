@@ -23,7 +23,6 @@ on:
         required: true
         default: false
         
-
 jobs:
   ManualTest:
     runs-on: self-hosted
