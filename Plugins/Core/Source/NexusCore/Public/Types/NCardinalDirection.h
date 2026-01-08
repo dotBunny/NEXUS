@@ -33,22 +33,22 @@
 UENUM()
 enum class ENCardinalDirection : uint8
 {
-	CD_North					UMETA(DisplayName = "North"),
-	CD_NorthNorthEast			UMETA(DisplayName = "North North East"),
-	CD_NorthEast				UMETA(DisplayName = "North East"),
-	CD_EastNorthEast			UMETA(DisplayName = "East North East"),
-	CD_East						UMETA(DisplayName = "East"),
-	CD_EastSouthEast			UMETA(DisplayName = "East South East"),
-	CD_SouthEast				UMETA(DisplayName = "South East"),
-	CD_SouthSouthEast			UMETA(DisplayName = "South South East"),
-	CD_South					UMETA(DisplayName = "South"),
-	CD_SouthSouthWest			UMETA(DisplayName = "South South West"),
-	CD_SouthWest				UMETA(DisplayName = "South West"),
-	CD_WestSouthWest			UMETA(DisplayName = "West South West"),
-	CD_West						UMETA(DisplayName = "West"),
-	CD_WestNorthWest 			UMETA(DisplayName = "West North West"),
-	CD_NorthWest 				UMETA(DisplayName = "North West"),
-	CD_NorthNorthWest 			UMETA(DisplayName = "North North West"),
+	CD_North = 0				UMETA(DisplayName = "North"),
+	CD_NorthNorthEast = 1		UMETA(DisplayName = "North North East"),
+	CD_NorthEast = 2			UMETA(DisplayName = "North East"),
+	CD_EastNorthEast = 3		UMETA(DisplayName = "East North East"),
+	CD_East	= 4					UMETA(DisplayName = "East"),
+	CD_EastSouthEast = 5		UMETA(DisplayName = "East South East"),
+	CD_SouthEast = 6			UMETA(DisplayName = "South East"),
+	CD_SouthSouthEast = 7		UMETA(DisplayName = "South South East"),
+	CD_South = 8				UMETA(DisplayName = "South"),
+	CD_SouthSouthWest = 9		UMETA(DisplayName = "South South West"),
+	CD_SouthWest = 10			UMETA(DisplayName = "South West"),
+	CD_WestSouthWest = 11		UMETA(DisplayName = "West South West"),
+	CD_West	= 12				UMETA(DisplayName = "West"),
+	CD_WestNorthWest = 13		UMETA(DisplayName = "West North West"),
+	CD_NorthWest = 14			UMETA(DisplayName = "North West"),
+	CD_NorthNorthWest = 15		UMETA(DisplayName = "North North West"),
 };
 
 class FNCardinalDirectionUtils

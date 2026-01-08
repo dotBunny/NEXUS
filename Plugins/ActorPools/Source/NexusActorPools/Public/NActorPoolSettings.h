@@ -12,19 +12,19 @@ enum ENActorPoolStrategy : uint8
 	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 	
 	// Create AActor as needed.
-	APS_Create				UMETA(DisplayName = "Create"),
+	APS_Create = 0				UMETA(DisplayName = "Create"),
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
-	APS_CreateLimited		UMETA(DisplayName = "Create Till Cap"),
+	APS_CreateLimited = 1		UMETA(DisplayName = "Create Till Cap"),
 	// Create AActor until MaximumActorCount is reached, any requests beyond provide the oldest already spawned AActor in a FIFO behavior.
-	APS_CreateRecycleFirst	UMETA(DisplayName = "Create Till Cap, Recycle First"),
+	APS_CreateRecycleFirst = 2	UMETA(DisplayName = "Create Till Cap, Recycle First"),
 	// Create AActor until MaximumActorCount is reached, any requests beyond provide the newest already spawned AActor in a LIFO behavior.
-	APS_CreateRecycleLast	UMETA(DisplayName = "Create Till Cap, Recycle Last"),
+	APS_CreateRecycleLast = 3	UMETA(DisplayName = "Create Till Cap, Recycle Last"),
 	// Deploys AActor as needed from fixed pools, exceeding availability results in a nullptr being returned.
-	APS_Fixed				UMETA(DisplayName = "Fixed Availability"),
+	APS_Fixed = 4				UMETA(DisplayName = "Fixed Availability"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the oldest already spawned AActor in a FIFO behavior.
-	APS_FixedRecycleFirst	UMETA(DisplayName = "Fixed Availability, Recycle First"),
+	APS_FixedRecycleFirst = 5	UMETA(DisplayName = "Fixed Availability, Recycle First"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior.
-	APS_FixedRecycleLast	UMETA(DisplayName = "Fixed Availability, Recycle Last")
+	APS_FixedRecycleLast = 6	UMETA(DisplayName = "Fixed Availability, Recycle Last")
 
 	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 };

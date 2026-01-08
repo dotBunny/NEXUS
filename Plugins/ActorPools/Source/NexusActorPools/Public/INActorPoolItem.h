@@ -17,11 +17,11 @@ class FNActorPool;
 UENUM(BlueprintType)
 enum ENActorOperationalState : uint8
 {
-	AOS_Undefined		UMETA(DisplayName = "Undefined"),
-	AOS_Created			UMETA(DisplayName = "Created"),
-	AOS_Enabled			UMETA(DisplayName = "Enabled"),
-	AOS_Disabled		UMETA(DisplayName = "Disabled"),
-	AOS_Destroyed		UMETA(DisplayName = "Destroyed")
+	AOS_Undefined = 0		UMETA(DisplayName = "Undefined"),
+	AOS_Created = 1			UMETA(DisplayName = "Created"),
+	AOS_Enabled	= 2			UMETA(DisplayName = "Enabled"),
+	AOS_Disabled = 3		UMETA(DisplayName = "Disabled"),
+	AOS_Destroyed = 4		UMETA(DisplayName = "Destroyed")
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, const ENActorOperationalState OldState, const ENActorOperationalState NewState);

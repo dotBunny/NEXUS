@@ -23,7 +23,7 @@ bool FNMersenneTwister::Bias(const float Chance)
 void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex)
 {
 	const int ActualCount = StartIndex + Count;
-	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(0.0, 1.0);
+	auto Distribution = std::uniform_real_distribution<float>(0.0, 1.0);
 	for (int i = StartIndex; i < ActualCount; i++)
 	{
 		if (Distribution(this->Engine) <= Chance)
@@ -76,7 +76,7 @@ void FNMersenneTwister::DoubleRange(TArray<double>& OutArray, const int32 Count,
 	const double MaximumValue, const int32 StartIndex)
 {
 	const int ActualCount = StartIndex + Count;
-	std::uniform_real_distribution<double> Distribution = std::uniform_real_distribution<double>(MinimumValue, MaximumValue);
+	auto Distribution = std::uniform_real_distribution<double>(MinimumValue, MaximumValue);
 	for (int i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
@@ -119,7 +119,7 @@ void FNMersenneTwister::FloatRange(TArray<float>& OutArray, const int32 Count, c
 	const float MaximumValue, const int32 StartIndex)
 {
 	const int ActualCount = StartIndex + Count;
-	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(MinimumValue, MaximumValue);
+	auto Distribution = std::uniform_real_distribution<float>(MinimumValue, MaximumValue);
 	for (int i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
@@ -138,7 +138,7 @@ void FNMersenneTwister::IntegerRange(TArray<int32>& OutArray, const int32 Count,
 	const int32 MaximumValue, const int32 StartIndex)
 {
 	const int ActualCount = StartIndex + Count;
-	std::uniform_int_distribution<int32> Distribution = std::uniform_int_distribution<int32>(MinimumValue, MaximumValue);
+	auto Distribution = std::uniform_int_distribution<int32>(MinimumValue, MaximumValue);
 	for (int i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
@@ -157,7 +157,7 @@ void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int
 	const uint32 MaximumValue, const int32 StartIndex)
 {
 	const int ActualCount = StartIndex + Count;
-	std::uniform_int_distribution<uint32> Distribution = std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue);
+	auto Distribution = std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue);
 	for (int i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
@@ -178,7 +178,7 @@ FVector FNMersenneTwister::VectorNormalized()
 
 FVector FNMersenneTwister::Vector(const float MinimumRange, const float MaximumRange)
 {
-	std::uniform_real_distribution<float> Distribution = std::uniform_real_distribution<float>(MinimumRange, MaximumRange);
+	auto Distribution = std::uniform_real_distribution<float>(MinimumRange, MaximumRange);
 	const FVector PseudoRandomValue = FVector(Distribution(this->Engine), Distribution(this->Engine), Distribution(this->Engine));
 	this->CallCounter += 3;
 	return PseudoRandomValue;

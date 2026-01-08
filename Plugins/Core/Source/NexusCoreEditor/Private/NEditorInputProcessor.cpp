@@ -83,8 +83,6 @@ bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, c
 				Editor->SetViewLocation(ViewLocation, ViewZoom);
 				return true;
 			}
-			//const FName& TypeName = Editor->GetEditingAssetTypeName();
-			
 		}
 	}
 	return false;

@@ -9,10 +9,9 @@ class FNTestScopeTimer
 {
 public:
 	explicit FNTestScopeTimer(const FString& InName, const float MaxDurationMs = MAX_FLT, const bool bUseNamedEvent = true)
-		: Name(InName), MaxDuration(MaxDurationMs), EndTime(0)
+		: bNamedEvent(bUseNamedEvent), Name(InName), MaxDuration(MaxDurationMs)
 	{
-		bNamedEvent = bUseNamedEvent;
-		if (bNamedEvent)
+		if (bUseNamedEvent)
 		{
 			UE_LOG(LogTemp, Log, TEXT("[%s] BEGIN"), *Name);
 			FPlatformMisc::BeginNamedEvent(FColor::Blue, *Name);
@@ -55,5 +54,5 @@ private:
 	FString Name;
 	double MaxDuration;
 	double StartTime;
-	double EndTime;
+	double EndTime = 0;
 };

@@ -613,7 +613,7 @@ void FNProcGenEditorCommands::CellJunctionAddComponent()
 		AActor* Actor = Cast<AActor>( *SelectedActor );
 		if (!Actor) continue;
 		
-		UNCellJunctionComponent* NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
+		auto NewComponent = static_cast<UNCellJunctionComponent*>(Actor->AddComponentByClass(
 			UNCellJunctionComponent::StaticClass(), true, FTransform::Identity, false));
 		
 		Actor->Modify();

@@ -103,7 +103,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	{
 		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		FNActorPool* Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
+		const auto Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
 		ActorPools.Add(ActorClass, Pool);
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Creating a new FNActorPool(%s) in UWorld(%s), raising the total pool count to %i."), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return true;
@@ -115,7 +115,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
 	if (ActorPoolSet->NestedSets.Num() == 0)
 	{
-		// Optimized fast path for if the APS is not using nested sets.
+		// Optimized fast-path for if the APS is not using nested sets.
 		for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
 		{
 			if (ActorPools.Contains(Definition.ActorClass))

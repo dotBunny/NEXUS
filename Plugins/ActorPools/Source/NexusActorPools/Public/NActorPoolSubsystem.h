@@ -149,7 +149,7 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 	{
 		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
+		const auto NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);
 		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::GetActor] Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
@@ -165,7 +165,7 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 	{
 		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
 		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		FNActorPool* NewPool = new FNActorPool(GetWorld(), ActorClass);
+		const auto NewPool = new FNActorPool(GetWorld(), ActorClass);
 		ActorPools.Add(ActorClass, NewPool);
 		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::SpawnActor] Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());

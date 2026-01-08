@@ -30,11 +30,11 @@ enum ENActorPoolSpawnerDistribution : uint8
 {
 	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 	
-	APSD_Point			UMETA(DisplayName = "Point"),
-	APSD_Radius			UMETA(DisplayName = "Radius"),
-	APSD_Sphere			UMETA(DisplayName = "Sphere"),
-	APSD_Box			UMETA(DisplayName = "Box"),
-	APSD_Spline			UMETA(DisplayName = "Spline")
+	APSD_Point = 0			UMETA(DisplayName = "Point"),
+	APSD_Radius = 1			UMETA(DisplayName = "Radius"),
+	APSD_Sphere = 2			UMETA(DisplayName = "Sphere"),
+	APSD_Box = 3			UMETA(DisplayName = "Box"),
+	APSD_Spline = 4			UMETA(DisplayName = "Spline")
 
 	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
 };

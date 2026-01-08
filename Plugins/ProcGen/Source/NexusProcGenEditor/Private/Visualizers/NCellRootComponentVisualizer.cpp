@@ -100,7 +100,7 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 	{
 		if (VisProxy->IsA(HNIndexComponentVisProxy::StaticGetType()))
 		{
-			UNCellRootComponent* IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
+			const auto IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
 			const HNIndexComponentVisProxy* Proxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
 			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 			{

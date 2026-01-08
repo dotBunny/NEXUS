@@ -17,12 +17,10 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		ObjectPtr = nullptr;
 	}
 	
-	explicit FNObjectSnapshotEntry(const FUObjectItem& Item)
+	explicit FNObjectSnapshotEntry(const FUObjectItem& Item) : bIsRoot(Item.IsRootSet()), bIsGarbage(Item.IsGarbage())
 	{
 		RefCount = Item.GetRefCount();
 		SerialNumber = Item.GetSerialNumber();
-		bIsGarbage = Item.IsGarbage();
-		bIsRoot = Item.IsRootSet();
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		if (UObject* Object = static_cast<UObject*>(Item.Object))
 #else

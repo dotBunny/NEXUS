@@ -256,7 +256,7 @@ void FNProcGenEditorToolMenu::Register()
 	}
 
 	// EUW Entry
-	FNWindowCommandInfo EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNWindowCommandInfo();
 	
 	EditorWindow.Identifier = "NProcGenSystem";
 	EditorWindow.DisplayName = LOCTEXT("NProcGenSystem_EUW_DisplayName", "ProcGen System");
