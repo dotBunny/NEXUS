@@ -35,3 +35,12 @@ FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 ````
+
+## Badges
+
+### Static Analysis (SonarQube)
+
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=code_smells)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
