@@ -213,37 +213,38 @@ public:
 	{
 		switch (CardinalDirection)
 		{
-		case ENCardinalDirection::CD_North:
+			using enum ENCardinalDirection;
+		case CD_North:
 			return N_CARDINAL_NORTH;
-		case ENCardinalDirection::CD_NorthNorthEast:
+		case CD_NorthNorthEast:
 			return N_CARDINAL_NORTH_NORTH_EAST;
-		case ENCardinalDirection::CD_NorthEast:
+		case CD_NorthEast:
 			return N_CARDINAL_NORTH_EAST;
-		case ENCardinalDirection::CD_EastNorthEast:
+		case CD_EastNorthEast:
 			return N_CARDINAL_EAST_NORTH_EAST;
-		case ENCardinalDirection::CD_East:
+		case CD_East:
 			return N_CARDINAL_EAST;
-		case ENCardinalDirection::CD_EastSouthEast:
+		case CD_EastSouthEast:
 			return N_CARDINAL_EAST_SOUTH_EAST;
-		case ENCardinalDirection::CD_SouthEast:
+		case CD_SouthEast:
 			return N_CARDINAL_SOUTH_EAST;
-		case ENCardinalDirection::CD_SouthSouthEast:
+		case CD_SouthSouthEast:
 			return N_CARDINAL_SOUTH_SOUTH_EAST;
-		case ENCardinalDirection::CD_South:
+		case CD_South:
 			return N_CARDINAL_SOUTH;
-		case ENCardinalDirection::CD_SouthSouthWest:
+		case CD_SouthSouthWest:
 			return N_CARDINAL_SOUTH_SOUTH_WEST;
-		case ENCardinalDirection::CD_SouthWest:
+		case CD_SouthWest:
 			return N_CARDINAL_SOUTH_WEST;
-		case ENCardinalDirection::CD_WestSouthWest:
+		case CD_WestSouthWest:
 			return N_CARDINAL_WEST_SOUTH_WEST;
-		case ENCardinalDirection::CD_West:
+		case CD_West:
 			return N_CARDINAL_WEST;
-		case ENCardinalDirection::CD_WestNorthWest:
+		case CD_WestNorthWest:
 			return N_CARDINAL_WEST_NORTH_WEST;
-		case ENCardinalDirection::CD_NorthWest:
+		case CD_NorthWest:
 			return N_CARDINAL_NORTH_WEST;
-		case ENCardinalDirection::CD_NorthNorthWest:
+		case CD_NorthNorthWest:
 			return N_CARDINAL_NORTH_NORTH_WEST;
 		}
 		return N_CARDINAL_NORTH
@@ -254,37 +255,38 @@ public:
 	{
 		switch (CardinalDirection)
 		{
-		case ENCardinalDirection::CD_SouthSouthWest:
+			using enum ENCardinalDirection;
+		case CD_SouthSouthWest:
 			return N_CARDINAL_SOUTH_SOUTH_WEST_NORMALIZED;			
-		case ENCardinalDirection::CD_SouthWest:
+		case CD_SouthWest:
 			return N_CARDINAL_SOUTH_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_WestSouthWest:
+		case CD_WestSouthWest:
 			return N_CARDINAL_WEST_SOUTH_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_West:
+		case CD_West:
 			return N_CARDINAL_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_WestNorthWest:
+		case CD_WestNorthWest:
 			return N_CARDINAL_WEST_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_NorthWest:
+		case CD_NorthWest:
 			return N_CARDINAL_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_NorthNorthWest:
+		case CD_NorthNorthWest:
 			return N_CARDINAL_NORTH_NORTH_WEST_NORMALIZED;
-		case ENCardinalDirection::CD_North:
+		case CD_North:
 			return N_CARDINAL_NORTH;
-		case ENCardinalDirection::CD_NorthNorthEast:
+		case CD_NorthNorthEast:
 			return N_CARDINAL_NORTH_NORTH_EAST;
-		case ENCardinalDirection::CD_NorthEast:
+		case CD_NorthEast:
 			return N_CARDINAL_NORTH_EAST;
-		case ENCardinalDirection::CD_EastNorthEast:
+		case CD_EastNorthEast:
 			return N_CARDINAL_EAST_NORTH_EAST;
-		case ENCardinalDirection::CD_East:
+		case CD_East:
 			return N_CARDINAL_EAST;
-		case ENCardinalDirection::CD_EastSouthEast:
+		case CD_EastSouthEast:
 			return N_CARDINAL_EAST_SOUTH_EAST;
-		case ENCardinalDirection::CD_SouthEast:
+		case CD_SouthEast:
 			return N_CARDINAL_SOUTH_EAST;
-		case ENCardinalDirection::CD_SouthSouthEast:
+		case CD_SouthSouthEast:
 			return N_CARDINAL_SOUTH_SOUTH_EAST;
-		case ENCardinalDirection::CD_South:
+		case CD_South:
 			return N_CARDINAL_SOUTH;
 
 		}
