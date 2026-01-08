@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.5] - 2026-01-??
+
+### Changed
+
+- The `main` branch of the GitHub repository is now the base point of development, tags are still created for specific release versions, with those points in time being commited to the `release` branch.
+
 ## [0.2.4] - 2026-01-06
 
 ### Added

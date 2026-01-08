@@ -1,18 +1,17 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-
 #pragma once
+
 #include "NDelayedEditorTask.h"
 #include "NUpdateCheckDelayedEditorTask.generated.h"
-
 
 UENUM(BlueprintType)
 enum ENUpdatesChannel
 {
-	NUC_GithubMain	= 0 UMETA(DisplayName = "Mainline (GitHub)"),
-	NUC_GithubDev	= 1 UMETA(DisplayName = "Development (GitHub)"),
-	NUC_Custom		= 6 UMETA(DisplayName = "Custom"),
+	NUC_GithubRelease	= 0 UMETA(DisplayName = "Release (GitHub)"),
+	NUC_GithubMain		= 1 UMETA(DisplayName = "Main (GitHub)"),
+	NUC_Custom			= 6 UMETA(DisplayName = "Custom"),
 };
 
 UCLASS()
@@ -28,10 +27,10 @@ private:
 	UFUNCTION()
 	void Execute();
 	
+	const FString ReleaseQueryURI = TEXT("https://raw.githubusercontent.com/dotBunny/NEXUS/refs/heads/release/Plugins/Core/Source/NexusCore/Public/NCoreMinimal.h");
+	const FString ReleaseUpdateURI = TEXT("https://github.com/dotBunny/NEXUS/tree/release");
 	const FString MainQueryURI = TEXT("https://raw.githubusercontent.com/dotBunny/NEXUS/refs/heads/main/Plugins/Core/Source/NexusCore/Public/NCoreMinimal.h");
 	const FString MainUpdateURI = TEXT("https://github.com/dotBunny/NEXUS/tree/main");
-	const FString DevQueryURI = TEXT("https://raw.githubusercontent.com/dotBunny/NEXUS/refs/heads/dev/Plugins/Core/Source/NexusCore/Public/NCoreMinimal.h");
-	const FString DevUpdateURI = TEXT("https://github.com/dotBunny/NEXUS/tree/dev");
 	
 	FString GetQueryURI() const;
 	FString GetUpdateURI() const;
