@@ -44,12 +44,6 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 					.Padding(0.0f, 0.0f, 6.0f, 0.0f)
 					.VAlign(VAlign_Center)
 					.AutoWidth()
-					// [
-					// 	SNew(SImage)
-					// 	.DesiredSizeOverride(FVector2D(16,16))
-					// 	.Image(FPCGEditorStyle::Get().GetBrush("PCG.Command.ForceRegenClearCache"))
-					// 	.ColorAndOpacity(FSlateColor::UseForeground())
-					// ]
 					+SHorizontalBox::Slot()
 					.VAlign(VAlign_Center)
 					.AutoWidth()
@@ -77,7 +71,6 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 					[
 						SNew(SImage)
 						.DesiredSizeOverride(FVector2D(16, 16))
-						//.Image(FPCGEditorStyle::Get().GetBrush("PCG.Command.StopRegen"))
 						.ColorAndOpacity(FSlateColor::UseForeground())
 					]
 					+ SHorizontalBox::Slot()

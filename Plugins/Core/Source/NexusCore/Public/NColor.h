@@ -6,33 +6,31 @@
 UENUM(BlueprintType)
 enum ENColor : uint8
 {
-	NC_Black				UMETA(DisplayName = "Black"),
-	NC_White				UMETA(DisplayName = "White"),
-
-	NC_BlueLight			UMETA(DisplayName = "Light Blue"),
-	NC_BlueMid				UMETA(DisplayName = "Mid Blue"),
-	NC_BlueDark				UMETA(DisplayName = "Dark Blue"),
-
-	NC_GreenLight			UMETA(DisplayName = "Light Green"),
-	NC_GreenMid				UMETA(DisplayName = "Mid Green"),
-	NC_GreenDark			UMETA(DisplayName = "Dark Green"),
-
-	NC_GreyLight			UMETA(DisplayName = "Light Grey"),
-	NC_GreyDark				UMETA(DisplayName = "Dark Grey"),
+	NC_Black = 0				UMETA(DisplayName = "Black"),
+	NC_White = 1				UMETA(DisplayName = "White"),
+	NC_GreyLight = 2			UMETA(DisplayName = "Light Grey"),
+	NC_GreyDark = 3				UMETA(DisplayName = "Dark Grey"),
 	
-	NC_Red					UMETA(DisplayName = "Red"),
-	NC_Orange				UMETA(DisplayName = "Orange"),
-	NC_Yellow				UMETA(DisplayName = "Yellow"),
-	NC_Green				UMETA(DisplayName = "Green"),
-	NC_Pink					UMETA(DisplayName = "Pink"),
+	NC_BlueLight = 5			UMETA(DisplayName = "Light Blue"),
+	NC_BlueMid = 6				UMETA(DisplayName = "Mid Blue"),
+	NC_BlueDark = 7				UMETA(DisplayName = "Dark Blue"),
 
+	NC_GreenLight = 10			UMETA(DisplayName = "Light Green"),
+	NC_GreenMid	 = 11			UMETA(DisplayName = "Mid Green"),
+	NC_GreenDark = 12			UMETA(DisplayName = "Dark Green"),
 
-	NC_NexusDarkBlue		UMETA(DisplayName = "NEXUS: Dark Blue"),
-	NC_NexusLightBlue		UMETA(DisplayName = "NEXUS: Light Blue"),
-	NC_NexusBlack			UMETA(DisplayName = "NEXUS: Black"),
-	NC_NexusPink			UMETA(DisplayName = "NEXUS: Pink"),
+	NC_Red = 15					UMETA(DisplayName = "Red"),
+	NC_Orange = 20				UMETA(DisplayName = "Orange"),
+	NC_Yellow = 25				UMETA(DisplayName = "Yellow"),
+	NC_Green = 30				UMETA(DisplayName = "Green"),
+	NC_Pink	= 35				UMETA(DisplayName = "Pink"),
+	
+	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS: Dark Blue"),
+	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS: Light Blue"),
+	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS: Black"),
+	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS: Pink"),
 
-	NC_HalfBlack			UMETA(DisplayName = "Half Black")
+	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black")
 };
 
 /**

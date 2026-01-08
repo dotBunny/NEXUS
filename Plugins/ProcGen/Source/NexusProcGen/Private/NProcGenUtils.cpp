@@ -223,17 +223,11 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		// STEP 2 - Broad Trace
 		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_BroadTrace", "Broad Trace"));
 		BroadTraceTask.MakeDialog(false);
-		
-		// DEBUG
-		//FlushPersistentDebugLines(World);
-		
-		// We iterate over the array by axis to minimize inverse calculations
 
+		// We iterate over the array by axis to minimize inverse calculations
 		TArray<FVector> RayEndPoints;
 		FHitResult SingleHit;
 		TArray<FHitResult> ObjectHits;
-	//	FVector HitActorLocation;
-	//	FVector HitActorExtents;
 		
 		// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
 		FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
@@ -255,60 +249,6 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 					{
 						ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
 					}
-					
-					//
-					// // Create Rays
-					// RayEndPoints.Empty();
-					// GetVoxelQueryLevelBoundsEndPoints(VoxelCenter, Bounds, RayEndPoints);
-					//
-					// bool bIsInside = false;
-					// for (int j = 0; j < 26; j++)
-					// {
-					// 	bool bHitObjects =  World->LineTraceMultiByObjectType(ObjectHits, RayEndPoints[j], VoxelCenter, ObjectParams, Params);
-					// 	DrawDebugLineTraceMulti(World, RayEndPoints[j], VoxelCenter, EDrawDebugTrace::Persistent, bHitObjects, OutHits, FLinearColor::Yellow, FLinearColor::Red, -1.f);
-					// 	if (bHitObjects)
-					// 	{
-					// 		
-					// 		// We've hit objects from the outside of the bounds inward, which now means we need to 
-					// 		// determine if we are inside one of them.
-					// 		
-					// 		const int Hits = ObjectHits.Num();
-					// 		if (Hits == 0) continue; // No hits, void
-					// 		
-					// 		for (int  k = 0; k < Hits; k++)
-					// 		{
-					// 			AActor* HitActor = ObjectHits[k].GetActor();
-					// 			
-					// 			// We want to rule out quickly if we are no longer in the bounds of an object
-					// 			HitActor->GetActorBounds(true, HitActorLocation, HitActorExtents);
-					// 			if (FBox HitActorBox = FBox(HitActorLocation - HitActorExtents, HitActorLocation + HitActorExtents); 
-					// 				!HitActorBox.IsInsideOrOn(VoxelCenter))
-					// 			{
-					// 				continue;
-					// 			}
-					// 			
-					// 			// Now we know that were inside of it we need to do some calculations to see if we are 
-					// 			// actually inside its meshes triangles
-					// 			
-					// 			
-					// 			
-					// 			
-					// 			//UE_LOG(LogTemp, Warning, TEXT("Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
-					// 		}
-					// 		
-					// 		
-					// 		if (FMath::Modulo(ObjectHits.Num(), 2) != 0)
-					// 		{
-					// 			bIsInside = true;
-					// 		}
-					// 	}
-					// }
-			
-					// if (bIsInside)
-					// {
-					// 	// Outside
-					// 	//DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 2.0f);
-					// }
 				}
 			}
 		}
