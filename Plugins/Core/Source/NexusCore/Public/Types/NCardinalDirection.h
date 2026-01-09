@@ -15,24 +15,21 @@ namespace Nexus::Core::CardinalDirection
 	constexpr float SouthSouthEast = 157.5f;
 	constexpr float South = 180.0f;
 	constexpr float SouthSouthWest = 202.5f;
+	constexpr float SouthSouthWestNormalized = -157.5f;
 	constexpr float SouthWest = 225.0f;
+	constexpr float SouthWestNormalized = -135.0f;
 	constexpr float WestSouthWest = 247.5f;
+	constexpr float WestSouthWestNormalized = -112.5f;
 	constexpr float West = 270.0f;
+	constexpr float WestNormalized = -90.0f;
 	constexpr float WestNorthWest = 292.5f;
+	constexpr float WestNorthWestNormalized = -67.5f;
 	constexpr float NorthWest = 315.0f;
+	constexpr float NorthWestNormalized = -45.0f;
 	constexpr float NorthNorthWest = 337.5f;
+	constexpr float NorthNorthWestNormalized = -22.5f;
 }
 
-namespace Nexus::Core::CardinalDirectionNormalized
-{
-	constexpr float SouthSouthWest = -157.5f;
-	constexpr float SouthWest = -135.0f;
-	constexpr float WestSouthWest = -112.5f;
-	constexpr float West = -90.0f;
-	constexpr float WestNorthWest = -67.5f;
-	constexpr float NorthWest = -45.0f;
-	constexpr float NorthNorthWest = -22.5f;
-}
 
 UENUM()
 enum class ENCardinalDirection : uint8
@@ -181,31 +178,31 @@ public:
 		{
 			return ENCardinalDirection::CD_South;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::SouthSouthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::SouthSouthWestNormalized))
 		{
 			return ENCardinalDirection::CD_SouthSouthWest;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::SouthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::SouthWestNormalized))
 		{
 			return ENCardinalDirection::CD_SouthWest;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::WestSouthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::WestSouthWestNormalized))
 		{
 			return ENCardinalDirection::CD_WestSouthWest;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::West))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::WestNormalized))
 		{
 			return ENCardinalDirection::CD_West;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::WestNorthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::WestNorthWestNormalized))
 		{
 			return ENCardinalDirection::CD_WestNorthWest;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::NorthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::NorthWestNormalized))
 		{
 			return ENCardinalDirection::CD_NorthWest;
 		}
-		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirectionNormalized::NorthNorthWest))
+		if (FMath::IsNearlyEqual(NormalizedAngle, Nexus::Core::CardinalDirection::NorthNorthWestNormalized))
 		{
 			return ENCardinalDirection::CD_NorthNorthWest;
 		}
@@ -260,19 +257,19 @@ public:
 		{
 			using enum ENCardinalDirection;
 		case CD_SouthSouthWest:
-			return Nexus::Core::CardinalDirectionNormalized::SouthSouthWest;
+			return Nexus::Core::CardinalDirection::SouthSouthWestNormalized;
 		case CD_SouthWest:
-			return Nexus::Core::CardinalDirectionNormalized::SouthWest;
+			return Nexus::Core::CardinalDirection::SouthWestNormalized;
 		case CD_WestSouthWest:
-			return Nexus::Core::CardinalDirectionNormalized::WestSouthWest;
+			return Nexus::Core::CardinalDirection::WestSouthWestNormalized;
 		case CD_West:
-			return Nexus::Core::CardinalDirectionNormalized::West;
+			return Nexus::Core::CardinalDirection::WestNormalized;
 		case CD_WestNorthWest:
-			return Nexus::Core::CardinalDirectionNormalized::WestNorthWest;
+			return Nexus::Core::CardinalDirection::WestNorthWestNormalized;
 		case CD_NorthWest:
-			return Nexus::Core::CardinalDirectionNormalized::NorthWest;
+			return Nexus::Core::CardinalDirection::NorthWestNormalized;
 		case CD_NorthNorthWest:
-			return Nexus::Core::CardinalDirectionNormalized::NorthNorthWest;
+			return Nexus::Core::CardinalDirection::NorthNorthWestNormalized;
 		case CD_North:
 			return Nexus::Core::CardinalDirection::North;
 		case CD_NorthNorthEast:
