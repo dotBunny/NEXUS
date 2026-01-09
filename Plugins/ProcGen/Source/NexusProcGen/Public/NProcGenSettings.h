@@ -13,11 +13,20 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-
-	
 	N_IMPLEMENT_SETTINGS(UNProcGenSettings);
 
 #if WITH_EDITOR
+	
+	virtual void PostInitProperties() override
+	{
+		Super::PostInitProperties();
+		ValidateSettings();
+	}
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		ValidateSettings();
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+	}
 
 	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
@@ -44,8 +53,41 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget (Override)",
-		meta=(ToolTip="Override the default (/NexusProcGen/WB_NProcGenDeveloperOverlay) widget used for the developer overlay."))
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget")
 	TSubclassOf<UNProcGenDeveloperOverlayWidget> DeveloperOverlayWidget;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
+	TSoftObjectPtr<UMaterial> ProxyMaterial;
+
+private:
+	void ValidateSettings()
+	{
+#if WITH_EDITOR		
+		bool bNeedsSave = false;
+		
+		if (!DeveloperOverlayWidget)
+		{
+			if (UClass* DefaultOverlayClass = FSoftClassPath(TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C")).TryLoadClass<UNProcGenDeveloperOverlayWidget>())
+			{
+				bNeedsSave = true;
+				DeveloperOverlayWidget = DefaultOverlayClass;
+			}
+		}
+		
+		if (!ProxyMaterial)
+		{
+			if (UObject* DefaultProxyMaterial = FSoftClassPath(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy")).TryLoad())
+			{
+				bNeedsSave = true;
+				ProxyMaterial = Cast<UMaterial>(DefaultProxyMaterial);
+			}
+		}
+	
+		if (bNeedsSave)
+		{
+			TryUpdateDefaultConfigFile();
+		}
+#endif		
+	}
 };
