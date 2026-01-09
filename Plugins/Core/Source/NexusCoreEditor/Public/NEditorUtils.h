@@ -122,7 +122,7 @@ public:
 	
 	FORCEINLINE static UWorld* GetCurrentWorld()
 	{
-		if (ULevel* CurrentLevel = GetCurrentLevel(); CurrentLevel != nullptr)
+		if (ULevel* CurrentLevel = GetCurrentLevel())
 		{
 			return CurrentLevel->OwningWorld;
 		}
