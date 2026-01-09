@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "INProcGenOperationOwner.h"
 #include "NEditorUtils.h"
 #include "NProcGenOperation.h"
 #include "Macros/NSubsystemMacros.h"
@@ -11,7 +12,7 @@
 class UNProcGenOperation;
 
 UCLASS()
-class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem, public FTickableGameObject
+class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem, public FTickableGameObject, public INProcGenOperationOwner
 {
 	GENERATED_BODY()
 	N_EDITOR_SUBSYSTEM(UNProcGenEditorSubsystem)
@@ -44,9 +45,11 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	}
 	virtual bool IsTickableWhenPaused() const override{ return true; }
 	virtual bool IsTickableInEditor() const override { return true; }
+
+	virtual void StartOperation(UNProcGenOperation* Operation) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
+	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	
-	void StartOperation(UNProcGenOperation* Operation);
-	void OnOperationFinished(UNProcGenOperation* Operation);
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
 
 private:

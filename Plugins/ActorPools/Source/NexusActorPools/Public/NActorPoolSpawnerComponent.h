@@ -158,6 +158,8 @@ protected:
 	UPROPERTY(EditAnywhere, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")
 	TArray<FNActorPoolSpawnerTemplate> Templates;
 private:
+	void CacheSplineComponent();
+	
 	FNWeightedIntegerArray WeightedIndices;
 	bool bIsNetAuthority = false;
 	float TimeSinceSpawned = 0.f;

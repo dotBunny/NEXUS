@@ -62,39 +62,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 
 	if (Distribution == APSD_Spline)
 	{
-		// We have a level reference, first check
-		if (!SplineLevelReference.PathToComponent.IsEmpty())
-		{
-			if (SplineLevelReference.OtherActor.IsValid())
-			{
-				AActor* Owner = SplineLevelReference.OtherActor.Get();
-				CachedSplineComponent = Cast<USplineComponent>(SplineLevelReference.GetComponent(Owner));
-			}
-			else
-			{
-				CachedSplineComponent = Cast<USplineComponent>(SplineLevelReference.GetComponent(this->GetOwner()));
-			}
-		}
-		else if (!SplineComponentName.IsNone())
-		{
-			// We have a name and should look for the component based off that
-			TArray<USplineComponent*> FoundSplineComponents;
-			this->GetOwner()->GetComponents<USplineComponent>(FoundSplineComponents, true);
-			const int32 FoundCount = FoundSplineComponents.Num();
-			for (int32 i = 0; i < FoundCount; i++)
-			{
-				if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
-				{
-					CachedSplineComponent = FoundSplineComponents[i];
-				}
-
-			}
-		}
-		if (CachedSplineComponent == nullptr)
-		{
-			Distribution = APSD_Point;
-			UE_LOG(LogNexusActorPools, Error, TEXT("Unable to find USplineComponent to use for distribution with UNActorPoolSpawnerComponent on AActor(%s); changing to spawn at point."), *this->GetOwner()->GetName());
-		}
+		CacheSplineComponent();
 	}
 }
 
@@ -158,4 +126,41 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, SpawnLocation, SpawnRotator);
 	}
 	TimeSinceSpawned = 0;
+}
+
+void UNActorPoolSpawnerComponent::CacheSplineComponent()
+{
+	// We have a level reference, first check
+	if (!SplineLevelReference.PathToComponent.IsEmpty())
+	{
+		if (SplineLevelReference.OtherActor.IsValid())
+		{
+			AActor* Owner = SplineLevelReference.OtherActor.Get();
+			CachedSplineComponent = Cast<USplineComponent>(SplineLevelReference.GetComponent(Owner));
+		}
+		else
+		{
+			CachedSplineComponent = Cast<USplineComponent>(SplineLevelReference.GetComponent(this->GetOwner()));
+		}
+	}
+	else if (!SplineComponentName.IsNone())
+	{
+		// We have a name and should look for the component based off that
+		TArray<USplineComponent*> FoundSplineComponents;
+		this->GetOwner()->GetComponents<USplineComponent>(FoundSplineComponents, true);
+		const int32 FoundCount = FoundSplineComponents.Num();
+		for (int32 i = 0; i < FoundCount; i++)
+		{
+			if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
+			{
+				CachedSplineComponent = FoundSplineComponents[i];
+			}
+		}
+	}
+	
+	if (CachedSplineComponent == nullptr)
+	{
+		Distribution = APSD_Point;
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to find USplineComponent to use for distribution with UNActorPoolSpawnerComponent on AActor(%s); changing to spawn at point."), *this->GetOwner()->GetName());
+	}
 }

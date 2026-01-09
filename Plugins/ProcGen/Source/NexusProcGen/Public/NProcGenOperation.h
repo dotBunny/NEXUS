@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "INProcGenOperationOwner.h"
 #include "NProcGenNamespace.h"
 #include "Math/NSeedGenerator.h"
 #include "Generation/NProcGenOperationContext.h"
@@ -65,7 +66,7 @@ public:
 	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName= FText::GetEmpty());
 	
 	void Reset() const;
-	void StartBuild(UObject* Caller);
+	void StartBuild(INProcGenOperationOwner* Caller);
 	
 	void SetSeedOnContext(const FString& NewSeed) const;
 	bool AddToContext(UNOrganComponent* Component) const;
@@ -102,7 +103,7 @@ protected:
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	TObjectPtr<UObject> ExecuteCaller = nullptr;
+	INProcGenOperationOwner* Owner = nullptr;
 	FNProcGenOperationTaskGraph* Graph = nullptr;
 	FNProcGenOperationContext* Context = nullptr;
 	bool bIsContextLocked;

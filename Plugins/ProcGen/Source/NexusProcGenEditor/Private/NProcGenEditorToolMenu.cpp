@@ -307,22 +307,20 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
 	// Default value
-	FString TemplatePath = TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'");
+	const TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
 	
 	// Evaluate override
-	if (TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget; 
-		WidgetClass != nullptr)
+	if (WidgetClass != nullptr)
 	{
 		FString PathName = WidgetClass->GetPathName();
 		PathName.RemoveFromEnd("_C");
-		TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName);
-	}
-
-	UNWidgetEditorUtilityWidget::GetOrCreate(
+		
+		UNWidgetEditorUtilityWidget::GetOrCreate(
 		EditorUtilityWindowName, 
-		TemplatePath, 
+		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
 		FText::FromString("NEXUS: ProcGen"), 
 		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
+	}
 }
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()

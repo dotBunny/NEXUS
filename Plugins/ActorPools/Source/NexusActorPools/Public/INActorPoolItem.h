@@ -93,7 +93,10 @@ public:
 	/**
 	 * Called during the deferred construction process for the Actor.
 	 */
-	virtual void OnDeferredConstruction() { };
+	virtual void OnDeferredConstruction() 
+	{ 
+		// Implementations should fill this out as needed. 
+	};
 
 	/**
 	 * Set the ActorOperationalState of the INActorPoolItem (Actor) calling the change delegate as needed.

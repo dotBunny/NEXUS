@@ -63,9 +63,8 @@ public:
 private:
 	void ValidateSettings()
 	{
-#if WITH_EDITOR		
+	
 		bool bNeedsSave = false;
-		
 		if (!DeveloperOverlayWidget)
 		{
 			if (UClass* DefaultOverlayClass = FSoftClassPath(TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C")).TryLoadClass<UNProcGenDeveloperOverlayWidget>())
@@ -74,7 +73,6 @@ private:
 				DeveloperOverlayWidget = DefaultOverlayClass;
 			}
 		}
-		
 		if (!ProxyMaterial)
 		{
 			if (UObject* DefaultProxyMaterial = FSoftClassPath(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy")).TryLoad())
@@ -83,11 +81,10 @@ private:
 				ProxyMaterial = Cast<UMaterial>(DefaultProxyMaterial);
 			}
 		}
-	
+		
 		if (bNeedsSave)
 		{
 			TryUpdateDefaultConfigFile();
 		}
-#endif		
 	}
 };

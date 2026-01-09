@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "INProcGenOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenSubsystem.generated.h"
 
@@ -13,7 +14,7 @@ class ANCellActor;
 class UNProcGenContext;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Subsystem")
-class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem
+class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, public INProcGenOperationOwner
 {
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNProcGenSubsystem, true)
@@ -29,9 +30,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+
+	virtual void StartOperation(UNProcGenOperation* Operation) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
+	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	
-	void StartOperation(UNProcGenOperation* Operation);
-	void OnOperationFinished(UNProcGenOperation* Operation);
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
 	
 	

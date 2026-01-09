@@ -12,3 +12,8 @@ void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation
 {
 	KnownOperations.Remove(Operation);
 }
+
+void UNProcGenEditorSubsystem::OnOperationDestroyed(UNProcGenOperation* Operation)
+{
+	KnownOperations.Remove(Operation);
+}
