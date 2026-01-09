@@ -14,12 +14,12 @@ class FNProcGenOperationTaskGraph;
 UENUM(BlueprintType)
 enum ENProcGenOperationState : uint8
 {
-	PGOS_None = 0		UMETA(DisplayName="None"),
-	PGOS_Registered		UMETA(DisplayName="Registered"),
-	PGOS_Started		UMETA(DisplayName="Started"),
-	PGOS_Updated		UMETA(DisplayName="Updated"),
-	PGOS_Finished		UMETA(DisplayName="Finished"),
-	PGOS_Unregistered	UMETA(DisplayName="Unregistered")
+	PGOS_None = 0			UMETA(DisplayName="None"),
+	PGOS_Registered = 1		UMETA(DisplayName="Registered"),
+	PGOS_Started = 2		UMETA(DisplayName="Started"),
+	PGOS_Updated = 3		UMETA(DisplayName="Updated"),
+	PGOS_Finished = 4		UMETA(DisplayName="Finished"),
+	PGOS_Unregistered = 5	UMETA(DisplayName="Unregistered")
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationDisplayMessageChanged, const FString&, NewMessage);

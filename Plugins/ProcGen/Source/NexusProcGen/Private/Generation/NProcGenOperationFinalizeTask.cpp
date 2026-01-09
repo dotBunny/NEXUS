@@ -7,8 +7,9 @@
 
 
 FNProcGenOperationFinalizeTask::FNProcGenOperationFinalizeTask(UNProcGenOperation* TargetOperation)
+	: Operation(TargetOperation)
 {
-	Operation = TargetOperation;
+	
 }
 
 void FNProcGenOperationFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
