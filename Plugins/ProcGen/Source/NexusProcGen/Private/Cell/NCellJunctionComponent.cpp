@@ -148,11 +148,12 @@ FLinearColor UNCellJunctionComponent::GetColor() const
 {
 	switch (Details.Requirements)
 	{
-	case ENCellJunctionRequirements::CJR_AllowBlocking:
+		using enum ENCellJunctionRequirements;
+	case CJR_AllowBlocking:
 		return FNColor::GreenMid;
-	case ENCellJunctionRequirements::CJR_AllowEmpty:
+	case CJR_AllowEmpty:
 		return FNColor::GreenDark;
-	case ENCellJunctionRequirements::CJR_Required:
+	case CJR_Required:
 	default:
 		return FNColor::GreenLight;
 	}
