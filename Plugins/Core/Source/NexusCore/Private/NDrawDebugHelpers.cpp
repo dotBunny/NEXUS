@@ -37,7 +37,16 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 		return;
 	}
 
-	float const LineLifeTime =  bPersistentLines ? -1.0f : ((LifeTime > 0.f) ? LifeTime : LineBatcher->DefaultLifeTime);
+	// Determine line life-time and override as needed
+	float LineLifeTime = LineBatcher->DefaultLifeTime;
+	if (LifeTime > 0.f)
+	{
+		LineLifeTime = LifeTime;
+	}
+	if (bPersistentLines)
+	{
+		LineLifeTime = -1.0f;
+	}
 
 	// Ensure our glyphs are created
 	if (!FNPrimitiveFont::IsInitialized())
