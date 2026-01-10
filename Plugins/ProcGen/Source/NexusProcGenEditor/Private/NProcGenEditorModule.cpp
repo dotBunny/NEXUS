@@ -116,15 +116,15 @@ void FNProcGenEditorModule::OnPostEngineInit()
 	// Visualizers
 	if (GUnrealEd != nullptr)
 	{
-		const TSharedPtr<FComponentVisualizer> RootComponentVisualizer = MakeShareable(new FNCellRootComponentVisualizer());
+		const TSharedPtr<FComponentVisualizer> RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
 	
-		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShareable(new FNCellJunctionComponentVisualizer());
+		const TSharedPtr<FComponentVisualizer> JunctionComponentVisualizer = MakeShared<FNCellJunctionComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName(), JunctionComponentVisualizer);
 		JunctionComponentVisualizer->OnRegister();
 		
-		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShareable(new FNBoneComponentVisualizer());
+		const TSharedPtr<FComponentVisualizer> BoneComponentVisualizer = MakeShared<FNBoneComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName(), BoneComponentVisualizer);
 		BoneComponentVisualizer->OnRegister();
 	}
