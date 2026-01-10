@@ -7,8 +7,10 @@
 
 NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCore, Log, All);
 
-#define N_VERSION_NUMBER	7
-
-#define N_VERSION_MAJOR		0
-#define N_VERSION_MINOR		2
-#define N_VERSION_PATCH		4
+namespace NEXUS::Version
+{
+	constexpr int Number = 8;
+	constexpr int Major = 0;
+	constexpr int Minor = 2;
+	constexpr int Patch = 5;
+}

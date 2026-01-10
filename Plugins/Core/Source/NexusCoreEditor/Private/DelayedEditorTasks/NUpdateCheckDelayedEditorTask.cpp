@@ -51,9 +51,13 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 			Response->GetContentAsString().ParseIntoArrayLines(Lines, true);
 			for (int32 i = Lines.Num() - 1; i >= 0; i--)
 			{
-				if (Lines[i].StartsWith(TEXT("#define N_VERSION_NUMBER")))
+				if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int Number")))
 				{
-					const FString VersionNumber = Lines[i].Replace(TEXT("#define N_VERSION_NUMBER"), TEXT("")).TrimStartAndEnd();
+					const FString VersionNumber = Lines[i]
+						.Replace(TEXT("constexpr int Number ="), TEXT(""))
+						.Replace(TEXT(";"), TEXT(""))
+						.TrimStartAndEnd();
+					
 					UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Found remote plugin version(%s)."), *VersionNumber);
 
 					if (VersionNumber.IsNumeric())
@@ -62,9 +66,9 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 						UNEditorSettings* Settings = UNEditorSettings::GetMutable();
 						
 						// Check for a previously saved ignored version, and bump it up to current
-						if (Settings->UpdatesIgnoreVersion < N_VERSION_NUMBER)
+						if (Settings->UpdatesIgnoreVersion < NEXUS::Version::Number)
 						{
-							Settings->UpdatesIgnoreVersion = N_VERSION_NUMBER;
+							Settings->UpdatesIgnoreVersion = NEXUS::Version::Number;
 							Settings->SaveConfig();
 						}
 					
@@ -73,7 +77,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 							const FText DialogTitle = FText::FromString(TEXT("NEXUS: Update Detected"));
 							const FText DialogMessage = FText::FromString(FString::Printf(
 								TEXT("An update is available for the NEXUS Framework.\nCurrently you are on v%i.%i.%i (%i), there is a newer version number (%i) available.\n\nWould you like to get it?\n\nSelecting 'No' will ignore this version update."),
-								N_VERSION_MAJOR, N_VERSION_MINOR, N_VERSION_PATCH, N_VERSION_NUMBER, VersionNumberActual));
+								NEXUS::Version::Major, NEXUS::Version::Minor, NEXUS::Version::Patch, NEXUS::Version::Number, VersionNumberActual));
 
 							const EAppReturnType::Type DialogResponse = FMessageDialog::Open(EAppMsgCategory::Success,
 								EAppMsgType::Type::YesNo,DialogMessage, DialogTitle);
