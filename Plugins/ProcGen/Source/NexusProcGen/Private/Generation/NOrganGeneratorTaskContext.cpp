@@ -7,10 +7,8 @@
 #include "Organ/NOrganComponent.h"
 
 FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(FNOrganGenerationContext* GeneratorContextMap, const uint64 TaskSeed)
+	: Seed(TaskSeed)
 {
-	// Cache the seed for the task
-	Seed = TaskSeed;
-	
 	// Collect all thread safe data about organ
 	// All possible cells that could go in organ? 
 	
