@@ -3,6 +3,8 @@
 
 #pragma once
 
+// #SONARQUBE This file is ignored from duplication checks as this is meant as fast logic
+
 namespace Nexus::Core::CardinalDirection
 {
 	constexpr float North = 0.0f;
