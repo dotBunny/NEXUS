@@ -66,7 +66,9 @@ private:
 
 		if (!DeveloperOverlayWidget)
 		{
-			UClass* DefaultOverlayClass = FSoftClassPath(TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C")).TryLoadClass<UNProcGenDeveloperOverlayWidget>();
+			UClass* DefaultOverlayClass = FSoftClassPath(
+				TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C"))
+				.TryLoadClass<UNProcGenDeveloperOverlayWidget>();
 			if (DefaultOverlayClass != nullptr)
 			{
 				bNeedsSave = true;
@@ -76,7 +78,9 @@ private:
 
 		if (!ProxyMaterial)
 		{
-			UObject* DefaultProxyMaterial = FSoftClassPath(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy")).TryLoad();
+			UObject* DefaultProxyMaterial = FSoftClassPath(
+				TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy"))
+				.TryLoad();
 			if (DefaultProxyMaterial != nullptr)
 			{
 				bNeedsSave = true;
