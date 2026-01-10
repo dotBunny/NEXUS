@@ -10,8 +10,8 @@ class UNProcGenOperation;
 class INProcGenOperationOwner
 {
 public:
-	INProcGenOperationOwner(){}
-	virtual ~INProcGenOperationOwner(){}
+	INProcGenOperationOwner() = default;
+	virtual ~INProcGenOperationOwner() = default;
 	virtual void StartOperation(UNProcGenOperation* Operation) = 0;
 	virtual void  OnOperationFinished(UNProcGenOperation* Operation) = 0;
 	virtual void  OnOperationDestroyed(UNProcGenOperation* Operation) = 0;
