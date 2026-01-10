@@ -22,10 +22,11 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		RefCount = Item.GetRefCount();
 		SerialNumber = Item.GetSerialNumber();
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
-		if (UObject* Object = static_cast<UObject*>(Item.Object))
+		UObject* Object = static_cast<UObject*>(Item.Object);
 #else
-		if (UObject* Object = static_cast<UObject*>(Item.GetObject()))
+		UObject* Object = static_cast<UObject*>(Item.GetObject());
 #endif
+		if (Object != nullptr)
 		{
 			ObjectPtr = Object;
 			Name = Object->GetFName().ToString();
