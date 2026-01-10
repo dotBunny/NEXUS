@@ -46,8 +46,6 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 	
 	if (GUnrealEd)
 	{
-		
-		
 		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShared<FNActorPoolSpawnerComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
