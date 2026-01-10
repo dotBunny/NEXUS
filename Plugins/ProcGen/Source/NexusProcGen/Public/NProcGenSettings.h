@@ -44,7 +44,6 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 
 #endif	
 
-	//TODO: junctions are based on the mid-point, and draw from that dunno if we need to rethink that drawing because of voxel.
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Unit Size",
 		meta=(ToolTip="What is the base unit sized when operating on our grid?"))
@@ -63,19 +62,22 @@ public:
 private:
 	void ValidateSettings()
 	{
-	
 		bool bNeedsSave = false;
+
 		if (!DeveloperOverlayWidget)
 		{
-			if (UClass* DefaultOverlayClass = FSoftClassPath(TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C")).TryLoadClass<UNProcGenDeveloperOverlayWidget>())
+			UClass* DefaultOverlayClass = FSoftClassPath(TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C")).TryLoadClass<UNProcGenDeveloperOverlayWidget>();
+			if (DefaultOverlayClass != nullptr)
 			{
 				bNeedsSave = true;
 				DeveloperOverlayWidget = DefaultOverlayClass;
 			}
 		}
+
 		if (!ProxyMaterial)
 		{
-			if (UObject* DefaultProxyMaterial = FSoftClassPath(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy")).TryLoad())
+			UObject* DefaultProxyMaterial = FSoftClassPath(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy")).TryLoad();
+			if (DefaultProxyMaterial != nullptr)
 			{
 				bNeedsSave = true;
 				ProxyMaterial = Cast<UMaterial>(DefaultProxyMaterial);
