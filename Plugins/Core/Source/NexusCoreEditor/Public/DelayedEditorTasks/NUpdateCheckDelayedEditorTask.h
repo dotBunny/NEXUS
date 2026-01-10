@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "HttpFwd.h"
 #include "NDelayedEditorTask.h"
 #include "NUpdateCheckDelayedEditorTask.generated.h"
 
@@ -23,6 +24,8 @@ public:
 	static void Create();
 	
 private:
+	
+	static void OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfully);
 	
 	UFUNCTION()
 	void Execute();
