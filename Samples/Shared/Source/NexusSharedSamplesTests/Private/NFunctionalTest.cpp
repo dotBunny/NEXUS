@@ -73,22 +73,23 @@ void ANFunctionalTest::OnFinishTest(ESampleTestResult TestResult, const FString&
 {
 	switch (TestResult)
 	{
-	case ESampleTestResult::Default:
+		using enum ESampleTestResult;
+	case Default:
 		FinishTest(EFunctionalTestResult::Default, Message);
 		break;
-	case ESampleTestResult::Invalid:
+	case Invalid:
 		FinishTest(EFunctionalTestResult::Invalid, Message);
 		break;
-	case ESampleTestResult::Error:
+	case Error:
 		FinishTest(EFunctionalTestResult::Error, Message);
 		break;
-	case ESampleTestResult::Running:
+	case Running:
 		FinishTest(EFunctionalTestResult::Running, Message);
 		break;
-	case ESampleTestResult::Failed:
+	case Failed:
 		FinishTest(EFunctionalTestResult::Failed, Message);
 		break;
-	case ESampleTestResult::Succeeded:
+	case Succeeded:
 		FinishTest(EFunctionalTestResult::Succeeded, Message);
 		break;
 	}
