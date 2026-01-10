@@ -41,6 +41,12 @@ void FNFixersEditorBulkOperations::Register()
 
 void FNFixersEditorBulkOperations::Unregister()
 {
+	UToolMenus* ToolMenus = UToolMenus::Get();
+	if (ToolMenus != nullptr)
+	{
+		ToolMenus->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NFixersBulkOperations");
+		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Tools", "NEXUS", "NFixersBulkOperations");
+	}
 }
 
 void FNFixersEditorBulkOperations::FillMenu(UToolMenu* Menu, bool bIsContextMenu)
