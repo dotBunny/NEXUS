@@ -91,7 +91,8 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 void UNCellJunctionComponent::OnRegister()
 {
 	// Is this part of a level instance?
-	if (ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this))
+	ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this);
+	if (Interface != nullptr)
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
@@ -170,8 +171,8 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		
 		// LOCATION
 		const FVector ComponentLocation = GetComponentLocation();
-		if (const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->UnitSize);
-			GridLocation != Details.RootRelativeLocation)
+		const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->UnitSize);
+		if (GridLocation != Details.RootRelativeLocation)
 		{
 			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
 			Details.RootRelativeLocation = GridLocation;

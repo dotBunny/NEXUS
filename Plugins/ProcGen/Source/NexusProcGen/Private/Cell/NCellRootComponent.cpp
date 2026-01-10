@@ -42,7 +42,8 @@ FBox UNCellRootComponent::GetOffsetBounds() const
 void UNCellRootComponent::OnRegister()
 {
 	// Is this part of a level instance?
-	if (ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this))
+	ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this);
+	if (Interface != nullptr)
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}

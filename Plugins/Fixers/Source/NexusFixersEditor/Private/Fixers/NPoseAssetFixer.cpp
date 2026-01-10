@@ -86,7 +86,8 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		{
 			if(PoseAsset->SourceAnimation->HasAnyFlags(RF_NeedLoad))
 			{
-				if (FLinkerLoad* Linker = PoseAsset->SourceAnimation->GetLinker())
+				FLinkerLoad* Linker = PoseAsset->SourceAnimation->GetLinker();
+				if (Linker != nullptr)
 				{
 					Linker->Preload(PoseAsset->SourceAnimation);
 				}

@@ -5,7 +5,6 @@
 
 #include "Cell/NCell.h"
 #include "Cell/NCellLevelInstance.h"
-#include "NColor.h"
 #include "NProcGenSettings.h"
 #include "Components/BillboardComponent.h"
 #include "Components/DynamicMeshComponent.h"
@@ -125,7 +124,8 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));
 	
 	// Setup collision
-	if (UBodySetup* BodySetup = Mesh->GetBodySetup())
+	UBodySetup* BodySetup = Mesh->GetBodySetup();
+	if (BodySetup != nullptr)
 	{
 		BodySetup->Modify();
 	}
@@ -140,7 +140,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	
 	Mesh->SetSimpleCollisionShapes(AggGeom, true);		
 
-	// Lets rock some colors
+	// Let's rock some colors
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
 	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
 	

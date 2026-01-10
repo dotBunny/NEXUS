@@ -22,7 +22,7 @@ public:
 		this->Initialize(InSeed);
 	}
 
-	~FNMersenneTwister() { }
+	~FNMersenneTwister() = default;
 
 	/**
 	 * Set seed of the FMersenneTwister.

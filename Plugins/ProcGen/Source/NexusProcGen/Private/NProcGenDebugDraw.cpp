@@ -4,7 +4,6 @@
 #include "NProcGenDebugDraw.h"
 
 #include "NProcGenSettings.h"
-#include "NProcGenUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
@@ -25,8 +24,8 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		case Y:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
 			break;
-		default:
 		case Z:
+		default:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
 			break;
 		}
