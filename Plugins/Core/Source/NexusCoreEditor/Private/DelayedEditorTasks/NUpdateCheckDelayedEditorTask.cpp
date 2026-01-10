@@ -11,7 +11,6 @@
 #include "Interfaces/IHttpRequest.h"
 #include "Interfaces/IHttpResponse.h"
 
-UE_DISABLE_OPTIMIZATION
 void UNUpdateCheckDelayedEditorTask::Create()
 {
 	const UNEditorSettings* Settings = UNEditorSettings::Get();
@@ -36,7 +35,6 @@ void UNUpdateCheckDelayedEditorTask::Create()
 	DelayedMechanism->Complete.AddDynamic(UpdateObject, &UNUpdateCheckDelayedEditorTask::Execute);
 	DelayedMechanism->Start(5.f, 25);
 }
-UE_ENABLE_OPTIMIZATION
 
 void UNUpdateCheckDelayedEditorTask::Execute()
 {
