@@ -291,34 +291,38 @@ FSlateIcon FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon()
 
 void FNProcGenEditorCommands::CellAddActor()
 {
-	if (UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld == nullptr)
 	{
-		if (FNEditorUtils::IsUnsavedWorld(CurrentWorld))
+		return;
+	}
+
+	if (FNEditorUtils::IsUnsavedWorld(CurrentWorld))
+	{
+		const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgCategory::Error, EAppMsgType::Type::YesNo,
+			FText::FromString(TEXT("You need to save the world/map that you are working in before creating a NCellActor.\n\nDo you wish to save the map now?")),
+			FText::FromString(TEXT("NEXUS: ProcGen")));
+		switch (Choice)
 		{
-			const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgCategory::Error, EAppMsgType::Type::YesNo,
-				FText::FromString(TEXT("You need to save the world/map that you are working in before creating a NCellActor.\n\nDo you wish to save the map now?")),
-				FText::FromString(TEXT("NEXUS: ProcGen")));
-			switch (Choice)
+		case EAppReturnType::No:
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			return;
+		case EAppReturnType::Yes:
+			if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
 			{
-			case EAppReturnType::No:
-				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
-				return;
-			case EAppReturnType::Yes:
-				if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
-				{
-					UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
-					return;
-				}
-				break;
-			default:
 				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
 				return;
 			}
+			break;
+		default:
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			return;
 		}
-		
-		ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
-		FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
 	}
+	
+	ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
+	FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
+	
 }
 
 bool FNProcGenEditorCommands::CellAddActor_CanExecute()
