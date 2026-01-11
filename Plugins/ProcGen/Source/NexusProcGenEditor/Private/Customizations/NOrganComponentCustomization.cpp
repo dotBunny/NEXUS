@@ -8,11 +8,9 @@
 #include "NProcGenEditorSubsystem.h"
 #include "NProcGenOperation.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 {
-	return MakeShareable(new FNOrganComponentCustomization());
+	return MakeShared<FNOrganComponentCustomization>();
 }
 
 void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
@@ -50,7 +48,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 					[
 						SNew(STextBlock)
 						.Font(IDetailLayoutBuilder::GetDetailFont())
-						.Text(LOCTEXT("GenerateButton", "Generate"))
+						.Text(NSLOCTEXT("NexusProcGenEditor", "GenerateButton", "Generate"))
 					]
 				]
 			]
@@ -79,7 +77,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 					[
 						SNew(STextBlock)
 						.Font(IDetailLayoutBuilder::GetDetailFont())
-						.Text(LOCTEXT("CancelButton", "Cancel"))
+						.Text(NSLOCTEXT("NexusProcGenEditor", "CancelButton", "Cancel"))
 					]
 				]
 			]
@@ -96,7 +94,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 				[
 					SNew(STextBlock)
 					.Font(IDetailLayoutBuilder::GetDetailFont())
-					.Text(LOCTEXT("CleanupButton", "Cleanup"))
+					.Text(NSLOCTEXT("NexusProcGenEditor", "CleanupButton", "Cleanup"))
 				]
 			]
 			+ SHorizontalBox::Slot()
@@ -112,7 +110,7 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 				[
 					SNew(STextBlock)
 					.Font(IDetailLayoutBuilder::GetDetailFont())
-					.Text(LOCTEXT("RefreshButton", "Refresh"))
+					.Text(NSLOCTEXT("NexusProcGenEditor", "RefreshButton", "Refresh"))
 				]
 			]
 		];
@@ -158,5 +156,3 @@ EVisibility FNOrganComponentCustomization::RefreshButtonVisible() const
 {
 	return EVisibility::Visible;
 }
-
-#undef LOCTEXT_NAMESPACE

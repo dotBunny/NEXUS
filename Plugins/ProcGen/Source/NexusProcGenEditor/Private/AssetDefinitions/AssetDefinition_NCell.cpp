@@ -14,8 +14,6 @@
 #include "Misc/DataValidation.h"
 #include "UObject/ObjectSaveContext.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 TConstArrayView<FAssetCategoryPath> UAssetDefinition_NCell::GetAssetCategories() const
 {
 	static const auto Categories = { FNEditorDefaults::AssetCategory };
@@ -33,7 +31,7 @@ FText UAssetDefinition_NCell::GetAssetDescription(const FAssetData& AssetData) c
 
 FText UAssetDefinition_NCell::GetAssetDisplayName() const
 {
-	static const FText DisplayName = LOCTEXT("AssetTypeActions_NCell", "NCell"); 
+	static const FText DisplayName = NSLOCTEXT("NexusProcGenEditor", "AssetTypeActions_NCell", "NCell"); 
 	return DisplayName; 
 }
 
@@ -117,34 +115,32 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 	if (Cell->World.IsNull())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("Validate_NCell_MissingWorld", "Cell {0} has no World set."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NCell_MissingWorld", "Cell {0} has no World set."), FText::FromString(Cell->GetName())));
 	}
 
 	if (Cell->Root.Bounds.GetSize() == FVector::ZeroVector)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("Validate_NCell_BoundsSizeZero", "Cell {0} has no bounds."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NCell_BoundsSizeZero", "Cell {0} has no bounds."), FText::FromString(Cell->GetName())));
 	}
 
 	if (Cell->Root.Hull.Vertices.Num() == 0)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
 	}
 	
 	if (!Cell->Root.Hull.IsConvex())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("Validate_NCell_HullNotConvex", "Cell {0} hull is not convex."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex."), FText::FromString(Cell->GetName())));
 	}
 
 	if (Cell->Junctions.Num() == 0)
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(LOCTEXT("Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));
 	}
 	
 	return Result;
 }
-
-#undef LOCTEXT_NAMESPACE

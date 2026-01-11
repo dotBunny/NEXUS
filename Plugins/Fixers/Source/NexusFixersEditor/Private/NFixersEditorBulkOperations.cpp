@@ -4,8 +4,6 @@
 #include "NFixersEditorBulkOperations.h"
 #include "NFixersEditorCommands.h"
 
-#define LOCTEXT_NAMESPACE "NexusFixersEditor"
-
 void FNFixersEditorBulkOperations::Register()
 {
 	// Add to folder to ContentBrowser
@@ -14,8 +12,8 @@ void FNFixersEditorBulkOperations::Register()
 		FToolMenuSection& Section = Menu->FindOrAddSection("PathContextBulkOperations");
 		Section.AddSubMenu(
 				"NFixersBulkOperations",
-				LOCTEXT("NFixersBulkOperations", "Find & Fix"),
-				LOCTEXT("NFixersBulkOperations_ToolTip", "Find and fix operations on selected content."),
+				NSLOCTEXT("NexusFixersEditor", "ContextMenu_FindAndFix", "Find & Fix"),
+				NSLOCTEXT("NexusFixersEditor", "ContextMenu_FindAndFix_ToolTip", "Find and fix operations on selected content."),
 				FNewToolMenuDelegate::CreateStatic(&FillMenu, true),
 				false,
 				FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix")
@@ -26,12 +24,12 @@ void FNFixersEditorBulkOperations::Register()
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
 		FToolMenuSection& Section = Menu->FindOrAddSection("NEXUS");
-		Section.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
+		Section.Label = NSLOCTEXT("NexusFixersEditor", "NLevelEditorTools", "NEXUS");
 
 		Section.AddSubMenu(
 				"NFixersBulkOperations",
-				LOCTEXT("NFixersBulkOperations", "Find & Fix"),
-				LOCTEXT("NFixersBulkOperations_ToolTip", "Find and fix operations on game content."),
+				NSLOCTEXT("NexusFixersEditor", "ToolsMenu_FindAndFix", "Find & Fix"),
+				NSLOCTEXT("NexusFixersEditor", "ToolsMenu_FindAndFix_ToolTip", "Find and fix operations on game content."),
 				FNewToolMenuDelegate::CreateStatic(&FillMenu, false),
 				false,
 				FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix")
@@ -53,7 +51,7 @@ void FNFixersEditorBulkOperations::FillMenu(UToolMenu* Menu, bool bIsContextMenu
 {
 	const FNFixersEditorCommands Commands = FNFixersEditorCommands::Get();
 	FToolMenuSection& AssetsSection = Menu->AddSection(TEXT("Assets"));
-	AssetsSection.Label = LOCTEXT("NFixersBulkOperations_Assets", "Assets");
+	AssetsSection.Label = NSLOCTEXT("NexusFixersEditor", "NFixersBulkOperations_Assets", "Assets");
 	
 	if (bIsContextMenu)
 	{
@@ -66,5 +64,3 @@ void FNFixersEditorBulkOperations::FillMenu(UToolMenu* Menu, bool bIsContextMenu
 			Commands.CommandList_BulkOperations);
 	}
 }
-
-#undef LOCTEXT_NAMESPACE

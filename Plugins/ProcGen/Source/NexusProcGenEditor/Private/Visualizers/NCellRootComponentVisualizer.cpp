@@ -8,8 +8,6 @@
 #include "ComponentVisProxies/NEdgeComponentVisProxy.h"
 #include "ComponentVisProxies/NIndexComponentVisProxy.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI)
 {
 	// First we check that we indeed have an actor component
@@ -143,7 +141,7 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 	// Handle Occupied
 	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
 	{
-		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Empty", "Set Voxel Empty"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_Voxel_Empty", "Set Voxel Empty"));
 		Component->Modify();
 		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
@@ -156,7 +154,7 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 	// Handle Empty
 	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty)))
 	{
-		const FScopedTransaction Transaction(LOCTEXT("FNCellRootComponentVisualizer_Voxel_Occupied", "Set Voxel Occupied"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_Voxel_Occupied", "Set Voxel Occupied"));
 		Component->Modify();
 		N_FLAGS_REMOVE(Data, static_cast<uint8>(ENCellVoxel::CVD_Empty));
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::CVD_Occupied));
@@ -184,7 +182,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 	
 	if (CurrentEditMode == EM_HullVertex)
 	{
-		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
+		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
 	
 		RootComponent->Modify();
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
@@ -203,7 +201,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 	
 	if (CurrentEditMode == EM_BoundsVertex)
 	{
-		const FScopedTransaction HullVertexTransaction(LOCTEXT("FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
+		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
 	
 		RootComponent->Modify();
 		RootComponent->Details.BoundsSettings.bCalculateOnSave = false;
@@ -258,5 +256,3 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 		return false;
 	}
 }
-
-#undef LOCTEXT_NAMESPACE

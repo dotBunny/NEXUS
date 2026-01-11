@@ -8,11 +8,9 @@
 #include "DetailWidgetRow.h"
 #include "Cell/NCellActor.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 TSharedRef<IDetailCustomization> FNCellRootComponentCustomization::MakeInstance()
 {
-	return MakeShareable(new FNCellRootComponentCustomization());
+	return MakeShared<FNCellRootComponentCustomization>();
 }
 
 void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
@@ -40,7 +38,7 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 		}
 		return EVisibility::Visible;
 	};
-	NexusCategory.AddCustomRow(LOCTEXT("Validation", "Alerts"))
+	NexusCategory.AddCustomRow(NSLOCTEXT("NexusProcGenEditor", "Validation", "Alerts"))
 		.Visibility( TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateLambda(OnBoundsNoCalcWarning)))
 		.WholeRowContent()
 		[
@@ -51,7 +49,7 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 				[
 					SNew(STextBlock)
 						//.TextStyle(&FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold"))
-						.Text(LOCTEXT("BoundsNoCalc", "- The NCell Bounds are not calculated on save."))
+						.Text(NSLOCTEXT("NexusProcGenEditor", "BoundsNoCalc", "- The NCell Bounds are not calculated on save."))
 						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
 				]
 		];
@@ -65,7 +63,7 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 		}
 		return EVisibility::Visible;
 	};
-	NexusCategory.AddCustomRow(LOCTEXT("Validation", "Alerts"))
+	NexusCategory.AddCustomRow(NSLOCTEXT("NexusProcGenEditor", "Validation", "Alerts"))
 		.Visibility( TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateLambda(OnHullNoCalcWarning)))
 		.WholeRowContent()
 		[
@@ -76,7 +74,7 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 				[
 					SNew(STextBlock)
 						//.TextStyle(&FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold"))
-						.Text(LOCTEXT("HullNoCalc", "- The NCell Convex Hull is not calculated on save."))
+						.Text(NSLOCTEXT("NexusProcGenEditor", "HullNoCalc", "- The NCell Convex Hull is not calculated on save."))
 						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
 				]
 		];
@@ -88,7 +86,7 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 		}
 		return EVisibility::Visible;
 	};
-	NexusCategory.AddCustomRow(LOCTEXT("Validation", "Alerts"))
+	NexusCategory.AddCustomRow(NSLOCTEXT("NexusProcGenEditor", "Validation", "Alerts"))
 		.Visibility( TAttribute<EVisibility>::Create(TAttribute<EVisibility>::FGetter::CreateLambda(OnVoxelNoCalcWarning)))
 		.WholeRowContent()
 		[
@@ -99,10 +97,8 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 				[
 					SNew(STextBlock)
 						//.TextStyle(&FAppStyle::Get().GetWidgetStyle<FTextBlockStyle>("RichTextBlock.Bold"))
-						.Text(LOCTEXT("VoxelNoCalc", "- The NCell Voxel Data is not calculated on save."))
+						.Text(NSLOCTEXT("NexusProcGenEditor", "VoxelNoCalc", "- The NCell Voxel Data is not calculated on save."))
 						.ColorAndOpacity(FSlateColor(EStyleColor::AccentWhite))
 				]
 		];
 }
-
-#undef LOCTEXT_NAMESPACE

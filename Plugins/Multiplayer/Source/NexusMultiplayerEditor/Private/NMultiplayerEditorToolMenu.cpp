@@ -5,8 +5,6 @@
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorUserSettings.h"
 
-#define LOCTEXT_NAMESPACE "NexusMultiplayerEditor"
-
 bool FNMultiplayerEditorToolMenu::bIsMultiplayerTestRunning = false;
 
 void FNMultiplayerEditorToolMenu::Register()
@@ -36,9 +34,9 @@ FText FNMultiplayerEditorToolMenu::MultiplayerTest_GetTooltip()
 {
 	if (bIsMultiplayerTestRunning)
 	{
-		return LOCTEXT("Command_NMultiplayer_StopMultiplayerTest_Tooltip", "Stop the ongoing local multiplayer test");
+		return NSLOCTEXT("NexusMultiplayerEditor", "Command_StopMultiplayerTest_Tooltip", "Stop the ongoing local multiplayer test");
 	}
-	return LOCTEXT("Command_NMultiplayer_StartMultiplayerTest_Tooltip", "Play this level in a local multiplayer test");
+	return NSLOCTEXT("NexusMultiplayerEditor", "Command_StartMultiplayerTest_Tooltip", "Play this level in a local multiplayer test");
 }
 
 FSlateIcon FNMultiplayerEditorToolMenu::MultiplayerTest_GetIcon()
@@ -118,5 +116,3 @@ void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
 		bIsMultiplayerTestRunning = true;
 	}
 }
-
-#undef LOCTEXT_NAMESPACE

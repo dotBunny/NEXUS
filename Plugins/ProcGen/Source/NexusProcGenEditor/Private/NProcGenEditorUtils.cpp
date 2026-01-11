@@ -17,8 +17,6 @@
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganVolume.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 bool FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld()
 {
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
@@ -143,11 +141,11 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 {
 	bool bUpdatedCellData = false;
 	
-	FScopedSlowTask MainTask = FScopedSlowTask(7, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell", "Update Cell"));
+	FScopedSlowTask MainTask = FScopedSlowTask(7, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell", "Update Cell"));
 	MainTask.MakeDialog(false);
 
 	// STEP 1 - Ensure CellActor Setup
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step1", "CellActor Setup ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step1", "CellActor Setup ..."));
 	FString CellActorName = TEXT("NCellActor__");
 	CellActorName.Append( FPackageName::GetShortName(CellActor->GetWorld()->GetOutermost()->GetName()));
 	if (!CellActor->GetActorLabel().Equals(CellActorName))
@@ -156,7 +154,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 	
 	// STEP 2 - Calculate Bounds
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step2", "Cell Bounds ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step2", "Cell Bounds ..."));
 	// Update Our Cell Overall Data (in the level, not copied at this point)
 	if (CellActor->CellRoot->Details.BoundsSettings.bCalculateOnSave)
 	{
@@ -164,7 +162,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 
 	// STEP 3 - Calculate Hull
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step3", "Cell Hull ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step3", "Cell Hull ..."));
 	if (CellActor->CellRoot->Details.HullSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateHull();
@@ -172,7 +170,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 	
 	// STEP 4 - Calculate Voxel Data
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step4", "Cell Voxel ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step4", "Cell Voxel ..."));
 	if (CellActor->CellRoot->Details.VoxelSettings.bCalculateOnSave)
 	{
 		CellActor->CalculateVoxelData();
@@ -187,7 +185,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 
 	// STEP 5 - Apply actor root data to the NCell root cache
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step5", "Apply Actor Root Data ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step5", "Apply Actor Root Data ..."));
 	if (!CellActor->CellRoot->Details.IsEqual(Cell->Root))
 	{
 		CellActor->Modify();
@@ -196,7 +194,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 	
 	// STEP 6 - Clean up Junction Data
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step6", "Clean Up Junction Data ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step6", "Clean Up Junction Data ..."));
 	const TMap<int32, TObjectPtr<UNCellJunctionComponent>>& JunctionComponents = CellActor->CellJunctions;
 
 	// Clear out old data
@@ -235,7 +233,7 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	}
 	
 	// STEP 7 - Ensure Sidecar
-	MainTask.EnterProgressFrame(1, LOCTEXT("NProcGen_FNProcGenEditorUtils_UpdateCell_Step7", "Ensure Sidecar ..."));
+	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusProcGenEditor", "Task_UpdateCell_Step7", "Ensure Sidecar ..."));
 	
 	// Ensure the Cell is mapped to the component.
 	if (CellActor->Sidecar != Cell)
@@ -262,5 +260,3 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 	
 	return bUpdatedCellData;
 }
-
-#undef LOCTEXT_NAMESPACE

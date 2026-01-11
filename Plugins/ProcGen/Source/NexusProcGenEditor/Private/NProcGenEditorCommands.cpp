@@ -21,85 +21,83 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "NProcGenOperation.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 void FNProcGenEditorCommands::RegisterCommands()
 {
 	// Build NCell Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCaptureThumbnail,
 			"NProcGen.NCell.CaptureThumbnail",
-			LOCTEXT("Command_NCell_CaptureThumbnail", "Capture Thumbnail"),
-			LOCTEXT("Command_NCell_CaptureThumbnail_Tooltip", "Captures the active viewport (minus widgets) as the thumbnail for the level containing the NCell."),
+			NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CaptureThumbnail", "Capture Thumbnail"),
+			NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CaptureThumbnail_Tooltip", "Captures the active viewport (minus widgets) as the thumbnail for the level containing the NCell."),
 			FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 			EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateAll,
 		"NProcGen.NCell.CalculateAll",
-		LOCTEXT("Command_NCell_CalculateAll", "Calculate All"),
-		LOCTEXT("Command_NCell_CalculateAll_Tooltip", "Calculate all data related to the cell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateAll", "Calculate All"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateAll_Tooltip", "Calculate all data related to the cell."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateBounds,
 		"NProcGen.NCell.CalculateBounds",
-		LOCTEXT("Command_NCell_CalculateBounds", "Calculate Bounds"),
-		LOCTEXT("Command_NCell_CalculateBounds_Tooltip", "Calculate bounds for the cell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateBounds", "Calculate Bounds"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateBounds_Tooltip", "Calculate bounds for the cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateBounds"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateHull,
 		"NProcGen.NCell.CalculateHull",
-		LOCTEXT("Command_NCell_CalculateHull", "Calculate Hull"),
-		LOCTEXT("Command_NCell_CalculateHull_Tooltip", "Calculate convex hull for the cell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateHull", "Calculate Hull"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateHull_Tooltip", "Calculate convex hull for the cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateVoxelData,
 		"NProcGen.NCell.CalculateVoxelData",
-		LOCTEXT("Command_NCell_CalculateVoxelData", "Calculate Voxel Data"),
-		LOCTEXT("Command_NCell_CalculateVoxelData_Tooltip", "Calculate voxel data for the cell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateVoxelData", "Calculate Voxel Data"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateVoxelData_Tooltip", "Calculate voxel data for the cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateVoxelData"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleBoundsCalculateOnSave,
 		"NProcGen.NCell.ToggleBoundsCalculateOnSave",
-		LOCTEXT("Command_NCell_ToggleBoundsCalculateOnSave", "Calculate Bounds On Save"),
-		LOCTEXT("Command_NCell_ToggleBoundsCalculateOnSave_Tooltip", "Calculates the bounds of the cell when the level is saved."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleBoundsCalculateOnSave", "Calculate Bounds On Save"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleBoundsCalculateOnSave_Tooltip", "Calculates the bounds of the cell when the level is saved."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateBounds"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleHullCalculateOnSave,
 		"NProcGen.NCell.ToggleHullCalculateOnSave",
-		LOCTEXT("Command_NCell_ToggleHullCalculateOnSave", "Calculate Hull On Save"),
-		LOCTEXT("Command_NCell_ToggleHullCalculateOnSave_Tooltip", "Calculates the hull of the cell when the level is saved."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleHullCalculateOnSave", "Calculate Hull On Save"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleHullCalculateOnSave_Tooltip", "Calculates the hull of the cell when the level is saved."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleVoxelCalculateOnSave,
 		"NProcGen.NCell.ToggleVoxelCalculateOnSave",
-		LOCTEXT("Command_NCell_ToggleVoxelCalculateOnSave", "Calculate Voxel Data On Save"),
-		LOCTEXT("Command_NCell_ToggleVoxelCalculateOnSave_Tooltip", "Calculates the voxel data of the cell when the level is saved."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelCalculateOnSave", "Calculate Voxel Data On Save"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelCalculateOnSave_Tooltip", "Calculates the voxel data of the cell when the level is saved."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateVoxelData"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleVoxelData,
 		"NProcGen.NCell.ToggleVoxelData",
-		LOCTEXT("Command_NCell_ToggleVoxelData", "Use Voxel Data w/ Cell"),
-		LOCTEXT("Command_NCell_ToggleVoxelData_Tooltip", "Should voxel data be generated and associated to this cell?"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelData", "Use Voxel Data w/ Cell"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelData_Tooltip", "Should voxel data be generated and associated to this cell?"),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellResetCell,
 		"NProcGen.NCell.ResetCell",
-		LOCTEXT("Command_NCell_ResetCell", "Reset Cell"),
-		LOCTEXT("Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ResetCell", "Reset Cell"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellRemoveActor,
 		"NProcGen.NCell.RemoveActor",
-		LOCTEXT("Command_NCell_RemoveActor", "Remove Actor"),
-		LOCTEXT("Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_RemoveActor", "Remove Actor"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
 		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.RemoveNCellActor"),
 		EUserInterfaceActionType::Button, FInputChord());
 
@@ -163,15 +161,15 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	// Build NCellJunction Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionAddComponent,
 		"NProcGen.NCellJunction.AddComponent",
-		LOCTEXT("Command_NCellJunction_AddComponent", "Add Component"),
-		LOCTEXT("Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCellJunction_AddComponent", "Add Component"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCellJunction_AddComponent_Tooltip", "Add a NCellJunction component to current actor."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionSelectComponent,
 	"NProcGen.NCellJunction.SelectComponent",
-	LOCTEXT("Command_NCellJunction_SelectComponent", "Select Component"),
-	LOCTEXT("Command_NCellJunction_SelectComponent_Tooltip", "Select a NCellJunction in the level."),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NCellJunction_SelectComponent", "Select Component"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NCellJunction_SelectComponent_Tooltip", "Select a NCellJunction in the level."),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 
@@ -185,8 +183,8 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	// Organ
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerate,
 	"NProcGen.NOrganComponent.Generate",
-	LOCTEXT("Command_NOrganComponent_Generate", "Generate"),
-	LOCTEXT("Command_NOrganComponent_Generate_Tooltip", "Generate thingy"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_Generate", "Generate"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_Generate_Tooltip", "Generate thingy"),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
@@ -379,7 +377,7 @@ bool FNProcGenEditorCommands::CellCalculateAll_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateBounds()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateBounds();
 }
@@ -391,7 +389,7 @@ bool FNProcGenEditorCommands::CellCalculateBounds_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateHull()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateHull", "Calculate Cell Hull"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellCalculateHull", "Calculate Cell Hull"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateHull();
 	
@@ -405,7 +403,7 @@ bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()
 
 void FNProcGenEditorCommands::CellCalculateVoxelData()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellCalculateVoxel", "Calculate Voxel Data"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellCalculateVoxel", "Calculate Voxel Data"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateVoxelData();
 }
@@ -419,7 +417,7 @@ bool FNProcGenEditorCommands::CellCalculateVoxelData_CanExecute()
 
 void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleBoundsCalculateOnSave", "Toggle Calculate Bounds On Save"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleBoundsCalculateOnSave", "Toggle Calculate Bounds On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
@@ -452,7 +450,7 @@ bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleHullCalculateOnSave", "Toggle Calculate Hull On Save"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleHullCalculateOnSave", "Toggle Calculate Hull On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
@@ -485,7 +483,7 @@ bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleVoxelCalculateOnSave", "Toggle Calculate Voxel On Save"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleVoxelCalculateOnSave", "Toggle Calculate Voxel On Save"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
@@ -518,7 +516,7 @@ bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 
 void FNProcGenEditorCommands::CellToggleVoxelData()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellToggleUseVoxelData", "Use Voxel Data"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleUseVoxelData", "Use Voxel Data"));
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
 	{
 		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
@@ -557,7 +555,7 @@ bool FNProcGenEditorCommands::CellToggleVoxelData_IsActionChecked()
 
 void FNProcGenEditorCommands::CellResetCell()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellResetCell", "Reset Cell"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellResetCell", "Reset Cell"));
 	// Get the cell actor
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->Modify();
@@ -582,7 +580,7 @@ bool FNProcGenEditorCommands::CellResetCell_CanExecute()
 
 void FNProcGenEditorCommands::CellRemoveActor()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellRemoveActor", "Remove Cell Actor"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellRemoveActor", "Remove Cell Actor"));
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
 	CellActor->Destroy();
@@ -604,7 +602,7 @@ bool FNProcGenEditorCommands::CellRemoveActor_CanExecute()
 
 void FNProcGenEditorCommands::CellJunctionAddComponent()
 {
-	const FScopedTransaction Transaction(LOCTEXT("FNProcGenEditorCommands_CellJunctionAddComponent", "Add Junction Component"));
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellJunctionAddComponent", "Add Junction Component"));
 	TArray<UNCellJunctionComponent*> OutComponents;
 	TArray<UNCellJunctionComponent*> SelectComponents;
 	bool bNeedsRefresh = false;
@@ -694,5 +692,3 @@ bool FNProcGenEditorCommands::CellCaptureThumbnail_CanExecute()
 	const UWorld* World = FNEditorUtils::GetCurrentWorld();
 	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
 }
-
-#undef LOCTEXT_NAMESPACE

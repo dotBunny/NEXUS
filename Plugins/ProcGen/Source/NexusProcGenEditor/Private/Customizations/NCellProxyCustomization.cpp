@@ -9,11 +9,9 @@
 #include "Cell/NCellActor.h"
 #include "Cell/NCellProxy.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 TSharedRef<IDetailCustomization> FNCellProxyCustomization::MakeInstance()
 {
-	return MakeShareable(new FNCellProxyCustomization());
+	return MakeShared<FNCellProxyCustomization>();
 }
 
 void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
@@ -76,11 +74,11 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 		return FReply::Handled();
 	};
 	
-	NexusCategory.AddCustomRow(LOCTEXT("ProxyActionsRow", "ActionsRow"))
+	NexusCategory.AddCustomRow(NSLOCTEXT("NexusProcGenEditor", "ProxyActionsRow", "ActionsRow"))
 		.NameContent()
 		[
 			SNew(STextBlock)
-				.Text(LOCTEXT("ProxyActions", "Actions"))
+				.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyActions", "Actions"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 		]
 		.ValueContent().MinDesiredWidth(500)
@@ -99,8 +97,8 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 						SNew(SButton)
 							.VAlign(VAlign_Center)
 							.HAlign(HAlign_Left)
-							.Text(LOCTEXT("ProxyCreate", "Create Instance"))
-							.ToolTipText(LOCTEXT("ProxyCreateTooltip", "Create the level instance in the current level."))
+							.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyCreate", "Create Instance"))
+							.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "ProxyCreateTooltip", "Create the level instance in the current level."))
 							.OnClicked_Lambda(OnCreate)
 					]
 					+ SHorizontalBox::Slot()
@@ -110,8 +108,8 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 						SNew(SButton)
 							.VAlign(VAlign_Center)
 							.HAlign(HAlign_Left)
-							.Text(LOCTEXT("ProxyDestroy", "Destroy Instance"))
-							.ToolTipText(LOCTEXT("ProxyDestroyTooltip", "Destroy the level instance in the world."))
+							.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyDestroy", "Destroy Instance"))
+							.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "ProxyDestroyTooltip", "Destroy the level instance in the world."))
 							.OnClicked_Lambda(OnDestroy)
 					]
 				]
@@ -129,8 +127,8 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 							.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("PrimaryButton"))
 							.VAlign(VAlign_Center)
 							.HAlign(HAlign_Left)
-							.Text(LOCTEXT("ProxyLoad", "Load Level"))
-							.ToolTipText(LOCTEXT("ProxyLoadTooltip", "Load the level instance into the world."))
+							.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyLoad", "Load Level"))
+							.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "ProxyLoadTooltip", "Load the level instance into the world."))
 							.OnClicked_Lambda(OnLoad)
 					]
 					+ SHorizontalBox::Slot()
@@ -140,8 +138,8 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 						SNew(SButton)
 							.VAlign(VAlign_Center)
 							.HAlign(HAlign_Left)
-							.Text(LOCTEXT("ProxyUnload", "Unload Level"))
-							.ToolTipText(LOCTEXT("ProxyUnloadTooltip", "Unload the level instance in the world."))
+							.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyUnload", "Unload Level"))
+							.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "ProxyUnloadTooltip", "Unload the level instance in the world."))
 							.OnClicked_Lambda(OnUnload)
 						//.IsEnabled_Lambda()
 					]
@@ -149,5 +147,3 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 			
 		];
 }
-
-#undef LOCTEXT_NAMESPACE

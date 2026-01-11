@@ -12,9 +12,6 @@
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
-
-#define LOCTEXT_NAMESPACE "NexusCoreEditor"
-
 void FNCoreEditorModule::StartupModule()
 {
 	if (IsRunningGame()) return;
@@ -116,6 +113,5 @@ void FNCoreEditorModule::ApplyWindowIconPostEditorTick(float Time) const
 	FNEditorUtils::ReplaceWindowIcon(BasePath);
 	GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
 }
-#undef LOCTEXT_NAMESPACE
 
 IMPLEMENT_MODULE(FNCoreEditorModule, NexusCoreEditor)

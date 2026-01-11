@@ -11,15 +11,13 @@
 #include "Organ/NOrganComponent.h"
 #include "Misc/ScopedSlowTask.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGen"
-
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
 	if (InLevel)
 	{
 		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask Task = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculatePlayableBounds", "Calculate Playable Bounds"));
+		FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
 		Task.MakeDialog(false);
 	
 		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
@@ -61,7 +59,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 		FVector BoxVertices[8];
 		const int32 NumActors = InLevel->Actors.Num();
 		
-		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
+		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
 		ActorTask.MakeDialog(false);
 		
 		Vertices.Reserve(NumActors * 8);
@@ -103,7 +101,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
 	Chaos::FConvex::FAABB3Type OutLocalBounds;
 
-	FScopedSlowTask ChaosTask = FScopedSlowTask(2, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Chaos", "Calculate Convex Hull - Chaos"));
+	FScopedSlowTask ChaosTask = FScopedSlowTask(2, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Chaos", "Calculate Convex Hull - Chaos"));
 	ChaosTask.MakeDialog(false);
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
@@ -115,7 +113,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	const int VerticesCount = OutVertices.Num();
 	const int IndicesCount = OutFaceIndices.Num();
 	
-	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
+	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
 	BuildTask.MakeDialog(false);
 	
 	Mesh.Vertices.Reserve(VerticesCount);
@@ -165,7 +163,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		// STEP 1 - Specific Bounds / Ignore Actors
 		FBox Bounds(ForceInit);
 		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_Bounds", "Build Voxel World"));
+		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
 		BoundsTask.MakeDialog(false);
 		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 		{
@@ -216,12 +214,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 		Params.AddIgnoredActors(IgnoredActors);
 		
-		
-		FCollisionObjectQueryParams ObjectParams = FCollisionObjectQueryParams(CollisionChannel);
-	
-		
 		// STEP 2 - Broad Trace
-		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_BroadTrace", "Broad Trace"));
+		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
 		BroadTraceTask.MakeDialog(false);
 
 		// We iterate over the array by axis to minimize inverse calculations
@@ -489,5 +483,3 @@ void FNProcGenUtils::GetVoxelQueryLevelBoundsEndPoints(const FVector& WorldCente
 	}
 	
 }
-
-#undef LOCTEXT_NAMESPACE
