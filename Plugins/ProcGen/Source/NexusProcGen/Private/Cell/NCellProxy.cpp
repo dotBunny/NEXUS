@@ -5,7 +5,7 @@
 
 #include "Cell/NCell.h"
 #include "Cell/NCellLevelInstance.h"
-#include "NColor.h"
+#include "NProcGenSettings.h"
 #include "Components/BillboardComponent.h"
 #include "Components/DynamicMeshComponent.h"
 #include "LevelInstance/LevelInstanceActor.h"
@@ -19,23 +19,11 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	Mesh = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("Mesh"));
 	SetRootComponent(Mesh);
 	Mesh->Mobility = EComponentMobility::Movable;
-
-	struct FConstructorStatics
-	{
-		ConstructorHelpers::FObjectFinderOptional<UMaterial> ProxyMaterial;
-		FName ID_Info;
-		FText NAME_Info;
-		FConstructorStatics()
-			: ProxyMaterial(TEXT("/NexusProcGen/M_NCellProxy"))
-			, ID_Info(TEXT("Info"))
-			, NAME_Info(NSLOCTEXT("MaterialCategory", "Info", "Info"))
-		{}
-	};
 	
 	// Mesh Visible-stuff
 	Mesh->SetEnableRaytracing(false);
 	Mesh->SetVisibleInRayTracing(false);
-	DynamicMaterial = UMaterialInstanceDynamic::Create(FConstructorStatics().ProxyMaterial.Get(), this);
+	DynamicMaterial = UMaterialInstanceDynamic::Create(UNProcGenSettings::Get()->ProxyMaterial.Get(), this);
 	Mesh->SetMaterial(0, DynamicMaterial);
 	Mesh->bExplicitShowWireframe = true;
 	Mesh->WireframeColor = FLinearColor::Gray;
@@ -136,7 +124,8 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));
 	
 	// Setup collision
-	if (UBodySetup* BodySetup = Mesh->GetBodySetup())
+	UBodySetup* BodySetup = Mesh->GetBodySetup();
+	if (BodySetup != nullptr)
 	{
 		BodySetup->Modify();
 	}
@@ -151,7 +140,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	
 	Mesh->SetSimpleCollisionShapes(AggGeom, true);		
 
-	// Lets rock some colors
+	// Let's rock some colors
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
 	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
 	

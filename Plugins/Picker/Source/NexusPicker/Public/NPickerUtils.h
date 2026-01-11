@@ -6,14 +6,6 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
-#define N_PICKER_TOLERANCE 0.01f
-
-#define N_VLOG_PICKER_INNER_COLOR FColor::Black
-#define N_VLOG_PICKER_OUTER_COLOR FColor::White
-#define N_VLOG_PICKER_POINT_COLOR FColor::Green
-#define N_VLOG_PICKER_POINT_SIZE 2.f
-#define N_VLOG_PICKER_CHANNEL LogNexusPicker
-
 #define N_VARIABLES_PICKER_PROJECTION() \
 	const UWorld* InWorld = nullptr, const FVector& Projection = FNPickerUtils::DefaultProjection, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
 
@@ -31,29 +23,29 @@
 #define N_IMPLEMENT_VLOG_BOX() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIREBOX(World, N_VLOG_PICKER_CHANNEL, Verbose, MinimumDimensions.MoveTo(Origin), N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIREBOX(World, N_VLOG_PICKER_CHANNEL, Verbose, MaximumDimensions.MoveTo(Origin), N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIREBOX(World, LogNexusPicker, Verbose, MinimumDimensions.MoveTo(Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIREBOX(World, LogNexusPicker, Verbose, MaximumDimensions.MoveTo(Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_BOX_SIMPLE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIREBOX(World, N_VLOG_PICKER_CHANNEL, Verbose, Dimensions.MoveTo(Origin), N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIREBOX(World, LogNexusPicker, Verbose, Dimensions.MoveTo(Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_BOX_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIREBOX(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, MinimumDimensions.MoveTo(Origin), N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIREBOX(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, MaximumDimensions.MoveTo(Origin), N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIREBOX(InWorld, LogNexusPicker, Verbose, MinimumDimensions.MoveTo(Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIREBOX(InWorld, LogNexusPicker, Verbose, MaximumDimensions.MoveTo(Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIREBOX(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Dimensions.MoveTo(Origin), N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIREBOX(InWorld, LogNexusPicker, Verbose, Dimensions.MoveTo(Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 // CIRCLE
@@ -61,16 +53,16 @@
 #define N_IMPLEMENT_VLOG_CIRCLE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRECIRCLE(World, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIRECIRCLE(World, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRECIRCLE(World, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIRECIRCLE(World, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_CIRCLE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRECIRCLE(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIRECIRCLE(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRECIRCLE(InWorld, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIRECIRCLE(InWorld, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 // RECTANGLE
@@ -87,44 +79,44 @@
 
 // Not a superfan of using segments
 #define N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, VerticesVariable, Color) \
-		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[0], VerticesVariable[1], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[1], VerticesVariable[2], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[2], VerticesVariable[3], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, VerticesVariable[3], VerticesVariable[0], Color, TEXT(""));
+		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[0], VerticesVariable[1], Color, TEXT("")); \
+		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[1], VerticesVariable[2], Color, TEXT("")); \
+		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[2], VerticesVariable[3], Color, TEXT("")); \
+		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[3], VerticesVariable[0], Color, TEXT(""));
 
 
 #define N_IMPLEMENT_VLOG_RECTANGLE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MinimumDimensions, Rotation, MinimumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MinimumPoints, N_VLOG_PICKER_INNER_COLOR); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MinimumPoints, NEXUS::Picker::VLog::InnerColor); \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MaximumDimensions, Rotation, MaximumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MaximumPoints, N_VLOG_PICKER_OUTER_COLOR); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MaximumPoints, NEXUS::Picker::VLog::OuterColor); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, Points) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, Points, N_VLOG_PICKER_OUTER_COLOR); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, Points, NEXUS::Picker::VLog::OuterColor); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MinimumDimensions, Rotation, MinimumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MinimumPoints, N_VLOG_PICKER_INNER_COLOR); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor); \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MaximumDimensions, Rotation, MaximumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MaximumPoints, N_VLOG_PICKER_OUTER_COLOR); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
 		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, Points) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, Points, N_VLOG_PICKER_OUTER_COLOR); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, Points, NEXUS::Picker::VLog::OuterColor); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 // SPHERE
@@ -132,29 +124,29 @@
 #define N_IMPLEMENT_VLOG_SPHERE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(World, N_VLOG_PICKER_CHANNEL, Verbose, Origin, MinimumRadius, N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIRESPHERE(World, N_VLOG_PICKER_CHANNEL, Verbose, Origin, MaximumRadius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_SPHERE_SIMPLE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(World, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Radius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, Radius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_SPHERE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Origin, MinimumRadius, N_VLOG_PICKER_INNER_COLOR, TEXT("")); \
-		UE_VLOG_WIRESPHERE(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Origin, MaximumRadius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION() \
 	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, Origin, Radius, N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, Radius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_SPLINE() \
@@ -173,13 +165,13 @@
 		} \
 		for (int32 i = 0; i < NumSegments; ++i) \
 		{ \
-			UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, SplinePoints[i], SplinePoints[i+1], N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
+			UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, SplinePoints[i], SplinePoints[i+1], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		if(SplineComponent->IsClosedLoop()) \
 		{ \
-			UE_VLOG_SEGMENT(World, N_VLOG_PICKER_CHANNEL, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
+			UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
-		UE_VLOG_LOCATION(World, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #define N_IMPLEMENT_VLOG_SPLINE_PROJECTION() \
@@ -197,13 +189,13 @@
 		} \
 		for (int32 i = 0; i < NumSegments; ++i) \
 		{ \
-			UE_VLOG_SEGMENT(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, SplinePoints[i], SplinePoints[i+1], N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
+			UE_VLOG_SEGMENT(InWorld, LogNexusPicker, Verbose, SplinePoints[i], SplinePoints[i+1], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		if(SplineComponent->IsClosedLoop()) \
 		{ \
-			UE_VLOG_SEGMENT(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], N_VLOG_PICKER_OUTER_COLOR, TEXT("")); \
+			UE_VLOG_SEGMENT(InWorld, LogNexusPicker, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
-		UE_VLOG_LOCATION(InWorld, N_VLOG_PICKER_CHANNEL, Verbose, OutLocation, N_VLOG_PICKER_POINT_SIZE, N_VLOG_PICKER_POINT_COLOR, TEXT("%s"), *OutLocation.ToCompactString()); \
+		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
 	}
 
 #else

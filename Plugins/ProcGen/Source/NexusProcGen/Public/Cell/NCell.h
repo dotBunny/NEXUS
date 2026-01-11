@@ -5,7 +5,6 @@
 
 #include "NCellJunctionDetails.h"
 #include "NCellRootDetails.h"
-//#include "PCGDataAsset.h"
 #include "NCell.generated.h"
 
 /**
@@ -30,11 +29,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
 
-	/**
-	 * TODO: Explicit data structure populated to work with PCG
-	 */
-	//UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "PCG", meta = (NoResetToDefault))
-	//FPCGDataCollection DataCollection;
+	// TODO: Explicit data structure populated to work with PCG (FPCGDataCollection)
 
 private:
 

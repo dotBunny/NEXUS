@@ -17,7 +17,7 @@ public:
 	FNProcGenEditorCommands()
 		: TCommands<FNProcGenEditorCommands>(
 			TEXT("NProcGenEditorCommands"),
-			NSLOCTEXT("Contexts", "NProcGenEditorCommands", "NProcGenEditorCommands"),
+			NSLOCTEXT("NexusProcGenEditor", "NProcGenEditorCommands", "NProcGenEditorCommands"),
 			NAME_None,
 			FNProcGenEditorStyle::GetStyleSetName())
 	{

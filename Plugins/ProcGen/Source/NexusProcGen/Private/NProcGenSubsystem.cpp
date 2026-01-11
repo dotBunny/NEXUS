@@ -79,3 +79,8 @@ void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation)
 {
 	KnownOperations.Remove(Operation);
 }
+
+void UNProcGenSubsystem::OnOperationDestroyed(UNProcGenOperation* Operation)
+{
+	KnownOperations.Remove(Operation);
+}

@@ -179,9 +179,7 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
 {
 	// Get transform information
-	FVector RootLocation = RootComponent->GetComponentLocation();
-	FRotator RootRotation = RootComponent->GetComponentRotation();
-	FVector RootScale = RootComponent->GetComponentScale();
+	const FVector RootLocation = RootComponent->GetComponentLocation();
 
 	// Change floor
 	if (Floor != nullptr)
@@ -240,13 +238,10 @@ void ANSamplesLevelActor::SetWallPosition(UStaticMeshComponent* Wall, const floa
 	if (bMoveAlongX)
 	{
 		WorkingLocation.X += Position;
-		//WorkingLocation.Y = 0.f;
 	}
 	else
 	{
-		//WorkingLocation.X = WorkingLocation.Y;
 		WorkingLocation.Y += Position;
-		//WorkingLocation.X = 0.f;
 	}
 	WorkingLocation.Z += WallBaseVerticalOffset;
 

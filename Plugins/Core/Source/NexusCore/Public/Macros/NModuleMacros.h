@@ -31,12 +31,12 @@ public: \
 		const FPluginDescriptor CurrentDescriptor = Plugin->GetDescriptor(); \
 		FPluginDescriptor UpdatedDescriptor = FPluginDescriptor(CurrentDescriptor); \
 		bool bIsDirty = false; \
-		if(UpdatedDescriptor.Version != N_VERSION_NUMBER) \
+		if(UpdatedDescriptor.Version != NEXUS::Version::Number) \
 		{ \
-			UpdatedDescriptor.Version = N_VERSION_NUMBER; \
+			UpdatedDescriptor.Version = NEXUS::Version::Number; \
 			bIsDirty = true; \
 		} \
-		FString NewVersion = FString::Printf(TEXT("%i.%i.%i"), N_VERSION_MAJOR, N_VERSION_MINOR, N_VERSION_PATCH); \
+		FString NewVersion = FString::Printf(TEXT("%i.%i.%i"), NEXUS::Version::Major, NEXUS::Version::Minor, NEXUS::Version::Patch); \
 		if(!UpdatedDescriptor.VersionName.Equals(NewVersion, ESearchCase::CaseSensitive)) \
 		{ \
 			UpdatedDescriptor.VersionName = NewVersion; \

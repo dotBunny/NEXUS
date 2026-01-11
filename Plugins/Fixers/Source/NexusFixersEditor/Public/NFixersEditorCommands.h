@@ -11,7 +11,7 @@ public:
 	FNFixersEditorCommands()
 		: TCommands<FNFixersEditorCommands>(
 			TEXT("NFixersEditorCommands"),
-			NSLOCTEXT("Contexts", "NFixersEditorCommands", "NFixersEditorCommands"),
+			NSLOCTEXT("NexusFixersEditor", "Commands", "Commands"),
 			NAME_None,
 			FNFixersEditorStyle::GetStyleSetName())
 	{

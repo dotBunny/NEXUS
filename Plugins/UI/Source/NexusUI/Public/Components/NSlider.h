@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NUINamespace.h"
+#include "NUIMinimal.h"
 #include "Components/Slider.h"
 #include "NSlider.generated.h"
 

@@ -7,12 +7,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  DevPerfInsights:
+  PerformanceInsights:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Get Branch Settings
         id: settings
@@ -49,7 +47,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-dev-insights'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-insights'
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
         if: always()
@@ -66,13 +64,10 @@ jobs:
               Write-Output "$line" >> $outputPath
             }
           }
-  
-  DevPerfETL:
+  PerformanceETL:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Get Branch Settings
         id: settings
@@ -103,7 +98,7 @@ jobs:
         if: always()
         uses: ./.github/actions/xperf-stop
         with:
-          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-dev-etl
+          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-etl
 
       - name: Parse UE log
         if: always()
@@ -117,7 +112,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-dev-etl'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-etl'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary
@@ -135,12 +130,10 @@ jobs:
               Write-Output "$line" >> $outputPath
             }
           }
-  DevPerf:
+  Performance:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: dev
 
       - name: Get Branch Settings
         id: settings
@@ -176,194 +169,7 @@ jobs:
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-dev'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
-        if: always()
-        shell: powershell
-        run: |
-          $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
-          if(Test-Path -Path $markdownPath)
-          {
-            $markdownLines = Get-Content -Path $markdownPath
-            $outputPath = $env:GITHUB_STEP_SUMMARY
-            Write-Output "Updating GITHUB_STEP_SUMMARY with $outputPath."
-            foreach ($line in $markdownLines) 
-            {
-              Write-Output "$line" >> $outputPath
-            }
-          }
-  MainPerfInsights:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Get Branch Settings
-        id: settings
-        run: |
-          $json = Get-Content .github/branch.json | ConvertFrom-Json
-          $installation = $json.installation
-          echo "ue=$installation" >> $env:GITHUB_OUTPUT
-        shell: powershell
-
-      - name: Clean workspace
-        uses: ./.github/actions/workspace-clean
-
-      - name: Build project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run performance tests
-        uses: ./.github/actions/ue-cmd-tests
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-          tests: 'Performance Tests' 
-          trace: 'true' 
-
-      - name: Parse UE log
-        if: always()
-        uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
-        if: always()
-        uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
-        if: always()
-        uses: ./.github/actions/upload-artifacts
-        with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-main-insights'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
-        if: always()
-        shell: powershell
-        run: |
-          $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
-          if(Test-Path -Path $markdownPath)
-          {
-            $markdownLines = Get-Content -Path $markdownPath
-            $outputPath = $env:GITHUB_STEP_SUMMARY
-            Write-Output "Updating GITHUB_STEP_SUMMARY with $outputPath."
-            foreach ($line in $markdownLines) 
-            {
-              Write-Output "$line" >> $outputPath
-            }
-          }
-
-  MainPerfETL:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Get Branch Settings
-        id: settings
-        run: |
-          $json = Get-Content .github/branch.json | ConvertFrom-Json
-          $installation = $json.installation
-          echo "ue=$installation" >> $env:GITHUB_OUTPUT
-        shell: powershell
-
-      - name: Clean workspace
-        uses: ./.github/actions/workspace-clean
-
-      - name: Build project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Start performance recording
-        uses: ./.github/actions/xperf-start 
-
-      - name: Run performance tests
-        uses: ./.github/actions/ue-cmd-tests
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-          tests: 'Performance Tests'
-
-      - name: Stop performance recording
-        uses: ./.github/actions/xperf-stop
-        with:
-          etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-main-etl     
-
-      - name: Parse UE log
-        if: always()
-        uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
-        if: always()
-        uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
-        if: always()
-        uses: ./.github/actions/upload-artifacts
-        with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-main-etl'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
-        if: always()
-        shell: powershell
-        run: |
-          $markdownPath = "${{ github.workspace }}\Staging\TestResults\index.md"
-          if(Test-Path -Path $markdownPath)
-          {
-            $markdownLines = Get-Content -Path $markdownPath
-            $outputPath = $env:GITHUB_STEP_SUMMARY
-            Write-Output "Updating GITHUB_STEP_SUMMARY with $outputPath."
-            foreach ($line in $markdownLines) 
-            {
-              Write-Output "$line" >> $outputPath
-            }
-          }
-  MainPerf:
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-
-      - name: Get Branch Settings
-        id: settings
-        run: |
-          $json = Get-Content .github/branch.json | ConvertFrom-Json
-          $installation = $json.installation
-          echo "ue=$installation" >> $env:GITHUB_OUTPUT
-        shell: powershell
-
-      - name: Clean workspace
-        uses: ./.github/actions/workspace-clean
-
-      - name: Build project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run performance tests
-        uses: ./.github/actions/ue-cmd-tests
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-          tests: 'Performance Tests'
-
-      - name: Parse UE log
-        if: always()
-        uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
-        if: always()
-        uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
-        if: always()
-        uses: ./.github/actions/upload-artifacts
-        with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-main'
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}'
 
       # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
       - name: Update summary

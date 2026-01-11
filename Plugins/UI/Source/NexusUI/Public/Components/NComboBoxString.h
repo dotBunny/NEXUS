@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NUINamespace.h"
+#include "NUIMinimal.h"
 #include "Components/ComboBoxString.h"
 #include "NComboBoxString.generated.h"
 

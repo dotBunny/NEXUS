@@ -182,7 +182,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to alllow Config(%s)."), *Config);
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to allow Config(%s)."), *Config);
 		return;
 	}
 	
@@ -200,7 +200,8 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 
 void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 {
-	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
+	if (MutableStyleSet != nullptr)
 	{
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
@@ -212,7 +213,8 @@ void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 
 void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 {
-	if (FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get())))
+	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
+	if (MutableStyleSet != nullptr)
 	{
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
@@ -265,11 +267,12 @@ FString FNEditorUtils::GetEngineBinariesPath()
 void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals
-	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
+	if (GlobalActiveTab.IsValid())
 	{
 		if (OnTabClosedCallback.IsBound())
 		{
-			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+			GlobalActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 		}
 		return;
 	}
@@ -277,11 +280,12 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
 	{
 		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
+		if (LevelEditorActiveTab.IsValid())
 		{
 			if (OnTabClosedCallback.IsBound())
 			{
-				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+				LevelEditorActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 			}
 		}
 	}
@@ -290,21 +294,22 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals
-	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
+	if (GlobalActiveTab.IsValid())
 	{
 		if (Icon.IsSet())
 		{
-			ActiveTab.Get()->SetTabIcon(Icon);
+			GlobalActiveTab.Get()->SetTabIcon(Icon);
 		}
 		
 		if (!Label.IsEmpty())
 		{
-			ActiveTab.Get()->SetLabel(Label);
+			GlobalActiveTab.Get()->SetLabel(Label);
 		}
 		
 		if (OnTabClosedCallback.IsBound())
 		{
-			ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+			GlobalActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 		}
 		return;
 	}
@@ -313,21 +318,22 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
 	{
 		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
+		if (LevelEditorActiveTab.IsValid())
 		{
 			if (Icon.IsSet())
 			{
-				ActiveTab.Get()->SetTabIcon(Icon);
+				LevelEditorActiveTab.Get()->SetTabIcon(Icon);
 			}
 		
 			if (!Label.IsEmpty())
 			{
-				ActiveTab.Get()->SetLabel(Label);
+				LevelEditorActiveTab.Get()->SetLabel(Label);
 			}
 			
 			if (OnTabClosedCallback.IsBound())
 			{
-				ActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+				LevelEditorActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
 			}
 			return;
 		}
@@ -339,9 +345,8 @@ void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-		
-	const TArray< TSharedRef<FWorkspaceItem> >& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
-	
+	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
+
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
 		if (Child->GetFName() == WidgetIdentifier)
@@ -358,10 +363,11 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 void FNEditorUtils::FocusTab(const FName& TabIdentifier)
 {
 	// Check Globals
-	if (const TSharedPtr<SDockTab> ActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier))
+	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
+	if (GlobalActiveTab.IsValid())
 	{
-		ActiveTab->ActivateInParent(SetDirectly);
-		ActiveTab->FlashTab();
+		GlobalActiveTab->ActivateInParent(SetDirectly);
+		GlobalActiveTab->FlashTab();
 		return;
 	}
 	
@@ -369,10 +375,11 @@ void FNEditorUtils::FocusTab(const FName& TabIdentifier)
 	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
 	{
 		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		if (const TSharedPtr<SDockTab> ActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier))
+		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
+		if (LevelEditorActiveTab.IsValid())
 		{
-			ActiveTab->ActivateInParent(SetDirectly);
-			ActiveTab->FlashTab();
+			LevelEditorActiveTab->ActivateInParent(SetDirectly);
+			LevelEditorActiveTab->FlashTab();
 			return;
 		}
 	}

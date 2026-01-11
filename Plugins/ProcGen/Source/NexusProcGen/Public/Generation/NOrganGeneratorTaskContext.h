@@ -11,6 +11,6 @@ class FNOrganGeneratorTaskContext
 	friend struct FNOrganGeneratorTask;
 public:
 	FNOrganGeneratorTaskContext(FNOrganGenerationContext* GeneratorContextMap, uint64 TaskSeed);
-protected:
+private:
 	uint64 Seed;
 };

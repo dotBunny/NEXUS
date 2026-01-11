@@ -9,16 +9,14 @@
 #include "NMetaUtils.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 
-#define LOCTEXT_NAMESPACE "NexusEditor"
-
 TMap<FName, FNWindowCommandInfo> FNEditorCommands::WindowActions;
 
 void FNEditorCommands::RegisterCommands()
 {
 	// ReSharper disable StringLiteralTypo
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,"NCore.Help.OpenOverwatch",
-	LOCTEXT("Command_Help_OpenOverwatch", "Overwatch"),
-	LOCTEXT("Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
+	NSLOCTEXT("NexusCoreEditor", "Command_Help_OpenOverwatch", "Overwatch"),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
 	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
@@ -26,52 +24,52 @@ void FNEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
-	LOCTEXT("Command_Help_OpenBugReport", "Issues"),
-	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Issues"),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
 	EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Discord,
 	"NCore.Help.OpenDiscord",
-	LOCTEXT("Command_Help_OpenDiscord", "Discord"),
-	LOCTEXT("Command_Help_OpenDiscord_Desc", "Opens the Discord (dotBunny Support) invite link in your browser."),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDiscord", "Discord"),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDiscord_Desc", "Opens the Discord (dotBunny Support) invite link in your browser."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.OpenDiscordInviteLink"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_BugReport,
 	"NCore.Help.OpenBugReport",
-	LOCTEXT("Command_Help_OpenBugReport", "Report a Bug"),
-	LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub repository's bug report form in your browser."),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Report a Bug"),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport_Desc", "Opens the GitHub repository's bug report form in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.ReportABug"),
 	EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Roadmap,
 		"NCore.Help.OpenRoadmap",
-		LOCTEXT("Command_Help_OpenBugReport", "Roadmap"),
-		LOCTEXT("Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Roadmap"),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitOnlineLearning"),
 		EUserInterfaceActionType::Button, FInputChord());	
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
 		"NCore.Help.OpenDocumentation",
-		LOCTEXT("Command_Help_OpenDocumentation", "Documentation"),
-		LOCTEXT("Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDocumentation", "Documentation"),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
 	"NCore.Tools.LeakCheck",
-	LOCTEXT("Command_Tools_LeakCheck", "Leak Check"),
-	LOCTEXT("Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
+	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check"),
+	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputChord());
 
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
 	"NCore.Tools.Profile.NetworkProfiler",
-	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
-	LOCTEXT("Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
+	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
+	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
@@ -105,8 +103,8 @@ void FNEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
 			"NCore.Node.ExternalDocumentation",
-			LOCTEXT("Command_Node_OpenExternalDocumentation", "External Documentation"),
-			LOCTEXT("Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
+			NSLOCTEXT("NexusCoreEditor","Command_Node_OpenExternalDocumentation", "External Documentation"),
+			NSLOCTEXT("NexusCoreEditor","Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 			EUserInterfaceActionType::Button, FInputChord());
 
@@ -220,8 +218,8 @@ void FNEditorCommands::BuildMenus()
 		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
 		FileOpenSection.AddSubMenu(
 				"NProjectLevels",
-				LOCTEXT("ProjectLevels", "Project Levels"),
-				LOCTEXT("ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
+				NSLOCTEXT("NexusCoreEditor", "ProjectLevels", "Project Levels"),
+				NSLOCTEXT("NexusCoreEditor", "ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
 				FNewToolMenuDelegate::CreateStatic(&FillProjectLevelsSubMenu),
 				false,
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
@@ -232,8 +230,8 @@ void FNEditorCommands::BuildMenus()
 	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
 	LevelEditorSection.AddSubMenu(
 			"NEXUS",
-			LOCTEXT("NWindows", "NEXUS"),
-			LOCTEXT("NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
+			NSLOCTEXT("NexusCoreEditor", "NWindows", "NEXUS"),
+			NSLOCTEXT("NexusCoreEditor", "NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
 			FNewToolMenuDelegate::CreateStatic(&FillNexusWindowsMenu, true),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
@@ -243,7 +241,7 @@ void FNEditorCommands::BuildMenus()
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
 		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("NEXUS");
-		ToolsSection.Label = LOCTEXT("NLevelEditorTools", "NEXUS");
+		ToolsSection.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorTools", "NEXUS");
 
 		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
 	}
@@ -255,7 +253,7 @@ void FNEditorCommands::BuildMenus()
 		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
 		{
 			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
-			ExternalMenu.Label = LOCTEXT("NLevelEditorToolsExternal", "External");
+			ExternalMenu.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorToolsExternal", "External");
 
 			ExternalMenu.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_Profile_NetworkProfiler, Commands.CommandList_Tools);
 		}
@@ -267,8 +265,8 @@ void FNEditorCommands::BuildMenus()
 		FToolMenuSection& ApplicationSection = Menu->FindOrAddSection(FName("Reference"));
 		ApplicationSection.AddSubMenu(
 				"NEXUS",
-				LOCTEXT("NHelp", "NEXUS"),
-				LOCTEXT("NHelp_Tooltip", "Help related to NEXUS"),
+				NSLOCTEXT("NexusCoreEditor", "NHelp", "NEXUS"),
+				NSLOCTEXT("NexusCoreEditor", "NHelp_Tooltip", "Help related to NEXUS"),
 				FNewToolMenuDelegate::CreateStatic(&FillHelpSubMenu),
 				false,
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
@@ -285,7 +283,7 @@ void FNEditorCommands::BuildMenus()
 
 void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 {
-	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", LOCTEXT("ProjectLevels", ""));
+	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", NSLOCTEXT("NexusCoreEditor", "ProjectLevels", ""));
 	for (const UNEditorSettings* Settings = UNEditorSettings::Get();
 		const FSoftObjectPath& Path : Settings->ProjectLevels)
 	{
@@ -319,7 +317,7 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 
 void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", LOCTEXT("Windows", ""));
+	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", NSLOCTEXT("NexusCoreEditor", "Windows", ""));
 	for (auto WindowCommand : WindowActions)
 	{
 		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
@@ -365,16 +363,14 @@ void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 	const FNEditorCommands Commands = FNEditorCommands::Get();
 
 	FToolMenuSection& ReferenceSection = Menu->FindOrAddSection("Reference");
-	ReferenceSection.Label = LOCTEXT("NHelp_Reference", "Reference");
+	ReferenceSection.Label = NSLOCTEXT("NexusCoreEditor", "NHelp_Reference", "Reference");
 	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Documentation,Commands.CommandList_Help);
 	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Overwatch, Commands.CommandList_Help);
 	ReferenceSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Roadmap, Commands.CommandList_Help);
 
 	FToolMenuSection& SupportSection = Menu->FindOrAddSection("Support");
-	SupportSection.Label = LOCTEXT("NHelp_Support", "Support");
+	SupportSection.Label = NSLOCTEXT("NexusCoreEditor", "NHelp_Support", "Support");
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Discord, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_BugReport, Commands.CommandList_Help);
 	SupportSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Help_Issues, Commands.CommandList_Help);
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -112,7 +112,8 @@ public:
 			return nullptr;
 		}
 		
-		if (ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>())
+		ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+		if (LevelEditorSubsystem != nullptr)
 		{
 			return LevelEditorSubsystem->GetCurrentLevel();
 		}
@@ -122,7 +123,8 @@ public:
 	
 	FORCEINLINE static UWorld* GetCurrentWorld()
 	{
-		if (ULevel* CurrentLevel = GetCurrentLevel(); CurrentLevel != nullptr)
+		ULevel* CurrentLevel = GetCurrentLevel();
+		if (CurrentLevel != nullptr)
 		{
 			return CurrentLevel->OwningWorld;
 		}

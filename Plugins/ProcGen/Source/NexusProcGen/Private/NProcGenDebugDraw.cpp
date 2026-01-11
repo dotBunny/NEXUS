@@ -3,8 +3,8 @@
 
 #include "NProcGenDebugDraw.h"
 
+#include "NProcGenMinimal.h"
 #include "NProcGenSettings.h"
-#include "NProcGenUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
@@ -20,14 +20,14 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		switch (Axis)
 		{
 		case X:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		case Y:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
-		default:
 		case Z:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, PDI_LINE_THICKNESS);
+		default:
+			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		}
 	}
@@ -38,10 +38,10 @@ void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, con
 {
 	PDI->AddReserveLines(SDPG_World, 4, false, false);
 	
-	PDI->DrawLine(Points[1], Points[2], Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(Points[2], Points[3], Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(Points[3], Points[0], Color, Priority, PDI_LINE_THICKNESS);
-	PDI->DrawLine(Points[0], Points[1], Color, Priority, PDI_LINE_THICKNESS);
+	PDI->DrawLine(Points[1], Points[2], Color, Priority, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(Points[2], Points[3], Color, Priority, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(Points[3], Points[0], Color, Priority, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(Points[0], Points[1], Color, Priority, NEXUS::ProcGen::Debug::LineThickness);
 }
 
 void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PDI, const FVector& Location,
@@ -52,11 +52,11 @@ void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PD
 	case ENCellJunctionType::CJT_TwoWaySocket:
 		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
 		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
-		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
+		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
 	case ENCellJunctionType::CJT_OneWaySocket:
 		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
-		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, PDI_LINE_THICKNESS);
+		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
 	}
 }

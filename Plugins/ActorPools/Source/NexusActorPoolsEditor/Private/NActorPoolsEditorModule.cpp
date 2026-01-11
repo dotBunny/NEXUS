@@ -46,7 +46,7 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 	
 	if (GUnrealEd)
 	{
-		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShareable(new FNActorPoolSpawnerComponentVisualizer());
+		const TSharedPtr<FComponentVisualizer> ActorPoolSpawnerComponentVisualizer = MakeShared<FNActorPoolSpawnerComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName(), ActorPoolSpawnerComponentVisualizer);
 		ActorPoolSpawnerComponentVisualizer->OnRegister();
 	}
@@ -61,7 +61,7 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		NAME_None,
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
-		NSLOCTEXT("NexusActorPoolsEditor", "NKillZoneActorPlacement", "KillZone Actor"))));
+		NSLOCTEXT("NexusActorPoolsEditor", "Placement_NKillZoneActor", "KillZone Actor"))));
 		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
 			*ANPooledActor::StaticClass(),
 			FAssetData(ANPooledActor::StaticClass()),
@@ -69,7 +69,7 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 			NAME_None,
 			TOptional<FLinearColor>(),
 			TOptional<int32>(),
-			NSLOCTEXT("NexusActorPoolsEditor", "NPooledActorPlacement", "Pooled Actor"))));
+			NSLOCTEXT("NexusActorPoolsEditor", "Placement_NPooledActor", "Pooled Actor"))));
 	}
 }
 

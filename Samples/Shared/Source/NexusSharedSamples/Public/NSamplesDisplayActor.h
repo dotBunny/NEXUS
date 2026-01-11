@@ -17,7 +17,10 @@
 class UCameraComponent;
 class USpotLightComponent;
 
-#define N_TIMER_DRAW_THICKNESS 1.f
+namespace NEXUS::Samples
+{
+	constexpr float TimerDrawThickness = 1.f;
+}
 
 UENUM(BlueprintType)
 enum class ESampleTestResult : uint8
@@ -251,27 +254,27 @@ protected:
 	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, const FVector2D InnerOuter, const int TimerIntervals = 1) const
 	{
 		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
-			FNColor::GetColor(NC_Black), false,TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
+			FNColor::GetColor(NC_Black), false,TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
-			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World, N_TIMER_DRAW_THICKNESS);
+			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1) const
 	{
 		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Dimensions.GetExtent(),
 			FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
-			SDPG_World, N_TIMER_DRAW_THICKNESS);
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Box", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawComboBox(UObject* WorldContextObject, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1) const
 	{
 		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerDimensions.GetExtent(),
 			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
-			SDPG_World, N_TIMER_DRAW_THICKNESS);
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
 
 		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, OuterDimensions.GetExtent(),
 		FNColor::GetColor(NC_White), false, TimerDuration * TimerIntervals,
-	SDPG_World, N_TIMER_DRAW_THICKNESS);
+	SDPG_World, NEXUS::Samples::TimerDrawThickness);
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
@@ -281,7 +284,7 @@ protected:
 		
 		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, Radius, 24,
 			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			N_TIMER_DRAW_THICKNESS,false);
+			NEXUS::Samples::TimerDrawThickness,false);
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
@@ -291,11 +294,11 @@ protected:
 
 		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.X, 24,
 			FNColor::GetColor(NC_Black), false, TimerDuration * TimerIntervals,
-			SDPG_World, N_TIMER_DRAW_THICKNESS, false);
+			SDPG_World, NEXUS::Samples::TimerDrawThickness, false);
 
 		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.Y, 24,
 			FNColor::GetColor(NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			N_TIMER_DRAW_THICKNESS, false);
+			NEXUS::Samples::TimerDrawThickness, false);
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Spline", meta = (WorldContext = "WorldContextObject"))
 	void TimerDrawSpline(UObject* WorldContextObject, const USplineComponent* Spline, const int TimerIntervals = 1) const
@@ -316,7 +319,7 @@ protected:
 		for (int32 i = 0; i < SplinePoints.Num() - 1; ++i)
 		{
 			DrawDebugLine(World, SplinePoints[i], SplinePoints[i + 1], FNColor::GetColor(NC_White),
-				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 		}
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Rectangle", meta = (WorldContext = "WorldContextObject"))
@@ -351,7 +354,7 @@ protected:
 		for (int32 i = 0; i < 4; ++i)
 		{
 			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_White),
-				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 		}
 	}
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Rectangle", meta = (WorldContext = "WorldContextObject"))
@@ -389,7 +392,7 @@ protected:
 		for (int32 i = 0; i < 4; ++i)
 		{
 			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_Black),
-				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 		}
 
 		RectanglePoints.Empty();
@@ -416,7 +419,7 @@ protected:
 		for (int32 i = 0; i < 4; ++i)
 		{
 			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(NC_White),
-				false, LifeTime, SDPG_World, N_TIMER_DRAW_THICKNESS);
+				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 		}
 	}
 

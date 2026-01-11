@@ -41,19 +41,19 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	{
 		switch (BuildMethod)
 		{
-		case EBuildMethod::Default:	
+			using enum EBuildMethod;
+		case Default:	
 			return Chaos::FConvexBuilder::EBuildMethod::Default;
-		case EBuildMethod::Original:
+		case Original:
 			return Chaos::FConvexBuilder::EBuildMethod::Original;
-		case EBuildMethod::ConvexHull3:
+		case ConvexHull3:
 			return Chaos::FConvexBuilder::EBuildMethod::ConvexHull3;
-		case EBuildMethod::ConvexHull3Simplified:
+		case ConvexHull3Simplified:
 			return Chaos::FConvexBuilder::EBuildMethod::ConvexHull3Simplified;
 		default:
 			return Chaos::FConvexBuilder::EBuildMethod::Default;
 		}
 	}
-	
 
 	// TODO: Padding to surfaces ? character height
 	bool Equals(const FNCellHullGenerationSettings& Other) const

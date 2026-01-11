@@ -11,15 +11,13 @@
 #include "Organ/NOrganComponent.h"
 #include "Misc/ScopedSlowTask.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGen"
-
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
 	if (InLevel)
 	{
 		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask Task = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculatePlayableBounds", "Calculate Playable Bounds"));
+		FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
 		Task.MakeDialog(false);
 	
 		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
@@ -61,7 +59,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 		FVector BoxVertices[8];
 		const int32 NumActors = InLevel->Actors.Num();
 		
-		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
+		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
 		ActorTask.MakeDialog(false);
 		
 		Vertices.Reserve(NumActors * 8);
@@ -103,7 +101,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	TArray<Chaos::FConvex::FVec3Type> OutVertices;
 	Chaos::FConvex::FAABB3Type OutLocalBounds;
 
-	FScopedSlowTask ChaosTask = FScopedSlowTask(2, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Chaos", "Calculate Convex Hull - Chaos"));
+	FScopedSlowTask ChaosTask = FScopedSlowTask(2, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Chaos", "Calculate Convex Hull - Chaos"));
 	ChaosTask.MakeDialog(false);
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
@@ -115,7 +113,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	const int VerticesCount = OutVertices.Num();
 	const int IndicesCount = OutFaceIndices.Num();
 	
-	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, LOCTEXT("NProcGen_FNProcGenUtils_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
+	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
 	BuildTask.MakeDialog(false);
 	
 	Mesh.Vertices.Reserve(VerticesCount);
@@ -165,7 +163,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		// STEP 1 - Specific Bounds / Ignore Actors
 		FBox Bounds(ForceInit);
 		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_Bounds", "Build Voxel World"));
+		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
 		BoundsTask.MakeDialog(false);
 		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 		{
@@ -216,24 +214,14 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
 		Params.AddIgnoredActors(IgnoredActors);
 		
-		
-		FCollisionObjectQueryParams ObjectParams = FCollisionObjectQueryParams(CollisionChannel);
-	
-		
 		// STEP 2 - Broad Trace
-		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, LOCTEXT("NProcGen_FNProcGenUtils_CalculateVoxelData_BroadTrace", "Broad Trace"));
+		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
 		BroadTraceTask.MakeDialog(false);
-		
-		// DEBUG
-		//FlushPersistentDebugLines(World);
-		
-		// We iterate over the array by axis to minimize inverse calculations
 
+		// We iterate over the array by axis to minimize inverse calculations
 		TArray<FVector> RayEndPoints;
 		FHitResult SingleHit;
 		TArray<FHitResult> ObjectHits;
-	//	FVector HitActorLocation;
-	//	FVector HitActorExtents;
 		
 		// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
 		FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
@@ -255,60 +243,6 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 					{
 						ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
 					}
-					
-					//
-					// // Create Rays
-					// RayEndPoints.Empty();
-					// GetVoxelQueryLevelBoundsEndPoints(VoxelCenter, Bounds, RayEndPoints);
-					//
-					// bool bIsInside = false;
-					// for (int j = 0; j < 26; j++)
-					// {
-					// 	bool bHitObjects =  World->LineTraceMultiByObjectType(ObjectHits, RayEndPoints[j], VoxelCenter, ObjectParams, Params);
-					// 	DrawDebugLineTraceMulti(World, RayEndPoints[j], VoxelCenter, EDrawDebugTrace::Persistent, bHitObjects, OutHits, FLinearColor::Yellow, FLinearColor::Red, -1.f);
-					// 	if (bHitObjects)
-					// 	{
-					// 		
-					// 		// We've hit objects from the outside of the bounds inward, which now means we need to 
-					// 		// determine if we are inside one of them.
-					// 		
-					// 		const int Hits = ObjectHits.Num();
-					// 		if (Hits == 0) continue; // No hits, void
-					// 		
-					// 		for (int  k = 0; k < Hits; k++)
-					// 		{
-					// 			AActor* HitActor = ObjectHits[k].GetActor();
-					// 			
-					// 			// We want to rule out quickly if we are no longer in the bounds of an object
-					// 			HitActor->GetActorBounds(true, HitActorLocation, HitActorExtents);
-					// 			if (FBox HitActorBox = FBox(HitActorLocation - HitActorExtents, HitActorLocation + HitActorExtents); 
-					// 				!HitActorBox.IsInsideOrOn(VoxelCenter))
-					// 			{
-					// 				continue;
-					// 			}
-					// 			
-					// 			// Now we know that were inside of it we need to do some calculations to see if we are 
-					// 			// actually inside its meshes triangles
-					// 			
-					// 			
-					// 			
-					// 			
-					// 			//UE_LOG(LogTemp, Warning, TEXT("Voxel %d,%d,%d - Ray %d hit %s"), x,y,z, j,  *ObjectHits[k].GetActor()->GetActorLabel());
-					// 		}
-					// 		
-					// 		
-					// 		if (FMath::Modulo(ObjectHits.Num(), 2) != 0)
-					// 		{
-					// 			bIsInside = true;
-					// 		}
-					// 	}
-					// }
-			
-					// if (bIsInside)
-					// {
-					// 	// Outside
-					// 	//DrawDebugPoint(World, VoxelCenter, 10.f, FColor::Blue, true, 0.f, 2.0f);
-					// }
 				}
 			}
 		}
@@ -549,5 +483,3 @@ void FNProcGenUtils::GetVoxelQueryLevelBoundsEndPoints(const FVector& WorldCente
 	}
 	
 }
-
-#undef LOCTEXT_NAMESPACE

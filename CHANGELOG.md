@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.5] - 2026-01-11
+
+### Changed
+
+- The `main` branch of the GitHub repository is now the base point of development, tags are still created for specific release versions, with those points in time being commited to the `release` branch.
+- Code cleanup driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
+
+### Fixed
+
+- Add proper editor menu cleanup for the `NexusFixers` plugin.
+
 ## [0.2.4] - 2026-01-06
 
 ### Added
@@ -171,6 +182,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dotBunny/NEXUS/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dotBunny/NEXUS/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dotBunny/NEXUS/compare/v0.2.1...v0.2.2

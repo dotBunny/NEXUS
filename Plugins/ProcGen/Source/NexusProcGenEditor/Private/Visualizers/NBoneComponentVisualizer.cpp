@@ -5,8 +5,6 @@
 
 #include "Organ/NBoneComponent.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Component, const FSceneView* View,
 	FPrimitiveDrawInterface* PDI)
 {
@@ -20,5 +18,3 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 	// We are always going to draw this
 	BoneComponent->DrawDebugPDI(PDI);
 }
-
-#undef LOCTEXT_NAMESPACE

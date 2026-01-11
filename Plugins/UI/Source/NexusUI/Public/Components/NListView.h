@@ -5,7 +5,7 @@
 
 #include "CommonListView.h"
 #include "INListViewEntry.h"
-#include "NUINamespace.h"
+#include "NUIMinimal.h"
 #include "NListView.generated.h"
 
 UCLASS(DisplayName = "ListView", ClassGroup = UI, meta = (Category = "NEXUS"))

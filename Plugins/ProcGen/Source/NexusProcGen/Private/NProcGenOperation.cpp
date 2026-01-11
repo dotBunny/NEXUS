@@ -4,7 +4,6 @@
 #include "NProcGenOperation.h"
 
 #include "NProcGenMinimal.h"
-#include "NProcGenNamespace.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
@@ -114,7 +113,11 @@ void UNProcGenOperation::SetDisplayMessage(FString NewDisplayMessage)
 
 void UNProcGenOperation::BeginDestroy()
 {
-	this->RemoveFromRoot();
+	if (Owner != nullptr)
+	{
+		Owner->OnOperationDestroyed(this);
+		Owner = nullptr;
+	}
 	
 	if (Context != nullptr)
 	{
@@ -137,6 +140,8 @@ void UNProcGenOperation::BeginDestroy()
 		FNProcGenRegistry::UnregisterOperation(this);
 	}
 	
+	this->RemoveFromRoot();
+	
 	Super::BeginDestroy();
 }
 
@@ -156,24 +161,20 @@ void UNProcGenOperation::Tick()
 
 void UNProcGenOperation::FinishBuild()
 {
-	
-	// TODO: Not great but allows us to go both ways and its not frequent
-	if (ExecuteCaller->IsValidLowLevel())
+
+	if (Owner != nullptr)
 	{
-		if (UFunction* Function = ExecuteCaller->FindFunction(TEXT("OnOperationFinished")))
-		{
-			ExecuteCaller->ProcessEvent(Function, this);
-		}
+		Owner->OnOperationFinished(this);
 	}
 	
 	// Were going to delete this object
 	ConditionalBeginDestroy();
 }
 
-void UNProcGenOperation::StartBuild(UObject* Caller)
+void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 {
 	// Cache our caller
-	ExecuteCaller = Caller;
+	Owner = Caller;
 	
 	// Ensure that we have locked context and done the preprocessing.
 	if (!Context->IsLocked())

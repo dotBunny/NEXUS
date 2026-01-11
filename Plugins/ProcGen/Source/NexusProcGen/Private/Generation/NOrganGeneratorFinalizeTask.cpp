@@ -6,10 +6,11 @@
 #include "NProcGenOperation.h"
 
 
-FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, FNOrganGeneratorTaskContext* ContextPtr)
+FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
+	UNProcGenOperation* TargetOperation, FNOrganGeneratorTaskContext* ContextPtr)
+		: Operation(TargetOperation), Context(ContextPtr)
 {
-	Operation = TargetOperation;
-	Context = ContextPtr;
+
 }
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)

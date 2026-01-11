@@ -39,8 +39,9 @@ DEALINGS IN THE SOFTWARE.
 ## Badges
 
 ### Static Analysis (SonarQube)
-
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=alert_status)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=code_smells)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=sqale_rating)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=reliability_rating)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=dotBunny_NEXUS&metric=ncloc)](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main)

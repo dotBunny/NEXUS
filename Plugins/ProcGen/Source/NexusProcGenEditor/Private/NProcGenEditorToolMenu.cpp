@@ -14,8 +14,6 @@
 #include "NProcGenSettings.h"
 #include "NWidgetEditorUtilityWidget.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 FName FNProcGenEditorToolMenu::EditorUtilityWindowName = FName("NProcGenEditorUtilityWindow");
 
 void FNProcGenEditorToolMenu::Register()
@@ -38,7 +36,7 @@ void FNProcGenEditorToolMenu::Register()
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Organ);
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					
-					MenuBuilder.BeginSection("NOrganExtensions_SelectSection", LOCTEXT("NOrganExtensions_SelectSection", "Select Organ"));
+					MenuBuilder.BeginSection("NOrganExtensions_SelectSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectSection", "Select Organ"));
 					TArray<UNOrganComponent*> OrganComponents = FNProcGenRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
 					for (auto Organ : OrganComponents)
 					{
@@ -46,7 +44,7 @@ void FNProcGenEditorToolMenu::Register()
 						
 						MenuBuilder.AddMenuEntry(
 							OrganName,
-							FText::Format(LOCTEXT("NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
+							FText::Format(NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent, Organ),
 								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent_CanExecute, Organ),
@@ -55,14 +53,14 @@ void FNProcGenEditorToolMenu::Register()
 					}
 					MenuBuilder.EndSection();
 					
-					MenuBuilder.BeginSection("NOrganExtensions_ActionSection", LOCTEXT("NOrganExtensions_ActionSection", "Actions"));
+					MenuBuilder.BeginSection("NOrganExtensions_ActionSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_ActionSection", "Actions"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganGenerate);
 					MenuBuilder.EndSection();
 					
 					return MenuBuilder.MakeWidget();
 				}),
-			LOCTEXT("NOrganExtensions_Label", "Organ"),
-			LOCTEXT("NOrganExtensions_ToolTip", "Making procedural content easier since 2017."),
+			NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_Label", "Organ"),
+			NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_ToolTip", "Making procedural content easier since 2017."),
 			FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "ClassIcon.NOrganComponent")
 		);
 		NOrganDropdownMenu.StyleNameOverride = "CalloutToolbar";
@@ -76,8 +74,8 @@ void FNProcGenEditorToolMenu::Register()
 						FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::ProcGenEdMode_CanExecute),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::ProcGenEdMode_CanShow)),
-						LOCTEXT("Command_NProcGenEdMode_Button", "Switch To NProcGen Editor Mode"),
-						LOCTEXT("Command_NProcGenEdMode_Button", "Switch the current editor mode to the NProcGen Editor Mode, which enables specific tools for working with NCells, etc."),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NProcGenEdMode_Button", "Switch To NProcGen Editor Mode"),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NProcGenEdMode_Button", "Switch the current editor mode to the NProcGen Editor Mode, which enables specific tools for working with NCells, etc."),
 						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen"));
 		NexusSection.AddEntry(NProcGenEdMode_Button);
 		
@@ -89,8 +87,8 @@ void FNProcGenEditorToolMenu::Register()
 						FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellAddActor_CanExecute),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellAddActor_CanShow)),
-						LOCTEXT("Command_NCell_AddActor", "Add Actor"),
-						LOCTEXT("Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_AddActor", "Add Actor"),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
 						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.AddNCellActor"));
 		NexusSection.AddEntry(NCellActor_AddButton);
 
@@ -102,8 +100,8 @@ void FNProcGenEditorToolMenu::Register()
 						FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellSelectActor_CanExecute),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellSelectActor_CanShow)),
-						LOCTEXT("Command_NCell_SelectActor", "Select Actor"),
-						LOCTEXT("Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_SelectActor", "Select Actor"),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
 						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellActor.Selected"));
 		NexusSection.AddEntry(NCellActor_SelectButton);
 		
@@ -115,8 +113,8 @@ void FNProcGenEditorToolMenu::Register()
 						FCanExecuteAction(),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellEditMode)),
-						LOCTEXT("Command_NCellActor_EditBoundsMode", "Edit Bounds"),
-						LOCTEXT("Command_NCellActor_EditBoundsMode_Tooltip", "Edit the bounds of the NCell."),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditBoundsMode", "Edit Bounds"),
+						NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditBoundsMode_Tooltip", "Edit the bounds of the NCell."),
 						TAttribute<FSlateIcon>::Create(
 							TAttribute<FSlateIcon>::FGetter::CreateStatic(
 						&FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon)));
@@ -130,8 +128,8 @@ void FNProcGenEditorToolMenu::Register()
 				FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellActorEditHullMode_CanExecute),
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellEditMode)),
-				LOCTEXT("Command_NCellActor_EditHullMode", "Edit Hull"),
-				LOCTEXT("Command_NCellActor_EditHullMode_Tooltip", "Edit the hull vertices of the NCell (requires a tri-based hull)."),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditHullMode", "Edit Hull"),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditHullMode_Tooltip", "Edit the hull vertices of the NCell (requires a tri-based hull)."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNProcGenEditorCommands::CellActorEditHullMode_GetIcon)));
@@ -145,8 +143,8 @@ void FNProcGenEditorToolMenu::Register()
 		FCanExecuteAction(),
 		FIsActionChecked(),
 		FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowCellEditMode)),
-		LOCTEXT("Command_NCellActor_EditVoxelMode", "Edit Voxels"),
-		LOCTEXT("Command_NCellActor_EditVoxelMode_Tooltip", "Edit the voxel points of the NCell."),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditVoxelMode", "Edit Voxels"),
+		NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditVoxelMode_Tooltip", "Edit the voxel points of the NCell."),
 		TAttribute<FSlateIcon>::Create(
 			TAttribute<FSlateIcon>::FGetter::CreateStatic(
 		&FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon)));
@@ -166,33 +164,33 @@ void FNProcGenEditorToolMenu::Register()
 					FMenuBuilder MenuBuilder(true, FNProcGenEditorCommands::Get().CommandList_Cell);
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					
-					MenuBuilder.BeginSection("NCellExtensions_Asset", LOCTEXT("NCellExtensions_AssetSection", "Asset"));
+					MenuBuilder.BeginSection("NCellExtensions_Asset", NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_AssetSection", "Asset"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCaptureThumbnail);
 					MenuBuilder.EndSection();
 					
-					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", LOCTEXT("NCellExtensions_CalculateSection", "Calculate"));
+					MenuBuilder.BeginSection("NCellExtensions_CalculateSection", NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_CalculateSection", "Calculate"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateAll);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateBounds);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateHull);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellCalculateVoxelData);
 					MenuBuilder.EndSection();
 					
-					MenuBuilder.BeginSection("NCellExtensions_QuickSettings", LOCTEXT("NCellExtensions_QuickSettings", "Quick Settings"));
+					MenuBuilder.BeginSection("NCellExtensions_QuickSettings", NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_QuickSettings", "Quick Settings"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleBoundsCalculateOnSave);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleHullCalculateOnSave);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleVoxelCalculateOnSave);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellToggleVoxelData);
 					MenuBuilder.EndSection();
 					
-					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", LOCTEXT("NCellExtensions_CleanupSection", "Cleanup"));
+					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_CleanupSection", "Cleanup"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellResetCell);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellRemoveActor);
 					MenuBuilder.EndSection();
 					
 					return MenuBuilder.MakeWidget();
 				}),
-			LOCTEXT("NCellExtensions_Label", "Cell"),
-			LOCTEXT("NCellExtensions_ToolTip", "Making procedural content easier since 2017."),
+			NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_Label", "Cell"),
+			NSLOCTEXT("NexusProcGenEditor", "NCellExtensions_ToolTip", "Making procedural content easier since 2017."),
 			FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "ClassIcon.NCellActor")
 		);
 		NCellDropdownMenu.StyleNameOverride = "CalloutToolbar";
@@ -213,7 +211,7 @@ void FNProcGenEditorToolMenu::Register()
 				
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_CellJunctionAddComponent);
-					MenuBuilder.BeginSection("NCellJunctionExtensions_Section", LOCTEXT("NCellJunctionExtensions_Section", "Select Junction"));
+					MenuBuilder.BeginSection("NCellJunctionExtensions_Section", NSLOCTEXT("NexusProcGenEditor", "NCellJunctionExtensions_Section", "Select Junction"));
 					TArray<UNCellJunctionComponent*> Junctions = FNProcGenRegistry::GetCellJunctionsComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
 					for (auto Junction : Junctions)
 					{
@@ -221,7 +219,7 @@ void FNProcGenEditorToolMenu::Register()
 						
 						MenuBuilder.AddMenuEntry(
 							JunctionName,
-							FText::Format(LOCTEXT("SelectNCellJunctionComponent", "Select {0}"), JunctionName),
+							FText::Format(NSLOCTEXT("NexusProcGenEditor", "SelectNCellJunctionComponent", "Select {0}"), JunctionName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent, Junction),
 								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent_CanExecute, Junction),
@@ -232,8 +230,8 @@ void FNProcGenEditorToolMenu::Register()
 					
 					return MenuBuilder.MakeWidget();
 				}),
-			LOCTEXT("NCellJunctionExtensions_Label", "Junction"),
-			LOCTEXT("NCellJunctionExtensions_ToolTip", "Making procedural content easier since 2017."),
+			NSLOCTEXT("NexusProcGenEditor", "NCellJunctionExtensions_Label", "Junction"),
+			NSLOCTEXT("NexusProcGenEditor", "NCellJunctionExtensions_ToolTip", "Making procedural content easier since 2017."),
 			FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "ClassIcon.NCellJunctionComponent")
 		);
 		NCellJunctionDropdownMenu.StyleNameOverride = "CalloutToolbar";
@@ -247,8 +245,8 @@ void FNProcGenEditorToolMenu::Register()
 				FCanExecuteAction(),
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNProcGenEditorToolMenu::ShowDrawVoxels)),
-				LOCTEXT("Command_NCellActor_DrawVoxelData", "Draw Voxel Data"),
-				LOCTEXT("Command_NCellActor_DrawVoxelData_Tooltip", "Toggle drawing calculated voxel data for the NCell."),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_DrawVoxelData", "Draw Voxel Data"),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_DrawVoxelData_Tooltip", "Toggle drawing calculated voxel data for the NCell."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon)));
@@ -259,8 +257,8 @@ void FNProcGenEditorToolMenu::Register()
 	auto EditorWindow = FNWindowCommandInfo();
 	
 	EditorWindow.Identifier = "NProcGenSystem";
-	EditorWindow.DisplayName = LOCTEXT("NProcGenSystem_EUW_DisplayName", "ProcGen System");
-	EditorWindow.Tooltip = LOCTEXT("NProcGenSystem_EUW_DisplayName", "Opens the NProcGenSystem Window inside of an editor tab.");
+	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "NProcGenSystem_EUW_DisplayName", "ProcGen System");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "NProcGenSystem_EUW_DisplayName", "Opens the NProcGenSystem Window inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
@@ -307,27 +305,23 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
 	// Default value
-	FString TemplatePath = TEXT("/Script/UMGEditor.WidgetBlueprint'/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay'");
+	const TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
 	
 	// Evaluate override
-	if (TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget; 
-		WidgetClass != nullptr)
+	if (WidgetClass != nullptr)
 	{
 		FString PathName = WidgetClass->GetPathName();
 		PathName.RemoveFromEnd("_C");
-		TemplatePath = FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName);
-	}
-
-	UNWidgetEditorUtilityWidget::GetOrCreate(
+		
+		UNWidgetEditorUtilityWidget::GetOrCreate(
 		EditorUtilityWindowName, 
-		TemplatePath, 
+		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
 		FText::FromString("NEXUS: ProcGen"), 
 		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
+	}
 }
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
 	return UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(EditorUtilityWindowName);
 }
-
-#undef LOCTEXT_NAMESPACE

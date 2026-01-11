@@ -51,7 +51,7 @@ public:
 	int32 UpdatesFrequency = 7;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel" )
-	TEnumAsByte<ENUpdatesChannel> UpdatesChannel = NUC_GithubMain;
+	TEnumAsByte<ENUpdatesChannel> UpdatesChannel = NUC_GithubRelease;
 
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom Query URI", meta=(
 		EditCondition="UpdatesChannel == ENUpdatesChannel::NUC_Custom", EditConditionHides,
@@ -64,6 +64,6 @@ public:
 	FString UpdatesCustomUpdateURI = TEXT("");
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=")
-	int32 UpdatesIgnoreVersion = N_VERSION_NUMBER;
+	int32 UpdatesIgnoreVersion = NEXUS::Version::Number;
 #endif
 };

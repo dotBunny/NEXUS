@@ -5,11 +5,9 @@
 #include "NEditorDefaults.h"
 #include "Misc/DataValidation.h"
 
-#define LOCTEXT_NAMESPACE "NexusProcGenEditor"
-
 FText UAssetDefinition_NTissue::GetAssetDisplayName() const
 {
-	static const FText DisplayName = LOCTEXT("AssetTypeActions_NTissue", "NTissue");
+	static const FText DisplayName = NSLOCTEXT("NexusProcGenEditor", "AssetTypeActions_NTissue", "NTissue");
 	return DisplayName; 
 }
 
@@ -40,10 +38,8 @@ EDataValidationResult UAssetDefinition_NTissue::ValidateAsset(const FAssetData& 
 		if (Entry.Cell.IsNull())
 		{
 			Result = EDataValidationResult::Invalid;
-			Context.AddError(FText::Format(LOCTEXT("Validate_NTissue_MissingCell", "Tissue {0} has an entry with a missing cell."), FText::FromString(Set->GetName())));
+			Context.AddError(FText::Format(NSLOCTEXT("NexusProcGenEditor", "Validate_NTissue_MissingCell", "Tissue {0} has an entry with a missing cell."), FText::FromString(Set->GetName())));
 		}
 	}
 	return Result;
 }
-
-#undef LOCTEXT_NAMESPACE

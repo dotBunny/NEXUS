@@ -4,21 +4,19 @@
 #include "NFixersEditorCommands.h"
 #include "Fixers/NPoseAssetFixer.h"
 
-#define LOCTEXT_NAMESPACE "NexusFixersEditor"
-
 void FNFixersEditorCommands::RegisterCommands()
 {
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource,
 		"NFixers.BulkOperations.PoseAsset.OutOfDateAnimationSource",
-		LOCTEXT("Command_NFixers_PoseAsset", "Outdated PoseAsset Source Animations"),
-		LOCTEXT("Command_NFixers_BulkOperations", "Find and fix any PoseAssets in the selected content with out-of-date source animations."),
+		NSLOCTEXT("NexusFixersEditor", "Command_PoseAsset", "Outdated PoseAsset Source Animations"),
+		NSLOCTEXT("NexusFixersEditor", "Command_BulkOperations", "Find and fix any PoseAssets in the selected content with out-of-date source animations."),
 		FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext,
 		"NFixers.BulkOperations.PoseAsset.OutOfDateAnimationSource.NoContext",
-		LOCTEXT("Command_NFixers_PoseAsset", "Outdated PoseAsset Source Animations"),
-		LOCTEXT("Command_NFixers_BulkOperations_NoContext", "Find and fix any PoseAssets in the game content with out-of-date source animations."),
+		NSLOCTEXT("NexusFixersEditor", "Command_PoseAsset", "Outdated PoseAsset Source Animations"),
+		NSLOCTEXT("NexusFixersEditor", "Command_BulkOperations_NoContext", "Find and fix any PoseAssets in the game content with out-of-date source animations."),
 		FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item"),
 		EUserInterfaceActionType::Button, FInputChord());
 
@@ -32,5 +30,3 @@ void FNFixersEditorCommands::RegisterCommands()
 		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true),
 		FCanExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute));
 }
-
-#undef LOCTEXT_NAMESPACE

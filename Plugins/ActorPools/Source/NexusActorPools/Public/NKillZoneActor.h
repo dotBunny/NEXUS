@@ -22,8 +22,7 @@ class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 		SetRootComponent(KillZoneComponent);
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
-	
-protected:
+
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UNKillZoneComponent> KillZoneComponent;
 };

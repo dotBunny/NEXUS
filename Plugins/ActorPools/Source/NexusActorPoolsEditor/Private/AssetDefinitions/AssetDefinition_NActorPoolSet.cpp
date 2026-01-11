@@ -6,11 +6,9 @@
 #include "NEditorDefaults.h"
 #include "Misc/DataValidation.h"
 
-#define LOCTEXT_NAMESPACE "NexusActorPoolsEditor"
-
 FText UAssetDefinition_NActorPoolSet::GetAssetDisplayName() const
 {
-	static const FText DisplayName = NSLOCTEXT("AssetTypeActions", "AssetTypeActions_NActorPoolSet", "NActorPool Set"); 
+	static const FText DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "AssetTypeActions_NActorPoolSet", "NActorPool Set"); 
 	return DisplayName;
 }
 
@@ -45,5 +43,3 @@ EDataValidationResult UAssetDefinition_NActorPoolSet::ValidateAsset(const FAsset
 	}
 	return Result;
 }
-
-#undef LOCTEXT_NAMESPACE

@@ -44,7 +44,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 		{
 			return false;
 		}
-		const FText KickReason = NSLOCTEXT("NetworkMessages", "HostKicked", "You were kicked.");
+		const FText KickReason = NSLOCTEXT("NexusMultiplayer", "HostKicked", "You were kicked.");
 		return GameMode->GameSession->KickPlayer(PlayerState->GetPlayerController(), KickReason);
 	}
 	return false;
