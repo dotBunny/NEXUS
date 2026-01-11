@@ -4,7 +4,7 @@
 #pragma once
 
 #include "INProcGenOperationOwner.h"
-#include "NProcGenNamespace.h"
+#include "NProcGenMinimal.h"
 #include "Math/NSeedGenerator.h"
 #include "Generation/NProcGenOperationContext.h"
 #include "NProcGenOperation.generated.h"

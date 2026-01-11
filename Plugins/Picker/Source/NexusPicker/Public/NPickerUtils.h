@@ -6,18 +6,6 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
-namespace NEXUS::Picker
-{
-	constexpr float Tolerance = 0.01f;
-	namespace VLog
-	{
-		const FColor InnerColor = FColor::Black;
-		const FColor OuterColor = FColor::White;
-		const FColor PointColor = FColor::Green;
-		constexpr float PointSize = 2.f;
-	}
-}
-
 #define N_VARIABLES_PICKER_PROJECTION() \
 	const UWorld* InWorld = nullptr, const FVector& Projection = FNPickerUtils::DefaultProjection, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
 

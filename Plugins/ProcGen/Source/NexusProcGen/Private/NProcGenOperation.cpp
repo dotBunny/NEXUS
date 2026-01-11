@@ -4,7 +4,6 @@
 #include "NProcGenOperation.h"
 
 #include "NProcGenMinimal.h"
-#include "NProcGenNamespace.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
