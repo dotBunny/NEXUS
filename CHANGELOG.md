@@ -182,6 +182,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dotBunny/NEXUS/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dotBunny/NEXUS/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/dotBunny/NEXUS/compare/v0.2.1...v0.2.2
