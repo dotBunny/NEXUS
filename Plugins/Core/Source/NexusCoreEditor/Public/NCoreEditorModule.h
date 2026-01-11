@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NEditorSettings.h"
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
@@ -23,7 +24,10 @@ public:
 	}
 	
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
-	void ApplyWindowIcon(float Time) const;
+
+	static void ApplyAppIcon(const FString& IconPath);
+	void ApplyWindowIcon(const FString& IconPath);
+	void ApplyWindowIconPostEditorTick(float Time) const;
 
 private:
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
