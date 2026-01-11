@@ -12,20 +12,7 @@
 
 float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 {
-	if (const UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
-	{
-		if (const ULocalPlayer* LocalPlayer = World->GetFirstLocalPlayerFromController())
-		{
-			if (const APlayerController* PlayerController = LocalPlayer->GetPlayerController(World))
-			{
-				if (PlayerController->PlayerState != nullptr)
-				{
-					return PlayerController->PlayerState->ExactPing;
-				}
-			}
-		}
-	}
-	return 0.0f;
+	return FNMultiplayerUtils::Ping(GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull));
 }
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)

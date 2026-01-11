@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NMultiplayerMinimal.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
@@ -162,5 +163,38 @@ public:
 			}
 		}
 		return nullptr;
+	}
+
+	/**
+	 * Get the ping for the local player.
+	 * @param World The world to check.
+	 * @return If found, ping, or InvalidPing.
+	 */
+	FORCEINLINE static float Ping(const UWorld* World)
+	{
+		if (World == nullptr)
+		{
+			return NEXUS::Multiplayer::InvalidPing;
+		}
+	
+		const ULocalPlayer* LocalPlayer = World->GetFirstLocalPlayerFromController();
+		if (LocalPlayer == nullptr)
+		{
+			return NEXUS::Multiplayer::InvalidPing;
+		}
+	
+		const APlayerController* PlayerController = LocalPlayer->GetPlayerController(World);
+		if (PlayerController == nullptr)
+		{
+			return NEXUS::Multiplayer::InvalidPing;
+		}
+	
+		if (PlayerController->PlayerState == nullptr)
+		{
+			return NEXUS::Multiplayer::InvalidPing;
+		}
+	
+		// All conditions checked, should have a real ping to provide.
+		return PlayerController->PlayerState->ExactPing;
 	}
 };
