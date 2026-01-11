@@ -23,9 +23,6 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
-		
-		//SubTasks.Add(TArray<FGraphEventArray>());
-		
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
