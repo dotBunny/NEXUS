@@ -170,7 +170,7 @@ public:
 	 * @param World The world to check.
 	 * @return If found, ping, or InvalidPing.
 	 */
-	FORCEINLINE static float Ping(const UWorld* World)
+	FORCEINLINE static float GetPing(const UWorld* World)
 	{
 		if (World == nullptr)
 		{

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `FNMultiplayerUtils::GetPing()`
+
 ## [0.2.5] - 2026-01-11
 
 ### Changed

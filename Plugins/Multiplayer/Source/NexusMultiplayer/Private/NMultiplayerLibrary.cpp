@@ -12,7 +12,7 @@
 
 float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 {
-	return FNMultiplayerUtils::Ping(GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull));
+	return FNMultiplayerUtils::GetPing(GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull));
 }
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)
