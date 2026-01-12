@@ -228,8 +228,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
 	TArray<uint32> SurroundingIndices;
 	
-	// #SONARQUBE-DISABLE
-	// Need to loop depth to handle dimensions
+	// #SONARQUBE-DISABLE: Need to loop depth to handle dimensions
 	for (int x = 0; x < SizeX; x++)
 	{
 		for (int y = 0; y < SizeY; y++)

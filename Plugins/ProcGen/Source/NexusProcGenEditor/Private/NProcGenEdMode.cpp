@@ -10,7 +10,6 @@
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
 #include "NPrimitiveDrawingUtils.h"
-#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "Macros/NFlagsMacros.h"
@@ -137,12 +136,10 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			RootComponent->DrawDebugPDI(PDI, GetCellVoxelMode()); // We can't use caching because we are drawing ALL of the possible roots
 
 			// Notice ON Dirty
-			if (const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner()))
+			const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner());
+			if (Actor != nullptr && Actor->IsActorDirty())
 			{
-				if (Actor->IsActorDirty())
-				{
-					bHasDirtyActors = true;
-				}
+				bHasDirtyActors = true;
 			}
 		}
 	}
@@ -178,6 +175,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		if (OrganGenerator->IsLocked())
 		{
 			TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
+			// #SONARQUBE-DISABLE: Need the extra depth to iterate
 			for (int i = 0; i < Order.Num(); i++)
 			{
 				for (int p = 0; p < Order[i].Num(); p++)
@@ -191,6 +189,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 					 	LabelOrientation.Position, LabelOrientation.Rotation, FLinearColor::White);
 				}
 			}
+			// #SONARQUBE-ENABLE
 		}
 	}
 	else if ( OrganGenerator->IsLocked())
