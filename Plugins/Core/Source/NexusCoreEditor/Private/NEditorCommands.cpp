@@ -74,7 +74,7 @@ void FNEditorCommands::RegisterCommands()
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	
-	CommandList_Help = MakeShareable(new FUICommandList);
+	CommandList_Help = MakeShared<FUICommandList>();
 	
 	CommandList_Help->MapAction(Get().CommandInfo_Help_Discord,
 	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDiscord),
@@ -108,14 +108,14 @@ void FNEditorCommands::RegisterCommands()
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 			EUserInterfaceActionType::Button, FInputChord());
 
-	CommandList_Node = MakeShareable(new FUICommandList);
+	CommandList_Node = MakeShared<FUICommandList>();
 
 	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
 
 
-	CommandList_Tools = MakeShareable(new FUICommandList);
+	CommandList_Tools = MakeShared<FUICommandList>();
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));

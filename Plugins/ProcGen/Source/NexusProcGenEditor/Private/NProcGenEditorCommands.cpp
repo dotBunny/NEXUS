@@ -102,7 +102,7 @@ void FNProcGenEditorCommands::RegisterCommands()
 		EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
-	CommandList_Cell = MakeShareable(new FUICommandList);
+	CommandList_Cell = MakeShared<FUICommandList>();
 
 	// Map NCell Actions
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCaptureThumbnail,
@@ -174,7 +174,7 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
-	CommandList_CellJunction = MakeShareable(new FUICommandList);
+	CommandList_CellJunction = MakeShared<FUICommandList>();
 
 	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionAddComponent,
 FExecuteAction::CreateStatic(&CellJunctionAddComponent),
@@ -188,7 +188,7 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
-	CommandList_Organ = MakeShareable(new FUICommandList);
+	CommandList_Organ = MakeShared<FUICommandList>();
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerate,
 		FExecuteAction::CreateStatic(&OrganGenerate),
 		FCanExecuteAction::CreateStatic(&OrganGenerate_CanExecute));
