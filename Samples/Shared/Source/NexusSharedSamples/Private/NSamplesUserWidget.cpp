@@ -92,29 +92,30 @@ void UNSamplesUserWidget::UpdateCurrentValue()
 	}
 }
 
-void UNSamplesUserWidget::OnBoolDelegate(bool bNewValue)
+void UNSamplesUserWidget::OnBoolDelegate([[maybe_unused]] bool bNewValue)
 {
 	IncrementEventCount();
 }
 
-void UNSamplesUserWidget::OnFloatDelegate(float NewValue)
+void UNSamplesUserWidget::OnFloatDelegate([[maybe_unused]] float NewValue)
 {
 	IncrementEventCount();
 }
 
-void UNSamplesUserWidget::OnSelectionDelegate(FString NewSelection, ESelectInfo::Type NewSelectInfo)
+void UNSamplesUserWidget::OnSelectionDelegate([[maybe_unused]] FString NewSelection, [[maybe_unused]] ESelectInfo::Type NewSelectInfo)
 {
 	IncrementEventCount();
 }
 
-void UNSamplesUserWidget::OnFloatCommited(float NewValue, ETextCommit::Type CommitType)
+void UNSamplesUserWidget::OnFloatCommited([[maybe_unused]] float NewValue, [[maybe_unused]] ETextCommit::Type CommitType)
 {
 	IncrementEventCount();
 }
 
 void UNSamplesUserWidget::BindCheckbox()
 {
-	if (UCheckBox* Widget = Cast<UCheckBox>(MonitoredWidget))
+	UCheckBox* Widget = Cast<UCheckBox>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
 		Widget->OnCheckStateChanged.AddDynamic(this, &UNSamplesUserWidget::OnBoolDelegate);
 		bCachedBooleanValue = Widget->IsChecked();
@@ -123,7 +124,8 @@ void UNSamplesUserWidget::BindCheckbox()
 
 void UNSamplesUserWidget::BindComboBoxString()
 {
-	if (UComboBoxString* Widget = Cast<UComboBoxString>(MonitoredWidget))
+	UComboBoxString* Widget = Cast<UComboBoxString>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
 		Widget->OnSelectionChanged.AddDynamic(this, &UNSamplesUserWidget::OnSelectionDelegate);
 		CachedStringValue = Widget->GetSelectedOption();
@@ -132,7 +134,8 @@ void UNSamplesUserWidget::BindComboBoxString()
 
 void UNSamplesUserWidget::BindSlider()
 {
-	if (USlider* Widget = Cast<USlider>(MonitoredWidget))
+	USlider* Widget = Cast<USlider>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
 		Widget->OnValueChanged.AddDynamic(this, &UNSamplesUserWidget::OnFloatDelegate);
 		CachedFloatValue = Widget->GetValue();
@@ -141,7 +144,8 @@ void UNSamplesUserWidget::BindSlider()
 
 void UNSamplesUserWidget::BindSpinBox()
 {
-	if (USpinBox* Widget = Cast<USpinBox>(MonitoredWidget))
+	USpinBox* Widget = Cast<USpinBox>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
 		Widget->OnValueChanged.AddDynamic(this, &UNSamplesUserWidget::OnFloatDelegate);
 		Widget->OnValueCommitted.AddDynamic(this, &UNSamplesUserWidget::OnFloatCommited);
@@ -151,10 +155,11 @@ void UNSamplesUserWidget::BindSpinBox()
 
 void UNSamplesUserWidget::UpdateCurrentValueFromCheckbox()
 {
-	if (const UCheckBox* Widget = Cast<UCheckBox>(MonitoredWidget))
+	const UCheckBox* Widget = Cast<UCheckBox>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
-		if (const bool bCheck = Widget->IsChecked();
-			bCheck != bCachedBooleanValue)
+		const bool bCheck = Widget->IsChecked();
+		if (bCheck != bCachedBooleanValue)
 		{
 			if (bCheck)
 			{
@@ -171,10 +176,11 @@ void UNSamplesUserWidget::UpdateCurrentValueFromCheckbox()
 
 void UNSamplesUserWidget::UpdateCurrentValueFromComboBoxString()
 {
-	if (const UComboBoxString* Widget = Cast<UComboBoxString>(MonitoredWidget))
+	const UComboBoxString* Widget = Cast<UComboBoxString>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
-		if (const FString Check = Widget->GetSelectedOption();
-			Check != CachedStringValue)
+		const FString Check = Widget->GetSelectedOption();
+		if (Check != CachedStringValue)
 		{
 			CurrentValue->SetText(FText::FromString(Check));
 			CachedStringValue = Check;
@@ -185,10 +191,11 @@ void UNSamplesUserWidget::UpdateCurrentValueFromComboBoxString()
 
 void UNSamplesUserWidget::UpdateCurrentValueFromSlider()
 {
-	if (USlider* Widget = Cast<USlider>(MonitoredWidget))
+	USlider* Widget = Cast<USlider>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
-		if (const float Check = Widget->GetValue();
-			Check != CachedFloatValue)
+		const float Check = Widget->GetValue();
+		if (Check != CachedFloatValue)
 		{
 			CurrentValue->SetText(FText::FromString(FString::Printf(TEXT("%.2f"), Check)));
 			CachedFloatValue = Check;
@@ -198,10 +205,11 @@ void UNSamplesUserWidget::UpdateCurrentValueFromSlider()
 
 void UNSamplesUserWidget::UpdateCurrentValueFromSpinBox()
 {
-	if (USpinBox* Widget = Cast<USpinBox>(MonitoredWidget))
+	USpinBox* Widget = Cast<USpinBox>(MonitoredWidget);
+	if (Widget != nullptr)
 	{
-		if (const float Check = Widget->GetValue();
-			Check != CachedFloatValue)
+		const float Check = Widget->GetValue();
+		if (Check != CachedFloatValue)
 		{
 			CurrentValue->SetText(FText::FromString(FString::Printf(TEXT("%.2f"), Check)));
 			CachedFloatValue = Check;
