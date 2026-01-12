@@ -118,11 +118,14 @@ public:
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
 	/**
-	 * Get the raw actor pool itself for a given Actor class.
+	 * Get the pointer to the actor pool itself for a given Actor class.
 	 * @param ActorClass The class of the actor which you would like to access a pool for.
-	 * @return The raw-pointer to the pool, or nullptr if it was not found.
+	 * @return The pointer to the pool, or nullptr if it was not found.
 	 */
-	FNActorPool* GetActorPool(const TSubclassOf<AActor> ActorClass) const { return ActorPools.FindRef(ActorClass); }
+	FNActorPool* GetActorPool(const TSubclassOf<AActor> ActorClass) const
+	{
+		return ActorPools.Find(ActorClass)->Get();
+	}
 
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
@@ -130,7 +133,7 @@ private:
 	bool HasTickableActorPool(FNActorPool* ActorPool) const;
 
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TMap<UClass*, FNActorPool*> ActorPools;
+	TMap<UClass*, TUniquePtr<FNActorPool>> ActorPools;
 	TArray<FNActorPool*> TickableActorPools;
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNActorPoolSpawnerComponent*> TickableSpawners;
@@ -147,11 +150,8 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 {
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
-		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		const auto NewPool = new FNActorPool(GetWorld(), ActorClass);
-		ActorPools.Add(ActorClass, NewPool);
-		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::GetActor] Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
+		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return Cast<T>(NewPool->Get());
 	}
@@ -163,13 +163,10 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 {
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
-		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		const auto NewPool = new FNActorPool(GetWorld(), ActorClass);
-		ActorPools.Add(ActorClass, NewPool);
-		UE_LOG(LogNexusActorPools, Log, TEXT("[UNActorPoolSubsystem::SpawnActor] Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
+		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return Cast<T>(NewPool->Spawn(Position, Rotation));
 	}
-	return Cast<T>((ActorPools.FindRef(ActorClass))->Spawn(Position, Rotation));
+	return Cast<T>((ActorPools.Find(ActorClass)->Get())->Spawn(Position, Rotation));
 }

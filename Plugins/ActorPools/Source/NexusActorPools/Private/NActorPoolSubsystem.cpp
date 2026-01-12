@@ -9,10 +9,10 @@
 
 void UNActorPoolSubsystem::Deinitialize()
 {
-	for (TPair<UClass*, FNActorPool*>& Pool : ActorPools)
+	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
 		Pool.Value->Clear();
-		delete Pool.Value;
+		Pool.Value.Reset();
 	}
 	Super::Deinitialize();
 }
@@ -101,10 +101,7 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
-		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		const auto Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
-		ActorPools.Add(ActorClass, Pool);
+		ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, Settings));
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Creating a new FNActorPool(%s) in UWorld(%s), raising the total pool count to %i."), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		return true;
 	}
