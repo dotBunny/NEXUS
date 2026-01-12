@@ -83,7 +83,7 @@ void FNProcGenOperationTaskGraph::WaitForTasks()
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 
-void FNProcGenOperationTaskGraph::Reset()
+void FNProcGenOperationTaskGraph::ResetGraph()
 {
 	bTasksUnlocked = false;
 }

@@ -99,13 +99,13 @@ protected:
 	void Tick();
 	virtual void BeginDestroy() override;
 	void FinishBuild();
-	FNProcGenOperationTaskGraph* GetGraph() const { return Graph; }
+	FNProcGenOperationTaskGraph* GetGraph() const { return Graph.Get(); }
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	INProcGenOperationOwner* Owner = nullptr;
-	FNProcGenOperationTaskGraph* Graph = nullptr;
-	FNProcGenOperationContext* Context = nullptr;
+	TSharedPtr<FNProcGenOperationTaskGraph> Graph;
+	TSharedPtr<FNProcGenOperationContext> Context;
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;

@@ -8,7 +8,7 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
-void FNProcGenOperationContext::Reset()
+void FNProcGenOperationContext::ResetContext()
 {
 	Components.Empty();
 	bIsLocked = false;
