@@ -138,8 +138,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	}
 	
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
-	//Mesh.ConvertToTriangles();
-	//Mesh.Validate();
 	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
 	Mesh.bHasNonTris = Mesh.CheckNonTris();
@@ -233,6 +231,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
 	TArray<uint32> SurroundingIndices;
 	
+	// #SONARQUBE-DISABLE
+	// Need to loop depth to handle dimensions
 	for (int x = 0; x < SizeX; x++)
 	{
 		for (int y = 0; y < SizeY; y++)
@@ -252,6 +252,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 			}
 		}
 	}
+	// #SONARQUBE-ENABLE
 	
 	return MoveTemp(ReturnData);
 }
