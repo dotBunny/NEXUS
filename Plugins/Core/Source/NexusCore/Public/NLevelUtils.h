@@ -23,5 +23,6 @@ public:
 
 	static TArray<FString> GetAllMapNames(TArray<FString> SearchPaths);
 	
-	static void DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors, const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly = false, bool bIncludeNonColliding = false);
+	static void DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors, 
+		const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly = false, bool bIncludeNonColliding = false);
 };
