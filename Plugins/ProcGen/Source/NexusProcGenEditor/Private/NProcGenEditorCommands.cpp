@@ -422,10 +422,11 @@ bool FNProcGenEditorCommands::CellCalculateVoxelData_CanExecute()
 void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleBoundsCalculateOnSave", "Toggle Calculate Bounds On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave;
@@ -441,10 +442,11 @@ bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_CanExecute()
 
 bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if ( Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave;
 		}
@@ -455,10 +457,11 @@ bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleHullCalculateOnSave", "Toggle Calculate Hull On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
@@ -474,10 +477,11 @@ bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_CanExecute()
 
 bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
 		}
@@ -488,10 +492,11 @@ bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleVoxelCalculateOnSave", "Toggle Calculate Voxel On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave;
@@ -507,10 +512,11 @@ bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_CanExecute()
 
 bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave;
 		}
@@ -521,10 +527,11 @@ bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleVoxelData()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleUseVoxelData", "Use Voxel Data"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData = !Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
@@ -546,10 +553,11 @@ bool FNProcGenEditorCommands::CellToggleVoxelData_CanExecute()
 
 bool FNProcGenEditorCommands::CellToggleVoxelData_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
 		}
@@ -669,15 +677,16 @@ bool FNProcGenEditorCommands::OrganSelectComponent_CanExecute(UNOrganComponent* 
 
 void FNProcGenEditorCommands::CellCaptureThumbnail()
 {
-	if (FViewport* Viewport = GEditor->GetActiveViewport();
+	FViewport* Viewport = GEditor->GetActiveViewport();
+	if (Viewport != nullptr &&
 		ensure(GCurrentLevelEditingViewportClient) && ensure(Viewport) )
 	{
 		FLevelEditorViewportClient* OldViewportClient = GCurrentLevelEditingViewportClient;
 		GCurrentLevelEditingViewportClient = nullptr;
 		Viewport->Draw();
-
-		if (const UWorld* World = FNEditorUtils::GetCurrentWorld();
-			World != nullptr)
+		
+		const UWorld* World = FNEditorUtils::GetCurrentWorld();
+		if (World != nullptr)
 		{
 			TArray<FAssetData> SelectedAssets;
 			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
