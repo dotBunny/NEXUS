@@ -21,75 +21,75 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	if (!FNProcGenEdMode::IsActive())
 	{
 		CellRootComponent->DrawDebugPDI(PDI, FNProcGenEdMode::GetCellVoxelMode());
+		return;
 	}
-	else
+
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
 	{
-		if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Bounds)
+		const FBox Bounds = FNProcGenEdMode::GetCachedBounds();
+		const TArray<FVector> BoundsVertices = FNProcGenEdMode::GetCachedBoundsVertices();
+		
+		// Draw Min Max
+		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
+		PDI->DrawPoint(Bounds.Min, FNProcGenEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
+		PDI->SetHitProxy(nullptr);
+		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
+		PDI->DrawPoint(Bounds.Max, FNProcGenEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
+		PDI->SetHitProxy(nullptr);
+
+	}
+	else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
+	{
+		const TArray<FVector> WorldVertices = FNProcGenEdMode::GetCachedHullVertices();
+		const int VertCount = WorldVertices.Num();
+		for (int i = 0; i < VertCount; i++)
 		{
-			const FBox Bounds = FNProcGenEdMode::GetCachedBounds();
-			const TArray<FVector> BoundsVertices = FNProcGenEdMode::GetCachedBoundsVertices();
-			
-			// Draw Min Max
-			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
-			PDI->DrawPoint(Bounds.Min, FNProcGenEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
+			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
+			PDI->DrawPoint(WorldVertices[i], FNProcGenEdMode::GetCachedHullColor(), PointSize, SDPG_Foreground);
 			PDI->SetHitProxy(nullptr);
-			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
-			PDI->DrawPoint(Bounds.Max, FNProcGenEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
-			PDI->SetHitProxy(nullptr);
-	
 		}
-		else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Hull)
+	}
+	else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Voxel)
+	{
+		// Forcibly disable drawing of the voxel Mode
+		if (FNProcGenEdMode::GetCellVoxelMode() != FNProcGenEdMode::ENCellVoxelMode::CVM_None)
 		{
-			const TArray<FVector> WorldVertices = FNProcGenEdMode::GetCachedHullVertices();
-			const int VertCount = WorldVertices.Num();
-			for (int i = 0; i < VertCount; i++)
+			FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_None);
+		}
+		
+		const FNCellVoxelData CachedData = FNProcGenEdMode::GetCachedVoxelData();
+		if (!CachedData.IsValid())
+		{
+			return;
+		}
+
+		const size_t PointCount = CachedData.GetCount();
+		const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
+		const FVector UnitSize = Settings->UnitSize;
+		const FVector HalfUnitSize = UnitSize * 0.5f;
+		const FVector BaseOffset = CachedData.Origin;
+		for (int i = 0; i < PointCount; i++)
+		{
+			auto [x,y,z] = CachedData.GetInverseIndex(i);
+	
+			// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
+			FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+	
+			if (N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
 			{
 				PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-				PDI->DrawPoint(WorldVertices[i], FNProcGenEdMode::GetCachedHullColor(), PointSize, SDPG_Foreground);
+				PDI->DrawPoint(VoxelCenter, FColor::Blue, PointSize, SDPG_Foreground);
+				PDI->SetHitProxy(nullptr);
+			}
+			else
+			{
+				PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
+				PDI->DrawPoint(VoxelCenter, FColor::Green, PointSize, SDPG_Foreground);
 				PDI->SetHitProxy(nullptr);
 			}
 		}
-		else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Voxel)
-		{
-			// Forcibly disable drawing of the voxel Mode
-			if (FNProcGenEdMode::GetCellVoxelMode() != FNProcGenEdMode::ENCellVoxelMode::CVM_None)
-			{
-				FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_None);
-			}
-			
-			const FNCellVoxelData CachedData = FNProcGenEdMode::GetCachedVoxelData();
-			if (!CachedData.IsValid())
-			{
-				return;
-			}
-
-			const size_t PointCount = CachedData.GetCount();
-			const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
-			const FVector UnitSize = Settings->UnitSize;
-			const FVector HalfUnitSize = UnitSize * 0.5f;
-			const FVector BaseOffset = CachedData.Origin;
-			for (int i = 0; i < PointCount; i++)
-			{
-				auto [x,y,z] = CachedData.GetInverseIndex(i);
-		
-				// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
-				FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-		
-				if (N_FLAGS_HAS(CachedData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
-				{
-					PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-					PDI->DrawPoint(VoxelCenter, FColor::Blue, PointSize, SDPG_Foreground);
-					PDI->SetHitProxy(nullptr);
-				}
-				else
-				{
-					PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-					PDI->DrawPoint(VoxelCenter, FColor::Green, PointSize, SDPG_Foreground);
-					PDI->SetHitProxy(nullptr);
-				}
-			}
-		}
 	}
+	
 }
 
 bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click)
@@ -109,7 +109,7 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 				return EditHullVertex(IndexComponent, Proxy->Index);
 			}
 			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::CEM_Voxel)
-			{\
+			{
 				return ToggleVoxelPoint(IndexComponent, Proxy->Index);
 			}
 			return false;
