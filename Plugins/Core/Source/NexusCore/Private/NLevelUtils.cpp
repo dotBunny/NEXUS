@@ -82,4 +82,8 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 			}
 		}
 	}
+	
+#if WITH_EDITOR	
+	BoundsTask.Destroy();
+#endif
 }

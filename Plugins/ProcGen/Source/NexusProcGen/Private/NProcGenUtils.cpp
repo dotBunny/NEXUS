@@ -75,6 +75,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 			}
 		}
 	}
+	ActorTask.Destroy();
 	
 	TArray<Chaos::FConvex::FPlaneType> OutPlanes;
 	TArray<TArray<int32>> OutFaceIndices;
@@ -86,6 +87,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
 	ChaosTask.EnterProgressFrame(1);
+	ChaosTask.Destroy();
 	
 	// Construct FVector Vertices
 	const int VerticesCount = OutVertices.Num();
@@ -102,7 +104,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	}
 
 	// Build Loops
-	
 	Mesh.Loops.Reserve(IndicesCount);
 	for (int i = 0; i < IndicesCount; i++)
 	{
@@ -116,6 +117,8 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
 	Mesh.bHasNonTris = Mesh.CheckNonTris();
+	
+	BuildTask.Destroy();
 	
 	return Mesh;
 }
@@ -194,6 +197,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 		}
 	}
 	// #SONARQUBE-ENABLE
+	BroadTraceTask.Destroy();
 	
 	return MoveTemp(ReturnData);
 }
