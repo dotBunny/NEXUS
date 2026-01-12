@@ -56,45 +56,44 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	FNRawMesh Mesh;
 	TArray<Chaos::FConvex::FVec3Type> Vertices;
 	
-	if (InLevel)
+	if (InLevel == nullptr)
 	{
-		
-		FVector BoxVertices[8];
-		const int32 NumActors = InLevel->Actors.Num();
-		
-		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
-		ActorTask.MakeDialog(false);
-		
-		Vertices.Reserve(NumActors * 8);
-		for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+		return MoveTemp(Mesh);
+	}
+	
+	FVector BoxVertices[8];
+	const int32 NumActors = InLevel->Actors.Num();
+	
+	FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
+	ActorTask.MakeDialog(false);
+	
+	Vertices.Reserve(NumActors * 8);
+	for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+	{
+		ActorTask.EnterProgressFrame(1);
+		const AActor* Actor = InLevel->Actors[ActorIndex];
+		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
-			ActorTask.EnterProgressFrame(1);
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			if (Actor && Actor->IsLevelBoundsRelevant())
+			// Check Editor Only
+			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+			
+			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+			
+			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+			if (ActorBox.IsValid && 
+				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))
 			{
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-				
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-				
-				FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					if (ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0)
-					{
-						ActorBox.GetVertices(BoxVertices);
+				ActorBox.GetVertices(BoxVertices);
 
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
-					}
-				}
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
 			}
 		}
 	}
@@ -109,8 +108,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
 	ChaosTask.EnterProgressFrame(1);
-	
-	
 	
 	// Construct FVector Vertices
 	const int VerticesCount = OutVertices.Num();
