@@ -294,7 +294,7 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateSpotlight();
 	UpdateDisplayColor();
 	UpdateTitleText();
-	UpdateDescription();
+	BuildDescription();
 	UpdateCollisions();
 	UpdateWatermark();
 }
@@ -489,7 +489,7 @@ void ANSamplesDisplayActor::CreateTitlePanelInstances() const
 		FVector::OneVector), false); 
 }
 
-void ANSamplesDisplayActor::UpdateDescription()
+void ANSamplesDisplayActor::BuildDescription()
 {
 	// Headless server
 	if (DescriptionTextComponent == nullptr) return;
@@ -575,58 +575,62 @@ void ANSamplesDisplayActor::UpdateDescription()
 		GetTitle(),
 		FinalString);
 
-	// Set Position
-	if (!CachedDescription.IsEmpty())
+	UpdateDescription();
+}
+
+void ANSamplesDisplayActor::UpdateDescription() const
+{
+	if (CachedDescription.IsEmpty())
 	{
-		const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
+		DescriptionTextComponent->SetVisibility(false);
+		return;
+	}
+	
+	// Set Position
+	const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
 
-		FVector Origin;
-		if (bSeparateTitlePanel)
-		{
-			Origin = TitleTextTransform().GetLocation();
-		}
-		else
-		{
-			Origin = TitleTextComponent->GetRelativeLocation();
-		}
-
-		const float TitleSpacerOffset = GetTitleSpacerOffset();
-		
-		FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionTextPadding * .5f),
-			Origin.Z - TitleSpacerOffset - (DescriptionTextPadding * .5f));
-		FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
-
-		if (bSeparateTitlePanel)
-		{
-			WallLocation.Z += (TitleSpacerOffset * 1.5f);
-			FloorLocation.X += TitleSpacerOffset;
-		}
-		
-		DescriptionTextComponent->SetRelativeTransform(
-			FTransform(
-			FRotator(bHeightVSFloorText ? 90.f : 0.f, 0.f, 0.f),
-				bHeightVSFloorText ? FloorLocation : WallLocation, 
-				FVector::OneVector));
-		
-		DescriptionTextComponent->SetText(CachedDescription);
-		DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
-		DescriptionTextComponent->SetWorldSize(DescriptionScale);
-		DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));
-
-		if (bHeightVSFloorText)
-		{
-			DescriptionTextComponent->SetVerticalAlignment(EVRTA_TextBottom);
-		}
-		else
-		{
-			DescriptionTextComponent->SetVerticalAlignment(EVRTA_TextTop);
-		}
-		DescriptionTextComponent->SetVisibility(true);
+	FVector Origin;
+	if (bSeparateTitlePanel)
+	{
+		Origin = TitleTextTransform().GetLocation();
 	}
 	else
 	{
-		DescriptionTextComponent->SetVisibility(false);
+		Origin = TitleTextComponent->GetRelativeLocation();
 	}
+
+	const float TitleSpacerOffset = GetTitleSpacerOffset();
+	
+	FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionTextPadding * .5f),
+		Origin.Z - TitleSpacerOffset - (DescriptionTextPadding * .5f));
+	FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
+
+	if (bSeparateTitlePanel)
+	{
+		WallLocation.Z += (TitleSpacerOffset * 1.5f);
+		FloorLocation.X += TitleSpacerOffset;
+	}
+	
+	DescriptionTextComponent->SetRelativeTransform(
+		FTransform(
+		FRotator(bHeightVSFloorText ? 90.f : 0.f, 0.f, 0.f),
+			bHeightVSFloorText ? FloorLocation : WallLocation, 
+			FVector::OneVector));
+	
+	DescriptionTextComponent->SetText(CachedDescription);
+	DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
+	DescriptionTextComponent->SetWorldSize(DescriptionScale);
+	DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));
+
+	if (bHeightVSFloorText)
+	{
+		DescriptionTextComponent->SetVerticalAlignment(EVRTA_TextBottom);
+	}
+	else
+	{
+		DescriptionTextComponent->SetVerticalAlignment(EVRTA_TextTop);
+	}
+	DescriptionTextComponent->SetVisibility(true);
 }
 
 void ANSamplesDisplayActor::UpdateDisplayColor()

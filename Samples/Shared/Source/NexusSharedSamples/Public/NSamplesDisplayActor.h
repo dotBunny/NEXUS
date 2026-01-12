@@ -453,7 +453,9 @@ private:
 	void CreateShadowBoxInstances() const;
 	void CreateTitlePanelInstances() const;
 	
-	void UpdateDescription();
+	void BuildDescription();
+	
+	void UpdateDescription() const;
 	void UpdateDisplayColor();
 	void UpdateNotice();
 	void UpdateSpotlight() const;
