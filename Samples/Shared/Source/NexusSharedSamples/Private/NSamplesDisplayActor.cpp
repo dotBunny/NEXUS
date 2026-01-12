@@ -295,6 +295,7 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateDisplayColor();
 	UpdateTitleText();
 	BuildDescription();
+	UpdateDescription();
 	UpdateCollisions();
 	UpdateWatermark();
 }
@@ -574,8 +575,6 @@ void ANSamplesDisplayActor::BuildDescription()
 		TEXT("NSamplesDisplayActor"),
 		GetTitle(),
 		FinalString);
-
-	UpdateDescription();
 }
 
 void ANSamplesDisplayActor::UpdateDescription() const
