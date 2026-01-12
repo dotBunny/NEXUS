@@ -140,47 +140,48 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	Execute_OnRestoreWidgetStateEvent(BlueprintWidget, Identifier, WidgetState);
 	
 	FString NewWidgetBlueprint = WidgetState.GetString(WidgetState_WidgetBlueprint);
-	if (WidgetBlueprint != NewWidgetBlueprint)
+	if (WidgetBlueprint == NewWidgetBlueprint) return;
+	
+
+	// We already have a base widget, but this is changing it for some odd reason?
+	if (BaseWidget != nullptr)
 	{
-		// We already have a base widget, but this is changing it for some odd reason?
-		if (BaseWidget != nullptr)
-		{
-			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-			EditorScrollBox->RemoveChild(BaseWidget);
-			WidgetTree->RemoveWidget(BaseWidget);
-			BaseWidget = nullptr;
-			WidgetBlueprint = TEXT("");
-		}
+		UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
+		EditorScrollBox->RemoveChild(BaseWidget);
+		WidgetTree->RemoveWidget(BaseWidget);
+		BaseWidget = nullptr;
+		WidgetBlueprint = TEXT("");
+	}
+	
+	const UWidgetBlueprint* ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
+	const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
+	if (ContentWidget != nullptr)
+	{
+		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
+		WidgetBlueprint = NewWidgetBlueprint;
 		
-		const UWidgetBlueprint* ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
-		const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
-		if (ContentWidget != nullptr)
+		UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
+		EditorScrollBox->AddChild(BaseWidget);
+		
+		// Pass WidgetState Along
+		if (BaseWidget->Implements<UNWidgetStateProvider>())
 		{
-			BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
-			WidgetBlueprint = NewWidgetBlueprint;
-			
-			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-			EditorScrollBox->AddChild(BaseWidget);
-			
-			// Pass WidgetState Along
-			if (BaseWidget->Implements<UNWidgetStateProvider>())
+			if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
+				StateProvider != nullptr)
 			{
-				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
-					StateProvider != nullptr)
-				{
-					StateProvider->RestoreWidgetState(BaseWidget, Identifier, WidgetState);
-				}
-				else
-				{
-					Execute_OnRestoreWidgetStateEvent(BaseWidget, Identifier, WidgetState);
-				}
+				StateProvider->RestoreWidgetState(BaseWidget, Identifier, WidgetState);
+			}
+			else
+			{
+				Execute_OnRestoreWidgetStateEvent(BaseWidget, Identifier, WidgetState);
 			}
 		}
-		else
-		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
-		}
 	}
+	else
+	{
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
+	}
+	
 }
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()

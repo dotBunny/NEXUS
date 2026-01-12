@@ -30,7 +30,8 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
 	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
-	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
+	UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate);
+	if (EditorWidget != nullptr)
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
@@ -38,23 +39,12 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 		// We dont want these tracked
 		IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
 		BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
-				
-		if (UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget); 
-			UtilityWidget != nullptr)
+		
+		UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
+		if (UtilityWidget != nullptr)
 		{
 			UtilityWidget->PinTemplate(EditorWidget);
-			if (UtilityWidget->Implements<UNWidgetStateProvider>())
-			{
-				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(UtilityWidget); 
-					StateProvider != nullptr)
-				{
-					StateProvider->RestoreWidgetState(UtilityWidget, Identifier, WidgetState);
-				}
-				else
-				{
-					INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(UtilityWidget, Identifier, WidgetState);
-				}
-			}
+			RestoreWidgetState(UtilityWidget, Identifier, WidgetState);
 			return UtilityWidget;
 		}
 	}
@@ -64,8 +54,8 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
 	// Check for already registered
-	if (int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex == INDEX_NONE)
+	int32 WorkingIndex = GetIdentifierIndex(Identifier);
+	if (WorkingIndex == INDEX_NONE)
 	{
 		// Add our items
 		WorkingIndex = Identifiers.Add(Identifier);
@@ -91,8 +81,8 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 
 void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 {
-	if (const int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex != INDEX_NONE)
+	const int32 WorkingIndex = GetIdentifierIndex(Identifier);
+	if (WorkingIndex != INDEX_NONE)
 	{
 		Identifiers.RemoveAt(WorkingIndex);
 		Templates.RemoveAt(WorkingIndex);
@@ -106,10 +96,27 @@ void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
 	}
 }
 
+void UNEditorUtilityWidgetSystem::RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier,
+	FNWidgetState& WidgetState)
+{
+	if (Widget->Implements<UNWidgetStateProvider>())
+	{
+		INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(Widget);
+		if (StateProvider != nullptr)
+		{
+			StateProvider->RestoreWidgetState(Widget, Identifier, WidgetState);
+		}
+		else
+		{
+			INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(Widget, Identifier, WidgetState);
+		}
+	}
+}
+
 void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
 {
-	if (const int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex != INDEX_NONE)
+	const int32 WorkingIndex = GetIdentifierIndex(Identifier);
+	if (WorkingIndex != INDEX_NONE)
 	{
 		WidgetStates[WorkingIndex] = WidgetState;
 		SaveConfig();

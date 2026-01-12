@@ -32,6 +32,9 @@ public:
 	void UnregisterWidget(const FName& Identifier);
 	void UpdateWidgetState(const FName& Identifier,  const FNWidgetState& WidgetState);
 	
+	static void RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier, FNWidgetState& WidgetState);
+	
+	
 	void Clear()
 	{
 		Identifiers.Empty(); 

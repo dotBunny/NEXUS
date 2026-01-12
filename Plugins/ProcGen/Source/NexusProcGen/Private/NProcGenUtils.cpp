@@ -14,37 +14,40 @@
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
-	if (InLevel)
+	
+	// Go home early
+	if (InLevel == nullptr)
 	{
-		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
-		Task.MakeDialog(false);
+		return MoveTemp(LevelBounds);
+	}
 	
-		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
+	const int32 NumActors = InLevel->Actors.Num();
+	FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
+	Task.MakeDialog(false);
+
+	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
+	{
+		
+		const AActor* Actor = InLevel->Actors[ActorIndex];
+		Task.EnterProgressFrame(1);
+		
+		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
+			// Check Editor Only
+			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
 			
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			Task.EnterProgressFrame(1);
-	
+			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
 			
-			if (Actor && Actor->IsLevelBoundsRelevant())
+			const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+			if (ActorBox.IsValid)
 			{
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-				
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-				
-				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					LevelBounds+= ActorBox;
-				}
+				LevelBounds+= ActorBox;
 			}
 		}
 	}
-
-	return LevelBounds;
+	
+	return MoveTemp(LevelBounds);
 }
 
 
@@ -146,103 +149,105 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 
 FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
 {
-	
 	// TODO: We probably could use the voxel data to actually generate the overall bounds to avoid the double parse of the actors in the level
 	FNCellVoxelData ReturnData;
 	
-	if (InLevel)
+	// Go home early
+	if (InLevel == nullptr)
 	{
-		// Settings
-		const UWorld* World = InLevel->GetWorld();
-		const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
-		const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
-		const FVector HalfUnitSize = UnitSize * 0.5f;
-		TArray<const AActor*> IgnoredActors;
-		
-		
-		// STEP 1 - Specific Bounds / Ignore Actors
-		FBox Bounds(ForceInit);
-		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
-		BoundsTask.MakeDialog(false);
-		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
-		{
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			BoundsTask.EnterProgressFrame(1);
+		return MoveTemp(ReturnData);
+	}
 
-			if (Actor && Actor->IsLevelBoundsRelevant())
+	// Settings
+	const UWorld* World = InLevel->GetWorld();
+	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+	const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	TArray<const AActor*> IgnoredActors;
+	
+	
+	// STEP 1 - Specific Bounds / Ignore Actors
+	FBox Bounds(ForceInit);
+	const int32 NumActors = InLevel->Actors.Num();
+	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
+	BoundsTask.MakeDialog(false);
+	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
+	{
+		const AActor* Actor = InLevel->Actors[ActorIndex];
+		BoundsTask.EnterProgressFrame(1);
+
+		if (Actor && Actor->IsLevelBoundsRelevant())
+		{
+			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags))
 			{
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags))
-				{
-					IgnoredActors.Add(Actor);
-					continue;
-				}
-				
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly)
-				{
-					IgnoredActors.Add(Actor);
-					continue;
-				}
-					
-				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					Bounds+= ActorBox;
-				}
-				
-				
+				IgnoredActors.Add(Actor);
+				continue;
 			}
-		}
-		
-		// Determine the Voxel origin adjustment
-		ReturnData.Origin = Bounds.Min;
-		
-		const FBox UnitBounds = FBox(
-					FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
-					FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
-		
-		const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-		const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-		const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
-		
-		// Setup array
-		ReturnData.Resize(SizeX, SizeY, SizeZ);
-		const size_t Count = ReturnData.GetCount();
-		
-		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
-		Params.AddIgnoredActors(IgnoredActors);
-		
-		// STEP 2 - Broad Trace
-		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
-		BroadTraceTask.MakeDialog(false);
-
-		// We iterate over the array by axis to minimize inverse calculations
-		TArray<FVector> RayEndPoints;
-		FHitResult SingleHit;
-		TArray<FHitResult> ObjectHits;
-		
-		// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
-		FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
-		TArray<uint32> SurroundingIndices;
-		
-		for (int x = 0; x < SizeX; x++)
-		{
-			for (int y = 0; y < SizeY; y++)
+			
+			// Check Editor Only
+			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly)
 			{
-				for (int z = 0; z < SizeZ; z++)
+				IgnoredActors.Add(Actor);
+				continue;
+			}
+				
+			const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+			if (ActorBox.IsValid)
+			{
+				Bounds+= ActorBox;
+			}
+			
+			
+		}
+	}
+	
+	// Determine the Voxel origin adjustment
+	ReturnData.Origin = Bounds.Min;
+	
+	const FBox UnitBounds = FBox(
+				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
+				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
+	
+	const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
+	const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
+	const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
+	
+	// Setup array
+	ReturnData.Resize(SizeX, SizeY, SizeZ);
+	const size_t Count = ReturnData.GetCount();
+	
+	FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
+	Params.AddIgnoredActors(IgnoredActors);
+	
+	// STEP 2 - Broad Trace
+	FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
+	BroadTraceTask.MakeDialog(false);
+
+	// We iterate over the array by axis to minimize inverse calculations
+	TArray<FVector> RayEndPoints;
+	FHitResult SingleHit;
+	TArray<FHitResult> ObjectHits;
+	
+	// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
+	FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
+	TArray<uint32> SurroundingIndices;
+	
+	for (int x = 0; x < SizeX; x++)
+	{
+		for (int y = 0; y < SizeY; y++)
+		{
+			for (int z = 0; z < SizeZ; z++)
+			{
+				const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
+				BroadTraceTask.EnterProgressFrame(1);
+				FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+				
+				// Standard Overlap Check
+				bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+				if (bHit)
 				{
-					const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
-					BroadTraceTask.EnterProgressFrame(1);
-					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-					
-					// Standard Overlap Check
-					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
-					if (bHit)
-					{
-						ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
-					}
+					ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
 				}
 			}
 		}
