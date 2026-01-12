@@ -27,7 +27,7 @@ N_TEST(FNActorPoolsTests_Interface_Events, "NEXUS::UnitTests::NActorPools::Inter
 		ANPooledActor* SpawnedActor = Cast<ANPooledActor>(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
 		
 
-		FNTestObject* TestObject = new FNTestObject();
+		TSharedPtr<FNTestObject> TestObject = MakeShared<FNTestObject>();
 		SpawnedActor->OnActorOperationalStateChanged.AddLambda([this, TestObject](ENActorOperationalState OldState, ENActorOperationalState NewState)
 		{
 			TestObject->Counter++;
@@ -46,7 +46,7 @@ N_TEST(FNActorPoolsTests_Interface_Events, "NEXUS::UnitTests::NActorPools::Inter
 
 		CHECK_EQUALS("Check destroyed state event occured.", TestObject->State, ENActorOperationalState::AOS_Destroyed)
 		
-		delete TestObject;
+		TestObject.Reset();
 	});
 }
 

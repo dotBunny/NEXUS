@@ -16,6 +16,7 @@ class FNCoreEditorModule final : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
 	void OnPostEngineInit();
 	
 	FNEditorInputProcessor* GetInputProcessor() const
