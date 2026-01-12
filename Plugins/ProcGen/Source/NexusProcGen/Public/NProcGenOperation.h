@@ -104,8 +104,8 @@ protected:
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	INProcGenOperationOwner* Owner = nullptr;
-	TSharedPtr<FNProcGenOperationTaskGraph> Graph;
-	TSharedPtr<FNProcGenOperationContext> Context;
+	TUniquePtr<FNProcGenOperationTaskGraph> Graph;
+	TUniquePtr<FNProcGenOperationContext> Context;
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;

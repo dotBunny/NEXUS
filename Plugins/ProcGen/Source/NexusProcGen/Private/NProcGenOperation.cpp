@@ -5,13 +5,12 @@
 
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
-#include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
 #include "Generation/NProcGenOperationTaskGraph.h"
 
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = MakeShared<FNProcGenOperationContext>();
+	Context = MakeUnique<FNProcGenOperationContext>();
 	
 	// A generator should never be deleted
 	this->AddToRoot();
@@ -191,7 +190,7 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
-	Graph = MakeShared<FNProcGenOperationTaskGraph>(this, Context.Get());
+	Graph = MakeUnique<FNProcGenOperationTaskGraph>(this, Context.Get());
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
