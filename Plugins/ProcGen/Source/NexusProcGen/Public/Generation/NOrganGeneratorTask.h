@@ -8,7 +8,7 @@
 
 struct FNOrganGeneratorTask
 {
-	explicit FNOrganGeneratorTask(FNOrganGeneratorTaskContext* ContextPtr);
+	explicit FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr);
     
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphTask, STATGROUP_TaskGraphTasks); }
     
@@ -18,5 +18,5 @@ struct FNOrganGeneratorTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	FNOrganGeneratorTaskContext* Context;
+	TSharedRef<FNOrganGeneratorTaskContext> Context;
 };

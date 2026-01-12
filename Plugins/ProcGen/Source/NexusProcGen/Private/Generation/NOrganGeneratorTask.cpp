@@ -5,8 +5,8 @@
 
 #include "Math/NMersenneTwister.h"
 
-FNOrganGeneratorTask::FNOrganGeneratorTask(FNOrganGeneratorTaskContext* ContextPtr)
-	: Context(ContextPtr)
+FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr)
+	: Context(ContextPtr.ToSharedRef())
 {
 }
 
