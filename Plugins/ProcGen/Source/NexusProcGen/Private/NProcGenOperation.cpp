@@ -39,9 +39,11 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
-		if (UObject* Object = WeakObject.Get())
+		UObject* Object = WeakObject.Get();
+		if (Object != nullptr)
 		{
-			if (UNOrganComponent* Component = Cast<UNOrganComponent>(Object))
+			UNOrganComponent* Component = Cast<UNOrganComponent>(Object);
+			if (Component != nullptr)
 			{
 				OrganGenerator->AddToContext(Component);
 			}

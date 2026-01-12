@@ -20,7 +20,7 @@ void FNFixersEditorCommands::RegisterCommands()
 		FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item"),
 		EUserInterfaceActionType::Button, FInputChord());
 
-	CommandList_BulkOperations = MakeShareable(new FUICommandList);
+	CommandList_BulkOperations = MakeShared<FUICommandList>();
 	
 	CommandList_BulkOperations->MapAction(Get().CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext,
 		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, false),
