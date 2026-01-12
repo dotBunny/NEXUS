@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NLevelUtils.h"
+
+#include "NArrayUtils.h"
 #include "Engine/ObjectLibrary.h"
 #include "LevelInstance/LevelInstanceSubsystem.h"
 
@@ -38,4 +40,42 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 	ObjectLibrary->ConditionalBeginDestroy();
 
 	return MoveTemp(ReturnArray);
+}
+
+void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
+	const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly, bool bIncludeNonColliding)
+{
+	const int32 NumActors = InLevel->Actors.Num();
+	
+	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusCore", "Task_DetermineLevelBounds", "Determine Level Bounds"));
+	BoundsTask.MakeDialog(false);
+	
+	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
+	{
+		const AActor* Actor = InLevel->Actors[ActorIndex];
+		BoundsTask.EnterProgressFrame(1);
+
+		if (Actor && Actor->IsLevelBoundsRelevant())
+		{
+			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, ActorIgnoreTags))
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+			
+			// Check Editor Only
+			if (Actor->IsEditorOnly() && !bIncludeEditorOnly)
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+				
+			const FBox ActorBox = Actor->GetComponentsBoundingBox(bIncludeNonColliding);
+			if (ActorBox.IsValid)
+			{
+				OutBounds += ActorBox;
+			}
+		}
+	}
 }

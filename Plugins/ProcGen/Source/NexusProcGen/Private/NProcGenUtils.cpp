@@ -4,6 +4,7 @@
 #include "NProcGenUtils.h"
 
 #include "NArrayUtils.h"
+#include "NLevelUtils.h"
 #include "NProcGenSettings.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Organ/NOrganVolume.h"
@@ -21,31 +22,8 @@ FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBounds
 		return MoveTemp(LevelBounds);
 	}
 	
-	const int32 NumActors = InLevel->Actors.Num();
-	FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
-	Task.MakeDialog(false);
-
-	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
-	{
-		
-		const AActor* Actor = InLevel->Actors[ActorIndex];
-		Task.EnterProgressFrame(1);
-		
-		if (Actor && Actor->IsLevelBoundsRelevant())
-		{
-			// Check Editor Only
-			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-			
-			// Ignore Tags
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-			
-			const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-			if (ActorBox.IsValid)
-			{
-				LevelBounds+= ActorBox;
-			}
-		}
-	}
+	TArray<const AActor*> IgnoredActors;
+	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
 	
 	return MoveTemp(LevelBounds);
 }
@@ -163,41 +141,8 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	
 	// STEP 1 - Specific Bounds / Ignore Actors
 	FBox Bounds(ForceInit);
-	const int32 NumActors = InLevel->Actors.Num();
-	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
-	BoundsTask.MakeDialog(false);
-	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
-	{
-		const AActor* Actor = InLevel->Actors[ActorIndex];
-		BoundsTask.EnterProgressFrame(1);
-
-		if (Actor && Actor->IsLevelBoundsRelevant())
-		{
-			// Ignore Tags
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags))
-			{
-				IgnoredActors.Add(Actor);
-				continue;
-			}
-			
-			// Check Editor Only
-			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly)
-			{
-				IgnoredActors.Add(Actor);
-				continue;
-			}
-				
-			const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-			if (ActorBox.IsValid)
-			{
-				Bounds+= ActorBox;
-			}
-			
-			
-		}
-	}
+	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
 	
-	// Determine the Voxel origin adjustment
 	ReturnData.Origin = Bounds.Min;
 	
 	const FBox UnitBounds = FBox(
