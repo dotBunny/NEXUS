@@ -12,6 +12,7 @@
 
 - The `main` branch of the GitHub repository is now the base point of development, tags are still created for specific release versions, with those points in time being commited to the `release` branch.
 - Code cleanup driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
+- Status check reports for GitHub actions now marked on individual commits.
 
 ### Fixed
 

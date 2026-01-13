@@ -13,6 +13,8 @@ DECLARE_DELEGATE_RetVal_OneParam(bool, FNCellJunctionBoolDelegate, UNCellJunctio
 
 class FNProcGenEditorCommands final : public TCommands<FNProcGenEditorCommands>
 {
+	friend class FNProcGenEditorToolMenu;
+
 public:
 	FNProcGenEditorCommands()
 		: TCommands<FNProcGenEditorCommands>(
@@ -93,7 +95,8 @@ public:
 
 	static void CellCaptureThumbnail();
 	static bool CellCaptureThumbnail_CanExecute();
-	
+
+private:	
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;

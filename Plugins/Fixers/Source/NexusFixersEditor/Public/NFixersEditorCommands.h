@@ -7,6 +7,8 @@
 
 class FNFixersEditorCommands final : public TCommands<FNFixersEditorCommands>
 {
+	friend class FNFixersEditorBulkOperations;
+	
 public:
 	FNFixersEditorCommands()
 		: TCommands<FNFixersEditorCommands>(
@@ -18,9 +20,9 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
-	
+
+private:	
 	TSharedPtr<FUICommandList> CommandList_BulkOperations;
-	
 	TSharedPtr<FUICommandInfo> CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource;
 	TSharedPtr<FUICommandInfo> CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext;
 };
