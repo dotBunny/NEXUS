@@ -36,7 +36,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.workflow_run.head_sha }}',
-              context: 'tests-functional',
+              context: 'Dispatch / Functional Tests',
               state: 'pending',
               description: 'Running tests ...',                        
             })
@@ -58,10 +58,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.workflow_run.head_sha }}',
-              context: 'tests-functional',
+              context: 'Dispatch / Functional Tests',
               state: '${{ steps.parse-log.outcome }}',
-              description: ''                  
-            })          
+              description: ''
+            })
       - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results

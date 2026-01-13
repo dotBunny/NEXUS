@@ -29,21 +29,16 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:          
           script: |
-            github.checks.create({
-              name: 'development-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'in_progress',
-              conclusion: 'neutral',
-              output: {
-                title: 'Development Build',
-                summary: 'In Progress'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Development',
+              state: 'pending',
+              description: 'Building ...',                        
             })
       - name: Run UAT
         id: uat    
@@ -54,21 +49,16 @@ jobs:
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Development -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
       - name: Update Status Check
         if: always()
-        uses: actions/github-script@v3
+        uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.checks.create({
-              name: 'development-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'completed',
-              conclusion: '${{ steps.uat.outcome }}',
-              output: {
-                title: 'Development Build',
-                summary: '${{ steps.uat.outcome }}'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Development',
+              state: '${{ steps.uat.outcome }}',
+              description: ''
             })
   
   DebugGameBuild:
@@ -92,21 +82,16 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:          
           script: |
-            github.checks.create({
-              name: 'debug-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'in_progress',
-              conclusion: 'neutral',
-              output: {
-                title: 'Debug Build',
-                summary: 'In Progress'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Debug',
+              state: 'pending',
+              description: 'Building ...',                        
             })
       - name: Run UAT
         id: uat
@@ -117,21 +102,16 @@ jobs:
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=DebugGame -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
       - name: Update Status Check
         if: always()
-        uses: actions/github-script@v3
+        uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.checks.create({
-              name: 'debug-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'completed',
-              conclusion: '${{ steps.uat.outcome }}',
-              output: {
-                title: 'Debug Build',
-                summary: '${{ steps.uat.outcome }}'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Debug',
+              state: '${{ steps.uat.outcome }}',
+              description: ''
             })
   
   ShippingBuild:
@@ -155,21 +135,16 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:          
           script: |
-            github.checks.create({
-              name: 'shipping-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'in_progress',
-              conclusion: 'neutral',
-              output: {
-                title: 'Shipping Build',
-                summary: 'In Progress'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Shipping',
+              state: 'pending',
+              description: 'Building ...',                        
             })
       - name: Run UAT
         id: uat
@@ -180,19 +155,14 @@ jobs:
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Shipping -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
       - name: Update Status Check
         if: always()
-        uses: actions/github-script@v3
+        uses: actions/github-script@v8
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.checks.create({
-              name: 'shipping-build',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'completed',
-              conclusion: '${{ steps.uat.outcome }}',
-              output: {
-                title: 'Shipping Build',
-                summary: '${{ steps.uat.outcome }}'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
-            })          
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Shipping',
+              state: '${{ steps.uat.outcome }}',
+              description: ''
+            })         
