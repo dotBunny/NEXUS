@@ -8,8 +8,7 @@ on:
       - 'Plugins/**/Source/**'
       - 'Samples/**/Content/**'
       - 'TestProject/Content/**'
-      - 'TestProject/Source/**'
-  workflow_dispatch:      
+      - 'TestProject/Source/**'  
 
 jobs:
   Smoke:
@@ -29,34 +28,70 @@ jobs:
 
       - name: Clean workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Push / Unit Tests,
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project 
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run unit tests
+      - name: Update Status Check (Testing)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Push / Unit Tests',
+              state: 'pending',
+              description: 'Running Tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            })
+      - name: Run Unit Tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Unit Tests'
-
-      - name: Parse UE log
+      - name: Parse UE Log
+        id: parse-log
         if: always()
         uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Dispatch / Functional Tests',
+              state: '${{ steps.parse-log.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
+      - name: Gather And Upload Artifacts
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
           artifact-name: 'push-unit-tests-${{ github.run_number }}'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
+      - name: Update Summary
         if: always()
         shell: powershell
         run: |

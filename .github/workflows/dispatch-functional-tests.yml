@@ -41,7 +41,7 @@ jobs:
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-      - name: Update Status Check (Building)
+      - name: Update Status Check (Testing)
         if: always()
         uses: actions/github-script@v8
         with:          
@@ -52,7 +52,7 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / Functional Tests',
               state: 'pending',
-              description: 'Running tests ...',
+              description: 'Running Tests ...',
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
             })
       - name: Run Functional Tests
