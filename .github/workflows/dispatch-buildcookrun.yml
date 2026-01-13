@@ -35,6 +35,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Development',
               state: 'pending',
               description: 'Building Project ...',
+              target_uri: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
             })        
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -101,6 +102,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Debug',
               state: 'pending',
               description: 'Building Project ...',
+              target_uri: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
             })  
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -167,6 +169,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Shipping',
               state: 'pending',
               description: 'Building Project ...',
+              target_uri: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
             })        
       - name: Build Project
         uses: ./.github/actions/build-project

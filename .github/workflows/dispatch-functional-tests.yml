@@ -34,7 +34,8 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / Functional Tests',
               state: 'pending',
-              description: 'Building Project ...',                        
+              description: 'Building Project ...',
+              target_uri: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
             })
       - name: Build Project
         uses: ./.github/actions/build-project
