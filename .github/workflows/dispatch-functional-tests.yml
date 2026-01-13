@@ -29,21 +29,16 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:          
           script: |
-            github.checks.create({
-              name: 'tests-functional',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'in_progress',
-              conclusion: 'neutral',
-              output: {
-                title: 'Functional Tests',
-                summary: 'In Progress'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'tests-functional'
+              state: 'pending',
+              description: "Running tests ...",                        
             })
       - name: Run Functional Tests
         uses: ./.github/actions/ue-cmd-tests
@@ -58,19 +53,14 @@ jobs:
         if: always()
         uses: actions/github-script@v3
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            github.checks.create({
-              name: 'tests-functional',
-              head_sha: '${{ github.event.workflow_run.head_sha }}',
-              status: 'completed',
-              conclusion: '${{ steps.parse-log.outcome }}',
-              output: {
-                title: 'Functional Tests',
-                summary: '${{ steps.parse-log.outcome }}'
-              },
+            github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
-              repo: context.repo.repo
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'tests-functional'
+              state: '${{ steps.parse-log.outcome }}',
+              description: "",                        
             })          
       - name: Parse Test Results
         if: always()
