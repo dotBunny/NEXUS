@@ -57,6 +57,8 @@ public:
 	NEXUSCOREEDITOR_API static void RemoveWindowCommand(FName Identifier);
 
 private:
+	static TMap<FName, FNWindowCommandInfo> WindowActions;
+	
 	TSharedPtr<FUICommandList> CommandList_Help;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
@@ -72,6 +74,4 @@ private:
 	TSharedPtr<FUICommandList> CommandList_Tools;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
-	
-	static TMap<FName, FNWindowCommandInfo> WindowActions;
 };
