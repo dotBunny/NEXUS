@@ -25,21 +25,18 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell     
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.sha }}',
-              context: 'Push / Unit Tests,
+              context: 'Push / Unit Tests',
               state: 'pending',
               description: 'Building Project ...',
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
@@ -51,8 +48,6 @@ jobs:
       - name: Update Status Check (Testing)
         if: always()
         uses: actions/github-script@v8
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
@@ -76,15 +71,13 @@ jobs:
       - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
-        env:
-          GITHUB_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           script: |
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.sha }}',
-              context: 'Dispatch / Functional Tests',
+              context: 'Push / Unit Tests',
               state: '${{ steps.parse-log.outcome }}',
               description: '',
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
