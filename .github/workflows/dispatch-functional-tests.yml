@@ -23,11 +23,24 @@ jobs:
         shell: powershell
       - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / Functional Tests',
+              state: 'pending',
+              description: 'Building Project ...',                        
+            })
       - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-      - name: Add Status Check
+      - name: Update Status Check (Building)
         if: always()
         uses: actions/github-script@v8
         with:          
@@ -49,7 +62,7 @@ jobs:
         id: parse-log
         if: always()
         uses: ./.github/actions/ue-parse-log
-      - name: Update Status Check
+      - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
         with:

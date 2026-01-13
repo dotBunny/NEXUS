@@ -23,10 +23,6 @@ jobs:
         shell: powershell
       - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-      - name: Build Project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
@@ -38,7 +34,24 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Development',
               state: 'pending',
-              description: 'Building ...',                        
+              description: 'Building Project ...',
+            })        
+      - name: Build Project
+        uses: ./.github/actions/build-project
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue }}
+      - name: Update Status Check (UAT)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Development',
+              state: 'pending',
+              description: 'Runing UAT ...',
             })
       - name: Run UAT
         id: uat    
@@ -47,7 +60,7 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Development -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
-      - name: Update Status Check
+      - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
         with:
@@ -76,10 +89,6 @@ jobs:
         shell: powershell
       - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-      - name: Build Project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
@@ -91,7 +100,24 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Debug',
               state: 'pending',
-              description: 'Building ...',                        
+              description: 'Building Project ...',
+            })  
+      - name: Build Project
+        uses: ./.github/actions/build-project
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue }}
+      - name: Update Status Check (UAT)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Debug',
+              state: 'pending',
+              description: 'Running UAT ...',
             })
       - name: Run UAT
         id: uat
@@ -100,7 +126,7 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=DebugGame -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
-      - name: Update Status Check
+      - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
         with:
@@ -129,10 +155,6 @@ jobs:
         shell: powershell
       - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-      - name: Build Project
-        uses: ./.github/actions/build-project
-        with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
@@ -144,7 +166,24 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Shipping',
               state: 'pending',
-              description: 'Building ...',                        
+              description: 'Building Project ...',
+            })        
+      - name: Build Project
+        uses: ./.github/actions/build-project
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue }}
+      - name: Update Status Check (UAT)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Shipping',
+              state: 'pending',
+              description: 'Running UAT ...',
             })
       - name: Run UAT
         id: uat
@@ -153,7 +192,7 @@ jobs:
           ue-installation: ${{ steps.settings.outputs.ue }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Shipping -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
-      - name: Update Status Check
+      - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
         with:
