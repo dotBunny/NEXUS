@@ -35,7 +35,7 @@ jobs:
               context: 'Dispatch / Functional Tests',
               state: 'pending',
               description: 'Building Project ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -52,7 +52,8 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / Functional Tests',
               state: 'pending',
-              description: 'Running tests ...',                        
+              description: 'Running tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
             })
       - name: Run Functional Tests
         uses: ./.github/actions/ue-cmd-tests
@@ -74,7 +75,8 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / Functional Tests',
               state: '${{ steps.parse-log.outcome }}',
-              description: ''
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
       - name: Parse Test Results
         if: always()

@@ -35,7 +35,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Development',
               state: 'pending',
               description: 'Building Project ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })        
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -53,6 +53,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Development',
               state: 'pending',
               description: 'Runing UAT ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
       - name: Run UAT
         id: uat    
@@ -72,7 +73,8 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Development',
               state: '${{ steps.uat.outcome }}',
-              description: ''
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
   
   DebugGameBuild:
@@ -102,7 +104,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Debug',
               state: 'pending',
               description: 'Building Project ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })  
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -120,6 +122,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Debug',
               state: 'pending',
               description: 'Running UAT ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
       - name: Run UAT
         id: uat
@@ -139,7 +142,8 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Debug',
               state: '${{ steps.uat.outcome }}',
-              description: ''
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
   
   ShippingBuild:
@@ -169,7 +173,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Shipping',
               state: 'pending',
               description: 'Building Project ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/job/${{ github.job }}'
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })        
       - name: Build Project
         uses: ./.github/actions/build-project
@@ -187,6 +191,7 @@ jobs:
               context: 'Dispatch / BuildCookRun / Shipping',
               state: 'pending',
               description: 'Running UAT ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
       - name: Run UAT
         id: uat
@@ -206,5 +211,6 @@ jobs:
               sha: '${{ github.event.workflow_run.head_sha }}',
               context: 'Dispatch / BuildCookRun / Shipping',
               state: '${{ steps.uat.outcome }}',
-              description: ''
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })         
