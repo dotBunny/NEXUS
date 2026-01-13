@@ -29,8 +29,7 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
-
-	// ReSharper disable once IdentifierTypo
+	
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
 	static void OnHelpBugReport();
