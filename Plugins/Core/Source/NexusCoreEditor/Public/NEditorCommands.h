@@ -60,7 +60,7 @@ private:
 	TSharedPtr<FUICommandList> CommandList_Help;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
-	// ReSharper disable once IdentifierTypo
+
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
