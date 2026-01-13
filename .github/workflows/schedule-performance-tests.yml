@@ -22,10 +22,11 @@ jobs:
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -41,10 +42,11 @@ jobs:
       - name: Update Status Check (Testing)
         if: always()
         uses: actions/github-script@v8
-        with:          
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
+        with:
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -63,10 +65,11 @@ jobs:
       - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -118,10 +121,11 @@ jobs:
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -137,10 +141,11 @@ jobs:
       - name: Update Status Check (Testing)
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -165,10 +170,11 @@ jobs:
       - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -220,10 +226,11 @@ jobs:
       - name: Add Status Check
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -239,10 +246,11 @@ jobs:
       - name: Update Status Check (Testing)
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -260,10 +268,11 @@ jobs:
       - name: Update Status Check (Results)
         if: always()
         uses: actions/github-script@v8
+        env:
+          GH_TOKEN: ${{ secrets.CI_TOKEN }}
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
