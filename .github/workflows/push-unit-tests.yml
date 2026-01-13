@@ -26,39 +26,11 @@ jobs:
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell     
       - name: Clean Workspace
-        uses: ./.github/actions/workspace-clean
-      - name: Add Status Check
-        if: always()
-        uses: actions/github-script@v8
-        with:          
-          script: |
-            github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: '${{ github.sha }}',
-              context: 'Push / Unit Tests',
-              state: 'pending',
-              description: 'Building Project ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
-            })
+        uses: ./.github/actions/workspace-clean      
       - name: Build Project
         uses: ./.github/actions/build-project 
         with:
-          ue-installation: ${{ steps.settings.outputs.ue }}
-      - name: Update Status Check (Testing)
-        if: always()
-        uses: actions/github-script@v8
-        with:          
-          script: |
-            github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: '${{ github.sha }}',
-              context: 'Push / Unit Tests',
-              state: 'pending',
-              description: 'Running Tests ...',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
-            })
+          ue-installation: ${{ steps.settings.outputs.ue }}    
       - name: Run Unit Tests
         uses: ./.github/actions/ue-cmd-tests
         with:
@@ -67,21 +39,7 @@ jobs:
       - name: Parse UE Log
         id: parse-log
         if: always()
-        uses: ./.github/actions/ue-parse-log
-      - name: Update Status Check (Results)
-        if: always()
-        uses: actions/github-script@v8
-        with:
-          script: |
-            github.rest.repos.createCommitStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              sha: '${{ github.sha }}',
-              context: 'Push / Unit Tests',
-              state: '${{ steps.parse-log.outcome }}',
-              description: '',
-              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
-            })
+        uses: ./.github/actions/ue-parse-log      
       - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
@@ -105,4 +63,3 @@ jobs:
               Write-Output "$line" >> $outputPath
             }
           }
-          
