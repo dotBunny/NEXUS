@@ -36,9 +36,9 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.workflow_run.head_sha }}',
-              context: 'tests-functional'
+              context: 'tests-functional',
               state: 'pending',
-              description: "Running tests ...",                        
+              description: 'Running tests ...',                        
             })
       - name: Run Functional Tests
         uses: ./.github/actions/ue-cmd-tests
@@ -58,9 +58,9 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.workflow_run.head_sha }}',
-              context: 'tests-functional'
+              context: 'tests-functional',
               state: '${{ steps.parse-log.outcome }}',
-              description: "",                        
+              description: ''                  
             })          
       - name: Parse Test Results
         if: always()
