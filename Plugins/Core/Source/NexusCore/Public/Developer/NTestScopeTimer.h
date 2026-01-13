@@ -13,7 +13,7 @@ public:
 	{
 		if (bUseNamedEvent)
 		{
-			UE_LOG(LogTemp, Log, TEXT("[%s] BEGIN"), *Name);
+			UE_LOG(LogNexusCore, Log, TEXT("[%s] BEGIN"), *Name);
 			FPlatformMisc::BeginNamedEvent(FColor::Blue, *Name);
 		}
 		
@@ -29,7 +29,7 @@ public:
 			if (bNamedEvent)
 			{
 				FPlatformMisc::EndNamedEvent();
-				UE_LOG(LogTemp, Log, TEXT("[%s] END"), *Name);
+				UE_LOG(LogNexusCore, Log, TEXT("[%s] END"), *Name);
 			}
 			bStopped = true;
 		}

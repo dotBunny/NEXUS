@@ -5,6 +5,8 @@
 ### Added
 
 - `FNMultiplayerUtils::GetPing()`
+- `FNDeveloperUtils::GetRootSetObjects()`
+- `FNDeveloperUtils::DumpRootSetToLog()`
 
 ## [0.2.5] - 2026-01-11
 
