@@ -36,7 +36,7 @@ jobs:
               state: 'pending',
               description: 'Building Project ...',
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
-            })        
+            })
       - name: Build Project
         uses: ./.github/actions/build-project
         with:

@@ -27,19 +27,58 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Manual / BuildCookRun / ${{ inputs.configuration }}',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
+      - name: Update Status Check (UAT)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Manual / BuildCookRun / ${{ inputs.configuration }}',
+              state: 'pending',
+              description: 'Running UAT ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            })          
       - name: Run UAT
+        id: uat
         uses: ./.github/actions/ue-uat
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           command: 'BuildCookRun'
           additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=${{ inputs.configuration }} -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
-    
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Manual / BuildCookRun / ${{ inputs.configuration }}',
+              state: '${{ steps.uat.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
