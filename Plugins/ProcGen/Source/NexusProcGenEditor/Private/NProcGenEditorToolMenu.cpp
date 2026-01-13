@@ -280,6 +280,7 @@ bool FNProcGenEditorToolMenu::ShowDrawVoxels()
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 	if (!FNProcGenEdMode::IsActive()) return false;
 	if (!FNProcGenRegistry::HasRootComponents()) return false;
+
 	return true;
 }
 
