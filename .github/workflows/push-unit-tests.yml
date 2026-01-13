@@ -34,6 +34,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
+              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.sha }}',
@@ -52,6 +53,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
+              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.sha }}',
@@ -75,6 +77,7 @@ jobs:
         with:
           script: |
             github.rest.repos.createCommitStatus({
+              github-token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.sha }}',
