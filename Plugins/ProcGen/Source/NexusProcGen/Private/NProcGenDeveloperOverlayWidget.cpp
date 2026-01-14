@@ -40,19 +40,19 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 	
 	switch (NewState)
 	{
-	case PGOS_None:
+	case None:
 		break;
-	case PGOS_Registered:
+	case Registered:
 		OperationsList->AddItem(Cast<UObject>(Operation));
 		break;
-	case PGOS_Started:
+	case Started:
 		break;
-	case PGOS_Updated:
+	case Updated:
 		// No tick!
 		break;
-	case PGOS_Finished:
+	case Finished:
 		break;
-	case PGOS_Unregistered:
+	case Unregistered:
 		OperationsList->RemoveItem(Cast<UObject>(Operation));
 		break;
 	}

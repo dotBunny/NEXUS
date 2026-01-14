@@ -15,12 +15,12 @@ class FNProcGenOperationTaskGraph;
 UENUM(BlueprintType)
 enum ENProcGenOperationState : uint8
 {
-	PGOS_None = 0			UMETA(DisplayName="None"),
-	PGOS_Registered = 1		UMETA(DisplayName="Registered"),
-	PGOS_Started = 2		UMETA(DisplayName="Started"),
-	PGOS_Updated = 3		UMETA(DisplayName="Updated"),
-	PGOS_Finished = 4		UMETA(DisplayName="Finished"),
-	PGOS_Unregistered = 5	UMETA(DisplayName="Unregistered")
+	None = 0,
+	Registered = 1,
+	Started = 2,
+	Updated = 3,
+	Finished = 4,
+	Unregistered = 5
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationDisplayMessageChanged, const FString&, NewMessage);
@@ -46,15 +46,15 @@ public:
 	{
 		switch (State)
 		{
-		case PGOS_Registered:
+		case Registered:
 			return NEXUS::ProcGen::States::Registered;
-		case PGOS_Started:
+		case Started:
 			return NEXUS::ProcGen::States::Started;
-		case PGOS_Updated:
+		case Updated:
 			return NEXUS::ProcGen::States::Updated;
-		case PGOS_Finished:
+		case Finished:
 			return NEXUS::ProcGen::States::Finished;
-		case PGOS_Unregistered:
+		case Unregistered:
 			return NEXUS::ProcGen::States::Unregistered;
 		default:
 			return NEXUS::ProcGen::States::None;
