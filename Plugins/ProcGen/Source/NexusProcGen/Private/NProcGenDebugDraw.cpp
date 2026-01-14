@@ -19,13 +19,14 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, 0.0f, Points[i].Y), WorldCenter, Rotation);
 		switch (Axis)
 		{
-		case ENAxis::X:
+			using enum ENAxis;
+		case X:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
-		case ENAxis::Y:
+		case Y:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
-		case ENAxis::Z:
+		case Z:
 		default:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;

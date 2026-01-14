@@ -100,15 +100,17 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 		{
 			const auto IndexComponent = const_cast<UNCellRootComponent*>(Cast<UNCellRootComponent>(VisProxy->Component.Get()));
 			const HNIndexComponentVisProxy* Proxy = static_cast<HNIndexComponentVisProxy*>(VisProxy);
-			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Bounds)
+			
+			using enum FNProcGenEdMode::ENCellEdMode;
+			if (FNProcGenEdMode::GetCellEdMode() == Bounds)
 			{
 				return EditBoundsVertex(IndexComponent, Proxy->Index);
 			}
-			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
+			if (FNProcGenEdMode::GetCellEdMode() == Hull)
 			{
 				return EditHullVertex(IndexComponent, Proxy->Index);
 			}
-			if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Voxel)
+			if (FNProcGenEdMode::GetCellEdMode() == Voxel)
 			{
 				return ToggleVoxelPoint(IndexComponent, Proxy->Index);
 			}

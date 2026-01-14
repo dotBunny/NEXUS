@@ -265,14 +265,15 @@ void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
 {
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
-	case FNProcGenEdMode::ENCellVoxelMode::Grid:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::Points);
+		using enum FNProcGenEdMode::ENCellVoxelMode;
+	case Grid:
+		FNProcGenEdMode::SetCellVoxelMode(Points);
 		break;
-	case FNProcGenEdMode::ENCellVoxelMode::None:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::Grid);
+	case None:
+		FNProcGenEdMode::SetCellVoxelMode(Grid);
 		break;
 	default:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::None);
+		FNProcGenEdMode::SetCellVoxelMode(None);
 	}
 }
 
