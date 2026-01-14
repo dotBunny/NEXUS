@@ -13,7 +13,7 @@ class UNOrganComponent;
 class FNProcGenOperationTaskGraph;
 
 UENUM(BlueprintType)
-enum ENProcGenOperationState : uint8
+enum class ENProcGenOperationState : uint8
 {
 	None = 0,
 	Registered = 1,
@@ -46,6 +46,7 @@ public:
 	{
 		switch (State)
 		{
+			using enum ENProcGenOperationState;
 		case Registered:
 			return NEXUS::ProcGen::States::Registered;
 		case Started:

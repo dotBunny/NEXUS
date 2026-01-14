@@ -40,6 +40,7 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 	
 	switch (NewState)
 	{
+		using enum ENProcGenOperationState;
 	case None:
 		break;
 	case Registered:

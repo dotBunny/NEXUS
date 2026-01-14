@@ -6,7 +6,7 @@
 #include "NDeveloperOverlayWidget.h"
 #include "NProcGenDeveloperOverlayWidget.generated.h"
 
-enum ENProcGenOperationState : uint8;
+enum class ENProcGenOperationState : uint8;
 class UNProcGenOperation;
 class UNListView;
 
