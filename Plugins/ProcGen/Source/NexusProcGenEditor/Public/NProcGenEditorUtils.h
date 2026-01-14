@@ -14,7 +14,7 @@ enum class ENProcGenSelectionFlags : uint8
 {
 	None = 0,
 	CellActor = 1 << 0,
-	OrganVolume = 1 << 1,
+	OrganVolume = 1 << 1
 };
 ENUM_CLASS_FLAGS(ENProcGenSelectionFlags)
 

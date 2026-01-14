@@ -28,15 +28,11 @@ struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 UENUM(BlueprintType)
 enum class ENActorPoolSpawnerDistribution : uint8
 {
-	// ReSharper disable IdentifierTypo
-	
-	Point = 0			UMETA(DisplayName = "Point"),
-	Radius = 1			UMETA(DisplayName = "Radius"),
-	Sphere = 2			UMETA(DisplayName = "Sphere"),
-	Box = 3				UMETA(DisplayName = "Box"),
-	Spline = 4			UMETA(DisplayName = "Spline")
-
-	// ReSharper enable IdentifierTypo
+	Point = 0,
+	Radius = 1,
+	Sphere = 2,
+	Box = 3,
+	Spline = 4
 };
 
 /**

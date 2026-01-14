@@ -12,9 +12,9 @@ class NEXUSPROCGENEDITOR_API FNCellRootComponentVisualizer final : public FCompo
 {
 	enum class EEditMode
 	{
-		None,
-		HullVertex,
-		BoundsVertex
+		None = 0,
+		HullVertex = 1,
+		BoundsVertex = 2
 	};
 	
 public:

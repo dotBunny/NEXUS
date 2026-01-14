@@ -13,11 +13,11 @@
 UENUM(BlueprintType)
 enum class ENValidatorSeverity : uint8
 {
-	Disable	= 0 						UMETA(DisplayName = "Disabled"),
-	Warning = 1							UMETA(DisplayName = "Warning"),
-	WarningButValid = 2					UMETA(DisplayName = "Warning (Validate)", ToolTip="Throws warning but does not mark the asset as invalid."),
-	Error = 3							UMETA(DisplayName = "Error"),
-	Message = 4							UMETA(DisplayName = "Message")
+	Disable	= 0,
+	Warning = 1,
+	WarningButValid = 2 UMETA(DisplayName = "Warning (Validate)", ToolTip="Throws warning but does not mark the asset as invalid."),
+	Error = 3,
+	Message = 4
 };
 
 UCLASS(config = NexusEditor, defaultconfig)

@@ -9,8 +9,6 @@
 UENUM(BlueprintType)
 enum class ENActorPoolStrategy : uint8
 {
-	// ReSharper disable IdentifierTypo
-	
 	// Create AActor as needed.
 	Create = 0				UMETA(DisplayName = "Create"),
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
@@ -25,8 +23,6 @@ enum class ENActorPoolStrategy : uint8
 	FixedRecycleFirst = 5	UMETA(DisplayName = "Fixed Availability, Recycle First"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior.
 	FixedRecycleLast = 6	UMETA(DisplayName = "Fixed Availability, Recycle Last")
-
-	// ReSharper enable IdentifierTypo
 };
 
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))

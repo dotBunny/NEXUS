@@ -5,8 +5,6 @@
 
 #include "NArrayUtils.h"
 #include "NCellJunctionBlockerActor.h"
-#include "NCellVoxelData.h"
-#include "Math/NVoxelUtils.h"
 #include "Types/NCardinalRotation.h"
 #include "NCellJunctionDetails.generated.h"
 
