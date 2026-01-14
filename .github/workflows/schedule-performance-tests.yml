@@ -25,7 +25,7 @@ jobs:
         with:           
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -44,7 +44,7 @@ jobs:
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -66,7 +66,7 @@ jobs:
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},            
+              token: '${{ secrets.CI_TOKEN }}',            
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -121,7 +121,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -140,7 +140,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -168,7 +168,7 @@ jobs:
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -223,7 +223,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -242,7 +242,7 @@ jobs:
         with:          
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',
@@ -263,7 +263,7 @@ jobs:
         with:
           script: |
             github.rest.repos.createCommitStatus({
-              token: ${{ secrets.CI_TOKEN }},
+              token: '${{ secrets.CI_TOKEN }}',
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: '${{ github.event.schedule.head_sha }}',

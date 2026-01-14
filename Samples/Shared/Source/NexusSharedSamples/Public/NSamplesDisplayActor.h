@@ -10,6 +10,7 @@
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
 // ReSharper restore CppUnusedIncludeDirective
+#include "NSamplesDisplayLibrary.h"
 #include "Components/SplineComponent.h"
 #include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
@@ -42,6 +43,7 @@ UCLASS(DisplayName = "NEXUS: Samples Display Actor", BlueprintType, HideCategori
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
 	friend class ANSamplesPawn;
+	friend class UNSamplesDisplayLibrary;
 	
 	DECLARE_DELEGATE_OneParam(FOnTestEventWithMessageSignature, const FString&);
 	DECLARE_DELEGATE_TwoParams(FOnTestFinishEventSignature, ESampleTestResult TestResult, const FString& Message)
@@ -237,191 +239,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Duration", meta=(ClampMin=0, ClampMax=30))
 	float TimerDuration = 2.f;
-	
-	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Point", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawPoint(UObject* WorldContextObject, const FVector Location, const int TimerIntervals = 1) const
-	{
-		DrawDebugPoint(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
-			false, TimerDuration * TimerIntervals, SDPG_World);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Sphere", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawSphere(UObject* WorldContextObject, const FVector Location, const float Radius, const int TimerIntervals = 1) const
-	{
-		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Radius,24,
-			FNColor::GetColor(ENColor::NC_White), false, TimerDuration * TimerIntervals, SDPG_World);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Sphere", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboSphere(UObject* WorldContextObject, const FVector Location, const FVector2D InnerOuter, const int TimerIntervals = 1) const
-	{
-		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.X, 24,
-			FNColor::GetColor(ENColor::NC_Black), false,TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-		DrawDebugSphere(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerOuter.Y, 24,
-			FNColor::GetColor(ENColor::NC_White), false, TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Box", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawBox(UObject* WorldContextObject, const FVector Location, const FBox& Dimensions, const int TimerIntervals = 1) const
-	{
-		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, Dimensions.GetExtent(),
-			FNColor::GetColor(ENColor::NC_White), false, TimerDuration * TimerIntervals,
-			SDPG_World, NEXUS::Samples::TimerDrawThickness);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Box", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboBox(UObject* WorldContextObject, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1) const
-	{
-		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, InnerDimensions.GetExtent(),
-			FNColor::GetColor(ENColor::NC_Black), false, TimerDuration * TimerIntervals,
-			SDPG_World, NEXUS::Samples::TimerDrawThickness);
-
-		DrawDebugBox(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Location, OuterDimensions.GetExtent(),
-		FNColor::GetColor(ENColor::NC_White), false, TimerDuration * TimerIntervals,
-	SDPG_World, NEXUS::Samples::TimerDrawThickness);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Circle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawCircle(UObject* WorldContextObject, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
-	{
-		FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
-		DrawMatrix.SetOrigin(Location);
-		
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, Radius, 24,
-			FNColor::GetColor(ENColor::NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			NEXUS::Samples::TimerDrawThickness,false);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Circle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboCircle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
-	{
-		FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
-		DrawMatrix.SetOrigin(Location);
-
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.X, 24,
-			FNColor::GetColor(ENColor::NC_Black), false, TimerDuration * TimerIntervals,
-			SDPG_World, NEXUS::Samples::TimerDrawThickness, false);
-
-		DrawDebugCircle(N_GET_WORLD_FROM_CONTEXT(WorldContextObject), DrawMatrix, InnerOuter.Y, 24,
-			FNColor::GetColor(ENColor::NC_White), false,TimerDuration * TimerIntervals, SDPG_World,
-			NEXUS::Samples::TimerDrawThickness, false);
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Spline", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawSpline(UObject* WorldContextObject, const USplineComponent* Spline, const int TimerIntervals = 1) const
-	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-		const float LifeTime = TimerDuration * TimerIntervals;
-		TArray<FVector> SplinePoints;
-		const float SplineLength = Spline->GetSplineLength();
-		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); // One point every ~20 units
-		const float DistancePerSegment = SplineLength / NumSegments;
-		SplinePoints.Reserve(NumSegments);
-		for (int32 i = 0; i <= NumSegments; ++i)
-		{
-			const float Distance = DistancePerSegment * i;
-			const FVector Point = Spline->GetLocationAtDistanceAlongSpline(Distance, ESplineCoordinateSpace::World);
-			SplinePoints.Add(Point);
-		}
-		for (int32 i = 0; i < SplinePoints.Num() - 1; ++i)
-		{
-			DrawDebugLine(World, SplinePoints[i], SplinePoints[i + 1], FNColor::GetColor(ENColor::NC_White),
-				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-		}
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Rectangle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawRectangle(UObject* WorldContextObject, const FVector Location, const FVector2D& Dimensions, const FRotator& Rotation = FRotator::ZeroRotator, int TimerIntervals = 1) const
-	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-		const float LifeTime = TimerDuration * TimerIntervals;
-		TArray<FVector> RectanglePoints;
-		RectanglePoints.Reserve(5);
-		
-		const float ExtentX = Dimensions.X * 0.5f;
-		const float ExtentY = Dimensions.Y * 0.5f;
-
-		if (Rotation.IsZero())
-		{
-			RectanglePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
-			RectanglePoints.Add(Location + FVector(-ExtentX, ExtentY, 0));
-			RectanglePoints.Add(Location + FVector(ExtentX, ExtentY, 0));
-			RectanglePoints.Add(Location + FVector(ExtentX, -ExtentY, 0));
-		
-			RectanglePoints.Add(Location + FVector(-ExtentX, -ExtentY, 0));
-		}
-		else
-		{
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, ExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, ExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(ExtentX, -ExtentY, 0)));
-		
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-ExtentX, -ExtentY, 0)));
-		}
-		for (int32 i = 0; i < 4; ++i)
-		{
-			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(ENColor::NC_White),
-				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-		}
-	}
-	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Display|Timer", DisplayName="Timer: Draw Combo Rectangle", meta = (WorldContext = "WorldContextObject"))
-	void TimerDrawComboRectangle(UObject* WorldContextObject, const FVector Location, const FVector2D& InnerDimensions, const FVector2D& OuterDimensions, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1) const
-	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-		const float LifeTime = TimerDuration * TimerIntervals;
-		TArray<FVector> RectanglePoints;
-		RectanglePoints.Reserve(5);
-		
-		const float InnerExtentX = InnerDimensions.X * 0.5f;
-		const float InnerExtentY = InnerDimensions.Y * 0.5f;
-		const float OuterExtentX = OuterDimensions.X * 0.5f;
-		const float OuterExtentY = OuterDimensions.Y * 0.5f;
-
-		if (Rotation.IsZero())
-		{
-			RectanglePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
-			RectanglePoints.Add(Location + FVector(-InnerExtentX, InnerExtentY, 0));
-			RectanglePoints.Add(Location + FVector(InnerExtentX, InnerExtentY, 0));
-			RectanglePoints.Add(Location + FVector(InnerExtentX, -InnerExtentY, 0));
-
-			RectanglePoints.Add(Location + FVector(-InnerExtentX, -InnerExtentY, 0));
-		}
-		else
-		{
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, InnerExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, InnerExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(InnerExtentX, -InnerExtentY, 0)));
-
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-InnerExtentX, -InnerExtentY, 0)));
-		}
-		
-		for (int32 i = 0; i < 4; ++i)
-		{
-			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(ENColor::NC_Black),
-				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-		}
-
-		RectanglePoints.Empty();
-
-		if (Rotation.IsZero())
-		{
-			RectanglePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
-			RectanglePoints.Add(Location + FVector(-OuterExtentX, OuterExtentY, 0));
-			RectanglePoints.Add(Location + FVector(OuterExtentX, OuterExtentY, 0));
-			RectanglePoints.Add(Location + FVector(OuterExtentX, -OuterExtentY, 0));
-		
-			RectanglePoints.Add(Location + FVector(-OuterExtentX, -OuterExtentY, 0));
-		}
-		else
-		{
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, OuterExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, OuterExtentY, 0)));
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(OuterExtentX, -OuterExtentY, 0)));
-		
-			RectanglePoints.Add(Location + Rotation.RotateVector(FVector(-OuterExtentX, -OuterExtentY, 0)));
-		}
-		
-		for (int32 i = 0; i < 4; ++i)
-		{
-			DrawDebugLine(World, RectanglePoints[i], RectanglePoints[i + 1], FNColor::GetColor(ENColor::NC_White),
-				false, LifeTime, SDPG_World, NEXUS::Samples::TimerDrawThickness);
-		}
-	}
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
@@ -539,7 +356,6 @@ private:
 
 	FTransform MainPanelTransform;
 	FTransform FloorPanelTransform;
-	FMatrix BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 	
 	int CheckPassCount = 0;
 	int CheckFailCount = 0;
