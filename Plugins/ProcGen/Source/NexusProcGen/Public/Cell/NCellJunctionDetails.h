@@ -11,8 +11,8 @@
 UENUM()
 enum class ENCellJunctionType : uint8
 {
-	TwoWaySocket = 0 UMETA(DisplayName = "Two Way Socket"),
-	OneWaySocket = 1 UMETA(DisplayName = "One Way Socket"),
+	TwoWaySocket = 0,
+	OneWaySocket = 1,
 };
 
 UENUM()

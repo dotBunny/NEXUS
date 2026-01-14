@@ -10,7 +10,7 @@ UENUM(BlueprintType)
 enum class ENActorPoolStrategy : uint8
 {
 	// Create AActor as needed.
-	Create = 0				UMETA(DisplayName = "Create"),
+	Create = 0,
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
 	CreateLimited = 1		UMETA(DisplayName = "Create Till Cap"),
 	// Create AActor until MaximumActorCount is reached, any requests beyond provide the oldest already spawned AActor in a FIFO behavior.
@@ -28,30 +28,30 @@ enum class ENActorPoolStrategy : uint8
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENActorPoolFlags : uint8
 {
-	None = 0								UMETA(DisplayName = "None", Hidden),
+	None = 0 UMETA(Hidden),
 	// Should a sweep be done when setting the location of an Actor being spawned?
-	SweepBeforeSettingLocation = 1 << 0		UMETA(DisplayName = "Sweep Before Setting Location"),
+	SweepBeforeSettingLocation = 1 << 0,
 	// Should the Actor being returned to the pool be moved to a storage location? 
-	ReturnToStorageLocation = 1 << 1		UMETA(DisplayName = "Return To Storage Location"),
+	ReturnToStorageLocation = 1 << 1,
 	// Controls whether Actor construction is deferred when creating new Actors.
-	DeferConstruction = 1 << 2				UMETA(DisplayName = "Defer Construction"),
+	DeferConstruction = 1 << 2,
 	/**
 	 * Should FinishSpawning be called on the Actor when it does not implement INActorPoolItem?
 	 * @note This is not used by INActorPoolItems, they have a method which is called for logic to be applied before FinishSpawning is called.
 	 */
-	ShouldFinishSpawning = 1 << 3			UMETA(DisplayName = "Should Finish Spawning"),
+	ShouldFinishSpawning = 1 << 3,
 	/**
 	 * Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked.
 	 */
-	ServerOnly = 1 << 4						UMETA(DisplayName = "Server Only"),
+	ServerOnly = 1 << 4,
 	/**
 	 * Broadcast destroy event on the Actor through the operational change state delegate.
 	 */
-	BroadcastDestroy = 1 << 5				UMETA(DisplayName = "Broadcast Destroy"),
+	BroadcastDestroy = 1 << 5,
 	/**
 	 * Should an Actor's network dormancy be updated based on state?
 	 */
-	SetNetDormancy = 1 << 6					UMETA(DisplayName = "Set Net Dormancy"),
+	SetNetDormancy = 1 << 6,
 	
 	DefaultSettings = ReturnToStorageLocation | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
 };

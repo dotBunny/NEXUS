@@ -51,7 +51,7 @@ public:
 	int32 UpdatesFrequency = 7;
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel" )
-	ENUpdatesChannel UpdatesChannel = ENUpdatesChannel::NUC_GithubRelease;
+	ENUpdatesChannel UpdatesChannel = ENUpdatesChannel::GithubRelease;
 
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom Query URI", meta=(
 		EditCondition="UpdatesChannel == ENUpdatesChannel::NUC_Custom", EditConditionHides,

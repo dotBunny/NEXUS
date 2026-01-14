@@ -10,9 +10,9 @@
 UENUM(BlueprintType)
 enum class ENUpdatesChannel : uint8
 {
-	NUC_GithubRelease	= 0 UMETA(DisplayName = "Release (GitHub)"),
-	NUC_GithubMain		= 1 UMETA(DisplayName = "Main (GitHub)"),
-	NUC_Custom			= 6 UMETA(DisplayName = "Custom"),
+	GithubRelease	= 0 UMETA(DisplayName = "Release (GitHub)"),
+	GithubMain		= 1 UMETA(DisplayName = "Main (GitHub)"),
+	Custom			= 6 UMETA(DisplayName = "Custom"),
 };
 
 UCLASS()

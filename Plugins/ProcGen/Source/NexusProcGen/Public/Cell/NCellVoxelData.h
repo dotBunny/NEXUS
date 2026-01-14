@@ -11,8 +11,8 @@
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENCellVoxel : uint8
 {
-	Empty		= 0 UMETA(DisplayName = "Empty"),
-	Occupied	= 1 << 0 UMETA(DisplayName = "Occupied")
+	Empty		= 0,
+	Occupied	= 1 << 0
 };
 ENUM_CLASS_FLAGS(ENCellVoxel)
 

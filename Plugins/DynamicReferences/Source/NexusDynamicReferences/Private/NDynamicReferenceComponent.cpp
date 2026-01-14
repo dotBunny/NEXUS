@@ -6,7 +6,7 @@
 
 void UNDynamicReferenceComponent::BeginPlay()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::ACLS_BeginPlay)
+	if (LinkPhase == ENActorComponentLifecycleStart::BeginPlay)
 	{
 		// Register the references with the subsystem
 		Register();
@@ -17,7 +17,7 @@ void UNDynamicReferenceComponent::BeginPlay()
 
 void UNDynamicReferenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::ACLE_EndPlay)
+	if (BreakPhase == ENActorComponentLifecycleEnd::EndPlay)
 	{
 		Unregister();
 	}
@@ -26,7 +26,7 @@ void UNDynamicReferenceComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 
 void UNDynamicReferenceComponent::InitializeComponent()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::ACLS_InitializeComponent)
+	if (LinkPhase == ENActorComponentLifecycleStart::InitializeComponent)
 	{
 		Register();
 	}
@@ -35,7 +35,7 @@ void UNDynamicReferenceComponent::InitializeComponent()
 
 void UNDynamicReferenceComponent::UninitializeComponent()
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::ACLE_UninitializeComponent)
+	if (BreakPhase == ENActorComponentLifecycleEnd::UninitializeComponent)
 	{
 		// Unregister the references with the subsystem
 		Unregister();

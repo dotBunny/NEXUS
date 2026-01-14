@@ -35,22 +35,22 @@ namespace NEXUS::Core::CardinalDirection
 UENUM()
 enum class ENCardinalDirection : uint8
 {
-	CD_North = 0				UMETA(DisplayName = "North"),
-	CD_NorthNorthEast = 1		UMETA(DisplayName = "North North East"),
-	CD_NorthEast = 2			UMETA(DisplayName = "North East"),
-	CD_EastNorthEast = 3		UMETA(DisplayName = "East North East"),
-	CD_East	= 4					UMETA(DisplayName = "East"),
-	CD_EastSouthEast = 5		UMETA(DisplayName = "East South East"),
-	CD_SouthEast = 6			UMETA(DisplayName = "South East"),
-	CD_SouthSouthEast = 7		UMETA(DisplayName = "South South East"),
-	CD_South = 8				UMETA(DisplayName = "South"),
-	CD_SouthSouthWest = 9		UMETA(DisplayName = "South South West"),
-	CD_SouthWest = 10			UMETA(DisplayName = "South West"),
-	CD_WestSouthWest = 11		UMETA(DisplayName = "West South West"),
-	CD_West	= 12				UMETA(DisplayName = "West"),
-	CD_WestNorthWest = 13		UMETA(DisplayName = "West North West"),
-	CD_NorthWest = 14			UMETA(DisplayName = "North West"),
-	CD_NorthNorthWest = 15		UMETA(DisplayName = "North North West"),
+	North = 0,
+	NorthNorthEast = 1,
+	NorthEast = 2,
+	EastNorthEast = 3,
+	East = 4,
+	EastSouthEast = 5,
+	SouthEast = 6,
+	SouthSouthEast = 7,
+	South = 8,
+	SouthSouthWest = 9,
+	SouthWest = 10,
+	WestSouthWest = 11,
+	West = 12,
+	WestNorthWest = 13,
+	NorthWest = 14,
+	NorthNorthWest = 15,
 };
 
 class FNCardinalDirectionUtils
@@ -77,69 +77,69 @@ public:
 		using enum ENCardinalDirection;
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::North))
 		{
-			return CD_North;
+			return North;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::NorthNorthEast))
 		{
-			return CD_NorthNorthEast;
+			return NorthNorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::NorthEast))
 		{
-			return CD_NorthEast;
+			return NorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::EastNorthEast))
 		{
-			return CD_EastNorthEast;
+			return EastNorthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::East))
 		{
-			return CD_East;
+			return East;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::EastSouthEast))
 		{
-			return CD_EastSouthEast;
+			return EastSouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::SouthEast))
 		{
-			return CD_SouthEast;
+			return SouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::SouthSouthEast))
 		{
-			return CD_SouthSouthEast;
+			return SouthSouthEast;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::South))
 		{
-			return CD_South;
+			return South;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::SouthSouthWest))
 		{
-			return CD_SouthSouthWest;
+			return SouthSouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::SouthWest))
 		{
-			return CD_SouthWest;
+			return SouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::WestSouthWest))
 		{
-			return CD_WestSouthWest;
+			return WestSouthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::West))
 		{
-			return CD_West;
+			return West;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::WestNorthWest))
 		{
-			return CD_WestNorthWest;
+			return WestNorthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::NorthWest))
 		{
-			return CD_NorthWest;
+			return NorthWest;
 		}
 		if (FMath::IsNearlyEqual(Angle, NEXUS::Core::CardinalDirection::NorthNorthWest))
 		{
-			return CD_NorthNorthWest;
+			return NorthNorthWest;
 		}
-		return CD_North;
+		return North;
 	}
 
 	static ENCardinalDirection ToCardinalDirectionNormalized(const float NormalizedAngle)
@@ -147,69 +147,69 @@ public:
 		using enum ENCardinalDirection;
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::North))
 		{
-			return CD_North;
+			return North;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::NorthNorthEast))
 		{
-			return CD_NorthNorthEast;
+			return NorthNorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::NorthEast))
 		{
-			return CD_NorthEast;
+			return NorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::EastNorthEast))
 		{
-			return CD_EastNorthEast;
+			return EastNorthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::East))
 		{
-			return CD_East;
+			return East;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::EastSouthEast))
 		{
-			return CD_EastSouthEast;
+			return EastSouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::SouthEast))
 		{
-			return CD_SouthEast;
+			return SouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::SouthSouthEast))
 		{
-			return CD_SouthSouthEast;
+			return SouthSouthEast;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::South) || FMath::IsNearlyEqual(NormalizedAngle, -NEXUS::Core::CardinalDirection::South))
 		{
-			return CD_South;
+			return South;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::SouthSouthWestNormalized))
 		{
-			return CD_SouthSouthWest;
+			return SouthSouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::SouthWestNormalized))
 		{
-			return CD_SouthWest;
+			return SouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::WestSouthWestNormalized))
 		{
-			return CD_WestSouthWest;
+			return WestSouthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::WestNormalized))
 		{
-			return CD_West;
+			return West;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::WestNorthWestNormalized))
 		{
-			return CD_WestNorthWest;
+			return WestNorthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::NorthWestNormalized))
 		{
-			return CD_NorthWest;
+			return NorthWest;
 		}
 		if (FMath::IsNearlyEqual(NormalizedAngle, NEXUS::Core::CardinalDirection::NorthNorthWestNormalized))
 		{
-			return CD_NorthNorthWest;
+			return NorthNorthWest;
 		}
-		return CD_North;
+		return North;
 
 	}
 	
@@ -218,37 +218,37 @@ public:
 		switch (CardinalDirection)
 		{
 			using enum ENCardinalDirection;
-		case CD_North:
+		case North:
 			return NEXUS::Core::CardinalDirection::North;
-		case CD_NorthNorthEast:
+		case NorthNorthEast:
 			return NEXUS::Core::CardinalDirection::NorthNorthEast;
-		case CD_NorthEast:
+		case NorthEast:
 			return NEXUS::Core::CardinalDirection::NorthEast;
-		case CD_EastNorthEast:
+		case EastNorthEast:
 			return NEXUS::Core::CardinalDirection::EastNorthEast;
-		case CD_East:
+		case East:
 			return NEXUS::Core::CardinalDirection::East;
-		case CD_EastSouthEast:
+		case EastSouthEast:
 			return NEXUS::Core::CardinalDirection::EastSouthEast;
-		case CD_SouthEast:
+		case SouthEast:
 			return NEXUS::Core::CardinalDirection::SouthEast;
-		case CD_SouthSouthEast:
+		case SouthSouthEast:
 			return NEXUS::Core::CardinalDirection::SouthSouthEast;
-		case CD_South:
+		case South:
 			return NEXUS::Core::CardinalDirection::South;
-		case CD_SouthSouthWest:
+		case SouthSouthWest:
 			return NEXUS::Core::CardinalDirection::SouthSouthWest;
-		case CD_SouthWest:
+		case SouthWest:
 			return NEXUS::Core::CardinalDirection::SouthWest;
-		case CD_WestSouthWest:
+		case WestSouthWest:
 			return NEXUS::Core::CardinalDirection::WestSouthWest;
-		case CD_West:
+		case West:
 			return NEXUS::Core::CardinalDirection::West;
-		case CD_WestNorthWest:
+		case WestNorthWest:
 			return NEXUS::Core::CardinalDirection::WestNorthWest;
-		case CD_NorthWest:
+		case NorthWest:
 			return NEXUS::Core::CardinalDirection::NorthWest;
-		case CD_NorthNorthWest:
+		case NorthNorthWest:
 			return NEXUS::Core::CardinalDirection::NorthNorthWest;
 		}
 		return NEXUS::Core::CardinalDirection::North;
@@ -259,37 +259,37 @@ public:
 		switch (CardinalDirection)
 		{
 			using enum ENCardinalDirection;
-		case CD_SouthSouthWest:
+		case SouthSouthWest:
 			return NEXUS::Core::CardinalDirection::SouthSouthWestNormalized;
-		case CD_SouthWest:
+		case SouthWest:
 			return NEXUS::Core::CardinalDirection::SouthWestNormalized;
-		case CD_WestSouthWest:
+		case WestSouthWest:
 			return NEXUS::Core::CardinalDirection::WestSouthWestNormalized;
-		case CD_West:
+		case West:
 			return NEXUS::Core::CardinalDirection::WestNormalized;
-		case CD_WestNorthWest:
+		case WestNorthWest:
 			return NEXUS::Core::CardinalDirection::WestNorthWestNormalized;
-		case CD_NorthWest:
+		case NorthWest:
 			return NEXUS::Core::CardinalDirection::NorthWestNormalized;
-		case CD_NorthNorthWest:
+		case NorthNorthWest:
 			return NEXUS::Core::CardinalDirection::NorthNorthWestNormalized;
-		case CD_North:
+		case North:
 			return NEXUS::Core::CardinalDirection::North;
-		case CD_NorthNorthEast:
+		case NorthNorthEast:
 			return NEXUS::Core::CardinalDirection::NorthNorthEast;
-		case CD_NorthEast:
+		case NorthEast:
 			return NEXUS::Core::CardinalDirection::NorthEast;
-		case CD_EastNorthEast:
+		case EastNorthEast:
 			return NEXUS::Core::CardinalDirection::EastNorthEast;
-		case CD_East:
+		case East:
 			return NEXUS::Core::CardinalDirection::East;
-		case CD_EastSouthEast:
+		case EastSouthEast:
 			return NEXUS::Core::CardinalDirection::EastSouthEast;
-		case CD_SouthEast:
+		case SouthEast:
 			return NEXUS::Core::CardinalDirection::SouthEast;
-		case CD_SouthSouthEast:
+		case SouthSouthEast:
 			return NEXUS::Core::CardinalDirection::SouthSouthEast;
-		case CD_South:
+		case South:
 			return NEXUS::Core::CardinalDirection::South;
 
 		}
