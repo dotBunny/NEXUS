@@ -60,7 +60,7 @@ jobs:
               state: 'pending',
               description: 'Running UAT ...',
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
-            })          
+            })
       - name: Run UAT
         id: uat
         uses: ./.github/actions/ue-uat

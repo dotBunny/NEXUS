@@ -10,11 +10,11 @@ class UNCellRootComponent;
 
 class NEXUSPROCGENEDITOR_API FNCellRootComponentVisualizer final : public FComponentVisualizer
 {
-	enum EEditMode
+	enum class EEditMode
 	{
-		EM_None,
-		EM_HullVertex,
-		EM_BoundsVertex
+		None,
+		HullVertex,
+		BoundsVertex
 	};
 	
 public:
@@ -33,7 +33,7 @@ private:
 	bool EditBoundsVertex(UNCellRootComponent* Component, int32 Index);
 	static bool ToggleVoxelPoint(UNCellRootComponent* Component, int32 Index);
 	
-	EEditMode CurrentEditMode = EEditMode::EM_None;
+	EEditMode CurrentEditMode = EEditMode::None;
 
 	int32 VertexIndex = -1;
 	UNCellRootComponent* RootComponent = nullptr;

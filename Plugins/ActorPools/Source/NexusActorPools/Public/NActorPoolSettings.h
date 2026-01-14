@@ -7,57 +7,57 @@
 #include "NActorPoolSettings.generated.h"
 
 UENUM(BlueprintType)
-enum ENActorPoolStrategy : uint8
+enum class ENActorPoolStrategy : uint8
 {
-	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	// ReSharper disable IdentifierTypo
 	
 	// Create AActor as needed.
-	APS_Create = 0				UMETA(DisplayName = "Create"),
+	Create = 0				UMETA(DisplayName = "Create"),
 	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
-	APS_CreateLimited = 1		UMETA(DisplayName = "Create Till Cap"),
+	CreateLimited = 1		UMETA(DisplayName = "Create Till Cap"),
 	// Create AActor until MaximumActorCount is reached, any requests beyond provide the oldest already spawned AActor in a FIFO behavior.
-	APS_CreateRecycleFirst = 2	UMETA(DisplayName = "Create Till Cap, Recycle First"),
+	CreateRecycleFirst = 2	UMETA(DisplayName = "Create Till Cap, Recycle First"),
 	// Create AActor until MaximumActorCount is reached, any requests beyond provide the newest already spawned AActor in a LIFO behavior.
-	APS_CreateRecycleLast = 3	UMETA(DisplayName = "Create Till Cap, Recycle Last"),
+	CreateRecycleLast = 3	UMETA(DisplayName = "Create Till Cap, Recycle Last"),
 	// Deploys AActor as needed from fixed pools, exceeding availability results in a nullptr being returned.
-	APS_Fixed = 4				UMETA(DisplayName = "Fixed Availability"),
+	Fixed = 4				UMETA(DisplayName = "Fixed Availability"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the oldest already spawned AActor in a FIFO behavior.
-	APS_FixedRecycleFirst = 5	UMETA(DisplayName = "Fixed Availability, Recycle First"),
+	FixedRecycleFirst = 5	UMETA(DisplayName = "Fixed Availability, Recycle First"),
 	// Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior.
-	APS_FixedRecycleLast = 6	UMETA(DisplayName = "Fixed Availability, Recycle Last")
+	FixedRecycleLast = 6	UMETA(DisplayName = "Fixed Availability, Recycle Last")
 
-	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	// ReSharper enable IdentifierTypo
 };
 
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENActorPoolFlags : uint8
 {
-	APF_None = 0								UMETA(DisplayName = "None", Hidden),
+	None = 0								UMETA(DisplayName = "None", Hidden),
 	// Should a sweep be done when setting the location of an Actor being spawned?
-	APF_SweepBeforeSettingLocation = 1 << 0		UMETA(DisplayName = "Sweep Before Setting Location"),
+	SweepBeforeSettingLocation = 1 << 0		UMETA(DisplayName = "Sweep Before Setting Location"),
 	// Should the Actor being returned to the pool be moved to a storage location? 
-	APF_ReturnToStorageLocation = 1 << 1		UMETA(DisplayName = "Return To Storage Location"),
+	ReturnToStorageLocation = 1 << 1		UMETA(DisplayName = "Return To Storage Location"),
 	// Controls whether Actor construction is deferred when creating new Actors.
-	APF_DeferConstruction = 1 << 2				UMETA(DisplayName = "Defer Construction"),
+	DeferConstruction = 1 << 2				UMETA(DisplayName = "Defer Construction"),
 	/**
 	 * Should FinishSpawning be called on the Actor when it does not implement INActorPoolItem?
 	 * @note This is not used by INActorPoolItems, they have a method which is called for logic to be applied before FinishSpawning is called.
 	 */
-	APF_ShouldFinishSpawning = 1 << 3			UMETA(DisplayName = "Should Finish Spawning"),
+	ShouldFinishSpawning = 1 << 3			UMETA(DisplayName = "Should Finish Spawning"),
 	/**
 	 * Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked.
 	 */
-	APF_ServerOnly = 1 << 4						UMETA(DisplayName = "Server Only"),
+	ServerOnly = 1 << 4						UMETA(DisplayName = "Server Only"),
 	/**
 	 * Broadcast destroy event on the Actor through the operational change state delegate.
 	 */
-	APF_BroadcastDestroy = 1 << 5				UMETA(DisplayName = "Broadcast Destroy"),
+	BroadcastDestroy = 1 << 5				UMETA(DisplayName = "Broadcast Destroy"),
 	/**
 	 * Should an Actor's network dormancy be updated based on state?
 	 */
-	APF_SetNetDormancy = 1 << 6					UMETA(DisplayName = "Set Net Dormancy"),
+	SetNetDormancy = 1 << 6					UMETA(DisplayName = "Set Net Dormancy"),
 	
-	APF_DefaultSettings = APF_ReturnToStorageLocation | APF_DeferConstruction | APF_ShouldFinishSpawning | APF_ServerOnly | APF_SetNetDormancy
+	DefaultSettings = ReturnToStorageLocation | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
@@ -74,31 +74,31 @@ public:
 
 	FORCEINLINE bool HasFlag_DeferConstruction() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_DeferConstruction);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::DeferConstruction);
 	}
 	FORCEINLINE bool HasFlag_ShouldFinishSpawning() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ShouldFinishSpawning);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ShouldFinishSpawning);
 	}
 	FORCEINLINE bool HasFlag_ReturnToStorageLocation() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ReturnToStorageLocation);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ReturnToStorageLocation);
 	}
 	FORCEINLINE bool HasFlag_SweepBeforeSettingLocation() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_SweepBeforeSettingLocation);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SweepBeforeSettingLocation);
 	}
 	FORCEINLINE bool HasFlag_ServerOnly() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_ServerOnly);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ServerOnly);
 	}
 	FORCEINLINE bool HasFlag_BroadcastDestroy() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_BroadcastDestroy);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::BroadcastDestroy);
 	}
 	FORCEINLINE bool HasFlag_SetNetDormancy() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::APF_SetNetDormancy);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SetNetDormancy);
 	}
 	
 	/**
@@ -123,13 +123,13 @@ public:
 	 * Determines the approach taken when the pool does not have any Actors remaining in the "in" pool and needs to create one (or reuse)
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
-	TEnumAsByte<ENActorPoolStrategy> Strategy = ENActorPoolStrategy::APS_Create;
+	ENActorPoolStrategy Strategy = ENActorPoolStrategy::Create;
 	
 	/**
 	 * The behavioral flags to evaluate when doing operations with this pool.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
-	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::APF_DefaultSettings);
+	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::DefaultSettings);
 	
 	/**
 	 * The default applied transform when creating an actor, with the location component being used as the storage location when an actor is returned to the pool, and the scale applied when spawned.

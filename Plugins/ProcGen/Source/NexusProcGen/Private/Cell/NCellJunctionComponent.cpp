@@ -150,11 +150,11 @@ FLinearColor UNCellJunctionComponent::GetColor() const
 	switch (Details.Requirements)
 	{
 		using enum ENCellJunctionRequirements;
-	case CJR_AllowBlocking:
+	case AllowBlocking:
 		return FNColor::GreenMid;
-	case CJR_AllowEmpty:
+	case AllowEmpty:
 		return FNColor::GreenDark;
-	case CJR_Required:
+	case Required:
 	default:
 		return FNColor::GreenLight;
 	}

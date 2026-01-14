@@ -11,13 +11,13 @@
 
 
 UENUM(BlueprintType)
-enum ENValidatorSeverity : uint8
+enum class ENValidatorSeverity : uint8
 {
-	NVS_Disable	= 0 						UMETA(DisplayName = "Disabled"),
-	NVS_Warning = 1							UMETA(DisplayName = "Warning"),
-	NVS_WarningButValid = 2					UMETA(DisplayName = "Warning (Validate)", ToolTip="Throws warning but does not mark the asset as invalid."),
-	NVS_Error = 3							UMETA(DisplayName = "Error"),
-	NVS_Message = 4							UMETA(DisplayName = "Message")
+	Disable	= 0 						UMETA(DisplayName = "Disabled"),
+	Warning = 1							UMETA(DisplayName = "Warning"),
+	WarningButValid = 2					UMETA(DisplayName = "Warning (Validate)", ToolTip="Throws warning but does not mark the asset as invalid."),
+	Error = 3							UMETA(DisplayName = "Error"),
+	Message = 4							UMETA(DisplayName = "Message")
 };
 
 UCLASS(config = NexusEditor, defaultconfig)
@@ -47,13 +47,13 @@ public:
 	
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Empty Tick")
-	TEnumAsByte<ENValidatorSeverity> BlueprintEmptyTick = NVS_Error;
+	ENValidatorSeverity BlueprintEmptyTick = ENValidatorSeverity::Error;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Multi-Pin Pure Node")
-	TEnumAsByte<ENValidatorSeverity> BlueprintMultiPinPureNode = NVS_Warning;
+	ENValidatorSeverity BlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
 	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Engine: Content Change")
-	TEnumAsByte<ENValidatorSeverity> EngineContentChange = NVS_Warning;
+	ENValidatorSeverity EngineContentChange = ENValidatorSeverity::Warning;
 
 	UPROPERTY(EditAnywhere, config, Category = "Validator Ignores", DisplayName = "Assets")
 	TArray<FSoftObjectPath> IgnoredAssets;

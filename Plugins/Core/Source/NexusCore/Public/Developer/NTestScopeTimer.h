@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NCoreMinimal.h"
 #include "Misc/LowLevelTestAdapter.h"
 
 class FNTestScopeTimer

@@ -21,7 +21,8 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 	
 	switch (SpawnerComponent->GetDistribution())
 	{
-		case APSD_Point:
+		using enum ENActorPoolSpawnerDistribution;
+		case Point:
 		{
 			DrawCircle(PDI, Origin,
 				FRotationMatrix(Rotator).GetScaledAxis(EAxis::X), FRotationMatrix(Rotator).GetScaledAxis(EAxis::Y),
@@ -29,7 +30,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 			break;
 		}
 		
-		case APSD_Radius:
+		case Radius:
 		{
 			const FVector RadiusRange = SpawnerComponent->GetDistributionRange();
 			DrawCircle(PDI, Origin,
@@ -41,7 +42,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 			break;
 		}
 
-		case APSD_Sphere:
+		case Sphere:
 		{
 			const FVector SphereRange = SpawnerComponent->GetDistributionRange();
 			const FTransform& SphereTransform = SpawnerComponent->GetComponentTransform();
@@ -50,7 +51,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 			break;
 		}
 
-		case APSD_Box:
+		case Box:
 		{
 			const FVector BoxRange = SpawnerComponent->GetDistributionRange();
 			const FBox Box = FBox(Origin - BoxRange, Origin + BoxRange);
@@ -58,7 +59,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 			break;
 		}
 
-		case APSD_Spline:
+		case Spline:
 		{
 			break;
 		}

@@ -20,9 +20,9 @@
 void FNProcGenEdMode::ProtectCellEdMode()
 {
 	if (CellActor != nullptr && CellActor->GetCellRoot()->Details.Hull.HasNonTris() && 
-		GetCellEdMode() == CEM_Hull)
+		GetCellEdMode() == ENCellEdMode::Hull)
 	{
-		SetCellEdMode(CEM_Bounds);
+		SetCellEdMode(ENCellEdMode::Bounds);
 	}
 }
 
@@ -34,14 +34,14 @@ const FText FNProcGenEdMode::AutoHullMessage = FText::FromString("NCell Hull not
 const FText FNProcGenEdMode::AutoVoxelMessage = FText::FromString("NCell Voxel not calculated on save.");
 
 ANCellActor* FNProcGenEdMode::CellActor = nullptr;
-FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = CEM_Bounds;
+FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = ENCellEdMode::Bounds;
 TArray<FVector> FNProcGenEdMode::CachedHullVertices;
 FLinearColor FNProcGenEdMode::CachedHullColor = FColor::Blue;
 FBox FNProcGenEdMode::CachedBounds;
 FNCellVoxelData FNProcGenEdMode::CachedVoxelData;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
-FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = CVM_None;
+FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = ENCellVoxelMode::None;
 
 FNProcGenEdMode::~FNProcGenEdMode()
 {
@@ -133,7 +133,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
-			RootComponent->DrawDebugPDI(PDI, GetCellVoxelMode()); // We can't use caching because we are drawing ALL of the possible roots
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode())); // We can't use caching because we are drawing ALL of the possible roots
 
 			// Notice ON Dirty
 			const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner());
@@ -154,7 +154,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 
 	// Selection-specific drawing options
 	const ENProcGenSelectionFlags Flags = FNProcGenEditorUtils::GetSelectionFlags();
-	if (N_FLAGS_HAS(Flags, PGSF_OrganVolume))
+	if (N_FLAGS_UINT8_HAS_UINT8(Flags, ENProcGenSelectionFlags::OrganVolume))
 	{
 		TArray<ANOrganVolume*> SelectedOrganVolumes = FNProcGenEditorUtils::GetSelectedOrganVolumes();
 

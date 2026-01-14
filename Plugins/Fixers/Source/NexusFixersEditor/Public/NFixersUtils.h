@@ -9,21 +9,22 @@
 class FNFixersUtils
 {
 public:
-	static void AddResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& Message)
+	static void AddResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& NewMessage)
 	{
 		switch (Level)
 		{
-		case NVS_Disable:
+			using enum ENValidatorSeverity;
+		case Disable:
 			break;
-		case NVS_Warning:
-		case NVS_WarningButValid:
-			Context.AddWarning(Message);
+		case Warning:
+		case WarningButValid:
+			Context.AddWarning(NewMessage);
 			return;
-		case NVS_Error:
-			Context.AddError(Message);
+		case Error:
+			Context.AddError(NewMessage);
 			return;
-		case NVS_Message:
-			Context.AddMessage(EMessageSeverity::Type::Info, Message);
+		case Message:
+			Context.AddMessage(EMessageSeverity::Type::Info, NewMessage);
 			break;
 		}
 	};
@@ -32,15 +33,16 @@ public:
 	{
 		switch (Level)
 		{
-		case NVS_Disable:
+			using enum ENValidatorSeverity;
+		case Disable:
 			return EDataValidationResult::NotValidated;
-		case NVS_Warning:
+		case Warning:
 			return EDataValidationResult::Invalid;
-		case NVS_WarningButValid:
+		case WarningButValid:
 			return EDataValidationResult::Valid;
-		case NVS_Error:
+		case Error:
 			return EDataValidationResult::Invalid;
-		case NVS_Message:
+		case Message:
 			return EDataValidationResult::Valid;
 		}
 		return EDataValidationResult::NotValidated;

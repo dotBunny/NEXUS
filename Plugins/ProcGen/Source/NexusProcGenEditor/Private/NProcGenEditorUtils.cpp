@@ -102,12 +102,12 @@ ENProcGenSelectionFlags FNProcGenEditorUtils::GetSelectionFlags()
 	{
 		if (Cast<ANCellActor>( *SelectedActor ))
 		{
-			N_FLAGS_ADD(Flags, PGSF_CellActor);
+			N_FLAGS_ADD_UINT8(Flags, ENProcGenSelectionFlags::CellActor);
 		}
 		
 		if (Cast<ANOrganVolume>( *SelectedActor ))
 		{
-			N_FLAGS_ADD(Flags, PGSF_OrganVolume);
+			N_FLAGS_ADD_UINT8(Flags, ENProcGenSelectionFlags::OrganVolume);
 		}
 	}
 	return static_cast<ENProcGenSelectionFlags>(Flags);

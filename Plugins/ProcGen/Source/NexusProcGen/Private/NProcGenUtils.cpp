@@ -191,7 +191,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 				bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
 				if (bHit)
 				{
-					ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
+					ReturnData.AddFlag(VoxelIndex, ENCellVoxel::Occupied);
 				}
 			}
 		}

@@ -212,7 +212,7 @@ bool FNProcGenEditorCommands::ProcGenEdMode_CanShow()
 
 void FNProcGenEditorCommands::CellActorEditHullMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Hull);
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Hull);
 }
 
 bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
@@ -226,7 +226,7 @@ bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
 
 FSlateIcon FNProcGenEditorCommands::CellActorEditHullMode_GetIcon()
 {
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Hull)
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
 	{
 		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Hull.Selected");
 	}
@@ -235,12 +235,12 @@ FSlateIcon FNProcGenEditorCommands::CellActorEditHullMode_GetIcon()
 
 void FNProcGenEditorCommands::CellActorEditBoundsMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Bounds);
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Bounds);
 }
 
 FSlateIcon FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon()
 {
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Bounds)
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Bounds)
 	{
 		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds.Selected");
 	}
@@ -249,12 +249,12 @@ FSlateIcon FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon()
 
 void FNProcGenEditorCommands::CellActorEditVoxelMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Voxel);
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Voxel);
 }
 
 FSlateIcon FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon()
 {
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Voxel)
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Voxel)
 	{
 		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
 	}
@@ -265,14 +265,14 @@ void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
 {
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
-	case FNProcGenEdMode::ENCellVoxelMode::CVM_Grid:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_Points);
+	case FNProcGenEdMode::ENCellVoxelMode::Grid:
+		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::Points);
 		break;
-	case FNProcGenEdMode::ENCellVoxelMode::CVM_None:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_Grid);
+	case FNProcGenEdMode::ENCellVoxelMode::None:
+		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::Grid);
 		break;
 	default:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_None);
+		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::None);
 	}
 }
 
@@ -280,9 +280,9 @@ FSlateIcon FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon()
 {
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
-		case FNProcGenEdMode::ENCellVoxelMode::CVM_Grid:
+		case FNProcGenEdMode::ENCellVoxelMode::Grid:
 			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
-		case FNProcGenEdMode::ENCellVoxelMode::CVM_Points:
+		case FNProcGenEdMode::ENCellVoxelMode::Points:
 			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
 		default:
 			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");

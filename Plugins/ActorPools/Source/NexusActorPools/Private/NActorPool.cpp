@@ -137,10 +137,10 @@ bool FNActorPool::Return(AActor* Actor)
 	// We have to manage the position a bit based on the strategy.
 	switch (Settings.Strategy)
 	{
-	case APS_CreateRecycleFirst:
-	case APS_CreateRecycleLast:
-	case APS_FixedRecycleFirst:
-	case APS_FixedRecycleLast:
+	case ENActorPoolStrategy::CreateRecycleFirst:
+	case ENActorPoolStrategy::CreateRecycleLast:
+	case ENActorPoolStrategy::FixedRecycleFirst:
+	case ENActorPoolStrategy::FixedRecycleLast:
 		OutActors.Remove(Actor);
 		break;
 	default:
@@ -206,15 +206,15 @@ bool FNActorPool::ApplyStrategy()
 	
 	switch (Settings.Strategy)
 	{
-	case APS_Create:
+	case ENActorPoolStrategy::Create:
 		CreateActor();
 		return true;
-	case APS_CreateLimited:
+	case ENActorPoolStrategy::CreateLimited:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 			return false;
 		CreateActor();
 		return true;
-	case APS_CreateRecycleFirst:
+	case ENActorPoolStrategy::CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 		{
 			Return(OutActors[0]);
@@ -224,7 +224,7 @@ bool FNActorPool::ApplyStrategy()
 			CreateActor();
 		}
 		return true;
-	case APS_CreateRecycleLast:
+	case ENActorPoolStrategy::CreateRecycleLast:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 		{
 			Return(OutActors[OutActors.Num() - 1]);
@@ -234,12 +234,12 @@ bool FNActorPool::ApplyStrategy()
 			CreateActor();
 		}
 		return true;
-	case APS_Fixed:
+	case ENActorPoolStrategy::Fixed:
 		return false;
-	case APS_FixedRecycleFirst:
+	case ENActorPoolStrategy::FixedRecycleFirst:
 		Return(OutActors[0]);
 		return true;
-	case APS_FixedRecycleLast:
+	case ENActorPoolStrategy::FixedRecycleLast:
 		Return(OutActors[OutActors.Num() - 1]);
 		return true;
 	default:

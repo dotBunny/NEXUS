@@ -4,7 +4,7 @@
 #pragma once
 
 UENUM(BlueprintType)
-enum ENColor : uint8
+enum class ENColor : uint8
 {
 	NC_Black = 0				UMETA(DisplayName = "Black"),
 	NC_White = 1				UMETA(DisplayName = "White"),

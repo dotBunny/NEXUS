@@ -14,9 +14,9 @@ class UNTissue;
 UENUM(BlueprintType)
 enum class ENOrganGenerationTrigger : uint8
 {
-	OGT_GenerateOnLoad = 0		UMETA(DisplayName="Generate On Load", ToolTip = "Generates only when the component is loaded into the level."),
-	OGT_GenerateOnDemand = 1	UMETA(DisplayName="Generate On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint)."),
-	OGT_GenerateAtRuntime = 2	UMETA(DisplayName="Generate At Runtime", ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
+	GenerateOnLoad = 0		UMETA(DisplayName="Generate On Load", ToolTip = "Generates only when the component is loaded into the level."),
+	GenerateOnDemand = 1	UMETA(DisplayName="Generate On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint)."),
+	GenerateAtRuntime = 2	UMETA(DisplayName="Generate At Runtime", ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
 };
 
 // TODO: Need to get size from parent volume? or whatever its on?
@@ -37,7 +37,7 @@ public:
 	int Seed = 42;
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Settings, meta = (DisplayPriority = 200))
-	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OGT_GenerateOnLoad;
+	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::GenerateOnLoad;
 
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UNTissue>> Tissues;

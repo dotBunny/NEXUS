@@ -8,7 +8,7 @@
 #include "NUpdateCheckDelayedEditorTask.generated.h"
 
 UENUM(BlueprintType)
-enum ENUpdatesChannel
+enum class ENUpdatesChannel : uint8
 {
 	NUC_GithubRelease	= 0 UMETA(DisplayName = "Release (GitHub)"),
 	NUC_GithubMain		= 1 UMETA(DisplayName = "Main (GitHub)"),
