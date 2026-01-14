@@ -9,7 +9,8 @@ class FNOrganComponentCustomization final : public IDetailCustomization
 public:
 	static TSharedRef<IDetailCustomization> MakeInstance();
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
-protected:
+
+private:
 	FReply OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects);
 	FReply OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object);
 	FReply OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object);
