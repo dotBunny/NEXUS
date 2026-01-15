@@ -6,9 +6,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void FNSamplesDisplayBuilder::CreateDisplayInstances(UInstancedStaticMeshComponent* PanelCurve, 
-	UInstancedStaticMeshComponent* PanelCurveEdge, UInstancedStaticMeshComponent* PanelMain, 
-	UInstancedStaticMeshComponent* PanelCorner, UInstancedStaticMeshComponent* PanelSide,
+void FNSamplesDisplayBuilder::CreateDisplayInstances(FNSamplesDisplayComponents* Components,
 	FTransform& MainPanelTransform, FTransform& FloorPanelTransform, float Depth, float Width, float Height)
 {
 	// Ensure width
@@ -17,7 +15,7 @@ void FNSamplesDisplayBuilder::CreateDisplayInstances(UInstancedStaticMeshCompone
 	if (Height >= 2.f && Depth >= 2.f)
 	{
 		const float WidthY = (Width - 2.f) * 0.5f;
-		PanelCurve->AddInstance(
+		Components->PanelCurve->AddInstance(
 			FTransform(
 				FRotator::ZeroRotator,
 				FVector::ZeroVector,
@@ -34,7 +32,7 @@ void FNSamplesDisplayBuilder::CreateDisplayInstances(UInstancedStaticMeshCompone
 		FRotator(90.f, 360.f, 180.f),
 		FVector(0.f, WidthY * -100.f, 0.f),
 		FVector::OneVector));
-		PanelCurveEdge->AddInstances(InstanceTransforms, false, false, true);
+		Components->PanelCurveEdge->AddInstances(InstanceTransforms, false, false, true);
 	}
 	
 	// Panels
@@ -44,17 +42,17 @@ void FNSamplesDisplayBuilder::CreateDisplayInstances(UInstancedStaticMeshCompone
 		{
 			// Traditional Display
 			MainPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector);
-			FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, Height, Width);
+			CreateScalablePanelInstances(MainPanelTransform, Components, Height, Width);
 			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector);
-			FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Depth, Width);
+			CreateScalablePanelInstances(FloorPanelTransform, Components,Depth, Width);
 		}
 		else
 		{
 			// Floor
 			MainPanelTransform = FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector);
-			FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, 1.f, Width, true);
+			CreateScalablePanelInstances(MainPanelTransform, Components, 1.f, Width, true);
 			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector); 
-			FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Depth, Width);
+			CreateScalablePanelInstances(FloorPanelTransform, Components, Depth, Width);
 		}
 	}
 	else
@@ -65,15 +63,14 @@ void FNSamplesDisplayBuilder::CreateDisplayInstances(UInstancedStaticMeshCompone
 			Height = 2.f;
 		}
 		FloorPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector);
-		FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Height, Width);
+		FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, Components,Height, Width);
 		MainPanelTransform = FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector);
-		FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, 2.f, Width, false);
+		FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform, Components, 2.f, Width, false);
 	}
 }
 
-void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& BaseTransform, 
-	UInstancedStaticMeshComponent* PanelMain, UInstancedStaticMeshComponent* PanelCorner, 
-	UInstancedStaticMeshComponent* PanelSide, const float Depth, const float Width, const bool bIgnoreMainPanel)
+void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& BaseTransform,
+	const FNSamplesDisplayComponents* Components, const float Depth, const float Width, const bool bIgnoreMainPanel)
 {
 	const float PrimaryScaleY = (Width - 2) * 0.5f;
 	const float PrimaryScaleZ = (Depth - 2) * 0.5f;
@@ -84,7 +81,7 @@ void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& Bas
 
 	if (!bIgnoreMainPanel)
 	{
-		PanelMain->AddInstance(
+		Components->PanelMain->AddInstance(
 			UKismetMathLibrary::MakeRelativeTransform(
 				FTransform(
 					FRotator::ZeroRotator,
@@ -105,27 +102,26 @@ void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& Bas
 	FVector(0.f, SecondaryY * -1.f, SecondaryZ),
 	FVector::OneVector), BaseTransform));
 	
-	PanelCorner->AddInstances(InstanceTransforms, false, false, true);
+	Components->PanelCorner->AddInstances(InstanceTransforms, false, false, true);
 
 	// Sides
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(Components->PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator(0.f,0.f, 90.f),
 			FVector(0.f, ScaledLocationY, ScaledLocationZ),
 			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
 	
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(Components->PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator(0.f,0.f, -90.f),
 			FVector(0.f, ScaledLocationY * -1.f, ScaledLocationZ),
 			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
 	
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
+	ScaleSafeInstance(Components->PanelSide, UKismetMathLibrary::MakeRelativeTransform(
 		FTransform(FRotator::ZeroRotator,
 			FVector(0.f,0.f, (Depth - 2.f) * 100.f),
 			FVector(1.f, PrimaryScaleY, 1.f)), BaseTransform));
 }
 
-void FNSamplesDisplayBuilder::CreateShadowBoxInstances(UInstancedStaticMeshComponent* ShadowBoxSide, 
-	UInstancedStaticMeshComponent* ShadowBoxTop, UInstancedStaticMeshComponent* ShadowBoxRound, 
+void FNSamplesDisplayBuilder::CreateShadowBoxInstances(const FNSamplesDisplayComponents* Components, 
 	float ShadowBoxCoverDepthPercentage, float Depth, float Width, float Height)
 {
 	// Ensure the cover is only there when we need it and it will behave appropriately
@@ -142,10 +138,10 @@ void FNSamplesDisplayBuilder::CreateShadowBoxInstances(UInstancedStaticMeshCompo
 			(InstanceTransforms[0].GetLocation() * -1.f) + FVector(0.f, 0.f, (Height * 100) - 100.f),
 			InstanceTransforms[0].GetScale3D()));
 	
-	ShadowBoxSide->AddInstances(InstanceTransforms, false, false, true);
+	Components->ShadowBoxSide->AddInstances(InstanceTransforms, false, false, true);
 	InstanceTransforms.Empty();
 	
-	ShadowBoxTop->AddInstance(FTransform(
+	Components->ShadowBoxTop->AddInstance(FTransform(
 		FRotator(0.f, 0.f, -90.f),
 		FVector(0.f, (Width - 2.0f) * 50.f, Height * 100.f),
 		FVector((Depth - 1.f) * ShadowBoxCoverDepthPercentage, 1.f, (Width - 2.f) / 5.f)));
@@ -161,11 +157,10 @@ void FNSamplesDisplayBuilder::CreateShadowBoxInstances(UInstancedStaticMeshCompo
 		FVector(Location.X, (Location.Y * -1.f) + 100.f, Location.Z + 100.f),
 		InstanceTransforms[0].GetScale3D()));
 	
-	ShadowBoxRound->AddInstances(InstanceTransforms, false, false, true);
+	Components->ShadowBoxRound->AddInstances(InstanceTransforms, false, false, true);
 }
 
-void FNSamplesDisplayBuilder::CreateTitlePanelInstances(UInstancedStaticMeshComponent* TitleBarMain, 
-	UInstancedStaticMeshComponent* TitleBarEndLeft, UInstancedStaticMeshComponent* TitleBarEndRight,
+void FNSamplesDisplayBuilder::CreateTitlePanelInstances(const FNSamplesDisplayComponents* Components,
 	const float Depth, const float Width)
 {
 	// Ensure width doesn't make it look bad
@@ -180,16 +175,16 @@ void FNSamplesDisplayBuilder::CreateTitlePanelInstances(UInstancedStaticMeshComp
 		FVector((Depth - 1.f) * 100.f, 0.f, 0.f),
 		FVector(1.f, WidthLimited - 3.f, 1.f));
 	
-	TitleBarMain->AddInstance(BaseTransform, false);
+	Components->TitleBarMain->AddInstance(BaseTransform, false);
 	const FVector BaseLocation = BaseTransform.GetLocation();
 	
-	TitleBarEndLeft->AddInstance(FTransform(
+	Components->TitleBarEndLeft->AddInstance(FTransform(
 			FRotator::ZeroRotator,
 			FVector(BaseLocation.X, BaseLocation.Y + (((WidthLimited - 3.f) * 50.f) * -1.f), 
 				BaseLocation.Z),
 			FVector::OneVector), false);
 	
-	TitleBarEndRight->AddInstance(FTransform(
+	Components->TitleBarEndRight->AddInstance(FTransform(
 		FRotator::ZeroRotator,
 		FVector(BaseLocation.X, BaseLocation.Y + ((WidthLimited - 3.f) * 50.f), BaseLocation.Z),
 		FVector::OneVector), false); 

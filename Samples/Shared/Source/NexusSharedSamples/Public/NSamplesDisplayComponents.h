@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
+#include "Components/DecalComponent.h"
+#include "Components/TextRenderComponent.h"
 
 class FNSamplesDisplayComponents
 {

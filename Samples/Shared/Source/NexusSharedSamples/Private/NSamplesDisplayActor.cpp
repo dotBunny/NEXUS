@@ -26,7 +26,6 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	
 	Parts = MakeUnique<FNSamplesDisplayComponents>();
 	Materials = MakeUnique<FNSamplesDisplayMaterials>();
-
 	
 	// Create Materials
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
@@ -36,7 +35,6 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_GreyDark"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_White"));
-
 
 	// Create Components
 	Parts->NoticeDecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
@@ -99,7 +97,6 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 	Parts->SpotlightComponent->SetIESTexture(nullptr);
 	Parts->SpotlightComponent->bAffectsWorld = false;
-	// Turn off the sprite?
 	
 	Parts->TitleSpacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TitleSpacer"));
 	Parts->TitleSpacerComponent->SetupAttachment(PartRoot);
@@ -254,7 +251,7 @@ void ANSamplesDisplayActor::BeginDestroy()
 	if (Parts != nullptr)
 	{
 		Parts->ClearInstances();
-		Parts.Reset();	
+		Parts.Reset();
 	}
 	if (Materials != nullptr)
 	{
@@ -299,16 +296,13 @@ void ANSamplesDisplayActor::Rebuild()
 	}
 
 	// Static Instance Meshes
-	FNSamplesDisplayBuilder::CreateDisplayInstances(Parts->PanelCurve, Parts->PanelCurveEdge, Parts->PanelMain, Parts->PanelCorner, 
-		Parts->PanelSide, MainPanelTransform, FloorPanelTransform, Depth, Width, Height);
+	FNSamplesDisplayBuilder::CreateDisplayInstances(Parts.Get(), MainPanelTransform, FloorPanelTransform, Depth, Width, Height);
 	
-	FNSamplesDisplayBuilder::CreateShadowBoxInstances(Parts->ShadowBoxSide, Parts->ShadowBoxTop, Parts->ShadowBoxRound, 
-		ShadowBoxCoverDepthPercentage, Depth, Width, Height);
+	FNSamplesDisplayBuilder::CreateShadowBoxInstances(Parts.Get(), ShadowBoxCoverDepthPercentage, Depth, Width, Height);
 	
 	if (bSeparateTitlePanel)
 	{
-		FNSamplesDisplayBuilder::CreateTitlePanelInstances(Parts->TitleBarMain, Parts->TitleBarEndLeft, Parts->TitleBarEndRight, 
-			Depth, Width);
+		FNSamplesDisplayBuilder::CreateTitlePanelInstances(Parts.Get(), Depth, Width);
 	}
 
 	// Adjust Components
