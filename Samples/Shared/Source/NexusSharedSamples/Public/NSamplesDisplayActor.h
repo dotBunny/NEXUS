@@ -10,7 +10,8 @@
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
 // ReSharper restore CppUnusedIncludeDirective
-#include "NSamplesDisplayParts.h"
+#include "NSamplesDisplayComponents.h"
+#include "NSamplesDisplayMaterials.h"
 #include "NSamplesDisplayTest.h"
 #include "NSamplesDisplayActor.generated.h"
 
@@ -193,22 +194,18 @@ protected:
 	TObjectPtr<UNSamplesDisplayTest> TestInstance;
 	
 private:
-
-	TUniquePtr<FNSamplesDisplayParts> Parts;
-	
-	void TimerExpired();
-	
 	void BuildDescription();
-	
+
+	void TimerExpired();
+	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
+	FTransform TitleTextTransform() const;
+
 	void UpdateDescription() const;
 	void UpdateDisplayColor();
 	void UpdateNotice();
 	void UpdateSpotlight() const;
 	void UpdateTitleText() const;
 	void UpdateWatermark() const;
-	
-	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
-	FTransform TitleTextTransform() const;
 	
 	UPROPERTY()
 	TObjectPtr<USceneComponent> SceneRoot;
@@ -220,7 +217,9 @@ private:
 	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;
 
 	FTimerHandle TimerHandle;
-
+	
+	TUniquePtr<FNSamplesDisplayComponents> Parts;
+	TUniquePtr<FNSamplesDisplayMaterials> Materials;
 
 	FTransform MainPanelTransform;
 	FTransform FloorPanelTransform;

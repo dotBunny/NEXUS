@@ -7,7 +7,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 
-class FNSamplesDisplayParts
+class FNSamplesDisplayComponents
 {
 public:
 	
@@ -30,11 +30,6 @@ public:
 	TObjectPtr<UStaticMeshComponent> TitleSpacerComponent;
 	TObjectPtr<UTextRenderComponent> DescriptionTextComponent;
 	TObjectPtr<UTextRenderComponent> NoticeTextComponent;
-	
-	TObjectPtr<UMaterialInstanceDynamic> DisplayMaterial;
-	TObjectPtr<UMaterialInterface> DisplayMaterialInterface;
-	TObjectPtr<UMaterialInstanceDynamic> NoticeMaterial;
-	TObjectPtr<UMaterialInterface> NoticeMaterialInterface;
 	
 	void ClearInstances() const
 	{

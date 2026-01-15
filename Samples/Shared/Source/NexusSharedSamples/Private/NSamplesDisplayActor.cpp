@@ -9,7 +9,6 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Kismet/KismetMaterialLibrary.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetStringLibrary.h"
 
 TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
@@ -25,13 +24,15 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	PartRoot->SetupAttachment(SceneRoot);
 	PartRoot->SetMobility(EComponentMobility::Static);
 	
-	Parts = MakeUnique<FNSamplesDisplayParts>();
+	Parts = MakeUnique<FNSamplesDisplayComponents>();
+	Materials = MakeUnique<FNSamplesDisplayMaterials>();
 
+	
 	// Create Materials
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
 	if (MaterialGrey.Succeeded())
 	{
-		Parts->DisplayMaterialInterface = MaterialGrey.Object;
+		Materials->DisplayMaterialInterface = MaterialGrey.Object;
 	}
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGreyDark(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_GreyDark"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialWhite(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_White"));
@@ -46,7 +47,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DecalMaterial(TEXT("/NexusSharedSamples/M_NSamples_Notice"));
 	if (DecalMaterial.Succeeded())
 	{
-		Parts->NoticeMaterialInterface = DecalMaterial.Object;
+		Materials->NoticeMaterialInterface = DecalMaterial.Object;
 	}
 	Parts->NoticeTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Notice"));
 	Parts->NoticeTextComponent->SetupAttachment(PartRoot);
@@ -254,6 +255,10 @@ void ANSamplesDisplayActor::BeginDestroy()
 	{
 		Parts->ClearInstances();
 		Parts.Reset();	
+	}
+	if (Materials != nullptr)
+	{
+		Materials.Reset();	
 	}
 	
 	Super::BeginDestroy();
@@ -467,24 +472,24 @@ void ANSamplesDisplayActor::UpdateDescription() const
 
 void ANSamplesDisplayActor::UpdateDisplayColor()
 {
-	if (Parts->DisplayMaterial == nullptr)
+	if (Materials->DisplayMaterial == nullptr)
 	{
-		Parts->DisplayMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Parts->DisplayMaterialInterface, NAME_None, EMIDCreationFlags::Transient);
+		Materials->DisplayMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Materials->DisplayMaterialInterface, NAME_None, EMIDCreationFlags::Transient);
 		
 		// Update the static meshes with the dynamic material
-		if (Parts->DisplayMaterial != nullptr)
+		if (Materials->DisplayMaterial != nullptr)
 		{
-			Parts->PanelMain->SetMaterial(0, Parts->DisplayMaterial);
-			Parts->PanelCorner->SetMaterial(0, Parts->DisplayMaterial);
-			Parts->PanelCurve->SetMaterial(0, Parts->DisplayMaterial);
-			Parts->PanelSide->SetMaterial(0, Parts->DisplayMaterial);
-			Parts->PanelCurveEdge->SetMaterial(1, Parts->DisplayMaterial);
-			Parts->Watermark->SetMaterial(0, Parts->DisplayMaterial);
+			Parts->PanelMain->SetMaterial(0, Materials->DisplayMaterial);
+			Parts->PanelCorner->SetMaterial(0, Materials->DisplayMaterial);
+			Parts->PanelCurve->SetMaterial(0, Materials->DisplayMaterial);
+			Parts->PanelSide->SetMaterial(0, Materials->DisplayMaterial);
+			Parts->PanelCurveEdge->SetMaterial(1, Materials->DisplayMaterial);
+			Parts->Watermark->SetMaterial(0, Materials->DisplayMaterial);
 		}
 	}
-	if (Parts->DisplayMaterial != nullptr)
+	if (Materials->DisplayMaterial != nullptr)
 	{
-		Parts->DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
+		Materials->DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
 	}
 }
 
@@ -505,14 +510,14 @@ void ANSamplesDisplayActor::UpdateNotice()
 
 	if (bNoticeEnabled)
 	{
-		if (Parts->NoticeMaterial == nullptr)
+		if (Materials->NoticeMaterial == nullptr)
 		{
-			Parts->NoticeMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Parts->NoticeMaterialInterface, NAME_None, EMIDCreationFlags::Transient);
-			Parts->NoticeDecalComponent->SetMaterial(0, Parts->NoticeMaterial);
+			Materials->NoticeMaterial = UKismetMaterialLibrary::CreateDynamicMaterialInstance(this, Materials->NoticeMaterialInterface, NAME_None, EMIDCreationFlags::Transient);
+			Parts->NoticeDecalComponent->SetMaterial(0, Materials->NoticeMaterial);
 		}
-		if (Parts->NoticeMaterial != nullptr)
+		if (Materials->NoticeMaterial != nullptr)
 		{
-			Parts->NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeColor));
+			Materials->NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeColor));
 		}
 		
 		Parts->NoticeDecalComponent->SetActive(true);
