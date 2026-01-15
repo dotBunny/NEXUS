@@ -251,7 +251,6 @@ void ANSamplesDisplayActor::BeginDestroy()
 	
 	if (Parts != nullptr)
 	{
-		Parts->ClearInstances();
 		Parts.Reset();
 	}
 	if (Materials != nullptr)
@@ -291,19 +290,19 @@ void ANSamplesDisplayActor::Rebuild()
 	Parts->ClearInstances();
 
 	// Ensure depth
-	if (Depth < 0.5f)
+	if (BaseSettings.Depth < 0.5f)
 	{
-		Depth = 0.5f;
+		BaseSettings.Depth = 0.5f;
 	}
 
 	// Static Instance Meshes
-	FNSamplesDisplayBuilder::CreateDisplayInstances(Parts.Get(), MainPanelTransform, FloorPanelTransform, Depth, Width, Height);
+	FNSamplesDisplayBuilder::CreateDisplayInstances(Parts.Get(), MainPanelTransform, FloorPanelTransform, BaseSettings.Depth, BaseSettings.Width, BaseSettings.Height);
 	
-	FNSamplesDisplayBuilder::CreateShadowBoxInstances(Parts.Get(), ShadowBoxCoverDepthPercentage, Depth, Width, Height);
+	FNSamplesDisplayBuilder::CreateShadowBoxInstances(Parts.Get(), BaseSettings.ShadowBoxCoverDepthPercentage, BaseSettings.Depth, BaseSettings.Width, BaseSettings.Height);
 	
 	if (bSeparateTitlePanel)
 	{
-		FNSamplesDisplayBuilder::CreateTitlePanelInstances(Parts.Get(), Depth, Width);
+		FNSamplesDisplayBuilder::CreateTitlePanelInstances(Parts.Get(), BaseSettings.Depth, BaseSettings.Width);
 	}
 
 	// Adjust Components
@@ -330,13 +329,13 @@ void ANSamplesDisplayActor::BuildDescription()
 	
 	// Setup Line Spacing
 	FString ParagraphSpacingMarkup = TEXT("");
-	for (int i = 0; i < ParagraphSpacing + 1; i++)
+	for (int i = 0; i < DescriptionSettings.ParagraphSpacing + 1; i++)
 	{
 		ParagraphSpacingMarkup += TEXT("<br>");
 	}
 
 	FString LineSpacingMarkup = TEXT("");
-	for (int i = 0; i < LineSpacing + 1; i++)
+	for (int i = 0; i < DescriptionSettings.LineSpacing + 1; i++)
 	{
 		LineSpacingMarkup += TEXT("<br>");
 	}
@@ -366,8 +365,8 @@ void ANSamplesDisplayActor::BuildDescription()
 	}
 	
 	int CharacterCount = 0;
-	const int LineWidth = ((100.f * Width) - 100.f) -  DescriptionTextPadding;
-	const int LineLimit = FMath::Floor( LineWidth / (DescriptionScale * 0.45f));
+	const int LineWidth = ((100.f * BaseSettings.Width) - 100.f) -  DescriptionTextPadding;
+	const int LineLimit = FMath::Floor( LineWidth / (DescriptionSettings.DescriptionScale * 0.45f));
 	
 	// Sort the words into lines
 	int WordCount = WordArray.Num();
@@ -419,7 +418,7 @@ void ANSamplesDisplayActor::UpdateDescription() const
 	}
 	
 	// Set Position
-	const bool bHeightVSFloorText = (Height < 2.f || (bFloorText && Depth > 2.f));
+	const bool bHeightVSFloorText = (BaseSettings.Height < 2.f || (BaseSettings.bFloorText && BaseSettings.Depth > 2.f));
 
 	FVector Origin;
 	if (bSeparateTitlePanel)
@@ -450,9 +449,9 @@ void ANSamplesDisplayActor::UpdateDescription() const
 			FVector::OneVector));
 	
 	Parts->DescriptionTextComponent->SetText(CachedDescription);
-	Parts->DescriptionTextComponent->SetHorizontalAlignment(TextAlignment);
-	Parts->DescriptionTextComponent->SetWorldSize(DescriptionScale);
-	Parts->DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionColor));
+	Parts->DescriptionTextComponent->SetHorizontalAlignment(BaseSettings.TextAlignment);
+	Parts->DescriptionTextComponent->SetWorldSize(DescriptionSettings.DescriptionScale);
+	Parts->DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionSettings.DescriptionColor));
 
 	if (bHeightVSFloorText)
 	{
@@ -495,15 +494,15 @@ void ANSamplesDisplayActor::UpdateNotice()
 	
 	Parts->NoticeDecalComponent->SetRelativeTransform(FTransform(
 			FRotator(-90.f, 0.f, 0.f),
-			FVector((Depth * 100.f) + NoticeDepth, 0.f , 0.f),
+			FVector((BaseSettings.Depth * 100.f) + NoticeSettings.NoticeDepth, 0.f , 0.f),
 			FVector::OneVector));
 	Parts->NoticeTextComponent->SetRelativeTransform(FTransform(
 			FRotator(90.f, 0.f, 0.f),
-		FVector((Depth * 100.f) + NoticeDepth, 0.f , 0.5f),
+		FVector((BaseSettings.Depth * 100.f) + NoticeSettings.NoticeDepth, 0.f , 0.5f),
 	FVector::OneVector)
 	);
 
-	if (bNoticeEnabled)
+	if (NoticeSettings.bNoticeEnabled)
 	{
 		if (Materials->NoticeMaterial == nullptr)
 		{
@@ -512,17 +511,17 @@ void ANSamplesDisplayActor::UpdateNotice()
 		}
 		if (Materials->NoticeMaterial != nullptr)
 		{
-			Materials->NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeColor));
+			Materials->NoticeMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(NoticeSettings.NoticeColor));
 		}
 		
 		Parts->NoticeDecalComponent->SetActive(true);
-		Parts->NoticeDecalComponent->DecalSize = FVector(128.f, (50.f * Width), NoticeDepth);
+		Parts->NoticeDecalComponent->DecalSize = FVector(128.f, (50.f * BaseSettings.Width), NoticeSettings.NoticeDepth);
 		Parts->NoticeDecalComponent->SetVisibility(true);
 		Parts->NoticeDecalComponent->SetHiddenInGame(false);
 
-		Parts->NoticeTextComponent->SetText(NoticeText);
-		Parts->NoticeTextComponent->SetWorldSize(NoticeScale);
-		Parts->NoticeTextComponent->SetTextRenderColor(FNColor::GetColor(NoticeColor));
+		Parts->NoticeTextComponent->SetText(NoticeSettings.NoticeText);
+		Parts->NoticeTextComponent->SetWorldSize(NoticeSettings.NoticeScale);
+		Parts->NoticeTextComponent->SetTextRenderColor(FNColor::GetColor(NoticeSettings.NoticeColor));
 		Parts->NoticeTextComponent->SetVisibility(true);
 		Parts->NoticeTextComponent->SetHiddenInGame(false);
 	}
@@ -545,21 +544,21 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 	if (Parts->SpotlightComponent == nullptr) return;
 	
 	Parts->SpotlightComponent->SetRelativeLocationAndRotation(
-			FVector(FMath::Max(Depth, 2.5f) * 100.f, 0.f, FMath::Max(Height, 2.5f) * 100.f),
+			FVector(FMath::Max(BaseSettings.Depth, 2.5f) * 100.f, 0.f, FMath::Max(BaseSettings.Height, 2.5f) * 100.f),
 			FRotator(-135.f, 0.f , 0.f));
 	
-	if (bSpotlightEnabled)
+	if (SpotlightSettings.bSpotlightEnabled)
 	{
 		Parts->SpotlightComponent->SetActive(true);
 		
 		Parts->SpotlightComponent->bAffectsWorld = true;
-		Parts->SpotlightComponent->SetCastShadows(bSpotlightCastShadows);
-		Parts->SpotlightComponent->SetCastVolumetricShadow(bSpotlightCastVolumetricShadow);
-		Parts->SpotlightComponent->SetIntensity(SpotlightIntensity);
-		Parts->SpotlightComponent->SetInnerConeAngle(SpotlightInnerConeAngle);
-		Parts->SpotlightComponent->SetOuterConeAngle(SpotlightOuterConeAngle);
-		Parts->SpotlightComponent->SetAttenuationRadius(SpotlightAttenuationRadius);
-		Parts->SpotlightComponent->SetTemperature(SpotlightTemperature);
+		Parts->SpotlightComponent->SetCastShadows(SpotlightSettings.bSpotlightCastShadows);
+		Parts->SpotlightComponent->SetCastVolumetricShadow(SpotlightSettings.bSpotlightCastVolumetricShadow);
+		Parts->SpotlightComponent->SetIntensity(SpotlightSettings.SpotlightIntensity);
+		Parts->SpotlightComponent->SetInnerConeAngle(SpotlightSettings.SpotlightInnerConeAngle);
+		Parts->SpotlightComponent->SetOuterConeAngle(SpotlightSettings.SpotlightOuterConeAngle);
+		Parts->SpotlightComponent->SetAttenuationRadius(SpotlightSettings.SpotlightAttenuationRadius);
+		Parts->SpotlightComponent->SetTemperature(SpotlightSettings.SpotlightTemperature);
 
 		Parts->SpotlightComponent->SetVisibility(true);
 		Parts->SpotlightComponent->SetHiddenInGame(false);
@@ -596,7 +595,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 			Parts->TitleTextComponent->SetRelativeTransform(
 				FTransform(
 					FRotator(40.f, 0.f, 0.f),
-					FVector(((Depth - 1.f) * 100.f) + 88.f, 
+					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f, 
 						TextAlignmentOffset(3.f, bSeparateTitlePanel), 22.f),
 					FVector::OneVector));
 			
@@ -606,11 +605,11 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 		else
 		{
 			Parts->TitleTextComponent->SetRelativeTransform(TitleTextTransform());
-			Parts->TitleTextComponent->SetHorizontalAlignment(TextAlignment);
+			Parts->TitleTextComponent->SetHorizontalAlignment(BaseSettings.TextAlignment);
 			Parts->TitleTextComponent->SetWorldSize(TitleScale);
 		}
 		Parts->TitleTextComponent->SetText(TitleText);
-		Parts->TitleTextComponent->SetTextRenderColor(FNColor::GetColor(TitleColor));
+		Parts->TitleTextComponent->SetTextRenderColor(FNColor::GetColor(TitleSettings.TitleColor));
 		Parts->TitleTextComponent->SetVerticalAlignment(EVRTA_TextCenter);
 	}
 	else
@@ -624,7 +623,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 		const FVector TitleLocation = Parts->TitleTextComponent->GetRelativeLocation();
 		FVector LocationOffset = FVector::ZeroVector;
 
-		if (Height < 2.f || (bFloorText && Depth > 2.f))
+		if (BaseSettings.Height < 2.f || (BaseSettings.bFloorText && BaseSettings.Depth > 2.f))
 		{
 			LocationOffset.X = -1.f * (TitleScale / 2.f);
 		}
@@ -638,7 +637,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 				FRotator::ZeroRotator,
 				FVector(TitleLocation.X, 0.f, TitleLocation.Z) +
 				LocationOffset,
-				FVector(0.01f, Width - 1.f, 0.02f)
+				FVector(0.01f, BaseSettings.Width - 1.f, 0.02f)
 				));
 		Parts->TitleSpacerComponent->SetVisibility(true);
 	}
@@ -651,17 +650,17 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 
 void ANSamplesDisplayActor::UpdateWatermark() const
 {
-	if (!bWatermarkEnabled)
+	if (!WatermarkSettings.bWatermarkEnabled)
 	{
 		Parts->Watermark->SetVisibility(false);
 		return;
 	}
 
 	Parts->Watermark->SetRelativeTransform(MainPanelTransform);
-	if (Height < 2.f)
+	if (BaseSettings.Height < 2.f)
 	{
 		FVector NewLocation = Parts->Watermark->GetRelativeLocation();
-		NewLocation += FVector(Depth * 50, 0, 9);
+		NewLocation += FVector(BaseSettings.Depth * 50, 0, 9);
 		Parts->Watermark->SetRelativeLocation(NewLocation);
 		FRotator NewRotation = Parts->Watermark->GetRelativeRotation();
 		NewRotation.Pitch += 180.f;
@@ -670,40 +669,40 @@ void ANSamplesDisplayActor::UpdateWatermark() const
 	else
 	{
 		FVector NewLocation = Parts->Watermark->GetRelativeLocation();
-		NewLocation += FVector(9, 0, 100 + (Height * 50));
+		NewLocation += FVector(9, 0, 100 + (BaseSettings.Height * 50));
 		Parts->Watermark->SetRelativeLocation(NewLocation);
 	}
-	Parts->Watermark->SetWorldScale3D(FVector(1, WatermarkScale, WatermarkScale));
+	Parts->Watermark->SetWorldScale3D(FVector(1, WatermarkSettings.WatermarkScale, WatermarkSettings.WatermarkScale));
 	Parts->Watermark->SetVisibility(true);
 }
 
 float ANSamplesDisplayActor::TextAlignmentOffset(const float WidthAdjustment, const bool bForceCenter) const
 {
 	if (bForceCenter) return 0.f;
-	switch (TextAlignment)
+	switch (BaseSettings.TextAlignment)
 	{
 	case EHTA_Center:
 		return 0.f;
 	case EHTA_Right:
-		return ((Width - WidthAdjustment) * 0.5f) * -100.f;
+		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * -100.f;
 	case EHTA_Left:
 	default:
-		return ((Width - WidthAdjustment) * 0.5f) * 100.f;
+		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * 100.f;
 	}
 }
 
 FTransform ANSamplesDisplayActor::TitleTextTransform() const
 {
-	if (Height < 2.f || (bFloorText && Depth > 2.f))
+	if (BaseSettings.Height < 2.f || (BaseSettings.bFloorText && BaseSettings.Depth > 2.f))
 	{
 		return FTransform(
 			FRotator(90.f, 0.f, 0.f),
-			FVector(Depth * 100.f - (TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
+			FVector(BaseSettings.Depth * 100.f - (TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
 			FVector::OneVector);
 	}
 	return FTransform(
 			FRotator::ZeroRotator,
-			FVector(15.f, TextAlignmentOffset(1.0, false), Height * 100.f - (TitleScale + 50.f * 0.5f)),
+			FVector(15.f, TextAlignmentOffset(1.0, false), BaseSettings.Height * 100.f - (TitleScale + 50.f * 0.5f)),
 			FVector::OneVector);
 }
 

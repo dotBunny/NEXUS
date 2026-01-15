@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/TextRenderComponent.h"
 // ReSharper disable CppUnusedIncludeDirective
 #include "NColor.h"
 #include "Engine/Font.h"
@@ -12,11 +11,13 @@
 // ReSharper restore CppUnusedIncludeDirective
 #include "NSamplesDisplayComponents.h"
 #include "NSamplesDisplayMaterials.h"
+#include "NSamplesDisplaySettings.h"
 #include "NSamplesDisplayTest.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class UCameraComponent;
 class USpotLightComponent;
+
 
 /**
  * A display used in NEXUS demonstration levels
@@ -61,37 +62,17 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	float Width = 6.0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	float Depth = 5.0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	float Height = 4.0;	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	TEnumAsByte<EHorizTextAligment> TextAlignment = EHTA_Left;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	bool bFloorText = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display", DisplayName="ShadowBox Percentage", meta=(ToolTip="What percentage of the depth should the ShadowBox cover? If the Depth <= 1, it will be disabled."))
-	float ShadowBoxCoverDepthPercentage = 0.333f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
 	ENColor Color = ENColor::NC_Black;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display", DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
 	bool bCollisionEnabled = false;
 
+	// TITLE
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Text")
 	FText TitleText;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Scale")
 	float TitleScale = 40.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Color")
-	ENColor TitleColor = ENColor::NC_White;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Seperate Panel")
 	bool bSeparateTitlePanel = false;
@@ -99,70 +80,13 @@ protected:
 	// DESCRIPTION
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text")
 	TArray<FText> DescriptionText;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Scale")
-	float DescriptionScale = 15.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Line Spacing", meta=(ClampMin=0, ClampMax=10))
-	int LineSpacing = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Paragraph Spacing", meta=(ClampMin=0, ClampMax=10))
-	int ParagraphSpacing = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text Padding", meta=(ClampMin=0, ClampMax=100.f))
 	float DescriptionTextPadding = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Description", DisplayName = "Cached Description")
+	FText CachedDescription;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Color")
-	ENColor DescriptionColor = ENColor::NC_White;
-
-	// WATERMARK
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Enabled")
-	bool bWatermarkEnabled = true;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Watermark", DisplayName = "Scale")
-	float WatermarkScale = 2.25f;
-	
-	// SPOTLIGHT
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
-	bool bSpotlightEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Intensity")
-	float SpotlightIntensity = 5000.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Attenuation Radius")
-	float SpotlightAttenuationRadius = 722.770935f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Inner Cone Angle")
-	float SpotlightInnerConeAngle = 10.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Outer Cone Angle")
-	float SpotlightOuterConeAngle = 64.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Temperature")
-	float SpotlightTemperature = 5500.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Cast Shadows")
-	bool bSpotlightCastShadows = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Cast Volumetric Shadows")
-	bool bSpotlightCastVolumetricShadow = false;
-
-	// NOTICE
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Enabled")
-	bool bNoticeEnabled = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Color")
-	ENColor NoticeColor = ENColor::NC_White;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Text")
-	FText NoticeText;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Scale")
-	float NoticeScale = 80.f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Notice", DisplayName = "Depth", meta=(ClampMin=0, ClampMax=256))
-	float NoticeDepth = 128.f;
-
 	// TIMER
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Enabled")
 	bool bTimerEnabled = false;
@@ -170,6 +94,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Duration", meta=(ClampMin=0, ClampMax=30))
 	float TimerDuration = 2.f;
 
+	UPROPERTY(BlueprintReadOnly, Category = "NEXUS|Testing")
+	TObjectPtr<UNSamplesDisplayTest> TestInstance;
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
 
@@ -180,15 +107,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
 	bool bTestDisableTimer = false;
 
-	// CACHE
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
-	FText CachedDescription;
+
+
+	// SETTINGS
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Base")
+	FNSamplesDisplaySettings BaseSettings;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Screenshot", DisplayName = "Override Name")
-	FText ScreenshotCameraName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Title")
+	FNSamplesDisplayTitleSettings TitleSettings;
 	
-	UPROPERTY(BlueprintReadOnly, Category = "NEXUS|Testing")
-	TObjectPtr<UNSamplesDisplayTest> TestInstance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Description")
+	FNSamplesDisplayDescriptionSettings DescriptionSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Watermark")
+	FNSamplesDisplayWatermarkSettings WatermarkSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Spotlight")
+	FNSamplesDisplaySpotlightSettings SpotlightSettings;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Notice")
+	FNSamplesDisplayNoticeSettings NoticeSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Screenshot")
+	FNSamplesDisplayScreenshotSettings ScreenshotSettings;
 	
 private:
 	void BuildDescription();
