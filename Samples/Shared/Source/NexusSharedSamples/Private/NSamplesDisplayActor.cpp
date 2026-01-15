@@ -238,6 +238,17 @@ void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 }
 
+void ANSamplesDisplayActor::BeginDestroy()
+{
+	if (TestInstance != nullptr)
+	{
+		TestInstance->ClearBindings();
+		TestInstance->RemoveFromRoot();
+		TestInstance = nullptr;
+	}
+	Super::BeginDestroy();
+}
+
 void ANSamplesDisplayActor::BeginPlay()
 {
 	if (bTimerEnabled)
@@ -949,8 +960,12 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 
 void ANSamplesDisplayActor::PrepareTest()
 {
-	CheckFailCount = 0;
-	CheckPassCount = 0;
+	if (TestInstance != nullptr)
+	{
+		TestInstance->RemoveFromRoot();
+	}
+	TestInstance = NewObject<UNSamplesDisplayTest>(this, UNSamplesDisplayTest::StaticClass(), NAME_None, RF_Transient);
+	TestInstance->AddToRoot();
 	
 	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
 	{
@@ -968,146 +983,16 @@ void ANSamplesDisplayActor::StartTest()
 void ANSamplesDisplayActor::CleanupTest()
 {
 	ReceiveTestFinished();
+	
+	if (TestInstance != nullptr)
+	{
+		TestInstance->ClearBindings();
+		TestInstance->RemoveFromRoot();
+		TestInstance = nullptr;
+	}
 
 	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().UnPauseTimer(TimerHandle);
-	}
-}
-
-void ANSamplesDisplayActor::FinishTest(ESampleTestResult TestResult, const FString& Message)
-{
-	if (CheckPassCount > 0 || CheckFailCount > 0)
-	{
-		const FString UpdatedMessage = FString::Printf(TEXT("%s (PASS: %i | FAIL: %i)"), *Message.TrimStartAndEnd(), CheckPassCount, CheckFailCount);
-		OnTestFinish.ExecuteIfBound(TestResult, UpdatedMessage);
-	}
-	else
-	{
-		OnTestFinish.ExecuteIfBound(TestResult, Message);
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrue(const bool bResult, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FailMessage);
-	}
-}
-void ANSamplesDisplayActor::CheckFalse(const bool bResult, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FailMessage);
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrueWithCount(const bool bResult, const int& Count, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
-	}
-}
-
-void ANSamplesDisplayActor::CheckFalseWithCount(const bool bResult, const int& Count, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%i)"), *FailMessage, Count));
-	}
-}
-
-void ANSamplesDisplayActor::CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
-	}
-}
-void ANSamplesDisplayActor::CheckTrueWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithObject(const bool bResult, const UObject* Object, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Object->GetName()));
-	}
-}
-void ANSamplesDisplayActor::CheckTrueWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
-{
-	if (bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
-	}
-}
-void ANSamplesDisplayActor::CheckFalseWithActor(const bool bResult, const AActor* Actor, const FString FailMessage)
-{
-	if (!bResult)
-	{
-		CheckPassCount++;
-	}
-	else
-	{
-		CheckFailCount++;
-		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Actor->GetActorNameOrLabel()));
 	}
 }

@@ -9,6 +9,12 @@
 #include "NSamplesDisplayLibrary.generated.h"
 
 class ANSamplesDisplayActor;
+
+namespace NEXUS::Samples
+{
+	constexpr float TimerDrawThickness = 1.f;
+}
+
 /**
  * @class UNSamplesDisplayLibrary
  */
