@@ -10,26 +10,12 @@
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
 // ReSharper restore CppUnusedIncludeDirective
-#include "NSamplesDisplayLibrary.h"
+#include "NSamplesDisplayParts.h"
 #include "NSamplesDisplayTest.h"
-#include "Components/SplineComponent.h"
-#include "Macros/NWorldMacros.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class UCameraComponent;
 class USpotLightComponent;
-
-UENUM(BlueprintType)
-enum class ESampleTestResult : uint8
-{
-	Default = 0,
-	Invalid = 1,
-	Error = 2,
-	Running = 3,
-	Failed = 4,
-	Succeeded  = 5
-};
-
 
 /**
  * A display used in NEXUS demonstration levels
@@ -53,24 +39,10 @@ class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
-
 	static TArray<ANSamplesDisplayActor*> KnownDisplays;
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();
-
-	UFUNCTION(BlueprintCallable)
-	UActorComponent* GetComponentInstance(TSubclassOf<UActorComponent> ComponentClass);
-
-	UFUNCTION(BlueprintCallable, BlueprintPure=false)
-	FString GetTaggedMessage(const FString& Message) const { return FString::Printf(TEXT("[%s]: %s"), *GetTitle(), *Message);};
-
-	UFUNCTION(BlueprintCallable)
-	FString GetTitle() const { return TitleText.ToString();};
-
-	UFUNCTION(BlueprintCallable)
-	FString GetTaggedPrefix() const { return GetTitle(); };
-	
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Prepare Test"))
 	void ReceivePrepareTest();
@@ -80,7 +52,6 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Test Finished"))
 	void ReceiveTestFinished();
-	
 	
 	void PrepareTest();
 	void StartTest();
@@ -223,11 +194,9 @@ protected:
 	
 private:
 
-	void TimerExpired();
+	TUniquePtr<FNSamplesDisplayParts> Parts;
 	
-	void CreateDisplayInstances();
-	void CreateShadowBoxInstances() const;
-	void CreateTitlePanelInstances() const;
+	void TimerExpired();
 	
 	void BuildDescription();
 	
@@ -236,17 +205,9 @@ private:
 	void UpdateNotice();
 	void UpdateSpotlight() const;
 	void UpdateTitleText() const;
-	void UpdateCollisions() const;
-	void UpdateTestComponents();
 	void UpdateWatermark() const;
-
-	void DefaultInstanceStaticMesh(UInstancedStaticMeshComponent* Instance) const;
-
-	float GetTitleOffset() const;
-	float GetTitleSpacerOffset() const;
 	
 	float TextAlignmentOffset(float WidthAdjustment, bool bForceCenter) const;
-	FTransform TitlePanelTextTransform() const;
 	FTransform TitleTextTransform() const;
 	
 	UPROPERTY()
@@ -254,58 +215,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<USceneComponent> PartRoot;
-	
-	UPROPERTY()
-	TObjectPtr<UDecalComponent> NoticeDecalComponent;
-
-	UPROPERTY()
-	TObjectPtr<USpotLightComponent> SpotlightComponent;
-	
-	UPROPERTY()
-	TObjectPtr<UTextRenderComponent> TitleTextComponent;
-
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> PanelMain;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> PanelCorner;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> PanelSide;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> PanelCurve;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> PanelCurveEdge;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> TitleBarMain;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> TitleBarEndLeft;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> TitleBarEndRight;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxSide;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxTop;
-	UPROPERTY()
-	TObjectPtr<UInstancedStaticMeshComponent> ShadowBoxRound;
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> Watermark;
-	
-
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> TitleSpacerComponent;
-	UPROPERTY()
-	TObjectPtr<UTextRenderComponent> DescriptionTextComponent;
-	UPROPERTY()
-	TObjectPtr<UTextRenderComponent> NoticeTextComponent;
-
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> DisplayMaterial;
-	UPROPERTY()
-	TObjectPtr<UMaterialInterface> DisplayMaterialInterface;
-	
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> NoticeMaterial;
-	UPROPERTY()
-	TObjectPtr<UMaterialInterface> NoticeMaterialInterface;
 	
 	UPROPERTY()
 	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;

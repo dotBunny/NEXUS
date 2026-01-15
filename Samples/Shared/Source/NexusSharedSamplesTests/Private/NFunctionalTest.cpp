@@ -97,7 +97,7 @@ void ANFunctionalTest::UpdateFromDisplay()
 	const ANSamplesDisplayActor* Target = TargetDisplay.Get();
 	if (Target != nullptr)
 	{
-		TestLabel = Target->GetTitle();
+		TestLabel = Target->TitleText.ToString();
 		this->SetActorLabel(TestLabel);
 	}
 }
