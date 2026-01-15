@@ -66,7 +66,6 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			}
 		}
 	}
-	ScanTask.Destroy();
 
 	// Step 3 - Process Poses
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusFixersEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step3", "Processing ..."));
@@ -92,15 +91,11 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			break;
 		}
 	}
-	FixTask.Destroy();
 	UE_LOG(LogNexusFixersEditor, Log, TEXT("Fixed %i out-of-date UPose assets."), ProblemsFixed);
 
 	// Step 4 - Cleanup
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusFixersEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step4", "Cleanup ..."));
 	UPackageTools::UnloadPackages(CleanupPackages);
-	
-	// Clear
-	MainTask.Destroy();
 }
 
 bool FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute()

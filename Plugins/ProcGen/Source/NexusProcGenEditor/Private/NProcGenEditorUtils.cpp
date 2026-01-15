@@ -258,7 +258,5 @@ bool FNProcGenEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor)
 		Cell->Version++;
 	}
 	
-	MainTask.Destroy();
-	
 	return bUpdatedCellData;
 }
