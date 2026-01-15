@@ -19,7 +19,7 @@ void FNMultiplayerEditorToolMenu::Register()
 				"Toggle Multiplayer Test",
 				FUIAction(
 					FExecuteAction::CreateStatic(&ToggleMultiplayerTest),
-					FCanExecuteAction::CreateStatic(&MultiplayerTest_CanExecute),
+					FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
 					FIsActionChecked(),
 					FIsActionButtonVisible()),
 					TAttribute<FText>(),
@@ -46,11 +46,6 @@ FSlateIcon FNMultiplayerEditorToolMenu::MultiplayerTest_GetIcon()
 		return FSlateIcon(FNMultiplayerEditorStyle::GetStyleSetName(), "Command.Multiplayer.StopMultiplayerTest.On");
 	}
 	return FSlateIcon(FNMultiplayerEditorStyle::GetStyleSetName(), "Command.Multiplayer.StartMultiplayerTest.On");
-}
-
-bool FNMultiplayerEditorToolMenu::MultiplayerTest_CanExecute()
-{
-	return FNEditorUtils::IsNotPlayInEditor();
 }
 
 void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()

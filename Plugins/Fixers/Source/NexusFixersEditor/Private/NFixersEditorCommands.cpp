@@ -23,10 +23,8 @@ void FNFixersEditorCommands::RegisterCommands()
 	CommandList_BulkOperations = MakeShared<FUICommandList>();
 	
 	CommandList_BulkOperations->MapAction(Get().CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext,
-		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, false),
-		FCanExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute));
+		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, false));
 	
 	CommandList_BulkOperations->MapAction(Get().CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource,
-		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true),
-		FCanExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute));
+		FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true));
 }

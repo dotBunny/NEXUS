@@ -98,11 +98,6 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	UPackageTools::UnloadPackages(CleanupPackages);
 }
 
-bool FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute()
-{
-	return true;
-}
-
 bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages)
 {
 	if (PoseAsset->SourceAnimation == nullptr)

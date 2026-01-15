@@ -21,7 +21,6 @@ void FNEditorCommands::RegisterCommands()
 	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
 	
-
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
 	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Issues"),
@@ -117,8 +116,7 @@ void FNEditorCommands::RegisterCommands()
 
 	CommandList_Tools = MakeShared<FUICommandList>();
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsLeakCheck),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::ToolsLeakCheck_CanExecute));
+		FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create));
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
@@ -152,16 +150,6 @@ void FNEditorCommands::OnHelpRoadmap()
 void FNEditorCommands::OnHelpDocumentation()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://nexus-framework.com/docs/"),nullptr, nullptr);
-}
-
-void FNEditorCommands::OnToolsLeakCheck()
-{
-	UNLeakTestDelayedEditorTask::Create();
-}
-
-bool FNEditorCommands::ToolsLeakCheck_CanExecute()
-{
-	return true;
 }
 
 void FNEditorCommands::OnToolsProfileNetworkProfiler()
@@ -360,7 +348,7 @@ void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
 
 void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
 {
-	const FNEditorCommands Commands = FNEditorCommands::Get();
+	const FNEditorCommands Commands = Get();
 
 	FToolMenuSection& ReferenceSection = Menu->FindOrAddSection("Reference");
 	ReferenceSection.Label = NSLOCTEXT("NexusCoreEditor", "NHelp_Reference", "Reference");

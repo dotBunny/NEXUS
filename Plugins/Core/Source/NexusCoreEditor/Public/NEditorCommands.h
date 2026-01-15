@@ -37,9 +37,6 @@ public:
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
 	
-	static void OnToolsLeakCheck();
-	static bool ToolsLeakCheck_CanExecute();
-
 	static void OnToolsProfileNetworkProfiler();
 	static bool HasToolsProfileNetworkProfiler();
 	
