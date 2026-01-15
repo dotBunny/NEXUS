@@ -47,7 +47,7 @@ void FNProcGenEditorToolMenu::Register()
 							FText::Format(NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent, Organ),
-								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent_CanExecute, Organ),
+								FCanExecuteAction(),
 								FIsActionChecked()));
 						
 					}
@@ -71,7 +71,7 @@ void FNProcGenEditorToolMenu::Register()
 					"NProcGenEdMode_Button",
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNProcGenEditorCommands::ProcGenEdMode),
-						FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::ProcGenEdMode_CanExecute),
+						FCanExecuteAction::CreateStatic(&FNProcGenEdMode::IsNotActive),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::ProcGenEdMode_CanShow)),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NProcGenEdMode_Button", "Switch To NProcGen Editor Mode"),
@@ -84,7 +84,7 @@ void FNProcGenEditorToolMenu::Register()
 					"NCellActor_AddButton",
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellAddActor),
-						FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellAddActor_CanExecute),
+						FCanExecuteAction::CreateStatic(&FNProcGenEdMode::HasNoCellActor),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellAddActor_CanShow)),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_AddActor", "Add Actor"),
@@ -222,7 +222,7 @@ void FNProcGenEditorToolMenu::Register()
 							FText::Format(NSLOCTEXT("NexusProcGenEditor", "SelectNCellJunctionComponent", "Select {0}"), JunctionName),
 							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent, Junction),
-								FCanExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent_CanExecute, Junction),
+								FCanExecuteAction(),
 								FIsActionChecked()));
 						
 					}

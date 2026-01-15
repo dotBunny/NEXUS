@@ -111,15 +111,15 @@ void FNProcGenEditorCommands::RegisterCommands()
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateAll,
 		FExecuteAction::CreateStatic(&CellCalculateAll),
-		FCanExecuteAction::CreateStatic(&CellCalculateAll_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateBounds,
 		FExecuteAction::CreateStatic(&CellCalculateBounds),
-		FCanExecuteAction::CreateStatic(&CellCalculateBounds_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateHull,
 	FExecuteAction::CreateStatic(&CellCalculateHull),
-	FCanExecuteAction::CreateStatic(&CellCalculateHull_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateVoxelData,
 FExecuteAction::CreateStatic(&CellCalculateVoxelData),
@@ -127,36 +127,36 @@ FExecuteAction::CreateStatic(&CellCalculateVoxelData),
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleBoundsCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleBoundsCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleBoundsCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleBoundsCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelData,
 FExecuteAction::CreateStatic(&CellToggleVoxelData), 
-	FCanExecuteAction::CreateStatic(&CellToggleVoxelData_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelData_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellResetCell,
 	FExecuteAction::CreateStatic(&CellResetCell),
-	FCanExecuteAction::CreateStatic(&CellResetCell_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellRemoveActor,
 	FExecuteAction::CreateStatic(&CellRemoveActor),
-	FCanExecuteAction::CreateStatic(&CellRemoveActor_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	// Build NCellJunction Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionAddComponent,
@@ -178,7 +178,7 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 
 	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionAddComponent,
 FExecuteAction::CreateStatic(&CellJunctionAddComponent),
-	FCanExecuteAction::CreateStatic(&CellJunctionAddComponent_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorsSelected));
 	
 	// Organ
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerate,
@@ -191,17 +191,12 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	CommandList_Organ = MakeShared<FUICommandList>();
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerate,
 		FExecuteAction::CreateStatic(&OrganGenerate),
-		FCanExecuteAction::CreateStatic(&OrganGenerate_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsOrganVolumeSelected));
 }
 
 void FNProcGenEditorCommands::ProcGenEdMode()
 {
 	GLevelEditorModeTools().ActivateMode(FNProcGenEdMode::Identifier);
-}
-
-bool FNProcGenEditorCommands::ProcGenEdMode_CanExecute()
-{
-	return !FNProcGenEdMode::IsActive();
 }
 
 bool FNProcGenEditorCommands::ProcGenEdMode_CanShow()
@@ -326,11 +321,6 @@ void FNProcGenEditorCommands::CellAddActor()
 	
 }
 
-bool FNProcGenEditorCommands::CellAddActor_CanExecute()
-{
-	return !FNProcGenEdMode::HasCellActor();
-}
-
 bool FNProcGenEditorCommands::CellAddActor_CanShow()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
@@ -341,11 +331,6 @@ void FNProcGenEditorCommands::OrganGenerate()
 {
 	UNProcGenEditorSubsystem::Get()->StartOperation(
 		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
-}
-
-bool FNProcGenEditorCommands::OrganGenerate_CanExecute()
-{
-	return FNProcGenEditorUtils::IsOrganVolumeSelected();
 }
 
 void FNProcGenEditorCommands::CellSelectActor()
@@ -375,21 +360,11 @@ void FNProcGenEditorCommands::CellCalculateAll()
 	CellCalculateVoxelData();
 }
 
-bool FNProcGenEditorCommands::CellCalculateAll_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 void FNProcGenEditorCommands::CellCalculateBounds()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateBounds();
-}
-
-bool FNProcGenEditorCommands::CellCalculateBounds_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellCalculateHull()
@@ -399,11 +374,6 @@ void FNProcGenEditorCommands::CellCalculateHull()
 	CellActor->CalculateHull();
 	
 	FNProcGenEdMode::ProtectCellEdMode();
-}
-
-bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellCalculateVoxelData()
@@ -436,11 +406,6 @@ void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 {
 	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
@@ -471,11 +436,6 @@ void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 {
 	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
@@ -504,11 +464,6 @@ void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 			Actor->SetActorDirty();
 		}
 	}
-}
-
-bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
@@ -547,11 +502,6 @@ void FNProcGenEditorCommands::CellToggleVoxelData()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleVoxelData_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleVoxelData_IsActionChecked()
 {
 	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
@@ -586,11 +536,6 @@ void FNProcGenEditorCommands::CellResetCell()
 	CellActor->SetActorDirty();
 }
 
-bool FNProcGenEditorCommands::CellResetCell_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 void FNProcGenEditorCommands::CellRemoveActor()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellRemoveActor", "Remove Cell Actor"));
@@ -606,11 +551,6 @@ void FNProcGenEditorCommands::CellRemoveActor()
 		{
 			UEditorAssetLibrary::DeleteAsset(SidecarPath);
 		}
-}
-
-bool FNProcGenEditorCommands::CellRemoveActor_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellJunctionAddComponent()
@@ -648,32 +588,16 @@ void FNProcGenEditorCommands::CellJunctionAddComponent()
 	}
 }
 
-bool FNProcGenEditorCommands::CellJunctionAddComponent_CanExecute()
-{
-	if (GEditor->GetSelectedActorCount() == 0) return false;
-	return true;
-}
-
 void FNProcGenEditorCommands::CellJunctionSelectComponent(UNCellJunctionComponent* Junction)
 {
 	GEditor->SelectNone(false, true);
 	GEditor->SelectComponent(Junction, true, true, true);
 }
 
-bool FNProcGenEditorCommands::CellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction)
-{
-	return true;
-}
-
 void FNProcGenEditorCommands::OrganSelectComponent(UNOrganComponent* Organ)
 {
 	GEditor->SelectNone(false, true);
 	GEditor->SelectComponent(Organ, true, true, true);
-}
-
-bool FNProcGenEditorCommands::OrganSelectComponent_CanExecute(UNOrganComponent* Organ)
-{
-	return true;
 }
 
 void FNProcGenEditorCommands::CellCaptureThumbnail()

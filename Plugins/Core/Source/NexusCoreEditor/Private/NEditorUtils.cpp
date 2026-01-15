@@ -259,6 +259,12 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 	return false;
 }
 
+bool FNEditorUtils::HasActorsSelected()
+{
+	if (GEditor->GetSelectedActorCount() == 0) return false;
+	return true;
+}
+
 FString FNEditorUtils::GetEngineBinariesPath()
 {
 	return FPaths::Combine(FPaths::EngineDir(),"Binaries");

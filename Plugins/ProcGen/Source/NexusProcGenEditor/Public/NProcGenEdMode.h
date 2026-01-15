@@ -42,7 +42,9 @@ public:
 	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
 	
 	static bool HasCellActor() { return CellActor != nullptr; }
+	static bool HasNoCellActor() { return CellActor == nullptr; }
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
+	static bool IsNotActive() { return !GLevelEditorModeTools().IsModeActive(Identifier); }
 	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { CellEdMode = InCellEdMode; }
 	
 	const static FEditorModeID Identifier;
