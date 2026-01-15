@@ -13,4 +13,10 @@
 class FNProcGenEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusProcGen", "NProcGenEditorStyle")
+	
+public:	
+	static FSlateIcon CellActorEditHullModeIcon();
+	static FSlateIcon CellActorEditBoundsModeIcon();
+	static FSlateIcon CellActorEditVoxelModeIcon();
+	static FSlateIcon CellActorToggleDrawVoxelDataIcon();
 };

@@ -2,10 +2,51 @@
 
 #include "NProcGenEditorStyle.h"
 
+#include "NProcGenEdMode.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Styling/SlateStyle.h"
 
 N_IMPLEMENT_EDITOR_STYLE(FNProcGenEditorStyle)
+
+FSlateIcon FNProcGenEditorStyle::CellActorEditHullModeIcon()
+{
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Hull.Selected");
+	}
+	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Hull");
+}
+
+FSlateIcon FNProcGenEditorStyle::CellActorEditBoundsModeIcon()
+{
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Bounds)
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Bounds.Selected");
+	}
+	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Bounds");
+}
+
+FSlateIcon FNProcGenEditorStyle::CellActorEditVoxelModeIcon()
+{
+	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Voxel)
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+	}
+	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
+}
+
+FSlateIcon FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon()
+{
+	switch (FNProcGenEdMode::GetCellVoxelMode())
+	{
+	case FNProcGenEdMode::ENCellVoxelMode::Grid:
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
+	case FNProcGenEdMode::ENCellVoxelMode::Points:
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+	default:
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
+	}
+}
 
 TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 {

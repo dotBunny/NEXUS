@@ -117,7 +117,7 @@ void FNProcGenEditorToolMenu::Register()
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditBoundsMode_Tooltip", "Edit the bounds of the NCell."),
 						TAttribute<FSlateIcon>::Create(
 							TAttribute<FSlateIcon>::FGetter::CreateStatic(
-						&FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon)));
+						&FNProcGenEditorStyle::CellActorEditBoundsModeIcon)));
 		NCellActor_EditBoundsMode.StyleNameOverride = "Toolbar.BackplateLeft";
 		NexusSection.AddEntry(NCellActor_EditBoundsMode);
 		
@@ -132,7 +132,7 @@ void FNProcGenEditorToolMenu::Register()
 				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditHullMode_Tooltip", "Edit the hull vertices of the NCell (requires a tri-based hull)."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
-				&FNProcGenEditorCommands::CellActorEditHullMode_GetIcon)));
+				&FNProcGenEditorStyle::CellActorEditHullModeIcon)));
 		NCellActor_EditHullMode.StyleNameOverride = "Toolbar.BackplateCenter";
 		NexusSection.AddEntry(NCellActor_EditHullMode);
 		
@@ -147,7 +147,7 @@ void FNProcGenEditorToolMenu::Register()
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_EditVoxelMode_Tooltip", "Edit the voxel points of the NCell."),
 		TAttribute<FSlateIcon>::Create(
 			TAttribute<FSlateIcon>::FGetter::CreateStatic(
-		&FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon)));
+		&FNProcGenEditorStyle::CellActorEditVoxelModeIcon)));
 		NCellActor_EditVoxelMode.StyleNameOverride = "Toolbar.BackplateRight";
 		NexusSection.AddEntry(NCellActor_EditVoxelMode);
 		
@@ -249,7 +249,7 @@ void FNProcGenEditorToolMenu::Register()
 				NSLOCTEXT("NexusProcGenEditor", "Command_NCellActor_DrawVoxelData_Tooltip", "Toggle drawing calculated voxel data for the NCell."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
-				&FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon)));
+				&FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon)));
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 	}
 

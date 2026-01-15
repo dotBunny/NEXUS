@@ -219,41 +219,14 @@ bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
 	return !RootComponent->Details.Hull.HasNonTris();
 }
 
-FSlateIcon FNProcGenEditorCommands::CellActorEditHullMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Hull.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Hull");
-}
-
 void FNProcGenEditorCommands::CellActorEditBoundsMode()
 {
 	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Bounds);
 }
 
-FSlateIcon FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Bounds)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds");
-}
-
 void FNProcGenEditorCommands::CellActorEditVoxelMode()
 {
 	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Voxel);
-}
-
-FSlateIcon FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Voxel)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
 }
 
 void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
@@ -269,19 +242,6 @@ void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
 		break;
 	default:
 		FNProcGenEdMode::SetCellVoxelMode(None);
-	}
-}
-
-FSlateIcon FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon()
-{
-	switch (FNProcGenEdMode::GetCellVoxelMode())
-	{
-		case FNProcGenEdMode::ENCellVoxelMode::Grid:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
-		case FNProcGenEdMode::ENCellVoxelMode::Points:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
-		default:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
 	}
 }
 

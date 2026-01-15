@@ -32,16 +32,11 @@ public:
 
 	static void CellActorEditHullMode();
 	static bool CellActorEditHullMode_CanExecute();	
-	
-	static FSlateIcon CellActorEditHullMode_GetIcon();
+
 	static void CellActorEditBoundsMode();
-	static FSlateIcon CellActorEditBoundsMode_GetIcon();
 	
 	static void CellActorEditVoxelMode();
-	static FSlateIcon CellActorEditVoxelMode_GetIcon();
-	
 	static void CellActorToggleDrawVoxelData();
-	static FSlateIcon CellActorToggleDrawVoxelData_GetIcon();
 	
 	static void CellAddActor();
 	static bool CellAddActor_CanShow();
@@ -53,9 +48,7 @@ public:
 	static bool CellSelectActor_CanShow();
 	
 	static void CellCalculateAll();
-	
 	static void CellCalculateBounds();
-	
 	static void CellCalculateHull();
 	
 	static void CellCalculateVoxelData();
@@ -71,11 +64,9 @@ public:
 	static bool CellToggleVoxelData_IsActionChecked();
 	
 	static void CellResetCell();
-	
 	static void CellRemoveActor();
 
 	static void CellJunctionAddComponent();
-
 	static void CellJunctionSelectComponent(UNCellJunctionComponent* Junction);
 	
 	static void OrganSelectComponent(UNOrganComponent* Organ);
