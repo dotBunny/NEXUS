@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Camera/CameraComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/DecalComponent.h"
@@ -12,6 +13,9 @@
 class FNSamplesDisplayComponents
 {
 public:
+	
+	TObjectPtr<USceneComponent> SceneRoot;
+	TObjectPtr<USceneComponent> PartRoot;
 	
 	TObjectPtr<UInstancedStaticMeshComponent> PanelMain;
 	TObjectPtr<UInstancedStaticMeshComponent> PanelCorner;
@@ -32,6 +36,8 @@ public:
 	TObjectPtr<UStaticMeshComponent> TitleSpacerComponent;
 	TObjectPtr<UTextRenderComponent> DescriptionTextComponent;
 	TObjectPtr<UTextRenderComponent> NoticeTextComponent;
+	
+	TObjectPtr<UCameraComponent> ScreenshotCameraComponent;
 	
 	void ClearInstances() const
 	{

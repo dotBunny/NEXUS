@@ -12,4 +12,6 @@ public:
 	TObjectPtr<UMaterialInterface> DisplayMaterialInterface;
 	TObjectPtr<UMaterialInstanceDynamic> NoticeMaterial;
 	TObjectPtr<UMaterialInterface> NoticeMaterialInterface;
+	
+	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;
 };

@@ -15,17 +15,18 @@ TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
-	SceneRoot->SetMobility(EComponentMobility::Static);
-	RootComponent = SceneRoot;
-
-	// This is really just for organizational purposes and OCD.
-	PartRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Parts"));
-	PartRoot->SetupAttachment(SceneRoot);
-	PartRoot->SetMobility(EComponentMobility::Static);
-	
+	// Create reference storage
 	Parts = MakeUnique<FNSamplesDisplayComponents>();
 	Materials = MakeUnique<FNSamplesDisplayMaterials>();
+	
+	Parts->SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
+	Parts->SceneRoot->SetMobility(EComponentMobility::Static);
+	RootComponent = Parts->SceneRoot;
+
+	// This is really just for organizational purposes and OCD.
+	Parts->PartRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Parts"));
+	Parts->PartRoot->SetupAttachment(Parts->SceneRoot);
+	Parts->PartRoot->SetMobility(EComponentMobility::Static);
 	
 	// Create Materials
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialGrey(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
@@ -40,7 +41,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	Parts->NoticeDecalComponent = CreateDefaultSubobject<UDecalComponent>(TEXT("Decal"));
 	Parts->NoticeDecalComponent->bAutoActivate = false;
 	Parts->NoticeDecalComponent->SetMobility(EComponentMobility::Static);
-	Parts->NoticeDecalComponent->SetupAttachment(PartRoot);
+	Parts->NoticeDecalComponent->SetupAttachment(Parts->PartRoot);
 	Parts->NoticeDecalComponent->DecalSize = FVector::ZeroVector;
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DecalMaterial(TEXT("/NexusSharedSamples/M_NSamples_Notice"));
 	if (DecalMaterial.Succeeded())
@@ -48,16 +49,16 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 		Materials->NoticeMaterialInterface = DecalMaterial.Object;
 	}
 	Parts->NoticeTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Notice"));
-	Parts->NoticeTextComponent->SetupAttachment(PartRoot);
+	Parts->NoticeTextComponent->SetupAttachment(Parts->PartRoot);
 	Parts->NoticeTextComponent->SetWorldSize(24.f);
 	Parts->NoticeTextComponent->HorizontalAlignment = EHTA_Center;
 	Parts->NoticeTextComponent->VerticalAlignment = EVRTA_TextCenter;
 	
 	Parts->TitleTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Title"));
-	Parts->TitleTextComponent->SetupAttachment(PartRoot);
+	Parts->TitleTextComponent->SetupAttachment(Parts->PartRoot);
 	
 	Parts->DescriptionTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("Description"));
-	Parts->DescriptionTextComponent->SetupAttachment(PartRoot);
+	Parts->DescriptionTextComponent->SetupAttachment(Parts->PartRoot);
 
 	// These get stripped on servers
 	if (!GIsServer)
@@ -82,7 +83,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	Parts->SpotlightComponent = CreateDefaultSubobject<USpotLightComponent>(TEXT("Spotlight"));
 	Parts->SpotlightComponent->bAutoActivate = false;
 	Parts->SpotlightComponent->SetMobility(EComponentMobility::Type::Stationary);
-	Parts->SpotlightComponent->SetupAttachment(PartRoot);
+	Parts->SpotlightComponent->SetupAttachment(Parts->PartRoot);
 	Parts->SpotlightComponent->SetIntensity(0.f);
 	Parts->SpotlightComponent->SetIntensityUnits(ELightUnits::Unitless);
 	Parts->SpotlightComponent->SetAttenuationRadius(0.f);
@@ -93,13 +94,13 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	static ConstructorHelpers::FObjectFinder<UTextureLightProfile> LightProfile(TEXT("/Engine/EngineLightProfiles/180Degree_IES"));
 	if (LightProfile.Succeeded())
 	{
-		SpotlightLightProfile = LightProfile.Object;
+		Materials->SpotlightLightProfile = LightProfile.Object;
 	}
 	Parts->SpotlightComponent->SetIESTexture(nullptr);
 	Parts->SpotlightComponent->bAffectsWorld = false;
 	
 	Parts->TitleSpacerComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TitleSpacer"));
-	Parts->TitleSpacerComponent->SetupAttachment(PartRoot);
+	Parts->TitleSpacerComponent->SetupAttachment(Parts->PartRoot);
 	Parts->TitleSpacerComponent->SetCastShadow(false);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EngineCubeMesh(TEXT("/Engine/BasicShapes/Cube"));
 	if (EngineCubeMesh.Succeeded())
@@ -110,7 +111,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	
 	// Create Display
 	Parts->PanelCurveEdge = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Curve_Edge"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCurveEdge, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCurveEdge, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> EdgeCurveMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_EdgeCurve"));
 	if (EdgeCurveMesh.Succeeded())
 	{
@@ -119,7 +120,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 	
 	Parts->PanelSide = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Side"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelSide, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelSide, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SideMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Side"));
 	if (SideMesh.Succeeded())
 	{
@@ -128,7 +129,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->PanelCurve = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Curve"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCurve, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCurve, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CurveMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Curve"));
 	if (CurveMesh.Succeeded())
 	{
@@ -136,7 +137,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->PanelCorner = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Corner"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCorner, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelCorner, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CornerMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Corner"));
 	if (CornerMesh.Succeeded())
 	{
@@ -145,7 +146,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->PanelMain = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("Panel_Main"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelMain, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->PanelMain, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MainMesh(TEXT("/NexusSharedSamples/SM_NSamples_Display_Main"));
 	if (MainMesh.Succeeded())
 	{
@@ -154,7 +155,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 
 	// Create Tag Bar
 	Parts->TitleBarMain = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_Main"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarMain, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarMain, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarMainMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_Middle"));
 	if (TitleBarMainMesh.Succeeded())
 	{
@@ -163,7 +164,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->TitleBarEndLeft = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_End_Left"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarEndLeft, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarEndLeft, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarEndMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_R"));
 	if (TitleBarEndMesh.Succeeded())
 	{
@@ -172,7 +173,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->TitleBarEndRight = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("TitleBar_End_Right"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarEndRight, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->TitleBarEndRight, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> TitleBarEndRMesh(TEXT("/NexusSharedSamples/SM_NSamples_TagBar_L"));
 	if (TitleBarEndRMesh.Succeeded())
 	{
@@ -182,7 +183,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 
 	// Create ShadowBox
 	Parts->ShadowBoxSide = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Side"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxSide, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxSide, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowStraightMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_Side_Ribbed"));
 	if (ShadowStraightMesh.Succeeded())
 	{
@@ -192,7 +193,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->ShadowBoxRound = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Round"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxRound, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxRound, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowRoundMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_RoundEdge"));
 	if (ShadowRoundMesh.Succeeded())
 	{
@@ -202,7 +203,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 
 	Parts->ShadowBoxTop = CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("ShadowBox_Top"));
-	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxTop, PartRoot);
+	FNSamplesDisplayBuilder::ApplyDefaultInstanceStaticMeshSettings(Parts->ShadowBoxTop, Parts->PartRoot);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShadowStraightTopMesh(TEXT("/NexusSharedSamples/SM_NSamples_ShadowBox_Side"));
 	if (ShadowStraightTopMesh.Succeeded())
 	{
@@ -213,7 +214,7 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 
 	// Watermark Mesh
 	Parts->Watermark = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Branding"));
-	Parts->Watermark->SetupAttachment(PartRoot);
+	Parts->Watermark->SetupAttachment(Parts->PartRoot);
 	Parts->Watermark->SetMobility(EComponentMobility::Static);
 	Parts->Watermark->SetCollisionProfileName(FName("NoCollision"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh>BrandingMesh(TEXT("/NexusSharedSamples/SM_NSamples_NEXUS"));
@@ -224,13 +225,13 @@ ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectIni
 	}
 	
 	// Screenshot Camera
-	ScreenshotCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ScreenshotCamera"));
-	ScreenshotCameraComponent->SetupAttachment(RootComponent);
-	ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
-	ScreenshotCameraComponent->SetRelativeLocation(FVector(755.f, 0.f, 300.f));
-	ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
-	ScreenshotCameraComponent->AspectRatio = 1.777778;
-	ScreenshotCameraComponent->bConstrainAspectRatio = true;
+	Parts->ScreenshotCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("ScreenshotCamera"));
+	Parts->ScreenshotCameraComponent->SetupAttachment(RootComponent);
+	Parts->ScreenshotCameraComponent->SetMobility(EComponentMobility::Movable);
+	Parts->ScreenshotCameraComponent->SetRelativeLocation(FVector(755.f, 0.f, 300.f));
+	Parts->ScreenshotCameraComponent->SetRelativeRotation(FRotator(-20.f, -180.f, 0.f));
+	Parts->ScreenshotCameraComponent->AspectRatio = 1.777778;
+	Parts->ScreenshotCameraComponent->bConstrainAspectRatio = true;
 }
 
 void ANSamplesDisplayActor::OnConstruction(const FTransform& Transform)
@@ -284,7 +285,7 @@ void ANSamplesDisplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ANSamplesDisplayActor::Rebuild()
 {
 	// Fix stuff created in FunctionTest constructor
-	RootComponent = SceneRoot;
+	RootComponent = Parts->SceneRoot;
 	
 	// Clear previous instances
 	Parts->ClearInstances();
@@ -562,7 +563,7 @@ void ANSamplesDisplayActor::UpdateSpotlight() const
 
 		Parts->SpotlightComponent->SetVisibility(true);
 		Parts->SpotlightComponent->SetHiddenInGame(false);
-		Parts->SpotlightComponent->SetIESTexture(SpotlightLightProfile);
+		Parts->SpotlightComponent->SetIESTexture(Materials->SpotlightLightProfile);
 	}
 	else
 	{

@@ -180,12 +180,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
 	bool bTestDisableTimer = false;
 
+	// CACHE
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Description")
 	FText CachedDescription;
-	
-	// SCREENSHOT
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Screenshot", DisplayName = "Camera")
-	TObjectPtr<UCameraComponent> ScreenshotCameraComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Screenshot", DisplayName = "Override Name")
 	FText ScreenshotCameraName;
@@ -206,15 +203,6 @@ private:
 	void UpdateSpotlight() const;
 	void UpdateTitleText() const;
 	void UpdateWatermark() const;
-	
-	UPROPERTY()
-	TObjectPtr<USceneComponent> SceneRoot;
-
-	UPROPERTY()
-	TObjectPtr<USceneComponent> PartRoot;
-	
-	UPROPERTY()
-	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;
 
 	FTimerHandle TimerHandle;
 	
