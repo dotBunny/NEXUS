@@ -222,12 +222,10 @@ protected:
 	TObjectPtr<UNSamplesDisplayTest> TestInstance;
 	
 private:
-	static void ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform);
 
 	void TimerExpired();
 	
 	void CreateDisplayInstances();
-	void CreateScalablePanelInstances(const FTransform& BaseTransform, float Length, bool bIgnoreMainPanel = false) const;
 	void CreateShadowBoxInstances() const;
 	void CreateTitlePanelInstances() const;
 	

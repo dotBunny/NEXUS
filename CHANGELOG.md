@@ -8,6 +8,10 @@
 - `FNDeveloperUtils::GetRootSetObjects()`
 - `FNDeveloperUtils::DumpRootSetToLog()`
 
+### Changed
+
+- Extracted test logic from `ANSamplesDisplayActor` into its own test object.
+
 ```ini
 [CoreRedirects]
 +EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Undefined","Undefined")))

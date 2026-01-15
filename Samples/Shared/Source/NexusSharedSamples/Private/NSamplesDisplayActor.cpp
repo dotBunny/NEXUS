@@ -3,6 +3,7 @@
 
 #include "NSamplesDisplayActor.h"
 #include "NColor.h"
+#include "NSamplesDisplayBuilder.h"
 #include "Camera/CameraComponent.h"
 #include "Components/DecalComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -356,17 +357,17 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 		{
 			// Traditional Display
 			MainPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, -100.f), FVector::OneVector);
-			CreateScalablePanelInstances(MainPanelTransform, Height);
+			FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, Height, Width);
 			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100.f), FVector::OneVector);
-			CreateScalablePanelInstances(FloorPanelTransform, Depth);
+			FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Depth, Width);
 		}
 		else
 		{
 			// Floor
 			MainPanelTransform = FTransform(FRotator(-90.f, 0.f, 0.f), FVector::ZeroVector, FVector::OneVector);
-			CreateScalablePanelInstances(MainPanelTransform, 1.f, true);
+			FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, 1.f, Width, true);
 			FloorPanelTransform = FTransform(FRotator(90.f, 180.f, 0.f), FVector(0.f, 0.f, -100), FVector::OneVector); 
-			CreateScalablePanelInstances(FloorPanelTransform, Depth);
+			FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Depth, Width);
 		}
 	}
 	else
@@ -377,62 +378,12 @@ void ANSamplesDisplayActor::CreateDisplayInstances()
 			Height = 2.f;
 		}
 		FloorPanelTransform = FTransform(FRotator::ZeroRotator, FVector(0.f, 0.f, ((Height * 0.5f)) - 102.f), FVector::OneVector);
-		CreateScalablePanelInstances(FloorPanelTransform, Height);
+		FNSamplesDisplayBuilder::CreateScalablePanelInstances(FloorPanelTransform, PanelMain, PanelCorner, PanelSide,Height, Width);
 		MainPanelTransform = FTransform(FRotator(180.f, 180.f, 0.f), FVector(0.f, 0.f, 100.f), FVector::OneVector);
-		CreateScalablePanelInstances(MainPanelTransform, 2.f, false);
+		FNSamplesDisplayBuilder::CreateScalablePanelInstances(MainPanelTransform,PanelMain, PanelCorner, PanelSide, 2.f, Width, false);
 	}
 }
 
-void ANSamplesDisplayActor::CreateScalablePanelInstances(const FTransform& BaseTransform, const float Length, bool bIgnoreMainPanel) const
-{
-	const float PrimaryScaleY = (Width - 2) * 0.5f;
-	const float PrimaryScaleZ = (Length - 2) * 0.5f;
-	const float SecondaryY = ((Width - 2.f) * .5f) * 100.f;
-	const float SecondaryZ = (Length - 2.f) * 100.f;
-	const float ScaledLocationY = PrimaryScaleY * 100.f;
-	const float ScaledLocationZ = PrimaryScaleZ * 100.f;
-
-	if (!bIgnoreMainPanel)
-	{
-		PanelMain->AddInstance(
-			UKismetMathLibrary::MakeRelativeTransform(
-				FTransform(
-					FRotator::ZeroRotator,
-					FVector::ZeroVector,
-					FVector(1.f, PrimaryScaleY, PrimaryScaleZ)),
-					BaseTransform), false);
-	}
-		
-	// Corners
-	TArray<FTransform> InstanceTransforms;
-	InstanceTransforms.Add(UKismetMathLibrary::MakeRelativeTransform(FTransform(
-		FRotator::ZeroRotator,
-		FVector(0.f, SecondaryY, SecondaryZ),
-		FVector::OneVector), BaseTransform));
-	
-	InstanceTransforms.Add(UKismetMathLibrary::MakeRelativeTransform(FTransform(
-	FRotator(0.f,0.f, -90.f),
-	FVector(0.f, SecondaryY * -1.f, SecondaryZ),
-	FVector::OneVector), BaseTransform));
-	
-	PanelCorner->AddInstances(InstanceTransforms, false, false, true);
-
-	// Sides
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
-		FTransform(FRotator(0.f,0.f, 90.f),
-			FVector(0.f, ScaledLocationY, ScaledLocationZ),
-			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
-	
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
-		FTransform(FRotator(0.f,0.f, -90.f),
-			FVector(0.f, ScaledLocationY * -1.f, ScaledLocationZ),
-			FVector(1.f, PrimaryScaleZ, 1.f)), BaseTransform));
-	
-	ScaleSafeInstance(PanelSide, UKismetMathLibrary::MakeRelativeTransform(
-		FTransform(FRotator::ZeroRotator,
-			FVector(0.f,0.f, (Length - 2.f) * 100.f),
-			FVector(1.f, PrimaryScaleY, 1.f)), BaseTransform));
-}
 
 void ANSamplesDisplayActor::CreateShadowBoxInstances() const
 {
@@ -909,15 +860,6 @@ float ANSamplesDisplayActor::GetTitleOffset() const
 float ANSamplesDisplayActor::GetTitleSpacerOffset() const
 {
 	return GetTitleOffset() + 10.f;
-}
-
-void ANSamplesDisplayActor::ScaleSafeInstance(UInstancedStaticMeshComponent* Instance, const FTransform& Transform)
-{
-	if (const FVector Scale = Transform.GetScale3D();
-		Scale.X > 0.f && Scale.Y > 0.f && Scale.Z > 0.f)
-	{
-		Instance->AddInstance(Transform);
-	}
 }
 
 float ANSamplesDisplayActor::TextAlignmentOffset(const float WidthAdjustment, const bool bForceCenter) const
