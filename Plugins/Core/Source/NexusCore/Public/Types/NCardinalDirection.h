@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #SONARQUBE This file is ignored from duplication checks as this is meant as fast logic
+// #SONARQUBE-DISABLE: This file is ignored from duplication checks as this is meant as fast logic
 
 namespace NEXUS::Core::CardinalDirection
 {
@@ -296,3 +296,5 @@ public:
 		return NEXUS::Core::CardinalDirection::North;
 	}
 };
+
+// #SONARQUBE-ENABLE
