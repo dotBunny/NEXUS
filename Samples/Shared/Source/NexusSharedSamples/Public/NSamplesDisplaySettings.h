@@ -12,6 +12,9 @@ struct FNSamplesDisplaySettings
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ENColor Color = ENColor::NC_Black;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Width = 6.0;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -28,6 +31,9 @@ struct FNSamplesDisplaySettings
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="ShadowBox Percentage", meta=(ToolTip="What percentage of the depth should the ShadowBox cover? If the Depth <= 1, it will be disabled."))
 	float ShadowBoxCoverDepthPercentage = 0.333f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
+	bool bCollisionEnabled = false;
 };
 
 
@@ -36,14 +42,30 @@ struct FNSamplesDisplayTitleSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Color")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Color")
 	ENColor TitleColor = ENColor::NC_White;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Text")
+	FText TitleText;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Scale")
+	float TitleScale = 40.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Seperate Panel")
+	bool bSeparateTitlePanel = false;
 };
 
 USTRUCT(BlueprintType)
 struct FNSamplesDisplayDescriptionSettings
 {
 	GENERATED_BODY()
+	
+	// DESCRIPTION
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Text")
+	TArray<FText> DescriptionText;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Text Padding", meta=(ClampMin=0, ClampMax=100.f))
+	float DescriptionTextPadding = 0.f;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Scale")
 	float DescriptionScale = 15.f;
@@ -56,6 +78,9 @@ struct FNSamplesDisplayDescriptionSettings
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Color")
 	ENColor DescriptionColor = ENColor::NC_White;
+	
+	UPROPERTY(Transient, BlueprintReadOnly)
+	FText CachedDescription;
 };
 
 USTRUCT(BlueprintType)
@@ -128,4 +153,28 @@ struct FNSamplesDisplaySpotlightSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Cast Volumetric Shadows")
 	bool bSpotlightCastVolumetricShadow = false;
+};
+
+USTRUCT(BlueprintType)
+struct FNSamplesDisplayTimerSettings
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Enabled")
+	bool bTimerEnabled = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Duration", meta=(ClampMin=0, ClampMax=30))
+	float TimerDuration = 2.f;
+};
+
+USTRUCT(BlueprintType)
+struct FNSamplesDisplayTestingSettings
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Iteration Count")
+	int TestIterationCount = 24;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Disable Timer")
+	bool bTestDisableTimer = false;
 };

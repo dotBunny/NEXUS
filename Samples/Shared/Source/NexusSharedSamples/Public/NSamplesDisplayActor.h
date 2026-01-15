@@ -54,82 +54,48 @@ public:
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Test Finished"))
 	void ReceiveTestFinished();
+		
+	UFUNCTION(BlueprintPure, Category = "NEXUS|Samples Display|Test Settings")
+	int GetTestIterationCount() const { return TestingSettings.TestIterationCount; }
 	
 	void PrepareTest();
 	void StartTest();
 	void CleanupTest();
 	
 protected:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display")
-	ENColor Color = ENColor::NC_Black;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Display", DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
-	bool bCollisionEnabled = false;
-
-	// TITLE
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Text")
-	FText TitleText;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Scale")
-	float TitleScale = 40.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Title", DisplayName = "Seperate Panel")
-	bool bSeparateTitlePanel = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Base")
+	FNSamplesDisplaySettings BaseSettings;
 	
-	// DESCRIPTION
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text")
-	TArray<FText> DescriptionText;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Description", DisplayName = "Text Padding", meta=(ClampMin=0, ClampMax=100.f))
-	float DescriptionTextPadding = 0.f;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Description", DisplayName = "Cached Description")
-	FText CachedDescription;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Title")
+	FNSamplesDisplayTitleSettings TitleSettings;
 	
-	// TIMER
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Enabled")
-	bool bTimerEnabled = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Description")
+	FNSamplesDisplayDescriptionSettings DescriptionSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Watermark")
+	FNSamplesDisplayWatermarkSettings WatermarkSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Spotlight")
+	FNSamplesDisplaySpotlightSettings SpotlightSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Timer", DisplayName = "Duration", meta=(ClampMin=0, ClampMax=30))
-	float TimerDuration = 2.f;
-
-	UPROPERTY(BlueprintReadOnly, Category = "NEXUS|Testing")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Notice")
+	FNSamplesDisplayNoticeSettings NoticeSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Screenshot")
+	FNSamplesDisplayScreenshotSettings ScreenshotSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Timer")
+	FNSamplesDisplayTimerSettings TimerSettings;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Samples Display", DisplayName = "Testing")
+	FNSamplesDisplayTestingSettings TestingSettings;
+	
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNSamplesDisplayTest> TestInstance;
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnTimerExpired();
-
-	// TESTING
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Iteration Count")
-	int TestIterationCount = 24;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Testing", DisplayName = "Disable Timer")
-	bool bTestDisableTimer = false;
-
-
-
-	// SETTINGS
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Base")
-	FNSamplesDisplaySettings BaseSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Title")
-	FNSamplesDisplayTitleSettings TitleSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Description")
-	FNSamplesDisplayDescriptionSettings DescriptionSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Watermark")
-	FNSamplesDisplayWatermarkSettings WatermarkSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Spotlight")
-	FNSamplesDisplaySpotlightSettings SpotlightSettings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Notice")
-	FNSamplesDisplayNoticeSettings NoticeSettings;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Settings", DisplayName = "Screenshot")
-	FNSamplesDisplayScreenshotSettings ScreenshotSettings;
 	
 private:
 	void BuildDescription();

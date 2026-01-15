@@ -8,30 +8,30 @@ void UNSamplesDisplayLibrary::TimerDrawPoint(ANSamplesDisplayActor* SamplesDispl
 	const int TimerIntervals)
 {
 	DrawDebugPoint(SamplesDisplay->GetWorld(), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
-	false, SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World);
+	false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 }
 
 void UNSamplesDisplayLibrary::TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius,
 	const int TimerIntervals)
 {
 	DrawDebugSphere(SamplesDisplay->GetWorld(), Location, Radius,24,
-	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World);
+	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 }
 
 void UNSamplesDisplayLibrary::TimerDrawComboSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
                                                    const FVector2D InnerOuter, const int TimerIntervals)
 {
 	DrawDebugSphere(SamplesDisplay->GetWorld(), Location, InnerOuter.X, 24,
-		FNColor::GetColor(ENColor::NC_Black), false,SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
+		FNColor::GetColor(ENColor::NC_Black), false,SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 	DrawDebugSphere(SamplesDisplay->GetWorld(), Location, InnerOuter.Y, 24,
-		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
+		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
 }
 
 void UNSamplesDisplayLibrary::TimerDrawBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FBox& Dimensions,
 	const int TimerIntervals)
 {
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, Dimensions.GetExtent(),
-		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerDuration * TimerIntervals,
+		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 		SDPG_World, NEXUS::Samples::TimerDrawThickness);
 }
 
@@ -39,11 +39,11 @@ void UNSamplesDisplayLibrary::TimerDrawComboBox(ANSamplesDisplayActor* SamplesDi
 	const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals)
 {
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, InnerDimensions.GetExtent(),
-			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerDuration * TimerIntervals,
+			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 			SDPG_World, NEXUS::Samples::TimerDrawThickness);
 
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, OuterDimensions.GetExtent(),
-	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerDuration * TimerIntervals,
+	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 SDPG_World, NEXUS::Samples::TimerDrawThickness);	
 }
 
@@ -54,7 +54,7 @@ void UNSamplesDisplayLibrary::TimerDrawCircle(ANSamplesDisplayActor* SamplesDisp
 	DrawMatrix.SetOrigin(Location);
 		
 	DrawDebugCircle(SamplesDisplay->GetWorld(), DrawMatrix, Radius, 24,
-		FNColor::GetColor(ENColor::NC_White), false,SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World,
+		FNColor::GetColor(ENColor::NC_White), false,SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World,
 		NEXUS::Samples::TimerDrawThickness,false);
 }
 
@@ -65,11 +65,11 @@ void UNSamplesDisplayLibrary::TimerDrawComboCircle(ANSamplesDisplayActor* Sample
 	DrawMatrix.SetOrigin(Location);
 
 	DrawDebugCircle(SamplesDisplay->GetWorld(), DrawMatrix, InnerOuter.X, 24,
-		FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerDuration * TimerIntervals,
+		FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 		SDPG_World, NEXUS::Samples::TimerDrawThickness, false);
 
 	DrawDebugCircle(SamplesDisplay->GetWorld(), DrawMatrix, InnerOuter.Y, 24,
-		FNColor::GetColor(ENColor::NC_White), false,SamplesDisplay->TimerDuration * TimerIntervals, SDPG_World,
+		FNColor::GetColor(ENColor::NC_White), false,SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World,
 		NEXUS::Samples::TimerDrawThickness, false);
 }
 
@@ -77,7 +77,7 @@ void UNSamplesDisplayLibrary::TimerDrawSpline(ANSamplesDisplayActor* SamplesDisp
 	const int TimerIntervals)
 {
 	const UWorld* World = SamplesDisplay->GetWorld();
-	const float LifeTime = SamplesDisplay->TimerDuration * TimerIntervals;
+	const float LifeTime = SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals;
 	TArray<FVector> SplinePoints;
 	const float SplineLength = Spline->GetSplineLength();
 	const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); // One point every ~20 units
@@ -100,7 +100,7 @@ void UNSamplesDisplayLibrary::TimerDrawRectangle(ANSamplesDisplayActor* SamplesD
 	const FVector2D& Dimensions, const FRotator& Rotation, int TimerIntervals)
 {
 	const UWorld* World = SamplesDisplay->GetWorld();
-	const float LifeTime = SamplesDisplay->TimerDuration * TimerIntervals;
+	const float LifeTime = SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals;
 	TArray<FVector> RectanglePoints;
 	RectanglePoints.Reserve(5);
 		
@@ -137,7 +137,7 @@ void UNSamplesDisplayLibrary::TimerDrawComboRectangle(ANSamplesDisplayActor* Sam
 	const int TimerIntervals)
 {
 	const UWorld* World = SamplesDisplay->GetWorld();
-	const float LifeTime = SamplesDisplay->TimerDuration * TimerIntervals;
+	const float LifeTime = SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals;
 	TArray<FVector> RectanglePoints;
 	RectanglePoints.Reserve(5);
 	

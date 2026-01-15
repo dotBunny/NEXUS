@@ -263,9 +263,9 @@ void ANSamplesDisplayActor::BeginDestroy()
 
 void ANSamplesDisplayActor::BeginPlay()
 {
-	if (bTimerEnabled)
+	if (TimerSettings.bTimerEnabled)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerDuration, true, 0);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerSettings.TimerDuration, true, 0);
 	}
 
 	// Add to list of known displays so we can move between them easily.
@@ -300,7 +300,7 @@ void ANSamplesDisplayActor::Rebuild()
 	
 	FNSamplesDisplayBuilder::CreateShadowBoxInstances(Parts.Get(), BaseSettings.ShadowBoxCoverDepthPercentage, BaseSettings.Depth, BaseSettings.Width, BaseSettings.Height);
 	
-	if (bSeparateTitlePanel)
+	if (TitleSettings.bSeparateTitlePanel)
 	{
 		FNSamplesDisplayBuilder::CreateTitlePanelInstances(Parts.Get(), BaseSettings.Depth, BaseSettings.Width);
 	}
@@ -314,7 +314,7 @@ void ANSamplesDisplayActor::Rebuild()
 	UpdateDescription();
 	UpdateWatermark();
 	
-	Parts->UpdateCollisions(bCollisionEnabled);
+	Parts->UpdateCollisions(BaseSettings.bCollisionEnabled);
 }
 
 void ANSamplesDisplayActor::TimerExpired()
@@ -343,10 +343,10 @@ void ANSamplesDisplayActor::BuildDescription()
 	// Create word and break arrays
 	TArray<FString> WordArray;
 	TArray<bool> BreakArray;
-	for (int i = 0; i < DescriptionText.Num(); i++)
+	for (int i = 0; i < DescriptionSettings.DescriptionText.Num(); i++)
 	{
 		TArray<FString> TempParagraphArray =
-			UKismetStringLibrary::ParseIntoArray(DescriptionText[i].ToString(), TEXT(" "), true);
+			UKismetStringLibrary::ParseIntoArray(DescriptionSettings.DescriptionText[i].ToString(), TEXT(" "), true);
 		
 		WordArray.Append(TempParagraphArray);
 
@@ -365,7 +365,7 @@ void ANSamplesDisplayActor::BuildDescription()
 	}
 	
 	int CharacterCount = 0;
-	const int LineWidth = ((100.f * BaseSettings.Width) - 100.f) -  DescriptionTextPadding;
+	const int LineWidth = ((100.f * BaseSettings.Width) - 100.f) -  DescriptionSettings.DescriptionTextPadding;
 	const int LineLimit = FMath::Floor( LineWidth / (DescriptionSettings.DescriptionScale * 0.45f));
 	
 	// Sort the words into lines
@@ -403,15 +403,15 @@ void ANSamplesDisplayActor::BuildDescription()
 		FinalString += WordArray[i];
 	}
 	
-	CachedDescription = FText::AsLocalizable_Advanced(
+	DescriptionSettings.CachedDescription = FText::AsLocalizable_Advanced(
 		TEXT("NSamplesDisplayActor"),
-		TitleText.ToString(),
+		TitleSettings.TitleText.ToString(),
 		FinalString);
 }
 
 void ANSamplesDisplayActor::UpdateDescription() const
 {
-	if (CachedDescription.IsEmpty())
+	if (DescriptionSettings.CachedDescription.IsEmpty())
 	{
 		Parts->DescriptionTextComponent->SetVisibility(false);
 		return;
@@ -421,7 +421,7 @@ void ANSamplesDisplayActor::UpdateDescription() const
 	const bool bHeightVSFloorText = (BaseSettings.Height < 2.f || (BaseSettings.bFloorText && BaseSettings.Depth > 2.f));
 
 	FVector Origin;
-	if (bSeparateTitlePanel)
+	if (TitleSettings.bSeparateTitlePanel)
 	{
 		Origin = TitleTextTransform().GetLocation();
 	}
@@ -430,13 +430,13 @@ void ANSamplesDisplayActor::UpdateDescription() const
 		Origin = Parts->TitleTextComponent->GetRelativeLocation();
 	}
 
-	const float TitleSpacerOffset = (TitleScale / 2.f) + 10.f;
+	const float TitleSpacerOffset = (TitleSettings.TitleScale / 2.f) + 10.f;
 	
-	FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionTextPadding * .5f),
-		Origin.Z - TitleSpacerOffset - (DescriptionTextPadding * .5f));
-	FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
+	FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionSettings.DescriptionTextPadding * .5f),
+		Origin.Z - TitleSpacerOffset - (DescriptionSettings.DescriptionTextPadding * .5f));
+	FVector FloorLocation = FVector(Origin.X - TitleSpacerOffset - (DescriptionSettings.DescriptionTextPadding * .5f), WallLocation.Y, WallLocation.X);
 
-	if (bSeparateTitlePanel)
+	if (TitleSettings.bSeparateTitlePanel)
 	{
 		WallLocation.Z += (TitleSpacerOffset * 1.5f);
 		FloorLocation.X += TitleSpacerOffset;
@@ -448,7 +448,7 @@ void ANSamplesDisplayActor::UpdateDescription() const
 			bHeightVSFloorText ? FloorLocation : WallLocation, 
 			FVector::OneVector));
 	
-	Parts->DescriptionTextComponent->SetText(CachedDescription);
+	Parts->DescriptionTextComponent->SetText(DescriptionSettings.CachedDescription);
 	Parts->DescriptionTextComponent->SetHorizontalAlignment(BaseSettings.TextAlignment);
 	Parts->DescriptionTextComponent->SetWorldSize(DescriptionSettings.DescriptionScale);
 	Parts->DescriptionTextComponent->SetTextRenderColor(FNColor::GetColor(DescriptionSettings.DescriptionColor));
@@ -483,7 +483,7 @@ void ANSamplesDisplayActor::UpdateDisplayColor()
 	}
 	if (Materials->DisplayMaterial != nullptr)
 	{
-		Materials->DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(Color));
+		Materials->DisplayMaterial->SetVectorParameterValue(FName("Base Color"), FNColor::GetLinearColor(BaseSettings.Color));
 	}
 }
 
@@ -586,29 +586,29 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 	if (Parts->TitleTextComponent == nullptr) return;
 	
 	// Title Text
-	if (!TitleText.IsEmpty())
+	if (!TitleSettings.TitleText.IsEmpty())
 	{
 		Parts->TitleTextComponent->SetVisibility(true);
-		if (bSeparateTitlePanel)
+		if (TitleSettings.bSeparateTitlePanel)
 		{
 			
 			Parts->TitleTextComponent->SetRelativeTransform(
 				FTransform(
 					FRotator(40.f, 0.f, 0.f),
 					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f, 
-						TextAlignmentOffset(3.f, bSeparateTitlePanel), 22.f),
+						TextAlignmentOffset(3.f, TitleSettings.bSeparateTitlePanel), 22.f),
 					FVector::OneVector));
 			
 			Parts->TitleTextComponent->SetHorizontalAlignment(EHTA_Center);
-			Parts->TitleTextComponent->SetWorldSize(TitleScale * .5f);
+			Parts->TitleTextComponent->SetWorldSize(TitleSettings.TitleScale * .5f);
 		}
 		else
 		{
 			Parts->TitleTextComponent->SetRelativeTransform(TitleTextTransform());
 			Parts->TitleTextComponent->SetHorizontalAlignment(BaseSettings.TextAlignment);
-			Parts->TitleTextComponent->SetWorldSize(TitleScale);
+			Parts->TitleTextComponent->SetWorldSize(TitleSettings.TitleScale);
 		}
-		Parts->TitleTextComponent->SetText(TitleText);
+		Parts->TitleTextComponent->SetText(TitleSettings.TitleText);
 		Parts->TitleTextComponent->SetTextRenderColor(FNColor::GetColor(TitleSettings.TitleColor));
 		Parts->TitleTextComponent->SetVerticalAlignment(EVRTA_TextCenter);
 	}
@@ -618,18 +618,18 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 	}
 
 	// Title Spacer
-	if (!bSeparateTitlePanel)
+	if (!TitleSettings.bSeparateTitlePanel)
 	{
 		const FVector TitleLocation = Parts->TitleTextComponent->GetRelativeLocation();
 		FVector LocationOffset = FVector::ZeroVector;
 
 		if (BaseSettings.Height < 2.f || (BaseSettings.bFloorText && BaseSettings.Depth > 2.f))
 		{
-			LocationOffset.X = -1.f * (TitleScale / 2.f);
+			LocationOffset.X = -1.f * (TitleSettings.TitleScale / 2.f);
 		}
 		else
 		{
-			LocationOffset.Z = -1 * (TitleScale / 2.f);
+			LocationOffset.Z = -1 * (TitleSettings.TitleScale / 2.f);
 		}
 		
 		Parts->TitleSpacerComponent->SetRelativeTransform(
@@ -697,12 +697,12 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 	{
 		return FTransform(
 			FRotator(90.f, 0.f, 0.f),
-			FVector(BaseSettings.Depth * 100.f - (TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
+			FVector(BaseSettings.Depth * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
 			FVector::OneVector);
 	}
 	return FTransform(
 			FRotator::ZeroRotator,
-			FVector(15.f, TextAlignmentOffset(1.0, false), BaseSettings.Height * 100.f - (TitleScale + 50.f * 0.5f)),
+			FVector(15.f, TextAlignmentOffset(1.0, false), BaseSettings.Height * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f)),
 			FVector::OneVector);
 }
 
@@ -715,7 +715,7 @@ void ANSamplesDisplayActor::PrepareTest()
 	TestInstance = NewObject<UNSamplesDisplayTest>(this, UNSamplesDisplayTest::StaticClass(), NAME_None, RF_Transient);
 	TestInstance->AddToRoot();
 	
-	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
+	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().PauseTimer(TimerHandle);
 	}
@@ -739,7 +739,7 @@ void ANSamplesDisplayActor::CleanupTest()
 		TestInstance = nullptr;
 	}
 
-	if (bTimerEnabled && bTestDisableTimer && TimerHandle.IsValid())
+	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().UnPauseTimer(TimerHandle);
 	}
