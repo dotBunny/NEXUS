@@ -10,12 +10,10 @@
 #include "Components/DecalComponent.h"
 #include "Components/TextRenderComponent.h"
 
+// #SONARQUBE-DISABLE: This is a collection of components used, and whilst it has a large number, they are all needed.
 class FNSamplesDisplayComponents
 {
 public:
-	
-	// #SONARQUBE-DISABLE 
-	// This is a collection of components used, and whilst it has a large number, they are all needed.
 	TObjectPtr<USceneComponent> SceneRoot;
 	TObjectPtr<USceneComponent> PartRoot;
 	
@@ -40,7 +38,6 @@ public:
 	TObjectPtr<UTextRenderComponent> NoticeTextComponent;
 	
 	TObjectPtr<UCameraComponent> ScreenshotCameraComponent;
-	// #SONARQUBE-ENABLE
 	
 	void ClearInstances() const
 	{
@@ -99,3 +96,4 @@ public:
 		}
 	}
 };
+// #SONARQUBE-ENABLE
