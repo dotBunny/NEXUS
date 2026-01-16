@@ -3,7 +3,7 @@
 
 #pragma once
 
-// #SONARQUBE-DISABLE: This file is ignored from duplication checks the duplication is intended
+// #SONARQUBE-DISABLE This file is ignored from duplication checks the duplication is intended
 
 #if WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_HEADER() \
