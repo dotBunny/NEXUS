@@ -8,7 +8,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
-// #SONARQUBE-DISABLE-S107 Verbosity necessary.
+// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
 	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)

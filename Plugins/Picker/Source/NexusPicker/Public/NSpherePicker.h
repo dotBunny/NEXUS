@@ -32,7 +32,7 @@ public:
 		N_IMPLEMENT_VLOG_SPHERE()
 	}
 
-	// #SONARQUBE-DISABLE-S107 Verbosity necessary.
+	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
 	 * @param OutLocation [out] The generated and projected point location.
@@ -160,7 +160,7 @@ public:
 		N_IMPLEMENT_VLOG_SPHERE()
 	}
 
-	// #SONARQUBE-DISABLE-S107 Verbosity necessary.
+	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
 	/**
 	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
 	 * @param Seed The random seed to use.
@@ -231,7 +231,7 @@ public:
 		N_IMPLEMENT_VLOG_SPHERE()
 	}
 
-	// #SONARQUBE-DISABLE-S107 Verbosity necessary.
+	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
 	/**
 	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
 	 * Updates the seed value to enable sequential random point generation.
