@@ -12,6 +12,8 @@
 
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 
+### Core Redirects
+
 ```ini
 [CoreRedirects]
 +EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Undefined","Undefined")))
