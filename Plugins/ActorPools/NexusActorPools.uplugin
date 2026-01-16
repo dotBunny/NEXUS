@@ -33,11 +33,23 @@
 	],
 	"Plugins": [
 		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
 			"Enabled": true
 		},
 		{
+			"Name": "NexusDeveloperOverlay",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusPicker",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
 			"Enabled": true
 		}
 	],

@@ -6,10 +6,26 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NActorPool.h"
 #include "NActorPoolsMinimal.h"
+#include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.generated.h"
 
 class UNActorPoolSet;
 class UNActorPoolSpawnerComponent;
+
+USTRUCT(BlueprintType)
+struct FNActorPoolStats
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadOnly)
+	UClass* Class;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 In = 0;
+	
+	UPROPERTY(BlueprintReadOnly)
+	int32 Out = 0;
+};
 
 /**
  * A centralized management system that provides UWorld-specific access to AActor pooling functionality, acting as the primary interface for creating, managing, and accessing multiple FNActorPools.
@@ -19,10 +35,12 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 {
 	friend class FNActorPool;
-
+	
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNActorPoolSubsystem, true)
 
+	DECLARE_MULTICAST_DELEGATE_OneParam( OnActorPoolAddedDelegate, FNActorPool* );
+	
 public:
 
 	/**
@@ -69,7 +87,7 @@ public:
 
 	/**
 	 * Attempts to return an Actor to its owning pool.
-	 * @note If the returned actor does not belong in a pool, it may be destroyed, in that case it will return true.
+	 * @note If the returned actor does not belong in a pool (and UNActorPoolsSettings::bCreatePoolForUnknownActors is false), it may be destroyed, in that case it will return true.
 	 * @param Actor The target actor to return to a pool.
 	 * @return true/false if the Actor was returned to a pool.
 	 */
@@ -79,8 +97,6 @@ public:
 
 	void RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
 	void UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
-
-	void SetDestroyUnknownReturnedActors(bool ShouldDestroy);
 
 	//~UTickableWorldSubsystem
 	virtual void Deinitialize() final override;
@@ -127,6 +143,28 @@ public:
 		return ActorPools.Find(ActorClass)->Get();
 	}
 
+	/**
+	 * Event triggered when a new pool is added to the UNActorPoolSubsystem.
+	 */
+	OnActorPoolAddedDelegate OnActorPoolAdded;
+
+	/**
+	 * Get an array of all the Actor Pools.
+	 * @return An array of UniquePtr to all the known FNActorPools
+	 * @remark This is not meant to be used often and is more for debugging purposes.
+	 */
+	TArray<FNActorPool*> GetAllPools() const
+	{
+		TArray<FNActorPool*> ReturnPools;
+		ReturnPools.Reserve(ActorPools.Num());
+		
+		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
+		{
+			ReturnPools.Add(Pair.Value().Get());
+		}
+		return MoveTemp(ReturnPools);
+	}
+
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
@@ -140,8 +178,7 @@ private:
 	
 	bool bHasTickableActorPools;
 	bool bHasTickableSpawners;
-	bool bDestroyUnknownReturnedActors = true;
-	bool bStatsEnabled = false;
+	ENActorPoolUnknownBehaviour UnknownBehaviour = ENActorPoolUnknownBehaviour::Destroy;
 
 };
 
@@ -153,6 +190,7 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
 		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Get());
 	}
 	return Cast<T>((*ActorPools.Find(ActorClass))->Get());
@@ -166,6 +204,7 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
 		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
 			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Spawn(Position, Rotation));
 	}
 	return Cast<T>((ActorPools.Find(ActorClass)->Get())->Spawn(Position, Rotation));

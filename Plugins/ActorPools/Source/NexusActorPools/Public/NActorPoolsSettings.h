@@ -10,6 +10,14 @@
 #include "Macros/NSettingsMacros.h"
 #include "NActorPoolsSettings.generated.h"
 
+UENUM(BlueprintType)
+enum class ENActorPoolUnknownBehaviour : uint8
+{
+	Destroy = 0,
+	CreateDefaultPool = 1,
+	Ignore = 2
+};
+
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 {
@@ -34,10 +42,6 @@ public:
 		return SectionDescription;
 	}
 #endif	
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Stats Tracking",
-		meta=(ToolTip="Should the stat group (NActorPools) be populated? (when available)"))
-	bool bTrackStats = true;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
@@ -50,4 +54,8 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes", 
 		meta=(Tooltop="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
 	TArray<FString> IgnoreWorldPrefixes;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
+		meta=(Tooltop="What should be done with an AActor returned to APS that is not known to it."))
+	ENActorPoolUnknownBehaviour UnknownBehaviour;
 };

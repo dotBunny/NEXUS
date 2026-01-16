@@ -11,9 +11,11 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"CommonUI",
 					"Core",
 					"CoreUObject",
-					"Engine"
+					"Engine",
+					"UMG"
 				]
 			);
 			
@@ -26,7 +28,7 @@ namespace UnrealBuildTool.Rules
 			);
 			
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore"]);
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusDeveloperOverlay", "NexusUI"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker"]);
 
 			ShortName = "NexusActorPools";						

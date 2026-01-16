@@ -39,8 +39,8 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	if (bIgnoreStaticActors && !OtherActor->IsRootComponentMovable()) return;
 
 	// Check if in an actor pool, return to the pool
-	if (INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor); 
-		ActorItem != nullptr)
+	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor); 
+	if (ActorItem != nullptr)
 	{
 		if (!ActorItem->ReturnToActorPool())
 		{
@@ -63,7 +63,7 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	{
 		ActorPoolSubsystem->ReturnActor(OtherActor);
 		KillCount++;
-		return;
+		return; 
 	}
 
 	if (bIgnoreNonInterfacedActors)
@@ -71,14 +71,18 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		return;
 	}
 	
-	// Destroy, I guess.
-	if (!OtherActor->IsRooted())
+	if (ActorPoolSubsystem->ReturnActor(OtherActor))
 	{
-		OtherActor->Destroy();
 		KillCount++;
+		return; 
+	}
+	
+	if (OtherActor->IsRooted())
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behaviour has been ignored."), *OtherActor->GetName())
 	}
 	else
 	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behaviour has been ignored."), *OtherActor->GetName())
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to properly dispose of AActor(%s) via the UNKillZoneComponent."), *OtherActor->GetName())
 	}
 }

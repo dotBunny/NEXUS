@@ -4,6 +4,7 @@
 
 ### Added
 
+- ActorPools Developer Overlay Widget
 - `FNMultiplayerUtils::GetPing()`
 - `FNDeveloperUtils::GetRootSetObjects()`
 - `FNDeveloperUtils::DumpRootSetToLog()`
@@ -11,6 +12,10 @@
 ### Changed
 
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
+
+### Removed
+
+- `UNActorPoolSubsystem::bDestroyUnknownReturnedActors` removed in favor of `ENActorPoolUnknownBehaviour` settings
 
 ### Core Redirects
 

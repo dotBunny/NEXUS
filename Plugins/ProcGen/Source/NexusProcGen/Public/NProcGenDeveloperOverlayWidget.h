@@ -11,7 +11,7 @@ class UNProcGenOperation;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Developer Overlay Widget", BlueprintType, Abstract)
-class UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
+class NEXUSPROCGEN_API UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
 	
