@@ -7,7 +7,6 @@
 #include "Components/LineBatchComponent.h"
 
 // #SONARQUBE-DISABLE: Verbosity necessary, most are defaulted regardless.
-
 void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String, const FVector& Position,
 	const FRotator& Rotation, const bool bPersistentLines, const float LifeTime, const uint8 DepthPriority, const FLinearColor ForegroundColor,
 	const float Scale, const float LineHeight, const float Thickness, const bool bInvertLineFeed, const bool bDrawBelowPosition)
@@ -136,5 +135,4 @@ void FNDrawDebugHelpers::DrawDebugString(const UWorld* InWorld, FString& String,
 	}
 #endif	
 }
-
 // #SONARQUBE-ENABLE

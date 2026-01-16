@@ -8,6 +8,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
+// #SONARQUBE-DISABLE: Verbosity necessary.
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
 	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)
@@ -33,6 +34,7 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		}
 	}
 }
+// #SONARQUBE-ENABLE
 
 void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
 	const FLinearColor& Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
