@@ -206,6 +206,8 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 
+	// #SONARQUBE-DISABLE: Verbosity necessary.
+	
 	/**
 	 * Generates a random point inside or on the surface of the FBox using a provided seed, then projects it to the world.	 
 	 * @param Seed The random seed to use.
@@ -224,6 +226,8 @@ public:
 		N_IMPLEMENT_PICKER_PROJECTION()
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
+	
+	// #SONARQUBE-ENABLE
 
 	/**
 	 * Generates a random point inside or on the surface of the FBox using a provided seed.
@@ -296,6 +300,8 @@ public:
 		N_IMPLEMENT_VLOG_BOX()
 	}
 
+	// #SONARQUBE-DISABLE: Verbosity necessary.
+	
 	/**
 	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state, then grounds it to the world.
 	 * Updates the seed value to enable sequential random point generation.	
@@ -315,6 +321,8 @@ public:
 		N_IMPLEMENT_PICKER_PROJECTION()
 		N_IMPLEMENT_VLOG_BOX_PROJECTION()
 	}
+	
+	// #SONARQUBE-ENABLE
 
 	/**
 	 * Generates a random point inside or on the surface of the FBox while tracking the random seed state.
