@@ -12,21 +12,6 @@
 class UNActorPoolSet;
 class UNActorPoolSpawnerComponent;
 
-USTRUCT(BlueprintType)
-struct FNActorPoolStats
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(BlueprintReadOnly)
-	UClass* Class;
-	
-	UPROPERTY(BlueprintReadOnly)
-	int32 In = 0;
-	
-	UPROPERTY(BlueprintReadOnly)
-	int32 Out = 0;
-};
-
 /**
  * A centralized management system that provides UWorld-specific access to AActor pooling functionality, acting as the primary interface for creating, managing, and accessing multiple FNActorPools.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/">UNActorPoolSubsystem</a>
