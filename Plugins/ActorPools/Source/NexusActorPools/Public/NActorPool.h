@@ -111,6 +111,9 @@ public:
 
 	bool IsStubMode() const { return bStubMode; };
 
+	TSubclassOf<AActor> GetTemplate() const { return Template; };
+	UWorld* GetWorld() const { return World; };
+	
 private:
 
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);

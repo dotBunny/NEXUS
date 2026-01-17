@@ -4,6 +4,7 @@
 #pragma once
 
 #include "INListViewEntry.h"
+#include "NActorPoolObject.h"
 #include "Blueprint/UserWidget.h"
 #include "NActorPoolListViewEntry.generated.h"
 
@@ -11,11 +12,10 @@ class UNProcGenOperation;
 class UProgressBar;
 class UCommonTextBlock;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools ListView Entry", BlueprintType, Blueprintable, HideDropdown)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools ListView Entry", BlueprintType, Blueprintable)
 class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
-
 	
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
@@ -26,6 +26,9 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	
+	UFUNCTION(BlueprintCallable)
+	void Refresh();
+
 protected:	
 	
 	UPROPERTY(BlueprintReadOnly)
@@ -44,6 +47,8 @@ protected:
 	TObjectPtr<UCommonTextBlock> RightText;
 	
 private:
+	void Reset() const;
+	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	TObjectPtr<UNProcGenOperation> Operation = nullptr;	
+	TObjectPtr<UNActorPoolObject> Pool;	
 };

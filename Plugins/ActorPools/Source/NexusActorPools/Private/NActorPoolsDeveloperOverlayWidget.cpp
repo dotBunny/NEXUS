@@ -2,11 +2,35 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NActorPoolsDeveloperOverlayWidget.h"
+
+#include "NActorPoolObject.h"
+#include "NActorPoolSubsystem.h"
 #include "Components/NListView.h"
 
 void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
 {
-	System = UNActorPoolSubsystem::Get(GetWorld());
+	
+	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization);
+	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown);
+	Bind(GetWorld());
+	
+	Super::NativeConstruct();
+}
+
+void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
+{
+	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
+	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
+	
+	Unbind(GetWorld());
+	ActorPoolList->ClearListItems();
+	
+	Super::NativeDestruct();
+}
+
+void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
+{
+	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	
 	// Build out known list
 	TArray<FNActorPool*> KnownPools = System->GetAllPools();
@@ -16,34 +40,49 @@ void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
 	}
 	
 	// Add delegate for future pools
-	OnActorPoolAddedDelegateHandle = System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
+	WorldToHandleMap.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
-	});
-	
-	Super::NativeConstruct();
+	}));
 }
 
-void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
+void UNActorPoolsDeveloperOverlayWidget::Unbind(UWorld* World)
 {
-	System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegateHandle);
+	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
+	if (WorldToHandleMap.Contains(World))
+	{
+		System->OnActorPoolAdded.Remove(WorldToHandleMap[World]);
+	}
 	
 	TArray<UObject*> Items = ActorPoolList->GetListItems();
 	const int ItemCount = Items.Num();
 	for (int i = ItemCount - 1; i >= 0; i--)
 	{
-		UNActorPoolDeveloperObject* Object = Cast<UNActorPoolDeveloperObject>(Items[i]);
-		Object->RemoveFromRoot();
-	}
-	ActorPoolList->ClearListItems();
+		UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
+		if (Object->GetPoolWorld() == World)
+		{
+			ActorPoolList->RemoveItem(Object);
+			// 	Object->RemoveFromRoot();
+		}
 
-	
-	Super::NativeDestruct();
+	}
+}
+
+void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World,
+	FWorldInitializationValues WorldInitializationValues)
+{
+	Bind(World);
+}
+
+void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
+{
+	Unbind(World);
 }
 
 void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)
 {
-	UNActorPoolDeveloperObject* Object = NewObject<UNActorPoolDeveloperObject>(this, UNActorPoolDeveloperObject::StaticClass());
-	Object->SetPool(ActorPool);
+	UNActorPoolObject* Object = NewObject<UNActorPoolObject>(this, UNActorPoolObject::StaticClass(), NAME_None, RF_Transient);
+	Object->Link(ActorPool);
+	//Object->AddToRoot();
 	ActorPoolList->AddItem(Object);
 }

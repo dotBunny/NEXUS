@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "NActorPoolSubsystem.h"
 #include "NDeveloperOverlayWidget.h"
 #include "NActorPool.h"
 #include "NActorPoolsDeveloperOverlayWidget.generated.h"
 
+class UNActorPoolSubsystem;
 class UNActorPoolDeveloperObject;
 class UNListView;
 
@@ -15,49 +15,27 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget
 class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
+
 	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
+	void Bind(UWorld* World);
+	void Unbind(UWorld* World);
 	
 protected:	
-	UPROPERTY(BlueprintReadOnly)
-	TArray<UNActorPoolDeveloperObject*> ActorPoolObjects;
-	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNListView> ActorPoolList;	
 	
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UNActorPoolSubsystem> System;
+	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	void OnWorldBeginTearDown(UWorld* World);
 
 private:
 	void CreateListItem(FNActorPool* ActorPool);
-	FDelegateHandle OnActorPoolAddedDelegateHandle;
-};
-
-
-UCLASS(BlueprintType)
-class NEXUSACTORPOOLS_API UNActorPoolDeveloperObject : public UObject
-{
-	GENERATED_BODY()
-
-public:
-	void SetPool(FNActorPool* NewPool)
-	{
-		this->Pool = NewPool;
-	}
 	
-	UFUNCTION(BlueprintCallable)
-	int GetInCount() const
-	{
-		return Pool->GetInCount();
-	}
 	
-	UFUNCTION(BlueprintCallable)
-	int GetOutCount() const
-	{
-		return Pool->GetOutCount();
-	}
-private:	
-	FNActorPool* Pool;
+	
+	TMap<UWorld*, FDelegateHandle> WorldToHandleMap;
+	FDelegateHandle AddWorldDelegateHandle;
+	FDelegateHandle RemoveWorldDelegateHandle;
 };

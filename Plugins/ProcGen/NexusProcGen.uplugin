@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 8,
-	"VersionName": "0.2.5",
+	"Version": 9,
+	"VersionName": "0.2.6",
 	"FriendlyName": "NEXUS: Procedural Generation",
 	"Description": "A procedural generation system focused on creating dynamic gameplay-focused spaces.",
 	"Category": "NEXUS",
