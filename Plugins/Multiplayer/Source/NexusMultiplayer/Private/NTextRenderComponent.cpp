@@ -23,6 +23,12 @@ void UNTextRenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Ensure an owner is replicating
+	if (!GetOwner()->GetIsReplicated())
+	{
+		GetOwner()->SetReplicates(true);
+	}
+	
 	CachedValue = Text.ToString();
 }
 

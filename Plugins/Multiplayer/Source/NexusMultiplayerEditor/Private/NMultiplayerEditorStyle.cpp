@@ -17,5 +17,9 @@ TSharedRef<FSlateStyleSet> FNMultiplayerEditorStyle::Create()
 	Style.Set("Command.Multiplayer.StopMultiplayerTest.On", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StopMultiplayerTest_On"), Icon16x16));
 	Style.Set("Command.Multiplayer.StopMultiplayerTest.Off", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StopMultiplayerTest_Off"), Icon16x16));
 	
+	// NTextRendererComponent
+	Style.Set("ClassIcon.NTextRenderComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTextRenderComponent"), Icon16x16));
+	Style.Set("ClassThumbnail.NTextRenderComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTextRenderComponent"), Icon128x128));
+
 	return StyleRef;
 }
