@@ -9,9 +9,9 @@
 
 void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
 {
-	
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown);
+	
 	Bind(GetWorld());
 	
 	Super::NativeConstruct();
@@ -31,6 +31,7 @@ void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
 void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
+	if (System == nullptr) return; // System-less world
 	
 	// Build out known list
 	TArray<FNActorPool*> KnownPools = System->GetAllPools();

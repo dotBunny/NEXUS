@@ -257,8 +257,8 @@ void FNProcGenEditorToolMenu::Register()
 	auto EditorWindow = FNWindowCommandInfo();
 	
 	EditorWindow.Identifier = "NProcGenSystem";
-	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "NProcGenSystem_EUW_DisplayName", "ProcGen System");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "NProcGenSystem_EUW_DisplayName", "Opens the NProcGenSystem Window inside of an editor tab.");
+	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "ProcGen System");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
