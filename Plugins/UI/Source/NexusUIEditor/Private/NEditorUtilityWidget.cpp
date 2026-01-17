@@ -47,7 +47,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
 	if (bShouldSerializeWidget)
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RegisterWidget(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
 	}
 	
 	// We need a render to happen so this can be updated
@@ -58,6 +58,6 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (bShouldSerializeWidget && !IsEngineExitRequested())
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->UnregisterWidget(GetUserSettingsIdentifier());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetUserSettingsIdentifier());
 	}
 }

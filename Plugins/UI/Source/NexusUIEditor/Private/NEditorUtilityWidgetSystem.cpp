@@ -3,14 +3,44 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "IBlutilityModule.h"
+#include "LevelEditor.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
+
+void UNEditorUtilityWidgetSystem::OnMapChanged(UWorld* World, EMapChangeType MapChange)
+{
+	switch (MapChange)
+	{
+		using enum EMapChangeType;
+	case TearDownWorld:
+		// Save ?
+		break;
+	case NewMap:
+		// Restore
+		break;
+	case LoadMap:
+		break;
+	case SaveMap:
+		break;
+	}
+}
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	UNEditorUtilityWidgetLoadTask::Create();
+	
+	// Bind to map change event
+	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	MapChangeDelegateHandle = LevelEditorModule.OnMapChanged().AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapChanged);
+}
+
+void UNEditorUtilityWidgetSystem::Deinitialize()
+{
+	// Unbind map change event
+	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+	LevelEditorModule.OnMapChanged().Remove(MapChangeDelegateHandle);
 }
 
 UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
@@ -51,7 +81,7 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	return nullptr;
 }
 
-void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
+void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
 	// Check for already registered
 	int32 WorkingIndex = GetIdentifierIndex(Identifier);
@@ -76,10 +106,9 @@ void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const 
 	}
 	
 	SaveConfig();
-
 }
 
-void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
+void UNEditorUtilityWidgetSystem::RemoveWidgetState(const FName& Identifier)
 {
 	const int32 WorkingIndex = GetIdentifierIndex(Identifier);
 	if (WorkingIndex != INDEX_NONE)
