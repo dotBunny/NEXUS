@@ -317,7 +317,7 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 		UNWidgetEditorUtilityWidget::GetOrCreate(
 		EditorUtilityWindowName, 
 		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("NEXUS: ProcGen"), 
+		FText::FromString("ProcGen System"), 
 		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
 	}
 }

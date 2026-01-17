@@ -24,22 +24,25 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 	INListViewEntry::NativeOnListItemObjectSet(ListItemObject);
 }
 
-void UNActorPoolListViewEntry::Refresh()
+void UNActorPoolListViewEntry::Refresh() const
 {
 	if (Pool == nullptr)
 	{
 		return;
 	}
+
 	const int InCount = Pool->GetInCount();
 	if (InCount == 0)
 	{
 		return;
 	}
+
 	const int OutCount = Pool->GetOutCount();
 	const int Total = InCount + OutCount;
 	
-	LeftText->SetText(FText::AsNumber(InCount));
-	LeftText->SetText(FText::AsNumber(OutCount));
+	LeftText->SetText(FText::AsNumber(InCount));	
+	RightText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "OutAndTotal", "{0} | {1}"), FText::AsNumber(OutCount), FText::AsNumber(Total)));
+	
 	ProgressBar->SetPercent(static_cast<float>(InCount)/Total);
 }
 

@@ -15,13 +15,13 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget
 class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
-
 	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	
 	void Bind(UWorld* World);
-	void Unbind(UWorld* World);
+	void Unbind(const UWorld* World);
 	
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
@@ -33,9 +33,11 @@ protected:
 private:
 	void CreateListItem(FNActorPool* ActorPool);
 	
-	
-	
-	TMap<UWorld*, FDelegateHandle> WorldToHandleMap;
+	TMap<UWorld*, FDelegateHandle> OnActorPoolAddedDelegates;
 	FDelegateHandle AddWorldDelegateHandle;
 	FDelegateHandle RemoveWorldDelegateHandle;
+	
+	float CachedUpdateRate;
+	float UpdateTimer;
+	
 };

@@ -25,9 +25,11 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 	
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	
+
+public:	
+
 	UFUNCTION(BlueprintCallable)
-	void Refresh();
+	void Refresh() const;
 
 protected:	
 	

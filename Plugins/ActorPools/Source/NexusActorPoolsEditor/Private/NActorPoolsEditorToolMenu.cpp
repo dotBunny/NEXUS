@@ -38,7 +38,7 @@ void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
 		UNWidgetEditorUtilityWidget::GetOrCreate(
 		EditorUtilityWindowName, 
 		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("NEXUS: Actor Pools"), 
+		FText::FromString("Actor Pools"), 
 		FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool");
 	}
 }

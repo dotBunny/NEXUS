@@ -15,7 +15,11 @@ public:
 	void Link(FNActorPool* NewPool)
 	{
 		this->Pool = NewPool;
-		this->ClassName = FText::FromName(NewPool->GetTemplate()->GetFName());
+		
+		FString ClassNameOriginal = NewPool->GetTemplate()->GetFName().ToString();
+		ClassNameOriginal.RemoveFromEnd("_C");
+		
+		this->ClassName = FText::FromString(ClassNameOriginal);
 	}
 	
 	UFUNCTION(BlueprintCallable)

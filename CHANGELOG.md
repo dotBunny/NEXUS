@@ -1,21 +1,17 @@
 # Changelog
 
-## [Unreleased]
+## [0.2.6] - 2026-01-17
 
 ### Added
 
-- ActorPools Developer Overlay Widget
+- `Windows > NEXUS > Actor Pools` a tab for monitoring the pressure on the `UNActorPoolSubsystem` in realtime. 
+- `FNDeveloperUtils::GetRootSetObjects()` / `FNDeveloperUtils::DumpRootSetToLog()` to help with debugging world tear down issues.
 - `FNMultiplayerUtils::GetPing()`
-- `FNDeveloperUtils::GetRootSetObjects()`
-- `FNDeveloperUtils::DumpRootSetToLog()`
 
 ### Changed
 
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
-
-### Removed
-
-- `UNActorPoolSubsystem::bDestroyUnknownReturnedActors` removed in favor of `ENActorPoolUnknownBehaviour` settings
+- `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
 
 ### Core Redirects
 
@@ -92,9 +88,9 @@
 
 ### Changed
 
-- The `main` branch of the GitHub repository is now the base point of development, tags are still created for specific release versions, with those points in time being commited to the `release` branch.
-- Code cleanup driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
-- Status check reports for GitHub actions now marked on individual commits.
+- The `main` branch of the GitHub repository is now the base point of development; tags are still created for specific release versions, with those points in time being commited to the `release` branch.
+- Code cleanup is driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
+- Status check reports for GitHub actions are now marked on individual commits.
 
 ### Fixed
 
@@ -271,6 +267,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.6]: https://github.com/dotBunny/NEXUS/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dotBunny/NEXUS/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dotBunny/NEXUS/compare/v0.2.2...v0.2.3

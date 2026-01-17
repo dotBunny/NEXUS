@@ -3,6 +3,7 @@
 
 #include "NActorPoolsDeveloperOverlayWidget.h"
 
+#include "NActorPoolListViewEntry.h"
 #include "NActorPoolObject.h"
 #include "NActorPoolSubsystem.h"
 #include "Components/NListView.h"
@@ -14,6 +15,10 @@ void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
 	
 	Bind(GetWorld());
 	
+	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
+	CachedUpdateRate = Settings->DeveloperOverlayUpdateRate;
+	UpdateTimer = CachedUpdateRate;
+
 	Super::NativeConstruct();
 }
 
@@ -26,6 +31,28 @@ void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
 	ActorPoolList->ClearListItems();
 	
 	Super::NativeDestruct();
+}
+
+void UNActorPoolsDeveloperOverlayWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	UpdateTimer -= InDeltaTime;
+	if (UpdateTimer > 0.f)
+	{
+		return;
+	}
+	
+	// Reset timer
+	UpdateTimer = CachedUpdateRate;
+	
+	for (const auto Item : ActorPoolList->GetDisplayedEntryWidgets())
+	{
+		const UNActorPoolListViewEntry* Entry = Cast<UNActorPoolListViewEntry>(Item);
+		if (Entry != nullptr)
+		{
+			Entry->Refresh();
+		}
+	}
+	Super::NativeTick(MyGeometry, InDeltaTime);
 }
 
 void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
@@ -41,18 +68,18 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	}
 	
 	// Add delegate for future pools
-	WorldToHandleMap.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
+	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
 	}));
 }
 
-void UNActorPoolsDeveloperOverlayWidget::Unbind(UWorld* World)
+void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-	if (WorldToHandleMap.Contains(World))
+	if (OnActorPoolAddedDelegates.Contains(World))
 	{
-		System->OnActorPoolAdded.Remove(WorldToHandleMap[World]);
+		System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
 	}
 	
 	TArray<UObject*> Items = ActorPoolList->GetListItems();
@@ -65,7 +92,6 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(UWorld* World)
 			ActorPoolList->RemoveItem(Object);
 			// 	Object->RemoveFromRoot();
 		}
-
 	}
 }
 
