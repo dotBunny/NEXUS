@@ -4,14 +4,13 @@
 #include "NActorPoolSubsystem.h"
 #include "INActorPoolItem.h"
 #include "NActorPool.h"
-#include "NActorPoolObject.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
 
-namespace NEXUS::ActorPools
+namespace NEXUS::ActorPools::ConsoleCommands
 {
 	static bool bTrackStats = false;
-	static FAutoConsoleVariableRef CVAR_TrackStats(
+	static FAutoConsoleVariableRef CVAR_bTrackStats(
 		TEXT("N.ActorPools.TrackStats"),
 		bTrackStats,
 		TEXT("Track stats via internal stats system."),
@@ -64,14 +63,14 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 bool UNActorPoolSubsystem::IsTickable() const
 {
 	
-	return NEXUS::ActorPools::bTrackStats || bHasTickableActorPools || bHasTickableSpawners;
+	return NEXUS::ActorPools::ConsoleCommands::bTrackStats || bHasTickableActorPools || bHasTickableSpawners;
 }
 
 void UNActorPoolSubsystem::Tick(float DeltaTime)
 {
-	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_ActorPoolSubsystemTick, NEXUS::ActorPools::bTrackStats);
+	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_ActorPoolSubsystemTick, NEXUS::ActorPools::ConsoleCommands::bTrackStats);
 	
-	if (NEXUS::ActorPools::bTrackStats)
+	if (NEXUS::ActorPools::ConsoleCommands::bTrackStats)
 	{
 		SET_DWORD_STAT(STAT_ActorPoolCount, ActorPools.Num())
 		SET_DWORD_STAT(STAT_InActors, 0)
@@ -94,7 +93,7 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 		}
 	}
 
-	if (NEXUS::ActorPools::bTrackStats)
+	if (NEXUS::ActorPools::ConsoleCommands::bTrackStats)
 	{
 		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
 		{
