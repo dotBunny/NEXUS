@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.6] - 2026-01-17
+## [0.2.6] - 2026-01-18
 
 ### Added
 
@@ -10,6 +10,8 @@
 
 ### Changed
 
+- Numerous enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
+- Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
 

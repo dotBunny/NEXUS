@@ -12,6 +12,14 @@ class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject
 	GENERATED_BODY()
 
 public:
+
+	static UNActorPoolObject* Create(UObject* Outer, FNActorPool* ActorPool)
+	{
+		UNActorPoolObject* Object = NewObject<UNActorPoolObject>(Outer, StaticClass(), NAME_None, RF_Transient);
+		Object->Link(ActorPool);
+		return Object;
+	}
+	
 	void Link(FNActorPool* NewPool)
 	{
 		this->Pool = NewPool;

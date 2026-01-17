@@ -4,6 +4,7 @@
 #include "NActorPoolSubsystem.h"
 #include "INActorPoolItem.h"
 #include "NActorPool.h"
+#include "NActorPoolObject.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
 
@@ -11,7 +12,7 @@ namespace NEXUS::ActorPools
 {
 	static bool bTrackStats = false;
 	static FAutoConsoleVariableRef CVAR_TrackStats(
-		TEXT("NEXUS.ActorPools.TrackStats"),
+		TEXT("N.ActorPools.TrackStats"),
 		bTrackStats,
 		TEXT("Track stats via internal stats system."),
 		ECVF_Default | ECVF_Preview);
@@ -161,6 +162,18 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 		}
 	}
 	
+}
+
+TArray<FNActorPool*> UNActorPoolSubsystem::GetAllPools() const
+{
+	TArray<FNActorPool*> ReturnPools;
+	ReturnPools.Reserve(ActorPools.Num());
+		
+	for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
+	{
+		ReturnPools.Add(Pair.Value().Get());
+	}
+	return MoveTemp(ReturnPools);
 }
 
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)

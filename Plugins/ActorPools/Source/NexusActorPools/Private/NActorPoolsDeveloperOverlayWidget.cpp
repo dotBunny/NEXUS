@@ -90,7 +90,6 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 		if (Object->GetPoolWorld() == World)
 		{
 			ActorPoolList->RemoveItem(Object);
-			// 	Object->RemoveFromRoot();
 		}
 	}
 }
@@ -108,8 +107,5 @@ void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
 
 void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)
 {
-	UNActorPoolObject* Object = NewObject<UNActorPoolObject>(this, UNActorPoolObject::StaticClass(), NAME_None, RF_Transient);
-	Object->Link(ActorPool);
-	//Object->AddToRoot();
-	ActorPoolList->AddItem(Object);
+	ActorPoolList->AddItem(UNActorPoolObject::Create(this, ActorPool));
 }

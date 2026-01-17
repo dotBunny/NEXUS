@@ -9,6 +9,7 @@
 #include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.generated.h"
 
+class UNActorPoolObject;
 class UNActorPoolSet;
 class UNActorPoolSpawnerComponent;
 
@@ -72,7 +73,7 @@ public:
 
 	/**
 	 * Attempts to return an Actor to its owning pool.
-	 * @note If the returned actor does not belong in a pool (and UNActorPoolsSettings::bCreatePoolForUnknownActors is false), it may be destroyed, in that case it will return true.
+	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehaviour is applied.
 	 * @param Actor The target actor to return to a pool.
 	 * @return true/false if the Actor was returned to a pool.
 	 */
@@ -130,25 +131,16 @@ public:
 
 	/**
 	 * Event triggered when a new pool is added to the UNActorPoolSubsystem.
+	 * @remark Meant for native code only to ensure efficiency.
 	 */
 	OnActorPoolAddedDelegate OnActorPoolAdded;
 
 	/**
 	 * Get an array of all the Actor Pools.
-	 * @return An array of UniquePtr to all the known FNActorPools
+	 * @return An array of raw pointers to all the known FNActorPools
 	 * @remark This is not meant to be used often and is more for debugging purposes.
 	 */
-	TArray<FNActorPool*> GetAllPools() const
-	{
-		TArray<FNActorPool*> ReturnPools;
-		ReturnPools.Reserve(ActorPools.Num());
-		
-		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
-		{
-			ReturnPools.Add(Pair.Value().Get());
-		}
-		return MoveTemp(ReturnPools);
-	}
+	TArray<FNActorPool*> GetAllPools() const;
 
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
