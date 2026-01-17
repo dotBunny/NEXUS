@@ -7,6 +7,7 @@
 - `Windows > NEXUS > Actor Pools` a tab for monitoring the pressure on the `UNActorPoolSubsystem` in realtime. 
 - `FNDeveloperUtils::GetRootSetObjects()` / `FNDeveloperUtils::DumpRootSetToLog()` to help with debugging world tear down issues.
 - `FNMultiplayerUtils::GetPing()`
+- `UNTextRenderComponent` icon in editor.
 
 ### Changed
 
@@ -14,6 +15,7 @@
 - Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
+- `UNTextRenderComponent` will now ensure that its owning `AActor` on `BeginPlay` is replicated.
 
 ### Core Redirects
 
