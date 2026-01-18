@@ -160,7 +160,7 @@ void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, con
 void UNEditorUtilityWidgetSystem::SavePersistentWidgets()
 {
 	PersistentIdentifiers.Empty();
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("Saving %d persistent widgets."), KnownWidgetStateProviders.Num());
+	//UE_LOG(LogNexusUIEditor, Warning, TEXT("Saving %d persistent widgets."), KnownWidgetStateProviders.Num());
 	for (auto Provider : KnownWidgetStateProviders)
 	{
 		if (!HasWidgetState(Provider.Key))
