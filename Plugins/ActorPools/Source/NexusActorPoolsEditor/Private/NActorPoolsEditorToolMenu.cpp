@@ -45,5 +45,5 @@ void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
 
 bool FNActorPoolsEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(EditorUtilityWindowName);
+	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
 }

@@ -19,11 +19,10 @@ public:
 	
 	static UNWidgetEditorUtilityWidget* GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText = FText::GetEmpty(), const FName& TabIconStyle = TEXT(""), const FString& TabIconName = TEXT(""));
 	
-	static bool HasEditorUtilityWidget(FName Identifier);
-	static UNWidgetEditorUtilityWidget* GetEditorUtilityWidget(FName Identifier);
+	static bool HasWidget(FName Identifier);
+	static UNWidgetEditorUtilityWidget* GetWidget(FName Identifier);
 	
 	virtual FText GetTabDisplayText() const override;
-	
 	virtual FSlateIcon GetTabDisplayIcon() override;
 
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayBrush() override;
@@ -48,16 +47,13 @@ public:
 		return TemplatePath;
 	}
 	
-
-	
-
 	//~INWidgetStateProvider interface
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
 
 protected:
-	
+
 	virtual void NativeDestruct() override;
 	
 	UPROPERTY(BlueprintReadOnly)

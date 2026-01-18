@@ -40,33 +40,14 @@ public:
 		}
 	}
 	
-	FNWidgetState GetFullWidgetState()
+	FNWidgetState GetState()
 	{
 		return GetWidgetState(this);
 	};
 	
-
-
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bShouldSerializeState = true;
-
-	/**
-	 * Accessing this has to happen on the following frame after constructing the widget.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D UnitScale = FVector2D::One();	
-
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;	
-	
-	virtual FName GetTabIdentifier()
+	bool IsPersistent() const
 	{
-		if (PinnedTemplate != nullptr)
-		{
-			return PinnedTemplate->GetRegistrationName();
-		}
-		return GetFName();
+		return bIsPersistent;
 	}
 	
 	virtual FName GetUserSettingsIdentifier()
@@ -86,6 +67,31 @@ protected:
 		}
 		return GetFullName();
 	}
+
+protected:
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsPersistent = false;
+	
+	/**
+	 * Accessing this has to happen on the following frame after constructing the widget.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector2D UnitScale = FVector2D::One();	
+
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;	
+	
+	virtual FName GetTabIdentifier()
+	{
+		if (PinnedTemplate != nullptr)
+		{
+			return PinnedTemplate->GetRegistrationName();
+		}
+		return GetFName();
+	}
+	
+	
 	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;

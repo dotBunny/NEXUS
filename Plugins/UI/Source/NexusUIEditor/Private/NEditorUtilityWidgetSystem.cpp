@@ -8,21 +8,34 @@
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
 
-TMap<FName, INWidgetStateProvider*> UNEditorUtilityWidgetSystem::KnownWidgetStateProviders;
+TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::KnownWidgets;
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
 	
-	MapChangedDelegateHandle = FEditorDelegates::MapChange.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapChanged);
+	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
 	
-	
+	// Bind to look for when we are changing worlds/maps and prepare to have to remake tabs
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (AssetEditorSubsystem != nullptr)
+	{
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+	}
+
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
 void UNEditorUtilityWidgetSystem::Deinitialize()
 {
-	FEditorDelegates::MapChange.Remove(MapChangedDelegateHandle);
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (AssetEditorSubsystem != nullptr)
+	{
+		AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(OnAssetEditorRequestedOpenHandle);
+	}
+	
+	FEditorDelegates::OnMapOpened.Remove(OnMapOpenedHandle);
+
 	Super::Deinitialize();
 }
 
@@ -40,7 +53,7 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	const FName Identifier(IdentifierString);
 			
 	// Need to duplicate the base
-	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
+	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), NAME_None);
 	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
 	UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate);
@@ -64,63 +77,34 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	return nullptr;
 }
 
-void UNEditorUtilityWidgetSystem::OnMapChanged(uint32 MapChangeFlags)
-{
-	// THIS HAPPENS AFTER THE WINDOW HAS ALREADY BEEN DESTROYED
-	UE_LOG(LogNexusUIEditor, Log, TEXT("Map changed event fired. %i"), MapChangeFlags);
-	SavePersistentWidgets();
-	// if (MapChangeFlags == MapChangeEventFlags::WorldTornDown)
-	// {
-	// 	SavePersistentWidgets();
-	// }
-	// if ( MapChangeFlags == MapChangeEventFlags::NewMap)
-	// {
-	// 	RecreatePersistentWidgets();
-	// }
-}
 
 void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
-	// Check for already registered
-	int32 WorkingIndex = GetIdentifierIndex(Identifier);
-	if (WorkingIndex == INDEX_NONE)
+	if (SavedState.AddWidgetState(Identifier, Template, WidgetState))
 	{
-		// Add our items
-		WorkingIndex = Identifiers.Add(Identifier);
-		const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState);
-		const int32 TemplateIndexCheck = Templates.Add(Template);
-		
-		// Sanity check
-		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
-		{
-			UE_LOG(LogNexusUIEditor, Error, TEXT("Sanity check of the known registered widgets's arrays shows inconsistencies; data will be cleared."))
-			ClearStateData();
-		}
+		SaveConfig();
 	}
-	else
-	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("A widget is already registered for Identifier(%s); updating cached state only."), *Identifier.ToString());
-		WidgetStates[WorkingIndex] = WidgetState;
-	}
-	
-	SaveConfig();
 }
 
 void UNEditorUtilityWidgetSystem::RemoveWidgetState(const FName& Identifier)
 {
-	const int32 WorkingIndex = GetIdentifierIndex(Identifier);
-	if (WorkingIndex != INDEX_NONE)
+	if (SavedState.RemoveWidgetState(Identifier))
 	{
-		Identifiers.RemoveAt(WorkingIndex);
-		Templates.RemoveAt(WorkingIndex);
-		WidgetStates.RemoveAt(WorkingIndex);
-		
 		SaveConfig();
 	}
-	else
+}
+
+void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
+{
+	if (SavedState.UpdateWidgetState(Identifier, WidgetState))
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Failed to unregister widget(%s); no registered widget was found."), *Identifier.ToString());
+		SaveConfig();
 	}
+}
+
+bool UNEditorUtilityWidgetSystem::HasWidgetState(const FName& Identifier) const
+{
+	return SavedState.HasWidgetState(Identifier);
 }
 
 void UNEditorUtilityWidgetSystem::RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier,
@@ -140,72 +124,78 @@ void UNEditorUtilityWidgetSystem::RestoreWidgetState(UNEditorUtilityWidget* Widg
 	}
 }
 
-void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
+void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 {
-	const int32 WorkingIndex = GetIdentifierIndex(Identifier);
-	if (WorkingIndex != INDEX_NONE)
+	if (Cast<UWorld>(Object) == nullptr) return;
+	
+	// Were about to lose our world, we need to save things
+	TemporaryState.Clear();
+	for (const auto Widget : KnownWidgets)
 	{
-		WidgetStates[WorkingIndex] = WidgetState;
-		SaveConfig();
-	}
-	else
-	{
-		UE_LOG(LogNexusUIEditor, Error, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
-	}
-}
-
-
-
-
-void UNEditorUtilityWidgetSystem::SavePersistentWidgets()
-{
-	PersistentIdentifiers.Empty();
-	//UE_LOG(LogNexusUIEditor, Warning, TEXT("Saving %d persistent widgets."), KnownWidgetStateProviders.Num());
-	for (auto Provider : KnownWidgetStateProviders)
-	{
-		if (!HasWidgetState(Provider.Key))
+		if (!Widget->IsPersistent())
 		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to recreate widget(%s)."), *Provider.Key.ToString());
 			continue;
-		}
-
-		UNEditorUtilityWidget* EUW = Cast<UNEditorUtilityWidget>(Provider.Value);
-		if (EUW != nullptr)
-		{
-			UpdateWidgetState(Provider.Key, EUW->GetFullWidgetState());
-		}
-		else
-		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to cast widget(%s)."), *Provider.Key.ToString());
-		}
+		};
 		
+		// Add to our temp cache
+		TemporaryState.AddWidgetState(
+			Widget->GetUserSettingsIdentifier(), 
+			Widget->GetUserSettingsTemplate(),
+			Widget->GetState());
 	}
 }
-void UNEditorUtilityWidgetSystem::RecreatePersistentWidgets()
+
+void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
 {
-	if (PersistentIdentifiers.Num() > 0)
+	// Don't recreate 
+	if (bAsTemplate) return;
+	
+	// Restore things
+	const int Count = TemporaryState.GetCount();
+	for (int i = 0; i < Count; ++i)
 	{
-		for (auto Identifier : PersistentIdentifiers)
-		{
-			UE_LOG(LogNexusUIEditor, Log, TEXT("Creating persistent widget(%s)."), *Identifier.ToString());
-	// 		UNWidgetEditorUtilityWidget* Widget = UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(Identifier);
-	// 		if (Widget != nullptr)
-	// 		{
-	// 			CreateWithState(Templates[GetIdentifierIndex(Identifier)], Identifier, WidgetStates[GetIdentifierIndex(Identifier)]);
-	// 		}
-		}
-		PersistentIdentifiers.Empty();
+		
+		CreateWithState(TemporaryState.Templates[i], TemporaryState.Identifiers[i], TemporaryState.WidgetStates[i]);
+	}
+	TemporaryState.Clear();
+}
+
+void UNEditorUtilityWidgetSystem::RegisterWidget(UNEditorUtilityWidget* Widget)
+{
+	if (!KnownWidgets.Contains(Widget))
+	{
+		KnownWidgets.Add(Widget);
 	}
 }
 
-void UNEditorUtilityWidgetSystem::RegisterAsPersistent(const FName& Identifier,
-	INWidgetStateProvider* WidgetStateProvider)
+void UNEditorUtilityWidgetSystem::UnregisterWidget(UNEditorUtilityWidget* Widget)
 {
-	KnownWidgetStateProviders.Add(Identifier, WidgetStateProvider);
+	if (KnownWidgets.Contains(Widget))
+	{
+		KnownWidgets.Remove(Widget);
+	}
 }
 
-void UNEditorUtilityWidgetSystem::UnregisterAsPersistent(const FName& Identifier,
-	INWidgetStateProvider* WidgetStateProvider)
+UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::GetWidget(const FName& Identifier)
 {
-	KnownWidgetStateProviders.Remove(Identifier);
+	for (const auto Widget : KnownWidgets)
+	{
+		if (Widget->GetUserSettingsIdentifier() == Identifier)
+		{
+			return Widget;
+		}
+	}
+	return nullptr;
+}
+
+bool UNEditorUtilityWidgetSystem::HasWidget(const FName& Identifier)
+{
+	for (const auto Widget : KnownWidgets)
+	{
+		if (Widget->GetUserSettingsIdentifier() == Identifier)
+		{
+			return true;
+		}
+	}
+	return false;
 }

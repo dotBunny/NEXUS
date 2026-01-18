@@ -3,21 +3,14 @@
 
 #pragma once
 
-#include "INWidgetStateProvider.h"
 #include "NWidgetState.h"
+#include "NWidgetStateSnapshot.h"
 #include "Engine/DeveloperSettings.h"
 #include "NEditorUtilityWidgetSystem.generated.h"
 
 class UNEditorUtilityWidget;
 
 
-// use this to store a snap shot ? 
-struct FNWidgetStateSnapshot
-{
-	TArray<FName> Identifiers;
-	TArray<FString> Templates;	
-	TArray<FNWidgetState> WidgetStates;
-};
 
 
 /**
@@ -29,53 +22,37 @@ class NEXUSUIEDITOR_API UNEditorUtilityWidgetSystem : public UEditorSubsystem
 public:
 	GENERATED_BODY()
 
+	static void RegisterWidget(UNEditorUtilityWidget* Widget);
+	static void UnregisterWidget(UNEditorUtilityWidget* Widget);
+	static UNEditorUtilityWidget* GetWidget(const FName& Identifier);
+	static bool HasWidget(const FName& Identifier);
 	
 	static UNEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
+	static void RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier, FNWidgetState& WidgetState);
+
 	
-	void OnMapChanged(uint32 MapFlags);
+	void OnAssetEditorRequestedOpen(UObject* Object);
+	void OnMapOpened(const FString& Filename, bool bAsTemplate);
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
 	void AddWidgetState(const FName& Identifier, const FString& Template,  const FNWidgetState& WidgetState);
 	void RemoveWidgetState(const FName& Identifier);
 	void UpdateWidgetState(const FName& Identifier,  const FNWidgetState& WidgetState);
-	bool HasWidgetState(const FName& Identifier) const
-	{
-		return Identifiers.Contains(Identifier);
-	}
-	
-	static void RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier, FNWidgetState& WidgetState);
-	
-	void SavePersistentWidgets();
-	void RecreatePersistentWidgets();
-	
-	static void RegisterAsPersistent(const FName& Identifier, INWidgetStateProvider* WidgetStateProvider);
-	static void UnregisterAsPersistent(const FName& Identifier, INWidgetStateProvider* WidgetStateProvider);
-	
-	void ClearStateData()
-	{
-		Identifiers.Empty(); 
-		Templates.Empty();
-		WidgetStates.Empty();
-	}
+	bool HasWidgetState(const FName& Identifier) const;
 	
 	
-	
-	UPROPERTY(config)
-	TArray<FName> Identifiers;
-	UPROPERTY(config)
-	TArray<FString> Templates;	
-	UPROPERTY(config)
-	TArray<FNWidgetState> WidgetStates;
+	UPROPERTY(config)   
+	FNWidgetStateSnapshot SavedState;
 
 private:
-	int32 GetIdentifierIndex(const FName Identifier) const { return Identifiers.IndexOfByKey(Identifier);}
 	
+	FDelegateHandle OnAssetEditorRequestedOpenHandle;
+	FDelegateHandle OnMapOpenedHandle;
 	
-	FDelegateHandle MapChangedDelegateHandle;
-	TArray<FName> PersistentIdentifiers;
+	FNWidgetStateSnapshot TemporaryState;
 	
-	
-	static TMap<FName, INWidgetStateProvider*> KnownWidgetStateProviders;
+	static TArray<UNEditorUtilityWidget*> KnownWidgets;
 };
 

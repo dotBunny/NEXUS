@@ -19,6 +19,8 @@ void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
+	UNEditorUtilityWidgetSystem::RegisterWidget(this);
+	
 	// Bind our default behaviour
 	OnTabClosedCallback.BindUObject(this, &UNEditorUtilityWidget::OnTabClosed);
 	
@@ -30,6 +32,8 @@ void UNEditorUtilityWidget::NativeConstruct()
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
+	UNEditorUtilityWidgetSystem::UnregisterWidget(this);
+	
 	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 	EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
 	
@@ -46,9 +50,17 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	FNEditorUtils::UpdateWorkspaceItem(GetTabIdentifier(), GetTabDisplayText(), GetTabDisplayIcon());
 	
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
-	if (bShouldSerializeState)
+	if (IsPersistent())
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetFullWidgetState());
+		UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>();
+		if (System->HasWidgetState(GetUserSettingsIdentifier()))
+		{
+			System->UpdateWidgetState(GetUserSettingsIdentifier(), GetState());
+		}
+		else
+		{
+			System->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetState());
+		}
 	}
 	
 	// We need a render to happen so this can be updated
@@ -57,7 +69,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (bShouldSerializeState && !IsEngineExitRequested())
+	if (IsPersistent() && !IsEngineExitRequested())
 	{
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetUserSettingsIdentifier());
 	}

@@ -324,5 +324,5 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(EditorUtilityWindowName);
+	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
 }

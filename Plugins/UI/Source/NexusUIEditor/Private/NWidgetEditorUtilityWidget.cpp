@@ -21,7 +21,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	}
 	
 	// Return existing and flash it
-	if (UNWidgetEditorUtilityWidget* ExistingWidget = GetEditorUtilityWidget(Identifier); 
+	if (UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
 		ExistingWidget != nullptr)
 	{
 		FNEditorUtils::FocusTab(ExistingWidget->GetTabIdentifier());
@@ -34,12 +34,12 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	return Cast<UNWidgetEditorUtilityWidget>(Widget);
 }
 
-bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
+bool UNWidgetEditorUtilityWidget::HasWidget(const FName Identifier)
 {
 	return KnownWidgets.Contains(Identifier);
 }
 
-UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(const FName Identifier)
+UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetWidget(const FName Identifier)
 {
 	if (KnownWidgets.Contains(Identifier))
 	{
@@ -183,6 +183,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	}
 	
 }
+
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
