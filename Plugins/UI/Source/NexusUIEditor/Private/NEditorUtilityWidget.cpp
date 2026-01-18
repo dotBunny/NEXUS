@@ -14,6 +14,7 @@ const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_
 const FString UNEditorUtilityWidget::WidgetState_TabIconStyle = TEXT("NWidget_TabIconStyle");
 const FString UNEditorUtilityWidget::WidgetState_TabIconName = TEXT("NWidget_TabIconName");
 
+
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -45,9 +46,9 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	FNEditorUtils::UpdateWorkspaceItem(GetTabIdentifier(), GetTabDisplayText(), GetTabDisplayIcon());
 	
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
-	if (bShouldSerializeWidget)
+	if (bShouldSerializeState)
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetFullWidgetState());
 	}
 	
 	// We need a render to happen so this can be updated
@@ -56,7 +57,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (bShouldSerializeWidget && !IsEngineExitRequested())
+	if (bShouldSerializeState && !IsEngineExitRequested())
 	{
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetUserSettingsIdentifier());
 	}

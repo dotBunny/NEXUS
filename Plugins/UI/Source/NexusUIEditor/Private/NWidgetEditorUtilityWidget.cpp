@@ -9,7 +9,7 @@
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
 
-TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
+TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownWidgets;
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
 
 UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
@@ -36,14 +36,14 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 
 bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
 {
-	return KnownEditorUtilityWidgets.Contains(Identifier);
+	return KnownWidgets.Contains(Identifier);
 }
 
 UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(const FName Identifier)
 {
-	if (KnownEditorUtilityWidgets.Contains(Identifier))
+	if (KnownWidgets.Contains(Identifier))
 	{
-		return KnownEditorUtilityWidgets[Identifier];
+		return KnownWidgets[Identifier];
 	}
 	return nullptr;
 }
@@ -186,7 +186,8 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	KnownEditorUtilityWidgets.Remove(WidgetIdentifier);
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("Destroying UNWidgetEditorUtilityWidget."))
+	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
 }
 
@@ -195,6 +196,6 @@ void UNWidgetEditorUtilityWidget::NativeDestruct()
 void UNWidgetEditorUtilityWidget::DelayedConstructTask()
 {
 	// We register a frame later as the base widget data has been set at that point
-	KnownEditorUtilityWidgets.Add(WidgetIdentifier, this);
+	KnownWidgets.Add(WidgetIdentifier, this);
 	Super::DelayedConstructTask();
 }

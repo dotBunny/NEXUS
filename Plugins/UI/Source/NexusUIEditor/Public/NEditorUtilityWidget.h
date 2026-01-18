@@ -39,11 +39,18 @@ public:
 			PinnedTemplate = nullptr;
 		}
 	}
+	
+	FNWidgetState GetFullWidgetState()
+	{
+		return GetWidgetState(this);
+	};
+	
+
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bShouldSerializeWidget = true;
-	
+	bool bShouldSerializeState = true;
+
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
@@ -88,6 +95,8 @@ protected:
 	
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
 
+
 private:
+	
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

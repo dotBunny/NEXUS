@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSystem.h"
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
@@ -46,6 +47,9 @@ public:
 	{
 		return TemplatePath;
 	}
+	
+
+	
 
 	//~INWidgetStateProvider interface
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
@@ -76,7 +80,7 @@ protected:
 
 private:
 	virtual void DelayedConstructTask() override;
-	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownEditorUtilityWidgets;
+	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
 };
 

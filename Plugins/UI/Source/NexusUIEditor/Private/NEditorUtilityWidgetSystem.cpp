@@ -3,44 +3,27 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "IBlutilityModule.h"
-#include "LevelEditor.h"
+
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
 
-void UNEditorUtilityWidgetSystem::OnMapChanged(UWorld* World, EMapChangeType MapChange)
-{
-	switch (MapChange)
-	{
-		using enum EMapChangeType;
-	case TearDownWorld:
-		// Save ?
-		break;
-	case NewMap:
-		// Restore
-		break;
-	case LoadMap:
-		break;
-	case SaveMap:
-		break;
-	}
-}
+TMap<FName, INWidgetStateProvider*> UNEditorUtilityWidgetSystem::KnownWidgetStateProviders;
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	UNEditorUtilityWidgetLoadTask::Create();
 	
-	// Bind to map change event
-	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	MapChangeDelegateHandle = LevelEditorModule.OnMapChanged().AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapChanged);
+	MapChangedDelegateHandle = FEditorDelegates::MapChange.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapChanged);
+	
+	
+	UNEditorUtilityWidgetLoadTask::Create();
 }
 
 void UNEditorUtilityWidgetSystem::Deinitialize()
 {
-	// Unbind map change event
-	FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
-	LevelEditorModule.OnMapChanged().Remove(MapChangeDelegateHandle);
+	FEditorDelegates::MapChange.Remove(MapChangedDelegateHandle);
+	Super::Deinitialize();
 }
 
 UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
@@ -81,6 +64,21 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 	return nullptr;
 }
 
+void UNEditorUtilityWidgetSystem::OnMapChanged(uint32 MapChangeFlags)
+{
+	// THIS HAPPENS AFTER THE WINDOW HAS ALREADY BEEN DESTROYED
+	UE_LOG(LogNexusUIEditor, Log, TEXT("Map changed event fired. %i"), MapChangeFlags);
+	SavePersistentWidgets();
+	// if (MapChangeFlags == MapChangeEventFlags::WorldTornDown)
+	// {
+	// 	SavePersistentWidgets();
+	// }
+	// if ( MapChangeFlags == MapChangeEventFlags::NewMap)
+	// {
+	// 	RecreatePersistentWidgets();
+	// }
+}
+
 void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
 	// Check for already registered
@@ -96,7 +94,7 @@ void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const 
 		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
 		{
 			UE_LOG(LogNexusUIEditor, Error, TEXT("Sanity check of the known registered widgets's arrays shows inconsistencies; data will be cleared."))
-			Clear();
+			ClearStateData();
 		}
 	}
 	else
@@ -154,4 +152,60 @@ void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, con
 	{
 		UE_LOG(LogNexusUIEditor, Error, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
 	}
+}
+
+
+
+
+void UNEditorUtilityWidgetSystem::SavePersistentWidgets()
+{
+	PersistentIdentifiers.Empty();
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("Saving %d persistent widgets."), KnownWidgetStateProviders.Num());
+	for (auto Provider : KnownWidgetStateProviders)
+	{
+		if (!HasWidgetState(Provider.Key))
+		{
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to recreate widget(%s)."), *Provider.Key.ToString());
+			continue;
+		}
+
+		UNEditorUtilityWidget* EUW = Cast<UNEditorUtilityWidget>(Provider.Value);
+		if (EUW != nullptr)
+		{
+			UpdateWidgetState(Provider.Key, EUW->GetFullWidgetState());
+		}
+		else
+		{
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to cast widget(%s)."), *Provider.Key.ToString());
+		}
+		
+	}
+}
+void UNEditorUtilityWidgetSystem::RecreatePersistentWidgets()
+{
+	if (PersistentIdentifiers.Num() > 0)
+	{
+		for (auto Identifier : PersistentIdentifiers)
+		{
+			UE_LOG(LogNexusUIEditor, Log, TEXT("Creating persistent widget(%s)."), *Identifier.ToString());
+	// 		UNWidgetEditorUtilityWidget* Widget = UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(Identifier);
+	// 		if (Widget != nullptr)
+	// 		{
+	// 			CreateWithState(Templates[GetIdentifierIndex(Identifier)], Identifier, WidgetStates[GetIdentifierIndex(Identifier)]);
+	// 		}
+		}
+		PersistentIdentifiers.Empty();
+	}
+}
+
+void UNEditorUtilityWidgetSystem::RegisterAsPersistent(const FName& Identifier,
+	INWidgetStateProvider* WidgetStateProvider)
+{
+	KnownWidgetStateProviders.Add(Identifier, WidgetStateProvider);
+}
+
+void UNEditorUtilityWidgetSystem::UnregisterAsPersistent(const FName& Identifier,
+	INWidgetStateProvider* WidgetStateProvider)
+{
+	KnownWidgetStateProviders.Remove(Identifier);
 }

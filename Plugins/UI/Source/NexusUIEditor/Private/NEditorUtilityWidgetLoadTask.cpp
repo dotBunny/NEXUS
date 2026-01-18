@@ -24,7 +24,7 @@ void UNEditorUtilityWidgetLoadTask::Execute()
 		const TArray<FString> TemplatesCopy = System->Templates;
 		TArray<FNWidgetState> WidgetStatesCopy = System->WidgetStates;
 		
-		System->Clear();
+		System->ClearStateData();
 
 		const int32 Count = IdentifiersCopy.Num();
 		
