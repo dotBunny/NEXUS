@@ -8,7 +8,8 @@
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
 
-TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::KnownWidgets;
+TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::PersistentWidgets;
+FNWidgetStateSnapshot UNEditorUtilityWidgetSystem::PersistentStates;
 bool UNEditorUtilityWidgetSystem::bIsOpeningMap = false;
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -18,9 +19,9 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	if (AssetEditorSubsystem != nullptr)
 	{
-		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddStatic(&UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
 	}
-	FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
+	FEditorDelegates::OnMapOpened.AddStatic(&UNEditorUtilityWidgetSystem::OnMapOpened);
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
@@ -38,35 +39,27 @@ void UNEditorUtilityWidgetSystem::Deinitialize()
 
 void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 {
-	UE_LOG(LogNexusUIEditor, Warning, TEXT(" UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen"));
 	// We only want to do something when were opening worlds as an asset
 	if (!Cast<UWorld>(Object)) return;
 	
 	bIsOpeningMap = true;
 	
 	// Record our transient rebuild data
-	TransientStates.Clear();
-	for (UNEditorUtilityWidget* Widget : KnownWidgets)
+	PersistentStates.Clear();
+	for (UNEditorUtilityWidget* Widget : PersistentWidgets)
 	{
 		if (Widget->IsPersistent())
 		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("RECORD STATE"));
-			TransientStates.AddWidgetState(
+			PersistentStates.AddWidgetState(
 				Widget->GetUserSettingsIdentifier(), 
 				Widget->GetUserSettingsTemplate(), 
-				Widget->GetState());
-			
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("ID: %s"), *Widget->GetUserSettingsIdentifier().ToString());
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Template: %s"), *Widget->GetUserSettingsTemplate());
+				Widget->GetWidgetState(Widget));
 		}
 	}
-	
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("Recording transient widget states for %d widgets"), TransientStates.Identifiers.Num());
 }
 
 void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
 {
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnMapOpened"));
 	bIsOpeningMap = false;
 }
 
@@ -159,54 +152,36 @@ FNWidgetState& UNEditorUtilityWidgetSystem::GetWidgetState(const FName& Identifi
 	return WidgetStates.GetWidgetState(Identifier);
 }
 
-void UNEditorUtilityWidgetSystem::RestoreTransientWidget(UNEditorUtilityWidget* Widget)
+void UNEditorUtilityWidgetSystem::RestorePersistentWidget(UNEditorUtilityWidget* Widget)
 {
-	if (TransientStates.GetCount() > 0)
+	int32 TransientStateCount = PersistentStates.GetCount();
+	if (TransientStateCount > 0)
 	{
-		int32 Index = TransientStates.GetCount() - 1;
-		UE_LOG(LogNexusUIEditor, Log, TEXT("Restoring transient widget state for %s"), *TransientStates.Identifiers[Index].ToString());
-		Widget->RestoreWidgetState(Widget, TransientStates.Identifiers[Index], TransientStates.WidgetStates[Index]);
-		TransientStates.RemoveAtIndex(Index);
-	}
-}
-
-
-void UNEditorUtilityWidgetSystem::RegisterWidget(UNEditorUtilityWidget* Widget)
-{
-	if (!KnownWidgets.Contains(Widget))
-	{
-		KnownWidgets.Add(Widget);
-	}
-}
-
-void UNEditorUtilityWidgetSystem::UnregisterWidget(UNEditorUtilityWidget* Widget)
-{
-	if (KnownWidgets.Contains(Widget))
-	{
-		KnownWidgets.Remove(Widget);
-	}
-}
-
-UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::GetWidget(const FName& Identifier)
-{
-	for (const auto Widget : KnownWidgets)
-	{
-		if (Widget->GetUserSettingsIdentifier() == Identifier)
+		const FString& WidgetTemplate = Widget->GetUserSettingsTemplate(); 
+		for (int32 Index = TransientStateCount - 1; Index >= 0; Index--)
 		{
-			return Widget;
+			if (PersistentStates.Templates[Index] == WidgetTemplate)
+			{
+				Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
+				PersistentStates.RemoveAtIndex(Index);
+			}
 		}
 	}
-	return nullptr;
 }
 
-bool UNEditorUtilityWidgetSystem::HasWidget(const FName& Identifier)
+
+void UNEditorUtilityWidgetSystem::RegisterPersistentWidget(UNEditorUtilityWidget* Widget)
 {
-	for (const auto Widget : KnownWidgets)
+	if (!PersistentWidgets.Contains(Widget))
 	{
-		if (Widget->GetUserSettingsIdentifier() == Identifier)
-		{
-			return true;
-		}
+		PersistentWidgets.Add(Widget);
 	}
-	return false;
+}
+
+void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(UNEditorUtilityWidget* Widget)
+{
+	if (PersistentWidgets.Contains(Widget))
+	{
+		PersistentWidgets.Remove(Widget);
+	}
 }

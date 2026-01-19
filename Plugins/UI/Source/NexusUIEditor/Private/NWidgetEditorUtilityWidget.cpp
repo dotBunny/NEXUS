@@ -191,21 +191,20 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 
 void UNWidgetEditorUtilityWidget::NativeConstruct()
 {
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNWidgetEditorUtilityWidget::NativeConstruct: %s"), *GetUserSettingsIdentifier().ToString());
 	Super::NativeConstruct();
-	
 	if (IsPersistent() && !bHasWidgetStateBeenRestored)
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Has Not Been Restored"));
-		UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>();
-		System->RestoreTransientWidget(this);
+		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+		if (System != nullptr)
+		{
+			System->RestorePersistentWidget(this);
+		}
 	}
 }
 
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNWidgetEditorUtilityWidget::NativeDestruct: %s"), *GetUserSettingsIdentifier().ToString());
 	if (ContentWidgetTemplate != nullptr)
 	{
 		ContentWidgetTemplate->RemoveFromRoot();

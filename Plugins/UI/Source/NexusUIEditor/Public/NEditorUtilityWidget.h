@@ -25,82 +25,38 @@ public:
 	static const FString WidgetState_TabIconStyle;
 	static const FString WidgetState_TabIconName;
 	
-	void PinTemplate(UEditorUtilityWidgetBlueprint* Template)
-	{
-		PinnedTemplate = Template;
-		PinnedTemplate->AddToRoot();
-	}
-
-	void UnpinTemplate()
-	{
-		if (PinnedTemplate != nullptr)
-		{
-			PinnedTemplate->RemoveFromRoot();
-			PinnedTemplate = nullptr;
-		}
-	}
+	void PinTemplate(UEditorUtilityWidgetBlueprint* Template);
+	void UnpinTemplate();
 	
-	FNWidgetState GetState()
-	{
-		return GetWidgetState(this);
-	};
+	UFUNCTION(BlueprintCallable)
+	bool IsPersistent() const;
 	
-	bool IsPersistent() const
-	{
-		return bIsPersistent;
-	}
-	
-	virtual FName GetUserSettingsIdentifier()
-	{
-		if (PinnedTemplate != nullptr)
-		{
-			return PinnedTemplate->GetRegistrationName();
-		}
-		return GetFName();
-	}
-	
-	virtual FString GetUserSettingsTemplate()
-	{
-		if (PinnedTemplate != nullptr)
-		{
-			return PinnedTemplate->GetFullName();
-		}
-		return GetFullName();
-	}
+	virtual FName GetUserSettingsIdentifier();
+	virtual FString GetUserSettingsTemplate();
 
 protected:
 	
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;	
+	virtual FName GetTabIdentifier();
+	
+	UFUNCTION()
+	virtual void DelayedConstructTask();
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsPersistent = false;
+	
+	UPROPERTY(BlueprintReadOnly);
+	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 	
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D UnitScale = FVector2D::One();	
-
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;	
 	
-	virtual FName GetTabIdentifier()
-	{
-		if (PinnedTemplate != nullptr)
-		{
-			return PinnedTemplate->GetRegistrationName();
-		}
-		return GetFName();
-	}
-	
-	UPROPERTY(BlueprintReadOnly);
-	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
-	
-	
-	UFUNCTION()
-	virtual void DelayedConstructTask();
-	
+private:
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
 
-
-private:
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.6] - 2026-01-18
+## [0.2.6] - 2026-01-23
 
 ### Added
 
@@ -8,15 +8,19 @@
 - `FNDeveloperUtils::GetRootSetObjects()` / `FNDeveloperUtils::DumpRootSetToLog()` to help with debugging world tear down issues.
 - `FNMultiplayerUtils::GetPing()`
 - `UNTextRenderComponent` icon in editor.
+- `NEditorUtilityWidget` persistent flag can be used to automatically restore state across map changes (as the widgets are recreated).
 
 ### Changed
 
-- Numerous enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
+- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
 - Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
 - `UNTextRenderComponent` will now ensure that its owning `AActor` on `BeginPlay` is replicated.
 
+### Fixed
+
+- `NEditorUtilityWidget` no longer always get destroyed when changing maps in the editor.
 ### Core Redirects
 
 ```ini

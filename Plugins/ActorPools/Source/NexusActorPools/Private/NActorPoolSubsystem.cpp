@@ -63,7 +63,7 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 bool UNActorPoolSubsystem::IsTickable() const
 {
 	
-	return NEXUS::ActorPools::ConsoleCommands::bTrackStats || bHasTickableActorPools || bHasTickableSpawners;
+	return bHasTickableActorPools || bHasTickableSpawners || NEXUS::ActorPools::ConsoleCommands::bTrackStats;
 }
 
 void UNActorPoolSubsystem::Tick(float DeltaTime)

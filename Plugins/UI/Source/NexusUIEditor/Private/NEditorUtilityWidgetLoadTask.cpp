@@ -18,7 +18,8 @@ void UNEditorUtilityWidgetLoadTask::Create()
 
 void UNEditorUtilityWidgetLoadTask::Execute()
 {
-	if (UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>())
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System != nullptr)
 	{
 		const TArray<FName> IdentifiersCopy = System->WidgetStates.Identifiers;
 		const TArray<FString> TemplatesCopy = System->WidgetStates.Templates;

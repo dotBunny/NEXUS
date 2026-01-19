@@ -6,6 +6,7 @@
 #include "INProcGenOperationOwner.h"
 #include "NEditorUtils.h"
 #include "NProcGenOperation.h"
+#include "Macros/NEditorSubsystemMacros.h"
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
 
