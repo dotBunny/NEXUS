@@ -187,7 +187,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("Destroying UNWidgetEditorUtilityWidget."))
+	//UE_LOG(LogNexusUIEditor, Warning, TEXT("Destroying UNWidgetEditorUtilityWidget."))
 	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
 }

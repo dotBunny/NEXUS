@@ -34,8 +34,8 @@ void UNEditorUtilityWidget::NativeDestruct()
 {
 	UNEditorUtilityWidgetSystem::UnregisterWidget(this);
 	
-	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-	EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
+	//UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+	//EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
 	
 	UnpinTemplate();
 

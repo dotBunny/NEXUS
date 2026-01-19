@@ -36,6 +36,12 @@ struct FNWidgetStateSnapshot
 		return Identifiers.IndexOfByKey(Identifier);
 	}
 
+	bool DuplicateWidgetState(const FName Identifier, const FString Template, const FNWidgetState WidgetState)
+	{
+		
+		return AddWidgetState(Identifier, Template, WidgetState);
+	}
+	
 	bool AddWidgetState(const FName& Identifier, const FString& Template,  const FNWidgetState& WidgetState)
 	{
 		// Check for already registered
@@ -91,5 +97,10 @@ struct FNWidgetStateSnapshot
 	bool HasWidgetState(const FName& Identifier) const
 	{
 		return Identifiers.Contains(Identifier);
+	}
+	
+	FNWidgetState& GetWidgetState(const FName& Identifier)
+	{
+		return WidgetStates[GetIdentifierIndex(Identifier)];
 	}
 };

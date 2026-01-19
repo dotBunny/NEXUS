@@ -29,13 +29,8 @@ public:
 	
 	static UNEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
 	static void RestoreWidgetState(UNEditorUtilityWidget* Widget, const FName& Identifier, FNWidgetState& WidgetState);
-
-	
-	void OnAssetEditorRequestedOpen(UObject* Object);
-	void OnMapOpened(const FString& Filename, bool bAsTemplate);
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
 	
 	void AddWidgetState(const FName& Identifier, const FString& Template,  const FNWidgetState& WidgetState);
 	void RemoveWidgetState(const FName& Identifier);
@@ -47,11 +42,6 @@ public:
 	FNWidgetStateSnapshot SavedState;
 
 private:
-	
-	FDelegateHandle OnAssetEditorRequestedOpenHandle;
-	FDelegateHandle OnMapOpenedHandle;
-	
-	FNWidgetStateSnapshot TemporaryState;
 	
 	static TArray<UNEditorUtilityWidget*> KnownWidgets;
 };

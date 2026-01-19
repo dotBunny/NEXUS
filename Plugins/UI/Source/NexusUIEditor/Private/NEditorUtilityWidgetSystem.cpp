@@ -2,7 +2,6 @@
 
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "IBlutilityModule.h"
 
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
@@ -14,29 +13,7 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 {
 	Super::Initialize(Collection);
 	
-	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
-	
-	// Bind to look for when we are changing worlds/maps and prepare to have to remake tabs
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-	if (AssetEditorSubsystem != nullptr)
-	{
-		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
-	}
-
 	UNEditorUtilityWidgetLoadTask::Create();
-}
-
-void UNEditorUtilityWidgetSystem::Deinitialize()
-{
-	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
-	if (AssetEditorSubsystem != nullptr)
-	{
-		AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(OnAssetEditorRequestedOpenHandle);
-	}
-	
-	FEditorDelegates::OnMapOpened.Remove(OnMapOpenedHandle);
-
-	Super::Deinitialize();
 }
 
 UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
@@ -62,9 +39,10 @@ UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FStrin
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
 				
-		// We dont want these tracked
-		IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-		BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
+		// // We dont want these tracked (Remove from EUW window list)
+		// IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+		// BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
+		//
 		
 		UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
 		if (UtilityWidget != nullptr)
@@ -122,42 +100,6 @@ void UNEditorUtilityWidgetSystem::RestoreWidgetState(UNEditorUtilityWidget* Widg
 			INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(Widget, Identifier, WidgetState);
 		}
 	}
-}
-
-void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
-{
-	if (Cast<UWorld>(Object) == nullptr) return;
-	
-	// Were about to lose our world, we need to save things
-	TemporaryState.Clear();
-	for (const auto Widget : KnownWidgets)
-	{
-		if (!Widget->IsPersistent())
-		{
-			continue;
-		};
-		
-		// Add to our temp cache
-		TemporaryState.AddWidgetState(
-			Widget->GetUserSettingsIdentifier(), 
-			Widget->GetUserSettingsTemplate(),
-			Widget->GetState());
-	}
-}
-
-void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
-{
-	// Don't recreate 
-	if (bAsTemplate) return;
-	
-	// Restore things
-	const int Count = TemporaryState.GetCount();
-	for (int i = 0; i < Count; ++i)
-	{
-		
-		CreateWithState(TemporaryState.Templates[i], TemporaryState.Identifiers[i], TemporaryState.WidgetStates[i]);
-	}
-	TemporaryState.Clear();
 }
 
 void UNEditorUtilityWidgetSystem::RegisterWidget(UNEditorUtilityWidget* Widget)
