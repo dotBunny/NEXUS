@@ -8,7 +8,8 @@
 - `FNDeveloperUtils::GetRootSetObjects()` / `FNDeveloperUtils::DumpRootSetToLog()` to help with debugging world tear down issues.
 - `FNMultiplayerUtils::GetPing()`
 - `UNTextRenderComponent` icon in editor.
-- `NEditorUtilityWidget` persistent flag can be used to automatically restore state across map changes (as the widgets are recreated).
+- `UNEditorUtilityWidget` persistent flag can be used to automatically restore state across map changes (as the widgets are recreated).
+- `FNWidgetUtils` to support converting from serialized to slate space.
 
 ### Changed
 
@@ -21,6 +22,7 @@
 ### Fixed
 
 - `NEditorUtilityWidget` no longer always get destroyed when changing maps in the editor.
+
 ### Core Redirects
 
 ```ini
