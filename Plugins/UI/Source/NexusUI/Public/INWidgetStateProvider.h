@@ -23,6 +23,7 @@ public:
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
 	{
 		Execute_OnRestoreWidgetStateEvent(BlueprintWidget, Identifier, InState);
+		bHasWidgetStateBeenRestored = true;
 	};
 	
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget)
@@ -30,9 +31,17 @@ public:
 		return Execute_OnGetWidgetStateEvent(BlueprintWidget);
 	};
 	
+	bool HasWidgetStateBeenRestored() const
+	{
+		return bHasWidgetStateBeenRestored;
+	}
+	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnRestoreWidgetStateEvent(const FName& Identifier, FNWidgetState State);
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	FNWidgetState OnGetWidgetStateEvent();
+	
+protected:
+	bool bHasWidgetStateBeenRestored = false;
 };

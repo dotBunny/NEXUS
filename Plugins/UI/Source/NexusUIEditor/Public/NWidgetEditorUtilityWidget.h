@@ -54,6 +54,7 @@ public:
 
 protected:
 
+	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	
 	UPROPERTY(BlueprintReadOnly)
@@ -78,5 +79,6 @@ private:
 	virtual void DelayedConstructTask() override;
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
+	UWidgetBlueprint* ContentWidgetTemplate;
 };
 

@@ -20,10 +20,11 @@ void UNEditorUtilityWidgetLoadTask::Execute()
 {
 	if (UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>())
 	{
-		const TArray<FName> IdentifiersCopy = System->SavedState.Identifiers;
-		const TArray<FString> TemplatesCopy = System->SavedState.Templates;
-		TArray<FNWidgetState> WidgetStatesCopy = System->SavedState.WidgetStates;
-		System->SavedState.Clear();
+		const TArray<FName> IdentifiersCopy = System->WidgetStates.Identifiers;
+		const TArray<FString> TemplatesCopy = System->WidgetStates.Templates;
+		TArray<FNWidgetState> WidgetStatesCopy = System->WidgetStates.WidgetStates;
+		
+		System->WidgetStates.Clear();
 		
 		const int32 Count = IdentifiersCopy.Num();
 		

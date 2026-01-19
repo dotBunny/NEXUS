@@ -91,11 +91,10 @@ protected:
 		return GetFName();
 	}
 	
-	
-	
 	UPROPERTY(BlueprintReadOnly);
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
-
+	
+	
 	UFUNCTION()
 	virtual void DelayedConstructTask();
 	
@@ -103,6 +102,5 @@ protected:
 
 
 private:
-	
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

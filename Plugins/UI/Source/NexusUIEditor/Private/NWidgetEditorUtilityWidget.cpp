@@ -112,6 +112,7 @@ FNWidgetState UNWidgetEditorUtilityWidget::GetWidgetState(UObject* BlueprintWidg
 			ChildWidgetState = Execute_OnGetWidgetStateEvent(BaseWidget);
 		}
 		BaseState.OverlayState(ChildWidgetState, false);
+		BaseState.DumpToLog();
 	}
 	
 	return BaseState;
@@ -153,7 +154,10 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		WidgetBlueprint = TEXT("");
 	}
 	
-	const UWidgetBlueprint* ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
+	ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
+	ContentWidgetTemplate->AddToRoot();
+	ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);	
+	
 	const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
 	if (ContentWidget != nullptr)
 	{
@@ -182,12 +186,31 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
 	}
 	
+	bHasWidgetStateBeenRestored = true;
+}
+
+void UNWidgetEditorUtilityWidget::NativeConstruct()
+{
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNWidgetEditorUtilityWidget::NativeConstruct: %s"), *GetUserSettingsIdentifier().ToString());
+	Super::NativeConstruct();
+	
+	if (IsPersistent() && !bHasWidgetStateBeenRestored)
+	{
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Has Not Been Restored"));
+		UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>();
+		System->RestoreTransientWidget(this);
+	}
 }
 
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	//UE_LOG(LogNexusUIEditor, Warning, TEXT("Destroying UNWidgetEditorUtilityWidget."))
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNWidgetEditorUtilityWidget::NativeDestruct: %s"), *GetUserSettingsIdentifier().ToString());
+	if (ContentWidgetTemplate != nullptr)
+	{
+		ContentWidgetTemplate->RemoveFromRoot();
+	}
+		
 	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
 }

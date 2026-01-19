@@ -31,6 +31,13 @@ struct FNWidgetStateSnapshot
 		WidgetStates.Empty();
 	}
 	
+	void RemoveAtIndex(int32 Index)
+	{
+		Identifiers.RemoveAt(Index);
+		Templates.RemoveAt(Index);
+		WidgetStates.RemoveAt(Index);
+	}
+	
 	int32 GetIdentifierIndex(const FName Identifier) const
 	{
 		return Identifiers.IndexOfByKey(Identifier);
