@@ -11,8 +11,6 @@
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
-// TODO The child BP has no idea about recompile and crashes?
-
 UCLASS()
 class NEXUSUIEDITOR_API UNWidgetEditorUtilityWidget : public UNEditorUtilityWidget
 {
@@ -56,8 +54,7 @@ public:
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
-	
-	
+
 	void UpdateHeader() const;
 
 protected:
