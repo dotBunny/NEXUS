@@ -25,8 +25,7 @@ public:
 	static const FString WidgetState_TabIconStyle;
 	static const FString WidgetState_TabIconName;
 	
-	void PinTemplate(UEditorUtilityWidgetBlueprint* Template);
-	void UnpinTemplate();
+	void SetTemplate(TObjectPtr<UEditorUtilityWidgetBlueprint> Template);
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsPersistent() const;
@@ -46,7 +45,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsPersistent = false;
 	
-	UPROPERTY(BlueprintReadOnly);
+	
+	UPROPERTY()
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 	
 	/**
@@ -54,9 +54,9 @@ protected:
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D UnitScale = FVector2D::One();	
-	
+
 private:
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
-
+	
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 };

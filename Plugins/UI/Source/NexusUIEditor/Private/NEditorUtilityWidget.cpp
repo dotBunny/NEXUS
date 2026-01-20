@@ -14,19 +14,9 @@ const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_
 const FString UNEditorUtilityWidget::WidgetState_TabIconStyle = TEXT("NWidget_TabIconStyle");
 const FString UNEditorUtilityWidget::WidgetState_TabIconName = TEXT("NWidget_TabIconName");
 
-void UNEditorUtilityWidget::PinTemplate(UEditorUtilityWidgetBlueprint* Template)
+void UNEditorUtilityWidget::SetTemplate(TObjectPtr<UEditorUtilityWidgetBlueprint> Template)
 {
 	PinnedTemplate = Template;
-	PinnedTemplate->AddToRoot();
-}
-
-void UNEditorUtilityWidget::UnpinTemplate()
-{
-	if (PinnedTemplate != nullptr)
-	{
-		PinnedTemplate->RemoveFromRoot();
-		PinnedTemplate = nullptr;
-	}
 }
 
 bool UNEditorUtilityWidget::IsPersistent() const
@@ -89,8 +79,6 @@ void UNEditorUtilityWidget::NativeDestruct()
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
 	}
-	
-	UnpinTemplate();
 	Super::NativeDestruct();
 }
 

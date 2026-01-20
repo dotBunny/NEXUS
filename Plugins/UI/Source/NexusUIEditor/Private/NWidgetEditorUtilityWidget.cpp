@@ -9,8 +9,34 @@
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
 
-TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownWidgets;
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
+
+
+TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownWidgets;
+TMap<FString, TSharedPtr<UWidgetBlueprint>> UNWidgetEditorUtilityWidget::WidgetBlueprints;
+
+TSharedPtr<UWidgetBlueprint> UNWidgetEditorUtilityWidget::GetSharedWidgetBlueprint(const FString& InTemplate)
+{
+	if (WidgetBlueprints.Contains(InTemplate))
+	{
+		return WidgetBlueprints[InTemplate].ToSharedRef();
+	}
+	// DO we need to force compile?
+	// FKismetEditorUtilities::CompileBlueprint(UBlueprint* BlueprintObj, EBlueprintCompileOptions CompileFlags, FCompilerResultsLog* pResults)
+	
+	UWidgetBlueprint* NewWidget = LoadObject<UWidgetBlueprint>(UNEditorUtilityWidgetSystem::Get(), InTemplate);
+	if (NewWidget == nullptr)
+	{
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *InTemplate)
+		return nullptr;
+	}
+	NewWidget->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
+	
+	WidgetBlueprints.Add(InTemplate, MakeShareable<UWidgetBlueprint>(NewWidget));
+	
+	return WidgetBlueprints[InTemplate].ToSharedRef();
+}
+
 
 UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
 {
@@ -21,8 +47,8 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	}
 	
 	// Return existing and flash it
-	if (UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
-		ExistingWidget != nullptr)
+	UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
+	if (ExistingWidget != nullptr)
 	{
 		FNEditorUtils::FocusTab(ExistingWidget->GetTabIdentifier());
 		return ExistingWidget;
@@ -30,7 +56,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	
 
 	FNWidgetState WidgetState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
-	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
+	UEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
 	return Cast<UNWidgetEditorUtilityWidget>(Widget);
 }
 
@@ -142,7 +168,6 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	
 	FString NewWidgetBlueprint = WidgetState.GetString(WidgetState_WidgetBlueprint);
 	if (WidgetBlueprint == NewWidgetBlueprint) return;
-	
 
 	// We already have a base widget, but this is changing it for some odd reason?
 	if (BaseWidget != nullptr)
@@ -154,13 +179,29 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		WidgetBlueprint = TEXT("");
 	}
 	
-	ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
-	ContentWidgetTemplate->AddToRoot();
-	ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);	
+	// Manage our spawned widgets were loading as they can be reused during different scenarios
+	// V2 ContentWidgetTemplate = GetSharedWidgetBlueprint(NewWidgetBlueprint);
 	
-	const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
-	if (ContentWidget != nullptr)
+	
+	// V1 modified to SharedPtr
+	ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(this, NewWidgetBlueprint);
+	if (ContentWidgetTemplate == nullptr)
 	{
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *NewWidgetBlueprint)
+		return;
+	}
+	ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
+	
+	
+	
+	const TSubclassOf<UUserWidget> ContentWidget
+	{
+		ContentWidgetTemplate->GeneratedClass
+	};
+	
+	if (ContentWidget != nullptr)
+ 	{
+		// The widget tree might be the generated class thats nulled?
 		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
 		WidgetBlueprint = NewWidgetBlueprint;
 		
@@ -168,18 +209,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		EditorScrollBox->AddChild(BaseWidget);
 		
 		// Pass WidgetState Along
-		if (BaseWidget->Implements<UNWidgetStateProvider>())
-		{
-			if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
-				StateProvider != nullptr)
-			{
-				StateProvider->RestoreWidgetState(BaseWidget, Identifier, WidgetState);
-			}
-			else
-			{
-				Execute_OnRestoreWidgetStateEvent(BaseWidget, Identifier, WidgetState);
-			}
-		}
+		InvokeRestoreWidgetState(BaseWidget, Identifier, WidgetState);
 	}
 	else
 	{
@@ -187,6 +217,15 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	}
 	
 	bHasWidgetStateBeenRestored = true;
+}
+
+void UNWidgetEditorUtilityWidget::ResetWidgetBlueprints()
+{
+	for (auto& Blueprint : WidgetBlueprints)
+	{
+		Blueprint.Value.Reset();
+	}
+	WidgetBlueprints.Empty();
 }
 
 void UNWidgetEditorUtilityWidget::NativeConstruct()
@@ -205,11 +244,6 @@ void UNWidgetEditorUtilityWidget::NativeConstruct()
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	if (ContentWidgetTemplate != nullptr)
-	{
-		ContentWidgetTemplate->RemoveFromRoot();
-	}
-		
 	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
 }

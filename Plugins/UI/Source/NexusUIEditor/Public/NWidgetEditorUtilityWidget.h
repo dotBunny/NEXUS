@@ -8,6 +8,8 @@
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
+// TODO The child BP has no idea about recompile and crashes?
+
 UCLASS()
 class NEXUSUIEDITOR_API UNWidgetEditorUtilityWidget : public UNEditorUtilityWidget
 {
@@ -51,6 +53,9 @@ public:
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
+	
+	
+	static void ResetWidgetBlueprints();
 
 protected:
 
@@ -74,11 +79,17 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly)
 	FString TabIconName;
+	
+	UPROPERTY()
+	TObjectPtr<UWidgetBlueprint> ContentWidgetTemplate;
 
 private:
 	virtual void DelayedConstructTask() override;
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
-	UWidgetBlueprint* ContentWidgetTemplate;
+	
+	
+	static TMap<FString, TSharedPtr<UWidgetBlueprint>> WidgetBlueprints;
+	static TSharedPtr<UWidgetBlueprint> GetSharedWidgetBlueprint(const FString& InTemplate);
 };
 

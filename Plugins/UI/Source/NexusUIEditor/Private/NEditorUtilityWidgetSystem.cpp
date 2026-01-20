@@ -7,6 +7,10 @@
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
+#include "NWidgetEditorUtilityWidget.h"
+
+// TODO: Add a console command to output the number of shared known pointer refs?
+
 
 TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::PersistentWidgets;
 FNWidgetStateSnapshot UNEditorUtilityWidgetSystem::PersistentStates;
@@ -15,13 +19,20 @@ bool UNEditorUtilityWidgetSystem::bIsOpeningMap = false;
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
 	// Bind to look for when we are changing worlds/maps and prepare to have to remake tabs
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	if (AssetEditorSubsystem != nullptr)
 	{
-		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddStatic(&UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
 	}
-	FEditorDelegates::OnMapOpened.AddStatic(&UNEditorUtilityWidgetSystem::OnMapOpened);
+	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
+	
+	// Bind Blueprint Recompiles
+	// OnBlueprintCompiledHandle = GEditor->OnBlueprintCompiled().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintCompiled);
+	// OnBlueprintReinstancedHandle = GEditor->OnBlueprintReinstanced().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintReinstanced);
+	// OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintPreCompile);
+	
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
@@ -34,11 +45,24 @@ void UNEditorUtilityWidgetSystem::Deinitialize()
 	}
 	FEditorDelegates::OnMapOpened.Remove(OnMapOpenedHandle);
 	
+	// GEditor->OnBlueprintCompiled().Remove(OnBlueprintCompiledHandle);
+	// GEditor->OnBlueprintReinstanced().Remove(OnBlueprintReinstancedHandle);
+	// GEditor->OnBlueprintPreCompile().Remove(OnBlueprintPreCompileHandle);
+	
+	// Unload all known blueprints
+	WidgetBlueprints.Empty();
+	
+	// V2
+	/// UNWidgetEditorUtilityWidget::ResetWidgetBlueprints();
+	
 	Super::Deinitialize();
 }
 
 void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 {
+	// TODO: We could check if you've opened the BP asset used by NWidgetEditorUtilityWidget and close the tab?
+	
+	
 	// We only want to do something when were opening worlds as an asset
 	if (!Cast<UWorld>(Object)) return;
 	
@@ -63,60 +87,53 @@ void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsT
 	bIsOpeningMap = false;
 }
 
-UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
+void UNEditorUtilityWidgetSystem::OnBlueprintPreCompile(UBlueprint* Blueprint)
 {
-	// Load as 
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintPreCompile: %s"), *Blueprint->GetFullName())
+}
+
+void UNEditorUtilityWidgetSystem::OnBlueprintReinstanced()
+{
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintReinstanced"))
+}
+
+void UNEditorUtilityWidgetSystem::OnBlueprintCompiled()
+{
+	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintCompiled"))
+}
+
+UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
+{
+	// Manage our spawned widgets were loading as they can be reused during different scenarios
+	TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = GetWidgetBlueprint(InTemplate);
+	// TODO: Do we need to duplicate the shared widget?
 	
-	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
-	if (TemplateWidget == nullptr)
-	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to create a UNEditorUtilityWidget as the provided UBlueprint(%s) was unable to load."), *InTemplate)
-		return nullptr;
-	}
-			
 	FString IdentifierString = InIdentifier.ToString();
 	IdentifierString.RemoveFromEnd(TEXT("_ActiveTab"));
 	const FName Identifier(IdentifierString);
-			
-	// Need to duplicate the base
-	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), NAME_None);
-	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
-	UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate);
-	if (EditorWidget != nullptr)
+	// Spawn and make the tab for the widget
+	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+	
+	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget.Get());
+	
+	// We don't want these tracked (Remove from EUW list), opening it from there will just break the restoring
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	BlutilityModule->RemoveLoadedScriptUI(NewWidget.Get());
+	
+	// If it is one of our widgets lets do a little extra
+	UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
+	if (UtilityWidget != nullptr)
 	{
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-				
-		// We dont want these tracked (Remove from EUW window list), opening it from there will just break the restoring
-		IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-		BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
+		UtilityWidget->SetTemplate(NewWidget);
 		
-		UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
-		if (UtilityWidget != nullptr)
-		{
-			
-			UtilityWidget->PinTemplate(EditorWidget);
-			
-			// Attempt to automatically restore the widget state
-			if (UtilityWidget->Implements<UNWidgetStateProvider>())
-			{
-				INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(UtilityWidget);
-				if (StateProvider != nullptr)
-				{
-					StateProvider->RestoreWidgetState(UtilityWidget, Identifier, WidgetState);
-				}
-				else
-				{
-					INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(UtilityWidget, Identifier, WidgetState);
-				}
-			}
-			return UtilityWidget;
-		}
+		// Attempt to automatically restore the widget state
+		INWidgetStateProvider::InvokeRestoreWidgetState(UtilityWidget, Identifier, WidgetState);
+		
+		return UtilityWidget;
 	}
-	return nullptr;
+	return Widget;
 }
-
 
 void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
@@ -162,7 +179,9 @@ void UNEditorUtilityWidgetSystem::RestorePersistentWidget(UNEditorUtilityWidget*
 		{
 			if (PersistentStates.Templates[Index] == WidgetTemplate)
 			{
+				Widget->SetTemplate(GetWidgetBlueprint(PersistentStates.Templates[Index]));
 				Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
+				
 				PersistentStates.RemoveAtIndex(Index);
 			}
 		}
@@ -184,4 +203,26 @@ void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(UNEditorUtilityWidg
 	{
 		PersistentWidgets.Remove(Widget);
 	}
+}
+
+TObjectPtr<UEditorUtilityWidgetBlueprint> UNEditorUtilityWidgetSystem::GetWidgetBlueprint(const FString& InTemplate)
+{
+	UNEditorUtilityWidgetSystem* System = Get();
+	
+	if (System->WidgetBlueprints.Contains(InTemplate))
+	{
+		return System->WidgetBlueprints[InTemplate];
+	}
+	
+	TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(System, InTemplate);
+	if (NewWidget == nullptr)
+	{
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNEditorUtilityWidget as the provided UEditorUtilityWidgetBlueprint(%s) was unable to load."), *InTemplate)
+		return nullptr;
+	}
+	NewWidget->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
+	
+	System->WidgetBlueprints.Add(InTemplate, NewWidget);
+	
+	return System->WidgetBlueprints[InTemplate];
 }

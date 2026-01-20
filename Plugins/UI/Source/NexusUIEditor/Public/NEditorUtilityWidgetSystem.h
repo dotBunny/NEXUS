@@ -9,6 +9,8 @@
 #include "Macros/NEditorSubsystemMacros.h"
 #include "NEditorUtilityWidgetSystem.generated.h"
 
+class UEditorUtilityWidget;
+class UEditorUtilityWidgetBlueprint;
 class UNEditorUtilityWidget;
 
 /**
@@ -26,12 +28,9 @@ public:
 	static bool IsRebuildingWidgets() { return bIsOpeningMap;}
 	static void RegisterPersistentWidget(UNEditorUtilityWidget* Widget);
 	static void UnregisterPersistentWidget(UNEditorUtilityWidget* Widget);
+	
 	static void RestorePersistentWidget(UNEditorUtilityWidget* Widget);
-	
-	static void OnAssetEditorRequestedOpen(UObject* Object);
-	static void OnMapOpened(const FString& Filename, bool bAsTemplate);
-	
-	static UNEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
+	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
 
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -41,17 +40,37 @@ public:
 	void UpdateWidgetState(const FName& Identifier,  const FNWidgetState& WidgetState);
 	bool HasWidgetState(const FName& Identifier) const;
 	FNWidgetState& GetWidgetState(const FName& Identifier);
+	
+	
+	void OnAssetEditorRequestedOpen(UObject* Object);
+	void OnMapOpened(const FString& Filename, bool bAsTemplate);
+	void OnBlueprintPreCompile(UBlueprint* Blueprint);
+	void OnBlueprintCompiled();
+	void OnBlueprintReinstanced();
 
+
+	
 protected:	
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;
 	
+	
+	UPROPERTY()
+	TMap<FString, TObjectPtr<UEditorUtilityWidgetBlueprint>> WidgetBlueprints;
+	
 private:
 	static TArray<UNEditorUtilityWidget*> PersistentWidgets;
 	static FNWidgetStateSnapshot PersistentStates;
+	
 	static bool bIsOpeningMap;
+	
+	static TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
+	
 	
 	FDelegateHandle OnAssetEditorRequestedOpenHandle;
 	FDelegateHandle OnMapOpenedHandle;
+	FDelegateHandle OnBlueprintPreCompileHandle;
+	FDelegateHandle OnBlueprintReinstancedHandle;
+	FDelegateHandle OnBlueprintCompiledHandle;
 };
 
