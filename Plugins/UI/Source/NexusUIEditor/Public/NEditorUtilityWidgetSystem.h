@@ -25,13 +25,15 @@ public:
 	GENERATED_BODY()
 	N_EDITOR_SUBSYSTEM(UNEditorUtilityWidgetSystem)
 
+	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
+
+	
 	static bool IsRebuildingWidgets() { return bIsOpeningMap;}
 	static void RegisterPersistentWidget(UNEditorUtilityWidget* Widget);
 	static void UnregisterPersistentWidget(UNEditorUtilityWidget* Widget);
 	
 	static void RestorePersistentWidget(UNEditorUtilityWidget* Widget);
-	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
-
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	

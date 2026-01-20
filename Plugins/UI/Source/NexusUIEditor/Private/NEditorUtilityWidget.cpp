@@ -58,8 +58,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 		UNEditorUtilityWidgetSystem::RegisterPersistentWidget(this);
 		if (UNEditorUtilityWidgetSystem::IsRebuildingWidgets())
 		{
-			UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
-			System->RestorePersistentWidget(this);
+			UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
 		}
 	}
 	

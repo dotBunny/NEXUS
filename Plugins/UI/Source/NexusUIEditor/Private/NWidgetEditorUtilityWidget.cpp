@@ -233,11 +233,7 @@ void UNWidgetEditorUtilityWidget::NativeConstruct()
 	Super::NativeConstruct();
 	if (IsPersistent() && !bHasWidgetStateBeenRestored)
 	{
-		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
-		if (System != nullptr)
-		{
-			System->RestorePersistentWidget(this);
-		}
+		UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
 	}
 }
 
