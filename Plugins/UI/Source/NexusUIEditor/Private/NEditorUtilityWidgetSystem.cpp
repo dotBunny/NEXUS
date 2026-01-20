@@ -7,10 +7,6 @@
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
-#include "NWidgetEditorUtilityWidget.h"
-
-// TODO: Add a console command to output the number of shared known pointer refs?
-
 
 TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::PersistentWidgets;
 FNWidgetStateSnapshot UNEditorUtilityWidgetSystem::PersistentStates;
@@ -24,9 +20,9 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	if (AssetEditorSubsystem != nullptr)
 	{
-		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddStatic(&UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
 	}
-	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
+	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddStatic( &UNEditorUtilityWidgetSystem::OnMapOpened);
 	
 	UNEditorUtilityWidgetLoadTask::Create();
 }
@@ -43,17 +39,11 @@ void UNEditorUtilityWidgetSystem::Deinitialize()
 	// Unload all known blueprints
 	WidgetBlueprints.Empty();
 	
-	// V2
-	/// UNWidgetEditorUtilityWidget::ResetWidgetBlueprints();
-	
 	Super::Deinitialize();
 }
 
 void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 {
-	// TODO: We could check if you've opened the BP asset used by NWidgetEditorUtilityWidget and close the tab?
-	
-	
 	// We only want to do something when were opening worlds as an asset
 	if (!Cast<UWorld>(Object)) return;
 	

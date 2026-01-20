@@ -34,6 +34,9 @@ public:
 	static void AddPersistentState(UNEditorUtilityWidget* Widget);
 	static void RestorePersistentWidget(UNEditorUtilityWidget* Widget);
 	
+	static void OnAssetEditorRequestedOpen(UObject* Object);
+	static void OnMapOpened(const FString& Filename, bool bAsTemplate);
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	
@@ -42,9 +45,8 @@ public:
 	void UpdateWidgetState(const FName& Identifier,  const FNWidgetState& WidgetState);
 	bool HasWidgetState(const FName& Identifier) const;
 	FNWidgetState& GetWidgetState(const FName& Identifier);
-	
-	void OnAssetEditorRequestedOpen(UObject* Object);
-	void OnMapOpened(const FString& Filename, bool bAsTemplate);
+
+
 	
 	
 protected:	
