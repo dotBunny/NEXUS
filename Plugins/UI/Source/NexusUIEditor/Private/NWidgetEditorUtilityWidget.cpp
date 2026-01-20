@@ -105,16 +105,7 @@ FNWidgetState UNWidgetEditorUtilityWidget::GetWidgetState(UObject* BlueprintWidg
 	// Add in child data that WILL NOT override parent keys
 	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetStateProvider>())
 	{
-		FNWidgetState ChildWidgetState;
-		if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
-			StateProvider != nullptr)
-		{
-			ChildWidgetState = StateProvider->GetWidgetState(BaseWidget);
-		}
-		else
-		{
-			ChildWidgetState = Execute_OnGetWidgetStateEvent(BaseWidget);
-		}
+		FNWidgetState ChildWidgetState = INWidgetStateProvider::InvokeGetWidgetState(BaseWidget);
 		BaseState.OverlayState(ChildWidgetState, false);
 		BaseState.DumpToLog();
 	}
@@ -154,7 +145,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		VerticalBox->RemoveChild(BaseWidget);
 		WidgetTree->RemoveWidget(BaseWidget);
 		
-		INStatusProvider::UnbindStatusProviderUpdated(BaseWidget, OnStatusProviderUpdateHandle);
+		N_UNBIND_STATUS_PROVIDER_UPDATED(BaseWidget, OnStatusProviderUpdateHandle);
 		
 		BaseWidget = nullptr;
 		WidgetBlueprint = TEXT("");
@@ -173,18 +164,9 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
  	{
 		// The widget tree might be the generated class that's nulled?
 		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
-	
-		UpdateHeader();
 		
-		// Bind to updates
-		if (BaseWidget->Implements<UNStatusProvider>())
-		{
-			INStatusProvider* StatusProvider = Cast<INStatusProvider>(BaseWidget);
-			if (StatusProvider != nullptr)
-			{
-				OnStatusProviderUpdateHandle = StatusProvider->OnStatusProviderUpdated().AddUObject(this, &UNWidgetEditorUtilityWidget::UpdateHeader);
-			}
-		}
+		// Bind to updates of a status provider
+		N_BIND_STATUS_PROVIDER_UPDATED(BaseWidget, OnStatusProviderUpdateHandle, UNWidgetEditorUtilityWidget::UpdateHeader);
 		
 		// Check for some known crash things
 		if (BaseWidget->IsFocusable())
@@ -194,12 +176,14 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		
 		WidgetBlueprint = NewWidgetBlueprint;
 		
-		
 		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
 		VerticalBox->AddChild(BaseWidget);
 		
 		// Pass WidgetState Along
 		InvokeRestoreWidgetState(BaseWidget, Identifier, WidgetState);
+		
+		// Initial update of the header
+		UpdateHeader();
 	}
 	else
 	{
@@ -215,21 +199,19 @@ void UNWidgetEditorUtilityWidget::UpdateHeader() const
 	if (BaseWidget == nullptr || !INStatusProvider::InvokeHasStatusProviderMessage(BaseWidget))
 	{
 		Header->SetVisibility(ESlateVisibility::Collapsed);
+		HeaderFooter->SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 
-	const FString Message = INStatusProvider::InvokeGetStatusProviderMessage(BaseWidget);
-	HeaderText->SetText(FText::FromString(Message));
-	Header->SetVisibility(ESlateVisibility::Visible);
+	HeaderText->SetText(FText::FromString(INStatusProvider::InvokeGetStatusProviderMessage(BaseWidget)));
+	Header->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	HeaderFooter->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UNWidgetEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
-	// Never show the header unless the widget added has the interface
-	Header->SetVisibility(ESlateVisibility::Collapsed);
-	
+
 	if (IsPersistent())
 	{
 		OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNWidgetEditorUtilityWidget::OnBlueprintPreCompile);
@@ -238,6 +220,8 @@ void UNWidgetEditorUtilityWidget::NativeConstruct()
 			UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
 		}
 	}
+
+	UpdateHeader();
 }
 
 

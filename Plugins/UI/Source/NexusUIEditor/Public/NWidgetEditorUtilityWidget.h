@@ -7,6 +7,7 @@
 #include "CommonTextBlock.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
+#include "Components/Image.h"
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
@@ -69,6 +70,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> HeaderText;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> HeaderFooter;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FName WidgetIdentifier = GetFName();

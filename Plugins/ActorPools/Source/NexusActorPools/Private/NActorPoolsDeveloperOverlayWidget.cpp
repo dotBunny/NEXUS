@@ -65,6 +65,9 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	{
 		CreateListItem(Pool);
 	}
+
+	// We've bound a world check it
+	BroadcastStatusProviderUpdated();
 	
 	// Add delegate for future pools
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
@@ -95,6 +98,8 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 			}
 		}
 	}
+	
+	BroadcastStatusProviderUpdated();
 }
 
 bool UNActorPoolsDeveloperOverlayWidget::HasStatusProviderMessage() const
@@ -112,7 +117,7 @@ FString UNActorPoolsDeveloperOverlayWidget::GetStatusProviderMessage() const
 }
 
 void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World, 
-	FWorldInitializationValues WorldInitializationValues)
+                                                                   FWorldInitializationValues WorldInitializationValues)
 {
 	Bind(World);
 }
