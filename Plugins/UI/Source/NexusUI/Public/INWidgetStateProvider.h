@@ -65,6 +65,10 @@ public:
 	{
 		return bHasWidgetStateBeenRestored;
 	}
+	void SetWidgetStateHasBeenRestored(const bool bHasBeenRestored)
+	{
+		bHasWidgetStateBeenRestored = bHasBeenRestored;
+	}
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnRestoreWidgetStateEvent(const FName& Identifier, FNWidgetState State);
@@ -72,6 +76,6 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	FNWidgetState OnGetWidgetStateEvent();
 	
-protected:
+private:
 	bool bHasWidgetStateBeenRestored = false;
 };

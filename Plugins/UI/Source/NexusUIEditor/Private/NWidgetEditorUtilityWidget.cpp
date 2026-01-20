@@ -216,7 +216,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
 	}
 	
-	bHasWidgetStateBeenRestored = true;
+	SetWidgetStateHasBeenRestored(true);
 }
 
 void UNWidgetEditorUtilityWidget::ResetWidgetBlueprints()
@@ -231,7 +231,7 @@ void UNWidgetEditorUtilityWidget::ResetWidgetBlueprints()
 void UNWidgetEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (IsPersistent() && !bHasWidgetStateBeenRestored)
+	if (IsPersistent() && !HasWidgetStateBeenRestored())
 	{
 		UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
 	}
