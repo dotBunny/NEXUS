@@ -28,7 +28,6 @@ void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
 	Unbind(GetWorld());
-	ActorPoolList->ClearListItems();
 	
 	Super::NativeDestruct();
 }
@@ -82,14 +81,17 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 		System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
 	}
 	
-	TArray<UObject*> Items = ActorPoolList->GetListItems();
-	const int ItemCount = Items.Num();
-	for (int i = ItemCount - 1; i >= 0; i--)
+	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
 	{
-		UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
-		if (Object->GetPoolWorld() == World)
+		TArray<UObject*> Items = ActorPoolList->GetListItems();
+		const int ItemCount = Items.Num();
+		for (int i = ItemCount - 1; i >= 0; i--)
 		{
-			ActorPoolList->RemoveItem(Object);
+			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
+			if (Object->GetPoolWorld() == World)
+			{
+				ActorPoolList->RemoveItem(Object);
+			}
 		}
 	}
 }

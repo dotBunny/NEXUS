@@ -3,6 +3,7 @@
 
 #include "NWidgetEditorUtilityWidget.h"
 
+#include "EditorUtilityLibrary.h"
 #include "EditorUtilityWidgetComponents.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
@@ -13,30 +14,6 @@ const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutilit
 
 
 TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownWidgets;
-TMap<FString, TSharedPtr<UWidgetBlueprint>> UNWidgetEditorUtilityWidget::WidgetBlueprints;
-
-TSharedPtr<UWidgetBlueprint> UNWidgetEditorUtilityWidget::GetSharedWidgetBlueprint(const FString& InTemplate)
-{
-	if (WidgetBlueprints.Contains(InTemplate))
-	{
-		return WidgetBlueprints[InTemplate].ToSharedRef();
-	}
-	// DO we need to force compile?
-	// FKismetEditorUtilities::CompileBlueprint(UBlueprint* BlueprintObj, EBlueprintCompileOptions CompileFlags, FCompilerResultsLog* pResults)
-	
-	UWidgetBlueprint* NewWidget = LoadObject<UWidgetBlueprint>(UNEditorUtilityWidgetSystem::Get(), InTemplate);
-	if (NewWidget == nullptr)
-	{
-		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *InTemplate)
-		return nullptr;
-	}
-	NewWidget->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
-	
-	WidgetBlueprints.Add(InTemplate, MakeShareable<UWidgetBlueprint>(NewWidget));
-	
-	return WidgetBlueprints[InTemplate].ToSharedRef();
-}
-
 
 UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
 {
@@ -190,14 +167,12 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *NewWidgetBlueprint)
 		return;
 	}
-	ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
-	
-	
-	
+	//ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
 	const TSubclassOf<UUserWidget> ContentWidget
 	{
 		ContentWidgetTemplate->GeneratedClass
 	};
+	
 	
 	if (ContentWidget != nullptr)
  	{
@@ -217,15 +192,6 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	}
 	
 	SetWidgetStateHasBeenRestored(true);
-}
-
-void UNWidgetEditorUtilityWidget::ResetWidgetBlueprints()
-{
-	for (auto& Blueprint : WidgetBlueprints)
-	{
-		Blueprint.Value.Reset();
-	}
-	WidgetBlueprints.Empty();
 }
 
 void UNWidgetEditorUtilityWidget::NativeConstruct()

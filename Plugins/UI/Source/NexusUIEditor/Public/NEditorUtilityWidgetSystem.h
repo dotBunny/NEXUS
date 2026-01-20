@@ -43,14 +43,8 @@ public:
 	bool HasWidgetState(const FName& Identifier) const;
 	FNWidgetState& GetWidgetState(const FName& Identifier);
 	
-	
 	void OnAssetEditorRequestedOpen(UObject* Object);
 	void OnMapOpened(const FString& Filename, bool bAsTemplate);
-	void OnBlueprintPreCompile(UBlueprint* Blueprint);
-	void OnBlueprintCompiled();
-	void OnBlueprintReinstanced();
-
-
 	
 protected:	
 	UPROPERTY(config)   
@@ -68,11 +62,7 @@ private:
 	
 	static TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
 	
-	
 	FDelegateHandle OnAssetEditorRequestedOpenHandle;
 	FDelegateHandle OnMapOpenedHandle;
-	FDelegateHandle OnBlueprintPreCompileHandle;
-	FDelegateHandle OnBlueprintReinstancedHandle;
-	FDelegateHandle OnBlueprintCompiledHandle;
 };
 

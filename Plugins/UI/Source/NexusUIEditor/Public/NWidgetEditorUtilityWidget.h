@@ -53,9 +53,6 @@ public:
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
-	
-	
-	static void ResetWidgetBlueprints();
 
 protected:
 
@@ -82,14 +79,9 @@ protected:
 	
 	UPROPERTY()
 	TObjectPtr<UWidgetBlueprint> ContentWidgetTemplate;
-
 private:
 	virtual void DelayedConstructTask() override;
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
-	
-	
-	static TMap<FString, TSharedPtr<UWidgetBlueprint>> WidgetBlueprints;
-	static TSharedPtr<UWidgetBlueprint> GetSharedWidgetBlueprint(const FString& InTemplate);
 };
 

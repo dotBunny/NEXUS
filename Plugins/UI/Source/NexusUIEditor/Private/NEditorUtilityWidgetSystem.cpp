@@ -28,11 +28,6 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 	}
 	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddUObject(this, &UNEditorUtilityWidgetSystem::OnMapOpened);
 	
-	// Bind Blueprint Recompiles
-	// OnBlueprintCompiledHandle = GEditor->OnBlueprintCompiled().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintCompiled);
-	// OnBlueprintReinstancedHandle = GEditor->OnBlueprintReinstanced().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintReinstanced);
-	// OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNEditorUtilityWidgetSystem::OnBlueprintPreCompile);
-	
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
@@ -44,10 +39,6 @@ void UNEditorUtilityWidgetSystem::Deinitialize()
 		AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(OnAssetEditorRequestedOpenHandle);
 	}
 	FEditorDelegates::OnMapOpened.Remove(OnMapOpenedHandle);
-	
-	// GEditor->OnBlueprintCompiled().Remove(OnBlueprintCompiledHandle);
-	// GEditor->OnBlueprintReinstanced().Remove(OnBlueprintReinstancedHandle);
-	// GEditor->OnBlueprintPreCompile().Remove(OnBlueprintPreCompileHandle);
 	
 	// Unload all known blueprints
 	WidgetBlueprints.Empty();
@@ -87,26 +78,12 @@ void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsT
 	bIsOpeningMap = false;
 }
 
-void UNEditorUtilityWidgetSystem::OnBlueprintPreCompile(UBlueprint* Blueprint)
-{
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintPreCompile: %s"), *Blueprint->GetFullName())
-}
-
-void UNEditorUtilityWidgetSystem::OnBlueprintReinstanced()
-{
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintReinstanced"))
-}
-
-void UNEditorUtilityWidgetSystem::OnBlueprintCompiled()
-{
-	UE_LOG(LogNexusUIEditor, Warning, TEXT("UNEditorUtilityWidgetSystem::OnBlueprintCompiled"))
-}
-
 UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
 {
+
+	
 	// Manage our spawned widgets were loading as they can be reused during different scenarios
-	TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = GetWidgetBlueprint(InTemplate);
-	// TODO: Do we need to duplicate the shared widget?
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = GetWidgetBlueprint(InTemplate);
 	
 	FString IdentifierString = InIdentifier.ToString();
 	IdentifierString.RemoveFromEnd(TEXT("_ActiveTab"));
@@ -117,11 +94,11 @@ UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString
 	
 	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget.Get());
 	
-	// We don't want these tracked (Remove from EUW list), opening it from there will just break the restoring
+	// We don't want these tracked (Remove from EUW-list), opening it from there will just break the restoring
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
 	BlutilityModule->RemoveLoadedScriptUI(NewWidget.Get());
 	
-	// If it is one of our widgets lets do a little extra
+	// If it is one of our widgets, let's do a little extra
 	UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
 	if (UtilityWidget != nullptr)
 	{
@@ -213,15 +190,13 @@ TObjectPtr<UEditorUtilityWidgetBlueprint> UNEditorUtilityWidgetSystem::GetWidget
 	{
 		return System->WidgetBlueprints[InTemplate];
 	}
-	
-	TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(System, InTemplate);
+
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(System, InTemplate);
 	if (NewWidget == nullptr)
 	{
 		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNEditorUtilityWidget as the provided UEditorUtilityWidgetBlueprint(%s) was unable to load."), *InTemplate)
 		return nullptr;
 	}
-	NewWidget->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
-	
 	System->WidgetBlueprints.Add(InTemplate, NewWidget);
 	
 	return System->WidgetBlueprints[InTemplate];
