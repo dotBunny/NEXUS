@@ -154,6 +154,8 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		VerticalBox->RemoveChild(BaseWidget);
 		WidgetTree->RemoveWidget(BaseWidget);
 		
+		INStatusProvider::UnbindStatusProviderUpdated(BaseWidget, OnStatusProviderUpdateHandle);
+		
 		BaseWidget = nullptr;
 		WidgetBlueprint = TEXT("");
 	}
@@ -172,7 +174,17 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		// The widget tree might be the generated class that's nulled?
 		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
 	
-		SetHeaderVisibility(INStatusProvider::InvokeHasStatusProviderMessage(BaseWidget));
+		UpdateHeader();
+		
+		// Bind to updates
+		if (BaseWidget->Implements<UNStatusProvider>())
+		{
+			INStatusProvider* StatusProvider = Cast<INStatusProvider>(BaseWidget);
+			if (StatusProvider != nullptr)
+			{
+				OnStatusProviderUpdateHandle = StatusProvider->OnStatusProviderUpdated().AddUObject(this, &UNWidgetEditorUtilityWidget::UpdateHeader);
+			}
+		}
 		
 		// Check for some known crash things
 		if (BaseWidget->IsFocusable())
@@ -197,16 +209,18 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	SetWidgetStateHasBeenRestored(true);
 }
 
-void UNWidgetEditorUtilityWidget::SetHeaderVisibility(bool bIsVisible) const
+
+void UNWidgetEditorUtilityWidget::UpdateHeader() const
 {
-	if (bIsVisible)
-	{
-		Header->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
+	if (BaseWidget == nullptr || !INStatusProvider::InvokeHasStatusProviderMessage(BaseWidget))
 	{
 		Header->SetVisibility(ESlateVisibility::Collapsed);
+		return;
 	}
+
+	const FString Message = INStatusProvider::InvokeGetStatusProviderMessage(BaseWidget);
+	HeaderText->SetText(FText::FromString(Message));
+	Header->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UNWidgetEditorUtilityWidget::NativeConstruct()

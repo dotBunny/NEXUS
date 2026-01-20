@@ -70,6 +70,7 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
+		BroadcastStatusProviderUpdated();
 	}));
 }
 

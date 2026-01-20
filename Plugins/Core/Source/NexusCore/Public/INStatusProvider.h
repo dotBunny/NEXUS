@@ -6,6 +6,9 @@
 #include "CoreMinimal.h"
 #include "INStatusProvider.generated.h"
 
+
+
+
 UINTERFACE(BlueprintType)
 class NEXUSCORE_API UNStatusProvider : public UInterface
 {
@@ -17,6 +20,19 @@ class NEXUSCORE_API INStatusProvider
 	GENERATED_BODY()
 
 public:
+	
+	
+	static void UnbindStatusProviderUpdated(UObject* BaseWidget, FDelegateHandle Handle)
+	{
+		if (BaseWidget->Implements<UNStatusProvider>())
+		{
+			INStatusProvider* StatusProvider = Cast<INStatusProvider>(BaseWidget);
+			if (StatusProvider != nullptr)
+			{
+				StatusProvider->OnStatusProviderUpdated().Remove(Handle);
+			}
+		}
+	}
 	
 	static FString InvokeGetStatusProviderMessage(UObject* BaseWidget)
 	{
@@ -31,7 +47,6 @@ public:
 		}
 		return TEXT("");
 	}
-	
 	static bool InvokeHasStatusProviderMessage(UObject* BaseWidget)
 	{
 		if (BaseWidget->Implements<UNStatusProvider>())
@@ -46,13 +61,19 @@ public:
 		return false;
 	}
 	
-
 	virtual bool HasStatusProviderMessage() const { return false; }
 	virtual FString GetStatusProviderMessage() const { return TEXT(""); }
+	
+	DECLARE_EVENT(INStatusProvider, FStatusProviderUpdated);
+	FStatusProviderUpdated& OnStatusProviderUpdated() { return StatusProviderUpdatedEvent; }
+	void BroadcastStatusProviderUpdated() const { StatusProviderUpdatedEvent.Broadcast(); }
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	FString OnGetStatusProviderMessage();
 	
 	UFUNCTION(BlueprintImplementableEvent)
 	bool OnHasStatusProviderMessage();
+	
+protected:
+	FStatusProviderUpdated StatusProviderUpdatedEvent;
 };

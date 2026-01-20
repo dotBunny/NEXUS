@@ -24,8 +24,10 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDevelope
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
 	
+	//~INStatusProvider interface
 	virtual bool HasStatusProviderMessage() const override;
 	virtual FString GetStatusProviderMessage() const override;
+	//~End of INStatusProvider interface
 	
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

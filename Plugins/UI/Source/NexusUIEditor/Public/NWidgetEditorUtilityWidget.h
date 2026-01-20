@@ -57,8 +57,7 @@ public:
 	//~End of INWidgetStateProvider interface
 	
 	
-	// TODO how to get the widget 
-	void SetHeaderVisibility(bool bIsVisible) const;
+	void UpdateHeader() const;
 
 protected:
 	
@@ -99,5 +98,6 @@ private:
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
 	FDelegateHandle OnBlueprintPreCompileHandle;
+	FDelegateHandle OnStatusProviderUpdateHandle;
 };
 
