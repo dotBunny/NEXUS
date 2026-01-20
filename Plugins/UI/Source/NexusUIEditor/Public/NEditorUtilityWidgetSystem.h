@@ -31,7 +31,7 @@ public:
 	static bool IsRebuildingWidgets() { return bIsOpeningMap;}
 	static void RegisterPersistentWidget(UNEditorUtilityWidget* Widget);
 	static void UnregisterPersistentWidget(UNEditorUtilityWidget* Widget);
-	
+	static void AddPersistentState(UNEditorUtilityWidget* Widget);
 	static void RestorePersistentWidget(UNEditorUtilityWidget* Widget);
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
@@ -45,6 +45,7 @@ public:
 	
 	void OnAssetEditorRequestedOpen(UObject* Object);
 	void OnMapOpened(const FString& Filename, bool bAsTemplate);
+	
 	
 protected:	
 	UPROPERTY(config)   

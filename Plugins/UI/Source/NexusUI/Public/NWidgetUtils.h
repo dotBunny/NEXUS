@@ -8,7 +8,7 @@
 class FNWidgetUtils
 {
 public:
-	static EVisibility ToEVisibility(const ESlateVisibility Visibility)
+	FORCEINLINE static EVisibility ToEVisibility(const ESlateVisibility Visibility)
 	{
 		switch ( Visibility )
 		{

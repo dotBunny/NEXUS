@@ -15,6 +15,7 @@ namespace UnrealBuildTool.Rules
 					// ReSharper disable once StringLiteralTypo
 					"Blutility",
 					"Core",
+					"CommonUI",
 					"UnrealEd",
 					"ScriptableEditorWidgets"
 				]

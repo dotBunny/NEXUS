@@ -63,25 +63,30 @@ void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 	PersistentStates.Clear();
 	for (UNEditorUtilityWidget* Widget : PersistentWidgets)
 	{
-		if (Widget->IsPersistent())
-		{
-			PersistentStates.AddWidgetState(
-				Widget->GetUserSettingsIdentifier(), 
-				Widget->GetUserSettingsTemplate(), 
-				Widget->GetWidgetState(Widget));
-		}
+		AddPersistentState(Widget);
 	}
 }
+
+
 
 void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
 {
 	bIsOpeningMap = false;
 }
 
+void UNEditorUtilityWidgetSystem::AddPersistentState(UNEditorUtilityWidget* Widget)
+{
+	if (Widget->IsPersistent())
+	{
+		PersistentStates.AddWidgetState(
+					Widget->GetUserSettingsIdentifier(), 
+					Widget->GetUserSettingsTemplate(), 
+					Widget->GetWidgetState(Widget));
+	}
+}
+
 UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
 {
-
-	
 	// Manage our spawned widgets were loading as they can be reused during different scenarios
 	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = GetWidgetBlueprint(InTemplate);
 	

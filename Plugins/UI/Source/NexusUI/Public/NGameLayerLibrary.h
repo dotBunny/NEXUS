@@ -10,10 +10,10 @@
 #include "NGameLayerLibrary.generated.h"
 
 /**
- * A collection of functionality used to interact with a games' UGameUserSettings helping build UI components around them.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/">UNGameUserSettingsLibrary</a>
+ * A collection of functionality used to interact with a games' IGameLayerManager.
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/">UNGameUserSettingsLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Game User Settings Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Game Layer Library")
 class UNGameLayerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

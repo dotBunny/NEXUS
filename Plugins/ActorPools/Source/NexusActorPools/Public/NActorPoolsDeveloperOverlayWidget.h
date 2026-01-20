@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "INStatusProvider.h"
 #include "NDeveloperOverlayWidget.h"
 #include "NActorPool.h"
 #include "NActorPoolsDeveloperOverlayWidget.generated.h"
@@ -12,7 +13,7 @@ class UNActorPoolDeveloperObject;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
+class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INStatusProvider
 {
 	GENERATED_BODY()
 	
@@ -22,6 +23,9 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDevelope
 	
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
+	
+	virtual bool HasStatusProviderMessage() const override;
+	virtual FString GetStatusProviderMessage() const override;
 	
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

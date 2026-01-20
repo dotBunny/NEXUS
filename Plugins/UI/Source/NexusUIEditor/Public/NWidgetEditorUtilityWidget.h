@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "CommonBorder.h"
+#include "CommonTextBlock.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "Textures/SlateIcon.h"
@@ -53,11 +55,21 @@ public:
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
+	
+	
+	// TODO how to get the widget 
+	void SetHeaderVisibility(bool bIsVisible) const;
 
 protected:
-
+	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonBorder> Header;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> HeaderText;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FName WidgetIdentifier = GetFName();
@@ -79,9 +91,13 @@ protected:
 	
 	UPROPERTY()
 	TObjectPtr<UWidgetBlueprint> ContentWidgetTemplate;
+	
+	void OnBlueprintPreCompile(UBlueprint* Blueprint);
+	
 private:
 	virtual void DelayedConstructTask() override;
 	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
+	FDelegateHandle OnBlueprintPreCompileHandle;
 };
 

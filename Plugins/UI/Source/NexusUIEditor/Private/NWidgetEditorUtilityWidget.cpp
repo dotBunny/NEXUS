@@ -3,12 +3,13 @@
 
 #include "NWidgetEditorUtilityWidget.h"
 
-#include "EditorUtilityLibrary.h"
 #include "EditorUtilityWidgetComponents.h"
+#include "INStatusProvider.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/VerticalBox.h"
 
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
 
@@ -149,39 +150,41 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	// We already have a base widget, but this is changing it for some odd reason?
 	if (BaseWidget != nullptr)
 	{
-		UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-		EditorScrollBox->RemoveChild(BaseWidget);
+		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
+		VerticalBox->RemoveChild(BaseWidget);
 		WidgetTree->RemoveWidget(BaseWidget);
+		
 		BaseWidget = nullptr;
 		WidgetBlueprint = TEXT("");
 	}
 	
-	// Manage our spawned widgets were loading as they can be reused during different scenarios
-	// V2 ContentWidgetTemplate = GetSharedWidgetBlueprint(NewWidgetBlueprint);
-	
-	
-	// V1 modified to SharedPtr
 	ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(this, NewWidgetBlueprint);
 	if (ContentWidgetTemplate == nullptr)
 	{
 		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *NewWidgetBlueprint)
 		return;
 	}
-	//ContentWidgetTemplate->SetFlags(RF_Public | RF_Transient | RF_DuplicateTransient);
-	const TSubclassOf<UUserWidget> ContentWidget
-	{
-		ContentWidgetTemplate->GeneratedClass
-	};
 	
+	const TSubclassOf<UUserWidget> ContentWidget { ContentWidgetTemplate->GeneratedClass };
 	
 	if (ContentWidget != nullptr)
  	{
-		// The widget tree might be the generated class thats nulled?
+		// The widget tree might be the generated class that's nulled?
 		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
+	
+		SetHeaderVisibility(INStatusProvider::InvokeHasStatusProviderMessage(BaseWidget));
+		
+		// Check for some known crash things
+		if (BaseWidget->IsFocusable())
+		{
+			UE_LOG(LogNexusUIEditor, Error, TEXT("UNWidgetEditorUtilityWidgets cannot have focusable content (%s)."), *ContentWidget->GetName())
+		}
+		
 		WidgetBlueprint = NewWidgetBlueprint;
 		
-		UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-		EditorScrollBox->AddChild(BaseWidget);
+		
+		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
+		VerticalBox->AddChild(BaseWidget);
 		
 		// Pass WidgetState Along
 		InvokeRestoreWidgetState(BaseWidget, Identifier, WidgetState);
@@ -194,20 +197,52 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	SetWidgetStateHasBeenRestored(true);
 }
 
+void UNWidgetEditorUtilityWidget::SetHeaderVisibility(bool bIsVisible) const
+{
+	if (bIsVisible)
+	{
+		Header->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Header->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
 void UNWidgetEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-	if (IsPersistent() && !HasWidgetStateBeenRestored())
+	
+	// Never show the header unless the widget added has the interface
+	Header->SetVisibility(ESlateVisibility::Collapsed);
+	
+	if (IsPersistent())
 	{
-		UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
+		OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNWidgetEditorUtilityWidget::OnBlueprintPreCompile);
+		if (!HasWidgetStateBeenRestored())
+		{
+			UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
+		}
 	}
 }
 
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
+	if (IsPersistent())
+	{
+		GEditor->OnBlueprintPreCompile().Remove(OnBlueprintPreCompileHandle);
+	}
 	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
+}
+
+void UNWidgetEditorUtilityWidget::OnBlueprintPreCompile(UBlueprint* Blueprint)
+{
+	if (Blueprint == PinnedTemplate || Blueprint == ContentWidgetTemplate)
+	{
+		UNEditorUtilityWidgetSystem::AddPersistentState(this);
+	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic

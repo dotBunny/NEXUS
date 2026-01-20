@@ -96,7 +96,21 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 	}
 }
 
-void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World,
+bool UNActorPoolsDeveloperOverlayWidget::HasStatusProviderMessage() const
+{
+	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
+	{
+		return ActorPoolList->GetNumItems() <= 0;
+	}
+	return true;
+}
+
+FString UNActorPoolsDeveloperOverlayWidget::GetStatusProviderMessage() const
+{
+	return TEXT("No Actor Pools Found");
+}
+
+void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World, 
 	FWorldInitializationValues WorldInitializationValues)
 {
 	Bind(World);
