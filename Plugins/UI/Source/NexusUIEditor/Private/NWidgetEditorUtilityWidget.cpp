@@ -4,7 +4,7 @@
 #include "NWidgetEditorUtilityWidget.h"
 
 #include "EditorUtilityWidgetComponents.h"
-#include "INMessageProvider.h"
+#include "INWidgetMessageProvider.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
 #include "NUIEditorMinimal.h"
@@ -145,7 +145,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		VerticalBox->RemoveChild(BaseWidget);
 		WidgetTree->RemoveWidget(BaseWidget);
 		
-		N_UNBIND_MESSAGE_PROVIDER_UPDATED(BaseWidget, OnStatusProviderUpdateHandle);
+		N_UNBIND_WIDGET_MESSAGE_PROVIDED(BaseWidget, OnStatusProviderUpdateHandle);
 		
 		BaseWidget = nullptr;
 		WidgetBlueprint = TEXT("");
@@ -166,7 +166,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
 		
 		// Bind to updates of a status provider
-		N_BIND_MESSAGE_PROVIDER_UPDATED(BaseWidget, OnStatusProviderUpdateHandle, UNWidgetEditorUtilityWidget::UpdateHeader);
+		N_BIND_WIDGET_MESSAGE_PROVIDED(BaseWidget, OnStatusProviderUpdateHandle, UNWidgetEditorUtilityWidget::UpdateHeader);
 		
 		// Check for some known crash things
 		if (BaseWidget->IsFocusable())
@@ -196,14 +196,14 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 
 void UNWidgetEditorUtilityWidget::UpdateHeader() const
 {
-	if (BaseWidget == nullptr || !INMessageProvider::InvokeHasStatusProviderMessage(BaseWidget))
+	if (BaseWidget == nullptr || !INWidgetMessageProvider::InvokeHasStatusProviderMessage(BaseWidget))
 	{
 		Header->SetVisibility(ESlateVisibility::Collapsed);
 		HeaderFooter->SetVisibility(ESlateVisibility::Collapsed);
 		return;
 	}
 
-	HeaderText->SetText(FText::FromString(INMessageProvider::InvokeGetStatusProviderMessage(BaseWidget)));
+	HeaderText->SetText(FText::FromString(INWidgetMessageProvider::InvokeGetStatusProviderMessage(BaseWidget)));
 	Header->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	HeaderFooter->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }

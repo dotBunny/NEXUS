@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "INMessageProvider.h"
+#include "INWidgetMessageProvider.h"
 #include "NDeveloperOverlayWidget.h"
 #include "NActorPool.h"
 #include "NActorPoolsDeveloperOverlayWidget.generated.h"
@@ -13,7 +13,7 @@ class UNActorPoolDeveloperObject;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INMessageProvider
+class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INWidgetMessageProvider
 {
 	GENERATED_BODY()
 	
