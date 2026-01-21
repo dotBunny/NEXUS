@@ -12,7 +12,7 @@ class FNOrganGeneratorComponentMap;
 struct FNOrganGeneratorFinalizeTask
 {
 public:
-	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, FNOrganGeneratorTaskContext* ContextPtr);
+	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
     
@@ -23,5 +23,5 @@ public:
 
 private:
 	UNProcGenOperation* Operation;
-	FNOrganGeneratorTaskContext* Context;
+	TSharedRef<FNOrganGeneratorTaskContext> Context;
 };

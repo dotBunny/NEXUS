@@ -7,12 +7,22 @@
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
 
+namespace NEXUS::ActorPools::ConsoleCommands
+{
+	static bool bTrackStats = false;
+	static FAutoConsoleVariableRef CVAR_bTrackStats(
+		TEXT("N.ActorPools.TrackStats"),
+		bTrackStats,
+		TEXT("Track stats via internal stats system."),
+		ECVF_Default | ECVF_Preview);
+}
+
 void UNActorPoolSubsystem::Deinitialize()
 {
-	for (TPair<UClass*, FNActorPool*>& Pool : ActorPools)
+	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
 		Pool.Value->Clear();
-		delete Pool.Value;
+		Pool.Value.Reset();
 	}
 	Super::Deinitialize();
 }
@@ -22,12 +32,13 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	
 	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
-	bStatsEnabled = Settings->bTrackStats;
+	
+	UnknownBehaviour = Settings->UnknownBehaviour;
 	
 	// Check if we have anything to automatically load
 	if (Settings->AlwaysCreateSets.Num() == 0) return;
 	
-	// Check if we have any ignores
+	// Check if we have any prefixes to ignore
 	if (Settings->IgnoreWorldPrefixes.Num() > 0)
 	{
 		bool bShouldIgnoreLevel = false;
@@ -51,14 +62,15 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 bool UNActorPoolSubsystem::IsTickable() const
 {
-	return bStatsEnabled || bHasTickableActorPools || bHasTickableSpawners;
+	
+	return bHasTickableActorPools || bHasTickableSpawners || NEXUS::ActorPools::ConsoleCommands::bTrackStats;
 }
 
 void UNActorPoolSubsystem::Tick(float DeltaTime)
 {
-	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_ActorPoolSubsystemTick, bStatsEnabled);
+	CONDITIONAL_SCOPE_CYCLE_COUNTER(STAT_ActorPoolSubsystemTick, NEXUS::ActorPools::ConsoleCommands::bTrackStats);
 	
-	if (bStatsEnabled)
+	if (NEXUS::ActorPools::ConsoleCommands::bTrackStats)
 	{
 		SET_DWORD_STAT(STAT_ActorPoolCount, ActorPools.Num())
 		SET_DWORD_STAT(STAT_InActors, 0)
@@ -81,7 +93,7 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 		}
 	}
 
-	if (bStatsEnabled)
+	if (NEXUS::ActorPools::ConsoleCommands::bTrackStats)
 	{
 		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
 		{
@@ -101,11 +113,9 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	
 	if (!ActorPools.Contains(ActorClass))
 	{
-		// #RawPointer - I did try to have this as a UObject; I was not able to resolve behavioral differences
-		// with the TSubclassOf<AActor> when looking up pools on UNActorPoolSubsystem.
-		const auto Pool = new FNActorPool(GetWorld(), ActorClass, Settings);
-		ActorPools.Add(ActorClass, Pool);
+		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, Settings));
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Creating a new FNActorPool(%s) in UWorld(%s), raising the total pool count to %i."), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return true;
 	}
 	return false;
@@ -153,6 +163,18 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 	
 }
 
+TArray<FNActorPool*> UNActorPoolSubsystem::GetAllPools() const
+{
+	TArray<FNActorPool*> ReturnPools;
+	ReturnPools.Reserve(ActorPools.Num());
+		
+	for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
+	{
+		ReturnPools.Add(Pair.Value().Get());
+	}
+	return MoveTemp(ReturnPools);
+}
+
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 {
 	// Don't add a stub pool to be ticked.
@@ -185,17 +207,38 @@ void UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Po
 
 bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 {
-	const UClass* ActorClass = Actor->GetClass();
+	UClass* ActorClass = Actor->GetClass();
 	if (ActorPools.Contains(ActorClass))
 	{
 		return (*ActorPools.Find(ActorClass))->Return(Actor);
 	}
-	if (bDestroyUnknownReturnedActors)
+	
+	switch (UnknownBehaviour)
 	{
-		UE_LOG(LogNexusActorPools, Verbose, TEXT("Attempting to destroy an unknown AActor(%s)) set to the UNActorPoolSubsystem."), *Actor->GetPathName());
-		return Actor->Destroy();
+		using enum ENActorPoolUnknownBehaviour;
+		case CreateDefaultPool:
+		{
+			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via ReturnActor for %s (%s), raising the total pool count to %i."),
+				*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
+			OnActorPoolAdded.Broadcast(NewPool.Get());
+			if (NewPool->DoesSupportInterface())
+			{
+				INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
+				ActorItem->InitializeActorPoolItem(NewPool.Get());		
+			}
+			return NewPool->Return(Actor);
+		}
+		case Ignore:
+			return false;
+		case Destroy: 
+		default:
+			if (Actor->IsRooted())
+			{
+				return false;
+			}
+			return Actor->Destroy();
 	}
-	return false;
 }
 
 void UNActorPoolSubsystem::RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
@@ -208,9 +251,4 @@ void UNActorPoolSubsystem::UnregisterTickableSpawner(UNActorPoolSpawnerComponent
 {
 	TickableSpawners.Remove(TargetComponent);
 	bHasTickableSpawners = (TickableSpawners.Num() > 0);
-}
-
-void UNActorPoolSubsystem::SetDestroyUnknownReturnedActors(const bool ShouldDestroy)
-{
-	bDestroyUnknownReturnedActors = ShouldDestroy;
 }

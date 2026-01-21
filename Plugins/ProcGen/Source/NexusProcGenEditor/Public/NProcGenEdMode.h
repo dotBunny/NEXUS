@@ -13,17 +13,17 @@ class UNProcGenOperation;
 class FNProcGenEdMode final : public FEdMode
 {
 public:
-	enum ENCellEdMode : uint8
+	enum class ENCellEdMode : uint8
 	{
-		CEM_Bounds = 0,
-		CEM_Hull = 1,
-		CEM_Voxel = 2
+		Bounds = 0,
+		Hull = 1,
+		Voxel = 2
 	};
-	enum ENCellVoxelMode : uint8
+	enum class ENCellVoxelMode : uint8
 	{
-		CVM_None = 0,
-		CVM_Grid = 1,
-		CVM_Points = 2
+		None = 0,
+		Grid = 1,
+		Points = 2
 	};
 
 	
@@ -42,7 +42,9 @@ public:
 	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
 	
 	static bool HasCellActor() { return CellActor != nullptr; }
+	static bool HasNoCellActor() { return CellActor == nullptr; }
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
+	static bool IsNotActive() { return !GLevelEditorModeTools().IsModeActive(Identifier); }
 	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { CellEdMode = InCellEdMode; }
 	
 	const static FEditorModeID Identifier;

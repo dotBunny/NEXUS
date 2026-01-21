@@ -45,9 +45,9 @@ protected:
 	}
 	void UpdateFromDisplay();
 #endif
-
 	
-	void OnFinishTest(ESampleTestResult TestResult, const FString& Message);
+	UFUNCTION()
+	void OnFinishSampleDisplayTest(ESampleDisplayTestResult TestResult, const FString& Message);
 
 	
 private:

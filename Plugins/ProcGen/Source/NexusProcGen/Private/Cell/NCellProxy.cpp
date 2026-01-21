@@ -23,8 +23,6 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	// Mesh Visible-stuff
 	Mesh->SetEnableRaytracing(false);
 	Mesh->SetVisibleInRayTracing(false);
-	DynamicMaterial = UMaterialInstanceDynamic::Create(UNProcGenSettings::Get()->ProxyMaterial.Get(), this);
-	Mesh->SetMaterial(0, DynamicMaterial);
 	Mesh->bExplicitShowWireframe = true;
 	Mesh->WireframeColor = FLinearColor::Gray;
 	Mesh->SetTangentsType(EDynamicMeshComponentTangentsMode::AutoCalculated);
@@ -142,6 +140,11 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 
 	// Let's rock some colors
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
+	
+	// Create the material on placement (CDO settings access = bad)
+	DynamicMaterial = UMaterialInstanceDynamic::Create(UNProcGenSettings::Get()->ProxyMaterial.Get(), this);
+	Mesh->SetMaterial(0, DynamicMaterial);
+	
 	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
 	
 	Mesh->MarkRenderStateDirty();

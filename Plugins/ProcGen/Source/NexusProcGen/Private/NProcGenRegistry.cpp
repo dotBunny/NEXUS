@@ -148,7 +148,7 @@ bool FNProcGenRegistry::RegisterOperation(UNProcGenOperation* Operation)
 
 	Operations.Add(Operation);
 	
-	NotifyOfStateChange(Operation, PGOS_Registered);
+	NotifyOfStateChange(Operation, ENProcGenOperationState::Registered);
 	return true;
 }
 
@@ -197,6 +197,6 @@ bool FNProcGenRegistry::UnregisterOperation(UNProcGenOperation* Operation)
 	}
 
 	Operations.RemoveSwap(Operation);
-	NotifyOfStateChange(Operation, PGOS_Unregistered);
+	NotifyOfStateChange(Operation, ENProcGenOperationState::Unregistered);
 	return true;
 }

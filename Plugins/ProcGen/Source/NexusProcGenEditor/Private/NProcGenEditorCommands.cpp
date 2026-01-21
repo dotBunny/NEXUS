@@ -102,7 +102,7 @@ void FNProcGenEditorCommands::RegisterCommands()
 		EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
-	CommandList_Cell = MakeShareable(new FUICommandList);
+	CommandList_Cell = MakeShared<FUICommandList>();
 
 	// Map NCell Actions
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCaptureThumbnail,
@@ -111,15 +111,15 @@ void FNProcGenEditorCommands::RegisterCommands()
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateAll,
 		FExecuteAction::CreateStatic(&CellCalculateAll),
-		FCanExecuteAction::CreateStatic(&CellCalculateAll_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateBounds,
 		FExecuteAction::CreateStatic(&CellCalculateBounds),
-		FCanExecuteAction::CreateStatic(&CellCalculateBounds_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateHull,
 	FExecuteAction::CreateStatic(&CellCalculateHull),
-	FCanExecuteAction::CreateStatic(&CellCalculateHull_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellCalculateVoxelData,
 FExecuteAction::CreateStatic(&CellCalculateVoxelData),
@@ -127,36 +127,36 @@ FExecuteAction::CreateStatic(&CellCalculateVoxelData),
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleBoundsCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleBoundsCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleBoundsCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleBoundsCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave),
-	FCanExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelCalculateOnSave_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelData,
 FExecuteAction::CreateStatic(&CellToggleVoxelData), 
-	FCanExecuteAction::CreateStatic(&CellToggleVoxelData_CanExecute),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleVoxelData_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellResetCell,
 	FExecuteAction::CreateStatic(&CellResetCell),
-	FCanExecuteAction::CreateStatic(&CellResetCell_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellRemoveActor,
 	FExecuteAction::CreateStatic(&CellRemoveActor),
-	FCanExecuteAction::CreateStatic(&CellRemoveActor_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	// Build NCellJunction Command Info
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellJunctionAddComponent,
@@ -174,11 +174,11 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
-	CommandList_CellJunction = MakeShareable(new FUICommandList);
+	CommandList_CellJunction = MakeShared<FUICommandList>();
 
 	CommandList_CellJunction->MapAction(Get().CommandInfo_CellJunctionAddComponent,
 FExecuteAction::CreateStatic(&CellJunctionAddComponent),
-	FCanExecuteAction::CreateStatic(&CellJunctionAddComponent_CanExecute));
+	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorsSelected));
 	
 	// Organ
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerate,
@@ -188,20 +188,15 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
-	CommandList_Organ = MakeShareable(new FUICommandList);
+	CommandList_Organ = MakeShared<FUICommandList>();
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerate,
 		FExecuteAction::CreateStatic(&OrganGenerate),
-		FCanExecuteAction::CreateStatic(&OrganGenerate_CanExecute));
+		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsOrganVolumeSelected));
 }
 
 void FNProcGenEditorCommands::ProcGenEdMode()
 {
 	GLevelEditorModeTools().ActivateMode(FNProcGenEdMode::Identifier);
-}
-
-bool FNProcGenEditorCommands::ProcGenEdMode_CanExecute()
-{
-	return !FNProcGenEdMode::IsActive();
 }
 
 bool FNProcGenEditorCommands::ProcGenEdMode_CanShow()
@@ -212,7 +207,7 @@ bool FNProcGenEditorCommands::ProcGenEdMode_CanShow()
 
 void FNProcGenEditorCommands::CellActorEditHullMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Hull);
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Hull);
 }
 
 bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
@@ -224,106 +219,66 @@ bool FNProcGenEditorCommands::CellActorEditHullMode_CanExecute()
 	return !RootComponent->Details.Hull.HasNonTris();
 }
 
-FSlateIcon FNProcGenEditorCommands::CellActorEditHullMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Hull)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Hull.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Hull");
-}
-
 void FNProcGenEditorCommands::CellActorEditBoundsMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Bounds);
-}
-
-FSlateIcon FNProcGenEditorCommands::CellActorEditBoundsMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Bounds)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Bounds");
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Bounds);
 }
 
 void FNProcGenEditorCommands::CellActorEditVoxelMode()
 {
-	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::CEM_Voxel);
-}
-
-FSlateIcon FNProcGenEditorCommands::CellActorEditVoxelMode_GetIcon()
-{
-	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::CEM_Voxel)
-	{
-		return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
-	}
-	return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
+	FNProcGenEdMode::SetCellEdMode(FNProcGenEdMode::ENCellEdMode::Voxel);
 }
 
 void FNProcGenEditorCommands::CellActorToggleDrawVoxelData()
 {
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
-	case FNProcGenEdMode::ENCellVoxelMode::CVM_Grid:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_Points);
+		using enum FNProcGenEdMode::ENCellVoxelMode;
+	case Grid:
+		FNProcGenEdMode::SetCellVoxelMode(Points);
 		break;
-	case FNProcGenEdMode::ENCellVoxelMode::CVM_None:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_Grid);
+	case None:
+		FNProcGenEdMode::SetCellVoxelMode(Grid);
 		break;
 	default:
-		FNProcGenEdMode::SetCellVoxelMode(FNProcGenEdMode::ENCellVoxelMode::CVM_None);
-	}
-}
-
-FSlateIcon FNProcGenEditorCommands::CellActorToggleDrawVoxelData_GetIcon()
-{
-	switch (FNProcGenEdMode::GetCellVoxelMode())
-	{
-		case FNProcGenEdMode::ENCellVoxelMode::CVM_Grid:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
-		case FNProcGenEdMode::ENCellVoxelMode::CVM_Points:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
-		default:
-			return FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
+		FNProcGenEdMode::SetCellVoxelMode(None);
 	}
 }
 
 void FNProcGenEditorCommands::CellAddActor()
 {
-	if (UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld == nullptr)
 	{
-		if (FNEditorUtils::IsUnsavedWorld(CurrentWorld))
+		return;
+	}
+
+	if (FNEditorUtils::IsUnsavedWorld(CurrentWorld))
+	{
+		const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgCategory::Error, EAppMsgType::Type::YesNo,
+			FText::FromString(TEXT("You need to save the world/map that you are working in before creating a NCellActor.\n\nDo you wish to save the map now?")),
+			FText::FromString(TEXT("NEXUS: ProcGen")));
+		switch (Choice)
 		{
-			const EAppReturnType::Type Choice = FMessageDialog::Open(EAppMsgCategory::Error, EAppMsgType::Type::YesNo,
-				FText::FromString(TEXT("You need to save the world/map that you are working in before creating a NCellActor.\n\nDo you wish to save the map now?")),
-				FText::FromString(TEXT("NEXUS: ProcGen")));
-			switch (Choice)
+		case EAppReturnType::No:
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			return;
+		case EAppReturnType::Yes:
+			if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
 			{
-			case EAppReturnType::No:
-				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
-				return;
-			case EAppReturnType::Yes:
-				if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
-				{
-					UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
-					return;
-				}
-				break;
-			default:
 				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
 				return;
 			}
+			break;
+		default:
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			return;
 		}
-		
-		ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
-		FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
 	}
-}
-
-bool FNProcGenEditorCommands::CellAddActor_CanExecute()
-{
-	return !FNProcGenEdMode::HasCellActor();
+	
+	ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
+	FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
+	
 }
 
 bool FNProcGenEditorCommands::CellAddActor_CanShow()
@@ -336,11 +291,6 @@ void FNProcGenEditorCommands::OrganGenerate()
 {
 	UNProcGenEditorSubsystem::Get()->StartOperation(
 		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
-}
-
-bool FNProcGenEditorCommands::OrganGenerate_CanExecute()
-{
-	return FNProcGenEditorUtils::IsOrganVolumeSelected();
 }
 
 void FNProcGenEditorCommands::CellSelectActor()
@@ -370,21 +320,11 @@ void FNProcGenEditorCommands::CellCalculateAll()
 	CellCalculateVoxelData();
 }
 
-bool FNProcGenEditorCommands::CellCalculateAll_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 void FNProcGenEditorCommands::CellCalculateBounds()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->CalculateBounds();
-}
-
-bool FNProcGenEditorCommands::CellCalculateBounds_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellCalculateHull()
@@ -394,11 +334,6 @@ void FNProcGenEditorCommands::CellCalculateHull()
 	CellActor->CalculateHull();
 	
 	FNProcGenEdMode::ProtectCellEdMode();
-}
-
-bool FNProcGenEditorCommands::CellCalculateHull_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellCalculateVoxelData()
@@ -418,10 +353,11 @@ bool FNProcGenEditorCommands::CellCalculateVoxelData_CanExecute()
 void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleBoundsCalculateOnSave", "Toggle Calculate Bounds On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave;
@@ -430,17 +366,13 @@ void FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if ( Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.BoundsSettings.bCalculateOnSave;
 		}
@@ -451,10 +383,11 @@ bool FNProcGenEditorCommands::CellToggleBoundsCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleHullCalculateOnSave", "Toggle Calculate Hull On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
@@ -463,17 +396,13 @@ void FNProcGenEditorCommands::CellToggleHullCalculateOnSave()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
 		}
@@ -484,10 +413,11 @@ bool FNProcGenEditorCommands::CellToggleHullCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleVoxelCalculateOnSave", "Toggle Calculate Voxel On Save"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave;
@@ -496,17 +426,13 @@ void FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.VoxelSettings.bCalculateOnSave;
 		}
@@ -517,10 +443,11 @@ bool FNProcGenEditorCommands::CellToggleVoxelCalculateOnSave_IsActionChecked()
 void FNProcGenEditorCommands::CellToggleVoxelData()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellToggleUseVoxelData", "Use Voxel Data"));
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData = !Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
@@ -535,17 +462,13 @@ void FNProcGenEditorCommands::CellToggleVoxelData()
 	}
 }
 
-bool FNProcGenEditorCommands::CellToggleVoxelData_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 bool FNProcGenEditorCommands::CellToggleVoxelData_IsActionChecked()
 {
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld())
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
 	{
-		if (const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
-			Actor != nullptr)
+		const ANCellActor* Actor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true); 
+		if (Actor != nullptr)
 		{
 			return Actor->GetCellRoot()->Details.VoxelSettings.bUseVoxelData;
 		}
@@ -573,11 +496,6 @@ void FNProcGenEditorCommands::CellResetCell()
 	CellActor->SetActorDirty();
 }
 
-bool FNProcGenEditorCommands::CellResetCell_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
-}
-
 void FNProcGenEditorCommands::CellRemoveActor()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusProcGenEditor", "FNProcGenEditorCommands_CellRemoveActor", "Remove Cell Actor"));
@@ -593,11 +511,6 @@ void FNProcGenEditorCommands::CellRemoveActor()
 		{
 			UEditorAssetLibrary::DeleteAsset(SidecarPath);
 		}
-}
-
-bool FNProcGenEditorCommands::CellRemoveActor_CanExecute()
-{
-	return FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld();
 }
 
 void FNProcGenEditorCommands::CellJunctionAddComponent()
@@ -635,21 +548,10 @@ void FNProcGenEditorCommands::CellJunctionAddComponent()
 	}
 }
 
-bool FNProcGenEditorCommands::CellJunctionAddComponent_CanExecute()
-{
-	if (GEditor->GetSelectedActorCount() == 0) return false;
-	return true;
-}
-
 void FNProcGenEditorCommands::CellJunctionSelectComponent(UNCellJunctionComponent* Junction)
 {
 	GEditor->SelectNone(false, true);
 	GEditor->SelectComponent(Junction, true, true, true);
-}
-
-bool FNProcGenEditorCommands::CellJunctionSelectComponent_CanExecute(UNCellJunctionComponent* Junction)
-{
-	return true;
 }
 
 void FNProcGenEditorCommands::OrganSelectComponent(UNOrganComponent* Organ)
@@ -658,22 +560,18 @@ void FNProcGenEditorCommands::OrganSelectComponent(UNOrganComponent* Organ)
 	GEditor->SelectComponent(Organ, true, true, true);
 }
 
-bool FNProcGenEditorCommands::OrganSelectComponent_CanExecute(UNOrganComponent* Organ)
-{
-	return true;
-}
-
 void FNProcGenEditorCommands::CellCaptureThumbnail()
 {
-	if (FViewport* Viewport = GEditor->GetActiveViewport();
+	FViewport* Viewport = GEditor->GetActiveViewport();
+	if (Viewport != nullptr &&
 		ensure(GCurrentLevelEditingViewportClient) && ensure(Viewport) )
 	{
 		FLevelEditorViewportClient* OldViewportClient = GCurrentLevelEditingViewportClient;
 		GCurrentLevelEditingViewportClient = nullptr;
 		Viewport->Draw();
-
-		if (const UWorld* World = FNEditorUtils::GetCurrentWorld();
-			World != nullptr)
+		
+		const UWorld* World = FNEditorUtils::GetCurrentWorld();
+		if (World != nullptr)
 		{
 			TArray<FAssetData> SelectedAssets;
 			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));

@@ -59,6 +59,7 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
 	TSoftObjectPtr<UMaterial> ProxyMaterial;
 
+#if WITH_EDITOR
 private:
 	void ValidateSettings()
 	{
@@ -93,4 +94,5 @@ private:
 			TryUpdateDefaultConfigFile();
 		}
 	}
+#endif
 };

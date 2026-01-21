@@ -21,7 +21,7 @@ struct NEXUSPROCGEN_API FNOrganGenerationContext
 class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
-	void Reset();
+	void ResetContext();
 	bool IsLocked() const { return bIsLocked; }
 	void LockAndPreprocess();
 	

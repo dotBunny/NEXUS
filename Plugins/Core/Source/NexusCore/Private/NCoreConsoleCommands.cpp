@@ -6,7 +6,7 @@
 #include "Developer/NObjectSnapshotUtils.h"
 #include "HAL/IConsoleManager.h"
 
-namespace NConsoleCommands::Developer
+namespace NEXUS::Core::ConsoleCommands
 {
 	static FAutoConsoleCommand SnapshotToDisk(TEXT("N.Developer.Snapshot"),
 		TEXT("Take a snapshot of the currently known objects and save to the projects log folder."),

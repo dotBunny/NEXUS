@@ -3,119 +3,187 @@
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "IBlutilityModule.h"
+
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
 
+bool UNEditorUtilityWidgetSystem::bIsOpeningMap = false;
+
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	
+	// Bind to look for when we are changing worlds/maps and prepare to have to remake tabs
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (AssetEditorSubsystem != nullptr)
+	{
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+	}
+	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddStatic(&UNEditorUtilityWidgetSystem::OnMapOpened);
+	
 	UNEditorUtilityWidgetLoadTask::Create();
 }
 
-UNEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
+void UNEditorUtilityWidgetSystem::Deinitialize()
 {
-	const UBlueprint* TemplateWidget = LoadObject<UBlueprint>(nullptr, InTemplate);
-	if (TemplateWidget == nullptr)
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (AssetEditorSubsystem != nullptr)
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to create a UNEditorUtilityWidget as the provided UBlueprint(%s) was unable to load."), *InTemplate)
-		return nullptr;
+		AssetEditorSubsystem->OnAssetEditorRequestedOpen().Remove(OnAssetEditorRequestedOpenHandle);
 	}
-			
+	FEditorDelegates::OnMapOpened.Remove(OnMapOpenedHandle);
+	
+	// Unload all known blueprints
+	WidgetBlueprints.Empty();
+	
+	Super::Deinitialize();
+}
+
+void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
+{
+	// We only want to do something when were opening worlds as an asset
+	if (!Cast<UWorld>(Object)) return;
+	
+	bIsOpeningMap = true;
+	
+	// Record our transient rebuild data
+	PersistentStates.Clear();
+	for (UNEditorUtilityWidget* Widget : PersistentWidgets)
+	{
+		AddPersistentState(Widget);
+	}
+}
+
+void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
+{
+	bIsOpeningMap = false;
+}
+
+void UNEditorUtilityWidgetSystem::AddPersistentState(const TObjectPtr<UNEditorUtilityWidget> Widget)
+{
+	if (Widget->IsPersistent())
+	{
+		PersistentStates.AddWidgetState(
+					Widget->GetUserSettingsIdentifier(), 
+					Widget->GetUserSettingsTemplate(), 
+					Widget->GetWidgetState(Widget));
+	}
+}
+
+UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
+{
+	// Manage our spawned widgets were loading as they can be reused during different scenarios
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = Get()->GetWidgetBlueprint(InTemplate);
+	
 	FString IdentifierString = InIdentifier.ToString();
 	IdentifierString.RemoveFromEnd(TEXT("_ActiveTab"));
 	const FName Identifier(IdentifierString);
-			
-	// Need to duplicate the base
-	UBlueprint* TemplateDuplicate = DuplicateObject<UBlueprint>(TemplateWidget, TemplateWidget->GetOutermost(), Identifier);
-	TemplateDuplicate->SetFlags(RF_Public | RF_Transient | RF_TextExportTransient | RF_DuplicateTransient);
 	
-	if (UEditorUtilityWidgetBlueprint* EditorWidget = Cast<UEditorUtilityWidgetBlueprint>(TemplateDuplicate))
+	// Spawn and make the tab for the widget
+	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+	
+	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget.Get());
+	
+	// We don't want these tracked (Remove from EUW-list), opening it from there will just break the restoring
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	BlutilityModule->RemoveLoadedScriptUI(NewWidget.Get());
+	
+	// If it is one of our widgets, let's do a little extra
+	UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget);
+	if (UtilityWidget != nullptr)
 	{
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(EditorWidget);
-				
-		// We dont want these tracked
-		IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-		BlutilityModule->RemoveLoadedScriptUI(EditorWidget);
-				
-		if (UNEditorUtilityWidget* UtilityWidget = Cast<UNEditorUtilityWidget>(Widget); 
-			UtilityWidget != nullptr)
-		{
-			UtilityWidget->PinTemplate(EditorWidget);
-			if (UtilityWidget->Implements<UNWidgetStateProvider>())
-			{
-				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(UtilityWidget); 
-					StateProvider != nullptr)
-				{
-					StateProvider->RestoreWidgetState(UtilityWidget, Identifier, WidgetState);
-				}
-				else
-				{
-					INWidgetStateProvider::Execute_OnRestoreWidgetStateEvent(UtilityWidget, Identifier, WidgetState);
-				}
-			}
-			return UtilityWidget;
-		}
+		UtilityWidget->SetTemplate(NewWidget);
+		
+		// Attempt to automatically restore the widget state
+		INWidgetStateProvider::InvokeRestoreWidgetState(UtilityWidget, Identifier, WidgetState);
+		
+		return UtilityWidget;
 	}
-	return nullptr;
+	return Widget;
 }
 
-void UNEditorUtilityWidgetSystem::RegisterWidget(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
+void UNEditorUtilityWidgetSystem::AddWidgetState(const FName& Identifier, const FString& Template, const FNWidgetState& WidgetState)
 {
-	// Check for already registered
-	if (int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex == INDEX_NONE)
+	if (WidgetStates.AddWidgetState(Identifier, Template, WidgetState))
 	{
-		// Add our items
-		WorkingIndex = Identifiers.Add(Identifier);
-		const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState);
-		const int32 TemplateIndexCheck = Templates.Add(Template);
-		
-		// Sanity check
-		if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
-		{
-			UE_LOG(LogNexusUIEditor, Error, TEXT("Sanity check of the known registered widgets's arrays shows inconsistencies; data will be cleared."))
-			Clear();
-		}
-	}
-	else
-	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("A widget is already registered for Identifier(%s); updating cached state only."), *Identifier.ToString());
-		WidgetStates[WorkingIndex] = WidgetState;
-	}
-	
-	SaveConfig();
-
-}
-
-void UNEditorUtilityWidgetSystem::UnregisterWidget(const FName& Identifier)
-{
-	if (const int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex != INDEX_NONE)
-	{
-		Identifiers.RemoveAt(WorkingIndex);
-		Templates.RemoveAt(WorkingIndex);
-		WidgetStates.RemoveAt(WorkingIndex);
-		
 		SaveConfig();
 	}
-	else
+}
+
+void UNEditorUtilityWidgetSystem::RemoveWidgetState(const FName& Identifier)
+{
+	if (WidgetStates.RemoveWidgetState(Identifier))
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Failed to unregister widget(%s); no registered widget was found."), *Identifier.ToString());
+		SaveConfig();
 	}
 }
 
 void UNEditorUtilityWidgetSystem::UpdateWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
 {
-	if (const int32 WorkingIndex = GetIdentifierIndex(Identifier); 
-		WorkingIndex != INDEX_NONE)
+	if (WidgetStates.UpdateWidgetState(Identifier, WidgetState))
 	{
-		WidgetStates[WorkingIndex] = WidgetState;
 		SaveConfig();
 	}
-	else
+}
+
+bool UNEditorUtilityWidgetSystem::HasWidgetState(const FName& Identifier) const
+{
+	return WidgetStates.HasWidgetState(Identifier);
+}
+
+FNWidgetState& UNEditorUtilityWidgetSystem::GetWidgetState(const FName& Identifier)
+{
+	return WidgetStates.GetWidgetState(Identifier);
+}
+
+void UNEditorUtilityWidgetSystem::RestorePersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
+{
+	const int32 TransientStateCount = PersistentStates.GetCount();
+	if (TransientStateCount > 0)
 	{
-		UE_LOG(LogNexusUIEditor, Error, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
+		const FString& WidgetTemplate = Widget->GetUserSettingsTemplate(); 
+		for (int32 Index = TransientStateCount - 1; Index >= 0; Index--)
+		{
+			if (PersistentStates.Templates[Index] == WidgetTemplate)
+			{
+				Widget->SetTemplate(GetWidgetBlueprint(PersistentStates.Templates[Index]));
+				Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
+				
+				PersistentStates.RemoveAtIndex(Index);
+			}
+		}
 	}
+}
+
+void UNEditorUtilityWidgetSystem::RegisterPersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
+{
+	if (!PersistentWidgets.Contains(Widget))
+	{
+		PersistentWidgets.Add(Widget);
+	}
+}
+
+void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
+{
+	if (PersistentWidgets.Contains(Widget))
+	{
+		PersistentWidgets.Remove(Widget);
+	}
+}
+
+TObjectPtr<UEditorUtilityWidgetBlueprint> UNEditorUtilityWidgetSystem::GetWidgetBlueprint(const FString& InTemplate)
+{
+	if (WidgetBlueprints.Contains(InTemplate))
+	{
+		return WidgetBlueprints[InTemplate];
+	}
+
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(this, InTemplate);
+	if (NewWidget == nullptr)
+	{
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNEditorUtilityWidget as the provided UEditorUtilityWidgetBlueprint(%s) was unable to load."), *InTemplate)
+		return nullptr;
+	}
+	return WidgetBlueprints.Add(InTemplate, NewWidget);
 }

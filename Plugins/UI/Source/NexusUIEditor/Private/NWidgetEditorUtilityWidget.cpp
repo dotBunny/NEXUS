@@ -4,13 +4,17 @@
 #include "NWidgetEditorUtilityWidget.h"
 
 #include "EditorUtilityWidgetComponents.h"
+#include "INWidgetMessageProvider.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/VerticalBox.h"
 
-TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownEditorUtilityWidgets;
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
+
+
+TMap<FName, UNWidgetEditorUtilityWidget*> UNWidgetEditorUtilityWidget:: KnownWidgets;
 
 UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText,  const FName& TabIconStyle, const FString& TabIconName)
 {
@@ -21,8 +25,8 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	}
 	
 	// Return existing and flash it
-	if (UNWidgetEditorUtilityWidget* ExistingWidget = GetEditorUtilityWidget(Identifier); 
-		ExistingWidget != nullptr)
+	UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
+	if (ExistingWidget != nullptr)
 	{
 		FNEditorUtils::FocusTab(ExistingWidget->GetTabIdentifier());
 		return ExistingWidget;
@@ -30,20 +34,20 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	
 
 	FNWidgetState WidgetState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
-	UNEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
+	UEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
 	return Cast<UNWidgetEditorUtilityWidget>(Widget);
 }
 
-bool UNWidgetEditorUtilityWidget::HasEditorUtilityWidget(const FName Identifier)
+bool UNWidgetEditorUtilityWidget::HasWidget(const FName Identifier)
 {
-	return KnownEditorUtilityWidgets.Contains(Identifier);
+	return KnownWidgets.Contains(Identifier);
 }
 
-UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetEditorUtilityWidget(const FName Identifier)
+UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetWidget(const FName Identifier)
 {
-	if (KnownEditorUtilityWidgets.Contains(Identifier))
+	if (KnownWidgets.Contains(Identifier))
 	{
-		return KnownEditorUtilityWidgets[Identifier];
+		return KnownWidgets[Identifier];
 	}
 	return nullptr;
 }
@@ -101,17 +105,9 @@ FNWidgetState UNWidgetEditorUtilityWidget::GetWidgetState(UObject* BlueprintWidg
 	// Add in child data that WILL NOT override parent keys
 	if (BaseWidget != nullptr && BaseWidget->Implements<UNWidgetStateProvider>())
 	{
-		FNWidgetState ChildWidgetState;
-		if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
-			StateProvider != nullptr)
-		{
-			ChildWidgetState = StateProvider->GetWidgetState(BaseWidget);
-		}
-		else
-		{
-			ChildWidgetState = Execute_OnGetWidgetStateEvent(BaseWidget);
-		}
+		FNWidgetState ChildWidgetState = INWidgetStateProvider::InvokeGetWidgetState(BaseWidget);
 		BaseState.OverlayState(ChildWidgetState, false);
+		BaseState.DumpToLog();
 	}
 	
 	return BaseState;
@@ -140,53 +136,111 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	Execute_OnRestoreWidgetStateEvent(BlueprintWidget, Identifier, WidgetState);
 	
 	FString NewWidgetBlueprint = WidgetState.GetString(WidgetState_WidgetBlueprint);
-	if (WidgetBlueprint != NewWidgetBlueprint)
+	if (WidgetBlueprint == NewWidgetBlueprint) return;
+
+	// We already have a base widget, but this is changing it for some odd reason?
+	if (BaseWidget != nullptr)
 	{
-		// We already have a base widget, but this is changing it for some odd reason?
-		if (BaseWidget != nullptr)
+		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
+		VerticalBox->RemoveChild(BaseWidget);
+		WidgetTree->RemoveWidget(BaseWidget);
+		
+		N_UNBIND_WIDGET_MESSAGE_PROVIDED(BaseWidget, OnStatusProviderUpdateHandle);
+		
+		BaseWidget = nullptr;
+		WidgetBlueprint = TEXT("");
+	}
+	
+	ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(this, NewWidgetBlueprint);
+	if (ContentWidgetTemplate == nullptr)
+	{
+		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNWidgetEditorUtilityWidget as the provided UWidgetBlueprint(%s) was unable to load."), *NewWidgetBlueprint)
+		return;
+	}
+	
+	const TSubclassOf<UUserWidget> ContentWidget { ContentWidgetTemplate->GeneratedClass };
+	
+	if (ContentWidget != nullptr)
+ 	{
+		// The widget tree might be the generated class that's nulled?
+		BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
+		
+		// Bind to updates of a status provider
+		N_BIND_WIDGET_MESSAGE_PROVIDED(BaseWidget, OnStatusProviderUpdateHandle, UNWidgetEditorUtilityWidget::UpdateHeader);
+		
+		// Check for some known crash things
+		if (BaseWidget->IsFocusable())
 		{
-			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-			EditorScrollBox->RemoveChild(BaseWidget);
-			WidgetTree->RemoveWidget(BaseWidget);
-			BaseWidget = nullptr;
-			WidgetBlueprint = TEXT("");
+			UE_LOG(LogNexusUIEditor, Error, TEXT("UNWidgetEditorUtilityWidgets cannot have focusable content (%s)."), *ContentWidget->GetName())
 		}
 		
-		const UWidgetBlueprint* ContentWidgetTemplate = LoadObject<UWidgetBlueprint>(nullptr, NewWidgetBlueprint);
-		const TSubclassOf<UUserWidget> ContentWidget{ContentWidgetTemplate->GeneratedClass};
-		if (ContentWidget != nullptr)
+		WidgetBlueprint = NewWidgetBlueprint;
+		
+		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
+		VerticalBox->AddChild(BaseWidget);
+		
+		// Pass WidgetState Along
+		InvokeRestoreWidgetState(BaseWidget, Identifier, WidgetState);
+		
+		// Initial update of the header
+		UpdateHeader();
+	}
+	else
+	{
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
+	}
+	
+	SetWidgetStateHasBeenRestored(true);
+}
+
+
+void UNWidgetEditorUtilityWidget::UpdateHeader() const
+{
+	if (BaseWidget == nullptr || !INWidgetMessageProvider::InvokeHasStatusProviderMessage(BaseWidget))
+	{
+		Header->SetVisibility(ESlateVisibility::Collapsed);
+		HeaderFooter->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+
+	HeaderText->SetText(FText::FromString(INWidgetMessageProvider::InvokeGetStatusProviderMessage(BaseWidget)));
+	Header->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	HeaderFooter->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+}
+
+void UNWidgetEditorUtilityWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	if (IsPersistent())
+	{
+		OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNWidgetEditorUtilityWidget::OnBlueprintPreCompile);
+		if (!HasWidgetStateBeenRestored())
 		{
-			BaseWidget = WidgetTree->ConstructWidget(ContentWidget);
-			WidgetBlueprint = NewWidgetBlueprint;
-			
-			UEditorUtilityScrollBox* EditorScrollBox = Cast<UEditorUtilityScrollBox>(WidgetTree->RootWidget);
-			EditorScrollBox->AddChild(BaseWidget);
-			
-			// Pass WidgetState Along
-			if (BaseWidget->Implements<UNWidgetStateProvider>())
-			{
-				if (INWidgetStateProvider* StateProvider = Cast<INWidgetStateProvider>(BaseWidget); 
-					StateProvider != nullptr)
-				{
-					StateProvider->RestoreWidgetState(BaseWidget, Identifier, WidgetState);
-				}
-				else
-				{
-					Execute_OnRestoreWidgetStateEvent(BaseWidget, Identifier, WidgetState);
-				}
-			}
-		}
-		else
-		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
+			UNEditorUtilityWidgetSystem::Get()->RestorePersistentWidget(this);
 		}
 	}
+
+	UpdateHeader();
 }
+
 
 void UNWidgetEditorUtilityWidget::NativeDestruct()
 {
-	KnownEditorUtilityWidgets.Remove(WidgetIdentifier);
+	if (IsPersistent())
+	{
+		GEditor->OnBlueprintPreCompile().Remove(OnBlueprintPreCompileHandle);
+	}
+	KnownWidgets.Remove(WidgetIdentifier);
 	Super::NativeDestruct();
+}
+
+void UNWidgetEditorUtilityWidget::OnBlueprintPreCompile(UBlueprint* Blueprint)
+{
+	if (Blueprint == PinnedTemplate || Blueprint == ContentWidgetTemplate)
+	{
+		UNEditorUtilityWidgetSystem::Get()->AddPersistentState(this);
+	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -194,6 +248,6 @@ void UNWidgetEditorUtilityWidget::NativeDestruct()
 void UNWidgetEditorUtilityWidget::DelayedConstructTask()
 {
 	// We register a frame later as the base widget data has been set at that point
-	KnownEditorUtilityWidgets.Add(WidgetIdentifier, this);
+	KnownWidgets.Add(WidgetIdentifier, this);
 	Super::DelayedConstructTask();
 }

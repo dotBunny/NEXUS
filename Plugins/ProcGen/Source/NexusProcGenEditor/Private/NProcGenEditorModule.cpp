@@ -24,7 +24,6 @@
 #include "Organ/NOrganComponent.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 #include "NProcGenEditorCommands.h"
-#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorToolMenu.h"
 #include "NProcGenEditorUndo.h"
 #include "NProcGenEdMode.h"
@@ -72,19 +71,18 @@ void FNProcGenEditorModule::ShutdownModule()
 	FNProcGenEditorStyle::Shutdown();
 
 	// Remove Undo handler
-	if (UndoHandler != nullptr)
+	if (UndoHandler.IsValid())
 	{
-		delete UndoHandler;
-		UndoHandler = nullptr;
+		UndoHandler.Reset();
 	}
 }
 
 void FNProcGenEditorModule::OnPostEngineInit()
 {
 	// Initialize Undo Handler
-	if (UndoHandler == nullptr)
+	if (!UndoHandler.IsValid())
 	{
-		UndoHandler = new FNProcGenEditorUndo();
+		UndoHandler = MakeShared<FNProcGenEditorUndo>();
 	}
 	
 	// Configure Style

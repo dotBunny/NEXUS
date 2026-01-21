@@ -9,12 +9,14 @@
 
 class UNCell;
 
-enum ENProcGenSelectionFlags : uint8
+UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
+enum class ENProcGenSelectionFlags : uint8
 {
-	PGSF_None = 0,
-	PGSF_CellActor = 1 << 0,
-	PGSF_OrganVolume = 1 << 1,
+	None = 0,
+	CellActor = 1 << 0,
+	OrganVolume = 1 << 1
 };
+ENUM_CLASS_FLAGS(ENProcGenSelectionFlags)
 
 class NEXUSPROCGENEDITOR_API FNProcGenEditorUtils
 {

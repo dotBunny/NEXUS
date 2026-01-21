@@ -162,6 +162,8 @@ public:
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 	static bool ReplaceWindowIcon(const FString& IconPath);
 
+	static bool HasActorsSelected();
+	
 	static FString GetEngineBinariesPath();
 	
 	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);

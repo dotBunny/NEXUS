@@ -6,6 +6,7 @@
 #include "IPlacementModeModule.h"
 #include "NActorPoolsEditorMinimal.h"
 #include "NActorPoolsEditorStyle.h"
+#include "NActorPoolsEditorToolMenu.h"
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
@@ -43,6 +44,13 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
+	
+	
+	// Initialize Tool Menu
+	if (FSlateApplication::IsInitialized())
+	{
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNActorPoolsEditorToolMenu::Register));
+	}
 	
 	if (GUnrealEd)
 	{

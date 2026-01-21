@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 8,
-	"VersionName": "0.2.5",
+	"Version": 9,
+	"VersionName": "0.2.6",
 	"FriendlyName": "NEXUS Samples: Multiplayer",
 	"Description": "Sample content for the NEXUS: Multiplayer plugin.",
 	"Category": "NEXUS Samples",

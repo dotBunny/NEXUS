@@ -19,7 +19,7 @@ class UAssetDefinition_NActorPoolSet : public UAssetDefinitionDefault
 public:
 	//~ Begin UAssetDefinition
 	virtual FText GetAssetDisplayName() const override;
-	virtual FLinearColor GetAssetColor() const override { return FNColor::GetLinearColor(NC_NexusLightBlue); };
+	virtual FLinearColor GetAssetColor() const override { return FNColor::GetLinearColor(ENColor::NC_NexusLightBlue); };
 	virtual TSoftClassPtr<UObject> GetAssetClass() const override { return UNActorPoolSet::StaticClass(); }
 	virtual TConstArrayView<FAssetCategoryPath> GetAssetCategories() const override;
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;

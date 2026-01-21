@@ -3,7 +3,11 @@
 
 #pragma once
 
+#include "CommonBorder.h"
+#include "CommonTextBlock.h"
 #include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSystem.h"
+#include "Components/Image.h"
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
 
@@ -18,11 +22,10 @@ public:
 	
 	static UNWidgetEditorUtilityWidget* GetOrCreate(const FName Identifier, const FString& WidgetBlueprint, const FText& TabDisplayText = FText::GetEmpty(), const FName& TabIconStyle = TEXT(""), const FString& TabIconName = TEXT(""));
 	
-	static bool HasEditorUtilityWidget(FName Identifier);
-	static UNWidgetEditorUtilityWidget* GetEditorUtilityWidget(FName Identifier);
+	static bool HasWidget(FName Identifier);
+	static UNWidgetEditorUtilityWidget* GetWidget(FName Identifier);
 	
 	virtual FText GetTabDisplayText() const override;
-	
 	virtual FSlateIcon GetTabDisplayIcon() override;
 
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayBrush() override;
@@ -46,15 +49,27 @@ public:
 	{
 		return TemplatePath;
 	}
-
+	
 	//~INWidgetStateProvider interface
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& WidgetState) override;
 	//~End of INWidgetStateProvider interface
 
+	void UpdateHeader() const;
+
 protected:
 	
+	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonBorder> Header;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> HeaderText;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> HeaderFooter;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FName WidgetIdentifier = GetFName();
@@ -73,10 +88,17 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly)
 	FString TabIconName;
-
+	
+	UPROPERTY()
+	TObjectPtr<UWidgetBlueprint> ContentWidgetTemplate;
+	
+	void OnBlueprintPreCompile(UBlueprint* Blueprint);
+	
 private:
 	virtual void DelayedConstructTask() override;
-	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownEditorUtilityWidgets;
+	static TMap<FName, UNWidgetEditorUtilityWidget*> KnownWidgets;
 	FSlateIcon TabIcon;
+	FDelegateHandle OnBlueprintPreCompileHandle;
+	FDelegateHandle OnStatusProviderUpdateHandle;
 };
 

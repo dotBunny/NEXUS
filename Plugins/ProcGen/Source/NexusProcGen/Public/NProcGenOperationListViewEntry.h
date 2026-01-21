@@ -11,7 +11,7 @@ class UNProcGenOperation;
 class UProgressBar;
 class UCommonTextBlock;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Operation ListView Entry", BlueprintType, Blueprintable, HideDropdown)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Operation ListView Entry", BlueprintType, Blueprintable)
 class NEXUSPROCGEN_API UNProcGenOperationListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()

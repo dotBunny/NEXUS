@@ -12,7 +12,6 @@ public:
 	
 private:
 	static bool bIsMultiplayerTestRunning;
-	static bool MultiplayerTest_CanExecute();
 	static FText MultiplayerTest_GetTooltip();
 	static FSlateIcon MultiplayerTest_GetIcon();
 	static void ToggleMultiplayerTest();

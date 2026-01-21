@@ -8,6 +8,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMesh.h"
 
+// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
 void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter,
 	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)
@@ -19,6 +20,7 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, 0.0f, Points[i].Y), WorldCenter, Rotation);
 		switch (Axis)
 		{
+			using enum ENAxis;
 		case X:
 			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
@@ -32,6 +34,7 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 		}
 	}
 }
+// #SONARQUBE-ENABLE
 
 void FNProcGenDebugDraw::DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
 	const FLinearColor& Color, const ENAxis Axis, const ESceneDepthPriorityGroup Priority)
@@ -49,12 +52,12 @@ void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PD
 {
 	switch (Type)
 	{
-	case ENCellJunctionType::CJT_TwoWaySocket:
+	case ENCellJunctionType::TwoWaySocket:
 		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
 		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
 		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
-	case ENCellJunctionType::CJT_OneWaySocket:
+	case ENCellJunctionType::OneWaySocket:
 		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
 		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
@@ -105,7 +108,7 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 		const FVector VoxelMin = VoxelCenter - HalfUnitSize;
 		const FVector VoxelMax = VoxelCenter + HalfUnitSize;
 		
-		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
 			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_Foreground );
 		}
@@ -145,7 +148,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 		}
 		
 		
-		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::CVD_Occupied)))
+		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
 			PDI->DrawPoint(VoxelCenter, FColor::Blue, 5.f, SDPG_Foreground);
 		}

@@ -144,9 +144,9 @@ FString UNUpdateCheckDelayedEditorTask::GetQueryURI() const
 	switch (const UNEditorSettings* Settings = UNEditorSettings::Get();
 		Settings->UpdatesChannel)
 	{
-		case NUC_GithubMain:
+		case ENUpdatesChannel::GithubMain:
 		return MainQueryURI;
-		case NUC_Custom:
+		case ENUpdatesChannel::Custom:
 		return Settings->UpdatesCustomQueryURI;
 		default:
 		return ReleaseQueryURI;
@@ -158,9 +158,9 @@ FString UNUpdateCheckDelayedEditorTask::GetUpdateURI() const
 	switch (const UNEditorSettings* Settings = UNEditorSettings::Get();
 		Settings->UpdatesChannel)
 	{
-		case NUC_GithubMain:
+		case ENUpdatesChannel::GithubMain:
 		return MainUpdateURI;
-		case NUC_Custom:
+		case ENUpdatesChannel::Custom:
 		return Settings->UpdatesCustomUpdateURI;
 		default:
 		return ReleaseUpdateURI;

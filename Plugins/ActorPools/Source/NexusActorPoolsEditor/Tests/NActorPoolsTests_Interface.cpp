@@ -18,35 +18,33 @@ N_TEST(FNActorPoolsTests_Interface_Events, "NEXUS::UnitTests::NActorPools::Inter
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 1;
 		ActorPoolSettings.MaximumActorCount = 1;
-		ActorPoolSettings.Strategy = APS_Create;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::APF_BroadcastDestroy);
+		ActorPoolSettings.Strategy = ENActorPoolStrategy::Create;
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::BroadcastDestroy);
 		
 		FNActorPool Pool = FNActorPool(World, ANPooledActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
 		ANPooledActor* SpawnedActor = Cast<ANPooledActor>(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
-		
 
-		FNTestObject* TestObject = new FNTestObject();
-		SpawnedActor->OnActorOperationalStateChanged.AddLambda([this, TestObject](ENActorOperationalState OldState, ENActorOperationalState NewState)
+		const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
+		FNTestObject* TestObjectPtr = TestObject.Get();
+		SpawnedActor->OnActorOperationalStateChanged.AddLambda([this, TestObjectPtr](const ENActorOperationalState OldState, const ENActorOperationalState NewState)
 		{
-			TestObject->Counter++;
-			TestObject->State = NewState;
+			TestObjectPtr->Counter++;
+			TestObjectPtr->State = static_cast<uint8>(NewState);
 		});
 		
 		SpawnedActor->ReturnToActorPool();
 		
-		CHECK_EQUALS("Check return to pool state event occured.", TestObject->State, ENActorOperationalState::AOS_Disabled)
+		CHECK_EQUALS("Check return to pool state event occured.", TestObject->State, static_cast<uint8>(ENActorOperationalState::Disabled))
 
 		Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator);
 		
-		CHECK_EQUALS("Check spawn state event occured.", TestObject->State, ENActorOperationalState::AOS_Enabled)
+		CHECK_EQUALS("Check spawn state event occured.", TestObject->State, static_cast<uint8>(ENActorOperationalState::Enabled))
 	
 		Pool.Clear();
 
-		CHECK_EQUALS("Check destroyed state event occured.", TestObject->State, ENActorOperationalState::AOS_Destroyed)
-		
-		delete TestObject;
+		CHECK_EQUALS("Check destroyed state event occured.", TestObject->State, static_cast<uint8>(ENActorOperationalState::Destroyed))
 	});
 }
 

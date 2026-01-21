@@ -18,7 +18,7 @@ EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementati
 {
 	const UNFixersEditorSettings* Settings = UNFixersEditorSettings::Get();
 	EDataValidationResult Result = EDataValidationResult::Valid;
-	if (Settings->EngineContentChange != NVS_Disable)
+	if (Settings->EngineContentChange != ENValidatorSeverity::Disable)
 	{
 		FNFixersUtils::AddResponse(Context, Settings->EngineContentChange,
 			FText::FromString(TEXT("Engine content changes should be heavily scrutinized before commiting. They can be easily overwritten during upgrades or other verification processes.\nFor more information visit https://nexus-framework.com/docs/plugins/fixers/validators/engine-content-validator/#engine-content-changed")));

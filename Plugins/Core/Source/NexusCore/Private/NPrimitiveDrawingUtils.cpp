@@ -4,6 +4,7 @@
 #include "NPrimitiveDrawingUtils.h"
 #include "NPrimitiveFont.h"
 
+// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary, most are defaulted regardless.
 void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
                                          const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale,
                                          const float LineHeight, const float Thickness,
@@ -96,3 +97,4 @@ void FNPrimitiveDrawingUtils::DrawString(FPrimitiveDrawInterface* PDI, FString& 
 		}
 	}
 }
+// #SONARQUBE-ENABLE

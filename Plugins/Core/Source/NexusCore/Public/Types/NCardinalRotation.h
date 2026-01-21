@@ -12,13 +12,13 @@ struct NEXUSCORE_API FNCardinalRotation
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ENCardinalDirection Roll = ENCardinalDirection::CD_North;
+	ENCardinalDirection Roll = ENCardinalDirection::North;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ENCardinalDirection Pitch = ENCardinalDirection::CD_North;
+	ENCardinalDirection Pitch = ENCardinalDirection::North;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ENCardinalDirection Yaw = ENCardinalDirection::CD_North;
+	ENCardinalDirection Yaw = ENCardinalDirection::North;
 
 	bool CopyTo(FNCardinalRotation& Other) const
 	{

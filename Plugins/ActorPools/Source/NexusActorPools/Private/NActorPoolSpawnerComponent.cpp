@@ -60,7 +60,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		Seed = FNRandom::NonDeterministic.RandHelper(42);
 	}
 
-	if (Distribution == APSD_Spline)
+	if (Distribution == ENActorPoolSpawnerDistribution::Spline)
 	{
 		CacheSplineComponent();
 	}
@@ -98,23 +98,23 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);
 		}
-
 		switch (Distribution)
 		{
-		case APSD_Radius:
+			using enum ENActorPoolSpawnerDistribution;
+		case Radius:
 			FNCirclePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin, DistributionRange.X, DistributionRange.Y);
 			Seed++;
 			break;
-		case APSD_Sphere:
+		case Sphere:
 			FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin,DistributionRange.X, DistributionRange.Y);
 			Seed++;
 			break;
-		case APSD_Box:
+		case Box:
 			FVector HalfDistribution = DistributionRange / 2.0f;
 			FNBoxPicker::RandomTrackedPointInsideOrOnSimple(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
 			Seed++;
 			break;
-		case APSD_Spline:
+		case Spline:
 			if (CachedSplineComponent != nullptr)
 			{
 				FNSplinePicker::RandomTrackedPointOn(Seed, SpawnLocation, CachedSplineComponent);
@@ -160,7 +160,7 @@ void UNActorPoolSpawnerComponent::CacheSplineComponent()
 	
 	if (CachedSplineComponent == nullptr)
 	{
-		Distribution = APSD_Point;
+		Distribution = ENActorPoolSpawnerDistribution::Point;
 		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to find USplineComponent to use for distribution with UNActorPoolSpawnerComponent on AActor(%s); changing to spawn at point."), *this->GetOwner()->GetName());
 	}
 }

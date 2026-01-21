@@ -4,6 +4,7 @@
 #include "NProcGenUtils.h"
 
 #include "NArrayUtils.h"
+#include "NLevelUtils.h"
 #include "NProcGenSettings.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Organ/NOrganVolume.h"
@@ -14,37 +15,17 @@
 FBox FNProcGenUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCellBoundsGenerationSettings& Settings)
 {
 	FBox LevelBounds(ForceInit);
-	if (InLevel)
+	
+	// Go home early
+	if (InLevel == nullptr)
 	{
-		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask Task = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculatePlayableBounds", "Calculate Playable Bounds"));
-		Task.MakeDialog(false);
-	
-		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
-		{
-			
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			Task.EnterProgressFrame(1);
-	
-			
-			if (Actor && Actor->IsLevelBoundsRelevant())
-			{
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-				
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-				
-				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					LevelBounds+= ActorBox;
-				}
-			}
-		}
+		return MoveTemp(LevelBounds);
 	}
-
-	return LevelBounds;
+	
+	TArray<const AActor*> IgnoredActors;
+	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
+	
+	return MoveTemp(LevelBounds);
 }
 
 
@@ -53,45 +34,44 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	FNRawMesh Mesh;
 	TArray<Chaos::FConvex::FVec3Type> Vertices;
 	
-	if (InLevel)
+	if (InLevel == nullptr)
 	{
-		
-		FVector BoxVertices[8];
-		const int32 NumActors = InLevel->Actors.Num();
-		
-		FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
-		ActorTask.MakeDialog(false);
-		
-		Vertices.Reserve(NumActors * 8);
-		for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+		return MoveTemp(Mesh);
+	}
+	
+	FVector BoxVertices[8];
+	const int32 NumActors = InLevel->Actors.Num();
+	
+	FScopedSlowTask ActorTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Actor", "Calculate Convex Hull - Actors"));
+	ActorTask.MakeDialog(false);
+	
+	Vertices.Reserve(NumActors * 8);
+	for (int32 ActorIndex = 0; ActorIndex < InLevel->Actors.Num() ; ++ActorIndex)
+	{
+		ActorTask.EnterProgressFrame(1);
+		const AActor* Actor = InLevel->Actors[ActorIndex];
+		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
-			ActorTask.EnterProgressFrame(1);
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			if (Actor && Actor->IsLevelBoundsRelevant())
+			// Check Editor Only
+			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
+			
+			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+			
+			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
+			if (ActorBox.IsValid && 
+				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))
 			{
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
-				
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-				
-				FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					if (ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0)
-					{
-						ActorBox.GetVertices(BoxVertices);
+				ActorBox.GetVertices(BoxVertices);
 
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
-						Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
-					}
-				}
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[0]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[1]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[2]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[3]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[4]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[5]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[6]));
+				Vertices.Add(Chaos::FConvex::FVec3Type(BoxVertices[7]));
 			}
 		}
 	}
@@ -106,8 +86,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	ChaosTask.EnterProgressFrame(1);
 	Chaos::FConvexBuilder::FConvexBuilder::Build(Vertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, Settings.GetChaosBuildMethod());
 	ChaosTask.EnterProgressFrame(1);
-	
-	
 	
 	// Construct FVector Vertices
 	const int VerticesCount = OutVertices.Num();
@@ -124,7 +102,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	}
 
 	// Build Loops
-	
 	Mesh.Loops.Reserve(IndicesCount);
 	for (int i = 0; i < IndicesCount; i++)
 	{
@@ -135,8 +112,6 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	}
 	
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
-	//Mesh.ConvertToTriangles();
-	//Mesh.Validate();
 	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
 	Mesh.bHasNonTris = Mesh.CheckNonTris();
@@ -146,107 +121,78 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 
 FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCellVoxelGenerationSettings& Settings)
 {
-	
 	// TODO: We probably could use the voxel data to actually generate the overall bounds to avoid the double parse of the actors in the level
 	FNCellVoxelData ReturnData;
 	
-	if (InLevel)
+	// Go home early
+	if (InLevel == nullptr)
 	{
-		// Settings
-		const UWorld* World = InLevel->GetWorld();
-		const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
-		const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
-		const FVector HalfUnitSize = UnitSize * 0.5f;
-		TArray<const AActor*> IgnoredActors;
-		
-		
-		// STEP 1 - Specific Bounds / Ignore Actors
-		FBox Bounds(ForceInit);
-		const int32 NumActors = InLevel->Actors.Num();
-		FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_Bounds", "Build Voxel World"));
-		BoundsTask.MakeDialog(false);
-		for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
-		{
-			const AActor* Actor = InLevel->Actors[ActorIndex];
-			BoundsTask.EnterProgressFrame(1);
+		return MoveTemp(ReturnData);
+	}
 
-			if (Actor && Actor->IsLevelBoundsRelevant())
-			{
-				// Ignore Tags
-				if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags))
-				{
-					IgnoredActors.Add(Actor);
-					continue;
-				}
-				
-				// Check Editor Only
-				if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly)
-				{
-					IgnoredActors.Add(Actor);
-					continue;
-				}
-					
-				const FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
-				if (ActorBox.IsValid)
-				{
-					Bounds+= ActorBox;
-				}
-				
-				
-			}
-		}
-		
-		// Determine the Voxel origin adjustment
-		ReturnData.Origin = Bounds.Min;
-		
-		const FBox UnitBounds = FBox(
-					FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
-					FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
-		
-		const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-		const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-		const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
-		
-		// Setup array
-		ReturnData.Resize(SizeX, SizeY, SizeZ);
-		const size_t Count = ReturnData.GetCount();
-		
-		FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
-		Params.AddIgnoredActors(IgnoredActors);
-		
-		// STEP 2 - Broad Trace
-		FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
-		BroadTraceTask.MakeDialog(false);
+	// Settings
+	const UWorld* World = InLevel->GetWorld();
+	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+	const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
+	const FVector HalfUnitSize = UnitSize * 0.5f;
+	TArray<const AActor*> IgnoredActors;
+	
+	
+	// STEP 1 - Specific Bounds / Ignore Actors
+	FBox Bounds(ForceInit);
+	FNLevelUtils::DetermineLevelBounds(InLevel, Bounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
+	
+	ReturnData.Origin = Bounds.Min;
+	
+	const FBox UnitBounds = FBox(
+				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
+				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
+	
+	const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
+	const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
+	const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
+	
+	// Setup array
+	ReturnData.Resize(SizeX, SizeY, SizeZ);
+	const size_t Count = ReturnData.GetCount();
+	
+	FCollisionQueryParams Params = FCollisionQueryParams(TEXT("CalculateVoxelData"), true);
+	Params.AddIgnoredActors(IgnoredActors);
+	
+	// STEP 2 - Broad Trace
+	FScopedSlowTask BroadTraceTask = FScopedSlowTask(Count, NSLOCTEXT("NexusProcGen", "Task_CalculateVoxelData_BroadTrace", "Broad Trace"));
+	BroadTraceTask.MakeDialog(false);
 
-		// We iterate over the array by axis to minimize inverse calculations
-		TArray<FVector> RayEndPoints;
-		FHitResult SingleHit;
-		TArray<FHitResult> ObjectHits;
-		
-		// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
-		FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
-		TArray<uint32> SurroundingIndices;
-		
-		for (int x = 0; x < SizeX; x++)
+	// We iterate over the array by axis to minimize inverse calculations
+	TArray<FVector> RayEndPoints;
+	FHitResult SingleHit;
+	TArray<FHitResult> ObjectHits;
+	
+	// Our initial box shape is slightly larger than the actual voxel unit size as to always detect collisions right on the extents.
+	FCollisionShape BoxShape = FCollisionShape::MakeBox(HalfUnitSize + FVector(0.001f, 0.001f, 0.001f));
+	TArray<uint32> SurroundingIndices;
+	
+	// #SONARQUBE-DISABLE Need to loop depth to handle dimensions
+	for (int x = 0; x < SizeX; x++)
+	{
+		for (int y = 0; y < SizeY; y++)
 		{
-			for (int y = 0; y < SizeY; y++)
+			for (int z = 0; z < SizeZ; z++)
 			{
-				for (int z = 0; z < SizeZ; z++)
+				const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
+				BroadTraceTask.EnterProgressFrame(1);
+				FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
+				
+				// Standard Overlap Check
+				bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
+				if (bHit)
 				{
-					const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
-					BroadTraceTask.EnterProgressFrame(1);
-					FVector VoxelCenter = ReturnData.Origin + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-					
-					// Standard Overlap Check
-					bool const bHit = World ? World->SweepSingleByChannel(SingleHit, VoxelCenter, VoxelCenter, FQuat::Identity, CollisionChannel, BoxShape, Params) : false;
-					if (bHit)
-					{
-						ReturnData.AddFlag(VoxelIndex, ENCellVoxel::CVD_Occupied);
-					}
+					ReturnData.AddFlag(VoxelIndex, ENCellVoxel::Occupied);
 				}
 			}
 		}
 	}
+	// #SONARQUBE-ENABLE
 	
 	return MoveTemp(ReturnData);
 }

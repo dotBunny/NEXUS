@@ -3,15 +3,13 @@ run-name: SCHEDULE.PerformanceTests
 
 on:  
   schedule:
-    - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy
-  workflow_dispatch:
+    - cron: '0 8 * * *' # 4:00 AM EST - Farm Not Busy  
 
 jobs:
   PerformanceInsights:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Get Branch Settings
         id: settings
         run: |
@@ -19,37 +17,76 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8        
+        with:           
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Insights',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run performance tests
+      - name: Update Status Check (Testing)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Insights',
+              state: 'pending',
+              description: 'Running Tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            })
+      - name: Run Performance Tests
+        id: performance-tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Performance Tests'
           trace: 'true'
-
-      - name: Parse UE log
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',            
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Insights',
+              state: '${{ steps.performance-tests.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Parse UE Log
         if: always()
         uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
+      - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
+      - name: Gather And Upload Artifacts
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-insights'
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
+          artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-insights'      
+      - name: Update Summary
         if: always()
         shell: powershell
         run: |
@@ -64,11 +101,11 @@ jobs:
               Write-Output "$line" >> $outputPath
             }
           }
+  
   PerformanceETL:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Get Branch Settings
         id: settings
         run: |
@@ -76,46 +113,82 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / ETL',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Start performance recording
-        uses: ./.github/actions/xperf-start
-       
-      - name: Run performance tests
+      - name: Update Status Check (Testing)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / ETL',
+              state: 'pending',
+              description: 'Running Tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            })  
+      - name: Start Performance Recording
+        uses: ./.github/actions/xperf-start           
+      - name: Run Performance Tests
+        id: performance-tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Performance Tests'
-
-      - name: Stop performance recording
+      - name: Stop Performance Recording
         if: always()
         uses: ./.github/actions/xperf-stop
         with:
           etl-file-name: NPerformanceTest-${{ github.run_number }}-${{ runner.name }}-etl
-
-      - name: Parse UE log
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / ETL',
+              state: '${{ steps.performance-tests.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Parse UE Log
         if: always()
         uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
+      - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
+      - name: Gather And Upload Artifacts
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
           artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}-etl'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
+      - name: Update Summary
         if: always()
         shell: powershell
         run: |
@@ -130,11 +203,11 @@ jobs:
               Write-Output "$line" >> $outputPath
             }
           }
+  
   Performance:
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
-
       - name: Get Branch Settings
         id: settings
         run: |
@@ -142,37 +215,75 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Standard',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run performance tests
+      - name: Update Status Check (Testing)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Standard',
+              state: 'pending',
+              description: 'Running Tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            }) 
+      - name: Run Performance Tests
+        id: performance-tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Performance Tests'
-
-      - name: Parse UE log
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              token: '${{ secrets.CI_TOKEN }}',
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.sha }}',
+              context: 'Schedule / Performance Tests / Standard',
+              state: '${{ steps.performance-tests.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Parse UE Log
         if: always()
         uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
+      - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
+      - name: Gather And Upload Artifacts
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
           artifact-name: 'schedule-performance-tests-${{ github.run_number }}-${{ runner.name }}'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
+      - name: Update Summary
         if: always()
         shell: powershell
         run: |

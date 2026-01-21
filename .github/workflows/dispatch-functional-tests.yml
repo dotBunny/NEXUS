@@ -14,7 +14,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_branch }}
-
       - name: Get Branch Settings
         id: settings
         run: |
@@ -22,37 +21,72 @@ jobs:
           $installation = $json.installation
           echo "ue=$installation" >> $env:GITHUB_OUTPUT
         shell: powershell
-
-      - name: Clean workspace
+      - name: Clean Workspace
         uses: ./.github/actions/workspace-clean
-
-      - name: Build project
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / Functional Tests',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Build Project
         uses: ./.github/actions/build-project
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
-
-      - name: Run functional tests
+      - name: Update Status Check (Testing)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / Functional Tests',
+              state: 'pending',
+              description: 'Running Tests ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'                
+            })
+      - name: Run Functional Tests
         uses: ./.github/actions/ue-cmd-tests
         with:
           ue-installation: ${{ steps.settings.outputs.ue }}
           tests: 'Functional Tests'
-
-      - name: Parse UE log
+      - name: Parse UE Log
+        id: parse-log
         if: always()
         uses: ./.github/actions/ue-parse-log
-
-      - name: Parse test results
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / Functional Tests',
+              state: '${{ steps.parse-log.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Parse Test Results
         if: always()
         uses: ./.github/actions/ue-parse-results
-
-      - name: Gather and upload artifacts
+      - name: Gather And Upload Artifacts
         if: always()
         uses: ./.github/actions/upload-artifacts
         with:
-          artifact-name: 'schedule-functional-tests-${{ github.run_number }}'
-
-      # This needs to be on the workflow to ensure it has access to the GITHUB_STEP_SUMMARY
-      - name: Update summary
+          artifact-name: 'schedule-functional-tests-${{ github.run_number }}'      
+      - name: Update Summary
         if: always()
         shell: powershell
         run: |

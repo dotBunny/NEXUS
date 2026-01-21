@@ -33,6 +33,15 @@ void FNCoreEditorModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNCoreEditorModule, OnPostEngineInit);
 }
 
+void FNCoreEditorModule::ShutdownModule()
+{
+	if (InputProcessor.IsValid())
+	{
+		InputProcessor.Reset();
+	}
+	IModuleInterface::ShutdownModule();
+}
+
 void FNCoreEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

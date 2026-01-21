@@ -3,4 +3,9 @@
 
 #pragma once
 
+namespace NEXUS::Multiplayer
+{
+	constexpr float InvalidPing = -1.f;
+}
+
 NEXUSMULTIPLAYER_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusMultiplayer, Log, All);

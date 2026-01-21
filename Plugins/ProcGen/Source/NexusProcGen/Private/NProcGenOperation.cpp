@@ -5,13 +5,12 @@
 
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
-#include "NProcGenUtils.h"
 #include "Organ/NOrganComponent.h"
 #include "Generation/NProcGenOperationTaskGraph.h"
 
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = new FNProcGenOperationContext();
+	Context = MakeUnique<FNProcGenOperationContext>();
 	
 	// A generator should never be deleted
 	this->AddToRoot();
@@ -39,9 +38,11 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
-		if (UObject* Object = WeakObject.Get())
+		UObject* Object = WeakObject.Get();
+		if (Object != nullptr)
 		{
-			if (UNOrganComponent* Component = Cast<UNOrganComponent>(Object))
+			UNOrganComponent* Component = Cast<UNOrganComponent>(Object);
+			if (Component != nullptr)
 			{
 				OrganGenerator->AddToContext(Component);
 			}
@@ -97,7 +98,7 @@ void UNProcGenOperation::Reset() const
 {
 	if (Context != nullptr)
 	{
-		Context->Reset();
+		Context->ResetContext();
 	}
 }
 
@@ -119,21 +120,18 @@ void UNProcGenOperation::BeginDestroy()
 		Owner = nullptr;
 	}
 	
-	if (Context != nullptr)
+	if (Context.IsValid())
 	{
-		Context->Reset();
-		delete Context;
-
-		Context = nullptr;
+		Context->ResetContext();
+		Context.Reset();
 	}
 	
-	if (Graph != nullptr)
+	if (Graph.IsValid())
 	{
-		Graph->Reset();
-		delete Graph;
-		
-		Graph = nullptr;
+		Graph->ResetGraph();
+		Graph.Reset();
 	}
+
 
 	if (!this->IsTemplate())
 	{
@@ -147,7 +145,7 @@ void UNProcGenOperation::BeginDestroy()
 
 void UNProcGenOperation::Tick()
 {
-	if (Graph == nullptr) return;
+	if (!Graph.IsValid()) return;
 	
 	if (const FIntVector2 Status = Graph->GetTaskStatus(); 
 		Status.Y != CachedTotalTasks || Status.X != CachedCompletedTasks)
@@ -184,15 +182,15 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	}
 	
 	// TODO: We shouldn't have a graph, but maybe we do?
-	if (Graph != nullptr)
+	if (Graph.IsValid())
 	{
-		Graph->Reset();
-		delete Graph;
+		Graph->ResetGraph();
+		Graph.Reset();
 	}
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
-	Graph = new FNProcGenOperationTaskGraph(this, Context);
+	Graph = MakeUnique<FNProcGenOperationTaskGraph>(this, Context.Get());
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);

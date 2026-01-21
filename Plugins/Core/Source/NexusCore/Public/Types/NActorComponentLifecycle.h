@@ -4,15 +4,15 @@
 #pragma once
 
 UENUM(BlueprintType)
-enum ENActorComponentLifecycleStart : uint8
+enum class ENActorComponentLifecycleStart : uint8
 {
-	ACLS_BeginPlay = 0				UMETA(DisplayName = "Begin Play"), 
-	ACLS_InitializeComponent = 1	UMETA(DisplayName = "Initialize Component"),
+	BeginPlay = 0, 
+	InitializeComponent = 1,
 };
 
 UENUM(BlueprintType)
-enum ENActorComponentLifecycleEnd : uint8
+enum class ENActorComponentLifecycleEnd : uint8
 {
-    ACLE_EndPlay = 0				UMETA(DisplayName = "End Play"),
-    ACLE_UninitializeComponent = 1	UMETA(DisplayName = "Uninitialize Component"),
+    EndPlay = 0,
+    UninitializeComponent = 1,
 };

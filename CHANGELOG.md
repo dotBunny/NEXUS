@@ -1,11 +1,102 @@
 # Changelog
 
+## [0.2.6] - 2026-01-20
+
+### Added
+
+- `Windows > NEXUS > Actor Pools` a tab for monitoring the pressure on the `UNActorPoolSubsystem` in realtime. 
+- `FNDeveloperUtils::GetRootSetObjects()` / `FNDeveloperUtils::DumpRootSetToLog()` to help with debugging world tear down issues.
+- `FNMultiplayerUtils::GetPing()`
+- `UNTextRenderComponent` icon in editor.
+- `UNEditorUtilityWidget` persistent flag can be used to automatically restore state across map changes (as the widgets are recreated).
+- `FNWidgetUtils` to support converting from serialized to slate space.
+
+### Changed
+
+- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
+- Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
+- Extracted test logic from `ANSamplesDisplayActor` into its own test object.
+- `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
+- `UNTextRenderComponent` will now ensure that its owning `AActor` on `BeginPlay` is replicated.
+
+### Core Redirects
+
+```ini
+[CoreRedirects]
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Undefined","Undefined")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Created","Created")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Enabled","Enabled")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Disabled","Disabled")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("AOS_Destroyed","Destroyed")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_Create","Create")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_CreateLimited","CreateLimited")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_CreateRecycleFirst","CreateRecycleFirst")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_CreateRecycleLast","CreateRecycleLast")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_Fixed","Fixed")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_FixedRecycleFirst","FixedRecycleFirst")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolStrategy",ValueChanges=(("APS_FixedRecycleLast","FixedRecycleLast")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_None","None")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_SweepBeforeSettingLocation","SweepBeforeSettingLocation")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_ReturnToStorageLocation","ReturnToStorageLocation")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_DeferConstruction","DeferConstruction")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_ShouldFinishSpawning","ShouldFinishSpawning")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_ServerOnly","ServerOnly")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_BroadcastDestroy","BroadcastDestroy")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_SetNetDormancy","SetNetDormancy")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("APF_DefaultSettings","DefaultSettings")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolSpawnerDistribution",ValueChanges=(("APSD_Point","Point")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolSpawnerDistribution",ValueChanges=(("APSD_Radius","Radius")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolSpawnerDistribution",ValueChanges=(("APSD_Sphere","Sphere")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolSpawnerDistribution",ValueChanges=(("APSD_Box","Box")))
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolSpawnerDistribution",ValueChanges=(("APSD_Spline","Spline")))
++EnumRedirects=(OldName="/Script/NexusFixersEditor.ENValidatorSeverity",ValueChanges=(("NVS_Disable","Disable")))
++EnumRedirects=(OldName="/Script/NexusFixersEditor.ENValidatorSeverity",ValueChanges=(("NVS_Warning","Warning")))
++EnumRedirects=(OldName="/Script/NexusFixersEditor.ENValidatorSeverity",ValueChanges=(("NVS_WarningButValid","WarningButValid")))
++EnumRedirects=(OldName="/Script/NexusFixersEditor.ENValidatorSeverity",ValueChanges=(("NVS_Error","Error")))
++EnumRedirects=(OldName="/Script/NexusFixersEditor.ENValidatorSeverity",ValueChanges=(("NVS_Message","Message")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellJunctionType",ValueChanges=(("CJT_TwoWaySocket","TwoWaySocket")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellJunctionType",ValueChanges=(("CJT_OneWaySocket","OneWaySocket")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellJunctionRequirements",ValueChanges=(("CJR_Required","Required")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellJunctionRequirements",ValueChanges=(("CJR_AllowBlocking","AllowBlocking")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellJunctionRequirements",ValueChanges=(("CJR_AllowEmpty","AllowEmpty")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellVoxel",ValueChanges=(("CVD_Empty","Empty")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENCellVoxel",ValueChanges=(("CVD_Occupied","Occupied")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENOrganGenerationTrigger",ValueChanges=(("OGT_GenerateOnLoad","GenerateOnLoad")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENOrganGenerationTrigger",ValueChanges=(("OGT_GenerateOnDemand","GenerateOnDemand")))
++EnumRedirects=(OldName="/Script/NexusProcGen.ENOrganGenerationTrigger",ValueChanges=(("OGT_GenerateAtRuntime","GenerateAtRuntime")))
++EnumRedirects=(OldName="/Script/NexusProcGen.EBuildMethod",NewName="/Script/NexusProcGen.ENullBuildMethod")
++EnumRedirects=(OldName="/Script/NexusCore.ENActorComponentLifecycleStart",ValueChanges=(("ACLS_BeginPlay","BeginPlay")))
++EnumRedirects=(OldName="/Script/NexusCore.ENActorComponentLifecycleStart",ValueChanges=(("ACLS_InitializeComponent","InitializeComponent")))
++EnumRedirects=(OldName="/Script/NexusCore.ENActorComponentLifecycleEnd",ValueChanges=(("ACLE_UninitializeComponent","UninitializeComponent")))
++EnumRedirects=(OldName="/Script/NexusCore.ENActorComponentLifecycleEnd",ValueChanges=(("ACLE_EndPlay","EndPlay")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_North","North")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_NorthNorthEast","NorthNorthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_NorthEast","NorthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_EastNorthEast","EastNorthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_East","East")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_EastSouthEast","EastSouthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_SouthEast","SouthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_SouthSouthEast","SouthSouthEast")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_South","South")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_SouthSouthWest","SouthSouthWest")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_SouthWest","SouthWest")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_WestSouthWest","WestSouthWest")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_West","West")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_WestNorthWest","WestNorthWest")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_NorthWest","NorthWest")))
++EnumRedirects=(OldName="/Script/NexusCore.ENCardinalDirection",ValueChanges=(("CD_NorthNorthWest","NorthNorthWest")))
++EnumRedirects=(OldName="/Script/NexusCoreEditor.ENUpdatesChannel",ValueChanges=(("NUC_GithubRelease","GithubRelease")))
++EnumRedirects=(OldName="/Script/NexusCoreEditor.ENUpdatesChannel",ValueChanges=(("NUC_GithubMain","GithubMain")))
++EnumRedirects=(OldName="/Script/NexusCoreEditor.ENUpdatesChannel",ValueChanges=(("NUC_Custom","Custom")))
+```
+
 ## [0.2.5] - 2026-01-11
 
 ### Changed
 
-- The `main` branch of the GitHub repository is now the base point of development, tags are still created for specific release versions, with those points in time being commited to the `release` branch.
-- Code cleanup driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
+- The `main` branch of the GitHub repository is now the base point of development; tags are still created for specific release versions, with those points in time being commited to the `release` branch.
+- Code cleanup is driven by [SonarQube](https://sonarcloud.io/summary/overall?id=dotBunny_NEXUS&branch=main) static analysis and suggestions.
+- Status check reports for GitHub actions are now marked on individual commits.
 
 ### Fixed
 
@@ -182,6 +273,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.6]: https://github.com/dotBunny/NEXUS/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dotBunny/NEXUS/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/dotBunny/NEXUS/compare/v0.2.2...v0.2.3

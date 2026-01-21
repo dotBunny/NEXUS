@@ -21,6 +21,6 @@ class FNProcGenEditorModule final : public IModuleInterface
 	N_IMPLEMENT_MODULE(FNProcGenEditorModule, "NexusProcGenEditor")
 
 private:
-	FNProcGenEditorUndo* UndoHandler = nullptr;
+	TSharedPtr<FNProcGenEditorUndo> UndoHandler;
 	TArray<TOptional<FPlacementModeID>> PlacementActors;
 };

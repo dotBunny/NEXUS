@@ -8,14 +8,13 @@
 
 // Keep in sync with Chaos::FConvexBuilder::EBuildMethod
 UENUM(BlueprintType) 
-enum class EBuildMethod : uint8
+enum class ENullBuildMethod : uint8
 {
 	Default = 0,
 	Original = 1,
 	ConvexHull3 = 2,
 	ConvexHull3Simplified = 3,
 };
-
 
 USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellHullGenerationSettings
@@ -32,7 +31,7 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	bool bIncludeEditorOnly = false;
 
 	UPROPERTY(VisibleAnywhere)
-	EBuildMethod BuildMethod = EBuildMethod::Original;
+	ENullBuildMethod BuildMethod = ENullBuildMethod::Original;
 
 	UPROPERTY(EditAnywhere)
 	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };
@@ -41,7 +40,7 @@ struct NEXUSPROCGEN_API FNCellHullGenerationSettings
 	{
 		switch (BuildMethod)
 		{
-			using enum EBuildMethod;
+			using enum ENullBuildMethod;
 		case Default:	
 			return Chaos::FConvexBuilder::EBuildMethod::Default;
 		case Original:

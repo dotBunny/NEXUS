@@ -4,11 +4,20 @@
 #pragma once
 
 #include "InputCoreTypes.h"
+#include "NActorPoolsDeveloperOverlayWidget.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSettings.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NActorPoolsSettings.generated.h"
+
+UENUM(BlueprintType)
+enum class ENActorPoolUnknownBehaviour : uint8
+{
+	Destroy = 0,
+	CreateDefaultPool = 1,
+	Ignore = 2
+};
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
@@ -33,11 +42,18 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Actor Pools."));
 		return SectionDescription;
 	}
+	
+	virtual void PostInitProperties() override
+	{
+		Super::PostInitProperties();
+		ValidateSettings();
+	}
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		ValidateSettings();
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+	}
 #endif	
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Stats Tracking",
-		meta=(ToolTip="Should the stat group (NActorPools) be populated? (when available)"))
-	bool bTrackStats = true;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
@@ -50,4 +66,40 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes", 
 		meta=(Tooltop="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
 	TArray<FString> IgnoreWorldPrefixes;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
+		meta=(Tooltop="What should be done with an AActor returned to APS that is not known to it."))
+	ENActorPoolUnknownBehaviour UnknownBehaviour;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget")
+	TSubclassOf<UNActorPoolsDeveloperOverlayWidget> DeveloperOverlayWidget;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Update Rate",
+		meta=(Tooltop="How often should the Actor Pools be queried and the widget updated."))
+	float DeveloperOverlayUpdateRate = 0.1f;
+
+#if WITH_EDITOR
+private:
+	void ValidateSettings()
+	{
+		bool bNeedsSave = false;
+
+		if (!DeveloperOverlayWidget)
+		{
+			UClass* DefaultOverlayClass = FSoftClassPath(
+				TEXT("/NexusActorPools/WB_NActorPoolsDeveloperOverlay.WB_NActorPoolsDeveloperOverlay_C"))
+				.TryLoadClass<UNActorPoolsDeveloperOverlayWidget>();
+			if (DefaultOverlayClass != nullptr)
+			{
+				bNeedsSave = true;
+				DeveloperOverlayWidget = DefaultOverlayClass;
+			}
+		}
+		
+		if (bNeedsSave)
+		{
+			TryUpdateDefaultConfigFile();
+		}
+	}
+#endif
 };

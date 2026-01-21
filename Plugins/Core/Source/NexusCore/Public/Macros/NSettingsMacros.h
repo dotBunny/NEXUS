@@ -7,7 +7,8 @@
 public: \
 	static const Type* Get() \
 	{ \
-		return GetDefault<Type>(); \
+		static const Type* CachedSettings = GetDefault<Type>(); \
+		return CachedSettings; \
 	} \
 	static Type* GetMutable() { \
 		static Type* MutableInstance; \

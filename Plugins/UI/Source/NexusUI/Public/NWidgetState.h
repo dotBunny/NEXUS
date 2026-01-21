@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NUIMinimal.h"
 #include "NWidgetState.generated.h"
 
 USTRUCT(BlueprintType)
@@ -193,6 +194,41 @@ struct FNWidgetState
 			}
 		}
 		
+	}
+
+	void DumpToLog() const
+	{
+		UE_LOG(LogNexusUI, Log, TEXT("[FNWidgetState]"));
+		
+		const int BooleanCount = BooleanKeys.Num();
+		if (BooleanCount > 0)
+		{
+			UE_LOG(LogNexusUI, Log, TEXT("Booleans(%i)"), BooleanCount);
+			for (int i = 0; i < BooleanCount; ++i)
+			{
+				UE_LOG(LogNexusUI, Display, TEXT("  %s : %i"), *BooleanKeys[i], BooleanValues[i]);
+			}
+		}
+		
+		const int FloatCount = FloatKeys.Num();
+		if (FloatCount > 0)
+		{
+			UE_LOG(LogNexusUI, Log, TEXT("Floats(%i)"), FloatCount);
+			for (int i = 0; i < FloatCount; ++i)
+			{
+				UE_LOG(LogNexusUI, Log, TEXT("  %s : %f"), *FloatKeys[i], FloatValues[i]);
+			}
+		}
+		
+		const int StringCount = StringKeys.Num();
+		if (StringCount > 0)
+		{
+			UE_LOG(LogNexusUI, Log, TEXT("Strings(%i)"), StringCount);
+			for (int i = 0; i < StringCount; ++i)
+			{
+				UE_LOG(LogNexusUI, Log, TEXT("  %s : %s"), *StringKeys[i], *StringValues[i]);
+			}
+		}
 	}
 
 protected:

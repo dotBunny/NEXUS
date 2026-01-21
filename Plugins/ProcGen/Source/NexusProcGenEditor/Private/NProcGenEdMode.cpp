@@ -10,7 +10,6 @@
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
 #include "NPrimitiveDrawingUtils.h"
-#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "Macros/NFlagsMacros.h"
@@ -21,9 +20,9 @@
 void FNProcGenEdMode::ProtectCellEdMode()
 {
 	if (CellActor != nullptr && CellActor->GetCellRoot()->Details.Hull.HasNonTris() && 
-		GetCellEdMode() == CEM_Hull)
+		GetCellEdMode() == ENCellEdMode::Hull)
 	{
-		SetCellEdMode(CEM_Bounds);
+		SetCellEdMode(ENCellEdMode::Bounds);
 	}
 }
 
@@ -35,14 +34,14 @@ const FText FNProcGenEdMode::AutoHullMessage = FText::FromString("NCell Hull not
 const FText FNProcGenEdMode::AutoVoxelMessage = FText::FromString("NCell Voxel not calculated on save.");
 
 ANCellActor* FNProcGenEdMode::CellActor = nullptr;
-FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = CEM_Bounds;
+FNProcGenEdMode::ENCellEdMode FNProcGenEdMode::CellEdMode = ENCellEdMode::Bounds;
 TArray<FVector> FNProcGenEdMode::CachedHullVertices;
 FLinearColor FNProcGenEdMode::CachedHullColor = FColor::Blue;
 FBox FNProcGenEdMode::CachedBounds;
 FNCellVoxelData FNProcGenEdMode::CachedVoxelData;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
-FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = CVM_None;
+FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = ENCellVoxelMode::None;
 
 FNProcGenEdMode::~FNProcGenEdMode()
 {
@@ -134,15 +133,13 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
-			RootComponent->DrawDebugPDI(PDI, GetCellVoxelMode()); // We can't use caching because we are drawing ALL of the possible roots
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode())); // We can't use caching because we are drawing ALL of the possible roots
 
 			// Notice ON Dirty
-			if (const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner()))
+			const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner());
+			if (Actor != nullptr && Actor->IsActorDirty())
 			{
-				if (Actor->IsActorDirty())
-				{
-					bHasDirtyActors = true;
-				}
+				bHasDirtyActors = true;
 			}
 		}
 	}
@@ -157,7 +154,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 
 	// Selection-specific drawing options
 	const ENProcGenSelectionFlags Flags = FNProcGenEditorUtils::GetSelectionFlags();
-	if (N_FLAGS_HAS(Flags, PGSF_OrganVolume))
+	if (N_FLAGS_UINT8_HAS_UINT8(Flags, ENProcGenSelectionFlags::OrganVolume))
 	{
 		TArray<ANOrganVolume*> SelectedOrganVolumes = FNProcGenEditorUtils::GetSelectedOrganVolumes();
 
@@ -178,6 +175,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		if (OrganGenerator->IsLocked())
 		{
 			TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
+			// #SONARQUBE-DISABLE Need the extra depth to iterate
 			for (int i = 0; i < Order.Num(); i++)
 			{
 				for (int p = 0; p < Order[i].Num(); p++)
@@ -191,6 +189,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 					 	LabelOrientation.Position, LabelOrientation.Rotation, FLinearColor::White);
 				}
 			}
+			// #SONARQUBE-ENABLE
 		}
 	}
 	else if ( OrganGenerator->IsLocked())

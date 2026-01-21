@@ -30,7 +30,7 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
 			// Check for Empty Ticks
-			if (Settings->BlueprintEmptyTick != NVS_Disable)
+			if (Settings->BlueprintEmptyTick != ENValidatorSeverity::Disable)
 			{
 				if (UK2Node_Event* EventNode = Cast<UK2Node_Event>(Node); EventNode && EventNode->EventReference.GetMemberName() == EventTickName)
 				{
@@ -44,7 +44,7 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 			}
 
 			// Check for MultiPin Pure Nodes
-			if (Settings->BlueprintMultiPinPureNode != NVS_Disable)
+			if (Settings->BlueprintMultiPinPureNode != ENValidatorSeverity::Disable)
 			{
 				if (UK2Node* PureNode = Cast<UK2Node>(Node); PureNode && PureNode->IsNodePure())
 				{

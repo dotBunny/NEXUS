@@ -134,9 +134,9 @@ void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)
 	}
 	
 	PlayerController->SetViewTargetWithBlend(DisplayActor);
-	if (!DisplayActor->ScreenshotCameraName.IsEmpty())
+	if (!DisplayActor->ScreenshotSettings.ScreenshotCameraName.IsEmpty())
 	{
-		HUD->SetCurrentCameraName(DisplayActor->ScreenshotCameraName.ToString());
+		HUD->SetCurrentCameraName(DisplayActor->ScreenshotSettings.ScreenshotCameraName.ToString());
 	}
 	else
 	{

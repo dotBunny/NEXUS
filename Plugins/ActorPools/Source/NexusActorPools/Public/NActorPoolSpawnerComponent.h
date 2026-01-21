@@ -26,17 +26,13 @@ struct NEXUSACTORPOOLS_API FNActorPoolSpawnerTemplate
 };
 
 UENUM(BlueprintType)
-enum ENActorPoolSpawnerDistribution : uint8
+enum class ENActorPoolSpawnerDistribution : uint8
 {
-	// ReSharper disable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
-	
-	APSD_Point = 0			UMETA(DisplayName = "Point"),
-	APSD_Radius = 1			UMETA(DisplayName = "Radius"),
-	APSD_Sphere = 2			UMETA(DisplayName = "Sphere"),
-	APSD_Box = 3			UMETA(DisplayName = "Box"),
-	APSD_Spline = 4			UMETA(DisplayName = "Spline")
-
-	// ReSharper enable IdentifierTypo, CppUE4CodingStandardNamingViolationWarning
+	Point = 0,
+	Radius = 1,
+	Sphere = 2,
+	Box = 3,
+	Spline = 4
 };
 
 /**
@@ -78,7 +74,7 @@ public:
 	* The distribution method used to choose where things are spawned.
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
-	TEnumAsByte<ENActorPoolSpawnerDistribution> Distribution = ENActorPoolSpawnerDistribution::APSD_Point;
+	ENActorPoolSpawnerDistribution Distribution = ENActorPoolSpawnerDistribution::Point;
 
 	/**
 	* The dimensional input to the distribution method.
@@ -89,7 +85,7 @@ public:
 	/**
 	 * The in-level component reference for usage with the Spline distribution method.
 	 */
-	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::APSD_Spline", EditConditionHides), Category="Actor Pool Spawner")
+	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::Spline", EditConditionHides), Category="Actor Pool Spawner")
 	FComponentReference SplineLevelReference;
 
 	/**

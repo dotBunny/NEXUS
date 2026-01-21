@@ -5,6 +5,7 @@
 
 FLinearColor FNColor::GetLinearColor(const ENColor& Color)
 {
+	using enum ENColor;
 	switch (Color)
 	{
 	case NC_Black:

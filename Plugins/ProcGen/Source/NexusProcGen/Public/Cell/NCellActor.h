@@ -96,17 +96,20 @@ public:
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }
 	
 protected:
-	/**
-	 * This is something that needs to be turned off when we spawn
-	 */
-	UPROPERTY(EditInstanceOnly)
-	TArray<TObjectPtr<AActor>> EditorOnlyActors;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UNCellRootComponent> CellRoot;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient)
 	TMap<int32, TObjectPtr<UNCellJunctionComponent>> CellJunctions;
+
+private:
+	
+	/**
+	* This is something that needs to be turned off when we spawn
+	*/
+	UPROPERTY(EditInstanceOnly)
+	TArray<TObjectPtr<AActor>> EditorOnlyActors;
 	
 	UPROPERTY(VisibleInstanceOnly)
 	TSoftObjectPtr<UNCell> Sidecar = nullptr;
@@ -114,7 +117,6 @@ protected:
 	UPROPERTY(VisibleInstanceOnly)
 	int32 CellJunctionNextIdentifier = 0;
 	
-private:
 	bool bActorDirty = false;
 	bool bSpawnedFromProxy = false;
 };

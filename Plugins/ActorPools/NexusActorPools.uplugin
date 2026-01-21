@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 8,
-	"VersionName": "0.2.5",
+	"Version": 9,
+	"VersionName": "0.2.6",
 	"FriendlyName": "NEXUS: Actor Pools",
 	"Description": "Generalized pooling system for Actors.",
 	"Category": "NEXUS",
@@ -11,7 +11,7 @@
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
 	"Modules": [
@@ -33,11 +33,23 @@
 	],
 	"Plugins": [
 		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
 			"Enabled": true
 		},
 		{
+			"Name": "NexusDeveloperOverlay",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusPicker",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
 			"Enabled": true
 		}
 	],

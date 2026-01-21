@@ -80,27 +80,9 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 
 		UE_LOG(LogNexusFixersEditor, Log, TEXT("Updating out-of-date UPose(%s)."), *PoseAsset->GetName());
 		
-		if (PoseAsset->SourceAnimation != nullptr)
+		if (UpdatePoseAsset(EditorAssetSubsystem, PoseAsset, CleanupPackages))
 		{
-			if(PoseAsset->SourceAnimation->HasAnyFlags(RF_NeedLoad))
-			{
-				FLinkerLoad* Linker = PoseAsset->SourceAnimation->GetLinker();
-				if (Linker != nullptr)
-				{
-					Linker->Preload(PoseAsset->SourceAnimation);
-				}
-				CleanupPackages.AddUnique(PoseAsset->SourceAnimation->GetOutermost());
-			}
-			PoseAsset->SourceAnimation->ConditionalPostLoad();
-			
-			if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != PoseAsset->SourceAnimation->GetDataModel()->GenerateGuid())
-			{
-				PoseAsset->UpdatePoseFromAnimation(PoseAsset->SourceAnimation);
-				// ReSharper disable once CppExpressionWithoutSideEffects
-				PoseAsset->MarkPackageDirty();
-				EditorAssetSubsystem->SaveLoadedAsset(PoseAsset);
-				ProblemsFixed++;
-			}
+			ProblemsFixed++;
 		}
 		
 		if (GWarn->ReceivedUserCancel())
@@ -116,7 +98,33 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	UPackageTools::UnloadPackages(CleanupPackages);
 }
 
-bool FNPoseAssetFixer::OutOfDateAnimationSource_CanExecute()
+bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages)
 {
-	return true;
+	if (PoseAsset->SourceAnimation == nullptr)
+	{
+		return false;
+	}
+	
+	if(PoseAsset->SourceAnimation->HasAnyFlags(RF_NeedLoad))
+	{
+		FLinkerLoad* Linker = PoseAsset->SourceAnimation->GetLinker();
+		if (Linker != nullptr)
+		{
+			Linker->Preload(PoseAsset->SourceAnimation);
+		}
+		CleanupPackages.AddUnique(PoseAsset->SourceAnimation->GetOutermost());
+	}
+	PoseAsset->SourceAnimation->ConditionalPostLoad();
+		
+	if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != PoseAsset->SourceAnimation->GetDataModel()->GenerateGuid())
+	{
+		PoseAsset->UpdatePoseFromAnimation(PoseAsset->SourceAnimation);
+		
+		// ReSharper disable once CppExpressionWithoutSideEffects
+		PoseAsset->MarkPackageDirty();
+		EditorAssetSubsystem->SaveLoadedAsset(PoseAsset);
+		return true;
+	}
+	
+	return false;
 }

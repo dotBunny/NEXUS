@@ -29,13 +29,16 @@ void ANFunctionalTest::PrepareTest()
 	
 	if (Display != nullptr)
 	{
-		// Bindings
-		Display->OnTestError.BindUObject(this, &AFunctionalTest::AddError);
-		Display->OnTestInfo.BindUObject(this, &AFunctionalTest::AddInfo);
-		Display->OnTestWarning.BindUObject(this, &AFunctionalTest::AddWarning);
-		Display->OnTestFinish.BindUObject(this, &ANFunctionalTest::OnFinishTest);
-		
 		Display->PrepareTest();
+		
+		// Bind to test instance
+		if (Display->TestInstance != nullptr)
+		{
+			Display->TestInstance->OnTestError.AddDynamic(this, &ANFunctionalTest::AddError);
+			Display->TestInstance->OnTestWarning.AddDynamic(this, &ANFunctionalTest::AddWarning);
+			Display->TestInstance->OnTestInfo.AddDynamic(this, &ANFunctionalTest::AddInfo);
+			Display->TestInstance->OnTestFinish.AddDynamic(this, &ANFunctionalTest::OnFinishSampleDisplayTest);
+		}
 	}
 }
 
@@ -58,22 +61,15 @@ void ANFunctionalTest::CleanUp()
 	if (Display != nullptr)
 	{
 		Display->CleanupTest();
-
-		
-		Display->OnTestError.Unbind();
-		Display->OnTestInfo.Unbind();
-		Display->OnTestWarning.Unbind();
-		Display->OnTestFinish.Unbind();
-
 		Display = nullptr;
 	}
 }
 
-void ANFunctionalTest::OnFinishTest(ESampleTestResult TestResult, const FString& Message)
+void ANFunctionalTest::OnFinishSampleDisplayTest(ESampleDisplayTestResult TestResult, const FString& Message)
 {
 	switch (TestResult)
 	{
-		using enum ESampleTestResult;
+		using enum ESampleDisplayTestResult;
 	case Default:
 		FinishTest(EFunctionalTestResult::Default, Message);
 		break;
@@ -101,7 +97,7 @@ void ANFunctionalTest::UpdateFromDisplay()
 	const ANSamplesDisplayActor* Target = TargetDisplay.Get();
 	if (Target != nullptr)
 	{
-		TestLabel = Target->GetTitle();
+		TestLabel = Target->TitleSettings.TitleText.ToString();
 		this->SetActorLabel(TestLabel);
 	}
 }

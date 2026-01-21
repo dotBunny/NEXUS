@@ -11,6 +11,7 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"Blutility",
 					"Core",
 					"DataValidation", 
 					"EditorSubsystem",
@@ -25,14 +26,18 @@ namespace UnrealBuildTool.Rules
 					"Engine",
 					"PlacementMode",
 					"Projects",
+					"Slate",
 					"SlateCore",
-					"UnrealEd", 
+					"ToolMenus",
+					"UMG",
+					"UMGEditor",
+					"UnrealEd"
 				]
 			);
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusActorPools"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusActorPools"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusActorPools", "NexusUIEditor"]);
 
 			ShortName = "NexusActorPoolsEditor";						
 		}

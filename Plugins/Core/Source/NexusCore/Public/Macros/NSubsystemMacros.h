@@ -16,15 +16,6 @@
 		}
 
 #if WITH_EDITOR
-#define N_EDITOR_SUBSYSTEM(Type) \
-	public: \
-		FORCEINLINE static Type* Get() { \
-			return GEditor->GetEditorSubsystem<Type>(); \
-		}
-#endif
-
-
-#if WITH_EDITOR
 #define N_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
 	public: \
 		FORCEINLINE static Type* Get(const UWorld* World) { \

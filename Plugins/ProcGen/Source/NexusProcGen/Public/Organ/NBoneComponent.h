@@ -35,10 +35,10 @@ public:
 	FNCardinalRotation RootRelativeCardinalRotation;
 	
 	UPROPERTY(EditInstanceOnly)
-	ENCellJunctionType Type = ENCellJunctionType::CJT_TwoWaySocket;
+	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;
 
 	UPROPERTY(EditInstanceOnly)
-	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::CJR_Required;
+	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 	
 private:
 	N_WORLD_ICON_HEADER()

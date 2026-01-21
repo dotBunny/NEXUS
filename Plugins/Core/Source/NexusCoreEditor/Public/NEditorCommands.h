@@ -30,23 +30,6 @@ public:
 
 	virtual void RegisterCommands() override;
 	
-	TSharedPtr<FUICommandList> CommandList_Help;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
-	// ReSharper disable once IdentifierTypo
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
-	TSharedPtr<FUICommandInfo> CommandInfo_Help_Documentation; 
-
-	TSharedPtr<FUICommandList> CommandList_Node;
-	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
-
-	TSharedPtr<FUICommandList> CommandList_Tools;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
-
-	// ReSharper disable once IdentifierTypo
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
 	static void OnHelpBugReport();
@@ -54,9 +37,6 @@ public:
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
 	
-	static void OnToolsLeakCheck();
-	static bool ToolsLeakCheck_CanExecute();
-
 	static void OnToolsProfileNetworkProfiler();
 	static bool HasToolsProfileNetworkProfiler();
 	
@@ -74,4 +54,20 @@ public:
 
 private:
 	static TMap<FName, FNWindowCommandInfo> WindowActions;
+	
+	TSharedPtr<FUICommandList> CommandList_Help;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
+
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
+	TSharedPtr<FUICommandInfo> CommandInfo_Help_Documentation; 
+
+	TSharedPtr<FUICommandList> CommandList_Node;
+	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
+
+	TSharedPtr<FUICommandList> CommandList_Tools;
+	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
+	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
 };

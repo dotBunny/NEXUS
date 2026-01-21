@@ -17,7 +17,7 @@ public:
 	
 	void WaitForTasks();
 	
-	void Reset();
+	void ResetGraph();
 
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
 

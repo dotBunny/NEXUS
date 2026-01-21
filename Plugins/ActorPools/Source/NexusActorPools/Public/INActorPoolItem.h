@@ -15,13 +15,13 @@ class FNActorPool;
  * The operational state of an Actor.
  */
 UENUM(BlueprintType)
-enum ENActorOperationalState : uint8
+enum class ENActorOperationalState : uint8
 {
-	AOS_Undefined = 0		UMETA(DisplayName = "Undefined"),
-	AOS_Created = 1			UMETA(DisplayName = "Created"),
-	AOS_Enabled	= 2			UMETA(DisplayName = "Enabled"),
-	AOS_Disabled = 3		UMETA(DisplayName = "Disabled"),
-	AOS_Destroyed = 4		UMETA(DisplayName = "Destroyed")
+	Undefined = 0,
+	Created = 1,
+	Enabled	= 2,
+	Disabled = 3,
+	Destroyed = 4,
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, const ENActorOperationalState OldState, const ENActorOperationalState NewState);
@@ -73,22 +73,22 @@ public:
 	/**
 	 * Called on the Actor when it has been created by an Actor Pool.
 	 */
-	virtual void OnCreatedByActorPool() { SetActorOperationalState(AOS_Created); };
+	virtual void OnCreatedByActorPool() { SetActorOperationalState(ENActorOperationalState::Created); };
 
 	/**
 	 * Called on the Actor when it has been destroyed by an Actor Pool.
 	 */
-	virtual void OnDestroyedByActorPool() { SetActorOperationalState(AOS_Destroyed); };
+	virtual void OnDestroyedByActorPool() { SetActorOperationalState(ENActorOperationalState::Destroyed); };
 
 	/**
 	 * Called after the Actor has been placed back in the Actor Pool, and its settings have been applied.
 	 */
-	virtual void OnReturnToActorPool() { SetActorOperationalState(AOS_Disabled); };
+	virtual void OnReturnToActorPool() { SetActorOperationalState(ENActorOperationalState::Disabled); };
 
 	/**
 	 * Called after the Actor has been spawned from the Actor Pool, and its settings have been applied.
 	 */
-	virtual void OnSpawnedFromActorPool() { SetActorOperationalState(AOS_Enabled); };
+	virtual void OnSpawnedFromActorPool() { SetActorOperationalState(ENActorOperationalState::Enabled); };
 
 	/**
 	 * Called during the deferred construction process for the Actor.
@@ -140,10 +140,10 @@ private:
 	/**
 	 * The known operational state of the Actor.
 	 */
-	ENActorOperationalState CurrentActorOperationalState = AOS_Undefined;
+	ENActorOperationalState CurrentActorOperationalState = ENActorOperationalState::Undefined;
 
 	/**	 
 	 * The previous operational state of the Actor.
 	 */
-	ENActorOperationalState PreviousActorOperationalState = AOS_Undefined;
+	ENActorOperationalState PreviousActorOperationalState = ENActorOperationalState::Undefined;
 };

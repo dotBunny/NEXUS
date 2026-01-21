@@ -18,14 +18,15 @@ void UNEditorUtilityWidgetLoadTask::Create()
 
 void UNEditorUtilityWidgetLoadTask::Execute()
 {
-	if (UNEditorUtilityWidgetSystem* System = GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>())
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System != nullptr)
 	{
-		const TArray<FName> IdentifiersCopy = System->Identifiers;
-		const TArray<FString> TemplatesCopy = System->Templates;
-		TArray<FNWidgetState> WidgetStatesCopy = System->WidgetStates;
+		const TArray<FName> IdentifiersCopy = System->WidgetStates.Identifiers;
+		const TArray<FString> TemplatesCopy = System->WidgetStates.Templates;
+		TArray<FNWidgetState> WidgetStatesCopy = System->WidgetStates.WidgetStates;
 		
-		System->Clear();
-
+		System->WidgetStates.Clear();
+		
 		const int32 Count = IdentifiersCopy.Num();
 		
 		for (int i = 0; i < Count; i++)
