@@ -7,6 +7,7 @@
 #include "CommonTextBlock.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
+#include "Components/CanvasPanel.h"
 #include "Components/Image.h"
 #include "Textures/SlateIcon.h"
 #include "NWidgetEditorUtilityWidget.generated.h"
@@ -70,6 +71,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UImage> HeaderFooter;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCanvasPanel> ContentPanel;
 	
 	UPROPERTY(BlueprintReadOnly)
 	FName WidgetIdentifier = GetFName();

@@ -9,6 +9,7 @@
 #include "NEditorUtils.h"
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/VerticalBox.h"
 
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
@@ -141,8 +142,7 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	// We already have a base widget, but this is changing it for some odd reason?
 	if (BaseWidget != nullptr)
 	{
-		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
-		VerticalBox->RemoveChild(BaseWidget);
+		ContentPanel->RemoveChild(BaseWidget);
 		WidgetTree->RemoveWidget(BaseWidget);
 		
 		N_UNBIND_WIDGET_MESSAGE_PROVIDED(BaseWidget, OnStatusProviderUpdateHandle);
@@ -176,8 +176,14 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 		
 		WidgetBlueprint = NewWidgetBlueprint;
 		
-		UVerticalBox* VerticalBox = Cast<UVerticalBox>(WidgetTree->RootWidget);
-		VerticalBox->AddChild(BaseWidget);
+		UCanvasPanelSlot* CanvasSlot = Cast<UCanvasPanelSlot>(ContentPanel->AddChild(BaseWidget));
+		if (CanvasSlot)
+		{
+			CanvasSlot->SetAnchors(FAnchors(0.0f, 0.0f, 1.0f, 1.0f));
+			CanvasSlot->SetOffsets(FMargin(0.0f));
+		}
+		
+		
 		
 		// Pass WidgetState Along
 		InvokeRestoreWidgetState(BaseWidget, Identifier, WidgetState);
