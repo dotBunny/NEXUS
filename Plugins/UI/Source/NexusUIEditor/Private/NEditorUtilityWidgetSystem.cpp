@@ -80,10 +80,11 @@ UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString
 	IdentifierString.RemoveFromEnd(TEXT("_ActiveTab"));
 	const FName Identifier(IdentifierString);
 	
+	UE_LOG(LogNexusUIEditor, Log, TEXT("Creating a new UNEditorUtilityWidget with identifier: %s"), *Identifier.ToString());
+	
 	// Spawn and make the tab for the widget
 	UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-	
-	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget.Get());
+	UEditorUtilityWidget* Widget = EditorUtilitySubsystem->SpawnAndRegisterTabWithId(NewWidget.Get(), Identifier);
 	
 	// We don't want these tracked (Remove from EUW-list), opening it from there will just break the restoring
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
@@ -147,10 +148,15 @@ void UNEditorUtilityWidgetSystem::RestorePersistentWidget(const TObjectPtr<UNEdi
 		{
 			if (PersistentStates.Templates[Index] == WidgetTemplate)
 			{
-				Widget->SetTemplate(GetWidgetBlueprint(PersistentStates.Templates[Index]));
+				const TObjectPtr<UEditorUtilityWidgetBlueprint> GetKnownBlueprint = GetWidgetBlueprint(PersistentStates.Templates[Index]);
+				if (GetKnownBlueprint != nullptr)
+				{
+					Widget->SetTemplate(GetKnownBlueprint);
+				}
 				Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
 				
 				PersistentStates.RemoveAtIndex(Index);
+				return;
 			}
 		}
 	}

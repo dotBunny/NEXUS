@@ -29,7 +29,13 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
 	if (ExistingWidget != nullptr)
 	{
-		FNEditorUtils::FocusTab(ExistingWidget->GetTabIdentifier());
+		const TSharedPtr<SDockTab> Tab = ExistingWidget->GetTab();
+		if (Tab.IsValid())
+		{
+			Tab->ActivateInParent(SetDirectly);
+			Tab->FlashTab();
+		}
+
 		return ExistingWidget;
 	}
 	
@@ -108,7 +114,6 @@ FNWidgetState UNWidgetEditorUtilityWidget::GetWidgetState(UObject* BlueprintWidg
 	{
 		FNWidgetState ChildWidgetState = INWidgetStateProvider::InvokeGetWidgetState(BaseWidget);
 		BaseState.OverlayState(ChildWidgetState, false);
-		BaseState.DumpToLog();
 	}
 	
 	return BaseState;

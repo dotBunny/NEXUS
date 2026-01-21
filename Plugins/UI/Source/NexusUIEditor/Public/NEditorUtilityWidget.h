@@ -33,19 +33,19 @@ public:
 	virtual FName GetUserSettingsIdentifier();
 	virtual FString GetUserSettingsTemplate();
 
+	TSharedPtr<SDockTab> GetTab();
+	
 protected:
 	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;	
-	virtual FName GetTabIdentifier();
 	
 	UFUNCTION()
 	virtual void DelayedConstructTask();
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsPersistent = false;
-	
-	
+
 	UPROPERTY()
 	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
 	

@@ -42,6 +42,41 @@ FString UNEditorUtilityWidget::GetUserSettingsTemplate()
 	return GetFullName();
 }
 
+TSharedPtr<SDockTab> UNEditorUtilityWidget::GetTab()
+{
+	const TSharedPtr<SWidget> BaseWidget = this->TakeWidget();
+	TSharedPtr<SWidget> Widget = BaseWidget;
+	while (Widget.IsValid())
+	{
+		// Bound Tab
+		if (Widget->GetType() == FName("SDockingTabStack"))
+		{
+			FChildren* Children = Widget->GetChildren();
+			int ChildrenCount = Children->Num();
+			
+			for (int i = 0; i < ChildrenCount; ++i)
+			{
+
+				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
+				TSharedPtr<SWidget> Found = FNEditorUtils::FindWidgetByType(ChildWidget, FName("SDockTab"));
+				if (Found.IsValid())
+				{
+					return StaticCastSharedPtr<SDockTab>(Found);
+				}
+			}
+		}
+		
+		// Floating Tab  ?
+		if (Widget->GetType() == FName("SDockTab"))
+		{
+			return StaticCastSharedPtr<SDockTab>(Widget);
+		}
+		
+		Widget = Widget->GetParentWidget();
+	}
+	return nullptr;
+}
+
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -65,6 +100,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 	
 	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
+	DelayedConstructTask->RegisterWithGameInstance(nullptr);
 	DelayedConstructTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
 	DelayedConstructTask->Start(0.01f, 1);
 }
@@ -78,18 +114,13 @@ void UNEditorUtilityWidget::NativeDestruct()
 	else
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());
+		const TSharedPtr<SDockTab> Tab = GetTab();
+		if (Tab.IsValid())
+		{
+			EditorUtilitySubsystem->UnregisterTabByID( FName(Tab->GetLayoutIdentifier().ToString()));
+		}
 	}
 	Super::NativeDestruct();
-}
-
-FName UNEditorUtilityWidget::GetTabIdentifier()
-{
-	if (PinnedTemplate != nullptr)
-	{
-		return PinnedTemplate->GetRegistrationName();
-	}
-	return GetFName();
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -114,8 +145,32 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 		}
 	}
 	
-	FNEditorUtils::UpdateTab(GetTabIdentifier(), GetTabDisplayBrush(), GetTabDisplayText(), OnTabClosedCallback);
-	FNEditorUtils::UpdateWorkspaceItem(GetTabIdentifier(), GetTabDisplayText(), GetTabDisplayIcon());
+	
+	
+	TSharedPtr<SDockTab> Tab = GetTab();
+	if (Tab.IsValid())
+	{
+		if (GetTabDisplayBrush().IsSet())
+		{
+			Tab->SetTabIcon(GetTabDisplayBrush());
+		}
+		
+		if (!GetTabDisplayText().IsEmpty())
+		{
+			Tab->SetLabel(GetTabDisplayText());
+		}
+		
+		if (OnTabClosedCallback.IsBound())
+		{
+			Tab->SetOnTabClosed(OnTabClosedCallback);
+		}
+
+		FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayText(), GetTabDisplayIcon());
+	}
+	else
+	{
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."))
+	}
 	
 	// We need a render to happen so this can be updated
 	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();

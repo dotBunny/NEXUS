@@ -27,7 +27,11 @@ void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	Unbind(GetWorld());
+	const UWorld* World = GetWorld();
+	if (World != nullptr)
+	{
+		Unbind(World);
+	}
 	
 	Super::NativeDestruct();
 }
@@ -124,7 +128,10 @@ void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World
 
 void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
 {
-	Unbind(World);
+	if (World != nullptr)
+	{
+		Unbind(World);
+	}
 }
 
 void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)

@@ -33,12 +33,18 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
 	FVector2D AreaSize = FVector2D(4, 7);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
+	bool bShowLevelName = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
+	bool bShowLogo = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Lighting")
 	bool bUseDefaultLighting = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Lighting")
 	FRotator SunDirection = FRotator(190.f, 0.f, 0.f);
-
+	
 	UPROPERTY()
 	TObjectPtr<USceneComponent> SceneRoot;
 	

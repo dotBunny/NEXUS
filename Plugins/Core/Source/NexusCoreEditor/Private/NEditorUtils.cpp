@@ -297,6 +297,30 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	}
 }
 
+TSharedPtr<SWidget> FNEditorUtils::FindWidgetByType(TSharedPtr<SWidget> BaseWidget, const FName& WidgetType)
+{
+	if (!BaseWidget.IsValid())
+	{
+		return nullptr;
+	}
+	if (BaseWidget->GetType() == WidgetType)
+	{
+		return BaseWidget;
+	}
+	
+	FChildren* Children = BaseWidget->GetChildren();
+	for (int i = 0; i < Children->Num(); ++i)
+	{
+		TSharedPtr<SWidget> Found = FindWidgetByType(Children->GetChildAt(i), WidgetType);
+		if (Found.IsValid())
+		{
+			return Found;
+		}
+	}
+	
+	return nullptr;
+}
+
 void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals

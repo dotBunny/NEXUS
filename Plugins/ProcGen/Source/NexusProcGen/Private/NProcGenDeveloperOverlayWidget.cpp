@@ -33,8 +33,22 @@ void UNProcGenDeveloperOverlayWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
+bool UNProcGenDeveloperOverlayWidget::HasProvidedMessage() const
+{
+	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
+	{
+		return OperationsList->GetNumItems() <= 0;
+	}
+	return true;
+}
+
+FString UNProcGenDeveloperOverlayWidget::GetProvidedMessage() const
+{
+	return TEXT("No Tasks Found");
+}
+
 void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperation* Operation,
-	const ENProcGenOperationState NewState)
+                                                               const ENProcGenOperationState NewState)
 {
 	if (!ShouldShowOperation(Operation->GetFName())) return;
 	

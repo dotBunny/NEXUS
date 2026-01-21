@@ -173,6 +173,9 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 		DemoName->SetText(CachedLevelName);
 	}
 	
+	Brand->SetVisibility(bShowLogo);
+	DemoName->SetVisibility(bShowLevelName);
+	
 	Super::OnConstruction(Transform);
 }
 

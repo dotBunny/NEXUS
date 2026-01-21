@@ -31,14 +31,6 @@ public:
 
 	virtual TAttribute<const FSlateBrush*> GetTabDisplayBrush() override;
 	
-	virtual FName GetTabIdentifier() override
-	{
-		if (PinnedTemplate != nullptr)
-		{
-			return PinnedTemplate->GetRegistrationName();
-		}
-		return WidgetIdentifier;
-	}
 	virtual FName GetUserSettingsIdentifier() override
 	{
 		return WidgetIdentifier;

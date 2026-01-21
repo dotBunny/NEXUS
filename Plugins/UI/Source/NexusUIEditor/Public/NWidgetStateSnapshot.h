@@ -110,4 +110,14 @@ struct FNWidgetStateSnapshot
 	{
 		return WidgetStates[GetIdentifierIndex(Identifier)];
 	}
+	
+	void DumpToLog()
+	{
+		UE_LOG(LogNexusUIEditor, Log, TEXT("[FNWidgetStateSnapshot]"));
+		for (int32 Index = 0; Index < Identifiers.Num(); ++Index)
+		{
+			UE_LOG(LogNexusUIEditor, Log, TEXT("Identifier(%s) @ Template(%s)"), *Identifiers[Index].ToString(), *Templates[Index]);
+			WidgetStates[Index].DumpToLog();
+		}
+	}
 };

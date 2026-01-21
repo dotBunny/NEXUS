@@ -2,9 +2,14 @@
 
 ## [0.2.7]
 
+### Added
+
+- `ANSamplesLevelActor` now has `bShowLevelName` and `bShowLogo` properties to control whether the level name and logo are shown.
+
 ### Changed
 
 - `UNWidgetEditorUtilityWidget` places content now in a `UCanvasPanel` and fully stretches the content to fill the available space.
+- `UNEditorUtilityWidget::GetTab()` providers robust access to the tab for the widget.
 
 ## [0.2.6] - 2026-01-20
 
