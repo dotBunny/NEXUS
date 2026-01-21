@@ -26,16 +26,15 @@ public:
 	N_EDITOR_SUBSYSTEM(UNEditorUtilityWidgetSystem)
 
 	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
-
-	
 	static bool IsRebuildingWidgets() { return bIsOpeningMap;}
-	static void RegisterPersistentWidget(UNEditorUtilityWidget* Widget);
-	static void UnregisterPersistentWidget(UNEditorUtilityWidget* Widget);
-	static void AddPersistentState(UNEditorUtilityWidget* Widget);
-	static void RestorePersistentWidget(UNEditorUtilityWidget* Widget);
-	
-	static void OnAssetEditorRequestedOpen(UObject* Object);
 	static void OnMapOpened(const FString& Filename, bool bAsTemplate);
+	
+	void OnAssetEditorRequestedOpen(UObject* Object);
+	
+	void RegisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
+	void UnregisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
+	void AddPersistentState(TObjectPtr<UNEditorUtilityWidget> Widget);
+	void RestorePersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -46,24 +45,24 @@ public:
 	bool HasWidgetState(const FName& Identifier) const;
 	FNWidgetState& GetWidgetState(const FName& Identifier);
 
-
-	
 	
 protected:	
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;
 	
-	
 	UPROPERTY()
 	TMap<FString, TObjectPtr<UEditorUtilityWidgetBlueprint>> WidgetBlueprints;
 	
+	UPROPERTY()
+	TArray<TObjectPtr<UNEditorUtilityWidget>> PersistentWidgets;
+	
+	UPROPERTY()
+	FNWidgetStateSnapshot PersistentStates;
+	
 private:
-	static TArray<UNEditorUtilityWidget*> PersistentWidgets;
-	static FNWidgetStateSnapshot PersistentStates;
+	TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
 	
 	static bool bIsOpeningMap;
-	
-	static TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
 	
 	FDelegateHandle OnAssetEditorRequestedOpenHandle;
 	FDelegateHandle OnMapOpenedHandle;

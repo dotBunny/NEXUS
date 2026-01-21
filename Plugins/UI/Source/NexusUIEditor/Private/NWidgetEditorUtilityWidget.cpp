@@ -217,7 +217,7 @@ void UNWidgetEditorUtilityWidget::NativeConstruct()
 		OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNWidgetEditorUtilityWidget::OnBlueprintPreCompile);
 		if (!HasWidgetStateBeenRestored())
 		{
-			UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
+			UNEditorUtilityWidgetSystem::Get()->RestorePersistentWidget(this);
 		}
 	}
 
@@ -239,7 +239,7 @@ void UNWidgetEditorUtilityWidget::OnBlueprintPreCompile(UBlueprint* Blueprint)
 {
 	if (Blueprint == PinnedTemplate || Blueprint == ContentWidgetTemplate)
 	{
-		UNEditorUtilityWidgetSystem::AddPersistentState(this);
+		UNEditorUtilityWidgetSystem::Get()->AddPersistentState(this);
 	}
 }
 

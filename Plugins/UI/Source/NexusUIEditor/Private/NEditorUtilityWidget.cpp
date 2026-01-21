@@ -55,10 +55,11 @@ void UNEditorUtilityWidget::NativeConstruct()
 	
 	if (IsPersistent())
 	{
-		UNEditorUtilityWidgetSystem::RegisterPersistentWidget(this);
+		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+		System->RegisterPersistentWidget(this);
 		if (UNEditorUtilityWidgetSystem::IsRebuildingWidgets())
 		{
-			UNEditorUtilityWidgetSystem::RestorePersistentWidget(this);
+			System->RestorePersistentWidget(this);
 		}
 	}
 	
@@ -70,10 +71,11 @@ void UNEditorUtilityWidget::NativeConstruct()
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
-	UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(this);
-	
-	// This stops it from removing the tab when transitioning between maps
-	if (!IsPersistent())
+	if (IsPersistent())
+	{
+		UNEditorUtilityWidgetSystem::Get()->UnregisterPersistentWidget(this);
+	}
+	else
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		EditorUtilitySubsystem->UnregisterTabByID(GetTabIdentifier());

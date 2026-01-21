@@ -8,8 +8,6 @@
 #include "NEditorUtilityWidgetLoadTask.h"
 #include "NUIEditorMinimal.h"
 
-TArray<UNEditorUtilityWidget*> UNEditorUtilityWidgetSystem::PersistentWidgets;
-FNWidgetStateSnapshot UNEditorUtilityWidgetSystem::PersistentStates;
 bool UNEditorUtilityWidgetSystem::bIsOpeningMap = false;
 
 void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -20,9 +18,9 @@ void UNEditorUtilityWidgetSystem::Initialize(FSubsystemCollectionBase& Collectio
 	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
 	if (AssetEditorSubsystem != nullptr)
 	{
-		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddStatic(&UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
+		OnAssetEditorRequestedOpenHandle = AssetEditorSubsystem->OnAssetEditorRequestedOpen().AddUObject(this, &UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen);	
 	}
-	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddStatic( &UNEditorUtilityWidgetSystem::OnMapOpened);
+	OnMapOpenedHandle = FEditorDelegates::OnMapOpened.AddStatic(&UNEditorUtilityWidgetSystem::OnMapOpened);
 	
 	UNEditorUtilityWidgetLoadTask::Create();
 }
@@ -57,14 +55,12 @@ void UNEditorUtilityWidgetSystem::OnAssetEditorRequestedOpen(UObject* Object)
 	}
 }
 
-
-
 void UNEditorUtilityWidgetSystem::OnMapOpened(const FString& Filename, bool bAsTemplate)
 {
 	bIsOpeningMap = false;
 }
 
-void UNEditorUtilityWidgetSystem::AddPersistentState(UNEditorUtilityWidget* Widget)
+void UNEditorUtilityWidgetSystem::AddPersistentState(const TObjectPtr<UNEditorUtilityWidget> Widget)
 {
 	if (Widget->IsPersistent())
 	{
@@ -78,7 +74,7 @@ void UNEditorUtilityWidgetSystem::AddPersistentState(UNEditorUtilityWidget* Widg
 UEditorUtilityWidget* UNEditorUtilityWidgetSystem::CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState)
 {
 	// Manage our spawned widgets were loading as they can be reused during different scenarios
-	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = GetWidgetBlueprint(InTemplate);
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = Get()->GetWidgetBlueprint(InTemplate);
 	
 	FString IdentifierString = InIdentifier.ToString();
 	IdentifierString.RemoveFromEnd(TEXT("_ActiveTab"));
@@ -141,9 +137,9 @@ FNWidgetState& UNEditorUtilityWidgetSystem::GetWidgetState(const FName& Identifi
 	return WidgetStates.GetWidgetState(Identifier);
 }
 
-void UNEditorUtilityWidgetSystem::RestorePersistentWidget(UNEditorUtilityWidget* Widget)
+void UNEditorUtilityWidgetSystem::RestorePersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
 {
-	int32 TransientStateCount = PersistentStates.GetCount();
+	const int32 TransientStateCount = PersistentStates.GetCount();
 	if (TransientStateCount > 0)
 	{
 		const FString& WidgetTemplate = Widget->GetUserSettingsTemplate(); 
@@ -160,8 +156,7 @@ void UNEditorUtilityWidgetSystem::RestorePersistentWidget(UNEditorUtilityWidget*
 	}
 }
 
-
-void UNEditorUtilityWidgetSystem::RegisterPersistentWidget(UNEditorUtilityWidget* Widget)
+void UNEditorUtilityWidgetSystem::RegisterPersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
 {
 	if (!PersistentWidgets.Contains(Widget))
 	{
@@ -169,7 +164,7 @@ void UNEditorUtilityWidgetSystem::RegisterPersistentWidget(UNEditorUtilityWidget
 	}
 }
 
-void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(UNEditorUtilityWidget* Widget)
+void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
 {
 	if (PersistentWidgets.Contains(Widget))
 	{
@@ -179,20 +174,16 @@ void UNEditorUtilityWidgetSystem::UnregisterPersistentWidget(UNEditorUtilityWidg
 
 TObjectPtr<UEditorUtilityWidgetBlueprint> UNEditorUtilityWidgetSystem::GetWidgetBlueprint(const FString& InTemplate)
 {
-	UNEditorUtilityWidgetSystem* System = Get();
-	
-	if (System->WidgetBlueprints.Contains(InTemplate))
+	if (WidgetBlueprints.Contains(InTemplate))
 	{
-		return System->WidgetBlueprints[InTemplate];
+		return WidgetBlueprints[InTemplate];
 	}
 
-	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(System, InTemplate);
+	const TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(this, InTemplate);
 	if (NewWidget == nullptr)
 	{
 		UE_LOG(LogNexusUIEditor, Error, TEXT("Unable to create a UNEditorUtilityWidget as the provided UEditorUtilityWidgetBlueprint(%s) was unable to load."), *InTemplate)
 		return nullptr;
 	}
-	System->WidgetBlueprints.Add(InTemplate, NewWidget);
-	
-	return System->WidgetBlueprints[InTemplate];
+	return WidgetBlueprints.Add(InTemplate, NewWidget);
 }
