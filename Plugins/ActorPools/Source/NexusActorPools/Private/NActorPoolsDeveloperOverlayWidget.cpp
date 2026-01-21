@@ -80,7 +80,7 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-	if (OnActorPoolAddedDelegates.Contains(World))
+	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
 	{
 		System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
 	}
