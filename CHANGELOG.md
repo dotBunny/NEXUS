@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.6] - 2026-01-23
+## [0.2.6] - 2026-01-20
 
 ### Added
 
@@ -18,10 +18,6 @@
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
 - `UNTextRenderComponent` will now ensure that its owning `AActor` on `BeginPlay` is replicated.
-
-### Fixed
-
-- `NEditorUtilityWidget` no longer always get destroyed when changing maps in the editor.
 
 ### Core Redirects
 
