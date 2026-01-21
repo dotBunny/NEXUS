@@ -3,7 +3,6 @@
 
 #pragma once
 
-
 #include "EditorUtilityWidget.h"
 #include "EditorUtilityWidgetBlueprint.h"
 #include "INWidgetStateProvider.h"
@@ -32,8 +31,6 @@ public:
 	
 	virtual FName GetUserSettingsIdentifier();
 	virtual FString GetUserSettingsTemplate();
-
-	TSharedPtr<SDockTab> GetTab();
 	
 protected:
 	

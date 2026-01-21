@@ -165,14 +165,14 @@ public:
 	static bool HasActorsSelected();
 	
 	static FString GetEngineBinariesPath();
-	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
 	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
-	static void FocusTab(const FName& TabIdentifier);
 	
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
 
 
-	static TSharedPtr<SWidget> FindWidgetByType(TSharedPtr<SWidget> BaseWidget, const FName& WidgetType);
+	static TSharedPtr<SWidget> FindSWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType);
+	
+	static TSharedPtr<SDockTab> FindSDocTab(const TSharedPtr<SWidget>& BaseWidget);
 	
 	static bool IsEditorShuttingDown()
 	{

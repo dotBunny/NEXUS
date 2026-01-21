@@ -42,41 +42,6 @@ FString UNEditorUtilityWidget::GetUserSettingsTemplate()
 	return GetFullName();
 }
 
-TSharedPtr<SDockTab> UNEditorUtilityWidget::GetTab()
-{
-	const TSharedPtr<SWidget> BaseWidget = this->TakeWidget();
-	TSharedPtr<SWidget> Widget = BaseWidget;
-	while (Widget.IsValid())
-	{
-		// Bound Tab
-		if (Widget->GetType() == FName("SDockingTabStack"))
-		{
-			FChildren* Children = Widget->GetChildren();
-			int ChildrenCount = Children->Num();
-			
-			for (int i = 0; i < ChildrenCount; ++i)
-			{
-
-				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
-				TSharedPtr<SWidget> Found = FNEditorUtils::FindWidgetByType(ChildWidget, FName("SDockTab"));
-				if (Found.IsValid())
-				{
-					return StaticCastSharedPtr<SDockTab>(Found);
-				}
-			}
-		}
-		
-		// Floating Tab  ?
-		if (Widget->GetType() == FName("SDockTab"))
-		{
-			return StaticCastSharedPtr<SDockTab>(Widget);
-		}
-		
-		Widget = Widget->GetParentWidget();
-	}
-	return nullptr;
-}
-
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -114,7 +79,7 @@ void UNEditorUtilityWidget::NativeDestruct()
 	else
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		const TSharedPtr<SDockTab> Tab = GetTab();
+		const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(this->TakeWidget());
 		if (Tab.IsValid())
 		{
 			EditorUtilitySubsystem->UnregisterTabByID( FName(Tab->GetLayoutIdentifier().ToString()));
@@ -147,7 +112,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	
 	
 	
-	TSharedPtr<SDockTab> Tab = GetTab();
+	const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(this->TakeWidget());
 	if (Tab.IsValid())
 	{
 		if (GetTabDisplayBrush().IsSet())

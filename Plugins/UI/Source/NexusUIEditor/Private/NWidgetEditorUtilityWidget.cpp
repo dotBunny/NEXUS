@@ -29,7 +29,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
 	if (ExistingWidget != nullptr)
 	{
-		const TSharedPtr<SDockTab> Tab = ExistingWidget->GetTab();
+		const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(ExistingWidget->TakeWidget());
 		if (Tab.IsValid())
 		{
 			Tab->ActivateInParent(SetDirectly);

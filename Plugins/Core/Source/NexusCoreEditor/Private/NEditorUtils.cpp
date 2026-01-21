@@ -297,21 +297,21 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	}
 }
 
-TSharedPtr<SWidget> FNEditorUtils::FindWidgetByType(TSharedPtr<SWidget> BaseWidget, const FName& WidgetType)
+TSharedPtr<SWidget> FNEditorUtils::FindSWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType)
 {
-	if (!BaseWidget.IsValid())
+	if (!ParentWidget.IsValid())
 	{
 		return nullptr;
 	}
-	if (BaseWidget->GetType() == WidgetType)
+	if (ParentWidget->GetType() == WidgetType)
 	{
-		return BaseWidget;
+		return ParentWidget;
 	}
 	
-	FChildren* Children = BaseWidget->GetChildren();
+	FChildren* Children = ParentWidget->GetChildren();
 	for (int i = 0; i < Children->Num(); ++i)
 	{
-		TSharedPtr<SWidget> Found = FindWidgetByType(Children->GetChildAt(i), WidgetType);
+		TSharedPtr<SWidget> Found = FindSWidgetByType(Children->GetChildAt(i), WidgetType);
 		if (Found.IsValid())
 		{
 			return Found;
@@ -321,55 +321,38 @@ TSharedPtr<SWidget> FNEditorUtils::FindWidgetByType(TSharedPtr<SWidget> BaseWidg
 	return nullptr;
 }
 
-void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
+TSharedPtr<SDockTab> FNEditorUtils::FindSDocTab(const TSharedPtr<SWidget>& BaseWidget)
 {
-	// Check Globals
-	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
-	if (GlobalActiveTab.IsValid())
+	TSharedPtr<SWidget> Widget = BaseWidget;
+	while (Widget.IsValid())
 	{
-		if (Icon.IsSet())
+		// Bound Tab
+		if (Widget->GetType() == FName("SDockingTabStack"))
 		{
-			GlobalActiveTab.Get()->SetTabIcon(Icon);
-		}
-		
-		if (!Label.IsEmpty())
-		{
-			GlobalActiveTab.Get()->SetLabel(Label);
-		}
-		
-		if (OnTabClosedCallback.IsBound())
-		{
-			GlobalActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
-		}
-		return;
-	}
-	
-	// Check Level Editor
-	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-	{
-		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
-		if (LevelEditorActiveTab.IsValid())
-		{
-			if (Icon.IsSet())
-			{
-				LevelEditorActiveTab.Get()->SetTabIcon(Icon);
-			}
-		
-			if (!Label.IsEmpty())
-			{
-				LevelEditorActiveTab.Get()->SetLabel(Label);
-			}
+			FChildren* Children = Widget->GetChildren();
+			int ChildrenCount = Children->Num();
 			
-			if (OnTabClosedCallback.IsBound())
+			for (int i = 0; i < ChildrenCount; ++i)
 			{
-				LevelEditorActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
+
+				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
+				TSharedPtr<SWidget> FoundWidget = FindSWidgetByType(ChildWidget, FName("SDockTab"));
+				if (FoundWidget.IsValid())
+				{
+					return StaticCastSharedPtr<SDockTab>(FoundWidget);
+				}
 			}
-			return;
 		}
+		
+		// Floating Tab  ?
+		if (Widget->GetType() == FName("SDockTab"))
+		{
+			return StaticCastSharedPtr<SDockTab>(Widget);
+		}
+		
+		Widget = Widget->GetParentWidget();
 	}
-	
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to update SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
+	return nullptr;
 }
 
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
@@ -388,30 +371,4 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 			}
 		}
 	}
-}
-
-void FNEditorUtils::FocusTab(const FName& TabIdentifier)
-{
-	// Check Globals
-	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
-	if (GlobalActiveTab.IsValid())
-	{
-		GlobalActiveTab->ActivateInParent(SetDirectly);
-		GlobalActiveTab->FlashTab();
-		return;
-	}
-	
-	// Check Level Editor
-	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-	{
-		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
-		if (LevelEditorActiveTab.IsValid())
-		{
-			LevelEditorActiveTab->ActivateInParent(SetDirectly);
-			LevelEditorActiveTab->FlashTab();
-			return;
-		}
-	}
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to focus SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
 }
