@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "INStatusProvider.h"
+#include "INMessageProvider.h"
 #include "NDeveloperOverlayWidget.h"
 #include "NActorPool.h"
 #include "NActorPoolsDeveloperOverlayWidget.generated.h"
@@ -13,7 +13,7 @@ class UNActorPoolDeveloperObject;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INStatusProvider
+class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INMessageProvider
 {
 	GENERATED_BODY()
 	
@@ -24,10 +24,10 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDevelope
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
 	
-	//~INStatusProvider interface
-	virtual bool HasStatusProviderMessage() const override;
-	virtual FString GetStatusProviderMessage() const override;
-	//~End of INStatusProvider interface
+	//~INMessageProvider interface
+	virtual bool HasProvidedMessage() const override;
+	virtual FString GetProvidedMessage() const override;
+	//~End of INMessageProvider interface
 	
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

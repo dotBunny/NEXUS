@@ -67,13 +67,13 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	}
 
 	// We've bound a world check it
-	BroadcastStatusProviderUpdated();
+	BroadcastProvidedMessageChanged();
 	
 	// Add delegate for future pools
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
-		BroadcastStatusProviderUpdated();
+		BroadcastProvidedMessageChanged();
 	}));
 }
 
@@ -99,10 +99,10 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 		}
 	}
 	
-	BroadcastStatusProviderUpdated();
+	BroadcastProvidedMessageChanged();
 }
 
-bool UNActorPoolsDeveloperOverlayWidget::HasStatusProviderMessage() const
+bool UNActorPoolsDeveloperOverlayWidget::HasProvidedMessage() const
 {
 	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
 	{
@@ -111,7 +111,7 @@ bool UNActorPoolsDeveloperOverlayWidget::HasStatusProviderMessage() const
 	return true;
 }
 
-FString UNActorPoolsDeveloperOverlayWidget::GetStatusProviderMessage() const
+FString UNActorPoolsDeveloperOverlayWidget::GetProvidedMessage() const
 {
 	return TEXT("No Actor Pools Found");
 }
