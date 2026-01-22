@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "INWidgetMessageProvider.h"
 #include "NDeveloperOverlayWidget.h"
 #include "NActorPool.h"
 #include "NActorPoolsDeveloperOverlayWidget.generated.h"
@@ -13,7 +12,7 @@ class UNActorPoolDeveloperObject;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget, public INWidgetMessageProvider
+class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
 	
@@ -23,12 +22,7 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDevelope
 	
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
-	
-	//~INMessageProvider interface
-	virtual bool HasProvidedMessage() const override;
-	virtual FString GetProvidedMessage() const override;
-	//~End of INMessageProvider interface
-	
+
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNListView> ActorPoolList;	
@@ -37,7 +31,11 @@ protected:
 	void OnWorldBeginTearDown(UWorld* World);
 
 private:
+	
 	void CreateListItem(FNActorPool* ActorPool);
+	
+	bool HasItems();
+	void OnChanges() { };
 	
 	TMap<UWorld*, FDelegateHandle> OnActorPoolAddedDelegates;
 	FDelegateHandle AddWorldDelegateHandle;

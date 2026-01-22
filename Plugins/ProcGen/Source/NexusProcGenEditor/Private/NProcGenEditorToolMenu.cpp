@@ -4,15 +4,15 @@
 #include "NProcGenEditorToolMenu.h"
 
 #include "NEditorCommands.h"
+#include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSystem.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
-#include "NProcGenDeveloperOverlayWidget.h"
 #include "NProcGenEditorCommands.h"
+#include "NProcGenEditorSubsystem.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
-#include "NProcGenSettings.h"
-#include "NWidgetEditorUtilityWidget.h"
 
 FName FNProcGenEditorToolMenu::EditorUtilityWindowName = FName("NProcGenEditorUtilityWindow");
 
@@ -305,24 +305,12 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
-	// Default value
-	const TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
-	
-	// Evaluate override
-	if (WidgetClass != nullptr)
-	{
-		FString PathName = WidgetClass->GetPathName();
-		PathName.RemoveFromEnd("_C");
-		
-		UNWidgetEditorUtilityWidget::GetOrCreate(
-		EditorUtilityWindowName, 
-		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("ProcGen System"), 
-		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
-	}
+	UNEditorUtilityWidget::SpawnTab( TEXT("/NexusProcGen/EditorResources/EUW_NProcGenSystem.EUW_NProcGenSystem"), FName("EUW_NProcGenSystem"));
 }
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System == nullptr) return false;
+	return System->HasWidget(FName("EUW_NProcGenSystem"));
 }

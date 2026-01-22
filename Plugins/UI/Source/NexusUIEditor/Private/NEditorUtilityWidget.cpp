@@ -10,46 +10,33 @@
 #include "NEditorUtils.h"
 #include "NSlateUtils.h"
 
-const FString UNEditorUtilityWidget::WidgetState_WidgetBlueprint = TEXT("NWidget_WidgetBlueprint");
-const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_TabDisplayText");
-const FString UNEditorUtilityWidget::WidgetState_TabIconStyle = TEXT("NWidget_TabIconStyle");
-const FString UNEditorUtilityWidget::WidgetState_TabIconName = TEXT("NWidget_TabIconName");
-
-void UNEditorUtilityWidget::SetTemplate(TObjectPtr<UEditorUtilityWidgetBlueprint> Template)
+UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, FName Identifier)
 {
-	PinnedTemplate = Template;
-}
-
-bool UNEditorUtilityWidget::IsPersistent() const
-{
-	return bIsPersistent;
-}
-
-FName UNEditorUtilityWidget::GetUserSettingsIdentifier()
-{
-	if (PinnedTemplate != nullptr)
-    {
-    	return PinnedTemplate->GetRegistrationName();
-    }
-    return GetFName();
-}
-
-FString UNEditorUtilityWidget::GetUserSettingsTemplate()
-{
-	if (PinnedTemplate != nullptr)
+	if (Identifier != NAME_None)
 	{
-		return PinnedTemplate->GetFullName();
+		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+		if (System != nullptr && System->HasWidget(Identifier))
+		{
+			return System->GetWidget(Identifier);
+		}
 	}
-	return GetFullName();
+	
+	if(UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
+	{
+		TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
+		return EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget);
+	}
+	return nullptr;
 }
+
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
-	UE_LOG(LogNexusUIEditor, Log, TEXT("NativeConstruct (%s) ..."), *this->GetFullName());
-	Super::NativeConstruct();
-	
-	// We do not want to do anything if its in a transient location
-	if (GetOutermost() == GetTransientPackage()) return;
+	// Ensure that we have some sort of identifier
+	if (StateIdentifier == NAME_None)
+	{
+		StateIdentifier = FName(GetFName());
+	}
 	
 	// Bind our default behaviour
 	if (OnTabClosedCallback.IsBound())
@@ -58,13 +45,32 @@ void UNEditorUtilityWidget::NativeConstruct()
 	}
 	OnTabClosedCallback.BindUObject(this, &UNEditorUtilityWidget::OnTabClosed);
 	
-	if (IsPersistent())
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System != nullptr)
 	{
-		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
-		System->RegisterPersistentWidget(this);
+		System->RegisterWidget(this);
+		if (IsPersistent())
+		{
+			const FName CachedIdentifier = GetStateIdentifier();
+			if (System->HasWidgetState(CachedIdentifier))
+			{
+				RestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
+			}
+			else
+			{
+				// By this time we have added a proper identifier through restore state
+				System->AddWidgetState(CachedIdentifier, GetWidgetState(this));
+			}
+		}
 	}
 	
-	//We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
+	// If we have icon data set we should create the icon
+	if (TabIconStyle != NAME_None && TabIconName != NAME_None)
+	{
+		TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
+	}
+	
+	// We need to make a callback after the window has been constructed further to ensure we have a tab
 	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
 	DelayedConstructTask->RegisterWithGameInstance(this);
 	DelayedConstructTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
@@ -73,23 +79,12 @@ void UNEditorUtilityWidget::NativeConstruct()
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
-	// Clear pin
-	PinnedTemplate = nullptr;
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System != nullptr)
+	{
+		System->UnregisterWidget(this);
+	}
 	
-	if (IsPersistent())
-	{
-		UNEditorUtilityWidgetSystem::Get()->UnregisterPersistentWidget(this);
-	}
-	else
-	{
-		// We might need to do this when destroying post map change
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
-		if (Tab.IsValid())
-		{
-			EditorUtilitySubsystem->UnregisterTabByID( FName(Tab->GetLayoutIdentifier().ToString()));
-		}
-	}
 	Super::NativeDestruct();
 }
 
@@ -97,55 +92,23 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	// NOTES : execution issues if in transient and task made in another outer
-	// weirdly only moves one out of transient (maybe we can?))
-	// Other option is to tear down windows ourselves and remake
-	
-	
-	UE_LOG(LogNexusUIEditor, Log, TEXT("Executing Delayed Construct Task (%s) ..."), *this->GetFullName());
-	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
-	if (IsPersistent())
-	{
-		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
-		
-		if (System != nullptr)
-		{
-			if (System->RestorePersistentWidget(this))
-			{
-				// Ensure strong data is added back
-				System->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
-			}
-			else if (System->HasWidgetState(GetUserSettingsIdentifier()))
-			{
-				RestoreWidgetState(this, GetUserSettingsIdentifier(), System->GetWidgetState(GetUserSettingsIdentifier()));
-			}
-			else
-			{
-				// By this time we have added a proper identifier through restore state
-				System->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
-			}
-		}
-	}
-
 	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
 	if (Tab.IsValid())
 	{
-		if (GetTabDisplayBrush().IsSet())
+		Tab->SetLabel(GetTabDisplayName());
+		
+		if (TabIcon.IsSet())
 		{
-			Tab->SetTabIcon(GetTabDisplayBrush());
+			Tab->SetTabIcon(TabIcon.GetIcon());
 		}
 		
-		if (!GetTabDisplayText().IsEmpty())
-		{
-			Tab->SetLabel(GetTabDisplayText());
-		}
-		
+		// Bind tab closed callback
 		if (OnTabClosedCallback.IsBound())
 		{
 			Tab->SetOnTabClosed(OnTabClosedCallback);
 		}
 
-		FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayText(), GetTabDisplayIcon());
+		FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayName(), TabIcon);
 	}
 	else
 	{
@@ -158,8 +121,8 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (IsPersistent() && !IsEngineExitRequested() && GetOutermost() != GetTransientPackage())
+	if (IsPersistent() && !IsEngineExitRequested())
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetUserSettingsIdentifier());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetStateIdentifier());
 	}
 }

@@ -71,13 +71,13 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	}
 
 	// We've bound a world check it
-	BroadcastProvidedMessageChanged();
+	OnChanges();
 	
 	// Add delegate for future pools
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
-		BroadcastProvidedMessageChanged();
+		OnChanges();
 	}));
 }
 
@@ -103,21 +103,7 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 		}
 	}
 	
-	BroadcastProvidedMessageChanged();
-}
-
-bool UNActorPoolsDeveloperOverlayWidget::HasProvidedMessage() const
-{
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
-	{
-		return ActorPoolList->GetNumItems() <= 0;
-	}
-	return true;
-}
-
-FString UNActorPoolsDeveloperOverlayWidget::GetProvidedMessage() const
-{
-	return TEXT("No Actor Pools Found");
+	OnChanges();
 }
 
 void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World, 
@@ -132,6 +118,15 @@ void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
 	{
 		Unbind(World);
 	}
+}
+
+bool UNActorPoolsDeveloperOverlayWidget::HasItems()
+{
+	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
+	{
+		return ActorPoolList->GetNumItems() <= 0;
+	}
+	return true;
 }
 
 void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)

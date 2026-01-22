@@ -20,6 +20,8 @@ void UNProcGenDeveloperOverlayWidget::NativeConstruct()
 		OperationsList->AddItem(Cast<UObject>(Operation));
 	}
 	
+	OnChanges();
+	
 	OperationsStatusChangedDelegateHandle = FNProcGenRegistry::OnOperationStateChanged.AddUObject(
 		this, &UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged);
 }
@@ -31,20 +33,6 @@ void UNProcGenDeveloperOverlayWidget::NativeDestruct()
 	FNProcGenRegistry::OnOperationStateChanged.Remove(OperationsStatusChangedDelegateHandle);
 	
 	Super::NativeDestruct();
-}
-
-bool UNProcGenDeveloperOverlayWidget::HasProvidedMessage() const
-{
-	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
-	{
-		return OperationsList->GetNumItems() <= 0;
-	}
-	return true;
-}
-
-FString UNProcGenDeveloperOverlayWidget::GetProvidedMessage() const
-{
-	return TEXT("No Tasks Found");
 }
 
 void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperation* Operation,
@@ -59,6 +47,7 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 		break;
 	case Registered:
 		OperationsList->AddItem(Cast<UObject>(Operation));
+		OnChanges();
 		break;
 	case Started:
 		break;
@@ -69,8 +58,18 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 		break;
 	case Unregistered:
 		OperationsList->RemoveItem(Cast<UObject>(Operation));
+		OnChanges();
 		break;
 	}
+}
+
+bool UNProcGenDeveloperOverlayWidget::HasItems()
+{
+	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
+	{
+		return OperationsList->GetNumItems() <= 0;
+	}
+	return true;
 }
 
 bool UNProcGenDeveloperOverlayWidget::ShouldShowOperation(const FName& OperationName)

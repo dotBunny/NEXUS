@@ -42,17 +42,6 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Actor Pools."));
 		return SectionDescription;
 	}
-	
-	virtual void PostInitProperties() override
-	{
-		Super::PostInitProperties();
-		ValidateSettings();
-	}
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
-	{
-		ValidateSettings();
-		Super::PostEditChangeProperty(PropertyChangedEvent);
-	}
 #endif	
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
@@ -71,35 +60,8 @@ public:
 		meta=(Tooltop="What should be done with an AActor returned to APS that is not known to it."))
 	ENActorPoolUnknownBehaviour UnknownBehaviour;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget")
-	TSubclassOf<UNActorPoolsDeveloperOverlayWidget> DeveloperOverlayWidget;
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Update Rate",
 		meta=(Tooltop="How often should the Actor Pools be queried and the widget updated."))
 	float DeveloperOverlayUpdateRate = 0.1f;
 
-#if WITH_EDITOR
-private:
-	void ValidateSettings()
-	{
-		bool bNeedsSave = false;
-
-		if (!DeveloperOverlayWidget)
-		{
-			UClass* DefaultOverlayClass = FSoftClassPath(
-				TEXT("/NexusActorPools/WB_NActorPoolsDeveloperOverlay.WB_NActorPoolsDeveloperOverlay_C"))
-				.TryLoadClass<UNActorPoolsDeveloperOverlayWidget>();
-			if (DefaultOverlayClass != nullptr)
-			{
-				bNeedsSave = true;
-				DeveloperOverlayWidget = DefaultOverlayClass;
-			}
-		}
-		
-		if (bNeedsSave)
-		{
-			TryUpdateDefaultConfigFile();
-		}
-	}
-#endif
 };

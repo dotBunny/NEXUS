@@ -24,45 +24,21 @@ class NEXUSUIEDITOR_API UNEditorUtilityWidgetSystem : public UEditorSubsystem
 public:
 	GENERATED_BODY()
 	N_EDITOR_SUBSYSTEM(UNEditorUtilityWidgetSystem)
-
-	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
 	
-	void OnAssetEditorRequestedOpen(UObject* Object);
-	
-	void RegisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
-	void UnregisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
-	bool RestorePersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
-	
-	void AddTransientState(TObjectPtr<UNEditorUtilityWidget> Widget);
-	
-	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-	virtual void Deinitialize() override;
-	
-	void AddWidgetState(const FName& Identifier, const FString& Template,  const FNWidgetState& WidgetState);
+	void AddWidgetState(const FName& Identifier, const FNWidgetState& WidgetState);
 	void RemoveWidgetState(const FName& Identifier);
 	void UpdateWidgetState(const FName& Identifier,  const FNWidgetState& WidgetState);
 	bool HasWidgetState(const FName& Identifier) const;
 	FNWidgetState& GetWidgetState(const FName& Identifier);
 
-	
-protected:	
+	void RegisterWidget(UNEditorUtilityWidget* Widget);
+	void UnregisterWidget(const UNEditorUtilityWidget* Widget);
+	UNEditorUtilityWidget* GetWidget(const FName& Identifier);
+	bool HasWidget(const FName& Identifier);
+protected:
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;
-	
-	UPROPERTY()
-	TMap<FString, TObjectPtr<UEditorUtilityWidgetBlueprint>> WidgetBlueprints;
-	
-	UPROPERTY()
-	TArray<TObjectPtr<UNEditorUtilityWidget>> PersistentWidgets;
-	
-	UPROPERTY()
-	FNWidgetStateSnapshot TransientStates;
-	
 private:
-	TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
-	
-	static bool bIsOpeningMap;
-	
-	FDelegateHandle OnAssetEditorRequestedOpenHandle;
+	TMap<FName, TObjectPtr<UNEditorUtilityWidget>> KnownWidgets;
 };
 

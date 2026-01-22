@@ -1,10 +1,11 @@
 ﻿#include "NActorPoolsEditorToolMenu.h"
 
-#include "NActorPoolsDeveloperOverlayWidget.h"
+
 #include "NActorPoolsEditorStyle.h"
-#include "NActorPoolsSettings.h"
 #include "NEditorCommands.h"
-#include "NWidgetEditorUtilityWidget.h"
+#include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSystem.h"
+
 
 FName FNActorPoolsEditorToolMenu::EditorUtilityWindowName = FName("NActorPoolsEditorUtilityWindow");
 
@@ -26,24 +27,12 @@ void FNActorPoolsEditorToolMenu::Register()
 
 void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
 {
-	// Default value
-	const TSubclassOf<UNActorPoolsDeveloperOverlayWidget> WidgetClass = UNActorPoolsSettings::Get()->DeveloperOverlayWidget;
-	
-	// Evaluate override
-	if (WidgetClass != nullptr)
-	{
-		FString PathName = WidgetClass->GetPathName();
-		PathName.RemoveFromEnd("_C");
-		
-		UNWidgetEditorUtilityWidget::GetOrCreate(
-		EditorUtilityWindowName, 
-		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("Actor Pools"), 
-		FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool");
-	}
+	UNEditorUtilityWidget::SpawnTab(TEXT("/NexusActorPools/EditorResources/EUW_NActorPools.EUW_NActorPools"), FName("EUW_NActorPools"));
 }
 
 bool FNActorPoolsEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
+	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	if (System == nullptr) return false;
+	return System->HasWidget(FName("EUW_NActorPools"));
 }

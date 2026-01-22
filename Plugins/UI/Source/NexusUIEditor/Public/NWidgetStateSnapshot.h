@@ -15,8 +15,6 @@ struct FNWidgetStateSnapshot
 	UPROPERTY()
 	TArray<FName> Identifiers;
 	UPROPERTY()
-	TArray<FString> Templates;	
-	UPROPERTY()
 	TArray<FNWidgetState> WidgetStates;
 	
 	int GetCount() const
@@ -27,14 +25,12 @@ struct FNWidgetStateSnapshot
 	void Clear()
 	{
 		Identifiers.Empty();
-		Templates.Empty();
 		WidgetStates.Empty();
 	}
 	
 	void RemoveAtIndex(int32 Index)
 	{
 		Identifiers.RemoveAt(Index);
-		Templates.RemoveAt(Index);
 		WidgetStates.RemoveAt(Index);
 	}
 	
@@ -43,13 +39,13 @@ struct FNWidgetStateSnapshot
 		return Identifiers.IndexOfByKey(Identifier);
 	}
 
-	bool DuplicateWidgetState(const FName Identifier, const FString Template, const FNWidgetState WidgetState)
+	bool DuplicateWidgetState(const FName Identifier, const FNWidgetState WidgetState)
 	{
 		
-		return AddWidgetState(Identifier, Template, WidgetState);
+		return AddWidgetState(Identifier, WidgetState);
 	}
 	
-	bool AddWidgetState(const FName& Identifier, const FString& Template,  const FNWidgetState& WidgetState)
+	bool AddWidgetState(const FName& Identifier, const FNWidgetState& WidgetState)
 	{
 		// Check for already registered
 		int32 WorkingIndex = GetIdentifierIndex(Identifier);
@@ -58,10 +54,9 @@ struct FNWidgetStateSnapshot
 			// Add our items
 			WorkingIndex = Identifiers.Add(Identifier);
 			const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState);
-			const int32 TemplateIndexCheck = Templates.Add(Template);
 		
 			// Sanity check
-			if (WorkingIndex != PayloadIndexCheck || WorkingIndex != TemplateIndexCheck)
+			if (WorkingIndex != PayloadIndexCheck)
 			{
 				UE_LOG(LogNexusUIEditor, Error, TEXT("Sanity check of the known registered widgets's arrays shows inconsistencies; data will be cleared."))
 				Clear();
@@ -79,12 +74,10 @@ struct FNWidgetStateSnapshot
 		if (WorkingIndex != INDEX_NONE)
 		{
 			Identifiers.RemoveAt(WorkingIndex);
-			Templates.RemoveAt(WorkingIndex);
 			WidgetStates.RemoveAt(WorkingIndex);
 		
 			return true;
 		}
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Failed to unregister widget(%s); no registered widget was found."), *Identifier.ToString());
 		return false;
 	}
 	
@@ -115,7 +108,7 @@ struct FNWidgetStateSnapshot
 		UE_LOG(LogNexusUIEditor, Log, TEXT("[FNWidgetStateSnapshot]"));
 		for (int32 Index = 0; Index < Identifiers.Num(); ++Index)
 		{
-			UE_LOG(LogNexusUIEditor, Log, TEXT("Identifier(%s) @ Template(%s)"), *Identifiers[Index].ToString(), *Templates[Index]);
+			UE_LOG(LogNexusUIEditor, Log, TEXT("Identifier(%s)"), *Identifiers[Index].ToString());
 			WidgetStates[Index].DumpToLog();
 		}
 	}
