@@ -19,8 +19,6 @@ class UNEditorUtilityWidget;
 UCLASS(config = EditorPerProjectUserSettings)
 class NEXUSUIEDITOR_API UNEditorUtilityWidgetSystem : public UEditorSubsystem
 {
-	friend class UNEditorUtilityWidgetLoadTask;
-
 public:
 	GENERATED_BODY()
 	N_EDITOR_SUBSYSTEM(UNEditorUtilityWidgetSystem)
@@ -35,9 +33,11 @@ public:
 	void UnregisterWidget(const UNEditorUtilityWidget* Widget);
 	UNEditorUtilityWidget* GetWidget(const FName& Identifier);
 	bool HasWidget(const FName& Identifier);
+
 protected:
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;
+
 private:
 	TMap<FName, TObjectPtr<UNEditorUtilityWidget>> KnownWidgets;
 };

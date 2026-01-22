@@ -59,14 +59,12 @@ void UNEditorUtilityWidget::NativeConstruct()
 			const FName CachedIdentifier = GetStateIdentifier();
 			if (System->HasWidgetState(CachedIdentifier))
 			{
-				UE_LOG(LogNexusUIEditor, Log, TEXT("Restoring persistent widget state: %s"), *GetStateIdentifier().ToString());
 				RestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
 			}
 			else
 			{
 				// By this time we have added a proper identifier through restore state
 				System->AddWidgetState(CachedIdentifier, GetWidgetState(this));
-				UE_LOG(LogNexusUIEditor, Log, TEXT("Adding persistent widget state: %s"), *GetStateIdentifier().ToString());
 			}
 		}
 	}
@@ -137,7 +135,6 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (IsPersistent() && !IsEngineExitRequested())
 	{
-		UE_LOG(LogNexusUIEditor, Log, TEXT("Removing persistent widget state: %s"), *GetStateIdentifier().ToString());
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetStateIdentifier());
 	}
 }
