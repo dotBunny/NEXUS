@@ -69,7 +69,6 @@ struct FNWidgetStateSnapshot
 			return true;
 		}
 		
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("A widget is already registered for Identifier(%s); updating cached state only."), *Identifier.ToString());
 		WidgetStates[WorkingIndex] = WidgetState;
 		return true;
 	}

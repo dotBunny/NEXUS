@@ -26,15 +26,14 @@ public:
 	N_EDITOR_SUBSYSTEM(UNEditorUtilityWidgetSystem)
 
 	static UEditorUtilityWidget* CreateWithState(const FString& InTemplate, const FName& InIdentifier, FNWidgetState& WidgetState);
-	static bool IsRebuildingWidgets() { return bIsOpeningMap;}
-	static void OnMapOpened(const FString& Filename, bool bAsTemplate);
 	
 	void OnAssetEditorRequestedOpen(UObject* Object);
 	
 	void RegisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
 	void UnregisterPersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
-	void AddPersistentState(TObjectPtr<UNEditorUtilityWidget> Widget);
-	void RestorePersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
+	bool RestorePersistentWidget(TObjectPtr<UNEditorUtilityWidget> Widget);
+	
+	void AddTransientState(TObjectPtr<UNEditorUtilityWidget> Widget);
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -57,7 +56,7 @@ protected:
 	TArray<TObjectPtr<UNEditorUtilityWidget>> PersistentWidgets;
 	
 	UPROPERTY()
-	FNWidgetStateSnapshot PersistentStates;
+	FNWidgetStateSnapshot TransientStates;
 	
 private:
 	TObjectPtr<UEditorUtilityWidgetBlueprint> GetWidgetBlueprint(const FString& InTemplate);
@@ -65,6 +64,5 @@ private:
 	static bool bIsOpeningMap;
 	
 	FDelegateHandle OnAssetEditorRequestedOpenHandle;
-	FDelegateHandle OnMapOpenedHandle;
 };
 

@@ -33,10 +33,8 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 			Tab->ActivateInParent(SetDirectly);
 			Tab->FlashTab();
 		}
-
 		return ExistingWidget;
 	}
-	
 
 	FNWidgetState WidgetState = CreateWidgetState(WidgetBlueprint, TabDisplayText, TabIconStyle, TabIconName);
 	UEditorUtilityWidget* Widget = UNEditorUtilityWidgetSystem::CreateWithState(TemplatePath, Identifier, WidgetState);
@@ -198,8 +196,6 @@ void UNWidgetEditorUtilityWidget::RestoreWidgetState(UObject* BlueprintWidget, F
 	{
 		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to find content widget(%s) to use with the UNWidgetEditorUtilityWidget."), *TemplatePath)
 	}
-	
-	SetWidgetStateHasBeenRestored(true);
 }
 
 
@@ -220,14 +216,10 @@ void UNWidgetEditorUtilityWidget::UpdateHeader() const
 void UNWidgetEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
-
+	
 	if (IsPersistent())
 	{
 		OnBlueprintPreCompileHandle = GEditor->OnBlueprintPreCompile().AddUObject(this, &UNWidgetEditorUtilityWidget::OnBlueprintPreCompile);
-		if (!HasWidgetStateBeenRestored())
-		{
-			UNEditorUtilityWidgetSystem::Get()->RestorePersistentWidget(this);
-		}
 	}
 
 	UpdateHeader();
@@ -248,7 +240,7 @@ void UNWidgetEditorUtilityWidget::OnBlueprintPreCompile(UBlueprint* Blueprint)
 {
 	if (Blueprint == PinnedTemplate || Blueprint == ContentWidgetTemplate)
 	{
-		UNEditorUtilityWidgetSystem::Get()->AddPersistentState(this);
+		UNEditorUtilityWidgetSystem::Get()->AddTransientState(this);
 	}
 }
 

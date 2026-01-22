@@ -45,7 +45,11 @@ FString UNEditorUtilityWidget::GetUserSettingsTemplate()
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
+	UE_LOG(LogNexusUIEditor, Log, TEXT("NativeConstruct (%s) ..."), *this->GetFullName());
 	Super::NativeConstruct();
+	
+	// We do not want to do anything if its in a transient location
+	if (GetOutermost() == GetTransientPackage()) return;
 	
 	// Bind our default behaviour
 	if (OnTabClosedCallback.IsBound())
@@ -58,27 +62,27 @@ void UNEditorUtilityWidget::NativeConstruct()
 	{
 		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 		System->RegisterPersistentWidget(this);
-		if (UNEditorUtilityWidgetSystem::IsRebuildingWidgets())
-		{
-			System->RestorePersistentWidget(this);
-		}
 	}
 	
-	// We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
-	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>();
-	DelayedConstructTask->RegisterWithGameInstance(nullptr);
+	//We need to ensure that the window has its icon after all -- this oddly only executes once if you are opening multiple windows at once.
+	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
+	DelayedConstructTask->RegisterWithGameInstance(this);
 	DelayedConstructTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
 	DelayedConstructTask->Start(0.01f, 1);
 }
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
+	// Clear pin
+	PinnedTemplate = nullptr;
+	
 	if (IsPersistent())
 	{
 		UNEditorUtilityWidgetSystem::Get()->UnregisterPersistentWidget(this);
 	}
 	else
 	{
+		// We might need to do this when destroying post map change
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
 		const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
 		if (Tab.IsValid())
@@ -93,13 +97,25 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
+	// NOTES : execution issues if in transient and task made in another outer
+	// weirdly only moves one out of transient (maybe we can?))
+	// Other option is to tear down windows ourselves and remake
+	
+	
+	UE_LOG(LogNexusUIEditor, Log, TEXT("Executing Delayed Construct Task (%s) ..."), *this->GetFullName());
 	// We need to do this _late_ as the identifier might not be set yet (as it could be based off the pinned template), unless overridden.
 	if (IsPersistent())
 	{
 		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+		
 		if (System != nullptr)
 		{
-			if (System->HasWidgetState(GetUserSettingsIdentifier()))
+			if (System->RestorePersistentWidget(this))
+			{
+				// Ensure strong data is added back
+				System->AddWidgetState(GetUserSettingsIdentifier(), GetUserSettingsTemplate(), GetWidgetState(this));
+			}
+			else if (System->HasWidgetState(GetUserSettingsIdentifier()))
 			{
 				RestoreWidgetState(this, GetUserSettingsIdentifier(), System->GetWidgetState(GetUserSettingsIdentifier()));
 			}
@@ -142,7 +158,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (IsPersistent() && !IsEngineExitRequested())
+	if (IsPersistent() && !IsEngineExitRequested() && GetOutermost() != GetTransientPackage())
 	{
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetUserSettingsIdentifier());
 	}
