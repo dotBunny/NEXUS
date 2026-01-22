@@ -28,6 +28,7 @@ TSharedPtr<SWidget> FNSlateUtils::FindWidgetByType(TSharedPtr<SWidget> ParentWid
 	return nullptr;
 }
 
+// #SONARQUBE-DISABLE-CPP_S134
 TSharedPtr<SDockTab> FNSlateUtils::FindDocTab(const TSharedPtr<SWidget>& BaseWidget)
 {
 	TSharedPtr<SWidget> Widget = BaseWidget;
@@ -41,9 +42,9 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTab(const TSharedPtr<SWidget>& BaseWid
 			
 			for (int i = 0; i < ChildrenCount; ++i)
 			{
-
 				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
 				TSharedPtr<SWidget> FoundWidget = FindWidgetByType(ChildWidget, SDockTabName);
+				
 				if (FoundWidget.IsValid())
 				{
 					return StaticCastSharedPtr<SDockTab>(FoundWidget);
@@ -61,3 +62,4 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTab(const TSharedPtr<SWidget>& BaseWid
 	}
 	return nullptr;
 }
+// #SONARQUBE-ENABLE

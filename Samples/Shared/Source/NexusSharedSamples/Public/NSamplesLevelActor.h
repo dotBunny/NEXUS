@@ -7,6 +7,16 @@
 #include "NSamplesLevelComponents.h"
 #include "NSamplesLevelActor.generated.h"
 
+namespace NEXUS::Samples::Level
+{
+	constexpr float DemoTextSize = 100.f;
+	constexpr float WallBaseVerticalOffset = 149.5f;
+	constexpr float WallPositionBase = 500.f;
+	constexpr float WallPositionOffset = 50.f;
+	constexpr float WallScaleBase = 10.f;
+	constexpr float WallScaleOffset= 2.f;
+}
+
 /**
  * An actor used to control the base NEXUS demo level
  */
@@ -58,15 +68,9 @@ private:
 	const FVector BrandBaseLocation = FVector(0.f,0.f, 0.f);
 
 	const FText DemoText = FText::FromString(TEXT("DEMO"));
-	const float DemoTextSize = 100.f;
+	
 	const FVector DemoNameBaseLocation = FVector(-125.f , 0, 10);
 	const FRotator DemoNameBaseRotation = FRotator(90.f, -180.f, 0);
-	
-	const float WallBaseVerticalOffset = 149.5f;
-	const float WallPositionBase = 500.f;
-	const float WallPositionOffset = 50.f;
-	const float WallScaleBase = 10.f;
-	const float WallScaleOffset= 2.f;
 	
 	TUniquePtr<FNSamplesLevelActorComponents> Components;
 };

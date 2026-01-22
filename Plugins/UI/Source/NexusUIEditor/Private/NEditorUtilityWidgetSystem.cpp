@@ -149,24 +149,22 @@ FNWidgetState& UNEditorUtilityWidgetSystem::GetWidgetState(const FName& Identifi
 void UNEditorUtilityWidgetSystem::RestorePersistentWidget(const TObjectPtr<UNEditorUtilityWidget> Widget)
 {
 	const int32 TransientStateCount = PersistentStates.GetCount();
-	if (TransientStateCount > 0)
+	if (TransientStateCount <= 0) return;
+	
+	const FString& WidgetTemplate = Widget->GetUserSettingsTemplate(); 
+	for (int32 Index = TransientStateCount - 1; Index >= 0; Index--)
 	{
-		const FString& WidgetTemplate = Widget->GetUserSettingsTemplate(); 
-		for (int32 Index = TransientStateCount - 1; Index >= 0; Index--)
+		if (PersistentStates.Templates[Index] != WidgetTemplate) continue;
+		
+		const TObjectPtr<UEditorUtilityWidgetBlueprint> GetKnownBlueprint = GetWidgetBlueprint(PersistentStates.Templates[Index]);
+		if (GetKnownBlueprint != nullptr)
 		{
-			if (PersistentStates.Templates[Index] == WidgetTemplate)
-			{
-				const TObjectPtr<UEditorUtilityWidgetBlueprint> GetKnownBlueprint = GetWidgetBlueprint(PersistentStates.Templates[Index]);
-				if (GetKnownBlueprint != nullptr)
-				{
-					Widget->SetTemplate(GetKnownBlueprint);
-				}
-				Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
-				
-				PersistentStates.RemoveAtIndex(Index);
-				return;
-			}
+			Widget->SetTemplate(GetKnownBlueprint);
 		}
+		Widget->RestoreWidgetState(Widget, PersistentStates.Identifiers[Index], PersistentStates.WidgetStates[Index]);
+		
+		PersistentStates.RemoveAtIndex(Index);
+		return;
 	}
 }
 

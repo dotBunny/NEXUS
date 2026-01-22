@@ -58,7 +58,7 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 	Components->DemoName->SetWorldRotation(DemoNameBaseRotation);
 	Components->DemoName->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
 	Components->DemoName->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
-	Components->DemoName->WorldSize = DemoTextSize;
+	Components->DemoName->WorldSize = NEXUS::Samples::Level::DemoTextSize;
 	Components->DemoName->SetText(DemoText);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DemoNameMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/DebugText/MI_NDebugText_White"));
 	if (DemoNameMaterialAsset.Succeeded())
@@ -246,7 +246,7 @@ void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
 
 void ANSamplesLevelActor::SetWallPosition(UStaticMeshComponent* Wall, const float Multiplier, const bool bNegative, const bool bMoveAlongX) const
 {
-	float Position =  ((WallPositionBase * Multiplier) + WallPositionOffset);
+	float Position =  ((NEXUS::Samples::Level::WallPositionBase * Multiplier) + NEXUS::Samples::Level::WallPositionOffset);
 	if (bNegative) Position *= -1.f;
 
 	FVector WorkingLocation = RootComponent->GetComponentLocation();
@@ -258,7 +258,7 @@ void ANSamplesLevelActor::SetWallPosition(UStaticMeshComponent* Wall, const floa
 	{
 		WorkingLocation.Y += Position;
 	}
-	WorkingLocation.Z += WallBaseVerticalOffset;
+	WorkingLocation.Z += NEXUS::Samples::Level::WallBaseVerticalOffset;
 
 	Wall->SetWorldLocation(WorkingLocation);
 }
@@ -268,11 +268,11 @@ void ANSamplesLevelActor::SetWallScale(UStaticMeshComponent* Wall, const float M
 	FVector Scale = WallBaseScale;
 	if (bScaleAlongX)
 	{
-		Scale.X = (WallScaleBase * Multiplier) + WallScaleOffset;
+		Scale.X = (NEXUS::Samples::Level::WallScaleBase * Multiplier) + NEXUS::Samples::Level::WallScaleOffset;
 	}
 	else
 	{
-		Scale.Y = (WallScaleBase * Multiplier);
+		Scale.Y = (NEXUS::Samples::Level::WallScaleBase * Multiplier);
 	}
 	Wall->SetWorldScale3D(Scale);
 }
