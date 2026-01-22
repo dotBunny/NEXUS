@@ -3,6 +3,7 @@
 
 #include "NSamplesLevelActor.h"
 
+#include "NSamplesDisplayComponents.h"
 #include "Components/DecalComponent.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -14,137 +15,139 @@
 
 ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"), false);
-	SceneRoot->SetMobility(EComponentMobility::Static);
-	RootComponent = SceneRoot;
+	Components = MakeUnique<FNSamplesLevelActorComponents>();
+	
+	Components->SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"), false);
+	Components->SceneRoot->SetMobility(EComponentMobility::Static);
+	RootComponent = Components->SceneRoot;
 	
 	// Create Floor
-	Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Floor"), false);
-	Floor->SetupAttachment(RootComponent);
+	Components->Floor = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Floor"), false);
+	Components->Floor->SetupAttachment(RootComponent);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> FloorMeshAsset(TEXT("/Engine/MapTemplates/SM_Template_Map_Floor"));
 	if (FloorMeshAsset.Succeeded())
 	{
-		Floor->SetStaticMesh(FloorMeshAsset.Object);
+		Components->Floor->SetStaticMesh(FloorMeshAsset.Object);
 		static ConstructorHelpers::FObjectFinder<UMaterialInterface> FloorMaterialAsset(TEXT("/Engine/OpenWorldTemplate/LandscapeMaterial/MI_ProcGrid"));
 		if (FloorMaterialAsset.Succeeded())
 		{
-			Floor->SetMaterial(0, FloorMaterialAsset.Object);
+			Components->Floor->SetMaterial(0, FloorMaterialAsset.Object);
 		}
 	}
 
 	// Floor - Position & Scale
-	Floor->SetWorldLocation(FloorBaseLocation);
-	Floor->SetWorldScale3D(FloorBaseScale);
+	Components->Floor->SetWorldLocation(FloorBaseLocation);
+	Components->Floor->SetWorldScale3D(FloorBaseScale);
 
 	// Create Decal
-	Brand = CreateDefaultSubobject<UDecalComponent>(TEXT("D_Brand"), false);
-	Brand->SetupAttachment(RootComponent);
-	Brand->SetWorldLocation(BrandBaseLocation);
-	Brand->SetWorldScale3D(BrandBaseScale);
-	Brand->SetWorldRotation(BrandBaseRotation);
+	Components->Brand = CreateDefaultSubobject<UDecalComponent>(TEXT("D_Brand"), false);
+	Components->Brand->SetupAttachment(RootComponent);
+	Components->Brand->SetWorldLocation(BrandBaseLocation);
+	Components->Brand->SetWorldScale3D(BrandBaseScale);
+	Components->Brand->SetWorldRotation(BrandBaseRotation);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> BrandMaterialAsset(TEXT("/NexusSharedSamples/M_NSamples_Decal"));
 	if (BrandMaterialAsset.Succeeded())
 	{
-		Brand->SetMaterial(0, BrandMaterialAsset.Object);
+		Components->Brand->SetMaterial(0, BrandMaterialAsset.Object);
 	}
 	
 	// Create Demo Name
-	DemoName = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TR_DemoName"), false);
-	DemoName->SetupAttachment(RootComponent);
-	DemoName->SetWorldLocation(DemoNameBaseLocation);
-	DemoName->SetWorldRotation(DemoNameBaseRotation);
-	DemoName->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
-	DemoName->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
-	DemoName->WorldSize = DemoTextSize;
-	DemoName->SetText(DemoText);
+	Components->DemoName = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TR_DemoName"), false);
+	Components->DemoName->SetupAttachment(RootComponent);
+	Components->DemoName->SetWorldLocation(DemoNameBaseLocation);
+	Components->DemoName->SetWorldRotation(DemoNameBaseRotation);
+	Components->DemoName->HorizontalAlignment = EHorizTextAligment::EHTA_Center;
+	Components->DemoName->VerticalAlignment = EVerticalTextAligment::EVRTA_TextCenter;
+	Components->DemoName->WorldSize = DemoTextSize;
+	Components->DemoName->SetText(DemoText);
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DemoNameMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/DebugText/MI_NDebugText_White"));
 	if (DemoNameMaterialAsset.Succeeded())
 	{
-		DemoName->SetMaterial(0, DemoNameMaterialAsset.Object);
+		Components->DemoName->SetMaterial(0, DemoNameMaterialAsset.Object);
 	}
-	DemoName->SetCastShadow(true);
-	DemoName->SetReceivesDecals(false);
+	Components->DemoName->SetCastShadow(true);
+	Components->DemoName->SetReceivesDecals(false);
 	
 	// Create Walls
-	WallNorth = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_North"), false);
-	WallNorth->SetupAttachment(RootComponent);
-	WallEast = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_East"), false);
-	WallEast->SetupAttachment(RootComponent);
-	WallSouth = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_South"), false);
-	WallSouth->SetupAttachment(RootComponent);
-	WallWest = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_West"), false);
-	WallWest->SetupAttachment(RootComponent);	
+	Components->WallNorth = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_North"), false);
+	Components->WallNorth->SetupAttachment(RootComponent);
+	Components->WallEast = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_East"), false);
+	Components->WallEast->SetupAttachment(RootComponent);
+	Components->WallSouth = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_South"), false);
+	Components->WallSouth->SetupAttachment(RootComponent);
+	Components->WallWest = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SM_Wall_West"), false);
+	Components->WallWest->SetupAttachment(RootComponent);	
 	
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> WallMeshAsset(TEXT("/Engine/BasicShapes/Cube"));
 	if (WallMeshAsset.Succeeded())
 	{
-		WallNorth->SetStaticMesh(WallMeshAsset.Object);
-		WallEast->SetStaticMesh(WallMeshAsset.Object);
-		WallSouth->SetStaticMesh(WallMeshAsset.Object);
-		WallWest->SetStaticMesh(WallMeshAsset.Object);
+		Components->WallNorth->SetStaticMesh(WallMeshAsset.Object);
+		Components->WallEast->SetStaticMesh(WallMeshAsset.Object);
+		Components->WallSouth->SetStaticMesh(WallMeshAsset.Object);
+		Components->WallWest->SetStaticMesh(WallMeshAsset.Object);
 		
 		static ConstructorHelpers::FObjectFinder<UMaterialInterface> WallMaterialAsset(TEXT("/NexusBlockout/MaterialLibrary/MaterialInstances/Debug/MI_NDebug_Grey"));
 		if (WallMaterialAsset.Succeeded())
 		{
-			WallNorth->SetMaterial(0, WallMaterialAsset.Object);
-			WallEast->SetMaterial(0, WallMaterialAsset.Object);
-			WallSouth->SetMaterial(0, WallMaterialAsset.Object);
-			WallWest->SetMaterial(0, WallMaterialAsset.Object);
+			Components->WallNorth->SetMaterial(0, WallMaterialAsset.Object);
+			Components->WallEast->SetMaterial(0, WallMaterialAsset.Object);
+			Components->WallSouth->SetMaterial(0, WallMaterialAsset.Object);
+			Components->WallWest->SetMaterial(0, WallMaterialAsset.Object);
 		}
 	}
 
 	// Walls - Position & Scale
-	WallNorth->SetWorldLocation(WallBasePosition);
-	WallNorth->SetWorldScale3D(WallBaseScale);
-	WallEast->SetWorldLocation(WallBasePosition);
-	WallEast->SetWorldScale3D(WallBaseScale);
-	WallSouth->SetWorldLocation(WallBasePosition);
-	WallSouth->SetWorldScale3D(WallBaseScale);
-	WallWest->SetWorldLocation(WallBasePosition);
-	WallWest->SetWorldScale3D(WallBaseScale);
+	Components->WallNorth->SetWorldLocation(WallBasePosition);
+	Components->WallNorth->SetWorldScale3D(WallBaseScale);
+	Components->WallEast->SetWorldLocation(WallBasePosition);
+	Components->WallEast->SetWorldScale3D(WallBaseScale);
+	Components->WallSouth->SetWorldLocation(WallBasePosition);
+	Components->WallSouth->SetWorldScale3D(WallBaseScale);
+	Components->WallWest->SetWorldLocation(WallBasePosition);
+	Components->WallWest->SetWorldScale3D(WallBaseScale);
 
-	Floor->SetMobility(EComponentMobility::Static);
-	WallNorth->SetMobility(EComponentMobility::Static);
-	WallEast->SetMobility(EComponentMobility::Static);
-	WallSouth->SetMobility(EComponentMobility::Static);
-	WallWest->SetMobility(EComponentMobility::Static);
-	DemoName->SetMobility(EComponentMobility::Static);
-	Brand->SetMobility(EComponentMobility::Static);
+	Components->Floor->SetMobility(EComponentMobility::Static);
+	Components->WallNorth->SetMobility(EComponentMobility::Static);
+	Components->WallEast->SetMobility(EComponentMobility::Static);
+	Components->WallSouth->SetMobility(EComponentMobility::Static);
+	Components->WallWest->SetMobility(EComponentMobility::Static);
+	Components->DemoName->SetMobility(EComponentMobility::Static);
+	Components->Brand->SetMobility(EComponentMobility::Static);
 
 	// Lighting
-	DirectionalLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("DirectionalLight"), false);
-	DirectionalLight->SetupAttachment(RootComponent);
-	DirectionalLight->SetWorldLocation(FVector(0.f, 0.f, 400.f));
+	Components->DirectionalLight = CreateDefaultSubobject<UDirectionalLightComponent>(TEXT("DirectionalLight"), false);
+	Components->DirectionalLight->SetupAttachment(RootComponent);
+	Components->DirectionalLight->SetWorldLocation(FVector(0.f, 0.f, 400.f));
 	
-	ExponentialHeightFog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("ExponentialHeightFog"), false);
-	ExponentialHeightFog->SetupAttachment(RootComponent);
-	ExponentialHeightFog->SetWorldLocation(FVector(0.f, 0.f, -6850.f));
+	Components->ExponentialHeightFog = CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("ExponentialHeightFog"), false);
+	Components->ExponentialHeightFog->SetupAttachment(RootComponent);
+	Components->ExponentialHeightFog->SetWorldLocation(FVector(0.f, 0.f, -6850.f));
 	
-	SkyAtmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("SkyAtmosphere"), false);
-	SkyAtmosphere->SetupAttachment(RootComponent);
-	SkyAtmosphere->SetWorldLocation(FVector(0.f, 0.f, -6000.f));
+	Components->SkyAtmosphere = CreateDefaultSubobject<USkyAtmosphereComponent>(TEXT("SkyAtmosphere"), false);
+	Components->SkyAtmosphere->SetupAttachment(RootComponent);
+	Components->SkyAtmosphere->SetWorldLocation(FVector(0.f, 0.f, -6000.f));
 
-	SkyLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("SkyLight"), false);
-	SkyLight->SetupAttachment(RootComponent);
-	SkyLight->SetWorldLocation(FVector(0.f, 0.f, 600.f));
+	Components->SkyLight = CreateDefaultSubobject<USkyLightComponent>(TEXT("SkyLight"), false);
+	Components->SkyLight->SetupAttachment(RootComponent);
+	Components->SkyLight->SetWorldLocation(FVector(0.f, 0.f, 600.f));
 
-	SkySphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SkySphere"), false);
-	SkySphere->SetupAttachment(RootComponent);
-	SkySphere->SetWorldScale3D(FVector(400.f, 400.f, 400.f));
-	SkySphere->SetWorldLocation(FVector(0.f, 70.f, 0.f));
+	Components->SkySphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SkySphere"), false);
+	Components->SkySphere->SetupAttachment(RootComponent);
+	Components->SkySphere->SetWorldScale3D(FVector(400.f, 400.f, 400.f));
+	Components->SkySphere->SetWorldLocation(FVector(0.f, 70.f, 0.f));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SkySphereMeshAsset(TEXT("/Engine/EngineSky/SM_SkySphere"));
 	if (SkySphereMeshAsset.Succeeded())
 	{
-		SkySphere->SetStaticMesh(SkySphereMeshAsset.Object);
+		Components->SkySphere->SetStaticMesh(SkySphereMeshAsset.Object);
 		static ConstructorHelpers::FObjectFinder<UMaterialInterface> SkySphereMaterialAsset(TEXT("/Engine/EngineSky/M_SimpleSkyDome"));
 		if (SkySphereMaterialAsset.Succeeded())
 		{
-			SkySphere->SetMaterial(0, SkySphereMaterialAsset.Object);
+			Components->SkySphere->SetMaterial(0, SkySphereMaterialAsset.Object);
 		}
 	}
-	VolumetricCloud = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("VolumetricCloud"), false);
-	VolumetricCloud->SetupAttachment(RootComponent);
-	VolumetricCloud->SetWorldLocation(FVector(0.f,0.f, 700.f));
+	Components->VolumetricCloud = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("VolumetricCloud"), false);
+	Components->VolumetricCloud->SetupAttachment(RootComponent);
+	Components->VolumetricCloud->SetWorldLocation(FVector(0.f,0.f, 700.f));
 }
 
 void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
@@ -153,13 +156,13 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 	ResizeLevel(AreaSize.X, AreaSize.Y);
 
 	// Handle lighting options
-	DirectionalLight->SetVisibility(bUseDefaultLighting);
-	DirectionalLight->SetWorldRotation(SunDirection);
-	ExponentialHeightFog->SetVisibility(bUseDefaultLighting);
-	SkyAtmosphere->SetVisibility(bUseDefaultLighting);
-	SkyLight->SetVisibility(bUseDefaultLighting);
-	SkySphere->SetVisibility(bUseDefaultLighting);
-	VolumetricCloud->SetVisibility(bUseDefaultLighting);
+	Components->DirectionalLight->SetVisibility(bUseDefaultLighting);
+	Components->DirectionalLight->SetWorldRotation(SunDirection);
+	Components->ExponentialHeightFog->SetVisibility(bUseDefaultLighting);
+	Components->SkyAtmosphere->SetVisibility(bUseDefaultLighting);
+	Components->SkyLight->SetVisibility(bUseDefaultLighting);
+	Components->SkySphere->SetVisibility(bUseDefaultLighting);
+	Components->VolumetricCloud->SetVisibility(bUseDefaultLighting);
 
 	// Update with level name
 	const FString LevelName = UGameplayStatics::GetCurrentLevelName(GetWorld(), true).Replace(TEXT("DEMO_"), TEXT(""));
@@ -168,15 +171,24 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 		LevelName,
 		LevelName);
 
-	if (DemoName != nullptr)
+	if (Components->DemoName != nullptr)
 	{
-		DemoName->SetText(CachedLevelName);
+		Components->DemoName->SetText(CachedLevelName);
 	}
 	
-	Brand->SetVisibility(bShowLogo);
-	DemoName->SetVisibility(bShowLevelName);
+	Components->Brand->SetVisibility(bShowLogo);
+	Components->DemoName->SetVisibility(bShowLevelName);
 	
 	Super::OnConstruction(Transform);
+}
+
+void ANSamplesLevelActor::BeginDestroy()
+{
+	if (Components != nullptr)
+	{
+		Components.Reset();
+	}
+	Super::BeginDestroy();
 }
 
 void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
@@ -185,50 +197,50 @@ void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
 	const FVector RootLocation = RootComponent->GetComponentLocation();
 
 	// Change floor
-	if (Floor != nullptr)
+	if (Components->Floor != nullptr)
 	{
-		FVector FloorScale = Floor->GetComponentScale();
+		FVector FloorScale = Components->Floor->GetComponentScale();
 		FloorScale.X = InX;
 		FloorScale.Y = InY;
-		Floor->SetWorldScale3D(FloorScale);
+		Components->Floor->SetWorldScale3D(FloorScale);
 	}
 
-	if (WallNorth != nullptr)
+	if (Components->WallNorth != nullptr)
 	{
-		SetWallPosition(WallNorth, InX, false, true);
-		SetWallScale(WallNorth, InY, false);
+		SetWallPosition(Components->WallNorth, InX, false, true);
+		SetWallScale(Components->WallNorth, InY, false);
 	}
 
-	if (WallSouth != nullptr)
+	if (Components->WallSouth != nullptr)
 	{
-		SetWallPosition(WallSouth, InX, true, true);
-		SetWallScale(WallSouth, InY, false);
+		SetWallPosition(Components->WallSouth, InX, true, true);
+		SetWallScale(Components->WallSouth, InY, false);
 	}
 
-	if (WallEast != nullptr)
+	if (Components->WallEast != nullptr)
 	{
-		SetWallPosition(WallEast, InY, false, false);
-		SetWallScale(WallEast, InX, true);
+		SetWallPosition(Components->WallEast, InY, false, false);
+		SetWallScale(Components->WallEast, InX, true);
 	}
 
-	if (WallWest != nullptr)
+	if (Components->WallWest != nullptr)
 	{
-		SetWallPosition(WallWest, InY, true, false);
-		SetWallScale(WallWest, InX, true);
+		SetWallPosition(Components->WallWest, InY, true, false);
+		SetWallScale(Components->WallWest, InX, true);
 	}
 
-	if (Brand != nullptr)
+	if (Components->Brand != nullptr)
 	{
-		Brand->SetWorldLocation(RootLocation + BrandBaseLocation);
-		Brand->SetWorldRotation(BrandBaseRotation);
-		Brand->SetWorldScale3D(BrandBaseScale);
+		Components->Brand->SetWorldLocation(RootLocation + BrandBaseLocation);
+		Components->Brand->SetWorldRotation(BrandBaseRotation);
+		Components->Brand->SetWorldScale3D(BrandBaseScale);
 	}
 
-	if (DemoName != nullptr)
+	if (Components->DemoName != nullptr)
 	{
-		DemoName->SetWorldLocation(RootLocation + DemoNameBaseLocation);
-		DemoName->SetWorldRotation(DemoNameBaseRotation);
-		DemoName->SetWorldScale3D(FVector::OneVector);
+		Components->DemoName->SetWorldLocation(RootLocation + DemoNameBaseLocation);
+		Components->DemoName->SetWorldRotation(DemoNameBaseRotation);
+		Components->DemoName->SetWorldScale3D(FVector::OneVector);
 	}
 }
 

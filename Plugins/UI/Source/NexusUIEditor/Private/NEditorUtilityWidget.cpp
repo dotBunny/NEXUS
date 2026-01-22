@@ -8,6 +8,7 @@
 #include "EditorUtilityWidgetBlueprint.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NEditorUtils.h"
+#include "NSlateUtils.h"
 
 const FString UNEditorUtilityWidget::WidgetState_WidgetBlueprint = TEXT("NWidget_WidgetBlueprint");
 const FString UNEditorUtilityWidget::WidgetState_TabDisplayText = TEXT("NWidget_TabDisplayText");
@@ -79,7 +80,7 @@ void UNEditorUtilityWidget::NativeDestruct()
 	else
 	{
 		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(this->TakeWidget());
+		const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
 		if (Tab.IsValid())
 		{
 			EditorUtilitySubsystem->UnregisterTabByID( FName(Tab->GetLayoutIdentifier().ToString()));
@@ -109,10 +110,8 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 			}
 		}
 	}
-	
-	
-	
-	const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(this->TakeWidget());
+
+	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
 	if (Tab.IsValid())
 	{
 		if (GetTabDisplayBrush().IsSet())

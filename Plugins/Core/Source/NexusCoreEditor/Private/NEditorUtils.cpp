@@ -259,17 +259,6 @@ bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 	return false;
 }
 
-bool FNEditorUtils::HasActorsSelected()
-{
-	if (GEditor->GetSelectedActorCount() == 0) return false;
-	return true;
-}
-
-FString FNEditorUtils::GetEngineBinariesPath()
-{
-	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
-}
-
 void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals
@@ -295,64 +284,6 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 			}
 		}
 	}
-}
-
-TSharedPtr<SWidget> FNEditorUtils::FindSWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType)
-{
-	if (!ParentWidget.IsValid())
-	{
-		return nullptr;
-	}
-	if (ParentWidget->GetType() == WidgetType)
-	{
-		return ParentWidget;
-	}
-	
-	FChildren* Children = ParentWidget->GetChildren();
-	for (int i = 0; i < Children->Num(); ++i)
-	{
-		TSharedPtr<SWidget> Found = FindSWidgetByType(Children->GetChildAt(i), WidgetType);
-		if (Found.IsValid())
-		{
-			return Found;
-		}
-	}
-	
-	return nullptr;
-}
-
-TSharedPtr<SDockTab> FNEditorUtils::FindSDocTab(const TSharedPtr<SWidget>& BaseWidget)
-{
-	TSharedPtr<SWidget> Widget = BaseWidget;
-	while (Widget.IsValid())
-	{
-		// Bound Tab
-		if (Widget->GetType() == FName("SDockingTabStack"))
-		{
-			FChildren* Children = Widget->GetChildren();
-			int ChildrenCount = Children->Num();
-			
-			for (int i = 0; i < ChildrenCount; ++i)
-			{
-
-				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
-				TSharedPtr<SWidget> FoundWidget = FindSWidgetByType(ChildWidget, FName("SDockTab"));
-				if (FoundWidget.IsValid())
-				{
-					return StaticCastSharedPtr<SDockTab>(FoundWidget);
-				}
-			}
-		}
-		
-		// Floating Tab  ?
-		if (Widget->GetType() == FName("SDockTab"))
-		{
-			return StaticCastSharedPtr<SDockTab>(Widget);
-		}
-		
-		Widget = Widget->GetParentWidget();
-	}
-	return nullptr;
 }
 
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)

@@ -4,16 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NSamplesLevelComponents.h"
 #include "NSamplesLevelActor.generated.h"
-
-class UVolumetricCloudComponent;
-class USkyAtmosphereComponent;
-class UExponentialHeightFogComponent;
-class ATextRenderActor;
-class AStaticMeshActor;
-class UDirectionalLightComponent;
-class UTextRenderComponent;
-
 
 /**
  * An actor used to control the base NEXUS demo level
@@ -25,8 +17,10 @@ class NEXUSSHAREDSAMPLES_API ANSamplesLevelActor : public AActor
 	GENERATED_BODY()
 
 public:
+
 	explicit ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
+	virtual void BeginDestroy() override;
 
 protected:
 
@@ -45,48 +39,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Lighting")
 	FRotator SunDirection = FRotator(190.f, 0.f, 0.f);
 	
-	UPROPERTY()
-	TObjectPtr<USceneComponent> SceneRoot;
-	
-	UPROPERTY()
-	TObjectPtr<UDecalComponent> Brand;
-	
-	UPROPERTY()
-	TObjectPtr<UTextRenderComponent> DemoName;
-	
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> Floor;
-
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> WallNorth;
-
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> WallEast;
-	
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> WallSouth;
-
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> WallWest;
-
-	UPROPERTY()
-	TObjectPtr<UDirectionalLightComponent> DirectionalLight;
-
-	UPROPERTY()
-	TObjectPtr<UExponentialHeightFogComponent> ExponentialHeightFog;
-
-	UPROPERTY()
-	TObjectPtr<USkyAtmosphereComponent> SkyAtmosphere;
-
-	UPROPERTY()
-	TObjectPtr<USkyLightComponent> SkyLight;
-
-	UPROPERTY()
-	TObjectPtr<UStaticMeshComponent> SkySphere;
-	
-	UPROPERTY()
-	TObjectPtr<UVolumetricCloudComponent> VolumetricCloud;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "NEXUS|Cache", DisplayName = "Level Name")
 	FText CachedLevelName;
 private:
@@ -115,5 +67,6 @@ private:
 	const float WallPositionOffset = 50.f;
 	const float WallScaleBase = 10.f;
 	const float WallScaleOffset= 2.f;
-
+	
+	TUniquePtr<FNSamplesLevelActorComponents> Components;
 };

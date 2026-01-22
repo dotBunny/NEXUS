@@ -20,6 +20,25 @@ class NEXUSCOREEDITOR_API FNEditorUtils
 {
 public:
 	/**
+	 * Indicates if the editor is in a shutdown process.
+	 * @return true/false if an exit has been requested.
+	 */
+	FORCEINLINE static bool IsEditorShuttingDown()
+	{
+		return IsEngineExitRequested();
+	}
+
+	/**
+	 * Are any Actors selected in the editor currently?
+	 * @return true/false if any actors are selected.
+	 */
+	FORCEINLINE static bool HasActorsSelected()
+	{
+		if (GEditor->GetSelectedActorCount() == 0) return false;
+		return true;
+	}
+	
+	/**
 	 * Get the current editor map name.
 	 */
 	FORCEINLINE static FString GetCurrentMapName()
@@ -34,6 +53,7 @@ public:
 	{
 		return GEditor->GetEditorWorldContext().World()->GetName();
 	}
+
 	/**
 	 * Is in PIE mode.
 	 */
@@ -90,7 +110,6 @@ public:
 	 */
 	static bool TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection);
 
-
 	/**
 	 * Create a new Blueprint asset of the specified class at the given path.
 	 * @param InPath The path where the Blueprint asset will be created.
@@ -139,6 +158,8 @@ public:
 		return !FPackageName::DoesPackageExist(Package->GetName());
 	}
 	
+	
+	
 	static TArray<FString> GetSelectedContentBrowserPaths()
 	{
 		TArray<FString> SelectedPaths;
@@ -162,20 +183,13 @@ public:
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 	static bool ReplaceWindowIcon(const FString& IconPath);
 
-	static bool HasActorsSelected();
 	
-	static FString GetEngineBinariesPath();
+	FORCEINLINE static FString GetEngineBinariesPath()
+	{
+		return FPaths::Combine(FPaths::EngineDir(), "Binaries");
+	}
+	
 	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
 	
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
-
-
-	static TSharedPtr<SWidget> FindSWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType);
-	
-	static TSharedPtr<SDockTab> FindSDocTab(const TSharedPtr<SWidget>& BaseWidget);
-	
-	static bool IsEditorShuttingDown()
-	{
-		return IsEngineExitRequested();
-	}
 };

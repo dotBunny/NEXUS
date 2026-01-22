@@ -68,6 +68,14 @@ void UNEditorUtilityWidgetSystem::AddPersistentState(const TObjectPtr<UNEditorUt
 					Widget->GetUserSettingsIdentifier(), 
 					Widget->GetUserSettingsTemplate(), 
 					Widget->GetWidgetState(Widget));
+		
+		// Remove existing
+		int32 HardState = WidgetStates.GetIdentifierIndex(Widget->GetUserSettingsIdentifier());
+		if (HardState != INDEX_NONE)
+		{
+			WidgetStates.RemoveAtIndex(HardState);
+			
+		}
 	}
 }
 

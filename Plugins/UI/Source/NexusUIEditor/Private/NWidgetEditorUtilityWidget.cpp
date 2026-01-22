@@ -3,14 +3,12 @@
 
 #include "NWidgetEditorUtilityWidget.h"
 
-#include "EditorUtilityWidgetComponents.h"
 #include "INWidgetMessageProvider.h"
 #include "NEditorUtilityWidgetSystem.h"
-#include "NEditorUtils.h"
+#include "NSlateUtils.h"
 #include "NUIEditorMinimal.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanelSlot.h"
-#include "Components/VerticalBox.h"
 
 const FString UNWidgetEditorUtilityWidget::TemplatePath = TEXT("/Script/Blutility.EditorUtilityWidgetBlueprint'/NexusUI/EditorResources/EUW_NWidgetWrapper.EUW_NWidgetWrapper'");
 
@@ -29,7 +27,7 @@ UNWidgetEditorUtilityWidget* UNWidgetEditorUtilityWidget::GetOrCreate(const FNam
 	UNWidgetEditorUtilityWidget* ExistingWidget = GetWidget(Identifier); 
 	if (ExistingWidget != nullptr)
 	{
-		const TSharedPtr<SDockTab> Tab = FNEditorUtils::FindSDocTab(ExistingWidget->TakeWidget());
+		const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(ExistingWidget->TakeWidget());
 		if (Tab.IsValid())
 		{
 			Tab->ActivateInParent(SetDirectly);

@@ -9,7 +9,7 @@
 ### Changed
 
 - `UNWidgetEditorUtilityWidget` places content now in a `UCanvasPanel` and fully stretches the content to fill the available space.
-- ``FNEditorUtils::FindSDocTab()` providing more robust searching for a widgets tab.
+- `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 
 ## [0.2.6] - 2026-01-20
 
