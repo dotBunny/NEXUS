@@ -4,7 +4,6 @@
 #include "NProcGenDeveloperOverlayWidget.h"
 
 #include "NProcGenRegistry.h"
-#include "ParticleHelper.h"
 #include "Components/NListView.h"
 
 void UNProcGenDeveloperOverlayWidget::NativeConstruct()
@@ -20,7 +19,7 @@ void UNProcGenDeveloperOverlayWidget::NativeConstruct()
 		OperationsList->AddItem(Cast<UObject>(Operation));
 	}
 	
-	OnChanges();
+	UpdateBanner();
 	
 	OperationsStatusChangedDelegateHandle = FNProcGenRegistry::OnOperationStateChanged.AddUObject(
 		this, &UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged);
@@ -28,7 +27,10 @@ void UNProcGenDeveloperOverlayWidget::NativeConstruct()
 
 void UNProcGenDeveloperOverlayWidget::NativeDestruct()
 {
-	OperationsList->ClearListItems();
+	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
+	{
+		OperationsList->ClearListItems();
+	}
 	
 	FNProcGenRegistry::OnOperationStateChanged.Remove(OperationsStatusChangedDelegateHandle);
 	
@@ -47,7 +49,7 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 		break;
 	case Registered:
 		OperationsList->AddItem(Cast<UObject>(Operation));
-		OnChanges();
+		UpdateBanner();
 		break;
 	case Started:
 		break;
@@ -58,18 +60,21 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 		break;
 	case Unregistered:
 		OperationsList->RemoveItem(Cast<UObject>(Operation));
-		OnChanges();
+		UpdateBanner();
 		break;
 	}
 }
 
-bool UNProcGenDeveloperOverlayWidget::HasItems()
+void UNProcGenDeveloperOverlayWidget::UpdateBanner() const
 {
-	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
+	if (OperationsList != nullptr && OperationsList->IsValidLowLevel() && OperationsList->GetNumItems() > 0)
 	{
-		return OperationsList->GetNumItems() <= 0;
+		HideBanner();
 	}
-	return true;
+	else
+	{
+		ShowBannerMessage();
+	}
 }
 
 bool UNProcGenDeveloperOverlayWidget::ShouldShowOperation(const FName& OperationName)

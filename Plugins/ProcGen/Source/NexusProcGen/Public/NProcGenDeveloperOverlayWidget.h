@@ -25,9 +25,7 @@ protected:
 	TObjectPtr<UNListView> OperationsList;	
 	
 private:
-	
-	bool HasItems();
-	void OnChanges() { };
+	void UpdateBanner() const;
 	
 	FDelegateHandle OperationsStatusChangedDelegateHandle;
 	static bool ShouldShowOperation(const FName& OperationName);

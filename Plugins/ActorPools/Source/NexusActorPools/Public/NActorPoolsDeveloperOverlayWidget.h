@@ -21,7 +21,7 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDevelope
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	void Bind(UWorld* World);
-	void Unbind(const UWorld* World);
+	void Unbind(const UWorld* World, bool bClearItems = true);
 
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
@@ -33,9 +33,7 @@ protected:
 private:
 	
 	void CreateListItem(FNActorPool* ActorPool);
-	
-	bool HasItems();
-	void OnChanges() { };
+	void UpdateBanner() const;
 	
 	TMap<UWorld*, FDelegateHandle> OnActorPoolAddedDelegates;
 	FDelegateHandle AddWorldDelegateHandle;

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "EditorUtilityLibrary.h"
 #include "EditorUtilityWidget.h"
 #include "INWidgetStateProvider.h"
 #include "NEditorUtilityWidget.generated.h"
@@ -47,11 +48,13 @@ protected:
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Info")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Info")
 	FVector2D UnitScale = FVector2D::One();	
 	
 private:
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 	FSlateIcon TabIcon;
+	
+	TObjectPtr<UAsyncEditorDelay> DelayedTask;
 };

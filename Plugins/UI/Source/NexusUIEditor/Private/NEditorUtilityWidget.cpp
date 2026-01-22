@@ -23,8 +23,11 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 	
 	if(UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
 	{
-		TObjectPtr<UEditorUtilityWidgetBlueprint> NewWidget = LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
-		return EditorUtilitySubsystem->SpawnAndRegisterTab(NewWidget);
+		const TObjectPtr<UEditorUtilityWidgetBlueprint> LoadedWidgetBlueprint = 
+			LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
+		
+		// Use an internal system to spawn and register the widget
+		return EditorUtilitySubsystem->SpawnAndRegisterTab(LoadedWidgetBlueprint);
 	}
 	return nullptr;
 }
@@ -32,6 +35,8 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 
 void UNEditorUtilityWidget::NativeConstruct()
 {
+	Super::NativeConstruct();
+	
 	// Ensure that we have some sort of identifier
 	if (StateIdentifier == NAME_None)
 	{
@@ -54,12 +59,14 @@ void UNEditorUtilityWidget::NativeConstruct()
 			const FName CachedIdentifier = GetStateIdentifier();
 			if (System->HasWidgetState(CachedIdentifier))
 			{
+				UE_LOG(LogNexusUIEditor, Log, TEXT("Restoring persistent widget state: %s"), *GetStateIdentifier().ToString());
 				RestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
 			}
 			else
 			{
 				// By this time we have added a proper identifier through restore state
 				System->AddWidgetState(CachedIdentifier, GetWidgetState(this));
+				UE_LOG(LogNexusUIEditor, Log, TEXT("Adding persistent widget state: %s"), *GetStateIdentifier().ToString());
 			}
 		}
 	}
@@ -71,14 +78,21 @@ void UNEditorUtilityWidget::NativeConstruct()
 	}
 	
 	// We need to make a callback after the window has been constructed further to ensure we have a tab
-	UAsyncEditorDelay* DelayedConstructTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
-	DelayedConstructTask->RegisterWithGameInstance(this);
-	DelayedConstructTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
-	DelayedConstructTask->Start(0.01f, 1);
+	DelayedTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
+	DelayedTask->RegisterWithGameInstance(this);
+	DelayedTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
+	DelayedTask->Start(0.01f, 1);
 }
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
+	// Remove the delayed task to prevent dangling behaviour.
+	if (DelayedTask->IsValidLowLevel())
+	{
+		DelayedTask->Complete.RemoveAll(this);
+		DelayedTask = nullptr;
+	}
+	
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System != nullptr)
 	{
@@ -123,6 +137,7 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (IsPersistent() && !IsEngineExitRequested())
 	{
+		UE_LOG(LogNexusUIEditor, Log, TEXT("Removing persistent widget state: %s"), *GetStateIdentifier().ToString());
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetStateIdentifier());
 	}
 }

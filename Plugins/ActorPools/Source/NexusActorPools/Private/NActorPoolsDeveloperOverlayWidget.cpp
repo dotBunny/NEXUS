@@ -71,17 +71,17 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	}
 
 	// We've bound a world check it
-	OnChanges();
+	UpdateBanner();
 	
 	// Add delegate for future pools
 	OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
 	{
 		this->CreateListItem(ActorPool);
-		OnChanges();
+		this->UpdateBanner();
 	}));
 }
 
-void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
+void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World, bool bClearItems)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
@@ -101,9 +101,8 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World)
 				ActorPoolList->RemoveItem(Object);
 			}
 		}
+		UpdateBanner();
 	}
-	
-	OnChanges();
 }
 
 void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World, 
@@ -120,13 +119,16 @@ void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
 	}
 }
 
-bool UNActorPoolsDeveloperOverlayWidget::HasItems()
+void UNActorPoolsDeveloperOverlayWidget::UpdateBanner() const
 {
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
+	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel() && ActorPoolList->GetNumItems() > 0)
 	{
-		return ActorPoolList->GetNumItems() <= 0;
+		HideBanner();
 	}
-	return true;
+	else
+	{
+		ShowBannerMessage();
+	}
 }
 
 void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)
