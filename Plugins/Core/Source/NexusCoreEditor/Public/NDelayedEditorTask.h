@@ -27,6 +27,7 @@ protected:
 	}
 	void Release()
 	{
+		Parent->Complete.RemoveAll(this);
 		Parent->RemoveFromRoot();
 
 		RemoveFromRoot();

@@ -10,6 +10,10 @@
 
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 
+### Fixed
+
+- Ensure that a `UNDelayedEditorTask` removes itself from `UAsyncEditorDelay` complete event when released.
+
 ### Removed
 
 - `UNWidgetEditorUtilityWidget` no longer used to wrap content widgets, individuals should extend off `UNEditorUtilityWidget` instead.
