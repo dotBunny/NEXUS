@@ -27,7 +27,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferences",
+			"Name": "NexusDynamicRef",
 			"Enabled": true
 		},
 		{
@@ -55,7 +55,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferencesSamples",
+			"Name": "NexusDynamicRefSamples",
 			"Enabled": true
 		},
 		{

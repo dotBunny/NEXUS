@@ -6,7 +6,7 @@
 #include "UObject/ObjectMacros.h"
 
 UENUM(BlueprintType)
-enum ENDynamicReference : int32
+enum ENDynamicRef : int32
 {
 	// ReSharper disable CppUE4CodingStandardNamingViolationWarning
 

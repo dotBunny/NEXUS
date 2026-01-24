@@ -28,3 +28,14 @@ bool UNActorLibrary::IsSameActors(const TArray<AActor*>& A, const TArray<AActor*
 	}
 	return true;
 }
+
+TArray<AActor*> UNActorLibrary::ToActorArray(const TArray<UObject*> InObjects)
+{
+	TArray<AActor*> ReturnArray;
+	for (UObject* Object : InObjects)
+	{
+		AActor* Actor = Cast<AActor>(Object);
+		if (Actor != nullptr) ReturnArray.Add(Actor);
+	}
+	return MoveTemp(ReturnArray);
+}

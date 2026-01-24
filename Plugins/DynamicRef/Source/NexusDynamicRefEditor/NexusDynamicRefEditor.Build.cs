@@ -3,31 +3,31 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class NexusDynamicReferences : ModuleRules
+	public class NexusDynamicRefEditor : ModuleRules
 	{
-		public NexusDynamicReferences(ReadOnlyTargetRules Target) : base(Target)
+		public NexusDynamicRefEditor(ReadOnlyTargetRules Target) : base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 			PublicDependencyModuleNames.AddRange(
 				[
 					"Core",
-					"Engine"
 				]
 			);
-			
+
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"CoreUObject",
-					"Projects"
+					"Projects",
+					"SlateCore"
 				]
 			);
-			
-			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
-			ShortName = "NexusDynamicReferences";						
+			// NEXUS
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusDynamicRef"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusDynamicRef"]);
+
+			ShortName = "NexusDynamicRefEditor";						
 		}
 	}
 }

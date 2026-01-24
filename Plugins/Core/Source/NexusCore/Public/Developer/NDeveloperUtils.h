@@ -42,4 +42,20 @@ public:
 			UE_LOG(LogNexusCore, Log, TEXT("%s"), *Object->GetName());
 		}
 	}
+	
+	
+	static FString GetBuildWatermark()
+	{
+		static const FString BuildWatermark = FString::Printf(TEXT("%s-%s%s (%s)"),
+			FApp::GetBuildVersion(),
+			LexToString(FApp::GetBuildConfiguration()),
+			LexToString(FApp::GetBuildTargetType()),
+			*FApp::GetBuildDate()).Replace(TEXT("+"), TEXT("/"));
+		return BuildWatermark;
+	}
+
+	static bool HasBuildInfo()
+	{
+		return !FString(FApp::GetBuildVersion()).Equals(FString(TEXT("UE5-CL-0")));
+	}
 };

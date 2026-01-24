@@ -8,7 +8,9 @@
 
 ### Changed
 
+- `NexusDynamicReferences` module renamed `NexusDynamicRef` avoid unnecessarily long names.
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
+- Renamed `UNDynamicReferenceSubsystem` to `UNDynamicReferencesSubsystem`
 
 ### Fixed
 

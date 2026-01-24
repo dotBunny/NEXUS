@@ -7,17 +7,12 @@
 #include "Modules/ModuleInterface.h"
 
 /**
- * NEXUS: Dynamic References Editor Module
+ * NEXUS: DynamicRef Module
  */
-class FNDynamicReferencesEditorModule final : public IModuleInterface
+// ReSharper disable once CppUE4CodingStandardNamingViolationWarning
+class FNDynamicRefModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
-	
 	void OnPostEngineInit();
-	
-	N_IMPLEMENT_MODULE(FNDynamicReferencesEditorModule, "NexusDynamicReferencesEditor")
+	N_IMPLEMENT_MODULE(FNDynamicRefModule, "NexusDynamicRef")
 };
-
-
-

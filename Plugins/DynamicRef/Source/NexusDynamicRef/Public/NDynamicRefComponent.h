@@ -3,26 +3,26 @@
 
 #pragma once
 
-#include "NDynamicReference.h"
+#include "NDynamicRef.h"
 #include "Types/NActorComponentLifecycle.h"
-#include "NDynamicReferenceComponent.generated.h"
+#include "NDynamicRefComponent.generated.h"
 
 /**
- * A component which registers and unregisters the owning AActor with the UNDynamicReferencesSubsystem for future lookup.
- * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-reference-component/">UNDynamicReferenceComponent</a>
+ * A component which registers and unregisters the owning AActor with the UNDynamicRefSubsystem for future lookup.
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ptr-component/">UNDynamicRefComponent</a>
  */
-UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="Dynamic Reference Component",
+UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName="DynamicRef Component",
 	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."),
 	HideCategories=(Tags, Activation, Cooking, AssetUserData, Navigation))
-class NEXUSDYNAMICREFERENCES_API UNDynamicReferenceComponent : public UActorComponent
+class NEXUSDYNAMICREF_API UNDynamicRefComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
 
-	static FString ToStringSlow(const ENDynamicReference& DynamicReference)
+	static FString ToStringSlow(const ENDynamicRef& DynamicReference)
 	{
-		return StaticEnum<ENDynamicReference>()->GetDisplayNameTextByValue(DynamicReference).ToString();
+		return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
 	}
 
 	virtual void BeginPlay() override;
@@ -45,7 +45,10 @@ protected:
 	ENActorComponentLifecycleEnd BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
-	TArray<TEnumAsByte<ENDynamicReference>> References;
+	TArray<TEnumAsByte<ENDynamicRef>> FastReferences;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
+	TArray<FName> NamedReferences;
 	
 private:
 	void Register();
