@@ -22,7 +22,7 @@ struct FNDynamicRefCollection
 };
 
 /**
- * A locator system that maintains a map that organizes UObject's into predefined categories (ENDynamicRef) or buckets (FName).
+ * A locator system that maintains a map that organizes UObject into predefined categories (ENDynamicRef) or named buckets (FName).
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/">UNDynamicRefSubsystem</a>
  */
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "DynamicRef Subsystem")

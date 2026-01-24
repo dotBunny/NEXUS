@@ -35,19 +35,19 @@ protected:
 	/**
 	 * What phase of the component's lifecycle should the references be linked?
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	ENActorComponentLifecycleStart LinkPhase = ENActorComponentLifecycleStart::BeginPlay;
 
 	/**
 	 * What phase of the component's lifecycle should the references be broken?
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	ENActorComponentLifecycleEnd BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<TEnumAsByte<ENDynamicRef>> FastReferences;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Dynamic Reference")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<FName> NamedReferences;
 	
 private:
