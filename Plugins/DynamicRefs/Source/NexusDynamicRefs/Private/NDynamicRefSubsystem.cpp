@@ -22,11 +22,13 @@ void UNDynamicRefSubsystem::Deinitialize()
 void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
 	FastCollection[DynamicRef].Add(InObject);
+	OnAdded.Broadcast(DynamicRef, InObject);
 }
 
 void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
 	FastCollection[DynamicRef].Remove(InObject);
+	OnRemoved.Broadcast(DynamicRef, InObject);
 }
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef)
@@ -99,6 +101,7 @@ void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 		NamedCollection.Add(Name, FNDynamicRefCollection());
 		NamedCollection[Name].Add(InObject);
 	}
+	OnAddedByName.Broadcast(Name, InObject);
 }
 
 void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObject)
@@ -106,6 +109,7 @@ void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObje
 	if (NamedCollection.Contains(Name))
 	{
 		NamedCollection[Name].Remove(InObject);
+		OnRemovedByName.Broadcast(Name, InObject);
 	}
 }
 

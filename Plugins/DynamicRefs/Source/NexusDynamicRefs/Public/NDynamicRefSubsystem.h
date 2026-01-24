@@ -31,12 +31,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 	N_WORLD_SUBSYSTEM_GAME_ONLY(UNDynamicRefSubsystem, true)
 	
-	/*
-	TODO:
-	Binding for count change?
-	*/
-	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefCountChangedDelegate, ENDynamicRef, int32 );
-	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefNameCountChangedDelegate, FName, int32 );
+	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefChangeDelegate, ENDynamicRef, UObject* );
+	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefNameChangeDelegate, FName, UObject* );
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -79,7 +75,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UFUNCTION(BlueprintCallable, DisplayName="Remove Object (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-object-by-name"))
 	void RemoveObjectByName(FName Name, UObject* InObject);
-	
 
 	/**
 	 * Gets an array of AActor dynamically associated with the provided ENDynamicRef.
@@ -100,7 +95,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Name)", Category = "NEXUS|DynamicRefs",
 			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-actors-by-name"))
 	TArray<AActor*> GetActorsByName(FName Name);
-
 
 	/**
 	 * Retrieves the count of UObjects associated with a specified ENDynamicRef collection.
@@ -238,6 +232,12 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	*/
 	UObject* GetLastObjectByNameUnsafe(FName Name);
 
+
+	OnDynamicRefChangeDelegate OnAdded;
+	OnDynamicRefNameChangeDelegate OnAddedByName;
+	OnDynamicRefChangeDelegate OnRemoved;
+	OnDynamicRefNameChangeDelegate OnRemovedByName;
+	
 private:
 	UPROPERTY()
 	TArray<FNDynamicRefCollection> FastCollection;
