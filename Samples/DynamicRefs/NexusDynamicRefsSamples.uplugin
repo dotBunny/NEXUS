@@ -2,12 +2,12 @@
 	"FileVersion": 3,
 	"Version": 9,
 	"VersionName": "0.2.6",
-	"FriendlyName": "NEXUS Samples: DynamicRef",
-	"Description": "Sample content for the NEXUS: DynamicRef plugin.",
+	"FriendlyName": "NEXUS Samples: DynamicRefs",
+	"Description": "Sample content for the NEXUS: DynamicRefs plugin.",
 	"Category": "NEXUS Samples",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://nexus-framework.com/docs/plugins/dynamic-ref/samples/",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/dynamic-refs/samples/",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
@@ -20,7 +20,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicRef",
+			"Name": "NexusDynamicRefs",
 			"Enabled": true
 		},
 		{

@@ -3,9 +3,9 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class NexusDynamicRef : ModuleRules
+	public class NexusDynamicRefs : ModuleRules
 	{
-		public NexusDynamicRef(ReadOnlyTargetRules Target) : base(Target)
+		public NexusDynamicRefs(ReadOnlyTargetRules Target) : base(Target)
 		{
 			PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
@@ -29,7 +29,7 @@ namespace UnrealBuildTool.Rules
 			PublicDependencyModuleNames.AddRange(["NexusCore",  "NexusDeveloperOverlay"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
-			ShortName = "NexusDynamicRef";						
+			ShortName = "NexusDynamicRefs";						
 		}
 	}
 }

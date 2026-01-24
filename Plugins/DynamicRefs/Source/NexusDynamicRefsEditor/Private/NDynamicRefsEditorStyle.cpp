@@ -1,15 +1,14 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NDynamicRefEditorStyle.h"
-
+#include "NDynamicRefsEditorStyle.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNDynamicRefEditorStyle)
+N_IMPLEMENT_EDITOR_STYLE(FNDynamicRefsEditorStyle)
 
-TSharedRef<FSlateStyleSet> FNDynamicRefEditorStyle::Create()
+TSharedRef<FSlateStyleSet> FNDynamicRefsEditorStyle::Create()
 {
 	N_IMPLEMENT_EDITOR_STYLE_CREATE
 	

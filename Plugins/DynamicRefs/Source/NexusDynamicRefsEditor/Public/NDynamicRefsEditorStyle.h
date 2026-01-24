@@ -10,7 +10,7 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
-class FNDynamicRefEditorStyle
+class FNDynamicRefsEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusDynamicRef", "NDynamicRefEditorStyle")
+	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusDynamicRefs", "NDynamicRefsEditorStyle")
 };

@@ -54,12 +54,12 @@ void UNDynamicRefComponent::Register()
 		for (int i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
-			Subsystem->AddFastReference(FastReferences[i], Owner);
+			Subsystem->AddObject(FastReferences[i], Owner);
 		}
 		for (int i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
-			Subsystem->AddNamedReference(NamedReferences[i], Owner);
+			Subsystem->AddObjectByName(NamedReferences[i], Owner);
 		}
 	}
 }
@@ -75,12 +75,12 @@ void UNDynamicRefComponent::Unregister()
 		for (int i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
-			Subsystem->RemoveFastReference(FastReferences[i], Owner);
+			Subsystem->RemoveObject(FastReferences[i], Owner);
 		}
 		for (int i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
-			Subsystem->RemoveNamedReference(NamedReferences[i], Owner);
+			Subsystem->RemoveObjectByName(NamedReferences[i], Owner);
 		}
 	}
 }

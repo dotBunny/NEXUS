@@ -4,14 +4,14 @@
 #pragma once
 
 #include "NDeveloperOverlayWidget.h"
-#include "NDynamicRefDeveloperOverlayWidget.generated.h"
+#include "NDynamicRefsDeveloperOverlayWidget.generated.h"
 
 enum class ENProcGenOperationState : uint8;
 class UNProcGenOperation;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRef Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSDYNAMICREF_API UNDynamicRefDeveloperOverlayWidget : public UNDeveloperOverlayWidget
+UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRefs Developer Overlay Widget", BlueprintType, Abstract)
+class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
 {
 	GENERATED_BODY()
 };

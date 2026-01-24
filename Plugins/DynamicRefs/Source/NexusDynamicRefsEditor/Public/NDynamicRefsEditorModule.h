@@ -7,16 +7,16 @@
 #include "Modules/ModuleInterface.h"
 
 /**
- * NEXUS: DynamicRef Editor Module
+ * NEXUS: DynamicRefs Editor Module
  */
-class FNDynamicRefEditorModule final : public IModuleInterface
+class FNDynamicRefsEditorModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
 	void OnPostEngineInit();
 	
-	N_IMPLEMENT_MODULE(FNDynamicRefEditorModule, "NexusDynamicRefEditor")
+	N_IMPLEMENT_MODULE(FNDynamicRefsEditorModule, "NexusDynamicRefsEditor")
 };
 
 
