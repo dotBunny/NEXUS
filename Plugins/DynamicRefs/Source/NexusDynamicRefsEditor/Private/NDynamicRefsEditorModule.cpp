@@ -4,6 +4,7 @@
 #include "NDynamicRefsEditorModule.h"
 #include "NEditorUtils.h"
 #include "NDynamicRefsEditorStyle.h"
+#include "NDynamicRefsEditorToolMenu.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -24,6 +25,12 @@ void FNDynamicRefsEditorModule::OnPostEngineInit()
 	
 	// Configure Style
 	FNDynamicRefsEditorStyle::Initialize();
+	
+	// Initialize Tool Menu
+	if (FSlateApplication::IsInitialized())
+	{
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNDynamicRefsEditorToolMenu::Register));
+	}
 }
 
 IMPLEMENT_MODULE(FNDynamicRefsEditorModule, NexusDynamicRefsEditor)

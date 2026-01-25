@@ -48,6 +48,16 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	void AddObject(ENDynamicRef DynamicRef, UObject* InObject);
 
 	/**
+	 * Add a reference by ENDynamicRef to a TArray of UObjects.
+	 * @remark Be careful with the manual add method. If you add it, you must remove it!
+	 * @param DynamicRef The desired ENDynamicRef to add too.
+	 * @param InObjects The TArray of UObjects to be referenced by the provided ENDynamicRef.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Add Objects", Category = "NEXUS|DynamicRefs",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#add-objects"))
+	void AddObjects(ENDynamicRef DynamicRef, TArray<UObject*> InObjects);
+	
+	/**
 	 * Add a reference by FName to a specified UObject.
 	 * @remark Be careful with the manual add method. If you add it, you must remove it!
 	 * @param Name The desired FName to add too.
@@ -56,6 +66,16 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UFUNCTION(BlueprintCallable, DisplayName="Add Object (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#add-object-by-name"))
 	void AddObjectByName(FName Name, UObject* InObject);
+	
+	/**
+	 * Add a reference by FName to a TArray of UObjects.
+	 * @remark Be careful with the manual add method. If you add it, you must remove it!
+	 * @param Name The desired FName to add too.
+	 * @param InObjects The TArray of UObjects to be referenced by the FName.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Add Objects (By Name)", Category = "NEXUS|DynamicRefs",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#add-objects-by-name"))
+	void AddObjectsByName(FName Name, TArray<UObject*> InObjects);	
 	
 	/**
 	 * Remove a reference by ENDynamicRef to a specified UObject.
@@ -67,6 +87,15 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	void RemoveObject(ENDynamicRef DynamicRef, UObject* InObject);
 	
 	/**
+	 * Remove a reference by ENDynamicRef to a TArray of UObjects.
+	 * @param DynamicRef The desired ENDynamicRef to remove from.
+	 * @param InObjects TThe TArray of UObjects to be having their references removed by the provided ENDynamicRef.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Remove Objects", Category = "NEXUS|DynamicRefs",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-objects"))
+	void RemoveObjects(ENDynamicRef DynamicRef, TArray<UObject*> InObjects);	
+	
+	/**
 	 * Remove a reference by FName to a specified UObject.
 	 * @remark Be careful with the manual remove method, it should be used for things that you have manually added.
 	 * @param Name The desired FName to remove from.
@@ -75,6 +104,16 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UFUNCTION(BlueprintCallable, DisplayName="Remove Object (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-object-by-name"))
 	void RemoveObjectByName(FName Name, UObject* InObject);
+	
+	/**
+	 * Remove a reference by FName to a TArray of UObjects.
+	 * @remark Be careful with the manual remove method, it should be used for things that you have manually added.
+	 * @param Name The desired FName to remove from.
+	 * @param InObjects The TArray of UObjects to be having their references removed by the FName.	 
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Remove Objects (By Name)", Category = "NEXUS|DynamicRefs",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-objects-by-name"))
+	void RemoveObjectsByName(FName Name, TArray<UObject*> InObjects);
 
 	/**
 	 * Gets an array of AActor dynamically associated with the provided ENDynamicRef.
@@ -232,7 +271,13 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	*/
 	UObject* GetLastObjectByNameUnsafe(FName Name);
 
-
+	
+	TArray<FName> GetNames() const;
+	TArray<ENDynamicRef> GetDynamicRefs() const;
+	
+	FNDynamicRefCollection& GetCollection(ENDynamicRef DynamicRef);
+	FNDynamicRefCollection& GetCollection(FName Name);
+	
 	OnDynamicRefChangeDelegate OnAdded;
 	OnDynamicRefNameChangeDelegate OnAddedByName;
 	OnDynamicRefChangeDelegate OnRemoved;

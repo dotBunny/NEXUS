@@ -3,16 +3,17 @@
 
 #pragma once
 
-#include "NDeveloperOverlayWidget.h"
-#include "NProcGenDeveloperOverlayWidget.generated.h"
+#include "Widgets/NDeveloperOverlay.h"
+#include "NProcGenDeveloperOverlay.generated.h"
 
 enum class ENProcGenOperationState : uint8;
 class UNProcGenOperation;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSPROCGEN_API UNProcGenDeveloperOverlayWidget : public UNDeveloperOverlayWidget
+UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Developer Overlay", BlueprintType, Abstract)
+class NEXUSPROCGEN_API UNProcGenDeveloperOverlay : public UNDeveloperOverlay
 {
+	
 	GENERATED_BODY()
 	
 	virtual void NativeConstruct() override;

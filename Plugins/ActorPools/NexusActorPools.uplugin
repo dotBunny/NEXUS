@@ -41,10 +41,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperOverlay",
-			"Enabled": true
-		},
-		{
 			"Name": "NexusPicker",
 			"Enabled": true
 		},

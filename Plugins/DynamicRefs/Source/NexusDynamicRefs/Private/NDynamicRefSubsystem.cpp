@@ -25,10 +25,65 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 	OnAdded.Broadcast(DynamicRef, InObject);
 }
 
+void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
+{
+	for (UObject* Object : InObjects)
+	{
+		AddObject(DynamicRef, Object);
+	}
+}
+
+void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
+{
+	if (NamedCollection.Contains(Name))
+	{
+		NamedCollection[Name].Add(InObject);
+	}
+	else
+	{
+		NamedCollection.Add(Name, FNDynamicRefCollection());
+		NamedCollection[Name].Add(InObject);
+	}
+	OnAddedByName.Broadcast(Name, InObject);
+}
+
+void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> InObjects)
+{
+	for (UObject* Object : InObjects)
+	{
+		AddObjectByName(Name, Object);
+	}
+}
+
 void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
 	FastCollection[DynamicRef].Remove(InObject);
 	OnRemoved.Broadcast(DynamicRef, InObject);
+}
+
+void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
+{
+	for (UObject* Object : InObjects)
+	{
+		RemoveObject(DynamicRef, Object);
+	}
+}
+
+void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObject)
+{
+	if (NamedCollection.Contains(Name))
+	{
+		NamedCollection[Name].Remove(InObject);
+		OnRemovedByName.Broadcast(Name, InObject);
+	}
+}
+
+void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject*> InObjects)
+{
+	for (UObject* Object : InObjects)
+	{
+		RemoveObjectByName(Name, Object);
+	}
 }
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef)
@@ -36,7 +91,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef
 	return FastCollection[DynamicRef].GetObjects();
 }
 
-TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(FName Name)
+TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 {
 	if (NamedCollection.Contains(Name))
 	{
@@ -55,7 +110,7 @@ AActor* UNDynamicRefSubsystem::GetFirstActor(const ENDynamicRef DynamicRef)
 	return nullptr;
 }
 
-AActor* UNDynamicRefSubsystem::GetFirstActorByName(FName Name)
+AActor* UNDynamicRefSubsystem::GetFirstActorByName(const FName Name)
 {
 	for (UObject* Object : GetObjectsByName(Name))
 	{
@@ -90,29 +145,6 @@ UObject* UNDynamicRefSubsystem::GetLastObjectUnsafe(const ENDynamicRef DynamicRe
 	return FastCollection[DynamicRef].Objects.Last();
 }
 
-void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
-{
-	if (NamedCollection.Contains(Name))
-	{
-		NamedCollection[Name].Add(InObject);
-	}
-	else
-	{
-		NamedCollection.Add(Name, FNDynamicRefCollection());
-		NamedCollection[Name].Add(InObject);
-	}
-	OnAddedByName.Broadcast(Name, InObject);
-}
-
-void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObject)
-{
-	if (NamedCollection.Contains(Name))
-	{
-		NamedCollection[Name].Remove(InObject);
-		OnRemovedByName.Broadcast(Name, InObject);
-	}
-}
-
 TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 {
 	TArray<AActor*> Result;
@@ -124,7 +156,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 	return MoveTemp(Result);
 }
 
-TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(FName Name)
+TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(const FName Name)
 {
 	TArray<AActor*> Result;
 	for (UObject* Object : GetObjectsByName(Name))
@@ -173,7 +205,7 @@ AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 	return nullptr;
 }
 
-AActor* UNDynamicRefSubsystem::GetLastActorByName(FName Name)
+AActor* UNDynamicRefSubsystem::GetLastActorByName(const FName Name)
 {
 	TArray<UObject*> Objects = GetObjectsByName(Name);
 	const int ObjectsCount = Objects.Num();
@@ -197,4 +229,34 @@ UObject* UNDynamicRefSubsystem::GetLastObjectByName(const FName Name)
 UObject* UNDynamicRefSubsystem::GetLastObjectByNameUnsafe(const FName Name)
 {
 	return NamedCollection[Name].Objects.Last();
+}
+
+TArray<FName> UNDynamicRefSubsystem::GetNames() const
+{
+	TArray<FName> Result;
+	NamedCollection.GetKeys(Result);
+	return MoveTemp(Result);
+}
+
+TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
+{
+	TArray<ENDynamicRef> Result;
+	for (int i = 0; i < NDR_Max; i++)
+	{
+		if (FastCollection[i].HasObjects())
+		{
+			Result.Add(static_cast<ENDynamicRef>(i));
+		}
+	}
+	return MoveTemp(Result);
+}
+
+FNDynamicRefCollection& UNDynamicRefSubsystem::GetCollection(const ENDynamicRef DynamicRef)
+{
+	return FastCollection[DynamicRef];
+}
+
+FNDynamicRefCollection& UNDynamicRefSubsystem::GetCollection(const FName Name)
+{
+	return NamedCollection[Name];
 }

@@ -1,12 +1,12 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NProcGenDeveloperOverlayWidget.h"
+#include "NProcGenDeveloperOverlay.h"
 
 #include "NProcGenRegistry.h"
 #include "Components/NListView.h"
 
-void UNProcGenDeveloperOverlayWidget::NativeConstruct()
+void UNProcGenDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
@@ -22,10 +22,10 @@ void UNProcGenDeveloperOverlayWidget::NativeConstruct()
 	UpdateBanner();
 	
 	OperationsStatusChangedDelegateHandle = FNProcGenRegistry::OnOperationStateChanged.AddUObject(
-		this, &UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged);
+		this, &UNProcGenDeveloperOverlay::OnOperationStatusChanged);
 }
 
-void UNProcGenDeveloperOverlayWidget::NativeDestruct()
+void UNProcGenDeveloperOverlay::NativeDestruct()
 {
 	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
 	{
@@ -37,7 +37,7 @@ void UNProcGenDeveloperOverlayWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperation* Operation,
+void UNProcGenDeveloperOverlay::OnOperationStatusChanged(UNProcGenOperation* Operation,
                                                                const ENProcGenOperationState NewState)
 {
 	if (!ShouldShowOperation(Operation->GetFName())) return;
@@ -65,7 +65,7 @@ void UNProcGenDeveloperOverlayWidget::OnOperationStatusChanged(UNProcGenOperatio
 	}
 }
 
-void UNProcGenDeveloperOverlayWidget::UpdateBanner() const
+void UNProcGenDeveloperOverlay::UpdateBanner() const
 {
 	if (OperationsList != nullptr && OperationsList->IsValidLowLevel() && OperationsList->GetNumItems() > 0)
 	{
@@ -77,7 +77,7 @@ void UNProcGenDeveloperOverlayWidget::UpdateBanner() const
 	}
 }
 
-bool UNProcGenDeveloperOverlayWidget::ShouldShowOperation(const FName& OperationName)
+bool UNProcGenDeveloperOverlay::ShouldShowOperation(const FName& OperationName)
 {
 	if (OperationName == NEXUS::ProcGen::Operations::EditorMode) return false;
 	return true;

@@ -14,7 +14,15 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 	if (ListPool != nullptr)
 	{
 		Pool = ListPool;
-		CenterText->SetText(Pool->GetClassName());
+		if (Pool->GetWorld() != nullptr)
+		{
+			CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0} ({1})"), 
+				Pool->GetClassName(), FText::FromString(Pool->GetWorld()->GetName())));
+		}
+		else
+		{
+			CenterText->SetText(Pool->GetClassName());
+		}
 		Refresh();
 	}
 	else

@@ -83,10 +83,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperOverlay",
-			"Enabled": true
-		},
-		{
 			"Name": "AIAssistant",
 			"Enabled": true
 		}

@@ -14,8 +14,6 @@
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 
-FName FNProcGenEditorToolMenu::EditorUtilityWindowName = FName("NProcGenEditorUtilityWindow");
-
 void FNProcGenEditorToolMenu::Register()
 {
 	// Level Tools
@@ -256,7 +254,7 @@ void FNProcGenEditorToolMenu::Register()
 	// EUW Entry
 	auto EditorWindow = FNWindowCommandInfo();
 	
-	EditorWindow.Identifier = "NProcGenSystem";
+	EditorWindow.Identifier = "EUW_NProcGenSystem";
 	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "ProcGen System");
 	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");

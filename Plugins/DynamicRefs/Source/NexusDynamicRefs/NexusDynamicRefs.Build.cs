@@ -26,7 +26,7 @@ namespace UnrealBuildTool.Rules
 			);
 			
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore",  "NexusDeveloperOverlay"]);
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
 			ShortName = "NexusDynamicRefs";						

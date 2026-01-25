@@ -1,17 +1,17 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NActorPoolsDeveloperOverlayWidget.h"
+#include "NActorPoolsDeveloperOverlay.h"
 
 #include "NActorPoolListViewEntry.h"
 #include "NActorPoolObject.h"
 #include "NActorPoolSubsystem.h"
 #include "Components/NListView.h"
 
-void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
+void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown);
+	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
+	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
 	
 	Bind(GetWorld());
 	
@@ -22,7 +22,7 @@ void UNActorPoolsDeveloperOverlayWidget::NativeConstruct()
 	Super::NativeConstruct();
 }
 
-void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
+void UNActorPoolsDeveloperOverlay::NativeDestruct()
 {
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
@@ -36,7 +36,7 @@ void UNActorPoolsDeveloperOverlayWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNActorPoolsDeveloperOverlayWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	UpdateTimer -= InDeltaTime;
 	if (UpdateTimer > 0.f)
@@ -58,7 +58,7 @@ void UNActorPoolsDeveloperOverlayWidget::NativeTick(const FGeometry& MyGeometry,
 	Super::NativeTick(MyGeometry, InDeltaTime);
 }
 
-void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
+void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (System == nullptr) return; // System-less world
@@ -81,7 +81,7 @@ void UNActorPoolsDeveloperOverlayWidget::Bind(UWorld* World)
 	}));
 }
 
-void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World, bool bClearItems)
+void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World, bool bClearItems)
 {
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
@@ -105,13 +105,13 @@ void UNActorPoolsDeveloperOverlayWidget::Unbind(const UWorld* World, bool bClear
 	}
 }
 
-void UNActorPoolsDeveloperOverlayWidget::OnWorldPostInitialization(UWorld* World, 
+void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, 
                                                                    FWorldInitializationValues WorldInitializationValues)
 {
 	Bind(World);
 }
 
-void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
+void UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 {
 	if (World != nullptr)
 	{
@@ -119,7 +119,7 @@ void UNActorPoolsDeveloperOverlayWidget::OnWorldBeginTearDown(UWorld* World)
 	}
 }
 
-void UNActorPoolsDeveloperOverlayWidget::UpdateBanner() const
+void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 {
 	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel() && ActorPoolList->GetNumItems() > 0)
 	{
@@ -131,7 +131,7 @@ void UNActorPoolsDeveloperOverlayWidget::UpdateBanner() const
 	}
 }
 
-void UNActorPoolsDeveloperOverlayWidget::CreateListItem(FNActorPool* ActorPool)
+void UNActorPoolsDeveloperOverlay::CreateListItem(FNActorPool* ActorPool)
 {
 	ActorPoolList->AddItem(UNActorPoolObject::Create(this, ActorPool));
 }

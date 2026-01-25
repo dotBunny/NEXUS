@@ -11,7 +11,7 @@
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
-	"CanContainContent": false,
+	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"Installed": false,
 	"Modules": [
@@ -37,7 +37,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperOverlay",
+			"Name": "NexusUI",
 			"Enabled": true
 		}
 	],

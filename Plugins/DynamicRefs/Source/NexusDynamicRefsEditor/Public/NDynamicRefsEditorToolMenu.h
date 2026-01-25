@@ -3,16 +3,10 @@
 
 #pragma once
 
-class FNProcGenEditorToolMenu
+class FNDynamicRefsEditorToolMenu
 {
 public:
 	static void Register();
-	static bool ShowCellEditMode();
-	static bool ShowDrawVoxels();
-	static bool ShowCellDropdown();
-	static bool ShowCellJunctionDropdown();
-	static bool ShowOrganDropdown();
-	
 	
 	static void CreateEditorUtilityWindow();
 	static bool HasEditorUtilityWindow();

@@ -45,10 +45,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperOverlay",
-			"Enabled": true
-		},
-		{
 			"Name": "NexusUI",
 			"Enabled": true
 		}

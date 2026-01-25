@@ -8,9 +8,10 @@
 
 ### Changed
 
-- `NexusDynamicReferences` module renamed `NexusDynamicRef` avoid unnecessarily long names.
+- `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names.
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 - Renamed `UNDynamicReferenceSubsystem` to `UNDynamicReferencesSubsystem`
+- `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 
 ### Fixed
 

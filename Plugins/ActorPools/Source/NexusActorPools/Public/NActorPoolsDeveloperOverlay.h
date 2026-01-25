@@ -3,16 +3,16 @@
 
 #pragma once
 
-#include "NDeveloperOverlayWidget.h"
+#include "Widgets/NDeveloperOverlay.h"
 #include "NActorPool.h"
-#include "NActorPoolsDeveloperOverlayWidget.generated.h"
+#include "NActorPoolsDeveloperOverlay.generated.h"
 
 class UNActorPoolSubsystem;
 class UNActorPoolDeveloperObject;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay Widget", BlueprintType, Abstract)
-class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlayWidget : public UNDeveloperOverlayWidget
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Developer Overlay", BlueprintType, Abstract)
+class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()
 	

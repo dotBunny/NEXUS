@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NProcGenDeveloperOverlayWidget.h"
+#include "NProcGenDeveloperOverlay.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NProcGenSettings.generated.h"

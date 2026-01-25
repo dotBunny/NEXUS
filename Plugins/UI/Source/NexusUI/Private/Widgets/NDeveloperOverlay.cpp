@@ -1,10 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NDeveloperOverlayWidget.h"
+#include "Widgets/NDeveloperOverlay.h"
 
-
-void UNDeveloperOverlayWidget::ShowBannerMessage(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
+void UNDeveloperOverlay::ShowBannerMessage(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
 {
 	BannerContainer->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 	if (!Text.IsEmpty())
@@ -15,7 +14,7 @@ void UNDeveloperOverlayWidget::ShowBannerMessage(const FText& Text, ENColor Mess
 	}
 }
 
-void UNDeveloperOverlayWidget::HideBanner() const
+void UNDeveloperOverlay::HideBanner() const
 {
 	BannerContainer->SetVisibility(ESlateVisibility::Collapsed);
 }

@@ -7,7 +7,7 @@
 #include "CommonUserWidget.h"
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
-#include "NDeveloperOverlayWidget.generated.h"
+#include "NDeveloperOverlay.generated.h"
 
 class UCommonBorder;
 class UVerticalBox;
@@ -18,8 +18,8 @@ class UButton;
 
 class UCommonTextBlock;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay Widget", Abstract, Blueprintable)
-class NEXUSDEVELOPEROVERLAY_API UNDeveloperOverlayWidget :  public UCommonUserWidget
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay", Abstract, Blueprintable)
+class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 {
 	GENERATED_BODY()
 	
