@@ -323,13 +323,22 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 		Actor->SetActorTransform(
 			FTransform(InRotation, InPosition + HalfHeightOffset, Settings.DefaultTransform.GetScale3D()),
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
+#if ENABLE_VISUAL_LOG
+		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition + HalfHeightOffset, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
+#endif	
 	}
 	else
 	{
 		Actor->SetActorTransform(
 			FTransform(InRotation, InPosition, Settings.DefaultTransform.GetScale3D()),
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
+#if ENABLE_VISUAL_LOG
+		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
+#endif	
 	}
+#if ENABLE_VISUAL_LOG
+	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, Actor->GetActorLocation(), NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::ActualPointColor, TEXT("%s"), *Actor->GetName());
+#endif
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
 	
