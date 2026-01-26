@@ -10,7 +10,6 @@
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
-
 class UAsyncEditorDelay;
 
 /**
@@ -117,7 +116,6 @@ public:
 	 * @return A pointer to the newly created Blueprint asset.
 	 */
 	static UBlueprint* CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass);
-
 	
 	FORCEINLINE static FEditorViewportClient* GetActiveViewportClient()
 	{
@@ -138,7 +136,6 @@ public:
 		}
 		return nullptr;
 	}
-
 	
 	FORCEINLINE static UWorld* GetCurrentWorld()
 	{
@@ -157,8 +154,6 @@ public:
 		if (Package == nullptr || Package->GetFileSize() == 0) return true;
 		return !FPackageName::DoesPackageExist(Package->GetName());
 	}
-	
-	
 	
 	static TArray<FString> GetSelectedContentBrowserPaths()
 	{

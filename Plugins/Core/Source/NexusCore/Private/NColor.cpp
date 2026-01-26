@@ -46,10 +46,14 @@ FLinearColor FNColor::GetLinearColor(const ENColor& Color)
 		return NexusPink;
 	case NC_HalfBlack:
 		return HalfBlack;
+	case NC_QuarterBlack:
+		return QuarterBlack;
 	case NC_Pink:
-		break;
+		return Pink;
+	case NC_Transparent:
+		return Transparent;
 	}
-	return Pink;
+	return FLinearColor::Black;
 }
 
 FColor FNColor::GetColor(const ENColor& Color)

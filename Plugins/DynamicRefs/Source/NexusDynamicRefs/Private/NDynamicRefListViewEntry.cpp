@@ -1,10 +1,11 @@
 ﻿#include "NDynamicRefListViewEntry.h"
 
 #include "CommonTextBlock.h"
-#include "NColor.h"
 #include "NDynamicRefObject.h"
 #include "Components/NListView.h"
-#include "Developer/NTextObject.h"
+#include "Widgets/NButtonListViewEntry.h"
+#include "Widgets/NTextListViewEntry.h"
+
 
 void UNDynamicRefListViewEntry::NativeDestruct()
 {
@@ -41,15 +42,16 @@ void UNDynamicRefListViewEntry::Refresh() const
 	if (Object != nullptr)
 	{
 		References->ClearListItems();
-		
 		for (const UObject* ReferenceObject : Object->GetObjects())
 		{
-			UNTextObject* TextObject = NewObject<UNTextObject>(
-				Object, UNTextObject::StaticClass(), NAME_None, RF_Transient);
-			
-			TextObject->SetText(FText::FromName(ReferenceObject->GetFName()));
+			UNTextListViewEntryObject* TextObject = NewObject<UNTextListViewEntryObject>(
+				Object, UNTextListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
+
+			TextObject->SetText(FText::FromString(FString::Printf(TEXT("- %s"), *ReferenceObject->GetFName().ToString())));
+
 			TextObject->SetForegroundColor(ENColor::NC_White);
-			
+			TextObject->SetBackgroundColor(ENColor::NC_GreyDark);
+
 			References->AddItem(TextObject);
 		}
 	}

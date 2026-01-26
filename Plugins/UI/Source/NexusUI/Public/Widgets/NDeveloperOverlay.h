@@ -31,6 +31,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HideBanner() const;
 	
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsEditorUtilityWidget;
+	
 protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UBorder> BannerContainer;
