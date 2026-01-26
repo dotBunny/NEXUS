@@ -17,6 +17,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Text")
 	FText GetText() const { return Text; }
 	
+	UFUNCTION(BlueprintCallable, Category = "Text")
+	ENColor GetForegroundColor() const { return ForegroundColor; }
+	
+	UFUNCTION(BlueprintCallable, Category = "Text")
+	void SetForegroundColor(const ENColor Color) { ForegroundColor = Color; }
+	
 private:
 	FText Text;
+	
+	ENColor ForegroundColor;
 };

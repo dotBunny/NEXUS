@@ -1,6 +1,7 @@
 ﻿#include "NDynamicRefListViewEntry.h"
 
 #include "CommonTextBlock.h"
+#include "NColor.h"
 #include "NDynamicRefObject.h"
 #include "Components/NListView.h"
 #include "Developer/NTextObject.h"
@@ -47,6 +48,7 @@ void UNDynamicRefListViewEntry::Refresh() const
 				Object, UNTextObject::StaticClass(), NAME_None, RF_Transient);
 			
 			TextObject->SetText(FText::FromName(ReferenceObject->GetFName()));
+			TextObject->SetForegroundColor(ENColor::NC_White);
 			
 			References->AddItem(TextObject);
 		}

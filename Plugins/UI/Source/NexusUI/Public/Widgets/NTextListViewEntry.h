@@ -5,6 +5,7 @@
 
 #include "CommonTextBlock.h"
 #include "INListViewEntry.h"
+#include "NColor.h"
 #include "Blueprint/UserWidget.h"
 #include "Developer/NTextObject.h"
 #include "NTextListViewEntry.generated.h"
@@ -23,6 +24,7 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 		if (TextObject != nullptr)
 		{
 			SetText(TextObject->GetText());
+			SetTextColor(TextObject->GetForegroundColor());
 		}
 	}
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
@@ -35,6 +37,12 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 	void SetText(const FText NewText) const
 	{
 		Text->SetText(NewText);
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	void SetTextColor(ENColor NewColor)
+	{
+		Text->SetColorAndOpacity(FNColor::GetLinearColor(NewColor));
 	}
 	
 protected:	
