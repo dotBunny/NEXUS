@@ -14,7 +14,7 @@ struct NEXUSPICKER_API FNPickerParams
 	int Count = 1;
 	
 	UPROPERTY(Category = "Base", BlueprintReadWrite)
-	FVector Origin;
+	FVector Origin = FVector::ZeroVector;
 	
 	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	int32 Seed = -1;

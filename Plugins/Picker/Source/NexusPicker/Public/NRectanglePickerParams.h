@@ -15,8 +15,8 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	FRotator Rotation = FRotator::ZeroRotator;
 	
 	UPROPERTY()
-	FVector2D MinimumDimensions;
+	FVector2D MinimumDimensions = FVector2D::ZeroVector;
 
 	UPROPERTY()
-	FVector2D MaximumDimensions;
+	FVector2D MaximumDimensions = FVector2D(1.f,1.f);
 };

@@ -13,5 +13,5 @@ struct NEXUSPICKER_API FNSplinePickerParams : public FNPickerParams
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	TObjectPtr<USplineComponent> SplineComponent;
+	TObjectPtr<USplineComponent> SplineComponent = nullptr;
 };
