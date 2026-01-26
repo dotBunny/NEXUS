@@ -8,6 +8,7 @@
 #include "Blueprint/UserWidget.h"
 #include "NDynamicRefListViewEntry.generated.h"
 
+class UNDynamicRefObject;
 class UCommonTextBlock;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRef ListView Entry", BlueprintType, Blueprintable)
@@ -23,6 +24,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, publi
 	
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+	virtual void NativeOnEntryReleased() override;
 
 public:	
 
@@ -41,5 +43,5 @@ protected:
 	TObjectPtr<UNListView> References;
 	
 private:
-	void Reset() const;
+	UNDynamicRefObject* Object;
 };

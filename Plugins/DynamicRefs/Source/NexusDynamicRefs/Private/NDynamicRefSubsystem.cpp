@@ -250,13 +250,3 @@ TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
 	}
 	return MoveTemp(Result);
 }
-
-FNDynamicRefCollection& UNDynamicRefSubsystem::GetCollection(const ENDynamicRef DynamicRef)
-{
-	return FastCollection[DynamicRef];
-}
-
-FNDynamicRefCollection& UNDynamicRefSubsystem::GetCollection(const FName Name)
-{
-	return NamedCollection[Name];
-}

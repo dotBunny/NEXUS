@@ -6,6 +6,7 @@
 #include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "Blueprint/UserWidget.h"
+#include "Developer/NTextObject.h"
 #include "NTextListViewEntry.generated.h"
 
 class UCommonTextBlock;
@@ -16,6 +17,14 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 {
 	GENERATED_BODY()
 
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
+	{
+		const UNTextObject* TextObject = Cast<UNTextObject>(ListItemObject);
+		if (TextObject != nullptr)
+		{
+			SetText(TextObject->GetText());
+		}
+	}
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;

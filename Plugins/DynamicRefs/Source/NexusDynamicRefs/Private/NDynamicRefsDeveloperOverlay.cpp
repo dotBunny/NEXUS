@@ -34,83 +34,110 @@ void UNDynamicRefsDeveloperOverlay::NativeDestruct()
 void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
 {
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
-	if (System == nullptr) return; // System-less world
-	
-	// check if entry exists
-	// add new / add item too 
-	
-	
+	if (System == nullptr)
+	{
+		UpdateBanner();
+		return; // System-less world
+	}
 	
 	// Get this worlds used references currently
 	TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
 	for (ENDynamicRef DynamicRef : DynamicRefs)
 	{
-		if (DynamicRefObjects.Contains(DynamicRef))
+		if (!DynamicRefObjects.Contains(DynamicRef))
 		{
-			
+			NamedReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
 		}
-		else
+		for (UObject* Object : System->GetObjects(DynamicRef))
 		{
-			// make new
+			DynamicRefObjects[DynamicRef]->AddObject(Object);
 		}
-		// ADD / CREATE
-		//UNDynamicRefObject::Create(World, FName("Test"), World);
 	}
+	
 	TArray<FName> Names = System->GetNames();
 	for (FName Name : Names)
 	{
-		
-		// Itterate over objects
+		if (!NamedObjects.Contains(Name))
+		{
+			NamedReferences->AddItem(NamedObjects.Add(Name, UNDynamicRefObject::Create(this, Name)));
+		}
 		for (UObject* Object : System->GetObjectsByName(Name))
 		{
-			
+			NamedObjects[Name]->AddObject(Object);
 		}
-		if (NamedObjects.Contains(Name))
-		{
-			//NamedObjects[Name]->TargetObjects.Add()
-		}
-		else
-		{
-			// make new
-		}
-		// ADD / CREATE
-		//UNDynamicRefObject::Create(World, FName("Test"), World);
 	}
 	
 	// We've bound a world check it
 	UpdateBanner();
 	
-	//
-	// // Add delegate for future pools
-	// OnActorPoolAddedDelegates.Add(World,System->OnActorPoolAdded.AddLambda([this] (FNActorPool* ActorPool)
-	// {
-	// 	this->CreateListItem(ActorPool);
-	// 	this->UpdateBanner();
-	// }));
+
+	// Add delegate for future pools
+	OnAddedDelegates.Add(World,System->OnAdded.AddLambda([this] (ENDynamicRef DynamicRef, UObject* Object)
+	{
+		this->AddListItem(DynamicRef, Object);
+		this->UpdateBanner();
+	}));
+	OnAddedByNameDelegates.Add(World,System->OnAddedByName.AddLambda([this] (FName Name, UObject* Object)
+	{
+		this->AddListItem(Name, Object);
+		this->UpdateBanner();
+	}));
+	OnRemovedDelegates.Add(World,System->OnRemoved.AddLambda([this] (ENDynamicRef DynamicRef, UObject* Object)
+	{
+		this->RemoveListItem(DynamicRef, Object);
+		this->UpdateBanner();
+	}));
+	OnRemovedByNameDelegates.Add(World,System->OnRemovedByName.AddLambda([this] (FName Name, UObject* Object)
+	{
+		this->RemoveListItem(Name, Object);
+		this->UpdateBanner();
+	}));
 }
+
+
 
 void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World, bool bClearItems)
 {
-	// UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-	// if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
-	// {
-	// 	System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
-	// }
-	//
-	// if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
-	// {
-	// 	TArray<UObject*> Items = ActorPoolList->GetListItems();
-	// 	const int ItemCount = Items.Num();
-	// 	for (int i = ItemCount - 1; i >= 0; i--)
-	// 	{
-	// 		UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
-	// 		if (Object->GetPoolWorld() == World)
-	// 		{
-	// 			ActorPoolList->RemoveItem(Object);
-	// 		}
-	// 	}
-	// 	UpdateBanner();
-	// }
+	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
+	if (OnAddedDelegates.Contains(World) && System != nullptr)
+	{
+		System->OnAdded.Remove(OnAddedDelegates[World]);
+	}
+	if (OnAddedByNameDelegates.Contains(World) && System != nullptr)
+	{
+		System->OnAddedByName.Remove(OnAddedByNameDelegates[World]);
+	}
+	if (OnRemovedDelegates.Contains(World) && System != nullptr)
+	{
+		System->OnRemoved.Remove(OnRemovedDelegates[World]);
+	}
+	if (OnRemovedByNameDelegates.Contains(World) && System != nullptr)
+	{
+		System->OnRemovedByName.Remove(OnRemovedByNameDelegates[World]);
+	}
+	
+	if (System != nullptr)
+	{
+		TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
+		for (ENDynamicRef DynamicRef : DynamicRefs)
+		{
+			for (UObject* Object : System->GetObjects(DynamicRef))
+			{
+				RemoveListItem(DynamicRef, Object);
+			}
+		}
+	
+		TArray<FName> Names = System->GetNames();
+		for (FName Name : Names)
+		{
+			for (UObject* Object : System->GetObjectsByName(Name))
+			{
+				RemoveListItem(Name, Object);
+			}
+		}
+	}
+	
+	UpdateBanner();
 }
 
 void UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization(UWorld* World,
@@ -129,12 +156,82 @@ void UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 
 void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 {
-	if (References != nullptr && References->IsValidLowLevel() && References->GetNumItems() > 0)
+	const bool bNamedReferences = (NamedReferences != nullptr && 
+		NamedReferences->IsValidLowLevel() && 
+		NamedReferences->GetNumItems() > 0);
+	const bool bDynamicReferences = (DynamicReferences != nullptr && 
+		DynamicReferences->IsValidLowLevel() && 
+		DynamicReferences->GetNumItems() > 0);
+		
+	if (bNamedReferences || bDynamicReferences)
 	{
+		// add check
 		HideBanner();
+		
+		if (bNamedReferences)
+		{
+			NamedReferencesHeader->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (bDynamicReferences)
+		{
+			DynamicReferencesHeader->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
 	else
 	{
+		if (DynamicReferencesHeader != nullptr)
+		{
+			DynamicReferencesHeader->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		if (NamedReferencesHeader != nullptr)
+		{
+			NamedReferencesHeader->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		
 		ShowBannerMessage();
+	}
+}
+
+void UNDynamicRefsDeveloperOverlay::AddListItem(FName Name, UObject* Object)
+{
+	if (!NamedObjects.Contains(Name))
+	{
+		NamedReferences->AddItem(NamedObjects.Add(Name, UNDynamicRefObject::Create(this, Name)));
+	}
+	NamedObjects[Name]->AddObject(Object);
+}
+
+void UNDynamicRefsDeveloperOverlay::AddListItem(ENDynamicRef DynamicRef, UObject* Object)
+{
+	if (!DynamicRefObjects.Contains(DynamicRef))
+	{
+		DynamicReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
+	}
+	DynamicRefObjects[DynamicRef]->AddObject(Object);
+}
+
+void UNDynamicRefsDeveloperOverlay::RemoveListItem(FName Name, UObject* Object)
+{
+	if (NamedObjects.Contains(Name))
+	{
+		NamedObjects[Name]->RemoveObject(Object);
+		if (NamedObjects[Name]->GetCount() == 0)
+		{
+			NamedReferences->RemoveItem(NamedObjects[Name]);
+			NamedObjects.Remove(Name);
+		}
+	}
+}
+
+void UNDynamicRefsDeveloperOverlay::RemoveListItem(ENDynamicRef DynamicRef, UObject* Object)
+{
+	if (DynamicRefObjects.Contains(DynamicRef))
+	{
+		DynamicRefObjects[DynamicRef]->RemoveObject(Object);
+		if (DynamicRefObjects[DynamicRef]->GetCount() == 0)
+		{
+			DynamicReferences->RemoveItem(DynamicRefObjects[DynamicRef]);
+			DynamicRefObjects.Remove(DynamicRef);
+		}
 	}
 }

@@ -26,22 +26,37 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 protected:	
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UNListView> References;
+	TObjectPtr<UBorder> DynamicReferencesHeader;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UNListView> DynamicReferences;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UBorder> NamedReferencesHeader;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UNListView> NamedReferences;
 	
 	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
 	void OnWorldBeginTearDown(UWorld* World);
 
+	UPROPERTY()
+	TMap<TEnumAsByte<ENDynamicRef>, TObjectPtr<UNDynamicRefObject>> DynamicRefObjects;
+	UPROPERTY()
+	TMap<FName, TObjectPtr<UNDynamicRefObject>> NamedObjects;
 private:
 	void UpdateBanner() const;
+	
+	void AddListItem(FName Name, UObject* Object);
+	void AddListItem(ENDynamicRef DynamicRef, UObject* Object);
+	void RemoveListItem(FName Name, UObject* Object);
+	void RemoveListItem(ENDynamicRef DynamicRef, UObject* Object);	
 	
 	TMap<UWorld*, FDelegateHandle> OnAddedDelegates;
 	TMap<UWorld*, FDelegateHandle> OnAddedByNameDelegates;
 	TMap<UWorld*, FDelegateHandle> OnRemovedDelegates;
 	TMap<UWorld*, FDelegateHandle> OnRemovedByNameDelegates;
-	
-	TMap<ENDynamicRef, TObjectPtr<UNDynamicRefObject>> DynamicRefObjects;
-	TMap<FName, TObjectPtr<UNDynamicRefObject>> NamedObjects;
-	
+
 	FDelegateHandle AddWorldDelegateHandle;
 	FDelegateHandle RemoveWorldDelegateHandle;
 };

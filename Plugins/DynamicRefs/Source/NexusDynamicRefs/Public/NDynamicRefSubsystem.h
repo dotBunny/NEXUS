@@ -275,9 +275,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	TArray<FName> GetNames() const;
 	TArray<ENDynamicRef> GetDynamicRefs() const;
 	
-	FNDynamicRefCollection& GetCollection(ENDynamicRef DynamicRef);
-	FNDynamicRefCollection& GetCollection(FName Name);
-	
 	OnDynamicRefChangeDelegate OnAdded;
 	OnDynamicRefNameChangeDelegate OnAddedByName;
 	OnDynamicRefChangeDelegate OnRemoved;
