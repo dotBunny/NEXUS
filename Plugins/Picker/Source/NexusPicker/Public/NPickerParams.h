@@ -22,8 +22,10 @@ struct NEXUSPICKER_API FNPickerParams
 	/**
 	 * The world for line tracing.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite)
+	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	TObjectPtr<UWorld> World = nullptr;
+	
+	
 	
 	UPROPERTY(Category = "Projection", BlueprintReadWrite)
 	bool bProjectPoint = false;

@@ -40,6 +40,7 @@ public:
 	static void OnToolsProfileNetworkProfiler();
 	static bool HasToolsProfileNetworkProfiler();
 	
+	static void OnWindowCleanLogsFolder();
 	
 	static void OnNodeExternalDocumentation();
 	static bool NodeExternalDocumentation_CanExecute();
@@ -70,4 +71,7 @@ private:
 	TSharedPtr<FUICommandList> CommandList_Tools;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
+	
+	TSharedPtr<FUICommandList> CommandList_Window;
+	TSharedPtr<FUICommandInfo> CommandInfo_Window_CleanLogsFolder;
 };

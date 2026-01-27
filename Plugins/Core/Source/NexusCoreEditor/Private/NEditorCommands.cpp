@@ -63,7 +63,14 @@ void FNEditorCommands::RegisterCommands()
 	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
 	EUserInterfaceActionType::Button, FInputChord());
-
+	
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Window_CleanLogsFolder,
+	"NCore.Logs.CleanLogsFolder",
+	NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder"),
+	NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
+	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder"),
+	EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
 	"NCore.Tools.Profile.NetworkProfiler",
@@ -112,13 +119,16 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
-
-
+	
 	CommandList_Tools = MakeShared<FUICommandList>();
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
 		FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create));
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
+	
+	CommandList_Window = MakeShared<FUICommandList>();
+	CommandList_Window->MapAction(Get().CommandInfo_Window_CleanLogsFolder, 
+		FExecuteAction::CreateStatic(&FNEditorCommands::OnWindowCleanLogsFolder));
 }
 
 // ReSharper disable once IdentifierTypo
@@ -171,6 +181,41 @@ bool FNEditorCommands::HasToolsProfileNetworkProfiler()
 	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
+void FNEditorCommands::OnWindowCleanLogsFolder()
+{
+	TArray<FString> FilePaths;
+	IFileManager& FileManager = IFileManager::Get();
+	
+	TArray<FString> Searches;
+	Searches.Add(TEXT("*-backup-*")); // Backups
+	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
+	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
+	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
+	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
+
+	const FString ProjectLogDir = FPaths::ProjectLogDir();
+	int DeleteCount = 0;
+
+	for (const FString& Search : Searches)
+	{
+		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
+		for (const FString& File : FilePaths)
+		{
+			FileManager.Delete(*File, false, true);
+			DeleteCount++;
+		}
+	}
+	
+	if (DeleteCount > 0)
+	{
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());
+	}
+	else
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("No files found to delete from %s."), *FPaths::ProjectLogDir());
+	}
+}
+
 void FNEditorCommands::OnNodeExternalDocumentation()
 {
 	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
@@ -214,6 +259,7 @@ void FNEditorCommands::BuildMenus()
 			);
 	}
 	
+	// Dynamic NEXUS Window Section
 	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
 	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
 	LevelEditorSection.AddSubMenu(
@@ -224,6 +270,10 @@ void FNEditorCommands::BuildMenus()
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 		);
+	
+	// Log Section
+	FToolMenuSection& LogSection = WindowsMenu->FindOrAddSection("Log");
+	LogSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Window_CleanLogsFolder, Commands.CommandList_Window);
 	
 	// Tools Menu
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
