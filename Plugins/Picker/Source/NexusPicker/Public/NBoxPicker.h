@@ -39,12 +39,14 @@ public:
 //		N_IMPLEMENT_VLOG_BOX()
 		if(Params.World != nullptr)
 		{
+#if ENABLE_VISUAL_LOGGING			
 			if (FVisualLogger::IsRecording())
 			{
 				UE_VLOG_WIREBOX(Params.World , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT(""));
 				UE_VLOG_WIREBOX(Params.World , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT(""));
 				UE_VLOG_LOCATION(Params.World , LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString());
 			}
+#endif			
 		}
 	}
 	
