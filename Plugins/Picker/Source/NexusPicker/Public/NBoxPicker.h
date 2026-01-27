@@ -39,7 +39,7 @@ public:
 //		N_IMPLEMENT_VLOG_BOX()
 		if(Params.World != nullptr)
 		{
-#if ENABLE_VISUAL_LOGGING			
+#if ENABLE_VISUAL_LOG			
 			if (FVisualLogger::IsRecording())
 			{
 				UE_VLOG_WIREBOX(Params.World , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT(""));
