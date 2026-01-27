@@ -5,6 +5,7 @@
 ### Added
 
 - `ANSamplesLevelActor` now has `bShowLevelName` and `bShowLogo` properties to control whether the level name and logo are shown.
+- `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
 
 ### Changed
 
