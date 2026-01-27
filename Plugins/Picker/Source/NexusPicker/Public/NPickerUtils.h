@@ -3,8 +3,11 @@
 
 #pragma once
 
+// ReSharper disable once CppUnusedIncludeDirective
+#include "NPickerMinimal.h"
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
+#include "NPickerParams.h"
 
 #define N_VARIABLES_PICKER_PROJECTION() \
 	const UWorld* InWorld = nullptr, const FVector& Projection = FNPickerUtils::DefaultProjection, const ECollisionChannel CollisionChannel = ECollisionChannel::ECC_WorldStatic
@@ -236,4 +239,9 @@ public:
 
 	static FRotator BaseRotation;
 	static FMatrix BaseMatrix;
+	
+	static void InitializeParams(FNPickerParams& Params)
+	{
+		
+	}
 };

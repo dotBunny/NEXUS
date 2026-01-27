@@ -6,14 +6,26 @@
 #include "NPickerParams.h"
 #include "NBoxPickerParams.generated.h"
 
+UENUM(BlueprintType)
+enum class EBoxPickerMode : uint8
+{
+	InsideOrOn = 0,
+};
+
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
+	/**
+	 * The minimum dimensions to use when generating a point.
+	 */
+	UPROPERTY(Category = "Box", BlueprintReadWrite)
 	FBox MinimumDimensions;
 	
-	UPROPERTY()
+	/**
+	 * The maximum dimensions to use when generating a point.
+	 */
+	UPROPERTY(Category = "Box", BlueprintReadWrite)
 	FBox MaximumDimensions;
 };

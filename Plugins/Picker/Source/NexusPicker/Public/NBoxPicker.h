@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NBoxPickerParams.h"
 #include "NPickerMinimal.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
@@ -18,7 +19,35 @@ class NEXUSPICKER_API FNBoxPicker
 public:
 
 	// NEXT POINT
+	
+	FORCEINLINE static void NextPointInsideOrOn2(FVector& OutLocation, const FNBoxPickerParams& Params)
+	{
+		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
+		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
+		
+		OutLocation = Params.Origin + FVector(
+		FNRandom::Deterministic.Bool() ?
+				FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
+				FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
+		FNRandom::Deterministic.Bool() ?
+				FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
+				FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
+		FNRandom::Deterministic.Bool() ?
+				FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
+				FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z));
 
+//		N_IMPLEMENT_VLOG_BOX()
+		if(Params.World != nullptr)
+		{
+			if (FVisualLogger::IsRecording())
+			{
+				UE_VLOG_WIREBOX(Params.World , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT(""));
+				UE_VLOG_WIREBOX(Params.World , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT(""));
+				UE_VLOG_LOCATION(Params.World , LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString());
+			}
+		}
+	}
+	
 	/**
 	 * Generates a deterministic point inside or on the surface of the FBox.
 	 * Uses the deterministic random generator to ensure reproducible results.

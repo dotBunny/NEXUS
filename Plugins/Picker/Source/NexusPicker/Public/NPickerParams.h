@@ -10,26 +10,33 @@ struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()	
 	
-	UPROPERTY(Category = "Base", BlueprintReadWrite)
+	UPROPERTY(Category = "Base", BlueprintReadWrite, AdvancedDisplay)
 	int Count = 1;
-	
+
+	/**
+	 * The center point when attempting to generate new points.
+	 */
 	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
 	
-	UPROPERTY(Category = "Base", BlueprintReadWrite)
-	int32 Seed = -1;
-	
-	//bool bOnExtents = false;
+	/**
+	 * The world for line tracing.
+	 */
+	UPROPERTY(Category = "Projection", BlueprintReadWrite)
+	TObjectPtr<UWorld> World = nullptr;
 	
 	UPROPERTY(Category = "Projection", BlueprintReadWrite)
 	bool bProjectPoint = false;
-	
-	UPROPERTY(Category = "Projection", BlueprintReadWrite)
-	TObjectPtr<UObject> WorldContextObject = nullptr;
-	
+
+	/**
+	 * Direction and distance for the line trace.
+	 */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite)
 	FVector Projection = FVector(0,0,-500.f);
-	
+
+	/**
+	 * The collision channel to use for tracing.
+	 */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite)
-	TEnumAsByte<ECollisionChannel> ProjectionCollisionChannel = ECC_WorldStatic;
+	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 };

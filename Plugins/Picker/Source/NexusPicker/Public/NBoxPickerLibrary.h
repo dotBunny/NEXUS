@@ -21,6 +21,19 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 
 	// NEXT POINT
 
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (IO) 2", Category = "NEXUS|Picker|Box",
+	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/box/#next-point-io", WorldContext = "WorldContextObject"))
+	static FVector NextPointInsideOrOn2(UPARAM(ref) FNBoxPickerParams& Params, UObject* WorldContextObject)
+	{
+		FVector ReturnLocation;
+		Params.World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+		FNBoxPicker::NextPointInsideOrOn2(ReturnLocation, Params);
+		return ReturnLocation;
+	}
+	
+	
+	
+	
 	/**
 	 * Gets the next deterministic point inside or on the FBox.
 	 * @param Origin The center point of the FBox.
