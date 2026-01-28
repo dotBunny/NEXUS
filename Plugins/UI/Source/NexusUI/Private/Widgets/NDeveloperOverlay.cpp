@@ -5,16 +5,19 @@
 
 void UNDeveloperOverlay::ShowBannerMessage(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
 {
-	BannerContainer->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-	if (!Text.IsEmpty())
+	if (ContainerBanner != nullptr && ContainerBanner->IsValidLowLevel())
 	{
-		BannerMessage->SetText(Text);
-		BannerMessage->SetColorAndOpacity(FNColor::GetLinearColor(MessageColor));
-		BannerContainer->SetBrushColor(FNColor::GetLinearColor(BannerColor));
+		ContainerBanner->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		if (!Text.IsEmpty())
+		{
+			ContainerBannerMessage->SetText(Text);
+			ContainerBannerMessage->SetColorAndOpacity(FNColor::GetLinearColor(MessageColor));
+			ContainerBanner->SetBrushColor(FNColor::GetLinearColor(BannerColor));
+		}
 	}
 }
 
 void UNDeveloperOverlay::HideBanner() const
 {
-	BannerContainer->SetVisibility(ESlateVisibility::Collapsed);
+	ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
 }

@@ -3,13 +3,12 @@
 
 #pragma once
 
+#include "CommonBorder.h"
 #include "NColor.h"
 #include "CommonUserWidget.h"
-#include "Components/Border.h"
 #include "Components/TextBlock.h"
 #include "NDeveloperOverlay.generated.h"
 
-class UCommonBorder;
 class UVerticalBox;
 class UHorizontalBox;
 class UCommonHierarchicalScrollBox;
@@ -36,8 +35,11 @@ public:
 	
 protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UBorder> BannerContainer;
+	TObjectPtr<UCommonBorder> ContainerBanner;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UTextBlock> BannerMessage;
+	TObjectPtr<UTextBlock> ContainerBannerMessage;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UVerticalBox> ContainerBox;
 };
