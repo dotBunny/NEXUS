@@ -28,10 +28,30 @@ public:
 	FText GetText() const { return Text; }
 	
 	UFUNCTION(BlueprintCallable, Category = "Text")
-	void SetBackgroundColor(const ENColor Color) { BackgroundColor = Color; }
+	void SetBackgroundColor(const ENColor Color)
+	{
+		bHasBackgroundColor = true;
+		BackgroundColor = Color;
+	}
 	
 	UFUNCTION(BlueprintCallable, Category = "Text")
-	void SetForegroundColor(const ENColor Color) { ForegroundColor = Color; }
+	bool HasBackgroundColor() const
+	{
+		return bHasBackgroundColor;
+	}
+	
+	UFUNCTION(BlueprintCallable, Category = "Text")
+	void SetForegroundColor(const ENColor Color)
+	{
+		bHasForegroundColor = true;
+		ForegroundColor = Color;
+	}
+	
+	UFUNCTION(BlueprintCallable, Category = "Text")
+	bool HasForegroundColor() const
+	{
+		return bHasForegroundColor;
+	}
 	
 	UFUNCTION(BlueprintCallable, Category = "Text")
 	void SetText(const FText& InText) { Text = InText; }
@@ -39,6 +59,8 @@ public:
 private:
 
 	FText Text;
+	bool bHasForegroundColor = false;
+	bool bHasBackgroundColor = false;
 	ENColor ForegroundColor = ENColor::NC_White;
 	ENColor BackgroundColor = ENColor::NC_Transparent;
 };
@@ -55,8 +77,15 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 		if (TextObject != nullptr)
 		{
 			SetText(TextObject->GetText());
-			SetTextColor(TextObject->GetForegroundColor());
-			SetBackgroundColor(TextObject->GetBackgroundColor());
+			
+			if (TextObject->HasForegroundColor())
+			{
+				SetTextColor(TextObject->GetForegroundColor());
+			}
+			if (TextObject->HasBackgroundColor())
+			{
+				SetBackgroundColor(TextObject->GetBackgroundColor());
+			}
 		}
 	}
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override

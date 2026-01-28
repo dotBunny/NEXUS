@@ -4,6 +4,7 @@
 #include "NProcGenDeveloperOverlay.h"
 
 #include "NProcGenRegistry.h"
+#include "NStyleLibrary.h"
 #include "Components/NListView.h"
 
 void UNProcGenDeveloperOverlay::NativeConstruct()
@@ -69,11 +70,13 @@ void UNProcGenDeveloperOverlay::UpdateBanner() const
 {
 	if (OperationsList != nullptr && OperationsList->IsValidLowLevel() && OperationsList->GetNumItems() > 0)
 	{
-		HideBanner();
+		HideContainerBanner();
 	}
 	else
 	{
-		ShowBannerMessage();
+		ShowContainerBanner(NoOperationsFoundText,
+			UNStyleLibrary::GetInfoForegroundColor(), 
+			UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }
 

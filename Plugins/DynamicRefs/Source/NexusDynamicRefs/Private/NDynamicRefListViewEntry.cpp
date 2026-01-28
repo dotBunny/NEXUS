@@ -48,9 +48,7 @@ void UNDynamicRefListViewEntry::Refresh() const
 				Object, UNTextListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
 
 			TextObject->SetText(FText::FromString(FString::Printf(TEXT("- %s"), *ReferenceObject->GetFName().ToString())));
-
-			TextObject->SetForegroundColor(ENColor::NC_White);
-			TextObject->SetBackgroundColor(ENColor::NC_GreyDark);
+			
 
 			References->AddItem(TextObject);
 		}

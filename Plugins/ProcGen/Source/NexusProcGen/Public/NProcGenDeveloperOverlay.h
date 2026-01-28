@@ -28,6 +28,8 @@ protected:
 private:
 	void UpdateBanner() const;
 	
+	FText NoOperationsFoundText = NSLOCTEXT("NexusProcGen", "NoOperationsFound", "No Operations Found");
+	
 	FDelegateHandle OperationsStatusChangedDelegateHandle;
 	static bool ShouldShowOperation(const FName& OperationName);
 };

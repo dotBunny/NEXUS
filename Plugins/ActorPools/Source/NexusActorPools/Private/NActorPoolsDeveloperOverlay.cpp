@@ -6,6 +6,7 @@
 #include "NActorPoolListViewEntry.h"
 #include "NActorPoolObject.h"
 #include "NActorPoolSubsystem.h"
+#include "NStyleLibrary.h"
 #include "Components/NListView.h"
 
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
@@ -19,6 +20,8 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 	CachedUpdateRate = Settings->DeveloperOverlayUpdateRate;
 	UpdateTimer = CachedUpdateRate;
 
+	UpdateBanner();
+	
 	Super::NativeConstruct();
 }
 
@@ -123,11 +126,13 @@ void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 {
 	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel() && ActorPoolList->GetNumItems() > 0)
 	{
-		HideBanner();
+		HideContainerBanner();
 	}
 	else
 	{
-		ShowBannerMessage();
+		ShowContainerBanner(NoActorPoolsFoundText,
+			UNStyleLibrary::GetInfoForegroundColor(), 
+			UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }
 

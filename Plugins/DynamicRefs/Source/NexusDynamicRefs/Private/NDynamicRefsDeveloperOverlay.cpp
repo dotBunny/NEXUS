@@ -5,6 +5,7 @@
 
 #include "NDynamicRefObject.h"
 #include "NDynamicRefSubsystem.h"
+#include "NStyleLibrary.h"
 #include "Components/NListView.h"
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
@@ -166,7 +167,7 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 	if (bNamedReferences || bDynamicReferences)
 	{
 		// add check
-		HideBanner();
+		HideContainerBanner();
 		
 		if (bNamedReferences)
 		{
@@ -188,7 +189,9 @@ void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 			NamedReferencesHeader->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		
-		ShowBannerMessage();
+		ShowContainerBanner(NoReferencesFoundText,
+	UNStyleLibrary::GetInfoForegroundColor(), 
+	UNStyleLibrary::GetInfoBackgroundColor());
 	}
 }
 

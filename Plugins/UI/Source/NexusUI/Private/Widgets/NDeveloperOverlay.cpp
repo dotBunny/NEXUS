@@ -3,21 +3,21 @@
 
 #include "Widgets/NDeveloperOverlay.h"
 
-void UNDeveloperOverlay::ShowBannerMessage(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
+void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
 {
 	if (ContainerBanner != nullptr && ContainerBanner->IsValidLowLevel())
 	{
 		ContainerBanner->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		ContainerBanner->SetBrushColor(FNColor::GetLinearColor(BannerColor));
 		if (!Text.IsEmpty())
 		{
 			ContainerBannerMessage->SetText(Text);
 			ContainerBannerMessage->SetColorAndOpacity(FNColor::GetLinearColor(MessageColor));
-			ContainerBanner->SetBrushColor(FNColor::GetLinearColor(BannerColor));
 		}
 	}
 }
 
-void UNDeveloperOverlay::HideBanner() const
+void UNDeveloperOverlay::HideContainerBanner() const
 {
 	ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
 }

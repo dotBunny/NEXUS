@@ -4,9 +4,9 @@
 #pragma once
 
 #include "CommonBorder.h"
+#include "CommonTextBlock.h"
 #include "NColor.h"
 #include "CommonUserWidget.h"
-#include "Components/TextBlock.h"
 #include "NDeveloperOverlay.generated.h"
 
 class UVerticalBox;
@@ -15,7 +15,6 @@ class UCommonHierarchicalScrollBox;
 class UNCheckBox;
 class UButton;
 
-class UCommonTextBlock;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay", Abstract, Blueprintable)
 class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
@@ -24,11 +23,11 @@ class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 	
 public:
 	UFUNCTION(BlueprintCallable)
-	void ShowBannerMessage(const FText& Text = FText::GetEmpty(), 
+	void ShowContainerBanner(const FText& Text = FText::GetEmpty(), 
 		ENColor MessageColor = ENColor::NC_White, ENColor BannerColor = ENColor::NC_NexusDarkBlue) const;
 	
 	UFUNCTION(BlueprintCallable)
-	void HideBanner() const;
+	void HideContainerBanner() const;
 	
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsEditorUtilityWidget;
@@ -38,7 +37,7 @@ protected:
 	TObjectPtr<UCommonBorder> ContainerBanner;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UTextBlock> ContainerBannerMessage;
+	TObjectPtr<UCommonTextBlock> ContainerBannerMessage;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UVerticalBox> ContainerBox;

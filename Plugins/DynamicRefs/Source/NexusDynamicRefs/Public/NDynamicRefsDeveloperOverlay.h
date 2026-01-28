@@ -57,6 +57,7 @@ private:
 	TMap<UWorld*, FDelegateHandle> OnRemovedDelegates;
 	TMap<UWorld*, FDelegateHandle> OnRemovedByNameDelegates;
 
+	FText NoReferencesFoundText = NSLOCTEXT("NexusDynamicRefs", "NoReferencesFound", "No References Found");
 	FDelegateHandle AddWorldDelegateHandle;
 	FDelegateHandle RemoveWorldDelegateHandle;
 };
