@@ -19,6 +19,16 @@
 			"Name": "NexusPicker",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusPickerEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
 		}
 	],
 	"Plugins": [

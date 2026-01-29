@@ -64,11 +64,9 @@ public:
 	 */
 	static void Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 	{
-#if ENABLE_VISUAL_LOG			
 		const int OutLocationsStartIndex = OutLocations.Num();
-#endif
-		OutLocations.Reserve(OutLocations.Num() + Params.Count);
 		const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
+		OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 		
 		if (bSimpleMode)
 		{
@@ -133,11 +131,9 @@ public:
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 	{
-#if ENABLE_VISUAL_LOG			
 		const int OutLocationsStartIndex = OutLocations.Num();
-#endif
-		OutLocations.Reserve(OutLocations.Num() + Params.Count);
 		const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
+		OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 		
 		if (bSimpleMode)
 		{
@@ -216,12 +212,10 @@ public:
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params)
 	{
-#if ENABLE_VISUAL_LOG			
 		const int OutLocationsStartIndex = OutLocations.Num();
-#endif
-		OutLocations.Reserve(OutLocations.Num() + Params.Count);
 		const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
 		const FRandomStream RandomStream(Seed);
+		OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 		
 		if (bSimpleMode)
 		{
@@ -291,7 +285,15 @@ public:
 		const FBox Box(Origin + Dimensions.Min, Origin + Dimensions.Max);
 		return Box.IsInsideOrOn(Point);
 	}
-	
+
+	/**
+	 * Checks if multiple points are inside or on the surface of the FBox.
+	 * @param Points The array of points to check.
+	 * @param Origin The center point of the FBox.
+	 * @param MinimumDimensions The minimum dimensions of the FBox.
+	 * @param MaximumDimensions The maximum dimensions of the FBox.
+	 * @return An array of boolean values indicating if each point is inside or on the surface of the FBox.
+	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
 		TArray<bool> OutResults;
