@@ -42,7 +42,7 @@ struct NEXUSPICKER_API FNPickerParams
 	 * Should the point be projected somewhere?
 	 */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay)
-	ENPickerProjectionMode ProjectionMode;
+	ENPickerProjectionMode ProjectionMode = ENPickerProjectionMode::None;
 
 	/**
 	 * Direction and distance for the line trace.
