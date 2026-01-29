@@ -25,6 +25,28 @@
 		OutLocation = HitResult.Location; \
 	}
 
+
+#if ENABLE_VISUAL_LOG
+	#define N_IMPLEMENT_VLOG_BOX_V2(HasMinimumDimensions) \
+		if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+		{ \
+			if(HasMinimumDimensions) \
+			{ \
+				UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			} \
+			if(Params.MaximumDimensions.IsValid != 0) \
+			{ \
+				UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			} \
+			for (int i = 0; i < Params.Count; i++) \
+			{ \
+				UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			} \
+		}
+#else
+	#define N_IMPLEMENT_VLOG_BOX_V2(HasMinimumDimensions)
+#endif
+
 #if ENABLE_VISUAL_LOG
 
 // BOX

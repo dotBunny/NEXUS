@@ -77,6 +77,25 @@ void UNSamplesDisplayTest::CheckTrueWithLocation(const bool bResult, const FVect
 		AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Location.ToCompactString()));
 	}
 }
+
+void UNSamplesDisplayTest::CheckTrueWithLocations(const TArray<bool> bResults, const TArray<FVector>& Locations,
+	const FString FailMessage)
+{
+	const int Count = bResults.Num();
+	for (int i = 0; i < Count; i++)
+	{
+		if (bResults[i])
+		{
+			CheckPassCount++;
+		}
+		else
+		{
+			CheckFailCount++;
+			AddError(FString::Printf(TEXT("%s (%s)"), *FailMessage, *Locations[i].ToCompactString()));
+		}
+	}
+}
+
 void UNSamplesDisplayTest::CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage)
 {
 	if (!bResult)

@@ -13,6 +13,7 @@
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 - Renamed `UNDynamicReferenceSubsystem` to `UNDynamicReferencesSubsystem`
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
+- All `FNBoxPicker` methods have been changed to take `FNBoxPickerParams` struct, change also made to `UNBoxPickerLibrary` methods.
 
 ### Fixed
 

@@ -9,7 +9,7 @@ UENUM(BlueprintType)
 enum class ENPickerProjectionMode : uint8
 {
 	None = 0,
-	Projection = 1,
+	Projected = 1,
 	NearestNavMesh = 2
 };
 

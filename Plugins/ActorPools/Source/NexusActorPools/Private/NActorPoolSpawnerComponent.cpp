@@ -90,6 +90,19 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	const FRotator SpawnRotator = this->GetComponentRotation();
 	const FVector Origin = this->GetComponentLocation() + Offset;
 
+	// NEW API
+	TArray<FVector> OutLocations;
+	if (Distribution == ENActorPoolSpawnerDistribution::Box)
+	{
+		FVector HalfDistribution = DistributionRange / 2.0f;
+		FNBoxPickerParams Params;
+		Params.Origin = Origin;
+		Params.MaximumDimensions = FBox(-HalfDistribution, HalfDistribution);
+		Params.Count = Count;
+		FNBoxPicker::Tracked(OutLocations, Seed, Params);
+	}
+	
+	
 	for (int32 i = 0; i < Count; i++)
 	{
 		FVector SpawnLocation = Origin;
@@ -110,9 +123,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			Seed++;
 			break;
 		case Box:
-			FVector HalfDistribution = DistributionRange / 2.0f;
-			FNBoxPicker::RandomTrackedPointInsideOrOnSimple(Seed, SpawnLocation, Origin, FBox(-HalfDistribution, HalfDistribution));
-			Seed++;
+			SpawnLocation = OutLocations[i];
 			break;
 		case Spline:
 			if (CachedSplineComponent != nullptr)
@@ -123,6 +134,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			break;
 		default: ;
 		}
+		
+		
 		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, SpawnLocation, SpawnRotator);
 	}
 	TimeSinceSpawned = 0;
