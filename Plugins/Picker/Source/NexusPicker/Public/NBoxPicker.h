@@ -58,7 +58,8 @@ public:
 		const int OutLocationsStartIndex = OutLocations.Num() - 1;
 #endif
 		
-		const bool bSimpleMode = Params.MinimumDimensions.IsValid != 0;
+	 	
+		const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
 		FVector OutLocation;
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Projection && Params.CachedWorld != nullptr)
@@ -136,7 +137,7 @@ public:
 #if ENABLE_VISUAL_LOG			
 		const int OutLocationsStartIndex = OutLocations.Num() - 1;
 #endif
-		const bool bSimpleMode = Params.MinimumDimensions.IsValid != 0;
+		const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Projection && Params.CachedWorld != nullptr)
 		{
