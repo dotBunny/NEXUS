@@ -47,12 +47,12 @@ struct NEXUSPICKER_API FNPickerParams
 	/**
 	 * Direction and distance for the line trace.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projection"))
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projected"))
 	FVector Projection = FVector(0,0,-500.f);
 
 	/**
 	 * The collision channel to use for tracing.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projection"))
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projected"))
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 };
