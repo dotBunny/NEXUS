@@ -239,9 +239,4 @@ public:
 
 	static FRotator BaseRotation;
 	static FMatrix BaseMatrix;
-	
-	static void InitializeParams(FNPickerParams& Params)
-	{
-		
-	}
 };
