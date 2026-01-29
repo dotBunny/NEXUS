@@ -5,12 +5,25 @@
 
 #include "NPickerParams.generated.h"
 
+UENUM(BlueprintType)
+enum class ENPickerProjectionMode : uint8
+{
+	None = 0,
+	Projection = 1,
+	NearestNavMesh = 2
+};
+
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams
 {
-	GENERATED_BODY()	
+	GENERATED_BODY()
+
+	// InsideOrOn vs Inside vs On
 	
-	UPROPERTY(Category = "Base", BlueprintReadWrite, AdvancedDisplay)
+	/**
+	 * The number of points to generate in a single pass.
+	 */
+	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	int Count = 1;
 
 	/**
@@ -22,23 +35,24 @@ struct NEXUSPICKER_API FNPickerParams
 	/**
 	 * The world for line tracing.
 	 */
-	UPROPERTY(Category = "Base", BlueprintReadWrite)
-	TObjectPtr<UWorld> World = nullptr;
-	
-	
-	
-	UPROPERTY(Category = "Projection", BlueprintReadWrite)
-	bool bProjectPoint = false;
+	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
+	TObjectPtr<UWorld> CachedWorld = nullptr;
+
+	/**
+	 * Should the point be projected somewhere?
+	 */
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay)
+	ENPickerProjectionMode ProjectionMode;
 
 	/**
 	 * Direction and distance for the line trace.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite)
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projection"))
 	FVector Projection = FVector(0,0,-500.f);
 
 	/**
 	 * The collision channel to use for tracing.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite)
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projection"))
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 };

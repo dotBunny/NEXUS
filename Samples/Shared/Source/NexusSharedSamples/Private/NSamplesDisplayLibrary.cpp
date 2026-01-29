@@ -11,8 +11,18 @@ void UNSamplesDisplayLibrary::TimerDrawPoint(ANSamplesDisplayActor* SamplesDispl
 	false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 }
 
-void UNSamplesDisplayLibrary::TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius,
+void UNSamplesDisplayLibrary::TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations,
 	const int TimerIntervals)
+{
+	for (const FVector& Location : Locations)
+	{
+		DrawDebugPoint(SamplesDisplay->GetWorld(), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
+			false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
+	}
+}
+
+void UNSamplesDisplayLibrary::TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius,
+                                              const int TimerIntervals)
 {
 	DrawDebugSphere(SamplesDisplay->GetWorld(), Location, Radius,24,
 	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);

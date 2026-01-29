@@ -20,15 +20,22 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 	// NEXT POINT
-
-	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point (IO) 2", Category = "NEXUS|Picker|Box",
+	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point V2", Category = "NEXUS|Picker|Box",
 	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/box/#next-point-io", WorldContext = "WorldContextObject"))
-	static FVector NextPointInsideOrOn2(UPARAM(ref) FNBoxPickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPointV2(UPARAM(ref) FNBoxPickerParams& Params, UObject* WorldContextObject)
 	{
-		FVector ReturnLocation;
-		Params.World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
-		FNBoxPicker::NextPointInsideOrOn2(ReturnLocation, Params);
-		return ReturnLocation;
+		// Create return function
+		TArray<FVector> ReturnLocations;
+		
+		// Ensure World from Context
+		if (Params.CachedWorld == nullptr)
+		{
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+		}
+		
+		FNBoxPicker::NextPointV2(ReturnLocations, Params);
+		
+		return MoveTemp(ReturnLocations);
 	}
 	
 	
