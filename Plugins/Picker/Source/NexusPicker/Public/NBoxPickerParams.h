@@ -11,16 +11,16 @@ USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-
+	
 	/**
 	 * The minimum dimensions to use when generating a point.
 	 */
 	UPROPERTY(Category = "Box", BlueprintReadWrite)
-	FBox MinimumDimensions;
+	FBox MinimumDimensions = FBox(ForceInit);
 	
 	/**
 	 * The maximum dimensions to use when generating a point.
 	 */
 	UPROPERTY(Category = "Box", BlueprintReadWrite)
-	FBox MaximumDimensions;
+	FBox MaximumDimensions = FBox(ForceInit);
 };

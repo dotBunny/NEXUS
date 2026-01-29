@@ -10,25 +10,27 @@
 #include "NRandom.h"
 
 #if ENABLE_VISUAL_LOG
-#define N_IMPLEMENT_VLOG_BOX_V2() \
+#define N_IMPLEMENT_VLOG_BOX_V2(HasMinimumDimensions) \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
-		UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		if(HasMinimumDimensions) \
+		{ \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		} \
+		if(Params.MaximumDimensions.IsValid != 0) \
+		{ \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		} \
 		for (int i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}	
 #else
-#define N_IMPLEMENT_VLOG_BOX_V2()
+#define N_IMPLEMENT_VLOG_BOX_V2(HasMinimumDimensions)
 #endif
 
-#define N_IMPLEMENT_PICKER_PROJECTION_V2() \
-		if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, OutLocation, (OutLocation + Params.Projection), Params.CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
-		{ \
-			OutLocation = HitResult.Location; \
-		}
+
 
 
 /**
@@ -46,7 +48,7 @@ public:
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void NextPointV2(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
+	 static void NextPoint(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 	{
 		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
 		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
@@ -56,76 +58,39 @@ public:
 		const int OutLocationsStartIndex = OutLocations.Num() - 1;
 #endif
 		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projection && Params.CachedWorld != nullptr)
-		{
-			FHitResult HitResult(ForceInit);
-			for (int i = 0; i < Params.Count; i++)
-			{
-				FVector OutLocation = Params.Origin + FVector(
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z));
-				
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
-				
-				OutLocations.Add(OutLocation);
-			}
-		}
-		else if ( Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
-		{
-			// TODO: Implement nearest nav mesh projection
-		}
-		else
-		{
-			OutLocations.Add(Params.Origin + FVector(
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
-				FNRandom::Deterministic.Bool() ?
-						FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
-						FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z)));
-		}
-		
-		N_IMPLEMENT_VLOG_BOX_V2()
-	}
-	
-	/**
-	 * Generates a deterministic point in relation to an FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @notes Does not support a minimum extent.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	FORCEINLINE static void NextPointSimpleV2(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
-	{
-#if ENABLE_VISUAL_LOG			
-		const int OutLocationsStartIndex = OutLocations.Num() - 1;
-#endif
+		const bool bSimpleMode = Params.MinimumDimensions.IsValid != 0;
+		FVector OutLocation;
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Projection && Params.CachedWorld != nullptr)
 		{
 			FHitResult HitResult(ForceInit);
-			for (int i = 0; i < Params.Count; i++)
-			{
-				FVector OutLocation = Params.Origin + FVector(
-				FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X),
-			FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
-			FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z));
-				
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
-				
-				OutLocations.Add(OutLocation);
-			}
 			
+			for (int i = 0; i < Params.Count; i++)
+			{
+				if (bSimpleMode)
+				{
+					OutLocation = Params.Origin + FVector(
+					FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X),
+					FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
+					FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z));
+				}
+				else
+				{
+					OutLocation  = Params.Origin + FVector(
+						FNRandom::Deterministic.Bool() ?
+								FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
+								FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
+						FNRandom::Deterministic.Bool() ?
+								FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
+								FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
+						FNRandom::Deterministic.Bool() ?
+								FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
+								FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z));
+				}
+				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				
+				OutLocations.Add(OutLocation);
+			}
 		}
 		else if ( Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
 		{
@@ -133,176 +98,226 @@ public:
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			if (bSimpleMode)
 			{
 				OutLocations.Add(Params.Origin + FVector(
 				FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X),
-			FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
-			FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z)));
+				FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
+				FNRandom::Deterministic.FloatRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z)));
+			}
+			else
+			{
+				OutLocations.Add(Params.Origin + FVector(
+			FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
+					FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
+			FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
+					FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
+			FNRandom::Deterministic.Bool() ?
+					FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
+					FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z)));
 			}
 		}
-		N_IMPLEMENT_VLOG_BOX_V2()
+		
+		N_IMPLEMENT_VLOG_BOX_V2(bSimpleMode)
+	}
+	/**
+	 * Generates a random point in relation to an FBox.
+	 * Uses the non-deterministic random generator for true randomness.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void RandomPoint(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
+	{
+		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
+		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
+	
+#if ENABLE_VISUAL_LOG			
+		const int OutLocationsStartIndex = OutLocations.Num() - 1;
+#endif
+		const bool bSimpleMode = Params.MinimumDimensions.IsValid != 0;
+		
+		if (Params.ProjectionMode == ENPickerProjectionMode::Projection && Params.CachedWorld != nullptr)
+		{
+			FVector OutLocation;
+			FHitResult HitResult(ForceInit);
+			for (int i = 0; i < Params.Count; i++)
+			{
+				if (bSimpleMode)
+				{
+					OutLocation = Params.Origin + FVector(FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X),
+			FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
+			FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z));
+				}
+				else
+				{
+					OutLocation = Params.Origin + FVector(
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.X, -MaximumExtent.X) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.X, MaximumExtent.X),
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Y, -MaximumExtent.Y) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.Y, MaximumExtent.Y),
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Z, -MaximumExtent.Z) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.Z, MaximumExtent.Z));
+				}
+				
+				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				
+				OutLocations.Add(OutLocation);
+			}
+		}
+		else if ( Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		{
+			// TODO: Implement nearest nav mesh projection
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				if (bSimpleMode)
+				{
+					OutLocations.Add(Params.Origin + FVector(FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X),
+			FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y),
+			FNRandom::NonDeterministic.FRandRange(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z)));
+				}
+				else
+				{
+					
+					OutLocations.Add(Params.Origin + FVector(
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.X, -MaximumExtent.X) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.X, MaximumExtent.X),
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Y, -MaximumExtent.Y) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.Y, MaximumExtent.Y),
+			FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
+					FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Z, -MaximumExtent.Z) :
+					FNRandom::NonDeterministic.FRandRange(MinimumExtent.Z, MaximumExtent.Z)));
+				}
+			}
+		}
+		N_IMPLEMENT_VLOG_BOX_V2(bSimpleMode)
+		
+
 	}
 	
 	
 	/// ---- rebuilt stop
 	
-	
-	/**
-	 * Generates a deterministic point inside or on the surface of the FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the FBox.
-	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
-	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
-	 */
 	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
-		const FVector MinimumExtent = 0.5f * (MinimumDimensions.Max - MinimumDimensions.Min);
-		const FVector MaximumExtent = 0.5f * (MaximumDimensions.Max - MaximumDimensions.Min);
+		TArray<FVector> OutLocations;
 		
-		OutLocation = Origin + FVector(
-		FNRandom::Deterministic.Bool() ?
-				FNRandom::Deterministic.FloatRange(-MinimumExtent.X, -MaximumExtent.X) :
-				FNRandom::Deterministic.FloatRange(MinimumExtent.X, MaximumExtent.X),
-		FNRandom::Deterministic.Bool() ?
-				FNRandom::Deterministic.FloatRange(-MinimumExtent.Y, -MaximumExtent.Y) :
-				FNRandom::Deterministic.FloatRange(MinimumExtent.Y, MaximumExtent.Y),
-		FNRandom::Deterministic.Bool() ?
-				FNRandom::Deterministic.FloatRange(-MinimumExtent.Z, -MaximumExtent.Z) :
-				FNRandom::Deterministic.FloatRange(MinimumExtent.Z, MaximumExtent.Z));
-
-		N_IMPLEMENT_VLOG_BOX()
+		FNBoxPickerParams Params;
+		Params.Origin = Origin;
+		Params.MinimumDimensions = MinimumDimensions;
+		Params.MaximumDimensions = MaximumDimensions;
+		
+		NextPoint(OutLocations, Params);
+		OutLocation = OutLocations[0];
 	}
-
-	/**
-	 * Generates a deterministic point inside or on the surface of the FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the FBox.
-	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
-	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
 	FORCEINLINE static void NextPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions, N_VARIABLES_PICKER_PROJECTION())
 	{
-		NextPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_BOX_PROJECTION()
+		TArray<FVector> OutLocations;
+		
+		FNBoxPickerParams Params;
+		Params.Origin = Origin;
+		Params.MinimumDimensions = MinimumDimensions;
+		Params.MaximumDimensions = MaximumDimensions;
+		
+		Params.ProjectionMode = ENPickerProjectionMode::Projection;
+		Params.Projection = Projection;
+		Params.CollisionChannel = CollisionChannel;
+		Params.CachedWorld = const_cast<UWorld*>(InWorld);
+		
+		NextPoint(OutLocations, Params);
+		OutLocation = OutLocations[0];
 	}
-
-	/**
-	 * Generates a deterministic point inside or on the surface of the FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the FBox.
-	 * @param Dimensions The dimensions of the FBox.
-	 */
 	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
 	{
-		OutLocation = Origin + FVector(
-			FNRandom::Deterministic.FloatRange(Dimensions.Min.X, Dimensions.Max.X),
-		FNRandom::Deterministic.FloatRange(Dimensions.Min.Y, Dimensions.Max.Y),
-		FNRandom::Deterministic.FloatRange(Dimensions.Min.Z, Dimensions.Max.Z));
-
-		N_IMPLEMENT_VLOG_BOX_SIMPLE()
+		TArray<FVector> OutLocations;
+		
+		FNBoxPickerParams Params;
+		Params.Origin = Origin;
+		Params.MaximumDimensions = Dimensions;
+		
+		NextPoint(OutLocations, Params);
+		OutLocation = OutLocations[0];
 	}
-
-	/**
-	 * Generates a deterministic point inside or on the surface of the FBox, then projects it to the world.
-	 * @param OutLocation [out] The generated and grounded point location.
-	 * @param Origin The center point of the FBox.
-	 * @param Dimensions The dimensions of the FBox.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
 	FORCEINLINE static void NextPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions, N_VARIABLES_PICKER_PROJECTION())
 	{
-		NextPointInsideOrOnSimple(OutLocation, Origin, Dimensions);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
+		TArray<FVector> OutLocations;
+		
+		FNBoxPickerParams Params;
+		Params.Origin = Origin;
+		Params.MaximumDimensions = Dimensions;
+		
+		Params.ProjectionMode = ENPickerProjectionMode::Projection;
+		Params.Projection = Projection;
+		Params.CollisionChannel = CollisionChannel;
+		Params.CachedWorld = const_cast<UWorld*>(InWorld);
+		
+		NextPoint(OutLocations, Params);
+		OutLocation = OutLocations[0];
 	}
-
-	// RANDOM POINT
-
-	/**
-	 * Generates a random point inside or on the surface of the FBox.
-	 * Uses the non-deterministic random generator for true randomness.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the FBox.
-	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
-	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
-	 */
 	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{
-		const FVector MinimumExtent = 0.5f * (MinimumDimensions.Max - MinimumDimensions.Min);
-		const FVector MaximumExtent = 0.5f * (MaximumDimensions.Max - MaximumDimensions.Min);
+	 	TArray<FVector> OutLocations;
 		
-		OutLocation = Origin + FVector(
-		FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
-				FNRandom::NonDeterministic.FRandRange(-MinimumExtent.X, -MaximumExtent.X) :
-				FNRandom::NonDeterministic.FRandRange(MinimumExtent.X, MaximumExtent.X),
-		FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
-				FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Y, -MaximumExtent.Y) :
-				FNRandom::NonDeterministic.FRandRange(MinimumExtent.Y, MaximumExtent.Y),
-		FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f ?
-				FNRandom::NonDeterministic.FRandRange(-MinimumExtent.Z, -MaximumExtent.Z) :
-				FNRandom::NonDeterministic.FRandRange(MinimumExtent.Z, MaximumExtent.Z));
-
-		N_IMPLEMENT_VLOG_BOX()
+	 	FNBoxPickerParams Params;
+	 	Params.Origin = Origin;
+	 	Params.MinimumDimensions = MinimumDimensions;
+	 	Params.MaximumDimensions = MaximumDimensions;
+		
+	 	RandomPoint(OutLocations, Params);
+	 	OutLocation = OutLocations[0];
 	}
-
-	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
-	/**
-	 * Generates a random point inside or on the surface of the FBox, then projects it to the world.
-	 * @param OutLocation [out] The generated and grounded point location.
-	 * @param Origin The center point of the FBox.
-	 * @param MinimumDimensions The minimum dimensions to use when generating a point.
-	 * @param MaximumDimensions The maximum dimensions to use when generating a point.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
 	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions, N_VARIABLES_PICKER_PROJECTION())
 	{
-		RandomPointInsideOrOn(OutLocation, Origin, MinimumDimensions, MaximumDimensions);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_BOX_PROJECTION()
+	 	TArray<FVector> OutLocations;
+		
+	 	FNBoxPickerParams Params;
+	 	Params.Origin = Origin;
+	 	Params.MinimumDimensions = MinimumDimensions;
+	 	Params.MaximumDimensions = MaximumDimensions;
+		
+	 	Params.ProjectionMode = ENPickerProjectionMode::Projection;
+	 	Params.Projection = Projection;
+	 	Params.CollisionChannel = CollisionChannel;
+	 	Params.CachedWorld = const_cast<UWorld*>(InWorld);
+		
+	 	RandomPoint(OutLocations, Params);
+	 	OutLocation = OutLocations[0];
 	}
-	// #SONARQUBE-ENABLE
-
-	/**
-	 * Generates a random point inside or on the surface of the FBox.
-	 * Uses the non-deterministic random generator for true randomness.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the FBox.
-	 * @param Dimensions The dimensions of the FBox.
-	 */
 	FORCEINLINE static void RandomPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions)
 	{
-		OutLocation = Origin + FVector(FNRandom::NonDeterministic.FRandRange(Dimensions.Min.X, Dimensions.Max.X),
-			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Y, Dimensions.Max.Y),
-			FNRandom::NonDeterministic.FRandRange(Dimensions.Min.Z, Dimensions.Max.Z));
-		N_IMPLEMENT_VLOG_BOX_SIMPLE()
+	 	TArray<FVector> OutLocations;
+		
+	 	FNBoxPickerParams Params;
+	 	Params.Origin = Origin;
+	 	Params.MaximumDimensions = Dimensions;
+		
+	 	RandomPoint(OutLocations, Params);
+	 	OutLocation = OutLocations[0];
 	}
-
-	/**
-	 * Generates a random point inside or on the surface of the FBox, then projects it to the world.
-	 * @param OutLocation [out] The generated and grounded point location.
-	 * @param Origin The center point of the FBox.
-	 * @param Dimensions The dimensions of the FBox.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
 	FORCEINLINE static void RandomPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const FBox& Dimensions, N_VARIABLES_PICKER_PROJECTION())
 	{
-		RandomPointInsideOrOnSimple(OutLocation, Origin, Dimensions);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
+	 	TArray<FVector> OutLocations;
+		
+	 	FNBoxPickerParams Params;
+	 	Params.Origin = Origin;
+	 	Params.MaximumDimensions = Dimensions;
+		
+	 	Params.ProjectionMode = ENPickerProjectionMode::Projection;
+	 	Params.Projection = Projection;
+	 	Params.CollisionChannel = CollisionChannel;
+	 	Params.CachedWorld = const_cast<UWorld*>(InWorld);
+		
+	 	RandomPoint(OutLocations, Params);
+	 	OutLocation = OutLocations[0];
 	}
 
 	// RANDOM ONE-SHOT POINT

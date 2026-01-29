@@ -33,7 +33,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		
-		FNBoxPicker::NextPointV2(ReturnLocations, Params);
+		FNBoxPicker::NextPoint(ReturnLocations, Params);
 		
 		return MoveTemp(ReturnLocations);
 	}

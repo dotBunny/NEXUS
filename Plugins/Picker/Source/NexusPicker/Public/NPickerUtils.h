@@ -19,6 +19,12 @@
 		OutLocation = HitResult.Location; \
 	}
 
+#define N_IMPLEMENT_PICKER_PROJECTION_V2() \
+	if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, OutLocation, (OutLocation + Params.Projection), Params.CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
+	{ \
+		OutLocation = HitResult.Location; \
+	}
+
 #if ENABLE_VISUAL_LOG
 
 // BOX
