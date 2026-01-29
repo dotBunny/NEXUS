@@ -3,6 +3,7 @@
 
 #include "NFunctionalTest.h"
 #include "Components/BillboardComponent.h"
+#include "Developer/NTestUtils.h"
 
 ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -40,6 +41,9 @@ void ANFunctionalTest::PrepareTest()
 			Display->TestInstance->OnTestFinish.AddDynamic(this, &ANFunctionalTest::OnFinishSampleDisplayTest);
 		}
 	}
+	
+	// Ensure generally speaking things are in a good state
+	FNTestUtils::PrePerformanceTest();
 }
 
 void ANFunctionalTest::StartTest()
