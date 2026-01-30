@@ -21,7 +21,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_NextSimple, "NEXUS::PerfTests::NPicker::Box::N
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(Box_Simple_1000, 2.5f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_NextSimple, 0.1f)
 		FNBoxPicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -42,8 +42,92 @@ N_TEST_PERF(FNPickerPerfTests_Box_Next, "NEXUS::PerfTests::NPicker::Box::Next", 
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(Box_Simple_1000, 2.5f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Next, 0.1f)
 		FNBoxPicker::Next(Points, Params);
+		
+		// Explicitly stop the timer
+		NTestTimer.ManualStop();
+	}
+	
+	FNTestUtils::PostPerformanceTest();
+}
+N_TEST_PERF(FNPickerPerfTests_Box_RandomSimple, "NEXUS::PerfTests::NPicker::Box::RandomSimple", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+	
+	FNBoxPickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 1000;
+	Params.MaximumDimensions = FBox(FVector::ZeroVector, FVector::OneVector);
+	TArray<FVector> Points;
+	// TEST
+	{
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_RandomSimple, 0.1f)
+		FNBoxPicker::Random(Points, Params);
+		
+		// Explicitly stop the timer
+		NTestTimer.ManualStop();
+	}
+	
+	FNTestUtils::PostPerformanceTest();
+}
+N_TEST_PERF(FNPickerPerfTests_Box_Random, "NEXUS::PerfTests::NPicker::Box::Random", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+	
+	FNBoxPickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 1000;
+	Params.MinimumDimensions = FBox(FVector::ZeroVector, FVector::OneVector);
+	Params.MaximumDimensions = FBox(FVector::ZeroVector, FVector::OneVector*100.f);
+	TArray<FVector> Points;
+	// TEST
+	{
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Random, 0.1f)
+		FNBoxPicker::Random(Points, Params);
+		
+		// Explicitly stop the timer
+		NTestTimer.ManualStop();
+	}
+	
+	FNTestUtils::PostPerformanceTest();
+}
+N_TEST_PERF(FNPickerPerfTests_Box_TrackedSimple, "NEXUS::PerfTests::NPicker::Box::TrackedSimple", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+	
+	FNBoxPickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 1000;
+	Params.MaximumDimensions = FBox(FVector::ZeroVector, FVector::OneVector);
+	TArray<FVector> Points;
+	int32 Seed = 123456789;
+	// TEST
+	{
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_TrackedSimple, 0.1f)
+		FNBoxPicker::Tracked(Points, Seed, Params);
+		
+		// Explicitly stop the timer
+		NTestTimer.ManualStop();
+	}
+	
+	FNTestUtils::PostPerformanceTest();
+}
+N_TEST_PERF(FNPickerPerfTests_Box_Tracked, "NEXUS::PerfTests::NPicker::Box::Tracked", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+	
+	FNBoxPickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 1000;
+	Params.MinimumDimensions = FBox(FVector::ZeroVector, FVector::OneVector);
+	Params.MaximumDimensions = FBox(FVector::ZeroVector, FVector::OneVector*100.f);
+	TArray<FVector> Points;
+	int32 Seed = 123456789;
+	// TEST
+	{
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Tracked, 0.1f)
+		FNBoxPicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer
 		NTestTimer.ManualStop();
