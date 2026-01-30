@@ -9,8 +9,8 @@ UENUM(BlueprintType)
 enum class ENPickerProjectionMode : uint8
 {
 	None = 0,
-	Projected = 1,
-	NearestNavMesh = 2
+	Trace = 1,
+	NearestNavMeshV1 = 2
 };
 
 USTRUCT(BlueprintType)
@@ -47,12 +47,12 @@ struct NEXUSPICKER_API FNPickerParams
 	/**
 	 * Direction and distance for the line trace.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projected"))
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Trace"))
 	FVector Projection = FVector(0,0,-500.f);
 
 	/**
 	 * The collision channel to use for tracing.
 	 */
-	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Projected"))
+	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Trace"))
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 };

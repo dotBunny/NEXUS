@@ -2,10 +2,19 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NBoxPicker.h"
+
+#include "NavigationSystem.h"
 #include "NPickerMinimal.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
+#define N_PICKER_BOX_PREFIX() \
+	const int OutLocationsStartIndex = OutLocations.Num(); \
+	const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0; \
+	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+#define N_PICKER_BOX_EXTENTS() \
+	const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min); \
+	const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
 #define N_PICKER_BOX_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector( \
 		FloatValue(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X), \
@@ -38,28 +47,33 @@
 #define N_PICKER_BOX_VLOG(HasMinimumDimensions)
 #endif
 
+// #SONARQUBE-DISABLE-CPP_S107 Trying to keep all logic in one method
+
 void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 {
-	
-	const int OutLocationsStartIndex = OutLocations.Num();
-	const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	N_PICKER_BOX_PREFIX()
 	
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(FNRandom::Deterministic.FloatRange);
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(FNRandom::Deterministic.FloatRange);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -71,22 +85,27 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 	}
 	else
 	{
-		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
-		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
+		N_PICKER_BOX_EXTENTS()
 		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION(FNRandom::Deterministic.FloatRange, FNRandom::Deterministic.Bool());
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION(FNRandom::Deterministic.FloatRange, FNRandom::Deterministic.Bool());
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -103,25 +122,29 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 
 void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 {
-	const int OutLocationsStartIndex = OutLocations.Num();
-	const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	N_PICKER_BOX_PREFIX()
 		
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(FNRandom::NonDeterministic.FRandRange);
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(FNRandom::NonDeterministic.FRandRange);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -133,22 +156,27 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 	}
 	else
 	{
-		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
-		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
+		N_PICKER_BOX_EXTENTS()
 			
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION(FNRandom::NonDeterministic.FRandRange, FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f);
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION(FNRandom::NonDeterministic.FRandRange, FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -164,26 +192,31 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 
 void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params)
 {
-	const int OutLocationsStartIndex = OutLocations.Num();
-	const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0;
+	N_PICKER_BOX_PREFIX()
+
 	const FRandomStream RandomStream(Seed);
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 		
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RandomStream.FRandRange);
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RandomStream.FRandRange);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -195,22 +228,27 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	}
 	else
 	{
-		const FVector MinimumExtent = 0.5f * (Params.MinimumDimensions.Max - Params.MinimumDimensions.Min);
-		const FVector MaximumExtent = 0.5f * (Params.MaximumDimensions.Max - Params.MaximumDimensions.Min);
+		N_PICKER_BOX_EXTENTS()
 			
-		if (Params.ProjectionMode == ENPickerProjectionMode::Projected && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			FHitResult HitResult(ForceInit);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX()
 			for (int i = 0; i < Params.Count; i++)
 			{
 				FVector Location = N_PICKER_BOX_LOCATION(RandomStream.FRandRange, RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f);
-				N_IMPLEMENT_PICKER_PROJECTION_V2()
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE()
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMesh)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			// TODO: Implement nearest nav mesh projection	
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX()
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RandomStream.FRandRange);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1()
+				OutLocations.Add(Location);
+			}
 		}
 		else
 		{
@@ -224,3 +262,5 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	N_PICKER_BOX_VLOG(bSimpleMode)
 	Seed = RandomStream.GetCurrentSeed();
 }
+
+// #SONARQUBE-ENABLE

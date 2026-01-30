@@ -17,11 +17,23 @@
 	{ \
 		OutLocation = HitResult.Location; \
 	}
-
-#define N_IMPLEMENT_PICKER_PROJECTION_V2() \
+#define N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX() \
+	FHitResult HitResult(ForceInit);
+#define N_IMPLEMENT_PICKER_PROJECTION_TRACE() \
 	if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
 	{ \
 		Location = HitResult.Location; \
+	}
+
+#define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX() \
+	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Params.CachedWorld); \
+	FNavLocation NavLocation;
+
+#define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1() \
+	NavigationSystem->ProjectPointToNavigation(Location, NavLocation); \
+	if (Location != NavLocation.Location) \
+	{ \
+		Location = NavLocation.Location; \
 	}
 
 #if ENABLE_VISUAL_LOG

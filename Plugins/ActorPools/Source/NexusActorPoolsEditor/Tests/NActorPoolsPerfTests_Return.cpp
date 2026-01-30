@@ -28,7 +28,7 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return"
 
 		// TEST
 		{
-			N_TEST_TIMER_SCOPE(Return_Actor_1000, 2.5f)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Return, 2.5f)
 			for (int32 i = 0; i < TestSize; i++)
 			{
 				Pool.Return(Actors[i]);
