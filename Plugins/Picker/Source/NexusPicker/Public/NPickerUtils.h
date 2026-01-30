@@ -38,23 +38,6 @@
 
 #if ENABLE_VISUAL_LOG
 
-// CIRCLE
-
-#define N_IMPLEMENT_VLOG_CIRCLE() \
-	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
-	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRECIRCLE(World, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIRECIRCLE(World, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_CIRCLE_PROJECTION() \
-	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRECIRCLE(InWorld, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIRECIRCLE(InWorld, LogNexusPicker, Verbose, Origin, Rotation.RotateVector(FVector::UpVector), MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
 // RECTANGLE
 
 #define N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, VerticesVariable) \
@@ -190,22 +173,16 @@
 
 #else
 
-#define N_IMPLEMENT_VLOG_BOX()
-#define N_IMPLEMENT_VLOG_BOX_SIMPLE()
-#define N_IMPLEMENT_VLOG_BOX_PROJECTION()
-#define N_IMPLEMENT_VLOG_BOX_SIMPLE_PROJECTION()
-#define N_IMPLEMENT_VLOG_CIRCLE()
-#define N_IMPLEMENT_VLOG_CIRCLE_SIMPLE()
-#define N_IMPLEMENT_VLOG_CIRCLE_PROJECTION()
-#define N_IMPLEMENT_VLOG_CIRCLE_SIMPLE_PROJECTION()
 #define N_IMPLEMENT_VLOG_RECTANGLE()
 #define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
 #define N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
 #define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
+
 #define N_IMPLEMENT_VLOG_SPHERE()
 #define N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
 #define N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
 #define N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
+
 #define N_IMPLEMENT_VLOG_SPLINE()
 #define N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
 
