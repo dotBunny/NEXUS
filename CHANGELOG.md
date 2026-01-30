@@ -18,6 +18,7 @@
 ### Fixed
 
 - Ensure that a `UNDelayedEditorTask` removes itself from `UAsyncEditorDelay` complete event when released.
+- Added exception for `UDataValidationChangelist` to `UNEngineContentValidator` as when submitting with the Revision Control window the changelist object would prevent validation.
 
 ### Removed
 

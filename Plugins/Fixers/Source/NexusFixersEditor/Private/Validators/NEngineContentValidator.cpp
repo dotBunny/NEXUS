@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Validators/NEngineContentValidator.h"
+#include "DataValidation/Public/DataValidationChangelist.h"
 #include "NFixersEditorSettings.h"
 #include "NFixersUtils.h"
 
@@ -11,7 +12,9 @@ bool UNEngineContentValidator::CanValidateAsset_Implementation(const FAssetData&
 	{
 		return false;
 	}
-	return InObject && InAssetData.GetSoftObjectPath().ToString().StartsWith("/Engine/");
+
+	// Changelists are created and validated when submitting through the version control setup
+	return InObject && !InObject->IsA<UDataValidationChangelist>() && InAssetData.GetSoftObjectPath().ToString().StartsWith("/Engine/");
 }
 
 EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
