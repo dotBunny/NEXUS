@@ -5,20 +5,26 @@
 
 #include "NPickerParams.generated.h"
 
+/**
+ * Enumeration representing possible projection modes for point generation.
+ */
 UENUM(BlueprintType)
 enum class ENPickerProjectionMode : uint8
 {
 	None = 0,
-	Trace = 1,
-	NearestNavMeshV1 = 2
+	Trace = 1 UMETA(DisplayName="Line Trace (Collision)"),
+	NearestNavMeshV1 = 2 UMETA(DisplayName="Nearest NavMesh Point (V1)")
 };
 
+/**
+ * Structure representing the parameters used for the generation of points.
+ */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()
 
-	// InsideOrOn vs Inside vs On
+	// TODO: Is there a world where we change the logic to support Inside VS InsideOrOn when generating points
 	
 	/**
 	 * The number of points to generate in a single pass.
