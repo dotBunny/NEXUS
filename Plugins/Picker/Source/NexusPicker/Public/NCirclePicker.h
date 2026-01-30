@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NCirclePickerParams.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
@@ -17,6 +18,56 @@ class NEXUSPICKER_API FNCirclePicker
 {
 public:
 
+	/**
+	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Uses the deterministic random generator to ensure reproducible results.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Next(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
+
+	/**
+	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Uses the non-deterministic random generator for true randomness.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
+	
+
+	/**
+	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Useful for one-time random point generation with reproducible results.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Seed The random seed to use.
+	 * @param Params The parameters for the point generation.
+	 */
+	FORCEINLINE static void OneShot(TArray<FVector>& OutLocations, const int32 Seed, const FNCirclePickerParams& Params)
+	{
+		int32 DuplicateSeed = Seed;
+		Tracked(OutLocations, DuplicateSeed, Params);
+	}
+	
+	/**
+	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Updates the seed value to enable sequential random point generation.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Seed The random seed to start with, and update.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNCirclePickerParams& Params);
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	// NEXT POINT
 	
 	/**
@@ -248,5 +299,15 @@ public:
 		return	DistanceSquared >= FMath::Square(MinimumRadius) &&
 				DistanceSquared <= FMath::Square(MaximumRadius);
 		
+	}
+
+	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
+	{
+		TArray<bool> OutResults;
+		for (const FVector& Point : Points)
+		{
+			OutResults.Add(IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point));
+		}
+		return MoveTemp(OutResults);
 	}
 };

@@ -103,17 +103,25 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Checks if a point is inside or on the FBox.
-	 * @param Origin      The center point of the FBox.
-	 * @param Dimensions  The dimensions of the FBox.
-	 * @param Point       The point to check.
-	 * @return            True if the point is inside or on the FBox, false otherwise.
+	 * @param Origin The center point of the FBox.
+	 * @param Dimensions The dimensions of the FBox.
+	 * @param Point The point to check.
+	 * @return True if the point is inside or on the FBox, false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Box: Is Point Inside Or On?", Category = "NEXUS|Picker|Box")
 	static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Dimensions, const FVector& Point)
 	{
 		return FNBoxPicker::IsPointInsideOrOn(Origin, Dimensions, Point);
 	}
-	
+
+	/**
+	 * Checks if multiple points are inside or on the FBox.
+	 * @param Points Array of points to check.
+	 * @param Origin  The center point of the FBox.
+	 * @param MinimumDimensions The minimum dimensions of the FBox.
+	 * @param MaximumDimensions The maximum dimensions of the FBox.
+	 * @return Array of booleans indicating if each point is inside or on the FBox.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Box: Is Points Inside Or On?", Category = "NEXUS|Picker|Box")
 	static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
 	{

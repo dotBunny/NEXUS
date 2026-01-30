@@ -101,6 +101,15 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		Params.Count = Count;
 		FNBoxPicker::Tracked(OutLocations, Seed, Params);
 	}
+	else if (Distribution == ENActorPoolSpawnerDistribution::Radius)
+	{
+		FNCirclePickerParams Params;
+		Params.Origin = Origin;
+		Params.MinimumRadius = DistributionRange.X;
+		Params.MaximumRadius = DistributionRange.Y;
+		Params.Count = Count;
+		FNCirclePicker::Tracked(OutLocations, Seed, Params);
+	}
 	
 	
 	for (int32 i = 0; i < Count; i++)
@@ -115,9 +124,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			using enum ENActorPoolSpawnerDistribution;
 		case Radius:
-			FNCirclePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin, DistributionRange.X, DistributionRange.Y);
-			Seed++;
-			break;
+			SpawnLocation = OutLocations[i];break;
 		case Sphere:
 			FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin,DistributionRange.X, DistributionRange.Y);
 			Seed++;

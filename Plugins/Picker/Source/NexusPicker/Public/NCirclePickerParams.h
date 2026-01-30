@@ -15,7 +15,7 @@ struct NEXUSPICKER_API FNCirclePickerParams : public FNPickerParams
 	FRotator Rotation = FRotator::ZeroRotator;
 	
 	UPROPERTY()
-	float MinimumRadius = -1.f;
+	float MinimumRadius = 0.f;
 	
 	UPROPERTY()
 	float MaximumRadius = 10.f;
