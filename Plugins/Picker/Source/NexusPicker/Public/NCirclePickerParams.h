@@ -7,8 +7,8 @@
 #include "NCirclePickerParams.generated.h"
 
 /**
- * Parameters for the circle picker functionality, used to define boundaries
- * for generating points within a specified circle.
+ * Parameters for the circle picker functionality, used to define boundaries for generating points within a 
+ * specified circle.
  */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNCirclePickerParams : public FNPickerParams
