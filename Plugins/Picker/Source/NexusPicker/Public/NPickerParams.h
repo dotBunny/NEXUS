@@ -23,8 +23,6 @@ USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()
-
-	// TODO: Is there a world where we change the logic to support Inside VS InsideOrOn when generating points
 	
 	/**
 	 * The number of points to generate in a single pass.
@@ -33,7 +31,7 @@ struct NEXUSPICKER_API FNPickerParams
 	int Count = 1;
 	
 	/**
-	 * The world for line tracing.
+	 * The world for line tracing and drawing.
 	 */
 	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
 	TObjectPtr<UWorld> CachedWorld = nullptr;
