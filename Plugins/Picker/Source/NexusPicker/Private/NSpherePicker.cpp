@@ -31,7 +31,7 @@
 		} \
 	}
 #else
-#define N_PICKER_RECTANGLE_VLOG(HasMinimumDimensions)
+#define N_PICKER_SPHERE_VLOG(HasMinimumDimensions)
 #endif
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
