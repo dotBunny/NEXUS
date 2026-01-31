@@ -16,7 +16,7 @@ class NEXUSPICKER_API FNBoxPicker
 public:
 	
 	/**
-	 * Generates a deterministic point in relation to an FBox.
+	 * Generates a deterministic point in relation to an axis-aligned FBox.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -24,7 +24,7 @@ public:
 	static void Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
 
 	/**
-	 * Generates a random point in relation to an FBox.
+	 * Generates a random point in relation to an axis-aligned FBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -33,7 +33,7 @@ public:
 	
 
 	/**
-	 * Generates a random point in relation to an FBox.
+	 * Generates a random point in relation to an axis-aligned FBox.
 	 * Useful for one-time random point generation with reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
@@ -46,7 +46,7 @@ public:
 	}
 	
 	/**
-	 * Generates a random point in relation to an FBox.
+	 * Generates a random point in relation to an axis-aligned FBox.
 	 * Updates the seed value to enable sequential random point generation.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to start with, and update.
@@ -55,7 +55,7 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params);
 
 	/**
-	 * Checks if a point is inside or on the surface of the FBox.
+	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
 	 * @param Origin The center point of the FBox.
 	 * @param Dimensions The dimensions of the FBox.
 	 * @param Point The point to check.
@@ -68,7 +68,7 @@ public:
 	}
 
 	/**
-	 * Checks if multiple points are inside or on the surface of the FBox.
+	 * Checks if multiple points are inside or on the surface of the axis-aligned FBox.
 	 * @param Points The array of points to check.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumDimensions The minimum dimensions of the FBox.
