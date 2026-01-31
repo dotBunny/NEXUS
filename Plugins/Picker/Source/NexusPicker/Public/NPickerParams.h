@@ -31,12 +31,6 @@ struct NEXUSPICKER_API FNPickerParams
 	 */
 	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	int Count = 1;
-
-	/**
-	 * The center point when attempting to generate new points.
-	 */
-	UPROPERTY(Category = "Base", BlueprintReadWrite)
-	FVector Origin = FVector::ZeroVector;
 	
 	/**
 	 * The world for line tracing.

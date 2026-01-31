@@ -16,6 +16,12 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	GENERATED_BODY()
 	
 	/**
+	 * The center point when attempting to generate new points.
+	 */
+	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
+	FVector Origin = FVector::ZeroVector;
+	
+	/**
 	 * The inner dimensions of the rectangle (X = width, Y = height).
 	 */	
 	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)

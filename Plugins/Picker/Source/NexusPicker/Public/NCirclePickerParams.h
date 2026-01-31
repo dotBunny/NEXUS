@@ -16,6 +16,12 @@ struct NEXUSPICKER_API FNCirclePickerParams : public FNPickerParams
 	GENERATED_BODY()
 
 	/**
+	 * The center point when attempting to generate new points.
+	 */
+	UPROPERTY(Category = "Circle", BlueprintReadWrite)
+	FVector Origin = FVector::ZeroVector;
+
+	/**
 	 * The minimum radius of the circle (inner bound).
 	 */
 	UPROPERTY(Category = "Circle", BlueprintReadWrite)

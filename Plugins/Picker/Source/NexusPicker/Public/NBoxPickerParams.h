@@ -17,6 +17,11 @@ struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 	GENERATED_BODY()
 	
 	/**
+	 * The center point when attempting to generate new points.
+	 */
+	UPROPERTY(Category = "Box", BlueprintReadWrite)
+	FVector Origin = FVector::ZeroVector;
+	/**
 	 * The minimum dimensions to use when generating a point.
 	 * @note If left unset, will use simplified faster logic to generate points.
 	 */

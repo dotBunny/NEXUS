@@ -16,6 +16,12 @@ struct NEXUSPICKER_API FNSpherePickerParams : public FNPickerParams
 	GENERATED_BODY()
 
 	/**
+	 * The center point when attempting to generate new points.
+	 */
+	UPROPERTY(Category = "Sphere", BlueprintReadWrite)
+	FVector Origin = FVector::ZeroVector;
+	
+	/**
 	 * The minimum radius of the sphere (inner bound).
 	 */
 	UPROPERTY(Category = "Sphere", BlueprintReadWrite)

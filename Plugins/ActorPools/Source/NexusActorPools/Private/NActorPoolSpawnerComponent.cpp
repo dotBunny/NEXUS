@@ -87,67 +87,68 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
 	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
 	
-	const FRotator SpawnRotator = this->GetComponentRotation();
-	const FVector Origin = this->GetComponentLocation() + Offset;
-
-	// NEW API
 	TArray<FVector> OutLocations;
-	if (Distribution == ENActorPoolSpawnerDistribution::Box)
+	switch (Distribution)
 	{
-		FVector HalfDistribution = DistributionRange / 2.0f;
-		FNBoxPickerParams Params;
-		Params.Origin = Origin;
-		Params.MaximumDimensions = FBox(-HalfDistribution, HalfDistribution);
-		Params.Count = Count;
-		FNBoxPicker::Tracked(OutLocations, Seed, Params);
-	}
-	else if (Distribution == ENActorPoolSpawnerDistribution::Radius)
-	{
-		FNCirclePickerParams Params;
-		Params.Origin = Origin;
-		Params.MinimumRadius = DistributionRange.X;
-		Params.MaximumRadius = DistributionRange.Y;
-		Params.Count = Count;
-		FNCirclePicker::Tracked(OutLocations, Seed, Params);
-	}
-	else if (Distribution == ENActorPoolSpawnerDistribution::Sphere)
-	{
-		FNSpherePickerParams Params;
-		Params.Origin = Origin;
-		Params.MinimumRadius = DistributionRange.X;
-		Params.MaximumRadius = DistributionRange.Y;
-		Params.Count = Count;
-		FNSpherePicker::Tracked(OutLocations, Seed, Params);
+		using enum ENActorPoolSpawnerDistribution;
+	case Radius:
+		{
+			FNCirclePickerParams Params;
+			Params.Origin = this->GetComponentLocation() + Offset;
+			Params.MinimumRadius = DistributionRange.X;
+			Params.MaximumRadius = DistributionRange.Y;
+			Params.Count = Count;
+			FNCirclePicker::Tracked(OutLocations, Seed, Params);
+			break;
+		}
+	case Box:
+		{
+			FVector HalfDistribution = DistributionRange / 2.0f;
+			FNBoxPickerParams Params;
+			Params.Origin = this->GetComponentLocation() + Offset;
+			Params.MaximumDimensions = FBox(-HalfDistribution, HalfDistribution);
+			Params.Count = Count;
+			FNBoxPicker::Tracked(OutLocations, Seed, Params);
+			break;
+		}
+	case Sphere:
+		{
+			FNSpherePickerParams Params;
+			Params.Origin = this->GetComponentLocation() + Offset;
+			Params.MinimumRadius = DistributionRange.X;
+			Params.MaximumRadius = DistributionRange.Y;
+			Params.Count = Count;
+			FNSpherePicker::Tracked(OutLocations, Seed, Params);
+			break;
+		}
+	case Spline:
+		if (CachedSplineComponent != nullptr)
+		{
+			FNSplinePickerParams Params;
+			Params.SplineComponent = CachedSplineComponent;
+			Params.Count = Count;
+			FNSplinePicker::Tracked(OutLocations, Seed, Params);
+		}
+		else
+		{
+			UE_LOG(LogNexusActorPools, Error, TEXT("Unable to spawn actors as the USplineComponent is not valid."));
+			return;
+		}
+		break;
+	default: 
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to spawn actors as the distribution type is not valid."));
+		return;
 	}
 	
-	
+	const FRotator SpawnRotator = this->GetComponentRotation();
 	for (int32 i = 0; i < Count; i++)
 	{
-		FVector SpawnLocation = Origin;
 		int32 RandomIndex = 0;
 		if (TemplateCount > 1)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);
 		}
-		switch (Distribution)
-		{
-			using enum ENActorPoolSpawnerDistribution;
-		case Radius:
-		case Box:
-		case Sphere:
-			SpawnLocation = OutLocations[i];
-			break;
-		case Spline:
-			if (CachedSplineComponent != nullptr)
-			{
-				FNSplinePicker::RandomTrackedPointOn(Seed, SpawnLocation, CachedSplineComponent);
-				Seed++;
-			}
-			break;
-		default: ;
-		}
-		
-		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, SpawnLocation, SpawnRotator);
+		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
 	}
 	TimeSinceSpawned = 0;
 }
