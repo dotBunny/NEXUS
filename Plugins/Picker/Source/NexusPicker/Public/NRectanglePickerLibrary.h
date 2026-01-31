@@ -19,328 +19,87 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 {
 	GENERATED_BODY()
 
-	// NEXT POINT   
-
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
+	 * Uses the deterministic random generator to ensure reproducible results.
+	 * @param Params The parameters for the point generation. 
+	 * @param WorldContextObject Object that provides access to the world.
+	 * @returns An array of generated points.	 
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point (IO)", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point-io"))
-	static FVector NextPointInsideOrOn(const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator)
+	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point", Category = "NEXUS|Picker|Rectangle", 
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point", WorldContext = "WorldContextObject"))
+	static TArray<FVector> NextPoint(UPARAM(ref) FNRectanglePickerParams& Params, UObject* WorldContextObject)
 	{
-		FVector ReturnLocation;
-		FNRectanglePicker::NextPointInsideOrOn(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
-		return ReturnLocation;
+		TArray<FVector> ReturnLocations;
+		if (Params.CachedWorld == nullptr)
+		{
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+		}
+		FNRectanglePicker::Next(ReturnLocations, Params);
+		return MoveTemp(ReturnLocations);
 	}
-
+	
 	/**
-	 * Generates a deterministic point inside or on the boundary of a rectangle using simple dimensions.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
+	 * Generates a deterministic point inside or on the boundary of a rectangle.
+	 * Uses the non-deterministic random generator for true randomness.
+	 * @param Params The parameters for the point generation. 
+	 * @param WorldContextObject Object that provides access to the world.
+	 * @returns An array of generated points.	 
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point (IO) [Simple]", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point-io"))
-	static FVector NextPointInsideOrOnSimple(const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator)
+	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Point", Category = "NEXUS|Picker|Rectangle", 
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-point", WorldContext = "WorldContextObject"))
+	static TArray<FVector> RandomPoint(UPARAM(ref) FNRectanglePickerParams& Params, UObject* WorldContextObject)
 	{
-		FVector ReturnLocation;
-		FNRectanglePicker::NextPointInsideOrOnSimple(ReturnLocation, Origin, Dimensions, Rotation);
-		return ReturnLocation;
+		TArray<FVector> ReturnLocations;
+		if (Params.CachedWorld == nullptr)
+		{
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+		}
+		FNRectanglePicker::Random(ReturnLocations, Params);
+		return MoveTemp(ReturnLocations);
 	}
-
+	
 	/**
-	 * Generates a deterministic point inside or on the boundary of a rectangle, then projects it onto a surface in the world.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
+	 * Generates a deterministic point inside or on the boundary of a rectangle.
+	 * Updates the seed value to enable sequential random point generation.	 
+	 * @param Params The parameters for the point generation.
+	 * @param Seed The random seed to start with, and update.	  
+	 * @param WorldContextObject Object that provides access to the world.
+	 * @returns An array of generated points.	
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point Projected (IO)", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point-projected-io"))
-	static FVector NextPointInsideOrOnProjected(const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Tracked Point", Category = "NEXUS|Picker|Rectangle", 
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#tracked-point", WorldContext = "WorldContextObject"))
+	static TArray<FVector> TrackedPoint(UPARAM(ref) FNRectanglePickerParams& Params, UPARAM(ref) int32& Seed, UObject* WorldContextObject)
 	{
-		FVector ReturnLocation;
-		FNRectanglePicker::NextPointInsideOrOnProjected(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
+		TArray<FVector> ReturnLocations;
+		if (Params.CachedWorld == nullptr)
+		{
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+		}
+		FNRectanglePicker::Tracked(ReturnLocations, Seed, Params);
+		return MoveTemp(ReturnLocations);
 	}
-
+	
 	/**
-	 * Generates a deterministic point inside or on the boundary of a rectangle using simple dimensions, then projects it onto a surface in the world.
-	 * The projection is a line trace that starts at the generated point and extends along the specified direction.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point-projected-io"))
-	static FVector NextPointInsideOrOnSimpleProjected(const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
+	 * Generates a deterministic point inside or on the boundary of a rectangle.
+	 * Useful for one-time random point generation with reproducible results. 
+	 * @param Params The parameters for the point generation.
+	 * @param Seed The random seed to start with, and update.	  
+	 * @param WorldContextObject Object that provides access to the world.
+	 * @returns An array of generated points.	
+	 */	
+	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: One-Shot Point", Category = "NEXUS|Picker|Rectangle", 
+	meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#one-shot-point", WorldContext = "WorldContextObject"))
+	static TArray<FVector> OneShotPoint(UPARAM(ref) FNRectanglePickerParams& Params, const int32 Seed, UObject* WorldContextObject)
 	{
-		FVector ReturnLocation;
-		FNRectanglePicker::NextPointInsideOrOnSimpleProjected(ReturnLocation, Origin, Dimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
+		TArray<FVector> ReturnLocations;
+		if (Params.CachedWorld == nullptr)
+		{
+			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
+		}
+		FNRectanglePicker::OneShot(ReturnLocations, Seed, Params);
+		return MoveTemp(ReturnLocations);
 	}
-
-	// RANDOM POINT
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Point (IO)", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-point-io"))
-	static FVector RandomPointInsideOrOn(const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomPointInsideOrOn(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Point (IO) [Simple]", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-point-io"))
-	static FVector RandomPointInsideOrOnSimple(const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomPointInsideOrOnSimple(ReturnLocation, Origin, Dimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle, then projects it onto a surface in the world.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Point Projected (IO)", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-point-projected-io"))
-	static FVector RandomPointInsideOrOnProjected(const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomPointInsideOrOnProjected(ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions, then projects it onto a surface in the world.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-point-projected-io"))
-	static FVector RandomPointInsideOrOnSimpleProjected(const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomPointInsideOrOnSimpleProjected(ReturnLocation, Origin, Dimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	// RANDOM ONE-SHOT POINT
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using a provided seed.
-	 * @param Seed The random seed to use.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random One-Shot Point (IO)", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-one-shot-point-io"))
-	static FVector RandomOneShotPointInsideOrOn(const int32 Seed, const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomOneShotPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a provided seed.
-	 * @param Seed The random seed to use.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random One-Shot Point (IO) [Simple]", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-one-shot-point-io"))
-	static FVector RandomOneShotPointInsideOrOnSimple(const int32 Seed, const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomOneShotPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Dimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using a provided seed, then projects it onto a surface in the world.
-	 * @param Seed The random seed to use.
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random One-Shot Point Projected (IO)", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-one-shot-point-projected-io"))
-	static FVector RandomOneShotPointInsideOrOnProjected(const int32 Seed, const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomOneShotPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a provided seed, then projects it onto a surface in the world.
-	 * @param Seed The random seed to use.
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random One-Shot Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-one-shot-point-projected-io"))
-	static FVector RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomOneShotPointInsideOrOnSimpleProjected(Seed, ReturnLocation, Origin, Dimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	// RANDOM TRACKED POINT
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using a tracked seed.
-	 * @param Seed The random seed to use and modify (passed by reference).
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Tracked Point (IO)", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-tracked-point-io"))
-	static FVector RandomTrackedPointInsideOrOn(UPARAM(ref)int32& Seed, const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomTrackedPointInsideOrOn(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a tracked seed.
-	 * @param Seed The random seed to use and modify (passed by reference).
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return The generated point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Tracked Point (IO) [Simple]", Category = "NEXUS|Picker|Rectangle",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-tracked-point-io"))
-	static FVector RandomTrackedPointInsideOrOnSimple(UPARAM(ref)int32& Seed, const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomTrackedPointInsideOrOnSimple(Seed, ReturnLocation, Origin, Dimensions, Rotation);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using a tracked seed, then projects it onto a surface in the world.
-	 * @param Seed The random seed to use and modify (passed by reference).
-	 * @param Origin The center point of the rectangle.
-	 * @param MinimumDimensions The minimum dimensions of the rectangle (X = width, Y = height).
-	 * @param MaximumDimensions The maximum dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Tracked Point Projected (IO)", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-tracked-point-projected-io"))
-	static FVector RandomTrackedPointInsideOrOnProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const FVector2D MinimumDimensions, const FVector2D MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomTrackedPointInsideOrOnProjected(Seed, ReturnLocation, Origin, MinimumDimensions, MaximumDimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	/**
-	 * Generates a random point inside or on the boundary of a rectangle using simple dimensions and a tracked seed, then projects it onto a surface in the world.
-	 * @param Seed The random seed to use and modify (passed by reference).
-	 * @param Origin The center point of the rectangle.
-	 * @param Dimensions The dimensions of the rectangle (X = width, Y = height).
-	 * @param Rotation The rotation of the rectangle around its center.
-	 * @param WorldContextObject Object that provides context for accessing the world.
-	 * @param Projection Direction and distance of the projection line trace (default is downward).
-	 * @param CollisionChannel The collision channel to use for the line trace.
-	 * @return The generated and projected point location.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Random Tracked Point Projected (IO) [Simple]", Category = "NEXUS|Picker|Rectangle", meta = (WorldContext = "WorldContextObject",
-		DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#random-tracked-point-projected-io"))
-	static FVector RandomTrackedPointInsideOrOnSimpleProjected(UPARAM(ref)int32& Seed, const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation = FRotator::ZeroRotator,
-		UObject* WorldContextObject = nullptr, const FVector Projection = FVector(0,0,-500.f), const ECollisionChannel CollisionChannel = ECC_WorldStatic)
-	{
-		FVector ReturnLocation;
-		FNRectanglePicker::RandomTrackedPointInsideOrOnSimpleProjected(Seed, ReturnLocation, Origin, Dimensions, Rotation,
-			N_GET_WORLD_FROM_CONTEXT(WorldContextObject), Projection, CollisionChannel);
-		return ReturnLocation;
-	}
-
-	// ASSERT
 
 	/**
 	 * Checks whether a given point is inside or on the boundary of a rectangle.
@@ -354,5 +113,20 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 	static bool IsPointInsideOrOn(const FVector& Origin, const FVector2D Dimensions, const FRotator Rotation, const FVector& Point)
 	{
 		return FNRectanglePicker::IsPointInsideOrOn(Origin, Dimensions, Rotation, Point);
+	}
+	
+	/**
+	 * Checks if multiple points are inside or on the boundary of a rectangle.
+	 * @param Points Array of points to check.
+	 * @param Origin  The center point of the rectangle.
+	 * @param MinimumDimensions The minimum dimensions of the rectangle.
+	 * @param MaximumDimensions The maximum dimensions of the rectangle.
+	 * @param Rotation The rotation of the rectangle around its center.
+	 * @return Array of booleans indicating if each point is inside or on the rectangle.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Rectangle: Is Points Inside Or On?", Category = "NEXUS|Picker|Rectangle")
+	static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator Rotation = FRotator::ZeroRotator)
+	{
+		return FNRectanglePicker::IsPointsInsideOrOn(Points, Origin, MinimumDimensions, MaximumDimensions, Rotation);
 	}
 };

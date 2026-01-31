@@ -35,8 +35,10 @@
 #define N_PICKER_CIRCLE_VLOG
 #endif
 
-// #SONARQUBE-DISABLE-CPP_S107 Trying to keep all logic in one method
+// #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 
+#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
+#define RANDOM_FLOAT FNRandom::Deterministic.Float
 void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
 	N_PICKER_CIRCLE_PREFIX
@@ -47,8 +49,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -59,8 +61,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -70,8 +72,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION_SIMPLE);
 			}
 		}
@@ -83,8 +85,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -95,8 +97,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -106,8 +108,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::Deterministic.Float)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::Deterministic.FloatRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION);
 			}
 		}
@@ -115,7 +117,11 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 	
 	N_PICKER_CIRCLE_VLOG
 }
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
+#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_FLOAT FNRandom::NonDeterministic.FRand
 void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
 	N_PICKER_CIRCLE_PREFIX
@@ -126,8 +132,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -138,8 +144,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -149,8 +155,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION_SIMPLE);
 			}
 		}
@@ -162,8 +168,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -174,8 +180,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -185,8 +191,8 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(FNRandom::NonDeterministic.FRand)
-				N_PICKER_CIRCLE_RADIUS(FNRandom::NonDeterministic.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION);
 			}
 		}
@@ -194,13 +200,15 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 	
 	N_PICKER_CIRCLE_VLOG
 }
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
+#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_FLOAT RandomStream.FRand
 void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNCirclePickerParams& Params)
 {
-	N_PICKER_CIRCLE_PREFIX
-	
 	const FRandomStream RandomStream(Seed);
-	
+	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
@@ -208,8 +216,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -220,8 +228,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -231,8 +239,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION_SIMPLE);
 			}
 		}
@@ -244,8 +252,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -256,8 +264,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				FVector Location = N_PICKER_CIRCLE_LOCATION;
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -267,8 +275,8 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_CIRCLE_THETA(RandomStream.FRand)
-				N_PICKER_CIRCLE_RADIUS(RandomStream.FRandRange)
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
 				OutLocations.Add(N_PICKER_CIRCLE_LOCATION);
 			}
 		}
@@ -277,5 +285,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	N_PICKER_CIRCLE_VLOG
 	Seed = RandomStream.GetCurrentSeed();
 }
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
 // #SONARQUBE-ENABLE

@@ -11,12 +11,12 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
-	FRotator Rotation = FRotator::ZeroRotator;
-	
-	UPROPERTY()
+	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FVector2D MinimumDimensions = FVector2D::ZeroVector;
 
-	UPROPERTY()
+	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
 	FVector2D MaximumDimensions = FVector2D(1.f,1.f);
+	
+	UPROPERTY(Category = "Rectangle", BlueprintReadWrite)
+	FRotator Rotation = FRotator::ZeroRotator;
 };

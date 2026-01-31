@@ -16,12 +16,6 @@ struct NEXUSPICKER_API FNCirclePickerParams : public FNPickerParams
 	GENERATED_BODY()
 
 	/**
-	 * The rotation of the circle plane.
-	 */
-	UPROPERTY(Category = "Circle", BlueprintReadWrite)
-	FRotator Rotation = FRotator::ZeroRotator;
-
-	/**
 	 * The minimum radius of the circle (inner bound).
 	 */
 	UPROPERTY(Category = "Circle", BlueprintReadWrite)
@@ -32,4 +26,10 @@ struct NEXUSPICKER_API FNCirclePickerParams : public FNPickerParams
 	 */
 	UPROPERTY(Category = "Circle", BlueprintReadWrite)
 	float MaximumRadius = 10.f;
+	
+	/**
+	 * The rotation of the circle plane.
+	 */
+	UPROPERTY(Category = "Circle", BlueprintReadWrite)
+	FRotator Rotation = FRotator::ZeroRotator;
 };

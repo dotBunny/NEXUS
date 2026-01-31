@@ -28,7 +28,6 @@
 #define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX \
 	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Params.CachedWorld); \
 	FNavLocation NavLocation;
-
 #define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1 \
 	NavigationSystem->ProjectPointToNavigation(Location, NavLocation); \
 	if (Location != NavLocation.Location) \
@@ -37,60 +36,6 @@
 	}
 
 #if ENABLE_VISUAL_LOG
-
-// RECTANGLE
-
-#define N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, VerticesVariable) \
-		const float VerticesVariable##ExtentX = Dimensions.X * 0.5f; \
-		const float VerticesVariable##ExtentY = Dimensions.Y * 0.5f; \
-		TArray<FVector> VerticesVariable { \
-			Origin + Rotation.RotateVector(FVector(-VerticesVariable##ExtentX, -VerticesVariable##ExtentY, 0)), \
-			Origin + Rotation.RotateVector(FVector(-VerticesVariable##ExtentX, VerticesVariable##ExtentY, 0)), \
-			Origin + Rotation.RotateVector(FVector(VerticesVariable##ExtentX, VerticesVariable##ExtentY, 0)), \
-			Origin + Rotation.RotateVector(FVector(VerticesVariable##ExtentX, -VerticesVariable##ExtentY, 0)) \
-		};
-
-// Not a superfan of using segments
-#define N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, VerticesVariable, Color) \
-		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[0], VerticesVariable[1], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[1], VerticesVariable[2], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[2], VerticesVariable[3], Color, TEXT("")); \
-		UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[3], VerticesVariable[0], Color, TEXT(""));
-
-
-#define N_IMPLEMENT_VLOG_RECTANGLE() \
-	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
-	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MinimumDimensions, Rotation, MinimumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MinimumPoints, NEXUS::Picker::VLog::InnerColor); \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MaximumDimensions, Rotation, MaximumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, MaximumPoints, NEXUS::Picker::VLog::OuterColor); \
-		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE() \
-	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
-	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, Points) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(World, Points, NEXUS::Picker::VLog::OuterColor); \
-		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION() \
-	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MinimumDimensions, Rotation, MinimumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor); \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, MaximumDimensions, Rotation, MaximumPoints) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor); \
-		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION() \
-	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		N_IMPLEMENT_VLOG_RECTANGLE_VERTICES(Origin, Dimensions, Rotation, Points) \
-		N_IMPLEMENT_VLOG_RECTANGLE_DRAW(InWorld, Points, NEXUS::Picker::VLog::OuterColor); \
-		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
 
 // SPHERE
 
@@ -172,11 +117,6 @@
 	}
 
 #else
-
-#define N_IMPLEMENT_VLOG_RECTANGLE()
-#define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE()
-#define N_IMPLEMENT_VLOG_RECTANGLE_PROJECTION()
-#define N_IMPLEMENT_VLOG_RECTANGLE_SIMPLE_PROJECTION()
 
 #define N_IMPLEMENT_VLOG_SPHERE()
 #define N_IMPLEMENT_VLOG_SPHERE_SIMPLE()

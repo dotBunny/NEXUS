@@ -9,11 +9,10 @@
 
 ### Changed
 
-- `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names.
+- `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
-- Renamed `UNDynamicReferenceSubsystem` to `UNDynamicReferencesSubsystem`
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
-- All `FNBoxPicker` methods have been changed to take `FNBoxPickerParams` struct, change also made to `UNBoxPickerLibrary` methods.
+- All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a breaking change without any direct upgrade path.
 
 ### Fixed
 
@@ -38,7 +37,7 @@
 
 ### Changed
 
-- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
+- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where necessary.
 - Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
@@ -135,7 +134,7 @@
 
 ### Changed
 
-- Update detection now bumps ignored version to the installed version if its greater then the saved version.
+- Update detection now bumps the ignored version to the installed version if it is greater than the saved version.
 - Exposed all log categories for external reference.
 
 ### Fixed
@@ -157,7 +156,7 @@
 
 ### Changed
 
-- Altered GitHub actions to dispatch tests based on initial Unit test, as well as fixed up additional warnings thrown by EGS UE.
+- Altered GitHub actions to dispatch tests based on the initial Unit test, as well as fixed up additional warnings thrown by EGS UE.
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
@@ -233,7 +232,7 @@
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
 - `FNActorPool` will properly time-slice their strategies.
 - `FGCScopeGuard` guards like a boss during tests now.
-- Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc).
+- Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc.).
 - `UNActorPoolSpawnerComponent` will properly now allow BP editing of some variables.
 
 ### Changed
