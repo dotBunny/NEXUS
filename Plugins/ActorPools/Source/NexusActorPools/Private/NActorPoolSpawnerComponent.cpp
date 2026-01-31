@@ -135,6 +135,12 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			return;
 		}
 		break;
+	case Point:
+		for (int32 i = 0; i < Count; i++)
+		{
+			OutLocations.Add(this->GetComponentLocation() + Offset);
+		}
+		break;
 	default: 
 		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to spawn actors as the distribution type is not valid."));
 		return;
