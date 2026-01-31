@@ -64,7 +64,6 @@ public:
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const float Radius, const FVector& Point)
 	{
 		return FVector::Distance(Point, Origin) <= Radius;
-		//return (Origin - Point).Length() <= Radius;
 	}
 	
 	/**

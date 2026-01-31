@@ -37,36 +37,6 @@
 
 #if ENABLE_VISUAL_LOG
 
-// SPHERE
-
-#define N_IMPLEMENT_VLOG_SPHERE() \
-	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
-	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_SPHERE_SIMPLE() \
-	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
-	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(World, LogNexusPicker, Verbose, Origin, Radius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(World, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_SPHERE_PROJECTION() \
-	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
-#define N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION() \
-	if(InWorld != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
-		UE_VLOG_WIRESPHERE(InWorld, LogNexusPicker, Verbose, Origin, Radius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_LOCATION(InWorld, LogNexusPicker, Verbose, OutLocation, NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocation.ToCompactString()); \
-	}
-
 #define N_IMPLEMENT_VLOG_SPLINE() \
 	const UWorld* World = GEngine->GetCurrentPlayWorld(); \
 	if(World != nullptr && FNPickerUtils::bVisualLoggingEnabled && FVisualLogger::IsRecording()) { \
@@ -117,11 +87,6 @@
 	}
 
 #else
-
-#define N_IMPLEMENT_VLOG_SPHERE()
-#define N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
-#define N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
-#define N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
 
 #define N_IMPLEMENT_VLOG_SPLINE()
 #define N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
