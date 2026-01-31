@@ -110,6 +110,15 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		Params.Count = Count;
 		FNCirclePicker::Tracked(OutLocations, Seed, Params);
 	}
+	else if (Distribution == ENActorPoolSpawnerDistribution::Sphere)
+	{
+		FNSpherePickerParams Params;
+		Params.Origin = Origin;
+		Params.MinimumRadius = DistributionRange.X;
+		Params.MaximumRadius = DistributionRange.Y;
+		Params.Count = Count;
+		FNSpherePicker::Tracked(OutLocations, Seed, Params);
+	}
 	
 	
 	for (int32 i = 0; i < Count; i++)
@@ -124,12 +133,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			using enum ENActorPoolSpawnerDistribution;
 		case Radius:
-			SpawnLocation = OutLocations[i];break;
-		case Sphere:
-			FNSpherePicker::RandomTrackedPointInsideOrOn(Seed, SpawnLocation, Origin,DistributionRange.X, DistributionRange.Y);
-			Seed++;
-			break;
 		case Box:
+		case Sphere:
 			SpawnLocation = OutLocations[i];
 			break;
 		case Spline:
@@ -141,7 +146,6 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			break;
 		default: ;
 		}
-		
 		
 		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, SpawnLocation, SpawnRotator);
 	}

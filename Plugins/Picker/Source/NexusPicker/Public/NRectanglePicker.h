@@ -4,9 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NPickerMinimal.h"
-#include "NPickerUtils.h"
-#include "NRandom.h"
 #include "NRectanglePickerParams.h"
 
 /**
@@ -34,7 +31,6 @@ public:
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params);
 	
-
 	/**
 	 * Generates a deterministic point inside or on the plane of a rectangle.
 	 * Useful for one-time random point generation with reproducible results.

@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "NBoxPickerParams.h"
 
-
 /**
  * Provides various functions for generating points inside or on the surface of the FBox using different
  * random generation strategies (deterministic, non-deterministic, seeded).
@@ -91,6 +90,5 @@ public:
 			}
 		}
 		return MoveTemp(OutResults);
-		
 	}
 };

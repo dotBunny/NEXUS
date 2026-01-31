@@ -31,7 +31,6 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
-	
 
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.

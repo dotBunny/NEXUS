@@ -7,11 +7,18 @@
 #include "Components/SplineComponent.h"
 #include "NSplinePickerParams.generated.h"
 
+/**
+ * Parameters for the spline picker functionality, used to define boundaries for generating points within a 
+ * specified spline.
+ */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNSplinePickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-	
-	UPROPERTY()
+
+	/**
+	 * The spline component to generate points on.
+	 */
+	UPROPERTY(Category = "Spline", BlueprintReadWrite)
 	TObjectPtr<USplineComponent> SplineComponent = nullptr;
 };

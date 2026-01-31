@@ -6,14 +6,24 @@
 #include "NPickerParams.h"
 #include "NSpherePickerParams.generated.h"
 
+/**
+ * Parameters for the sphere picker functionality, used to define boundaries for generating points within a 
+ * specified sphere.
+ */
 USTRUCT(BlueprintType)
 struct NEXUSPICKER_API FNSpherePickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
-	
-	UPROPERTY()
+
+	/**
+	 * The minimum radius of the sphere (inner bound).
+	 */
+	UPROPERTY(Category = "Sphere", BlueprintReadWrite)
 	float MinimumRadius = 0.f;
-	
-	UPROPERTY()
+
+	/**
+	 * The maximum radius of the sphere (outer bound).
+	 */
+	UPROPERTY(Category = "Sphere", BlueprintReadWrite)
 	float MaximumRadius = 10.f;
 };

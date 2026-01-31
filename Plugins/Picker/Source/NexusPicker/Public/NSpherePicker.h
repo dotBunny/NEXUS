@@ -4,8 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NRandom.h"
-#include "NPickerUtils.h"
+#include "NSpherePickerParams.h"
 
 /** 
  * Provides various functions for generating points inside or on the surface of a sphere using different
@@ -16,279 +15,44 @@ class NEXUSPICKER_API FNSpherePicker
 {
 public:
 
-	// NEXT POINT
-	
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void NextPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
-	{
-		OutLocation = Origin + (FNRandom::Deterministic.VRand() * FNRandom::Deterministic.FloatRange(MinimumRadius, MaximumRadius));
-		N_IMPLEMENT_VLOG_SPHERE()
-	}
-
-	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
-	/**
-	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void NextPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		NextPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
-	}
-	// #SONARQUBE-ENABLE
+	static void Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params);
 
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 */
-	FORCEINLINE static void NextPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const float Radius)
-	{
-		OutLocation = Origin + (FNRandom::Deterministic.VRand() * Radius);
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
-	}
-
-	/**
-	 * Generates a deterministic point inside or on the surface of a sphere, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void NextPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const float Radius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		NextPointInsideOrOnSimple(OutLocation, Origin, Radius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
-	}
-
-	// RANDOM POINT
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomPointInsideOrOn(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
-	{
-		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * FNRandom::NonDeterministic.FRandRange(MinimumRadius, MaximumRadius));
-		N_IMPLEMENT_VLOG_SPHERE()
-	}
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomPointInsideOrOnProjected(FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomPointInsideOrOn(OutLocation, Origin, MinimumRadius, MaximumRadius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
-	}
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere.
-	 * Uses the non-deterministic random generator for true randomness.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 */
-	FORCEINLINE static void RandomPointInsideOrOnSimple(FVector& OutLocation, const FVector& Origin, const float Radius)
-	{
-		OutLocation = Origin + (FNRandom::NonDeterministic.VRand() * Radius);
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
-	}
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomPointInsideOrOnSimpleProjected(FVector& OutLocation, const FVector& Origin, const float Radius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomPointInsideOrOnSimple(OutLocation, Origin, Radius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
-	}
-
-	// RANDOM ONE-SHOT POINT
+	static void Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params);
 	
+
 	/**
-	 * Generates a random point inside or on the surface of a sphere using a provided seed.
+	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Useful for one-time random point generation with reproducible results.
+	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOn(const int32 Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	FORCEINLINE static void OneShot(TArray<FVector>& OutLocations, const int32 Seed, const FNSpherePickerParams& Params)
 	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
-		N_IMPLEMENT_VLOG_SPHERE()
-	}
-
-	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
-	/**
-	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
-	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOnProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomOneShotPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
-	}
-	// #SONARQUBE-ENABLE
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere using a provided seed.
-	 * Useful for one-time random point generation with reproducible results.
-	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOnSimple(const int32 Seed, FVector& OutLocation, const FVector& Origin, const float Radius)
-	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + (RandomStream.VRand() * Radius);
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
+		int32 DuplicateSeed = Seed;
+		Tracked(OutLocations, DuplicateSeed, Params);
 	}
 
 	/**
-	 * Generates a random point inside or on the surface of a sphere using a provided seed, then projects it to the world.
-	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomOneShotPointInsideOrOnSimpleProjected(const int32 Seed, FVector& OutLocation, const FVector& Origin, const float Radius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomOneShotPointInsideOrOnSimple(Seed, OutLocation, Origin, Radius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
-	}
-
-	// RANDOM TRACKED POINT
-	
-	/**
-	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation. 
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
-	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOn(int32& Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
-	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + (RandomStream.VRand() * RandomStream.FRandRange(MinimumRadius, MaximumRadius));
-		Seed = RandomStream.GetCurrentSeed();
-		N_IMPLEMENT_VLOG_SPHERE()
-	}
-
-	// #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary.
-	/**
-	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
+	 * Generates a deterministic point inside or on the surface of a sphere.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Seed The random seed to start with, and update.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOnProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomTrackedPointInsideOrOn(Seed, OutLocation, Origin, MinimumRadius, MaximumRadius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_PROJECTION()
-	}
-	// #SONARQUBE-ENABLE
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state.
-	 * Updates the seed value to enable sequential random point generation.
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOnSimple(int32& Seed, FVector& OutLocation, const FVector& Origin, const float Radius)
-	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = Origin + (RandomStream.VRand() * Radius);
-		Seed = RandomStream.GetCurrentSeed();
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE()
-	}
-
-	/**
-	 * Generates a random point inside or on the surface of a sphere while tracking the random seed state, then projects it to the world.
-	 * Updates the seed value to enable sequential random point generation.
-	 * @note Projected points are not constrained by the MinimumRadius, nor MaximumRadius.
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param Origin The center point of the sphere.
-	 * @param Radius The radius of the sphere.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomTrackedPointInsideOrOnSimpleProjected(int32& Seed, FVector& OutLocation, const FVector& Origin, const float Radius, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomTrackedPointInsideOrOnSimple(Seed, OutLocation, Origin, Radius);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPHERE_SIMPLE_PROJECTION()
-	}
-
-	// ASSERT
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params);	
 	
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.
@@ -299,6 +63,32 @@ public:
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const float Radius, const FVector& Point)
 	{
-		return (Origin - Point).Length() <= Radius;
+		return FVector::Distance(Point, Origin) <= Radius;
+		//return (Origin - Point).Length() <= Radius;
+	}
+	
+	/**
+	 * Checks if multiple points are inside or on the surface of a sphere.
+	 * @param Points The array of points to check.
+	 * @param Origin The center point of the FBox.
+	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
+	 * @param MaximumRadius The maximum radius of the sphere (inner bound).
+	 * @return An array of boolean values indicating if each point is inside or on the surface of a sphere.
+	 */
+	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
+	{
+		TArray<bool> OutResults;
+		for (const FVector& Point : Points)
+		{
+			if (IsPointInsideOrOn(Origin, MinimumRadius, Point) || !IsPointInsideOrOn(Origin, MaximumRadius, Point))
+			{
+				OutResults.Add(false);
+			}
+			else
+			{
+				OutResults.Add(true);
+			}
+		}
+		return MoveTemp(OutResults);
 	}
 };

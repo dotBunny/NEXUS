@@ -22,13 +22,13 @@
 	const float ExtentY = Params.MaximumDimensions.Y * 0.5f;
 #define N_PICKER_RECTANGLE_LOCATION(FloatValue, BooleanValue) \
 	Params.Origin + FVector( \
-		BooleanValue() ? FloatValue(-MinimumExtentX, -MaximumExtentX) : FloatValue(MinimumExtentX, MaximumExtentX), \
-		BooleanValue() ? FloatValue(-MinimumExtentY, -MaximumExtentY) : FloatValue(MinimumExtentY, MaximumExtentY), \
+		BooleanValue ? FloatValue(-MinimumExtentX, -MaximumExtentX) : FloatValue(MinimumExtentX, MaximumExtentX), \
+		BooleanValue ? FloatValue(-MinimumExtentY, -MaximumExtentY) : FloatValue(MinimumExtentY, MaximumExtentY), \
 		0.f)
 #define N_PICKER_RECTANGLE_LOCATION_ROTATION(FloatValue, BooleanValue) \
 	Params.Origin + Params.Rotation.RotateVector(FVector( \
-		BooleanValue() ? FloatValue(-MinimumExtentX, -MaximumExtentX) : FloatValue(MinimumExtentX, MaximumExtentX), \
-		BooleanValue() ? FloatValue(-MinimumExtentY, -MaximumExtentY) : FloatValue(MinimumExtentY, MaximumExtentY), \
+		BooleanValue ? FloatValue(-MinimumExtentX, -MaximumExtentX) : FloatValue(MinimumExtentX, MaximumExtentX), \
+		BooleanValue ? FloatValue(-MinimumExtentY, -MaximumExtentY) : FloatValue(MinimumExtentY, MaximumExtentY), \
 		0.f))
 #define N_PICKER_RECTANGLE_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector ( FloatValue(-ExtentX, ExtentX), FloatValue(-ExtentY, ExtentY), 0.f)
@@ -73,7 +73,7 @@
 // Excluded from code duplication
 
 #define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
-#define RANDOM_BOOL FNRandom::Deterministic.Bool
+#define RANDOM_BOOL FNRandom::Deterministic.Bool()
 void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX
@@ -212,8 +212,8 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_BOOL
 
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
-#define RANDOM_BOOL FNRandom::Deterministic.Bool
+#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_BOOL FNRandom::NonDeterministic.FRandRange(0.0f, 1.0f) >= 0.5f
 void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX
@@ -352,10 +352,11 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_BOOL
 
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
-#define RANDOM_BOOL FNRandom::Deterministic.Bool
+#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_BOOL RandomStream.FRandRange(0.0f, 1.0f) >= 0.5f
 void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params)
 {
+	const FRandomStream RandomStream(Seed);
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -488,6 +489,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 		}
 	}
 	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
+	Seed = RandomStream.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_BOOL
