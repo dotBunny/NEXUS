@@ -47,7 +47,9 @@
 #define N_PICKER_BOX_VLOG(HasMinimumDimensions)
 #endif
 
+
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
+// Excluded from code duplication
 
 #define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
 #define RANDOM_BOOL FNRandom::Deterministic.Bool()
