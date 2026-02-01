@@ -51,8 +51,14 @@ struct FNSamplesDisplayTitleSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Scale")
 	float TitleScale = 40.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Seperate Panel")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Text Offset")
+	FVector2D TitleTextOffset = FVector2D::ZeroVector;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Seperate Panel?")
 	bool bSeparateTitlePanel = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Horizontal Rule?")
+	bool bShowTitleHorizontalRule = true;
 };
 
 USTRUCT(BlueprintType)

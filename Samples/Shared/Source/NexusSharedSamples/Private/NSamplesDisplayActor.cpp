@@ -430,7 +430,7 @@ void ANSamplesDisplayActor::UpdateDescription() const
 		Origin = Parts->TitleTextComponent->GetRelativeLocation();
 	}
 
-	const float TitleSpacerOffset = (TitleSettings.TitleScale / 2.f) + 10.f;
+	const float TitleSpacerOffset = (TitleSettings.TitleScale / 2.f) + (TitleSettings.bShowTitleHorizontalRule ? 10.f : 0.f);
 	
 	FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionSettings.DescriptionTextPadding * .5f),
 		Origin.Z - TitleSpacerOffset - (DescriptionSettings.DescriptionTextPadding * .5f));
@@ -595,8 +595,8 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 			Parts->TitleTextComponent->SetRelativeTransform(
 				FTransform(
 					FRotator(40.f, 0.f, 0.f),
-					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f, 
-						TextAlignmentOffset(3.f, TitleSettings.bSeparateTitlePanel), 22.f),
+					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f + TitleSettings.TitleTextOffset.Y, 
+						TextAlignmentOffset(3.f, TitleSettings.bSeparateTitlePanel), 22.f) + TitleSettings.TitleTextOffset.X,
 					FVector::OneVector));
 			
 			Parts->TitleTextComponent->SetHorizontalAlignment(EHTA_Center);
@@ -639,7 +639,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 				LocationOffset,
 				FVector(0.01f, BaseSettings.Width - 1.f, 0.02f)
 				));
-		Parts->TitleSpacerComponent->SetVisibility(true);
+		Parts->TitleSpacerComponent->SetVisibility(TitleSettings.bShowTitleHorizontalRule);
 	}
 	else
 	{
@@ -684,10 +684,10 @@ float ANSamplesDisplayActor::TextAlignmentOffset(const float WidthAdjustment, co
 	case EHTA_Center:
 		return 0.f;
 	case EHTA_Right:
-		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * -100.f;
+		return (((BaseSettings.Width - WidthAdjustment) * 0.5f) * -100.f);
 	case EHTA_Left:
 	default:
-		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * 100.f;
+		return (((BaseSettings.Width - WidthAdjustment) * 0.5f) * 100.f);
 	}
 }
 
@@ -697,12 +697,15 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 	{
 		return FTransform(
 			FRotator(90.f, 0.f, 0.f),
-			FVector(BaseSettings.Depth * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
+			FVector(BaseSettings.Depth * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f) + TitleSettings.TitleTextOffset.Y, 
+				TextAlignmentOffset(1.0, false) + TitleSettings.TitleTextOffset.X, 
+				15.f),
 			FVector::OneVector);
 	}
 	return FTransform(
 			FRotator::ZeroRotator,
-			FVector(15.f, TextAlignmentOffset(1.0, false), BaseSettings.Height * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f)),
+			FVector(15.f, TextAlignmentOffset(1.0, false) + TitleSettings.TitleTextOffset.Y, 
+				BaseSettings.Height * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f)) + TitleSettings.TitleTextOffset.X,
 			FVector::OneVector);
 }
 

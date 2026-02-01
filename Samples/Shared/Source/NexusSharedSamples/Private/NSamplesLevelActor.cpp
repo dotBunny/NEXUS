@@ -3,7 +3,6 @@
 
 #include "NSamplesLevelActor.h"
 
-#include "NSamplesDisplayComponents.h"
 #include "Components/DecalComponent.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/ExponentialHeightFogComponent.h"
@@ -135,6 +134,8 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 	Components->SkySphere->SetupAttachment(RootComponent);
 	Components->SkySphere->SetWorldScale3D(FVector(400.f, 400.f, 400.f));
 	Components->SkySphere->SetWorldLocation(FVector(0.f, 70.f, 0.f));
+	
+
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SkySphereMeshAsset(TEXT("/Engine/EngineSky/SM_SkySphere"));
 	if (SkySphereMeshAsset.Succeeded())
 	{
@@ -144,6 +145,7 @@ ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitial
 		{
 			Components->SkySphere->SetMaterial(0, SkySphereMaterialAsset.Object);
 		}
+		Components->SkySphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 	Components->VolumetricCloud = CreateDefaultSubobject<UVolumetricCloudComponent>(TEXT("VolumetricCloud"), false);
 	Components->VolumetricCloud->SetupAttachment(RootComponent);

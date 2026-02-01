@@ -97,8 +97,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			FNCirclePickerParams Params;
 			Params.Origin = this->GetComponentLocation() + Offset;
-			Params.MinimumRadius = DistributionRange.X;
-			Params.MaximumRadius = DistributionRange.Y;
+			Params.MinimumRadius = DistributionRange.X * GetComponentScale().X;
+			Params.MaximumRadius = DistributionRange.Y * GetComponentScale().X;
 			//Params.Rotation = DistributionRotation;
 			Params.Count = Count;
 			FNCirclePicker::Tracked(OutLocations, Seed, Params);
@@ -106,7 +106,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		}
 	case Box:
 		{
-			FVector HalfDistribution = DistributionRange / 2.0f;
+			FVector HalfDistribution = GetDistributionRange() / 2.0f;
 			FNBoxPickerParams Params;
 			Params.Origin = this->GetComponentLocation() + Offset;
 			Params.MaximumDimensions = FBox(-HalfDistribution, HalfDistribution);
@@ -118,8 +118,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			FNSpherePickerParams Params;
 			Params.Origin = this->GetComponentLocation() + Offset;
-			Params.MinimumRadius = DistributionRange.X;
-			Params.MaximumRadius = DistributionRange.Y;
+			Params.MinimumRadius = DistributionRange.X * GetComponentScale().X;
+			Params.MaximumRadius = DistributionRange.Y * GetComponentScale().X;
 			Params.Count = Count;
 			FNSpherePicker::Tracked(OutLocations, Seed, Params);
 			break;
@@ -128,8 +128,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			FNOrientedBoxPickerParams Params;
 			Params.Origin = this->GetComponentLocation() + Offset;
-			Params.MaximumDimensions = DistributionRange;
-			Params.Rotation = DistributionRotation;
+			Params.MaximumDimensions = GetDistributionRange();
+			Params.Rotation = GetDistributionRotation();
 			Params.Count = Count;
 			FNOrientedBoxPicker::Tracked(OutLocations, Seed, Params);
 			break;

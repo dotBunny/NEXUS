@@ -58,5 +58,5 @@ FLinearColor FNColor::GetLinearColor(const ENColor& Color)
 
 FColor FNColor::GetColor(const ENColor& Color)
 {
-	return GetLinearColor(Color).ToFColor(true);
+	return GetLinearColor(Color).ToFColor(false);
 }

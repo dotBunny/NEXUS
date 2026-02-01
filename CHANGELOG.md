@@ -8,6 +8,9 @@
 - `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
 - All pickers now support finding the nearest point on a NavMesh (V1) via projection mode.
 - `FNOrientedBox`-ish method for generating points in a rotated box.
+- `ANSamplesDisplayActor` title settings now has `bShowTitleHorizontalRule` allowing for the title to be drawn with or without a horizontal rule.
+- `ANSamplesDisplayActor` title settings now has `TitleTextPadding` allowing for the title to have some padding from the edges.
+
 
 ### Changed
 
@@ -22,6 +25,7 @@
 - Added exception for `UDataValidationChangelist` to `UNEngineContentValidator` as when submitting with the Revision Control window the changelist object would prevent validation.
 - `FNCirclePicker::IsPointInsideOrOn` and `UNCirclePickerLibrary::IsPointInsideOrOn` now correctly return `true` when the point is inside a rotated circle.
 - Stopped `NActorPoolSubsystem` from ticking when it was not initialized.
+- `ANSamplesLevelActor` now properly flags the `SM_SkySphere` not to have any collisions, stopping a warning when building NavMesh.
 
 ### Removed
 

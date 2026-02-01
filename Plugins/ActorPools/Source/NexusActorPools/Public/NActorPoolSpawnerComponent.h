@@ -84,13 +84,6 @@ public:
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
 	
 	/**
-	* The dimensional rotation to the distribution method.
-	* @note Only applies to OrientedBox distribution method.
-	*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
-	FRotator DistributionRotation = FRotator::ZeroRotator;
-
-	/**
 	 * The in-level component reference for usage with the Spline distribution method.
 	 */
 	UPROPERTY(EditAnywhere, meta = (UseComponentPicker, AllowedClasses = "/Script/Engine.SplineComponent", AllowAnyActor, EditCondition="Distribution == ENActorPoolSpawnerDistribution::Spline", EditConditionHides), Category="Actor Pool Spawner")
@@ -156,8 +149,8 @@ public:
 	
 	FORCEINLINE FVector GetOffset() const { return Offset; }
 	FORCEINLINE ENActorPoolSpawnerDistribution GetDistribution() const { return Distribution; }
-	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange; }
-	FORCEINLINE FRotator GetDistributionRotation() const { return DistributionRotation; }
+	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange * GetComponentScale(); }
+	FORCEINLINE FRotator GetDistributionRotation() const { return GetComponentRotation(); }
 
 protected:
 	UPROPERTY(EditAnywhere, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")

@@ -62,7 +62,6 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 bool UNActorPoolSubsystem::IsTickable() const
 {
-	
 	return bHasTickableActorPools || bHasTickableSpawners || NEXUS::ActorPools::ConsoleCommands::bTrackStats;
 }
 
@@ -101,6 +100,8 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetOutCount())
 		}
 	}
+	
+	Super::Tick(DeltaTime);
 }
 
 bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings Settings)
