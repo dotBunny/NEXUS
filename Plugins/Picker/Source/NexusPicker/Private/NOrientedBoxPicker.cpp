@@ -42,12 +42,13 @@
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions) \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
-		FMatrix Matrix = FRotationMatrix::Make(Params.Rotation); \
+		FTransform VLogTransform(Params.Rotation, Params.Origin); \
+		FMatrix Matrix = VLogTransform.ToMatrixWithScale(); \
 		if(HasMinimumDimensions) \
 		{ \
-			UE_VLOG_OBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMinimumAlignedBox(), Matrix, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIREOBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMinimumAlignedBox(), Matrix, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
-		UE_VLOG_OBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMaximumAlignedBox(), Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_WIREOBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMaximumAlignedBox(), Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		for (int i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
@@ -57,6 +58,8 @@
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions)
 #endif
 
+// #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
+// Excluded from code duplication
 
 #define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
 #define RANDOM_BOOL FNRandom::Deterministic.Bool()
@@ -484,3 +487,5 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 }
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_BOOL
+
+// #SONARQUBE-ENABLE

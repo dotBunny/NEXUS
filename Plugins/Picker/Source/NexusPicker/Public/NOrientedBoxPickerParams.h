@@ -4,7 +4,6 @@
 #pragma once
 
 #include "NPickerParams.h"
-#include "WorldPartition/RuntimeHashSet/StaticSpatialIndex.h"
 #include "NOrientedBoxPickerParams.generated.h"
 
 
@@ -74,12 +73,12 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	FBox GetMinimumAlignedBox() const
 	{
 		const FVector Half = MinimumDimensions * 0.5f;
-		return FBox(Origin - Half, Origin + Half);
+		return FBox(- Half,  Half);
 	}
 	
 	FBox GetMaximumAlignedBox() const
 	{
 		const FVector Half = MaximumDimensions * 0.5f;
-		return FBox(Origin - Half, Origin + Half);
+		return FBox( -Half,  Half);
 	}
 };
