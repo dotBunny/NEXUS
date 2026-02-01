@@ -64,22 +64,13 @@ public:
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, const FVector& Point)
 	{
+		const FMatrix RotationMatrix = FRotationMatrix::Make(Rotation);
+		const FVector LocalPoint = RotationMatrix.InverseTransformPosition(Point - Origin);
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
-
-		if (Rotation.IsZero())
-		{
-			if (Point.Z != Origin.Z) return false;
-			if (Point.X < Origin.X - ExtentX || Point.X > Origin.X + ExtentX) return false;
-			if (Point.Y < Origin.Y - ExtentY || Point.Y > Origin.Y + ExtentY) return false;
-			return true;
-		}
-
-		const FVector UnrotatedPoint = Rotation.UnrotateVector(Point);
-		if (UnrotatedPoint.Z != Origin.Z) return false;
-		if (UnrotatedPoint.X < Origin.X - ExtentX || UnrotatedPoint.X > Origin.X + ExtentX) return false;
-		if (UnrotatedPoint.Y < Origin.Y - ExtentY || UnrotatedPoint.Y > Origin.Y + ExtentY) return false;
-		return true;
+		
+		return LocalPoint.X >= -ExtentX && LocalPoint.X <= ExtentX &&
+			   LocalPoint.Y >= -ExtentY && LocalPoint.Y <= ExtentY;
 	}
 
 	/**
