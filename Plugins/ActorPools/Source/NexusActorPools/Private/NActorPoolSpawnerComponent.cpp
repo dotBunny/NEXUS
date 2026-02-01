@@ -99,7 +99,6 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			Params.Origin = this->GetComponentLocation() + Offset;
 			Params.MinimumRadius = DistributionRange.X * GetComponentScale().X;
 			Params.MaximumRadius = DistributionRange.Y * GetComponentScale().X;
-			//Params.Rotation = DistributionRotation;
 			Params.Count = Count;
 			FNCirclePicker::Tracked(OutLocations, Seed, Params);
 			break;
