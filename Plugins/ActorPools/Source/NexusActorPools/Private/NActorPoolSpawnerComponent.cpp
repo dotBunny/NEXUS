@@ -6,6 +6,8 @@
 #include "NBoxPicker.h"
 #include "NCirclePicker.h"
 #include "NCoreMinimal.h"
+#include "NOrientedBoxPicker.h"
+#include "NOrientedBoxPickerParams.h"
 #include "NSpherePicker.h"
 #include "NSplinePicker.h"
 #include "Components/SplineComponent.h"
@@ -97,6 +99,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			Params.Origin = this->GetComponentLocation() + Offset;
 			Params.MinimumRadius = DistributionRange.X;
 			Params.MaximumRadius = DistributionRange.Y;
+			//Params.Rotation = DistributionRotation;
 			Params.Count = Count;
 			FNCirclePicker::Tracked(OutLocations, Seed, Params);
 			break;
@@ -119,6 +122,16 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			Params.MaximumRadius = DistributionRange.Y;
 			Params.Count = Count;
 			FNSpherePicker::Tracked(OutLocations, Seed, Params);
+			break;
+		}
+	case OrientedBox:
+		{
+			FNOrientedBoxPickerParams Params;
+			Params.Origin = this->GetComponentLocation() + Offset;
+			Params.MaximumDimensions = DistributionRange;
+			Params.Rotation = DistributionRotation;
+			Params.Count = Count;
+			FNOrientedBoxPicker::Tracked(OutLocations, Seed, Params);
 			break;
 		}
 	case Spline:

@@ -29,7 +29,6 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 				Settings->DistributionOuterColor, 5.f, Settings->DebugCircleSides, SDPG_Foreground, Settings->DebugLineThickness);
 			break;
 		}
-		
 		case Radius:
 		{
 			const FVector RadiusRange = SpawnerComponent->GetDistributionRange();
@@ -41,7 +40,6 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 				Settings->DistributionOuterColor, RadiusRange.Y, Settings->DebugCircleSides, SDPG_Foreground, Settings->DebugLineThickness);
 			break;
 		}
-
 		case Sphere:
 		{
 			const FVector SphereRange = SpawnerComponent->GetDistributionRange();
@@ -50,15 +48,22 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 			DrawWireSphere(PDI, SphereTransform, Settings->DistributionOuterColor, SphereRange.Y, Settings->DebugCircleSides, SDPG_Foreground, Settings->DebugLineThickness);
 			break;
 		}
-
 		case Box:
 		{
 			const FVector BoxRange = SpawnerComponent->GetDistributionRange();
-			const FBox Box = FBox(Origin - BoxRange, Origin + BoxRange);
-			DrawWireBox(PDI, Box, Settings->DistributionOuterColor, SDPG_Foreground, Settings->DebugLineThickness);
+			const FBox ABox = FBox(Origin - BoxRange, Origin + BoxRange);
+			DrawWireBox(PDI, ABox, Settings->DistributionOuterColor, SDPG_Foreground, Settings->DebugLineThickness);
 			break;
 		}
-
+		case OrientedBox:
+		{
+			FTransform VLogTransform(SpawnerComponent->GetDistributionRotation(), SpawnerComponent->GetComponentTransform().GetLocation());
+			FMatrix Matrix = VLogTransform.ToMatrixWithScale();
+			const FVector BoxRange = SpawnerComponent->GetDistributionRange() * 0.5f;
+			const FBox OBox = FBox(-BoxRange, BoxRange);
+			DrawWireBox(PDI, Matrix, OBox, Settings->DistributionOuterColor, SDPG_Foreground, Settings->DebugLineThickness);
+			break;
+		}
 		case Spline:
 		{
 			break;
