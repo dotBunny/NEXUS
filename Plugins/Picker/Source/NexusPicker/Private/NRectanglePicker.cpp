@@ -56,10 +56,10 @@
 		if(HasMinimumDimensions) \
 		{ \
 			N_PICKER_RECTANGLE_VLOG_VERTICES(Params.Origin, Params.MinimumDimensions, Params.Rotation, MinimumPoints) \
-			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor); \
+			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor) \
 		} \
 		N_PICKER_RECTANGLE_VLOG_VERTICES(Params.Origin, Params.MaximumDimensions, Params.Rotation, MaximumPoints) \
-		N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor); \
+		N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor) \
 		for (int i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \

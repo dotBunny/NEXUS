@@ -70,4 +70,16 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 			MaxPoint.Y - MinPoint.Y, 
 			MaxPoint.Z - MinPoint.Z);
 	}
+	
+	FBox GetMinimumAlignedBox() const
+	{
+		const FVector Half = MinimumDimensions * 0.5f;
+		return FBox(Origin - Half, Origin + Half);
+	}
+	
+	FBox GetMaximumAlignedBox() const
+	{
+		const FVector Half = MaximumDimensions * 0.5f;
+		return FBox(Origin - Half, Origin + Half);
+	}
 };

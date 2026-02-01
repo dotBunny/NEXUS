@@ -42,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Box")
 	static void TimerDrawComboBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1);
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo OrientedBox")
+	static void TimerDrawComboOrientedBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FVector& InnerDimensions, const FVector& OuterDimensions, const FRotator& Rotation, const int TimerIntervals = 1);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Circle")
 	static void TimerDrawCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1);
 	

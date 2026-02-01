@@ -49,16 +49,31 @@ void UNSamplesDisplayLibrary::TimerDrawComboBox(ANSamplesDisplayActor* SamplesDi
 	const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals)
 {
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, InnerDimensions.GetExtent(),
-			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
-			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+		FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+		SDPG_World, NEXUS::Samples::TimerDrawThickness);
 
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, OuterDimensions.GetExtent(),
-	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 SDPG_World, NEXUS::Samples::TimerDrawThickness);	
 }
 
+void UNSamplesDisplayLibrary::TimerDrawComboOrientedBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
+	const FVector& InnerDimensions, const FVector& OuterDimensions, const FRotator& Rotation, const int TimerIntervals)
+{
+	FVector MinExtents = InnerDimensions * 0.5f;
+	FVector MaxExtents = OuterDimensions * 0.5f;
+	
+	DrawDebugBox(SamplesDisplay->GetWorld(), Location, MinExtents, Rotation.Quaternion(),
+			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+	
+	DrawDebugBox(SamplesDisplay->GetWorld(), Location, MaxExtents, Rotation.Quaternion(),
+			FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+}
+
 void UNSamplesDisplayLibrary::TimerDrawCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float& Radius,
-	const FRotator& Rotation, const int TimerIntervals)
+                                              const FRotator& Rotation, const int TimerIntervals)
 {
 	FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
 	DrawMatrix.SetOrigin(Location);
