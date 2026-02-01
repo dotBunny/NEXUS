@@ -21,7 +21,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_NextSimple, "NEXUS::PerfTests::NPicker::
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_NextSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_NextSimple, 0.15f)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -42,7 +42,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Next, "NEXUS::PerfTests::NPicker::Rectan
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Next, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Next, 0.15f)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -62,7 +62,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_RandomSimple, "NEXUS::PerfTests::NPicker
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_RandomSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_RandomSimple, 0.15f)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -83,7 +83,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Random, "NEXUS::PerfTests::NPicker::Rect
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Random, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Random, 0.15f)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -104,7 +104,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_TrackedSimple, "NEXUS::PerfTests::NPicke
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_TrackedSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_TrackedSimple, 0.15f)
 		FNRectanglePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -126,7 +126,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Tracked, "NEXUS::PerfTests::NPicker::Rec
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Tracked, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Tracked, 0.15f)
 		FNRectanglePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer

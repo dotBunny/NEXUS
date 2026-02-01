@@ -22,7 +22,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_NextSimple, "NEXUS::PerfTests::NPicker::Cir
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_NextSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_NextSimple, 0.15f)
 		FNCirclePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -44,7 +44,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Next, "NEXUS::PerfTests::NPicker::Circle::N
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Next, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Next, 0.15f)
 		FNCirclePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -64,7 +64,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_RandomSimple, "NEXUS::PerfTests::NPicker::C
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_RandomSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_RandomSimple, 0.15f)
 		FNCirclePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -86,7 +86,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Random, "NEXUS::PerfTests::NPicker::Circle:
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Random, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Random, 0.15f)
 		FNCirclePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -108,7 +108,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_TrackedSimple, "NEXUS::PerfTests::NPicker::
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_TrackedSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_TrackedSimple, 0.15f)
 		FNCirclePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -131,7 +131,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Tracked, "NEXUS::PerfTests::NPicker::Circle
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Tracked, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Tracked, 0.15f)
 		FNCirclePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer

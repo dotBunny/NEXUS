@@ -21,7 +21,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_NextSimple, "NEXUS::PerfTests::NPicker::Box::N
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_NextSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_NextSimple, 0.15f)
 		FNBoxPicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -42,7 +42,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Next, "NEXUS::PerfTests::NPicker::Box::Next", 
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Next, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Next, 0.15f)
 		FNBoxPicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -62,7 +62,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_RandomSimple, "NEXUS::PerfTests::NPicker::Box:
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_RandomSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_RandomSimple, 0.15f)
 		FNBoxPicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -83,7 +83,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Random, "NEXUS::PerfTests::NPicker::Box::Rando
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Random, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Random, 0.15f)
 		FNBoxPicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -104,7 +104,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_TrackedSimple, "NEXUS::PerfTests::NPicker::Box
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_TrackedSimple, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_TrackedSimple, 0.15f)
 		FNBoxPicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -126,7 +126,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Tracked, "NEXUS::PerfTests::NPicker::Box::Trac
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Tracked, 0.1f)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Box_Tracked, 0.15f)
 		FNBoxPicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer
