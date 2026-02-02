@@ -7,6 +7,8 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
+// TODO: Extents seems wrong
+
 #define N_PICKER_ORIENTED_BOX_PREFIX \
 	const int OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumDimensions.IsZero(); \
