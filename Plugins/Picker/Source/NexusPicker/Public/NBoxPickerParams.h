@@ -27,65 +27,77 @@ struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 	 * @note If left unset, will use simplified faster logic to generate points.
 	 */
 	UPROPERTY(Category = "Box", BlueprintReadWrite)
-	FBox MinimumDimensions = FBox(ForceInit);
+	FBox MinimumBox = FBox(ForceInit);
 	
 	/**
 	 * The maximum dimensions to use when generating a point.
 	 */
 	UPROPERTY(Category = "Box", BlueprintReadWrite)
-	FBox MaximumDimensions = FBox(ForceInit);
-	
+	FBox MaximumBox = FBox(ForceInit);
+
+	/**
+	 * 
+	 * @return An array of FBox regions that can be used respecting the min/max FBox.
+	 */
 	TArray<FBox> GetRegions() const
 	{
 		TArray<FBox> ValidRegions;
-		ValidRegions.Reserve(6);
-		if (!MaximumDimensions.IsInside(MinimumDimensions.Min) || !MaximumDimensions.IsInside(MinimumDimensions.Max))
+		if (MinimumBox.IsValid == 0 || !MaximumBox.IsInside(MinimumBox.Min) || !MaximumBox.IsInside(MinimumBox.Max))
 		{
-			UE_LOG(LogNexusPicker, Log, TEXT("Invalid minimum dimensions (%s) detected. Using MaximumDimensions(%s) as region."), *MinimumDimensions.ToCompactString(), *MaximumDimensions.ToCompactString());
-			ValidRegions.Add(MaximumDimensions);
+			UE_LOG(LogNexusPicker, Log, TEXT("Invalid minimum dimensions (%s) detected. Using MaximumDimensions(%s) as region."), *MinimumBox.ToCompactString(), *MaximumBox.ToCompactString());
+			ValidRegions.Add(MaximumBox);
 		}
 		else
 		{
-			if (MaximumDimensions.Min.X < MinimumDimensions.Min.X) // LEFT
+			// Reserve the number of possible sides just because
+			ValidRegions.Reserve(6);
+			
+			// Left Region
+			if (MaximumBox.Min.X < MinimumBox.Min.X)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MaximumDimensions.Min.X, MaximumDimensions.Min.Y, MaximumDimensions.Min.Z),
-					FVector(MinimumDimensions.Min.X, MaximumDimensions.Max.Y, MaximumDimensions.Max.Z)
+					FVector(MaximumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+					FVector(MinimumBox.Min.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
 				));
 			}
-			if (MaximumDimensions.Max.X > MinimumDimensions.Max.X) // RIGHT
+			// Right Region
+			if (MaximumBox.Max.X > MinimumBox.Max.X)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MinimumDimensions.Max.X, MaximumDimensions.Min.Y, MaximumDimensions.Min.Z),
-					FVector(MaximumDimensions.Max.X, MaximumDimensions.Max.Y, MaximumDimensions.Max.Z)
+					FVector(MinimumBox.Max.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+					FVector(MaximumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
 				));
 			}
-			if (MaximumDimensions.Min.Y < MinimumDimensions.Min.Y) // FRONT
+			// Front Region
+			if (MaximumBox.Min.Y < MinimumBox.Min.Y)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MinimumDimensions.Min.X, MaximumDimensions.Min.Y, MaximumDimensions.Min.Z),
-					FVector(MinimumDimensions.Max.X, MinimumDimensions.Min.Y, MinimumDimensions.Max.Z)
+					FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+					FVector(MinimumBox.Max.X, MinimumBox.Min.Y, MinimumBox.Max.Z)
 				));
 			}
-			if (MaximumDimensions.Max.Y > MinimumDimensions.Max.Y) // BACK
+			// Back Region
+			if (MaximumBox.Max.Y > MinimumBox.Max.Y)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MinimumDimensions.Min.X, MinimumDimensions.Max.Y, MinimumDimensions.Min.Z),
-					FVector(MinimumDimensions.Max.X, MaximumDimensions.Max.Y, MaximumDimensions.Max.Z)
+					FVector(MinimumBox.Min.X, MinimumBox.Max.Y, MinimumBox.Min.Z),
+					FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
 				));
 			}
-			if (MaximumDimensions.Min.Z < MinimumDimensions.Min.Z) // BOTTOM
+			// Bottom Region
+			if (MaximumBox.Min.Z < MinimumBox.Min.Z)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MinimumDimensions.Min.X, MinimumDimensions.Min.Y, MaximumDimensions.Min.Z),
-					FVector(MinimumDimensions.Max.X, MinimumDimensions.Max.Y, MinimumDimensions.Min.Z)
+					FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MaximumBox.Min.Z),
+					FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MinimumBox.Min.Z)
 				));
 			}
-			if (MaximumDimensions.Max.Z > MinimumDimensions.Max.Z) // TOP
+			// Top Region
+			if (MaximumBox.Max.Z > MinimumBox.Max.Z)
 			{
 				ValidRegions.Add(FBox(
-					FVector(MinimumDimensions.Min.X, MinimumDimensions.Min.Y, MinimumDimensions.Max.Z),
-					FVector(MinimumDimensions.Max.X, MinimumDimensions.Max.Y, MaximumDimensions.Max.Z)
+					FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MinimumBox.Max.Z),
+					FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MaximumBox.Max.Z)
 				));
 			}
 		}

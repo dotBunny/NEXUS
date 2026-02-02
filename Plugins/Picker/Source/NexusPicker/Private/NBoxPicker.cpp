@@ -10,7 +10,7 @@
 
 #define N_PICKER_BOX_PREFIX \
 	const int OutLocationsStartIndex = OutLocations.Num(); \
-	const bool bSimpleMode = Params.MinimumDimensions.IsValid == 0; \
+	const bool bSimpleMode = Params.MinimumBox.IsValid == 0; \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_BOX_REGION \
 	TArray<FBox> ValidRegions = Params.GetRegions();
@@ -18,9 +18,9 @@
 	FBox Region = ValidRegions[RandomIndex(0,ValidRegions.Num()-1)];
 #define N_PICKER_BOX_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(Params.MaximumDimensions.Min.X, Params.MaximumDimensions.Max.X), \
-		FloatValue(Params.MaximumDimensions.Min.Y, Params.MaximumDimensions.Max.Y), \
-		FloatValue(Params.MaximumDimensions.Min.Z, Params.MaximumDimensions.Max.Z))
+		FloatValue(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X), \
+		FloatValue(Params.MaximumBox.Min.Y, Params.MaximumBox.Max.Y), \
+		FloatValue(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z))
 #define N_PICKER_BOX_LOCATION(FloatValue) \
 	Params.Origin + FVector( \
 		FloatValue(Region.Min.X, Region.Max.X), \
@@ -28,16 +28,16 @@
 		FloatValue(Region.Min.Z, Region.Max.Z))
 
 #if ENABLE_VISUAL_LOG
-#define N_PICKER_BOX_VLOG(HasMinimumDimensions) \
+#define N_PICKER_BOX_VLOG(HasMinimumBox) \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
-		if(HasMinimumDimensions) \
+		if(HasMinimumBox) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumBox.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
-		if(Params.MaximumDimensions.IsValid != 0) \
+		if(Params.MaximumBox.IsValid != 0) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumDimensions.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumBox.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		for (int i = 0; i < Params.Count; i++) \
 		{ \
@@ -45,7 +45,7 @@
 		} \
 	}
 #else
-#define N_PICKER_BOX_VLOG(HasMinimumDimensions)
+#define N_PICKER_BOX_VLOG(HasMinimumBox)
 #endif
 
 

@@ -108,7 +108,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 			FVector HalfDistribution = GetDistributionRange() / 2.0f;
 			FNBoxPickerParams Params;
 			Params.Origin = this->GetComponentLocation() + Offset;
-			Params.MaximumDimensions = FBox(-HalfDistribution, HalfDistribution);
+			Params.MaximumBox = FBox(-HalfDistribution, HalfDistribution);
 			Params.Count = Count;
 			FNBoxPicker::Tracked(OutLocations, Seed, Params);
 			break;

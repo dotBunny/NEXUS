@@ -57,30 +57,29 @@ public:
 	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
 	 * @param Origin The center point of the FBox.
-	 * @param Dimensions The dimensions of the FBox.
+	 * @param Box The FBox to check if the point against.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the surface of the FBox, false otherwise.
 	 */
-	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Dimensions, const FVector& Point)
+	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Box, const FVector& Point)
 	{
-		const FBox Box(Origin + Dimensions.Min, Origin + Dimensions.Max);
-		return Box.IsInsideOrOn(Point);
+		return Box.MoveTo(Origin).IsInsideOrOn(Point);
 	}
 
 	/**
 	 * Checks if multiple points are inside or on the surface of the axis-aligned FBox.
 	 * @param Points The array of points to check.
 	 * @param Origin The center point of the FBox.
-	 * @param MinimumDimensions The minimum dimensions of the FBox.
-	 * @param MaximumDimensions The maximum dimensions of the FBox.
+	 * @param MinimumBox The minimum FBox.
+	 * @param MaximumBox The maximum FBox.
 	 * @return An array of boolean values indicating if each point is inside or on the surface of the FBox.
 	 */
-	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumDimensions, const FBox& MaximumDimensions)
+	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox)
 	{
 		TArray<bool> OutResults;
 		for (const FVector& Point : Points)
 		{
-			if (IsPointInsideOrOn(Origin, MinimumDimensions, Point) || !IsPointInsideOrOn(Origin, MaximumDimensions, Point))
+			if (IsPointInsideOrOn(Origin, MinimumBox, Point) || !IsPointInsideOrOn(Origin, MaximumBox, Point))
 			{
 				OutResults.Add(false);
 			}

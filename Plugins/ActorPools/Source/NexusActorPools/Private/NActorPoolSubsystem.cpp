@@ -99,9 +99,7 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetInCount())
 			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetOutCount())
 		}
-	}
-	
-	Super::Tick(DeltaTime);
+	};
 }
 
 bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings Settings)
