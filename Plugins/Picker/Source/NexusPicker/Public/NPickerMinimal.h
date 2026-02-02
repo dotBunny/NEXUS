@@ -8,6 +8,7 @@ namespace NEXUS::Picker
 	constexpr float Tolerance = 0.01f;
 	namespace VLog
 	{
+		const FColor DivisionColor = FColor::Red;
 		const FColor InnerColor = FColor::Black;
 		const FColor OuterColor = FColor::White;
 		const FColor PointColor = FColor::Green;

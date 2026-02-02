@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NColor.h"
 #include "Components/SplineComponent.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NSamplesDisplayLibrary.generated.h"
@@ -25,10 +26,10 @@ class UNSamplesDisplayLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Samples Display", DisplayName="Draw Point")
-	static void TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const int TimerIntervals = 1);
+	static void TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const int TimerIntervals = 1, ENColor Color = ENColor::NC_Red, float Size = 10.f);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Samples Display", DisplayName="Draw Points")
-	static void TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations, const int TimerIntervals = 1);
+	static void TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations, const int TimerIntervals = 1, ENColor Color = ENColor::NC_Red, float Size = 10.f);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Sphere")
 	static void TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius, const int TimerIntervals = 1);

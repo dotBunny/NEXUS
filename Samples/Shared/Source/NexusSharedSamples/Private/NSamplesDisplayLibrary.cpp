@@ -5,18 +5,18 @@
 FMatrix UNSamplesDisplayLibrary::BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 
 void UNSamplesDisplayLibrary::TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
-	const int TimerIntervals)
+	const int TimerIntervals, const ENColor Color, const float Size)
 {
-	DrawDebugPoint(SamplesDisplay->GetWorld(), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
+	DrawDebugPoint(SamplesDisplay->GetWorld(), Location, Size, FNColor::GetColor(Color),
 	false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 }
 
 void UNSamplesDisplayLibrary::TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations,
-	const int TimerIntervals)
+	const int TimerIntervals, const ENColor Color, const float Size)
 {
 	for (const FVector& Location : Locations)
 	{
-		DrawDebugPoint(SamplesDisplay->GetWorld(), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
+		DrawDebugPoint(SamplesDisplay->GetWorld(), Location, Size, FNColor::GetColor(Color),
 			false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 	}
 }

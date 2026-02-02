@@ -12,10 +12,8 @@
 	const int OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumBox.IsValid == 0; \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
-#define N_PICKER_BOX_REGION \
-	TArray<FBox> ValidRegions = Params.GetRegions();
-#define N_PICKER_BOX_REGION_CHOICE(RandomIndex) \
-	FBox Region = ValidRegions[RandomIndex(0,ValidRegions.Num()-1)];
+#define N_PICKER_BOX_VALID_BOXES_CHOICE(RandomIndex) \
+	FBox ChosenBox = ValidBoxes[RandomIndex(0,ValidBoxes.Num()-1)];
 #define N_PICKER_BOX_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector( \
 		FloatValue(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X), \
@@ -23,11 +21,21 @@
 		FloatValue(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z))
 #define N_PICKER_BOX_LOCATION(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(Region.Min.X, Region.Max.X), \
-		FloatValue(Region.Min.Y, Region.Max.Y), \
-		FloatValue(Region.Min.Z, Region.Max.Z))
+		FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
+		FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
+		FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z))
 
 #if ENABLE_VISUAL_LOG
+#define N_PICKER_BOX_VALID_BOXES \
+	TArray<FBox> ValidBoxes = Params.GetValidBoxes(); \
+	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	{ \
+		for(int v = 0; v < ValidBoxes.Num(); v++) \
+		{ \
+			FBox Temp = ValidBoxes[v].MoveTo(Params.Origin); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Temp, NEXUS::Picker::VLog::DivisionColor, TEXT("")); \
+		} \
+	}
 #define N_PICKER_BOX_VLOG(HasMinimumBox) \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
@@ -46,6 +54,8 @@
 	}
 #else
 #define N_PICKER_BOX_VLOG(HasMinimumBox)
+#define N_PICKER_BOX_VALID_BOXES \
+	TArray<FBox> ValidBoxes = Params.GetValidBoxes();
 #endif
 
 
@@ -90,14 +100,14 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 	}
 	else
 	{
-		N_PICKER_BOX_REGION
+		N_PICKER_BOX_VALID_BOXES
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -108,7 +118,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -118,7 +128,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				OutLocations.Add(N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 			}
 		}
@@ -167,14 +177,14 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 	}
 	else
 	{
-		N_PICKER_BOX_REGION
+		N_PICKER_BOX_VALID_BOXES
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -185,7 +195,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -195,7 +205,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				OutLocations.Add(N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 			}
 		}
@@ -245,14 +255,14 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	}
 	else
 	{
-		N_PICKER_BOX_REGION
+		N_PICKER_BOX_VALID_BOXES
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_TRACE
 				OutLocations.Add(Location);
@@ -263,7 +273,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
 				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 				OutLocations.Add(Location);
@@ -273,7 +283,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 		{
 			for (int i = 0; i < Params.Count; i++)
 			{
-				N_PICKER_BOX_REGION_CHOICE(RANDOM_INDEX)
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
 				OutLocations.Add(N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 			}
 		}
