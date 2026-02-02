@@ -263,12 +263,15 @@ void ANSamplesDisplayActor::BeginDestroy()
 
 void ANSamplesDisplayActor::BeginPlay()
 {
-	if (TimerSettings.bTimerEnabled)
+	
+	// If we are running in automation, we absolutely do not want timers in other places running, so we disable them
+	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerSettings.TimerDuration, true, 0);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, 
+			TimerSettings.TimerDuration, true, 0);
 	}
 
-	// Add to list of known displays so we can move between them easily.
+	// Add to the list of known displays so we can move between them easily.
 	KnownDisplays.Add(this);
 	Super::BeginPlay();
 }
@@ -277,6 +280,11 @@ void ANSamplesDisplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	// Remove me from the list.
 	KnownDisplays.Remove(this);
+	
+	if (TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -718,6 +726,12 @@ void ANSamplesDisplayActor::PrepareTest()
 	TestInstance = NewObject<UNSamplesDisplayTest>(this, UNSamplesDisplayTest::StaticClass(), NAME_None, RF_Transient);
 	TestInstance->AddToRoot();
 	
+	if (TimerSettings.bTimerEnabled && !TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerSettings.TimerDuration, true, 0);
+	}
+
+	// Disable for test
 	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().PauseTimer(TimerHandle);
@@ -742,7 +756,7 @@ void ANSamplesDisplayActor::CleanupTest()
 		TestInstance = nullptr;
 	}
 
-	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
+	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().UnPauseTimer(TimerHandle);
 	}
