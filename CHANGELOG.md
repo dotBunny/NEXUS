@@ -17,6 +17,7 @@
 - `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
+- `NexusBlockout` now contain simplified collision primitives.
 
 ### Fixed
 
