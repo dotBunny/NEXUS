@@ -3,6 +3,6 @@
 
 #include "NPickerUtils.h"
 
-FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
-FVector FNPickerUtils::DefaultNavExtent = INVALID_NAVEXTENT;
-FNavAgentProperties FNPickerUtils::DefaultNavAgentProperties = FNavAgentProperties(1, 10 );
+FCollisionQueryParams FNPickerUtils::CollisionQueryParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
+FVector FNPickerUtils::NavQueryExtent = FVector(1500, 1500, 1500);
+FNavAgentProperties FNPickerUtils::NavAgentProperties = FNavAgentProperties(1, 10 );

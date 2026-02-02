@@ -11,7 +11,7 @@
 #define N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX \
 	FHitResult HitResult(ForceInit);
 #define N_IMPLEMENT_PICKER_PROJECTION_TRACE \
-	if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::DefaultTraceParams)) \
+	if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::CollisionQueryParams)) \
 	{ \
 		Location = HitResult.Location; \
 	}
@@ -26,7 +26,7 @@
 		OutLocations.Add(Location); \
 		continue; \
 	} \
-	if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::DefaultNavExtent, &FNPickerUtils::DefaultNavAgentProperties )) \
+	if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::NavQueryExtent, &FNPickerUtils::NavAgentProperties )) \
 	{ \
 		if (Location != NavLocation.Location) \
 		{ \
@@ -35,7 +35,7 @@
 	} \
 	else \
 	{ \
-		UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh! Was the location(%s) outside of the NavMesh volume?"), *Location.ToCompactString()); \
+		UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh! Was the location(%s) outside of the NavMesh volume, or inside of a NavModifier. Adjust your NavQueryExtent to account for this increased distance, or ensure your dimensions are within the NavMesh volume."), *Location.ToCompactString()); \
 	}
 
 /**
@@ -44,7 +44,7 @@
 class NEXUSPICKER_API FNPickerUtils
 {
 public:
-	static FCollisionQueryParams DefaultTraceParams;
-	static FVector DefaultNavExtent;
-	static FNavAgentProperties DefaultNavAgentProperties;
+	static FCollisionQueryParams CollisionQueryParams;
+	static FVector NavQueryExtent;
+	static FNavAgentProperties NavAgentProperties;
 };
