@@ -20,10 +20,22 @@
 	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Params.CachedWorld); \
 	FNavLocation NavLocation;
 #define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1 \
-	NavigationSystem->ProjectPointToNavigation(Location, NavLocation); \
-	if (Location != NavLocation.Location) \
+	if (!NavigationSystem->IsInitialized()) \
 	{ \
-		Location = NavLocation.Location; \
+		UE_LOG(LogNexusPicker, Error, TEXT("Attempted to project a generated location(%s) onto a NavMesh prior to the Navigation system having been initialized. Falling back to using the initial location point."), *Location.ToCompactString()) \
+		OutLocations.Add(Location); \
+		continue; \
+	} \
+	if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::DefaultNavExtent, &FNPickerUtils::DefaultNavAgentProperties )) \
+	{ \
+		if (Location != NavLocation.Location) \
+		{ \
+			Location = NavLocation.Location; \
+		} \
+	} \
+	else \
+	{ \
+		UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh! Was the location(%s) outside of the NavMesh volume?"), *Location.ToCompactString()); \
 	}
 
 /**
@@ -33,10 +45,6 @@ class NEXUSPICKER_API FNPickerUtils
 {
 public:
 	static FCollisionQueryParams DefaultTraceParams;
-	
-	static FVector DefaultProjection;
-	static FRotator DefaultRotation;
-
-	static FRotator BaseRotation;
-	static FMatrix BaseMatrix;
+	static FVector DefaultNavExtent;
+	static FNavAgentProperties DefaultNavAgentProperties;
 };
