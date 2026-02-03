@@ -72,7 +72,7 @@ public:
 
 		const FVector ClosestLocationOnSpline = SplineComponent->FindLocationClosestToWorldLocation(Point, ESplineCoordinateSpace::World);
 		const float Distance = FVector::Distance(Point, ClosestLocationOnSpline);
-		return Distance <= NEXUS::Picker::Tolerance;
+		return Distance <= NEXUS::Picker::SplinePointTolerance;
 	}
 	
 	/**

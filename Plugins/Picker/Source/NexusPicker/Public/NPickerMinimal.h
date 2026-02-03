@@ -5,7 +5,7 @@
 
 namespace NEXUS::Picker
 {
-	constexpr float Tolerance = 0.01f;
+	constexpr float SplinePointTolerance = 0.1f;
 	namespace VLog
 	{
 		const FColor InnerColor = FColor::Black;
