@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NPickerMinimal.h"
 #include "NPickerParams.h"
 #include "NRectanglePickerParams.generated.h"
 
@@ -41,6 +42,7 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	
 	/**
 	 * Gets the ranges which can be selected from.
+	 * @note This will appropriate cut out portions of available space when the MinimumDimensions are not fully enclosed by the MaximumDimensions.
 	 * @return An array of packed Min/Max coords representing the possible area to select from based on parameters.
 	 */
 	TArray<FVector4> GetValidRanges() const
@@ -57,29 +59,75 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
 				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
 		}
+		else if (MinimumDimensions.X > MaximumDimensions.X && MinimumDimensions.Y > MaximumDimensions.Y)
+		{
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions completely encompasses the MaximumDimensions, using MaximumDimensions instead."));
+			ValidRanges.Add( FVector4(
+				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
+				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
+		}
 		else
 		{
 			const FVector2D HalfMinDimensions = MinimumDimensions * 0.5f;
 			
 			// Reserve the number of possible sides just because
-			ValidRanges.Reserve(4);
+			ValidRanges.Reserve(8);
 			
-			// Top
-			ValidRanges.Add( FVector4(-HalfMaxDimensions.X,HalfMaxDimensions.Y, 
-				HalfMinDimensions.X, HalfMinDimensions.Y));
+			// We can do some really simple checks for the absolute vertical spots
+			if (HalfMinDimensions.Y < HalfMaxDimensions.Y)
+			{
+				// North | bottom (density)
+				ValidRanges.Add( FVector4(
+					FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
+					HalfMaxDimensions.Y, 
+				FMath::Min(HalfMinDimensions.X, HalfMaxDimensions.X) , 
+				FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y)));
+				
+				// South | top (density)
+				ValidRanges.Add( FVector4(
+					FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
+					FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y), 
+				FMath::Min(HalfMinDimensions.X,HalfMaxDimensions.X), 
+				-HalfMaxDimensions.Y));
+			}
 			
-			// Right
-			ValidRanges.Add( FVector4(HalfMinDimensions.X,HalfMaxDimensions.Y, 
-				HalfMaxDimensions.X, -HalfMinDimensions.Y));
+			// We can do some really simple checks for the absolute horizontal spots
+			if (HalfMinDimensions.X < HalfMaxDimensions.X)
+			{
+				// East | right (density)
+				ValidRanges.Add( FVector4(
+					FMath::Min(HalfMinDimensions.X, HalfMaxDimensions.X), 
+					FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y),
+				HalfMaxDimensions.X, 
+				FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y)));
+				
+				// West | left (density)
+				ValidRanges.Add( FVector4(
+					-HalfMaxDimensions.X,
+					FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y),
+				FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
+				FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y)));
+			}
 			
-			// Bottom
-			ValidRanges.Add( FVector4(-HalfMinDimensions.X,-HalfMinDimensions.Y, 
-				HalfMaxDimensions.X,-HalfMaxDimensions.Y));
-			
-			// Left
-			ValidRanges.Add( FVector4(-HalfMaxDimensions.X,HalfMinDimensions.Y, 
-				-HalfMinDimensions.X,HalfMaxDimensions.Y));
-			
+			// If we're inside and do not overlap we can make our corners
+			if (HalfMinDimensions.Y < HalfMaxDimensions.Y && HalfMinDimensions.X < HalfMaxDimensions.X)
+			{
+				// North East | bottom right (density)
+				ValidRanges.Add( FVector4(HalfMinDimensions.X,HalfMaxDimensions.Y, 
+				HalfMaxDimensions.X, HalfMinDimensions.Y));
+				
+				// South East | top right (density)
+				ValidRanges.Add( FVector4(HalfMinDimensions.X,-HalfMinDimensions.Y, 
+				HalfMaxDimensions.X, -HalfMaxDimensions.Y));
+				
+				// South West | top left (density)
+				ValidRanges.Add( FVector4(-HalfMaxDimensions.X,-HalfMinDimensions.Y, 
+				-HalfMinDimensions.X, -HalfMaxDimensions.Y));
+				
+				// North West | bottom left (density)
+				ValidRanges.Add( FVector4(-HalfMaxDimensions.X,HalfMinDimensions.Y, 
+				-HalfMinDimensions.X, HalfMaxDimensions.Y));
+			}
 		}
 		return MoveTemp(ValidRanges);
 	}

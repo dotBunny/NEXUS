@@ -7,23 +7,13 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
-// TODO: Extents seems wrong
-
-
 #define N_PICKER_RECTANGLE_PREFIX \
 	const int OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumDimensions.IsZero(); \
 	const bool bHasRotation = !Params.Rotation.IsZero(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
-#define N_PICKER_RECTANGLE_VALID_RANGES \
-	TArray<FVector4> ValidRanges = Params.GetValidRanges();
 #define N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RandomIndex) \
 	FVector4 ChosenRange = ValidRanges[RandomIndex(0,ValidRanges.Num()-1)];
-#define N_PICKER_RECTANGLE_EXTENTS \
-	const float MaximumExtentX = Params.MaximumDimensions.X * 0.5f; \
-	const float MaximumExtentY = Params.MaximumDimensions.Y * 0.5f; \
-	const float MinimumExtentX = Params.MinimumDimensions.X * 0.5f; \
-	const float MinimumExtentY = Params.MinimumDimensions.Y * 0.5f;
 #define N_PICKER_RECTANGLE_EXTENTS_SIMPLE \
 	const float ExtentX = Params.MaximumDimensions.X * 0.5f; \
 	const float ExtentY = Params.MaximumDimensions.Y * 0.5f;
@@ -37,6 +27,23 @@
 	Params.Origin + Params.Rotation.RotateVector(FVector(FloatValue(-ExtentX, ExtentX), FloatValue(-ExtentY, ExtentY), 0.f))
 
 #if ENABLE_VISUAL_LOG
+#define N_PICKER_RECTANGLE_VALID_RANGES \
+	TArray<FVector4> ValidRanges = Params.GetValidRanges(); \
+	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	{ \
+		for(int v = 0; v < ValidRanges.Num(); v++) \
+		{ \
+			const FVector MinPoint = FVector(ValidRanges[v].X, ValidRanges[v].Y, 0); \
+			const FVector MaxPoint = FVector(ValidRanges[v].Z, ValidRanges[v].W, 0); \
+			TArray<FVector> RangeVertices; \
+			RangeVertices.Reserve(4); \
+			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(MinPoint)); \
+			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(FVector(MaxPoint.X, MinPoint.Y, 0.f))); \
+			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(MaxPoint)); \
+			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(FVector(MinPoint.X, MaxPoint.Y, 0.f))); \
+			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, RangeVertices, NEXUS::Picker::VLog::OuterColor) \
+		} \
+	}
 #define N_PICKER_RECTANGLE_VLOG_VERTICES(Origin, Dimensions, Rotation, VerticesVariable) \
 	const float VerticesVariable##ExtentX = Dimensions.X * 0.5f; \
 	const float VerticesVariable##ExtentY = Dimensions.Y * 0.5f; \
@@ -68,6 +75,8 @@
 	}
 #else
 #define N_PICKER_RECTANGLE_VLOG(HasMinimumDimensions)
+#define N_PICKER_RECTANGLE_VALID_RANGES \
+	TArray<FVector4> ValidRanges = Params.GetValidRanges();
 #endif
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
@@ -146,8 +155,8 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 	}
 	else
 	{
-		N_PICKER_RECTANGLE_EXTENTS
 		N_PICKER_RECTANGLE_VALID_RANGES
+		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
@@ -293,8 +302,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 		}
 	}
 	else
-	{
-		N_PICKER_RECTANGLE_EXTENTS
+	{		
 		N_PICKER_RECTANGLE_VALID_RANGES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
@@ -443,7 +451,6 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 	}
 	else
 	{
-		N_PICKER_RECTANGLE_EXTENTS
 		N_PICKER_RECTANGLE_VALID_RANGES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
