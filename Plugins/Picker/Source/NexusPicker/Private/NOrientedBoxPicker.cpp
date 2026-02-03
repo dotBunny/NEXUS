@@ -66,7 +66,8 @@
 	}
 #else
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions)
-#define N_PICKER_ORIENTED_BOX_VALID_BOXES
+#define N_PICKER_ORIENTED_BOX_VALID_BOXES \
+	TArray<FBox> ValidBoxes = Params.GetValidBoxes();
 #endif
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
