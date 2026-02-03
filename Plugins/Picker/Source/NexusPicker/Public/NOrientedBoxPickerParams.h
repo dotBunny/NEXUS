@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NPickerMinimal.h"
 #include "NPickerParams.h"
 #include "NOrientedBoxPickerParams.generated.h"
 
@@ -72,13 +73,79 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	
 	FBox GetMinimumAlignedBox() const
 	{
+		if (MinimumDimensions.IsZero())
+		{
+			return FBox(ForceInit);
+		}
 		const FVector Half = MinimumDimensions * 0.5f;
 		return FBox(- Half,  Half);
 	}
 	
 	FBox GetMaximumAlignedBox() const
 	{
+		if (MaximumDimensions.IsZero())
+		{
+			return FBox(ForceInit);
+		}
 		const FVector Half = MaximumDimensions * 0.5f;
 		return FBox( -Half,  Half);
+	}
+	
+	TArray<FBox> GetValidBoxes() const
+	{
+		const FBox MinimumBox = GetMinimumAlignedBox();
+		const FBox MaximumBox = GetMaximumAlignedBox();
+		
+		TArray<FBox> Boxes;
+		if (MinimumBox.IsValid == 0)
+		{
+			Boxes.Add(MaximumBox);
+		}
+		else if (MinimumDimensions.X > MaximumDimensions.X && MinimumDimensions.Y > MaximumDimensions.Y && MinimumDimensions.Z > MaximumDimensions.Z)
+		{
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions completely encompasses the MaximumDimensions, using MaximumDimensions instead."));
+			Boxes.Add(MaximumBox);
+		}
+		else
+		{
+			// Reserve the number of possible sides just because
+			Boxes.Reserve(6);
+			
+			// Left
+			Boxes.Add(FBox(
+				FVector(MaximumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Min.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
+			));
+			
+			// Right
+			Boxes.Add(FBox(
+			FVector(MinimumBox.Max.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+			FVector(MaximumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)));
+		
+			// Front
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MinimumBox.Min.Y, MinimumBox.Max.Z)
+			));
+		
+			// Back
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MinimumBox.Max.Y, MinimumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
+			));
+			
+			// Bottom
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MinimumBox.Min.Z)
+			));
+			
+			// Top
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MinimumBox.Max.Z),
+				FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MaximumBox.Max.Z)
+			));
+		}
+		return MoveTemp(Boxes);
 	}
 };
