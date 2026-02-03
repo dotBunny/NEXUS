@@ -16,7 +16,7 @@ class NEXUSPICKER_API FNOrientedBoxPicker
 public:
 	
 	/**
-	 * Generates a deterministic point in relation to an FOrientedBox.
+	 * Generate deterministic points in relation to an FOrientedBox.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -24,7 +24,7 @@ public:
 	static void Next(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params);
 
 	/**
-	 * Generates a random point in relation to an FOrientedBox.
+	 * Generate random points in relation to an FOrientedBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -32,7 +32,7 @@ public:
 	static void Random(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params);
 	
 	/**
-	 * Generates a random point in relation to an FOrientedBox.
+	 * Generate random points in relation to an FOrientedBox.
 	 * Useful for one-time random point generation with reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
@@ -45,7 +45,7 @@ public:
 	}
 	
 	/**
-	 * Generates a random point in relation to an FOrientedBox.
+	 * Generate random points in relation to an FOrientedBox.
 	 * Updates the seed value to enable sequential random point generation.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to start with, and update.

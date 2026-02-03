@@ -17,7 +17,7 @@ class NEXUSPICKER_API FNCirclePicker
 public:
 
 	/**
-	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Generate deterministic points inside or on the perimeter of a circle.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -25,7 +25,7 @@ public:
 	static void Next(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
 
 	/**
-	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Generate random points inside or on the perimeter of a circle.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -33,7 +33,7 @@ public:
 	static void Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
 
 	/**
-	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Generate random points inside or on the perimeter of a circle.
 	 * Useful for one-time random point generation with reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
@@ -46,7 +46,7 @@ public:
 	}
 	
 	/**
-	 * Generates a deterministic point inside or on the perimeter of a circle.
+	 * Generate random points inside or on the perimeter of a circle.
 	 * Updates the seed value to enable sequential random point generation.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to start with, and update.

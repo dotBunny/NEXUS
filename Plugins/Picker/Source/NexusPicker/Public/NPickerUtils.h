@@ -39,7 +39,7 @@
 	}
 
 /**
- * Utility methods supporting picker operations.
+ * Some of the project settings used by pickers.
  */
 class NEXUSPICKER_API FNPickerUtils
 {

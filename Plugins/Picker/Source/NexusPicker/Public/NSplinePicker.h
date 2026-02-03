@@ -19,7 +19,7 @@ class NEXUSPICKER_API FNSplinePicker
 public:
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generate deterministic points on a spline.
 	 * Uses the deterministic random generator to ensure reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -27,7 +27,7 @@ public:
 	static void Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generate random points on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
@@ -35,7 +35,7 @@ public:
 	static void Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates random points on a spline.
 	 * Useful for one-time random point generation with reproducible results.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
@@ -48,7 +48,7 @@ public:
 	}
 
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates random points on a spline.
 	 * Updates the seed value to enable sequential random point generation.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to start with, and update.
