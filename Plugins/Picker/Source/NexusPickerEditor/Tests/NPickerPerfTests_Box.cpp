@@ -37,7 +37,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Next, "NEXUS::PerfTests::NPicker::Box::Next", 
 	FNBoxPickerParams Params;
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 1000;
-	Params.MinimumBox = FBox(FVector::ZeroVector, FVector::OneVector);
+	Params.MinimumBox = FBox(FVector::OneVector, FVector::OneVector);
 	Params.MaximumBox = FBox(FVector::ZeroVector, FVector::OneVector*100.f);
 	TArray<FVector> Points;
 	// TEST
@@ -78,7 +78,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Random, "NEXUS::PerfTests::NPicker::Box::Rando
 	FNBoxPickerParams Params;
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 1000;
-	Params.MinimumBox = FBox(FVector::ZeroVector, FVector::OneVector);
+	Params.MinimumBox = FBox(FVector::OneVector, FVector::OneVector);
 	Params.MaximumBox = FBox(FVector::ZeroVector, FVector::OneVector*100.f);
 	TArray<FVector> Points;
 	// TEST
@@ -120,7 +120,7 @@ N_TEST_PERF(FNPickerPerfTests_Box_Tracked, "NEXUS::PerfTests::NPicker::Box::Trac
 	FNBoxPickerParams Params;
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 1000;
-	Params.MinimumBox = FBox(FVector::ZeroVector, FVector::OneVector);
+	Params.MinimumBox = FBox(FVector::OneVector, FVector::OneVector);
 	Params.MaximumBox = FBox(FVector::ZeroVector, FVector::OneVector*100.f);
 	TArray<FVector> Points;
 	int32 Seed = 123456789;
