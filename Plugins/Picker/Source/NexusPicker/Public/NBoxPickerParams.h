@@ -42,8 +42,13 @@ struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 	TArray<FBox> GetValidBoxes() const
 	{
 		TArray<FBox> Boxes;
-		if (MinimumBox.IsValid == 0 || !MaximumBox.IsInside(MinimumBox.Min) || !MaximumBox.IsInside(MinimumBox.Max))
+		if (MinimumBox.IsValid == 0)//|| )
 		{
+			Boxes.Add(MaximumBox);
+		}
+		else if (!MaximumBox.IsInside(MinimumBox.Min) || !MaximumBox.IsInside(MinimumBox.Max))
+		{
+			UE_LOG(LogNexusPicker, Warning, TEXT("The minimum box is not fully enclosed by the MaximumBox, this is not supported and will default to using the MaximumBox."));
 			Boxes.Add(MaximumBox);
 		}
 		else
@@ -52,53 +57,39 @@ struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 			Boxes.Reserve(6);
 			
 			// Left
-			if (MaximumBox.Min.X < MinimumBox.Min.X)
-			{
-				Boxes.Add(FBox(
-					FVector(MaximumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
-					FVector(MinimumBox.Min.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
-				));
-			}
+			Boxes.Add(FBox(
+				FVector(MaximumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Min.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
+			));
+			
 			// Right
-			if (MaximumBox.Max.X > MinimumBox.Max.X)
-			{
-				Boxes.Add(FBox(
-					FVector(MinimumBox.Max.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
-					FVector(MaximumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
-				));
-			}
+			Boxes.Add(FBox(
+			FVector(MinimumBox.Max.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+			FVector(MaximumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)));
+		
 			// Front
-			if (MaximumBox.Min.Y < MinimumBox.Min.Y)
-			{
-				Boxes.Add(FBox(
-					FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
-					FVector(MinimumBox.Max.X, MinimumBox.Min.Y, MinimumBox.Max.Z)
-				));
-			}
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MinimumBox.Min.Y, MinimumBox.Max.Z)
+			));
+		
 			// Back
-			if (MaximumBox.Max.Y > MinimumBox.Max.Y)
-			{
-				Boxes.Add(FBox(
-					FVector(MinimumBox.Min.X, MinimumBox.Max.Y, MinimumBox.Min.Z),
-					FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
-				));
-			}
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MinimumBox.Max.Y, MinimumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MaximumBox.Max.Z)
+			));
+			
 			// Bottom
-			if (MaximumBox.Min.Z < MinimumBox.Min.Z)
-			{
-				Boxes.Add(FBox(
-					FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MaximumBox.Min.Z),
-					FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MinimumBox.Min.Z)
-				));
-			}
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MaximumBox.Min.Z),
+				FVector(MinimumBox.Max.X, MaximumBox.Max.Y, MinimumBox.Min.Z)
+			));
+			
 			// Top
-			if (MaximumBox.Max.Z > MinimumBox.Max.Z)
-			{
-				Boxes.Add(FBox(
-					FVector(MinimumBox.Min.X, MinimumBox.Min.Y, MinimumBox.Max.Z),
-					FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MaximumBox.Max.Z)
-				));
-			}
+			Boxes.Add(FBox(
+				FVector(MinimumBox.Min.X, MaximumBox.Min.Y, MinimumBox.Max.Z),
+				FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MaximumBox.Max.Z)
+			));
 		}
 		return MoveTemp(Boxes);
 	}

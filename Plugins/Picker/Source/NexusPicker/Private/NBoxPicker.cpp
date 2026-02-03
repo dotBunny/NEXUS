@@ -32,8 +32,7 @@
 	{ \
 		for(int v = 0; v < ValidBoxes.Num(); v++) \
 		{ \
-			FBox Temp = ValidBoxes[v].MoveTo(Params.Origin); \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Temp, NEXUS::Picker::VLog::DivisionColor, TEXT("")); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v].ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 	}
 #define N_PICKER_BOX_VLOG(HasMinimumBox) \
@@ -41,11 +40,11 @@
 	{ \
 		if(HasMinimumBox) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumBox.MoveTo(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
 		if(Params.MaximumBox.IsValid != 0) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumBox.MoveTo(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		for (int i = 0; i < Params.Count; i++) \
 		{ \
