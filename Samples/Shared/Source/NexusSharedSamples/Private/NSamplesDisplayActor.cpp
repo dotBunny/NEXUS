@@ -15,9 +15,17 @@ TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
 void ANSamplesDisplayActor::SortKnownDisplays()
 {
-	KnownDisplays.Sort([](const AActor& A, const AActor& B)
+	KnownDisplays.Sort([](const ANSamplesDisplayActor& A, const ANSamplesDisplayActor& B)
 	{
-		return A.GetName() < B.GetName();
+		if (A.ScreenshotSettings.FilenameOverride.IsEmpty() == B.ScreenshotSettings.FilenameOverride.IsEmpty())
+		{
+			return A.ScreenshotSettings.FilenameOverride > B.ScreenshotSettings.FilenameOverride;
+		}
+		if (A.ScreenshotSettings.CameraNameOverride.IsEmpty() == B.ScreenshotSettings.CameraNameOverride.IsEmpty())
+		{
+			return A.ScreenshotSettings.CameraNameOverride.ToString() > B.ScreenshotSettings.CameraNameOverride.ToString();
+		}
+		return A.GetName() > B.GetName();
 	});
 }
 

@@ -57,7 +57,7 @@ void ANSamplesHUD::DrawHUD()
 				"Toggle HUD: Backspace\n"
 				"Screenshot: F12\n"
 				"Screenshot Multiplier (%i): -/=\n"
-				"Auto-Screenshot: F7"),
+				"Auto-Screenshot: F10"),
 				*CurrentCameraName,
 				ScreenshotMultiplier);
 		

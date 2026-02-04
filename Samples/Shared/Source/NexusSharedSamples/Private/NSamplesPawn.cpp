@@ -29,9 +29,7 @@ void ANSamplesPawn::BeginPlay()
 	InputComponent->BindKey(EKeys::Backslash, IE_Released, this, &ANSamplesPawn::OnReturnToPawn);
 	InputComponent->BindKey(EKeys::Hyphen, IE_Released, this, &ANSamplesPawn::OnResolutionDecrease);
 	InputComponent->BindKey(EKeys::Equals, IE_Released, this, &ANSamplesPawn::OnResolutionIncrease);
-	
-	InputComponent->BindKey(EKeys::Slash, IE_Released, this, &ANSamplesPawn::OnSortDisplays); // Hidden
-	InputComponent->BindKey(EKeys::F7, IE_Released, this, &ANSamplesPawn::OnAutoScreenshot);
+	InputComponent->BindKey(EKeys::F10, IE_Released, this, &ANSamplesPawn::OnAutoScreenshot);
 
 	ChangeView(nullptr);
 	
@@ -51,58 +49,14 @@ void ANSamplesPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ANSamplesPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	if (bAutoScreenshotMode)
+	
+	if (FrameSkipCounter > 0)
 	{
-		if (ScreenshotFrameWait > 0)
-		{
-			ScreenshotFrameWait--;
-			return;
-		}
-		
-		if (!bReadyToShoot)
-		{
-			// Change view
-			ChangeView(ANSamplesDisplayActor::KnownDisplays[CurrentScreenshotIndex]);
-			bReadyToShoot = true;
-			
-			// We need to do it next frame			
-			return;
-		}
-		
-		if (ScreenshotFrameWait > 0)
-		{
-			ScreenshotFrameWait--;
-			return;
-		}
-		
-		if (bReadyToShoot)
-		{
-			GIsHighResScreenshot = true;
-			
-			GScreenshotResolutionX = 1920 * ResolutionMultiplier;
-			GScreenshotResolutionY = 1080 * ResolutionMultiplier;
-
-			const ANSamplesDisplayActor* Display = ANSamplesDisplayActor::KnownDisplays[CurrentScreenshotIndex];
-			if (Display->BaseSettings.AutoScreenshotFilename.IsEmpty())
-			{
-				GetHighResScreenshotConfig().FilenameOverride = Display->GetName();
-			}
-			else
-			{
-				GetHighResScreenshotConfig().FilenameOverride =  Display->BaseSettings.AutoScreenshotFilename;
-			}
-			FScreenshotRequest::RequestScreenshot(false);
-			
-			CurrentScreenshotIndex++;
-			bReadyToShoot = false;
-		}
-		
-		if (CurrentScreenshotIndex >= ANSamplesDisplayActor::KnownDisplays.Num())
-		{
-			bAutoScreenshotMode = false;
-		}
-		
+		FrameSkipCounter--;
+		return;
 	}
+	
+	CheckScreenshotState();
 }
 
 void ANSamplesPawn::OnNextDisplay()
@@ -180,25 +134,10 @@ void ANSamplesPawn::OnResolutionDecrease()
 	HUD->SetScreenshotMultiplier(ResolutionMultiplier);
 }
 
-void ANSamplesPawn::OnSortDisplays()
-{
-	ANSamplesDisplayActor::SortKnownDisplays();	
-}
-
 void ANSamplesPawn::OnAutoScreenshot()
 {
 	if (ANSamplesDisplayActor::KnownDisplays.Num() == 0) return;
-	
-	OnSortDisplays();
-	
-	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-	HUD->SetVisibility(false);
-	
-	CameraIndex = 0;
-	ScreenshotFrameWait = 60;
-	bAutoScreenshotMode = true;
-	bReadyToShoot = false;
-	CurrentScreenshotIndex = 0;
+	ScreenshotState = ENSamplesScreenshotState::Prepare;
 }
 
 void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)
@@ -216,12 +155,81 @@ void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)
 	}
 	
 	PlayerController->SetViewTargetWithBlend(DisplayActor);
-	if (!DisplayActor->ScreenshotSettings.ScreenshotCameraName.IsEmpty())
+	if (!DisplayActor->ScreenshotSettings.CameraNameOverride.IsEmpty())
 	{
-		HUD->SetCurrentCameraName(DisplayActor->ScreenshotSettings.ScreenshotCameraName.ToString());
+		HUD->SetCurrentCameraName(DisplayActor->ScreenshotSettings.CameraNameOverride.ToString());
 	}
 	else
 	{
-		HUD->SetCurrentCameraName(DisplayActor->GetName());
+		HUD->SetCurrentCameraName(DisplayActor->TitleSettings.TitleText.ToString());
+	}
+}
+
+void ANSamplesPawn::CheckScreenshotState()
+{
+	using enum ENSamplesScreenshotState;
+	switch (ScreenshotState)
+	{
+	default:
+	case NotRunning:
+		break;
+	case Prepare:
+		{
+			ANSamplesDisplayActor::SortKnownDisplays();	
+			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+			HUD->SetVisibility(false);
+			CameraIndex = 0;
+			ScreenshotState = SelectView;
+			FrameSkipCounter = FrameSkipDefault;
+		}
+		break;
+	case SelectView:
+		{
+			ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
+			ScreenshotState = RequestScreenshot;
+			FrameSkipCounter = FrameSkipDefault;
+			break;
+		}
+	case RequestScreenshot:
+		{
+			const ANSamplesDisplayActor* Display = ANSamplesDisplayActor::KnownDisplays[CameraIndex];
+		
+			GIsHighResScreenshot = true;
+			GScreenshotResolutionX = 1920 * ResolutionMultiplier;
+			GScreenshotResolutionY = 1080 * ResolutionMultiplier;
+		
+			if (Display->ScreenshotSettings.FilenameOverride.IsEmpty())
+			{
+				GetHighResScreenshotConfig().FilenameOverride = Display->GetName();
+			}
+			else
+			{
+				GetHighResScreenshotConfig().FilenameOverride =  Display->ScreenshotSettings.FilenameOverride;
+			}
+		
+			FScreenshotRequest::RequestScreenshot(false);
+		
+			CameraIndex++;
+			FrameSkipCounter = FrameSkipDefault;
+		
+			if (CameraIndex >= ANSamplesDisplayActor::KnownDisplays.Num())
+			{
+				ScreenshotState = Cleanup;
+			}
+			else
+			{
+				ScreenshotState = SelectView;
+			}
+			break;
+		}
+	case Cleanup:
+		{
+			CameraIndex = 0;
+			ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
+			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+			HUD->SetVisibility(true);
+			ScreenshotState = NotRunning;
+			break;
+		}
 	}
 }

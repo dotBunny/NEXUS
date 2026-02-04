@@ -34,11 +34,7 @@ struct FNSamplesDisplaySettings
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
 	bool bCollisionEnabled = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString AutoScreenshotFilename;
 };
-
 
 USTRUCT(BlueprintType)
 struct FNSamplesDisplayTitleSettings
@@ -97,8 +93,11 @@ struct FNSamplesDisplayScreenshotSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Override Name")
-	FText ScreenshotCameraName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Camera Name Override")
+	FText CameraNameOverride;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Filename Override")
+	FString FilenameOverride;
 };
 
 USTRUCT(BlueprintType)

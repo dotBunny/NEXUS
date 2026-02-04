@@ -10,6 +10,16 @@
 class UWidgetInteractionComponent;
 class ANSamplesDisplayActor;
 
+
+enum class ENSamplesScreenshotState : uint8
+{
+	NotRunning = 0,
+	Prepare = 1,
+	SelectView = 2,
+	RequestScreenshot = 3,
+	Cleanup = 4
+};
+
 /**
  * A pawn used in the NEXUS samples that has a few extra bits on it.
  */
@@ -34,7 +44,6 @@ protected:
 	void OnReturnToPawn();
 	void OnResolutionIncrease();
 	void OnResolutionDecrease();
-	void OnSortDisplays();
 	void OnAutoScreenshot();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
@@ -42,11 +51,11 @@ protected:
 private:
 
 	void ChangeView(ANSamplesDisplayActor* DisplayActor);
+	void CheckScreenshotState();
 	int CameraIndex = -1;
 	int ResolutionMultiplier = 1;
+	int FrameSkipDefault = 5;
+	int FrameSkipCounter = FrameSkipDefault;
+	ENSamplesScreenshotState ScreenshotState;
 	
-	bool bAutoScreenshotMode = false;
-	int ScreenshotFrameWait = 60;
-	bool bReadyToShoot = false;
-	int CurrentScreenshotIndex = 0;
 };
