@@ -53,6 +53,12 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (bAutoScreenshotMode)
 	{
+		if (ScreenshotFrameWait > 0)
+		{
+			ScreenshotFrameWait--;
+			return;
+		}
+		
 		if (!bReadyToShoot)
 		{
 			// Change view
@@ -60,6 +66,12 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 			bReadyToShoot = true;
 			
 			// We need to do it next frame			
+			return;
+		}
+		
+		if (ScreenshotFrameWait > 0)
+		{
+			ScreenshotFrameWait--;
 			return;
 		}
 		
@@ -183,6 +195,7 @@ void ANSamplesPawn::OnAutoScreenshot()
 	HUD->SetVisibility(false);
 	
 	CameraIndex = 0;
+	ScreenshotFrameWait = 60;
 	bAutoScreenshotMode = true;
 	bReadyToShoot = false;
 	CurrentScreenshotIndex = 0;

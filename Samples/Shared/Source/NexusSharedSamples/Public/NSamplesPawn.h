@@ -46,6 +46,7 @@ private:
 	int ResolutionMultiplier = 1;
 	
 	bool bAutoScreenshotMode = false;
+	int ScreenshotFrameWait = 60;
 	bool bReadyToShoot = false;
 	int CurrentScreenshotIndex = 0;
 };
