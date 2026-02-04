@@ -88,20 +88,23 @@ void UNSamplesDisplayLibrary::TimerDrawComboArc(ANSamplesDisplayActor* SamplesDi
 	const int TimerIntervals)
 {
 	const float AngleWidth = PI * (Degrees / 360);
-	const FQuat Quat = Rotation.Quaternion();
 	
+
+// Runtime version wants to use a forward vector but that messes with the rotation currently
+#if ENABLE_DRAW_DEBUG
 	if (MinimumDistance > 0)
 	{
-		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance, Quat, 
+		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance,  Rotation.Quaternion(), 
 			AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 			SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 			NEXUS::Samples::TimerDrawThickness);
 	}
 	
-	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance, Quat, 
+	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance,  Rotation.Quaternion(), 
 		AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 		NEXUS::Samples::TimerDrawThickness);
+#endif	
 	
 	const float MaxDegrees = Degrees * 0.5f;
 	const float MinDegrees = -MaxDegrees;

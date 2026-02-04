@@ -34,6 +34,9 @@ struct FNSamplesDisplaySettings
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Collisions?", meta=(ToolTip="Should the collision profile be setup for the display?"))
 	bool bCollisionEnabled = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString AutoScreenshotFilename;
 };
 
 

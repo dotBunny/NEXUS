@@ -3,6 +3,7 @@
 
 #include "NSamplesPawn.h"
 
+#include "HighResScreenshot.h"
 #include "NSamplesDisplayActor.h"
 #include "NSamplesHUD.h"
 #include "Components/WidgetInteractionComponent.h"
@@ -54,16 +55,33 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 	{
 		if (!bReadyToShoot)
 		{
+			// Change view
 			ChangeView(ANSamplesDisplayActor::KnownDisplays[CurrentScreenshotIndex]);
-			CurrentScreenshotIndex++;
 			bReadyToShoot = true;
+			
+			// We need to do it next frame			
 			return;
 		}
 		
-		
 		if (bReadyToShoot)
 		{
-			OnScreenshot();
+			GIsHighResScreenshot = true;
+			
+			GScreenshotResolutionX = 1920 * ResolutionMultiplier;
+			GScreenshotResolutionY = 1080 * ResolutionMultiplier;
+
+			const ANSamplesDisplayActor* Display = ANSamplesDisplayActor::KnownDisplays[CurrentScreenshotIndex];
+			if (Display->BaseSettings.AutoScreenshotFilename.IsEmpty())
+			{
+				GetHighResScreenshotConfig().FilenameOverride = Display->GetName();
+			}
+			else
+			{
+				GetHighResScreenshotConfig().FilenameOverride =  Display->BaseSettings.AutoScreenshotFilename;
+			}
+			FScreenshotRequest::RequestScreenshot(false);
+			
+			CurrentScreenshotIndex++;
 			bReadyToShoot = false;
 		}
 		
