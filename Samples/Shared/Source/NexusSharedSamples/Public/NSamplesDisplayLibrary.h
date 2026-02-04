@@ -48,6 +48,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Circle")
 	static void TimerDrawCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Arc")
+	static void TimerDrawComboArc(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance, const int TimerIntervals = 1);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Circle")
 	static void TimerDrawComboCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1);

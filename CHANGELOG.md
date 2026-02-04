@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.7] - 2026-02-05
+## [0.2.7] - 2026-02-09
 
 ### Added
 
@@ -9,7 +9,8 @@
 - `ANSamplesDisplayActor` title settings now has `TitleTextPadding` allowing for the title to have some padding from the edges.
 - `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
 - `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
-- `FNOrientedBox` for generating points in a box with rotation.
+- `FNOrientedBoxPicker` for generating points in a box with rotation.
+- [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
 
 ### Changed
 
