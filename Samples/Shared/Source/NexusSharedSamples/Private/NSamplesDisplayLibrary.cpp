@@ -88,16 +88,17 @@ void UNSamplesDisplayLibrary::TimerDrawComboArc(ANSamplesDisplayActor* SamplesDi
 	const int TimerIntervals)
 {
 	const float AngleWidth = PI * (Degrees / 360);
+	const FQuat Quat = Rotation.Quaternion();
 	
 	if (MinimumDistance > 0)
 	{
-		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance, Rotation.Vector(), 
+		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance, Quat, 
 			AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 			SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 			NEXUS::Samples::TimerDrawThickness);
 	}
 	
-	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance, Rotation.Vector(), 
+	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance, Quat, 
 		AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 		NEXUS::Samples::TimerDrawThickness);

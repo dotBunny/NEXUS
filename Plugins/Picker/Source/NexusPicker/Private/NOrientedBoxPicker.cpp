@@ -220,7 +220,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 #undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
-#define RANDOM_INDEX FNRandom::Deterministic.IntegerRange
+#define RANDOM_INDEX FNRandom::NonDeterministic.RandRange
 void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params)
 {
 	N_PICKER_ORIENTED_BOX_PREFIX
@@ -366,7 +366,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 #undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE RandomStream.FRandRange
-#define RANDOM_INDEX FNRandom::Deterministic.IntegerRange
+#define RANDOM_INDEX RandomStream.RandRange
 void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNOrientedBoxPickerParams& Params)
 {
 	const FRandomStream RandomStream(Seed);
