@@ -91,13 +91,13 @@ void UNSamplesDisplayLibrary::TimerDrawComboArc(ANSamplesDisplayActor* SamplesDi
 	
 	if (MinimumDistance > 0)
 	{
-		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance, Rotation.Quaternion(), 
+		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance, Rotation.Vector(), 
 			AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 			SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 			NEXUS::Samples::TimerDrawThickness);
 	}
 	
-	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance, Rotation.Quaternion(), 
+	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance, Rotation.Vector(), 
 		AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 		NEXUS::Samples::TimerDrawThickness);

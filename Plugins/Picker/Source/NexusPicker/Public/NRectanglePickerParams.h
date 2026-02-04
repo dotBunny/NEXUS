@@ -42,7 +42,7 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	
 	/**
 	 * Gets the ranges which can be selected from.
-	 * @note This will appropriate cut out portions of available space when the MinimumDimensions are not fully enclosed by the MaximumDimensions.
+	 * @note This will appropriately cut out portions of available space when the MinimumDimensions are not fully enclosed by the MaximumDimensions.
 	 * @return An array of packed Min/Max coords representing the possible area to select from based on parameters.
 	 */
 	TArray<FVector4> GetValidRanges() const
