@@ -88,9 +88,6 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 		if (CurrentScreenshotIndex >= ANSamplesDisplayActor::KnownDisplays.Num())
 		{
 			bAutoScreenshotMode = false;
-			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-			HUD->SetVisibility(true);
-			ChangeView(ANSamplesDisplayActor::KnownDisplays[0]);
 		}
 		
 	}
