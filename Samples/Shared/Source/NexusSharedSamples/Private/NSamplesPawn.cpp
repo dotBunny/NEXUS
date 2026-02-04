@@ -28,6 +28,9 @@ void ANSamplesPawn::BeginPlay()
 	InputComponent->BindKey(EKeys::Backslash, IE_Released, this, &ANSamplesPawn::OnReturnToPawn);
 	InputComponent->BindKey(EKeys::Hyphen, IE_Released, this, &ANSamplesPawn::OnResolutionDecrease);
 	InputComponent->BindKey(EKeys::Equals, IE_Released, this, &ANSamplesPawn::OnResolutionIncrease);
+	
+	InputComponent->BindKey(EKeys::Slash, IE_Released, this, &ANSamplesPawn::OnSortDisplays); // Hidden
+	InputComponent->BindKey(EKeys::F7, IE_Released, this, &ANSamplesPawn::OnAutoScreenshot);
 
 	ChangeView(nullptr);
 	
@@ -42,6 +45,37 @@ void ANSamplesPawn::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	}
 	
 	Super::EndPlay(EndPlayReason);
+}
+
+void ANSamplesPawn::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	if (bAutoScreenshotMode)
+	{
+		if (!bReadyToShoot)
+		{
+			ChangeView(ANSamplesDisplayActor::KnownDisplays[CurrentScreenshotIndex]);
+			CurrentScreenshotIndex++;
+			bReadyToShoot = true;
+			return;
+		}
+		
+		
+		if (bReadyToShoot)
+		{
+			OnScreenshot();
+			bReadyToShoot = false;
+		}
+		
+		if (CurrentScreenshotIndex >= ANSamplesDisplayActor::KnownDisplays.Num())
+		{
+			bAutoScreenshotMode = false;
+			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+			HUD->SetVisibility(true);
+			ChangeView(ANSamplesDisplayActor::KnownDisplays[0]);
+		}
+		
+	}
 }
 
 void ANSamplesPawn::OnNextDisplay()
@@ -117,6 +151,26 @@ void ANSamplesPawn::OnResolutionDecrease()
 	if (ResolutionMultiplier < 1) ResolutionMultiplier = 1;
 	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
 	HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+}
+
+void ANSamplesPawn::OnSortDisplays()
+{
+	ANSamplesDisplayActor::SortKnownDisplays();	
+}
+
+void ANSamplesPawn::OnAutoScreenshot()
+{
+	if (ANSamplesDisplayActor::KnownDisplays.Num() == 0) return;
+	
+	OnSortDisplays();
+	
+	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
+	HUD->SetVisibility(false);
+	
+	CameraIndex = 0;
+	bAutoScreenshotMode = true;
+	bReadyToShoot = false;
+	CurrentScreenshotIndex = 0;
 }
 
 void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)

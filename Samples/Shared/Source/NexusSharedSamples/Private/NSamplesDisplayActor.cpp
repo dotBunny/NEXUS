@@ -13,6 +13,14 @@
 
 TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
+void ANSamplesDisplayActor::SortKnownDisplays()
+{
+	KnownDisplays.Sort([](const AActor& A, const AActor& B)
+	{
+		return A.GetName() < B.GetName();
+	});
+}
+
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	// Create reference storage

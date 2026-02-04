@@ -36,7 +36,7 @@ void ANSamplesHUD::DrawHUD()
 		{
 			CalculatedTextWidth = InstructionWidth;
 		}
-		const float CalculatedTextHeight = OutHeight * 8;
+		const float CalculatedTextHeight = OutHeight * 9;
 
 		// Text position
 		const FVector2D TextPosition(ScreenSafeZone, ScreenSafeZone);
@@ -56,7 +56,8 @@ void ANSamplesHUD::DrawHUD()
 				"Select Pawn: Backslash\n"
 				"Toggle HUD: Backspace\n"
 				"Screenshot: F12\n"
-				"Screenshot Multiplier (%i): -/="),
+				"Screenshot Multiplier (%i): -/=\n"
+				"Auto-Screenshot: F7"),
 				*CurrentCameraName,
 				ScreenshotMultiplier);
 		

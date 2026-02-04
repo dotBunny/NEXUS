@@ -42,6 +42,7 @@ class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 
 public:
 	static TArray<ANSamplesDisplayActor*> KnownDisplays;
+	static void SortKnownDisplays();
 	
 	UFUNCTION(BlueprintCallable)
 	void Rebuild();

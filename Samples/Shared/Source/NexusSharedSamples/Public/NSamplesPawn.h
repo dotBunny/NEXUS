@@ -19,8 +19,11 @@ class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 	GENERATED_BODY()
 
 	ANSamplesPawn(const FObjectInitializer& ObjectInitializer);
+
+	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaSeconds) override;
 
 protected:
 
@@ -31,6 +34,8 @@ protected:
 	void OnReturnToPawn();
 	void OnResolutionIncrease();
 	void OnResolutionDecrease();
+	void OnSortDisplays();
+	void OnAutoScreenshot();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	TObjectPtr<UWidgetInteractionComponent> WidgetInteraction;
@@ -39,4 +44,8 @@ private:
 	void ChangeView(ANSamplesDisplayActor* DisplayActor);
 	int CameraIndex = -1;
 	int ResolutionMultiplier = 1;
+	
+	bool bAutoScreenshotMode = false;
+	bool bReadyToShoot = false;
+	int CurrentScreenshotIndex = 0;
 };
