@@ -55,6 +55,8 @@ enum class ECollisionQueryTestShape : uint8
 	Sphere
 };
 
+// #SONARQUBE-DISABLE-CPP_S1820 Wanting to keep all the settings inline
+
 /**
  * Used to test collision queries at design time in the editor.
  * @remarks The was originally started after watching George Prosser's UnrealFest 2023 talk "Collision Data in UE5". 
@@ -204,3 +206,5 @@ private:
 	
 	float TickTimer = 0;
 };
+
+// #SONARQUBE-ENABLE
