@@ -70,47 +70,51 @@ TArray<FName> ANCollisionQueryTestActor::GetCollisionProfileNames()
 
 void ANCollisionQueryTestActor::Query(const float DrawTime) const
 {
-	if (QueryMethod == ECollisionQueryTestMethod::LineTrace)
+	using enum ECollisionQueryTestMethod;
+	if (QueryMethod == LineTrace)
 	{
-		if (QueryPrefix == ECollisionQueryTestPrefix::Single)
+		using enum ECollisionQueryTestPrefix;
+		if (QueryPrefix == Single)
 		{
 			DoLineTraceSingle(DrawTime);
 		}
-		else if (QueryPrefix == ECollisionQueryTestPrefix::Multi)
+		else if (QueryPrefix == Multi)
 		{
 			DoLineTraceMulti(DrawTime);
 		}
-		else if (QueryPrefix == ECollisionQueryTestPrefix::Test)
+		else if (QueryPrefix == Test)
 		{
 			DoLineTraceTest(DrawTime);
 		}
 	}
-	else if (QueryMethod == ECollisionQueryTestMethod::Sweep)
+	else if (QueryMethod == Sweep)
 	{
-		if (QueryPrefix == ECollisionQueryTestPrefix::Single)
+		using enum ECollisionQueryTestPrefix;
+		if (QueryPrefix == Single)
 		{
 			DoSweepSingle(DrawTime);
 		}
-		else if (QueryPrefix == ECollisionQueryTestPrefix::Multi)
+		else if (QueryPrefix == Multi)
 		{
 			DoSweepMulti(DrawTime);
 		}
-		else if (QueryPrefix == ECollisionQueryTestPrefix::Test)
+		else if (QueryPrefix == Test)
 		{
 			DoSweepTest(DrawTime);
 		}
 	}
-	else if (QueryMethod == ECollisionQueryTestMethod::Overlap)
+	else if (QueryMethod == Overlap)
 	{
-		if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Blocking)
+		using enum ECollisionQueryTestOverlapBlocking;
+		if (QueryOverlapBlocking == Blocking)
 		{
 			DoOverlapBlocking(DrawTime);
 		}
-		else if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Any)
+		else if (QueryOverlapBlocking == Any)
 		{
 			DoOverlapAny(DrawTime);
 		}
-		else if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Multi)
+		else if (QueryOverlapBlocking == Multi)
 		{
 			DoOverlapMulti(DrawTime);
 		}
@@ -358,15 +362,18 @@ void ANCollisionQueryTestActor::DoOverlapBlocking(const float DrawTime) const
 	
 	if (QueryBy == ECollisionQueryTestBy::Channel)
 	{
-		bHit = World->OverlapBlockingTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+		bHit = World->OverlapBlockingTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, 
+			GetCollisionQueryParams(), GetCollisionResponseParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
-		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, 
+			CollisionShape, GetCollisionQueryParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
-		bHit = World->OverlapBlockingTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapBlockingTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, 
+			GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
@@ -384,15 +391,18 @@ void ANCollisionQueryTestActor::DoOverlapAny(const float DrawTime) const
 	
 	if (QueryBy == ECollisionQueryTestBy::Channel)
 	{
-		bHit = World->OverlapAnyTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+		bHit = World->OverlapAnyTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, 
+			GetCollisionQueryParams(), GetCollisionResponseParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
-		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, 
+			CollisionShape, GetCollisionQueryParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
-		bHit = World->OverlapAnyTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapAnyTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, 
+			GetCollisionQueryParams());
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
@@ -411,20 +421,29 @@ void ANCollisionQueryTestActor::DoOverlapMulti(const float DrawTime) const
 	
 	if (QueryBy == ECollisionQueryTestBy::Channel)
 	{
-		bHit = World->OverlapMultiByChannel(OverlapsResults, StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+		bHit = World->OverlapMultiByChannel(OverlapsResults, StartPosition, ActorQuat, Channel, CollisionShape, 
+			GetCollisionQueryParams(), GetCollisionResponseParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
-		bHit = World->OverlapMultiByObjectType(OverlapsResults, StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapMultiByObjectType(OverlapsResults, StartPosition, ActorQuat, 
+			N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
-		bHit = World->OverlapMultiByProfile(OverlapsResults, StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+		bHit = World->OverlapMultiByProfile(OverlapsResults, StartPosition, ActorQuat, CollisionProfileName, 
+			CollisionShape, GetCollisionQueryParams());
 	}
 	
 	
 #if UE_ENABLE_DEBUG_DRAWING
-	// TODO overlap results
+	if (DrawLabels)
+	{
+		for (const FOverlapResult& OverlapResult : OverlapsResults)
+		{
+		
+		}
+	}
 	FNDrawDebugHelpers::DrawCollisionShape(World, StartPosition, ActorQuat, CollisionShape, 
 		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, 
 		SDPG_World, DrawLineThickness);

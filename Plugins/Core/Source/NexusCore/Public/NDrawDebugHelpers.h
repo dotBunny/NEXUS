@@ -3,6 +3,7 @@
 
 #pragma once
 
+// #SONARQUBE-DISABLE-CPP_S107 Necessary verbosity of methods to fully convey the drawing methods
 
 /**
  * A set of functionality made to extend DrawDebug commands.
@@ -73,4 +74,6 @@ public:
 	static void DrawCollisionShape(const UWorld* InWorld, const FVector& Position, const FQuat& Quat,
 		const FCollisionShape& Shape, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f, 
 		uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
+	
+// #SONARQUBE-ENABLE
 };

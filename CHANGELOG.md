@@ -11,6 +11,7 @@
 - `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
 - `FNOrientedBoxPicker` for generating points in a box with rotation.
 - [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
+- `ANCollisionQueryTestActor` to visualize collision queries in Simulation/Editor.
 
 ### Changed
 

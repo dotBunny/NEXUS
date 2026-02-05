@@ -154,6 +154,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Point Size")
 	float DrawPointSize = 15.f;
 	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Labels")
+	bool DrawLabels = false;
+	
 protected:
 	UFUNCTION()
 	static TArray<FName> GetCollisionProfileNames();
