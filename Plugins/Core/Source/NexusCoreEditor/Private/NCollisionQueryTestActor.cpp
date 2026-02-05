@@ -2,22 +2,22 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NCollisionQueryTestActor.h"
-#include "NColor.h"
+#include "Engine/OverlapResult.h"
+#include "NDrawDebugHelpers.h"
 
 #define N_COLLISION_QUERY_TEST_COMMON \
 	const FVector StartPosition = GetActorLocation(); \
 	const FVector EndPosition = EndPointComponent->GetComponentLocation(); \
 	bool bHit = false; \
 	const UWorld* World = GetWorld();
-#define N_COLLISION_QUERY_HIT_COLOR FNColor::GetColor(ENColor::NC_Green)
-#define N_COLLISION_QUERY_MID_COLOR FNColor::GetColor(ENColor::NC_BlueMid)
-#define N_COLLISION_QUERY_MISS_COLOR FNColor::GetColor(ENColor::NC_Red)
+#define N_COLLISION_QUERY_OBJECT_PARAMS FCollisionObjectQueryParams(UEngineTypes::ConvertToCollisionChannel(ObjectType))
+#define N_COLLISION_QUERY_HIT_COLOR FColor::Green
+#define N_COLLISION_QUERY_MID_COLOR FColor::Blue
+#define N_COLLISION_QUERY_MISS_COLOR FColor::Red
 
-
-ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer)
+ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	bIsEditorOnlyActor = true;
-	
 	StartPointComponent= CreateDefaultSubobject<USceneComponent>(TEXT("Start Point"));
 	StartPointComponent->SetMobility(EComponentMobility::Movable);
 	StartPointComponent->bIsEditorOnly = true;
@@ -45,8 +45,8 @@ void ANCollisionQueryTestActor::Tick(const float DeltaSeconds)
 	TickTimer -= DeltaSeconds;
 	if (TickTimer <= 0)
 	{
-		Query(Options.UpdateTimer);
-		TickTimer = Options.UpdateTimer;
+		Query(UpdateTimer);
+		TickTimer = UpdateTimer;
 	}
 	
 	Super::Tick(DeltaSeconds);	
@@ -87,11 +87,33 @@ void ANCollisionQueryTestActor::Query(const float DrawTime) const
 	}
 	else if (QueryMethod == ECollisionQueryTestMethod::Sweep)
 	{
-	
+		if (QueryPrefix == ECollisionQueryTestPrefix::Single)
+		{
+			DoSweepSingle(DrawTime);
+		}
+		else if (QueryPrefix == ECollisionQueryTestPrefix::Multi)
+		{
+			DoSweepMulti(DrawTime);
+		}
+		else if (QueryPrefix == ECollisionQueryTestPrefix::Test)
+		{
+			DoSweepTest(DrawTime);
+		}
 	}
 	else if (QueryMethod == ECollisionQueryTestMethod::Overlap)
 	{
-	
+		if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Blocking)
+		{
+			DoOverlapBlocking(DrawTime);
+		}
+		else if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Any)
+		{
+			DoOverlapAny(DrawTime);
+		}
+		else if (QueryOverlapBlocking == ECollisionQueryTestOverlapBlocking::Multi)
+		{
+			DoOverlapMulti(DrawTime);
+		}
 	}
 }
 
@@ -107,8 +129,7 @@ void ANCollisionQueryTestActor::DoLineTraceSingle(const float DrawTime) const
 	}
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
-		bHit = World->LineTraceSingleByObjectType(HitResult, StartPosition, EndPosition, 
-			FCollisionObjectQueryParams(UEngineTypes::ConvertToCollisionChannel(ObjectType)));
+		bHit = World->LineTraceSingleByObjectType(HitResult, StartPosition, EndPosition, N_COLLISION_QUERY_OBJECT_PARAMS);
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
@@ -136,6 +157,7 @@ void ANCollisionQueryTestActor::DoLineTraceMulti(const float DrawTime) const
 {
 	N_COLLISION_QUERY_TEST_COMMON
 	TArray<FHitResult> HitResults;
+	
 	if (QueryBy == ECollisionQueryTestBy::Channel)
 	{
 		bHit = World->LineTraceMultiByChannel(HitResults, StartPosition, EndPosition, 
@@ -144,7 +166,7 @@ void ANCollisionQueryTestActor::DoLineTraceMulti(const float DrawTime) const
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
 		bHit = World->LineTraceMultiByObjectType(HitResults, StartPosition, EndPosition, 
-			FCollisionObjectQueryParams(UEngineTypes::ConvertToCollisionChannel(ObjectType)), GetCollisionQueryParams());
+			N_COLLISION_QUERY_OBJECT_PARAMS, GetCollisionQueryParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
@@ -182,6 +204,7 @@ void ANCollisionQueryTestActor::DoLineTraceMulti(const float DrawTime) const
 void ANCollisionQueryTestActor::DoLineTraceTest(const float DrawTime) const
 {
 	N_COLLISION_QUERY_TEST_COMMON
+	
 	if (QueryBy == ECollisionQueryTestBy::Channel)
 	{
 		bHit = World->LineTraceTestByChannel(StartPosition, EndPosition, 
@@ -189,13 +212,14 @@ void ANCollisionQueryTestActor::DoLineTraceTest(const float DrawTime) const
 	}
 	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
 	{
-		bHit = World->LineTraceTestByObjectType(StartPosition, EndPosition, 
-			FCollisionObjectQueryParams(UEngineTypes::ConvertToCollisionChannel(ObjectType)), GetCollisionQueryParams());
+		bHit = World->LineTraceTestByObjectType(StartPosition, EndPosition, N_COLLISION_QUERY_OBJECT_PARAMS, 
+			GetCollisionQueryParams());
 	}
 	else if (QueryBy == ECollisionQueryTestBy::Profile)
 	{
 		bHit = World->LineTraceTestByProfile(StartPosition, EndPosition, CollisionProfileName, GetCollisionQueryParams());
 	}
+
 #if UE_ENABLE_DEBUG_DRAWING
 	DrawDebugLine(World, StartPosition, EndPosition, 
 		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, 
@@ -205,36 +229,216 @@ void ANCollisionQueryTestActor::DoLineTraceTest(const float DrawTime) const
 
 void ANCollisionQueryTestActor::DoSweepSingle(const float DrawTime) const
 {
+	N_COLLISION_QUERY_TEST_COMMON
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape CollisionShape = GetCollisionShape();
+	FHitResult HitResult;
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->SweepSingleByChannel(HitResult, StartPosition, EndPosition, ActorQuat, Channel, 
+			CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->SweepSingleByObjectType(HitResult, StartPosition, EndPosition, ActorQuat, 
+			N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->SweepSingleByProfile(HitResult, StartPosition, EndPosition, ActorQuat, CollisionProfileName, 
+			CollisionShape, GetCollisionQueryParams());
+	}
+
+#if UE_ENABLE_DEBUG_DRAWING
+	if (bHit)
+	{
+		DrawDebugPoint(World, HitResult.ImpactPoint, DrawPointSize, N_COLLISION_QUERY_HIT_COLOR, 
+			false, DrawTime, SDPG_World);
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, HitResult.Location, ActorQuat, CollisionShape,
+			N_COLLISION_QUERY_HIT_COLOR, false, DrawTime, SDPG_World, DrawLineThickness);
+	}
+	else
+	{
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, ActorQuat, CollisionShape, 
+			N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, SDPG_World, DrawLineThickness);
+	}
+#endif
 }
 
 void ANCollisionQueryTestActor::DoSweepMulti(const float DrawTime) const
 {
+	N_COLLISION_QUERY_TEST_COMMON
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape CollisionShape = GetCollisionShape();
+	TArray<FHitResult> HitResults;
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->SweepMultiByChannel(HitResults, StartPosition, EndPosition, ActorQuat, Channel, 
+			CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->SweepMultiByObjectType(HitResults, StartPosition, EndPosition, ActorQuat, 
+			N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->SweepMultiByProfile(HitResults, StartPosition, EndPosition, ActorQuat, CollisionProfileName, 
+			CollisionShape, GetCollisionQueryParams());
+	}
+
+#if UE_ENABLE_DEBUG_DRAWING
+	if (bHit)
+	{
+		FVector SweepEnd = HitResults.Last().Location;
+		if (QueryBy == ECollisionQueryTestBy::ObjectType)
+		{
+			SweepEnd = EndPosition;
+		}
+		else if (HitResults.Last().bStartPenetrating)
+		{
+			SweepEnd = EndPosition;
+		}
+
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, SweepEnd, ActorQuat, CollisionShape, 
+			N_COLLISION_QUERY_HIT_COLOR, false, DrawTime, SDPG_World, DrawLineThickness);
+	}
+	else
+	{
+		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, ActorQuat, CollisionShape, 
+			HitResults.Num() > 0 ? N_COLLISION_QUERY_MID_COLOR : N_COLLISION_QUERY_MISS_COLOR, 
+			false, DrawTime, SDPG_World, DrawLineThickness);
+	}
+
+	for (const FHitResult& HitResult : HitResults)
+	{
+		DrawDebugPoint(World, HitResult.ImpactPoint, DrawPointSize, 
+			HitResult.bBlockingHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MID_COLOR, 
+			false, DrawTime, SDPG_World);
+	}
+#endif
 }
 
 void ANCollisionQueryTestActor::DoSweepTest(const float DrawTime) const
 {
+	N_COLLISION_QUERY_TEST_COMMON
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape& CollisionShape = GetCollisionShape();
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->SweepTestByChannel(StartPosition, EndPosition, ActorQuat, Channel, CollisionShape, 
+			GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->SweepTestByObjectType(StartPosition, EndPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, 
+			CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->SweepTestByProfile(StartPosition, EndPosition, ActorQuat, CollisionProfileName, 
+			CollisionShape, GetCollisionQueryParams());
+	}
+
+#if UE_ENABLE_DEBUG_DRAWING
+	FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, ActorQuat, CollisionShape, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR: N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, 
+		SDPG_World, DrawLineThickness);
+#endif
 }
 
-void ANCollisionQueryTestActor::DoOverlapSingle(const float DrawTime) const
+void ANCollisionQueryTestActor::DoOverlapBlocking(const float DrawTime) const
 {
+	N_COLLISION_QUERY_TEST_COMMON
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape& CollisionShape = GetCollisionShape();
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->OverlapBlockingTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->OverlapBlockingTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+	}
+
+#if UE_ENABLE_DEBUG_DRAWING
+	FNDrawDebugHelpers::DrawCollisionShape(World, StartPosition, ActorQuat, CollisionShape, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, 
+		SDPG_World, DrawLineThickness);
+#endif 
+}
+
+void ANCollisionQueryTestActor::DoOverlapAny(const float DrawTime) const
+{
+	N_COLLISION_QUERY_TEST_COMMON
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape& CollisionShape = GetCollisionShape();
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->OverlapAnyTestByChannel(StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->OverlapAnyTestByObjectType(StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->OverlapAnyTestByProfile(StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+	}
+
+#if UE_ENABLE_DEBUG_DRAWING
+	FNDrawDebugHelpers::DrawCollisionShape(World, StartPosition, ActorQuat, CollisionShape, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, 
+		SDPG_World, DrawLineThickness);
+#endif
 }
 
 void ANCollisionQueryTestActor::DoOverlapMulti(const float DrawTime) const
 {
-}
-
-void ANCollisionQueryTestActor::DoOverlapTest(const float DrawTime) const
-{
+	N_COLLISION_QUERY_TEST_COMMON
+	TArray<FOverlapResult>OverlapsResults;
+	const FQuat ActorQuat = GetActorQuat();
+	const FCollisionShape& CollisionShape = GetCollisionShape();
+	
+	if (QueryBy == ECollisionQueryTestBy::Channel)
+	{
+		bHit = World->OverlapMultiByChannel(OverlapsResults, StartPosition, ActorQuat, Channel, CollisionShape, GetCollisionQueryParams(), GetCollisionResponseParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::ObjectType)
+	{
+		bHit = World->OverlapMultiByObjectType(OverlapsResults, StartPosition, ActorQuat, N_COLLISION_QUERY_OBJECT_PARAMS, CollisionShape, GetCollisionQueryParams());
+	}
+	else if (QueryBy == ECollisionQueryTestBy::Profile)
+	{
+		bHit = World->OverlapMultiByProfile(OverlapsResults, StartPosition, ActorQuat, CollisionProfileName, CollisionShape, GetCollisionQueryParams());
+	}
+	
+	
+#if UE_ENABLE_DEBUG_DRAWING
+	// TODO overlap results
+	FNDrawDebugHelpers::DrawCollisionShape(World, StartPosition, ActorQuat, CollisionShape, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, DrawTime, 
+		SDPG_World, DrawLineThickness);
+#endif
 }
 
 FCollisionQueryParams ANCollisionQueryTestActor::GetCollisionQueryParams() const
 {
 	FCollisionQueryParams Parameters;
-	Parameters.bTraceComplex = Options.bTraceComplex;
-	Parameters.bFindInitialOverlaps = Options.bFindInitialOverlaps;
-	Parameters.bIgnoreBlocks = Options.bIgnoreBlocks;
-	Parameters.bIgnoreTouches = Options.bIgnoreTouches;
-	Parameters.bSkipNarrowPhase = Options.bSkipNarrowPhase;
+	Parameters.bTraceComplex = bTraceComplex;
+	Parameters.bFindInitialOverlaps = bFindInitialOverlaps;
+	Parameters.bIgnoreBlocks = bIgnoreBlocks;
+	Parameters.bIgnoreTouches = bIgnoreTouches;
+	Parameters.bSkipNarrowPhase = bSkipNarrowPhase;
 	return MoveTemp(Parameters);
 }
 

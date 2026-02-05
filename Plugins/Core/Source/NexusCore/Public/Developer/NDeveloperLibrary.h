@@ -129,7 +129,7 @@ public:
 	{
 		const UWorld* InWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
 		if (InWorld == nullptr) return;
-		FNDrawDebugHelpers::DrawDebugString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime, 
+		FNDrawDebugHelpers::DrawString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime, 
 			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);		
 	}
 };

@@ -23,11 +23,11 @@ enum class ECollisionQueryTestPrefix : uint8
 };
 
 UENUM()
-enum class ECollisionQueryTestSuffix : uint8
+enum class ECollisionQueryTestOverlapBlocking : uint8
 {
 	Blocking,
 	Any,
-	Test
+	Multi
 };
 
 UENUM()
@@ -55,34 +55,6 @@ enum class ECollisionQueryTestShape : uint8
 	Sphere
 };
 
-USTRUCT()
-struct FNCollisionQueryTestOptions
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, DisplayName="Trace Complex")
-	bool bTraceComplex = false;
-
-	UPROPERTY(EditAnywhere, DisplayName="Find Initial Overlaps")
-	bool bFindInitialOverlaps = true;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Ignore Blocks")
-	bool bIgnoreBlocks = false;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Ignore Touches")
-	bool bIgnoreTouches = false;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Skip Narrow Phase")
-	bool bSkipNarrowPhase = false;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
-	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Update Timer", meta=(Tooltip="How long between queries."))
-	float UpdateTimer = 0.f;
-};
-
-// TODO: Transient - cant be currently when entering a level it gets removed
 /**
  * Used to test collision queries at design time in the editor.
  * @remarks The was originally started after watching George Prosser's UnrealFest 2023 talk "Collision Data in UE5". 
@@ -92,7 +64,8 @@ struct FNCollisionQueryTestOptions
  * @ref https://github.com/StudioGobo/UECollisionQueryTools 
  */
 UCLASS(DisplayName = "NEXUS: Collision Query Test Actor", ClassGroup = "NEXUS", 
-	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
+	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, 
+		Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
 class NEXUSCOREEDITOR_API ANCollisionQueryTestActor: public AActor
 {
 	GENERATED_BODY()
@@ -110,9 +83,9 @@ public:
 		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::Overlap", EditConditionHides))
 	ECollisionQueryTestPrefix QueryPrefix = ECollisionQueryTestPrefix::Single;
 	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Type", 
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::Overlap", EditConditionHides))
-	ECollisionQueryTestSuffix QuerySuffix = ECollisionQueryTestSuffix::Any;
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Blocking", 
+		meta=(EditCondition="QueryMethod==ECollisionQueryTestMethod::Overlap", EditConditionHides))
+	ECollisionQueryTestOverlapBlocking QueryOverlapBlocking = ECollisionQueryTestOverlapBlocking::Any;
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="By")
 	ECollisionQueryTestBy QueryBy = ECollisionQueryTestBy::Channel;
@@ -120,10 +93,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Channel",
 		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Channel", EditConditionHides))
 	TEnumAsByte<ECollisionChannel> Channel = ECC_Pawn;
-		
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Collision Responses",
-		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Channel", EditConditionHides))
-	FCollisionResponseContainer CollisionResponses;
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Object Type",
 		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::ObjectType", EditConditionHides))
@@ -153,8 +122,31 @@ public:
 		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Sphere", EditConditionHides))
 	float SphereRadius = 42.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Collision Test", DisplayName="Options")
-	FNCollisionQueryTestOptions Options;
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Query", DisplayName="Collision Responses",
+	meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Channel", EditConditionHides))
+	FCollisionResponseContainer CollisionResponses;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Trace Complex")
+	bool bTraceComplex = false;
+
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Find Initial Overlaps")
+	bool bFindInitialOverlaps = true;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Ignore Blocks")
+	bool bIgnoreBlocks = false;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Ignore Touches")
+	bool bIgnoreTouches = false;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Skip Narrow Phase")
+	bool bSkipNarrowPhase = false;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Mobility Type")
+	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
+	
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Update Timer", meta=(Tooltip="How long between queries."))
+	float UpdateTimer = 0.f;
+	
 
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;
@@ -183,9 +175,9 @@ private:
 	void DoSweepMulti(float DrawTime) const;
 	void DoSweepTest(float DrawTime) const;
 	
-	void DoOverlapSingle(float DrawTime) const;
+	void DoOverlapBlocking(float DrawTime) const;
+	void DoOverlapAny(float DrawTime) const;
 	void DoOverlapMulti(float DrawTime) const;
-	void DoOverlapTest(float DrawTime) const;
 	
 	FCollisionQueryParams  GetCollisionQueryParams() const;
 	FCollisionResponseParams GetCollisionResponseParams() const;

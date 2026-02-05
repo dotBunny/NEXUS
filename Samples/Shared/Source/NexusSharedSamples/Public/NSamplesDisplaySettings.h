@@ -138,28 +138,28 @@ struct FNSamplesDisplaySpotlightSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Enabled")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Enabled")
 	bool bSpotlightEnabled = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Intensity")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Intensity")
 	float SpotlightIntensity = 5000.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Attenuation Radius")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Attenuation Radius")
 	float SpotlightAttenuationRadius = 722.770935f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Inner Cone Angle")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Inner Cone Angle")
 	float SpotlightInnerConeAngle = 10.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Outer Cone Angle")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Outer Cone Angle")
 	float SpotlightOuterConeAngle = 64.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Temperature")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Temperature")
 	float SpotlightTemperature = 5500.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Cast Shadows")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Cast Shadows")
 	bool bSpotlightCastShadows = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NEXUS|Spotlight", DisplayName = "Cast Volumetric Shadows")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Cast Volumetric Shadows")
 	bool bSpotlightCastVolumetricShadow = false;
 };
 
