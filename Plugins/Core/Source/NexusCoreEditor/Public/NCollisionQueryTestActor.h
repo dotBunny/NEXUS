@@ -55,6 +55,33 @@ enum class ECollisionQueryTestShape : uint8
 	Sphere
 };
 
+USTRUCT()
+struct FNCollisionQueryTestOptions
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, DisplayName="Trace Complex")
+	bool bTraceComplex = false;
+
+	UPROPERTY(EditAnywhere, DisplayName="Find Initial Overlaps")
+	bool bFindInitialOverlaps = true;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Ignore Blocks")
+	bool bIgnoreBlocks = false;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Ignore Touches")
+	bool bIgnoreTouches = false;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Skip Narrow Phase")
+	bool bSkipNarrowPhase = false;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
+	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Update Timer", meta=(Tooltip="How long between queries."))
+	float UpdateTimer = 0.f;
+};
+
 // TODO: Transient - cant be currently when entering a level it gets removed
 /**
  * Used to test collision queries at design time in the editor.
@@ -126,26 +153,8 @@ public:
 		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Sphere", EditConditionHides))
 	float SphereRadius = 42.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Trace Complex")
-	bool bTraceComplex = false;
-
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Find Initial Overlaps")
-	bool bFindInitialOverlaps = true;
-	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Ignore Blocks")
-	bool bIgnoreBlocks = false;
-	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Ignore Touches")
-	bool bIgnoreTouches = false;
-	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Skip Narrow Phase")
-	bool bSkipNarrowPhase = false;
-	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Mobility Type")
-	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
-	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Options", DisplayName="Update Timer", meta=(Tooltip="How long between queries."))
-	float UpdateTimer = 0.f;
+	UPROPERTY(EditAnywhere, Category = "Collision Test", DisplayName="Options")
+	FNCollisionQueryTestOptions Options;
 
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;

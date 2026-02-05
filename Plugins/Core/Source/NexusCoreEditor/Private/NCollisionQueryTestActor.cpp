@@ -45,8 +45,8 @@ void ANCollisionQueryTestActor::Tick(const float DeltaSeconds)
 	TickTimer -= DeltaSeconds;
 	if (TickTimer <= 0)
 	{
-		Query(UpdateTimer);
-		TickTimer = UpdateTimer;
+		Query(Options.UpdateTimer);
+		TickTimer = Options.UpdateTimer;
 	}
 	
 	Super::Tick(DeltaSeconds);	
@@ -230,11 +230,11 @@ void ANCollisionQueryTestActor::DoOverlapTest(const float DrawTime) const
 FCollisionQueryParams ANCollisionQueryTestActor::GetCollisionQueryParams() const
 {
 	FCollisionQueryParams Parameters;
-	Parameters.bTraceComplex = bTraceComplex;
-	Parameters.bFindInitialOverlaps = bFindInitialOverlaps;
-	Parameters.bIgnoreBlocks = bIgnoreBlocks;
-	Parameters.bIgnoreTouches = bIgnoreTouches;
-	Parameters.bSkipNarrowPhase = bSkipNarrowPhase;
+	Parameters.bTraceComplex = Options.bTraceComplex;
+	Parameters.bFindInitialOverlaps = Options.bFindInitialOverlaps;
+	Parameters.bIgnoreBlocks = Options.bIgnoreBlocks;
+	Parameters.bIgnoreTouches = Options.bIgnoreTouches;
+	Parameters.bSkipNarrowPhase = Options.bSkipNarrowPhase;
 	return MoveTemp(Parameters);
 }
 
