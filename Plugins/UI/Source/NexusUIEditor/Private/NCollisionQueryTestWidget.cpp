@@ -25,11 +25,8 @@ void UNCollisionQueryTestWidget::NativeConstruct()
 
 void UNCollisionQueryTestWidget::NativeDestruct()
 {
-	StartActor->Destroy();
-	StartActor = nullptr;
-	
-	EndActor->Destroy();
-	EndActor = nullptr;
+	QueryActor->Destroy();
+	QueryActor = nullptr;
 	
 	FWorldDelegates::OnPIEStarted.Remove(OnPIEMapCreatedHandle);
 	
@@ -70,18 +67,18 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 		using enum ECollisionQueryTestPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceSingle(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation());
+			FNCollisionQueryTestUtils::DoLineTraceSingle(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceMulti(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation());
+			FNCollisionQueryTestUtils::DoLineTraceMulti(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceTest(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation());
+			FNCollisionQueryTestUtils::DoLineTraceTest(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Sweep)
@@ -89,21 +86,21 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 		using enum ECollisionQueryTestPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionQueryTestUtils::DoSweepSingle(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation(), 
-				StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoSweepSingle(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
+				QueryActor->GetActorQuat());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionQueryTestUtils::DoSweepMulti(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation(), 
-				StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoSweepMulti(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
+				QueryActor->GetActorQuat());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionQueryTestUtils::DoSweepTest(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), EndActor->GetActorLocation(), 
-				StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoSweepTest(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
+				QueryActor->GetActorQuat());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Overlap)
@@ -111,28 +108,28 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 		using enum ECollisionQueryTestOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
-			FNCollisionQueryTestUtils::DoOverlapBlocking(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoOverlapBlocking(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
-			FNCollisionQueryTestUtils::DoOverlapAny(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoOverlapAny(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionQueryTestUtils::DoOverlapMulti(Settings, StartActor->GetWorld(), 
-				StartActor->GetActorLocation(), StartActor->GetActorQuat());
+			FNCollisionQueryTestUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
+				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
 		}
 	}
 }
 
 void UNCollisionQueryTestWidget::OnSelectStartButtonClicked()
 {
-	if (StartActor != nullptr)
+	if (QueryActor != nullptr)
 	{
 		GEditor->SelectNone(false, true);
-		GEditor->SelectActor(StartActor, true, true, true, true);
+		GEditor->SelectComponent(QueryActor->GetStartComponent(), true, true, true);
 	}
 	else
 	{
@@ -142,10 +139,10 @@ void UNCollisionQueryTestWidget::OnSelectStartButtonClicked()
 
 void UNCollisionQueryTestWidget::OnSelectEndButtonClicked()
 {
-	if (EndActor != nullptr)
+	if (QueryActor != nullptr)
 	{
 		GEditor->SelectNone(false, true);
-		GEditor->SelectActor(EndActor, true, true, true, true);
+		GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
 	}
 	else
 	{
@@ -156,24 +153,18 @@ void UNCollisionQueryTestWidget::OnSelectEndButtonClicked()
 void UNCollisionQueryTestWidget::CheckActors()
 {
 	FActorSpawnParameters SpawnParams;
+	// TODO: Do i want this?
 	//SpawnParams.bHideFromSceneOutliner = true;
 	
-	if (StartActor == nullptr)
+	if (QueryActor == nullptr)
 	{
-		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryStart"));
-		StartActor = GetWorld()->SpawnActor<ANTransientActor>(
+		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANCollisionQueryTestActor::StaticClass(), TEXT("CollisionQueryStart"));
+		QueryActor = GetWorld()->SpawnActor<ANCollisionQueryTestActor>(
 			FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
 		
 		// We're going to have the actor handle pumping the query
-		StartActor->OnTick.BindUObject(this, &UNCollisionQueryTestWidget::OnWorldTick); 
+		QueryActor->OnTick.BindUObject(this, &UNCollisionQueryTestWidget::OnWorldTick); 
 	}
-	
-	if (EndActor == nullptr)
-	{
-		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryEnd"));
-		EndActor = GetWorld()->SpawnActor<ANTransientActor>(
-			FVector(0,0,500.f), FRotator::ZeroRotator, SpawnParams);
-	}
-	
-	GEditor->SelectActor(EndActor, true, true, true, true);
+	GEditor->SelectNone(false, true);
+	GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
 }

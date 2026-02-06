@@ -4,7 +4,7 @@
 #pragma once
 
 #include "EditorUtilityWidgetComponents.h"
-#include "NTransientActor.h"
+#include "NCollisionQueryTestActor.h"
 #include "NEditorUtilityWidget.h"
 #include "NCollisionQueryTestSettings.h"
 #include "Components/NDetailsView.h"
@@ -54,10 +54,7 @@ protected:
 	TObjectPtr<UNDetailsView> ObjectDetails;
 	
 	UPROPERTY()
-	TObjectPtr<ANTransientActor> StartActor;
-	
-	UPROPERTY()
-	TObjectPtr<ANTransientActor> EndActor;
+	TObjectPtr<ANCollisionQueryTestActor> QueryActor;
 	
 	UPROPERTY(EditAnywhere)
 	FNCollisionQueryTestSettings Settings;
