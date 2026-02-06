@@ -15,7 +15,7 @@ public:
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 	
 	static void DoLineTraceMulti(const FNCollisionQueryTestSettings& Settings, 
-	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
+		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 	
 	static void DoLineTraceTest(const FNCollisionQueryTestSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
@@ -37,22 +37,6 @@ public:
 	
 	static void DoOverlapMulti(const FNCollisionQueryTestSettings& Settings, 
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
-	
-	static TArray<FName> GetCollisionProfileNames()
-	{
-		TArray<FName> Names;
-		const UCollisionProfile* CollisionProfile = UCollisionProfile::Get();
-		const int32 Count = CollisionProfile->GetNumOfProfiles();
-		Names.Reserve(Count);
-
-		for (int32 i = 0; i < Count; ++i)
-		{
-			const FCollisionResponseTemplate* ProfileTemplate = CollisionProfile->GetProfileByIndex(i);
-			Names.Add(ProfileTemplate->Name);
-		}
-
-		return MoveTemp(Names);
-	}
 	
 private:
 	static EQueryMobilityType ToQueryMobilityType(const ECollisionQueryTestMobility Mobility)

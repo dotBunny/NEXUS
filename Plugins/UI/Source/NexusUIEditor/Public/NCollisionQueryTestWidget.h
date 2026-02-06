@@ -34,10 +34,14 @@ public:
 	
 protected:
 	
+	UFUNCTION() 
+	void OnPIEMapCreated(UGameInstance* GameInstance);
 	UFUNCTION()
 	void OnWorldTick(float DeltaTime);
+	
 	UFUNCTION()
 	void OnSelectStartButtonClicked();
+	
 	UFUNCTION()
 	void OnSelectEndButtonClicked();
 	
@@ -57,4 +61,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	FNCollisionQueryTestSettings Settings;
+	
+private:
+	void CheckActors();
+	
+	FDelegateHandle OnPIEMapCreatedHandle;
 };

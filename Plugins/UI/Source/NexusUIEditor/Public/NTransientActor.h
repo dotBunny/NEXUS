@@ -17,18 +17,21 @@ class NEXUSUIEDITOR_API ANTransientActor: public AActor
 	{
 		PrimaryActorTick.bCanEverTick = true;
 		PrimaryActorTick.bStartWithTickEnabled = true;
+		SetTickableWhenPaused(true);
 		
 		SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
+#if WITH_EDITORONLY_DATA
+		SceneComponent->bVisualizeComponent = true;
+#endif
 		RootComponent = SceneComponent;
 		
 		bIsEditorOnlyActor = true;
-		bIsEditorPreviewActor = true;
-		
 		SetFlags(RF_Transient); // Ensure it never gets saved
 	}
 	
 	virtual void Tick(float DeltaSeconds) override
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Tick"));
 		Super::Tick(DeltaSeconds);
 		OnTick.ExecuteIfBound(DeltaSeconds);
 	}

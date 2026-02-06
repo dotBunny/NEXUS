@@ -9,26 +9,18 @@ void UNCollisionQueryTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.bHideFromSceneOutliner = true;
-	
-	SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryStart"));
-	StartActor = GetWorld()->SpawnActor<ANTransientActor>(
-		FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
-	SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryEnd"));
-	EndActor = GetWorld()->SpawnActor<ANTransientActor>(
-		FVector(0,0,500.f), FRotator::ZeroRotator, SpawnParams);
-	
-	GEditor->SelectActor(EndActor, true, true, true, true);
-	
 	// Bindings
 	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionQueryTestWidget::OnSelectStartButtonClicked);
 	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::OnSelectEndButtonClicked);
 	
 	ObjectDetails->SetObject(this);
 	
-	// We're going to have the actor handle pumping the query
-	StartActor->OnTick.BindUObject(this, &UNCollisionQueryTestWidget::OnWorldTick); 
+	OnPIEMapCreatedHandle = FWorldDelegates::OnPIEMapCreated.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEMapCreated);
+	
+	CheckActors();
+	
+	// TODO: We need to check actors on recreate? 
+	UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::NativeConstruct"));
 }
 
 void UNCollisionQueryTestWidget::NativeDestruct()
@@ -38,6 +30,8 @@ void UNCollisionQueryTestWidget::NativeDestruct()
 	
 	EndActor->Destroy();
 	EndActor = nullptr;
+	
+	FWorldDelegates::OnPIEStarted.Remove(OnPIEMapCreatedHandle);
 	
 	Super::NativeDestruct();
 }
@@ -52,6 +46,12 @@ FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidge
 {
 	// Save settings?
 	return Super::GetWidgetState(BlueprintWidget);
+}
+
+void UNCollisionQueryTestWidget::OnPIEMapCreated(UGameInstance* GameInstance)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::OnPIEMapCreated"));
+	CheckActors();
 }
 
 void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
@@ -129,13 +129,51 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 
 void UNCollisionQueryTestWidget::OnSelectStartButtonClicked()
 {
-	GEditor->SelectNone(false, true);
-	GEditor->SelectActor(StartActor, true, true, true, true);
+	if (StartActor != nullptr)
+	{
+		GEditor->SelectNone(false, true);
+		GEditor->SelectActor(StartActor, true, true, true, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Start actor is null"));
+	}
 }
 
 void UNCollisionQueryTestWidget::OnSelectEndButtonClicked()
 {
-	GEditor->SelectNone(false, true);
-	GEditor->SelectActor(EndActor, true, true, true, true);
+	if (EndActor != nullptr)
+	{
+		GEditor->SelectNone(false, true);
+		GEditor->SelectActor(EndActor, true, true, true, true);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Start actor is null"));
+	}
+}
+
+void UNCollisionQueryTestWidget::CheckActors()
+{
+	FActorSpawnParameters SpawnParams;
+	//SpawnParams.bHideFromSceneOutliner = true;
 	
+	if (StartActor == nullptr)
+	{
+		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryStart"));
+		StartActor = GetWorld()->SpawnActor<ANTransientActor>(
+			FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
+		
+		// We're going to have the actor handle pumping the query
+		StartActor->OnTick.BindUObject(this, &UNCollisionQueryTestWidget::OnWorldTick); 
+	}
+	
+	if (EndActor == nullptr)
+	{
+		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANTransientActor::StaticClass(), TEXT("CollisionQueryEnd"));
+		EndActor = GetWorld()->SpawnActor<ANTransientActor>(
+			FVector(0,0,500.f), FRotator::ZeroRotator, SpawnParams);
+	}
+	
+	GEditor->SelectActor(EndActor, true, true, true, true);
 }

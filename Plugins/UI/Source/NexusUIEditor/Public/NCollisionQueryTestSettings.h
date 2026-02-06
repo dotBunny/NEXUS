@@ -84,7 +84,8 @@ struct FNCollisionQueryTestQuery
 	TEnumAsByte<EObjectTypeQuery> ObjectType = EObjectTypeQuery::ObjectTypeQuery1;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Collision Profile",
-		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Profile", EditConditionHides, GetOptions="FNCollisionQueryTestUtils::GetCollisionProfileNames"))
+		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Profile", EditConditionHides, 
+			GetOptions="GetCollisionProfileNames"))
 	FName CollisionProfileName = TEXT("BlockAll");
 	
 	UPROPERTY(EditAnywhere, DisplayName="Shape",
@@ -131,6 +132,22 @@ struct FNCollisionQueryTestQuery
 			return FCollisionShape::MakeSphere(SphereRadius);
 		}
 		return FCollisionShape();
+	}
+	
+	TArray<FName> GetCollisionProfileNames() const
+	{
+		TArray<FName> Names;
+		const UCollisionProfile* CollisionProfile = UCollisionProfile::Get();
+		const int32 Count = CollisionProfile->GetNumOfProfiles();
+		Names.Reserve(Count);
+
+		for (int32 i = 0; i < Count; ++i)
+		{
+			const FCollisionResponseTemplate* ProfileTemplate = CollisionProfile->GetProfileByIndex(i);
+			Names.Add(ProfileTemplate->Name);
+		}
+
+		return MoveTemp(Names);
 	}
 };
 
