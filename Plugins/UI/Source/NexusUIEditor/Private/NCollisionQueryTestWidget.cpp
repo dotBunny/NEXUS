@@ -2,7 +2,6 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NCollisionQueryTestWidget.h"
-
 #include "NCollisionQueryTestUtils.h"
 
 void UNCollisionQueryTestWidget::NativeConstruct()
@@ -53,7 +52,7 @@ void UNCollisionQueryTestWidget::OnPIEMapCreated(UGameInstance* GameInstance)
 
 void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Ticking"));
+	UE_LOG(LogTemp, Warning, TEXT("Sub Ticking"));
 	//  Add update delay here ? 
 	// TickTimer -= DeltaSeconds;
 	// if (TickTimer <= 0)
@@ -88,19 +87,19 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 		{
 			FNCollisionQueryTestUtils::DoSweepSingle(Settings, QueryActor->GetWorld(), 
 				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
-				QueryActor->GetActorQuat());
+				QueryActor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
 			FNCollisionQueryTestUtils::DoSweepMulti(Settings, QueryActor->GetWorld(), 
 				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
-				QueryActor->GetActorQuat());
+				QueryActor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
 			FNCollisionQueryTestUtils::DoSweepTest(Settings, QueryActor->GetWorld(), 
 				QueryActor->GetStartPosition(), QueryActor->GetEndPosition(), 
-				QueryActor->GetActorQuat());
+				QueryActor->GetRotation());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Overlap)
@@ -109,17 +108,17 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
 			FNCollisionQueryTestUtils::DoOverlapBlocking(Settings, QueryActor->GetWorld(), 
-				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
+				QueryActor->GetStartPosition(), QueryActor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
 			FNCollisionQueryTestUtils::DoOverlapAny(Settings, QueryActor->GetWorld(), 
-				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
+				QueryActor->GetStartPosition(), QueryActor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
 			FNCollisionQueryTestUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
-				QueryActor->GetStartPosition(), QueryActor->GetActorQuat());
+				QueryActor->GetStartPosition(), QueryActor->GetRotation());
 		}
 	}
 }
@@ -158,12 +157,14 @@ void UNCollisionQueryTestWidget::CheckActors()
 	
 	if (QueryActor == nullptr)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Creating actor!"));
 		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANCollisionQueryTestActor::StaticClass(), TEXT("CollisionQueryStart"));
+		
 		QueryActor = GetWorld()->SpawnActor<ANCollisionQueryTestActor>(
 			FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
 		
-		// We're going to have the actor handle pumping the query
-		QueryActor->OnTick.BindUObject(this, &UNCollisionQueryTestWidget::OnWorldTick); 
+		UE_LOG(LogTemp, Warning, TEXT("Bind Event"));
+		QueryActor->Widget = this;
 	}
 	GEditor->SelectNone(false, true);
 	GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);

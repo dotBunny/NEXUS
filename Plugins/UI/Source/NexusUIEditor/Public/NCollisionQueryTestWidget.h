@@ -30,14 +30,15 @@ public:
 	
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState) override;
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
-	
-	
+
+	void OnWorldTick(float DeltaTime);
+
 protected:
 	
 	UFUNCTION() 
 	void OnPIEMapCreated(UGameInstance* GameInstance);
-	UFUNCTION()
-	void OnWorldTick(float DeltaTime);
+	
+	
 	
 	UFUNCTION()
 	void OnSelectStartButtonClicked();
