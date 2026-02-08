@@ -3,29 +3,33 @@
 
 #include "NCollisionQueryTestWidget.h"
 #include "NCollisionQueryTestUtils.h"
+#include "Selection.h"
 
 void UNCollisionQueryTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
 	// Bindings
-	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionQueryTestWidget::OnSelectStartButtonClicked);
-	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::OnSelectEndButtonClicked);
+	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionQueryTestWidget::SelectStartPoint);
+	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::SelectEndPoint);
 	
 	ObjectDetails->SetObject(this);
+	ObjectDetails->bExpandedInDesigner = true;
 	
 	OnPIEMapCreatedHandle = FWorldDelegates::OnPIEMapCreated.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEMapCreated);
 	
-	CheckActors();
-	
-	// TODO: We need to check actors on recreate? 
-	UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::NativeConstruct"));
+	CheckProxyActor();
 }
 
 void UNCollisionQueryTestWidget::NativeDestruct()
 {
-	QueryActor->Destroy();
-	QueryActor = nullptr;
+	if (QueryActor != nullptr && QueryActor->IsValidLowLevel())
+	{
+		
+		GEditor->GetSelectedActors()->Deselect(QueryActor);
+		QueryActor->Destroy(true, false);
+		QueryActor = nullptr;
+	}
 	
 	FWorldDelegates::OnPIEStarted.Remove(OnPIEMapCreatedHandle);
 	
@@ -46,20 +50,11 @@ FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidge
 
 void UNCollisionQueryTestWidget::OnPIEMapCreated(UGameInstance* GameInstance)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::OnPIEMapCreated"));
-	CheckActors();
+	CheckProxyActor(true);
 }
 
-void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
+void UNCollisionQueryTestWidget::OnWorldTick()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Sub Ticking"));
-	//  Add update delay here ? 
-	// TickTimer -= DeltaSeconds;
-	// if (TickTimer <= 0)
-	// {
-	// 	TickTimer = UpdateTimer;
-	// }
-	
 	using enum ECollisionQueryTestMethod;
 	if (Settings.Query.QueryMethod == LineTrace)
 	{
@@ -123,49 +118,52 @@ void UNCollisionQueryTestWidget::OnWorldTick(float DeltaTime)
 	}
 }
 
-void UNCollisionQueryTestWidget::OnSelectStartButtonClicked()
+void UNCollisionQueryTestWidget::SelectStartPoint()
 {
 	if (QueryActor != nullptr)
 	{
-		GEditor->SelectNone(false, true);
+		GEditor->GetSelectedActors()->DeselectAll();
+		GEditor->GetSelectedComponents()->DeselectAll();
+		
+		GEditor->SelectActor(QueryActor, true, true, true, true);
 		GEditor->SelectComponent(QueryActor->GetStartComponent(), true, true, true);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Start actor is null"));
-	}
 }
 
-void UNCollisionQueryTestWidget::OnSelectEndButtonClicked()
+void UNCollisionQueryTestWidget::SelectEndPoint()
 {
 	if (QueryActor != nullptr)
 	{
-		GEditor->SelectNone(false, true);
+		GEditor->GetSelectedActors()->DeselectAll();
+		GEditor->GetSelectedComponents()->DeselectAll();
+		
+		GEditor->SelectActor(QueryActor, true, true, true, true);
 		GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Start actor is null"));
 	}
 }
 
-void UNCollisionQueryTestWidget::CheckActors()
+void UNCollisionQueryTestWidget::CheckProxyActor(bool bWithDestroyExisting)
 {
-	FActorSpawnParameters SpawnParams;
-	// TODO: Do i want this?
-	//SpawnParams.bHideFromSceneOutliner = true;
+	GEditor->GetSelectedComponents()->DeselectAll();
+	
+	if (bWithDestroyExisting && QueryActor != nullptr)
+	{
+		QueryActor->Destroy(true, false);
+		QueryActor = nullptr;
+	}
 	
 	if (QueryActor == nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Creating actor!"));
-		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANCollisionQueryTestActor::StaticClass(), TEXT("CollisionQueryStart"));
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.bTemporaryEditorActor = true;
+		//SpawnParams.bHideFromSceneOutliner = true;
+		SpawnParams.Name = MakeUniqueObjectName(GetWorld(), ANCollisionQueryTestActor::StaticClass(), TEXT("CollisionQueryTest"));
 		
 		QueryActor = GetWorld()->SpawnActor<ANCollisionQueryTestActor>(
 			FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
 		
-		UE_LOG(LogTemp, Warning, TEXT("Bind Event"));
 		QueryActor->Widget = this;
 	}
-	GEditor->SelectNone(false, true);
-	GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
+	
+	SelectStartPoint();
 }

@@ -31,7 +31,7 @@ public:
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState) override;
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 
-	void OnWorldTick(float DeltaTime);
+	void OnWorldTick();
 
 protected:
 	
@@ -41,10 +41,10 @@ protected:
 	
 	
 	UFUNCTION()
-	void OnSelectStartButtonClicked();
+	void SelectStartPoint();
 	
 	UFUNCTION()
-	void OnSelectEndButtonClicked();
+	void SelectEndPoint();
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
@@ -61,7 +61,7 @@ protected:
 	FNCollisionQueryTestSettings Settings;
 	
 private:
-	void CheckActors();
+	void CheckProxyActor(bool bWithDestroyExisting = false);
 	
 	FDelegateHandle OnPIEMapCreatedHandle;
 };

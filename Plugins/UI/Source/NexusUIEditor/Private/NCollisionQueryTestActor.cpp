@@ -8,6 +8,9 @@
 
 ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	// Setting the USceneComponents or AActor to bIsEditorOnlyActor will only cause warnings to throw in the editor when 
+	// existing simulation / play mode.
+	
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 	SetTickableWhenPaused(true);
@@ -26,19 +29,15 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 #endif
 	EndPointComponent->SetupAttachment(StartPointComponent);
 	EndPointComponent->SetRelativeLocation(FVector(500.f, 0.f, 0.f));
+	
 
-	/// one of these breaks it
-	//bIsEditorOnlyActor = true;
-		
-//	SetFlags(RF_Transient); // Ensure it never gets saved
 }
 
 void ANCollisionQueryTestActor::Tick(float DeltaSeconds)
 {
 	if (Widget != nullptr)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Sub Ticking START"));
-		Widget->OnWorldTick(DeltaSeconds);
+		Widget->OnWorldTick();
 	}
 	Super::Tick(DeltaSeconds);
 }
