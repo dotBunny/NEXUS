@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "CommonTextBlock.h"
 #include "EditorUtilityWidgetComponents.h"
 #include "NCollisionQueryTestActor.h"
 #include "NEditorUtilityWidget.h"
@@ -34,11 +35,15 @@ public:
 	void OnWorldTick();
 
 protected:
+
+	UFUNCTION()
+	void OnImportSettingsClicked();
+	
+	UFUNCTION()
+	void OnExportSettingsClicked();
 	
 	UFUNCTION() 
 	void OnPIEMapCreated(UGameInstance* GameInstance);
-	
-	
 	
 	UFUNCTION()
 	void SelectStartPoint();
@@ -50,6 +55,13 @@ protected:
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectEndButton;
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UEditorUtilityButton> ImportSettingsButton;
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UEditorUtilityButton> ExportSettingsButton;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonTextBlock> ActorNameText;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNDetailsView> ObjectDetails;

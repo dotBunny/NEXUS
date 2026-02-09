@@ -10,7 +10,7 @@
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorCommands.h"
-#include "NProcGenEditorSubsystem.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 
@@ -254,15 +254,20 @@ void FNProcGenEditorToolMenu::Register()
 	// EUW Entry
 	auto EditorWindow = FNWindowCommandInfo();
 	
-	EditorWindow.Identifier = "EUW_NProcGenSystem";
+	EditorWindow.Identifier = NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier;
 	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "ProcGen System");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), NEXUS::ProcGenEditor::EditorUtilityWidget::Icon);
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
 	FNEditorCommands::AddWindowCommand(EditorWindow);
+}
+
+void FNProcGenEditorToolMenu::Unregister()
+{
+	FNEditorCommands::RemoveWindowCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()
@@ -303,12 +308,14 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
-	UNEditorUtilityWidget::SpawnTab( TEXT("/NexusProcGen/EditorResources/EUW_NProcGenSystem.EUW_NProcGenSystem"), FName("EUW_NProcGenSystem"));
+	UNEditorUtilityWidget::SpawnTab(
+		NEXUS::ProcGenEditor::EditorUtilityWidget::Path, 
+		NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System == nullptr) return false;
-	return System->HasWidget(FName("EUW_NProcGenSystem"));
+	return System->HasWidget(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }

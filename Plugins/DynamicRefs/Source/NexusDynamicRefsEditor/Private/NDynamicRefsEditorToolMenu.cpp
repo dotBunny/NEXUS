@@ -3,6 +3,7 @@
 
 #include "NDynamicRefsEditorToolMenu.h"
 
+#include "NDynamicRefsEditorMinimal.h"
 #include "NDynamicRefsEditorStyle.h"
 #include "NEditorCommands.h"
 #include "NEditorUtilityWidget.h"
@@ -13,10 +14,10 @@ void FNDynamicRefsEditorToolMenu::Register()
 	// EUW Entry
 	auto EditorWindow = FNWindowCommandInfo();
 	
-	EditorWindow.Identifier = "EUW_NDynamicRefs";
+	EditorWindow.Identifier = NEXUS::DynamicRefsEditor::EUW::Identifier;
 	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "DynamicRefs");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Opens the NDynamicRefs Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNDynamicRefsEditorStyle::GetStyleSetName(), "ClassIcon.NDynamicRefComponent");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NDynamicRefs Developer Overlay inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNDynamicRefsEditorStyle::GetStyleSetName(), NEXUS::DynamicRefsEditor::EUW::Icon);
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow);
@@ -24,14 +25,19 @@ void FNDynamicRefsEditorToolMenu::Register()
 	FNEditorCommands::AddWindowCommand(EditorWindow);
 }
 
+void FNDynamicRefsEditorToolMenu::Unregister()
+{
+	FNEditorCommands::RemoveWindowCommand(NEXUS::DynamicRefsEditor::EUW::Identifier);
+}
+
 void FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow()
 {
-	UNEditorUtilityWidget::SpawnTab( TEXT("/NexusDynamicRefs/EditorResources/EUW_NDynamicRefs.EUW_NDynamicRefs"), FName("EUW_NDynamicRefs"));
+	UNEditorUtilityWidget::SpawnTab(NEXUS::DynamicRefsEditor::EUW::Path, NEXUS::DynamicRefsEditor::EUW::Identifier);
 }
 
 bool FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow()
 {
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System == nullptr) return false;
-	return System->HasWidget(FName("EUW_NDynamicRefs"));
+	return System->HasWidget(NEXUS::DynamicRefsEditor::EUW::Identifier);
 }

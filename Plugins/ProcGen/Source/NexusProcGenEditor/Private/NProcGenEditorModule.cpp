@@ -68,6 +68,7 @@ void FNProcGenEditorModule::ShutdownModule()
 	
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	
+	FNProcGenEditorToolMenu::Unregister();
 	FNProcGenEditorStyle::Shutdown();
 
 	// Remove Undo handler

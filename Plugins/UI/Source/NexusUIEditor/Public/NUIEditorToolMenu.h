@@ -3,13 +3,12 @@
 
 #pragma once
 
-class FNActorPoolsEditorToolMenu
+class FNUIEditorToolMenu
 {
 public:
 	static void Register();
 	static void Unregister();
 	
-	static void CreateEditorUtilityWindow();
-	static bool HasEditorUtilityWindow();
+	static void CreateCollisionQueryWindow();
+	static bool HasCollisionQueryWindow();
 };
-

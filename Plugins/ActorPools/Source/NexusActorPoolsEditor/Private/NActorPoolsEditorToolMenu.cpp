@@ -1,23 +1,21 @@
 ﻿#include "NActorPoolsEditorToolMenu.h"
 
 
+#include "NActorPoolsEditorMinimal.h"
 #include "NActorPoolsEditorStyle.h"
 #include "NEditorCommands.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
-
-
-FName FNActorPoolsEditorToolMenu::EditorUtilityWindowName = FName("NActorPoolsEditorUtilityWindow");
 
 void FNActorPoolsEditorToolMenu::Register()
 {
 	// EUW Entry
 	auto EditorWindow = FNWindowCommandInfo();
 	
-	EditorWindow.Identifier = "NActorPools";
+	EditorWindow.Identifier = NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier;
 	EditorWindow.DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Actor Pools");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Opens the NActorPools Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_Tooltip", "Opens the NActorPools Developer Overlay inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), NEXUS::ActorPoolsEditor::EditorUtilityWidget::Icon);
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNActorPoolsEditorToolMenu::HasEditorUtilityWindow);
@@ -25,14 +23,21 @@ void FNActorPoolsEditorToolMenu::Register()
 	FNEditorCommands::AddWindowCommand(EditorWindow);
 }
 
+void FNActorPoolsEditorToolMenu::Unregister()
+{
+	FNEditorCommands::RemoveWindowCommand(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
+}
+
 void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
 {
-	UNEditorUtilityWidget::SpawnTab(TEXT("/NexusActorPools/EditorResources/EUW_NActorPools.EUW_NActorPools"), FName("EUW_NActorPools"));
+	UNEditorUtilityWidget::SpawnTab(
+		NEXUS::ActorPoolsEditor::EditorUtilityWidget::Path, 
+		NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNActorPoolsEditorToolMenu::HasEditorUtilityWindow()
 {
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System == nullptr) return false;
-	return System->HasWidget(FName("EUW_NActorPools"));
+	return System->HasWidget(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }

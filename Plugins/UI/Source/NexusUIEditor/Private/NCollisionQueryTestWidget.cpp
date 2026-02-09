@@ -12,6 +12,8 @@ void UNCollisionQueryTestWidget::NativeConstruct()
 	// Bindings
 	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionQueryTestWidget::SelectStartPoint);
 	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::SelectEndPoint);
+	ImportSettingsButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::OnImportSettingsClicked);
+	ExportSettingsButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::OnExportSettingsClicked);
 	
 	ObjectDetails->SetObject(this);
 	ObjectDetails->bExpandedInDesigner = true;
@@ -118,6 +120,14 @@ void UNCollisionQueryTestWidget::OnWorldTick()
 	}
 }
 
+void UNCollisionQueryTestWidget::OnImportSettingsClicked()
+{
+}
+
+void UNCollisionQueryTestWidget::OnExportSettingsClicked()
+{
+}
+
 void UNCollisionQueryTestWidget::SelectStartPoint()
 {
 	if (QueryActor != nullptr)
@@ -163,6 +173,8 @@ void UNCollisionQueryTestWidget::CheckProxyActor(bool bWithDestroyExisting)
 			FVector::Zero(), FRotator::ZeroRotator, SpawnParams);
 		
 		QueryActor->Widget = this;
+		
+		ActorNameText->SetText(FText::FromString(*QueryActor->GetActorLabel()));
 	}
 	
 	SelectStartPoint();

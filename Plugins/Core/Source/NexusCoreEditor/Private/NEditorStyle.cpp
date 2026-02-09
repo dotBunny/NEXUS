@@ -20,9 +20,5 @@ TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 	Style.Set("Command.Visualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Visualizer"), Icon16x16));
 	Style.Set("Command.OpenDiscordInviteLink", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_OpenDiscordInviteLink"), Icon16x16));
 	
-	// NCollisionQueryTestActor
-	Style.Set("ClassIcon.NCollisionQueryTestActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionQueryTestActor"), Icon16x16));
-	Style.Set("ClassThumbnail.NCollisionQueryTestActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionQueryTestActor"), Icon128x128));
-
 	return StyleRef;
 }

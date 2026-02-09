@@ -15,6 +15,7 @@ void FNDynamicRefsEditorModule::StartupModule()
 
 void FNDynamicRefsEditorModule::ShutdownModule()
 {
+	FNDynamicRefsEditorToolMenu::Unregister();
 	FNDynamicRefsEditorStyle::Shutdown();
 }
 

@@ -17,7 +17,7 @@ class NEXUSUI_API UNListView : public UCommonListView
 	GENERATED_BODY()
 
 #if WITH_EDITOR
-	virtual const FText GetPaletteCategory() override {  return NEXUS::UI::Editor::PaletteCategory; }
+	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
 	
 public:
