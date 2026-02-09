@@ -57,6 +57,21 @@ enum class ECollisionQueryTestShape : uint8
 
 
 USTRUCT()
+struct FNCollisionQueryTestPoints
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, DisplayName="Start Point (Absolute)")
+	FVector StartPoint = FVector(0,0,0);
+	
+	UPROPERTY(EditAnywhere, DisplayName="End Point (Relative)")
+	FVector EndPoint = FVector(0,0,500);
+	
+	UPROPERTY(EditAnywhere, DisplayName="Rotation")
+	FRotator Rotation = FRotator(0,0,0);
+};
+
+USTRUCT()
 struct FNCollisionQueryTestQuery
 {
 	GENERATED_BODY()
@@ -209,7 +224,10 @@ USTRUCT()
 struct FNCollisionQueryTestSettings
 {
 	GENERATED_BODY()
-
+	
+	UPROPERTY(EditAnywhere)
+	FNCollisionQueryTestPoints Points;
+	
 	UPROPERTY(EditAnywhere)
 	FNCollisionQueryTestQuery Query;
 	

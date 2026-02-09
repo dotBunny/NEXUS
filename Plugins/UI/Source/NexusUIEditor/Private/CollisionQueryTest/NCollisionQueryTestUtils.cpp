@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NCollisionQueryTestUtils.h"
+#include "CollisionQueryTest/NCollisionQueryTestUtils.h"
 #include "Engine/OverlapResult.h"
 #include "NDrawDebugHelpers.h"
 
@@ -12,12 +12,16 @@
 #define N_COLLISION_QUERY_HIT_COLOR FColor::Green
 #define N_COLLISION_QUERY_MID_COLOR FColor::Blue
 #define N_COLLISION_QUERY_MISS_COLOR FColor::Red
+#define N_COLLISION_QUERY_NO_SIMULATION_COLOR FColor::Yellow
+
+// TODO: Detect if world is playing and use the NO_SIM
 
 void FNCollisionQueryTestUtils::DoLineTraceSingle(const FNCollisionQueryTestSettings& Settings, 
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_QUERY_TEST_COMMON
 	FHitResult HitResult;
+	
 	
 	if (Settings.Query.QueryBy == ECollisionQueryTestBy::Channel)
 	{

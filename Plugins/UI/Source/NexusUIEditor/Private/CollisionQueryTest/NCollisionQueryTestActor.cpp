@@ -2,9 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 #pragma once
 
-#include "NCollisionQueryTestActor.h"
-#include "NCollisionQueryTestWidget.h"
-
+#include "CollisionQueryTest/NCollisionQueryTestActor.h"
+#include "CollisionQueryTest/NCollisionQueryTestWidget.h"
+#include "Components/ActorComponent.h"
 
 ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -12,10 +12,13 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 	// existing simulation / play mode.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
+	
+	AActor::SetActorTickEnabled(true);
 	SetTickableWhenPaused(true);
 		
 	// Setup Start
 	StartPointComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Start Point"));
+	StartPointComponent->TransformUpdated.AddUObject(this, &ANCollisionQueryTestActor::OnTransformChanged);
 #if WITH_EDITORONLY_DATA
 	StartPointComponent->bVisualizeComponent = true;
 #endif
@@ -23,6 +26,7 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 		
 	// Setup End
 	EndPointComponent = CreateDefaultSubobject<USceneComponent>(TEXT("End Point"));
+	EndPointComponent->TransformUpdated.AddUObject(this, &ANCollisionQueryTestActor::OnTransformChanged);
 #if WITH_EDITORONLY_DATA
 	EndPointComponent->bVisualizeComponent = true;
 #endif
@@ -30,11 +34,35 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 	EndPointComponent->SetRelativeLocation(FVector(500.f, 0.f, 0.f));
 }
 
-void ANCollisionQueryTestActor::Tick(float DeltaSeconds)
+void ANCollisionQueryTestActor::Tick(float DeltaTime)
 {
 	if (Widget != nullptr)
 	{
-		Widget->OnWorldTick();
+		Widget->OnWorldTick(this);
 	}
-	Super::Tick(DeltaSeconds);
+	Super::Tick(DeltaTime);
+}
+
+void ANCollisionQueryTestActor::BeginDestroy()
+{
+	if (Widget != nullptr && Widget->QueryActor == this)
+	{
+		Widget->QueryActor = nullptr;
+	}
+	
+	// Safety
+	if (this->IsRooted())
+	{
+		RemoveFromRoot();
+	}
+	
+	Super::BeginDestroy();
+}
+
+void ANCollisionQueryTestActor::OnTransformChanged(USceneComponent* Component, EUpdateTransformFlags Flags, ETeleportType Teleport)
+{
+	if (Widget != nullptr)
+	{
+		Widget->UpdateSettings(this);
+	}
 }

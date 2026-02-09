@@ -11,7 +11,6 @@
 #include "Components/NDetailsView.h"
 #include "NCollisionQueryTestWidget.generated.h"
 
-
 /**
  * Used to test collision queries at design time in the editor.
  * @remarks The was originally started after watching George Prosser's UnrealFest 2023 talk "Collision Data in UE5". 
@@ -23,6 +22,8 @@
 UCLASS(BlueprintType)
 class NEXUSUIEDITOR_API UNCollisionQueryTestWidget : public UNEditorUtilityWidget
 {
+	friend class ANCollisionQueryTestActor;
+	
 	GENERATED_BODY()
 
 public:
@@ -32,18 +33,14 @@ public:
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState) override;
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 
-	void OnWorldTick();
-
+	void OnWorldTick(const ANCollisionQueryTestActor* Actor);
+	void UpdateSettings(const ANCollisionQueryTestActor* Actor);
+	
 protected:
-
-	UFUNCTION()
-	void OnImportSettingsClicked();
 	
-	UFUNCTION()
-	void OnExportSettingsClicked();
-	
-	UFUNCTION() 
-	void OnPIEMapCreated(UGameInstance* GameInstance);
+	void OnPIEStarted(UGameInstance* GameInstance);
+	void OnPIEReady(UGameInstance* GameInstance);
+	void OnPIEEnded(UGameInstance* GameInstance);
 	
 	UFUNCTION()
 	void SelectStartPoint();
@@ -55,10 +52,6 @@ protected:
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectEndButton;
-	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UEditorUtilityButton> ImportSettingsButton;
-	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UEditorUtilityButton> ExportSettingsButton;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ActorNameText;
@@ -71,9 +64,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere)
 	FNCollisionQueryTestSettings Settings;
-	
+
 private:
-	void CheckProxyActor(bool bWithDestroyExisting = false);
+	void CreateActor(UWorld* TargetWorld = nullptr);
+	void DestroyActor();
 	
-	FDelegateHandle OnPIEMapCreatedHandle;
+	FDelegateHandle OnPIEStartedHandle;
+	FDelegateHandle OnPIEReadyHandle;
+	FDelegateHandle OnPIEEndedHandle;
 };
