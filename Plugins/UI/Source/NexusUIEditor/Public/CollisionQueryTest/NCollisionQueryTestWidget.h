@@ -27,6 +27,7 @@ class NEXUSUIEDITOR_API UNCollisionQueryTestWidget : public UNEditorUtilityWidge
 	GENERATED_BODY()
 
 public:
+	
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	
@@ -34,9 +35,13 @@ public:
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 
 	void OnWorldTick(const ANCollisionQueryTestActor* Actor);
+	void PushSettings(ANCollisionQueryTestActor* Actor) const;
 	void UpdateSettings(const ANCollisionQueryTestActor* Actor);
 	
 protected:
+	
+	UFUNCTION()
+	void OnPropertyValueChanged(FName Name);
 	
 	void OnPIEStarted(UGameInstance* GameInstance);
 	void OnPIEReady(UGameInstance* GameInstance);
@@ -68,6 +73,8 @@ protected:
 private:
 	void CreateActor(UWorld* TargetWorld = nullptr);
 	void DestroyActor();
+
+	static bool IsActorProperty(FName Name);
 	
 	FDelegateHandle OnPIEStartedHandle;
 	FDelegateHandle OnPIEReadyHandle;

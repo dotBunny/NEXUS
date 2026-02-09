@@ -7,6 +7,19 @@
 #include "CollisionQueryTest/NCollisionQueryTestUtils.h"
 #include "Selection.h"
 
+void UNCollisionQueryTestWidget::OnPropertyValueChanged(FName Name)
+{
+	if (IsActorProperty(Name))
+	{
+		PushSettings(QueryActor);
+	} 
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::OnPropertyValueChanged(%s)"), *Name.ToString());
+	}
+	
+}
+
 void UNCollisionQueryTestWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -17,6 +30,7 @@ void UNCollisionQueryTestWidget::NativeConstruct()
 	
 	ObjectDetails->SetObject(this);
 	ObjectDetails->bExpandedInDesigner = true;
+	ObjectDetails->GetOnPropertyValueChangedRef()->AddDynamic(this, &UNCollisionQueryTestWidget::OnPropertyValueChanged);
 	
 	OnPIEStartedHandle = FWorldDelegates::OnPIEStarted.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEStarted);
 	OnPIEReadyHandle = FWorldDelegates::OnPIEReady.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEReady);
@@ -62,8 +76,6 @@ FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidge
 
 void UNCollisionQueryTestWidget::OnWorldTick(const ANCollisionQueryTestActor* Actor)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::OnWorldTick - %s"), *Actor->GetActorLabel());
-	
 	// Update Settings (for the one we know about)
 	UpdateSettings(Actor);
 	
@@ -128,6 +140,17 @@ void UNCollisionQueryTestWidget::OnWorldTick(const ANCollisionQueryTestActor* Ac
 			FNCollisionQueryTestUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
+	}
+}
+
+void UNCollisionQueryTestWidget::PushSettings(ANCollisionQueryTestActor* Actor) const
+{
+	if (Actor != nullptr)
+	{
+		Actor->GetStartComponent()->SetWorldLocation(Settings.Points.StartPoint);
+		Actor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
+		Actor->GetStartComponent()->SetWorldRotation(Settings.Points.Rotation.Quaternion());
+		Actor->SetActorTickInterval(Settings.Options.UpdateTimer);
 	}
 }
 
@@ -202,19 +225,14 @@ void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
 		if (World == nullptr) World = GetWorld();
 		
 		FActorSpawnParameters SpawnParams;
-		SpawnParams.bTemporaryEditorActor = true;
 		SpawnParams.bDeferConstruction = false;
 		SpawnParams.InitialActorLabel = TEXT("NCollisionQueryTest");
-		
 		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionQueryTestActor::StaticClass(), TEXT("NCollisionQueryTest"));
-		
-		// Spawn in location
-		UE_LOG(LogTemp, Warning, TEXT("Spawning Test actor in World: %s"), *World->GetName());
 		
 		QueryActor = World->SpawnActor<ANCollisionQueryTestActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
 		
-		// TODO: Update when property changes (this and positions)
+		
 		QueryActor->SetActorTickInterval(Settings.Options.UpdateTimer);
 		
 		QueryActor->AddToRoot();
@@ -249,5 +267,13 @@ void UNCollisionQueryTestWidget::DestroyActor()
 		QueryActor->Destroy(true, false);
 	}
 	QueryActor = nullptr;
+}
+
+bool UNCollisionQueryTestWidget::IsActorProperty(FName Name)
+{
+	return	Name == TEXT("X") || Name == TEXT("Y") || Name == TEXT("Z") ||
+			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") ||
+			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Rotation") ||
+			Name == TEXT("UpdateTimer");
 }
 

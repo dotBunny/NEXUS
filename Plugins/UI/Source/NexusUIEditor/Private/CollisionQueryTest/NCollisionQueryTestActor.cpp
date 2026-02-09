@@ -10,11 +10,17 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 {
 	// Setting the USceneComponents or AActor to bIsEditorOnlyActor will only cause warnings to throw in the editor when 
 	// existing simulation / play mode.
+
+	// Tick everywhere!
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
-	
 	AActor::SetActorTickEnabled(true);
 	SetTickableWhenPaused(true);
+	
+	// Extra setup for Actor
+	bActorSeamlessTraveled = true;
+	SetCanBeDamaged(false);
+	SetActorEnableCollision(false);
 		
 	// Setup Start
 	StartPointComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Start Point"));

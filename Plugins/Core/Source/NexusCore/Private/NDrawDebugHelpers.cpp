@@ -189,7 +189,7 @@ void FNDrawDebugHelpers::DrawCapsuleSweep(const UWorld* InWorld, const FVector& 
 {
 	DrawDebugCapsule(InWorld, StartPosition, HalfHeight, Radius, Quat, Color, bPersistentLines, LifeTime, 
 		DepthPriority, Thickness);
-	DrawDebugCapsule(InWorld, StartPosition, HalfHeight, Radius, Quat, Color, bPersistentLines, LifeTime, 
+	DrawDebugCapsule(InWorld, EndPosition, HalfHeight, Radius, Quat, Color, bPersistentLines, LifeTime, 
 		DepthPriority, Thickness);
 
 	const float HalfLength = HalfHeight - Radius;
