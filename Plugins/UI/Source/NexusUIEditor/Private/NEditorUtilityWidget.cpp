@@ -59,7 +59,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 			const FName CachedIdentifier = GetStateIdentifier();
 			if (System->HasWidgetState(CachedIdentifier))
 			{
-				RestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
+				InvokeRestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
 			}
 			else
 			{

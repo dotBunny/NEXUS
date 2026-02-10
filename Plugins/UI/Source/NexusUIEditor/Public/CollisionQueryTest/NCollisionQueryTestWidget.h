@@ -74,7 +74,7 @@ private:
 	void CreateActor(UWorld* TargetWorld = nullptr);
 	void DestroyActor();
 
-	static bool IsActorProperty(FName Name);
+	static bool DoesPropertyAffectActor(FName Name);
 	
 	FDelegateHandle OnPIEStartedHandle;
 	FDelegateHandle OnPIEReadyHandle;

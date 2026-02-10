@@ -61,11 +61,11 @@ struct FNCollisionQueryTestPoints
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, DisplayName="Start Point (Absolute)")
+	UPROPERTY(EditAnywhere, DisplayName="Start Point", meta=(Tooltip="The ABSOLUTE world location to start the query from."))
 	FVector StartPoint = FVector(0,0,0);
 	
-	UPROPERTY(EditAnywhere, DisplayName="End Point (Relative)")
-	FVector EndPoint = FVector(0,0,500);
+	UPROPERTY(EditAnywhere, DisplayName="End Point", meta=(Tooltip="The RELATIVE location to the Start Point to query towards."))
+	FVector EndPoint = FVector(500,0,0);
 	
 	UPROPERTY(EditAnywhere, DisplayName="Rotation")
 	FRotator Rotation = FRotator(0,0,0);

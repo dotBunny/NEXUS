@@ -4,24 +4,16 @@
 #include "CollisionQueryTest/NCollisionQueryTestWidget.h"
 
 #include "JsonObjectConverter.h"
+#include "NUIEditorMinimal.h"
 #include "CollisionQueryTest/NCollisionQueryTestUtils.h"
 #include "Selection.h"
 
-void UNCollisionQueryTestWidget::OnPropertyValueChanged(FName Name)
-{
-	if (IsActorProperty(Name))
-	{
-		PushSettings(QueryActor);
-	} 
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UNCollisionQueryTestWidget::OnPropertyValueChanged(%s)"), *Name.ToString());
-	}
-	
-}
 
 void UNCollisionQueryTestWidget::NativeConstruct()
 {
+	StateIdentifier = NEXUS::UIEditor::CollisionQueryTest::Identifier;
+	bIsPersistent = true;
+	
 	Super::NativeConstruct();
 	
 	// Bindings
@@ -52,12 +44,14 @@ void UNCollisionQueryTestWidget::NativeDestruct()
 
 void UNCollisionQueryTestWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
 {
+	UE_LOG(LogTemp, Warning, TEXT("RESTORING STATE"));
 	if (InState.HasString("Settings"))
 	{
 		FNCollisionQueryTestSettings OutSettings;
 		if (FJsonObjectConverter::JsonObjectStringToUStruct(
 			InState.GetString("Settings"), &OutSettings, 0, 0))
 		{
+			UE_LOG(LogTemp, Warning, TEXT("LOADED SETTINGS"));
 			Settings = OutSettings;
 		}
 	}
@@ -67,11 +61,19 @@ FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidge
 {
 	FNWidgetState State;
 	FString JsonOutput;
-	if (FJsonObjectConverter::UStructToJsonObjectString(Settings, JsonOutput))
+	if (FJsonObjectConverter::UStructToJsonObjectString(Settings, JsonOutput, 0, 0, 0, nullptr, false))
 	{
 		State.AddString(TEXT("Settings"), JsonOutput);	
 	}
 	return State;
+}
+
+void UNCollisionQueryTestWidget::OnPropertyValueChanged(FName Name)
+{
+	if (DoesPropertyAffectActor(Name))
+	{
+		PushSettings(QueryActor);
+	}
 }
 
 void UNCollisionQueryTestWidget::OnWorldTick(const ANCollisionQueryTestActor* Actor)
@@ -269,11 +271,12 @@ void UNCollisionQueryTestWidget::DestroyActor()
 	QueryActor = nullptr;
 }
 
-bool UNCollisionQueryTestWidget::IsActorProperty(FName Name)
+bool UNCollisionQueryTestWidget::DoesPropertyAffectActor(FName Name)
 {
 	return	Name == TEXT("X") || Name == TEXT("Y") || Name == TEXT("Z") ||
 			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") ||
 			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Rotation") ||
-			Name == TEXT("UpdateTimer");
+			Name == TEXT("UpdateTimer") || Name == TEXT("Points") || 
+			Name == TEXT("Options") || Name == TEXT("Settings");
 }
 
