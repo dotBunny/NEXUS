@@ -230,14 +230,15 @@ void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
 		SpawnParams.InitialActorLabel = TEXT("NCollisionQueryTest");
 		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionQueryTestActor::StaticClass(), TEXT("NCollisionQueryTest"));
 		
+		
 		QueryActor = World->SpawnActor<ANCollisionQueryTestActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
+		QueryActor->SetFlags(RF_Transient);
 		
 		
 		QueryActor->SetActorTickInterval(Settings.Options.UpdateTimer);
 		
 		QueryActor->AddToRoot();
-		
 		
 		// Move our end point to where we think it should be
 		QueryActor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
