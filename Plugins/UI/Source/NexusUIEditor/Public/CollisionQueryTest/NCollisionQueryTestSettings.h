@@ -55,6 +55,14 @@ enum class ECollisionQueryTestShape : uint8
 	Sphere
 };
 
+UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
+enum class ECollisionQueryTestDrawMode : uint8
+{
+	None = 0 UMETA(Hidden),
+	EditorOnly = 1 << 0 UMETA(DisplayName = "Editor"),
+	PlayInEditor =  1 << 1 UMETA(DisplayName = "PIE"),
+	SimulateInEditor =  1 << 2 UMETA(DisplayName = "SIE"),
+};
 
 USTRUCT()
 struct FNCollisionQueryTestPoints
@@ -208,6 +216,9 @@ USTRUCT()
 struct FNCollisionQueryTestDrawing
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusUIEditor.ECollisionQueryTestDrawMode"))
+	uint8 DrawMode = static_cast<uint8>(ECollisionQueryTestDrawMode::EditorOnly);
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;

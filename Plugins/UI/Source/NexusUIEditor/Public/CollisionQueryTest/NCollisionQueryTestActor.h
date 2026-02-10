@@ -51,4 +51,8 @@ protected:
 private:
 	UPROPERTY()
 	TObjectPtr<UNCollisionQueryTestWidget> Widget;
+	
+	bool bTickInEditor = false;
+	bool bTickInGame = false;
+	bool bTickInSimulation = false;
 };

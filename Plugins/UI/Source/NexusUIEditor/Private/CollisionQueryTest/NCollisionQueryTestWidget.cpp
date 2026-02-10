@@ -7,6 +7,7 @@
 #include "NUIEditorMinimal.h"
 #include "CollisionQueryTest/NCollisionQueryTestUtils.h"
 #include "Selection.h"
+#include "Macros/NFlagsMacros.h"
 
 
 void UNCollisionQueryTestWidget::NativeConstruct()
@@ -151,7 +152,10 @@ void UNCollisionQueryTestWidget::PushSettings(ANCollisionQueryTestActor* Actor) 
 		Actor->GetStartComponent()->SetWorldLocation(Settings.Points.StartPoint);
 		Actor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
 		Actor->GetStartComponent()->SetWorldRotation(Settings.Points.Rotation.Quaternion());
+		
 		Actor->SetActorTickInterval(Settings.Options.UpdateTimer);
+		
+		Actor->bTickInEditor = N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::EditorOnly);
 	}
 }
 
@@ -234,14 +238,9 @@ void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
 		QueryActor = World->SpawnActor<ANCollisionQueryTestActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
 		QueryActor->SetFlags(RF_Transient);
-		
-		
-		QueryActor->SetActorTickInterval(Settings.Options.UpdateTimer);
-		
 		QueryActor->AddToRoot();
 		
-		// Move our end point to where we think it should be
-		QueryActor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
+		PushSettings(QueryActor);
 		
 		QueryActor->Widget = this;
 
@@ -277,6 +276,7 @@ bool UNCollisionQueryTestWidget::DoesPropertyAffectActor(FName Name)
 			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") ||
 			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Rotation") ||
 			Name == TEXT("UpdateTimer") || Name == TEXT("Points") || 
+			Name == TEXT("Drawing") || Name == TEXT("DrawMode") ||
 			Name == TEXT("Options") || Name == TEXT("Settings");
 }
 
