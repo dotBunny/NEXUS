@@ -20,7 +20,8 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
-
+	static void UnregisterCommands();
+	
 private:	
 	TSharedPtr<FUICommandList> CommandList_BulkOperations;
 	TSharedPtr<FUICommandInfo> CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource;

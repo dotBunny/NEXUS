@@ -19,6 +19,7 @@ void FNFixersEditorModule::StartupModule()
 void FNFixersEditorModule::ShutdownModule()
 {
 	FNFixersEditorBulkOperations::Unregister();
+	FNFixersEditorCommands::UnregisterCommands();
 	FNFixersEditorStyle::Shutdown();
 }
 

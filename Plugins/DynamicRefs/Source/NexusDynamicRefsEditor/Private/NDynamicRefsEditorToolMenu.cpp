@@ -12,13 +12,13 @@
 void FNDynamicRefsEditorToolMenu::Register()
 {
 	// EUW Entry
-	auto EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNEditorCommandInfo();
 	
+	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::DynamicRefsEditor::EUW::Identifier;
-	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "DynamicRefs");
+	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Dynamic References");
 	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NDynamicRefs Developer Overlay inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNDynamicRefsEditorStyle::GetStyleSetName(), NEXUS::DynamicRefsEditor::EUW::Icon);
-	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow);
 	

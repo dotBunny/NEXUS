@@ -5,8 +5,9 @@
 
 #include "NEditorStyle.h"
 
-struct FNWindowCommandInfo
+struct FNEditorCommandInfo
 {
+	FName Section = TEXT("General");
 	FName Identifier;
 	FText DisplayName;
 	FText Tooltip;
@@ -14,6 +15,7 @@ struct FNWindowCommandInfo
 	FCanExecuteAction CanExecute;
 	FIsActionChecked IsChecked;
 	FSlateIcon Icon;
+	bool bContextMenu = false;
 };
 
 class FNEditorCommands final : public TCommands<FNEditorCommands>
@@ -46,20 +48,31 @@ public:
 	static bool NodeExternalDocumentation_CanExecute();
 
 	static void BuildMenus();
+	
 	static void FillHelpSubMenu(UToolMenu* Menu);
 	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
 	
-	static void FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu);
-	NEXUSCOREEDITOR_API static void AddWindowCommand(FNWindowCommandInfo CommandInfo);
+	static void FillWindowMenu(UToolMenu* Menu, bool bIsContextMenu) { FillEditorCommandMenu(Menu, bIsContextMenu, WindowSections, WindowCommandInfo); }
+	static void FillToolMenu(UToolMenu* Menu, bool bIsContextMenu) { FillEditorCommandMenu(Menu, bIsContextMenu, ToolsSections, ToolsCommandInfo); }
+	static void FillEditorCommandMenu(UToolMenu* Menu, bool bIsContextMenu, TMap<FName, FText>& Sections, TMap<FName, FNEditorCommandInfo> Actions);
+	
+	NEXUSCOREEDITOR_API static void AddWindowCommand(FNEditorCommandInfo CommandInfo);
 	NEXUSCOREEDITOR_API static void RemoveWindowCommand(FName Identifier);
+	
+	NEXUSCOREEDITOR_API static void AddToolCommand(FNEditorCommandInfo CommandInfo);
+	NEXUSCOREEDITOR_API static void RemoveToolCommand(FName Identifier);
+
 
 private:
-	static TMap<FName, FNWindowCommandInfo> WindowActions;
+	static TMap<FName, FNEditorCommandInfo> WindowCommandInfo;
+	static TMap<FName, FText> WindowSections;
+	
+	static TMap<FName, FNEditorCommandInfo> ToolsCommandInfo;
+	static TMap<FName, FText> ToolsSections;
 	
 	TSharedPtr<FUICommandList> CommandList_Help;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
-
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
@@ -69,9 +82,5 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
 
 	TSharedPtr<FUICommandList> CommandList_Tools;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
 	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
-	
-	TSharedPtr<FUICommandList> CommandList_Window;
-	TSharedPtr<FUICommandInfo> CommandInfo_Window_CleanLogsFolder;
 };

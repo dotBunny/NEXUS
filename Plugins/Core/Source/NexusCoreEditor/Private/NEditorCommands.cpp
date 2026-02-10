@@ -9,7 +9,11 @@
 #include "NMetaUtils.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 
-TMap<FName, FNWindowCommandInfo> FNEditorCommands::WindowActions;
+TMap<FName, FNEditorCommandInfo> FNEditorCommands::WindowCommandInfo;
+TMap<FName, FText> FNEditorCommands::WindowSections;
+
+TMap<FName, FNEditorCommandInfo> FNEditorCommands::ToolsCommandInfo;
+TMap<FName, FText> FNEditorCommands::ToolsSections;
 
 void FNEditorCommands::RegisterCommands()
 {
@@ -56,22 +60,25 @@ void FNEditorCommands::RegisterCommands()
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
 
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
-	"NCore.Tools.LeakCheck",
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check"),
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
-	EUserInterfaceActionType::Button, FInputChord());
+	// Tools: Leak Check
+	auto LeakCheckCommandInfo = FNEditorCommandInfo();
+	LeakCheckCommandInfo.Identifier = "NCore.Tools.LeakCheck";
+	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check");
+	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
+	LeakCheckCommandInfo.Icon = FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck");
+	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
+	AddToolCommand(LeakCheckCommandInfo);
 	
-	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Window_CleanLogsFolder,
-	"NCore.Logs.CleanLogsFolder",
-	NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder"),
-	NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder"),
-	EUserInterfaceActionType::Button, FInputChord());
+	// Tools: Clean Logs
+	auto CleanLogsCommandInfo = FNEditorCommandInfo();
+	LeakCheckCommandInfo.Identifier = "NCore.Logs.CleanLogsFolder";
+	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder");
+	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
+	LeakCheckCommandInfo.Icon = FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder");
+	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&FNEditorCommands::OnWindowCleanLogsFolder);
+	AddToolCommand(LeakCheckCommandInfo);
 
+	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
 	"NCore.Tools.Profile.NetworkProfiler",
 	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
@@ -121,14 +128,8 @@ void FNEditorCommands::RegisterCommands()
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
 	
 	CommandList_Tools = MakeShared<FUICommandList>();
-	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
-		FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create));
 	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
-	
-	CommandList_Window = MakeShared<FUICommandList>();
-	CommandList_Window->MapAction(Get().CommandInfo_Window_CleanLogsFolder, 
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnWindowCleanLogsFolder));
 }
 
 // ReSharper disable once IdentifierTypo
@@ -259,31 +260,31 @@ void FNEditorCommands::BuildMenus()
 			);
 	}
 	
-	// Dynamic NEXUS Window Section
+	// Dynamic NEXUS Windows
 	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
 	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
 	LevelEditorSection.AddSubMenu(
-			"NEXUS",
+			"NEXUS_Windows",
 			NSLOCTEXT("NexusCoreEditor", "NWindows", "NEXUS"),
 			NSLOCTEXT("NexusCoreEditor", "NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
-			FNewToolMenuDelegate::CreateStatic(&FillNexusWindowsMenu, true),
+			FNewToolMenuDelegate::CreateStatic(&FillWindowMenu, true),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 		);
 	
-	// Log Section
-	FToolMenuSection& LogSection = WindowsMenu->FindOrAddSection("Log");
-	LogSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Window_CleanLogsFolder, Commands.CommandList_Window);
-	
-	// Tools Menu
+	// Dynamic NEXUS Tools
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
-		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("NEXUS");
-		ToolsSection.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorTools", "NEXUS");
-
-		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
+		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("Tools");
+		ToolsSection.AddSubMenu(
+			"NEXUS_Tools",
+			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
+			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS."),
+			FNewToolMenuDelegate::CreateStatic(&FillToolMenu, true),
+			false,
+			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
+		);
 	}
-
 	
 	// Add in NetworkProfiler menu option if its present
 	if (HasToolsProfileNetworkProfiler())
@@ -353,46 +354,99 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
-void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu)
+void FNEditorCommands::FillEditorCommandMenu(UToolMenu* Menu, bool bIsContextMenu, TMap<FName, FText>& Sections, TMap<FName, FNEditorCommandInfo> Actions)
 {
-	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", NSLOCTEXT("NexusCoreEditor", "Windows", ""));
-	for (auto WindowCommand : WindowActions)
+	for (auto CommandSection : Sections)
 	{
-		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
-			WindowCommand.Value.IsChecked, FIsActionButtonVisible());
+		FToolMenuSection& Section = Menu->AddSection(CommandSection.Key, CommandSection.Value);
+		for (auto CommandAction : Actions)
+		{
+			if (CommandAction.Value.Section != CommandSection.Key) continue;
+			
+			FUIAction ButtonAction = FUIAction(CommandAction.Value.Execute,CommandAction.Value.CanExecute, 
+				CommandAction.Value.IsChecked, FIsActionButtonVisible());
 		
-		if (WindowCommand.Value.IsChecked.IsBound())
-		{
-			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
-			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
-			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
-		}
-		else
-		{
-			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
-			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
-			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+			if (CommandAction.Value.IsChecked.IsBound())
+			{
+				Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
+				CommandAction.Value.Tooltip, CommandAction.Value.Icon,
+				FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
+			}
+			else
+			{
+				Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
+				CommandAction.Value.Tooltip, CommandAction.Value.Icon,
+				FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+			}
 		}
 	}
 }
 
-void FNEditorCommands::AddWindowCommand(FNWindowCommandInfo CommandInfo)
+void FNEditorCommands::AddWindowCommand(FNEditorCommandInfo CommandInfo)
 {
-	if (!WindowActions.Contains(CommandInfo.Identifier))
+	if (!WindowCommandInfo.Contains(CommandInfo.Identifier))
 	{
-		WindowActions.Add(CommandInfo.Identifier, CommandInfo);
+		WindowCommandInfo.Add(CommandInfo.Identifier, CommandInfo);
+		WindowCommandInfo.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
 	}
 	else
 	{
-		WindowActions[CommandInfo.Identifier] = CommandInfo;
+		WindowCommandInfo[CommandInfo.Identifier] = CommandInfo;
+	}
+	
+	if (!WindowSections.Contains(CommandInfo.Section))
+	{
+		WindowSections.Add(CommandInfo.Section, FText::FromName(CommandInfo.Section));
+		WindowSections.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
 	}
 }
 
 void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
 {
-	if (WindowActions.Contains(Identifier))
+	if (WindowCommandInfo.Contains(Identifier))
 	{
-		WindowActions.Remove(Identifier);
+		WindowCommandInfo.Remove(Identifier);
+	}
+}
+
+void FNEditorCommands::AddToolCommand(FNEditorCommandInfo CommandInfo)
+{
+	if (!ToolsCommandInfo.Contains(CommandInfo.Identifier))
+	{
+		ToolsCommandInfo.Add(CommandInfo.Identifier, CommandInfo);
+		ToolsCommandInfo.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
+	}
+	else
+	{
+		ToolsCommandInfo[CommandInfo.Identifier] = CommandInfo;
+	}
+	
+	if (!ToolsSections.Contains(CommandInfo.Section))
+	{
+		ToolsSections.Add(CommandInfo.Section, FText::FromName(CommandInfo.Section));
+		ToolsSections.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
+	}
+	
+	
+}
+
+void FNEditorCommands::RemoveToolCommand(FName Identifier)
+{
+	if (ToolsCommandInfo.Contains(Identifier))
+	{
+		ToolsCommandInfo.Remove(Identifier);
 	}
 }
 

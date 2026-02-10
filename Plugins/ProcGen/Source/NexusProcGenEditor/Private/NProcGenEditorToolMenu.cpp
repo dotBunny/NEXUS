@@ -252,10 +252,11 @@ void FNProcGenEditorToolMenu::Register()
 	}
 
 	// EUW Entry
-	auto EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNEditorCommandInfo();
 	
+	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier;
-	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "ProcGen System");
+	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Procedural Generation");
 	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), NEXUS::ProcGenEditor::EditorUtilityWidget::Icon);
 	

@@ -15,7 +15,6 @@ class UCommonHierarchicalScrollBox;
 class UNCheckBox;
 class UButton;
 
-
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay", Abstract, Blueprintable)
 class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 {

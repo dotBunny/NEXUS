@@ -11,8 +11,9 @@
 void FNUIEditorToolMenu::Register()
 {
 	// EUW Entry
-	auto EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNEditorCommandInfo();
 	
+	EditorWindow.Section = TEXT("Windows");
 	EditorWindow.Identifier = NEXUS::UIEditor::CollisionQueryTest::Identifier;
 	EditorWindow.DisplayName = NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionQueryTest_DisplayName", "Collision Query");
 	EditorWindow.Tooltip = NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionQueryTest_Tooltip", "Opens the Collision Query Test window.");
@@ -21,7 +22,7 @@ void FNUIEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNUIEditorToolMenu::CreateCollisionQueryWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNUIEditorToolMenu::HasCollisionQueryWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNEditorCommands::AddToolCommand(EditorWindow);
 }
 
 void FNUIEditorToolMenu::Unregister()
