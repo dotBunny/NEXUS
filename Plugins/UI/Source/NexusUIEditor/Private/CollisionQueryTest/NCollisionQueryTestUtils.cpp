@@ -39,14 +39,14 @@ void FNCollisionQueryTestUtils::DoLineTraceSingle(const FNCollisionQueryTestSett
 	if (bHit)
 	{
 		DrawDebugLine(World, StartPosition, HitResult.Location, N_COLLISION_QUERY_HIT_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_QUERY_HIT_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World);
+			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 	else
 	{
 		DrawDebugLine(World, StartPosition, EndPosition, N_COLLISION_QUERY_MISS_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 #endif
 }
@@ -83,19 +83,19 @@ void FNCollisionQueryTestUtils::DoLineTraceMulti(const FNCollisionQueryTestSetti
 			TraceEndPosition = EndPosition;
 		}
 		DrawDebugLine(World, StartPosition, TraceEndPosition, N_COLLISION_QUERY_HIT_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
 		DrawDebugLine(World, StartPosition, EndPosition, 
 			HitResults.Num() > 0 ? N_COLLISION_QUERY_MID_COLOR : N_COLLISION_QUERY_MISS_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	for (const FHitResult& HitResult : HitResults)
 	{
 		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, 
 			HitResult.bBlockingHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MID_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World);
+			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 #endif
 }
@@ -123,7 +123,7 @@ void FNCollisionQueryTestUtils::DoLineTraceTest(const FNCollisionQueryTestSettin
 #if UE_ENABLE_DEBUG_DRAWING
 	DrawDebugLine(World, StartPosition, EndPosition, 
 		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, 
-		false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+		false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif
 }
 
@@ -156,15 +156,15 @@ void FNCollisionQueryTestUtils::DoSweepSingle(const FNCollisionQueryTestSettings
 	if (bHit)
 	{
 		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, N_COLLISION_QUERY_HIT_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World);
+			false, Settings.Drawing.DrawTimer, SDPG_World);
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, HitResult.Location, Rotation, CollisionShape,
-			N_COLLISION_QUERY_HIT_COLOR, false, Settings.Options.UpdateTimer, SDPG_World, 
+			N_COLLISION_QUERY_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
 			Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-			N_COLLISION_QUERY_MISS_COLOR, false, Settings.Options.UpdateTimer, SDPG_World, 
+			N_COLLISION_QUERY_MISS_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
 			Settings.Drawing.DrawLineThickness);
 	}
 #endif
@@ -207,21 +207,21 @@ void FNCollisionQueryTestUtils::DoSweepMulti(const FNCollisionQueryTestSettings&
 		}
 
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, SweepEnd, Rotation, CollisionShape, 
-			N_COLLISION_QUERY_HIT_COLOR, false, Settings.Options.UpdateTimer, SDPG_World, 
+			N_COLLISION_QUERY_HIT_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
 			Settings.Drawing.DrawLineThickness);
 	}
 	else
 	{
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
 			HitResults.Num() > 0 ? N_COLLISION_QUERY_MID_COLOR : N_COLLISION_QUERY_MISS_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 
 	for (const FHitResult& HitResult : HitResults)
 	{
 		DrawDebugPoint(World, HitResult.ImpactPoint, Settings.Drawing.DrawPointSize, 
 			HitResult.bBlockingHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MID_COLOR, 
-			false, Settings.Options.UpdateTimer, SDPG_World);
+			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
 #endif
 }
@@ -250,7 +250,7 @@ void FNCollisionQueryTestUtils::DoSweepTest(const FNCollisionQueryTestSettings& 
 #if UE_ENABLE_DEBUG_DRAWING
 	FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_QUERY_HIT_COLOR: N_COLLISION_QUERY_MISS_COLOR, false, 
-		Settings.Options.UpdateTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
+		Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif
 }
 
@@ -278,7 +278,7 @@ void FNCollisionQueryTestUtils::DoOverlapBlocking(const FNCollisionQueryTestSett
 
 #if UE_ENABLE_DEBUG_DRAWING
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Options.UpdateTimer, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif 
 }
@@ -307,7 +307,7 @@ void FNCollisionQueryTestUtils::DoOverlapAny(const FNCollisionQueryTestSettings&
 
 #if UE_ENABLE_DEBUG_DRAWING
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Options.UpdateTimer, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif
 }
@@ -344,7 +344,7 @@ void FNCollisionQueryTestUtils::DoOverlapMulti(const FNCollisionQueryTestSetting
 		}
 	}
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
-		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Options.UpdateTimer, 
+		bHit ? N_COLLISION_QUERY_HIT_COLOR : N_COLLISION_QUERY_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
 #endif
 }

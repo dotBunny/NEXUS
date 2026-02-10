@@ -63,6 +63,7 @@ enum class ECollisionQueryTestDrawMode : uint8
 	PlayInEditor =  1 << 1 UMETA(DisplayName = "PIE"),
 	SimulateInEditor =  1 << 2 UMETA(DisplayName = "SIE"),
 };
+ENUM_CLASS_FLAGS(ECollisionQueryTestDrawMode)
 
 USTRUCT()
 struct FNCollisionQueryTestPoints
@@ -197,8 +198,7 @@ struct FNCollisionQueryTestOptions
 	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
 	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Update Timer", meta=(Tooltip="How long between queries."))
-	float UpdateTimer = 0.f;
+	
 	
 	FCollisionQueryParams GetCollisionQueryParams() const
 	{
@@ -218,7 +218,9 @@ struct FNCollisionQueryTestDrawing
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusUIEditor.ECollisionQueryTestDrawMode"))
-	uint8 DrawMode = static_cast<uint8>(ECollisionQueryTestDrawMode::EditorOnly);
+	uint8 DrawMode =	static_cast<uint8>(ECollisionQueryTestDrawMode::EditorOnly) | 
+						static_cast<uint8>(ECollisionQueryTestDrawMode::PlayInEditor) | 
+						static_cast<uint8>(ECollisionQueryTestDrawMode::SimulateInEditor);
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;
@@ -228,6 +230,9 @@ struct FNCollisionQueryTestDrawing
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Labels")
 	bool DrawLabels = false;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Draw Timer", meta=(Tooltip="How long between queries/draws."))
+	float DrawTimer = 0.f;
 };
 
 

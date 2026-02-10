@@ -20,7 +20,7 @@ class NEXUSUIEDITOR_API ANCollisionQueryTestActor: public AActor
 	GENERATED_BODY()
 	
 	explicit ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer);
-	virtual bool ShouldTickIfViewportsOnly() const override { return true; }
+	virtual bool ShouldTickIfViewportsOnly() const override { return bTickInEditor; }
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginDestroy() override;
 #if WITH_EDITOR
@@ -45,6 +45,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USceneComponent> EndPointComponent;
 protected:
+	
+	void SetTickInGame(bool bTick);
+	void SetTickInSimulation(bool bTick);
+	void SetTickInEditor(bool bTick);
 	
 	void OnTransformChanged(USceneComponent* Component, EUpdateTransformFlags Flags, ETeleportType Teleport);
 	

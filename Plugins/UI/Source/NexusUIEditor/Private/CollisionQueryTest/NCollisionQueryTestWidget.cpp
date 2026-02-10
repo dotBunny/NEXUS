@@ -153,9 +153,11 @@ void UNCollisionQueryTestWidget::PushSettings(ANCollisionQueryTestActor* Actor) 
 		Actor->GetEndComponent()->SetRelativeLocation(Settings.Points.EndPoint);
 		Actor->GetStartComponent()->SetWorldRotation(Settings.Points.Rotation.Quaternion());
 		
-		Actor->SetActorTickInterval(Settings.Options.UpdateTimer);
+		Actor->SetActorTickInterval(Settings.Drawing.DrawTimer);
 		
-		Actor->bTickInEditor = N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::EditorOnly);
+		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::EditorOnly));
+		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::PlayInEditor));
+		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::SimulateInEditor));
 	}
 }
 
@@ -273,10 +275,10 @@ void UNCollisionQueryTestWidget::DestroyActor()
 bool UNCollisionQueryTestWidget::DoesPropertyAffectActor(FName Name)
 {
 	return	Name == TEXT("X") || Name == TEXT("Y") || Name == TEXT("Z") ||
-			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") ||
-			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Rotation") ||
-			Name == TEXT("UpdateTimer") || Name == TEXT("Points") || 
-			Name == TEXT("Drawing") || Name == TEXT("DrawMode") ||
-			Name == TEXT("Options") || Name == TEXT("Settings");
+			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") || 
+			Name == TEXT("Rotation") || 
+			Name == TEXT("StartPoint") || Name == TEXT("EndPoint") || Name == TEXT("Points") || 
+			Name == TEXT("Drawing") || Name == TEXT("DrawMode") || Name == TEXT("DrawTimer") ||
+			Name == TEXT("Settings");
 }
 

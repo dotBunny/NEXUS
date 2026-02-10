@@ -42,6 +42,24 @@ ANCollisionQueryTestActor::ANCollisionQueryTestActor(const FObjectInitializer& O
 
 void ANCollisionQueryTestActor::Tick(float DeltaTime)
 {
+	// Handle Draw Mode
+	const UWorld* World = GetWorld();
+	if (World)
+	{
+		if (World->IsPlayInEditor() && !bTickInGame)
+		{
+			return;
+		}
+		if (World->WorldType == EWorldType::Editor && World->HasBegunPlay() && !bTickInSimulation)
+		{
+			return;
+		}
+		if (World->WorldType == EWorldType::Editor && !bTickInEditor)
+		{
+			return;
+		}
+	}
+	
 	if (Widget != nullptr)
 	{
 		Widget->OnWorldTick(this);
@@ -63,6 +81,21 @@ void ANCollisionQueryTestActor::BeginDestroy()
 	}
 	
 	Super::BeginDestroy();
+}
+
+void ANCollisionQueryTestActor::SetTickInGame(bool bTick)
+{
+	bTickInGame = bTick;
+}
+
+void ANCollisionQueryTestActor::SetTickInSimulation(bool bTick)
+{
+	bTickInSimulation = bTick;
+}
+
+void ANCollisionQueryTestActor::SetTickInEditor(bool bTick)
+{
+	bTickInEditor = bTick;
 }
 
 void ANCollisionQueryTestActor::OnTransformChanged(USceneComponent* Component, EUpdateTransformFlags Flags, ETeleportType Teleport)
