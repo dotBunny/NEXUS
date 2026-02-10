@@ -23,6 +23,10 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsPersistent() const { return bIsPersistent; };
+	
+	UFUNCTION(BlueprintCallable)
+	bool HasPermanentState() const { return bHasPermanentState; };
+	
 	FName GetStateIdentifier() const { return StateIdentifier; };
 	
 protected:
@@ -35,6 +39,10 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	bool bIsPersistent = false;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
+	bool bHasPermanentState = false;
+	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	FName StateIdentifier;

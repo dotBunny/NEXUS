@@ -94,6 +94,10 @@ void UNEditorUtilityWidget::NativeDestruct()
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System != nullptr)
 	{
+		if (bHasPermanentState)
+		{
+			System->UpdateWidgetState( GetStateIdentifier(), GetWidgetState(this));
+		}
 		System->UnregisterWidget(this);
 	}
 	
@@ -133,7 +137,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (IsPersistent() && !IsEngineExitRequested())
+	if (IsPersistent() && !IsEngineExitRequested() && !bHasPermanentState)
 	{
 		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetStateIdentifier());
 	}

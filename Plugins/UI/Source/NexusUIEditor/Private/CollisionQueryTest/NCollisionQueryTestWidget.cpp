@@ -13,6 +13,7 @@ void UNCollisionQueryTestWidget::NativeConstruct()
 {
 	StateIdentifier = NEXUS::UIEditor::CollisionQueryTest::Identifier;
 	bIsPersistent = true;
+	bHasPermanentState = true;
 	
 	Super::NativeConstruct();
 	
@@ -44,14 +45,12 @@ void UNCollisionQueryTestWidget::NativeDestruct()
 
 void UNCollisionQueryTestWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
 {
-	UE_LOG(LogTemp, Warning, TEXT("RESTORING STATE"));
 	if (InState.HasString("Settings"))
 	{
 		FNCollisionQueryTestSettings OutSettings;
 		if (FJsonObjectConverter::JsonObjectStringToUStruct(
 			InState.GetString("Settings"), &OutSettings, 0, 0))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LOADED SETTINGS"));
 			Settings = OutSettings;
 		}
 	}
