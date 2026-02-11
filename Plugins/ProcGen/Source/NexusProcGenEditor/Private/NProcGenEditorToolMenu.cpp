@@ -3,7 +3,7 @@
 
 #include "NProcGenEditorToolMenu.h"
 
-#include "NEditorCommands.h"
+#include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "Cell/NCellJunctionComponent.h"
@@ -263,12 +263,12 @@ void FNProcGenEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddToolCommand(EditorWindow);
+	FNEditorToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNProcGenEditorToolMenu::Unregister()
 {
-	FNEditorCommands::RemoveWindowCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
+	FNEditorToolsMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()

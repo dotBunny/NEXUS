@@ -5,7 +5,7 @@
 
 #include "NDynamicRefsEditorMinimal.h"
 #include "NDynamicRefsEditorStyle.h"
-#include "NEditorCommands.h"
+#include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
 
@@ -22,12 +22,12 @@ void FNDynamicRefsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddToolCommand(EditorWindow);
+	FNEditorToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNDynamicRefsEditorToolMenu::Unregister()
 {
-	FNEditorCommands::RemoveWindowCommand(NEXUS::DynamicRefsEditor::EUW::Identifier);
+	FNEditorToolsMenu::RemoveCommand(NEXUS::DynamicRefsEditor::EUW::Identifier);
 }
 
 void FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow()

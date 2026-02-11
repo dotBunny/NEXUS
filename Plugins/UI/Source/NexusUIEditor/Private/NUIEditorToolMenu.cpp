@@ -3,7 +3,7 @@
 
 #include "NUIEditorToolMenu.h"
 
-#include "NEditorCommands.h"
+#include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
 #include "NUIEditorStyle.h"
@@ -22,12 +22,12 @@ void FNUIEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNUIEditorToolMenu::CreateCollisionQueryWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNUIEditorToolMenu::HasCollisionQueryWindow);
 	
-	FNEditorCommands::AddToolCommand(EditorWindow);
+	FNEditorToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNUIEditorToolMenu::Unregister()
 {
-	FNEditorCommands::RemoveWindowCommand(NEXUS::UIEditor::CollisionQueryTest::Identifier);
+	FNEditorToolsMenu::RemoveCommand(NEXUS::UIEditor::CollisionQueryTest::Identifier);
 }
 
 void FNUIEditorToolMenu::CreateCollisionQueryWindow()

@@ -5,15 +5,10 @@
 
 #include "BlueprintEditor.h"
 #include "NEditorSettings.h"
+#include "NEditorToolsMenu.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
-
-TMap<FName, FNEditorCommandInfo> FNEditorCommands::WindowCommandInfo;
-TMap<FName, FText> FNEditorCommands::WindowSections;
-
-TMap<FName, FNEditorCommandInfo> FNEditorCommands::ToolsCommandInfo;
-TMap<FName, FText> FNEditorCommands::ToolsSections;
 
 void FNEditorCommands::RegisterCommands()
 {
@@ -59,25 +54,6 @@ void FNEditorCommands::RegisterCommands()
 		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
-
-	// Tools: Leak Check
-	auto LeakCheckCommandInfo = FNEditorCommandInfo();
-	LeakCheckCommandInfo.Identifier = "NCore.Tools.LeakCheck";
-	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check");
-	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
-	LeakCheckCommandInfo.Icon = FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck");
-	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
-	AddToolCommand(LeakCheckCommandInfo);
-	
-	// Tools: Clean Logs
-	auto CleanLogsCommandInfo = FNEditorCommandInfo();
-	LeakCheckCommandInfo.Identifier = "NCore.Logs.CleanLogsFolder";
-	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder");
-	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
-	LeakCheckCommandInfo.Icon = FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder");
-	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&FNEditorCommands::OnWindowCleanLogsFolder);
-	AddToolCommand(LeakCheckCommandInfo);
-
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
 	"NCore.Tools.Profile.NetworkProfiler",
@@ -182,40 +158,6 @@ bool FNEditorCommands::HasToolsProfileNetworkProfiler()
 	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
-void FNEditorCommands::OnWindowCleanLogsFolder()
-{
-	TArray<FString> FilePaths;
-	IFileManager& FileManager = IFileManager::Get();
-	
-	TArray<FString> Searches;
-	Searches.Add(TEXT("*-backup-*")); // Backups
-	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
-	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
-	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
-	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
-
-	const FString ProjectLogDir = FPaths::ProjectLogDir();
-	int DeleteCount = 0;
-
-	for (const FString& Search : Searches)
-	{
-		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
-		for (const FString& File : FilePaths)
-		{
-			FileManager.Delete(*File, false, true);
-			DeleteCount++;
-		}
-	}
-	
-	if (DeleteCount > 0)
-	{
-		UE_LOG(LogNexusCoreEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());
-	}
-	else
-	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("No files found to delete from %s."), *FPaths::ProjectLogDir());
-	}
-}
 
 void FNEditorCommands::OnNodeExternalDocumentation()
 {
@@ -260,30 +202,20 @@ void FNEditorCommands::BuildMenus()
 			);
 	}
 	
-	// Dynamic NEXUS Windows
-	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
-	LevelEditorSection.AddSubMenu(
-			"NEXUS_Windows",
-			NSLOCTEXT("NexusCoreEditor", "NWindows", "NEXUS"),
-			NSLOCTEXT("NexusCoreEditor", "NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
-			FNewToolMenuDelegate::CreateStatic(&FillWindowMenu, true),
-			false,
-			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
-		);
-	
 	// Dynamic NEXUS Tools
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
 		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("Tools");
-		ToolsSection.AddSubMenu(
+		FToolMenuEntry Entry = FToolMenuEntry::InitSubMenu(
 			"NEXUS_Tools",
 			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
 			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS."),
-			FNewToolMenuDelegate::CreateStatic(&FillToolMenu, true),
+			FNewToolMenuDelegate::CreateStatic(&FNEditorToolsMenu::GenerateMenu, false),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 		);
+		Entry.InsertPosition = FToolMenuInsert("FindInBlueprints", EToolMenuInsertType::After);
+		ToolsSection.AddEntry(Entry);
 	}
 	
 	// Add in NetworkProfiler menu option if its present
@@ -351,110 +283,6 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Level"),
 			FToolUIActionChoice(ButtonAction),
 			EUserInterfaceActionType::Button, AssetName);
-	}
-}
-
-void FNEditorCommands::FillMenu(UToolMenu* Menu, bool bIsContextMenu, const TMap<FName, FText>& Sections, const TMap<FName, FNEditorCommandInfo>& Actions)
-{
-	for (const auto& CommandSection : Sections)
-	{
-		FToolMenuSection& Section = Menu->AddSection(CommandSection.Key, CommandSection.Value);
-		for (const auto& CommandAction : Actions)
-		{
-			if (CommandAction.Value.Section != CommandSection.Key) continue;
-			
-			if (CommandAction.Value.bIsMenuEntry)
-			{
-				Section.AddSubMenu(CommandAction.Value.Identifier, CommandAction.Value.DisplayName, 
-					CommandAction.Value.Tooltip, CommandAction.Value.MenuChoice, false, CommandAction.Value.Icon);
-			}
-			else
-			{
-				FUIAction ButtonAction = FUIAction(CommandAction.Value.Execute,CommandAction.Value.CanExecute, 
-					CommandAction.Value.IsChecked, FIsActionButtonVisible());
-		
-				if (CommandAction.Value.IsChecked.IsBound())
-				{
-					Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
-					CommandAction.Value.Tooltip, CommandAction.Value.Icon,
-					FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
-				}
-				else
-				{
-					Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
-					CommandAction.Value.Tooltip, CommandAction.Value.Icon,
-					FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
-				}
-			}
-		}
-	}
-}
-
-void FNEditorCommands::AddWindowCommand(FNEditorCommandInfo CommandInfo)
-{
-	if (!WindowCommandInfo.Contains(CommandInfo.Identifier))
-	{
-		WindowCommandInfo.Add(CommandInfo.Identifier, CommandInfo);
-		WindowCommandInfo.KeySort([](const FName A, const FName B)
-			{
-				return A.Compare(B) < 0;
-			});
-	}
-	else
-	{
-		WindowCommandInfo[CommandInfo.Identifier] = CommandInfo;
-	}
-	
-	if (!WindowSections.Contains(CommandInfo.Section))
-	{
-		WindowSections.Add(CommandInfo.Section, FText::FromName(CommandInfo.Section));
-		WindowSections.KeySort([](const FName A, const FName B)
-			{
-				return A.Compare(B) < 0;
-			});
-	}
-}
-
-void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
-{
-	if (WindowCommandInfo.Contains(Identifier))
-	{
-		WindowCommandInfo.Remove(Identifier);
-	}
-}
-
-void FNEditorCommands::AddToolCommand(FNEditorCommandInfo CommandInfo)
-{
-	if (!ToolsCommandInfo.Contains(CommandInfo.Identifier))
-	{
-		ToolsCommandInfo.Add(CommandInfo.Identifier, CommandInfo);
-		ToolsCommandInfo.KeySort([](const FName A, const FName B)
-			{
-				return A.Compare(B) < 0;
-			});
-	}
-	else
-	{
-		ToolsCommandInfo[CommandInfo.Identifier] = CommandInfo;
-	}
-	
-	if (!ToolsSections.Contains(CommandInfo.Section))
-	{
-		ToolsSections.Add(CommandInfo.Section, FText::FromName(CommandInfo.Section));
-		ToolsSections.KeySort([](const FName A, const FName B)
-			{
-				return A.Compare(B) < 0;
-			});
-	}
-	
-	
-}
-
-void FNEditorCommands::RemoveToolCommand(FName Identifier)
-{
-	if (ToolsCommandInfo.Contains(Identifier))
-	{
-		ToolsCommandInfo.Remove(Identifier);
 	}
 }
 

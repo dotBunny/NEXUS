@@ -37,9 +37,8 @@ void FNFixersEditorBulkOperations::Unregister()
 
 void FNFixersEditorBulkOperations::FillContextBulkOperationsMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	FNEditorCommands::FillMenu(Menu, bIsContextMenu, Sections, CommandInfo);
+	N_IMPLEMENT_GENERATE_COMMAND_INFO_MENU(Sections, CommandInfo)
 }
-
 
 void FNFixersEditorBulkOperations::AddCommand(const FNEditorCommandInfo& Command)
 {

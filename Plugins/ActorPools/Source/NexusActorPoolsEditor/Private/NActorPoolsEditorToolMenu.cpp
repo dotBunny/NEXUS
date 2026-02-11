@@ -3,7 +3,7 @@
 
 #include "NActorPoolsEditorMinimal.h"
 #include "NActorPoolsEditorStyle.h"
-#include "NEditorCommands.h"
+#include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSystem.h"
 
@@ -21,12 +21,12 @@ void FNActorPoolsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNActorPoolsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddToolCommand(EditorWindow);
+	FNEditorToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNActorPoolsEditorToolMenu::Unregister()
 {
-	FNEditorCommands::RemoveWindowCommand(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
+	FNEditorToolsMenu::RemoveCommand(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }
 
 void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
