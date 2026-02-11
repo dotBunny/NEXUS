@@ -21,7 +21,7 @@ void FNActorPoolsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNActorPoolsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNEditorCommands::AddToolCommand(EditorWindow);
 }
 
 void FNActorPoolsEditorToolMenu::Unregister()

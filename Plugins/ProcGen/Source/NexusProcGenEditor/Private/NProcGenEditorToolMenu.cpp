@@ -263,7 +263,7 @@ void FNProcGenEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNEditorCommands::AddToolCommand(EditorWindow);
 }
 
 void FNProcGenEditorToolMenu::Unregister()

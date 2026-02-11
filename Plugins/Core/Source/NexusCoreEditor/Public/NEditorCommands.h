@@ -14,8 +14,9 @@ struct FNEditorCommandInfo
 	FExecuteAction Execute;
 	FCanExecuteAction CanExecute;
 	FIsActionChecked IsChecked;
+	bool bIsMenuEntry = false;
+	FNewToolMenuChoice MenuChoice;
 	FSlateIcon Icon;
-	bool bContextMenu = false;
 };
 
 class FNEditorCommands final : public TCommands<FNEditorCommands>
@@ -52,9 +53,8 @@ public:
 	static void FillHelpSubMenu(UToolMenu* Menu);
 	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
 	
-	static void FillWindowMenu(UToolMenu* Menu, bool bIsContextMenu) { FillEditorCommandMenu(Menu, bIsContextMenu, WindowSections, WindowCommandInfo); }
-	static void FillToolMenu(UToolMenu* Menu, bool bIsContextMenu) { FillEditorCommandMenu(Menu, bIsContextMenu, ToolsSections, ToolsCommandInfo); }
-	static void FillEditorCommandMenu(UToolMenu* Menu, bool bIsContextMenu, TMap<FName, FText>& Sections, TMap<FName, FNEditorCommandInfo> Actions);
+	static void FillWindowMenu(UToolMenu* Menu, bool bIsContextMenu) { FillMenu(Menu, bIsContextMenu, WindowSections, WindowCommandInfo); }
+	static void FillToolMenu(UToolMenu* Menu, bool bIsContextMenu) { FillMenu(Menu, bIsContextMenu, ToolsSections, ToolsCommandInfo); }
 	
 	NEXUSCOREEDITOR_API static void AddWindowCommand(FNEditorCommandInfo CommandInfo);
 	NEXUSCOREEDITOR_API static void RemoveWindowCommand(FName Identifier);
@@ -62,8 +62,10 @@ public:
 	NEXUSCOREEDITOR_API static void AddToolCommand(FNEditorCommandInfo CommandInfo);
 	NEXUSCOREEDITOR_API static void RemoveToolCommand(FName Identifier);
 
-
+	NEXUSCOREEDITOR_API static void FillMenu(UToolMenu* Menu, bool bIsContextMenu, const TMap<FName, FText>& Sections, const TMap<FName, FNEditorCommandInfo>& Actions);
+	
 private:
+	
 	static TMap<FName, FNEditorCommandInfo> WindowCommandInfo;
 	static TMap<FName, FText> WindowSections;
 	

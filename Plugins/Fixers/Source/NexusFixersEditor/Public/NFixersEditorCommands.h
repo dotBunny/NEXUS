@@ -3,27 +3,10 @@
 
 #pragma once
 
-#include "NFixersEditorStyle.h"
 
-class FNFixersEditorCommands final : public TCommands<FNFixersEditorCommands>
+class FNFixersEditorCommands
 {
-	friend class FNFixersEditorBulkOperations;
-	
 public:
-	FNFixersEditorCommands()
-		: TCommands<FNFixersEditorCommands>(
-			TEXT("NFixersEditorCommands"),
-			NSLOCTEXT("NexusFixersEditor", "Commands", "Commands"),
-			NAME_None,
-			FNFixersEditorStyle::GetStyleSetName())
-	{
-	}
-
-	virtual void RegisterCommands() override;
-	static void UnregisterCommands();
-	
-private:	
-	TSharedPtr<FUICommandList> CommandList_BulkOperations;
-	TSharedPtr<FUICommandInfo> CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource;
-	TSharedPtr<FUICommandInfo> CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource_NoContext;
+	static void Register();
+	static void Unregister();
 };

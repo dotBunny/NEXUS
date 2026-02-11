@@ -22,7 +22,7 @@ void FNDynamicRefsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNEditorCommands::AddToolCommand(EditorWindow);
 }
 
 void FNDynamicRefsEditorToolMenu::Unregister()

@@ -11,7 +11,7 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
-					"Core",
+					"Core", 
 				]
 			);
 
@@ -32,7 +32,7 @@ namespace UnrealBuildTool.Rules
 			);
 
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore"]);
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor"]);
 
 			ShortName = "NexusFixersEditor";						

@@ -354,29 +354,37 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
-void FNEditorCommands::FillEditorCommandMenu(UToolMenu* Menu, bool bIsContextMenu, TMap<FName, FText>& Sections, TMap<FName, FNEditorCommandInfo> Actions)
+void FNEditorCommands::FillMenu(UToolMenu* Menu, bool bIsContextMenu, const TMap<FName, FText>& Sections, const TMap<FName, FNEditorCommandInfo>& Actions)
 {
-	for (auto CommandSection : Sections)
+	for (const auto& CommandSection : Sections)
 	{
 		FToolMenuSection& Section = Menu->AddSection(CommandSection.Key, CommandSection.Value);
-		for (auto CommandAction : Actions)
+		for (const auto& CommandAction : Actions)
 		{
 			if (CommandAction.Value.Section != CommandSection.Key) continue;
 			
-			FUIAction ButtonAction = FUIAction(CommandAction.Value.Execute,CommandAction.Value.CanExecute, 
-				CommandAction.Value.IsChecked, FIsActionButtonVisible());
-		
-			if (CommandAction.Value.IsChecked.IsBound())
+			if (CommandAction.Value.bIsMenuEntry)
 			{
-				Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
-				CommandAction.Value.Tooltip, CommandAction.Value.Icon,
-				FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
+				Section.AddSubMenu(CommandAction.Value.Identifier, CommandAction.Value.DisplayName, 
+					CommandAction.Value.Tooltip, CommandAction.Value.MenuChoice, false, CommandAction.Value.Icon);
 			}
 			else
 			{
-				Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
-				CommandAction.Value.Tooltip, CommandAction.Value.Icon,
-				FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+				FUIAction ButtonAction = FUIAction(CommandAction.Value.Execute,CommandAction.Value.CanExecute, 
+					CommandAction.Value.IsChecked, FIsActionButtonVisible());
+		
+				if (CommandAction.Value.IsChecked.IsBound())
+				{
+					Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
+					CommandAction.Value.Tooltip, CommandAction.Value.Icon,
+					FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
+				}
+				else
+				{
+					Section.AddMenuEntry(CommandAction.Value.Identifier,  CommandAction.Value.DisplayName, 
+					CommandAction.Value.Tooltip, CommandAction.Value.Icon,
+					FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
+				}
 			}
 		}
 	}

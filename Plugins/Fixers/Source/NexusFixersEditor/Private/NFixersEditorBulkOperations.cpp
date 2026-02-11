@@ -4,7 +4,10 @@
 #include "NFixersEditorBulkOperations.h"
 
 #include "NEditorCommands.h"
-#include "NFixersEditorCommands.h"
+#include "NFixersEditorStyle.h"
+
+TMap<FName, FNEditorCommandInfo> FNFixersEditorBulkOperations::CommandInfo;
+TMap<FName, FText> FNFixersEditorBulkOperations::Sections;
 
 void FNFixersEditorBulkOperations::Register()
 {
@@ -16,13 +19,11 @@ void FNFixersEditorBulkOperations::Register()
 				"NFixersBulkOperations",
 				NSLOCTEXT("NexusFixersEditor", "ContextMenu_FindAndFix", "Find & Fix"),
 				NSLOCTEXT("NexusFixersEditor", "ContextMenu_FindAndFix_ToolTip", "Find and fix operations on selected content."),
-				FNewToolMenuDelegate::CreateStatic(&FillMenu, true),
+				FNewToolMenuDelegate::CreateStatic(&FillContextBulkOperationsMenu, true),
 				false,
 				FSlateIcon(FNFixersEditorStyle::GetStyleSetName(), "Command.FindAndFix")
 			);
 	}
-
-
 }
 
 void FNFixersEditorBulkOperations::Unregister()
@@ -34,12 +35,41 @@ void FNFixersEditorBulkOperations::Unregister()
 	}
 }
 
-void FNFixersEditorBulkOperations::FillMenu(UToolMenu* Menu, bool bIsContextMenu)
+void FNFixersEditorBulkOperations::FillContextBulkOperationsMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	const FNFixersEditorCommands Commands = FNFixersEditorCommands::Get();
-	FToolMenuSection& AssetsSection = Menu->AddSection(TEXT("Assets"));
-	AssetsSection.Label = NSLOCTEXT("NexusFixersEditor", "NFixersBulkOperations_Assets", "Assets");
-	if (bIsContextMenu)
-		AssetsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_BulkOperations_PoseAsset_OutOfDateAnimationSource,
-					Commands.CommandList_BulkOperations);
+	FNEditorCommands::FillMenu(Menu, bIsContextMenu, Sections, CommandInfo);
+}
+
+
+void FNFixersEditorBulkOperations::AddCommand(const FNEditorCommandInfo& Command)
+{
+	if (!CommandInfo.Contains(Command.Identifier))
+	{
+		CommandInfo.Add(Command.Identifier, Command);
+		CommandInfo.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
+	}
+	else
+	{
+		CommandInfo[Command.Identifier] = Command;
+	}
+	
+	if (!Sections.Contains(Command.Section))
+	{
+		Sections.Add(Command.Section, FText::FromName(Command.Section));
+		Sections.KeySort([](const FName A, const FName B)
+			{
+				return A.Compare(B) < 0;
+			});
+	}
+}
+
+void FNFixersEditorBulkOperations::RemoveCommand(const FName Identifier)
+{
+	if (CommandInfo.Contains(Identifier))
+	{
+		CommandInfo.Remove(Identifier);
+	}
 }
