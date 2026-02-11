@@ -17,6 +17,12 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 		if (System != nullptr && System->HasWidget(Identifier))
 		{
+			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
+			if (Widget != nullptr)
+			{
+				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(Widget->TakeWidget());
+				Tab->FlashTab();
+			}
 			return System->GetWidget(Identifier);
 		}
 	}
