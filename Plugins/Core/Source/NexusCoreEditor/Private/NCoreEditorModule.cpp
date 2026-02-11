@@ -40,6 +40,7 @@ void FNCoreEditorModule::ShutdownModule()
 	{
 		InputProcessor.Reset();
 	}
+	FNEditorCommands::RemoveMenuEntries();
 	IModuleInterface::ShutdownModule();
 }
 
@@ -59,7 +60,7 @@ void FNCoreEditorModule::OnPostEngineInit()
 	
 	FNEditorToolsMenu::RegisterCommands();
 	FNEditorCommands::Register();
-	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::BuildMenus));
+	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::AddMenuEntries));
 	
 	const UNEditorSettings* Settings = UNEditorSettings::Get();
 	

@@ -5,7 +5,7 @@
 
 #include "NEditorUtils.h"
 #include "NUIEditorStyle.h"
-#include "NUIEditorToolMenu.h"
+#include "NUIEditorCommands.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -17,7 +17,7 @@ void FNUIEditorModule::StartupModule()
 
 void FNUIEditorModule::ShutdownModule()
 {
-	FNUIEditorToolMenu::Unregister();
+	FNUIEditorCommands::RemoveMenuEntries();
 	FNUIEditorStyle::Shutdown();
 }
 
@@ -31,7 +31,7 @@ void FNUIEditorModule::OnPostEngineInit()
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNUIEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNUIEditorCommands::AddMenuEntries));
 	}
 }
 

@@ -14,7 +14,7 @@
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
 
-void FNProcGenEditorToolMenu::Register()
+void FNProcGenEditorToolMenu::AddMenuEntries()
 {
 	// Level Tools
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User"))
@@ -266,9 +266,24 @@ void FNProcGenEditorToolMenu::Register()
 	FNEditorToolsMenu::AddCommand(EditorWindow);
 }
 
-void FNProcGenEditorToolMenu::Unregister()
+void FNProcGenEditorToolMenu::RemoveMenuEntries()
 {
 	FNEditorToolsMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
+	
+	UToolMenus* Menu = UToolMenus::Get();
+	if (Menu)
+	{
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NOrganExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NProcGenEdMode_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_AddButton");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_SelectButton");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditBoundsMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditHullMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditVoxelMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellJunctionExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_DrawVoxelData");
+	}
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()

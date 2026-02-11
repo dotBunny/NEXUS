@@ -3,7 +3,7 @@
 
 #pragma once
 
-class FNMultiplayerEditorToolMenu
+class FNMultiplayerEditorCommands
 {
 public:
 

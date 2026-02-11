@@ -18,6 +18,8 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
+	static void AddMenuEntries();
+	static void RemoveMenuEntries();
 	
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
@@ -31,11 +33,9 @@ public:
 	
 	static void OnNodeExternalDocumentation();
 	static bool NodeExternalDocumentation_CanExecute();
-
-	static void BuildMenus();
 	
-	static void FillHelpSubMenu(UToolMenu* Menu);
-	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
+	static void GenerateHelpSubMenu(UToolMenu* Menu);
+	static void GenerateProjectLevelsSubMenu(UToolMenu* Menu);
 
 private:
 	TSharedPtr<FUICommandList> CommandList_Help;

@@ -184,7 +184,7 @@ bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
 	return FNMetaUtils::HasExternalDocumentation(Node);
 }
 
-void FNEditorCommands::BuildMenus()
+void FNEditorCommands::AddMenuEntries()
 {
 	const FNEditorCommands Commands = Get();
 
@@ -196,7 +196,7 @@ void FNEditorCommands::BuildMenus()
 				"NProjectLevels",
 				NSLOCTEXT("NexusCoreEditor", "ProjectLevels", "Project Levels"),
 				NSLOCTEXT("NexusCoreEditor", "ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
-				FNewToolMenuDelegate::CreateStatic(&FillProjectLevelsSubMenu),
+				FNewToolMenuDelegate::CreateStatic(&GenerateProjectLevelsSubMenu),
 				false,
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
 			);
@@ -207,9 +207,9 @@ void FNEditorCommands::BuildMenus()
 	{
 		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("Tools");
 		FToolMenuEntry Entry = FToolMenuEntry::InitSubMenu(
-			"NEXUS_Tools",
+			"NEXUS",
 			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
-			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS."),
+			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS that don't seem to fit anywhere else."),
 			FNewToolMenuDelegate::CreateStatic(&FNEditorToolsMenu::GenerateMenu, false),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
@@ -238,7 +238,7 @@ void FNEditorCommands::BuildMenus()
 				"NEXUS",
 				NSLOCTEXT("NexusCoreEditor", "NHelp", "NEXUS"),
 				NSLOCTEXT("NexusCoreEditor", "NHelp_Tooltip", "Help related to NEXUS"),
-				FNewToolMenuDelegate::CreateStatic(&FillHelpSubMenu),
+				FNewToolMenuDelegate::CreateStatic(&GenerateHelpSubMenu),
 				false,
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 			);
@@ -252,7 +252,22 @@ void FNEditorCommands::BuildMenus()
 	}
 }
 
-void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
+void FNEditorCommands::RemoveMenuEntries()
+{
+	
+	UToolMenus* ToolMenus = UToolMenus::Get();
+	if (ToolMenus)
+	{
+		ToolMenus->RemoveEntry("LevelEditor.MainMenu.File", "FileOpen", "NProjectLevels");
+		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
+		ToolMenus->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
+		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Help", "Reference", "NEXUS");
+		ToolMenus->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
+			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");
+	}
+}
+
+void FNEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
 {
 	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", NSLOCTEXT("NexusCoreEditor", "ProjectLevels", ""));
 	for (const UNEditorSettings* Settings = UNEditorSettings::Get();
@@ -286,7 +301,7 @@ void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
 	}
 }
 
-void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
+void FNEditorCommands::GenerateHelpSubMenu(UToolMenu* Menu)
 {
 	const FNEditorCommands Commands = Get();
 

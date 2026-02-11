@@ -1,13 +1,13 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NMultiplayerEditorToolMenu.h"
+#include "NMultiplayerEditorCommands.h"
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorUserSettings.h"
 
-bool FNMultiplayerEditorToolMenu::bIsMultiplayerTestRunning = false;
+bool FNMultiplayerEditorCommands::bIsMultiplayerTestRunning = false;
 
-void FNMultiplayerEditorToolMenu::Register()
+void FNMultiplayerEditorCommands::Register()
 {
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User"))
 	{
@@ -30,7 +30,7 @@ void FNMultiplayerEditorToolMenu::Register()
 	}
 }
 
-FText FNMultiplayerEditorToolMenu::MultiplayerTest_GetTooltip()
+FText FNMultiplayerEditorCommands::MultiplayerTest_GetTooltip()
 {
 	if (bIsMultiplayerTestRunning)
 	{
@@ -39,7 +39,7 @@ FText FNMultiplayerEditorToolMenu::MultiplayerTest_GetTooltip()
 	return NSLOCTEXT("NexusMultiplayerEditor", "Command_StartMultiplayerTest_Tooltip", "Play this level in a local multiplayer test");
 }
 
-FSlateIcon FNMultiplayerEditorToolMenu::MultiplayerTest_GetIcon()
+FSlateIcon FNMultiplayerEditorCommands::MultiplayerTest_GetIcon()
 {
 	if (bIsMultiplayerTestRunning)
 	{
@@ -48,7 +48,7 @@ FSlateIcon FNMultiplayerEditorToolMenu::MultiplayerTest_GetIcon()
 	return FSlateIcon(FNMultiplayerEditorStyle::GetStyleSetName(), "Command.Multiplayer.StartMultiplayerTest.On");
 }
 
-void FNMultiplayerEditorToolMenu::ToggleMultiplayerTest()
+void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 {
 	if (bIsMultiplayerTestRunning)
 	{

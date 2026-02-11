@@ -3,11 +3,11 @@
 
 #pragma once
 
-class FNUIEditorToolMenu
+class FNUIEditorCommands
 {
 public:
-	static void Register();
-	static void Unregister();
+	static void AddMenuEntries();
+	static void RemoveMenuEntries();
 	
 	static void CreateCollisionQueryWindow();
 	static bool HasCollisionQueryWindow();
