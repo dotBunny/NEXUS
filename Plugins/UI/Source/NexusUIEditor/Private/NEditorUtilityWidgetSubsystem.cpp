@@ -39,17 +39,17 @@ FNWidgetState& UNEditorUtilityWidgetSubsystem::GetWidgetState(const FName& Ident
 
 void UNEditorUtilityWidgetSubsystem::RegisterWidget(UNEditorUtilityWidget* Widget)
 {
-	if (!KnownWidgets.Contains(Widget->GetStateIdentifier()))
+	if (!KnownWidgets.Contains(Widget->GetUniqueIdentifier()))
 	{
-		KnownWidgets.Add(Widget->GetStateIdentifier(), Widget);
+		KnownWidgets.Add(Widget->GetUniqueIdentifier(), Widget);
 	}
 }
 
 void UNEditorUtilityWidgetSubsystem::UnregisterWidget(const UNEditorUtilityWidget* Widget)
 {
-	if (KnownWidgets.Contains(Widget->GetStateIdentifier()))
+	if (KnownWidgets.Contains(Widget->GetUniqueIdentifier()))
 	{
-		KnownWidgets.Remove(Widget->GetStateIdentifier());
+		KnownWidgets.Remove(Widget->GetUniqueIdentifier());
 	}
 }
 

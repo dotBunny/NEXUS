@@ -37,7 +37,7 @@ public:
 	 * @param TargetLabel The label to validate the tab
 	 * @return The desired SDocTab or nullptr if not found
 	 */
-	static TSharedPtr<SDockTab> FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel, const FName& TabIdentifier = NAME_None);
+	static TSharedPtr<SDockTab> FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel);
 
 private:
 	static const FName SDockingTabStackName;

@@ -22,10 +22,18 @@ public:
 	static UEditorUtilityWidget* SpawnTab(const FString& ObjectPath, FName Identifier = NAME_None);
 	
 	UFUNCTION(BlueprintCallable)
-	bool IsPersistent() const { return bIsPersistent; };
+	bool IsPersistent() const
+	{
+		return bIsPersistent;
+	};
 	
-	FName GetStateIdentifier() const { return StateIdentifier; };
+	UFUNCTION(BlueprintCallable)
+	FName GetUniqueIdentifier() const
+	{
+		return UniqueIdentifier;
+	};
 	
+	UFUNCTION(BlueprintCallable)
 	FName GetTabIdentifier() const
 	{
 		return CachedTabIdentifier;
@@ -46,7 +54,7 @@ protected:
 	bool bHasPermanentState = false;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
-	FName StateIdentifier;
+	FName UniqueIdentifier;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
 	FName TabIconStyle;

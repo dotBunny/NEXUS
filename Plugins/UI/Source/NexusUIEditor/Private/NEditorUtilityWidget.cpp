@@ -21,9 +21,7 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 			if (Widget != nullptr)
 			{
 				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
-					Widget->TakeWidget(), 
-					Widget->GetTabDisplayName(),
-					Widget->GetTabIdentifier());
+					Widget->TakeWidget(), Widget->GetTabDisplayName());
 				if (Tab.IsValid())
 				{
 					Tab->FlashTab();
@@ -57,9 +55,9 @@ void UNEditorUtilityWidget::NativeConstruct()
 	Super::NativeConstruct();
 	
 	// Ensure that we have some sort of identifier
-	if (StateIdentifier == NAME_None)
+	if (UniqueIdentifier == NAME_None)
 	{
-		StateIdentifier = FName(GetFName());
+		UniqueIdentifier = FName(GetFName());
 	}
 	
 	// Bind our default behaviour
@@ -111,9 +109,7 @@ void UNEditorUtilityWidget::NativeDestruct()
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
 	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
-		this->TakeWidget(), 
-		GetTabDisplayName(),
-		GetTabIdentifier());
+		this->TakeWidget(), GetTabDisplayName());
 	
 	if (Tab.IsValid())
 	{
@@ -145,6 +141,6 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (IsPersistent() && !IsEngineExitRequested() && !bHasPermanentState)
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetStateIdentifier());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetUniqueIdentifier());
 	}
 }

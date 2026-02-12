@@ -13,7 +13,7 @@
 
 void UNCollisionVisualizerWidget::NativeConstruct()
 {
-	StateIdentifier = NEXUS::UIEditor::CollisionVisualizer::Identifier;
+	UniqueIdentifier = NEXUS::UIEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
 	
 	Super::NativeConstruct();
@@ -144,7 +144,6 @@ void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor
 void UNCollisionVisualizerWidget::UpdateSettings(const ANCollisionVisualizerActor* Actor)
 {
 	// Update Settings (for the one we know about)
-	
 	bool bFoundChanged = false;
 	if (Actor == QueryActor)
 	{
@@ -229,11 +228,11 @@ void UNCollisionVisualizerWidget::SelectEndPoint()
 void UNCollisionVisualizerWidget::RestoreState()
 {
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
-	if (System != nullptr && System->HasWidgetState(GetStateIdentifier()))
+	if (System != nullptr && System->HasWidgetState(GetUniqueIdentifier()))
 	{
 		FNCollisionVisualizerSettings OutSettings;
 		if (FJsonObjectConverter::JsonObjectStringToUStruct(
-			System->GetWidgetState(GetStateIdentifier()).GetString("Settings"), &OutSettings, 0, 0))
+			System->GetWidgetState(GetUniqueIdentifier()).GetString("Settings"), &OutSettings, 0, 0))
 		{
 			Settings = OutSettings;
 		}
@@ -250,7 +249,7 @@ void UNCollisionVisualizerWidget::SaveState() const
 		{
 			FNWidgetState State;
 			State.AddString(TEXT("Settings"), JsonOutput);	
-			System->AddWidgetState(GetStateIdentifier(), State);
+			System->AddWidgetState(GetUniqueIdentifier(), State);
 		}
 	}
 }

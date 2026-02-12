@@ -1,7 +1,5 @@
 ﻿#include "NSlateUtils.h"
 
-#include "LevelEditor.h"
-
 const FName FNSlateUtils::SDockingTabStackName = FName("SDockingTabStack");
 const FName FNSlateUtils::SDockTabName = FName("SDockTab");
 
@@ -52,9 +50,9 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TS
 }
 
 // #SONARQUBE-DISABLE-CPP_S134
-TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel, const FName& TabIdentifier)
+TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Finding Tab '%s' w/ base of %s (%s)"), *TargetLabel.ToString(), *BaseWidget->GetTypeAsString(), *TabIdentifier.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("Finding Tab '%s' w/ base of %s"), *TargetLabel.ToString(), *BaseWidget->GetTypeAsString());
 	TSharedPtr<SWidget> Widget = BaseWidget;
 	while (Widget.IsValid())
 	{
@@ -100,38 +98,7 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 		Widget = Widget->GetParentWidget();
 	}
 	
-	// TODO: If we've reached here there is a good chance that the Widget is not visible, but is a tab part of a bound collection
-	// We need to now just search by the identifier
-		
-	if (TabIdentifier != NAME_None)
-	{
-		FName ActiveTabIdentifier = FName(FString::Printf(TEXT("%s_ActiveTab"), *TabIdentifier.ToString()));
-		const TSharedPtr<SDockTab> GlobalTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
-		if (GlobalTab.IsValid())
-		{
-			return GlobalTab;
-		}
-		const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(ActiveTabIdentifier);
-		if (GlobalActiveTab.IsValid())
-		{
-			return GlobalActiveTab;
-		}
-	
-		if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-		{
-			const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-			const TSharedPtr<SDockTab> LevelEditorTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
-			if (LevelEditorTab.IsValid())
-			{
-				return LevelEditorTab;
-			}
-			const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(ActiveTabIdentifier);
-			if (LevelEditorActiveTab.IsValid())
-			{
-				return LevelEditorActiveTab;
-			}
-		}
-	}
+	// TODO: So if we've reached here, we are probably not actually a visible tab. 
 	return nullptr;
 }
 // #SONARQUBE-ENABLE

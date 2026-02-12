@@ -52,6 +52,7 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
+	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectEndButton;
 	
