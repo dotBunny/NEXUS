@@ -20,7 +20,7 @@
 - `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
-- `NexusBlockout` now contain simplified collision primitives and UVs.
+- [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
 
 ### Fixed
 
