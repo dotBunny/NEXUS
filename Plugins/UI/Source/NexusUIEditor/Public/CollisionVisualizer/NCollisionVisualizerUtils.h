@@ -4,46 +4,46 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NCollisionQueryTestSettings.h"
+#include "NCollisionVisualizerSettings.h"
 
 
-class FNCollisionQueryTestUtils
+class FNCollisionVisualizerUtils
 {
 public:
 	
-	static void DoLineTraceSingle(const FNCollisionQueryTestSettings& Settings, 
+	static void DoLineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 	
-	static void DoLineTraceMulti(const FNCollisionQueryTestSettings& Settings, 
+	static void DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 	
-	static void DoLineTraceTest(const FNCollisionQueryTestSettings& Settings,
+	static void DoLineTraceTest(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 	
-	static void DoSweepSingle(const FNCollisionQueryTestSettings& Settings, 
+	static void DoSweepSingle(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 	
-	static void DoSweepMulti(const FNCollisionQueryTestSettings& Settings, 
+	static void DoSweepMulti(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 	
-	static void DoSweepTest(const FNCollisionQueryTestSettings& Settings, 
+	static void DoSweepTest(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 	
-	static void DoOverlapBlocking(const FNCollisionQueryTestSettings& Settings, 
+	static void DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 	
-	static void DoOverlapAny(const FNCollisionQueryTestSettings& Settings, 
+	static void DoOverlapAny(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 	
-	static void DoOverlapMulti(const FNCollisionQueryTestSettings& Settings, 
+	static void DoOverlapMulti(const FNCollisionVisualizerSettings& Settings, 
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 	
 private:
-	static EQueryMobilityType ToQueryMobilityType(const ECollisionQueryTestMobility Mobility)
+	static EQueryMobilityType ToQueryMobilityType(const ECollisionVisualizerMobility Mobility)
 	{
 		switch (Mobility)
 		{
-			using enum ECollisionQueryTestMobility;
+			using enum ECollisionVisualizerMobility;
 		case Any: 
 			return EQueryMobilityType::Any;
 		case Static: 

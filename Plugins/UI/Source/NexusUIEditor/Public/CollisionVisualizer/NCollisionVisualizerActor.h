@@ -5,28 +5,25 @@
 
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
-#include "NCollisionQueryTestActor.generated.h"
+#include "NCollisionVisualizerActor.generated.h"
 
-class UNCollisionQueryTestWidget;
-
-UCLASS(DisplayName = "NEXUS: Collision Query Test Actor", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
+UCLASS(DisplayName = "NEXUS: Collision Visualizer Actor", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
 	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, 
 		Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
-class NEXUSUIEDITOR_API ANCollisionQueryTestActor: public AActor
+class NEXUSUIEDITOR_API ANCollisionVisualizerActor: public AActor
 {
-	friend class UNCollisionQueryTestWidget;
-	friend class UNCollisionQueryTestComponent;
+	friend class UNCollisionVisualizerWidget;
 	
 	GENERATED_BODY()
 	
-	explicit ANCollisionQueryTestActor(const FObjectInitializer& ObjectInitializer);
+	explicit ANCollisionVisualizerActor(const FObjectInitializer& ObjectInitializer);
 	virtual bool ShouldTickIfViewportsOnly() const override { return bTickInEditor; }
 	virtual void Tick(float DeltaTime) override;
 	virtual void BeginDestroy() override;
 #if WITH_EDITOR
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override
 	{
-		OutReason = FText::FromString("This AActor is managed by the NCollisionQueryTest.");
+		OutReason = FText::FromString("This AActor is managed by the NCollisionVisualizer.");
 		return false;
 	}
 #endif
@@ -54,7 +51,7 @@ protected:
 	
 private:
 	UPROPERTY()
-	TObjectPtr<UNCollisionQueryTestWidget> Widget;
+	TObjectPtr<UNCollisionVisualizerWidget> Widget;
 	
 	bool bTickInEditor = false;
 	bool bTickInGame = false;

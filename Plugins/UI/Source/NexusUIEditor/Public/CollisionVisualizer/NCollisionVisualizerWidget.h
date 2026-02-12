@@ -5,11 +5,11 @@
 
 #include "CommonTextBlock.h"
 #include "EditorUtilityWidgetComponents.h"
-#include "NCollisionQueryTestActor.h"
+#include "NCollisionVisualizerActor.h"
 #include "NEditorUtilityWidget.h"
-#include "NCollisionQueryTestSettings.h"
+#include "NCollisionVisualizerSettings.h"
 #include "Components/NDetailsView.h"
-#include "NCollisionQueryTestWidget.generated.h"
+#include "NCollisionVisualizerWidget.generated.h"
 
 /**
  * Used to test collision queries at design time in the editor.
@@ -20,9 +20,9 @@
  * @ref https://github.com/StudioGobo/UECollisionQueryTools 
  */
 UCLASS(BlueprintType)
-class NEXUSUIEDITOR_API UNCollisionQueryTestWidget : public UNEditorUtilityWidget
+class NEXUSUIEDITOR_API UNCollisionVisualizerWidget : public UNEditorUtilityWidget
 {
-	friend class ANCollisionQueryTestActor;
+	friend class ANCollisionVisualizerActor;
 	
 	GENERATED_BODY()
 
@@ -34,9 +34,9 @@ public:
 	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState) override;
 	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
 
-	void OnWorldTick(const ANCollisionQueryTestActor* Actor);
-	void PushSettings(ANCollisionQueryTestActor* Actor) const;
-	void UpdateSettings(const ANCollisionQueryTestActor* Actor);
+	void OnWorldTick(const ANCollisionVisualizerActor* Actor);
+	void PushSettings(ANCollisionVisualizerActor* Actor) const;
+	void UpdateSettings(const ANCollisionVisualizerActor* Actor);
 	
 protected:
 	
@@ -65,10 +65,10 @@ protected:
 	TObjectPtr<UNDetailsView> ObjectDetails;
 	
 	UPROPERTY()
-	TObjectPtr<ANCollisionQueryTestActor> QueryActor;
+	TObjectPtr<ANCollisionVisualizerActor> QueryActor;
 	
 	UPROPERTY(EditAnywhere)
-	FNCollisionQueryTestSettings Settings;
+	FNCollisionVisualizerSettings Settings;
 
 private:
 	void CreateActor(UWorld* TargetWorld = nullptr);

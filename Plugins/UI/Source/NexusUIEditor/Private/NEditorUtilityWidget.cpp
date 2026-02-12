@@ -20,8 +20,11 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
 			if (Widget != nullptr)
 			{
-				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(Widget->TakeWidget());
-				Tab->FlashTab();
+				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(Widget->TakeWidget(), Widget->GetTabDisplayName());
+				if (Tab.IsValid())
+				{
+					Tab->FlashTab();
+				}
 			}
 			return System->GetWidget(Identifier);
 		}
@@ -114,7 +117,7 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTab(this->TakeWidget());
+	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(this->TakeWidget(), GetTabDisplayName());
 	if (Tab.IsValid())
 	{
 		Tab->SetLabel(GetTabDisplayName());

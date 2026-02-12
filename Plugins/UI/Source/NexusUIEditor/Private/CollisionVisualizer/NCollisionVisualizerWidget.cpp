@@ -1,39 +1,39 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "CollisionQueryTest/NCollisionQueryTestWidget.h"
+#include "CollisionVisualizer/NCollisionVisualizerWidget.h"
 
 #include "JsonObjectConverter.h"
 #include "NUIEditorMinimal.h"
-#include "CollisionQueryTest/NCollisionQueryTestUtils.h"
+#include "CollisionVisualizer/NCollisionVisualizerUtils.h"
 #include "Selection.h"
 #include "Macros/NFlagsMacros.h"
 
 
-void UNCollisionQueryTestWidget::NativeConstruct()
+void UNCollisionVisualizerWidget::NativeConstruct()
 {
-	StateIdentifier = NEXUS::UIEditor::CollisionQueryTest::Identifier;
+	StateIdentifier = NEXUS::UIEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
 	bHasPermanentState = true;
 	
 	Super::NativeConstruct();
 	
 	// Bindings
-	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionQueryTestWidget::SelectStartPoint);
-	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionQueryTestWidget::SelectEndPoint);
+	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionVisualizerWidget::SelectStartPoint);
+	SelectEndButton->OnClicked.AddDynamic(this, &UNCollisionVisualizerWidget::SelectEndPoint);
 	
 	ObjectDetails->SetObject(this);
 	ObjectDetails->bExpandedInDesigner = true;
-	ObjectDetails->GetOnPropertyValueChangedRef()->AddDynamic(this, &UNCollisionQueryTestWidget::OnPropertyValueChanged);
+	ObjectDetails->GetOnPropertyValueChangedRef()->AddDynamic(this, &UNCollisionVisualizerWidget::OnPropertyValueChanged);
 	
-	OnPIEStartedHandle = FWorldDelegates::OnPIEStarted.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEStarted);
-	OnPIEReadyHandle = FWorldDelegates::OnPIEReady.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEReady);
-	OnPIEEndedHandle = FWorldDelegates::OnPIEEnded.AddUObject(this, &UNCollisionQueryTestWidget::OnPIEEnded);
+	OnPIEStartedHandle = FWorldDelegates::OnPIEStarted.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEStarted);
+	OnPIEReadyHandle = FWorldDelegates::OnPIEReady.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEReady);
+	OnPIEEndedHandle = FWorldDelegates::OnPIEEnded.AddUObject(this, &UNCollisionVisualizerWidget::OnPIEEnded);
 	
 	CreateActor();
 }
 
-void UNCollisionQueryTestWidget::NativeDestruct()
+void UNCollisionVisualizerWidget::NativeDestruct()
 {
 	DestroyActor();
 	
@@ -44,11 +44,11 @@ void UNCollisionQueryTestWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNCollisionQueryTestWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
+void UNCollisionVisualizerWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
 {
 	if (InState.HasString("Settings"))
 	{
-		FNCollisionQueryTestSettings OutSettings;
+		FNCollisionVisualizerSettings OutSettings;
 		if (FJsonObjectConverter::JsonObjectStringToUStruct(
 			InState.GetString("Settings"), &OutSettings, 0, 0))
 		{
@@ -57,7 +57,7 @@ void UNCollisionQueryTestWidget::RestoreWidgetState(UObject* BlueprintWidget, FN
 	}
 }
 
-FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidget)
+FNWidgetState UNCollisionVisualizerWidget::GetWidgetState(UObject* BlueprintWidget)
 {
 	FNWidgetState State;
 	FString JsonOutput;
@@ -68,7 +68,7 @@ FNWidgetState UNCollisionQueryTestWidget::GetWidgetState(UObject* BlueprintWidge
 	return State;
 }
 
-void UNCollisionQueryTestWidget::OnPropertyValueChanged(FName Name)
+void UNCollisionVisualizerWidget::OnPropertyValueChanged(FName Name)
 {
 	if (DoesPropertyAffectActor(Name))
 	{
@@ -76,76 +76,76 @@ void UNCollisionQueryTestWidget::OnPropertyValueChanged(FName Name)
 	}
 }
 
-void UNCollisionQueryTestWidget::OnWorldTick(const ANCollisionQueryTestActor* Actor)
+void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* Actor)
 {
 	// Update Settings (for the one we know about)
 	UpdateSettings(Actor);
 	
 	// Draw Actor w/ Settings
-	using enum ECollisionQueryTestMethod;
+	using enum ECollisionVisualizerMethod;
 	if (Settings.Query.QueryMethod == LineTrace)
 	{
-		using enum ECollisionQueryTestPrefix;
+		using enum ECollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoLineTraceSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoLineTraceMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionQueryTestUtils::DoLineTraceTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoLineTraceTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Sweep)
 	{
-		using enum ECollisionQueryTestPrefix;
+		using enum ECollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionQueryTestUtils::DoSweepSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoSweepSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionQueryTestUtils::DoSweepMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoSweepMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionQueryTestUtils::DoSweepTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoSweepTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Overlap)
 	{
-		using enum ECollisionQueryTestOverlapBlocking;
+		using enum ECollisionVisualizerOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
-			FNCollisionQueryTestUtils::DoOverlapBlocking(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoOverlapBlocking(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
-			FNCollisionQueryTestUtils::DoOverlapAny(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoOverlapAny(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionQueryTestUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
+			FNCollisionVisualizerUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 	}
 }
 
-void UNCollisionQueryTestWidget::PushSettings(ANCollisionQueryTestActor* Actor) const
+void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor) const
 {
 	if (Actor != nullptr)
 	{
@@ -155,13 +155,13 @@ void UNCollisionQueryTestWidget::PushSettings(ANCollisionQueryTestActor* Actor) 
 		
 		Actor->SetActorTickInterval(Settings.Drawing.DrawTimer);
 		
-		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::EditorOnly));
-		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::PlayInEditor));
-		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionQueryTestDrawMode::SimulateInEditor));
+		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::EditorOnly));
+		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::PlayInEditor));
+		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::SimulateInEditor));
 	}
 }
 
-void UNCollisionQueryTestWidget::UpdateSettings(const ANCollisionQueryTestActor* Actor)
+void UNCollisionVisualizerWidget::UpdateSettings(const ANCollisionVisualizerActor* Actor)
 {
 	// Update Settings (for the one we know about)
 	if (Actor == QueryActor)
@@ -172,23 +172,23 @@ void UNCollisionQueryTestWidget::UpdateSettings(const ANCollisionQueryTestActor*
 	}
 }
 
-void UNCollisionQueryTestWidget::OnPIEStarted(UGameInstance* GameInstance)
+void UNCollisionVisualizerWidget::OnPIEStarted(UGameInstance* GameInstance)
 {
 	DestroyActor();
 }
 
-void UNCollisionQueryTestWidget::OnPIEReady(UGameInstance* GameInstance)
+void UNCollisionVisualizerWidget::OnPIEReady(UGameInstance* GameInstance)
 {
 	CreateActor();
 }
 
-void UNCollisionQueryTestWidget::OnPIEEnded(UGameInstance* GameInstance)
+void UNCollisionVisualizerWidget::OnPIEEnded(UGameInstance* GameInstance)
 {
 	DestroyActor();
 	CreateActor();
 }
 
-void UNCollisionQueryTestWidget::SelectStartPoint()
+void UNCollisionVisualizerWidget::SelectStartPoint()
 {
 	if (QueryActor != nullptr)
 	{
@@ -205,7 +205,7 @@ void UNCollisionQueryTestWidget::SelectStartPoint()
 	}
 }
 
-void UNCollisionQueryTestWidget::SelectEndPoint()
+void UNCollisionVisualizerWidget::SelectEndPoint()
 {
 	if (QueryActor != nullptr)
 	{
@@ -222,7 +222,7 @@ void UNCollisionQueryTestWidget::SelectEndPoint()
 	}
 }
 
-void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
+void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 {
 	if (QueryActor == nullptr)
 	{
@@ -233,11 +233,11 @@ void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
 		
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.bDeferConstruction = false;
-		SpawnParams.InitialActorLabel = TEXT("NCollisionQueryTest");
-		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionQueryTestActor::StaticClass(), TEXT("NCollisionQueryTest"));
+		SpawnParams.InitialActorLabel = TEXT("NCollisionVisualizer");
+		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionVisualizerActor::StaticClass(), TEXT("NCollisionVisualizer"));
 		
 		
-		QueryActor = World->SpawnActor<ANCollisionQueryTestActor>(
+		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
 		QueryActor->SetFlags(RF_Transient);
 		QueryActor->AddToRoot();
@@ -253,7 +253,7 @@ void UNCollisionQueryTestWidget::CreateActor(UWorld* TargetWorld)
 	}
 }
 
-void UNCollisionQueryTestWidget::DestroyActor()
+void UNCollisionVisualizerWidget::DestroyActor()
 {
 	if (QueryActor != nullptr && QueryActor->IsValidLowLevel())
 	{
@@ -272,7 +272,7 @@ void UNCollisionQueryTestWidget::DestroyActor()
 	QueryActor = nullptr;
 }
 
-bool UNCollisionQueryTestWidget::DoesPropertyAffectActor(FName Name)
+bool UNCollisionVisualizerWidget::DoesPropertyAffectActor(FName Name)
 {
 	return	Name == TEXT("X") || Name == TEXT("Y") || Name == TEXT("Z") ||
 			Name == TEXT("Pitch") || Name == TEXT("Yaw") || Name == TEXT("Roll") || 

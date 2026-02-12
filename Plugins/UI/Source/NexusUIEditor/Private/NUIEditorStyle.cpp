@@ -19,9 +19,9 @@ TSharedRef<FSlateStyleSet> FNUIEditorStyle::Create()
 	Style.Set("Command.Reset", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Reset"), Icon16x16));
 	Style.Set("Command.SelectActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_SelectActor"), Icon16x16));
 
-	// NCollisionQueryTestActor / Window
-	Style.Set("ClassIcon.NCollisionQueryTestActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionQueryTestActor"), Icon16x16));
-	Style.Set("ClassThumbnail.NCollisionQueryTestActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionQueryTestActor"), Icon128x128));
+	// NCollisionVisualizerActor / Window
+	Style.Set("ClassIcon.NCollisionVisualizerActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionVisualizerActor"), Icon16x16));
+	Style.Set("ClassThumbnail.NCollisionVisualizerActor",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionVisualizerActor"), Icon128x128));
 	
 	return StyleRef;
 }

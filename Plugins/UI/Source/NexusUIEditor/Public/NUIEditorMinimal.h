@@ -3,11 +3,11 @@
 
 #pragma once
 
-namespace NEXUS::UIEditor::CollisionQueryTest
+namespace NEXUS::UIEditor::CollisionVisualizer
 {
-	inline FString Path = TEXT("/NexusUI/EditorResources/EUW_NCollisionQueryTest.EUW_NCollisionQueryTest");
-	inline FName Identifier = TEXT("EUW_NCollisionQueryTest");
-	inline FName Icon = TEXT("ClassIcon.NCollisionQueryTestActor");
+	inline FString Path = TEXT("/NexusUI/EditorResources/EUW_NCollisionVisualizer.EUW_NCollisionVisualizer");
+	inline FName Identifier = TEXT("EUW_NCollisionVisualizer");
+	inline FName Icon = TEXT("ClassIcon.NCollisionVisualizerActor");
 }
 
 NEXUSUIEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusUIEditor, Log, All);

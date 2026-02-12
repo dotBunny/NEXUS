@@ -4,10 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NCollisionQueryTestSettings.generated.h"
+#include "NCollisionVisualizerSettings.generated.h"
 
 UENUM()
-enum class ECollisionQueryTestMethod : uint8
+enum class ECollisionVisualizerMethod : uint8
 {
 	LineTrace,
 	Sweep,
@@ -15,7 +15,7 @@ enum class ECollisionQueryTestMethod : uint8
 };
 
 UENUM()
-enum class ECollisionQueryTestPrefix : uint8
+enum class ECollisionVisualizerPrefix : uint8
 {
 	Single,
 	Multi,
@@ -23,7 +23,7 @@ enum class ECollisionQueryTestPrefix : uint8
 };
 
 UENUM()
-enum class ECollisionQueryTestOverlapBlocking : uint8
+enum class ECollisionVisualizerOverlapBlocking : uint8
 {
 	Blocking,
 	Any,
@@ -31,7 +31,7 @@ enum class ECollisionQueryTestOverlapBlocking : uint8
 };
 
 UENUM()
-enum class ECollisionQueryTestBy : uint8
+enum class ECollisionVisualizerBy : uint8
 {
 	Channel,
 	ObjectType,
@@ -39,7 +39,7 @@ enum class ECollisionQueryTestBy : uint8
 };
 
 UENUM()
-enum class ECollisionQueryTestMobility : uint8
+enum class ECollisionVisualizerMobility : uint8
 {
 	Any,
 	Static,
@@ -48,7 +48,7 @@ enum class ECollisionQueryTestMobility : uint8
 
 
 UENUM()
-enum class ECollisionQueryTestShape : uint8
+enum class ECollisionVisualizerShape : uint8
 {
 	Box,
 	Capsule,
@@ -56,17 +56,17 @@ enum class ECollisionQueryTestShape : uint8
 };
 
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
-enum class ECollisionQueryTestDrawMode : uint8
+enum class ECollisionVisualizerDrawMode : uint8
 {
 	None = 0 UMETA(Hidden),
 	EditorOnly = 1 << 0 UMETA(DisplayName = "Editor"),
 	PlayInEditor =  1 << 1 UMETA(DisplayName = "PIE"),
 	SimulateInEditor =  1 << 2 UMETA(DisplayName = "SIE"),
 };
-ENUM_CLASS_FLAGS(ECollisionQueryTestDrawMode)
+ENUM_CLASS_FLAGS(ECollisionVisualizerDrawMode)
 
 USTRUCT()
-struct FNCollisionQueryTestPoints
+struct FNCollisionVisualizerPoints
 {
 	GENERATED_BODY()
 	
@@ -81,59 +81,59 @@ struct FNCollisionQueryTestPoints
 };
 
 USTRUCT()
-struct FNCollisionQueryTestQuery
+struct FNCollisionVisualizerQuery
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, DisplayName="Method")
-	ECollisionQueryTestMethod QueryMethod = ECollisionQueryTestMethod::LineTrace;
+	ECollisionVisualizerMethod QueryMethod = ECollisionVisualizerMethod::LineTrace;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Type", 
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::Overlap", EditConditionHides))
-	ECollisionQueryTestPrefix QueryPrefix = ECollisionQueryTestPrefix::Single;
+		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::Overlap", EditConditionHides))
+	ECollisionVisualizerPrefix QueryPrefix = ECollisionVisualizerPrefix::Single;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Blocking", 
-		meta=(EditCondition="QueryMethod==ECollisionQueryTestMethod::Overlap", EditConditionHides))
-	ECollisionQueryTestOverlapBlocking QueryOverlapBlocking = ECollisionQueryTestOverlapBlocking::Any;
+		meta=(EditCondition="QueryMethod==ECollisionVisualizerMethod::Overlap", EditConditionHides))
+	ECollisionVisualizerOverlapBlocking QueryOverlapBlocking = ECollisionVisualizerOverlapBlocking::Any;
 	
 	UPROPERTY(EditAnywhere, DisplayName="By")
-	ECollisionQueryTestBy QueryBy = ECollisionQueryTestBy::Channel;
+	ECollisionVisualizerBy QueryBy = ECollisionVisualizerBy::Channel;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Channel",
-		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Channel", EditConditionHides))
+		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Channel", EditConditionHides))
 	TEnumAsByte<ECollisionChannel> Channel = ECC_Pawn;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Object Type",
-		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::ObjectType", EditConditionHides))
+		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::ObjectType", EditConditionHides))
 	TEnumAsByte<EObjectTypeQuery> ObjectType = EObjectTypeQuery::ObjectTypeQuery1;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Collision Profile",
-		meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Profile", EditConditionHides, 
+		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Profile", EditConditionHides, 
 			GetOptions="GetCollisionProfileNames"))
 	FName CollisionProfileName = TEXT("BlockAll");
 	
 	UPROPERTY(EditAnywhere, DisplayName="Shape",
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace", EditConditionHides))
-	ECollisionQueryTestShape QueryShape = ECollisionQueryTestShape::Capsule;
+		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace", EditConditionHides))
+	ECollisionVisualizerShape QueryShape = ECollisionVisualizerShape::Capsule;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Radius", 
-	meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Capsule", EditConditionHides))
+	meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleRadius = 40.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Half Height",
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Capsule", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleHalfHeight = 80.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Half Extent", 
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Box", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Box", EditConditionHides))
 	FVector ShapeBoxHalfExtents = FVector(25,25,25);
 	
 	UPROPERTY(EditAnywhere, DisplayName="Radius", 
-		meta=(EditCondition="QueryMethod!=ECollisionQueryTestMethod::LineTrace&&QueryShape==ECollisionQueryTestShape::Sphere", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Sphere", EditConditionHides))
 	float SphereRadius = 42.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Collision Responses",
-	meta=(EditCondition="QueryBy==ECollisionQueryTestBy::Channel", EditConditionHides))
+	meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Channel", EditConditionHides))
 	FCollisionResponseContainer CollisionResponses;
 	
 	FCollisionResponseParams GetCollisionResponseParams() const
@@ -147,7 +147,7 @@ struct FNCollisionQueryTestQuery
 	{
 		switch (QueryShape)
 		{
-			using enum ECollisionQueryTestShape;
+			using enum ECollisionVisualizerShape;
 		case Box:
 			return FCollisionShape::MakeBox(ShapeBoxHalfExtents);
 		case Capsule:
@@ -176,7 +176,7 @@ struct FNCollisionQueryTestQuery
 };
 
 USTRUCT()
-struct FNCollisionQueryTestOptions
+struct FNCollisionVisualizerOptions
 {
 	GENERATED_BODY()
 	
@@ -196,7 +196,7 @@ struct FNCollisionQueryTestOptions
 	bool bSkipNarrowPhase = false;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
-	ECollisionQueryTestMobility QueryMobility = ECollisionQueryTestMobility::Any;
+	ECollisionVisualizerMobility QueryMobility = ECollisionVisualizerMobility::Any;
 	
 	
 	
@@ -213,14 +213,14 @@ struct FNCollisionQueryTestOptions
 };
 
 USTRUCT()
-struct FNCollisionQueryTestDrawing
+struct FNCollisionVisualizerDrawing
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusUIEditor.ECollisionQueryTestDrawMode"))
-	uint8 DrawMode =	static_cast<uint8>(ECollisionQueryTestDrawMode::EditorOnly) | 
-						static_cast<uint8>(ECollisionQueryTestDrawMode::PlayInEditor) | 
-						static_cast<uint8>(ECollisionQueryTestDrawMode::SimulateInEditor);
+	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusUIEditor.ECollisionVisualizerDrawMode"))
+	uint8 DrawMode =	static_cast<uint8>(ECollisionVisualizerDrawMode::EditorOnly) | 
+						static_cast<uint8>(ECollisionVisualizerDrawMode::PlayInEditor) | 
+						static_cast<uint8>(ECollisionVisualizerDrawMode::SimulateInEditor);
 	
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;
@@ -237,19 +237,19 @@ struct FNCollisionQueryTestDrawing
 
 
 USTRUCT()
-struct FNCollisionQueryTestSettings
+struct FNCollisionVisualizerSettings
 {
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
-	FNCollisionQueryTestPoints Points;
+	FNCollisionVisualizerPoints Points;
 	
 	UPROPERTY(EditAnywhere)
-	FNCollisionQueryTestQuery Query;
+	FNCollisionVisualizerQuery Query;
 	
 	UPROPERTY(EditAnywhere)
-	FNCollisionQueryTestOptions Options;
+	FNCollisionVisualizerOptions Options;
 	
 	UPROPERTY(EditAnywhere)
-	FNCollisionQueryTestDrawing Drawing;
+	FNCollisionVisualizerDrawing Drawing;
 };

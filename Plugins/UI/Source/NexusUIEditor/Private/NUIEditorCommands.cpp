@@ -12,11 +12,11 @@ void FNUIEditorCommands::AddMenuEntries()
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Debug"))
 	{
 		FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
-			NEXUS::UIEditor::CollisionQueryTest::Identifier,
-			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionQueryTest_DisplayName", "Collision Query"),
-			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionQueryTest_Tooltip", "Opens the NEXUS: Collision Query Test window."),
-			FSlateIcon(FNUIEditorStyle::GetStyleSetName(), NEXUS::UIEditor::CollisionQueryTest::Icon),
-			FExecuteAction::CreateStatic(&FNUIEditorCommands::CreateCollisionQueryWindow));
+			NEXUS::UIEditor::CollisionVisualizer::Identifier,
+			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionVisualizer_DisplayName", "Collision Visualizer"),
+			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionVisualizer_Tooltip", "Opens the NEXUS: Collision Visualizer window."),
+			FSlateIcon(FNUIEditorStyle::GetStyleSetName(), NEXUS::UIEditor::CollisionVisualizer::Icon),
+			FExecuteAction::CreateStatic(&FNUIEditorCommands::CreateCollisionVisualizerWindow));
 		Entry.InsertPosition = FToolMenuInsert(NAME_None, EToolMenuInsertType::First);
 		Menu->AddMenuEntry("Debug", Entry);
 	}
@@ -28,21 +28,21 @@ void FNUIEditorCommands::RemoveMenuEntries()
 	if (Menu)
 	{
 		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug", 
-			NEXUS::UIEditor::CollisionQueryTest::Identifier);
+			NEXUS::UIEditor::CollisionVisualizer::Identifier);
 	}
 }
 
 
-void FNUIEditorCommands::CreateCollisionQueryWindow()
+void FNUIEditorCommands::CreateCollisionVisualizerWindow()
 {
 	UNEditorUtilityWidget::SpawnTab(
-		NEXUS::UIEditor::CollisionQueryTest::Path, 
-		NEXUS::UIEditor::CollisionQueryTest::Identifier);
+		NEXUS::UIEditor::CollisionVisualizer::Path, 
+		NEXUS::UIEditor::CollisionVisualizer::Identifier);
 }
 
-bool FNUIEditorCommands::HasCollisionQueryWindow()
+bool FNUIEditorCommands::HasCollisionVisualizerWindow()
 {
 	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
 	if (System == nullptr) return false;
-	return System->HasWidget(NEXUS::UIEditor::CollisionQueryTest::Identifier);
+	return System->HasWidget(NEXUS::UIEditor::CollisionVisualizer::Identifier);
 }

@@ -9,6 +9,6 @@ public:
 	static void AddMenuEntries();
 	static void RemoveMenuEntries();
 	
-	static void CreateCollisionQueryWindow();
-	static bool HasCollisionQueryWindow();
+	static void CreateCollisionVisualizerWindow();
+	static bool HasCollisionVisualizerWindow();
 };
