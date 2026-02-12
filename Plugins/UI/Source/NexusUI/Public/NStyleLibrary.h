@@ -9,7 +9,7 @@
 
 #include "NStyleLibrary.generated.h"
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Style Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Style Library")
 class UNStyleLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

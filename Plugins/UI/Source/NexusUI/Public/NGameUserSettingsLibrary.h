@@ -14,7 +14,7 @@ class UNComboBoxString;
  * A collection of functionality used to interact with a games' UGameUserSettings helping build UI components around them.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/">UNGameUserSettingsLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Game User Settings Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Game User Settings Library")
 class UNGameUserSettingsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
