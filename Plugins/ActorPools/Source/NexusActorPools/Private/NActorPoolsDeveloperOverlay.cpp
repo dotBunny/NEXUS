@@ -14,18 +14,11 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
 	
-	// TODO: Binding of existing work when adding to existing playmode
-	UWorld* PlayWorld = GEngine->GetCurrentPlayWorld();
-	if (PlayWorld != nullptr)
+	// Look at all worlds and add them to bindings
+	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
+	for (const auto& Context : WorldContexts)
 	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("Found PlayWorld %s"), *PlayWorld->GetName());
-		Bind(PlayWorld);
-	}
-
-
-	if (GetWorld() != PlayWorld)
-	{
-		Bind(GetWorld());	
+		Bind(Context.World());
 	}
 	
 	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();

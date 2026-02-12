@@ -13,8 +13,12 @@ void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown);
 	
-	// TODO: Binding of existing work when adding to existing playmode
-	Bind(GetWorld());
+	// Look at all worlds and add them to bindings
+	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
+	for (const auto& Context : WorldContexts)
+	{
+		Bind(Context.World());
+	}
 
 	Super::NativeConstruct();
 }
