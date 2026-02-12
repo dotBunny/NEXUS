@@ -35,6 +35,11 @@ public:
 	UNEditorUtilityWidget* GetWidget(const FName& Identifier);
 	bool HasWidget(const FName& Identifier);
 
+	
+	FName GetTabIdentifier(FName WidgetIdentifier);
+	void SetTabIdentifier(FName WidgetIdentifier, FName TabIdentifier);
+	void RemoveTabIdentifier(FName WidgetIdentifier);
+	
 protected:
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;

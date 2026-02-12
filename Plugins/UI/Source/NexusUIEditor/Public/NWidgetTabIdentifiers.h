@@ -12,7 +12,8 @@ struct FNWidgetTabIdentifiers
 	GENERATED_BODY()
 	
 	UPROPERTY()
-	TArray<FName> Identifiers;
+	TArray<FName> WidgetIdentifiers;
+	
 	UPROPERTY()
 	TArray<FName> TabIdentifier;
 };

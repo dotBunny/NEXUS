@@ -11,6 +11,7 @@
 class NEXUSUIEDITOR_API FNEditorSlateUtils
 {
 public:
-	TSharedPtr<SDockTab> FindDocTabByIdentifier(const FName TabIdentifier);
+	static TSharedPtr<SDockTab> FindDocTab(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel, const FName TabIdentifier);
+	static TSharedPtr<SDockTab> FindDocTabByIdentifier(const FName TabIdentifier);
 };
 

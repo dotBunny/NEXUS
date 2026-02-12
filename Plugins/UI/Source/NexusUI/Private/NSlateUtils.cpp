@@ -1,4 +1,7 @@
-﻿#include "NSlateUtils.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NSlateUtils.h"
 
 const FName FNSlateUtils::SDockingTabStackName = FName("SDockingTabStack");
 const FName FNSlateUtils::SDockTabName = FName("SDockTab");
@@ -52,7 +55,6 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TS
 // #SONARQUBE-DISABLE-CPP_S134
 TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Finding Tab '%s' w/ base of %s"), *TargetLabel.ToString(), *BaseWidget->GetTypeAsString());
 	TSharedPtr<SWidget> Widget = BaseWidget;
 	while (Widget.IsValid())
 	{
@@ -72,17 +74,14 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 					if (FoundWidgets[j].IsValid())
 					{
 						TSharedPtr<SDockTab> Tab = StaticCastSharedPtr<SDockTab>(FoundWidgets[j]);
-						UE_LOG(LogTemp, Warning, TEXT("Found Tab '%s | %s | %s'"), *Tab->GetTabLabel().ToString(), *Tab->GetLayoutIdentifier().ToString(), *TargetLabel.ToString());
 						if (Tab->GetTabLabel().EqualTo(TargetLabel))
 						{
-							UE_LOG(LogTemp, Warning, TEXT("MATCHED!"))
 							return StaticCastSharedPtr<SDockTab>(FoundWidgets[j]);
 						}
 					}
 				}
 			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("No match found in dock stack"));
 			// Not going to go up at this point cause we already hit the container above me
 			return nullptr;
 		}
@@ -94,11 +93,10 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 		}
 		
 		// Goes up
-		UE_LOG(LogTemp, Warning, TEXT("Going up (%s)..."), *Widget->GetTypeAsString());
 		Widget = Widget->GetParentWidget();
 	}
 	
-	// TODO: So if we've reached here, we are probably not actually a visible tab. 
+	// So if we've reached here, we are probably not actually a visible tab.
 	return nullptr;
 }
 // #SONARQUBE-ENABLE

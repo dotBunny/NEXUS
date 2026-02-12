@@ -7,7 +7,6 @@
 #include "EditorUtilityWidget.h"
 #include "NEditorUtilityWidget.generated.h"
 
-
 /**
  * An extension on the UEditorUtilityWidget providing additional functionality around customization and appearance.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
@@ -38,6 +37,7 @@ public:
 	{
 		return CachedTabIdentifier;
 	};
+	
 protected:
 	
 	virtual void NativeConstruct() override;

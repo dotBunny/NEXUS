@@ -6,22 +6,23 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
+#include "NEditorSlateUtils.h"
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "NEditorUtils.h"
-#include "NSlateUtils.h"
 
 UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, FName Identifier)
 {
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+	
 	if (Identifier != NAME_None)
 	{
-		UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 		if (System != nullptr && System->HasWidget(Identifier))
 		{
 			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
 			if (Widget != nullptr)
 			{
-				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
-					Widget->TakeWidget(), Widget->GetTabDisplayName());
+				const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
+					Widget->TakeWidget(), Widget->GetTabDisplayName(), Widget->GetTabIdentifier());
 				if (Tab.IsValid())
 				{
 					Tab->FlashTab();
@@ -43,6 +44,7 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 		if (Widget)
 		{
 			Widget->CachedTabIdentifier = TabIdentifier;
+			System->SetTabIdentifier(Widget->UniqueIdentifier, TabIdentifier);
 		}
 		return SpawnedWidget;
 	}
@@ -71,6 +73,12 @@ void UNEditorUtilityWidget::NativeConstruct()
 	if (System != nullptr)
 	{
 		System->RegisterWidget(this);
+
+		const FName TabIdentifier = System->GetTabIdentifier(UniqueIdentifier);
+		if (TabIdentifier != NAME_None)
+		{
+			CachedTabIdentifier = TabIdentifier;
+		}
 	}
 	
 	// If we have icon data set we should create the icon
@@ -108,8 +116,8 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
-		this->TakeWidget(), GetTabDisplayName());
+	const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
+		this->TakeWidget(), GetTabDisplayName(), GetTabIdentifier());
 	
 	if (Tab.IsValid())
 	{
@@ -139,8 +147,17 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
-	if (IsPersistent() && !IsEngineExitRequested() && !bHasPermanentState)
+	if (IsPersistent() && !IsEngineExitRequested())
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetUniqueIdentifier());
+		UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+		if (System != nullptr)
+		{
+			System->RemoveTabIdentifier(GetUniqueIdentifier());
+			if (!bHasPermanentState)
+			{
+				GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetUniqueIdentifier());
+			}	
+		}
+		
 	}
 }
