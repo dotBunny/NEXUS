@@ -155,7 +155,7 @@ void UNCollisionVisualizerWidget::UpdateSettings(const ANCollisionVisualizerActo
 			bFoundChanged = true;
 		}
 
-		const FVector ActorEnd = Actor->GetEndPosition();
+		const FVector ActorEnd = Actor->GetRelativeEndPosition();
 		if (Settings.Points.EndPoint != ActorEnd)
 		{
 			Settings.Points.EndPoint = ActorEnd;
