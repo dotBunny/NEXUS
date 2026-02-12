@@ -21,7 +21,7 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverl
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	void Bind(UWorld* World);
-	void Unbind(const UWorld* World, bool bClearItems = true);
+	void Unbind(const UWorld* World);
 
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

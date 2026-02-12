@@ -21,7 +21,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 	virtual void NativeDestruct() override;
 	
 	void Bind(UWorld* World);
-	void Unbind(const UWorld* World, bool bClearItems = true);
+	void Unbind(const UWorld* World);
 
 protected:	
 	

@@ -28,10 +28,10 @@ void UNDynamicRefsDeveloperOverlay::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	const UWorld* World = GetWorld();
-	if (World != nullptr)
+	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
+	for (const auto& Context : WorldContexts)
 	{
-		Unbind(World);
+		Unbind(Context.World());
 	}
 	
 	Super::NativeDestruct();
@@ -102,8 +102,10 @@ void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
 
 
 
-void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World, bool bClearItems)
+void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (OnAddedDelegates.Contains(World) && System != nullptr)
 	{

@@ -35,10 +35,10 @@ void UNActorPoolsDeveloperOverlay::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	const UWorld* World = GetWorld();
-	if (World != nullptr)
+	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
+	for (const auto& Context : WorldContexts)
 	{
-		Unbind(World);
+		Unbind(Context.World());
 	}
 	
 	Super::NativeDestruct();
@@ -97,8 +97,10 @@ void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 	}));
 }
 
-void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World, bool bClearItems)
+void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
 	{
