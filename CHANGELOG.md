@@ -10,13 +10,14 @@
 - `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
 - `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
 - `FNOrientedBoxPicker` for generating points in a box with rotation.
+- `FNEditorSlateUtils` and `FNSlateUtils`.
+- [#117](https://github.com/dotBunny/NEXUS/issues/117)`Collision Visualizer` added to `Tools -> Debug`.
 - [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
-- WIP Collsion Test EUW
 
 ### Changed
 
+- Menu entries were streamlined and repositioned to better fit into the UE ecosystem.
 - `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
-- `FNSlateUtils::FindSDocTab()` a robust search mechanism to find a tab for a widget.
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
 - `NexusBlockout` now contain simplified collision primitives.

@@ -14,7 +14,19 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
 	
-	Bind(GetWorld());
+	// TODO: Binding of existing work when adding to existing playmode
+	UWorld* PlayWorld = GEngine->GetCurrentPlayWorld();
+	if (PlayWorld != nullptr)
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Found PlayWorld %s"), *PlayWorld->GetName());
+		Bind(PlayWorld);
+	}
+
+
+	if (GetWorld() != PlayWorld)
+	{
+		Bind(GetWorld());	
+	}
 	
 	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
 	CachedUpdateRate = Settings->DeveloperOverlayUpdateRate;
@@ -63,11 +75,19 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 
 void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 {
+	if (World == nullptr) return;
+	
+	UE_LOG(LogNexusActorPools, Warning, TEXT("Binding actor pools developer overlay to world %s"), *World->GetName());
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-	if (System == nullptr) return; // System-less world
+	if (System == nullptr)
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("No Subsystem"));
+		return; // System-less world
+	}
 	
 	// Build out known list
 	TArray<FNActorPool*> KnownPools = System->GetAllPools();
+	UE_LOG(LogNexusActorPools, Warning, TEXT("Pool Count %i"), KnownPools.Num());
 	for (const auto Pool : KnownPools)
 	{
 		CreateListItem(Pool);
