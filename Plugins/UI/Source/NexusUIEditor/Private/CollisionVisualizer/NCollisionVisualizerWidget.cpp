@@ -4,6 +4,7 @@
 #include "CollisionVisualizer/NCollisionVisualizerWidget.h"
 
 #include "JsonObjectConverter.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 #include "NUIEditorMinimal.h"
 #include "CollisionVisualizer/NCollisionVisualizerUtils.h"
 #include "Selection.h"
@@ -14,9 +15,10 @@ void UNCollisionVisualizerWidget::NativeConstruct()
 {
 	StateIdentifier = NEXUS::UIEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
-	bHasPermanentState = true;
 	
 	Super::NativeConstruct();
+	
+	RestoreState();
 	
 	// Bindings
 	SelectStartButton->OnClicked.AddDynamic(this,&UNCollisionVisualizerWidget::SelectStartPoint);
@@ -34,7 +36,7 @@ void UNCollisionVisualizerWidget::NativeConstruct()
 }
 
 void UNCollisionVisualizerWidget::NativeDestruct()
-{
+{	
 	DestroyActor();
 	
 	FWorldDelegates::OnPIEStarted.Remove(OnPIEStartedHandle);
@@ -44,29 +46,6 @@ void UNCollisionVisualizerWidget::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNCollisionVisualizerWidget::RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState)
-{
-	if (InState.HasString("Settings"))
-	{
-		FNCollisionVisualizerSettings OutSettings;
-		if (FJsonObjectConverter::JsonObjectStringToUStruct(
-			InState.GetString("Settings"), &OutSettings, 0, 0))
-		{
-			Settings = OutSettings;
-		}
-	}
-}
-
-FNWidgetState UNCollisionVisualizerWidget::GetWidgetState(UObject* BlueprintWidget)
-{
-	FNWidgetState State;
-	FString JsonOutput;
-	if (FJsonObjectConverter::UStructToJsonObjectString(Settings, JsonOutput, 0, 0, 0, nullptr, false))
-	{
-		State.AddString(TEXT("Settings"), JsonOutput);	
-	}
-	return State;
-}
 
 void UNCollisionVisualizerWidget::OnPropertyValueChanged(FName Name)
 {
@@ -74,6 +53,7 @@ void UNCollisionVisualizerWidget::OnPropertyValueChanged(FName Name)
 	{
 		PushSettings(QueryActor);
 	}
+	SaveState();
 }
 
 void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* Actor)
@@ -164,11 +144,35 @@ void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor
 void UNCollisionVisualizerWidget::UpdateSettings(const ANCollisionVisualizerActor* Actor)
 {
 	// Update Settings (for the one we know about)
+	
+	bool bFoundChanged = false;
 	if (Actor == QueryActor)
 	{
-		Settings.Points.StartPoint = Actor->GetStartPosition();
-		Settings.Points.EndPoint = Actor->GetRelativeEndPosition();
-		Settings.Points.Rotation = Actor->GetRotation().Rotator();
+		const FVector ActorStart = Actor->GetStartPosition();
+		if (Settings.Points.StartPoint != ActorStart)
+		{
+			Settings.Points.StartPoint = ActorStart;
+			bFoundChanged = true;
+		}
+
+		const FVector ActorEnd = Actor->GetEndPosition();
+		if (Settings.Points.EndPoint != ActorEnd)
+		{
+			Settings.Points.EndPoint = ActorEnd;
+			bFoundChanged = true;
+		}
+		
+		const FRotator ActorRotation = Actor->GetRotation().Rotator();
+		if (Settings.Points.Rotation != ActorRotation)
+		{
+			Settings.Points.Rotation = ActorRotation;
+			bFoundChanged = true;
+		}
+	}
+
+	if (bFoundChanged)
+	{
+		SaveState();
 	}
 }
 
@@ -219,6 +223,35 @@ void UNCollisionVisualizerWidget::SelectEndPoint()
 		
 		GEditor->SelectComponent(QueryActor->GetEndComponent(), true, true, true);
 		GEditor->SelectActor(QueryActor, true, true, true, true);
+	}
+}
+
+void UNCollisionVisualizerWidget::RestoreState()
+{
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+	if (System != nullptr && System->HasWidgetState(GetStateIdentifier()))
+	{
+		FNCollisionVisualizerSettings OutSettings;
+		if (FJsonObjectConverter::JsonObjectStringToUStruct(
+			System->GetWidgetState(GetStateIdentifier()).GetString("Settings"), &OutSettings, 0, 0))
+		{
+			Settings = OutSettings;
+		}
+	}
+}
+
+void UNCollisionVisualizerWidget::SaveState() const
+{
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+	if (System)
+	{
+		FString JsonOutput;
+		if (FJsonObjectConverter::UStructToJsonObjectString(Settings, JsonOutput, 0, 0, 0, nullptr, false))
+		{
+			FNWidgetState State;
+			State.AddString(TEXT("Settings"), JsonOutput);	
+			System->AddWidgetState(GetStateIdentifier(), State);
+		}
 	}
 }
 

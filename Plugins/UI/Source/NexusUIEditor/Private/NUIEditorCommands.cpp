@@ -4,7 +4,7 @@
 #include "NUIEditorCommands.h"
 
 #include "NEditorUtilityWidget.h"
-#include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 #include "NUIEditorStyle.h"
 
 void FNUIEditorCommands::AddMenuEntries()
@@ -42,7 +42,7 @@ void FNUIEditorCommands::CreateCollisionVisualizerWindow()
 
 bool FNUIEditorCommands::HasCollisionVisualizerWindow()
 {
-	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System == nullptr) return false;
 	return System->HasWidget(NEXUS::UIEditor::CollisionVisualizer::Identifier);
 }

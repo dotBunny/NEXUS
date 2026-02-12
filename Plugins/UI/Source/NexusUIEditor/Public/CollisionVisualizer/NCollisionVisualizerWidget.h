@@ -31,9 +31,6 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	
-	virtual void RestoreWidgetState(UObject* BlueprintWidget, FName Identifier, FNWidgetState& InState) override;
-	virtual FNWidgetState GetWidgetState(UObject* BlueprintWidget) override;
-
 	void OnWorldTick(const ANCollisionVisualizerActor* Actor);
 	void PushSettings(ANCollisionVisualizerActor* Actor) const;
 	void UpdateSettings(const ANCollisionVisualizerActor* Actor);
@@ -71,6 +68,9 @@ protected:
 	FNCollisionVisualizerSettings Settings;
 
 private:
+	void RestoreState();
+	void SaveState() const;
+	
 	void CreateActor(UWorld* TargetWorld = nullptr);
 	void DestroyActor();
 

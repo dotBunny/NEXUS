@@ -7,7 +7,7 @@
 #include "NDynamicRefsEditorStyle.h"
 #include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
-#include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 
 void FNDynamicRefsEditorToolMenu::Register()
 {
@@ -37,7 +37,7 @@ void FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow()
 
 bool FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow()
 {
-	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System == nullptr) return false;
 	return System->HasWidget(NEXUS::DynamicRefsEditor::EUW::Identifier);
 }

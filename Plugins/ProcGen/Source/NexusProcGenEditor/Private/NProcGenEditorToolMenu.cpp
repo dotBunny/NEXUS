@@ -5,7 +5,7 @@
 
 #include "NEditorToolsMenu.h"
 #include "NEditorUtilityWidget.h"
-#include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
@@ -331,7 +331,7 @@ void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
-	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System == nullptr) return false;
 	return System->HasWidget(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }

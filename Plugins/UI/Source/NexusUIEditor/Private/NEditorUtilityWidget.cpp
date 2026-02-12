@@ -6,7 +6,7 @@
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilitySubsystem.h"
 #include "EditorUtilityWidgetBlueprint.h"
-#include "NEditorUtilityWidgetSystem.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 #include "NEditorUtils.h"
 #include "NSlateUtils.h"
 
@@ -14,7 +14,7 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 {
 	if (Identifier != NAME_None)
 	{
-		UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+		UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 		if (System != nullptr && System->HasWidget(Identifier))
 		{
 			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
@@ -69,23 +69,10 @@ void UNEditorUtilityWidget::NativeConstruct()
 	}
 	OnTabClosedCallback.BindUObject(this, &UNEditorUtilityWidget::OnTabClosed);
 	
-	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System != nullptr)
 	{
 		System->RegisterWidget(this);
-		if (IsPersistent())
-		{
-			const FName CachedIdentifier = GetStateIdentifier();
-			if (System->HasWidgetState(CachedIdentifier))
-			{
-				InvokeRestoreWidgetState(this, CachedIdentifier, System->GetWidgetState(CachedIdentifier));
-			}
-			else
-			{
-				// By this time we have added a proper identifier through restore state
-				System->AddWidgetState(CachedIdentifier, GetWidgetState(this));
-			}
-		}
 	}
 	
 	// If we have icon data set we should create the icon
@@ -110,13 +97,9 @@ void UNEditorUtilityWidget::NativeDestruct()
 		DelayedTask = nullptr;
 	}
 	
-	UNEditorUtilityWidgetSystem* System = UNEditorUtilityWidgetSystem::Get();
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
 	if (System != nullptr)
 	{
-		if (bHasPermanentState)
-		{
-			System->UpdateWidgetState( GetStateIdentifier(), GetWidgetState(this));
-		}
 		System->UnregisterWidget(this);
 	}
 	
@@ -131,6 +114,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 		this->TakeWidget(), 
 		GetTabDisplayName(),
 		GetTabIdentifier());
+	
 	if (Tab.IsValid())
 	{
 		Tab->SetLabel(GetTabDisplayName());
@@ -161,6 +145,6 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
 {
 	if (IsPersistent() && !IsEngineExitRequested() && !bHasPermanentState)
 	{
-		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSystem>()->RemoveWidgetState(GetStateIdentifier());
+		GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetStateIdentifier());
 	}
 }

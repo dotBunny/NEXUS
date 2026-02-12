@@ -5,7 +5,6 @@
 
 #include "EditorUtilityLibrary.h"
 #include "EditorUtilityWidget.h"
-#include "INWidgetStateProvider.h"
 #include "NEditorUtilityWidget.generated.h"
 
 
@@ -14,7 +13,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
 UCLASS(BlueprintType)
-class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetStateProvider
+class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
 {
 	GENERATED_BODY()
 
@@ -24,9 +23,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool IsPersistent() const { return bIsPersistent; };
-	
-	UFUNCTION(BlueprintCallable)
-	bool HasPermanentState() const { return bHasPermanentState; };
 	
 	FName GetStateIdentifier() const { return StateIdentifier; };
 	
@@ -45,9 +41,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	bool bIsPersistent = false;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State", 
+		meta=(Tooltip="Should the widget attempt to remove itself when the tab is closed from any cached state in the UNEditorUtilityWidgetSubsystem."))
 	bool bHasPermanentState = false;
-	
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	FName StateIdentifier;
