@@ -20,7 +20,10 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
 			if (Widget != nullptr)
 			{
-				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(Widget->TakeWidget(), Widget->GetTabDisplayName());
+				const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
+					Widget->TakeWidget(), 
+					Widget->GetTabDisplayName(),
+					Widget->GetTabIdentifier());
 				if (Tab.IsValid())
 				{
 					Tab->FlashTab();
@@ -36,7 +39,14 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 			LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
 		
 		// Use an internal system to spawn and register the widget
-		return EditorUtilitySubsystem->SpawnAndRegisterTab(LoadedWidgetBlueprint);
+		FName TabIdentifier;
+		UEditorUtilityWidget* SpawnedWidget = EditorUtilitySubsystem->SpawnAndRegisterTabAndGetID(LoadedWidgetBlueprint, TabIdentifier);
+		UNEditorUtilityWidget* Widget = Cast<UNEditorUtilityWidget>(SpawnedWidget);
+		if (Widget)
+		{
+			Widget->CachedTabIdentifier = TabIdentifier;
+		}
+		return SpawnedWidget;
 	}
 	return nullptr;
 }
@@ -117,7 +127,10 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(this->TakeWidget(), GetTabDisplayName());
+	const TSharedPtr<SDockTab> Tab = FNSlateUtils::FindDocTabWithLabel(
+		this->TakeWidget(), 
+		GetTabDisplayName(),
+		GetTabIdentifier());
 	if (Tab.IsValid())
 	{
 		Tab->SetLabel(GetTabDisplayName());

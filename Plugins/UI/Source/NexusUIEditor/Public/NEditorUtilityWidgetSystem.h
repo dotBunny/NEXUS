@@ -5,6 +5,7 @@
 
 #include "NWidgetState.h"
 #include "NWidgetStateSnapshot.h"
+#include "NWidgetTabIdentifiers.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSubsystemMacros.h"
 #include "NEditorUtilityWidgetSystem.generated.h"
@@ -38,6 +39,8 @@ protected:
 	UPROPERTY(config)   
 	FNWidgetStateSnapshot WidgetStates;
 
+	UPROPERTY(config)
+	FNWidgetTabIdentifiers WidgetTabIdentifiers;
 private:
 	TMap<FName, TObjectPtr<UNEditorUtilityWidget>> KnownWidgets;
 };

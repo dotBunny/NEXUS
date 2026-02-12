@@ -30,6 +30,10 @@ public:
 	
 	FName GetStateIdentifier() const { return StateIdentifier; };
 	
+	FName GetTabIdentifier() const
+	{
+		return CachedTabIdentifier;
+	};
 protected:
 	
 	virtual void NativeConstruct() override;
@@ -59,10 +63,12 @@ protected:
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Info")
 	FVector2D UnitScale = FVector2D::One();	
-	
+
 private:
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 	FSlateIcon TabIcon;
 	TObjectPtr<UAsyncEditorDelay> DelayedTask;
+	FName CachedTabIdentifier;
+	
 };
