@@ -72,7 +72,7 @@ protected:
 	TObjectPtr<UAsyncEditorDelay> DelayedTask;
 	
 private:
-	void OnTabClosed(TSharedRef<SDockTab> Tab);
+	void OnTabClosed(TSharedRef<SDockTab> Tab) const;
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 	FSlateIcon TabIcon;
 	FName CachedTabIdentifier;

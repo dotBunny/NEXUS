@@ -40,11 +40,13 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 		// Use an internal system to spawn and register the widget
 		FName TabIdentifier;
 		UEditorUtilityWidget* SpawnedWidget = EditorUtilitySubsystem->SpawnAndRegisterTabAndGetID(LoadedWidgetBlueprint, TabIdentifier);
-		UNEditorUtilityWidget* Widget = Cast<UNEditorUtilityWidget>(SpawnedWidget);
-		if (Widget)
+		
+		// If its one of ours we will do some extra setup
+		UNEditorUtilityWidget* EditorUtilityWidget = Cast<UNEditorUtilityWidget>(SpawnedWidget);
+		if (EditorUtilityWidget)
 		{
-			Widget->CachedTabIdentifier = TabIdentifier;
-			System->SetTabIdentifier(Widget->UniqueIdentifier, TabIdentifier);
+			EditorUtilityWidget->CachedTabIdentifier = TabIdentifier;
+			System->SetTabIdentifier(EditorUtilityWidget->UniqueIdentifier, TabIdentifier);
 		}
 		return SpawnedWidget;
 	}
@@ -80,7 +82,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 		}
 	}
 	
-	// If we have icon data set we should create the icon
+	// If we have icon data set, we should create the icon
 	if (TabIconStyle != NAME_None && TabIconName != NAME_None)
 	{
 		TabIcon = FSlateIcon(TabIconStyle, FName(TabIconName));
@@ -144,7 +146,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();
 }
 
-void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab)
+void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const
 {
 	if (IsPersistent() && !IsEngineExitRequested())
 	{
