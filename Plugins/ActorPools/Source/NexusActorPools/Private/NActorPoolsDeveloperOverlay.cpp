@@ -70,17 +70,14 @@ void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 {
 	if (World == nullptr) return;
 	
-	UE_LOG(LogNexusActorPools, Warning, TEXT("Binding actor pools developer overlay to world %s"), *World->GetName());
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
 	if (System == nullptr)
 	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("No Subsystem"));
 		return; // System-less world
 	}
 	
 	// Build out known list
 	TArray<FNActorPool*> KnownPools = System->GetAllPools();
-	UE_LOG(LogNexusActorPools, Warning, TEXT("Pool Count %i"), KnownPools.Num());
 	for (const auto Pool : KnownPools)
 	{
 		CreateListItem(Pool);
