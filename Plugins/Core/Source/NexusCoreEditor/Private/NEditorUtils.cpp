@@ -289,8 +289,8 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
-
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
 		if (Child->GetFName() == WidgetIdentifier)
@@ -300,6 +300,26 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 			{
 				Child->AsSpawnerEntry()->SetIcon(Icon);
 			}
+			break;
 		}
+	}
+}
+
+void FNEditorUtils::RemoveWorkspaceItem(const FName& WidgetIdentifier)
+{
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
+	TSharedPtr<FWorkspaceItem> Found;
+	for (const TSharedRef<FWorkspaceItem>& Child : Children)
+	{
+		if (Child->GetFName() == WidgetIdentifier)
+		{
+			Found = Child.ToSharedPtr();
+			break;
+		}
+	}
+	if (Found.IsValid())
+	{
+		BlutilityModule->GetMenuGroup()->RemoveItem(Found.ToSharedRef());
 	}
 }

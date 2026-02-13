@@ -185,6 +185,7 @@ public:
 	}
 	
 	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
+	static void RemoveWorkspaceItem(const FName& WidgetIdentifier);
 	
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
 };

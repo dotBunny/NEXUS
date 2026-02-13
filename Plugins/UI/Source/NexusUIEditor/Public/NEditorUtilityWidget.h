@@ -61,6 +61,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
 	FName TabIconName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
+	bool bRemoveWorkspaceItem = true;
 		
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.

@@ -135,7 +135,15 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 			Tab->SetOnTabClosed(OnTabClosedCallback);
 		}
 
-		FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayName(), TabIcon);
+		if (bRemoveWorkspaceItem)
+		{
+			FNEditorUtils::RemoveWorkspaceItem(Tab->GetLayoutIdentifier().TabType);
+		}
+		else
+		{
+			FNEditorUtils::UpdateWorkspaceItem(Tab->GetLayoutIdentifier().TabType, GetTabDisplayName(), TabIcon);
+		}
+		
 	}
 	else
 	{
