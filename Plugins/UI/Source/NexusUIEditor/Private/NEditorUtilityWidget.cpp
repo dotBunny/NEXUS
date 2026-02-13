@@ -51,7 +51,6 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 	return nullptr;
 }
 
-
 void UNEditorUtilityWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -97,7 +96,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 void UNEditorUtilityWidget::NativeDestruct()
 {
 	// Remove the delayed task to prevent dangling behaviour.
-	if (DelayedTask->IsValidLowLevel())
+	if (DelayedTask)
 	{
 		DelayedTask->Complete.RemoveAll(this);
 		DelayedTask = nullptr;

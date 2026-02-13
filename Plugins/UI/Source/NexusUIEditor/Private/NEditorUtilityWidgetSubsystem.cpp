@@ -44,13 +44,26 @@ void UNEditorUtilityWidgetSubsystem::RegisterWidget(UNEditorUtilityWidget* Widge
 	{
 		KnownWidgets.Add(Widget->GetUniqueIdentifier(), Widget);
 	}
+	else
+	{
+		UE_LOG(LogNexusUIEditor, Warning, 
+			TEXT("Widget(%s) already registered with UNEditorUtilityWidgetSubsystem. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString())
+	}
 }
 
 void UNEditorUtilityWidgetSubsystem::UnregisterWidget(const UNEditorUtilityWidget* Widget)
 {
+	// Ensure the reference we are removing is in fact the reference we want to remove
 	if (KnownWidgets.Contains(Widget->GetUniqueIdentifier()))
 	{
-		KnownWidgets.Remove(Widget->GetUniqueIdentifier());
+		if (KnownWidgets[Widget->GetUniqueIdentifier()] == Widget)
+		{
+			KnownWidgets.Remove(Widget->GetUniqueIdentifier());
+		}
+		else
+		{
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Widget(%s) is not the registered reference for the identifier. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString())
+		}
 	}
 }
 

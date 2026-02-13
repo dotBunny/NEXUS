@@ -68,11 +68,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Info")
 	FVector2D UnitScale = FVector2D::One();	
 
+	UPROPERTY()
+	TObjectPtr<UAsyncEditorDelay> DelayedTask;
+	
 private:
 	void OnTabClosed(TSharedRef<SDockTab> Tab);
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
 	FSlateIcon TabIcon;
-	TObjectPtr<UAsyncEditorDelay> DelayedTask;
 	FName CachedTabIdentifier;
 	
 };

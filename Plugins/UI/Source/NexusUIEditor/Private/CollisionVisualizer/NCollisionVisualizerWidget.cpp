@@ -268,7 +268,6 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		SpawnParams.InitialActorLabel = TEXT("NCollisionVisualizer");
 		SpawnParams.Name = MakeUniqueObjectName(World, ANCollisionVisualizerActor::StaticClass(), TEXT("NCollisionVisualizer"));
 		
-		
 		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
 		QueryActor->SetFlags(RF_Transient);
@@ -295,7 +294,7 @@ void UNCollisionVisualizerWidget::DestroyActor()
 		ComponentSelection->Deselect(QueryActor->GetEndComponent());
 		
 		GEditor->GetSelectedActors()->Deselect(QueryActor);
-		
+
 		QueryActor->Destroy(true, false);
 	}
 	QueryActor = nullptr;
