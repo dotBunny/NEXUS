@@ -336,13 +336,6 @@ void FNCollisionVisualizerUtils::DoOverlapMulti(const FNCollisionVisualizerSetti
 	}
 
 #if UE_ENABLE_DEBUG_DRAWING
-	if (Settings.Drawing.DrawLabels)
-	{
-		for (const FOverlapResult& OverlapResult : OverlapsResults)
-		{
-		
-		}
-	}
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);

@@ -228,9 +228,6 @@ struct FNCollisionVisualizerDrawing
 	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Point Size")
 	float DrawPointSize = 15.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Collision Test|Drawing", DisplayName="Labels")
-	bool DrawLabels = false;
-	
 	UPROPERTY(EditAnywhere, DisplayName="Draw Timer", meta=(Tooltip="How long between queries/draws."))
 	float DrawTimer = 0.f;
 };
