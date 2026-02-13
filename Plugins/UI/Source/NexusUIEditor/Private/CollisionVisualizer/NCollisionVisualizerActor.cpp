@@ -1,8 +1,11 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
+
 #pragma once
 
 #include "CollisionVisualizer/NCollisionVisualizerActor.h"
+
+#include "CollisionVisualizer/NCollisionVisualizerSceneComponent.h"
 #include "CollisionVisualizer/NCollisionVisualizerWidget.h"
 #include "Components/ActorComponent.h"
 
@@ -23,19 +26,14 @@ ANCollisionVisualizerActor::ANCollisionVisualizerActor(const FObjectInitializer&
 	SetActorEnableCollision(false);
 		
 	// Setup Start
-	StartPointComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Start Point"));
+	StartPointComponent = CreateDefaultSubobject<UNCollisionVisualizerSceneComponent>(TEXT("Start Point"));
 	StartPointComponent->TransformUpdated.AddUObject(this, &ANCollisionVisualizerActor::OnTransformChanged);
-#if WITH_EDITORONLY_DATA
-	StartPointComponent->bVisualizeComponent = true;
-#endif
 	RootComponent = StartPointComponent;
 		
 	// Setup End
-	EndPointComponent = CreateDefaultSubobject<USceneComponent>(TEXT("End Point"));
+	EndPointComponent = CreateDefaultSubobject<UNCollisionVisualizerSceneComponent>(TEXT("End Point"));
+	EndPointComponent->bIsEnd = true;
 	EndPointComponent->TransformUpdated.AddUObject(this, &ANCollisionVisualizerActor::OnTransformChanged);
-#if WITH_EDITORONLY_DATA
-	EndPointComponent->bVisualizeComponent = true;
-#endif
 	EndPointComponent->SetupAttachment(StartPointComponent);
 	EndPointComponent->SetRelativeLocation(FVector(500.f, 0.f, 0.f));
 }

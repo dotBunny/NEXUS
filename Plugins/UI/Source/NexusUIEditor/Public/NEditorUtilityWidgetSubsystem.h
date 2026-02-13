@@ -17,7 +17,7 @@ class UNEditorUtilityWidget;
 /**
  * System to store state for any Widget that knows of the system, and facilitate restoring that state in different scenarios.
  */
-UCLASS(config = EditorPerProjectUserSettings)
+UCLASS(config = NexusUserSettings)
 class NEXUSUIEDITOR_API UNEditorUtilityWidgetSubsystem : public UEditorSubsystem
 {
 public:

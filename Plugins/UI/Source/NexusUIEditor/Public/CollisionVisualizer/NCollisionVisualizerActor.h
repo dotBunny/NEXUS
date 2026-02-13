@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NCollisionVisualizerSceneComponent.h"
 #include "Components/ActorComponent.h"
 #include "Components/SceneComponent.h"
 #include "NCollisionVisualizerActor.generated.h"
@@ -29,18 +30,18 @@ class NEXUSUIEDITOR_API ANCollisionVisualizerActor: public AActor
 #endif
 
 public:
-	USceneComponent* GetStartComponent() const { return StartPointComponent; }
+	UNCollisionVisualizerSceneComponent* GetStartComponent() const { return StartPointComponent; }
 	FVector GetStartPosition() const { return StartPointComponent->GetComponentLocation(); }
-	USceneComponent* GetEndComponent() const { return EndPointComponent; }
+	UNCollisionVisualizerSceneComponent* GetEndComponent() const { return EndPointComponent; }
 	FVector GetEndPosition() const { return EndPointComponent->GetComponentLocation(); }
 	FVector GetRelativeEndPosition() const { return EndPointComponent->GetRelativeLocation(); }
 	FQuat GetRotation() const { return StartPointComponent->GetComponentQuat(); }
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> StartPointComponent;
+	TObjectPtr<UNCollisionVisualizerSceneComponent> StartPointComponent;
 	
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USceneComponent> EndPointComponent;
+	TObjectPtr<UNCollisionVisualizerSceneComponent> EndPointComponent;
 protected:
 	
 	void SetTickInGame(bool bTick);
