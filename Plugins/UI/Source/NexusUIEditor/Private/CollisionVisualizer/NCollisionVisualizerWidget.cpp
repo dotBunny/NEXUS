@@ -272,7 +272,6 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
 		QueryActor->SetFlags(RF_Transient);
-		QueryActor->AddToRoot();
 		
 		PushSettings(QueryActor);
 		
@@ -287,11 +286,9 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 
 void UNCollisionVisualizerWidget::DestroyActor()
 {
-	if (QueryActor != nullptr && QueryActor->IsValidLowLevel())
+	if (QueryActor != nullptr)
 	{
 		QueryActor->Widget = nullptr;
-		
-		QueryActor->RemoveFromRoot();
 		
 		USelection* ComponentSelection = GEditor->GetSelectedComponents();
 		ComponentSelection->Deselect(QueryActor->GetStartComponent());

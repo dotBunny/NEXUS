@@ -72,12 +72,6 @@ void ANCollisionVisualizerActor::BeginDestroy()
 		Widget->QueryActor = nullptr;
 	}
 	
-	// Safety
-	if (this->IsRooted())
-	{
-		RemoveFromRoot();
-	}
-	
 	Super::BeginDestroy();
 }
 
