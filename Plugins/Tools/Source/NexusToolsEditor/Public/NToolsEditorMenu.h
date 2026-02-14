@@ -5,17 +5,14 @@
 
 #include "NEditorCommandInfo.h"
 
-class FNEditorToolsMenu
+class FNToolsEditorMenu
 {
 public:
-	NEXUSCOREEDITOR_API static void AddCommand(FNEditorCommandInfo CommandInfo);
-	NEXUSCOREEDITOR_API static void RemoveCommand(FName Identifier);
+	NEXUSTOOLSEDITOR_API static void AddCommand(FNEditorCommandInfo CommandInfo);
+	NEXUSTOOLSEDITOR_API static void RemoveCommand(FName Identifier);
 	
-	static void RegisterCommands();
 	static void GenerateMenu(UToolMenu* Menu, bool bIsContextMenu);
 private:
-	
-	static void OnWindowCleanLogsFolder();
 	
 	static TMap<FName, FNEditorCommandInfo> CommandInfos;
 	static TMap<FName, FText> Sections;

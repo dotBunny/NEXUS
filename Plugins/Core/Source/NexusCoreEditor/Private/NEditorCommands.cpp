@@ -2,13 +2,10 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NEditorCommands.h"
-
 #include "BlueprintEditor.h"
 #include "NEditorSettings.h"
-#include "NEditorToolsMenu.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
-#include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 
 void FNEditorCommands::RegisterCommands()
 {
@@ -55,14 +52,6 @@ void FNEditorCommands::RegisterCommands()
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
-	"NCore.Tools.Profile.NetworkProfiler",
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
-	EUserInterfaceActionType::Button, FInputChord());
-	
-	
 	CommandList_Help = MakeShared<FUICommandList>();
 	
 	CommandList_Help->MapAction(Get().CommandInfo_Help_Discord,
@@ -102,10 +91,6 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
 		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
-	
-	CommandList_Tools = MakeShared<FUICommandList>();
-	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
 
 // ReSharper disable once IdentifierTypo
@@ -138,26 +123,6 @@ void FNEditorCommands::OnHelpDocumentation()
 {
 	FPlatformProcess::LaunchURL(TEXT("https://nexus-framework.com/docs/"),nullptr, nullptr);
 }
-
-void FNEditorCommands::OnToolsProfileNetworkProfiler()
-{
-	const FString ExecutablePath = FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe");
-	constexpr bool bLaunchDetached = true;
-	constexpr bool bLaunchHidden = false;
-	constexpr bool bLaunchReallyHidden = false;
-	const FProcHandle ProcHandle = FPlatformProcess::CreateProc(*ExecutablePath, TEXT(""), bLaunchDetached,
-		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
-	if (!ProcHandle.IsValid())
-	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to launch NetworkProfiler."))
-	}
-}
-
-bool FNEditorCommands::HasToolsProfileNetworkProfiler()
-{
-	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
-}
-
 
 void FNEditorCommands::OnNodeExternalDocumentation()
 {
@@ -202,34 +167,6 @@ void FNEditorCommands::AddMenuEntries()
 			);
 	}
 	
-	// Dynamic NEXUS Tools
-	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
-	{
-		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("Tools");
-		FToolMenuEntry Entry = FToolMenuEntry::InitSubMenu(
-			"NEXUS",
-			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
-			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS that don't seem to fit anywhere else."),
-			FNewToolMenuDelegate::CreateStatic(&FNEditorToolsMenu::GenerateMenu, false),
-			false,
-			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
-		);
-		Entry.InsertPosition = FToolMenuInsert("FindInBlueprints", EToolMenuInsertType::After);
-		ToolsSection.AddEntry(Entry);
-	}
-	
-	// Add in NetworkProfiler menu option if its present
-	if (HasToolsProfileNetworkProfiler())
-	{
-		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
-		{
-			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
-			ExternalMenu.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorToolsExternal", "External");
-
-			ExternalMenu.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_Profile_NetworkProfiler, Commands.CommandList_Tools);
-		}
-	}
-	
 	// Help Menu Submenu
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Help"))
 	{
@@ -254,13 +191,10 @@ void FNEditorCommands::AddMenuEntries()
 
 void FNEditorCommands::RemoveMenuEntries()
 {
-	
 	UToolMenus* ToolMenus = UToolMenus::Get();
 	if (ToolMenus)
 	{
 		ToolMenus->RemoveEntry("LevelEditor.MainMenu.File", "FileOpen", "NProjectLevels");
-		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
-		ToolMenus->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
 		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Help", "Reference", "NEXUS");
 		ToolMenus->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
 			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");

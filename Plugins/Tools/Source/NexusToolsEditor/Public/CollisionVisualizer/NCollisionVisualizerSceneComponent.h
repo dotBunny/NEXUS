@@ -10,7 +10,7 @@
 UCLASS(DisplayName = "NEXUS: Collision Visualizer Scene Component", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
 	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, 
 		Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
-class NEXUSUIEDITOR_API UNCollisionVisualizerSceneComponent: public USceneComponent
+class NEXUSTOOLSEDITOR_API UNCollisionVisualizerSceneComponent: public USceneComponent
 {
 	friend class ANCollisionVisualizerActor;
 	
@@ -22,7 +22,7 @@ class NEXUSUIEDITOR_API UNCollisionVisualizerSceneComponent: public USceneCompon
 	void CreateCustomSpriteComponent();
 #endif
 	
-	const FString StartSpritePath = TEXT("/NexusUI/EditorResources/S_NCollisionVisualizerSceneComponentStart.S_NCollisionVisualizerSceneComponentStart");
-	const FString EndSpritePath = TEXT("/NexusUI/EditorResources/S_NCollisionVisualizerSceneComponentEnd.S_NCollisionVisualizerSceneComponentEnd");
+	const FString StartSpritePath = TEXT("/NexusTools/EditorResources/S_NCollisionVisualizerSceneComponentStart.S_NCollisionVisualizerSceneComponentStart");
+	const FString EndSpritePath = TEXT("/NexusTools/EditorResources/S_NCollisionVisualizerSceneComponentEnd.S_NCollisionVisualizerSceneComponentEnd");
 	bool bIsEnd = false;
 };

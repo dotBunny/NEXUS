@@ -11,7 +11,7 @@
 UCLASS(DisplayName = "NEXUS: Collision Visualizer Actor", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
 	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, 
 		Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
-class NEXUSUIEDITOR_API ANCollisionVisualizerActor: public AActor
+class NEXUSTOOLSEDITOR_API ANCollisionVisualizerActor: public AActor
 {
 	friend class UNCollisionVisualizerWidget;
 	

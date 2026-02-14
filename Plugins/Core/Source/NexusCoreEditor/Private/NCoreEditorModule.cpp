@@ -8,7 +8,6 @@
 #include "NEditorInputProcessor.h"
 #include "NEditorSettings.h"
 #include "NEditorStyle.h"
-#include "NEditorToolsMenu.h"
 #include "NEditorUserSettings.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
@@ -58,7 +57,6 @@ void FNCoreEditorModule::OnPostEngineInit()
 	// Nothing works without the application being initialized
 	if (!FSlateApplication::IsInitialized()) return;
 	
-	FNEditorToolsMenu::RegisterCommands();
 	FNEditorCommands::Register();
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::AddMenuEntries));
 	

@@ -5,15 +5,14 @@
 
 #include "JsonObjectConverter.h"
 #include "NEditorUtilityWidgetSubsystem.h"
-#include "NUIEditorMinimal.h"
+#include "NToolsEditorMinimal.h"
 #include "CollisionVisualizer/NCollisionVisualizerUtils.h"
 #include "Selection.h"
 #include "Macros/NFlagsMacros.h"
 
-
 void UNCollisionVisualizerWidget::NativeConstruct()
 {
-	UniqueIdentifier = NEXUS::UIEditor::CollisionVisualizer::Identifier;
+	UniqueIdentifier = NEXUS::ToolsEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
 	
 	Super::NativeConstruct();

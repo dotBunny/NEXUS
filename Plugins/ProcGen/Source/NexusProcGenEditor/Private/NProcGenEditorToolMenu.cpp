@@ -3,7 +3,7 @@
 
 #include "NProcGenEditorToolMenu.h"
 
-#include "NEditorToolsMenu.h"
+#include "NEditorCommandInfo.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "Cell/NCellJunctionComponent.h"
@@ -13,6 +13,7 @@
 #include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
+#include "NToolsEditorMenu.h"
 
 void FNProcGenEditorToolMenu::AddMenuEntries()
 {
@@ -263,12 +264,12 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorToolsMenu::AddCommand(EditorWindow);
+	FNToolsEditorMenu::AddCommand(EditorWindow);
 }
 
 void FNProcGenEditorToolMenu::RemoveMenuEntries()
 {
-	FNEditorToolsMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
+	FNToolsEditorMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 	
 	UToolMenus* Menu = UToolMenus::Get();
 	if (Menu)

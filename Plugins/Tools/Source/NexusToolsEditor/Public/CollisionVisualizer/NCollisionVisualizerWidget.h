@@ -20,7 +20,7 @@
  * @ref https://github.com/StudioGobo/UECollisionQueryTools 
  */
 UCLASS(BlueprintType)
-class NEXUSUIEDITOR_API UNCollisionVisualizerWidget : public UNEditorUtilityWidget
+class NEXUSTOOLSEDITOR_API UNCollisionVisualizerWidget : public UNEditorUtilityWidget
 {
 	friend class ANCollisionVisualizerActor;
 	

@@ -28,9 +28,6 @@ public:
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
 	
-	static void OnToolsProfileNetworkProfiler();
-	static bool HasToolsProfileNetworkProfiler();
-	
 	static void OnNodeExternalDocumentation();
 	static bool NodeExternalDocumentation_CanExecute();
 	
@@ -48,7 +45,4 @@ private:
 
 	TSharedPtr<FUICommandList> CommandList_Node;
 	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
-
-	TSharedPtr<FUICommandList> CommandList_Tools;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
 };

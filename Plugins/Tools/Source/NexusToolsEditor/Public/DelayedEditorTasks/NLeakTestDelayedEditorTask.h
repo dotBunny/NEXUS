@@ -4,15 +4,15 @@
 #pragma once
 
 #include "EditorUtilityLibrary.h"
-#include "NCoreEditorMinimal.h"
 #include "NDelayedEditorTask.h"
 #include "NEditorUserSettings.h"
+#include "NToolsEditorMinimal.h"
 #include "Developer/NObjectSnapshot.h"
 #include "Developer/NObjectSnapshotUtils.h"
 #include "NLeakTestDelayedEditorTask.generated.h"
 
 UCLASS()
-class NEXUSCOREEDITOR_API UNLeakTestDelayedEditorTask : public UNDelayedEditorTask
+class UNLeakTestDelayedEditorTask : public UNDelayedEditorTask
 {
 	GENERATED_BODY()
 
@@ -43,11 +43,11 @@ private:
 			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 			FString::Printf(TEXT("NEXUS_LeakCheck_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
-			UE_LOG(LogNexusCoreEditor, Warning, TEXT("UObject leak detected; comparison written to %s."), *DumpFilePath);
+			UE_LOG(LogNexusToolsEditor, Warning, TEXT("UObject leak detected; comparison written to %s."), *DumpFilePath);
 		}
 		else
 		{
-			UE_LOG(LogNexusCoreEditor, Log, TEXT("No measurable UObject leak was detected. %s"), *Diff.ToString());
+			UE_LOG(LogNexusToolsEditor, Log, TEXT("No measurable UObject leak was detected. %s"), *Diff.ToString());
 		}
 		Release();
 	}
