@@ -54,5 +54,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=")
 	int32 UpdatesIgnoreVersion = NEXUS::Version::Number;
-#endif
+
+#endif // WITH_EDITORONLY_DATA
 };
