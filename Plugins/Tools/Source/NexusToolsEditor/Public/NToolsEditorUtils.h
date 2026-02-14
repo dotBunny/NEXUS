@@ -9,7 +9,8 @@
 class FNToolsEditorUtils
 {
 public:
-	static void AddResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& NewMessage)
+
+	FORCEINLINE static void AddDataValidationResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& NewMessage)
 	{
 		switch (Level)
 		{
@@ -29,7 +30,7 @@ public:
 		}
 	};
 
-	static EDataValidationResult GetResult(const ENValidatorSeverity& Level)
+	FORCEINLINE static EDataValidationResult GetDataValidationResult(const ENValidatorSeverity& Level)
 	{
 		switch (Level)
 		{

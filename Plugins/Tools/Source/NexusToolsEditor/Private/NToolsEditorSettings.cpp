@@ -3,6 +3,8 @@
 
 #include "NToolsEditorSettings.h"
 
+#if WITH_EDITOR	
+
 bool UNToolsEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) const
 {
 	if (IgnoredAssets.Contains(AssetPath)) return true;
@@ -15,3 +17,5 @@ bool UNToolsEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) con
 
 	return false;
 }
+
+#endif // WITH_EDITOR

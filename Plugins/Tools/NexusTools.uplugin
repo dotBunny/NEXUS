@@ -3,7 +3,7 @@
 	"Version": 10,
 	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Tools",
-	"Description": "An assortment of developer tools that didn't fit anywhere else.",
+	"Description": "An assortment of developer tools for the Unreal Editor.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",

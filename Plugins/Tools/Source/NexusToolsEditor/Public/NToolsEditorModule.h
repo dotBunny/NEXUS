@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NEditorInputProcessor.h"
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
@@ -18,5 +19,19 @@ class FNToolsEditorModule final : public IModuleInterface
 	
 	void OnPostEngineInit();
 	
+	static void ApplyAppIcon(const FString& IconPath);
+	void ApplyWindowIcon(const FString& IconPath);
+	void ApplyWindowIconPostEditorTick(float Time) const;
+
+public:
+	FNEditorInputProcessor* GetInputProcessor() const
+	{
+		return InputProcessor.Get();
+	}
+
 	N_IMPLEMENT_MODULE(FNToolsEditorModule, "NexusToolsEditor")
+	
+private:
+	TSharedPtr<FNEditorInputProcessor> InputProcessor;
+	FDelegateHandle WindowIconDelegateHandle;
 };

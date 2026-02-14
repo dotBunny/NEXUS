@@ -8,6 +8,8 @@ class FNPoseAssetFixer
 {
 public:
 	static void OutOfDateAnimationSource(bool bIsContextMenu);
+	
 private:
-	static bool UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages);
+	static bool UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, 
+		UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages);
 };

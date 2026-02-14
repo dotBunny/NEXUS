@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NToolsMenuItem.h"
+#include "NMenuEntry.h"
 
 class FNFixersMenu
 {
@@ -12,13 +12,14 @@ public:
 	static void Register();
 	static void Unregister();
 	
-	NEXUSTOOLSEDITOR_API static void AddCommand(const FNToolsMenuItem& Item);
-	NEXUSTOOLSEDITOR_API static void RemoveCommand(FName Identifier);
+	NEXUSTOOLSEDITOR_API static void AddMenuEntry(const FNMenuEntry& Item);
+	NEXUSTOOLSEDITOR_API static void RemoveMenuEntry(FName Identifier);
 	
+	static void AddKnownEntries();
 	static void GenerateMenu(UToolMenu* Menu, bool bIsContextMenu);
 private:
 	
 	
-	static TMap<FName, FNToolsMenuItem> Items;
+	static TMap<FName, FNMenuEntry> Entries;
 	static TMap<FName, FText> Sections;
 };

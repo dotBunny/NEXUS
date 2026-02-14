@@ -12,8 +12,12 @@ public:
 	static void CreateCollisionVisualizerWindow();
 	static bool HasCollisionVisualizerWindow();
 	
-	static void OnToolsProfileNetworkProfiler();
+	static void OpenNetworkProfiler();
 	static bool HasToolsProfileNetworkProfiler();
 	
-	static void OnWindowCleanLogsFolder();
+	static void GenerateProjectLevelsSubMenu(UToolMenu* Menu);
+	
+	static void OnNodeExternalDocumentation();
+	static bool NodeExternalDocumentation_CanExecute();
+
 };

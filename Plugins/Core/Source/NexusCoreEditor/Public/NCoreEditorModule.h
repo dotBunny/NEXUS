@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "NEditorSettings.h"
 #include "Macros/NModuleMacros.h"
 #include "Modules/ModuleInterface.h"
 
@@ -17,20 +16,8 @@ class FNCoreEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+	
 	void OnPostEngineInit();
 	
-	FNEditorInputProcessor* GetInputProcessor() const
-	{
-		return InputProcessor.Get();
-	}
-	
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
-
-	static void ApplyAppIcon(const FString& IconPath);
-	void ApplyWindowIcon(const FString& IconPath);
-	void ApplyWindowIconPostEditorTick(float Time) const;
-
-private:
-	TSharedPtr<FNEditorInputProcessor> InputProcessor;
-	FDelegateHandle WindowIconDelegateHandle;
 };

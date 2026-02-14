@@ -1,18 +1,18 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NEditorUserSettings.h"
-#include "NCoreEditorMinimal.h"
+#include "NToolsEditorUserSettings.h"
+
 #include "NCoreEditorModule.h"
 #include "NEditorInputProcessor.h"
+#include "NToolsEditorMinimal.h"
+#include "NToolsEditorModule.h"
 #include "Editor/EditorPerformanceSettings.h"
 #include "GameFramework/GameUserSettings.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(NEditorUserSettings)
-
-void UNEditorUserSettings::OnPostEngineInit()
+void UNToolsEditorUserSettings::OnPostEngineInit()
 {
-	if (UNEditorUserSettings* Settings = GetMutable())
+	if (const UNToolsEditorUserSettings* Settings = Get())
 	{
 		Settings->ApplyEditorFrameRateLimit();
 		Settings->ApplyAlwaysShowFrameRateAndMemory();
@@ -20,14 +20,14 @@ void UNEditorUserSettings::OnPostEngineInit()
 	}
 }
 
-void UNEditorUserSettings::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+void UNToolsEditorUserSettings::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
 
 	const FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 
 	// Check if we are updating the frame rate
-	if (PropertyName == GET_MEMBER_NAME_CHECKED(UNEditorUserSettings, EditorFrameRateLimit))
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UNToolsEditorUserSettings, EditorFrameRateLimit))
 	{
 		ApplyEditorFrameRateLimit();
 	}
@@ -35,18 +35,18 @@ void UNEditorUserSettings::PostEditChangeProperty(struct FPropertyChangedEvent& 
 	ApplySpaceToPan();
 }
 
-void UNEditorUserSettings::ApplyEditorFrameRateLimit()
+void UNToolsEditorUserSettings::ApplyEditorFrameRateLimit() const
 {
 	if (FNEditorUtils::IsUserControlled())
 	{
-		UE_LOG(LogNexusCoreEditor, Log, TEXT("Apply framerate limit(%f)."), EditorFrameRateLimit);
+		UE_LOG(LogNexusToolsEditor, Log, TEXT("Apply framerate limit(%f)."), EditorFrameRateLimit);
 
 		GEngine->SetMaxFPS(EditorFrameRateLimit);
 		GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
 	}
 }
 
-void UNEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
+void UNToolsEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
 {
 	if (FNEditorUtils::IsUserControlled() && bAlwaysShowFrameRateAndMemory)
 	{
@@ -60,12 +60,12 @@ void UNEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
 	}
 }
 
-void UNEditorUserSettings::ApplySpaceToPan() const
+void UNToolsEditorUserSettings::ApplySpaceToPan() const
 {
 	if (FNEditorUtils::IsUserControlled())
 	{
-		const FNCoreEditorModule& CoreEditorModule = FModuleManager::GetModuleChecked<FNCoreEditorModule>("NexusCoreEditor");
-		FNEditorInputProcessor* InputProcessor = CoreEditorModule.GetInputProcessor();
+		const FNToolsEditorModule& ToolsEditorModule = FModuleManager::GetModuleChecked<FNToolsEditorModule>("NexusToolsEditor");
+		FNEditorInputProcessor* InputProcessor = ToolsEditorModule.GetInputProcessor();
 		InputProcessor->bCachedGraphNavigationSpaceToPan = bGraphNavigationSpaceToPan;
 		InputProcessor->CachedGraphNavigationPanSpeedMultiplier = GraphNavigationPanSpeedMultiplier;
 	}

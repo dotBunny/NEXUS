@@ -23,11 +23,11 @@ EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementati
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	if (Settings->EngineContentChange != ENValidatorSeverity::Disable)
 	{
-		FNToolsEditorUtils::AddResponse(Context, Settings->EngineContentChange,
+		FNToolsEditorUtils::AddDataValidationResponse(Context, Settings->EngineContentChange,
 			FText::FromString(TEXT("Engine content changes should be heavily scrutinized before commiting. They can be easily overwritten during upgrades or other verification processes.\nFor more information visit https://nexus-framework.com/docs/plugins/fixers/validators/engine-content-validator/#engine-content-changed")));
 
 		
-		Result = FNToolsEditorUtils::GetResult(Settings->EngineContentChange);
+		Result = FNToolsEditorUtils::GetDataValidationResult(Settings->EngineContentChange);
 	}
 	return Result;
 }

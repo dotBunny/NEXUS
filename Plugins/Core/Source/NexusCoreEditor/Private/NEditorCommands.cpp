@@ -3,7 +3,6 @@
 
 #include "NEditorCommands.h"
 #include "BlueprintEditor.h"
-#include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
 
@@ -77,20 +76,6 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Help->MapAction(Get().CommandInfo_Help_Documentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDocumentation),
 		FCanExecuteAction());
-
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
-			"NCore.Node.ExternalDocumentation",
-			NSLOCTEXT("NexusCoreEditor","Command_Node_OpenExternalDocumentation", "External Documentation"),
-			NSLOCTEXT("NexusCoreEditor","Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-			EUserInterfaceActionType::Button, FInputChord());
-
-	CommandList_Node = MakeShared<FUICommandList>();
-
-	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
 }
 
 // ReSharper disable once IdentifierTypo
@@ -124,49 +109,8 @@ void FNEditorCommands::OnHelpDocumentation()
 	FPlatformProcess::LaunchURL(TEXT("https://nexus-framework.com/docs/"),nullptr, nullptr);
 }
 
-void FNEditorCommands::OnNodeExternalDocumentation()
-{
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return;
-	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
-	if (Node == nullptr) return;
-
-	// Split the data so you can have multiple URIs in the data
-	TArray<FString> OutURIs;
-	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
-	for (int i = 0; i < OutURIs.Num(); i++)
-	{
-		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
-	}
-}
-
-bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
-{
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return false;
-	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
-	if (Node == nullptr) return false;
-	return FNMetaUtils::HasExternalDocumentation(Node);
-}
-
 void FNEditorCommands::AddMenuEntries()
 {
-	const FNEditorCommands Commands = Get();
-
-	// Project Levels
-	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File"))
-	{
-		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
-		FileOpenSection.AddSubMenu(
-				"NProjectLevels",
-				NSLOCTEXT("NexusCoreEditor", "ProjectLevels", "Project Levels"),
-				NSLOCTEXT("NexusCoreEditor", "ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
-				FNewToolMenuDelegate::CreateStatic(&GenerateProjectLevelsSubMenu),
-				false,
-				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
-			);
-	}
-	
 	// Help Menu Submenu
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Help"))
 	{
@@ -180,13 +124,6 @@ void FNEditorCommands::AddMenuEntries()
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 			);
 	}
-	
-	// Support for DocsURL addition to nodes
-	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
-	{
-		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
-		DocumentationSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Node_ExternalDocumentation, Commands.CommandList_Node);
-	}
 }
 
 void FNEditorCommands::RemoveMenuEntries()
@@ -194,44 +131,7 @@ void FNEditorCommands::RemoveMenuEntries()
 	UToolMenus* ToolMenus = UToolMenus::Get();
 	if (ToolMenus)
 	{
-		ToolMenus->RemoveEntry("LevelEditor.MainMenu.File", "FileOpen", "NProjectLevels");
 		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Help", "Reference", "NEXUS");
-		ToolMenus->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
-			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");
-	}
-}
-
-void FNEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
-{
-	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", NSLOCTEXT("NexusCoreEditor", "ProjectLevels", ""));
-	for (const UNEditorSettings* Settings = UNEditorSettings::Get();
-		const FSoftObjectPath& Path : Settings->ProjectLevels)
-	{
-		if (!Path.IsValid())
-		{
-			continue;
-		}
-		
-		const FText DisplayName = FText::FromString(Path.GetAssetName());
-		const FText DisplayTooltip = FText::FromString(Path.GetAssetPathString());
-		const FName AssetName = Path.GetAssetFName();
-
-		FUIAction ButtonAction = FUIAction(
-		FExecuteAction::CreateLambda([Path]()
-			{
-				if (const FString MapPath = Path.ToString(); MapPath.Len() > 0)
-				{
-					GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(MapPath);
-				}
-			}),
-			FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
-			FIsActionChecked(),
-			FIsActionButtonVisible());
-
-		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip,
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Level"),
-			FToolUIActionChoice(ButtonAction),
-			EUserInterfaceActionType::Button, AssetName);
 	}
 }
 

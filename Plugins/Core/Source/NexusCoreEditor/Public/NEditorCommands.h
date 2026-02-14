@@ -27,12 +27,9 @@ public:
 	static void OnHelpDiscord();
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
-	
-	static void OnNodeExternalDocumentation();
-	static bool NodeExternalDocumentation_CanExecute();
+
 	
 	static void GenerateHelpSubMenu(UToolMenu* Menu);
-	static void GenerateProjectLevelsSubMenu(UToolMenu* Menu);
 
 private:
 	TSharedPtr<FUICommandList> CommandList_Help;

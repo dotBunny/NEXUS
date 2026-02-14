@@ -3,56 +3,79 @@
 
 #include "NToolsEditorCommands.h"
 
+#include "BlueprintEditor.h"
 #include "NEditorStyle.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
-#include "NFixersMenu.h"
-#include "NToolsMenu.h"
+#include "NMetaUtils.h"
+#include "Menus/NFixersMenu.h"
+#include "Menus/NToolsMenu.h"
 #include "NToolsEditorMinimal.h"
+#include "NToolsEditorSettings.h"
 #include "NToolsEditorStyle.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
-#include "Fixers/NPoseAssetFixer.h"
+#include "Menus/NFixersMenuEntries.h"
+#include "Menus/NToolsMenuEntries.h"
 
 void FNToolsEditorCommands::AddMenuEntries()
 {
-	// Dynamic NEXUS Tools
+	// Project Levels
+	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File"))
+	{
+		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
+		FileOpenSection.AddSubMenu(
+				"NEXUS_ProjectLevels",
+				NSLOCTEXT("NexusCoreEditor", "ProjectLevels", "Project Levels"),
+				NSLOCTEXT("NexusCoreEditor", "ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
+				FNewToolMenuDelegate::CreateStatic(&GenerateProjectLevelsSubMenu),
+				false,
+				FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
+			);
+	}
+	
+	// Dynamic NEXUS Tools Menu
 	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
 	{
 		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("Tools");
 		FToolMenuEntry Entry = FToolMenuEntry::InitSubMenu(
 			"NEXUS",
-			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
-			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS that don't seem to fit anywhere else."),
+			NSLOCTEXT("NexusToolsEditor", "ToolsMenu", "NEXUS"),
+			NSLOCTEXT("NexusToolsEditor", "ToolsMenu_ToolTip", "An assortment of developer tools for the Unreal Editor."),
 			FNewToolMenuDelegate::CreateStatic(&FNToolsMenu::GenerateMenu, false),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 		);
 		Entry.InsertPosition = FToolMenuInsert("FindInBlueprints", EToolMenuInsertType::After);
 		ToolsSection.AddEntry(Entry);
+		
+		// Initialize known menu entries
+		FNToolsMenuEntries::AddMenuEntries();
 	}
 	
-	// Dyanmic Bulk Operations
-	// Add to folder to ContentBrowser
+	// Dynamic Find & Fix Menu (Fixers)
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.FolderContextMenu"))
 	{
 		FToolMenuSection& Section = Menu->FindOrAddSection("PathContextBulkOperations");
 		Section.AddSubMenu(
-				"NFindAndFixOperations",
-				NSLOCTEXT("NexusToolsEditor", "ContextMenu_FindAndFix", "Find & Fix"),
-				NSLOCTEXT("NexusToolsEditor", "ContextMenu_FindAndFix_ToolTip", "Find and fix operations on selected content."),
+				"NEXUS_FindAndFix",
+				NSLOCTEXT("NexusToolsEditor", "FindAndFixMenu", "Find & Fix"),
+				NSLOCTEXT("NexusToolsEditor", "FindAndFixMenu_ToolTip", "Find and fix operations on selected content."),
 				FNewToolMenuDelegate::CreateStatic(&FNFixersMenu::GenerateMenu, true),
 				false,
 				FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.FindAndFix")
 			);
+		
+		// Initialize known menu entries
+		FNFixersMenuEntries::AddMenuEntries();
 	}
 	
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Debug"))
 	{
-		// Add Collision Visualizer
+		// Inject the Collision Visualizer into the Tools > Debug menu
 		FToolMenuEntry Entry = FToolMenuEntry::InitMenuEntry(
 			NEXUS::ToolsEditor::CollisionVisualizer::Identifier,
-			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionVisualizer_DisplayName", "Collision Visualizer"),
-			NSLOCTEXT("NexusUIEditor", "Create_EUW_CollisionVisualizer_Tooltip", "Opens the NEXUS: Collision Visualizer window."),
+			NSLOCTEXT("NexusToolsEditor", "CollisionVisualizer_Create", "Collision Visualizer"),
+			NSLOCTEXT("NexusToolsEditor", "CollisionVisualizer_Create_Tooltip", "Opens the NEXUS: Collision Visualizer window."),
 			FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), NEXUS::ToolsEditor::CollisionVisualizer::Icon),
 			FExecuteAction::CreateStatic(&FNToolsEditorCommands::CreateCollisionVisualizerWindow));
 		Entry.InsertPosition = FToolMenuInsert(NAME_None, EToolMenuInsertType::First);
@@ -69,63 +92,28 @@ void FNToolsEditorCommands::AddMenuEntries()
 			
 			ExternalMenu.AddMenuEntry(
 			NEXUS::ToolsEditor::NetworkProfiler::Identifier,
-			NSLOCTEXT("NexusToolsEditor", "Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
-			NSLOCTEXT("NexusToolsEditor", "Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
+			NSLOCTEXT("NexusToolsEditor", "NetworkProfiler_Open", "Network Profiler"),
+			NSLOCTEXT("NexusToolsEditor", "NetworkProfiler_Open_Tooltip", "Launch external NetworkProfiler tool."),
 			FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.Visualizer"),
-			FExecuteAction::CreateStatic(&FNToolsEditorCommands::OnToolsProfileNetworkProfiler));
+			FExecuteAction::CreateStatic(&FNToolsEditorCommands::OpenNetworkProfiler));
 		}
 	}
-
-	// TOOLS MENU
 	
-	// Leak Check
-	auto LeakCheckCommandInfo = FNToolsMenuItem();
-	LeakCheckCommandInfo.Identifier = "NCore.Tools.LeakCheck";
-	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check");
-	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
-	LeakCheckCommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.LeakCheck");
-	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
-	FNToolsMenu::AddCommand(LeakCheckCommandInfo);
-	
-	// Clean Logs
-	auto CleanLogsCommandInfo = FNToolsMenuItem();
-	CleanLogsCommandInfo.Identifier = "NCore.Logs.CleanLogsFolder";
-	CleanLogsCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder");
-	CleanLogsCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
-	CleanLogsCommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder");
-	CleanLogsCommandInfo.Execute = FExecuteAction::CreateStatic(&OnWindowCleanLogsFolder);
-	FNToolsMenu::AddCommand(CleanLogsCommandInfo);
-	
-	// BULK OPERATIONS
-	
-	// Add Tool Commands
-	FNToolsMenuItem CommandInfo;
-	CommandInfo.Identifier = "NEXUS_Tools_FindAndFix_PoseAsset_OutOfDateAnimationSource";
-	CommandInfo.Section = "Assets";
-	CommandInfo.DisplayName = NSLOCTEXT("NexusToolsEditor", "Command_PoseAsset", "Outdated PoseAsset Source Animations");
-	CommandInfo.Tooltip = NSLOCTEXT("NexusToolsEditor", "Command_BulkOperations", "Find and fix any PoseAssets in the selected content with out-of-date source animations.");
-	CommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item");
-	CommandInfo.Execute = FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true);
-	FNFixersMenu::AddCommand(CommandInfo);
-}
-
-void FNToolsEditorCommands::RemoveMenuEntries()
-{
-	UToolMenus* Menu = UToolMenus::Get();
-	if (Menu)
+	// Support for DocsURL addition to nodes
+	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
 	{
-		// Remove Collision Visualizer
-		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug", 
-			NEXUS::ToolsEditor::CollisionVisualizer::Identifier);
+		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
 		
-		Menu->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NFindAndFixOperations");
+		FToolMenuEntry& Entry = DocumentationSection.AddMenuEntry(
+			"NEXUS_ExternalDocumentation",
+			NSLOCTEXT("NexusToolsEditor", "ExternalDocumentation", "External Documentation"),
+			NSLOCTEXT("NexusToolsEditor", "ExternalDocumentation_Tooltip", "Open the external documentation (DocsURL) about this function."),
+			FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Icons.Documentation"),
+			FExecuteAction::CreateStatic(&FNToolsEditorCommands::OnNodeExternalDocumentation));
+		Entry.Visibility = FCanExecuteAction::CreateStatic(&FNToolsEditorCommands::NodeExternalDocumentation_CanExecute);
 		
-		Menu->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
-		
-		Menu->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
 	}
 }
-
 
 void FNToolsEditorCommands::CreateCollisionVisualizerWindow()
 {
@@ -141,7 +129,7 @@ bool FNToolsEditorCommands::HasCollisionVisualizerWindow()
 	return System->HasWidget(NEXUS::ToolsEditor::CollisionVisualizer::Identifier);
 }
 
-void FNToolsEditorCommands::OnToolsProfileNetworkProfiler()
+void FNToolsEditorCommands::OpenNetworkProfiler()
 {
 	const FString ExecutablePath = FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe");
 	constexpr bool bLaunchDetached = true;
@@ -160,37 +148,82 @@ bool FNToolsEditorCommands::HasToolsProfileNetworkProfiler()
 	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
 }
 
-void FNToolsEditorCommands::OnWindowCleanLogsFolder()
+void FNToolsEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
 {
-	TArray<FString> FilePaths;
-	IFileManager& FileManager = IFileManager::Get();
-	
-	TArray<FString> Searches;
-	Searches.Add(TEXT("*-backup-*")); // Backups
-	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
-	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
-	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
-	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
-
-	const FString ProjectLogDir = FPaths::ProjectLogDir();
-	int DeleteCount = 0;
-
-	for (const FString& Search : Searches)
+	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", NSLOCTEXT("NexusToolsEditor", "ProjectLevels", ""));
+	for (const UNToolsEditorSettings* Settings = UNToolsEditorSettings::Get();
+		const FSoftObjectPath& Path : Settings->ProjectLevels)
 	{
-		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
-		for (const FString& File : FilePaths)
+		if (!Path.IsValid())
 		{
-			FileManager.Delete(*File, false, true);
-			DeleteCount++;
+			continue;
 		}
+		
+		const FText DisplayName = FText::FromString(Path.GetAssetName());
+		const FText DisplayTooltip = FText::FromString(Path.GetAssetPathString());
+		const FName AssetName = Path.GetAssetFName();
+
+		FUIAction ButtonAction = FUIAction(
+		FExecuteAction::CreateLambda([Path]()
+			{
+				if (const FString MapPath = Path.ToString(); MapPath.Len() > 0)
+				{
+					GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(MapPath);
+				}
+			}),
+			FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
+			FIsActionChecked(),
+			FIsActionButtonVisible());
+		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip,
+			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Level"),
+			FToolUIActionChoice(ButtonAction),
+			EUserInterfaceActionType::Button, AssetName);
 	}
-	
-	if (DeleteCount > 0)
+}
+
+void FNToolsEditorCommands::OnNodeExternalDocumentation()
+{
+	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
+	if (Editor == nullptr) return;
+	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
+	if (Node == nullptr) return;
+
+	// Split the data so you can have multiple URIs in the data
+	TArray<FString> OutURIs;
+	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
+	for (int i = 0; i < OutURIs.Num(); i++)
 	{
-		UE_LOG(LogNexusToolsEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());
+		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
 	}
-	else
+}
+
+bool FNToolsEditorCommands::NodeExternalDocumentation_CanExecute()
+{
+	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
+	if (Editor == nullptr) return false;
+	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
+	if (Node == nullptr) return false;
+	return FNMetaUtils::HasExternalDocumentation(Node);
+}
+
+void FNToolsEditorCommands::RemoveMenuEntries()
+{
+	UToolMenus* Menu = UToolMenus::Get();
+	if (Menu)
 	{
-		UE_LOG(LogNexusToolsEditor, Warning, TEXT("No files found to delete from %s."), *FPaths::ProjectLogDir());
+		// Remove Collision Visualizer
+		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug", 
+			NEXUS::ToolsEditor::CollisionVisualizer::Identifier);
+		
+		Menu->RemoveEntry("LevelEditor.MainMenu.File", "FileOpen", "NEXUS_ProjectLevels");
+		
+		Menu->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NEXUS_FindAndFix");
+		
+		Menu->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
+		
+		Menu->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
+		
+		Menu->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
+			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");
 	}
 }

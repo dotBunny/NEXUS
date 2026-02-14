@@ -3,15 +3,14 @@
 
 #include "NActorPoolsEditorMinimal.h"
 #include "NActorPoolsEditorStyle.h"
-#include "NToolsMenuItem.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
-#include "NToolsMenu.h"
+#include "Menus/NToolsMenu.h"
 
 void FNActorPoolsEditorToolMenu::Register()
 {
 	// EUW Entry
-	auto EditorWindow = FNToolsMenuItem();
+	auto EditorWindow = FNMenuEntry();
 	
 	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier;
@@ -22,12 +21,12 @@ void FNActorPoolsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNActorPoolsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNToolsMenu::AddCommand(EditorWindow);
+	FNToolsMenu::AddMenuEntry(EditorWindow);
 }
 
 void FNActorPoolsEditorToolMenu::Unregister()
 {
-	FNToolsMenu::RemoveCommand(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
+	FNToolsMenu::RemoveMenuEntry(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }
 
 void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()

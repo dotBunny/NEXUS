@@ -1,10 +1,10 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NFixersMenu.h"
+#include "Menus/NFixersMenu.h"
 #include "NToolsEditorStyle.h"
 
-TMap<FName, FNToolsMenuItem> FNFixersMenu::Items;
+TMap<FName, FNMenuEntry> FNFixersMenu::Entries;
 TMap<FName, FText> FNFixersMenu::Sections;
 
 void FNFixersMenu::Register()
@@ -35,22 +35,22 @@ void FNFixersMenu::Unregister()
 
 void FNFixersMenu::GenerateMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, Items)
+	N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, Entries)
 }
 
-void FNFixersMenu::AddCommand(const FNToolsMenuItem& Item)
+void FNFixersMenu::AddMenuEntry(const FNMenuEntry& Item)
 {
-	if (!Items.Contains(Item.Identifier))
+	if (!Entries.Contains(Item.Identifier))
 	{
-		Items.Add(Item.Identifier, Item);
-		Items.KeySort([](const FName A, const FName B)
+		Entries.Add(Item.Identifier, Item);
+		Entries.KeySort([](const FName A, const FName B)
 			{
 				return A.Compare(B) < 0;
 			});
 	}
 	else
 	{
-		Items[Item.Identifier] = Item;
+		Entries[Item.Identifier] = Item;
 	}
 	
 	if (!Sections.Contains(Item.Section))
@@ -63,10 +63,14 @@ void FNFixersMenu::AddCommand(const FNToolsMenuItem& Item)
 	}
 }
 
-void FNFixersMenu::RemoveCommand(const FName Identifier)
+void FNFixersMenu::RemoveMenuEntry(const FName Identifier)
 {
-	if (Items.Contains(Identifier))
+	if (Entries.Contains(Identifier))
 	{
-		Items.Remove(Identifier);
+		Entries.Remove(Identifier);
 	}
+}
+
+void FNFixersMenu::AddKnownEntries()
+{
 }
