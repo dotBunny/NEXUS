@@ -23,6 +23,7 @@ namespace UnrealBuildTool.Rules
 				[
 					"AssetDefinition",
 					"CoreUObject",
+					"DeveloperSettings",
 					"Engine",
 					"PlacementMode",
 					"Projects",

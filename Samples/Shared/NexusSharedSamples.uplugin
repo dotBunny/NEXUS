@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 9,
-	"VersionName": "0.2.6",
+	"Version": 10,
+	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS Samples: Shared",
 	"Description": "Content used by the other samples to demonstrate and test functionality.",
 	"Category": "NEXUS Samples",

@@ -3,6 +3,7 @@
 
 #include "Visualizers/NActorPoolSpawnerComponentVisualizer.h"
 
+#include "NActorPoolsEditorUserSettings.h"
 #include "SceneManagement.h"
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorUserSettings.h"
@@ -17,7 +18,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 
 	const FVector Origin = SpawnerComponent->GetComponentLocation() + SpawnerComponent->GetOffset();
 	const FRotator Rotator = SpawnerComponent->GetComponentRotation();
-	const UNEditorUserSettings* Settings = UNEditorUserSettings::Get();
+	const UNActorPoolsEditorUserSettings* Settings = UNActorPoolsEditorUserSettings::Get();
 	
 	switch (SpawnerComponent->GetDistribution())
 	{

@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
-	"Version": 9,
-	"VersionName": "0.2.6",
+	"Version": 10,
+	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Tools",
-	"Description": "Components for creating a user interface based on UMG/Slate.",
+	"Description": "An assortment of developer tools that didn't fit anywhere else.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",

@@ -9,7 +9,7 @@
 #include "NEditorUtils.h"
 #include "NMultiplayerEditorUserSettings.generated.h"
 
-UCLASS(config = EditorPerProjectUserSettings, meta = (DisplayName = "Multiplayer Editor"))
+UCLASS(config = NexusUserSettings, meta = (DisplayName = "Multiplayer (User)"))
 class UNMultiplayerEditorUserSettings : public UDeveloperSettings
 {
 public:

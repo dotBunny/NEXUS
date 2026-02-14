@@ -11,6 +11,7 @@
 
 void FNToolsEditorModule::StartupModule()
 {
+	N_UPDATE_UPLUGIN("NexusTools")
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNToolsEditorModule, OnPostEngineInit);
 }
 

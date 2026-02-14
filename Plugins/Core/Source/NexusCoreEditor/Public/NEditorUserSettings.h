@@ -9,7 +9,7 @@
 #include "NEditorUtils.h"
 #include "NEditorUserSettings.generated.h"
 
-UCLASS(config = EditorPerProjectUserSettings, meta = (DisplayName = "Editor"))
+UCLASS(config = NexusUserSettings, meta = (DisplayName = "Core (User)"))
 class NEXUSCOREEDITOR_API UNEditorUserSettings : public UDeveloperSettings
 {
 public:
@@ -38,7 +38,7 @@ public:
 #endif // WITH_EDITOR
 
 #if WITH_EDITORONLY_DATA
-public:
+
 	UPROPERTY(EditAnywhere, config,  Category = "Graph Navigation", meta = (DisplayName = "Space To Pan", Tooltip = "While holding space down, left click and drag to pan the foreground graph."))
 	bool bGraphNavigationSpaceToPan = true;
 
@@ -50,21 +50,6 @@ public:
 
 	UPROPERTY(EditAnywhere, config, Category = "Editor Performance", meta = (DisplayName = "Always Show Frame Rate & Memory", Tooltip = "Ensures that the checkbox for Show Frame Rate & Memory remains checked, even if local settings are wiped."))
 	bool bAlwaysShowFrameRateAndMemory = true;
-
-	UPROPERTY(EditAnywhere, config, Category = "Leak Check", DisplayName ="Duration", meta=(ToolTip="How long should the leak check run?"))
-	float LeakCheckTime = 30.f;
-	
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers", meta = (DisplayName = "Line Thickness", Tooltip = "The thickness of debug lines that are drawn."))
-	float DebugLineThickness = 1.25f;
-	
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers", meta = (DisplayName = "Circle Sides", Tooltip = "The number of lines used to draw a debug circle."))
-	int DebugCircleSides = 64;
-
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers", DisplayName = "Distribution: Outer Color")
-	FColor DistributionOuterColor = FColor(255,0,88);
-	
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers", DisplayName = "Distribution: Inner Color")
-	FColor DistributionInnerColor = FColor(150,0,89);
 	
 	UPROPERTY(VisibleAnywhere, Config, Category = "Updates", meta = (DisplayName = "Last Checked"))
 	FDateTime UpdatesLastChecked = FDateTime(2025, 7, 12);

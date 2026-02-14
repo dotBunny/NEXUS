@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 9,
-	"VersionName": "0.2.6",
+	"Version": 10,
+	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Dynamic References",
 	"Description": "Method for referring to UObjects prior to runtime, and by developer readable names.",
 	"Category": "NEXUS",
