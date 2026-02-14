@@ -3,12 +3,12 @@
 
 #include "Validators/NBlueprintValidator.h"
 #include "K2Node_Event.h"
-#include "NFixersEditorSettings.h"
-#include "NFixersUtils.h"
+#include "NToolsEditorSettings.h"
+#include "NToolsEditorUtils.h"
 
 bool UNBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
-	if (UNFixersEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
+	if (UNToolsEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
 		return false;
 	}
@@ -18,7 +18,7 @@ bool UNBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InA
 EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
 {
 	static const FName EventTickName(TEXT("ReceiveTick"));
-	const UNFixersEditorSettings* Settings = UNFixersEditorSettings::Get();
+	const UNToolsEditorSettings* Settings = UNToolsEditorSettings::Get();
 
 	// Check Type
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
@@ -36,9 +36,9 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 				{
 					if (IsEmptyTick(EventNode))
 					{
-						FNFixersUtils::AddResponse(Context, Settings->BlueprintEmptyTick,
-			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.\nFor more information visit https://nexus-framework.com/docs/plugins/fixers/validators/blueprint-validator/#isemptytick")));
-						Result = FNFixersUtils::GetResult(Settings->BlueprintEmptyTick);
+						FNToolsEditorUtils::AddResponse(Context, Settings->BlueprintEmptyTick,
+			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.\nFor more information visit https://nexus-framework.com/docs/plugins/tools/validators/blueprint-validator/#isemptytick")));
+						Result = FNToolsEditorUtils::GetResult(Settings->BlueprintEmptyTick);
 					}
 				}
 			}
@@ -50,10 +50,10 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 				{
 					if (IsMultiPinPureNode(PureNode))
 					{
-						FNFixersUtils::AddResponse(Context, Settings->BlueprintMultiPinPureNode,
+						FNToolsEditorUtils::AddResponse(Context, Settings->BlueprintMultiPinPureNode,
 						FText::Join(FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle),
-										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.\nFor more information visit https://nexus-framework.com/docs/plugins/fixers/validators/blueprint-validator/#ismultipinpurenode"))));
-						Result = FNFixersUtils::GetResult(Settings->BlueprintMultiPinPureNode);
+										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.\nFor more information visit https://nexus-framework.com/docs/plugins/tools/validators/blueprint-validator/#ismultipinpurenode"))));
+						Result = FNToolsEditorUtils::GetResult(Settings->BlueprintMultiPinPureNode);
 					}
 				}
 			}

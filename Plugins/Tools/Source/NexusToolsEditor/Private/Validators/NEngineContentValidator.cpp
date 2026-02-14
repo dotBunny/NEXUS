@@ -3,12 +3,12 @@
 
 #include "Validators/NEngineContentValidator.h"
 #include "DataValidation/Public/DataValidationChangelist.h"
-#include "NFixersEditorSettings.h"
-#include "NFixersUtils.h"
+#include "NToolsEditorSettings.h"
+#include "NToolsEditorUtils.h"
 
 bool UNEngineContentValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const
 {
-	if (UNFixersEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
+	if (UNToolsEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
 		return false;
 	}
@@ -19,15 +19,15 @@ bool UNEngineContentValidator::CanValidateAsset_Implementation(const FAssetData&
 
 EDataValidationResult UNEngineContentValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context)
 {
-	const UNFixersEditorSettings* Settings = UNFixersEditorSettings::Get();
+	const UNToolsEditorSettings* Settings = UNToolsEditorSettings::Get();
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	if (Settings->EngineContentChange != ENValidatorSeverity::Disable)
 	{
-		FNFixersUtils::AddResponse(Context, Settings->EngineContentChange,
+		FNToolsEditorUtils::AddResponse(Context, Settings->EngineContentChange,
 			FText::FromString(TEXT("Engine content changes should be heavily scrutinized before commiting. They can be easily overwritten during upgrades or other verification processes.\nFor more information visit https://nexus-framework.com/docs/plugins/fixers/validators/engine-content-validator/#engine-content-changed")));
 
 		
-		Result = FNFixersUtils::GetResult(Settings->EngineContentChange);
+		Result = FNToolsEditorUtils::GetResult(Settings->EngineContentChange);
 	}
 	return Result;
 }

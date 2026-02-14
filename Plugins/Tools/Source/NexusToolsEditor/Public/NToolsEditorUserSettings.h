@@ -33,7 +33,6 @@ public:
 		return SectionDescription;
 	}
 
-
 #if WITH_EDITORONLY_DATA
 
 	UPROPERTY(EditAnywhere, config, Category = "Leak Check", DisplayName ="Duration", meta=(ToolTip="How long should the leak check run?"))

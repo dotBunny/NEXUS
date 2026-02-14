@@ -3,7 +3,7 @@
 
 #pragma once
 
-struct FNEditorCommandInfo
+struct FNToolsMenuItem
 {
 	FName Section = TEXT("General");
 	FName Identifier;
@@ -17,7 +17,7 @@ struct FNEditorCommandInfo
 	FSlateIcon Icon;
 };
 
-#define N_IMPLEMENT_GENERATE_COMMAND_INFO_MENU(Sections, Commands) \
+#define N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, Commands) \
 	for (const auto& CommandSection : Sections) \
 	{ \
 		FToolMenuSection& Section = Menu->AddSection(CommandSection.Key, CommandSection.Value); \

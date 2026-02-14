@@ -1,9 +1,9 @@
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NFixersEditorSettings.h"
+#include "NToolsEditorSettings.h"
 
-bool UNFixersEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) const
+bool UNToolsEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) const
 {
 	if (IgnoredAssets.Contains(AssetPath)) return true;
 

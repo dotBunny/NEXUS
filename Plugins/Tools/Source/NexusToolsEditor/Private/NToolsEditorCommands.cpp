@@ -6,10 +6,12 @@
 #include "NEditorStyle.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
-#include "NToolsEditorMenu.h"
+#include "NFixersMenu.h"
+#include "NToolsMenu.h"
 #include "NToolsEditorMinimal.h"
 #include "NToolsEditorStyle.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
+#include "Fixers/NPoseAssetFixer.h"
 
 void FNToolsEditorCommands::AddMenuEntries()
 {
@@ -21,12 +23,27 @@ void FNToolsEditorCommands::AddMenuEntries()
 			"NEXUS",
 			NSLOCTEXT("NexusCoreEditor", "NTools", "NEXUS"),
 			NSLOCTEXT("NexusCoreEditor", "NTools_ToolTip", "Tools added by NEXUS that don't seem to fit anywhere else."),
-			FNewToolMenuDelegate::CreateStatic(&FNToolsEditorMenu::GenerateMenu, false),
+			FNewToolMenuDelegate::CreateStatic(&FNToolsMenu::GenerateMenu, false),
 			false,
 			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 		);
 		Entry.InsertPosition = FToolMenuInsert("FindInBlueprints", EToolMenuInsertType::After);
 		ToolsSection.AddEntry(Entry);
+	}
+	
+	// Dyanmic Bulk Operations
+	// Add to folder to ContentBrowser
+	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("ContentBrowser.FolderContextMenu"))
+	{
+		FToolMenuSection& Section = Menu->FindOrAddSection("PathContextBulkOperations");
+		Section.AddSubMenu(
+				"NFindAndFixOperations",
+				NSLOCTEXT("NexusToolsEditor", "ContextMenu_FindAndFix", "Find & Fix"),
+				NSLOCTEXT("NexusToolsEditor", "ContextMenu_FindAndFix_ToolTip", "Find and fix operations on selected content."),
+				FNewToolMenuDelegate::CreateStatic(&FNFixersMenu::GenerateMenu, true),
+				false,
+				FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.FindAndFix")
+			);
 	}
 	
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Debug"))
@@ -59,24 +76,37 @@ void FNToolsEditorCommands::AddMenuEntries()
 		}
 	}
 
+	// TOOLS MENU
 	
 	// Leak Check
-	auto LeakCheckCommandInfo = FNEditorCommandInfo();
+	auto LeakCheckCommandInfo = FNToolsMenuItem();
 	LeakCheckCommandInfo.Identifier = "NCore.Tools.LeakCheck";
 	LeakCheckCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check");
 	LeakCheckCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
 	LeakCheckCommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.LeakCheck");
 	LeakCheckCommandInfo.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
-	FNToolsEditorMenu::AddCommand(LeakCheckCommandInfo);
+	FNToolsMenu::AddCommand(LeakCheckCommandInfo);
 	
 	// Clean Logs
-	auto CleanLogsCommandInfo = FNEditorCommandInfo();
+	auto CleanLogsCommandInfo = FNToolsMenuItem();
 	CleanLogsCommandInfo.Identifier = "NCore.Logs.CleanLogsFolder";
 	CleanLogsCommandInfo.DisplayName = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder", "Clean Logs Folder");
 	CleanLogsCommandInfo.Tooltip = NSLOCTEXT("NexusCoreEditor","Command_Logs_CleanLogsFolder_Desc", "Removes old logs from the Saved\\Logs folder."),
 	CleanLogsCommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.CleanLogsFolder");
 	CleanLogsCommandInfo.Execute = FExecuteAction::CreateStatic(&OnWindowCleanLogsFolder);
-	FNToolsEditorMenu::AddCommand(CleanLogsCommandInfo);
+	FNToolsMenu::AddCommand(CleanLogsCommandInfo);
+	
+	// BULK OPERATIONS
+	
+	// Add Tool Commands
+	FNToolsMenuItem CommandInfo;
+	CommandInfo.Identifier = "NEXUS_Tools_FindAndFix_PoseAsset_OutOfDateAnimationSource";
+	CommandInfo.Section = "Assets";
+	CommandInfo.DisplayName = NSLOCTEXT("NexusToolsEditor", "Command_PoseAsset", "Outdated PoseAsset Source Animations");
+	CommandInfo.Tooltip = NSLOCTEXT("NexusToolsEditor", "Command_BulkOperations", "Find and fix any PoseAssets in the selected content with out-of-date source animations.");
+	CommandInfo.Icon = FSlateIcon(FNToolsEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item");
+	CommandInfo.Execute = FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true);
+	FNFixersMenu::AddCommand(CommandInfo);
 }
 
 void FNToolsEditorCommands::RemoveMenuEntries()
@@ -87,6 +117,8 @@ void FNToolsEditorCommands::RemoveMenuEntries()
 		// Remove Collision Visualizer
 		Menu->RemoveEntry("LevelEditor.MainMenu.Tools.Debug", "Debug", 
 			NEXUS::ToolsEditor::CollisionVisualizer::Identifier);
+		
+		Menu->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NFindAndFixOperations");
 		
 		Menu->RemoveEntry("LevelEditor.MainMenu.Tools", "Tools", "NEXUS");
 		

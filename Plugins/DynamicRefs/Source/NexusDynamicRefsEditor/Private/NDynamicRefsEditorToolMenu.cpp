@@ -7,12 +7,12 @@
 #include "NDynamicRefsEditorStyle.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
-#include "NToolsEditorMenu.h"
+#include "NToolsMenu.h"
 
 void FNDynamicRefsEditorToolMenu::Register()
 {
 	// EUW Entry
-	auto EditorWindow = FNEditorCommandInfo();
+	auto EditorWindow = FNToolsMenuItem();
 	
 	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::DynamicRefsEditor::EUW::Identifier;
@@ -22,12 +22,12 @@ void FNDynamicRefsEditorToolMenu::Register()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNDynamicRefsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNToolsEditorMenu::AddCommand(EditorWindow);
+	FNToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNDynamicRefsEditorToolMenu::Unregister()
 {
-	FNToolsEditorMenu::RemoveCommand(NEXUS::DynamicRefsEditor::EUW::Identifier);
+	FNToolsMenu::RemoveCommand(NEXUS::DynamicRefsEditor::EUW::Identifier);
 }
 
 void FNDynamicRefsEditorToolMenu::CreateEditorUtilityWindow()

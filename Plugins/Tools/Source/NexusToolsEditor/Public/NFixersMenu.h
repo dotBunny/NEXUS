@@ -3,18 +3,22 @@
 
 #pragma once
 
-#include "NEditorCommandInfo.h"
+#include "NToolsMenuItem.h"
 
-class FNToolsEditorMenu
+class FNFixersMenu
 {
 public:
-	NEXUSTOOLSEDITOR_API static void AddCommand(FNEditorCommandInfo CommandInfo);
+	
+	static void Register();
+	static void Unregister();
+	
+	NEXUSTOOLSEDITOR_API static void AddCommand(const FNToolsMenuItem& Item);
 	NEXUSTOOLSEDITOR_API static void RemoveCommand(FName Identifier);
 	
 	static void GenerateMenu(UToolMenu* Menu, bool bIsContextMenu);
 private:
 	
-	static TMap<FName, FNEditorCommandInfo> CommandInfos;
+	
+	static TMap<FName, FNToolsMenuItem> Items;
 	static TMap<FName, FText> Sections;
 };
-

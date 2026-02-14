@@ -25,6 +25,7 @@ namespace UnrealBuildTool.Rules
 				[
 					"BlueprintGraph",
 					"CoreUObject",
+					"DataValidation",
 					"DeveloperSettings",
 					"Engine",
 					"EditorSubsystem",

@@ -16,6 +16,7 @@
 
 ### Changed
 
+- `NEXUS: Fixers` has been collapsed into a more generalized `NEXUS: Tools` plugin, this is where many of the base level tooling has landed.
 - Menu entries were streamlined and repositioned to better fit into the UE ecosystem.
 - `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.

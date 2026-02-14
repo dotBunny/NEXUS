@@ -3,7 +3,7 @@
 
 #include "NProcGenEditorToolMenu.h"
 
-#include "NEditorCommandInfo.h"
+#include "NToolsMenuItem.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "Cell/NCellJunctionComponent.h"
@@ -13,7 +13,7 @@
 #include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
-#include "NToolsEditorMenu.h"
+#include "NToolsMenu.h"
 
 void FNProcGenEditorToolMenu::AddMenuEntries()
 {
@@ -253,7 +253,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 	}
 
 	// EUW Entry
-	auto EditorWindow = FNEditorCommandInfo();
+	auto EditorWindow = FNToolsMenuItem();
 	
 	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier;
@@ -264,12 +264,12 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNToolsEditorMenu::AddCommand(EditorWindow);
+	FNToolsMenu::AddCommand(EditorWindow);
 }
 
 void FNProcGenEditorToolMenu::RemoveMenuEntries()
 {
-	FNToolsEditorMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
+	FNToolsMenu::RemoveCommand(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 	
 	UToolMenus* Menu = UToolMenus::Get();
 	if (Menu)

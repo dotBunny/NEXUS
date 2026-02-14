@@ -31,10 +31,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusFixers",
-			"Enabled": true
-		},
-		{
 			"Name": "NexusMultiplayer",
 			"Enabled": true
 		},

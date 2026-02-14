@@ -2,11 +2,11 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
-#include "NFixersEditorSettings.h"
+
+#include "NToolsEditorSettings.h"
 #include "Misc/DataValidation.h"
 
-
-class FNFixersUtils
+class FNToolsEditorUtils
 {
 public:
 	static void AddResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& NewMessage)

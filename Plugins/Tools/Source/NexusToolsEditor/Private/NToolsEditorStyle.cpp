@@ -15,6 +15,8 @@ TSharedRef<FSlateStyleSet> FNToolsEditorStyle::Create()
 	Style.Set("Command.LeakCheck", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_LeakCheck"), Icon16x16));
 	Style.Set("Command.CleanLogsFolder", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_CleanLogsFolder"), Icon16x16));
 	Style.Set("Command.Visualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Visualizer"), Icon16x16));
+	Style.Set("Command.FindAndFix", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_FindAndFix"), Icon16x16));
+	Style.Set("Command.FindAndFix.Item", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_FindAndFix_Item"), Icon16x16));
 	
 	
 	// NCollisionVisualizerActor / Window
