@@ -5,9 +5,8 @@
 
 #include "NCoreEditorMinimal.h"
 #include "NEditorCommands.h"
-#include "NEditorSettings.h"
 #include "NEditorStyle.h"
-#include "NEditorUserSettings.h"
+#include "NEditorUtils.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
@@ -19,10 +18,6 @@ void FNCoreEditorModule::StartupModule()
 	{
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Framework initializing in an automated environment; some functionality will be ignored."));
 	}
-	
-	UNEditorSettings::Register();
-	UNEditorUserSettings::Register();
-
 	
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNCoreEditorModule, OnPostEngineInit);
 }

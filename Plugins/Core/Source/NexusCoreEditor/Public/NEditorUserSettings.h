@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include "NEditorDefaults.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
-#include "NEditorUtils.h"
 #include "NEditorUserSettings.generated.h"
 
 UCLASS(config = NexusUserSettings)
@@ -15,12 +13,9 @@ class NEXUSCOREEDITOR_API UNEditorUserSettings : public UDeveloperSettings
 public:
 	GENERATED_BODY()
 	N_IMPLEMENT_EDITOR_SETTINGS(UNEditorUserSettings);
-
-	static void Register() { FNEditorUtils::RegisterSettings(GetMutable()); }
-	static void Unregister() { FNEditorUtils::UnregisterSettings(Get());}
 	
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
+	virtual FName GetContainerName() const override { return NAME_None;  }
+	virtual FName GetCategoryName() const override {  return NAME_None;  }
 	virtual FText GetSectionText() const override
 	{
 		const FText SectionText =  FText::FromString(TEXT("Core (User)"));

@@ -2,12 +2,12 @@
 	"FileVersion": 3,
 	"Version": 10,
 	"VersionName": "0.2.7",
-	"FriendlyName": "NEXUS: Dynamic References",
-	"Description": "Method for referring to UObjects prior to runtime, and by developer readable names.",
+	"FriendlyName": "NEXUS: Tooling",
+	"Description": "An assortment of developer tooling for the Unreal Editor.",
 	"Category": "NEXUS",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://nexus-framework.com/docs/plugins/dynamic-references/",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/tooling/",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
@@ -16,12 +16,7 @@
 	"Installed": false,
 	"Modules": [
 		{
-			"Name": "NexusDynamicRefs",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "NexusDynamicRefsEditor",
+			"Name": "NexusToolingEditor",
 			"Type": "Editor",
 			"LoadingPhase": "Default",
 			"PlatformAllowList": [
@@ -37,11 +32,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusTooling",
+			"Name": "NexusUI",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusUI",
+			"Name": "CommonUI",
 			"Enabled": true
 		}
 	],

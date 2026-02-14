@@ -11,15 +11,6 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
-#if PLATFORM_WINDOWS
-#include "Windows/WindowsHWrapper.h"
-#ifdef UNICODE
-#define SEND_MESSAGE  SendMessageW
-#else
-#define SEND_MESSAGE  SendMessageA
-#endif // !UNICODE
-#endif
-
 void FNEditorUtils::RegisterSettings(UDeveloperSettings* SettingsObject)
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
@@ -196,67 +187,6 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
 	}
-}
-
-void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
-{
-	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
-	if (MutableStyleSet != nullptr)
-	{
-		MutableStyleSet->Set("AppIcon", Icon);
-	}
-	else
-	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateVectorImageBrush override."));
-	}
-}
-
-void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
-{
-	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
-	if (MutableStyleSet != nullptr)
-	{
-		MutableStyleSet->Set("AppIcon", Icon);
-	}
-	else
-	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateImageBrush override."));
-	}
-}
-
-bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
-{
-#if PLATFORM_WINDOWS
-	const FString FinalPath = FString::Printf(TEXT("%s.ico"), *IconPath);
-	// ReSharper disable CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	if (FPaths::FileExists(FinalPath))
-	{
-		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
-		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
-		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
-		
-		if (hIcon)
-		{
-			// Set the large icon (Alt+Tab, taskbar)
-			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        
-			// Set the small icon (window title bar)
-			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        
-			// Also set it for the window class
-			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
-			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
-			return true;
-		}
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it failed to load."), *FinalPath);
-		return false;
-	}
-	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it could not be found."), *FinalPath);
-#else
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Replacing the operating system icon for the Unreal Editor application is not supported on this platform."));
-#endif
-	return false;
 }
 
 void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)

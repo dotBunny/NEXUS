@@ -6,7 +6,6 @@
 #include "NEditorDefaults.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
-#include "NEditorUtils.h"
 #include "NMultiplayerEditorUserSettings.generated.h"
 
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Multiplayer (User)"))
@@ -15,9 +14,6 @@ class UNMultiplayerEditorUserSettings : public UDeveloperSettings
 public:
 	GENERATED_BODY()
 	N_IMPLEMENT_EDITOR_SETTINGS(UNMultiplayerEditorUserSettings);
-
-	static void Register() { FNEditorUtils::RegisterSettings(GetMutable()); }
-	static void Unregister() { FNEditorUtils::UnregisterSettings(Get());}
 	
 	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
 	virtual FName GetCategoryName() const override { return FNEditorDefaults::GetEditorSettingsCategoryName();  }

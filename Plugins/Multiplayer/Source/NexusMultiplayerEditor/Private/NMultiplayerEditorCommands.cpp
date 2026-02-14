@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NMultiplayerEditorCommands.h"
+
+#include "NEditorUtils.h"
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorUserSettings.h"
 

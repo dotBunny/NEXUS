@@ -174,11 +174,7 @@ public:
 	static void DisallowConfigFileFromStaging(const FString& Config);
 	static void AllowConfigFileForStaging(const FString& Config);
 	
-	static void ReplaceAppIcon(FSlateImageBrush* Icon);
-	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
-	static bool ReplaceWindowIcon(const FString& IconPath);
 
-	
 	FORCEINLINE static FString GetEngineBinariesPath()
 	{
 		return FPaths::Combine(FPaths::EngineDir(), "Binaries");

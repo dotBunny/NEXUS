@@ -7,7 +7,6 @@
 #include "NEditorDefaults.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
-#include "NEditorUtils.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "NEditorSettings.generated.h"
 
@@ -17,9 +16,6 @@ class UNEditorSettings : public UDeveloperSettings
 public:
 	GENERATED_BODY()
 	N_IMPLEMENT_EDITOR_SETTINGS(UNEditorSettings);
-	
-	static void Register() { FNEditorUtils::RegisterSettings(GetMutable());}
-	static void Unregister() { FNEditorUtils::UnregisterSettings(Get());}
 	
 	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }

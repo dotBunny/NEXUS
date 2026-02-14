@@ -45,6 +45,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "NexusTooling",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusUI",
 			"Enabled": true
 		}
