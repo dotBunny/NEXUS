@@ -26,7 +26,8 @@ public:
 	}
 	virtual FText GetSectionDescription() const override
 	{
-		const FText SectionDescription = FText::FromString(TEXT("General framework settings for the Unreal Editor."));
+		
+		const FText SectionDescription = FText::FromString("General settings for the NEXUS: Core plugin.");
 		return SectionDescription;
 	}
 
