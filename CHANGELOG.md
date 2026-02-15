@@ -16,7 +16,7 @@
 
 ### Changed
 
-- `NEXUS: Fixers` has been collapsed into a more generalized `NEXUS: Tools` plugin, this is where many of the base level tooling has landed.
+- `NEXUS: Fixers` has been collapsed into a more generalized `NEXUS: Tooling` plugin, this is where _all your base_ Unreal Editor tooling has been shifted as well (from the editor side of `NEXUS: Core`).
 - Menu entries were streamlined and repositioned to better fit into the UE ecosystem.
 - `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
@@ -30,6 +30,7 @@
 - `FNCirclePicker::IsPointInsideOrOn` and `UNCirclePickerLibrary::IsPointInsideOrOn` now correctly return `true` when the point is inside a rotated circle.
 - `FNBoxPicker` and `FNRectanglePicker` no longer have regions unintentionally excluded in the distribution.
 - `ANSamplesLevelActor` now properly flags the `SM_SkySphere` not to have any collisions, stopping a warning when building NavMesh.
+- [#125](https://github.com/dotBunny/NEXUS/issues/125) Issue with `NPoseAssetFixer` not working on external plugin content.
 
 ### Removed
 
