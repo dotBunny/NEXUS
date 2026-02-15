@@ -27,10 +27,10 @@ ENUM_CLASS_FLAGS(ENBuildConfigurationAvailability)
 	static_cast<uint8>(ENBuildConfigurationAvailability::Editor)
 
 #define N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING \
-static_cast<uint8>(ENBuildConfigurationAvailability::Debug) | \
-static_cast<uint8>(ENBuildConfigurationAvailability::Development) | \
-static_cast<uint8>(ENBuildConfigurationAvailability::Test) | \
-static_cast<uint8>(ENBuildConfigurationAvailability::Editor)
+	static_cast<uint8>(ENBuildConfigurationAvailability::Debug) | \
+	static_cast<uint8>(ENBuildConfigurationAvailability::Development) | \
+	static_cast<uint8>(ENBuildConfigurationAvailability::Test) | \
+	static_cast<uint8>(ENBuildConfigurationAvailability::Editor)
 
 class FNBuildConfigurationAvailability
 {
