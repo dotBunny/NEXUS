@@ -7,7 +7,7 @@
 	"Category": "NEXUS Samples",
 	"CreatedBy": "dotBunny Inc.",
 	"CreatedByURL": "https://dotbunny.com",
-	"DocsURL": "https://nexus-framework.com/docs/plugins/ui/samples/",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/ui/#samples",
 	"MarketplaceURL": "",
 	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
 	"EnabledByDefault": false,
