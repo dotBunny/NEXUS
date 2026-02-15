@@ -12,16 +12,15 @@
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
  * @see <a href="https://nexus-framework.com/docs/plugins/guardian/">Guardian</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Subsystem")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Subsystem")
 class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
-
-#if UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST	
-	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNGuardianSubsystem, UNGuardianSettings::Get()->bDeveloperSubsystemEnabled)
-#else // !(UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST)
- 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNGuardianSubsystem, false)
-#endif // UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST
+	
+	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(
+		UNGuardianSubsystem, 
+		FNBuildConfigurationAvailability::IsAvailableInBuild(
+			static_cast<ENBuildConfigurationAvailability>(UNGuardianSettings::Get()->BuildAvailability)))
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/#setting-a-baseline"))

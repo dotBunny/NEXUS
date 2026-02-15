@@ -9,3 +9,5 @@ namespace NEXUS::Guardian::EUW
 	inline FName Identifier = TEXT("EUW_NGuardian");
 	inline FName Icon = TEXT("ClassIcon.NGuardianSubsystem");
 }
+
+DECLARE_LOG_CATEGORY_EXTERN(LogNexusGuardian, Log, All);

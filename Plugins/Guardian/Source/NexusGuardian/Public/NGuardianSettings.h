@@ -5,6 +5,7 @@
 
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
+#include "Types/NBuildConfigurationAvailability.h"
 #include "NGuardianSettings.generated.h"
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Settings", Config=NexusGame, defaultconfig)
@@ -18,7 +19,6 @@ public:
 #if WITH_EDITOR	
 	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
-	
 
 	virtual FText GetSectionText() const override
 	{
@@ -27,32 +27,30 @@ public:
 	}
 	virtual FText GetSectionDescription() const override
 	{
-		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Guardian plugin."));
+		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Guardian subsystem."));
 		return SectionDescription;
 	}
 #endif // WITH_EDITOR	
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability"))
+	uint8 BuildAvailability = N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Use Developer Subsystem?",
-	meta=(ToolTip="Should the Developer Subsystem be created? It is required for UObject monitoring and you still must call UNDeveloperSubsystem::SetBaseline!"))
-	bool bDeveloperSubsystemEnabled = false;
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Warning Threshold",
-	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown.", EditCondition="bDeveloperSubsystemEnabled"))
-	int32 DeveloperObjectCountWarningThreshold = 25000;
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Snapshot Threshold",
-	meta=(ToolTip="The number of added UObjects to a world when a snapshot should be taken. This snapshot will be compared with later if the counts exceed the compare threshold.",
-		EditCondition="bDeveloperSubsystemEnabled"))
-	int32 DeveloperObjectCountSnapshotThreshold = 30000;
-
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Save Capture",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Save Capture",
 		meta=(ToolTip="Should the capture data be saved to the project's logs folder? Saving the capture to disk is not required to compare, the snapshot will be stored in memory.",
-			EditCondition="bDeveloperSubsystemEnabled"))
-	bool bDeveloperObjectCountCaptureOutput = false;
+			EditCondition="BuildAvailability!=0"))
+	bool bObjectCountCaptureOutput = false;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Warning Threshold",
+	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown.", EditCondition="BuildAvailability!=0"))
+	int32 ObjectCountWarningThreshold = 25000;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Compare Threshold",
-	meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done.",
-		EditCondition="bDeveloperSubsystemEnabled"))
-	int32 DeveloperObjectCountCompareThreshold = 40000;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Snapshot Threshold",
+	meta=(ToolTip="The number of added UObjects to a world when a snapshot should be taken. This snapshot will be compared with later if the counts exceed the compare threshold.",
+		EditCondition="BuildAvailability!=0"))
+	int32 ObjectCountSnapshotThreshold = 30000;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Compare Threshold",
+		meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done.",
+			EditCondition="BuildAvailability!=0"))
+	int32 ObjectCountCompareThreshold = 40000;
 };
