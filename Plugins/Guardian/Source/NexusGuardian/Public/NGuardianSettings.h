@@ -5,14 +5,14 @@
 
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
-#include "NCoreSettings.generated.h"
+#include "NGuardianSettings.generated.h"
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Core Settings", Config=NexusGame, defaultconfig)
-class NEXUSCORE_API UNCoreSettings : public UDeveloperSettings
+UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Settings", Config=NexusGame, defaultconfig)
+class UNGuardianSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	N_IMPLEMENT_SETTINGS(UNCoreSettings);
+	N_IMPLEMENT_SETTINGS(UNGuardianSettings);
 
 public:
 #if WITH_EDITOR	
@@ -22,16 +22,17 @@ public:
 
 	virtual FText GetSectionText() const override
 	{
-		const FText SectionText =  FText::FromString(TEXT("Core"));
+		const FText SectionText =  FText::FromString(TEXT("Guardian"));
 		return SectionText;
 	}
 	virtual FText GetSectionDescription() const override
 	{
-		const FText SectionDescription = FText::FromString(TEXT("Settings related to the core plugin."));
+		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Guardian plugin."));
 		return SectionDescription;
 	}
 #endif // WITH_EDITOR	
 
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Use Developer Subsystem?",
 	meta=(ToolTip="Should the Developer Subsystem be created? It is required for UObject monitoring and you still must call UNDeveloperSubsystem::SetBaseline!"))
 	bool bDeveloperSubsystemEnabled = false;

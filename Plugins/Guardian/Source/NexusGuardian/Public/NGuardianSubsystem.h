@@ -3,28 +3,28 @@
 
 #pragma once
 
-#include "NCoreSettings.h"
-#include "NObjectSnapshot.h"
+#include "NGuardianSettings.h"
+#include "Developer/NObjectSnapshot.h"
 #include "Macros/NSubsystemMacros.h"
-#include "NDeveloperSubsystem.generated.h"
+#include "NGuardianSubsystem.generated.h"
 
 /**
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/">UNDeveloperSubsystem</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/guardian/">Guardian</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Subsystem")
-class NEXUSCORE_API UNDeveloperSubsystem : public UTickableWorldSubsystem
+class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
 #if UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST	
-	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, UNCoreSettings::Get()->bDeveloperSubsystemEnabled)
+	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNGuardianSubsystem, UNGuardianSettings::Get()->bDeveloperSubsystemEnabled)
 #else // !(UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST)
- 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNDeveloperSubsystem, false)
+ 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNGuardianSubsystem, false)
 #endif // UE_BUILD_DEVELOPMENT || UE_BUILD_DEBUG || UE_BUILD_TEST
 
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-subsystem/#setting-a-baseline"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/#setting-a-baseline"))
 	void SetBaseline();
 	
 	virtual void Tick(float DeltaTime) override;

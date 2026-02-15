@@ -1,16 +1,17 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Developer/NDeveloperSubsystem.h"
+#include "NGuardianSubsystem.h"
 
 #include "NCoreMinimal.h"
+#include "NGuardianSettings.h"
 #include "Developer/NDeveloperUtils.h"
 #include "Developer/NObjectSnapshot.h"
 #include "Developer/NObjectSnapshotUtils.h"
 
-void UNDeveloperSubsystem::SetBaseline()
+void UNGuardianSubsystem::SetBaseline()
 {
-	const UNCoreSettings* Settings = UNCoreSettings::Get();
+	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
 
 	bPassedObjectCountWarningThreshold = false;
 	bPassedObjectCountSnapshotThreshold = false;
@@ -33,7 +34,7 @@ void UNDeveloperSubsystem::SetBaseline()
 	bBaselineSet = true;
 }
 
-void UNDeveloperSubsystem::Tick(float DeltaTime)
+void UNGuardianSubsystem::Tick(float DeltaTime)
 {
 	const int ObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 	
@@ -86,7 +87,7 @@ void UNDeveloperSubsystem::Tick(float DeltaTime)
 	}
 }
 
-void UNDeveloperSubsystem::OnWorldBeginPlay(UWorld& InWorld)
+void UNGuardianSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 	SetBaseline();

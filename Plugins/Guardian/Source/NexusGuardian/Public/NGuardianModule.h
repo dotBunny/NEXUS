@@ -7,12 +7,11 @@
 #include "Modules/ModuleInterface.h"
 
 /**
- * NEXUS: DynamicRefs Module
+ * NEXUS: Guardian Module
  */
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNGuardianModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
 	N_IMPLEMENT_MODULE(FNGuardianModule, "NexusGuardian")
 };
