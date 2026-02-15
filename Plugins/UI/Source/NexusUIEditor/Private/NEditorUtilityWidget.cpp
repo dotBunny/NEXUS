@@ -10,26 +10,22 @@
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "NEditorUtils.h"
 
-UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, FName Identifier)
+UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, const FName Identifier)
 {
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
-	
-	if (Identifier != NAME_None)
+	if (Identifier != NAME_None && System != nullptr && System->HasWidget(Identifier))
 	{
-		if (System != nullptr && System->HasWidget(Identifier))
+		UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
+		if (Widget != nullptr)
 		{
-			UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
-			if (Widget != nullptr)
+			const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
+				Widget->TakeWidget(), Widget->GetTabDisplayName(), Widget->GetTabIdentifier());
+			if (Tab.IsValid())
 			{
-				const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
-					Widget->TakeWidget(), Widget->GetTabDisplayName(), Widget->GetTabIdentifier());
-				if (Tab.IsValid())
-				{
-					Tab->FlashTab();
-				}
+				Tab->FlashTab();
 			}
-			return System->GetWidget(Identifier);
 		}
+		return System->GetWidget(Identifier);
 	}
 	
 	if(UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())

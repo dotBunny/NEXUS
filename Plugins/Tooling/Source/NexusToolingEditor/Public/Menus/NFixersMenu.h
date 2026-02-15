@@ -15,7 +15,6 @@ public:
 	NEXUSTOOLINGEDITOR_API static void AddMenuEntry(const FNMenuEntry& Item);
 	NEXUSTOOLINGEDITOR_API static void RemoveMenuEntry(FName Identifier);
 	
-	static void AddKnownEntries();
 	static void GenerateMenu(UToolMenu* Menu, bool bIsContextMenu);
 private:
 	

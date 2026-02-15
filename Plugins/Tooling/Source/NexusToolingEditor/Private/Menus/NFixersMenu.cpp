@@ -70,7 +70,3 @@ void FNFixersMenu::RemoveMenuEntry(const FName Identifier)
 		Entries.Remove(Identifier);
 	}
 }
-
-void FNFixersMenu::AddKnownEntries()
-{
-}

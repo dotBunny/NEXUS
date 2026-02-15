@@ -11,7 +11,7 @@
 void FNFixersMenuEntries::AddMenuEntries()
 {
 	// Add Tool Commands
-	FNMenuEntry FixPoseAssetMenuEntry = FNMenuEntry();
+	auto FixPoseAssetMenuEntry = FNMenuEntry();
 	FixPoseAssetMenuEntry.Identifier = "PoseAsset_OutOfDateAnimationSource";
 	FixPoseAssetMenuEntry.Section = "Assets";
 	FixPoseAssetMenuEntry.DisplayName = NSLOCTEXT("NexusToolingEditor", "PoseAsset_OutOfDateAnimationSource", "Outdated PoseAsset Source Animations");
