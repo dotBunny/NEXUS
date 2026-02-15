@@ -1,0 +1,41 @@
+{
+	"FileVersion": 3,
+	"Version": 10,
+	"VersionName": "0.2.7",
+	"FriendlyName": "NEXUS: Guardian",
+	"Description": "TBD",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/Guardian/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusGuardian",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusGuardianEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}
