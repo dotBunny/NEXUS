@@ -7,7 +7,7 @@
 #include "Windows/WindowsHWrapper.h"
 #ifdef UNICODE
 #define SEND_MESSAGE  SendMessageW
-#else // UNICODE
+#else // !UNICODE
 #define SEND_MESSAGE  SendMessageA
 #endif // UNICODE
 #endif // PLATFORM_WINDOWS
@@ -68,7 +68,7 @@ bool FNToolingEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 	}
 	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
 	UE_LOG(LogNexusToolingEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it could not be found."), *FinalPath);
-#else // PLATFORM_WINDOWS
+#else // !PLATFORM_WINDOWS
 	UE_LOG(LogNexusToolingEditor, Warning, TEXT("Replacing the operating system icon for the Unreal Editor application is not supported on this platform."));
 #endif // PLATFORM_WINDOWS
 	return false;

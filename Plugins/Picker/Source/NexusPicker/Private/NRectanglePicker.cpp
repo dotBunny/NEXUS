@@ -73,7 +73,7 @@
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
-#else // ENABLE_VISUAL_LOG
+#else // !ENABLE_VISUAL_LOG
 #define N_PICKER_RECTANGLE_VLOG(HasMinimumDimensions)
 #define N_PICKER_RECTANGLE_VALID_RANGES \
 	TArray<FVector4> ValidRanges = Params.GetValidRanges();

@@ -6,7 +6,7 @@
 #if UE_BUILD_SHIPPING
 	#define N_GET_WORLD_FROM_CONTEXT(WorldContextObject) \
 		WorldContextObject->GetWorld()
-#else // UE_BUILD_SHIPPING
+#else // !UE_BUILD_SHIPPING
 	#define N_GET_WORLD_FROM_CONTEXT(WorldContextObject) \
 		GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull)	
 #endif // UE_BUILD_SHIPPING

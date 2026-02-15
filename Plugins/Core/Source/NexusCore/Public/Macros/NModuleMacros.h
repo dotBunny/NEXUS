@@ -51,6 +51,6 @@ public: \
 			} \
 		} \
 	}
-#else // WITH_EDITOR && WITH_EDITORONLY_DATA
+#else // !(WITH_EDITOR && WITH_EDITORONLY_DATA)
 #define N_UPDATE_UPLUGIN(PluginName)
 #endif // WITH_EDITOR && WITH_EDITORONLY_DATA

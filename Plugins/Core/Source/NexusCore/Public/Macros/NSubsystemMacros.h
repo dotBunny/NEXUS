@@ -36,7 +36,7 @@
 			} \
 			return false; \
 		}
-#else // WITH_EDITOR
+#else // !WITH_EDITOR
 #define N_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
 	public: \
 		FORCEINLINE static Type* Get(const UWorld* World) { \
@@ -81,7 +81,7 @@
 			} \
 			return false; \
 		}
-#else // WITH_EDITOR
+#else // !WITH_EDITOR
 #define N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
 	public: \
 		FORCEINLINE static Type* Get(const UWorld* World) { \

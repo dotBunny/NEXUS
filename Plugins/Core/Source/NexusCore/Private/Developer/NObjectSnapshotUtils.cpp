@@ -21,7 +21,7 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		if (Objects[i].Object)
-#else // UE_VERSION_OLDER_THAN(5, 6, 0)
+#else // !UE_VERSION_OLDER_THAN(5, 6, 0)
 		if (Objects[i].GetObject())
 #endif // UE_VERSION_OLDER_THAN(5, 6, 0)
 		{

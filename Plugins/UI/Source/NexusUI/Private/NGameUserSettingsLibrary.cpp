@@ -35,7 +35,7 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FStri
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
-#else // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return EWindowMode::Type::Fullscreen;
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
@@ -52,7 +52,7 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
-#else // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return EWindowMode::Type::Fullscreen;
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
@@ -79,7 +79,7 @@ FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWind
 	default:
 		return DisplayModeLabels[0];
 	}
-#else // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return DisplayModeLabels[0];
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
@@ -96,7 +96,7 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 	default:
 		return DisplayModeTexts[0];
 	}
-#else // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return DisplayModeLabels[0];
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
