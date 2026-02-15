@@ -30,7 +30,7 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Settings related to the core plugin."));
 		return SectionDescription;
 	}
-#endif	
+#endif // WITH_EDITOR	
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Developer Subsystem", DisplayName ="Use Developer Subsystem?",
 	meta=(ToolTip="Should the Developer Subsystem be created? It is required for UObject monitoring and you still must call UNDeveloperSubsystem::SetBaseline!"))

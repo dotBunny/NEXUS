@@ -27,7 +27,7 @@ class NEXUSTOOLINGEDITOR_API ANCollisionVisualizerActor: public AActor
 		OutReason = FText::FromString("This AActor is managed by the NCollisionVisualizer.");
 		return false;
 	}
-#endif
+#endif // WITH_EDITOR
 
 public:
 	UNCollisionVisualizerSceneComponent* GetStartComponent() const { return StartPointComponent; }

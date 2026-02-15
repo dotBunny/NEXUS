@@ -42,7 +42,7 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 		return SectionDescription;
 	}
 
-#endif	
+#endif // WITH_EDITOR
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Unit Size",
@@ -79,5 +79,5 @@ private:
 			TryUpdateDefaultConfigFile();
 		}
 	}
-#endif
+#endif // WITH_EDITOR
 };

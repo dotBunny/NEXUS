@@ -41,7 +41,7 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 #if WITH_EDITOR
 		SetLockLocation(true);
 		bCanPlayFromHere = 0;
-#endif		
+#endif // WITH_EDITOR
 		
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
@@ -87,7 +87,7 @@ public:
 	virtual void PostRegisterAllComponents() override;
 	bool HasDifferencesFromSidecar() const;
 	
-#endif	
+#endif // WITH_EDITOR
 
 	void CalculateBounds();
 	void CalculateHull();

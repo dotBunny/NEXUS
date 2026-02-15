@@ -21,9 +21,9 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		if (Objects[i].Object)
-#else
+#else // UE_VERSION_OLDER_THAN(5, 6, 0)
 		if (Objects[i].GetObject())
-#endif
+#endif // UE_VERSION_OLDER_THAN(5, 6, 0)
 		{
 			Snapshot.CapturedObjects.Add(FNObjectSnapshotEntry(Objects[i]));
 			Snapshot.CapturedObjectCount++;

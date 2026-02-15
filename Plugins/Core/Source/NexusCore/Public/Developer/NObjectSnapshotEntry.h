@@ -23,9 +23,9 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		SerialNumber = Item.GetSerialNumber();
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		UObject* Object = static_cast<UObject*>(Item.Object);
-#else
+#else // UE_VERSION_OLDER_THAN(5, 6, 0)
 		UObject* Object = static_cast<UObject*>(Item.GetObject());
-#endif
+#endif // UE_VERSION_OLDER_THAN(5, 6, 0)
 		if (Object != nullptr)
 		{
 			ObjectPtr = Object;

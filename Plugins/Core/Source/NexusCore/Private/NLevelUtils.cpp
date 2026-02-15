@@ -50,14 +50,14 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 #if WITH_EDITOR			
 	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusCore", "Task_DetermineLevelBounds", "Determine Level Bounds"));
 	BoundsTask.MakeDialog(false);
-#endif	
+#endif // WITH_EDITOR	
 	
 	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
 		const AActor* Actor = InLevel->Actors[ActorIndex];
 #if WITH_EDITOR			
 		BoundsTask.EnterProgressFrame(1);
-#endif		
+#endif // WITH_EDITOR
 
 		if (Actor && Actor->IsLevelBoundsRelevant())
 		{

@@ -42,7 +42,7 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Actor Pools."));
 		return SectionDescription;
 	}
-#endif	
+#endif // WITH_EDITOR	
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))

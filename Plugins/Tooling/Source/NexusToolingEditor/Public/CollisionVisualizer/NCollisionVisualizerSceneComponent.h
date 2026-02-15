@@ -20,7 +20,7 @@ class NEXUSTOOLINGEDITOR_API UNCollisionVisualizerSceneComponent: public USceneC
 
 #if WITH_EDITOR
 	void CreateCustomSpriteComponent();
-#endif
+#endif // WITH_EDITOR
 	
 	const FString StartSpritePath = TEXT("/NexusTooling/EditorResources/S_NCollisionVisualizerSceneComponentStart.S_NCollisionVisualizerSceneComponentStart");
 	const FString EndSpritePath = TEXT("/NexusTooling/EditorResources/S_NCollisionVisualizerSceneComponentEnd.S_NCollisionVisualizerSceneComponentEnd");

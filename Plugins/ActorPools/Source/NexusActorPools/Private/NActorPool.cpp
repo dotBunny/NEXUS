@@ -10,7 +10,7 @@
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
-#endif
+#endif // WITH_EDITOR
 
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
 {
@@ -67,7 +67,7 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 		WorkingName = WorkingName.Mid(0, WorkingName.Len() - 2);
 	}
 	Name = FString::Printf(TEXT("AP_%s_%i"), *WorkingName, ActorPoolTicket);
-#endif
+#endif // WITH_EDITOR
 }
 
 void FNActorPool::PostInitialize()
@@ -270,7 +270,7 @@ void FNActorPool::CreateActor(const int32 Count)
 	
 #if WITH_EDITOR
 	int32 LabelNumber = (InActors.Num() + OutActors.Num());
-#endif
+#endif // WITH_EDITOR
 
 	// Create actual actors
 	for (int i = 0; i < Count; i++)
@@ -278,7 +278,7 @@ void FNActorPool::CreateActor(const int32 Count)
 #if WITH_EDITOR
 		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);
 		SpawnInfo.InitialActorLabel = Label;
-#endif
+#endif // WITH_EDITOR
 
 		AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
 
@@ -325,7 +325,7 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 #if ENABLE_VISUAL_LOG
 		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition + HalfHeightOffset, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
-#endif	
+#endif // ENABLE_VISUAL_LOG
 	}
 	else
 	{
@@ -334,11 +334,11 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 #if ENABLE_VISUAL_LOG
 		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
-#endif	
+#endif // ENABLE_VISUAL_LOG	
 	}
 #if ENABLE_VISUAL_LOG
 	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, Actor->GetActorLocation(), NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::ActualPointColor, TEXT("%s"), *Actor->GetName());
-#endif
+#endif // ENABLE_VISUAL_LOG
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
 	

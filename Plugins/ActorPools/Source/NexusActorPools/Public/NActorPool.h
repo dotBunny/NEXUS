@@ -147,7 +147,7 @@ private:
 #if WITH_EDITOR
 	FString Name;
 	static int32 ActorPoolTicket;
-#endif
+#endif // WITH_EDITOR
 	bool bImplementsInterface = false;
 
 	ENToggle SpawnPhysicsSimulation = T_Default;

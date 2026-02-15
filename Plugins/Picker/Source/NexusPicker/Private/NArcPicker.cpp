@@ -37,9 +37,9 @@
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
-#else
+#else // ENABLE_VISUAL_LOG
 #define N_PICKER_RADIAL_VLOG
-#endif
+#endif // ENABLE_VISUAL_LOG
 
 
 #define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange

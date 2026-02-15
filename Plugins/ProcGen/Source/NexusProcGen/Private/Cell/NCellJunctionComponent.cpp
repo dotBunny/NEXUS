@@ -128,7 +128,7 @@ void UNCellJunctionComponent::OnRegister()
 			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
 		}
 	}
-#endif
+#endif // WITH_EDITOR
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);
 	Super::OnRegister();

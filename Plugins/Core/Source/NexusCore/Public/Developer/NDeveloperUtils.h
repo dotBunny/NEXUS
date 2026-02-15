@@ -22,9 +22,9 @@ public:
 			{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 				UObject* Object = static_cast<UObject*>(ObjectItem.Object);
-#else
+#else // UE_VERSION_OLDER_THAN(5, 6, 0)
 				UObject* Object = static_cast<UObject*>(ObjectItem->GetObject());
-#endif
+#endif // UE_VERSION_OLDER_THAN(5, 6, 0)
 				if (Object != nullptr)
 				{
 					RootedObjects.Add(Object);

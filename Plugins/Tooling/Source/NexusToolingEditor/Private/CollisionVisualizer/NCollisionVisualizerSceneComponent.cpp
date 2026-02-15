@@ -15,7 +15,7 @@ void UNCollisionVisualizerSceneComponent::OnRegister()
 
 #if WITH_EDITOR
 	CreateCustomSpriteComponent();
-#endif
+#endif // WITH_EDITOR
 }
 
 #if WITH_EDITOR
@@ -56,4 +56,4 @@ void UNCollisionVisualizerSceneComponent::CreateCustomSpriteComponent()
 		SpriteComponent->SetRelativeScale3D(FVector3d(0.25f));
 	}
 }
-#endif
+#endif // WITH_EDITOR

@@ -48,7 +48,7 @@ void FNCollisionVisualizerUtils::DoLineTraceSingle(const FNCollisionVisualizerSe
 		DrawDebugLine(World, StartPosition, EndPosition, N_COLLISION_VISUALIZER_MISS_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
@@ -97,7 +97,7 @@ void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSet
 			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSettings& Settings, 
@@ -124,7 +124,7 @@ void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSett
 	DrawDebugLine(World, StartPosition, EndPosition, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
 		false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 
@@ -167,7 +167,7 @@ void FNCollisionVisualizerUtils::DoSweepSingle(const FNCollisionVisualizerSettin
 			N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, SDPG_World, 
 			Settings.Drawing.DrawLineThickness);
 	}
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
@@ -223,7 +223,7 @@ void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSetting
 			HitResult.bBlockingHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World);
 	}
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings& Settings, const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
@@ -251,7 +251,7 @@ void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings
 	FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR: N_COLLISION_VISUALIZER_MISS_COLOR, false, 
 		Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
@@ -280,7 +280,7 @@ void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSe
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
-#endif 
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSettings& Settings, 
@@ -309,7 +309,7 @@ void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSetting
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }
 
 void FNCollisionVisualizerUtils::DoOverlapMulti(const FNCollisionVisualizerSettings& Settings, 
@@ -339,5 +339,5 @@ void FNCollisionVisualizerUtils::DoOverlapMulti(const FNCollisionVisualizerSetti
 	FNDrawDebugHelpers::DrawCollisionShape(World, Position, Rotation, CollisionShape, 
 		bHit ? N_COLLISION_VISUALIZER_HIT_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, false, Settings.Drawing.DrawTimer, 
 		SDPG_World, Settings.Drawing.DrawLineThickness);
-#endif
+#endif // UE_ENABLE_DEBUG_DRAWING
 }

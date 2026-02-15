@@ -104,7 +104,7 @@ void UNSamplesDisplayLibrary::TimerDrawComboArc(ANSamplesDisplayActor* SamplesDi
 		AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
 		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
 		NEXUS::Samples::TimerDrawThickness);
-#endif	
+#endif // ENABLE_DRAW_DEBUG	
 	
 	const float MaxDegrees = Degrees * 0.5f;
 	const float MinDegrees = -MaxDegrees;

@@ -134,7 +134,7 @@ void FNDrawDebugHelpers::DrawString(const UWorld* InWorld, FString& String, cons
 			break;
 		}
 	}
-#endif	
+#endif // ENABLE_DRAW_DEBUG
 }
 
 void FNDrawDebugHelpers::DrawBoxSweep(const UWorld* InWorld, const FVector& StartPosition,

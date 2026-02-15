@@ -51,11 +51,11 @@
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
-#else
+#else // ENABLE_VISUAL_LOG
 #define N_PICKER_BOX_VLOG(HasMinimumBox)
 #define N_PICKER_BOX_VALID_BOXES \
 	TArray<FBox> ValidBoxes = Params.GetValidBoxes();
-#endif
+#endif // ENABLE_VISUAL_LOG
 
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
