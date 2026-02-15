@@ -48,8 +48,13 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	ScanTask.MakeDialog(false);
 	for (int i = 0; i < PathCount; i++)
 	{
-		SelectedPaths[i].RemoveFromStart(TEXT("/All"));
+		// Plugins should be their root path
+		SelectedPaths[i].RemoveFromStart("/All/Plugins");
+		// We just dont want the all, just incase.
+		SelectedPaths[i].RemoveFromStart("/All");
+		
 		ScanTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Item", "Scanning {0}"), FText::FromString(SelectedPaths[i])));
+		
 		if (!EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
 		{
 			continue;
