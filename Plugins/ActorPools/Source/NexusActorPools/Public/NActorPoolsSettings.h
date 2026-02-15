@@ -4,7 +4,6 @@
 #pragma once
 
 #include "InputCoreTypes.h"
-#include "NActorPoolsDeveloperOverlay.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSettings.h"
 #include "NSettingsUtils.h"
