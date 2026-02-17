@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.2.7] - 2026-02-16
+## [0.2.7] - 2026-02-20
 
 ### Added
 
@@ -22,6 +22,7 @@
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
 - [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
+- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full FTransfrom set.
 
 ### Fixed
 
@@ -35,6 +36,7 @@
 ### Removed
 
 - `UNWidgetEditorUtilityWidget` no longer used to wrap content widgets, individuals should extend off `UNEditorUtilityWidget` instead.
+- `FNActorPool` half-height calculations and offset (use `FActorPoolSettings::SpawnTransform`).
 
 ## [0.2.6] - 2026-01-20
 

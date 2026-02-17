@@ -83,25 +83,10 @@ public:
 	 */
 	bool DoesSupportInterface() const { return bImplementsInterface; }
 
-	/**
-	 * Get the calculated half-height of the ActorPool's Template.
-	 */
-	double GetHalfHeight() const { return HalfHeight; };
-	/**
-	 * Get the calculated half-height of the ActorPool's Template as an offset vector.
-	 */
-	FVector GetHalfHeightOffset() const { return HalfHeightOffset; };
-
 	int32 GetInCount() const { return InActors.Num(); };
 	int32 GetOutCount() const { return OutActors.Num(); };
 
 	const FNActorPoolSettings& GetSettings() const { return Settings; };
-	
-	/**
-	 * Does the ActorPool's Template have a cached half-height?
-	 * @note This is useful for finding the midpoint to spawn characters.
-	 */
-	bool HasHalfHeight() const { return bHasHalfHeight; };
 
 	/**
 	 * Does the ActorPool have any actors currently in the pool?
@@ -130,10 +115,7 @@ private:
 
 	TSubclassOf<AActor> Template;
 	
-	bool bHasHalfHeight;
 	bool bStubMode = false;
-	double HalfHeight;
-	FVector HalfHeightOffset;
 
 	bool ApplyStrategy();
 	void CreateActor(const int32 Count = 1);

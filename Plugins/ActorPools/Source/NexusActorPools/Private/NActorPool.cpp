@@ -72,18 +72,6 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 
 void FNActorPool::PostInitialize()
 {
-	// Cache half-height of the item	
-	if (const APawn* Pawn = Cast<APawn>(Template->GetDefaultObject()))
-	{
-		HalfHeight = Pawn->GetDefaultHalfHeight();
-		HalfHeightOffset = FVector(0.0f, 0.0f, HalfHeight);
-		bHasHalfHeight = true;
-	}
-	else
-	{
-		bHasHalfHeight = false;
-	}
-
 	if (Settings.CreateObjectsPerTick == -1)
 	{
 		Fill();
@@ -176,7 +164,8 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;
-	Settings.DefaultTransform = InNewSettings.DefaultTransform;
+	Settings.StorageTransform = InNewSettings.StorageTransform;
+	Settings.SpawnedTransform = InNewSettings.SpawnedTransform;
 	
 	// Update based on if we should tick - test usually don't have access to the system to time-slice
 	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
@@ -280,7 +269,7 @@ void FNActorPool::CreateActor(const int32 Count)
 		SpawnInfo.InitialActorLabel = Label;
 #endif // WITH_EDITOR
 
-		AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
+		AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.StorageTransform, SpawnInfo);
 
 		if (bImplementsInterface)
 		{
@@ -290,7 +279,7 @@ void FNActorPool::CreateActor(const int32 Count)
 			if (SpawnInfo.bDeferConstruction)
 			{
 				ActorItem->OnDeferredConstruction();
-				CreatedActor->FinishSpawning(Settings.DefaultTransform);
+				CreatedActor->FinishSpawning(Settings.StorageTransform);
 			}
 			ActorItem->OnCreatedByActorPool();
 			ApplyReturnState(CreatedActor);
@@ -300,7 +289,7 @@ void FNActorPool::CreateActor(const int32 Count)
 		{
 			if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
 			{
-				CreatedActor->FinishSpawning(Settings.DefaultTransform);
+				CreatedActor->FinishSpawning(Settings.StorageTransform);
 			}
 			ApplyReturnState(CreatedActor);
 		}
@@ -318,25 +307,14 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	}
 
 	// Set Actor Location And Rotation
-	if (bHasHalfHeight)
-	{
-		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition + HalfHeightOffset, Settings.DefaultTransform.GetScale3D()),
-			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
+	const FTransform SpawnTransform(
+		InRotation.Quaternion() + Settings.SpawnedTransform.GetRotation(), 
+		InPosition + Settings.SpawnedTransform.GetLocation(),
+		Settings.SpawnedTransform.GetScale3D());
+
+	Actor->SetActorTransform(SpawnTransform,Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
 #if ENABLE_VISUAL_LOG
-		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition + HalfHeightOffset, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
-#endif // ENABLE_VISUAL_LOG
-	}
-	else
-	{
-		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition, Settings.DefaultTransform.GetScale3D()),
-			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
-#if ENABLE_VISUAL_LOG
-		UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
-#endif // ENABLE_VISUAL_LOG	
-	}
-#if ENABLE_VISUAL_LOG
+	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
 	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, Actor->GetActorLocation(), NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::ActualPointColor, TEXT("%s"), *Actor->GetName());
 #endif // ENABLE_VISUAL_LOG
 	
@@ -364,9 +342,9 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 void FNActorPool::ApplyReturnState(AActor* Actor) const
 {
 	// Move to a storage location
-	if (Settings.HasFlag_ReturnToStorageLocation())
+	if (Settings.HasFlag_ReturnToStorage())
 	{
-		Actor->SetActorLocation(Settings.DefaultTransform.GetLocation(), false, nullptr, ETeleportType::ResetPhysics);
+		Actor->SetActorTransform(Settings.StorageTransform, false, nullptr, ETeleportType::ResetPhysics);
 	}
 
 	Actor->SetActorTickEnabled(false);
