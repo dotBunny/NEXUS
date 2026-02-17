@@ -12,9 +12,7 @@ TSharedRef<FSlateStyleSet> FNGuardianEditorStyle::Create()
 {
 	N_IMPLEMENT_EDITOR_STYLE_CREATE
 	
-	// NGuardianSubsystem
-	Style.Set("ClassIcon.NGuardianSubsystem", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NGuardianSubsystem"), Icon16x16));
-	Style.Set("ClassThumbnail.NGuardianSubsystem",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NGuardianSubsystem"), Icon128x128));
-
+	Style.Set("Icon.NGuardian", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NGuardianSubsystem"), Icon16x16));
+	
 	return StyleRef;
 }

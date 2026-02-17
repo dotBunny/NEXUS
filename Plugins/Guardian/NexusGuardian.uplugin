@@ -33,7 +33,15 @@
 	],
 	"Plugins": [
 		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusTooling",
 			"Enabled": true
 		},
 		{

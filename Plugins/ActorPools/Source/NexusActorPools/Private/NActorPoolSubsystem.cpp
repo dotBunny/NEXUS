@@ -120,6 +120,45 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	return false;
 }
 
+bool UNActorPoolSubsystem::AddDefaultSettings(const TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings)
+{
+	if (DefaultSettings.Contains(ActorClass))
+	{
+		return false;
+	}
+	DefaultSettings.Add(ActorClass, Settings);
+	return true;
+}
+
+bool UNActorPoolSubsystem::UpdateDefaultSettings(const TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings)
+{
+	if (DefaultSettings.Contains(ActorClass))
+	{
+		DefaultSettings[ActorClass] = Settings;
+		return true;
+	}
+	return false;
+}
+
+bool UNActorPoolSubsystem::RemoveDefaultSettings(const TSubclassOf<AActor> ActorClass)
+{
+	return DefaultSettings.Remove(ActorClass) != 0;
+}
+
+bool UNActorPoolSubsystem::HasDefaultSettings(const TSubclassOf<AActor> ActorClass) const
+{
+	return DefaultSettings.Contains(ActorClass);
+}
+
+FNActorPoolSettings UNActorPoolSubsystem::GetDefaultSettings(const TSubclassOf<AActor> ActorClass) const
+{
+	if (!DefaultSettings.Contains(ActorClass))
+	{
+		return UNActorPoolsSettings::Get()->DefaultSettings;
+	}
+	return DefaultSettings.FindChecked(ActorClass);
+}
+
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
 	if (ActorPoolSet->NestedSets.Num() == 0)
@@ -217,6 +256,20 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 		using enum ENActorPoolUnknownBehaviour;
 		case CreateDefaultPool:
 		{
+			if (HasDefaultSettings(ActorClass))
+			{
+				UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via ReturnActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
+					*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+				const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
+				OnActorPoolAdded.Broadcast(NewPool.Get());
+				if (NewPool->DoesSupportInterface())
+				{
+					INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
+					ActorItem->InitializeActorPoolItem(NewPool.Get());		
+				}
+				return NewPool->Return(Actor);
+			}
+			
 			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via ReturnActor for %s (%s), raising the total pool count to %i."),
 				*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));

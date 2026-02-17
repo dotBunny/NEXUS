@@ -31,6 +31,14 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); };
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	
+	int32 GetBaseObjectCount() const { return BaseObjectCount; }
+	int32 GetObjectCountWarningThreshold() const { return ObjectCountWarningThreshold; }
+	int32 GetObjectCountSnapshotThreshold() const { return ObjectCountSnapshotThreshold; }
+	int32 GetObjectCountCompareThreshold() const { return ObjectCountCompareThreshold; }
+	bool HasPassedWarningThreshold() const { return bPassedObjectCountWarningThreshold; }
+	bool HasPassedSnapshotThreshold() const { return bPassedObjectCountSnapshotThreshold; }
+	bool HasPassedCompareThreshold() const { return bPassedObjectCountCompareThreshold; }
+	
 private:
 	bool bPassedObjectCountWarningThreshold = false;
 	bool bPassedObjectCountSnapshotThreshold = false;

@@ -49,9 +49,12 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 			continue;
 		}
 
-		// Ensure actor pool is made, reuse if exists
-		Manager->CreateActorPool(Templates[i].Template, Templates[i].Settings);
-
+		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
+		if (!Manager->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
+		{
+			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%s) are already added to the subsystem, skipping."), *Templates[i].Template->GetName());
+		}
+		
 		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}

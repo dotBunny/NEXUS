@@ -16,7 +16,7 @@ void FNGuardianEditorToolMenu::Register()
 	
 	EditorWindow.Section = TEXT("Developer Overlay");
 	EditorWindow.Identifier = NEXUS::Guardian::EUW::Identifier;
-	EditorWindow.DisplayName = NSLOCTEXT("NexusGuardianEditor", "Create_EUW_DisplayName", "Dynamic References");
+	EditorWindow.DisplayName = NSLOCTEXT("NexusGuardianEditor", "Create_EUW_DisplayName", "Guardian");
 	EditorWindow.Tooltip = NSLOCTEXT("NexusGuardianEditor", "Create_EUW_Tooltip", "Opens the NGuardian Developer Overlay inside of an editor tab.");
 	EditorWindow.Icon = FSlateIcon(FNGuardianEditorStyle::GetStyleSetName(), NEXUS::Guardian::EUW::Icon);
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNGuardianEditorToolMenu::CreateEditorUtilityWindow);

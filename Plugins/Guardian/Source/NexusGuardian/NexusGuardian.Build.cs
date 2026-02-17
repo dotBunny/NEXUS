@@ -11,6 +11,7 @@ namespace UnrealBuildTool.Rules
 
 			PublicDependencyModuleNames.AddRange(
 				[
+					"CommonUI",
 					"Core",
 					"Engine",
 					"UMG"

@@ -8,8 +8,6 @@
 #include "NDynamicRefsDeveloperOverlay.generated.h"
 
 class UNDynamicRefObject;
-enum class ENProcGenOperationState : uint8;
-class UNProcGenOperation;
 class UNListView;
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRefs Developer Overlay", BlueprintType, Abstract)
