@@ -47,7 +47,7 @@ public:
 #elif UE_BUILD_SHIPPING		
 		return N_FLAGS_UINT8_HAS_UINT8(BuildConfigurationAvailability, ENBuildConfigurationAvailability::Shipping);
 #elif UE_BUILD_TEST
-		return N_FLAGS_HAS_UINT8(BuildConfigurationAvailability, ENBuildConfigurationAvailability::Test);
+		return N_FLAGS_UINT8_HAS_UINT8(BuildConfigurationAvailability, ENBuildConfigurationAvailability::Test);
 #else // !(UE_BUILD_DEBUG || UE_BUILD_DEBUG_GAME || UE_BUILD_DEVELOPMENT || UE_BUILD_SHIPPING || UE_BUILD_TEST)
 		return false;
 #endif // UE_BUILD_DEBUG	
