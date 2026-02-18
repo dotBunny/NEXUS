@@ -3,16 +3,17 @@
 
 #if WITH_TESTS
 
-namespace NEXUS::PickerTests::Rectangle
-{
-	constexpr float MaxDuration = 0.2f;
-}
 #include "NRectanglePicker.h"
 #include "NRectanglePickerParams.h"
 #include "Misc/Timespan.h"
 
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
+
+namespace NEXUS::PickerTests::Rectangle
+{
+	constexpr float MaxDuration = 0.2f;
+}
 
 N_TEST_PERF(FNPickerPerfTests_Rectangle_NextSimple, "NEXUS::PerfTests::NPicker::Rectangle::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {

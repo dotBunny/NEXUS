@@ -3,17 +3,17 @@
 
 #if WITH_TESTS
 
-namespace NEXUS::PickerTests::Box
-{
-	constexpr float MaxDuration = 0.2f;
-}
-
 #include "NBoxPicker.h"
 #include "NBoxPickerParams.h"
 #include "Misc/Timespan.h"
 
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
+
+namespace NEXUS::PickerTests::Box
+{
+	constexpr float MaxDuration = 0.2f;
+}
 
 N_TEST_PERF(FNPickerPerfTests_Box_NextSimple, "NEXUS::PerfTests::NPicker::Box::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {

@@ -3,16 +3,17 @@
 
 #if WITH_TESTS
 
-namespace NEXUS::PickerTests::Sphere
-{
-	constexpr float MaxDuration = 0.2f;
-}
 #include "NSpherePicker.h"
 #include "NSpherePickerParams.h"
 #include "Misc/Timespan.h"
 
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
+
+namespace NEXUS::PickerTests::Sphere
+{
+	constexpr float MaxDuration = 0.2f;
+}
 
 N_TEST_PERF(FNPickerPerfTests_Sphere_NextSimple, "NEXUS::PerfTests::NPicker::Sphere::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {

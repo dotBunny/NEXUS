@@ -3,17 +3,17 @@
 
 #if WITH_TESTS
 
-namespace NEXUS::PickerTests::Circle
-{
-	constexpr float MaxDuration = 0.2f;
-}
-
 #include "NCirclePicker.h"
 #include "NCirclePickerParams.h"
 #include "Misc/Timespan.h"
 
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
+
+namespace NEXUS::PickerTests::Circle
+{
+	constexpr float MaxDuration = 0.2f;
+}
 
 N_TEST_PERF(FNPickerPerfTests_Circle_NextSimple, "NEXUS::PerfTests::NPicker::Circle::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {
