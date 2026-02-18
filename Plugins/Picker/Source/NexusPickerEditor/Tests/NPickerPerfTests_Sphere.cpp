@@ -3,8 +3,10 @@
 
 #if WITH_TESTS
 
-#define N_SPHERE_PICKER_MAX_TEST_TIMER 0.2f
-
+namespace NEXUS::PickerTests::Sphere
+{
+	constexpr float MaxDuration = 0.2f;
+}
 #include "NSpherePicker.h"
 #include "NSpherePickerParams.h"
 #include "Misc/Timespan.h"
@@ -24,7 +26,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_NextSimple, "NEXUS::PerfTests::NPicker::Sph
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_NextSimple, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_NextSimple, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -45,7 +47,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_Next, "NEXUS::PerfTests::NPicker::Sphere::N
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Next, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Next, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -65,7 +67,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_RandomSimple, "NEXUS::PerfTests::NPicker::S
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_RandomSimple, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_RandomSimple, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -86,7 +88,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_Random, "NEXUS::PerfTests::NPicker::Sphere:
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Random, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Random, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -108,7 +110,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_TrackedSimple, "NEXUS::PerfTests::NPicker::
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_TrackedSimple, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_TrackedSimple, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -130,7 +132,7 @@ N_TEST_PERF(FNPickerPerfTests_Sphere_Tracked, "NEXUS::PerfTests::NPicker::Sphere
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Tracked, N_SPHERE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Sphere_Tracked, NEXUS::PickerTests::Sphere::MaxDuration)
 		FNSpherePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer

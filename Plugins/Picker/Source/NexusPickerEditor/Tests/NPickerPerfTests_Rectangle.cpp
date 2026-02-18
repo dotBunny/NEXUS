@@ -3,8 +3,10 @@
 
 #if WITH_TESTS
 
-#define N_RECTANGLE_PICKER_MAX_TEST_TIMER 0.2f
-
+namespace NEXUS::PickerTests::Rectangle
+{
+	constexpr float MaxDuration = 0.2f;
+}
 #include "NRectanglePicker.h"
 #include "NRectanglePickerParams.h"
 #include "Misc/Timespan.h"
@@ -23,7 +25,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_NextSimple, "NEXUS::PerfTests::NPicker::
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_NextSimple, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_NextSimple, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -44,7 +46,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Next, "NEXUS::PerfTests::NPicker::Rectan
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Next, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Next, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -64,7 +66,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_RandomSimple, "NEXUS::PerfTests::NPicker
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_RandomSimple, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_RandomSimple, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -85,7 +87,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Random, "NEXUS::PerfTests::NPicker::Rect
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Random, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Random, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -106,7 +108,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_TrackedSimple, "NEXUS::PerfTests::NPicke
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_TrackedSimple, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_TrackedSimple, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -128,7 +130,7 @@ N_TEST_PERF(FNPickerPerfTests_Rectangle_Tracked, "NEXUS::PerfTests::NPicker::Rec
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Tracked, N_RECTANGLE_PICKER_MAX_TEST_TIMER)
+		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Rectangle_Tracked, NEXUS::PickerTests::Rectangle::MaxDuration)
 		FNRectanglePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer
