@@ -37,9 +37,9 @@ void UNGuardianSubsystem::SetBaseline()
 
 void UNGuardianSubsystem::Tick(float DeltaTime)
 {
-	const int ObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
+	LastObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 	
-	if (ObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
+	if (LastObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
 	{
 		bPassedObjectCountWarningThreshold = false;
 		bPassedObjectCountSnapshotThreshold = false;
@@ -48,16 +48,16 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	
-	if (ObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
+	if (LastObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
-		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met met with %d/%d objects."), ObjectCount, ObjectCountWarningThreshold);
+		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met met with %d/%d objects."), LastObjectCount, ObjectCountWarningThreshold);
 		bPassedObjectCountWarningThreshold = true;
 		return;
 	}
 	
-	if (ObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
+	if (LastObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
 	{
-		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count snapshot threshold has been met with %d/%d objects."), ObjectCount, ObjectCountSnapshotThreshold);
+		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count snapshot threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountSnapshotThreshold);
 		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
 		if (bShouldOutputSnapshot)
 		{
@@ -71,10 +71,10 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	
-	if (ObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
+	if (LastObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
-		UE_LOG(LogNexusGuardian, Error, TEXT("Object count compare threshold met with %d objects."), ObjectCount);
+		UE_LOG(LogNexusGuardian, Error, TEXT("Object count compare threshold met with %d objects."), LastObjectCount);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
