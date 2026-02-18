@@ -146,6 +146,75 @@ jobs:
               target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
             })
   
+  TestBuild:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+      - name: Get Branch Settings
+        id: settings
+        run: |
+          $json = Get-Content .github/branch.json | ConvertFrom-Json
+          $installation = $json.installation
+          echo "ue=$installation" >> $env:GITHUB_OUTPUT
+        shell: powershell
+      - name: Clean Workspace
+        uses: ./.github/actions/workspace-clean
+      - name: Add Status Check
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Test',
+              state: 'pending',
+              description: 'Building Project ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })        
+      - name: Build Project
+        uses: ./.github/actions/build-project
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue }}
+      - name: Update Status Check (UAT)
+        if: always()
+        uses: actions/github-script@v8
+        with:          
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Test',
+              state: 'pending',
+              description: 'Running UAT ...',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+      - name: Run UAT
+        id: uat
+        uses: ./.github/actions/ue-uat
+        with:
+          ue-installation: ${{ steps.settings.outputs.ue }}
+          command: 'BuildCookRun'
+          additional-arguments: '-target=NEXUS -platform=Win64 -clientconfig=Test -cook -stage -package -build -pak -archive -archivedirectory="${{ github.workspace }}\Staging\Build"'
+      - name: Update Status Check (Results)
+        if: always()
+        uses: actions/github-script@v8
+        with:
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: '${{ github.event.workflow_run.head_sha }}',
+              context: 'Dispatch / BuildCookRun / Test',
+              state: '${{ steps.uat.outcome }}',
+              description: '',
+              target_url: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/'
+            })
+
   ShippingBuild:
     runs-on: self-hosted
     steps:
