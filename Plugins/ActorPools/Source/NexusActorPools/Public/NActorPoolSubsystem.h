@@ -142,10 +142,41 @@ public:
 	 */
 	TArray<FNActorPool*> GetAllPools() const;
 	
+	/**
+	 * Adds default settings for a specific AActor class.
+	 * @param ActorClass The class of the AActor to add default settings for.
+	 * @param Settings The default settings to apply.
+	 * @return True if default settings were added, false if settings already exist for the AActor class.
+	 */
 	bool AddDefaultSettings(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings);
+	
+	/**
+	 * Updates default settings for a specific AActor class.
+	 * @param ActorClass The class of the AActor to update default settings for.
+	 * @param Settings The new default settings to apply.
+	 * @return True if default settings were updated, false if no settings were found for the AActor class.
+	 */
 	bool UpdateDefaultSettings(TSubclassOf<AActor> ActorClass, const FNActorPoolSettings& Settings);
+	
+	/**
+	 * Removes default settings for a specific AActor class.
+	 * @param ActorClass The class of the AActor to remove default settings for.
+	 * @return True if default settings were removed, false if no settings were found for the AActor class.
+	 */
 	bool RemoveDefaultSettings(TSubclassOf<AActor> ActorClass);
+	
+	/**
+	 * Checks if default settings are registered for a specific AActor class.
+	 * @param ActorClass The class of the AActor to check for default settings.
+	 * @return True if default settings are registered for the AActor class, false otherwise.
+	 */
 	bool HasDefaultSettings(TSubclassOf<AActor> ActorClass) const;
+
+	/**
+	 * Returns any registered default settings for a specific AActor, if none are available will access the global UNActorPoolsSettings defaults.
+	 * @param ActorClass The class of the AActor which you would like to query for.
+	 * @return The default settings for the specified AActor class, or the global defaults if none are registered.
+	 */
 	FNActorPoolSettings GetDefaultSettings(TSubclassOf<AActor> ActorClass) const;
 	
 private:
