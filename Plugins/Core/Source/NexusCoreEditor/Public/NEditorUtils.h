@@ -7,6 +7,7 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "LevelEditorSubsystem.h"
+#include "Selection.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
@@ -153,6 +154,15 @@ public:
 		const UPackage* Package =  World->GetPackage();
 		if (Package == nullptr || Package->GetFileSize() == 0) return true;
 		return !FPackageName::DoesPackageExist(Package->GetName());
+	}
+	
+	FORCEINLINE static void SelectActor(AActor* Actor)
+	{
+		USelection* ActorSelection = GEditor->GetSelectedActors();
+		ActorSelection->Modify();
+		ActorSelection->DeselectAll();
+		
+		GEditor->SelectActor(Actor, true, true, true, true);
 	}
 	
 	static TArray<FString> GetSelectedContentBrowserPaths()

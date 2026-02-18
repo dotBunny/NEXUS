@@ -15,7 +15,7 @@ class NEXUSUI_API UNButtonListViewEntryObject : public UObject
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE( OnButtonPressedDelegate );
+	DECLARE_DELEGATE_OneParam( OnButtonPressedDelegate, UObject*);
 public:
 	
 	UFUNCTION(BlueprintCallable, Category = "Text")
@@ -26,7 +26,7 @@ public:
 
 	UFUNCTION()
 	// ReSharper disable once CppMemberFunctionMayBeConst
-	void OnPressed() { OnPressedEvent.ExecuteIfBound(); };
+	void OnPressed() { OnPressedEvent.ExecuteIfBound(TargetObject); };
 	
 	OnButtonPressedDelegate OnPressedEvent;
 	
@@ -39,6 +39,8 @@ public:
 	ENColor UnhoveredStateForegroundColor = ENColor::NC_White;
 	ENColor UnhoveredStateBackgroundColor = ENColor::NC_GreyDark;
 	
+	UPROPERTY()
+	TObjectPtr<UObject> TargetObject;
 private:
 	FText Text;
 };
@@ -175,5 +177,6 @@ protected:
 
 private:
 
+	UPROPERTY()
 	TObjectPtr<UObject> Object;
 };

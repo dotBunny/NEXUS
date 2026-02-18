@@ -4,6 +4,7 @@
 #pragma once
 #include "NDynamicRef.h"
 #include "NDynamicRefComponent.h"
+#include "NDynamicRefsDeveloperOverlay.h"
 #include "NDynamicRefObject.generated.h"
 
 UCLASS(BlueprintType)
@@ -20,6 +21,7 @@ public:
 	static UNDynamicRefObject* Create(UObject* Outer, const FName Name)
 	{
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
+		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetName = Name;
 		return Object;
 	};
@@ -27,6 +29,7 @@ public:
 	static UNDynamicRefObject* Create(UObject* Outer, const ENDynamicRef DynamicRef)
 	{
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
+		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetDynamicRef = DynamicRef;
 		return Object;
 	};
@@ -79,8 +82,13 @@ public:
 	}
 	
 	OnDynamicRefObjectChangeDelegate Changed;
+	
+	TObjectPtr<UNDynamicRefsDeveloperOverlay> GetOverlay() const { return Overlay; }
 
 private:
+	UPROPERTY()
+	TObjectPtr<UNDynamicRefsDeveloperOverlay> Overlay;
+	
 	TArray<TObjectPtr<UObject>> TargetObjects;
 	FName TargetName;
 	ENDynamicRef TargetDynamicRef;

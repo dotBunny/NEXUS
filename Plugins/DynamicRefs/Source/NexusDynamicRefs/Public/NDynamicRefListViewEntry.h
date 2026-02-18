@@ -26,8 +26,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, publi
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeOnEntryReleased() override;
 
-public:	
-
+public:
+	UFUNCTION()
+	void OnButtonPressed(UObject* TargetObject) const;
+	
 	UFUNCTION(BlueprintCallable)
 	void Refresh() const;
 
@@ -43,5 +45,6 @@ protected:
 	TObjectPtr<UNListView> References;
 	
 private:
-	UNDynamicRefObject* Object;
+	UPROPERTY()
+	TObjectPtr<UNDynamicRefObject> Object;
 };

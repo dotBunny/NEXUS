@@ -13,6 +13,8 @@ class UNListView;
 UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRefs Developer Overlay", BlueprintType, Abstract)
 class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOverlay
 {
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDynamicRefButtonDelegate, UObject*, TargetObject);
+	
 	GENERATED_BODY()
 	
 	virtual void NativeConstruct() override;
@@ -21,6 +23,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
 
+public:	
+	UPROPERTY(BlueprintAssignable)
+	FOnDynamicRefButtonDelegate OnButtonClicked;
+	
 protected:	
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
@@ -42,6 +48,7 @@ protected:
 	TMap<TEnumAsByte<ENDynamicRef>, TObjectPtr<UNDynamicRefObject>> DynamicRefObjects;
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UNDynamicRefObject>> NamedObjects;
+
 private:
 	void UpdateBanner() const;
 	
@@ -50,11 +57,13 @@ private:
 	void RemoveListItem(FName Name, UObject* Object);
 	void RemoveListItem(ENDynamicRef DynamicRef, UObject* Object);	
 	
+	// ReSharper disable CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<UWorld*, FDelegateHandle> OnAddedDelegates;
 	TMap<UWorld*, FDelegateHandle> OnAddedByNameDelegates;
 	TMap<UWorld*, FDelegateHandle> OnRemovedDelegates;
-	TMap<UWorld*, FDelegateHandle> OnRemovedByNameDelegates;
-
+	TMap<UWorld*, FDelegateHandle> OnRemovedByNameDelegates;	
+	// ReSharper restore CppUE4ProbableMemoryIssuesWithUObjectsInContainer
+	
 	FText NoReferencesFoundText = NSLOCTEXT("NexusDynamicRefs", "NoReferencesFound", "No References Found");
 	FDelegateHandle AddWorldDelegateHandle;
 	FDelegateHandle RemoveWorldDelegateHandle;

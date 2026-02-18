@@ -22,6 +22,7 @@ void UNDynamicRefListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObjec
 	Object = Cast<UNDynamicRefObject>(ListItemObject);
 	Object->Changed.BindUObject(this, &UNDynamicRefListViewEntry::Refresh);
 	
+	
 	Refresh();
 }
 
@@ -36,21 +37,29 @@ void UNDynamicRefListViewEntry::NativeOnEntryReleased()
 	INListViewEntry::NativeOnEntryReleased();
 }
 
+void UNDynamicRefListViewEntry::OnButtonPressed(UObject* TargetObject) const
+{
+	Object->GetOverlay()->OnButtonClicked.Broadcast(TargetObject);
+}
+
 void UNDynamicRefListViewEntry::Refresh() const
 {
 	Reference->SetText(Object->GetReferenceText());
 	if (Object != nullptr)
 	{
+		// Remake buttons for referenced objects
 		References->ClearListItems();
-		for (const UObject* ReferenceObject : Object->GetObjects())
+		
+		for (UObject* ReferenceObject : Object->GetObjects())
 		{
-			UNTextListViewEntryObject* TextObject = NewObject<UNTextListViewEntryObject>(
-				Object, UNTextListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
-
-			TextObject->SetText(FText::FromString(FString::Printf(TEXT("- %s"), *ReferenceObject->GetFName().ToString())));
+			UNButtonListViewEntryObject* ButtonObject = NewObject<UNButtonListViewEntryObject>(
+				Object, UNButtonListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
 			
+			ButtonObject->SetText(FText::FromString(FString::Printf(TEXT("%s"), *ReferenceObject->GetFName().ToString())));
+			ButtonObject->TargetObject = ReferenceObject;
+			ButtonObject->OnPressedEvent.BindUObject(this, &UNDynamicRefListViewEntry::OnButtonPressed);
 
-			References->AddItem(TextObject);
+			References->AddItem(ButtonObject);
 		}
 	}
 }
