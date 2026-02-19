@@ -9,7 +9,7 @@ NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCore, Log, All);
 
 namespace NEXUS::Version
 {
-	constexpr int Number = 10;
+	constexpr int Number = 11;
 	constexpr int Major = 0;
 	constexpr int Minor = 2;
 	constexpr int Patch = 7;

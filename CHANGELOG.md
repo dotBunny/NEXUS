@@ -23,6 +23,7 @@
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
 - [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
 - `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full FTransfrom set.
+- `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
 
 ### Fixed
 
