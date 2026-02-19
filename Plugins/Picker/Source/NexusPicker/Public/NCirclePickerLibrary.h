@@ -13,7 +13,6 @@
  * Provides various functions for generating points in the plane of a circle using different
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">UNCirclePickerLibrary</a>
- * @note There are no simple variants to these methods as it wouldn't change the computation.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Circle Picker Library")
 class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
@@ -28,7 +27,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	 * @returns An array of generated points.	 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point", Category = "NEXUS|Picker|Circle", 
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/box/#next-point", WorldContext = "WorldContextObject"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#next-point", WorldContext = "WorldContextObject"))
 	static TArray<FVector> NextPoint(UPARAM(ref) FNCirclePickerParams& Params, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;

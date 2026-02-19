@@ -5,4 +5,4 @@
 
 FCollisionQueryParams FNPickerUtils::CollisionQueryParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
 FVector FNPickerUtils::NavQueryExtent = FVector(1500, 1500, 1500);
-FNavAgentProperties FNPickerUtils::NavAgentProperties = FNavAgentProperties(1, 10 );
+FNavAgentProperties FNPickerUtils::NavAgentProperties = FNavAgentProperties(42, 192 );
