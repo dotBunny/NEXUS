@@ -13,6 +13,7 @@
 - `FNEditorSlateUtils` and `FNSlateUtils`.
 - [#117](https://github.com/dotBunny/NEXUS/issues/117)`Collision Visualizer` added to `Tools -> Debug`.
 - [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
+- [#70](https://github.com/dotBunny/NEXUS/issues/70) Add `Create Actor Pool Set` button to `UNActorPoolsEditorUtilityWidget` to create an `UNActorPoolSet` based on the currently found pools in **PIE**. 
 
 ### Changed
 

@@ -22,6 +22,9 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverl
 	
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
+	
+public:
+	TObjectPtr<UNListView> GetActorPoolList() const { return ActorPoolList; }
 
 protected:	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

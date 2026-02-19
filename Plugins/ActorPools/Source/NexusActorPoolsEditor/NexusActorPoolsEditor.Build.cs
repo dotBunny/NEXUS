@@ -15,7 +15,7 @@ namespace UnrealBuildTool.Rules
 					"Core",
 					"DataValidation", 
 					"EditorSubsystem",
-					"UnrealEd"
+					"UnrealEd", 
 				]
 			);
 
@@ -24,6 +24,7 @@ namespace UnrealBuildTool.Rules
 					"AssetDefinition",
 					"CoreUObject",
 					"DeveloperSettings",
+					"EditorScriptingUtilities",
 					"Engine",
 					"PlacementMode",
 					"Projects",
@@ -32,12 +33,12 @@ namespace UnrealBuildTool.Rules
 					"ToolMenus",
 					"UMG",
 					"UMGEditor",
-					"UnrealEd"
+					"UnrealEd", 
 				]
 			);
 
 			// NEXUS
-			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusActorPools"]);
+			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusActorPools", "NexusUIEditor"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusActorPools", "NexusToolingEditor", "NexusUIEditor"]);
 
 			ShortName = "NexusActorPoolsEditor";						
