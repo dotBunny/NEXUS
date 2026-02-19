@@ -66,11 +66,19 @@ public:
 	}
 	
 	UFUNCTION(BlueprintCallable)
+	TSubclassOf<AActor> GetTemplate()
+	{
+		if (Pool == nullptr) return nullptr;
+		return Pool->GetTemplate();
+	};
+	
+	UFUNCTION(BlueprintCallable)
 	FText GetClassName() const
 	{
 		return ClassName;
 	}
 	
+	UFUNCTION(BlueprintCallable)
 	UWorld* GetPoolWorld() const
 	{
 		if (Pool == nullptr) return nullptr;
