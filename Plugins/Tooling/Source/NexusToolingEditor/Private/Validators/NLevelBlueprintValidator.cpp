@@ -14,7 +14,7 @@ bool UNLevelBlueprintValidator::CanValidateAsset_Implementation(const FAssetData
 		return false;
 	}
 	
-	return InObject && InObject->IsA<ULevel>();
+	return InObject && InObject->IsA<UWorld>();
 }
 
 EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData,
@@ -22,16 +22,45 @@ EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementat
 {
 	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
 
-	
+	if (Settings->ValidatorLevelBlueprint == ENValidatorSeverity::Disable)
+	{
+		return EDataValidationResult::NotValidated;
+	}
 	
 	// Check Type
-	const ULevel* Level = Cast<ULevel>(InAsset);
-	if (!Level) return EDataValidationResult::NotValidated;
+	const UWorld* World = Cast<UWorld>(InAsset);
+	if (!World) return EDataValidationResult::NotValidated;
+	
+	const TArray<ULevel*> Levels = World->GetLevels();
+	if (Levels.Num() <= 0) return EDataValidationResult::NotValidated;
 	
 	EDataValidationResult Result = EDataValidationResult::Valid;
-	if (Level->LevelScriptBlueprint != nullptr && Level->LevelScriptBlueprint->UbergraphPages.Num() != 0)
+	for (const ULevel* Level : Levels)
 	{
-		Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorLevelBlueprint);
+		
+		if (Level->LevelScriptBlueprint != nullptr && Level->LevelScriptBlueprint->UbergraphPages.Num() != 0)
+		{
+			int NodeCount = 0;
+			TArray<TObjectPtr<UEdGraph>> Graphs = Level->LevelScriptBlueprint->UbergraphPages;
+			for (const UEdGraph* Graph : Graphs)
+			{
+				for (UEdGraphNode* Node : Graph->Nodes)
+				{
+					if (Node->IsAutomaticallyPlacedGhostNode()) continue;
+					NodeCount++;
+				}
+			}
+			
+			if (NodeCount > 0)
+			{
+				FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorLevelBlueprint,
+				FText::FormatOrdered(TextFormat, 
+					FText::FromString(FString::FromInt(NodeCount)),
+					FText::FromString(Level->GetName())));
+						
+				Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorLevelBlueprint);
+			}
+		}
 	}
 	return Result;
 }

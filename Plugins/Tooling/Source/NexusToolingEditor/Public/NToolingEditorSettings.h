@@ -63,8 +63,9 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Engine: Content Change")
 	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Level: Blueprint Logic")
-	ENValidatorSeverity ValidatorLevelBlueprint = ENValidatorSeverity::WarningButValid;
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Level: Blueprint Logic",
+		meta=(Tooltip="Determine if there are any non-ghost nodes in the level blueprint."))
+	ENValidatorSeverity ValidatorLevelBlueprint = ENValidatorSeverity::Disable;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Validators: Ignored", DisplayName = "Ignored Assets")
 	TArray<FSoftObjectPath> ValidatorIgnoredAssets;
