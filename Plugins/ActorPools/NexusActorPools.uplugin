@@ -37,6 +37,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
 			"Enabled": true
 		},
