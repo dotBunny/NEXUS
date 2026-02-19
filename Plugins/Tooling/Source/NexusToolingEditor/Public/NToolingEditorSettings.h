@@ -54,21 +54,21 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World"))
 	TArray<FSoftObjectPath> ProjectLevels;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Empty Tick")
-	ENValidatorSeverity BlueprintEmptyTick = ENValidatorSeverity::Error;
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Blueprint: Empty Tick")
+	ENValidatorSeverity ValidatorBlueprintEmptyTick = ENValidatorSeverity::Error;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Blueprint: Multi-Pin Pure Node")
-	ENValidatorSeverity BlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Blueprint: Multi-Pin Pure Node")
+	ENValidatorSeverity ValidatorBlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Engine: Content Change")
-	ENValidatorSeverity EngineContentChange = ENValidatorSeverity::Warning;
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Engine: Content Change")
+	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Ignored Assets")
-	TArray<FSoftObjectPath> IgnoredAssets;
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Ignored", DisplayName = "Ignored Assets")
+	TArray<FSoftObjectPath> ValidatorIgnoredAssets;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators", DisplayName = "Ignored Prefixes",
+	UPROPERTY(EditAnywhere, config, Category = "Validators: Ignored", DisplayName = "Ignored Prefixes",
 		meta = (ToolTip = "This can be folder paths which will ignore by looking if a path starts with this."))
-	TArray<FString> IgnoredPrefixes;
+	TArray<FString> ValidatorIgnoredPrefixes;
 	
 #endif // WITH_EDITORONLY_DATA
 

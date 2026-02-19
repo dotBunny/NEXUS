@@ -30,30 +30,30 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
 			// Check for Empty Ticks
-			if (Settings->BlueprintEmptyTick != ENValidatorSeverity::Disable)
+			if (Settings->ValidatorBlueprintEmptyTick != ENValidatorSeverity::Disable)
 			{
 				if (UK2Node_Event* EventNode = Cast<UK2Node_Event>(Node); EventNode && EventNode->EventReference.GetMemberName() == EventTickName)
 				{
 					if (IsEmptyTick(EventNode))
 					{
-						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->BlueprintEmptyTick,
+						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorBlueprintEmptyTick,
 			FText::FromString(TEXT("Empty Tick nodes still produce overhead, please use or remove it.\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/blueprint-validator/#isemptytick")));
-						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->BlueprintEmptyTick);
+						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorBlueprintEmptyTick);
 					}
 				}
 			}
 
 			// Check for MultiPin Pure Nodes
-			if (Settings->BlueprintMultiPinPureNode != ENValidatorSeverity::Disable)
+			if (Settings->ValidatorBlueprintMultiPinPureNode != ENValidatorSeverity::Disable)
 			{
 				if (UK2Node* PureNode = Cast<UK2Node>(Node); PureNode && PureNode->IsNodePure())
 				{
 					if (IsMultiPinPureNode(PureNode))
 					{
-						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->BlueprintMultiPinPureNode,
+						FNToolingEditorUtils::AddDataValidationResponse(Context, Settings->ValidatorBlueprintMultiPinPureNode,
 						FText::Join(FText::FromString(" "), PureNode->GetNodeTitle(ENodeTitleType::Type::MenuTitle),
 										FText::FromString(TEXT("MultiPin Pure Nodes actually get called for each connected pin output.\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/blueprint-validator/#ismultipinpurenode"))));
-						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->BlueprintMultiPinPureNode);
+						Result = FNToolingEditorUtils::GetDataValidationResult(Settings->ValidatorBlueprintMultiPinPureNode);
 					}
 				}
 			}
