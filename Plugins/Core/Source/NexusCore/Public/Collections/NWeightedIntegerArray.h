@@ -77,7 +77,13 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 		return CachedCount >= 0;
 	};
 
+	/**
+	 * How many entries remain in the weighted array?
+	 * @return The number of entries left?
+	 */
+	int32 Count() const { return CachedCount; }
+
 private:	
 	TArray<int> Data;
-	int CachedCount = -1;
+	int32 CachedCount = -1;
 };
