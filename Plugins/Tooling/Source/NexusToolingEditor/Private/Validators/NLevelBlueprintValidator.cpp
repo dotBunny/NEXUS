@@ -9,7 +9,9 @@
 bool UNLevelBlueprintValidator::CanValidateAsset_Implementation(const FAssetData& InAssetData, UObject* InObject,
                                                                 FDataValidationContext& InContext) const
 {
-	if (UNToolingEditorSettings::Get()->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
+	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
+	if (Settings->ValidatorLevelBlueprint == ENValidatorSeverity::Disable || 
+		Settings->IsAssetIgnored(InAssetData.GetSoftObjectPath()))
 	{
 		return false;
 	}
@@ -20,32 +22,26 @@ bool UNLevelBlueprintValidator::CanValidateAsset_Implementation(const FAssetData
 EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementation(const FAssetData& InAssetData,
 	UObject* InAsset, FDataValidationContext& Context)
 {
-	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
-
-	if (Settings->ValidatorLevelBlueprint == ENValidatorSeverity::Disable)
-	{
-		return EDataValidationResult::NotValidated;
-	}
-	
-	// Check Type
 	const UWorld* World = Cast<UWorld>(InAsset);
-	if (!World) return EDataValidationResult::NotValidated;
 	
 	const TArray<ULevel*> Levels = World->GetLevels();
-	if (Levels.Num() <= 0) return EDataValidationResult::NotValidated;
+	if (Levels.Num() <= 0) return EDataValidationResult::Valid;
 	
+	const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	for (const ULevel* Level : Levels)
 	{
-		
+		if (Level == nullptr) continue;
 		if (Level->LevelScriptBlueprint != nullptr && Level->LevelScriptBlueprint->UbergraphPages.Num() != 0)
 		{
 			int NodeCount = 0;
 			TArray<TObjectPtr<UEdGraph>> Graphs = Level->LevelScriptBlueprint->UbergraphPages;
 			for (const UEdGraph* Graph : Graphs)
 			{
+				if ( Graph == nullptr) continue;
 				for (UEdGraphNode* Node : Graph->Nodes)
 				{
+					if (Node == nullptr) continue;
 					if (Node->IsAutomaticallyPlacedGhostNode()) continue;
 					NodeCount++;
 				}

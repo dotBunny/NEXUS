@@ -22,7 +22,6 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 
 	// Check Type
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
-	if (!Blueprint) return EDataValidationResult::NotValidated;
 
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)

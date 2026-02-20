@@ -3,7 +3,7 @@
 
 #include "NCoreModule.h"
 #include "NCoreMinimal.h"
-#include "NPrimitiveFont.h"
+#include "Developer/NPrimitiveFont.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 

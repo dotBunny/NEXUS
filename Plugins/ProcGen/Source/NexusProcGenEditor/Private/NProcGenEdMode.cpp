@@ -9,7 +9,7 @@
 #include "NProcGenRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
-#include "NPrimitiveDrawingUtils.h"
+#include "Developer/NPrimitiveFont.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenUtils.h"
 #include "Macros/NFlagsMacros.h"
@@ -185,7 +185,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 					FString Label = FString::Printf(TEXT(" %i:%i %s"), i, p, *Order[i][p]->GetDebugLabel());
 
 					FNPositionRotation LabelOrientation = Order[i][p]->GetDebugLabelPositionRotation();
-					FNPrimitiveDrawingUtils::DrawString(PDI, Label,
+					FNPrimitiveFont::DrawPDI(PDI, Label,
 					 	LabelOrientation.Position, LabelOrientation.Rotation, FLinearColor::White);
 				}
 			}
