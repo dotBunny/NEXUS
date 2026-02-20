@@ -36,7 +36,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	 */
 	int32 NextValue() const
 	{
-		return Data[FNRandom::Deterministic.IntegerRange(0, CachedCount)];
+		return Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];
 	};
 
 	/**
@@ -45,7 +45,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	 */
 	int32 RandomValue() const
 	{
-		return Data[FNRandom::NonDeterministic.RandRange(0, CachedCount)];
+		return Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
 	}
 
 	/**
@@ -54,7 +54,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	int32 RandomOneShotValue(const int Seed) const
 	{
 		const FRandomStream RandomStream(Seed);
-		return Data[RandomStream.RandRange(0, CachedCount)];
+		return Data[RandomStream.RandRange(0, CachedMaxIndex)];
 	};
 
 	/**
@@ -64,7 +64,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	int RandomTrackedValue(int32& Seed) const
 	{
 		const FRandomStream Random(Seed);
-		const int RandomIndex = Random.RandRange(0, CachedCount);
+		const int RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
 		return Data[RandomIndex];
 	};
@@ -74,16 +74,16 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	 */
 	bool HasData() const
 	{
-		return CachedCount >= 0;
+		return Data.Num() > 0;
 	};
 
 	/**
 	 * How many entries remain in the weighted array?
 	 * @return The number of entries left?
 	 */
-	int32 Count() const { return CachedCount; }
+	int32 Count() const { return Data.Num(); }
 
 private:	
 	TArray<int> Data;
-	int32 CachedCount = -1;
+	int32 CachedMaxIndex = 0;
 };

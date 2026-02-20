@@ -11,13 +11,13 @@ void FNWeightedIntegerArray::Add(const int Value, const int Weight)
 	{
 		Data.Add(Value);
 	}
-	CachedCount = Data.Num() - 1;
+	CachedMaxIndex = Data.Num() - 1;
 }
 
 void FNWeightedIntegerArray::Empty()
 {
 	Data.Empty();
-	CachedCount = -1;
+	CachedMaxIndex = -1;
 }
 
 void FNWeightedIntegerArray::Remove(const int Value)
@@ -29,7 +29,7 @@ void FNWeightedIntegerArray::Remove(const int Value)
 			Data.RemoveAtSwap(i, EAllowShrinking::No);
 		}
 	}
-	CachedCount = Data.Num() - 1;
+	CachedMaxIndex = Data.Num() - 1;
 }
 
 void FNWeightedIntegerArray::RemoveSome(const int Value,  int Limit)
@@ -44,5 +44,5 @@ void FNWeightedIntegerArray::RemoveSome(const int Value,  int Limit)
 
 		if (Limit == 0) break;
 	}
-	CachedCount = Data.Num() - 1;
+	CachedMaxIndex = Data.Num() - 1;
 }
