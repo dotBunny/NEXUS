@@ -14,28 +14,39 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 	if (ListPool != nullptr)
 	{
 		Pool = ListPool;
-		if (Pool->GetWorld() != nullptr)
+		
+		
+		// Pool Name
+		CenterText->SetText(Pool->GetClassName());
+		
+		// Handle Color
+		if (Pool->DoesSupportInterface())
 		{
-			if (Pool->DoesImplementInterface())
-			{
-				CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0} ({1})"), 
-				Pool->GetClassName(), FText::FromString(Pool->GetWorld()->GetName())));
-			}
-			else
-			{
-				CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0}* ({1})"), 
-				Pool->GetClassName(), FText::FromString(Pool->GetWorld()->GetName())));
-			}
-			
+			TypeImage->SetBrushTintColor(FLinearColor::Green);
+			TypeImage->SetToolTipText(FText::FromString("INActorPoolItem"));
+		}
+		else if (Pool->HasInvokeUFunctionFlag())
+		{
+			TypeImage->SetBrushTintColor(FLinearColor::Yellow);
+			TypeImage->SetToolTipText(FText::FromString("Invoke UFUNCTION"));
 		}
 		else
 		{
-			CenterText->SetText(Pool->GetClassName());
+			TypeImage->SetBrushTintColor(FLinearColor::Blue);
+			TypeImage->SetToolTipText(FText::FromString("No Callbacks"));
 		}
+		
+		if (Pool->GetWorld() != nullptr)
+		{
+			ProgressBar->SetToolTipText(FText::FromString(Pool->GetWorld()->GetName()));
+		}
+	
 		Refresh();
 	}
 	else
 	{
+		TypeImage->SetBrushTintColor(FLinearColor::Gray);
+		TypeImage->SetToolTipText(FText::GetEmpty());
 		CenterText->SetText(FText::GetEmpty());
 	}
 	INListViewEntry::NativeOnListItemObjectSet(ListItemObject);

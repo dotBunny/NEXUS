@@ -82,6 +82,8 @@ public:
 	 * Does the ActorPool's Template implement the IActorPoolItem interface?
 	 */
 	bool DoesSupportInterface() const { return bImplementsInterface; }
+	
+	bool HasInvokeUFunctionFlag() const { return Settings.HasFlag_InvokeUFunctions(); }
 
 	int32 GetInCount() const { return InActors.Num(); };
 	int32 GetOutCount() const { return OutActors.Num(); };
@@ -132,6 +134,7 @@ private:
 #endif // WITH_EDITOR
 	bool bImplementsInterface = false;
 
+	
 	ENToggle SpawnPhysicsSimulation = T_Default;
 
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;

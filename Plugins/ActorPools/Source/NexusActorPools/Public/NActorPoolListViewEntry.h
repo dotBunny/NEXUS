@@ -6,6 +6,7 @@
 #include "INListViewEntry.h"
 #include "NActorPoolObject.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Image.h"
 #include "NActorPoolListViewEntry.generated.h"
 
 class UNProcGenOperation;
@@ -35,6 +36,9 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
+	
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UImage> TypeImage;
 	
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UProgressBar> ProgressBar;

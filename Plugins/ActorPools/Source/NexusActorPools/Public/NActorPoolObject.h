@@ -86,10 +86,17 @@ public:
 	}
 	
 	UFUNCTION(BlueprintCallable)
-	bool DoesImplementInterface() const
+	bool DoesSupportInterface() const
 	{
 		if (Pool == nullptr) return false;
 		return Pool->DoesSupportInterface();
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	bool HasInvokeUFunctionFlag() const
+	{
+		if (Pool == nullptr) return false;
+		return Pool->HasInvokeUFunctionFlag();
 	}
 	
 private:	
