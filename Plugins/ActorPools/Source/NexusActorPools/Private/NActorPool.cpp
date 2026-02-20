@@ -105,6 +105,16 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	{
 		(Cast<INActorPoolItem>(ReturnActor))->OnSpawnedFromActorPool();
 	}
+	
+	// Handle UFunction Invoke
+	if (Settings.HasFlag_InvokeUFunctions())
+	{
+		UFunction* Function = ReturnActor->FindFunction(FName("OnSpawnedFromActorPool"));
+		if (Function)
+		{
+			ReturnActor->ProcessEvent(Function, nullptr);
+		}
+	}
 
 	return ReturnActor;
 }
@@ -142,6 +152,16 @@ bool FNActorPool::Return(AActor* Actor)
 	if (bImplementsInterface)
 	{
 		(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
+	}
+	
+	// Handle UFunction Invoke
+	if (Settings.HasFlag_InvokeUFunctions())
+	{
+		UFunction* Function = Actor->FindFunction(FName("OnReturnToActorPool"));
+		if (Function)
+		{
+			Actor->ProcessEvent(Function, nullptr);
+		}
 	}
 
 	return true;
@@ -282,6 +302,7 @@ void FNActorPool::CreateActor(const int32 Count)
 				CreatedActor->FinishSpawning(Settings.StorageTransform);
 			}
 			ActorItem->OnCreatedByActorPool();
+			
 			ApplyReturnState(CreatedActor);
 			ActorItem->OnReturnToActorPool();
 		}
@@ -292,6 +313,16 @@ void FNActorPool::CreateActor(const int32 Count)
 				CreatedActor->FinishSpawning(Settings.StorageTransform);
 			}
 			ApplyReturnState(CreatedActor);
+		}
+		
+		// Handle UFunction Invoke
+		if (Settings.HasFlag_InvokeUFunctions())
+		{
+			UFunction* Function = CreatedActor->FindFunction(FName("OnCreatedByActorPool"));
+			if (Function)
+			{
+				InActors[i]->ProcessEvent(Function, nullptr);
+			}
 		}
 	
 		InActors.Add(CreatedActor);
@@ -382,6 +413,17 @@ void FNActorPool::Clear(const bool bForceDestroy)
 			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(InActors[i]);
 			ActorItem->OnDestroyedByActorPool();
 		}
+		
+		// Handle UFunction Invoke
+		if (Settings.HasFlag_InvokeUFunctions())
+		{
+			UFunction* Function = InActors[i]->FindFunction(FName("OnDestroyedByActorPool"));
+			if (Function)
+			{
+				InActors[i]->ProcessEvent(Function, nullptr);
+			}
+		}
+		
 		if (bForceDestroy)
 		{
 			InActors[i]->Destroy();
@@ -400,6 +442,16 @@ void FNActorPool::Clear(const bool bForceDestroy)
 		{
 			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OutActors[i]);
 			ActorItem->OnDestroyedByActorPool();
+		}
+		
+		// Handle UFunction Invoke
+		if (Settings.HasFlag_InvokeUFunctions())
+		{
+			UFunction* Function = InActors[i]->FindFunction(FName("OnDestroyedByActorPool"));
+			if (Function)
+			{
+				InActors[i]->ProcessEvent(Function, nullptr);
+			}
 		}
 		
 		if (bForceDestroy)

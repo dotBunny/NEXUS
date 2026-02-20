@@ -85,6 +85,13 @@ public:
 		return Pool->GetWorld();
 	}
 	
+	UFUNCTION(BlueprintCallable)
+	bool DoesImplementInterface() const
+	{
+		if (Pool == nullptr) return false;
+		return Pool->DoesSupportInterface();
+	}
+	
 private:	
 	FNActorPool* Pool;
 	FText ClassName;

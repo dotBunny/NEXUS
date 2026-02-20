@@ -52,6 +52,11 @@ enum class ENActorPoolFlags : uint8
 	 * Should an Actor's network dormancy be updated based on state?
 	 */
 	SetNetDormancy = 1 << 6,
+
+	/**
+	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnDestroyedByActorPool be invoked to simulate an interface callback to Actor-based blueprints?
+	 */
+	InvokeUFunctions = 1 << 7 UMETA(DisplayName = "Invoke UFunctions"),
 	
 	DefaultSettings = ReturnToStorage | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
 };
@@ -95,6 +100,11 @@ public:
 	FORCEINLINE bool HasFlag_SetNetDormancy() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SetNetDormancy);
+	}
+	
+	FORCEINLINE bool HasFlag_InvokeUFunctions() const
+	{
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::InvokeUFunctions);
 	}
 	
 	/**

@@ -16,8 +16,17 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 		Pool = ListPool;
 		if (Pool->GetWorld() != nullptr)
 		{
-			CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0} ({1})"), 
+			if (Pool->DoesImplementInterface())
+			{
+				CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0} ({1})"), 
 				Pool->GetClassName(), FText::FromString(Pool->GetWorld()->GetName())));
+			}
+			else
+			{
+				CenterText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "ClassWorld", "{0}* ({1})"), 
+				Pool->GetClassName(), FText::FromString(Pool->GetWorld()->GetName())));
+			}
+			
 		}
 		else
 		{
