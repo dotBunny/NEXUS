@@ -54,7 +54,8 @@ enum class ENActorPoolFlags : uint8
 	SetNetDormancy = 1 << 6,
 
 	/**
-	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnDestroyedByActorPool be invoked to simulate an interface callback to Actor-based blueprints?
+	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnDestroyedByActorPool be invoked to simulate an interface callback to AActor-based blueprints? 
+	 * @note This is only applicable to non-interfaced AActors, as interfaced Actors have their own interface callback mechanism.
 	 */
 	InvokeUFunctions = 1 << 7 UMETA(DisplayName = "Invoke UFunctions"),
 	
