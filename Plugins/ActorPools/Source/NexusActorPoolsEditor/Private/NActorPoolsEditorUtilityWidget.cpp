@@ -71,7 +71,5 @@ void UNActorPoolsEditorUtilityWidget::OnCreateActorPoolSet()
 		}
 	}
 	
-	// Not going to mark package dirty cause forcing save
-	UEditorAssetLibrary::SaveLoadedAsset(NewActorPoolSet, false);
 	FAssetRegistryModule::AssetCreated(NewActorPoolSet);
 }

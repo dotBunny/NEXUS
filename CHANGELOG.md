@@ -28,8 +28,6 @@
 - `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
 - `ANPooledActor` now has `OnCreatedByActorPoolEvent`, `OnSpawnedFromActorPoolEvent`, `OnReturnToActorPoolEvent`, and `OnDestroyedByActorPoolEvent` bindable events.
 - `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
-- `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
-
 
 ### Fixed
 
@@ -39,6 +37,7 @@
 - `FNBoxPicker` and `FNRectanglePicker` no longer have regions unintentionally excluded in the distribution.
 - `ANSamplesLevelActor` now properly flags the `SM_SkySphere` not to have any collisions, stopping a warning when building NavMesh.
 - [#125](https://github.com/dotBunny/NEXUS/issues/125) Issue with `NPoseAssetFixer` not working on external plugin content.
+- `UNActorPoolSubsystem` now properly places `UNActorPoolSet` generated actors in the correct world, no longer leaving some in limbo.
 
 ### Removed
 

@@ -40,7 +40,8 @@ void UNActorPoolsDeveloperOverlay::NativeDestruct()
 	{
 		Unbind(Context.World());
 	}
-	
+
+	ActorPoolList->ClearListItems();
 	Super::NativeDestruct();
 }
 
@@ -99,10 +100,12 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 	if (World == nullptr) return;
 	
 	UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
+	
 	if (OnActorPoolAddedDelegates.Contains(World) && System != nullptr)
 	{
 		System->OnActorPoolAdded.Remove(OnActorPoolAddedDelegates[World]);
 	}
+	
 	
 	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
 	{
@@ -111,17 +114,20 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 		for (int i = ItemCount - 1; i >= 0; i--)
 		{
 			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
+			
 			if (Object->GetPoolWorld() == World)
 			{
 				ActorPoolList->RemoveItem(Object);
+				
+				// Remove our created object
+				Object->ConditionalBeginDestroy();
 			}
 		}
 		UpdateBanner();
 	}
 }
 
-void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, 
-                                                                   FWorldInitializationValues WorldInitializationValues)
+void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues)
 {
 	Bind(World);
 }

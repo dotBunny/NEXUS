@@ -52,7 +52,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
 		if (!Manager->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
-			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%s) are already added to the subsystem, skipping."), *Templates[i].Template->GetName());
+			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());
 		}
 		
 		// Add to the weighted list

@@ -85,8 +85,8 @@ public:
 	void UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
 
 	//~UTickableWorldSubsystem
-	virtual void Deinitialize() final override;
-	virtual void Initialize(FSubsystemCollectionBase& Collection) final override;
+	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 	virtual bool IsTickable() const final override;
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	virtual void Tick(float DeltaTime) final override;
@@ -207,14 +207,14 @@ T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 		if (HasDefaultSettings(ActorClass))
 		{
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
-			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
-				*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %p|%s (%s) using the registered default settings, raising the total pool count to %i."),
+				ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			OnActorPoolAdded.Broadcast(NewPool.Get());
 			return Cast<T>(NewPool->Get());
 		}
 		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
-		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
-			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %p|%s (%s), raising the total pool count to %i."),
+			ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Get());
 	}
@@ -229,15 +229,15 @@ T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const 
 		if (HasDefaultSettings(ActorClass))
 		{
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
-			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
-				*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %p|%s (%s) using the registered default settings, raising the total pool count to %i."),
+				ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			OnActorPoolAdded.Broadcast(NewPool.Get());
 			return Cast<T>(NewPool->Spawn(Position, Rotation));
 		}
 		
 		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
-		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
-			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %p|%s (%s), raising the total pool count to %i."),
+			ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Spawn(Position, Rotation));
 	}
