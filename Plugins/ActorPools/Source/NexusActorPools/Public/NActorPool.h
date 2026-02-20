@@ -101,6 +101,10 @@ public:
 	TSubclassOf<AActor> GetTemplate() const { return Template; };
 	UWorld* GetWorld() const { return World; };
 	
+#if WITH_EDITOR
+	FString GetName() const { return Name; };
+#endif // WITH_EDITOR
+	
 private:
 
 	void PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass);

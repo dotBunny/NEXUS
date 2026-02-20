@@ -99,6 +99,19 @@ public:
 		return Pool->HasInvokeUFunctionFlag();
 	}
 	
+#if WITH_EDITOR
+	FString GetPoolName() const
+	{
+		if (Pool == nullptr) return TEXT("");
+		return Pool->GetName();
+	}
+#else
+	FString GetPoolName() const
+	{
+		return TEXT("");
+	}
+#endif // WITH_EDITOR	
+	
 private:	
 	FNActorPool* Pool;
 	FText ClassName;
