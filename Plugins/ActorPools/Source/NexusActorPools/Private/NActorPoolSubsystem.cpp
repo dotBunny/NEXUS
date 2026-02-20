@@ -56,7 +56,8 @@ void UNActorPoolSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	
 	for (auto& Set : Settings->AlwaysCreateSets)
 	{
-		ApplyActorPoolSet(Set.Get());
+		UNActorPoolSet* LoadedSet = Set.LoadSynchronous();
+		ApplyActorPoolSet(LoadedSet);
 	}
 }
 
@@ -161,6 +162,8 @@ FNActorPoolSettings UNActorPoolSubsystem::GetDefaultSettings(const TSubclassOf<A
 
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
+	if (ActorPoolSet == nullptr) return;
+	
 	if (ActorPoolSet->NestedSets.Num() == 0)
 	{
 		// Optimized fast-path for if the APS is not using nested sets.
