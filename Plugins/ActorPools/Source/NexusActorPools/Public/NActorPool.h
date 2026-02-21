@@ -82,10 +82,20 @@ public:
 	 * Does the ActorPool's Template implement the IActorPoolItem interface?
 	 */
 	bool DoesSupportInterface() const { return bImplementsInterface; }
-	
+
+	/**
+	 * Will the ActorPool attempt to invoke UFUNCTIONs for events?
+	 */
 	bool HasInvokeUFunctionFlag() const { return Settings.HasFlag_InvokeUFunctions(); }
 
+	/**
+	 * Get the number of AActors currently in the pool.
+	 */
 	int32 GetInCount() const { return InActors.Num(); };
+
+	/**
+	 * Get the number of AActors currently out of the pool.
+	 */
 	int32 GetOutCount() const { return OutActors.Num(); };
 
 	const FNActorPoolSettings& GetSettings() const { return Settings; };
@@ -123,8 +133,10 @@ private:
 	bool bStubMode = false;
 
 	bool ApplyStrategy();
-	void CreateActor(const int32 Count = 1);
+
+	void CreateActors(const int32 Count = 1);
 	
+	FORCEINLINE void CreateActor(const FActorSpawnParameters& SpawnInfo);
 	
 	void DestroyActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
