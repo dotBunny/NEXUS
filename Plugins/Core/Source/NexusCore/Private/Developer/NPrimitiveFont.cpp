@@ -8,6 +8,8 @@
 bool FNPrimitiveFont::bIsInitialized = false;
 TArray<TArray<FNPrimitiveFontPoint>> FNPrimitiveFont::Glyphs = TArray<TArray<FNPrimitiveFontPoint>>();
 
+// #SONARQUBE-DISABLE-CPP_S107 Necessary verbosity of methods to fully convey the drawing methods
+
 void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
 	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const float LineHeight, const float Thickness,
 	const bool bInvertLineFeed, const bool bDrawBelowPosition, const ESceneDepthPriorityGroup DepthPriorityGroup)
@@ -1805,3 +1807,5 @@ void FNPrimitiveFont::Initialize()
 	// Flag that we have generated at this point.
 	bIsInitialized = true;
 }
+
+// #SONARQUBE-ENABLE
