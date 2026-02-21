@@ -124,6 +124,9 @@ private:
 
 	bool ApplyStrategy();
 	void CreateActor(const int32 Count = 1);
+	
+	
+	void DestroyActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;

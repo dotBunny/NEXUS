@@ -370,6 +370,7 @@ void FNActorPool::CreateActor(const int32 Count)
 	// Create actual actors
 	for (int i = 0; i < Count; i++)
 	{
+		
 #if WITH_EDITOR
 		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);
 		SpawnInfo.InitialActorLabel = Label;
@@ -488,65 +489,46 @@ void FNActorPool::Clear(const bool bForceDestroy)
 {
 	for (int32 i = InActors.Num() - 1; i >= 0; i--)
 	{
-		check(InActors[i] != nullptr);
-		if (InActors[i]->IsPendingKillPending())
-		{
-			continue;
-		}
-		InActors[i]->RemoveFromRoot();
-		
-		const bool bBroadcastDestroy = Settings.HasFlag_BroadcastDestroy();
-		if (bImplementsInterface && bBroadcastDestroy)
-		{
-			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(InActors[i]);
-			ActorItem->OnDestroyedByActorPool();
-		}
-		else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
-		{
-			UFunction* Function = InActors[i]->FindFunction(FName("OnDestroyedByActorPool"));
-			if (Function)
-			{
-				InActors[i]->ProcessEvent(Function, nullptr);
-			}
-		}
-		
-		if (bForceDestroy)
-		{
-			InActors[i]->Destroy();
-		}
+		DestroyActor(InActors[i], bForceDestroy);
 	}
 	for (int32 i = OutActors.Num() - 1; i >= 0; i--)
 	{
-		check(OutActors[i] != nullptr);
-
-		if (OutActors[i]->IsPendingKillPending())
-		{
-			continue;
-		}
-		OutActors[i]->RemoveFromRoot();
-
-		const bool bBroadcastDestroy = Settings.HasFlag_BroadcastDestroy();
-		if (bImplementsInterface && bBroadcastDestroy)
-		{
-			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OutActors[i]);
-			ActorItem->OnDestroyedByActorPool();
-		}
-		else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
-		{
-			UFunction* Function = InActors[i]->FindFunction(FName("OnDestroyedByActorPool"));
-			if (Function)
-			{
-				InActors[i]->ProcessEvent(Function, nullptr);
-			}
-		}
-		
-		if (bForceDestroy)
-		{
-			OutActors[i]->Destroy();
-		}
+		DestroyActor(OutActors[i], bForceDestroy);
 	}
+	
 	InActors.Reset();
 	OutActors.Reset();
+}
+
+void FNActorPool::DestroyActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const
+{
+	check(Actor != nullptr);
+
+	if (Actor->IsPendingKillPending())
+	{
+		return;
+	}
+	Actor->RemoveFromRoot();
+
+	const bool bBroadcastDestroy = Settings.HasFlag_BroadcastDestroy();
+	if (bImplementsInterface && bBroadcastDestroy)
+	{
+		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
+		ActorItem->OnDestroyedByActorPool();
+	}
+	else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+	{
+		UFunction* Function = Actor->FindFunction(FName("OnDestroyedByActorPool"));
+		if (Function)
+		{
+			Actor->ProcessEvent(Function, nullptr);
+		}
+	}
+	
+	if (bForceDestroy)
+	{
+		Actor->Destroy();
+	}
 }
 
 void FNActorPool::Fill()
