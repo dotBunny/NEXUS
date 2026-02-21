@@ -58,9 +58,4 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
 		meta=(Tooltop="What should be done with an AActor returned to APS that is not known to it."))
 	ENActorPoolUnknownBehaviour UnknownBehaviour;
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Update Rate",
-		meta=(Tooltop="How often should the Actor Pools be queried and the widget updated."))
-	float DeveloperOverlayUpdateRate = 0.1f;
-
 };

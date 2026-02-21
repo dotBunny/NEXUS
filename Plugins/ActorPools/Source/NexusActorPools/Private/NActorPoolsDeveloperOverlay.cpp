@@ -9,6 +9,16 @@
 #include "NStyleLibrary.h"
 #include "Components/NListView.h"
 
+namespace NEXUS::ActorPools::ConsoleCommands
+{
+	static float DeveloperOverlayUpdateRate = 0.5f;
+	static FAutoConsoleVariableRef CVAR_bTrackStats(
+		TEXT("N.ActorPools.DeveloperOverlay.UpdateRate"),
+		DeveloperOverlayUpdateRate,
+		TEXT("How often should the FNActorPools be pooled for updates."),
+		ECVF_Default | ECVF_Preview);
+}
+
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
@@ -21,9 +31,7 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 		Bind(Context.World());
 	}
 	
-	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
-	CachedUpdateRate = Settings->DeveloperOverlayUpdateRate;
-	UpdateTimer = CachedUpdateRate;
+	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 
 	UpdateBanner();
 	
@@ -54,7 +62,7 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 	}
 	
 	// Reset timer
-	UpdateTimer = CachedUpdateRate;
+	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 	
 	for (const auto Item : ActorPoolList->GetDisplayedEntryWidgets())
 	{

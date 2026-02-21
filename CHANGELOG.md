@@ -29,6 +29,7 @@
 - `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
 - `ANPooledActor` now has `OnCreatedByActorPoolEvent`, `OnSpawnedFromActorPoolEvent`, `OnReturnToActorPoolEvent`, and `OnDestroyedByActorPoolEvent` bindable events.
 - `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
+- `UNActorPoolsDeveloperOverlay` now responds to `N.ActorPools.DeveloperOverlay.UpdateRate` console variable.
 
 ### Fixed
 

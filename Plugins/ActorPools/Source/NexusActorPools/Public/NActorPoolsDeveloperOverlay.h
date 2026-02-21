@@ -42,8 +42,6 @@ private:
 	FDelegateHandle AddWorldDelegateHandle;
 	FDelegateHandle RemoveWorldDelegateHandle;
 	FText NoActorPoolsFoundText = NSLOCTEXT("NexusActorPools", "NoActorPoolsFound", "No Actor Pools Found");
-	
-	float CachedUpdateRate;
 	float UpdateTimer;
 	
 };
