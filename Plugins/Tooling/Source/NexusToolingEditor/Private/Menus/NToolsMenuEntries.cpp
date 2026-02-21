@@ -13,7 +13,7 @@ void FNToolsMenuEntries::AddMenuEntries()
 	auto LeakCheckMenuEntry = FNMenuEntry();
 	LeakCheckMenuEntry.Identifier = "LeakCheck";
 	LeakCheckMenuEntry.DisplayName = NSLOCTEXT("NexusToolingEditor","LeakCheck", "Leak Check");
-	LeakCheckMenuEntry.Tooltip = NSLOCTEXT("NexusToolingEditor","LeakCheck_Tooltip", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
+	LeakCheckMenuEntry.Tooltip = NSLOCTEXT("NexusToolingEditor","LeakCheck_Tooltip", "Capture and process all UObjects over a defined period to check for leaks."),
 	LeakCheckMenuEntry.Icon = FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Command.LeakCheck");
 	LeakCheckMenuEntry.Execute = FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create);
 	FNToolsMenu::AddMenuEntry(LeakCheckMenuEntry);
