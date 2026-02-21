@@ -63,7 +63,14 @@ void UNActorPoolListViewEntry::Refresh() const
 	LeftText->SetText(FText::AsNumber(InCount));	
 	RightText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "OutAndTotal", "{0} | {1}"), FText::AsNumber(OutCount), FText::AsNumber(Total)));
 	
-	ProgressBar->SetPercent(static_cast<float>(InCount)/Total);
+	if (Total == 0)
+	{
+		ProgressBar->SetPercent(1.f);
+	}
+	else
+	{
+		ProgressBar->SetPercent(static_cast<float>(InCount)/Total);
+	}
 }
 
 void UNActorPoolListViewEntry::Reset() const
