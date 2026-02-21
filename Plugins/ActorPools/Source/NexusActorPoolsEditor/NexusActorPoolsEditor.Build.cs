@@ -22,6 +22,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"AssetDefinition",
+					"BlueprintGraph",
 					"CoreUObject",
 					"DeveloperSettings",
 					"EditorScriptingUtilities",

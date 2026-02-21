@@ -197,7 +197,7 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	}
 	else if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
 	{
-		UFunction* Function = ReturnActor->FindFunction(FName("OnSpawnedFromActorPool"));
+		UFunction* Function = ReturnActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnSpawned);
 		if (Function)
 		{
 			ReturnActor->ProcessEvent(Function, nullptr);
@@ -243,7 +243,7 @@ bool FNActorPool::Return(AActor* Actor)
 	}
 	else if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
 	{
-		UFunction* Function = Actor->FindFunction(FName("OnReturnToActorPool"));
+		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnReturn);
 		if (Function)
 		{
 			Actor->ProcessEvent(Function, nullptr);
@@ -407,7 +407,7 @@ void FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 			
 		if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
 		{
-			UFunction* Function = CreatedActor->FindFunction(FName("OnCreatedByActorPool"));
+			UFunction* Function = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreated);
 			if (Function)
 			{
 				CreatedActor->ProcessEvent(Function, nullptr);
@@ -522,7 +522,7 @@ void FNActorPool::DestroyActor(const TObjectPtr<AActor> Actor, bool bForceDestro
 	}
 	else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
 	{
-		UFunction* Function = Actor->FindFunction(FName("OnDestroyedByActorPool"));
+		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDestroyed);
 		if (Function)
 		{
 			Actor->ProcessEvent(Function, nullptr);

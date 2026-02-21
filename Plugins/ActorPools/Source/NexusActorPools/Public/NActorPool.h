@@ -6,6 +6,15 @@
 #include "NActorPoolSettings.h"
 #include "Types/NToggle.h"
 
+namespace NEXUS::ActorPools::InvokeMethods
+{
+	inline FName OnCreated = TEXT("OnCreatedByActorPool");
+	inline FName OnDestroyed = TEXT("OnDestroyedByActorPool");
+	inline FName OnReturn = TEXT("OnReturnToActorPool");
+	inline FName OnSpawned = TEXT("OnSpawnedFromActorPool");
+	
+}
+
 /**
  * A runtime-unique controlling object that maintains a pool of spawned actors.
  * @note Not thread-safe, must be used on the game thread due to creating actors.
