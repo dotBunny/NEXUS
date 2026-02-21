@@ -12,7 +12,7 @@
 namespace NEXUS::ActorPools::ConsoleCommands
 {
 	static float DeveloperOverlayUpdateRate = 0.5f;
-	static FAutoConsoleVariableRef CVAR_bTrackStats(
+	static FAutoConsoleVariableRef CVAR_DeveloperOverlayUpdateRate(
 		TEXT("N.ActorPools.DeveloperOverlay.UpdateRate"),
 		DeveloperOverlayUpdateRate,
 		TEXT("How often should the FNActorPools be pooled for updates."),
