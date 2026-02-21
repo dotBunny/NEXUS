@@ -57,11 +57,6 @@ void UNActorPoolListViewEntry::Refresh() const
 	}
 
 	const int InCount = Pool->GetInCount();
-	if (InCount == 0)
-	{
-		return;
-	}
-
 	const int OutCount = Pool->GetOutCount();
 	const int Total = InCount + OutCount;
 	
