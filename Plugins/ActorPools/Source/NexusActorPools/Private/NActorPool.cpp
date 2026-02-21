@@ -34,6 +34,96 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	PostInitialize();
 }
 
+FText FNActorPool::GetDescription() const
+{
+	// World Name
+	FString WorldDetails = TEXT("WORLD:\n");
+	if (World != nullptr)
+	{
+		WorldDetails += "\t" + World->GetName() + TEXT("\n");
+	}
+	else
+	{
+		WorldDetails += TEXT("NULL\n");
+	}
+	
+	// Actor Details
+	FString ActorDetails = TEXT("ACTOR:\n");
+#if WITH_EDITOR
+	ActorDetails += TEXT("\tSpawn Prefix: ") + Name + TEXT("\n");
+#endif
+	ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
+	ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
+	
+	switch (Settings.Strategy)
+	{
+		using enum ENActorPoolStrategy;
+	case Create:
+		ActorDetails += TEXT("\tStrategy: Create\n");
+		break;
+	case CreateLimited:
+		ActorDetails += TEXT("\tStrategy: Create Limited\n");
+		break;
+	case CreateRecycleFirst:
+		ActorDetails += TEXT("\tStrategy: Create Recycle First\n");
+		break;
+	case CreateRecycleLast:
+		ActorDetails += TEXT("\tStrategy: Create Recycle Last\n");
+		break;
+	case Fixed:
+		ActorDetails += TEXT("\tStrategy: Fixed\n");
+		break;
+	case FixedRecycleFirst:
+		ActorDetails += TEXT("\tStrategy: Fixed Recycle First\n");
+		break;
+	case FixedRecycleLast:
+		ActorDetails += TEXT("\tStrategy: Fixed Recycle Last\n");
+		break;
+	}
+	
+	// Flags
+	FString FlagDetails = TEXT("FLAGS:\n");
+	if (Settings.HasFlag_BroadcastDestroy())
+	{
+		FlagDetails += TEXT("\tBroadcast Destroy\n");
+	}
+	if (Settings.HasFlag_DeferConstruction())
+	{
+		FlagDetails += TEXT("\tDefer Construction\n");
+	}
+	if (Settings.HasFlag_InvokeUFunctions())
+	{
+		FlagDetails += TEXT("\tInvoke UFunctions\n");
+	}
+	if (Settings.HasFlag_ReturnToStorage())
+	{
+		FlagDetails += TEXT("\tReturn To Storage\n");
+	}
+	if (Settings.HasFlag_DeferConstruction())
+	{
+		FlagDetails += TEXT("\tDefer Construction\n");
+	}
+	if (Settings.HasFlag_ServerOnly())
+	{
+		FlagDetails += TEXT("\tServer Only\n");
+	}
+	if (Settings.HasFlag_ShouldFinishSpawning())
+	{
+		FlagDetails += TEXT("\tShould Finish Spawning\n");
+	}
+	if (Settings.HasFlag_SetNetDormancy())
+	{
+		FlagDetails += TEXT("\tSet Net Dormancy\n");
+	}
+	if (Settings.HasFlag_SweepBeforeSettingLocation())
+	{
+		FlagDetails += TEXT("\tSweep Before Setting Location\n");
+	}
+	
+	return FText::Format(NSLOCTEXT("NexusActorPools", "ActorPoolDescription", "{0}\n{1}\n{2}"), 
+		FText::FromString(WorldDetails), FText::FromString(ActorDetails), FText::FromString(FlagDetails));
+}
+
 void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
 {
 	World = TargetWorld;

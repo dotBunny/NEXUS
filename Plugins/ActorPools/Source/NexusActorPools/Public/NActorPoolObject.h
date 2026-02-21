@@ -98,19 +98,13 @@ public:
 		if (Pool == nullptr) return false;
 		return Pool->HasInvokeUFunctionFlag();
 	}
-	
-#if WITH_EDITOR
-	FString GetPoolName() const
+
+	UFUNCTION(BlueprintCallable)
+	FText GetDescription() const
 	{
-		if (Pool == nullptr) return TEXT("");
-		return Pool->GetName();
+		if (Pool == nullptr) return FText::FromString("Pool == nullptr");
+		return Pool->GetDescription();
 	}
-#else
-	FString GetPoolName() const
-	{
-		return TEXT("");
-	}
-#endif // WITH_EDITOR	
 	
 private:	
 	FNActorPool* Pool;

@@ -101,9 +101,8 @@ public:
 	TSubclassOf<AActor> GetTemplate() const { return Template; };
 	UWorld* GetWorld() const { return World; };
 	
-#if WITH_EDITOR
-	FString GetName() const { return Name; };
-#endif // WITH_EDITOR
+
+	FText GetDescription() const;
 	
 private:
 
@@ -140,6 +139,5 @@ private:
 
 	
 	ENToggle SpawnPhysicsSimulation = T_Default;
-
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;
 };

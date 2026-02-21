@@ -36,14 +36,7 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 			TypeImage->SetToolTipText(FText::FromString("No Callbacks"));
 		}
 		
-		if (Pool->GetWorld() != nullptr)
-		{
-#if WITH_EDITOR
-			ProgressBar->SetToolTipText(FText::Format(NSLOCTEXT("NexusActorPools", "ProgressBarTooltip", "{0}\n{1}"), FText::FromString(Pool->GetWorld()->GetName()), FText::FromString(Pool->GetPoolName())));
-#else
-			ProgressBar->SetToolTipText(FText::FromString(Pool->GetWorld()->GetName()));
-#endif
-		}
+		ProgressBar->SetToolTipText(Pool->GetDescription());
 	
 		Refresh();
 	}
