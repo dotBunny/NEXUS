@@ -27,11 +27,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferences",
+			"Name": "NexusDynamicRefs",
 			"Enabled": true
 		},
-		{
-			"Name": "NexusFixers",
+				{
+			"Name": "NexusGuardian",
 			"Enabled": true
 		},
 		{
@@ -40,6 +40,10 @@
 		},
 		{
 			"Name": "NexusPicker",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusTooling",
 			"Enabled": true
 		},
 		{
@@ -55,7 +59,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDynamicReferencesSamples",
+			"Name": "NexusDynamicRefsSamples",
 			"Enabled": true
 		},
 		{
@@ -80,10 +84,6 @@
 		},
 		{
 			"Name": "NexusProcGenSamples",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusDeveloperOverlay",
 			"Enabled": true
 		},
 		{

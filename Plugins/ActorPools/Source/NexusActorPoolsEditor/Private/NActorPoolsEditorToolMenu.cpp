@@ -1,49 +1,47 @@
 ﻿#include "NActorPoolsEditorToolMenu.h"
 
-#include "NActorPoolsDeveloperOverlayWidget.h"
-#include "NActorPoolsEditorStyle.h"
-#include "NActorPoolsSettings.h"
-#include "NEditorCommands.h"
-#include "NWidgetEditorUtilityWidget.h"
 
-FName FNActorPoolsEditorToolMenu::EditorUtilityWindowName = FName("NActorPoolsEditorUtilityWindow");
+#include "NActorPoolsEditorCommands.h"
+#include "NActorPoolsEditorMinimal.h"
+#include "NActorPoolsEditorStyle.h"
+#include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSubsystem.h"
+#include "Menus/NToolsMenu.h"
 
 void FNActorPoolsEditorToolMenu::Register()
 {
 	// EUW Entry
-	auto EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNMenuEntry();
 	
-	EditorWindow.Identifier = "NActorPools";
+	EditorWindow.Section = TEXT("Developer Overlay");
+	EditorWindow.Identifier = NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier;
 	EditorWindow.DisplayName = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Actor Pools");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Opens the NActorPools Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_Tooltip", "Opens the NActorPools Developer Overlay inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), NEXUS::ActorPoolsEditor::EditorUtilityWidget::Icon);
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNActorPoolsEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNToolsMenu::AddMenuEntry(EditorWindow);
+	FNActorPoolsEditorCommands::AddMenuEntries();
+}
+
+void FNActorPoolsEditorToolMenu::Unregister()
+{
+	FNActorPoolsEditorCommands::RemoveMenuEntries();
+	FNToolsMenu::RemoveMenuEntry(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }
 
 void FNActorPoolsEditorToolMenu::CreateEditorUtilityWindow()
 {
-	// Default value
-	const TSubclassOf<UNActorPoolsDeveloperOverlayWidget> WidgetClass = UNActorPoolsSettings::Get()->DeveloperOverlayWidget;
-	
-	// Evaluate override
-	if (WidgetClass != nullptr)
-	{
-		FString PathName = WidgetClass->GetPathName();
-		PathName.RemoveFromEnd("_C");
-		
-		UNWidgetEditorUtilityWidget::GetOrCreate(
-		EditorUtilityWindowName, 
-		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("Actor Pools"), 
-		FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool");
-	}
+	UNEditorUtilityWidget::SpawnTab(
+		NEXUS::ActorPoolsEditor::EditorUtilityWidget::Path, 
+		NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNActorPoolsEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+	if (System == nullptr) return false;
+	return System->HasWidget(NEXUS::ActorPoolsEditor::EditorUtilityWidget::Identifier);
 }

@@ -3,20 +3,19 @@
 
 #include "NProcGenEditorToolMenu.h"
 
-#include "NEditorCommands.h"
+#include "NEditorUtilityWidget.h"
+#include "NEditorUtilityWidgetSubsystem.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NProcGenRegistry.h"
 #include "NEditorUtils.h"
-#include "NProcGenDeveloperOverlayWidget.h"
 #include "NProcGenEditorCommands.h"
+#include "NProcGenEditorMinimal.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
-#include "NProcGenSettings.h"
-#include "NWidgetEditorUtilityWidget.h"
+#include "Menus/NMenuEntry.h"
+#include "Menus/NToolsMenu.h"
 
-FName FNProcGenEditorToolMenu::EditorUtilityWindowName = FName("NProcGenEditorUtilityWindow");
-
-void FNProcGenEditorToolMenu::Register()
+void FNProcGenEditorToolMenu::AddMenuEntries()
 {
 	// Level Tools
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User"))
@@ -254,17 +253,38 @@ void FNProcGenEditorToolMenu::Register()
 	}
 
 	// EUW Entry
-	auto EditorWindow = FNWindowCommandInfo();
+	auto EditorWindow = FNMenuEntry();
 	
-	EditorWindow.Identifier = "NProcGenSystem";
-	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "ProcGen System");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen");
+	EditorWindow.Section = TEXT("Developer Overlay");
+	EditorWindow.Identifier = NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier;
+	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Procedural Generation");
+	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
+	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), NEXUS::ProcGenEditor::EditorUtilityWidget::Icon);
 	
 	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
 	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
 	
-	FNEditorCommands::AddWindowCommand(EditorWindow);
+	FNToolsMenu::AddMenuEntry(EditorWindow);
+}
+
+void FNProcGenEditorToolMenu::RemoveMenuEntries()
+{
+	FNToolsMenu::RemoveMenuEntry(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
+	
+	UToolMenus* Menu = UToolMenus::Get();
+	if (Menu)
+	{
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NOrganExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NProcGenEdMode_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_AddButton");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_SelectButton");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditBoundsMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditHullMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_EditVoxelMode");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellJunctionExtensions_Button");
+		Menu->RemoveEntry("LevelEditor.LevelEditorToolBar.User", "NEXUS", "NCellActor_DrawVoxelData");
+	}
 }
 
 bool FNProcGenEditorToolMenu::ShowCellEditMode()
@@ -305,24 +325,14 @@ bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
 {
-	// Default value
-	const TSubclassOf<UNProcGenDeveloperOverlayWidget> WidgetClass = UNProcGenSettings::Get()->DeveloperOverlayWidget;
-	
-	// Evaluate override
-	if (WidgetClass != nullptr)
-	{
-		FString PathName = WidgetClass->GetPathName();
-		PathName.RemoveFromEnd("_C");
-		
-		UNWidgetEditorUtilityWidget::GetOrCreate(
-		EditorUtilityWindowName, 
-		 FString::Printf(TEXT("/Script/UMGEditor.WidgetBlueprint'%s'"), *PathName), 
-		FText::FromString("ProcGen System"), 
-		FNProcGenEditorStyle::GetStyleSetName(), "Icon.ProcGen" );
-	}
+	UNEditorUtilityWidget::SpawnTab(
+		NEXUS::ProcGenEditor::EditorUtilityWidget::Path, 
+		NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }
 
 bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
 {
-	return UNWidgetEditorUtilityWidget::HasWidget(EditorUtilityWindowName);
+	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
+	if (System == nullptr) return false;
+	return System->HasWidget(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }

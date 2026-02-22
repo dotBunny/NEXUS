@@ -3,12 +3,6 @@
 
 #include "NPickerUtils.h"
 
-FCollisionQueryParams FNPickerUtils::DefaultTraceParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
-
-bool FNPickerUtils::bVisualLoggingEnabled = true;
-
-FVector FNPickerUtils::DefaultProjection = FVector(0, 0, -500.f);
-FRotator FNPickerUtils::DefaultRotation = FRotator::ZeroRotator;
-
-FRotator FNPickerUtils::BaseRotation = FRotator(1,-1,0);
-FMatrix FNPickerUtils::BaseMatrix = FRotationMatrix(BaseRotation);
+FCollisionQueryParams FNPickerUtils::CollisionQueryParams = FCollisionQueryParams(FName(TEXT("NEXUS")),false);
+FVector FNPickerUtils::NavQueryExtent = FVector(1500, 1500, 1500);
+FNavAgentProperties FNPickerUtils::NavAgentProperties = FNavAgentProperties(42, 192 );

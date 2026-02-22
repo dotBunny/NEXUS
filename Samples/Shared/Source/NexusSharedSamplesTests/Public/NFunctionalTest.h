@@ -32,7 +32,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	bool bHideName= true;
-#endif
+#endif // WITH_EDITORONLY_DATA
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override
@@ -44,7 +44,7 @@ protected:
 		Super::PostEditChangeProperty(PropertyChangedEvent);
 	}
 	void UpdateFromDisplay();
-#endif
+#endif // WITH_EDITOR
 	
 	UFUNCTION()
 	void OnFinishSampleDisplayTest(ESampleDisplayTestResult TestResult, const FString& Message);

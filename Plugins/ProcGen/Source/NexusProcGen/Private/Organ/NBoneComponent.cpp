@@ -53,7 +53,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	FinalRotator.Normalize();
 	RootRelativeCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
 }
-#endif
+#endif // WITH_EDITOR
 
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {

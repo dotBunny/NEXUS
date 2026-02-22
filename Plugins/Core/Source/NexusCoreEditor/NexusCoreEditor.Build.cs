@@ -30,7 +30,6 @@ namespace UnrealBuildTool.Rules
 					"DeveloperSettings",
 					"Engine",
 					"HTTP",
-					"InputCore",
 					"Kismet",
 					"LevelEditor",
 					"Projects",

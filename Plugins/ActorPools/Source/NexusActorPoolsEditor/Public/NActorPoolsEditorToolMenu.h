@@ -5,9 +5,9 @@
 
 class FNActorPoolsEditorToolMenu
 {
-	static FName EditorUtilityWindowName;
 public:
 	static void Register();
+	static void Unregister();
 	
 	static void CreateEditorUtilityWindow();
 	static bool HasEditorUtilityWindow();

@@ -5,9 +5,10 @@
 
 class FNProcGenEditorToolMenu
 {
-	static FName EditorUtilityWindowName;
 public:
-	static void Register();
+	static void AddMenuEntries();
+	static void RemoveMenuEntries();
+	
 	static bool ShowCellEditMode();
 	static bool ShowDrawVoxels();
 	static bool ShowCellDropdown();

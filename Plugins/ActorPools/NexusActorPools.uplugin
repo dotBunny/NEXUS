@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 9,
-	"VersionName": "0.2.6",
+	"Version": 12,
+	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Actor Pools",
 	"Description": "Generalized pooling system for Actors.",
 	"Category": "NEXUS",
@@ -37,15 +37,19 @@
 			"Enabled": true
 		},
 		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusDeveloperOverlay",
+			"Name": "NexusPicker",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusPicker",
+			"Name": "NexusTooling",
 			"Enabled": true
 		},
 		{

@@ -15,12 +15,12 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 
 		//TEST
 		{
-			N_TEST_TIMER_SCOPE(Warm_Actor_1000, 20.0f)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, 20.0f)
 
 			Pool.Prewarm(TestSize);
 

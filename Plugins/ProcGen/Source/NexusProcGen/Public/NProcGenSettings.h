@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NProcGenDeveloperOverlayWidget.h"
+#include "NProcGenDeveloperOverlay.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NProcGenSettings.generated.h"
@@ -42,7 +42,7 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 		return SectionDescription;
 	}
 
-#endif	
+#endif // WITH_EDITOR
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Unit Size",
@@ -53,9 +53,6 @@ public:
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Developer Overlay", DisplayName="Widget")
-	TSubclassOf<UNProcGenDeveloperOverlayWidget> DeveloperOverlayWidget;
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
 	TSoftObjectPtr<UMaterial> ProxyMaterial;
 
@@ -64,18 +61,6 @@ private:
 	void ValidateSettings()
 	{
 		bool bNeedsSave = false;
-
-		if (!DeveloperOverlayWidget)
-		{
-			UClass* DefaultOverlayClass = FSoftClassPath(
-				TEXT("/NexusProcGen/WB_NProcGenDeveloperOverlay.WB_NProcGenDeveloperOverlay_C"))
-				.TryLoadClass<UNProcGenDeveloperOverlayWidget>();
-			if (DefaultOverlayClass != nullptr)
-			{
-				bNeedsSave = true;
-				DeveloperOverlayWidget = DefaultOverlayClass;
-			}
-		}
 
 		if (!ProxyMaterial)
 		{
@@ -94,5 +79,5 @@ private:
 			TryUpdateDefaultConfigFile();
 		}
 	}
-#endif
+#endif // WITH_EDITOR
 };

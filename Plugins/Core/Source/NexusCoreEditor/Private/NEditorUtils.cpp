@@ -11,15 +11,6 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
-#if PLATFORM_WINDOWS
-#include "Windows/WindowsHWrapper.h"
-#ifdef UNICODE
-#define SEND_MESSAGE  SendMessageW
-#else
-#define SEND_MESSAGE  SendMessageA
-#endif // !UNICODE
-#endif
-
 void FNEditorUtils::RegisterSettings(UDeveloperSettings* SettingsObject)
 {
 	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings");
@@ -198,78 +189,6 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	}
 }
 
-void FNEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
-{
-	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
-	if (MutableStyleSet != nullptr)
-	{
-		MutableStyleSet->Set("AppIcon", Icon);
-	}
-	else
-	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateVectorImageBrush override."));
-	}
-}
-
-void FNEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
-{
-	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
-	if (MutableStyleSet != nullptr)
-	{
-		MutableStyleSet->Set("AppIcon", Icon);
-	}
-	else
-	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace AppIcon with FSlateImageBrush override."));
-	}
-}
-
-bool FNEditorUtils::ReplaceWindowIcon(const FString& IconPath)
-{
-#if PLATFORM_WINDOWS
-	const FString FinalPath = FString::Printf(TEXT("%s.ico"), *IconPath);
-	// ReSharper disable CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	if (FPaths::FileExists(FinalPath))
-	{
-		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
-		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
-		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
-		
-		if (hIcon)
-		{
-			// Set the large icon (Alt+Tab, taskbar)
-			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
-        
-			// Set the small icon (window title bar)
-			SEND_MESSAGE(WindowHandle, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
-        
-			// Also set it for the window class
-			SetClassLongPtr(WindowHandle, GCLP_HICON, (LONG_PTR)hIcon);
-			SetClassLongPtr(WindowHandle, GCLP_HICONSM, (LONG_PTR)hIcon);
-			return true;
-		}
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it failed to load."), *FinalPath);
-		return false;
-	}
-	// ReSharper restore CppCStyleCast, CppUE4CodingStandardNamingViolationWarning, CppZeroConstantCanBeReplacedWithNullptr
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to replace the Unreal Editor application icon with the provided icon(%s) as it could not be found."), *FinalPath);
-#else
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Replacing the operating system icon for the Unreal Editor application is not supported on this platform."));
-#endif
-	return false;
-}
-
-bool FNEditorUtils::HasActorsSelected()
-{
-	if (GEditor->GetSelectedActorCount() == 0) return false;
-	return true;
-}
-
-FString FNEditorUtils::GetEngineBinariesPath()
-{
-	return FPaths::Combine(FPaths::EngineDir(),"Binaries");
-}
-
 void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
 {
 	// Check Globals
@@ -297,62 +216,11 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	}
 }
 
-void FNEditorUtils::UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)
-{
-	// Check Globals
-	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
-	if (GlobalActiveTab.IsValid())
-	{
-		if (Icon.IsSet())
-		{
-			GlobalActiveTab.Get()->SetTabIcon(Icon);
-		}
-		
-		if (!Label.IsEmpty())
-		{
-			GlobalActiveTab.Get()->SetLabel(Label);
-		}
-		
-		if (OnTabClosedCallback.IsBound())
-		{
-			GlobalActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
-		}
-		return;
-	}
-	
-	// Check Level Editor
-	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-	{
-		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
-		if (LevelEditorActiveTab.IsValid())
-		{
-			if (Icon.IsSet())
-			{
-				LevelEditorActiveTab.Get()->SetTabIcon(Icon);
-			}
-		
-			if (!Label.IsEmpty())
-			{
-				LevelEditorActiveTab.Get()->SetLabel(Label);
-			}
-			
-			if (OnTabClosedCallback.IsBound())
-			{
-				LevelEditorActiveTab.Get()->SetOnTabClosed(OnTabClosedCallback);
-			}
-			return;
-		}
-	}
-	
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to update SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
-}
-
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
-
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
 		if (Child->GetFName() == WidgetIdentifier)
@@ -362,32 +230,26 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 			{
 				Child->AsSpawnerEntry()->SetIcon(Icon);
 			}
+			break;
 		}
 	}
 }
 
-void FNEditorUtils::FocusTab(const FName& TabIdentifier)
+void FNEditorUtils::RemoveWorkspaceItem(const FName& WidgetIdentifier)
 {
-	// Check Globals
-	const TSharedPtr<SDockTab> GlobalActiveTab = FGlobalTabmanager::Get()->FindExistingLiveTab(TabIdentifier);
-	if (GlobalActiveTab.IsValid())
+	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
+	TSharedPtr<FWorkspaceItem> Found;
+	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
-		GlobalActiveTab->ActivateInParent(SetDirectly);
-		GlobalActiveTab->FlashTab();
-		return;
-	}
-	
-	// Check Level Editor
-	if (const FLevelEditorModule* LevelEditorModule = FModuleManager::GetModulePtr<FLevelEditorModule>(TEXT("LevelEditor")))
-	{
-		const TSharedPtr<FTabManager> LevelEditorTabManager = LevelEditorModule->GetLevelEditorTabManager();
-		const TSharedPtr<SDockTab> LevelEditorActiveTab = LevelEditorTabManager->FindExistingLiveTab(TabIdentifier);
-		if (LevelEditorActiveTab.IsValid())
+		if (Child->GetFName() == WidgetIdentifier)
 		{
-			LevelEditorActiveTab->ActivateInParent(SetDirectly);
-			LevelEditorActiveTab->FlashTab();
-			return;
+			Found = Child.ToSharedPtr();
+			break;
 		}
 	}
-	UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to focus SDockTab as tab(%s) does not exist."), *TabIdentifier.ToString())
+	if (Found.IsValid())
+	{
+		BlutilityModule->GetMenuGroup()->RemoveItem(Found.ToSharedRef());
+	}
 }

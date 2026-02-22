@@ -10,3 +10,14 @@ DECLARE_CYCLE_STAT_EXTERN(TEXT("Subsystem Tick"), STAT_ActorPoolSubsystemTick, S
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("Pool Count"), STAT_ActorPoolCount, STATGROUP_NActorPools, NEXUSACTORPOOLS_API)
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("In Actors"), STAT_InActors, STATGROUP_NActorPools, NEXUSACTORPOOLS_API)
 DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT("Out Actors"), STAT_OutActors, STATGROUP_NActorPools, NEXUSACTORPOOLS_API)
+
+
+namespace NEXUS::ActorPools
+{
+	namespace VLog
+	{
+		const FColor RequestedPointColor = FColor::Green;
+		const FColor ActualPointColor = FColor::Blue;
+		constexpr float PointSize = 2.f;
+	}
+}

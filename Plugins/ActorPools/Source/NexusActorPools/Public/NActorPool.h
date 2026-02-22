@@ -6,6 +6,16 @@
 #include "NActorPoolSettings.h"
 #include "Types/NToggle.h"
 
+namespace NEXUS::ActorPools::InvokeMethods
+{
+	inline FText Category = FText::FromString("NActor Pool");
+	inline FName OnCreated = TEXT("OnCreatedByActorPool");
+	inline FName OnDestroyed = TEXT("OnDestroyedByActorPool");
+	inline FName OnReturn = TEXT("OnReturnToActorPool");
+	inline FName OnSpawned = TEXT("OnSpawnedFromActorPool");
+	
+}
+
 /**
  * A runtime-unique controlling object that maintains a pool of spawned actors.
  * @note Not thread-safe, must be used on the game thread due to creating actors.
@@ -84,24 +94,21 @@ public:
 	bool DoesSupportInterface() const { return bImplementsInterface; }
 
 	/**
-	 * Get the calculated half-height of the ActorPool's Template.
+	 * Will the ActorPool attempt to invoke UFUNCTIONs for events?
 	 */
-	double GetHalfHeight() const { return HalfHeight; };
-	/**
-	 * Get the calculated half-height of the ActorPool's Template as an offset vector.
-	 */
-	FVector GetHalfHeightOffset() const { return HalfHeightOffset; };
+	bool HasInvokeUFunctionFlag() const { return Settings.HasFlag_InvokeUFunctions(); }
 
+	/**
+	 * Get the number of AActors currently in the pool.
+	 */
 	int32 GetInCount() const { return InActors.Num(); };
+
+	/**
+	 * Get the number of AActors currently out of the pool.
+	 */
 	int32 GetOutCount() const { return OutActors.Num(); };
 
 	const FNActorPoolSettings& GetSettings() const { return Settings; };
-	
-	/**
-	 * Does the ActorPool's Template have a cached half-height?
-	 * @note This is useful for finding the midpoint to spawn characters.
-	 */
-	bool HasHalfHeight() const { return bHasHalfHeight; };
 
 	/**
 	 * Does the ActorPool have any actors currently in the pool?
@@ -113,6 +120,9 @@ public:
 
 	TSubclassOf<AActor> GetTemplate() const { return Template; };
 	UWorld* GetWorld() const { return World; };
+	
+
+	FText GetDescription() const;
 	
 private:
 
@@ -130,13 +140,15 @@ private:
 
 	TSubclassOf<AActor> Template;
 	
-	bool bHasHalfHeight;
 	bool bStubMode = false;
-	double HalfHeight;
-	FVector HalfHeightOffset;
 
 	bool ApplyStrategy();
-	void CreateActor(const int32 Count = 1);
+
+	void CreateActors(const int32 Count = 1);
+	
+	FORCEINLINE void CreateActor(const FActorSpawnParameters& SpawnInfo);
+	
+	void DestroyActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;
@@ -147,10 +159,10 @@ private:
 #if WITH_EDITOR
 	FString Name;
 	static int32 ActorPoolTicket;
-#endif
+#endif // WITH_EDITOR
 	bool bImplementsInterface = false;
 
+	
 	ENToggle SpawnPhysicsSimulation = T_Default;
-
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;
 };

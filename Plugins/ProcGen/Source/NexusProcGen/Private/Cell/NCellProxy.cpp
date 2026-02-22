@@ -34,7 +34,7 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	
 #if WITH_EDITOR	
 	bCanPlayFromHere = 0;
-#endif
+#endif // WITH_EDITOR
 	
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
@@ -64,7 +64,7 @@ void ANCellProxy::CreateLevelInstance()
 
 #if WITH_EDITOR
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
-#endif
+#endif // WITH_EDITOR
 }
 
 void ANCellProxy::LoadLevelInstance()
@@ -116,7 +116,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	// Clear anything previous
 #if WITH_EDITOR	
 	Mesh->ClearAllCachedCookedPlatformData();
-#endif	
+#endif // WITH_EDITOR
 
 	// Convert our mesh data to UE
 	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));

@@ -8,6 +8,7 @@
 #include "NDrawDebugHelpers.h"
 #include "NObjectSnapshotUtils.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NWorldMacros.h"
 #include "NDeveloperLibrary.generated.h"
 
 /**
@@ -116,20 +117,22 @@ public:
 	 * @param Scale The multiplier to apply to glyph size.
 	 * @param LineHeight The height used to represent a line.
 	 * @param Thickness The thickness of the lines used to draw glyphs.
+	 * @param LifeTime The lifetime of the string in seconds, -1 for infinite.
 	 * @param bInvertLineFeed Should new lines be stacked on top of older lines?
 	 * @param bDrawBelowPosition Should the top of the first line align with the position?
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Draw Debug String", Category = "NEXUS|Developer",
 		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#draw-debug-string", WorldContext = "WorldContextObject"))
 	static void DrawDebugString(const UObject* WorldContextObject, FString String, const FVector Position,
-		const FRotator Rotation, const bool bPersistentLines = false, const float LifeTime=-1.f, const uint8 DepthPriority = 0,
+		const FRotator Rotation, const bool bPersistentLines = false, const float LifeTime = 0, const uint8 DepthPriority = 0,
 		const FLinearColor ForegroundColor = FLinearColor::White, const float Scale = 1,
 		const float LineHeight = 4.f, const float Thickness = 8.f, const bool bInvertLineFeed = false,
 		const bool bDrawBelowPosition = true)
 	{
-		const UWorld* InWorld = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::ReturnNull);
+		const UWorld* InWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
 		if (InWorld == nullptr) return;
-		FNDrawDebugHelpers::DrawDebugString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime, 
+		
+		FNDrawDebugHelpers::DrawString(InWorld, String, Position, Rotation, bPersistentLines, LifeTime, 
 			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);		
 	}
 };

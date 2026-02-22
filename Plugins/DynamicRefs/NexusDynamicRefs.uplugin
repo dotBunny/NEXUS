@@ -1,0 +1,49 @@
+{
+	"FileVersion": 3,
+	"Version": 12,
+	"VersionName": "0.2.7",
+	"FriendlyName": "NEXUS: Dynamic References",
+	"Description": "Method for referring to UObjects prior to runtime, and by developer readable names.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/dynamic-references/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusDynamicRefs",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusDynamicRefsEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusTooling",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

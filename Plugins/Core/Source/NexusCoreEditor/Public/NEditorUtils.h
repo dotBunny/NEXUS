@@ -7,9 +7,9 @@
 #include "ContentBrowserModule.h"
 #include "IContentBrowserSingleton.h"
 #include "LevelEditorSubsystem.h"
+#include "Selection.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
-
 
 class UAsyncEditorDelay;
 
@@ -19,6 +19,25 @@ class UAsyncEditorDelay;
 class NEXUSCOREEDITOR_API FNEditorUtils
 {
 public:
+	/**
+	 * Indicates if the editor is in a shutdown process.
+	 * @return true/false if an exit has been requested.
+	 */
+	FORCEINLINE static bool IsEditorShuttingDown()
+	{
+		return IsEngineExitRequested();
+	}
+
+	/**
+	 * Are any Actors selected in the editor currently?
+	 * @return true/false if any actors are selected.
+	 */
+	FORCEINLINE static bool HasActorsSelected()
+	{
+		if (GEditor->GetSelectedActorCount() == 0) return false;
+		return true;
+	}
+	
 	/**
 	 * Get the current editor map name.
 	 */
@@ -34,6 +53,7 @@ public:
 	{
 		return GEditor->GetEditorWorldContext().World()->GetName();
 	}
+
 	/**
 	 * Is in PIE mode.
 	 */
@@ -90,7 +110,6 @@ public:
 	 */
 	static bool TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection);
 
-
 	/**
 	 * Create a new Blueprint asset of the specified class at the given path.
 	 * @param InPath The path where the Blueprint asset will be created.
@@ -98,7 +117,6 @@ public:
 	 * @return A pointer to the newly created Blueprint asset.
 	 */
 	static UBlueprint* CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass);
-
 	
 	FORCEINLINE static FEditorViewportClient* GetActiveViewportClient()
 	{
@@ -119,7 +137,6 @@ public:
 		}
 		return nullptr;
 	}
-
 	
 	FORCEINLINE static UWorld* GetCurrentWorld()
 	{
@@ -137,6 +154,15 @@ public:
 		const UPackage* Package =  World->GetPackage();
 		if (Package == nullptr || Package->GetFileSize() == 0) return true;
 		return !FPackageName::DoesPackageExist(Package->GetName());
+	}
+	
+	FORCEINLINE static void SelectActor(AActor* Actor)
+	{
+		USelection* ActorSelection = GEditor->GetSelectedActors();
+		ActorSelection->Modify();
+		ActorSelection->DeselectAll();
+		
+		GEditor->SelectActor(Actor, true, true, true, true);
 	}
 	
 	static TArray<FString> GetSelectedContentBrowserPaths()
@@ -158,22 +184,14 @@ public:
 	static void DisallowConfigFileFromStaging(const FString& Config);
 	static void AllowConfigFileForStaging(const FString& Config);
 	
-	static void ReplaceAppIcon(FSlateImageBrush* Icon);
-	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
-	static bool ReplaceWindowIcon(const FString& IconPath);
 
-	static bool HasActorsSelected();
+	FORCEINLINE static FString GetEngineBinariesPath()
+	{
+		return FPaths::Combine(FPaths::EngineDir(), "Binaries");
+	}
 	
-	static FString GetEngineBinariesPath();
-	
-	static void UpdateTab(const FName& TabIdentifier, const TAttribute<const FSlateBrush*>& Icon, const FText& Label, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
 	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
-	static void FocusTab(const FName& TabIdentifier);
+	static void RemoveWorkspaceItem(const FName& WidgetIdentifier);
 	
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
-	
-	static bool IsEditorShuttingDown()
-	{
-		return IsEngineExitRequested();
-	}
 };

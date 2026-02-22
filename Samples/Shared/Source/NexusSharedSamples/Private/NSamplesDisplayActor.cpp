@@ -13,6 +13,22 @@
 
 TArray<ANSamplesDisplayActor*> ANSamplesDisplayActor::KnownDisplays;
 
+void ANSamplesDisplayActor::SortKnownDisplays()
+{
+	KnownDisplays.Sort([](const ANSamplesDisplayActor& A, const ANSamplesDisplayActor& B)
+	{
+		if (A.ScreenshotSettings.FilenameOverride.IsEmpty() == B.ScreenshotSettings.FilenameOverride.IsEmpty())
+		{
+			return A.ScreenshotSettings.FilenameOverride > B.ScreenshotSettings.FilenameOverride;
+		}
+		if (A.ScreenshotSettings.CameraNameOverride.IsEmpty() == B.ScreenshotSettings.CameraNameOverride.IsEmpty())
+		{
+			return A.ScreenshotSettings.CameraNameOverride.ToString() > B.ScreenshotSettings.CameraNameOverride.ToString();
+		}
+		return A.GetName() > B.GetName();
+	});
+}
+
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	// Create reference storage
@@ -263,12 +279,15 @@ void ANSamplesDisplayActor::BeginDestroy()
 
 void ANSamplesDisplayActor::BeginPlay()
 {
-	if (TimerSettings.bTimerEnabled)
+	
+	// If we are running in automation, we absolutely do not want timers in other places running, so we disable them
+	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled)
 	{
-		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerSettings.TimerDuration, true, 0);
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, 
+			TimerSettings.TimerDuration, true, 0);
 	}
 
-	// Add to list of known displays so we can move between them easily.
+	// Add to the list of known displays so we can move between them easily.
 	KnownDisplays.Add(this);
 	Super::BeginPlay();
 }
@@ -277,6 +296,11 @@ void ANSamplesDisplayActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	// Remove me from the list.
 	KnownDisplays.Remove(this);
+	
+	if (TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle);
+	}
 	
 	Super::EndPlay(EndPlayReason);
 }
@@ -430,7 +454,7 @@ void ANSamplesDisplayActor::UpdateDescription() const
 		Origin = Parts->TitleTextComponent->GetRelativeLocation();
 	}
 
-	const float TitleSpacerOffset = (TitleSettings.TitleScale / 2.f) + 10.f;
+	const float TitleSpacerOffset = (TitleSettings.TitleScale / 2.f) + (TitleSettings.bShowTitleHorizontalRule ? 10.f : 0.f);
 	
 	FVector WallLocation = FVector(15.f, TextAlignmentOffset(1.f, false) - (DescriptionSettings.DescriptionTextPadding * .5f),
 		Origin.Z - TitleSpacerOffset - (DescriptionSettings.DescriptionTextPadding * .5f));
@@ -595,8 +619,8 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 			Parts->TitleTextComponent->SetRelativeTransform(
 				FTransform(
 					FRotator(40.f, 0.f, 0.f),
-					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f, 
-						TextAlignmentOffset(3.f, TitleSettings.bSeparateTitlePanel), 22.f),
+					FVector(((BaseSettings.Depth - 1.f) * 100.f) + 88.f + TitleSettings.TitleTextOffset.Y, 
+						TextAlignmentOffset(3.f, TitleSettings.bSeparateTitlePanel), 22.f) + TitleSettings.TitleTextOffset.X,
 					FVector::OneVector));
 			
 			Parts->TitleTextComponent->SetHorizontalAlignment(EHTA_Center);
@@ -639,7 +663,7 @@ void ANSamplesDisplayActor::UpdateTitleText() const
 				LocationOffset,
 				FVector(0.01f, BaseSettings.Width - 1.f, 0.02f)
 				));
-		Parts->TitleSpacerComponent->SetVisibility(true);
+		Parts->TitleSpacerComponent->SetVisibility(TitleSettings.bShowTitleHorizontalRule);
 	}
 	else
 	{
@@ -684,10 +708,10 @@ float ANSamplesDisplayActor::TextAlignmentOffset(const float WidthAdjustment, co
 	case EHTA_Center:
 		return 0.f;
 	case EHTA_Right:
-		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * -100.f;
+		return (((BaseSettings.Width - WidthAdjustment) * 0.5f) * -100.f);
 	case EHTA_Left:
 	default:
-		return ((BaseSettings.Width - WidthAdjustment) * 0.5f) * 100.f;
+		return (((BaseSettings.Width - WidthAdjustment) * 0.5f) * 100.f);
 	}
 }
 
@@ -697,12 +721,15 @@ FTransform ANSamplesDisplayActor::TitleTextTransform() const
 	{
 		return FTransform(
 			FRotator(90.f, 0.f, 0.f),
-			FVector(BaseSettings.Depth * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f), TextAlignmentOffset(1.0, false), 15.f),
+			FVector(BaseSettings.Depth * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f) + TitleSettings.TitleTextOffset.Y, 
+				TextAlignmentOffset(1.0, false) + TitleSettings.TitleTextOffset.X, 
+				15.f),
 			FVector::OneVector);
 	}
 	return FTransform(
 			FRotator::ZeroRotator,
-			FVector(15.f, TextAlignmentOffset(1.0, false), BaseSettings.Height * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f)),
+			FVector(15.f, TextAlignmentOffset(1.0, false) + TitleSettings.TitleTextOffset.Y, 
+				BaseSettings.Height * 100.f - (TitleSettings.TitleScale + 50.f * 0.5f)) + TitleSettings.TitleTextOffset.X,
 			FVector::OneVector);
 }
 
@@ -715,6 +742,12 @@ void ANSamplesDisplayActor::PrepareTest()
 	TestInstance = NewObject<UNSamplesDisplayTest>(this, UNSamplesDisplayTest::StaticClass(), NAME_None, RF_Transient);
 	TestInstance->AddToRoot();
 	
+	if (TimerSettings.bTimerEnabled && !TimerHandle.IsValid())
+	{
+		GetWorldTimerManager().SetTimer(TimerHandle, this, &ANSamplesDisplayActor::TimerExpired, TimerSettings.TimerDuration, true, 0);
+	}
+
+	// Disable for test
 	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().PauseTimer(TimerHandle);
@@ -739,7 +772,7 @@ void ANSamplesDisplayActor::CleanupTest()
 		TestInstance = nullptr;
 	}
 
-	if (TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
+	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled && TestingSettings.bTestDisableTimer && TimerHandle.IsValid())
 	{
 		GetWorldTimerManager().UnPauseTimer(TimerHandle);
 	}

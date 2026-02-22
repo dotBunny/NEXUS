@@ -30,7 +30,10 @@ enum class ENColor : uint8
 	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS: Black"),
 	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS: Pink"),
 
-	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black")
+	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black"),
+	NC_QuarterBlack = 201		UMETA(DisplayName = "Quarter Black"),
+	
+	NC_Transparent = 255		UMETA(DisplayName = "Transparent")
 };
 
 /**
@@ -41,7 +44,6 @@ class NEXUSCORE_API FNColor
 public:
 	static FLinearColor GetLinearColor(const ENColor& Color);
 	static FColor GetColor(const ENColor& Color);
-
 	
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
 	static constexpr FLinearColor BlueMid = FLinearColor(0.1058823529411765f, 0.2745098039215686f, 0.6156862745098039f, 1.0f);
@@ -64,4 +66,7 @@ public:
 	static constexpr FLinearColor NexusPink = FLinearColor(0.6328125f,0.4609375f,0.8671875f, 1.f);
 
 	static constexpr FLinearColor HalfBlack = FLinearColor(0.f,0.f,0.f, 0.5f);
+	static constexpr FLinearColor QuarterBlack = FLinearColor(0.f,0.f,0.f, 0.25f);
+	
+	static constexpr FLinearColor Transparent = FLinearColor(0.f,0.f,0.f, 0.0f);
 };

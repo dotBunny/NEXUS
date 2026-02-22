@@ -35,4 +35,16 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor")
 	static bool IsSameActors(const TArray<AActor*>& A, const TArray<AActor*>& B);
+
+	/**
+	 * Converts an array of UObject pointers to an array of AActor pointers.
+	 * 
+	 * @param InObjects The array of UObject pointers to convert.
+	 * @return An array of AActor pointers containing only the actors from the input array.
+	 * 
+	 * @note This function iterates through the input array and casts each UObject pointer to AActor.
+	 *       Only valid AActor pointers are added to the output array.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor")
+	static TArray<AActor*> ToActorArray(const TArray<UObject*> InObjects);
 };

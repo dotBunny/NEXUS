@@ -2,14 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NEditorCommands.h"
-
 #include "BlueprintEditor.h"
-#include "NEditorSettings.h"
 #include "NEditorUtils.h"
 #include "NMetaUtils.h"
-#include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
-
-TMap<FName, FNWindowCommandInfo> FNEditorCommands::WindowActions;
 
 void FNEditorCommands::RegisterCommands()
 {
@@ -55,23 +50,6 @@ void FNEditorCommands::RegisterCommands()
 		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenDocumentation_Desc", "Open the documentation in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
 		EUserInterfaceActionType::Button, FInputChord());
-
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_LeakCheck,
-	"NCore.Tools.LeakCheck",
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck", "Leak Check"),
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_LeakCheck_Desc", "Capture and process all UObjects over a period of 5 seconds to check for leaks."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.LeakCheck"),
-	EUserInterfaceActionType::Button, FInputChord());
-
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Tools_Profile_NetworkProfiler,
-	"NCore.Tools.Profile.NetworkProfiler",
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Network Profiler"),
-	NSLOCTEXT("NexusCoreEditor","Command_Tools_Profile_NetworkProfiler", "Launch external NetworkProfiler tool."),
-	FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.Visualizer"),
-	EUserInterfaceActionType::Button, FInputChord());
-	
 	
 	CommandList_Help = MakeShared<FUICommandList>();
 	
@@ -98,27 +76,6 @@ void FNEditorCommands::RegisterCommands()
 	CommandList_Help->MapAction(Get().CommandInfo_Help_Documentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDocumentation),
 		FCanExecuteAction());
-
-
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Node_ExternalDocumentation,
-			"NCore.Node.ExternalDocumentation",
-			NSLOCTEXT("NexusCoreEditor","Command_Node_OpenExternalDocumentation", "External Documentation"),
-			NSLOCTEXT("NexusCoreEditor","Command_Help_OpenRepository_Desc", "Open the external documentation (DocsURL) about this function."),
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Documentation"),
-			EUserInterfaceActionType::Button, FInputChord());
-
-	CommandList_Node = MakeShared<FUICommandList>();
-
-	CommandList_Node->MapAction(Get().CommandInfo_Node_ExternalDocumentation,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnNodeExternalDocumentation),
-		FCanExecuteAction::CreateStatic(&FNEditorCommands::NodeExternalDocumentation_CanExecute));
-
-
-	CommandList_Tools = MakeShared<FUICommandList>();
-	CommandList_Tools->MapAction(Get().CommandInfo_Tools_LeakCheck,
-		FExecuteAction::CreateStatic(&UNLeakTestDelayedEditorTask::Create));
-	CommandList_Tools->MapAction(Get().CommandInfo_Tools_Profile_NetworkProfiler,
-		FExecuteAction::CreateStatic(&FNEditorCommands::OnToolsProfileNetworkProfiler));
 }
 
 // ReSharper disable once IdentifierTypo
@@ -152,101 +109,8 @@ void FNEditorCommands::OnHelpDocumentation()
 	FPlatformProcess::LaunchURL(TEXT("https://nexus-framework.com/docs/"),nullptr, nullptr);
 }
 
-void FNEditorCommands::OnToolsProfileNetworkProfiler()
+void FNEditorCommands::AddMenuEntries()
 {
-	const FString ExecutablePath = FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe");
-	constexpr bool bLaunchDetached = true;
-	constexpr bool bLaunchHidden = false;
-	constexpr bool bLaunchReallyHidden = false;
-	const FProcHandle ProcHandle = FPlatformProcess::CreateProc(*ExecutablePath, TEXT(""), bLaunchDetached,
-		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
-	if (!ProcHandle.IsValid())
-	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to launch NetworkProfiler."))
-	}
-}
-
-bool FNEditorCommands::HasToolsProfileNetworkProfiler()
-{
-	return FPaths::FileExists(FPaths::Combine(FNEditorUtils::GetEngineBinariesPath(), "DotNet", "NetworkProfiler.exe"));
-}
-
-void FNEditorCommands::OnNodeExternalDocumentation()
-{
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return;
-	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
-	if (Node == nullptr) return;
-
-	// Split the data so you can have multiple URIs in the data
-	TArray<FString> OutURIs;
-	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
-	for (int i = 0; i < OutURIs.Num(); i++)
-	{
-		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
-	}
-}
-
-bool FNEditorCommands::NodeExternalDocumentation_CanExecute()
-{
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return false;
-	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
-	if (Node == nullptr) return false;
-	return FNMetaUtils::HasExternalDocumentation(Node);
-}
-
-void FNEditorCommands::BuildMenus()
-{
-	const FNEditorCommands Commands = Get();
-
-	// Project Levels
-	if (UToolMenu* FileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.File"))
-	{
-		FToolMenuSection& FileOpenSection = FileMenu->FindOrAddSection("FileOpen");
-		FileOpenSection.AddSubMenu(
-				"NProjectLevels",
-				NSLOCTEXT("NexusCoreEditor", "ProjectLevels", "Project Levels"),
-				NSLOCTEXT("NexusCoreEditor", "ProjectLevels_Tooltip", "A pre-defined list of levels related to the project."),
-				FNewToolMenuDelegate::CreateStatic(&FillProjectLevelsSubMenu),
-				false,
-				FSlateIcon(FNEditorStyle::GetStyleSetName(), "Command.ProjectLevels")
-			);
-	}
-	
-	UToolMenu* WindowsMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
-	FToolMenuSection& LevelEditorSection = WindowsMenu->FindOrAddSection("LevelEditor");
-	LevelEditorSection.AddSubMenu(
-			"NEXUS",
-			NSLOCTEXT("NexusCoreEditor", "NWindows", "NEXUS"),
-			NSLOCTEXT("NexusCoreEditor", "NWindows_ToolTip", "EUW/Windows added by parts of NEXUS."),
-			FNewToolMenuDelegate::CreateStatic(&FillNexusWindowsMenu, true),
-			false,
-			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
-		);
-	
-	// Tools Menu
-	if (UToolMenu* ToolMenus = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools"))
-	{
-		FToolMenuSection& ToolsSection = ToolMenus->FindOrAddSection("NEXUS");
-		ToolsSection.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorTools", "NEXUS");
-
-		ToolsSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_LeakCheck, Commands.CommandList_Tools);
-	}
-
-	
-	// Add in NetworkProfiler menu option if its present
-	if (HasToolsProfileNetworkProfiler())
-	{
-		if (UToolMenu* ProfileMenu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Tools.Profile"))
-		{
-			FToolMenuSection& ExternalMenu = ProfileMenu->FindOrAddSection("External");
-			ExternalMenu.Label = NSLOCTEXT("NexusCoreEditor", "NLevelEditorToolsExternal", "External");
-
-			ExternalMenu.AddMenuEntryWithCommandList(Commands.CommandInfo_Tools_Profile_NetworkProfiler, Commands.CommandList_Tools);
-		}
-	}
-	
 	// Help Menu Submenu
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Help"))
 	{
@@ -255,98 +119,23 @@ void FNEditorCommands::BuildMenus()
 				"NEXUS",
 				NSLOCTEXT("NexusCoreEditor", "NHelp", "NEXUS"),
 				NSLOCTEXT("NexusCoreEditor", "NHelp_Tooltip", "Help related to NEXUS"),
-				FNewToolMenuDelegate::CreateStatic(&FillHelpSubMenu),
+				FNewToolMenuDelegate::CreateStatic(&GenerateHelpSubMenu),
 				false,
 				FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon")
 			);
 	}
-	
-	// Support for DocsURL addition to nodes
-	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
-	{
-		FToolMenuSection& DocumentationSection = BlueprintNodeContextMenu->FindOrAddSection(FName("EdGraphSchemaDocumentation"));
-		DocumentationSection.AddMenuEntryWithCommandList(Commands.CommandInfo_Node_ExternalDocumentation, Commands.CommandList_Node);
-	}
 }
 
-void FNEditorCommands::FillProjectLevelsSubMenu(UToolMenu* Menu)
+void FNEditorCommands::RemoveMenuEntries()
 {
-	FToolMenuSection& ProjectLevelsSection = Menu->AddSection("ProjectLevels", NSLOCTEXT("NexusCoreEditor", "ProjectLevels", ""));
-	for (const UNEditorSettings* Settings = UNEditorSettings::Get();
-		const FSoftObjectPath& Path : Settings->ProjectLevels)
+	UToolMenus* ToolMenus = UToolMenus::Get();
+	if (ToolMenus)
 	{
-		if (!Path.IsValid())
-		{
-			continue;
-		}
-		
-		const FText DisplayName = FText::FromString(Path.GetAssetName());
-		const FText DisplayTooltip = FText::FromString(Path.GetAssetPathString());
-		const FName AssetName = Path.GetAssetFName();
-
-		FUIAction ButtonAction = FUIAction(
-		FExecuteAction::CreateLambda([Path]()
-			{
-				if (const FString MapPath = Path.ToString(); MapPath.Len() > 0)
-				{
-					GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->OpenEditorForAsset(MapPath);
-				}
-			}),
-			FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
-			FIsActionChecked(),
-			FIsActionButtonVisible());
-
-		ProjectLevelsSection.AddMenuEntry(Path.GetAssetFName(), DisplayName, DisplayTooltip,
-			FSlateIcon(FAppStyle::GetAppStyleSetName(), "Icons.Level"),
-			FToolUIActionChoice(ButtonAction),
-			EUserInterfaceActionType::Button, AssetName);
+		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Help", "Reference", "NEXUS");
 	}
 }
 
-void FNEditorCommands::FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu)
-{
-	FToolMenuSection& WindowsSection = Menu->AddSection("Windows", NSLOCTEXT("NexusCoreEditor", "Windows", ""));
-	for (auto WindowCommand : WindowActions)
-	{
-		FUIAction ButtonAction = FUIAction(WindowCommand.Value.Execute,WindowCommand.Value.CanExecute, 
-			WindowCommand.Value.IsChecked, FIsActionButtonVisible());
-		
-		if (WindowCommand.Value.IsChecked.IsBound())
-		{
-			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
-			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
-			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Check);
-		}
-		else
-		{
-			WindowsSection.AddMenuEntry(WindowCommand.Value.Identifier,  WindowCommand.Value.DisplayName, 
-			WindowCommand.Value.Tooltip, WindowCommand.Value.Icon,
-			FToolUIActionChoice(ButtonAction), EUserInterfaceActionType::Button);
-		}
-	}
-}
-
-void FNEditorCommands::AddWindowCommand(FNWindowCommandInfo CommandInfo)
-{
-	if (!WindowActions.Contains(CommandInfo.Identifier))
-	{
-		WindowActions.Add(CommandInfo.Identifier, CommandInfo);
-	}
-	else
-	{
-		WindowActions[CommandInfo.Identifier] = CommandInfo;
-	}
-}
-
-void FNEditorCommands::RemoveWindowCommand(const FName Identifier)
-{
-	if (WindowActions.Contains(Identifier))
-	{
-		WindowActions.Remove(Identifier);
-	}
-}
-
-void FNEditorCommands::FillHelpSubMenu(UToolMenu* Menu)
+void FNEditorCommands::GenerateHelpSubMenu(UToolMenu* Menu)
 {
 	const FNEditorCommands Commands = Get();
 

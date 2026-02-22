@@ -1,0 +1,53 @@
+{
+	"FileVersion": 3,
+	"Version": 12,
+	"VersionName": "0.2.7",
+	"FriendlyName": "NEXUS: Guardian",
+	"Description": "A system which monitors metrics and takes action when thresholds are hit.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/guardian/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusGuardian",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "NexusGuardianEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusTooling",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

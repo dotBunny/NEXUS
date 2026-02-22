@@ -68,6 +68,7 @@ void FNProcGenEditorModule::ShutdownModule()
 	
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	
+	FNProcGenEditorToolMenu::RemoveMenuEntries();
 	FNProcGenEditorStyle::Shutdown();
 
 	// Remove Undo handler
@@ -103,7 +104,7 @@ void FNProcGenEditorModule::OnPostEngineInit()
 	if (FSlateApplication::IsInitialized())
 	{
 		FNProcGenEditorCommands::Register();
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNProcGenEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNProcGenEditorToolMenu::AddMenuEntries));
 	}
 
 	// Editor Mode

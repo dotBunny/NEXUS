@@ -5,17 +5,6 @@
 
 #include "NEditorStyle.h"
 
-struct FNWindowCommandInfo
-{
-	FName Identifier;
-	FText DisplayName;
-	FText Tooltip;
-	FExecuteAction Execute;
-	FCanExecuteAction CanExecute;
-	FIsActionChecked IsChecked;
-	FSlateIcon Icon;
-};
-
 class FNEditorCommands final : public TCommands<FNEditorCommands>
 {
 public:
@@ -29,6 +18,8 @@ public:
 	}
 
 	virtual void RegisterCommands() override;
+	static void AddMenuEntries();
+	static void RemoveMenuEntries();
 	
 	static void OnHelpOverwatch();
 	static void OnHelpIssues();
@@ -36,29 +27,14 @@ public:
 	static void OnHelpDiscord();
 	static void OnHelpRoadmap();
 	static void OnHelpDocumentation();
-	
-	static void OnToolsProfileNetworkProfiler();
-	static bool HasToolsProfileNetworkProfiler();
-	
-	
-	static void OnNodeExternalDocumentation();
-	static bool NodeExternalDocumentation_CanExecute();
 
-	static void BuildMenus();
-	static void FillHelpSubMenu(UToolMenu* Menu);
-	static void FillProjectLevelsSubMenu(UToolMenu* Menu);
 	
-	static void FillNexusWindowsMenu(UToolMenu* Menu, bool bIsContextMenu);
-	NEXUSCOREEDITOR_API static void AddWindowCommand(FNWindowCommandInfo CommandInfo);
-	NEXUSCOREEDITOR_API static void RemoveWindowCommand(FName Identifier);
+	static void GenerateHelpSubMenu(UToolMenu* Menu);
 
 private:
-	static TMap<FName, FNWindowCommandInfo> WindowActions;
-	
 	TSharedPtr<FUICommandList> CommandList_Help;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Discord;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_BugReport;
-
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Overwatch;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Roadmap;
 	TSharedPtr<FUICommandInfo> CommandInfo_Help_Issues;
@@ -66,8 +42,4 @@ private:
 
 	TSharedPtr<FUICommandList> CommandList_Node;
 	TSharedPtr<FUICommandInfo> CommandInfo_Node_ExternalDocumentation;
-
-	TSharedPtr<FUICommandList> CommandList_Tools;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_LeakCheck;
-	TSharedPtr<FUICommandInfo> CommandInfo_Tools_Profile_NetworkProfiler;
 };

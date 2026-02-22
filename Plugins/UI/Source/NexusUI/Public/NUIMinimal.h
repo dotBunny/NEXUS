@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace NEXUS::UI::Editor
+namespace NEXUS::UIEditor
 {
 	const FText PaletteCategory = NSLOCTEXT("NexusUIEditor", "WidgetPaletteCategory", "NEXUS UI");
 }

@@ -18,7 +18,7 @@ N_TEST(FNActorPoolTests_Strategy_Create, "NEXUS::UnitTests::NActorPools::Strateg
 		ActorPoolSettings.MinimumActorCount = 0;
 		ActorPoolSettings.MaximumActorCount = 5;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Create;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
@@ -60,7 +60,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited, "NEXUS::UnitTests::NActorPools::
 		ActorPoolSettings.MinimumActorCount = 0;
 		ActorPoolSettings.MaximumActorCount = 2;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::CreateLimited;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
@@ -104,7 +104,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, "NEXUS::UnitTests::NActorPo
 		ActorPoolSettings.MinimumActorCount = 5;
 		ActorPoolSettings.MaximumActorCount = 5;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::CreateRecycleFirst;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
@@ -147,7 +147,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPoo
 		ActorPoolSettings.MinimumActorCount = 5;
 		ActorPoolSettings.MaximumActorCount = 5;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::CreateRecycleLast;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
@@ -194,7 +194,7 @@ N_TEST(FNActorPoolTests_Strategy_Fixed, "NEXUS::UnitTests::NActorPools::Strategy
 		ActorPoolSettings.MinimumActorCount = 3;
 		ActorPoolSettings.MaximumActorCount = 3;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
@@ -229,7 +229,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, "NEXUS::UnitTests::NActorPoo
 		ActorPoolSettings.MinimumActorCount = 2;
 		ActorPoolSettings.MaximumActorCount = 3;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::FixedRecycleFirst;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
@@ -272,7 +272,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, "NEXUS::UnitTests::NActorPool
 		ActorPoolSettings.MinimumActorCount = 3;
 		ActorPoolSettings.MaximumActorCount = 3;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::FixedRecycleLast;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorageLocation | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 	
 	
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);

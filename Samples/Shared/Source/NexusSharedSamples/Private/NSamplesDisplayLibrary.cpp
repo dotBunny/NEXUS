@@ -5,14 +5,24 @@
 FMatrix UNSamplesDisplayLibrary::BaseDrawMatrix = FRotationMatrix::MakeFromYZ(FVector::ForwardVector, FVector::LeftVector);
 
 void UNSamplesDisplayLibrary::TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
-	const int TimerIntervals)
+	const int TimerIntervals, const ENColor Color, const float Size)
 {
-	DrawDebugPoint(SamplesDisplay->GetWorld(), Location, 15.f, FNColor::GetColor(ENColor::NC_Red),
+	DrawDebugPoint(SamplesDisplay->GetWorld(), Location, Size, FNColor::GetColor(Color),
 	false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
 }
 
+void UNSamplesDisplayLibrary::TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations,
+	const int TimerIntervals, const ENColor Color, const float Size)
+{
+	for (const FVector& Location : Locations)
+	{
+		DrawDebugPoint(SamplesDisplay->GetWorld(), Location, Size, FNColor::GetColor(Color),
+			false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
+	}
+}
+
 void UNSamplesDisplayLibrary::TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius,
-	const int TimerIntervals)
+                                              const int TimerIntervals)
 {
 	DrawDebugSphere(SamplesDisplay->GetWorld(), Location, Radius,24,
 	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World);
@@ -39,16 +49,31 @@ void UNSamplesDisplayLibrary::TimerDrawComboBox(ANSamplesDisplayActor* SamplesDi
 	const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals)
 {
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, InnerDimensions.GetExtent(),
-			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
-			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+		FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+		SDPG_World, NEXUS::Samples::TimerDrawThickness);
 
 	DrawDebugBox(SamplesDisplay->GetWorld(), Location, OuterDimensions.GetExtent(),
-	FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+		FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
 SDPG_World, NEXUS::Samples::TimerDrawThickness);	
 }
 
+void UNSamplesDisplayLibrary::TimerDrawComboOrientedBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
+	const FVector& InnerDimensions, const FVector& OuterDimensions, const FRotator& Rotation, const int TimerIntervals)
+{
+	FVector MinExtents = InnerDimensions * 0.5f;
+	FVector MaxExtents = OuterDimensions * 0.5f;
+	
+	DrawDebugBox(SamplesDisplay->GetWorld(), Location, MinExtents, Rotation.Quaternion(),
+			FNColor::GetColor(ENColor::NC_Black), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+	
+	DrawDebugBox(SamplesDisplay->GetWorld(), Location, MaxExtents, Rotation.Quaternion(),
+			FNColor::GetColor(ENColor::NC_White), false, SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals,
+			SDPG_World, NEXUS::Samples::TimerDrawThickness);
+}
+
 void UNSamplesDisplayLibrary::TimerDrawCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float& Radius,
-	const FRotator& Rotation, const int TimerIntervals)
+                                              const FRotator& Rotation, const int TimerIntervals)
 {
 	FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);
 	DrawMatrix.SetOrigin(Location);
@@ -58,7 +83,46 @@ void UNSamplesDisplayLibrary::TimerDrawCircle(ANSamplesDisplayActor* SamplesDisp
 		NEXUS::Samples::TimerDrawThickness,false);
 }
 
-void UNSamplesDisplayLibrary::TimerDrawComboCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
+void UNSamplesDisplayLibrary::TimerDrawComboArc(ANSamplesDisplayActor* SamplesDisplay, const FVector Location,
+	const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance,
+	const int TimerIntervals)
+{
+	const float AngleWidth = PI * (Degrees / 360);
+	
+
+// Runtime version wants to use a forward vector but that messes with the rotation currently
+#if ENABLE_DRAW_DEBUG
+	if (MinimumDistance > 0)
+	{
+		DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MinimumDistance,  Rotation.Quaternion(), 
+			AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
+			SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
+			NEXUS::Samples::TimerDrawThickness);
+	}
+	
+	DrawDebugCircleArc(SamplesDisplay->GetWorld(), Location, MaximumDistance,  Rotation.Quaternion(), 
+		AngleWidth, 24, FNColor::GetColor(ENColor::NC_White), false,
+		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, 
+		NEXUS::Samples::TimerDrawThickness);
+#endif // ENABLE_DRAW_DEBUG	
+	
+	const float MaxDegrees = Degrees * 0.5f;
+	const float MinDegrees = -MaxDegrees;
+	const float MaxAngle = FMath::DegreesToRadians(MaxDegrees);
+	const float MinAngle = FMath::DegreesToRadians(MinDegrees);
+	const FVector InMinPoint = Location + Rotation.RotateVector(FVector(FMath::Cos(MinAngle), FMath::Sin(MinAngle), 0) * MinimumDistance);
+	const FVector OutMinPoint = Location + Rotation.RotateVector(FVector(FMath::Cos(MinAngle), FMath::Sin(MinAngle), 0) * MaximumDistance);
+	const FVector InMaxPoint = Location + Rotation.RotateVector(FVector(FMath::Cos(MaxAngle), FMath::Sin(MaxAngle), 0) * MinimumDistance);
+	const FVector OutMaxPoint = Location + Rotation.RotateVector(FVector(FMath::Cos(MaxAngle), FMath::Sin(MaxAngle), 0) * MaximumDistance);
+	
+	DrawDebugLine(SamplesDisplay->GetWorld(), InMinPoint, OutMinPoint, FNColor::GetColor(ENColor::NC_White), false, 
+		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
+	DrawDebugLine(SamplesDisplay->GetWorld(), InMaxPoint, OutMaxPoint, FNColor::GetColor(ENColor::NC_White), false, 
+		SamplesDisplay->TimerSettings.TimerDuration * TimerIntervals, SDPG_World, NEXUS::Samples::TimerDrawThickness);
+}
+
+
+void UNSamplesDisplayLibrary::TimerDrawComboCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, 
 	const FVector2D& InnerOuter, const FRotator& Rotation, const int TimerIntervals)
 {
 	FMatrix DrawMatrix = BaseDrawMatrix * FRotationMatrix(Rotation);

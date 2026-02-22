@@ -32,6 +32,8 @@ void FNActorPoolsEditorModule::ShutdownModule()
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
 	
+	FNActorPoolsEditorToolMenu::Unregister();
+	
 	// Teardown Placement
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	

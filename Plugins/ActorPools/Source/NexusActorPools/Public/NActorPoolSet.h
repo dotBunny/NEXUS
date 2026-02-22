@@ -39,7 +39,7 @@ public:
 	TArray<FNActorPoolDefinition> ActorPools;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UNActorPoolSet>> NestedSets;
+	TArray<TSoftObjectPtr<UNActorPoolSet>> NestedSets;
 	
 	bool TryGetUniqueSets(TArray<UNActorPoolSet*>& OutActorPoolSets)
 	{
@@ -55,9 +55,10 @@ public:
 		// Add children/s
 		for (int i = 0; i < AdditionalCount; i++)
 		{
-			if (!OutActorPoolSets.Contains(NestedSets[i])) // Prevent infinite loop
+			UNActorPoolSet* NestedSetPtr = NestedSets[i].LoadSynchronous();
+			if (!OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
 			{
-				NestedSets[i]->TryGetUniqueSets(OutActorPoolSets);
+				NestedSetPtr->TryGetUniqueSets(OutActorPoolSets);
 			}
 		}
 

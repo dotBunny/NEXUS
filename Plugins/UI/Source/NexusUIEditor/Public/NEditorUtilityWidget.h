@@ -3,60 +3,81 @@
 
 #pragma once
 
-
+#include "EditorUtilityLibrary.h"
 #include "EditorUtilityWidget.h"
-#include "EditorUtilityWidgetBlueprint.h"
-#include "INWidgetStateProvider.h"
-#include "INWidgetTabDetailsProvider.h"
 #include "NEditorUtilityWidget.generated.h"
 
 /**
  * An extension on the UEditorUtilityWidget providing additional functionality around customization and appearance.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/editor-utility-widget/">UNEditorUtilityWidget</a>
  */
-UCLASS()
-class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget, public INWidgetTabDetailsProvider, public INWidgetStateProvider
+UCLASS(BlueprintType)
+class NEXUSUIEDITOR_API UNEditorUtilityWidget : public UEditorUtilityWidget
 {
 	GENERATED_BODY()
 
 public:
-	static const FString WidgetState_WidgetBlueprint;
-	static const FString WidgetState_TabDisplayText;
-	static const FString WidgetState_TabIconStyle;
-	static const FString WidgetState_TabIconName;
 	
-	void SetTemplate(TObjectPtr<UEditorUtilityWidgetBlueprint> Template);
+	static UEditorUtilityWidget* SpawnTab(const FString& ObjectPath, FName Identifier = NAME_None);
 	
 	UFUNCTION(BlueprintCallable)
-	bool IsPersistent() const;
+	bool IsPersistent() const
+	{
+		return bIsPersistent;
+	};
 	
-	virtual FName GetUserSettingsIdentifier();
-	virtual FString GetUserSettingsTemplate();
-
+	UFUNCTION(BlueprintCallable)
+	FName GetUniqueIdentifier() const
+	{
+		return UniqueIdentifier;
+	};
+	
+	UFUNCTION(BlueprintCallable)
+	FName GetTabIdentifier() const
+	{
+		return CachedTabIdentifier;
+	};
+	
 protected:
 	
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;	
-	virtual FName GetTabIdentifier();
+	virtual void NativeDestruct() override;
 	
 	UFUNCTION()
 	virtual void DelayedConstructTask();
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	bool bIsPersistent = false;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State", 
+		meta=(Tooltip="Should the widget attempt to remove itself when the tab is closed from any cached state in the UNEditorUtilityWidgetSubsystem."))
+	bool bHasPermanentState = false;
 	
-	UPROPERTY()
-	TObjectPtr<UEditorUtilityWidgetBlueprint> PinnedTemplate;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
+	FName UniqueIdentifier;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
+	FName TabIconStyle;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
+	FName TabIconName;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Tab")
+	bool bRemoveWorkspaceItem = true;
+		
 	/**
 	 * Accessing this has to happen on the following frame after constructing the widget.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="Info")
 	FVector2D UnitScale = FVector2D::One();	
 
-private:
-	void OnTabClosed(TSharedRef<SDockTab> Tab);
+	UPROPERTY()
+	TObjectPtr<UAsyncEditorDelay> DelayedTask;
 	
+private:
+	void OnTabClosed(TSharedRef<SDockTab> Tab) const;
 	SDockTab::FOnTabClosedCallback OnTabClosedCallback;
+	FSlateIcon TabIcon;
+	FName CachedTabIdentifier;
+	
 };

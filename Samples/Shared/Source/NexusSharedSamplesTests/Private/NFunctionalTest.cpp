@@ -17,7 +17,7 @@ ANFunctionalTest::ANFunctionalTest(const FObjectInitializer& ObjectInitializer) 
 	{
 		TestName->SetVisibility(false);
 	}
-#endif
+#endif // WITH_EDITORONLY_DATA
 }
 
 void ANFunctionalTest::PrepareTest()
@@ -101,4 +101,4 @@ void ANFunctionalTest::UpdateFromDisplay()
 		this->SetActorLabel(TestLabel);
 	}
 }
-#endif
+#endif // WITH_EDITOR

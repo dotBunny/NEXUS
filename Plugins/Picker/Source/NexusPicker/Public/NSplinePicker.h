@@ -4,7 +4,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NPickerUtils.h"
 #include "NRandom.h"
+#include "NSplinePickerParams.h"
 #include "Components/SplineComponent.h"
 
 /**
@@ -15,122 +17,44 @@
 class NEXUSPICKER_API FNSplinePicker
 {
 public:
+	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generate deterministic points on a spline.
 	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocation [out] The generated point location.
-	 * @param SplineComponent The spline component to generate points on.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void NextPointOn(FVector& OutLocation, const USplineComponent* SplineComponent)
-	{
-		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::Deterministic.FloatRange(0, SplineComponent->Duration));
-		N_IMPLEMENT_VLOG_SPLINE()
-	}
+	static void Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
-	 * Generates a deterministic point on a spline, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param SplineComponent The spline component to generate points on.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void NextPointOnProjected(FVector& OutLocation, const USplineComponent* SplineComponent, N_VARIABLES_PICKER_PROJECTION())
-	{
-		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::Deterministic.FloatRange(0, SplineComponent->Duration));
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
-		
-	}
-	
-	/**
-	 * Generates a random point on a spline.
+	 * Generate random points on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param OutLocation [out] The generated point location.
-	 * @param SplineComponent The spline component to generate points on.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomPointOn(FVector& OutLocation, const USplineComponent* SplineComponent)
-	{
-		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::NonDeterministic.FRandRange(0, SplineComponent->Duration));
-		N_IMPLEMENT_VLOG_SPLINE()
-	}
+	static void Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
-	 * Generates a random point on a spline, then projects it to the world.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param SplineComponent The spline component to generate points on.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomPointOnProjected(FVector& OutLocation, const USplineComponent* SplineComponent, N_VARIABLES_PICKER_PROJECTION())
-	{
-		OutLocation = SplineComponent->GetWorldLocationAtTime(FNRandom::NonDeterministic.FRandRange(0, SplineComponent->Duration));
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
-	}
-	
-	/**
-	 * Generates a random point on a spline using a provided seed.
+	 * Generates random points on a spline.
 	 * Useful for one-time random point generation with reproducible results.
+	 * @param OutLocations An array to store the generated points.
 	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated point location.
-	 * @param SplineComponent The spline component to generate points on.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomOneShotPointOn(const int32 Seed, FVector& OutLocation, const USplineComponent* SplineComponent)
+	FORCEINLINE static void OneShot(TArray<FVector>& OutLocations, const int32 Seed, const FNSplinePickerParams& Params)
 	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = SplineComponent->GetWorldLocationAtTime(RandomStream.FRandRange(0, SplineComponent->Duration));
-		N_IMPLEMENT_VLOG_SPLINE()
+		int32 DuplicateSeed = Seed;
+		Tracked(OutLocations, DuplicateSeed, Params);
 	}
 
 	/**
-	 * Generates a random point on a spline using a provided seed, then projects it to the world.
-	 * @param Seed The random seed to use.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param SplineComponent The spline component to generate points on.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomOneShotPointOnProjected(const int32 Seed, FVector& OutLocation, const USplineComponent* SplineComponent, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomOneShotPointOn(Seed, OutLocation, SplineComponent);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
-	}
-	
-	/**
-	 * Generates a random point on a spline while tracking the random seed state.
+	 * Generates random points on a spline.
 	 * Updates the seed value to enable sequential random point generation.
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated point location.
-	 * @param SplineComponent The spline component to generate points on.
+	 * @param OutLocations An array to store the generated points.
+	 * @param Seed The random seed to start with, and update.
+	 * @param Params The parameters for the point generation.
 	 */
-	FORCEINLINE static void RandomTrackedPointOn(int32& Seed, FVector& OutLocation, const USplineComponent* SplineComponent)
-	{
-		const FRandomStream RandomStream(Seed);
-		OutLocation = SplineComponent->GetWorldLocationAtTime(RandomStream.FRandRange(0, SplineComponent->Duration));
-		Seed = RandomStream.GetCurrentSeed();
-		N_IMPLEMENT_VLOG_SPLINE()
-	}
-
-	/**
-	 * Generates a random point on a spline while tracking the random seed state, then projects it to the world.
-	 * Updates the seed value to enable sequential random point generation.
-	 * @param Seed [in,out] The random seed to use and update.
-	 * @param OutLocation [out] The generated and projected point location.
-	 * @param SplineComponent The spline component to generate points on.
-	 * @param InWorld The world context for line tracing.
-	 * @param Projection Direction and distance for the line trace.
-	 * @param CollisionChannel The collision channel to use for tracing.
-	 */
-	FORCEINLINE static void RandomTrackedPointOnProjected(int32& Seed, FVector& OutLocation, const USplineComponent* SplineComponent, N_VARIABLES_PICKER_PROJECTION())
-	{
-		RandomTrackedPointOn(Seed, OutLocation, SplineComponent);
-		N_IMPLEMENT_PICKER_PROJECTION()
-		N_IMPLEMENT_VLOG_SPLINE_PROJECTION()
-	}
+	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params);	
 
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
@@ -148,6 +72,22 @@ public:
 
 		const FVector ClosestLocationOnSpline = SplineComponent->FindLocationClosestToWorldLocation(Point, ESplineCoordinateSpace::World);
 		const float Distance = FVector::Distance(Point, ClosestLocationOnSpline);
-		return Distance <= NEXUS::Picker::Tolerance;
+		return Distance <= NEXUS::Picker::SplinePointTolerance;
+	}
+	
+	/**
+	 * Checks if multiple points are on a spline within a specified tolerance.
+	 * @param Points The array of points to check.
+	 * @param SplineComponent The spline component to check against.
+	 * @return An array of boolean values indicating if each point is on a spline within a specified tolerance.
+	 */
+	FORCEINLINE static TArray<bool> IsPointsOn(const TArray<FVector>& Points, const USplineComponent* SplineComponent)
+	{
+		TArray<bool> OutResults;
+		for (const FVector& Point : Points)
+		{
+			OutResults.Add(IsPointOn(SplineComponent, Point));
+		}
+		return MoveTemp(OutResults);
 	}
 };

@@ -32,7 +32,8 @@ enum class ENActorPoolSpawnerDistribution : uint8
 	Radius = 1,
 	Sphere = 2,
 	Box = 3,
-	Spline = 4
+	Spline = 4,
+	OrientedBox = 5
 };
 
 /**
@@ -81,7 +82,7 @@ public:
 	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Actor Pool Spawner")
 	FVector DistributionRange = FVector(1.f, 20.f, 20.f);
-
+	
 	/**
 	 * The in-level component reference for usage with the Spline distribution method.
 	 */
@@ -148,7 +149,8 @@ public:
 	
 	FORCEINLINE FVector GetOffset() const { return Offset; }
 	FORCEINLINE ENActorPoolSpawnerDistribution GetDistribution() const { return Distribution; }
-	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange; }
+	FORCEINLINE FVector GetDistributionRange() const { return DistributionRange * GetComponentScale(); }
+	FORCEINLINE FRotator GetDistributionRotation() const { return GetComponentRotation(); }
 
 protected:
 	UPROPERTY(EditAnywhere, Meta = (AllowPrivateAccess = "true", TitleProperty="{Template}"), Category="Actor Pool Spawner")

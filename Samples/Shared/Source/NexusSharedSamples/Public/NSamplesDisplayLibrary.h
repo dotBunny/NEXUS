@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NColor.h"
 #include "Components/SplineComponent.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NSamplesDisplayLibrary.generated.h"
@@ -24,8 +25,11 @@ class UNSamplesDisplayLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Samples Display", DisplayName=" Draw Point")
-	static void TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const int TimerIntervals = 1);
+	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Samples Display", DisplayName="Draw Point")
+	static void TimerDrawPoint(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const int TimerIntervals = 1, ENColor Color = ENColor::NC_Red, float Size = 10.f);
+	
+	UFUNCTION(BlueprintCallable, BlueprintPure=false, Category = "NEXUS|Samples Display", DisplayName="Draw Points")
+	static void TimerDrawPoints(ANSamplesDisplayActor* SamplesDisplay, const TArray<FVector>& Locations, const int TimerIntervals = 1, ENColor Color = ENColor::NC_Red, float Size = 10.f);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Sphere")
 	static void TimerDrawSphere(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float Radius, const int TimerIntervals = 1);
@@ -39,8 +43,14 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Box")
 	static void TimerDrawComboBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FBox& InnerDimensions, const FBox& OuterDimensions, const int TimerIntervals = 1);
 	
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo OrientedBox")
+	static void TimerDrawComboOrientedBox(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FVector& InnerDimensions, const FVector& OuterDimensions, const FRotator& Rotation, const int TimerIntervals = 1);
+	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Circle")
 	static void TimerDrawCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const float& Radius, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Arc")
+	static void TimerDrawComboArc(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance, const int TimerIntervals = 1);
 	
 	UFUNCTION(BlueprintCallable, BlueprintPure=false,  Category = "NEXUS|Samples Display", DisplayName="Draw Combo Circle")
 	static void TimerDrawComboCircle(ANSamplesDisplayActor* SamplesDisplay, const FVector Location, const FVector2D& InnerOuter, const FRotator& Rotation = FRotator::ZeroRotator, const int TimerIntervals = 1);

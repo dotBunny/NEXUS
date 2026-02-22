@@ -22,9 +22,9 @@ public:
 			{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 				UObject* Object = static_cast<UObject*>(ObjectItem.Object);
-#else
+#else // !UE_VERSION_OLDER_THAN(5, 6, 0)
 				UObject* Object = static_cast<UObject*>(ObjectItem->GetObject());
-#endif
+#endif // UE_VERSION_OLDER_THAN(5, 6, 0)
 				if (Object != nullptr)
 				{
 					RootedObjects.Add(Object);
@@ -41,5 +41,21 @@ public:
 		{
 			UE_LOG(LogNexusCore, Log, TEXT("%s"), *Object->GetName());
 		}
+	}
+	
+	
+	static FString GetBuildWatermark()
+	{
+		static const FString BuildWatermark = FString::Printf(TEXT("%s-%s%s (%s)"),
+			FApp::GetBuildVersion(),
+			LexToString(FApp::GetBuildConfiguration()),
+			LexToString(FApp::GetBuildTargetType()),
+			*FApp::GetBuildDate()).Replace(TEXT("+"), TEXT("/"));
+		return BuildWatermark;
+	}
+
+	static bool HasBuildInfo()
+	{
+		return !FString(FApp::GetBuildVersion()).Equals(FString(TEXT("UE5-CL-0")));
 	}
 };

@@ -8,7 +8,7 @@
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 #include "Macros/NModuleMacros.h"
-#include "NMultiplayerEditorToolMenu.h"
+#include "NMultiplayerEditorCommands.h"
 
 void FNMultiplayerEditorModule::StartupModule()
 {
@@ -31,7 +31,7 @@ void FNMultiplayerEditorModule::OnPostEngineInit()
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerEditorCommands::Register));
 	}
 }
 

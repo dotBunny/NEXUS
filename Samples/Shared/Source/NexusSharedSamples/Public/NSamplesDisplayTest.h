@@ -52,6 +52,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Location)")
 	void CheckTrueWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
 	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check True (w/ Locations)")
+	void CheckTrueWithLocations(const TArray<bool> bResults, const TArray<FVector>& Locations, const FString FailMessage);
+	
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Functional Test|Validation", DisplayName="Check False (w/ Location)")
 	void CheckFalseWithLocation(const bool bResult, const FVector& Location, const FString FailMessage);
 	

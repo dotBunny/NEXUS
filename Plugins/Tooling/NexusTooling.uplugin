@@ -1,0 +1,44 @@
+{
+	"FileVersion": 3,
+	"Version": 12,
+	"VersionName": "0.2.7",
+	"FriendlyName": "NEXUS: Tooling",
+	"Description": "An assortment of developer tooling for the Unreal Editor.",
+	"Category": "NEXUS",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/tooling/",
+	"MarketplaceURL": "",
+	"SupportURL": "https://github.com/dotBunny/NEXUS/issues/new/choose",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "NexusToolingEditor",
+			"Type": "Editor",
+			"LoadingPhase": "Default",
+			"PlatformAllowList": [
+				"Mac",
+				"Linux",
+				"Win64"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "NexusCore",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusUI",
+			"Enabled": true
+		},
+		{
+			"Name": "CommonUI",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": false
+}

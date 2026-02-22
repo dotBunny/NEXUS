@@ -31,8 +31,8 @@ enum class ENActorPoolFlags : uint8
 	None = 0 UMETA(Hidden),
 	// Should a sweep be done when setting the location of an Actor being spawned?
 	SweepBeforeSettingLocation = 1 << 0,
-	// Should the Actor being returned to the pool be moved to a storage location? 
-	ReturnToStorageLocation = 1 << 1,
+	// Should the Actor being returned to the pool be moved to a storage transform?
+	ReturnToStorage = 1 << 1,
 	// Controls whether Actor construction is deferred when creating new Actors.
 	DeferConstruction = 1 << 2,
 	/**
@@ -52,8 +52,14 @@ enum class ENActorPoolFlags : uint8
 	 * Should an Actor's network dormancy be updated based on state?
 	 */
 	SetNetDormancy = 1 << 6,
+
+	/**
+	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnDestroyedByActorPool be invoked to simulate an interface callback to AActor-based blueprints? 
+	 * @note This is only applicable to non-interfaced AActors, as interfaced Actors have their own interface callback mechanism.
+	 */
+	InvokeUFunctions = 1 << 7 UMETA(DisplayName = "Invoke UFunctions"),
 	
-	DefaultSettings = ReturnToStorageLocation | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
+	DefaultSettings = ReturnToStorage | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
@@ -76,9 +82,9 @@ public:
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ShouldFinishSpawning);
 	}
-	FORCEINLINE bool HasFlag_ReturnToStorageLocation() const
+	FORCEINLINE bool HasFlag_ReturnToStorage() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ReturnToStorageLocation);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ReturnToStorage);
 	}
 	FORCEINLINE bool HasFlag_SweepBeforeSettingLocation() const
 	{
@@ -95,6 +101,11 @@ public:
 	FORCEINLINE bool HasFlag_SetNetDormancy() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SetNetDormancy);
+	}
+	
+	FORCEINLINE bool HasFlag_InvokeUFunctions() const
+	{
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::InvokeUFunctions);
 	}
 	
 	/**
@@ -128,8 +139,14 @@ public:
 	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::DefaultSettings);
 	
 	/**
-	 * The default applied transform when creating an actor, with the location component being used as the storage location when an actor is returned to the pool, and the scale applied when spawned.
+	 * The default applied transform when creating an actor, as well as where and how an actor is stored.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
-	FTransform DefaultTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
+	FTransform StorageTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
+	
+	/**
+	 * The base transform applied when spawning an actor.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
+	FTransform SpawnedTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
 };

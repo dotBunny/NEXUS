@@ -19,7 +19,9 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void DrawHUD() override;
+	
 	void ToggleVisibility() { bHideHUD = !bHideHUD;}
+	void SetVisibility(const bool bVisible) { bHideHUD = !bVisible; }
 	void SetScreenshotMultiplier(const int Multiplier) { ScreenshotMultiplier = Multiplier; };
 	void SetCurrentCameraName(FString Name) { CurrentCameraName = Name; };
 

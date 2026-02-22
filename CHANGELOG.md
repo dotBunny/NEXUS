@@ -1,5 +1,51 @@
 # Changelog
 
+## [0.2.7] - 2026-02-22
+
+### Added
+
+- `ANSamplesLevelActor` now has `bShowLevelName` and `bShowLogo` properties to control whether the level name and logo are shown.
+- `ANSamplesDisplayActor` title settings now has `bShowTitleHorizontalRule` allowing for the title to be drawn with or without a horizontal rule.
+- `ANSamplesDisplayActor` title settings now has `TitleTextPadding` allowing for the title to have some padding from the edges.
+- `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
+- `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
+- `FNOrientedBoxPicker` for generating points in a box with rotation.
+- `FNEditorSlateUtils` and `FNSlateUtils`.
+- [#117](https://github.com/dotBunny/NEXUS/issues/117)`Collision Visualizer` added to `Tools -> Debug`.
+- [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
+- [#70](https://github.com/dotBunny/NEXUS/issues/70) Add `Create Actor Pool Set` button to `UNActorPoolsEditorUtilityWidget` to create an `UNActorPoolSet` based on the currently found pools in **PIE**. 
+- `Invoke UFunctions` flag to `UNActorPoolSettings` to enable `UFUNCTION` invoking on non-interfaced `AActors`, specifically invoking `OnCreatedByActorPool`, `OnSpawnedFromActorPool`, `OnReturnToActorPool`, and `OnDestroyedByActorPool` (when enabled) named `UFUNCTION` on the `AActor` if it does not implement the `INActorPoolItem` interface..
+- `UNActorPoolsDeveloperOverlay` now has tooltips with detailed information about the behavior of the associated `FNActorPool`.
+
+### Changed
+
+- `NEXUS: Fixers` has been collapsed into a more generalized `NEXUS: Tooling` plugin, this is where _all your base_ Unreal Editor tooling has been shifted as well (from the editor side of `NEXUS: Core`).
+- Menu entries were streamlined and repositioned to better fit into the UE ecosystem.
+- `NexusDynamicReferences` module renamed `NexusDynamicRefs` avoid unnecessarily long names, this change includes all associated classes and methods.
+- `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
+- All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
+- [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
+- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full FTransfrom set.
+- `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
+- `ANPooledActor` now has `OnCreatedByActorPoolEvent`, `OnSpawnedFromActorPoolEvent`, `OnReturnToActorPoolEvent`, and `OnDestroyedByActorPoolEvent` bindable events.
+- `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
+- `UNActorPoolsDeveloperOverlay` now responds to `N.ActorPools.DeveloperOverlay.UpdateRate` console variable.
+
+### Fixed
+
+- Ensure that a `UNDelayedEditorTask` removes itself from `UAsyncEditorDelay` complete event when released.
+- Added exception for `UDataValidationChangelist` to `UNEngineContentValidator` as when submitting with the Revision Control window the changelist object would prevent validation.
+- `FNCirclePicker::IsPointInsideOrOn` and `UNCirclePickerLibrary::IsPointInsideOrOn` now correctly return `true` when the point is inside a rotated circle.
+- `FNBoxPicker` and `FNRectanglePicker` no longer have regions unintentionally excluded in the distribution.
+- `ANSamplesLevelActor` now properly flags the `SM_SkySphere` not to have any collisions, stopping a warning when building NavMesh.
+- [#125](https://github.com/dotBunny/NEXUS/issues/125) Issue with `NPoseAssetFixer` not working on external plugin content.
+- `UNActorPoolSubsystem` now properly places `UNActorPoolSet` generated actors in the correct world, no longer leaving some in limbo.
+
+### Removed
+
+- `UNWidgetEditorUtilityWidget` no longer used to wrap content widgets, individuals should extend off `UNEditorUtilityWidget` instead.
+- `FNActorPool` half-height calculations and offset (use `FActorPoolSettings::SpawnTransform`).
+
 ## [0.2.6] - 2026-01-20
 
 ### Added
@@ -13,7 +59,7 @@
 
 ### Changed
 
-- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where absolutely necessary.
+- Many enumerations have been modernized to `enum class`, leaving only a few `enum` where necessary.
 - Console command `NEXUS.ActorPools.TrackStats` renamed to `N.ActorPools.TrackStats`.
 - Extracted test logic from `ANSamplesDisplayActor` into its own test object.
 - `UNActorPoolSubsystem` now respects `UnknownBehaviour` in `UNActorPoolsSettings` to determine what to do when an `AActor` is returned to the system when a `FNActorPool` does not exist for it.
@@ -110,7 +156,7 @@
 
 ### Changed
 
-- Update detection now bumps ignored version to the installed version if its greater then the saved version.
+- Update detection now bumps the ignored version to the installed version if it is greater than the saved version.
 - Exposed all log categories for external reference.
 
 ### Fixed
@@ -132,7 +178,7 @@
 
 ### Changed
 
-- Altered GitHub actions to dispatch tests based on initial Unit test, as well as fixed up additional warnings thrown by EGS UE.
+- Altered GitHub actions to dispatch tests based on the initial Unit test, as well as fixed up additional warnings thrown by EGS UE.
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
@@ -208,7 +254,7 @@
 - `ANSamplesDisplayActor` no longer causes headless servers to crash.
 - `FNActorPool` will properly time-slice their strategies.
 - `FGCScopeGuard` guards like a boss during tests now.
-- Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc).
+- Crashes when trying to Pan a non-blueprint editor that uses the blueprint editor (Curves, etc.).
 - `UNActorPoolSpawnerComponent` will properly now allow BP editing of some variables.
 
 ### Changed
@@ -273,6 +319,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.2.7]: https://github.com/dotBunny/NEXUS/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/dotBunny/NEXUS/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/dotBunny/NEXUS/compare/v0.2.3...v0.2.4

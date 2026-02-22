@@ -10,7 +10,7 @@
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
-#endif
+#endif // WITH_EDITOR
 
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
 {
@@ -32,6 +32,96 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	PreInitialize(TargetWorld, ActorClass);
 	UpdateSettings(InActorPoolSetting);
 	PostInitialize();
+}
+
+FText FNActorPool::GetDescription() const
+{
+	// World Name
+	FString WorldDetails = TEXT("WORLD:\n");
+	if (World != nullptr)
+	{
+		WorldDetails += "\t" + World->GetName() + TEXT("\n");
+	}
+	else
+	{
+		WorldDetails += TEXT("NULL\n");
+	}
+	
+	// Actor Details
+	FString ActorDetails = TEXT("ACTOR:\n");
+#if WITH_EDITOR
+	ActorDetails += TEXT("\tSpawn Prefix: ") + Name + TEXT("\n");
+#endif
+	ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
+	ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
+	
+	switch (Settings.Strategy)
+	{
+		using enum ENActorPoolStrategy;
+	case Create:
+		ActorDetails += TEXT("\tStrategy: Create\n");
+		break;
+	case CreateLimited:
+		ActorDetails += TEXT("\tStrategy: Create Limited\n");
+		break;
+	case CreateRecycleFirst:
+		ActorDetails += TEXT("\tStrategy: Create Recycle First\n");
+		break;
+	case CreateRecycleLast:
+		ActorDetails += TEXT("\tStrategy: Create Recycle Last\n");
+		break;
+	case Fixed:
+		ActorDetails += TEXT("\tStrategy: Fixed\n");
+		break;
+	case FixedRecycleFirst:
+		ActorDetails += TEXT("\tStrategy: Fixed Recycle First\n");
+		break;
+	case FixedRecycleLast:
+		ActorDetails += TEXT("\tStrategy: Fixed Recycle Last\n");
+		break;
+	}
+	
+	// Flags
+	FString FlagDetails = TEXT("FLAGS:\n");
+	if (Settings.HasFlag_BroadcastDestroy())
+	{
+		FlagDetails += TEXT("\tBroadcast Destroy\n");
+	}
+	if (Settings.HasFlag_DeferConstruction())
+	{
+		FlagDetails += TEXT("\tDefer Construction\n");
+	}
+	if (Settings.HasFlag_InvokeUFunctions())
+	{
+		FlagDetails += TEXT("\tInvoke UFunctions\n");
+	}
+	if (Settings.HasFlag_ReturnToStorage())
+	{
+		FlagDetails += TEXT("\tReturn To Storage\n");
+	}
+	if (Settings.HasFlag_DeferConstruction())
+	{
+		FlagDetails += TEXT("\tDefer Construction\n");
+	}
+	if (Settings.HasFlag_ServerOnly())
+	{
+		FlagDetails += TEXT("\tServer Only\n");
+	}
+	if (Settings.HasFlag_ShouldFinishSpawning())
+	{
+		FlagDetails += TEXT("\tShould Finish Spawning\n");
+	}
+	if (Settings.HasFlag_SetNetDormancy())
+	{
+		FlagDetails += TEXT("\tSet Net Dormancy\n");
+	}
+	if (Settings.HasFlag_SweepBeforeSettingLocation())
+	{
+		FlagDetails += TEXT("\tSweep Before Setting Location\n");
+	}
+	
+	return FText::Format(NSLOCTEXT("NexusActorPools", "ActorPoolDescription", "{0}\n{1}\n{2}"), 
+		FText::FromString(WorldDetails), FText::FromString(ActorDetails), FText::FromString(FlagDetails));
 }
 
 void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
@@ -67,23 +157,11 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 		WorkingName = WorkingName.Mid(0, WorkingName.Len() - 2);
 	}
 	Name = FString::Printf(TEXT("AP_%s_%i"), *WorkingName, ActorPoolTicket);
-#endif
+#endif // WITH_EDITOR
 }
 
 void FNActorPool::PostInitialize()
 {
-	// Cache half-height of the item	
-	if (const APawn* Pawn = Cast<APawn>(Template->GetDefaultObject()))
-	{
-		HalfHeight = Pawn->GetDefaultHalfHeight();
-		HalfHeightOffset = FVector(0.0f, 0.0f, HalfHeight);
-		bHasHalfHeight = true;
-	}
-	else
-	{
-		bHasHalfHeight = false;
-	}
-
 	if (Settings.CreateObjectsPerTick == -1)
 	{
 		Fill();
@@ -116,6 +194,14 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	if (bImplementsInterface)
 	{
 		(Cast<INActorPoolItem>(ReturnActor))->OnSpawnedFromActorPool();
+	}
+	else if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+	{
+		UFunction* Function = ReturnActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnSpawned);
+		if (Function)
+		{
+			ReturnActor->ProcessEvent(Function, nullptr);
+		}
 	}
 
 	return ReturnActor;
@@ -155,6 +241,14 @@ bool FNActorPool::Return(AActor* Actor)
 	{
 		(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
 	}
+	else if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+	{
+		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnReturn);
+		if (Function)
+		{
+			Actor->ProcessEvent(Function, nullptr);
+		}
+	}
 
 	return true;
 }
@@ -176,7 +270,8 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;
-	Settings.DefaultTransform = InNewSettings.DefaultTransform;
+	Settings.StorageTransform = InNewSettings.StorageTransform;
+	Settings.SpawnedTransform = InNewSettings.SpawnedTransform;
 	
 	// Update based on if we should tick - test usually don't have access to the system to time-slice
 	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
@@ -209,12 +304,12 @@ bool FNActorPool::ApplyStrategy()
 	{
 		using enum ENActorPoolStrategy;
 	case Create:
-		CreateActor();
+		CreateActors();
 		return true;
 	case CreateLimited:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 			return false;
-		CreateActor();
+		CreateActors();
 		return true;
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
@@ -223,7 +318,7 @@ bool FNActorPool::ApplyStrategy()
 		}
 		else
 		{
-			CreateActor();
+			CreateActors();
 		}
 		return true;
 	case CreateRecycleLast:
@@ -233,7 +328,7 @@ bool FNActorPool::ApplyStrategy()
 		}
 		else
 		{
-			CreateActor();
+			CreateActors();
 		}
 		return true;
 	case Fixed:
@@ -249,7 +344,7 @@ bool FNActorPool::ApplyStrategy()
 	}
 }
 
-void FNActorPool::CreateActor(const int32 Count)
+void FNActorPool::CreateActors(const int32 Count)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
@@ -264,13 +359,14 @@ void FNActorPool::CreateActor(const int32 Count)
 	// Reserve space for the new actors
 	if (Count > 1)
 	{
-		InActors.Reserve(InActors.Num() + Count);
-		OutActors.Reserve(OutActors.Num() + Count);
+		const int BufferCount = Count * 2;
+		InActors.Reserve(InActors.Num() + BufferCount);
+		OutActors.Reserve(OutActors.Num() + BufferCount);
 	}
 	
 #if WITH_EDITOR
 	int32 LabelNumber = (InActors.Num() + OutActors.Num());
-#endif
+#endif // WITH_EDITOR
 
 	// Create actual actors
 	for (int i = 0; i < Count; i++)
@@ -278,35 +374,50 @@ void FNActorPool::CreateActor(const int32 Count)
 #if WITH_EDITOR
 		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);
 		SpawnInfo.InitialActorLabel = Label;
-#endif
-
-		AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.DefaultTransform, SpawnInfo);
-
-		if (bImplementsInterface)
-		{
-			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
-			ActorItem->InitializeActorPoolItem(this);
-
-			if (SpawnInfo.bDeferConstruction)
-			{
-				ActorItem->OnDeferredConstruction();
-				CreatedActor->FinishSpawning(Settings.DefaultTransform);
-			}
-			ActorItem->OnCreatedByActorPool();
-			ApplyReturnState(CreatedActor);
-			ActorItem->OnReturnToActorPool();
-		}
-		else
-		{
-			if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
-			{
-				CreatedActor->FinishSpawning(Settings.DefaultTransform);
-			}
-			ApplyReturnState(CreatedActor);
-		}
-	
-		InActors.Add(CreatedActor);
+#endif // WITH_EDITOR
+		CreateActor(SpawnInfo);
 	}
+}
+
+void FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
+{
+	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.StorageTransform, SpawnInfo);
+
+	if (bImplementsInterface)
+	{
+		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
+		ActorItem->InitializeActorPoolItem(this);
+
+		if (SpawnInfo.bDeferConstruction)
+		{
+			ActorItem->OnDeferredConstruction();
+			CreatedActor->FinishSpawning(Settings.StorageTransform);
+		}
+		ActorItem->OnCreatedByActorPool();
+			
+		ApplyReturnState(CreatedActor);
+		ActorItem->OnReturnToActorPool();
+	}
+	else
+	{
+		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
+		{
+			CreatedActor->FinishSpawning(Settings.StorageTransform);
+		}
+			
+		if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+		{
+			UFunction* Function = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreated);
+			if (Function)
+			{
+				CreatedActor->ProcessEvent(Function, nullptr);
+			}
+		}
+			
+		ApplyReturnState(CreatedActor);
+	}
+
+	InActors.Add(CreatedActor);
 }
 
 void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const
@@ -318,18 +429,16 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	}
 
 	// Set Actor Location And Rotation
-	if (bHasHalfHeight)
-	{
-		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition + HalfHeightOffset, Settings.DefaultTransform.GetScale3D()),
-			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
-	}
-	else
-	{
-		Actor->SetActorTransform(
-			FTransform(InRotation, InPosition, Settings.DefaultTransform.GetScale3D()),
-			Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
-	}
+	const FTransform SpawnTransform(
+		InRotation.Quaternion() + Settings.SpawnedTransform.GetRotation(), 
+		InPosition + Settings.SpawnedTransform.GetLocation(),
+		Settings.SpawnedTransform.GetScale3D());
+
+	Actor->SetActorTransform(SpawnTransform,Settings.HasFlag_SweepBeforeSettingLocation(), nullptr, ETeleportType::ResetPhysics);
+#if ENABLE_VISUAL_LOG
+	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, InPosition, NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::RequestedPointColor, TEXT("%s"), *Actor->GetName());
+	UE_VLOG_LOCATION(World, LogNexusActorPools, Verbose, Actor->GetActorLocation(), NEXUS::ActorPools::VLog::PointSize, NEXUS::ActorPools::VLog::ActualPointColor, TEXT("%s"), *Actor->GetName());
+#endif // ENABLE_VISUAL_LOG
 	
 	Actor->SetActorTickEnabled(Actor->PrimaryActorTick.bStartWithTickEnabled);
 	
@@ -355,9 +464,9 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 void FNActorPool::ApplyReturnState(AActor* Actor) const
 {
 	// Move to a storage location
-	if (Settings.HasFlag_ReturnToStorageLocation())
+	if (Settings.HasFlag_ReturnToStorage())
 	{
-		Actor->SetActorLocation(Settings.DefaultTransform.GetLocation(), false, nullptr, ETeleportType::ResetPhysics);
+		Actor->SetActorTransform(Settings.StorageTransform, false, nullptr, ETeleportType::ResetPhysics);
 	}
 
 	Actor->SetActorTickEnabled(false);
@@ -384,44 +493,46 @@ void FNActorPool::Clear(const bool bForceDestroy)
 {
 	for (int32 i = InActors.Num() - 1; i >= 0; i--)
 	{
-		check(InActors[i] != nullptr);
-		if (InActors[i]->IsPendingKillPending())
-		{
-			continue;
-		}
-		InActors[i]->RemoveFromRoot();
-		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
-		{
-			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(InActors[i]);
-			ActorItem->OnDestroyedByActorPool();
-		}
-		if (bForceDestroy)
-		{
-			InActors[i]->Destroy();
-		}
+		DestroyActor(InActors[i], bForceDestroy);
 	}
 	for (int32 i = OutActors.Num() - 1; i >= 0; i--)
 	{
-		check(OutActors[i] != nullptr);
-
-		if (OutActors[i]->IsPendingKillPending())
-		{
-			continue;
-		}
-		OutActors[i]->RemoveFromRoot();
-		if (bImplementsInterface && Settings.HasFlag_BroadcastDestroy())
-		{
-			INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OutActors[i]);
-			ActorItem->OnDestroyedByActorPool();
-		}
-		
-		if (bForceDestroy)
-		{
-			OutActors[i]->Destroy();
-		}
+		DestroyActor(OutActors[i], bForceDestroy);
 	}
+	
 	InActors.Reset();
 	OutActors.Reset();
+}
+
+void FNActorPool::DestroyActor(const TObjectPtr<AActor> Actor, bool bForceDestroy) const
+{
+	check(Actor != nullptr);
+
+	if (Actor->IsPendingKillPending())
+	{
+		return;
+	}
+	Actor->RemoveFromRoot();
+
+	const bool bBroadcastDestroy = Settings.HasFlag_BroadcastDestroy();
+	if (bImplementsInterface && bBroadcastDestroy)
+	{
+		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
+		ActorItem->OnDestroyedByActorPool();
+	}
+	else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+	{
+		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDestroyed);
+		if (Function)
+		{
+			Actor->ProcessEvent(Function, nullptr);
+		}
+	}
+	
+	if (bForceDestroy)
+	{
+		Actor->Destroy();
+	}
 }
 
 void FNActorPool::Fill()
@@ -430,7 +541,7 @@ void FNActorPool::Fill()
 	if (bStubMode) return;
 	
 	UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items."), *Template->GetName(), Settings.MinimumActorCount)
-	CreateActor(Settings.MinimumActorCount - InActors.Num());
+	CreateActors(Settings.MinimumActorCount - InActors.Num());
 }
 
 void FNActorPool::Prewarm(const int32 Count)
@@ -439,7 +550,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	if (bStubMode) return;
 	
 	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count)
-	CreateActor(Count);
+	CreateActors(Count);
 }
 
 void FNActorPool::Tick()
@@ -450,6 +561,6 @@ void FNActorPool::Tick()
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
-		CreateActor(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
+		CreateActors(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
 	}
 }

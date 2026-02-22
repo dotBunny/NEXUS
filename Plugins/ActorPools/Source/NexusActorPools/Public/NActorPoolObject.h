@@ -66,15 +66,44 @@ public:
 	}
 	
 	UFUNCTION(BlueprintCallable)
+	TSubclassOf<AActor> GetTemplate()
+	{
+		if (Pool == nullptr) return nullptr;
+		return Pool->GetTemplate();
+	};
+	
+	UFUNCTION(BlueprintCallable)
 	FText GetClassName() const
 	{
 		return ClassName;
 	}
 	
+	UFUNCTION(BlueprintCallable)
 	UWorld* GetPoolWorld() const
 	{
 		if (Pool == nullptr) return nullptr;
 		return Pool->GetWorld();
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	bool DoesSupportInterface() const
+	{
+		if (Pool == nullptr) return false;
+		return Pool->DoesSupportInterface();
+	}
+	
+	UFUNCTION(BlueprintCallable)
+	bool HasInvokeUFunctionFlag() const
+	{
+		if (Pool == nullptr) return false;
+		return Pool->HasInvokeUFunctionFlag();
+	}
+
+	UFUNCTION(BlueprintCallable)
+	FText GetDescription() const
+	{
+		if (Pool == nullptr) return FText::FromString("Pool == nullptr");
+		return Pool->GetDescription();
 	}
 	
 private:	

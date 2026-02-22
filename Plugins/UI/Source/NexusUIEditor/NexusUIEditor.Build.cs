@@ -22,12 +22,14 @@ namespace UnrealBuildTool.Rules
 			);
 
 			PrivateDependencyModuleNames.AddRange(
-				[			
+				[
 					"BlueprintGraph",
 					"CoreUObject",
 					"DeveloperSettings",
 					"Engine",
 					"EditorSubsystem",
+					"Json",
+					"JsonUtilities",
 					"LevelEditor",
 					"Projects",
 					"ScriptableEditorWidgets",

@@ -9,10 +9,10 @@
 
 TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 	NSLOCTEXT("NexusUI", "FullscreenDisplayModeLabel", "Fullscreen"),
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX			
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	NSLOCTEXT("NexusUI", "FullscreenWindowDisplayModeLabel", "Fullscreen Window"),
 	NSLOCTEXT("NexusUI", "WindowedDisplayModeLabel", "Windowed")
-#endif	
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 };
 
 TArray<FString> UNGameUserSettingsLibrary::DisplayModeLabels = {
@@ -20,7 +20,7 @@ TArray<FString> UNGameUserSettingsLibrary::DisplayModeLabels = {
 #if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
 	DisplayModeTexts[1].ToString(),
 	DisplayModeTexts[2].ToString()
-#endif	
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
 };
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FString& Selection)
@@ -35,9 +35,9 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FStri
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
-#else
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return EWindowMode::Type::Fullscreen;
-#endif
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& Selection)
@@ -52,9 +52,9 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 		return EWindowMode::Type::WindowedFullscreen;
 	}
 	return EWindowMode::Type::Fullscreen;
-#else
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return EWindowMode::Type::Fullscreen;
-#endif	
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
 FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
@@ -79,9 +79,9 @@ FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWind
 	default:
 		return DisplayModeLabels[0];
 	}
-#else
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return DisplayModeLabels[0];
-#endif	
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
 FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
@@ -96,9 +96,9 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 	default:
 		return DisplayModeTexts[0];
 	}
-#else
+#else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
 	return DisplayModeLabels[0];
-#endif
+#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()

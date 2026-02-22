@@ -10,7 +10,7 @@
 	private: \
 		UPROPERTY() \
 		TObjectPtr<class UBillboardComponent> SpriteComponent;
-#else
+#else // !WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_HEADER()
 #endif // WITH_EDITORONLY_DATA
 
@@ -21,9 +21,9 @@
 		SpriteComponent->DestroyComponent(); \
 		SpriteComponent = nullptr; \
 	}
-#else
+#else // !WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_CLEANUP()
-#endif
+#endif // WITH_EDITORONLY_DATA
 
 #if WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale) \
@@ -57,7 +57,7 @@
 		SpriteComponent->SetIsVisualizationComponent(true); \
 		SpriteComponent->bReceivesDecals = false; \
 	}
-#else
+#else // !WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
 #endif // WITH_EDITORONLY_DATA
 
@@ -95,7 +95,7 @@
 		SpriteComponent->SetIsVisualizationComponent(true); \
 		SpriteComponent->bReceivesDecals = false; \
 	}
-#else
+#else // !WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_IMPLEMENTATION_BRUSH_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
 #endif // WITH_EDITORONLY_DATA
 

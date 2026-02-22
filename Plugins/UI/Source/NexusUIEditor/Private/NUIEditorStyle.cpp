@@ -18,6 +18,6 @@ TSharedRef<FSlateStyleSet> FNUIEditorStyle::Create()
 	Style.Set("Command.RemoveActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_RemoveActor"), Icon16x16));
 	Style.Set("Command.Reset", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Reset"), Icon16x16));
 	Style.Set("Command.SelectActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_SelectActor"), Icon16x16));
-
+	
 	return StyleRef;
 }
