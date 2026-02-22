@@ -6,6 +6,16 @@
 #include "Kismet2/BlueprintEditorUtils.h"
 #include "Toolkits/AssetEditorToolkitMenuContext.h"
 
+#define N_ACTOR_POOL_INVOKE_METHODS(Name, Method, Category) \
+	UFunction* Name##Function = Blueprint->SkeletonGeneratedClass->FindFunctionByName(Method); \
+	if (!Name##Function) \
+	{ \
+		UEdGraph* Name##FunctionGraph = FBlueprintEditorUtils::CreateNewGraph(Blueprint, \
+			Method, UEdGraph::StaticClass(), UEdGraphSchema_K2::StaticClass()); \
+		FBlueprintEditorUtils::AddFunctionGraph<UFunction>(Blueprint, Name##FunctionGraph, true, nullptr); \
+		FBlueprintEditorUtils::SetBlueprintFunctionOrMacroCategory(Name##FunctionGraph, Category); \
+	}
+
 void FNActorPoolsEditorCommands::AddMenuEntries()
 {
 	// Help Menu Submenu
@@ -60,38 +70,11 @@ void FNActorPoolsEditorCommands::AddActorPoolMethods(const UObject* EditedObject
 		FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(EditorInstance);
 		UBlueprint* Blueprint = BlueprintEditor->GetBlueprintObj();
 		
-		// OnCreated
-		UEdGraph* OnCreatedFunctionGraph = FBlueprintEditorUtils::CreateNewGraph(
-		 	Blueprint,
-			NEXUS::ActorPools::InvokeMethods::OnCreated,
-		 	UEdGraph::StaticClass(),
-		 	UEdGraphSchema_K2::StaticClass());
-		FBlueprintEditorUtils::AddFunctionGraph<UFunction>(Blueprint, OnCreatedFunctionGraph, true, nullptr);
+		N_ACTOR_POOL_INVOKE_METHODS(OnCreated, NEXUS::ActorPools::InvokeMethods::OnCreated, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnSpawned, NEXUS::ActorPools::InvokeMethods::OnSpawned, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnReturn, NEXUS::ActorPools::InvokeMethods::OnReturn, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnDestroyed, NEXUS::ActorPools::InvokeMethods::OnDestroyed, NEXUS::ActorPools::InvokeMethods::Category)
 		
-		// OnSpawned
-		UEdGraph* OnSpawnedFunctionGraph = FBlueprintEditorUtils::CreateNewGraph(
-			 Blueprint,
-			NEXUS::ActorPools::InvokeMethods::OnSpawned,
-			 UEdGraph::StaticClass(),
-			 UEdGraphSchema_K2::StaticClass());
-		FBlueprintEditorUtils::AddFunctionGraph<UFunction>(Blueprint, OnSpawnedFunctionGraph, true, nullptr);
-		
-		// OnReturn
-		UEdGraph* OnReturnFunctionGraph = FBlueprintEditorUtils::CreateNewGraph(
-			 Blueprint,
-			NEXUS::ActorPools::InvokeMethods::OnReturn,
-			 UEdGraph::StaticClass(),
-			 UEdGraphSchema_K2::StaticClass());
-		FBlueprintEditorUtils::AddFunctionGraph<UFunction>(Blueprint, OnReturnFunctionGraph, true, nullptr);
-		
-		// OnDestroyed
-		UEdGraph* OnDestroyedFunctionGraph = FBlueprintEditorUtils::CreateNewGraph(
-			 Blueprint,
-			NEXUS::ActorPools::InvokeMethods::OnDestroyed,
-			 UEdGraph::StaticClass(),
-			 UEdGraphSchema_K2::StaticClass());
-		FBlueprintEditorUtils::AddFunctionGraph<UFunction>(Blueprint, OnDestroyedFunctionGraph, true, nullptr);
-
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 	}
 }

@@ -8,6 +8,7 @@
 
 namespace NEXUS::ActorPools::InvokeMethods
 {
+	inline FText Category = FText::FromString("NActor Pool");
 	inline FName OnCreated = TEXT("OnCreatedByActorPool");
 	inline FName OnDestroyed = TEXT("OnDestroyedByActorPool");
 	inline FName OnReturn = TEXT("OnReturnToActorPool");
