@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"Version": 11,
+	"Version": 12,
 	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Guardian",
 	"Description": "A system which monitors metrics and takes action when thresholds are hit.",

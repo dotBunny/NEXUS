@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"Version": 11,
+	"Version": 12,
 	"VersionName": "0.2.7",
 	"FriendlyName": "NEXUS: Multiplayer",
 	"Description": "Functionality and tools that are useful when developing multiplayer games.",
