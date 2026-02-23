@@ -1,5 +1,12 @@
 # Changelog
 
+
+## [0.3.0] - ??
+
+### Changed
+
+- Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
+
 ## [0.2.7] - 2026-02-22
 
 ### Added
