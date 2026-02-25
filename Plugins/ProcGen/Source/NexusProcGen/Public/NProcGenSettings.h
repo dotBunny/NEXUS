@@ -3,10 +3,17 @@
 
 #pragma once
 
-#include "NProcGenDeveloperOverlay.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "NProcGenSettings.generated.h"
+
+UENUM(BlueprintType)
+enum class ENBoneAutomaticAlignment : uint8
+{
+	Center = 0,
+	Minimum = 1,
+	Maximum = 2
+};
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame, defaultconfig)
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
@@ -52,10 +59,22 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Generation Settings", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ Settings", DisplayName="Automatic Bone: Horizontal Alignment",
+		meta=(ToolTip="If an Automatic UBoneComponent is being used, what horizontal alignment should be used on the target face."))
+	ENBoneAutomaticAlignment  OrganAutomaticBoneHorizontalAlignment = ENBoneAutomaticAlignment::Center;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ Settings", DisplayName="Automatic Bone: Vertical Alignment",
+		meta=(ToolTip="If an Automatic UBoneComponent is being used, what vertical alignment should be used on the target face."))
+	ENBoneAutomaticAlignment  OrganAutomaticBoneVerticalAlignment = ENBoneAutomaticAlignment::Center;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ Settings", DisplayName="Automatic Bone: Unit Offset",
+		meta=(ToolTip="The unit size offset from the alignment pivot of the automatic bone."))
+	FVector OrganAutomaticBoneUnitOffset = FVector::ZeroVector;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
 	TSoftObjectPtr<UMaterial> ProxyMaterial;
-
+	
 #if WITH_EDITOR
 private:
 	void ValidateSettings()

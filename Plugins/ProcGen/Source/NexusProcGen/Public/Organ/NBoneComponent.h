@@ -12,6 +12,9 @@
 // Bones will be anchors for junctions
 // need to add something like a 'organExclusion' ? for the actual space
 
+
+class UNOrganComponent;
+
 UCLASS(ClassGroup="NEXUS", DisplayName = "Bone Component", meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
@@ -39,6 +42,9 @@ public:
 
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
+	
+	UPROPERTY(EditInstanceOnly)
+	TObjectPtr<UNOrganComponent> OrganComponent;
 	
 private:
 	N_WORLD_ICON_HEADER()

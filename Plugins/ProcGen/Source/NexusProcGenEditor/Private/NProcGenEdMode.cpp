@@ -165,7 +165,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			OrganGenerator->Reset();
 			for (const ANOrganVolume* OrganVolume : SelectedOrganVolumes)
 			{
-				OrganGenerator->AddToContext(OrganVolume->OrganComponent);
+				OrganGenerator->AddToContext(OrganVolume->GetOrganComponent());
 			}
 			OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
 			

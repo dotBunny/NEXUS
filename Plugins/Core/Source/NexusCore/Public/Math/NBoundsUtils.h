@@ -20,6 +20,22 @@ public:
 		return (InnerMin.X >= OuterMin.X && InnerMin.Y >= OuterMin.Y && InnerMin.Z >= OuterMin.Z &&
 				InnerMax.X <= OuterMax.X && InnerMax.Y <= OuterMax.Y && InnerMax.Z <= OuterMax.Z);
 	}
+	static FORCEINLINE bool IsPointInBounds(const FVector& Point, const FBoxSphereBounds& Bounds)
+	{
+		if (FVector::DistSquared(Point, Bounds.Origin) > FMath::Square(Bounds.SphereRadius))
+		{
+			return false;
+		}
+		return Bounds.GetBox().IsInside(Point);
+	}
+	
+	static FORCEINLINE FVector GetPointInBounds(const FVector& Point, const FBoxSphereBounds& Bounds)
+	{
+		if (IsPointInBounds(Point, Bounds)) return Point;
+		const FBox Box = Bounds.GetBox();
+		return Box.GetClosestPointTo(Point);
+	}
+	
 	static bool IsVolumeContainedInVolume(const AVolume* InnerVolume, const AVolume* OuterVolume);
 	static bool IsVolumeContainedInVolumeFast(const AVolume* InnerVolume, const AVolume* OuterVolume);
 };

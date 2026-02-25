@@ -10,12 +10,19 @@
 #include "NProcGenUtils.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
+#include "Math/NBoundsUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
+#include "Organ/NOrganComponent.h"
 
 UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	Mobility = EComponentMobility::Static;
+
+#if WITH_EDITOR
+	TransformUpdated.AddUObject(this, &UNBoneComponent::OnTransformUpdated);
+#endif
+	
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NBoneComponent", this, false, 0.35f)
 }
 
@@ -52,6 +59,20 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
 	FinalRotator.Normalize();
 	RootRelativeCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
+	
+	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
+	{
+		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
+		const FVector BoneLocation = GetComponentLocation();
+		
+		// TODO: Need to in-set based on size?
+		const FVector ClosestPoint = FNBoundsUtils::GetPointInBounds(BoneLocation, OrganVolumeBounds);
+		if (ClosestPoint != BoneLocation)
+		{
+			SetWorldLocation(ClosestPoint);
+		}
+	}
 }
 #endif // WITH_EDITOR
 

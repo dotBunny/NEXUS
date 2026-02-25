@@ -16,8 +16,8 @@ UCLASS()
 class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem, public FTickableGameObject, public INProcGenOperationOwner
 {
 	GENERATED_BODY()
-	N_EDITOR_SUBSYSTEM(UNProcGenEditorSubsystem)
-	
+	N_EDITOR_TICKABLE_SUBSYSTEM(UNProcGenEditorSubsystem)
+
 	virtual void Tick(float DeltaTime) override
 	{
 		for (const auto Operation : KnownOperations)
