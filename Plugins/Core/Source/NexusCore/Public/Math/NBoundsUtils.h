@@ -35,6 +35,16 @@ public:
 		const FBox Box = Bounds.GetBox();
 		return Box.GetClosestPointTo(Point);
 	}
+	static FORCEINLINE FVector GetPointInBoundsWithMargin(const FVector& Point, const FBoxSphereBounds& Bounds, const FVector& Margin)
+	{
+		const FVector NewExtent = Bounds.BoxExtent - (Margin * 2.f);
+		const float NewRadius = Bounds.SphereRadius - Margin.GetMax();
+		const FBoxSphereBounds ReducedBounds(Bounds.Origin, NewExtent, NewRadius);
+		
+		if (IsPointInBounds(Point, ReducedBounds)) return Point;
+		const FBox Box = ReducedBounds.GetBox();
+		return Box.GetClosestPointTo(Point);
+	}
 	
 	static bool IsVolumeContainedInVolume(const AVolume* InnerVolume, const AVolume* OuterVolume);
 	static bool IsVolumeContainedInVolumeFast(const AVolume* InnerVolume, const AVolume* OuterVolume);

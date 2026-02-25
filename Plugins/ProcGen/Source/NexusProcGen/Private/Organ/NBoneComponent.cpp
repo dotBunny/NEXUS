@@ -64,10 +64,18 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
+		
 		const FVector BoneLocation = GetComponentLocation();
 		
-		// TODO: Need to in-set based on size?
-		const FVector ClosestPoint = FNBoundsUtils::GetPointInBounds(BoneLocation, OrganVolumeBounds);
+		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+		const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
+		const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
+		
+		// TODO: Need to get offset based on rotation
+		// TODO: Need to actual validate the margin stuff is working as expected
+		const FVector SizeOffset = FVector(UnitSizeX * 0.5f, UnitSizeY * 0.5f, 0);
+		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, SizeOffset);
+		
 		if (ClosestPoint != BoneLocation)
 		{
 			SetWorldLocation(ClosestPoint);
