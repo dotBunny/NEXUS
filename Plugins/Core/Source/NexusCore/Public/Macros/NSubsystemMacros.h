@@ -80,6 +80,11 @@
 				} \
 			} \
 			return false; \
+		} \
+		virtual void BeginDestroy() override \
+		{ \
+			Super::BeginDestroy(); \
+			SetTickableTickType(ETickableTickType::Never); \
 		}
 #else // !WITH_EDITOR
 #define N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
@@ -101,5 +106,10 @@
 				} \
 			} \
 			return true; \
+		} \
+		virtual void BeginDestroy() override \
+		{ \
+			Super::BeginDestroy(); \
+			SetTickableTickType(ETickableTickType::Never); \
 		}
 #endif // WITH_EDITOR

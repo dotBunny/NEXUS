@@ -8,3 +8,13 @@
 		FORCEINLINE static Type* Get() { \
 			return GEditor->GetEditorSubsystem<Type>(); \
 		}
+#define N_EDITOR_TICKABLE_SUBSYSTEM(Type) \
+	public: \
+		FORCEINLINE static Type* Get() { \
+			return GEditor->GetEditorSubsystem<Type>(); \
+		} \
+		virtual void BeginDestroy() override \
+		{ \
+			Super::BeginDestroy(); \
+			SetTickableTickType(ETickableTickType::Never); \
+		}
