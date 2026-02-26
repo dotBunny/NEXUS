@@ -35,7 +35,7 @@ public:
 	FIntVector2 UnitSize = FIntVector2(4, 2);
 
 	UPROPERTY(VisibleAnywhere)
-	FNCardinalRotation RootRelativeCardinalRotation;
+	FNCardinalRotation WorldCardinalRotation;
 	
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;

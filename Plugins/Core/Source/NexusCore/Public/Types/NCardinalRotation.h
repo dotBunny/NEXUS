@@ -80,6 +80,14 @@ struct NEXUSCORE_API FNCardinalRotation
 		Result.Yaw = FNCardinalDirectionUtils::ToCardinalDirectionNormalized(InRotator.Yaw);
 		
 		return Result;
-		
+	}
+	
+	
+	static FVector GetUnitSize(const FNCardinalRotation& CardinalDirection, const float UnitSizeX, const float UnitSizeY)
+	{
+		const FRotator Rotation = CardinalDirection.ToRotatorNormalized();
+		const FVector PreRotatedSize = FVector(0.f, UnitSizeX, UnitSizeY);
+		const FVector RotatedSize = Rotation.RotateVector(PreRotatedSize);
+		return RotatedSize;
 	}
 };

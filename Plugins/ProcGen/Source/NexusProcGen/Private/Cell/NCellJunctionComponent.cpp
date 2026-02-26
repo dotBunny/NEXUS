@@ -187,7 +187,9 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		StartRotator.Normalize();
 		FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
 		FinalRotator.Normalize();
+		
 		const FNCardinalRotation CardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
+		
 		if (!Details.RootRelativeCardinalRotation.IsEqual(CardinalRotation))
 		{
 			Details.RootRelativeCardinalRotation = CardinalRotation;

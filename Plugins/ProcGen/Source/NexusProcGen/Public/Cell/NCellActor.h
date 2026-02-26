@@ -80,6 +80,8 @@ public:
 	/**
 	 *  Purposely monitor for any sort of movement and reset it back to origin
 	 */
+	
+	virtual bool IsUserManaged() const override { return false; }
 	virtual void PostEditMove(bool bFinished) override;
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override;
 	virtual bool ShouldExport() override { return false; } // Stops Copy/Paste/Cut/Duplicate

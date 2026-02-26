@@ -37,7 +37,7 @@ public:
 	}
 	static FORCEINLINE FVector GetPointInBoundsWithMargin(const FVector& Point, const FBoxSphereBounds& Bounds, const FVector& Margin)
 	{
-		const FVector NewExtent = Bounds.BoxExtent - (Margin * 2.f);
+		const FVector NewExtent = Bounds.BoxExtent - Margin;
 		const float NewRadius = Bounds.SphereRadius - Margin.GetMax();
 		const FBoxSphereBounds ReducedBounds(Bounds.Origin, NewExtent, NewRadius);
 		

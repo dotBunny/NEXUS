@@ -58,7 +58,16 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	StartRotator.Normalize();
 	FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
 	FinalRotator.Normalize();
-	RootRelativeCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
+	WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
+	
+	FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
+	
+	if (StartRotator != UpdatedRotator)
+	{
+		MarkPackageDirty();
+		SetWorldRotation(UpdatedRotator);	
+	}
+	
 	
 	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
 	{
@@ -71,13 +80,18 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
 		const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
 		
-		// TODO: Need to get offset based on rotation
-		// TODO: Need to actual validate the margin stuff is working as expected
-		const FVector SizeOffset = FVector(UnitSizeX * 0.5f, UnitSizeY * 0.5f, 0);
+		
+		
+		FVector SizeOffset = FNCardinalRotation::GetUnitSize(WorldCardinalRotation, UnitSizeX, UnitSizeY) * 0.5f;
+		DrawDebugLine(GetWorld(), BoneLocation - SizeOffset, BoneLocation + SizeOffset, FColor::Red, false, 1.f, 0, 1.f);
+		
 		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, SizeOffset);
+		
+
 		
 		if (ClosestPoint != BoneLocation)
 		{
+			MarkPackageDirty();
 			SetWorldLocation(ClosestPoint);
 		}
 	}
@@ -87,17 +101,17 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	const FVector RootLocation = GetComponentLocation();
-	const FRotator RootRotation = GetComponentRotation();
-
-	const FRotator Rotation = RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
+	const FRotator Rotation = WorldCardinalRotation.ToRotatorNormalized();
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(UnitSize, Settings->UnitSize);
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(UnitSize, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
-	const FRotator JunctionRotator = (Rotation.Quaternion() *
-		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+	 const FRotator JunctionRotator = (Rotation.Quaternion() *
+	 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 
+	
+	
 	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(RootLocation, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
 
 	const FLinearColor Color = FLinearColor::White;

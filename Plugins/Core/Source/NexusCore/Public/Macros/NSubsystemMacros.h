@@ -81,6 +81,11 @@
 			} \
 			return false; \
 		} \
+		virtual void Initialize(FSubsystemCollectionBase& Collection) override \
+		{ \
+			if (HasAnyFlags(RF_ClassDefaultObject)) return; \
+			Super::Initialize(Collection); \
+		} \
 		virtual void BeginDestroy() override \
 		{ \
 			Super::BeginDestroy(); \
@@ -106,6 +111,11 @@
 				} \
 			} \
 			return true; \
+		} \
+		virtual void Initialize(FSubsystemCollectionBase& Collection) override \
+		{ \
+			if (HasAnyFlags(RF_ClassDefaultObject)) return; \
+			Super::Initialize(Collection); \
 		} \
 		virtual void BeginDestroy() override \
 		{ \
