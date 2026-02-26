@@ -85,6 +85,8 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		FVector SizeOffset = FNCardinalRotation::GetUnitSize(WorldCardinalRotation, UnitSizeX, UnitSizeY) * 0.5f;
 		DrawDebugLine(GetWorld(), BoneLocation - SizeOffset, BoneLocation + SizeOffset, FColor::Red, false, 1.f, 0, 1.f);
 		
+		// todo add to bounds to points
+		
 		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, SizeOffset);
 		
 
