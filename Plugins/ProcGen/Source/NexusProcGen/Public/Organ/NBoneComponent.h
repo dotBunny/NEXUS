@@ -43,7 +43,7 @@ public:
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<UNOrganComponent> OrganComponent;
 	
 private:

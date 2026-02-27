@@ -81,15 +81,13 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
 		
 		
+		// Create a 90-degree yaw rotation for the box that we can use to offset later.
+		const FRotator JunctionRotator = (UpdatedRotator.Quaternion() *
+		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+		const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(BoneLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
+		FBox QuickBounds(Points);
 		
-		FVector SizeOffset = FNCardinalRotation::GetUnitSize(WorldCardinalRotation, UnitSizeX, UnitSizeY) * 0.5f;
-		DrawDebugLine(GetWorld(), BoneLocation - SizeOffset, BoneLocation + SizeOffset, FColor::Red, false, 1.f, 0, 1.f);
-		
-		// todo add to bounds to points
-		
-		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, SizeOffset);
-		
-
+		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, QuickBounds.GetExtent());
 		
 		if (ClosestPoint != BoneLocation)
 		{
@@ -109,17 +107,17 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(UnitSize, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
-	 const FRotator JunctionRotator = (Rotation.Quaternion() *
+	 const FRotator BoneVisualizationRotator = (Rotation.Quaternion() *
 	 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 
 	
 	
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(RootLocation, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(RootLocation, BoneVisualizationRotator, Size.X,Size.Y, ENAxis::Z);
 
 	const FLinearColor Color = FLinearColor::White;
 	
 	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, RootLocation, JunctionRotator, NubPoints,  Color);
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, RootLocation, BoneVisualizationRotator, NubPoints,  Color);
 
 	const float LineLength = Settings->UnitSize.X * 0.25f;
 
