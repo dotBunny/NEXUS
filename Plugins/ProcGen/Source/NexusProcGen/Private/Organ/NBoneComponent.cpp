@@ -84,7 +84,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		
-		// #TODO This infest a cube volume and were working inside of those bounds
+		// #TODO This requests a cube volume and were working inside of those bounds
 		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
 		
 		const FVector BoneLocation = GetComponentLocation();
@@ -166,6 +166,16 @@ void UNBoneComponent::SetAutomaticTransform()
 	
 	UE_LOG(LogTemp, Warning, TEXT("Setting automatic transform for bone component"));
 	
+	if (OrganComponent->IsVolumeBased())
+	{
+		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
+		
+		//OrganVolumeBounds.GetBox().GetCenter()
+		
+		
+		//Settings->OrganAutomaticBoneDirection;
+	}
 }
 
 #endif // WITH_EDITOR

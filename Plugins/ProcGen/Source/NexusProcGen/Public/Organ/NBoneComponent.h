@@ -34,6 +34,7 @@ class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
 public:
 	
 #if WITH_EDITOR
+
 	virtual void OnRegister() override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	

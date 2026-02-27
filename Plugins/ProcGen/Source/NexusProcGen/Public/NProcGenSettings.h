@@ -69,6 +69,10 @@ public:
 		meta=(ToolTip="If an Automatic UBoneComponent is being used, what vertical alignment should be used on the target face."))
 	ENBoneAutomaticAlignment  OrganAutomaticBoneVerticalAlignment = ENBoneAutomaticAlignment::Center;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ Settings", DisplayName="Automatic Bone: Face Direction",
+		meta=(ToolTip="The direction of the face of the volume to use for placement."))
+	FVector OrganAutomaticBoneDirection = FVector::ZeroVector;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ Settings", DisplayName="Automatic Bone: Unit Offset",
 		meta=(ToolTip="The unit size offset from the alignment pivot of the automatic bone."))
 	FVector OrganAutomaticBoneUnitOffset = FVector::ZeroVector;
