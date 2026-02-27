@@ -56,6 +56,12 @@
 		}
 #endif // WITH_EDITOR
 
+#define N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(DefaultType) \
+	virtual ETickableTickType GetTickableTickType() const override \
+	{ \
+		if (HasAnyFlags(RF_ClassDefaultObject)) return ETickableTickType::Never; \
+		return DefaultType; \
+	} \
 
 #if WITH_EDITOR
 #define N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
@@ -80,16 +86,6 @@
 				} \
 			} \
 			return false; \
-		} \
-		virtual void Initialize(FSubsystemCollectionBase& Collection) override \
-		{ \
-			if (HasAnyFlags(RF_ClassDefaultObject)) return; \
-			Super::Initialize(Collection); \
-		} \
-		virtual void BeginDestroy() override \
-		{ \
-			Super::BeginDestroy(); \
-			SetTickableTickType(ETickableTickType::Never); \
 		}
 #else // !WITH_EDITOR
 #define N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
@@ -111,15 +107,5 @@
 				} \
 			} \
 			return true; \
-		} \
-		virtual void Initialize(FSubsystemCollectionBase& Collection) override \
-		{ \
-			if (HasAnyFlags(RF_ClassDefaultObject)) return; \
-			Super::Initialize(Collection); \
-		} \
-		virtual void BeginDestroy() override \
-		{ \
-			Super::BeginDestroy(); \
-			SetTickableTickType(ETickableTickType::Never); \
-		}
+		}		
 #endif // WITH_EDITOR

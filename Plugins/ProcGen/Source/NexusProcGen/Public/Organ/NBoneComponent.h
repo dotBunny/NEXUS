@@ -15,6 +15,15 @@
 
 class UNOrganComponent;
 
+UENUM(BlueprintType)
+enum class ENBoneMode : uint8
+{
+	Manual = 0,
+	Automatic = 1,
+	Disabled = 2
+};
+
+
 UCLASS(ClassGroup="NEXUS", DisplayName = "Bone Component", meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
@@ -26,7 +35,12 @@ public:
 	
 #if WITH_EDITOR
 	virtual void OnRegister() override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+	void OnModeChanged(ENBoneMode NewMode);
+	void SetAutomaticTransform();
+	
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
@@ -45,6 +59,9 @@ public:
 	
 	UPROPERTY(VisibleInstanceOnly)
 	TObjectPtr<UNOrganComponent> OrganComponent;
+	
+	UPROPERTY(EditAnywhere)
+	ENBoneMode Mode = ENBoneMode::Manual;
 	
 private:
 	N_WORLD_ICON_HEADER()

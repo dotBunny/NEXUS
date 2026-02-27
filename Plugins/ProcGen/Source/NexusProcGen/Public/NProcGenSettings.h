@@ -15,6 +15,7 @@ enum class ENBoneAutomaticAlignment : uint8
 	Maximum = 2
 };
 
+
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame, defaultconfig)
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {

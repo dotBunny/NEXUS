@@ -15,6 +15,11 @@
 #include "Organ/NBoneActor.h"
 #include "Organ/NOrganComponent.h"
 
+namespace NEXUS::ProcGen::Bone
+{
+	const FName Mode = FName("Mode");
+}
+
 UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	Mobility = EComponentMobility::Static;
@@ -54,6 +59,12 @@ void UNBoneComponent::OnRegister()
 void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags,
                                          ETeleportType Teleport)
 {
+	if (Mode == ENBoneMode::Automatic)
+	{
+		SetAutomaticTransform();
+		return;
+	}
+	
 	FRotator StartRotator = GetComponentRotation();
 	StartRotator.Normalize();
 	FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
@@ -72,6 +83,8 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+		
+		// #TODO This infest a cube volume and were working inside of those bounds
 		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
 		
 		const FVector BoneLocation = GetComponentLocation();
@@ -96,6 +109,65 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		}
 	}
 }
+
+void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.Property->GetFName() == NEXUS::ProcGen::Bone::Mode)
+	{
+		OnModeChanged(Mode);
+	}
+}
+
+void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
+{
+	switch (NewMode)
+	{
+	case ENBoneMode::Manual:
+#if WITH_EDITORONLY_DATA
+		SpriteComponent->SetVisibility(true);
+#endif // WITH_EDITORONLY_DATA
+		if (!IsActive())
+		{
+			ToggleActive();
+		}
+		break;
+		
+	case ENBoneMode::Automatic:
+		SetAutomaticTransform();
+#if WITH_EDITORONLY_DATA
+		SpriteComponent->SetVisibility(true);
+#endif // WITH_EDITORONLY_DATA
+		if (!IsActive())
+		{
+			ToggleActive();
+		}
+		break;
+
+	case ENBoneMode::Disabled:
+#if WITH_EDITORONLY_DATA
+		SpriteComponent->SetVisibility(false);
+#endif // WITH_EDITORONLY_DATA
+		if (IsActive())
+		{
+			ToggleActive();
+		}
+		// ZERO out data?
+		break;
+	}
+}
+
+void UNBoneComponent::SetAutomaticTransform()
+{
+	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr ) return;
+	
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	if (Settings == nullptr) return;
+	
+	UE_LOG(LogTemp, Warning, TEXT("Setting automatic transform for bone component"));
+	
+}
+
 #endif // WITH_EDITOR
 
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
@@ -109,12 +181,21 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	 const FRotator BoneVisualizationRotator = (Rotation.Quaternion() *
 	 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-
-	
 	
 	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(RootLocation, BoneVisualizationRotator, Size.X,Size.Y, ENAxis::Z);
 
-	const FLinearColor Color = FLinearColor::White;
+	
+	FLinearColor Color = FLinearColor::White;
+	switch (Mode)
+	{
+	case ENBoneMode::Manual:
+		break;
+	case ENBoneMode::Automatic:
+		Color = FNColor::NexusLightBlue;
+		break;
+	case ENBoneMode::Disabled:
+		return;
+	}
 	
 	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
 	FNProcGenDebugDraw::DrawJunctionUnits(PDI, RootLocation, BoneVisualizationRotator, NubPoints,  Color);

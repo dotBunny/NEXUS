@@ -29,7 +29,8 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); };
-	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
+	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 	
 	int32 GetLastObjectCount() const { return LastObjectCount; }
 	int32 GetBaseObjectCount() const { return BaseObjectCount; }

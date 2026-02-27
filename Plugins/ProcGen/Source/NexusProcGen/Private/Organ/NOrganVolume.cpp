@@ -12,11 +12,9 @@ ANOrganVolume::ANOrganVolume(const FObjectInitializer& ObjectInitializer)
 {
 	OrganComponent = ObjectInitializer.CreateDefaultSubobject<UNOrganComponent>(this, TEXT("NOrgan Component"));
 	
-	
 	BoneComponent = ObjectInitializer.CreateDefaultSubobject<UNBoneComponent>(this, TEXT("NBone Component"));
 	BoneComponent->SetupAttachment(this->GetRootComponent());
 	BoneComponent->SetMobility(EComponentMobility::Static);
 	BoneComponent->SetRelativeLocation(FVector::ZeroVector);
-	
 	BoneComponent->OrganComponent = OrganComponent;
 }

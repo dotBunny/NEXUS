@@ -18,7 +18,7 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 {
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNProcGenSubsystem, true)
-
+	
 public:
 	
 	bool RegisterCellActor(ANCellActor* CellActor);
@@ -29,14 +29,14 @@ public:
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
-	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
+	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
 	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
-	
 	
 private:	
 	
