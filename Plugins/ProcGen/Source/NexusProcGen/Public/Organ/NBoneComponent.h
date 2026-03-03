@@ -46,22 +46,22 @@ public:
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	FIntVector2 UnitSize = FIntVector2(4, 2);
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Bone Component")
 	FNCardinalRotation WorldCardinalRotation;
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;
 
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 	
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Bone Component")
 	ENBoneMode Mode = ENBoneMode::Manual;
 	
 private:

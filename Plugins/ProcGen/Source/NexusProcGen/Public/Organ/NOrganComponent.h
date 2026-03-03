@@ -30,16 +30,16 @@ class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 	GENERATED_BODY()
 	
 public:
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (DisplayPriority = 100))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
 	bool bActivated = true;
 	
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (DisplayPriority = 600))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
 	int Seed = 42;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = Settings, meta = (DisplayPriority = 200))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
 	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::GenerateOnLoad;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Organ Component")
 	TArray<TObjectPtr<UNTissue>> Tissues;
 
 	UFUNCTION(BlueprintCallable)
