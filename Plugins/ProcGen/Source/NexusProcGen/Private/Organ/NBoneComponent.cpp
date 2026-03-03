@@ -84,11 +84,19 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		
+	
 		
 		// #TODO This requests a cube volume and were working inside of those bounds
 		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
 		
 		const FVector BoneLocation = GetComponentLocation();
+		const FVector BoneLocationRelative = GetRelativeLocation();
+		
+		if (!OrganVolume->EncompassesPoint(BoneLocationRelative, 0, nullptr))
+		{
+			
+		}
+		
 		
 		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 		const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
