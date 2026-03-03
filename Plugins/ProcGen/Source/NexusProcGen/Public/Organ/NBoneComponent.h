@@ -58,11 +58,11 @@ public:
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 	
-	UPROPERTY()
-	TObjectPtr<UNOrganComponent> OrganComponent;
-	
 	UPROPERTY(EditAnywhere, Category = "Bone Component")
 	ENBoneMode Mode = ENBoneMode::Manual;
+	
+	UPROPERTY()
+	TObjectPtr<UNOrganComponent> OrganComponent;
 	
 private:
 	N_WORLD_ICON_HEADER()

@@ -84,6 +84,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		
+		
 		// #TODO This requests a cube volume and were working inside of those bounds
 		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
 		
