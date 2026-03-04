@@ -62,11 +62,6 @@ ANCellActor* UNCellRootComponent::GetNCellActor() const
 	return Cast<ANCellActor>(GetOwner());
 }
 
-void UNCellRootComponent::Reset()
-{
-	Details = FNCellRootDetails();
-}
-
 void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const
 {
 	// We need a version that has zero reliance on the EdMode tool

@@ -41,19 +41,11 @@ public:
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 
-	
 	bool IsRootComponent() const
 	{
 		return GetOwner() != nullptr && GetOwner()->GetRootComponent() == this;
 	}
-
-
 	
-
-	// TODO: DrawDebugHelper (Draw at runtime)
-
-
-	void Reset();
 	/**
 	 * Details about the NBlock that is used during the generation process.
 	 * This information is synced with a separate file as to ensure that we only load asset data when needed.

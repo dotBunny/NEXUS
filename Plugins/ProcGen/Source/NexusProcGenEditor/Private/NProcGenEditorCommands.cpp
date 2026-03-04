@@ -11,6 +11,7 @@
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorMinimal.h"
+#include "NProcGenEditorSettings.h"
 #include "NProcGenEditorSubsystem.h"
 #include "NProcGenEditorUtils.h"
 #include "NProcGenEdMode.h"
@@ -277,8 +278,12 @@ void FNProcGenEditorCommands::CellAddActor()
 	}
 	
 	ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
-	FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
+
+	// Apply default settings to the Cell
+	const UNProcGenEditorSettings* Settings = UNProcGenEditorSettings::Get();
+	Settings->ApplyDefaultSettings(SpawnedActor->CellRoot);
 	
+	FNProcGenEditorUtils::SaveCell(CurrentWorld, SpawnedActor);
 }
 
 bool FNProcGenEditorCommands::CellAddActor_CanShow()
@@ -482,7 +487,10 @@ void FNProcGenEditorCommands::CellResetCell()
 	// Get the cell actor
 	ANCellActor* CellActor = FNProcGenEditorUtils::GetCellActorFromCurrentWorld();
 	CellActor->Modify();
-	CellActor->CellRoot->Reset();
+	
+	// Apply default settings to the Cell
+	const UNProcGenEditorSettings* Settings = UNProcGenEditorSettings::Get();
+	Settings->ApplyDefaultSettings(CellActor->CellRoot);
 
 	// Get the cell
 	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage( FNEditorUtils::GetCurrentWorld());

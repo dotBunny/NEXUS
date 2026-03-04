@@ -25,6 +25,7 @@ namespace UnrealBuildTool.Rules
 					"AssetTools",
 					"Chaos",
 					"CoreUObject",
+					"DeveloperSettings",
 					"EditorFramework",
 					"EditorScriptingUtilities",
 					"EditorSubsystem",

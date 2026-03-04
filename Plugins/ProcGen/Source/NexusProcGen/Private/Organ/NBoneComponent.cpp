@@ -11,7 +11,6 @@
 #include "Components/BillboardComponent.h"
 #include "Components/BrushComponent.h"
 #include "Macros/NActorMacros.h"
-#include "Math/NBoundsUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
 #include "Organ/NOrganComponent.h"
@@ -130,10 +129,10 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 			
 			if (WorkingLocation != BoneLocation)
 			{
+				Mode = ENBoneMode::Manual;
 				SetWorldLocation(WorkingLocation);
 				MarkPackageDirty();
 			}
-		
 		}
 	}
 }

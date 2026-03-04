@@ -24,8 +24,7 @@ class NEXUSPROCGEN_API ANCellActor : public AActor
 	friend class FDebugRenderSceneProxy;
 	friend class UNCellDebugDrawComponent;
 	friend class UNCellJunctionComponent;
-	
-	
+
 	GENERATED_BODY()
 	
 	explicit ANCellActor(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get()) : Super(ObjectInitializer)
