@@ -9,6 +9,7 @@
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "Components/BillboardComponent.h"
+#include "Components/BrushComponent.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NBoundsUtils.h"
 #include "Math/NVectorUtils.h"
@@ -83,38 +84,56 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
-		
-	
-		
-		// #TODO This requests a cube volume and were working inside of those bounds
-		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
-		
-		const FVector BoneLocation = GetComponentLocation();
-		const FVector BoneLocationRelative = GetRelativeLocation();
-		
-		if (!OrganVolume->EncompassesPoint(BoneLocationRelative, 0, nullptr))
+		const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
+
+		if (BrushComponent != nullptr)
 		{
+			const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+			const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
+			const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
 			
-		}
+			const FVector BoneLocation = GetComponentLocation();
+			FVector WorkingLocation = BoneLocation;
+			
+			// Create a 90-degree yaw rotation for the box that we can use to offset later.
+			const FRotator JunctionRotator = (UpdatedRotator.Quaternion() *
+			FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+			
+			TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(BoneLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
+			int32 IterationCount = 12;
+			FVector ClosestLocation;
+			bool bDidAdjust = true;
+			while (IterationCount > 0 && bDidAdjust)
+			{
+				bDidAdjust = false;
+				for (int i = 0; i < 4; i++)
+				{
+					const float Distance = BrushComponent->GetClosestPointOnCollision(
+						Points[i], ClosestLocation, NAME_None);
+					
+					// Point is outside we need to now find the closest point and bring it in
+					if (Distance > 0.f)
+					{
+						const FVector Delta = ClosestLocation - Points[i];
+						
+						Points[0] += Delta;
+						Points[1] += Delta;
+						Points[2] += Delta;
+						Points[3] += Delta;
+						
+						WorkingLocation += Delta;
+						bDidAdjust = true;
+					}
+				}
+				IterationCount--;
+			}
+			
+			if (WorkingLocation != BoneLocation)
+			{
+				SetWorldLocation(WorkingLocation);
+				MarkPackageDirty();
+			}
 		
-		
-		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-		const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
-		const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
-		
-		
-		// Create a 90-degree yaw rotation for the box that we can use to offset later.
-		const FRotator JunctionRotator = (UpdatedRotator.Quaternion() *
-		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-		const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(BoneLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
-		FBox QuickBounds(Points);
-		
-		const FVector ClosestPoint = FNBoundsUtils::GetPointInBoundsWithMargin(BoneLocation, OrganVolumeBounds, QuickBounds.GetExtent());
-		
-		if (ClosestPoint != BoneLocation)
-		{
-			MarkPackageDirty();
-			SetWorldLocation(ClosestPoint);
 		}
 	}
 }
