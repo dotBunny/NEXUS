@@ -3,10 +3,13 @@
 
 #include "Organ/NOrganComponent.h"
 
+#include "DynamicMeshBuilder.h"
 #include "NCoreMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
+#include "Components/BrushComponent.h"
+#include "Math/NVolumeUtils.h"
 
 FString UNOrganComponent::GetDebugLabel() const
 {
@@ -39,9 +42,27 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	{
 		const AActor* Owner = GetOwner();
 		FTransform BoxTransform = Owner->GetLevelTransform();
-		const auto Box =  Cast<AVolume>(GetOwner())->GetBounds().GetBox();
+		const AVolume* Volume = Cast<AVolume>(Owner);
+		const auto Box =  Volume->GetBounds().GetBox();
 		BoxTransform.SetLocation( Owner->GetActorLocation() );
-		DrawBox( PDI, BoxTransform.ToMatrixWithScale(), Box.GetExtent(), GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World );
+		
+		UModel* Model = Volume->GetBrushComponent()->Brush;
+		
+		FNVolumeGeometryData Data;
+		FNVolumeUtils::FillGeometryData(Model, Data);
+		
+		FDynamicMeshBuilder MeshBuilder(PDI->View->GetFeatureLevel());
+		MeshBuilder.AddVertices(Data.Vertices);
+		for (int32 i = 0; i < Data.Indices.Num(); i += 3)
+		{
+			MeshBuilder.AddTriangle(
+				Data.Indices[i],
+				Data.Indices[i+1],
+				Data.Indices[i+2]
+			);
+		}
+		MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World);
 	}
 }
 
