@@ -71,6 +71,18 @@ struct NEXUSCORE_API FNCardinalRotation
 			Yaw == Other.Yaw;
 	}
 
+	
+	static FNCardinalRotation CreateFrom(const FRotator& InRotator)
+	{
+		FNCardinalRotation Result;
+		
+		Result.Roll = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Roll);
+		Result.Pitch = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Pitch);
+		Result.Yaw = FNCardinalDirectionUtils::ToCardinalDirection(InRotator.Yaw);
+		
+		return Result;
+	}
+	
 	static FNCardinalRotation CreateFromNormalized(const FRotator& InRotator)
 	{
 		FNCardinalRotation Result;

@@ -48,7 +48,7 @@ public:
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
-	FIntVector2 UnitSize = FIntVector2(4, 2);
+	FIntVector2 UnitSize = FIntVector2(4, 4);
 
 	UPROPERTY(VisibleAnywhere, Category = "Bone Component")
 	FNCardinalRotation WorldCardinalRotation;

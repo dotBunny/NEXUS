@@ -5,6 +5,7 @@
 
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
+#include "Types/NDirection.h"
 #include "NProcGenSettings.generated.h"
 
 
@@ -54,8 +55,12 @@ public:
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
-		meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))
-	FVector OrganAutomaticBoneDirection = FVector::ForwardVector;
+	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))
+	ENDirection OrganAutomaticBoneDirection = ENDirection::Backward;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction (Offset)",
+		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
+	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
 	TSoftObjectPtr<UMaterial> ProxyMaterial;

@@ -89,7 +89,6 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	}
 }
 
-
 void UNBoneComponent::SetAutomaticTransform()
 {
 	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr ) return;
@@ -102,8 +101,11 @@ void UNBoneComponent::SetAutomaticTransform()
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		const FVector BoneLocation = GetComponentLocation();
-		const FVector OutsidePoint = OrganVolume->GetBounds().Origin + 
-			(Settings->OrganAutomaticBoneDirection.GetSafeNormal() * ( OrganVolume->GetBounds().SphereRadius));
+		
+		const FVector OrganBoneDirection = FNDirection::GetVector(Settings->OrganAutomaticBoneDirection);
+		const FVector OutsidePoint = 
+			OrganVolume->GetBounds().Origin + 
+			((OrganBoneDirection + Settings->OrganAutomaticBoneDirectionOffset).GetSafeNormal() * (OrganVolume->GetBounds().SphereRadius));
 		
 		UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
 		if (BrushComponent != nullptr)
@@ -117,26 +119,15 @@ void UNBoneComponent::SetAutomaticTransform()
 				true, false, false, 
 				HitLocation, HitNormal, HitBone, HitResult))
 			{
-				
-				// TODO: need to figure out better rotation, bug? or ?
-				FRotator Rotation = UKismetMathLibrary::MakeRotFromY(HitNormal);
-				Rotation.Normalize();
-				WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(Rotation);
-				const FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
+				const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator();
 				if (GetComponentRotation() != UpdatedRotator)
 				{
 					SetWorldRotation(UpdatedRotator);	
+					WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(UpdatedRotator);
 					MarkPackageDirty();
 				}
 				
 				const FVector WorkingPosition = FindSafeLocation(HitLocation);
-				
-				DrawDebugLine(GetWorld(), OrganVolume->GetBounds().Origin, HitLocation, 
-						FColor::Red, false, 5.f);
-				DrawDebugPoint(GetWorld(), HitLocation, 10.f, FColor::Red, false, 5.f);
-				DrawDebugPoint(GetWorld(), WorkingPosition, 10.f, FColor::Red, false, 5.f);
-				DrawDebugLine(GetWorld(), HitLocation, HitLocation + (HitNormal * 100.f), FColor::Yellow, false, 5.f);
-				
 				if (BoneLocation != WorkingPosition)
 				{
 					SetWorldLocation(WorkingPosition);
@@ -151,8 +142,8 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 {
 	FVector WorkingLocation = WorldLocation;
 	
-	// Handle volume based logic
-	if (OrganComponent->IsVolumeBased())
+	// Handle volume-based organs
+	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
@@ -197,10 +188,6 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 				IterationCount--;
 			}
 		}
-	}
-	else
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Bone component is not volume based, unable to determine safe locations."));
 	}
 	
 	return WorkingLocation;
