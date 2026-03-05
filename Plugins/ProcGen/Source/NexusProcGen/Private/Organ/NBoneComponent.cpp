@@ -10,6 +10,7 @@
 #include "NProcGenUtils.h"
 #include "Components/BillboardComponent.h"
 #include "Components/BrushComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
@@ -83,8 +84,6 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	if (WorkingLocation != BoneLocation)
 	{
 		Mode = ENBoneMode::Manual;
-				
-		UE_LOG(LogTemp, Warning, TEXT("Setting restricted transform for bone component"));
 		SetWorldLocation(WorkingLocation);
 		MarkPackageDirty();
 	}
@@ -118,20 +117,29 @@ void UNBoneComponent::SetAutomaticTransform()
 				true, false, false, 
 				HitLocation, HitNormal, HitBone, HitResult))
 			{
+				
+				// TODO: need to figure out better rotation, bug? or ?
+				FRotator Rotation = UKismetMathLibrary::MakeRotFromY(HitNormal);
+				Rotation.Normalize();
+				WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(Rotation);
+				const FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
+				if (GetComponentRotation() != UpdatedRotator)
+				{
+					SetWorldRotation(UpdatedRotator);	
+					MarkPackageDirty();
+				}
+				
 				const FVector WorkingPosition = FindSafeLocation(HitLocation);
 				
 				DrawDebugLine(GetWorld(), OrganVolume->GetBounds().Origin, HitLocation, 
 						FColor::Red, false, 5.f);
 				DrawDebugPoint(GetWorld(), HitLocation, 10.f, FColor::Red, false, 5.f);
 				DrawDebugPoint(GetWorld(), WorkingPosition, 10.f, FColor::Red, false, 5.f);
+				DrawDebugLine(GetWorld(), HitLocation, HitLocation + (HitNormal * 100.f), FColor::Yellow, false, 5.f);
 				
 				if (BoneLocation != WorkingPosition)
 				{
-					// TODO : rotate ? to nearest cardinal based on normal? 
-					
-					
 					SetWorldLocation(WorkingPosition);
-					
 					MarkPackageDirty();
 				}
 			}
