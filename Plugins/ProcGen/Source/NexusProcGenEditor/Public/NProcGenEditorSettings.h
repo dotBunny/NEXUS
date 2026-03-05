@@ -9,6 +9,7 @@
 #include "Cell/NCellBoundsGenerationSettings.h"
 #include "Cell/NCellHullGenerationSettings.h"
 #include "Cell/NCellVoxelGenerationSettings.h"
+#include "Cell/NCellRootComponent.h"
 #include "Types/NRotationConstraint.h"
 #include "NProcGenEditorSettings.generated.h"
 

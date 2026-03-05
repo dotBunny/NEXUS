@@ -41,6 +41,7 @@ public:
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 	void OnModeChanged(ENBoneMode NewMode);
 	void SetAutomaticTransform();
+	FVector FindSafeLocation(const FVector& WorldLocation) const;
 	
 #endif // WITH_EDITOR
 	

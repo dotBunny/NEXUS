@@ -72,33 +72,95 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
 	
 	FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
-	
 	if (StartRotator != UpdatedRotator)
 	{
 		MarkPackageDirty();
 		SetWorldRotation(UpdatedRotator);	
 	}
 	
+	const FVector BoneLocation = GetComponentLocation();
+	const FVector WorkingLocation = FindSafeLocation(BoneLocation);
+	if (WorkingLocation != BoneLocation)
+	{
+		Mode = ENBoneMode::Manual;
+				
+		UE_LOG(LogTemp, Warning, TEXT("Setting restricted transform for bone component"));
+		SetWorldLocation(WorkingLocation);
+		MarkPackageDirty();
+	}
+}
+
+
+void UNBoneComponent::SetAutomaticTransform()
+{
+	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr ) return;
 	
-	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	if (Settings == nullptr) return;
+	
+	
+	if (OrganComponent->IsVolumeBased())
+	{
+		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+		const FVector BoneLocation = GetComponentLocation();
+		const FVector OutsidePoint = OrganVolume->GetBounds().Origin + 
+			(Settings->OrganAutomaticBoneDirection.GetSafeNormal() * ( OrganVolume->GetBounds().SphereRadius));
+		
+		UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
+		if (BrushComponent != nullptr)
+		{
+			FVector HitLocation;
+			FVector HitNormal;
+			FName HitBone;
+			FHitResult HitResult;
+			
+			if (BrushComponent->K2_LineTraceComponent(OutsidePoint, OrganVolume->GetBounds().Origin, 
+				true, false, false, 
+				HitLocation, HitNormal, HitBone, HitResult))
+			{
+				const FVector WorkingPosition = FindSafeLocation(HitLocation);
+				
+				DrawDebugLine(GetWorld(), OrganVolume->GetBounds().Origin, HitLocation, 
+						FColor::Red, false, 5.f);
+				DrawDebugPoint(GetWorld(), HitLocation, 10.f, FColor::Red, false, 5.f);
+				DrawDebugPoint(GetWorld(), WorkingPosition, 10.f, FColor::Red, false, 5.f);
+				
+				if (BoneLocation != WorkingPosition)
+				{
+					// TODO : rotate ? to nearest cardinal based on normal? 
+					
+					
+					SetWorldLocation(WorkingPosition);
+					
+					MarkPackageDirty();
+				}
+			}
+		}
+	}
+}
+
+FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
+{
+	FVector WorkingLocation = WorldLocation;
+	
+	// Handle volume based logic
+	if (OrganComponent->IsVolumeBased())
 	{
 		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
 		const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
 
+		// We have a brush that we can use
 		if (BrushComponent != nullptr)
 		{
 			const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 			const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
 			const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
 			
-			const FVector BoneLocation = GetComponentLocation();
-			FVector WorkingLocation = BoneLocation;
-			
 			// Create a 90-degree yaw rotation for the box that we can use to offset later.
-			const FRotator JunctionRotator = (UpdatedRotator.Quaternion() *
+			const FRotator JunctionRotator = (GetComponentQuat() *
 			FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 			
-			TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(BoneLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
+			TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(WorldLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
 			int32 IterationCount = 12;
 			FVector ClosestLocation;
 			bool bDidAdjust = true;
@@ -126,15 +188,14 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 				}
 				IterationCount--;
 			}
-			
-			if (WorkingLocation != BoneLocation)
-			{
-				Mode = ENBoneMode::Manual;
-				SetWorldLocation(WorkingLocation);
-				MarkPackageDirty();
-			}
 		}
 	}
+	else
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Bone component is not volume based, unable to determine safe locations."));
+	}
+	
+	return WorkingLocation;
 }
 
 void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
@@ -184,26 +245,6 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 	}
 }
 
-void UNBoneComponent::SetAutomaticTransform()
-{
-	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr ) return;
-	
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	if (Settings == nullptr) return;
-	
-	UE_LOG(LogTemp, Warning, TEXT("Setting automatic transform for bone component"));
-	
-	if (OrganComponent->IsVolumeBased())
-	{
-		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
-		const FBoxSphereBounds OrganVolumeBounds = OrganVolume->GetBounds();
-		
-		//OrganVolumeBounds.GetBox().GetCenter()
-		
-		
-		//Settings->OrganAutomaticBoneDirection;
-	}
-}
 
 #endif // WITH_EDITOR
 
