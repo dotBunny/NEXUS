@@ -60,7 +60,7 @@ public:
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 	
 	UPROPERTY(EditAnywhere, Category = "Bone Component")
-	ENBoneMode Mode = ENBoneMode::Manual;
+	ENBoneMode Mode = ENBoneMode::Automatic;
 	
 	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
