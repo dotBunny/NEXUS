@@ -21,22 +21,23 @@ public:
 	{
 		switch (Direction) 
 		{
-		case ENDirection::Up:
+			using enum ENDirection;
+		case Up:
 			return FVector::UpVector;
 
-		case ENDirection::Down:
+		case Down:
 			return FVector::DownVector;
 
-		case ENDirection::Forward:
+		case Forward:
 			return FVector::ForwardVector;
 		
-		case ENDirection::Backward:
+		case Backward:
 			return FVector::BackwardVector;
 		
-		case ENDirection::Right:
+		case Right:
 			return FVector::RightVector;
 		
-		case ENDirection::Left:
+		case Left:
 			return FVector::LeftVector;
 		}
 		return FVector::ZeroVector;

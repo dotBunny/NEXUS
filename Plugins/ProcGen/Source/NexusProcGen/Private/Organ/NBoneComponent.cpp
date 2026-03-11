@@ -10,7 +10,6 @@
 #include "NProcGenUtils.h"
 #include "Components/BillboardComponent.h"
 #include "Components/BrushComponent.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
@@ -75,8 +74,9 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
 	if (StartRotator != UpdatedRotator)
 	{
+		SetWorldRotation(UpdatedRotator);
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		MarkPackageDirty();
-		SetWorldRotation(UpdatedRotator);	
 	}
 	
 	const FVector BoneLocation = GetComponentLocation();
@@ -85,6 +85,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 	{
 		Mode = ENBoneMode::Manual;
 		SetWorldLocation(WorkingLocation);
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		MarkPackageDirty();
 	}
 }
@@ -124,6 +125,8 @@ void UNBoneComponent::SetAutomaticTransform()
 				{
 					SetWorldRotation(UpdatedRotator);	
 					WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(UpdatedRotator);
+					
+					// ReSharper disable once CppExpressionWithoutSideEffects
 					MarkPackageDirty();
 				}
 				
@@ -131,6 +134,8 @@ void UNBoneComponent::SetAutomaticTransform()
 				if (BoneLocation != WorkingPosition)
 				{
 					SetWorldLocation(WorkingPosition);
+					
+					// ReSharper disable once CppExpressionWithoutSideEffects
 					MarkPackageDirty();
 				}
 			}
@@ -142,52 +147,58 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 {
 	FVector WorkingLocation = WorldLocation;
 	
-	// Handle volume-based organs
-	if (OrganComponent != nullptr && OrganComponent->IsVolumeBased())
+	if (OrganComponent == nullptr || !OrganComponent->IsVolumeBased())
 	{
-		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
-		const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
-
-		// We have a brush that we can use
-		if (BrushComponent != nullptr)
+		return WorldLocation;
+	}
+	
+	const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+	const UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
+	
+	if (BrushComponent == nullptr)
+	{
+		return WorldLocation;
+	}
+	
+	// We have a brush that we can use
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const auto UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
+	const auto UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
+	
+	// Create a 90-degree yaw rotation for the box that we can use to offset later.
+	const FRotator JunctionRotator = (GetComponentQuat() *
+	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+	
+	TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(WorldLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
+	int32 IterationCount = 12;
+	FVector ClosestLocation;
+	bool bDidAdjust = true;
+	while (IterationCount > 0 && bDidAdjust)
+	{
+		bDidAdjust = false;
+		for (int i = 0; i < 4; i++)
 		{
-			const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-			const float UnitSizeX = static_cast<float>(UnitSize.X * Settings->UnitSize.X);
-			const float UnitSizeY = static_cast<float>(UnitSize.Y * Settings->UnitSize.Y);
+			const float Distance = BrushComponent->GetClosestPointOnCollision(
+				Points[i], ClosestLocation, NAME_None);
 			
-			// Create a 90-degree yaw rotation for the box that we can use to offset later.
-			const FRotator JunctionRotator = (GetComponentQuat() *
-			FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-			
-			TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(WorldLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
-			int32 IterationCount = 12;
-			FVector ClosestLocation;
-			bool bDidAdjust = true;
-			while (IterationCount > 0 && bDidAdjust)
+			if (Distance <= 0.f)
 			{
-				bDidAdjust = false;
-				for (int i = 0; i < 4; i++)
-				{
-					const float Distance = BrushComponent->GetClosestPointOnCollision(
-						Points[i], ClosestLocation, NAME_None);
-					
-					// Point is outside we need to now find the closest point and bring it in
-					if (Distance > 0.f)
-					{
-						const FVector Delta = ClosestLocation - Points[i];
-						
-						Points[0] += Delta;
-						Points[1] += Delta;
-						Points[2] += Delta;
-						Points[3] += Delta;
-						
-						WorkingLocation += Delta;
-						bDidAdjust = true;
-					}
-				}
-				IterationCount--;
+				continue;
 			}
+			
+			// Point is outside we need to now find the closest point and bring it in
+			const FVector Delta = ClosestLocation - Points[i];
+			
+			Points[0] += Delta;
+			Points[1] += Delta;
+			Points[2] += Delta;
+			Points[3] += Delta;
+			
+			WorkingLocation += Delta;
+			bDidAdjust = true;
+			
 		}
+		IterationCount--;
 	}
 	
 	return WorkingLocation;
@@ -206,7 +217,8 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 {
 	switch (NewMode)
 	{
-	case ENBoneMode::Manual:
+		using enum ENBoneMode;
+	case Manual:
 #if WITH_EDITORONLY_DATA
 		SpriteComponent->SetVisibility(true);
 #endif // WITH_EDITORONLY_DATA
@@ -216,7 +228,7 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 		}
 		break;
 		
-	case ENBoneMode::Automatic:
+	case Automatic:
 		SetAutomaticTransform();
 #if WITH_EDITORONLY_DATA
 		SpriteComponent->SetVisibility(true);
@@ -227,7 +239,7 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 		}
 		break;
 
-	case ENBoneMode::Disabled:
+	case Disabled:
 #if WITH_EDITORONLY_DATA
 		SpriteComponent->SetVisibility(false);
 #endif // WITH_EDITORONLY_DATA
