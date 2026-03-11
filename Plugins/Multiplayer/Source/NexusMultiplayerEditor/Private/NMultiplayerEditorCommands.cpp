@@ -62,6 +62,7 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
 		const FString MultiplayerFlag = TEXT(" -NMultiplayerTest");
+		const FString NoSoundFlag = TEXT(" -nosound");
 		// ReSharper disable once StringLiteralTypo
 		const FString NetworkProfileFlag = TEXT(" networkprofiler=true");
 	
@@ -86,16 +87,55 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 
 		// Build out Client parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters = Settings->ClientParameters;
+		
 		if (Settings->bClientGenerateNetworkProfile)
 		{
 			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(NetworkProfileFlag);
 		}
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(MultiplayerFlag);
 		
+		if (Settings->bClientDisableSound)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(NoSoundFlag);
+		}
+		if (Settings->ClientSimulateLagMinimum > 0)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+				FString::Printf(TEXT(" -PktLagMin=%i"), FMath::FloorToInt(Settings->ClientSimulateLagMinimum * 0.5f)));
+		}
+		else if (Settings->ClientSimulateLagMaximum > 0)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+				TEXT(" -PktLagMin=0"));
+		}
+		
+		if (Settings->ClientSimulateLagMaximum > 0)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+				FString::Printf(TEXT(" -PktLagMax=%i"), FMath::FloorToInt(Settings->ClientSimulateLagMaximum * 0.5f)));
+		}
+		
+		if (Settings->ClientSimulatePacketLoss > 0)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+				FString::Printf(TEXT(" -PktLoss=%i"), Settings->ClientSimulatePacketLoss));
+		}
+		
+		if (Settings->ClientSimulatePacketDuplication > 0)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+				FString::Printf(TEXT(" -PktDup=%i"), Settings->ClientSimulatePacketDuplication));
+		}
+		
+		if (Settings->bClientSimulateReceiveOutOfOrderPackets)
+		{
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(TEXT(" -PktOrder=1"));
+		}
+		
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
 		PlaySessionRequest.EditorPlaySettings->SetPlayNumberOfClients(Settings->ClientCount);
 
-		if (Settings->bUseDedicatedServer)
+		if (Settings->bUseDedicatedServer || Settings->ServerParameters.Len() > 0)
 		{
 			PlaySessionRequest.EditorPlaySettings->SetPlayNetMode(PIE_Client);
 			PlaySessionRequest.EditorPlaySettings->bLaunchSeparateServer = Settings->bSpawnSeparateServer;

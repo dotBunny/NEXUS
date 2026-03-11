@@ -39,12 +39,33 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Window Size", Tooltip = "The size of the created clients windows."))
 	FIntPoint ClientWindowSize = FIntPoint(800, 600);
 
+	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Disable Sound", Tooltip = "Mutes sound of clients."))
+	bool bClientDisableSound = false;
+	
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Generate Network Profile", Tooltip = "Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
 	bool bClientGenerateNetworkProfile = false;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the client being launched."))
 	FString ClientParameters = "";
 	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Lag (Minimum)", Tooltip = "The minimum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
+	int ClientSimulateLagMinimum = 20;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Lag (Maximum)", Tooltip = "The maximum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
+	int ClientSimulateLagMaximum = 60;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Loss", Tooltip = "An amount of packet loss (%) to be simulated.", ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", SliderExponent = 1)) 
+	int ClientSimulatePacketLoss = 0;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Jitter", Tooltip = "An amount of packet jitter (ms) to be simulated.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1)) 
+	int ClientSimulatePacketJitter = 0;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Duplication", Tooltip = "An amount of packet duplication (%) to be simulated.", ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", SliderExponent = 1)) 
+	int ClientSimulatePacketDuplication= 0;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Receive Out Of Order", Tooltip = "Forces network packets to be recieved out of order.")) 
+	bool bClientSimulateReceiveOutOfOrderPackets = false;
+
 	UPROPERTY(EditAnywhere, config, Category = "Server", meta = (EditCondition="!bClientGenerateNetworkProfile", EditConditionHides, DisplayName = "Generate Network Profile", Tooltip = "This setting has no effect if option is turned on for clients. Profiles will be stored in <PROJECT_DIRECTORY>/Saved/Profiling/<PROJECT_NAME>-<TIMESTAMP>.nprof"))
 	bool bServerGenerateNetworkProfile = false;
 	
