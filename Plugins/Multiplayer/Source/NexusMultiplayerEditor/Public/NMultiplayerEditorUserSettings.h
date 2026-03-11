@@ -61,7 +61,7 @@ public:
 	int ClientSimulatePacketJitter = 0;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Duplication", Tooltip = "An amount of packet duplication (%) to be simulated.", ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", SliderExponent = 1)) 
-	int ClientSimulatePacketDuplication= 0;
+	int ClientSimulatePacketDuplication = 0;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Receive Out Of Order", Tooltip = "Forces network packets to be recieved out of order.")) 
 	bool bClientSimulateReceiveOutOfOrderPackets = false;
