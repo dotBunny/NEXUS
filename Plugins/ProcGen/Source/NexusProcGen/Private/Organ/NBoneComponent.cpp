@@ -92,56 +92,55 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 
 void UNBoneComponent::SetAutomaticTransform()
 {
-	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr ) return;
+	if (Mode != ENBoneMode::Automatic || OrganComponent == nullptr || !OrganComponent->IsVolumeBased()) return;
 	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	if (Settings == nullptr) return;
 	
-	
-	if (OrganComponent->IsVolumeBased())
+	const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
+	const FVector BoneLocation = GetComponentLocation();
+		
+	const FVector OrganBoneDirection = FNDirection::GetVector(Settings->OrganAutomaticBoneDirection);
+	const FVector OutsidePoint = 
+		OrganVolume->GetBounds().Origin + 
+		((OrganBoneDirection + Settings->OrganAutomaticBoneDirectionOffset).GetSafeNormal() * (OrganVolume->GetBounds().SphereRadius));
+		
+	UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
+	if (BrushComponent == nullptr)
 	{
-		const AVolume* OrganVolume = Cast<AVolume>(OrganComponent->GetOwner());
-		const FVector BoneLocation = GetComponentLocation();
+		return;
+	}
+	
+	FVector HitLocation;
+	FVector HitNormal;
+	FName HitBone;
+	FHitResult HitResult;
 		
-		const FVector OrganBoneDirection = FNDirection::GetVector(Settings->OrganAutomaticBoneDirection);
-		const FVector OutsidePoint = 
-			OrganVolume->GetBounds().Origin + 
-			((OrganBoneDirection + Settings->OrganAutomaticBoneDirectionOffset).GetSafeNormal() * (OrganVolume->GetBounds().SphereRadius));
-		
-		UBrushComponent* BrushComponent = OrganVolume->GetBrushComponent();
-		if (BrushComponent != nullptr)
+	if (BrushComponent->K2_LineTraceComponent(OutsidePoint, OrganVolume->GetBounds().Origin, 
+		true, false, false, 
+		HitLocation, HitNormal, HitBone, HitResult))
+	{
+		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator();
+		if (GetComponentRotation() != UpdatedRotator)
 		{
-			FVector HitLocation;
-			FVector HitNormal;
-			FName HitBone;
-			FHitResult HitResult;
-			
-			if (BrushComponent->K2_LineTraceComponent(OutsidePoint, OrganVolume->GetBounds().Origin, 
-				true, false, false, 
-				HitLocation, HitNormal, HitBone, HitResult))
-			{
-				const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator();
-				if (GetComponentRotation() != UpdatedRotator)
-				{
-					SetWorldRotation(UpdatedRotator);	
-					WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(UpdatedRotator);
-					
-					// ReSharper disable once CppExpressionWithoutSideEffects
-					MarkPackageDirty();
-				}
+			SetWorldRotation(UpdatedRotator);	
+			WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(UpdatedRotator);
 				
-				const FVector WorkingPosition = FindSafeLocation(HitLocation);
-				if (BoneLocation != WorkingPosition)
-				{
-					SetWorldLocation(WorkingPosition);
-					
-					// ReSharper disable once CppExpressionWithoutSideEffects
-					MarkPackageDirty();
-				}
-			}
+			// ReSharper disable once CppExpressionWithoutSideEffects
+			MarkPackageDirty();
+		}
+			
+		const FVector WorkingPosition = FindSafeLocation(HitLocation);
+		if (BoneLocation != WorkingPosition)
+		{
+			SetWorldLocation(WorkingPosition);
+				
+			// ReSharper disable once CppExpressionWithoutSideEffects
+			MarkPackageDirty();
 		}
 	}
 }
+
 
 FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 {
@@ -185,7 +184,6 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 			{
 				continue;
 			}
-			
 			// Point is outside we need to now find the closest point and bring it in
 			const FVector Delta = ClosestLocation - Points[i];
 			
@@ -273,12 +271,13 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	FLinearColor Color = FLinearColor::White;
 	switch (Mode)
 	{
-	case ENBoneMode::Manual:
+		using enum ENBoneMode;
+	case Manual:
 		break;
-	case ENBoneMode::Automatic:
+	case Automatic:
 		Color = FNColor::NexusLightBlue;
 		break;
-	case ENBoneMode::Disabled:
+	case Disabled:
 		return;
 	}
 	
