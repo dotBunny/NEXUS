@@ -4,6 +4,7 @@
 #include "NMultiplayerEditorCommands.h"
 
 #include "NEditorUtils.h"
+#include "NMultiplayerEditorModule.h"
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorUserSettings.h"
 
@@ -52,8 +53,13 @@ FSlateIcon FNMultiplayerEditorCommands::MultiplayerTest_GetIcon()
 
 void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 {
+	// Get reference to module
+	const FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
+	
 	if (bIsMultiplayerTestRunning)
 	{
+		Module.OnMultiplayerTestEnd.ExecuteIfBound();
+		
 		GUnrealEd->EndPlayOnLocalPc();
 		bIsMultiplayerTestRunning = false;
 	}
@@ -131,6 +137,18 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		{
 			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(TEXT(" -PktOrder=1"));
 		}
+		
+		// Are there any additional parameters that a binding has provided?
+		if (Module.OnMultiplayerTestStart.IsBound())
+		{
+			const FString AdditionalArgs = Module.OnMultiplayerTestStart.Execute().TrimStartAndEnd();
+			if (!AdditionalArgs.IsEmpty())
+			{
+				PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
+					FString::Printf(TEXT(" %s"), *AdditionalArgs));
+			}
+		}
+
 		
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
 		PlaySessionRequest.EditorPlaySettings->SetPlayNumberOfClients(Settings->ClientCount);
