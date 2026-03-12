@@ -5,10 +5,15 @@
 ### Added
 
 - Additional settings to the `MultiplayerTest` to simulate different network conditions.
+- `FNMultiplayerEditorModule` now has `OnMultiplayerTestStart` and `OnMultiplayerTestEnd` delegates, the first also allows for additional arguments to be passed in to the launch of the client(s)/server.
 
 ### Changed
 
 - Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
+
+### Removed
+
+- `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
 
 ## [0.2.7] - 2026-02-22
 

@@ -3,11 +3,10 @@
 
 #include "NTextRenderComponent.h"
 
-#include "NMultiplayerUtils.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 
-UNTextRenderComponent::UNTextRenderComponent(const FObjectInitializer& Initializer)
+UNTextRenderComponent::UNTextRenderComponent(const FObjectInitializer& Initializer) : Super(Initializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
@@ -40,71 +39,53 @@ void UNTextRenderComponent::OnRep_TextValue()
 
 void UNTextRenderComponent::SetFromName(const FName& NewValue)
 {
-	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	if (GetOwner()->HasAuthority())
 	{
-		return;
+		FString NewString = NewValue.ToString();
+		
+		if (CachedValue.Equals(NewString))
+		{
+			return;
+		}
+		
+		CachedValue = NewString;
+		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
+		
+		SetText(FText::FromString(CachedValue));
+		OnTextChanged.Broadcast(CachedValue);
 	}
-	
-	FString NewString = NewValue.ToString();
-	if (CachedValue.Equals(NewString))
-	{
-		return;
-	}
-	CachedValue = NewString;
-	MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-	SetText(FText::FromString(CachedValue));
-	OnTextChanged.Broadcast(CachedValue);
 }
 
 void UNTextRenderComponent::SetFromString(const FString& NewValue)
 {
-	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	if (GetOwner()->HasAuthority())
 	{
-		return;
-	}
-
-	if (CachedValue.Equals(NewValue))
-	{
-		return;
-	}
+		if (CachedValue.Equals(NewValue))
+		{
+			return;
+		}
 	
-	CachedValue = NewValue;
-	MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-	SetText(FText::FromString(CachedValue));
-	OnTextChanged.Broadcast(CachedValue);
+		CachedValue = NewValue;
+		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
+		
+		SetText(FText::FromString(CachedValue));
+		OnTextChanged.Broadcast(CachedValue);
+	}
 }
 
 void UNTextRenderComponent::SetFromText(const FText& NewValue)
 {
-	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	if (GetOwner()->HasAuthority())
 	{
-		return;
+		if (NewValue.EqualTo(FText::FromString(CachedValue)))
+		{
+			return;
+		}
+		
+		CachedValue = NewValue.ToString();
+		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
+		
+		SetText(FText::FromString(CachedValue));
+		OnTextChanged.Broadcast(CachedValue);
 	}
-	
-	if (NewValue.EqualTo(FText::FromString(CachedValue)))
-	{
-		return;
-	}
-	CachedValue = NewValue.ToString();
-	MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-	SetText(FText::FromString(CachedValue));
-	OnTextChanged.Broadcast(CachedValue);
-}
-
-void UNTextRenderComponent::Server_SetFromName_Implementation(const FName& NewValue)
-{
-	if (!bAllowRPC) return;
-	SetFromName(NewValue);
-}
-
-void UNTextRenderComponent::Server_SetFromString_Implementation(const FString& NewValue)
-{
-	if (!bAllowRPC) return;
-	SetFromString(NewValue);
-}
-
-void UNTextRenderComponent::Server_SetFromText_Implementation(const FText& NewValue)
-{
-	if (!bAllowRPC) return;
-	SetFromText(NewValue);
 }
