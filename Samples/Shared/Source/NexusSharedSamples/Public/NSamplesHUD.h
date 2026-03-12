@@ -33,7 +33,7 @@ private:
 
 	const FLinearColor TextColor = FNColor::BlueLight;
 	const FLinearColor BackgroundColor = FNColor::HalfBlack;
-	const float TextScale = 2.f;
+	const float TextScale = 1.f;
 	const float ScreenSafeZone = 50.f;
 	const float BackgroundPadding = 20.f;
 	

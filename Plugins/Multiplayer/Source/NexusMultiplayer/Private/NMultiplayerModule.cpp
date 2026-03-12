@@ -28,44 +28,44 @@ void FNMultiplayerModule::OnPostEngineInit()
 	{
 #if PLATFORM_WINDOWS
 		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
-		FString FileName = FPaths::GetCleanFilename(FGenericPlatformOutputDevices::GetAbsoluteLogFilename());
-		FileName.ReplaceInline(TEXT(".log"), TEXT(""), ESearchCase::IgnoreCase);
-		FString NewWindowTitle;
+		const FString FileName = FPaths::GetCleanFilename(FGenericPlatformOutputDevices::GetAbsoluteLogFilename());
 		
-		FString ServerAddress;
-		const TCHAR* CmdLine = FCommandLine::Get();
-		
-		// Check if connecting to something
-		if (CmdLine && FCString::Strlen(CmdLine) > 0)
+		FString ConnectionAddress;
+		const TCHAR* CommandLine = FCommandLine::Get();
+		if (CommandLine && FCString::Strlen(CommandLine) > 0)
 		{
 			FString Token;
-			FParse::Token(CmdLine, Token, false);
+			FParse::Token(CommandLine, Token, false);
+			
+			// Is the first token an address (the proper format) to connect to?
 			if (Token.Contains(TEXT(".")) || Token.Contains(TEXT(":")))
 			{
-				ServerAddress = Token;
+				ConnectionAddress = Token;
 			}
 		}
-		if (!ServerAddress.IsEmpty())
+		
+		FString WindowTitle;
+		if (!ConnectionAddress.IsEmpty())
 		{
-			NewWindowTitle = FString::Printf(TEXT("Client (%s) %s"), *ServerAddress, *FileName);
+			WindowTitle = FString::Printf(TEXT("%s Client (%s) %s"), FApp::GetProjectName(), *ConnectionAddress, *FileName);
 		}
 		else
 		{
 			if (IsRunningDedicatedServer())
 			{
-				NewWindowTitle = FString::Printf(TEXT("DedicatedServer %s"), *FileName);
+				WindowTitle = FString::Printf(TEXT("%s DedicatedServer %s"), FApp::GetProjectName(), *FileName);
 			}
 			else if (IsRunningClientOnly())
 			{
-				NewWindowTitle = FString::Printf(TEXT("Client %s"), *FileName);
+				WindowTitle = FString::Printf(TEXT("%s Client %s"), FApp::GetProjectName(), *FileName);
 			}
 			else
 			{
-				NewWindowTitle = FString::Printf(TEXT("ClientServer %s"), *FileName);
+				WindowTitle = FString::Printf(TEXT("%s ClientServer %s"), FApp::GetProjectName(), *FileName);
 			}
 		}
-		
-		SetWindowText(WindowHandle, NewWindowTitle.GetCharArray().GetData());
+		UE_LOG(LogNexusMultiplayer, Log, TEXT("Multiplayer Test - %s"), *WindowTitle);
+		SetWindowText(WindowHandle, WindowTitle.GetCharArray().GetData());
 #else // !PLATFORM_WINDOWS
 	
 #endif // PLATFORM_WINDOWS

@@ -65,9 +65,6 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 	else
 	{
 		FRequestPlaySessionParams PlaySessionRequest;
-		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
-	
-		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
 		PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
 
 		// Get default editor settings
@@ -75,73 +72,12 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		FObjectDuplicationParameters DuplicationParams(PlaySessionRequest.EditorPlaySettings, GetTransientPackage());
 		PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
 
-		// Straight copies
-		PlaySessionRequest.EditorPlaySettings->SetClientWindowSize(Settings->ClientWindowSize);
+#if WITH_EDITORONLY_DATA
 		
-		// Build out SERVER parameters
-		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters = Settings->ServerParameters;
-		if (Settings->bServerGenerateNetworkProfile)
-		{
-			// ReSharper disable once StringLiteralTypo
-			PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(" networkprofiler=true");
-		}
+		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
+		Settings->ApplySettings(PlaySessionRequest);
 		
-		// Add blanket argument that will be captured and used to tell that a test is running
-		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(" -NMultiplayerTest");
-
-		// Build out CLIENT parameters
-		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters = Settings->ClientParameters;
-		
-		if (Settings->bClientGenerateNetworkProfile)
-		{
-			// ReSharper disable once StringLiteralTypo
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" networkprofiler=true");
-		}
-		
-		// Add blanket argument that will be captured and used to tell that a test is running
-		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -NMultiplayerTest");
-		
-		if (Settings->bClientDisableSound)
-		{
-			// ReSharper disable once StringLiteralTypo
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -nosound");
-		}
-		if (Settings->ClientSimulateLagMinimum > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-				FString::Printf(TEXT(" -PktLagMin=%i"), FMath::FloorToInt(Settings->ClientSimulateLagMinimum * 0.5f)));
-		}
-		else if (Settings->ClientSimulateLagMaximum > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -PktLagMin=0");
-		}
-		
-		if (Settings->ClientSimulateLagMaximum > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-				FString::Printf(TEXT(" -PktLagMax=%i"), FMath::FloorToInt(Settings->ClientSimulateLagMaximum * 0.5f)));
-		}
-		
-		if (Settings->ClientSimulatePacketLoss > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-				FString::Printf(TEXT(" -PktLoss=%i"), Settings->ClientSimulatePacketLoss));
-		}
-		
-		if (Settings->ClientSimulatePacketDuplication > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-				FString::Printf(TEXT(" -PktDup=%i"), Settings->ClientSimulatePacketDuplication));
-		}
-		
-		if (Settings->bClientSimulateReceiveOutOfOrderPackets)
-		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -PktOrder=1");
-		}
-		
-		//PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -=1");
-		
-		
+#endif // WITH_EDITORONLY_DATA
 		
 		// Are there any additional parameters that a binding has provided?
 		if (Module.OnMultiplayerTestStart.IsBound())
@@ -155,18 +91,6 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		}
 
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
-		PlaySessionRequest.EditorPlaySettings->SetPlayNumberOfClients(Settings->ClientCount);
-
-		if (Settings->bUseDedicatedServer || Settings->ServerParameters.Len() > 0)
-		{
-			PlaySessionRequest.EditorPlaySettings->SetPlayNetMode(PIE_Client);
-			PlaySessionRequest.EditorPlaySettings->bLaunchSeparateServer = Settings->bSpawnSeparateServer;
-		}
-		else
-		{
-			PlaySessionRequest.EditorPlaySettings->SetPlayNetMode(PIE_ListenServer);
-			PlaySessionRequest.EditorPlaySettings->bLaunchSeparateServer = false;
-		}
 
 		// Start!
 		GUnrealEd->RequestPlaySession(PlaySessionRequest);

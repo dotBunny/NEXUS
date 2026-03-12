@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "NMultiplayerMinimal.h"
-#include "Components/SceneComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Macros/NWorldMacros.h"
@@ -194,7 +193,7 @@ public:
 			return NEXUS::Multiplayer::InvalidPing;
 		}
 	
-		// All conditions checked, should have a real ping to provide.
+		// All conditions checked should have a real ping to provide.
 		return PlayerController->PlayerState->ExactPing;
 	}
 };
