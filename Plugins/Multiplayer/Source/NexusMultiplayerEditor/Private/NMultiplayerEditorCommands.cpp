@@ -59,7 +59,6 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 	if (bIsMultiplayerTestRunning)
 	{
 		Module.OnMultiplayerTestEnd.ExecuteIfBound();
-		
 		GUnrealEd->EndPlayOnLocalPc();
 		bIsMultiplayerTestRunning = false;
 	}
@@ -67,10 +66,6 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 	{
 		FRequestPlaySessionParams PlaySessionRequest;
 		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
-		const FString MultiplayerFlag = TEXT(" -NMultiplayerTest");
-		const FString NoSoundFlag = TEXT(" -nosound");
-		// ReSharper disable once StringLiteralTypo
-		const FString NetworkProfileFlag = TEXT(" networkprofiler=true");
 	
 		PlaySessionRequest.bAllowOnlineSubsystem = Settings->bUseOnlineSubsystem;
 		PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
@@ -83,26 +78,33 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		// Straight copies
 		PlaySessionRequest.EditorPlaySettings->SetClientWindowSize(Settings->ClientWindowSize);
 		
-		// Build out Server parameters
+		// Build out SERVER parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters = Settings->ServerParameters;
 		if (Settings->bServerGenerateNetworkProfile)
 		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(NetworkProfileFlag);
+			// ReSharper disable once StringLiteralTypo
+			PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(" networkprofiler=true");
 		}
-		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(MultiplayerFlag);
+		
+		// Add blanket argument that will be captured and used to tell that a test is running
+		PlaySessionRequest.EditorPlaySettings->AdditionalServerLaunchParameters.Append(" -NMultiplayerTest");
 
-		// Build out Client parameters
+		// Build out CLIENT parameters
 		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters = Settings->ClientParameters;
 		
 		if (Settings->bClientGenerateNetworkProfile)
 		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(NetworkProfileFlag);
+			// ReSharper disable once StringLiteralTypo
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" networkprofiler=true");
 		}
-		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(MultiplayerFlag);
+		
+		// Add blanket argument that will be captured and used to tell that a test is running
+		PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -NMultiplayerTest");
 		
 		if (Settings->bClientDisableSound)
 		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(NoSoundFlag);
+			// ReSharper disable once StringLiteralTypo
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -nosound");
 		}
 		if (Settings->ClientSimulateLagMinimum > 0)
 		{
@@ -111,8 +113,7 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		}
 		else if (Settings->ClientSimulateLagMaximum > 0)
 		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-				TEXT(" -PktLagMin=0"));
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -PktLagMin=0");
 		}
 		
 		if (Settings->ClientSimulateLagMaximum > 0)
@@ -135,8 +136,12 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 		
 		if (Settings->bClientSimulateReceiveOutOfOrderPackets)
 		{
-			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(TEXT(" -PktOrder=1"));
+			PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -PktOrder=1");
 		}
+		
+		//PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(" -=1");
+		
+		
 		
 		// Are there any additional parameters that a binding has provided?
 		if (Module.OnMultiplayerTestStart.IsBound())
@@ -149,7 +154,6 @@ void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 			}
 		}
 
-		
 		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
 		PlaySessionRequest.EditorPlaySettings->SetPlayNumberOfClients(Settings->ClientCount);
 
