@@ -13,7 +13,7 @@ class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Subsystem")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "N ProcGen Subsystem")
 class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, public INProcGenOperationOwner
 {
 	GENERATED_BODY()

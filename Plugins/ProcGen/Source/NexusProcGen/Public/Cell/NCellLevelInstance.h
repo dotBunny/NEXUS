@@ -8,7 +8,7 @@
 #include "NCellLevelInstance.generated.h"
 
 
-UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "Cell LevelInstance")
+UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "N Cell LevelInstance")
 class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 {
 	GENERATED_BODY()

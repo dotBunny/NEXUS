@@ -11,7 +11,7 @@
 class UNDynamicRefObject;
 class UCommonTextBlock;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "DynamicRef ListView Entry", BlueprintType, Blueprintable)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "N DynamicRef ListView Entry", BlueprintType, Blueprintable)
 class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()

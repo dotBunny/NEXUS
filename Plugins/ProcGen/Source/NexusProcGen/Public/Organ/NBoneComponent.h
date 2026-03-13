@@ -24,7 +24,7 @@ enum class ENBoneMode : uint8
 };
 
 
-UCLASS(ClassGroup="NEXUS", DisplayName = "Bone Component", meta=(BlueprintSpawnableComponent),
+UCLASS(ClassGroup="NEXUS", DisplayName = "N Bone", meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
 {

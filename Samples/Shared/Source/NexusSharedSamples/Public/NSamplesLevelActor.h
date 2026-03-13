@@ -20,7 +20,7 @@ namespace NEXUS::Samples::Level
 /**
  * An actor used to control the base NEXUS demo level
  */
-UCLASS(DisplayName = "Samples Level Actor", Config = Game, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+UCLASS(DisplayName = "N Samples Level Actor", Config = Game, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
 	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics, Networking, Replication))
 class NEXUSSHAREDSAMPLES_API ANSamplesLevelActor : public AActor
 {

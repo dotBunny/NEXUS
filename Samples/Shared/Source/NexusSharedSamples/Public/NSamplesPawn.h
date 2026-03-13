@@ -23,7 +23,7 @@ enum class ENSamplesScreenshotState : uint8
 /**
  * A pawn used in the NEXUS samples that has a few extra bits on it.
  */
-UCLASS(ClassGroup="NEXUS", DisplayName = "Samples Pawn", Config = Game, NotPlaceable)
+UCLASS(ClassGroup="NEXUS", DisplayName = "N Samples Pawn", Config = Game, NotPlaceable)
 class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 {
 	GENERATED_BODY()

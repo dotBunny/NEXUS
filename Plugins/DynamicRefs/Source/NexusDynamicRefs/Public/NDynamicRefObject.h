@@ -7,7 +7,7 @@
 #include "NDynamicRefsDeveloperOverlay.h"
 #include "NDynamicRefObject.generated.h"
 
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "N DynamicRef Object")
 class NEXUSDYNAMICREFS_API UNDynamicRefObject : public UObject
 {
 	GENERATED_BODY()

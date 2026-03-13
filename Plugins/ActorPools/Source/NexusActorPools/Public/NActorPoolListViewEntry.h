@@ -13,7 +13,7 @@ class UNProcGenOperation;
 class UProgressBar;
 class UCommonTextBlock;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools ListView Entry", BlueprintType, Blueprintable)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "N Actor Pools ListView Entry", BlueprintType, Blueprintable)
 class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
