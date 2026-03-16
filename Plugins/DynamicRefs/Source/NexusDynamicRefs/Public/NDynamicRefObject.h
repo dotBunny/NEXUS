@@ -12,8 +12,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefObject : public UObject
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE( OnDynamicRefObjectChangeDelegate );
-	
 public:
 	
 	// ADD DELEGATE TO BIND TO THAT WILL GET CALLED WHEN A CHANGE HAPPENS
@@ -81,7 +79,7 @@ public:
 		return TargetObjects;
 	}
 	
-	OnDynamicRefObjectChangeDelegate Changed;
+	FSimpleDelegate Changed;
 	
 	TObjectPtr<UNDynamicRefsDeveloperOverlay> GetOverlay() const { return Overlay; }
 
