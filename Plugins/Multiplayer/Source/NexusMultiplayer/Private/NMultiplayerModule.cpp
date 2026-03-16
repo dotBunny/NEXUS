@@ -17,13 +17,19 @@ void FNMultiplayerModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusMultiplayer")
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNMultiplayerModule, OnPostEngineInit);
+	
+	// After everything has been initialized, check for MP test and update.
+	FCoreDelegates::OnFEngineLoopInitComplete.AddStatic(&FNMultiplayerModule::UpdateForMultiplayerTest);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void FNMultiplayerModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusMultiplayerSamples")
-	
+}
+
+void FNMultiplayerModule::UpdateForMultiplayerTest()
+{
 	if (FNMultiplayerUtils::IsMultiplayerTest())
 	{
 #if PLATFORM_WINDOWS

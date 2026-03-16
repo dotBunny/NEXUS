@@ -14,6 +14,6 @@ class FNMultiplayerModule final : public IModuleInterface
 {
 	virtual void StartupModule() override;
 	void OnPostEngineInit();
-	
+	static void UpdateForMultiplayerTest();
 	N_IMPLEMENT_MODULE(FNMultiplayerModule, "NexusMultiplayer")
 };
