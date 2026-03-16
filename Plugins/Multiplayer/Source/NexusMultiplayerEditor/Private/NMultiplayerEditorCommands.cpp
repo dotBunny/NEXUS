@@ -6,9 +6,16 @@
 #include "NEditorUtils.h"
 #include "NMultiplayerEditorModule.h"
 #include "NMultiplayerEditorStyle.h"
-#include "NMultiplayerEditorUserSettings.h"
+#include "NMultiplayerEditorSubsystem.h"
 
-bool FNMultiplayerEditorCommands::bIsMultiplayerTestRunning = false;
+bool FNMultiplayerEditorCommands::bIsTestRunning = false;
+FDelegateHandle FNMultiplayerEditorCommands::OnTestStartedHandle;
+FDelegateHandle FNMultiplayerEditorCommands::OnTestEndedHandle;
+
+bool FNMultiplayerEditorCommands::MultiplayerTest_CanExecute()
+{
+	return FNEditorUtils::IsNotPlayInEditor();
+}
 
 void FNMultiplayerEditorCommands::Register()
 {
@@ -22,7 +29,7 @@ void FNMultiplayerEditorCommands::Register()
 				"Toggle Multiplayer Test",
 				FUIAction(
 					FExecuteAction::CreateStatic(&ToggleMultiplayerTest),
-					FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
+					FCanExecuteAction::CreateStatic(&MultiplayerTest_CanExecute),
 					FIsActionChecked(),
 					FIsActionButtonVisible()),
 					TAttribute<FText>(),
@@ -30,12 +37,31 @@ void FNMultiplayerEditorCommands::Register()
 					TAttribute<FSlateIcon>::Create(TAttribute<FSlateIcon>::FGetter::CreateStatic(&MultiplayerTest_GetIcon)));
 		
 		NexusSection.AddEntry(MultiplayerTest);
+		
+		FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
+		OnTestStartedHandle = Module.OnMultiplayerTestStarted.AddStatic(OnMultiplayerTestStarted);
+		OnTestEndedHandle = Module.OnMultiplayerTestEnded.AddStatic(OnMultiplayerTestEnded);
+	}
+}
+
+void FNMultiplayerEditorCommands::Unregister()
+{
+	FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
+
+	if (OnTestStartedHandle.IsValid())
+	{
+		Module.OnMultiplayerTestStarted.Remove(OnTestStartedHandle);
+	}
+	
+	if (OnTestEndedHandle.IsValid())
+	{
+		Module.OnMultiplayerTestEnded.Remove(OnTestEndedHandle);
 	}
 }
 
 FText FNMultiplayerEditorCommands::MultiplayerTest_GetTooltip()
 {
-	if (bIsMultiplayerTestRunning)
+	if (bIsTestRunning)
 	{
 		return NSLOCTEXT("NexusMultiplayerEditor", "Command_StopMultiplayerTest_Tooltip", "Stop the ongoing local multiplayer test");
 	}
@@ -44,7 +70,7 @@ FText FNMultiplayerEditorCommands::MultiplayerTest_GetTooltip()
 
 FSlateIcon FNMultiplayerEditorCommands::MultiplayerTest_GetIcon()
 {
-	if (bIsMultiplayerTestRunning)
+	if (bIsTestRunning)
 	{
 		return FSlateIcon(FNMultiplayerEditorStyle::GetStyleSetName(), "Command.Multiplayer.StopMultiplayerTest.On");
 	}
@@ -53,49 +79,15 @@ FSlateIcon FNMultiplayerEditorCommands::MultiplayerTest_GetIcon()
 
 void FNMultiplayerEditorCommands::ToggleMultiplayerTest()
 {
-	// Get reference to module
-	const FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
-	
-	if (bIsMultiplayerTestRunning)
-	{
-		Module.OnMultiplayerTestEnd.ExecuteIfBound();
-		GUnrealEd->EndPlayOnLocalPc();
-		bIsMultiplayerTestRunning = false;
-	}
-	else
-	{
-		FRequestPlaySessionParams PlaySessionRequest;
-		PlaySessionRequest.SessionDestination = EPlaySessionDestinationType::NewProcess;
+	UNMultiplayerEditorSubsystem::Get()->ToggleMultiplayerTest();
+}
 
-		// Get default editor settings
-		PlaySessionRequest.EditorPlaySettings = GetMutableDefault<ULevelEditorPlaySettings>();
-		FObjectDuplicationParameters DuplicationParams(PlaySessionRequest.EditorPlaySettings, GetTransientPackage());
-		PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
+void FNMultiplayerEditorCommands::OnMultiplayerTestStarted()
+{
+	bIsTestRunning = true;
+}
 
-#if WITH_EDITORONLY_DATA
-		
-		const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
-		Settings->ApplySettings(PlaySessionRequest);
-		
-#endif // WITH_EDITORONLY_DATA
-		
-		// Are there any additional parameters that a binding has provided?
-		if (Module.OnMultiplayerTestStart.IsBound())
-		{
-			const FString AdditionalArgs = Module.OnMultiplayerTestStart.Execute().TrimStartAndEnd();
-			if (!AdditionalArgs.IsEmpty())
-			{
-				PlaySessionRequest.EditorPlaySettings->AdditionalLaunchParameters.Append(
-					FString::Printf(TEXT(" %s"), *AdditionalArgs));
-			}
-		}
-
-		PlaySessionRequest.EditorPlaySettings->SetRunUnderOneProcess(false);
-
-		// Start!
-		GUnrealEd->RequestPlaySession(PlaySessionRequest);
-
-		// Toggle our tracker
-		bIsMultiplayerTestRunning = true;
-	}
+void FNMultiplayerEditorCommands::OnMultiplayerTestEnded()
+{
+	bIsTestRunning = false;
 }

@@ -21,6 +21,7 @@ namespace UnrealBuildTool.Rules
 					"Chaos",
 					"CoreUObject",
 					"DeveloperSettings",
+					"EditorSubsystem",
 					"Engine",
 					"InputCore",
 					"Projects",

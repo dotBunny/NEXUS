@@ -8,11 +8,19 @@ class FNMultiplayerEditorCommands
 public:
 
 	static void Register();
-	static bool IsMultiplayerTestRunning() { return bIsMultiplayerTestRunning; }
+	static void Unregister();
 	
 private:
-	static bool bIsMultiplayerTestRunning;
+	static bool MultiplayerTest_CanExecute();
 	static FText MultiplayerTest_GetTooltip();
 	static FSlateIcon MultiplayerTest_GetIcon();
 	static void ToggleMultiplayerTest();
+	
+	static void OnMultiplayerTestStarted();
+	static void OnMultiplayerTestEnded();
+	
+	static bool bIsTestRunning;
+	
+	static FDelegateHandle OnTestStartedHandle;
+	static FDelegateHandle OnTestEndedHandle;
 };

@@ -17,6 +17,7 @@ void FNMultiplayerEditorModule::StartupModule()
 
 void FNMultiplayerEditorModule::ShutdownModule()
 {
+	FNMultiplayerEditorCommands::Unregister();
 	FNMultiplayerEditorStyle::Shutdown();
 }
 

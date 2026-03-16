@@ -10,6 +10,7 @@
 ### Changed
 
 - Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
+- `MultiplayerTest` now monitors the status of the spawned processes and updates state accordingly.
 
 ### Removed
 
