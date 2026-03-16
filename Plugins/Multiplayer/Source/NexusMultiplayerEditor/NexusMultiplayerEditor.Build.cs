@@ -28,7 +28,7 @@ namespace UnrealBuildTool.Rules
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
+					"UnrealEd"
 				]
 			);
 
