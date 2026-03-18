@@ -4,15 +4,19 @@
 #pragma once
 
 #include "NOrganGeneratorTaskContext.h"
+#include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 class UNProcGenOperation;
 class FNOrganGeneratorComponentMap;
 
+// Task to create objects in world?
 struct FNOrganGeneratorFinalizeTask
 {
 public:
-	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr);
+	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, 
+		const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr, 
+		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
     
@@ -24,4 +28,5 @@ public:
 private:
 	UNProcGenOperation* Operation;
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
+	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };
