@@ -29,7 +29,6 @@ class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 	GENERATED_BODY()
 
 	ANSamplesPawn(const FObjectInitializer& ObjectInitializer);
-
 	
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
@@ -48,14 +47,21 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	TObjectPtr<UWidgetInteractionComponent> WidgetInteraction;
+
 private:
 
 	void ChangeView(ANSamplesDisplayActor* DisplayActor);
 	void CheckScreenshotState();
+	
 	int CameraIndex = -1;
 	int ResolutionMultiplier = 1;
 	int FrameSkipDefault = 5;
 	int FrameSkipCounter = FrameSkipDefault;
 	ENSamplesScreenshotState ScreenshotState;
+	
+	FVector CachedLocation;
+	
+	UFUNCTION(Server, Unreliable)
+	void Server_SetLocation(FVector Location);
 	
 };

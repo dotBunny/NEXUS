@@ -17,6 +17,9 @@ ANSamplesPawn::ANSamplesPawn(const FObjectInitializer& ObjectInitializer) : Supe
 	WidgetInteraction->InteractionDistance = 1000.0;
 	WidgetInteraction->InteractionSource = EWidgetInteractionSource::Mouse;
 	WidgetInteraction->SetupAttachment(RootComponent);
+
+	bReplicates = true;
+	AActor::SetReplicateMovement(true);
 }
 
 void ANSamplesPawn::BeginPlay()
@@ -53,12 +56,23 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
+	// Simple way of handling network sync of pawns position since we dont have a CMC
+	if (GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		const FVector CurrentLocation = GetActorLocation();
+		if (CurrentLocation != CachedLocation)
+		{
+			CachedLocation = CurrentLocation;
+			Server_SetLocation(CachedLocation);
+		}
+	}
+	
+	// Handle screenshot logic 
 	if (FrameSkipCounter > 0)
 	{
 		FrameSkipCounter--;
 		return;
 	}
-	
 	CheckScreenshotState();
 }
 
@@ -234,5 +248,14 @@ void ANSamplesPawn::CheckScreenshotState()
 			ScreenshotState = NotRunning;
 			break;
 		}
+	}
+}
+
+void ANSamplesPawn::Server_SetLocation_Implementation(const FVector Location)
+{
+	if (Location != CachedLocation)
+	{
+		CachedLocation = Location;
+		SetActorLocation(Location);
 	}
 }
