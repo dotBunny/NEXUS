@@ -10,6 +10,15 @@
 class FNDeveloperUtils
 {
 public:
+	FORCEINLINE static bool IsDemoBuild()
+	{
+#if IS_DEMO_BUILD
+		return true;
+#else // !IS_DEMO_BUILD
+		return false;
+#endif // IS_DEMO_BUILD
+	}
+	
 	FORCEINLINE static int32 GetCurrentObjectCount() { return GUObjectArray.GetObjectArrayNumMinusAvailable(); }
 	
 	static TArray<UObject*> GetRootSetObjects()

@@ -21,6 +21,25 @@ class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+	
+	/**
+	 * Is this a demo build?
+	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
+	 * @return true/false if IS_DEMO_BUILD is defined in this build.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build", Category = "NEXUS|Developer",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#is-demo-build"))
+	static bool IsDemoBuild() { return FNDeveloperUtils::IsDemoBuild(); }
+	
+	/**
+	 * Is this a demo build?
+	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
+	 * @return true/false if IS_DEMO_BUILD is defined in this build.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "? Is Demo Build", Category = "NEXUS|Developer",
+		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#is-demo-build"))
+	static bool IsDemoBuildExec() { return FNDeveloperUtils::IsDemoBuild(); }
+	
 	/**
 	 * Gets the current number of known UObjects by looking at the global UObject array and subtracting the number of available spots.
 	 * @return The number of objects.
