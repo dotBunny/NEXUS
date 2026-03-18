@@ -6,6 +6,7 @@
 
 - Additional settings to the `MultiplayerTest` to simulate different network conditions.
 - `FNMultiplayerEditorModule` now has `OnMultiplayerTestStart` and `OnMultiplayerTestEnd` delegates, the first also allows for additional arguments to be passed in to the launch of the client(s)/server.
+- Preference to clean logs folder prior to launching `MultiplayerTest`.
 
 ### Changed
 

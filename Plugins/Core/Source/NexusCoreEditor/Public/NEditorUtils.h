@@ -194,4 +194,6 @@ public:
 	static void RemoveWorkspaceItem(const FName& WidgetIdentifier);
 	
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
+	
+	static void CleanLogsFolder();
 };

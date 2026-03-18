@@ -53,6 +53,12 @@ void UNMultiplayerEditorSubsystem::StartMultiplayerTest()
 #if WITH_EDITORONLY_DATA
 		
 	const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
+	
+	if (Settings->bClearLogsFolder)
+	{
+		FNEditorUtils::CleanLogsFolder();
+	}
+	
 	Settings->ApplySettings(PlaySessionRequest);
 		
 #endif // WITH_EDITORONLY_DATA

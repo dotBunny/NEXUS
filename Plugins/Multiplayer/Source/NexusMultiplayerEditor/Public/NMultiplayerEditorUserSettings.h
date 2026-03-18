@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Setup", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
 	bool bUseOnlineSubsystem = false;
 	
+	UPROPERTY(EditAnywhere, config, Category = "Setup", meta = (DisplayName = "Clear Logs Folder", Tooltip = "Clear the log files (not in use) prior to running a test?"))
+	bool bClearLogsFolder = false;
+	
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Count", Tooltip = "The number of clients to spawn."))
 	int ClientCount = 2;
 

@@ -216,6 +216,41 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	}
 }
 
+void FNEditorUtils::CleanLogsFolder()
+{
+	TArray<FString> FilePaths;
+	IFileManager& FileManager = IFileManager::Get();
+	
+	TArray<FString> Searches;
+	Searches.Add(TEXT("*-backup-*")); // Backups
+	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
+	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
+	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
+	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
+
+	const FString ProjectLogDir = FPaths::ProjectLogDir();
+	int DeleteCount = 0;
+
+	for (const FString& Search : Searches)
+	{
+		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
+		for (const FString& File : FilePaths)
+		{
+			FileManager.Delete(*File, false, true);
+			DeleteCount++;
+		}
+	}
+	
+	if (DeleteCount > 0)
+	{
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());
+	}
+	else
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("No files found to delete from %s."), *FPaths::ProjectLogDir());
+	}
+}
+
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
