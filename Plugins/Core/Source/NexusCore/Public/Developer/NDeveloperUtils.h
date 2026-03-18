@@ -12,8 +12,12 @@ class FNDeveloperUtils
 public:
 	FORCEINLINE static bool IsDemoBuild()
 	{
-#if IS_DEMO_BUILD
+#ifdef IS_DEMO_BUILD
+#if IS_DEMO_BUILD == 1
 		return true;
+#else // IS_DEMO_BUILD != 1
+		return false;
+#endif // IS_DEMO_BUILD == 1
 #else // !IS_DEMO_BUILD
 		return false;
 #endif // IS_DEMO_BUILD
