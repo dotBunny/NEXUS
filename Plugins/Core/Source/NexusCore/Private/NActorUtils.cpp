@@ -7,25 +7,22 @@
 
 USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclassOf<AActor>& ActorClass)
 {
-	if (UBlueprintGeneratedClass* BlueprintClass = Cast<UBlueprintGeneratedClass>(ActorClass))
+	const UBlueprintGeneratedClass* BlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(ActorClass);
+	if (BlueprintGeneratedClass != nullptr)
 	{
-		TArray<const UBlueprintGeneratedClass*> BlueprintClasses;
-		UBlueprintGeneratedClass::GetGeneratedClassesHierarchy(BlueprintClass, BlueprintClasses);
-		for (const UBlueprintGeneratedClass* Class : BlueprintClasses)
+		if ( BlueprintGeneratedClass->SimpleConstructionScript != nullptr)
 		{
-			if (Class->SimpleConstructionScript)
+			const TArray<USCS_Node*>& RootNodes =  BlueprintGeneratedClass->SimpleConstructionScript->GetRootNodes();
+			if (RootNodes.Num() > 0 && RootNodes[0] != nullptr)
 			{
-				TArray<USCS_Node*> CDONodes = Class->SimpleConstructionScript->GetAllNodes();
-				for (USCS_Node* Node : CDONodes)
+				UActorComponent* RootTemplate = RootNodes[0]->ComponentTemplate;
+				if (RootTemplate->IsA<USceneComponent>())
 				{
-					UActorComponent* CDOComponent = Node->GetActualComponentTemplate(Cast<UBlueprintGeneratedClass>(BlueprintClass));
-					if (USceneComponent* FoundSceneComponent = Cast<USceneComponent>(CDOComponent))
-					{
-						return FoundSceneComponent;
-					}
+					return Cast<USceneComponent>(RootTemplate);
 				}
 			}
 		}
 	}
+	
 	return ActorClass->GetDefaultObject<AActor>()->GetRootComponent();
 }
