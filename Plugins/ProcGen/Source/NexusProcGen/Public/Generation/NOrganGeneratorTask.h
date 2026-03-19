@@ -4,11 +4,13 @@
 #pragma once
 
 #include "NOrganGeneratorTaskContext.h"
+#include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 struct FNOrganGeneratorTask
 {
-	explicit FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr);
+	explicit FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
+		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
     
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphTask, STATGROUP_TaskGraphTasks); }
     
@@ -19,4 +21,5 @@ struct FNOrganGeneratorTask
 
 private:
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
+	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };

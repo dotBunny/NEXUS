@@ -118,6 +118,9 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
+	// TODO: should we be clearing the previous?
+	
+	// Create and start generation operation
 	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects));
 	return FReply::Handled();
 }

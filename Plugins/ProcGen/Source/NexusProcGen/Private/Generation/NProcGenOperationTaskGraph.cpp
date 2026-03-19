@@ -9,6 +9,7 @@
 #include "Generation/NOrganGeneratorFinalizeTask.h"
 #include "Generation/NOrganGeneratorTask.h"
 #include "Generation/NProcGenOperationFinalizeTask.h"
+#include "Generation/NProcGenOperationSharedContext.h"
 
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
@@ -20,6 +21,10 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->FriendlySeed, BaseSeed);
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	uint32 SubTaskIndex = 0;
+	
+	// We need something that each task can share context to others with
+	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext>();
+	
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
@@ -36,7 +41,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
-				.ConstructAndHold(ContextPtr); // ConstructAndDispatchWhenReady
+				.ConstructAndHold(ContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
 			Tasks.Add(OrganTask);
 			
 			// Create a task to finalize the previous organ task on the main thread
@@ -44,7 +49,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 			SubTasks.Add(OrganTask);
 			FGraphEventRef OrganFinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&SubTasks, 
 				ENamedThreads::GameThread)
-				.ConstructAndHold(Generator, ContextPtr);
+				.ConstructAndHold(Generator, ContextPtr, SharedContextPtr);
 			Tasks.Add(OrganFinalizeTask);
 		}
 		

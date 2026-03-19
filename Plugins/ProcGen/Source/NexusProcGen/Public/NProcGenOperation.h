@@ -67,6 +67,11 @@ public:
 	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName= FText::GetEmpty());
 	
 	void Reset() const;
+
+	/**
+	 * Start build process.
+	 * @param Caller Owning system that will get callbacks for building process
+	 */
 	void StartBuild(INProcGenOperationOwner* Caller);
 	
 	void SetSeedOnContext(const FString& NewSeed) const;

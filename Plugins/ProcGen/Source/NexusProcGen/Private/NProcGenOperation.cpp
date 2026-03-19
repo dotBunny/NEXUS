@@ -36,6 +36,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
 	
 	
+	// Add all organs (as context) to the created generation operation
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
 		UObject* Object = WeakObject.Get();
