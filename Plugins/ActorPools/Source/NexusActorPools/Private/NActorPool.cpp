@@ -80,6 +80,7 @@ FText FNActorPool::GetDescription() const
 		ActorDetails += TEXT("\tStrategy: Fixed Recycle Last\n");
 		break;
 	}
+	ActorDetails += FString::Printf(TEXT("\tSpawn Physics Simulation: %s\n"), *FNToggle::ToString(SpawnPhysicsSimulation));
 	
 	// Flags
 	FString FlagDetails = TEXT("FLAGS:\n");
