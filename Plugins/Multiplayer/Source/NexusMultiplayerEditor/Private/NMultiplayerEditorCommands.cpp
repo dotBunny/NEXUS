@@ -7,6 +7,7 @@
 #include "NMultiplayerEditorModule.h"
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorSubsystem.h"
+#include "ShaderCompiler.h"
 
 bool FNMultiplayerEditorCommands::bIsTestRunning = false;
 FDelegateHandle FNMultiplayerEditorCommands::OnTestStartedHandle;
@@ -14,7 +15,7 @@ FDelegateHandle FNMultiplayerEditorCommands::OnTestEndedHandle;
 
 bool FNMultiplayerEditorCommands::MultiplayerTest_CanExecute()
 {
-	return FNEditorUtils::IsNotPlayInEditor();
+	return FNEditorUtils::IsNotPlayInEditor() && !IsAsyncLoading() && (GShaderCompilingManager ? !GShaderCompilingManager->IsCompiling() : true);
 }
 
 void FNMultiplayerEditorCommands::Register()
