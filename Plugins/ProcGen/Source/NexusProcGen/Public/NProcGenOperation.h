@@ -7,10 +7,10 @@
 #include "NProcGenMinimal.h"
 #include "Math/NSeedGenerator.h"
 #include "Generation/NProcGenOperationContext.h"
+#include "Generation/NProcGenOperationTaskGraph.h"
 #include "NProcGenOperation.generated.h"
 
 class UNOrganComponent;
-class FNProcGenOperationTaskGraph;
 
 UENUM(BlueprintType)
 enum class ENProcGenOperationState : uint8
