@@ -8,7 +8,7 @@
 #include "Components/SceneComponent.h"
 #include "NCollisionVisualizerActor.generated.h"
 
-UCLASS(DisplayName = "N Collision Visualizer Actor", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
+UCLASS(DisplayName = "NEXUS | Collision Visualizer Actor", ClassGroup = "NEXUS", NotPlaceable, Hidden, HideDropdown,
 	HideCategories=(Activation, Actor, AssetUserData, Collision, Cooking, DataLayers, HLOD, Input, LevelInstance, LOD, 
 		Navigation, Networking, Physics, Rendering, Replication, Tags,  WorldPartition))
 class NEXUSTOOLINGEDITOR_API ANCollisionVisualizerActor: public AActor

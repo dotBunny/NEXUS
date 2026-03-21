@@ -15,7 +15,7 @@
  * A small collection of functionality to wrap the usage of developer tools.
  * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-library/">UNDeveloperLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Developer Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Developer Library")
 class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -36,7 +36,7 @@ public:
 	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
 	 * @return true/false if IS_DEMO_BUILD is defined in this build.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "? Is Demo Build", Category = "NEXUS|Developer",
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build ?", Category = "NEXUS|Developer",
 		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#is-demo-build"))
 	static bool IsDemoBuildExec() { return FNDeveloperUtils::IsDemoBuild(); }
 	

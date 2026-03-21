@@ -11,7 +11,7 @@
  * The data-only representation of a NCellActor and its details.
  * @note The UNCell is effectively a side-car file to NCellActor.
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Cell")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell")
 class NEXUSPROCGEN_API UNCell : public UDataAsset
 {
 	friend class FNProcGenEditorUtils;

@@ -19,7 +19,7 @@ namespace NEXUS::Samples
 /**
  * @class UNSamplesDisplayLibrary
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Samples Display Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Samples Display Library")
 class UNSamplesDisplayLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

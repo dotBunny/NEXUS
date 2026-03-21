@@ -15,7 +15,7 @@ class APlayerState;
  * A handful of methods meant to support the building logic that works in multiplayer scenarios.
  * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/">UNMultiplayerLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Multiplayer Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Multiplayer Library")
 class NEXUSMULTIPLAYER_API UNMultiplayerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -57,7 +57,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if remote clients are found.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "? Has Remote Players", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Has Remote Players ?", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#has-remote-players"))
 	static bool HasRemotePlayersExec(UObject* WorldContextObject)
 	{
@@ -83,7 +83,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if only local clients are found.
 	 */		
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "? Has Local Players", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Has Local Players ?", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#has-local-players-only"))
 	static bool HasLocalPlayersOnlyExec(UObject* WorldContextObject)
 	{
@@ -113,7 +113,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if authority is found.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "? Has GameState Authority", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, DisplayName = "Has GameState Authority ?", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#has-gamestate-authority"))
 	static bool HasGameStateAuthorityExec(UObject* WorldContextObject)
 	{
@@ -143,7 +143,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if authority is found.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "? Has World Authority", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, DisplayName = "Has World Authority ?", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#has-world-authority"))
 	static bool HasWorldAuthorityExec(UObject* WorldContextObject)
 	{
@@ -247,7 +247,7 @@ public:
 	 * @param WorldContextObject Object that provides the context of which world to operate in.
 	 * @return true/false if the world is not operating in NM_Client mode.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName = "? Is Server", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Server ?", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-server"))
 	static bool IsServerExec(UObject* WorldContextObject)
 	{
@@ -269,7 +269,7 @@ public:
 	* Is the current session created from the MultiplayerTest editor command?
 	* @return true/false if it is.
 	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "? Is Multiplayer Test", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Is Multiplayer Test ?", Category = "NEXUS|Multiplayer",
 		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-multiplayer-test"))
 	static bool IsMultiplayerTestExec()
 	{

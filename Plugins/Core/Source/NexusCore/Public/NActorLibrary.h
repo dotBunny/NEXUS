@@ -16,7 +16,7 @@
  * callable from both C++ and Blueprint contexts, providing common operations
  * related to Actor manipulation, comparison, and management.
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Actor Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Library")
 class UNActorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -33,7 +33,7 @@ public:
 	 *       regardless of their order in the arrays. Each actor in array A must only have exactly one matching
 	 *       actor in array B, and vice versa.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor", DisplayName = "Is Same Actors")
 	static bool IsSameActors(const TArray<AActor*>& A, const TArray<AActor*>& B);
 
 	/**
@@ -45,6 +45,6 @@ public:
 	 * @note This function iterates through the input array and casts each UObject pointer to AActor.
 	 *       Only valid AActor pointers are added to the output array.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Actor", DisplayName = "To Actor Array")
 	static TArray<AActor*> ToActorArray(const TArray<UObject*> InObjects);
 };

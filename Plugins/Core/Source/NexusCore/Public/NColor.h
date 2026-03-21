@@ -25,10 +25,10 @@ enum class ENColor : uint8
 	NC_Green = 30				UMETA(DisplayName = "Green"),
 	NC_Pink	= 35				UMETA(DisplayName = "Pink"),
 	
-	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS: Dark Blue"),
-	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS: Light Blue"),
-	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS: Black"),
-	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS: Pink"),
+	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS | Dark Blue"),
+	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS | Light Blue"),
+	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS | Black"),
+	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS | Pink"),
 
 	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black"),
 	NC_QuarterBlack = 201		UMETA(DisplayName = "Quarter Black"),

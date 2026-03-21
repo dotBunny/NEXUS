@@ -12,7 +12,7 @@
  * A developer-focused subsystem to help monitor specific metrics related to UObject usage.
  * @see <a href="https://nexus-framework.com/docs/plugins/guardian/">Guardian</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Guardian Subsystem")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Subsystem")
 class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()

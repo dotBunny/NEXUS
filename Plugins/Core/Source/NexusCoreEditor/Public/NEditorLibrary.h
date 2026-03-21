@@ -8,7 +8,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NEditorLibrary.generated.h"
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Editor Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Editor Library")
 class UNEditorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

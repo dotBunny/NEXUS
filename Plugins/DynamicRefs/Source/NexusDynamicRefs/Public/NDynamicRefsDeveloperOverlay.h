@@ -10,7 +10,7 @@
 class UNDynamicRefObject;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N DynamicRefs Developer Overlay", BlueprintType, Abstract)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRefs Developer Overlay", BlueprintType, Abstract)
 class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOverlay
 {
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDynamicRefButtonDelegate, UObject*, TargetObject);

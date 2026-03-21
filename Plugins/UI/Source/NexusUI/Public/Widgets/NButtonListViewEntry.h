@@ -46,7 +46,7 @@ private:
 };
 
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()

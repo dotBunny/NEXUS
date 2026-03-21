@@ -10,7 +10,7 @@ enum class ENProcGenOperationState : uint8;
 class UNProcGenOperation;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N ProcGen Developer Overlay", BlueprintType, Abstract)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProcGen Developer Overlay", BlueprintType, Abstract)
 class NEXUSPROCGEN_API UNProcGenDeveloperOverlay : public UNDeveloperOverlay
 {
 	

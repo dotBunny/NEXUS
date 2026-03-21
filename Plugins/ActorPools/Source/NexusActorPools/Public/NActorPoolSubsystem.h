@@ -17,7 +17,7 @@ class UNActorPoolSpawnerComponent;
  * A centralized management system that provides UWorld-specific access to AActor pooling functionality, acting as the primary interface for creating, managing, and accessing multiple FNActorPools.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/">UNActorPoolSubsystem</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Actor Pool Subsystem")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 {
 	friend class FNActorPool;

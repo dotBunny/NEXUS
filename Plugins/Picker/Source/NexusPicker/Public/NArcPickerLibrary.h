@@ -14,7 +14,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/arc/">UNArcPickerLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Arc Picker Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Arc Picker Library")
 class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

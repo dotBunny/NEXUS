@@ -11,7 +11,7 @@
 class UNDynamicRefObject;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Guardian Developer Overlay", BlueprintType, Abstract)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Developer Overlay", BlueprintType, Abstract)
 class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()

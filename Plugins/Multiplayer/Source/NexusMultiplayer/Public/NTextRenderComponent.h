@@ -11,7 +11,7 @@
  * A component that builds a network-synchronized UTextRenderComponent between clients.
  * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/">UNTextRenderComponent</a>
  */
-UCLASS(ClassGroup="NEXUS", DisplayName = "N Text Render", meta = (BlueprintSpawnableComponent))
+UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Text Render", meta = (BlueprintSpawnableComponent))
 class NEXUSMULTIPLAYER_API UNTextRenderComponent final : public UTextRenderComponent
 {
 	GENERATED_BODY()

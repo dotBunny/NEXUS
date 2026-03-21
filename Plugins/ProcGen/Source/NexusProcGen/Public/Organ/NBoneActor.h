@@ -7,7 +7,7 @@
 #include "NBoneComponent.h"
 #include "NBoneActor.generated.h"
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Bone Actor")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Bone Actor")
 class NEXUSPROCGEN_API ANBoneActor : public AActor
 {
 	GENERATED_BODY()

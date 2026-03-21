@@ -6,7 +6,7 @@
 #include "NActorPool.h"
 #include "NActorPoolObject.generated.h"
 
-UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "N Actor Pool Object")
+UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Object")
 class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject
 {
 	GENERATED_BODY()

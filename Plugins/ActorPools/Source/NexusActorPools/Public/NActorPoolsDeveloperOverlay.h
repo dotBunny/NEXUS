@@ -11,7 +11,7 @@ class UNActorPoolSubsystem;
 class UNActorPoolDeveloperObject;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "N Actor Pools Developer Overlay", BlueprintType, Abstract)
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pools Developer Overlay", BlueprintType, Abstract)
 class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()
