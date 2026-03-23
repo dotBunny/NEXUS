@@ -195,12 +195,24 @@ void ANSamplesLevelActor::BeginDestroy()
 
 void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
 {
+	if (!bBuildArea)
+	{
+		Components->Floor->SetWorldScale3D(FVector::Zero());
+		
+		SetWallScale(Components->WallNorth, 0.f, false);
+		SetWallScale(Components->WallEast, 0.f, false);
+		SetWallScale(Components->WallSouth, 0.f, false);
+		SetWallScale(Components->WallWest, 0.f, false);
+		return;
+	}
+	
 	// Get transform information
 	const FVector RootLocation = RootComponent->GetComponentLocation();
 
 	// Change floor
 	if (Components->Floor != nullptr)
 	{
+		Components->Floor->SetWorldScale3D(FVector::One());
 		FVector FloorScale = Components->Floor->GetComponentScale();
 		FloorScale.X = InX;
 		FloorScale.Y = InY;

@@ -30,7 +30,7 @@
 			"Name": "NexusDynamicRefs",
 			"Enabled": true
 		},
-				{
+		{
 			"Name": "NexusGuardian",
 			"Enabled": true
 		},
@@ -88,6 +88,10 @@
 		},
 		{
 			"Name": "AIAssistant",
+			"Enabled": true
+		},
+		{
+			"Name": "PCG",
 			"Enabled": true
 		}
 	],

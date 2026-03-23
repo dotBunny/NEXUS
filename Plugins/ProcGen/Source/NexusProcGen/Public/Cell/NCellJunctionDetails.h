@@ -37,7 +37,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(EditAnywhere, meta = (EditCondition="Requirements==ENCellJunctionRequirements::AllowBlocking", ToolTip = "The blocker(s) that can be used to fill this junction.", EditConditionHides))
 	TArray<TSubclassOf<ANCellJunctionBlockerActor>> Blockers;
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 UnitSize = FIntVector2(4, 2);
 	
 	UPROPERTY(VisibleAnywhere)

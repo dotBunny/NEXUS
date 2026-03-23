@@ -35,6 +35,9 @@ public:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
+	bool bBuildArea = true;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
 	FVector2D AreaSize = FVector2D(4, 7);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")

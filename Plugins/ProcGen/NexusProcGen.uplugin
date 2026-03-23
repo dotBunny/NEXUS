@@ -41,6 +41,10 @@
 			"Enabled": true
 		},
 		{
+			"Name": "PCG",
+			"Enabled": true
+		},
+		{
 			"Name": "NexusCore",
 			"Enabled": true
 		},

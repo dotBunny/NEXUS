@@ -65,7 +65,7 @@ public:
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
-	UPROPERTY(EditAnywhere, Category = "NCell Junction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
 	FNCellJunctionDetails Details;
 
 private:
