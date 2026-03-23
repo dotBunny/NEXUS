@@ -45,6 +45,7 @@ public:
 	
 #endif // WITH_EDITOR
 	
+	void EnsureTagged();
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
