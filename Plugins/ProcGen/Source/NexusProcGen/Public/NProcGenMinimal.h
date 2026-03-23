@@ -5,11 +5,6 @@
 
 namespace NEXUS::ProcGen
 {
-	namespace Tags
-	{
-		const FName BoneComponent = FName("NBoneComponent");
-	}
-
 	namespace Debug
 	{
 		constexpr float LineThickness = 1.5f;
