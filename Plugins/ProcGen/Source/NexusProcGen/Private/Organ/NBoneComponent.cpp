@@ -29,6 +29,12 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 #endif
 	
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NBoneComponent", this, false, 0.35f)
+	
+	// Ensure Tags
+	if (!this->ComponentTags.Contains(NEXUS::ProcGen::Tags::BoneComponent))
+	{
+		this->ComponentTags.Add(NEXUS::ProcGen::Tags::BoneComponent);
+	}
 }
 
 #if WITH_EDITOR
@@ -202,6 +208,14 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 	return WorkingLocation;
 }
 
+void UNBoneComponent::EnsureTagged()
+{
+	if (!this->ComponentTags.Contains(NEXUS::ProcGen::Tags::BoneComponent))
+	{
+		this->ComponentTags.Add(NEXUS::ProcGen::Tags::BoneComponent);
+	}
+}
+
 void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -209,6 +223,8 @@ void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& Prope
 	{
 		OnModeChanged(Mode);
 	}
+	
+	EnsureTagged();
 }
 
 void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
