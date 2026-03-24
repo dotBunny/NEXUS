@@ -28,7 +28,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;
 
 	UPROPERTY(EditInstanceOnly)
@@ -40,10 +40,10 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 UnitSize = FIntVector2(4, 2);
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector RootRelativeLocation = FVector::ZeroVector;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FNCardinalRotation RootRelativeCardinalRotation;
 
 	UPROPERTY(VisibleAnywhere)
