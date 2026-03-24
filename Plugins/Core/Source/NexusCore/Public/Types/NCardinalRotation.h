@@ -111,8 +111,8 @@ struct FNCardinalDirectionDataRow : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	ENCardinalDirection Direction;
+	ENCardinalDirection Direction = ENCardinalDirection::North;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float Rotation;
+	float Rotation = 0.f;
 };
