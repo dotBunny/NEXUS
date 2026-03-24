@@ -6,6 +6,7 @@
 #include "NCardinalDirection.h"
 #include "NCardinalRotation.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNCardinalRotation
 {
@@ -102,4 +103,16 @@ struct NEXUSCORE_API FNCardinalRotation
 		const FVector RotatedSize = Rotation.RotateVector(PreRotatedSize);
 		return RotatedSize;
 	}
+};
+
+USTRUCT(BlueprintType)
+struct FNCardinalDirectionDataRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	ENCardinalDirection Direction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
+	float Rotation;
 };
