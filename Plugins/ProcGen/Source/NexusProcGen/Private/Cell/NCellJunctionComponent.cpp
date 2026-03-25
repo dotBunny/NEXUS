@@ -69,8 +69,10 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->UnitSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
-	const FRotator JunctionRotator = (Rotation.Quaternion() *
-		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+	
+	const FRotator JunctionRotator = Rotation;// (Rotation.Quaternion()).Rotator();
+	// const FRotator JunctionRotator = (Rotation.Quaternion() *
+	// 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 
 	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
 
@@ -81,11 +83,12 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const float LineLength = Settings->UnitSize.X * 0.25f;
 
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, Rotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], Rotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], Rotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], Rotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], Rotation, Color, Details.Type, LineLength);
+	const FRotator SocketTypeRotation =  (Rotation.Quaternion() * FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], SocketTypeRotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], SocketTypeRotation, Color, Details.Type, LineLength);
 }
 
 void UNCellJunctionComponent::OnRegister()

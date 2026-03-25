@@ -41,6 +41,9 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 #endif // WITH_EDITOR
 
 		N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
+		
+		// TODO: add preexisting rotation?
+		//-90 on Z
 	}
 
 public:
