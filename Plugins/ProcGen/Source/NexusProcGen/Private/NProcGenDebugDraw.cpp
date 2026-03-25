@@ -112,10 +112,6 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 		{
 			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_Foreground );
 		}
-		else
-		{
-			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Green, SDPG_Foreground );
-		}
 	}
 }
 
@@ -151,10 +147,6 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
 			PDI->DrawPoint(VoxelCenter, FColor::Blue, 5.f, SDPG_Foreground);
-		}
-		else
-		{
-			PDI->DrawPoint(VoxelCenter, FColor::Green, 5.f, SDPG_Foreground);
 		}
 	}
 }
