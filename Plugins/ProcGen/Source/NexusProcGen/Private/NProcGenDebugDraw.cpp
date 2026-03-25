@@ -58,7 +58,7 @@ void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PD
 		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
 	case ENCellJunctionType::OneWaySocket:
-		const FVector OneWayPoint = Location + (Rotation.Vector() * Length);
+		const FVector OneWayPoint = Location + (Rotation.Vector() * -Length);
 		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
 	}
