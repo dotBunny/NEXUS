@@ -48,14 +48,20 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	ScanTask.MakeDialog(false);
 	for (int i = 0; i < PathCount; i++)
 	{
+		if (SelectedPaths[i] == "/All")
+		{
+			UE_LOG(LogNexusToolingEditor, Warning, TEXT("Skipping /All as it is not a valid path. Make sure to select the Content folder if you are wanting to search project wide."));
+			continue;
+		}
+		
 		// Plugins should be their root path
 		SelectedPaths[i].RemoveFromStart("/All/Plugins");
-		// We just dont want the all, just incase.
+		// We just don't want the /All, just in case.
 		SelectedPaths[i].RemoveFromStart("/All");
 		
 		ScanTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Item", "Scanning {0}"), FText::FromString(SelectedPaths[i])));
-		
-		if (!EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
+	
+		if (SelectedPaths[i].Len() == 0 || !EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
 		{
 			continue;
 		}
@@ -101,6 +107,29 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	// Step 4 - Cleanup
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step4", "Cleanup ..."));
 	UPackageTools::UnloadPackages(CleanupPackages);
+}
+
+bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
+{
+	TArray<FString>SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
+	for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+	{
+		SelectedPaths.AddUnique(AdditionalPath);
+	}
+	
+	// Nothing selected, don't allow execution.
+	if (SelectedPaths.Num() == 0)
+	{
+		return false;
+	}
+	
+	// We cannot operate on /All
+	if (SelectedPaths[0] == "/All")
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages)

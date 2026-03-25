@@ -15,6 +15,10 @@
 - `MultiplayerTest` now monitors the status of the spawned processes and updates state accordingly.
 - `ANSamplesPawn` now replicates movement.
 
+### Fixed
+
+- `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
+
 ### Removed
 
 - `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
