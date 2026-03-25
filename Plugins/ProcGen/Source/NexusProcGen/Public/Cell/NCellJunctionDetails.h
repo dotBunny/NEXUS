@@ -38,7 +38,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	TArray<TSubclassOf<ANCellJunctionBlockerActor>> Blockers;
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
-	FIntVector2 UnitSize = FIntVector2(2, 4);
+	FIntVector2 SocketSize = FIntVector2(2, 4);
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector RootRelativeLocation = FVector::ZeroVector;
@@ -61,7 +61,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 			InstanceIdentifier == Other.InstanceIdentifier
 			&& Requirements == Other.Requirements
 			&& Type == Other.Type
-			&& UnitSize == Other.UnitSize
+			&& SocketSize == Other.SocketSize
 			&& RootRelativeLocation == Other.RootRelativeLocation
 			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers)
 			&& RootRelativeCardinalRotation.IsEqual(Other.RootRelativeCardinalRotation);

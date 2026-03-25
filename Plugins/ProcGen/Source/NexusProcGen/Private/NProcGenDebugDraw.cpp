@@ -95,10 +95,10 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 	if (PointCount == 0) return;
 	
 	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
-	const FVector UnitSize = Settings->UnitSize;
+	const FVector UnitSize = Settings->VoxelSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
-	
+		
 	for (int i = 0; i < PointCount; i++)
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
@@ -110,7 +110,8 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 		
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
-			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_Foreground );
+			
+			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Blue, SDPG_World );
 		}
 	}
 }
@@ -123,7 +124,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 	if (PointCount == 0) return;
 	
 	const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
-	const FVector UnitSize = Settings->UnitSize;
+	const FVector UnitSize = Settings->VoxelSize;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
 	

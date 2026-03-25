@@ -65,7 +65,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 
 		const size_t PointCount = CachedData.GetCount();
 		const UNProcGenSettings* Settings = GetDefault<UNProcGenSettings>();
-		const FVector UnitSize = Settings->UnitSize;
+		const FVector UnitSize = Settings->VoxelSize;
 		const FVector HalfUnitSize = UnitSize * 0.5f;
 		const FVector BaseOffset = CachedData.Origin;
 		for (int i = 0; i < PointCount; i++)

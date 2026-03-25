@@ -65,8 +65,8 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized() + RootRotation;
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.UnitSize, Settings->UnitSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.UnitSize, Settings->UnitSize);
+	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.SocketSize, Settings->SocketSize);
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.SocketSize, Settings->SocketSize);
 	
 	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
 	
@@ -81,7 +81,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
 	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  Color);
 
-	const float LineLength = Settings->UnitSize.X * 0.25f;
+	const float LineLength = Settings->SocketSize.X * 0.25f;
 
 	const FRotator SocketTypeRotation =  (Rotation.Quaternion() * FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, Color, Details.Type, LineLength);
@@ -174,12 +174,14 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		
 		// LOCATION
 		const FVector ComponentLocation = GetComponentLocation();
-		const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->UnitSize);
-		if (GridLocation != Details.RootRelativeLocation)
+		
+		// WE ARE NOT GOING TO LOCK TO GRID
+		//const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->VoxelSize);
+		if (ComponentLocation != Details.RootRelativeLocation)
 		{
 			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
-			Details.RootRelativeLocation = GridLocation;
-
+			Details.RootRelativeLocation = ComponentLocation;
+		
 			bHasMadeChanges = true;
 		}
 

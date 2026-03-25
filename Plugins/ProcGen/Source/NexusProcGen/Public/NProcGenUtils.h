@@ -36,13 +36,18 @@ public:
 	{
 		return Rotation.RotateVector(InLocation) + Offset;
 	}
+	
+	FORCEINLINE static FVector2D GetWorldSize2D(const FIntVector2& Units, const FVector2D& UnitSize)
+	{
+		return FVector2D(Units.X*UnitSize.X, Units.Y*UnitSize.Y);
+	}
 
 	FORCEINLINE static FVector2D GetWorldSize2D(const FIntVector2& Units, const FVector& UnitSize)
 	{
 		return FVector2D(Units.X*UnitSize.X, Units.Y*UnitSize.Y);
 	}
 
-	static TArray<FVector2D> GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize);
+	static TArray<FVector2D> GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector2D& UnitSize);
 
 	static TArray<FVector> GetCenteredWorldCornerPoints2D(const FVector& WorldCenter, const FRotator& Rotation, const float Width, const float Height, const ENAxis Axis = ENAxis::Z);
 

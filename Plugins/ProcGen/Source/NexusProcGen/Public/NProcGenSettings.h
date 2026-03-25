@@ -46,9 +46,13 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 #endif // WITH_EDITOR
 
 public:
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Unit Size",
-		meta=(ToolTip="What is the base unit sized when operating on our grid?"))
-	FVector UnitSize = FVector(50.f, 50.f, 50.f);
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Voxel Size",
+		meta=(ToolTip="What is the size to use when generating voxel data around the space of a NCell. This sizing will also be used to calculate some additional meta data as a unit size. It doesn't need to be too tight; just remember the smaller the size, the greater the performance hit."))
+	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Socket Size",
+		meta=(ToolTip="What is the unit base size for things like the NJunctions and NBones."))
+	FVector2D SocketSize = FVector2D(50.f, 50.f);
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))

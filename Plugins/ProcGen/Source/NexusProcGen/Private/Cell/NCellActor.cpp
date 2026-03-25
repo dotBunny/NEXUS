@@ -90,7 +90,7 @@ void ANCellActor::CalculateBounds()
 	
 	CellRoot->Details.Bounds = FNProcGenUtils::CalculatePlayableBounds(GetLevel(), CellRoot->Details.BoundsSettings);
 
-	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+	const FVector UnitSize = UNProcGenSettings::Get()->VoxelSize;
 
 	CellRoot->Details.UnitBounds = FBox(
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),

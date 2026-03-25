@@ -132,7 +132,7 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 
 	// Settings
 	const UWorld* World = InLevel->GetWorld();
-	const FVector UnitSize = UNProcGenSettings::Get()->UnitSize;
+	const FVector UnitSize = UNProcGenSettings::Get()->VoxelSize;
 	const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	TArray<const AActor*> IgnoredActors;
@@ -309,7 +309,7 @@ TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromWorld(const UWorld* Wo
 	return Result;
 }
 
-TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector& UnitSize)
+TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector2D& UnitSize)
 {
 	TArray<FVector2D> Points;
 	Points.Reserve( Units.X * Units.Y);
