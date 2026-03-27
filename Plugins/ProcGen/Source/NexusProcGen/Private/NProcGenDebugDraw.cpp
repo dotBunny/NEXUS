@@ -134,8 +134,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 		
 		// TODO: #ROTATE-VOXELS Rotation needs to actually rotated to the nearest grid???
 		FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
-		
-		
+
 		// Represent origin as a box
 		if (x == 0 && y == 0 && z == 0)
 		{
@@ -143,8 +142,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 			const FVector VoxelMax = VoxelCenter + HalfUnitSize;
 			DrawWireBox(PDI, FBox(VoxelMin, VoxelMax), FColor::Yellow, SDPG_Foreground );
 		}
-		
-		
+
 		if (N_FLAGS_HAS(VoxelData.GetData(i), static_cast<uint8>(ENCellVoxel::Occupied)))
 		{
 			PDI->DrawPoint(VoxelCenter, FColor::Blue, 5.f, SDPG_Foreground);
