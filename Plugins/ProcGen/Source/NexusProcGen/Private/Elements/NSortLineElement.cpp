@@ -98,7 +98,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                     Direction = (OutPoints[i].Transform.GetLocation() - OutPoints[i-1].Transform.GetLocation()).GetSafeNormal();
                 }
                 
-                if (i > 0)
+                if (i > 0 && i < NumPointsMinusOne)
                 {
                     FVector PreviousDirection = DirAttr->GetValue(OutPoints[i-1].MetadataEntry);
                     
@@ -108,7 +108,14 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                     TurnAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
                 }
                 
+               
+                
                 DirAttr->SetValue(OutPoints[i].MetadataEntry, Direction);
+            }
+            
+            if (Settings->bIsLoop)
+            {
+                // Handle loop back to point 0
             }
         }
 
