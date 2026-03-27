@@ -44,10 +44,10 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         // Do we need to find the starting position?
         if (Settings->bLeftMostStartingPoint)
         {
-            float MinX = TNumericLimits<float>::Max();
+            float MinimumPositionX = TNumericLimits<float>::Max();
             for(int32 i = 0; i < UnsortedPoints.Num(); ++i) {
-                if(UnsortedPoints[i].Transform.GetLocation().X < MinX) {
-                    MinX = UnsortedPoints[i].Transform.GetLocation().X;
+                if(UnsortedPoints[i].Transform.GetLocation().X < MinimumPositionX) {
+                    MinimumPositionX = UnsortedPoints[i].Transform.GetLocation().X;
                     CurrentIndex = i;
                 }
             }
