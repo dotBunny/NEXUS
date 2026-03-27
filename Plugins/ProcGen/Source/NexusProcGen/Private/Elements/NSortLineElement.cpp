@@ -78,19 +78,36 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         OutputData->InitializeFromData(PointData);
         TArray<FPCGPoint>& OutPoints = OutputData->GetMutablePoints();
         OutPoints = SortedPoints;
+        const int NumPoints = OutPoints.Num();
+        const int NumPointsMinusOne = NumPoints - 1;
 
         // Should we figure out the next direction?
         if (Settings->bWriteDirectionAttribute)
         {
             FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->DirectionAttributeName, FVector::ZeroVector, false, true);
-
-            for (int32 i = 0; i < OutPoints.Num(); ++i) {
+            FPCGMetadataAttribute<float>* TurnAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnAttributeName, false, false, true);
+            
+            for (int32 i = 0; i < NumPoints; ++i) {
+                
+                // Direction to "next" point
                 FVector Direction = FVector::ZeroVector;
-                if (i < OutPoints.Num() - 1) {
+                if (i < NumPointsMinusOne) {
                     Direction = (OutPoints[i+1].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
-                } else {
+                } 
+                else {
                     Direction = (OutPoints[i].Transform.GetLocation() - OutPoints[i-1].Transform.GetLocation()).GetSafeNormal();
                 }
+                
+                if (i > 0)
+                {
+                    FVector PreviousDirection = DirAttr->GetValue(OutPoints[i-1].MetadataEntry);
+                    
+                    // Inside your loop (starting from the second point):
+                    // A value near 0.0 is a very slight bend, while a value near 1.0 or -1.0 is a sharp 90-degree turn.
+                    float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousDirection, Direction), FVector::UpVector);
+                    TurnAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
+                }
+                
                 DirAttr->SetValue(OutPoints[i].MetadataEntry, Direction);
             }
         }

@@ -26,11 +26,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should point index 0 be used as the starting point to build the chain, or should we find the left most position?"))
 	bool bLeftMostStartingPoint;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Can we assume this is a closed loop?"))
+	bool bIsLoop;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should we calculate a direction to the next point and write it to the attributes?"))
 	bool bWriteDirectionAttribute = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
 	FName DirectionAttributeName = TEXT("NextDirection");
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	FName TurnAttributeName = TEXT("TurnAngle");
 };
 
 class FNSortLineElement : public IPCGElement
