@@ -30,47 +30,53 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         const UPCGPointData* PointData = Cast<UPCGPointData>(Input.Data);
         if (!PointData) continue;
 
-        const TArray<FPCGPoint>& RawPoints = PointData->GetPoints();
-        if (RawPoints.Num() < 2) {
+        const TArray<FPCGPoint>& UnsortedPoints = PointData->GetPoints();
+        if (UnsortedPoints.Num() < 2) {
             Outputs.Add(Input);
             continue;
         }
 
         TArray<FPCGPoint> SortedPoints;
         TArray<bool> Visited;
-        Visited.Init(false, RawPoints.Num());
+        Visited.Init(false, UnsortedPoints.Num());
         int32 CurrentIndex = 0;
         
         // Do we need to find the starting position?
         if (Settings->bLeftMostStartingPoint)
         {
             float MinX = TNumericLimits<float>::Max();
-            for(int32 i = 0; i < RawPoints.Num(); ++i) {
-                if(RawPoints[i].Transform.GetLocation().X < MinX) {
-                    MinX = RawPoints[i].Transform.GetLocation().X;
+            for(int32 i = 0; i < UnsortedPoints.Num(); ++i) {
+                if(UnsortedPoints[i].Transform.GetLocation().X < MinX) {
+                    MinX = UnsortedPoints[i].Transform.GetLocation().X;
                     CurrentIndex = i;
                 }
             }
         }
 
         // Build Sorted Points (Nearest Neighbor)
-        while (CurrentIndex != INDEX_NONE) {
+        while (CurrentIndex != INDEX_NONE) 
+        {
             Visited[CurrentIndex] = true;
-            SortedPoints.Add(RawPoints[CurrentIndex]);
+            SortedPoints.Add(UnsortedPoints[CurrentIndex]);
 
-            int32 NextIdx = INDEX_NONE;
-            float ClosestDistSq = TNumericLimits<float>::Max();
+            int32 NextIndex = INDEX_NONE;
+            float ClosestDistanceSquared = TNumericLimits<float>::Max();
 
-            for (int32 i = 0; i < RawPoints.Num(); ++i) {
-                if (Visited[i]) continue;
+            for (int32 i = 0; i < UnsortedPoints.Num(); ++i) 
+            {
+                if (Visited[i])
+                {
+                    continue;
+                }
 
-                float DistSq = FVector::DistSquared(RawPoints[CurrentIndex].Transform.GetLocation(), RawPoints[i].Transform.GetLocation());
-                if (DistSq < ClosestDistSq) {
-                    ClosestDistSq = DistSq;
-                    NextIdx = i;
+                const float DistanceSquared = FVector::DistSquared(UnsortedPoints[CurrentIndex].Transform.GetLocation(), UnsortedPoints[i].Transform.GetLocation());
+                if (DistanceSquared < ClosestDistanceSquared) 
+                {
+                    ClosestDistanceSquared = DistanceSquared;
+                    NextIndex = i;
                 }
             }
-            CurrentIndex = NextIdx;
+            CurrentIndex = NextIndex;
         }
 
         // Build Output Data
@@ -87,34 +93,37 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
             FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->DirectionAttributeName, FVector::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnAttributeName, false, false, true);
             
+            FVector PreviousNextDirectionCache;
             for (int32 i = 0; i < NumPoints; ++i) {
                 
                 // Direction to "next" point
-                FVector Direction = FVector::ZeroVector;
-                if (i < NumPointsMinusOne) {
-                    Direction = (OutPoints[i+1].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
+                FVector NextDirection = FVector::ZeroVector;
+                if (i < NumPointsMinusOne)  // Not the last point
+                {
+                    NextDirection = (OutPoints[i+1].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
                 } 
-                else {
-                    Direction = (OutPoints[i].Transform.GetLocation() - OutPoints[i-1].Transform.GetLocation()).GetSafeNormal();
+                else if (Settings->bIsLoop) // Is last point and loop
+                {
+                    NextDirection = (OutPoints[0].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
                 }
                 
-                if (i > 0 && i < NumPointsMinusOne)
+                if (i > 0)
                 {
-                    FVector PreviousDirection = DirAttr->GetValue(OutPoints[i-1].MetadataEntry);
-                    
                     // Inside your loop (starting from the second point):
                     // A value near 0.0 is a very slight bend, while a value near 1.0 or -1.0 is a sharp 90-degree turn.
-                    float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousDirection, Direction), FVector::UpVector);
+                    float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousNextDirectionCache, NextDirection), FVector::UpVector);
                     TurnAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
                 }
                 
-               
-                
-                DirAttr->SetValue(OutPoints[i].MetadataEntry, Direction);
+                DirAttr->SetValue(OutPoints[i].MetadataEntry, NextDirection);
+                PreviousNextDirectionCache = NextDirection;
             }
             
             if (Settings->bIsLoop)
             {
+                
+                float TurnValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[0].MetadataEntry), DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry)), FVector::UpVector);
+                TurnAttr->SetValue(OutPoints[0].MetadataEntry, TurnValue);
                 // Handle loop back to point 0
             }
         }
