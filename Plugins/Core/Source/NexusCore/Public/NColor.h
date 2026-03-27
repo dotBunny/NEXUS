@@ -69,4 +69,6 @@ public:
 	static constexpr FLinearColor QuarterBlack = FLinearColor(0.f,0.f,0.f, 0.25f);
 	
 	static constexpr FLinearColor Transparent = FLinearColor(0.f,0.f,0.f, 0.0f);
+	
+	static constexpr FLinearColor SortElement = FLinearColor(0.4f,0.62f,1.f, 1.f);
 };
