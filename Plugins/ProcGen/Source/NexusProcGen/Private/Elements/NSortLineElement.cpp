@@ -119,8 +119,9 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                 
                 if (i > 0)
                 {
-                    // Inside your loop (starting from the second point):
-                    // A value near 0.0 is a very slight bend, while a value near 1.0 or -1.0 is a sharp 90-degree turn.
+                    // 1/-1 90 degrees
+                    // inbetween/close to 0 is slight
+                    // 0 straight
                     float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousNextDirectionCache, NextDirection), FVector::UpVector);
                     TurnAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
                 }
