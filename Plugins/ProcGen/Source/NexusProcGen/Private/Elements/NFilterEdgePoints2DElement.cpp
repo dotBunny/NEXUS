@@ -4,6 +4,7 @@
 #include "Elements/NFilterEdgePoints2DElement.h"
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
+#include "Async/ParallelFor.h"
 
 TArray<FPCGPinProperties> UNFilterEdgePoints2DSettings::InputPinProperties() const
 {
@@ -27,65 +28,72 @@ FPCGElementPtr UNFilterEdgePoints2DSettings::CreateElement() const {
 bool FNFilterEdgePoints2DElement::ExecuteInternal(FPCGContext* Context) const
 {
 	const UNFilterEdgePoints2DSettings* Settings = Context->GetInputSettings<UNFilterEdgePoints2DSettings>();
-	check(Settings);
+    if (!Settings) return true;
 
-	TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
+    TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
 
-	for (const FPCGTaggedData& Input : Inputs)
-	{
-		const UPCGPointData* OriginalData = Cast<UPCGPointData>(Input.Data);
-		if (!OriginalData) continue;
+    for (const FPCGTaggedData& Input : Inputs)
+    {
+        const UPCGPointData* OriginalData = Cast<UPCGPointData>(Input.Data);
+        if (!OriginalData || OriginalData->GetPoints().Num() == 0) continue;
 
-		const TArray<FPCGPoint>& Points = OriginalData->GetPoints();
-		const PCGPointOctree::FPointOctree& Octree = OriginalData->GetPointOctree();
+        const TArray<FPCGPoint>& Points = OriginalData->GetPoints();
+        const int32 PointCount = Points.Num();
+        TArray<int8> Classification;
+        Classification.Init(0, PointCount);
+        const float SearchRadius = Settings->FilterParams.Spacing * 1.5f;
+        const float SquaredSearchRadius = SearchRadius * SearchRadius;
+    	const PCGPointOctree::FPointOctree& Octree = OriginalData->GetPointOctree();
 
-		UPCGPointData* InsideData = NewObject<UPCGPointData>();
-		InsideData->InitializeFromData(OriginalData);
-		UPCGPointData* OutsideData = NewObject<UPCGPointData>();
-		OutsideData->InitializeFromData(OriginalData);
+        ParallelFor(PointCount, [&](const int32 Index)
+        {
+            const FPCGPoint& CurrentPoint = Points[Index];
+            const FVector Center = CurrentPoint.Transform.GetLocation();
+            int32 NeighborCount = 0;
+            const FBox CenterBox(Center - FVector(SearchRadius), Center + FVector(SearchRadius));
 
-		const float SearchRadius = Settings->FilterParams.Spacing * 1.5f; // We want to build a bit of buffer in to the spatial query
-		const float SquaredSearchRadius = SearchRadius * SearchRadius;
+            Octree.FindElementsWithBoundsTest(CenterBox, [&](const PCGPointOctree::FPointRef& NeighborRef)
+            {
+                if (NeighborRef.Index != Index)
+                {
+                    if (FVector::DistSquaredXY(Center, Points[NeighborRef.Index].Transform.GetLocation()) <= SquaredSearchRadius)
+                    {
+                        NeighborCount++;
+                    }
+                }
+            });
 
-		for (int32 i = 0; i < Points.Num(); ++i)
-		{
-			const FPCGPoint& CurrentPoint = Points[i];
-			FVector Center = CurrentPoint.Transform.GetLocation();
-			int32 NeighborCount = 0;
-			FBox CenterBox(Center - FVector(SearchRadius), Center + FVector(SearchRadius));
+            if (NeighborCount >= 8)
+            {
+                Classification[Index] = 1;
+            }
+        });
 
-			Octree.FindElementsWithBoundsTest(CenterBox, [&](const PCGPointOctree::FPointRef& NeighborRef)
-			{
-				if (NeighborRef.Index != i)
-				{
-					const FPCGPoint& NeighborPoint = Points[NeighborRef.Index];
-					const float DistanceSquared = FVector::DistSquaredXY(Center, NeighborPoint.Transform.GetLocation());
-                    
-					if (DistanceSquared <= SquaredSearchRadius)
-					{
-						NeighborCount++;
-					}
-				}
-			});
+        UPCGPointData* InsideData = NewObject<UPCGPointData>();
+        InsideData->InitializeFromData(OriginalData);
+        UPCGPointData* OutsideData = NewObject<UPCGPointData>();
+        OutsideData->InitializeFromData(OriginalData);
 
-			if (NeighborCount == 8)
-			{
-				InsideData->GetMutablePoints().Add(CurrentPoint);
-			}
-			else
-			{
-				OutsideData->GetMutablePoints().Add(CurrentPoint);
-			}
-		}
+        for (int32 i = 0; i < PointCount; ++i)
+        {
+            if (Classification[i] == 1)
+            {
+                InsideData->GetMutablePoints().Add(Points[i]);
+            }
+            else
+            {
+                OutsideData->GetMutablePoints().Add(Points[i]);
+            }
+        }
+        
+        FPCGTaggedData& InsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
+        InsideOutput.Data = InsideData;
+        InsideOutput.Pin = PCGPinConstants::DefaultInFilterLabel;
+        
+        FPCGTaggedData& OutsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
+        OutsideOutput.Data = OutsideData;
+        OutsideOutput.Pin = PCGPinConstants::DefaultOutFilterLabel;
+    }
 
-		FPCGTaggedData& InsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
-		InsideOutput.Data = InsideData;
-		InsideOutput.Pin = PCGPinConstants::DefaultInFilterLabel;
-
-		FPCGTaggedData& OutsideOutput = Context->OutputData.TaggedData.Emplace_GetRef();
-		OutsideOutput.Data = OutsideData;
-		OutsideOutput.Pin = PCGPinConstants::DefaultOutFilterLabel;
-	}
-
-	return true;
+    return true;
 }
