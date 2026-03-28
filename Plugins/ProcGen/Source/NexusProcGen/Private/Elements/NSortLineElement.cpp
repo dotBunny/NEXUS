@@ -87,6 +87,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         OutputData->InitializeFromData(PointData);
         TArray<FPCGPoint>& OutPoints = OutputData->GetMutablePoints();
         OutPoints = SortedPoints;
+        
         const int NumPoints = OutPoints.Num();
         const int NumPointsMinusOne = NumPoints - 1;
 
@@ -98,6 +99,12 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
             
             FVector PreviousNextDirectionCache;
             for (int32 i = 0; i < NumPoints; ++i) {
+                
+                // Ensure metadata existence
+                if (OutPoints[i].MetadataEntry == -1)
+                {
+                    OutputData->Metadata->InitializeOnSet(OutPoints[i].MetadataEntry);
+                }
                 
                 // Direction to "next" point
                 FVector NextDirection = FVector::ZeroVector;
