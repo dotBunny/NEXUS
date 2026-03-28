@@ -71,4 +71,5 @@ public:
 	static constexpr FLinearColor Transparent = FLinearColor(0.f,0.f,0.f, 0.0f);
 	
 	static constexpr FLinearColor SortElement = FLinearColor(0.4f,0.62f,1.f, 1.f);
+	static constexpr FLinearColor FilterElement = FLinearColor(0.24f,0.09f,0.85f, 1.f);
 };

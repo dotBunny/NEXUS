@@ -1,0 +1,48 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+#include "NColor.h"
+#include "PCGSettings.h"
+#include "NFilterEdgePoints2DElement.generated.h"
+
+USTRUCT(BlueprintType)
+struct FNFilterEdgePoints2DParams
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Setting)
+	float Spacing = 100.f;
+};
+
+UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
+class UNFilterEdgePoints2DSettings : public UPCGSettings
+{
+	GENERATED_BODY()
+
+public:
+
+#if WITH_EDITOR
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Filter Edge Points 2D"); }
+	virtual FText GetNodeTooltipText() const override { return INVTEXT("Finds and identifies edge (border) points of a filled set of 2D points."); }
+	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::FilterElement; };
+	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::Filter; }
+#endif
+	
+	virtual TArray<FPCGPinProperties> InputPinProperties() const override;
+	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
+	
+	virtual FPCGElementPtr CreateElement() const override;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (ShowOnlyInnerProperties, PCG_Overridable))
+	FNFilterEdgePoints2DParams FilterParams;
+};
+
+class FNFilterEdgePoints2DElement : public IPCGElement
+{
+protected:
+	virtual bool ExecuteInternal(FPCGContext* Context) const override;
+	virtual EPCGElementExecutionLoopMode ExecutionLoopMode(const UPCGSettings* Settings) const override { return EPCGElementExecutionLoopMode::SinglePrimaryPin; }
+	
+};
