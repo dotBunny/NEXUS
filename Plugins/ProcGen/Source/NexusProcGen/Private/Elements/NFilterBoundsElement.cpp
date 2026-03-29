@@ -34,33 +34,6 @@ bool FNFilterBoundsElement::ExecuteInternal(FPCGContext* Context) const
     TArray<FPCGTaggedData> SourceInput = Context->InputData.GetInputsByPin(Settings->SourceAttribute);
     TArray<FPCGTaggedData> TargetInput = Context->InputData.GetInputsByPin(Settings->TargetAttribute);
 
-	// Build Inputs
-	for (const FPCGTaggedData& Source : SourceInput)
-	{
-		const UPCGPointData* OriginalData = Cast<UPCGPointData>(Source.Data);
-		if (!OriginalData || OriginalData->GetPoints().Num() == 0) continue;
-		
-	}
-	
-	// Build Targets
-	for (const FPCGTaggedData& Target : TargetInput)
-	{
-		const UPCGPointData* OriginalData = Cast<UPCGPointData>(Target.Data);
-		if (!OriginalData || OriginalData->GetPoints().Num() == 0) continue;
-		
-	}
-	
-	if (TargetInput.Num() == 0)
-	{
-		
-		return true;
-	}
-	
-	
-	UPCGPointData* InsideData = NewObject<UPCGPointData>();
-	InsideData->InitializeFromData(SourceInput.GetData());
-	UPCGPointData* OutsideData = NewObject<UPCGPointData>();
-	OutsideData->InitializeFromData(OriginalData);
 	
     return true;
 }
