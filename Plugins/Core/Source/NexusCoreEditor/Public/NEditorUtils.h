@@ -100,15 +100,11 @@ public:
 	static void UnregisterSettings(const UDeveloperSettings* SettingsObject);
 
 	/**
-	 * Get the currently selected Blueprint editor.
-	 * @return A pointer to the foreground Blueprint editor.
+	 * Get the currently selected asset editor.
+	 * @return A pointer to the foreground asset editor.
 	 */
-	static FBlueprintEditor* GetForegroundBlueprintEditor();
+	static IAssetEditorInstance* GetForegroundAssetEditor();
 
-	/**
-	 * Try to get the currently selected nodes in the foreground Blueprint editor.
-	 */
-	static bool TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection);
 
 	/**
 	 * Create a new Blueprint asset of the specified class at the given path.

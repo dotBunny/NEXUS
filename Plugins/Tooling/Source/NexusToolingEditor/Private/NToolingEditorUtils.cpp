@@ -1,6 +1,8 @@
 ﻿#include "NToolingEditorUtils.h"
 
+#include "BlueprintEditor.h"
 #include "NToolingEditorMinimal.h"
+#include "Engine/LevelScriptBlueprint.h"
 
 
 #if PLATFORM_WINDOWS
@@ -11,6 +13,29 @@
 #define SEND_MESSAGE  SendMessageA
 #endif // UNICODE
 #endif // PLATFORM_WINDOWS
+
+TArray<FName> FNToolingEditorUtils::KnownBlueprintEditorAssetTypes;
+
+bool FNToolingEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection)
+{
+	IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
+	if (ForegroundAssetEditor == nullptr) return false;
+	
+	if (IsBlueprintEditorAssetType(ForegroundAssetEditor->GetEditingAssetTypeName()))
+	{
+		const FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(ForegroundAssetEditor);
+		if (BlueprintEditor == nullptr) return false;
+		OutSelection = BlueprintEditor->GetSelectedNodes();
+		return true;
+	}
+	return false;
+}
+
+void FNToolingEditorUtils::SetBlueprintEditorAssetTypes()
+{
+	KnownBlueprintEditorAssetTypes.Add(ULevelScriptBlueprint::StaticClass()->GetFName());
+	KnownBlueprintEditorAssetTypes.Add(UBlueprint::StaticClass()->GetFName());
+}
 
 
 void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)

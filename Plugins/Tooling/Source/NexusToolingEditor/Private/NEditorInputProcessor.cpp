@@ -2,6 +2,8 @@
 
 #include "BlueprintEditor.h"
 #include "NEditorUtils.h"
+#include "NToolingEditorUtils.h"
+
 
 bool FNEditorInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {
@@ -68,16 +70,20 @@ bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, c
 {
 	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse)
 	{
-		FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-		if (Editor != nullptr && Editor->IsBlueprintEditor())
+		IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
+		if (ForegroundAssetEditor == nullptr) return false;
+		
+		if (FNToolingEditorUtils::IsBlueprintEditorAssetType(ForegroundAssetEditor->GetEditingAssetTypeName()))
 		{
-			// Handle the traditional blueprint editor
-			FVector2D ViewLocation;
-			float ViewZoom;
-			Editor->GetViewLocation(ViewLocation, ViewZoom);
-			ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
-			Editor->SetViewLocation(ViewLocation, ViewZoom);
-			return true;
+			if (FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(ForegroundAssetEditor))
+			{
+				FVector2D ViewLocation;
+				float ViewZoom;
+				BlueprintEditor->GetViewLocation(ViewLocation, ViewZoom);
+				ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
+				BlueprintEditor->SetViewLocation(ViewLocation, ViewZoom);
+				return true;
+			}
 		}
 	}
 	return false;
@@ -179,4 +185,3 @@ bool FNEditorInputProcessor::IsAnyMouseButtonDown() const
 {
 	return bLeftMouse || bRightMouse || bMiddleMouse;
 }
-

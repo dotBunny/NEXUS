@@ -13,6 +13,7 @@
 #include "NToolingEditorMinimal.h"
 #include "NToolingEditorSettings.h"
 #include "NToolingEditorStyle.h"
+#include "NToolingEditorUtils.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 #include "Menus/NFixersMenuEntries.h"
 #include "Menus/NToolsMenuEntries.h"
@@ -183,8 +184,14 @@ void FNToolingEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
 
 void FNToolingEditorCommands::OnNodeExternalDocumentation()
 {
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return;
+	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
+	if (AssetEditorInstance == nullptr) return;
+	
+	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
+	{
+		return;
+	}
+	FBlueprintEditor* Editor = static_cast<FBlueprintEditor*>(AssetEditorInstance);
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return;
 
@@ -199,8 +206,14 @@ void FNToolingEditorCommands::OnNodeExternalDocumentation()
 
 bool FNToolingEditorCommands::NodeExternalDocumentation_CanExecute()
 {
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return false;
+	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
+	if (AssetEditorInstance == nullptr) return false;
+	
+	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
+	{
+		return false;
+	}
+	FBlueprintEditor* Editor = static_cast<FBlueprintEditor*>(AssetEditorInstance);
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return false;
 	return FNMetaUtils::HasExternalDocumentation(Node);

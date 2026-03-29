@@ -8,6 +8,7 @@
 
 class FNToolingEditorUtils
 {
+	friend class FNToolingEditorModule;
 public:
 
 	FORCEINLINE static void AddDataValidationResponse(FDataValidationContext& Context, const ENValidatorSeverity& Level, const FText& NewMessage)
@@ -52,4 +53,14 @@ public:
 	static void ReplaceAppIcon(FSlateImageBrush* Icon);
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 	static bool ReplaceWindowIcon(const FString& IconPath);
+	static bool IsBlueprintEditorAssetType(const FName AssetType) { return KnownBlueprintEditorAssetTypes.Contains(AssetType);}
+	
+	/**
+	 * Try to get the currently selected nodes in the foreground Blueprint editor.
+	 */
+	static bool TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection);
+
+private:
+	static void SetBlueprintEditorAssetTypes();
+	static TArray<FName> KnownBlueprintEditorAssetTypes;
 };

@@ -38,30 +38,23 @@ void FNEditorUtils::UnregisterSettings(const UDeveloperSettings* SettingsObject)
 	}
 }
 
-FBlueprintEditor* FNEditorUtils::GetForegroundBlueprintEditor()
+IAssetEditorInstance* FNEditorUtils::GetForegroundAssetEditor()
 {
-	for (TArray<UObject*> EditedAssets = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllEditedAssets();
-		UObject* Asset : EditedAssets)
+	TArray<IAssetEditorInstance*> AssetEditorInstances = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllOpenEditors();
+	const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+	for (IAssetEditorInstance* AssetEditorInstance : AssetEditorInstances)
 	{
-		IAssetEditorInstance* AssetEditorInstance = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset(Asset, false);
-		FAssetEditorToolkit* AssetEditorToolkit = static_cast<FAssetEditorToolkit*>(AssetEditorInstance);
-
-		if (const TSharedPtr<SDockTab> Tab = AssetEditorToolkit->GetTabManager()->GetOwnerTab();
-			Tab->IsForeground())
+		const TSharedPtr<SDockTab> Tab = AssetEditorInstance->GetAssociatedTabManager()->GetOwnerTab();
+		if (Tab->IsForeground())
 		{
-  			return static_cast<FBlueprintEditor*>(AssetEditorToolkit);
+			TSharedPtr<SWindow> ParentWindow = Tab->GetParentWindow();
+			if (ParentWindow == ActiveWindow)
+			{
+				return AssetEditorInstance;
+			}
 		}
 	}
 	return nullptr;
-}
-
-bool FNEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection)
-{
-	const FBlueprintEditor* BlueprintEditor = GetForegroundBlueprintEditor();
-	if (BlueprintEditor == nullptr) return false;
-
-	OutSelection = BlueprintEditor->GetSelectedNodes();
-	return true;
 }
 
 UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass)

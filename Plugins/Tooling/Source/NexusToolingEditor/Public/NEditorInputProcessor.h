@@ -96,9 +96,9 @@ public:
 
 	bool bCachedGraphNavigationSpaceToPan;
 	float CachedGraphNavigationPanSpeedMultiplier;
-
+	
 private:
-
+	
 	bool bLeftMouse = false;
 	bool bRightMouse = false;
 	bool bMiddleMouse = false;
