@@ -4,7 +4,6 @@
 #include "Elements/NGetJunctionDataElement.h"
 
 #include "NProcGenPCGMacros.h"
-#include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "PCGContext.h"
 #include "PCGParamData.h"
@@ -22,9 +21,7 @@ TArray<FPCGPinProperties> UNGetJunctionDataSettings::InputPinProperties() const
 TArray<FPCGPinProperties> UNGetJunctionDataSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
-	
 	PinProperties.Emplace(JunctionsAttribute, EPCGDataType::Point);
-	
 	return PinProperties;
 }
 

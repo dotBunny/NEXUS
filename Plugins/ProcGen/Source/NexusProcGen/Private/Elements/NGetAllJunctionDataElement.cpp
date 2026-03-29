@@ -70,6 +70,7 @@ void UNGetAllJunctionDataSettings::GetStaticTrackedKeys(FPCGSelectionKeyToSettin
 	for (UNCellJunctionComponent* JunctionComponent : FNProcGenRegistry::GetCellJunctionComponents())
 	{
 		FPCGSelectionKey JunctionKey = FPCGSelectionKey::CreateFromObjectPtr(JunctionComponent);
+		
 		OutKeysToSettings.FindOrAdd(JunctionKey).AddUnique(SettingsAndCulling);
 	}
 }
