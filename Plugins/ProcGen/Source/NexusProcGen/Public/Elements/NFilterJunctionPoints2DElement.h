@@ -5,22 +5,22 @@
 
 #include "NColor.h"
 #include "PCGSettings.h"
-#include "NFilterBoundsElement.generated.h"
+#include "NFilterJunctionPoints2DElement.generated.h"
 
 
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
-class UNFilterBoundsSettings : public UPCGSettings
+class UNFilterJunctionPoints2DSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
 
 	const FName SourceAttribute = FName("Sources");
-	const FName TargetAttribute = FName("Targets");
+	const FName JunctionsAttribute = FName("Junctions");
 	
 #if WITH_EDITOR
-	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Filter Bounds"); }
-	virtual FText GetNodeTooltipText() const override { return INVTEXT("Filters points based on their bounds and their collision with target bounds."); }
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Filter Junction Points 2D"); }
+	virtual FText GetNodeTooltipText() const override { return INVTEXT("Filters points based on 2D distance to junctions."); }
 	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::FilterElement; };
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::Filter; }
 #endif
@@ -31,7 +31,7 @@ public:
 	virtual FPCGElementPtr CreateElement() const override;
 };
 
-class FNFilterBoundsElement : public IPCGElement
+class FNFilterJunctionPoints2DElement : public IPCGElement
 {
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;
