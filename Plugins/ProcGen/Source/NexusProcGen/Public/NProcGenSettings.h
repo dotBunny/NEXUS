@@ -53,6 +53,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Socket Size",
 		meta=(ToolTip="What is the unit base size for things like the NJunctions and NBones."))
 	FVector2D SocketSize = FVector2D(50.f, 50.f);
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Socket Depth",
+		meta=(ToolTip="The depth per side of a junction that is used for collision detection in some (PCG) scenarios."))
+	float SocketDepth = 100.f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
