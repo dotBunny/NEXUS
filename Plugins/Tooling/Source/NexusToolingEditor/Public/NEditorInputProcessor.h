@@ -107,4 +107,6 @@ private:
 	bool bLeftControl = false;
 	bool bRightControl = false;
 	bool bSpaceBar = false;
+	
+	FPointerEvent LastSyntheticEvent;
 };
