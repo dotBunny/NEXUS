@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NGetJunctionDataElement.h"
+#include "Elements/NGetAllJunctionDataElement.h"
 
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
@@ -10,23 +10,23 @@
 #include "Cell/NCellJunctionDetails.h"
 #include "Data/PCGPointData.h"
 
-TArray<FPCGPinProperties> UNGetJunctionDataSettings::OutputPinProperties() const
+TArray<FPCGPinProperties> UNGetAllJunctionDataSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	
-	PinProperties.Emplace(JunctionAttribute, EPCGDataType::Point);
+	PinProperties.Emplace(JunctionsAttribute, EPCGDataType::Point);
 	
 	return PinProperties;
 }
 
-FPCGElementPtr UNGetJunctionDataSettings::CreateElement() const
+FPCGElementPtr UNGetAllJunctionDataSettings::CreateElement() const
 {
-	return MakeShared<FNGetJunctionDataElement>();
+	return MakeShared<FNGetAllJunctionDataElement>();
 }
 
-bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
+bool FNGetAllJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 {
-	const UNGetJunctionDataSettings* Settings = Context->GetInputSettings<UNGetJunctionDataSettings>();
+	const UNGetAllJunctionDataSettings* Settings = Context->GetInputSettings<UNGetAllJunctionDataSettings>();
 	const FVector2D SocketSize = UNProcGenSettings::Get()->SocketSize;
 	
 	TArray<UNCellJunctionComponent*>& Junctions = FNProcGenRegistry::GetCellJunctionComponents();
@@ -75,7 +75,7 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 	
 	FPCGTaggedData& TaggedData = Outputs.Emplace_GetRef();
 	TaggedData.Data = OutputData;
-	TaggedData.Pin = Settings->JunctionAttribute; 
+	TaggedData.Pin = Settings->JunctionsAttribute; 
 	
 	
 	return true;

@@ -5,10 +5,10 @@
 
 #include "NColor.h"
 #include "PCGSettings.h"
-#include "NGetJunctionDataElement.generated.h"
+#include "NGetAllJunctionDataElement.generated.h"
 
 USTRUCT(BlueprintType)
-struct FNGetJunctionDataParams
+struct FNGetAllJunctionDataParams
 {
 	GENERATED_BODY()
 	
@@ -18,17 +18,17 @@ struct FNGetJunctionDataParams
 
 
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
-class UNGetJunctionDataSettings : public UPCGSettings
+class UNGetAllJunctionDataSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
-	const FName JunctionAttribute = FName("Junction");
+	const FName JunctionsAttribute = FName("Junctions");
 	
 	
 	
 #if WITH_EDITOR
-	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Get Junction Data"); }
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Get All Junction Data"); }
 	virtual FText GetNodeTooltipText() const override { return INVTEXT("Gets all registered Junction data from FNProcGenRegistry."); }
 	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::GetElement; };
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::Spatial; }
@@ -41,10 +41,10 @@ public:
 	
 	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (ShowOnlyInnerProperties, PCG_Overridable))
-	FNGetJunctionDataParams GetParams;
+	FNGetAllJunctionDataParams GetParams;
 };
 
-class FNGetJunctionDataElement : public IPCGElement
+class FNGetAllJunctionDataElement : public IPCGElement
 {
 public:
 	virtual bool IsCacheable(const UPCGSettings* InSettings) const override { return false; }

@@ -44,7 +44,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         Visited.Init(false, UnsortedPoints.Num());
         int32 CurrentIndex = 0;
         
-        // Do we need to find the starting position?
+        // Find starting point for consistency
         if (Settings->bLeftMostStartingPoint)
         {
             float MinimumPositionX = TNumericLimits<float>::Max();
@@ -130,12 +130,11 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                 PreviousNextDirectionCache = NextDirection;
             }
             
+            // Handle loop back to point 0
             if (Settings->bIsLoop)
             {
-                
-                float TurnValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[0].MetadataEntry), DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry)), FVector::UpVector);
+                float TurnValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), DirAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
                 TurnAttr->SetValue(OutPoints[0].MetadataEntry, TurnValue);
-                // Handle loop back to point 0
             }
         }
 
