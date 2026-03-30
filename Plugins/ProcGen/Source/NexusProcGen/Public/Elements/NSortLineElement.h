@@ -32,19 +32,19 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Can we assume this is a closed loop?"))
 	bool bIsLoop;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should we calculate and write additional information?"))
-	bool bWriteAdditionalData = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should we calculate and write additional metadata information?"))
+	bool bWriteMetadata = true;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
 	FName DirectionAttributeName = TEXT("NextDirection");
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
 	FName TurnAttributeName = TEXT("TurnAngle");
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
 	FName SegmentIndexAttributeName = TEXT("SegmentIndex");
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
 	FName SegmentLengthAttributeName = TEXT("SegmentLength");
 };
 
