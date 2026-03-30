@@ -5,6 +5,7 @@
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
 
+
 TArray<FPCGPinProperties> UNSortLineSettings::InputPinProperties() const
 {
     TArray<FPCGPinProperties> PinProperties;
@@ -22,6 +23,13 @@ TArray<FPCGPinProperties> UNSortLineSettings::OutputPinProperties() const
 FPCGElementPtr UNSortLineSettings::CreateElement() const {
     return MakeShared<FNSortLineElement>();
 }
+
+// TODO:
+//  - segmentindex
+//  - subsegmentindex
+//  - segmentlength
+// - Detect winding order | or use fixed
+// - rotate to facing direction
 
 bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
     const UNSortLineSettings* Settings = Context->GetInputSettings<UNSortLineSettings>();
@@ -90,12 +98,17 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         
         const int NumPoints = OutPoints.Num();
         const int NumPointsMinusOne = NumPoints - 1;
-    	
+        
         // Should we figure out the next direction?
         if (Settings->bWriteMetadata)
         {
+            uint32 SegmentIndex = 0;
+            
             FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->DirectionAttributeName, FVector::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnAttributeName, false, false, true);
+            FPCGMetadataAttribute<uint32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<uint32>(Settings->SegmentIndexAttributeName, false, false, true);
+            FPCGMetadataAttribute<uint32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<uint32>(Settings->SubsegmentIndexAttributeName, true, false, true);
+            FPCGMetadataAttribute<uint32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<uint32>(Settings->SegmentLengthAttributeName, true, false, true);
             
             FVector PreviousNextDirectionCache;
             for (int32 i = 0; i < NumPoints; ++i) {
