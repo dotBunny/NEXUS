@@ -32,14 +32,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Can we assume this is a closed loop?"))
 	bool bIsLoop;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should we calculate a direction to the next point and write it to the attributes?"))
-	bool bWriteDirectionAttribute = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta=(ToolTip="Should we calculate and write additional information?"))
+	bool bWriteAdditionalData = true;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
 	FName DirectionAttributeName = TEXT("NextDirection");
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
 	FName TurnAttributeName = TEXT("TurnAngle");
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	FName SegmentIndexAttributeName = TEXT("SegmentIndex");
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Settings, meta =(EditCondition="bWriteAdditionalData", EditConditionHides))
+	FName SegmentLengthAttributeName = TEXT("SegmentLength");
 };
 
 class FNSortLineElement : public IPCGElement
@@ -47,5 +53,4 @@ class FNSortLineElement : public IPCGElement
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;
 	virtual EPCGElementExecutionLoopMode ExecutionLoopMode(const UPCGSettings* Settings) const override { return EPCGElementExecutionLoopMode::SinglePrimaryPin; }
-	
 };

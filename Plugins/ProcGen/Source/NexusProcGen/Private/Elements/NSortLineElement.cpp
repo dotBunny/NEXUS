@@ -92,7 +92,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         const int NumPointsMinusOne = NumPoints - 1;
 
         // Should we figure out the next direction?
-        if (Settings->bWriteDirectionAttribute)
+        if (Settings->bWriteAdditionalData)
         {
             FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->DirectionAttributeName, FVector::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnAttributeName, false, false, true);
