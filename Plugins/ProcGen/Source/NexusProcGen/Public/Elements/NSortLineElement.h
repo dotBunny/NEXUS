@@ -46,11 +46,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Options", meta=(ToolTip="Should we calculate and write additional metadata information?"))
 	bool bWriteMetadata = true;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Options", meta=(ToolTip="Should we write out the segment length to each entry?"))
+	bool bWriteSegmentLength = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Options", meta=(ToolTip="Should we calculate and write additional metadata information?"))
 	bool bRotatePointToFaceDirection = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
-	FName DirectionAttributeName = TEXT("NextDirection");
+	FName NextGridDirectionAttributeName = TEXT("NextGridDirection");
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Metadata", meta =(EditCondition="bWriteMetadata", EditConditionHides))
 	FName FacingRotationAttributeName = TEXT("FacingRotation"); // TODO
