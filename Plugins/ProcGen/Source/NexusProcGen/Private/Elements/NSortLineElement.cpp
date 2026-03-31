@@ -27,10 +27,8 @@ FPCGElementPtr UNSortLineSettings::CreateElement() const {
 }
 
 // TODO:
-// - Detect winding order | or use fixed
 // - rotate to facing direction
 
-UE_DISABLE_OPTIMIZATION
 bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
     const UNSortLineSettings* Settings = Context->GetInputSettings<UNSortLineSettings>();
     TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
@@ -65,6 +63,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         }
 
         // Build Sorted Points (Nearest Neighbor)
+    	// It seems that the grid fill always ends up in a clockwise-wind.
         while (CurrentIndex != INDEX_NONE) 
         {
             Visited[CurrentIndex] = true;
@@ -101,12 +100,12 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         float TurnDirectionTotal = 0;
     	
         // Should we figure out the next direction?
-        if (Settings->bWriteDirectionMetadata)
+        if (Settings->bWriteAdditionalMetadata)
         {
         	TArray<float> CachedTurnValues { 0.f };
         	CachedTurnValues.Reserve(NumPoints);
         	
-            FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->NextGridDirectionAttributeName, FVector::ZeroVector, false, true);
+            FPCGMetadataAttribute<FVector>* NextGridDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->NextGridDirectionAttributeName, FVector::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnDirectionAttributeName, 0.f, false, true);
             
             FVector PreviousNextGridDirection;
@@ -142,22 +141,22 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                 }
                 
             	
-                DirAttr->SetValue(OutPoints[i].MetadataEntry, NextGridDirection);
+                NextGridDirectionAttr->SetValue(OutPoints[i].MetadataEntry, NextGridDirection);
                 PreviousNextGridDirection = NextGridDirection;
             }
             
             // Handle loop back to point 0
             if (Settings->bIsLoop)
             {
-                float TurnDirectionValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), DirAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
+                float TurnDirectionValue = FVector::DotProduct(FVector::CrossProduct(NextGridDirectionAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), NextGridDirectionAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
                 TurnDirectionAttr->SetValue(OutPoints[0].MetadataEntry, TurnDirectionValue);
             	CachedTurnValues[0] = TurnDirectionValue;
             	TurnDirectionTotal += TurnDirectionValue;
             	
-            	UE_LOG(LogNexusProcGen, Warning, TEXT("DEG: %f"), TurnDirectionTotal)
             }
         	
- 
+        	// TODO: Use this to dermine what rotation to use to face something
+        	bool IsClockwise = TurnDirectionTotal > 0.f;
         	
         	// Figure out segment information
         	int32 SegmentIndex = 0;
@@ -169,13 +168,22 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         	
         	FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, 0, false, true);
+        	FPCGMetadataAttribute<FName>* PartNameAttr = OutputData->Metadata->FindOrCreateAttribute<FName>(Settings->PointNameAttributeName, Settings->DefaultPointName, false, true);
+        	
         	for (int32 i = 0; i < NumPoints; ++i)
 			{
-				
-				
 				// We are in a turn
-				if (CachedTurnValues[i] != 0.f)
+        		float CachedTurnValue = CachedTurnValues[i];
+				if (CachedTurnValue!= 0.f)
 				{
+					if (CachedTurnValue == 1.f)
+					{
+						PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Left90PointName);
+					}
+					else if (CachedTurnValue == -1.f)
+					{
+						PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Right90PointName);
+					}
 					if (i != 0)
 					{
 						SegmentIndex++;
@@ -192,6 +200,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
 				}
 				else
 				{
+					PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->WallPointName);
 					SegmentLength++;
 					SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
 					CachedSegmentIndex.Add(SegmentIndex);
@@ -203,9 +212,28 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         	
         	// Pass to write out finalized data
         	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
+        	FRotator FaceRotation = FRotator(0, 90, 0);
+        	if (!IsClockwise)
+        	{
+        		FaceRotation = FaceRotation * -1.f;
+        	}
+        	
         	for (int32 i = 0; i < NumPoints; ++i)
         	{
         		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, CachedSegmentLengths[CachedSegmentIndex[i]]);
+        		
+        		if (Settings->bRotatePointToFaceDirection)
+        		{
+        			// Corners will get rotated to "Next Direction" where walls get turned to next direction + face rotation based on winding
+        			if (PartNameAttr->GetValue(OutPoints[i].MetadataEntry) == Settings->WallPointName)
+        			{
+        				OutPoints[i].Transform.SetRotation((NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry).Rotation() + FaceRotation).Quaternion());
+        			}
+			        else
+			        {
+			        	OutPoints[i].Transform.SetRotation(NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry).Rotation().Quaternion());
+			        }
+        		}
         	}
         }
 
@@ -214,4 +242,3 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
     }
     return true;
 }
-UE_ENABLE_OPTIMIZATION
