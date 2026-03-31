@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Elements/NSortLineElement.h"
+
+#include "NProcGenMinimal.h"
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
 
@@ -25,9 +27,6 @@ FPCGElementPtr UNSortLineSettings::CreateElement() const {
 }
 
 // TODO:
-//  - segmentindex
-//  - subsegmentindex
-//  - segmentlength
 // - Detect winding order | or use fixed
 // - rotate to facing direction
 
@@ -99,20 +98,17 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         
         const int NumPoints = OutPoints.Num();
         const int NumPointsMinusOne = NumPoints - 1;
-        
+        float TurnDirectionTotal = 0;
+    	
         // Should we figure out the next direction?
-        if (Settings->bWriteMetadata)
+        if (Settings->bWriteDirectionMetadata)
         {
-            int32 SegmentIndex = 0;
-        	int32 SegmentLength = 1;
-        	int32 SubsegmentIndex = 0;
-            TArray<int32> CachedSegmentLengths;
+        	TArray<float> CachedTurnValues { 0.f };
+        	CachedTurnValues.Reserve(NumPoints);
         	
             FPCGMetadataAttribute<FVector>* DirAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->NextGridDirectionAttributeName, FVector::ZeroVector, false, true);
-            FPCGMetadataAttribute<float>* TurnAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnAttributeName, false, false, true);
-            FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, false, false, true);
-            FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, false, false, true);
-          
+            FPCGMetadataAttribute<float>* TurnDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnDirectionAttributeName, 0.f, false, true);
+            
             FVector PreviousNextGridDirection;
             for (int32 i = 0; i < NumPoints; ++i) {
                 
@@ -133,72 +129,83 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                     NextGridDirection = (OutPoints[0].Transform.GetLocation() - OutPoints[i].Transform.GetLocation()).GetSafeNormal();
                 }
             	
-            	
-                
+                // Turn detection
                 if (i > 0)
                 {
                     // 1/-1 90 degrees
                     // inbetween/close to 0 is slight
                     // 0 straight
                     float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousNextGridDirection, NextGridDirection), FVector::UpVector);
-                    TurnAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
-                	
-                	
-                	// // We will need to clean up the loop
-                	// if (TurnValue != 0)
-                	// {
-                	// 	CachedSegmentLengths.Add(SegmentLength);
-	                //
-                	// 	SegmentIndex++;
-                	// 	SubsegmentIndex = 0;
-                	// 	SegmentLength = 1;
-                	// 	
-                	// 	SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
-                	// 	SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SubsegmentIndex);
-                	// 	
-                	// 	SegmentIndex++;
-                	// }
-	                // else
-	                // {
-	                // 	SubsegmentIndex++;
-	                // 	SegmentLength++;
-	                // }
+                    TurnDirectionAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
+                	CachedTurnValues.Add(TurnValue);
+                	TurnDirectionTotal += TurnValue;
                 }
-                else
-                {
-                	// SubsegmentIndex++;
-                	// SegmentLength++;
-                }
-            	
-            	
-            	
-            
-            	
+                
             	
                 DirAttr->SetValue(OutPoints[i].MetadataEntry, NextGridDirection);
                 PreviousNextGridDirection = NextGridDirection;
-            	
-            	
-            	
             }
             
             // Handle loop back to point 0
             if (Settings->bIsLoop)
             {
-                float TurnValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), DirAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
-                TurnAttr->SetValue(OutPoints[0].MetadataEntry, TurnValue);
+                float TurnDirectionValue = FVector::DotProduct(FVector::CrossProduct(DirAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), DirAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
+                TurnDirectionAttr->SetValue(OutPoints[0].MetadataEntry, TurnDirectionValue);
+            	CachedTurnValues[0] = TurnDirectionValue;
+            	TurnDirectionTotal += TurnDirectionValue;
+            	
+            	UE_LOG(LogNexusProcGen, Warning, TEXT("DEG: %f"), TurnDirectionTotal)
             }
         	
-        	// Write out lengths
-        	if (Settings->bWriteSegmentLength)
+ 
+        	
+        	// Figure out segment information
+        	int32 SegmentIndex = 0;
+        	int32 SegmentLength = 0;
+        	int32 SubsegmentIndex = 0;
+        	TArray<int32> CachedSegmentLengths;
+        	TArray<int32> CachedSegmentIndex;
+        	CachedSegmentIndex.Reserve(NumPoints);
+        	
+        	FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, 0, false, true);
+        	FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, 0, false, true);
+        	for (int32 i = 0; i < NumPoints; ++i)
+			{
+				
+				
+				// We are in a turn
+				if (CachedTurnValues[i] != 0.f)
+				{
+					if (i != 0)
+					{
+						SegmentIndex++;
+						CachedSegmentLengths.Add(SegmentLength);
+					}
+					SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
+					CachedSegmentIndex.Add(SegmentIndex);
+					SegmentIndex++;
+					SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, 0);
+					SubsegmentIndex = -1;
+					CachedSegmentLengths.Add(1);
+					SegmentLength = 0;
+					
+				}
+				else
+				{
+					SegmentLength++;
+					SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
+					CachedSegmentIndex.Add(SegmentIndex);
+					SubsegmentIndex++;
+					SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SubsegmentIndex);
+				}
+			}
+        	CachedSegmentLengths.Add(SegmentLength);
+        	
+        	// Pass to write out finalized data
+        	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
+        	for (int32 i = 0; i < NumPoints; ++i)
         	{
-    //     		FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, false, false, true);
-				// for (int32 i = 0; i < NumPoints; ++i)
-				// {
-				// 	int TempSegIndex = SegmentIndexAttr->GetValue(OutPoints[i].MetadataEntry);
-				// 	int TempValue = CachedSegmentLengths[TempSegIndex];
-				// 	SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, TempValue);
-				// }
+        		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, CachedSegmentLengths[CachedSegmentIndex[i]]);
         	}
         }
 
