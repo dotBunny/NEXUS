@@ -29,10 +29,11 @@ class NEXUSPROCGEN_API ANCellProxy : public AActor
 public:
 	void CreateLevelInstance();
 	void LoadLevelInstance();
-	void UnloadLevelInstance();
+	void UnloadLevelInstance() const;
 	void DestroyLevelInstance();
 	
 protected:
+	void OnProxyMaterialLoaded();
 	void InitializeFromNCell(UNCell* InNCell);
 private:
 

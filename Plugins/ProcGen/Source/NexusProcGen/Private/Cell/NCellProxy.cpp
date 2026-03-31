@@ -8,6 +8,7 @@
 #include "NProcGenSettings.h"
 #include "Components/BillboardComponent.h"
 #include "Components/DynamicMeshComponent.h"
+#include "Engine/AssetManager.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
@@ -83,7 +84,7 @@ void ANCellProxy::LoadLevelInstance()
 	}
 }
 
-void ANCellProxy::UnloadLevelInstance()
+void ANCellProxy::UnloadLevelInstance() const
 {
 	if (LevelInstance != nullptr && LevelInstance->IsLoaded())
 	{
@@ -142,11 +143,16 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
 	
 	// Create the material on placement (CDO settings access = bad)
+	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
+	Streamable.RequestAsyncLoad(UNProcGenSettings::Get()->ProxyMaterial.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ANCellProxy::OnProxyMaterialLoaded));
+}
+
+void ANCellProxy::OnProxyMaterialLoaded()
+{
 	DynamicMaterial = UMaterialInstanceDynamic::Create(UNProcGenSettings::Get()->ProxyMaterial.Get(), this);
 	Mesh->SetMaterial(0, DynamicMaterial);
 	
 	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
-	
 	Mesh->MarkRenderStateDirty();
 }
 

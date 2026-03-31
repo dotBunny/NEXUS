@@ -13,21 +13,19 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame,
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
+	
+	UNProcGenSettings()
+	{
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> DefaultProxyAsset(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy"));
+		if (DefaultProxyAsset.Succeeded())
+		{
+			ProxyMaterial = DefaultProxyAsset.Object;
+		}
+	}
 
 	N_IMPLEMENT_SETTINGS(UNProcGenSettings);
 
 #if WITH_EDITOR
-	
-	virtual void PostInitProperties() override
-	{
-		Super::PostInitProperties();
-		ValidateSettings();
-	}
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
-	{
-		ValidateSettings();
-		Super::PostEditChangeProperty(PropertyChangedEvent);
-	}
 
 	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
@@ -71,30 +69,5 @@ public:
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
-	TSoftObjectPtr<UMaterial> ProxyMaterial;
-	
-#if WITH_EDITOR
-private:
-	void ValidateSettings()
-	{
-		bool bNeedsSave = false;
-
-		if (!ProxyMaterial)
-		{
-			UObject* DefaultProxyMaterial = FSoftClassPath(
-				TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy"))
-				.TryLoad();
-			if (DefaultProxyMaterial != nullptr)
-			{
-				bNeedsSave = true;
-				ProxyMaterial = Cast<UMaterial>(DefaultProxyMaterial);
-			}
-		}
-		
-		if (bNeedsSave)
-		{
-			TryUpdateDefaultConfigFile();
-		}
-	}
-#endif // WITH_EDITOR
+	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;
 };
