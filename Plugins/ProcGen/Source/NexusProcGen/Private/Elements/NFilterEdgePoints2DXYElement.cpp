@@ -1,19 +1,19 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NFilterEdgePoints2DElement.h"
+#include "Elements/NFilterEdgePoints2DXYElement.h"
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
 #include "Async/ParallelFor.h"
 
-TArray<FPCGPinProperties> UNFilterEdgePoints2DSettings::InputPinProperties() const
+TArray<FPCGPinProperties> UNFilterEdgePoints2DXYSettings::InputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	PinProperties.Emplace(PCGPinConstants::DefaultInputLabel, EPCGDataType::Point);
 	return PinProperties;
 }
 
-TArray<FPCGPinProperties> UNFilterEdgePoints2DSettings::OutputPinProperties() const
+TArray<FPCGPinProperties> UNFilterEdgePoints2DXYSettings::OutputPinProperties() const
 {
 	TArray<FPCGPinProperties> PinProperties;
 	PinProperties.Emplace(PCGPinConstants::DefaultInFilterLabel, EPCGDataType::Point);
@@ -21,13 +21,13 @@ TArray<FPCGPinProperties> UNFilterEdgePoints2DSettings::OutputPinProperties() co
 	return PinProperties;
 }
 
-FPCGElementPtr UNFilterEdgePoints2DSettings::CreateElement() const {
-	return MakeShared<FNFilterEdgePoints2DElement>();
+FPCGElementPtr UNFilterEdgePoints2DXYSettings::CreateElement() const {
+	return MakeShared<FNFilterEdgePoints2DXYElement>();
 }
 
-bool FNFilterEdgePoints2DElement::ExecuteInternal(FPCGContext* Context) const
+bool FNFilterEdgePoints2DXYElement::ExecuteInternal(FPCGContext* Context) const
 {
-	const UNFilterEdgePoints2DSettings* Settings = Context->GetInputSettings<UNFilterEdgePoints2DSettings>();
+	const UNFilterEdgePoints2DXYSettings* Settings = Context->GetInputSettings<UNFilterEdgePoints2DXYSettings>();
     if (!Settings) return true;
 
     TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);

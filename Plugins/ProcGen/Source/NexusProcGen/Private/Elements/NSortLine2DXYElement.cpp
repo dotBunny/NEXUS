@@ -1,36 +1,32 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Elements/NSortLineElement.h"
+#include "Elements/NSortLine2DXYElement.h"
 
-#include "NProcGenMinimal.h"
 #include "Data/PCGPointData.h"
 #include "PCGContext.h"
 
 
-TArray<FPCGPinProperties> UNSortLineSettings::InputPinProperties() const
+TArray<FPCGPinProperties> UNSortLine2DXYSettings::InputPinProperties() const
 {
     TArray<FPCGPinProperties> PinProperties;
     PinProperties.Emplace(PCGPinConstants::DefaultInputLabel, EPCGDataType::Point);
     return PinProperties;
 }
 
-TArray<FPCGPinProperties> UNSortLineSettings::OutputPinProperties() const
+TArray<FPCGPinProperties> UNSortLine2DXYSettings::OutputPinProperties() const
 {
     TArray<FPCGPinProperties> PinProperties;
     PinProperties.Emplace(PCGPinConstants::DefaultOutputLabel, EPCGDataType::Point);
     return PinProperties;
 }
 
-FPCGElementPtr UNSortLineSettings::CreateElement() const {
-    return MakeShared<FNSortLineElement>();
+FPCGElementPtr UNSortLine2DXYSettings::CreateElement() const {
+    return MakeShared<FNSortLine2DXYElement>();
 }
 
-// TODO:
-// - rotate to facing direction
-
-bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
-    const UNSortLineSettings* Settings = Context->GetInputSettings<UNSortLineSettings>();
+bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
+    const UNSortLine2DXYSettings* Settings = Context->GetInputSettings<UNSortLine2DXYSettings>();
     TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
     TArray<FPCGTaggedData>& Outputs = Context->OutputData.TaggedData;
 
@@ -97,15 +93,16 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         
         const int NumPoints = OutPoints.Num();
         const int NumPointsMinusOne = NumPoints - 1;
-        float TurnDirectionTotal = 0;
+      
     	
         // Should we figure out the next direction?
-        if (Settings->bWriteAdditionalMetadata)
+        if (Settings->bBuildAdditionalMetadata)
         {
-        	TArray<float> CachedTurnValues { 0.f };
+        	float TurnDirectionTotal = 0;
+        	TArray CachedTurnValues { 0.f };
         	CachedTurnValues.Reserve(NumPoints);
         	
-            FPCGMetadataAttribute<FVector>* NextGridDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<FVector>(Settings->NextGridDirectionAttributeName, FVector::ZeroVector, false, true);
+            FPCGMetadataAttribute<FVector2D>* NextGridDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(Settings->NextGridDirectionAttributeName, FVector2D::ZeroVector, false, true);
             FPCGMetadataAttribute<float>* TurnDirectionAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->TurnDirectionAttributeName, 0.f, false, true);
             
             FVector PreviousNextGridDirection;
@@ -132,14 +129,13 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
                 if (i > 0)
                 {
                     // 1/-1 90 degrees
-                    // inbetween/close to 0 is slight
+                    // in-between is slight
                     // 0 straight
                     float TurnValue = FVector::DotProduct(FVector::CrossProduct(PreviousNextGridDirection, NextGridDirection), FVector::UpVector);
                     TurnDirectionAttr->SetValue(OutPoints[i].MetadataEntry, TurnValue);
                 	CachedTurnValues.Add(TurnValue);
                 	TurnDirectionTotal += TurnValue;
                 }
-                
             	
                 NextGridDirectionAttr->SetValue(OutPoints[i].MetadataEntry, NextGridDirection);
                 PreviousNextGridDirection = NextGridDirection;
@@ -148,14 +144,15 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
             // Handle loop back to point 0
             if (Settings->bIsLoop)
             {
-                float TurnDirectionValue = FVector::DotProduct(FVector::CrossProduct(NextGridDirectionAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry), NextGridDirectionAttr->GetValue(OutPoints[0].MetadataEntry)), FVector::UpVector);
+            	FVector2D LHS = NextGridDirectionAttr->GetValue(OutPoints[NumPointsMinusOne].MetadataEntry);
+            	FVector2D RHS = NextGridDirectionAttr->GetValue(OutPoints[0].MetadataEntry);
+                float TurnDirectionValue = FVector::DotProduct(FVector::CrossProduct(FVector(LHS.X, LHS.Y, 0), FVector(RHS.X, RHS.Y, 0)), FVector::UpVector);
                 TurnDirectionAttr->SetValue(OutPoints[0].MetadataEntry, TurnDirectionValue);
             	CachedTurnValues[0] = TurnDirectionValue;
             	TurnDirectionTotal += TurnDirectionValue;
-            	
             }
         	
-        	// TODO: Use this to dermine what rotation to use to face something
+        	// We're going to use this to figure out what way to rotate to face walls
         	bool IsClockwise = TurnDirectionTotal > 0.f;
         	
         	// Figure out segment information
@@ -212,6 +209,7 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         	
         	// Pass to write out finalized data
         	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
+        	FPCGMetadataAttribute<float>* FacingRotationAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->FacingRotationAttributeName, 0, false, true);
         	FRotator FaceRotation = FRotator(0, 90, 0);
         	if (!IsClockwise)
         	{
@@ -222,17 +220,19 @@ bool FNSortLineElement::ExecuteInternal(FPCGContext* Context) const {
         	{
         		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, CachedSegmentLengths[CachedSegmentIndex[i]]);
         		
+        		// Corners will get rotated to "Next Direction" where walls get turned to next direction + face rotation based on winding
+        		FVector2D Position2D = NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry);
+        		FVector Position = FVector(Position2D.X, Position2D.Y, 0);
+        		FRotator Rotation = Position.Rotation();
+        		if (PartNameAttr->GetValue(OutPoints[i].MetadataEntry) == Settings->WallPointName)
+        		{
+        			Rotation = Rotation + FaceRotation;
+        		}
+        		FacingRotationAttr->SetValue(OutPoints[i].MetadataEntry, Rotation.Yaw);
+        		
         		if (Settings->bRotatePointToFaceDirection)
         		{
-        			// Corners will get rotated to "Next Direction" where walls get turned to next direction + face rotation based on winding
-        			if (PartNameAttr->GetValue(OutPoints[i].MetadataEntry) == Settings->WallPointName)
-        			{
-        				OutPoints[i].Transform.SetRotation((NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry).Rotation() + FaceRotation).Quaternion());
-        			}
-			        else
-			        {
-			        	OutPoints[i].Transform.SetRotation(NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry).Rotation().Quaternion());
-			        }
+        			OutPoints[i].Transform.SetRotation(Rotation.Quaternion());
         		}
         	}
         }

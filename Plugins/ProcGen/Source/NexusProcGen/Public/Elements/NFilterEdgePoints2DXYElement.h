@@ -5,7 +5,7 @@
 
 #include "NColor.h"
 #include "PCGSettings.h"
-#include "NFilterEdgePoints2DElement.generated.h"
+#include "NFilterEdgePoints2DXYElement.generated.h"
 
 USTRUCT(BlueprintType)
 struct FNFilterEdgePoints2DParams
@@ -17,15 +17,15 @@ struct FNFilterEdgePoints2DParams
 };
 
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
-class UNFilterEdgePoints2DSettings : public UPCGSettings
+class UNFilterEdgePoints2DXYSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
 
 #if WITH_EDITOR
-	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Filter Edge Points 2D"); }
-	virtual FText GetNodeTooltipText() const override { return INVTEXT("Finds and identifies edge (border) points of a filled set of 2D points."); }
+	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Filter Edge Points 2D (XY)"); }
+	virtual FText GetNodeTooltipText() const override { return INVTEXT("Finds and identifies edge (border) points of a filled set of 2D points along the XY axis."); }
 	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::FilterElement; };
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::Filter; }
 #endif
@@ -39,7 +39,7 @@ public:
 	FNFilterEdgePoints2DParams FilterParams;
 };
 
-class FNFilterEdgePoints2DElement : public IPCGElement
+class FNFilterEdgePoints2DXYElement : public IPCGElement
 {
 protected:
 	virtual bool ExecuteInternal(FPCGContext* Context) const override;
