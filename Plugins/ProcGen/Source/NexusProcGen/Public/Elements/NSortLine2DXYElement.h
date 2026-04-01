@@ -7,7 +7,6 @@
 #include "PCGSettings.h"
 #include "NSortLine2DXYElement.generated.h"
 
-
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNSortLine2DXYSettings : public UPCGSettings
 {
@@ -40,6 +39,11 @@ public:
 	FName NextGridDirectionAttributeName = TEXT("NextGridDirection");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Facing Rotation (Yaw)", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
 	FName FacingRotationAttributeName = TEXT("FacingRotation");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Facing Cardinal", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName FacingCardinalAttributeName = TEXT("FacingCardinal");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Facing Cardinal", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName FacingCardinalIndexAttributeName = TEXT("FacingCardinalIndex");
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Turn Direction", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
 	FName TurnDirectionAttributeName = TEXT("TurnDirection");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Segment Index", Category = "Settings|Metadata (Attribute Names)", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
@@ -59,6 +63,17 @@ public:
 	FName Right90PointName = TEXT("Right90");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Wall", Category = "Settings|Point Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
 	FName WallPointName = TEXT("Wall");
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Unknown", Category = "Settings|Cardinal Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName DefaultCardinalName = TEXT("U");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="North", Category = "Settings|Cardinal Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName NorthCardinalName = TEXT("N");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="East", Category = "Settings|Cardinal Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName EastCardinalName = TEXT("E");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="South", Category = "Settings|Cardinal Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName SouthCardinalName = TEXT("S");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="West", Category = "Settings|Cardinal Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
+	FName WestCardinalName = TEXT("W");
 
 protected:
 	virtual FPCGElementPtr CreateElement() const override;

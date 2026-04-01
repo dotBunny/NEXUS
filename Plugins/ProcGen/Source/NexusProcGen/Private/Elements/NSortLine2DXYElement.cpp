@@ -210,6 +210,10 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         	// Pass to write out finalized data
         	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
         	FPCGMetadataAttribute<float>* FacingRotationAttr = OutputData->Metadata->FindOrCreateAttribute<float>(Settings->FacingRotationAttributeName, 0, false, true);
+        	FPCGMetadataAttribute<FName>* FacingCardinalAttr = OutputData->Metadata->FindOrCreateAttribute<FName>(Settings->FacingCardinalAttributeName, Settings->DefaultCardinalName, false, true);
+        	FPCGMetadataAttribute<int32>* FacingCardinalIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->FacingCardinalIndexAttributeName, 0, false, true);
+        	
+        	
         	FRotator FaceRotation = FRotator(0, 90, 0);
         	if (!IsClockwise)
         	{
@@ -229,6 +233,26 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         			Rotation = Rotation + FaceRotation;
         		}
         		FacingRotationAttr->SetValue(OutPoints[i].MetadataEntry, Rotation.Yaw);
+        		const int32 DirectionIndex = FMath::FloorToInt((Rotation.Yaw + 45.0f) / 90.0f) & 3;
+        		FacingCardinalIndexAttr->SetValue(OutPoints[i].MetadataEntry, DirectionIndex);
+		        switch (DirectionIndex)
+        		{
+        			case 0:
+        				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->NorthCardinalName);
+        				break;
+        			case 1:
+        				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->EastCardinalName);
+        				break;
+        			case 2:
+	        			FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->SouthCardinalName);
+        				break;  
+        			case 3:
+        				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->WestCardinalName);
+        				break;  
+        			default:
+        				FacingCardinalAttr->SetValue(OutPoints[i].MetadataEntry, Settings->DefaultCardinalName);
+        				break;
+        		}
         		
         		if (Settings->bRotatePointToFaceDirection)
         		{
