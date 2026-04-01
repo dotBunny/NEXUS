@@ -14,9 +14,7 @@ class UNGetAllJunctionDataSettings : public UPCGSettings
 
 public:
 	const FName JunctionsAttribute = FName("Junctions");
-	
-	
-	
+
 #if WITH_EDITOR
 	virtual FName GetDefaultNodeName() const override { return TEXT("NEXUS | Get All Junction Data"); }
 	virtual FText GetNodeTooltipText() const override { return INVTEXT("Gets all registered Junction data from FNProcGenRegistry."); }
@@ -29,7 +27,8 @@ public:
 	
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override { return {}; }
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
-	
+
+protected:
 	virtual FPCGElementPtr CreateElement() const override;
 };
 

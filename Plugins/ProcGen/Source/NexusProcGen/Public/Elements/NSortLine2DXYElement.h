@@ -23,8 +23,6 @@ public:
 	
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override;
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
-	
-	virtual FPCGElementPtr CreateElement() const override;
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Input", meta=(ToolTip="Can we assume this is a closed loop? This effects how the first/last point are evaluated."))
 	bool bIsLoop;
@@ -62,6 +60,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName="Wall", Category = "Settings|Point Names", meta=(EditCondition="bBuildAdditionalMetadata", EditConditionHides))
 	FName WallPointName = TEXT("Wall");
 
+protected:
+	virtual FPCGElementPtr CreateElement() const override;
 };
 
 class FNSortLine2DXYElement : public IPCGElement

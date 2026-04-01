@@ -33,10 +33,11 @@ public:
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override;
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
 	
-	virtual FPCGElementPtr CreateElement() const override;
-	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (ShowOnlyInnerProperties, PCG_Overridable))
 	FNFilterEdgePoints2DParams FilterParams;
+
+protected:
+	virtual FPCGElementPtr CreateElement() const override;
 };
 
 class FNFilterEdgePoints2DXYElement : public IPCGElement

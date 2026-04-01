@@ -17,9 +17,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 	
 	GENERATED_BODY()
 	
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	
 	void Bind(UWorld* World);
 	void Unbind(const UWorld* World);
 
@@ -29,6 +26,12 @@ public:
 	
 protected:	
 	
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	
+	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	void OnWorldBeginTearDown(UWorld* World);
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UBorder> DynamicReferencesHeader;
 	
@@ -41,11 +44,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNListView> NamedReferences;
 	
-	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
-	void OnWorldBeginTearDown(UWorld* World);
-
 	UPROPERTY()
 	TMap<TEnumAsByte<ENDynamicRef>, TObjectPtr<UNDynamicRefObject>> DynamicRefObjects;
+
 	UPROPERTY()
 	TMap<FName, TObjectPtr<UNDynamicRefObject>> NamedObjects;
 

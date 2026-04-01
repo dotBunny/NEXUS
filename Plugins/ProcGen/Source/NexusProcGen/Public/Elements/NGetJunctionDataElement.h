@@ -35,10 +35,11 @@ public:
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override;
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
 	
-	virtual FPCGElementPtr CreateElement() const override;
-	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings, meta = (ShowOnlyInnerProperties, PCG_Overridable))
 	FNGetJunctionDataParams GetParams;
+	
+protected:
+	virtual FPCGElementPtr CreateElement() const override;
 };
 
 class FNGetJunctionDataElement : public IPCGElement

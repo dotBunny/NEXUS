@@ -16,12 +16,13 @@ class NEXUSPROCGEN_API UNProcGenDeveloperOverlay : public UNDeveloperOverlay
 	
 	GENERATED_BODY()
 	
-	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	
 	void OnOperationStatusChanged(UNProcGenOperation* Operation, const ENProcGenOperationState NewState);
 	
 protected:	
+	
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNListView> OperationsList;	
 	
