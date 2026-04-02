@@ -23,76 +23,76 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FString& Seed, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
 	{
-		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+		Operation->DisplayName = FText::FromString(Operation->GetName());
 	}
 	else
 	{
-		OrganGenerator->DisplayName = DisplayName;
+		Operation->DisplayName = DisplayName;
 	}
-	OrganGenerator->SetSeedOnContext(Seed);
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
+	Operation->SetSeedOnContext(Seed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
 	
 	// Add all organs (as context) to the created generation operation
 	for (TWeakObjectPtr<UObject> WeakObject : Objects)
 	{
 		UObject* Object = WeakObject.Get();
-		if (Object != nullptr)
+		if (Object != nullptr && Object->IsA<UNOrganComponent>())
 		{
 			UNOrganComponent* Component = Cast<UNOrganComponent>(Object);
 			if (Component != nullptr)
 			{
-				OrganGenerator->AddToContext(Component);
+				Operation->AddToContext(Component);
 			}
 		}
 	}
 	
-	return OrganGenerator;
+	return Operation;
 }
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
 	{
-		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+		Operation->DisplayName = FText::FromString(Operation->GetName());
 	}
 	else
 	{
-		OrganGenerator->DisplayName = DisplayName;
+		Operation->DisplayName = DisplayName;
 	}
-	OrganGenerator->SetSeedOnContext(Seed);
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
+	Operation->SetSeedOnContext(Seed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
 	for (const auto Component : Components)
 	{
-		OrganGenerator->AddToContext(Component);
+		Operation->AddToContext(Component);
 	}
 	
-	return OrganGenerator;
+	return Operation;
 }
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed, const FText& DisplayName)
 {
-	UNProcGenOperation* OrganGenerator = NewObject<UNProcGenOperation>();
+	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	if (DisplayName.IsEmpty())
 	{
-		OrganGenerator->DisplayName = FText::FromString(OrganGenerator->GetName());
+		Operation->DisplayName = FText::FromString(Operation->GetName());
 	}
 	else
 	{
-		OrganGenerator->DisplayName = DisplayName;
+		Operation->DisplayName = DisplayName;
 	}
-	OrganGenerator->SetSeedOnContext(Seed);
+	Operation->SetSeedOnContext(Seed);
 	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *OrganGenerator->DisplayName.ToString(), *Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
-	OrganGenerator->AddToContext(BaseComponent);
+	Operation->AddToContext(BaseComponent);
 	
-	return OrganGenerator;
+	return Operation;
 }
 
 void UNProcGenOperation::Reset() const

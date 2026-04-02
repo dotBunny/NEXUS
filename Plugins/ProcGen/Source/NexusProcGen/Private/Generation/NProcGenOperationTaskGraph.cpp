@@ -7,6 +7,7 @@
 
 #include "Generation/NProcGenOperationContext.h"
 #include "Generation/NOrganGeneratorFinalizeTask.h"
+#include "Generation/NOrganGeneratorPassContext.h"
 #include "Generation/NOrganGeneratorTask.h"
 #include "Generation/NProcGenOperationFinalizeTask.h"
 #include "Generation/NProcGenOperationSharedContext.h"
@@ -14,7 +15,7 @@
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
 
-FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Generator, FNProcGenOperationContext* Context)
+FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
 	// Convert our friendly seed to something more appropriate
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->FriendlySeed);
@@ -28,6 +29,8 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
+		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext>();
+		
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
@@ -41,7 +44,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
-				.ConstructAndHold(ContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
+				.ConstructAndHold(ContextPtr, PassContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
 			Tasks.Add(OrganTask);
 			
 			// Create a task to finalize the previous organ task on the main thread
@@ -49,7 +52,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 			SubTasks.Add(OrganTask);
 			FGraphEventRef OrganFinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&SubTasks, 
 				ENamedThreads::GameThread)
-				.ConstructAndHold(Generator, ContextPtr, SharedContextPtr);
+				.ConstructAndHold(Operation, ContextPtr, PassContextPtr, SharedContextPtr);
 			Tasks.Add(OrganFinalizeTask);
 		}
 		
@@ -60,7 +63,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Gen
 	};
 	
 	// Create our finalizer task on the main thread
-	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Generator);
+	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation);
 }
 
 void FNProcGenOperationTaskGraph::UnlockTasks()

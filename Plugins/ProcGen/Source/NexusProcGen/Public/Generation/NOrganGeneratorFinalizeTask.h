@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NOrganGeneratorPassContext.h"
 #include "NOrganGeneratorTaskContext.h"
 #include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -16,6 +17,7 @@ struct FNOrganGeneratorFinalizeTask
 public:
 	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, 
 		const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr, 
+		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr, 
 		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }

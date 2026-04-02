@@ -8,6 +8,7 @@
 
 FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 	UNProcGenOperation* TargetOperation, const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
+	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
 	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
 		: Operation(TargetOperation), Context(ContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
 {
