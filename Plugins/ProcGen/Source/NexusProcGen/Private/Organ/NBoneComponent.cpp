@@ -128,7 +128,7 @@ void UNBoneComponent::SetAutomaticTransform()
 		true, false, false, 
 		HitLocation, HitNormal, HitBone, HitResult))
 	{
-		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator();
+		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator() + FRotator(0,-90,0);
 		if (GetComponentRotation() != UpdatedRotator)
 		{
 			SetWorldRotation(UpdatedRotator);	
