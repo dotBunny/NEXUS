@@ -66,6 +66,7 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 			}
 		}
 	}
+	
 	return true;
 }
 
@@ -141,6 +142,10 @@ void FNProcGenOperationContext::LockAndPreprocess()
 			GenerationOrderIndex++;
 		}
 	}
+	
+	// TODO: Handle UNBoneComponents
+	
+	// TODO: Find and block out used space?
 }
 
 void FNProcGenOperationContext::OutputToLog()

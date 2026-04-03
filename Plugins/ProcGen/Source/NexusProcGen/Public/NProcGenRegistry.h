@@ -20,28 +20,31 @@ public:
 	FORCEINLINE static TArray<UNCellRootComponent*>& GetCellRootComponents() { return CellRoots; }
 	FORCEINLINE static TArray<UNCellJunctionComponent*>& GetCellJunctionComponents() { return CellJunctions; }
 	FORCEINLINE static TArray<UNOrganComponent*>& GetOrganComponents() { return Organs; }
+	FORCEINLINE static TArray<UNBoneComponent*>& GetBoneComponents() { return Bones; }
 
 	static TArray<UNCellJunctionComponent*> GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted = true);
 	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* Level);
+	static TArray<UNBoneComponent*> GetBoneComponentsFromLevel(const ULevel* Level);
 	static UNCellRootComponent* GetCellRootComponentFromLevel(const ULevel* Level);
 	
+	static bool HasBoneComponents();
 	static bool HasRootComponents();
 	static bool HasJunctionComponents();
 	static bool HasOrganComponents();
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	static bool HasOperations();
 	
+	static bool RegisterBoneComponent(UNBoneComponent* Component);
 	static bool RegisterCellRootComponent(UNCellRootComponent* Component);
 	static bool RegisterCellJunctionComponent(UNCellJunctionComponent* Component);
 	static bool RegisterOrganComponent(UNOrganComponent* Organ);
 	static bool RegisterOperation(UNProcGenOperation* Operation);
 	
+	static bool UnregisterBoneComponent(UNBoneComponent* Component);
 	static bool UnregisterCellRootComponent(UNCellRootComponent* Component);
 	static bool UnregisterCellJunctionComponent(UNCellJunctionComponent* Component);
 	static bool UnregisterOrganComponent(UNOrganComponent* Organ);
 	static bool UnregisterOperation(UNProcGenOperation* Operation);
-	
-	
 	
 	static TArray<UNProcGenOperation*>& GetOperations() { return Operations; }
 	
@@ -55,6 +58,7 @@ private:
 	}
 
 	
+	static TArray<UNBoneComponent*> Bones;
 	static TArray<UNCellRootComponent*> CellRoots;
 	static TArray<UNCellJunctionComponent*> CellJunctions;
 	static TArray<UNOrganComponent*> Organs;

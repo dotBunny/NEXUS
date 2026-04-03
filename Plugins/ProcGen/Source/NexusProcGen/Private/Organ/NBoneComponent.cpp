@@ -53,7 +53,15 @@ void UNBoneComponent::OnRegister()
 			this->DestroyComponent();
 		}));
 	}
+
+	FNProcGenRegistry::RegisterBoneComponent(this);
 	Super::OnRegister();
+}
+
+void UNBoneComponent::OnUnregister()
+{
+	FNProcGenRegistry::UnregisterBoneComponent(this);
+	Super::OnUnregister();
 }
 
 void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags,

@@ -9,6 +9,7 @@
 #include "Organ/NOrganComponent.h"
 
 TArray<UNCellRootComponent*> FNProcGenRegistry::CellRoots;
+TArray<UNBoneComponent*> FNProcGenRegistry::Bones;
 TArray<UNCellJunctionComponent*> FNProcGenRegistry::CellJunctions;
 TArray<UNOrganComponent*> FNProcGenRegistry::Organs;
 
@@ -61,6 +62,25 @@ TArray<UNOrganComponent*> FNProcGenRegistry::GetOrganComponentsFromLevel(const U
 	return MoveTemp(OrganComponents);
 }
 
+TArray<UNBoneComponent*> FNProcGenRegistry::GetBoneComponentsFromLevel(const ULevel* Level)
+{
+	TArray<UNBoneComponent*> BoneComponents;
+	if (Level == nullptr)
+	{
+		return MoveTemp(BoneComponents);
+	}
+
+	for (UNBoneComponent* Bone : GetBoneComponents())
+	{
+		if (Bone->ComponentIsInLevel(Level))
+		{
+			BoneComponents.Add(Bone);
+		}
+	}
+
+	return MoveTemp(BoneComponents);
+}
+
 UNCellRootComponent* FNProcGenRegistry::GetCellRootComponentFromLevel(const ULevel* Level)
 {
 	for (UNCellRootComponent* RootComponent : GetCellRootComponents())
@@ -71,6 +91,11 @@ UNCellRootComponent* FNProcGenRegistry::GetCellRootComponentFromLevel(const ULev
 		}
 	}
 	return nullptr;
+}
+
+bool FNProcGenRegistry::HasBoneComponents()
+{
+	return Bones.Num() > 0;
 }
 
 bool FNProcGenRegistry::HasRootComponents()
@@ -100,6 +125,18 @@ bool FNProcGenRegistry::HasOrganComponentsInWorld(const UWorld* World)
 bool FNProcGenRegistry::HasOperations()
 {
 	return Operations.Num() > 0;
+}
+
+bool FNProcGenRegistry::RegisterBoneComponent(UNBoneComponent* Component)
+{
+	if (Bones.Contains(Component))
+	{
+		UE_LOG(LogNexusProcGen, Verbose, TEXT("Failed to register UNBoneComponent(%s) as it is already registered; this can occur when using undo!"), *Component->GetOwner()->GetName());
+		return false;
+	}
+
+	Bones.Add(Component);
+	return true;
 }
 
 bool FNProcGenRegistry::RegisterCellRootComponent(UNCellRootComponent* Component)
@@ -149,6 +186,18 @@ bool FNProcGenRegistry::RegisterOperation(UNProcGenOperation* Operation)
 	Operations.Add(Operation);
 	
 	NotifyOfStateChange(Operation, ENProcGenOperationState::Registered);
+	return true;
+}
+
+bool FNProcGenRegistry::UnregisterBoneComponent(UNBoneComponent* Component)
+{
+	if (!Bones.Contains(Component))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find UNBoneComponent(%s) when attempting to unregister it."), *Component->GetOwner()->GetName());
+		return false;
+	}
+
+	Bones.RemoveSwap(Component);
 	return true;
 }
 

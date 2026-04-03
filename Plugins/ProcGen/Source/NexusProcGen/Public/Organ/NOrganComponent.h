@@ -49,9 +49,12 @@ public:
 	FNPositionRotation GetDebugLabelPositionRotation() const;
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+
+
+protected:
+
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
 
-protected:
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
 };

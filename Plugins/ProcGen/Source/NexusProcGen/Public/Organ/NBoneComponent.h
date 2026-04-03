@@ -36,6 +36,7 @@ public:
 #if WITH_EDITOR
 
 	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);

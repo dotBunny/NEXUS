@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Organ/NBoneComponent.h"
 
 
 class UNOrganComponent;
@@ -11,6 +12,7 @@ class UNOrganComponent;
 struct NEXUSPROCGEN_API FNOrganGenerationContext
 {
 	UNOrganComponent* SourceComponent;
+	//TArray<UNBoneComponent*> BoneComponents;
 	TArray<UNOrganComponent*> IntersectComponents;
 	TArray<UNOrganComponent*> ContainedComponents;
 };
