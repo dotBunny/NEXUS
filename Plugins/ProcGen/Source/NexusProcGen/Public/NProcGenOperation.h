@@ -66,6 +66,9 @@ public:
 	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName = FText::GetEmpty());
 	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName= FText::GetEmpty());
 	
+	
+	virtual void BeginDestroy() override;
+	
 	void Reset() const;
 
 	/**
@@ -82,7 +85,7 @@ public:
 	/**
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
 	 */
-	void LockContext();
+	void LockContext(UWorld* World);
 	TArray<TArray<UNOrganComponent*>>& GetGenerationOrder() const
 	{
 		return Context->GenerationOrder;
@@ -103,7 +106,6 @@ public:
 
 protected:
 	void Tick();
-	virtual void BeginDestroy() override;
 	void FinishBuild();
 	FNProcGenOperationTaskGraph* GetGraph() const { return Graph.Get(); }
 	
@@ -112,6 +114,7 @@ private:
 	INProcGenOperationOwner* Owner = nullptr;
 	TUniquePtr<FNProcGenOperationTaskGraph> Graph;
 	TUniquePtr<FNProcGenOperationContext> Context;
+	
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;

@@ -4,6 +4,7 @@
 #include "Generation/NProcGenOperationContext.h"
 
 #include "NProcGenMinimal.h"
+#include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
@@ -70,9 +71,12 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	return true;
 }
 
-void FNProcGenOperationContext::LockAndPreprocess()
+void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 {
 	bIsLocked = true;
+	
+	// This is the world where generation ultimately takes place
+	TargetWorld = World;
 	
 	// Create a separate list of components that we will operate on and clear out.
 	int GenerationOrderIndex = 0;
@@ -82,6 +86,7 @@ void FNProcGenOperationContext::LockAndPreprocess()
 	TArray<UNOrganComponent*> ProcessedComponents;
 	for (auto& Pair : Components)
 	{
+		// TODO: DO we want to check if the component is actually in the current level here?
 		PossibleComponents.AddUnique(Pair.Key);
 	}
 
@@ -144,8 +149,12 @@ void FNProcGenOperationContext::LockAndPreprocess()
 	}
 	
 	// TODO: Handle UNBoneComponents
-	
 	// TODO: Find and block out used space?
+	
+	// We need to figure out what the space were working in looks like outside of the generation context
+	// - Bones (sockets) that need to be assigned to the Organ contexts they are in (if they have not already been as source)
+	// - Calculate obstructions in the world itself already that need to be accounted for.
+	TArray<UNBoneComponent*> BoneComponents = FNProcGenRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
 }
 
 void FNProcGenOperationContext::OutputToLog()

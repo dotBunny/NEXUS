@@ -50,6 +50,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
 	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
+	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
 

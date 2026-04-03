@@ -167,7 +167,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 			{
 				OrganGenerator->AddToContext(OrganVolume->GetOrganComponent());
 			}
-			OrganGenerator->LockContext(); // We need the context locked to figure out the actual ordering
+			OrganGenerator->LockContext(FNEditorUtils::GetCurrentWorld()); // We need the context locked to figure out the actual ordering
 			
 			PreviousSelectedOrganHash = NewSelectedOrganHash;
 		}

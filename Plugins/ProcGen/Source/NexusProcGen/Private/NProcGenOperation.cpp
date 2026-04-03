@@ -178,7 +178,7 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	// Ensure that we have locked context and done the preprocessing.
 	if (!Context->IsLocked())
 	{
-		Context->LockAndPreprocess();
+		Context->LockAndPreprocess(Owner->GetDefaultWorld());
 		SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 	}
 	
@@ -215,9 +215,9 @@ bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const
 	return Context->AddOrganComponent(Component);
 }
 
-void UNProcGenOperation::LockContext()
+void UNProcGenOperation::LockContext(UWorld* World)
 {
-	Context->LockAndPreprocess();
+	Context->LockAndPreprocess(World);
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 }
 

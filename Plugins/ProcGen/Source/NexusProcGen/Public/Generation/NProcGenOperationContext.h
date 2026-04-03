@@ -12,7 +12,6 @@ class UNOrganComponent;
 struct NEXUSPROCGEN_API FNOrganGenerationContext
 {
 	UNOrganComponent* SourceComponent;
-	//TArray<UNBoneComponent*> BoneComponents;
 	TArray<UNOrganComponent*> IntersectComponents;
 	TArray<UNOrganComponent*> ContainedComponents;
 };
@@ -23,18 +22,20 @@ struct NEXUSPROCGEN_API FNOrganGenerationContext
 class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
-	void ResetContext();
-	bool IsLocked() const { return bIsLocked; }
-	void LockAndPreprocess();
-	
-	bool AddOrganComponent(UNOrganComponent* Component);
-	
-	void OutputToLog();
 	
 	TMap<UNOrganComponent*, FNOrganGenerationContext> Components;
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 	FString FriendlySeed;
 	
+	bool AddOrganComponent(UNOrganComponent* Component);
+	bool IsLocked() const { return bIsLocked; }
+	void LockAndPreprocess(UWorld* World);
+	void OutputToLog();
+	void ResetContext();
+	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
+
 private:
+
 	bool bIsLocked = false;
+	UWorld* TargetWorld = nullptr;
 };
