@@ -14,6 +14,14 @@ struct NEXUSPROCGEN_API FNOrganGenerationContext
 	UNOrganComponent* SourceComponent;
 	TArray<UNOrganComponent*> IntersectComponents;
 	TArray<UNOrganComponent*> ContainedComponents;
+	TArray<UNBoneComponent*> ContainedBones;
+};
+
+struct NEXUSPROCGEN_API FNBoneGenerationContext
+{
+	UNBoneComponent* SourceComponent;
+	FVector MinimumPoint;
+	FVector MaximumPoint;
 };
 
 /**
@@ -23,8 +31,12 @@ class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
 	
-	TMap<UNOrganComponent*, FNOrganGenerationContext> Components;
+	TMap<UNOrganComponent*, FNOrganGenerationContext> OrganContext;
+	TMap<UNBoneComponent*, FNBoneGenerationContext> BoneContext;
+	
+	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
+	
 	FString FriendlySeed;
 	
 	bool AddOrganComponent(UNOrganComponent* Component);

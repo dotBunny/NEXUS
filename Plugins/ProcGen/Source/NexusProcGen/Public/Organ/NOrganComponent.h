@@ -44,6 +44,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
+	
+	UFUNCTION(BlueprintCallable)
+	AVolume* GetVolume() const { return Cast<AVolume>(GetOwner()); }
 
 	FString GetDebugLabel() const;
 	FNPositionRotation GetDebugLabelPositionRotation() const;

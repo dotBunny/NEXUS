@@ -189,9 +189,13 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 		Graph.Reset();
 	}
 	
+	// TODO: Temp output
+	Context->OutputToLog();
+	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
 	Graph = MakeUnique<FNProcGenOperationTaskGraph>(this, Context.Get());
+	
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);

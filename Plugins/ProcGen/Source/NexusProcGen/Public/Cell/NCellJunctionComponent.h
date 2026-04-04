@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NProcGenSettings.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "NCellJunctionComponent.generated.h"
@@ -47,9 +48,15 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 	}
 
 public:
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
+	FNCellJunctionDetails Details;
+	
 	FRotator GetOffsetRotator() const;
 	FVector GetOffsetLocation() const;
+	
+	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
+	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
 
 	// TODO: Assess if we need to actually register them
 	virtual void OnRegister() override;
@@ -68,9 +75,6 @@ public:
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
-	FNCellJunctionDetails Details;
-
 private:
 	ALevelInstance* LevelInstance;
 	N_WORLD_ICON_HEADER()

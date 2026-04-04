@@ -11,7 +11,8 @@
 
 void FNProcGenOperationContext::ResetContext()
 {
-	Components.Empty();
+	OrganContext.Empty();
+	BoneContext.Empty();
 	bIsLocked = false;
 }
 
@@ -24,13 +25,13 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	}
 	
 	// We've already added this component
-	if (Components.Contains(Component))
+	if (OrganContext.Contains(Component))
 	{
 		return true;
 	}
 	
-	Components.Add(Component, FNOrganGenerationContext());
-	FNOrganGenerationContext* WorkingContext = Components.Find(Component);
+	OrganContext.Add(Component, FNOrganGenerationContext());
+	FNOrganGenerationContext* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;
 
 	// We're going to capture all the other components in the level
@@ -74,9 +75,23 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 {
 	bIsLocked = true;
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	
 	// This is the world where generation ultimately takes place
 	TargetWorld = World;
+	
+	// Gather our bone components so we can add them to a specific organs context
+	TArray<UNBoneComponent*> BoneComponents = FNProcGenRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
+	BoneContext.Empty();
+	BoneContext.Reserve(BoneComponents.Num());
+	for (const auto& BoneComponent : BoneComponents)
+	{
+		BoneContext.Add(BoneComponent, FNBoneGenerationContext());
+		FNBoneGenerationContext* WorkingContext = BoneContext.Find(BoneComponent);
+		WorkingContext->SourceComponent = BoneComponent;
+		WorkingContext->MinimumPoint = BoneComponent->GetMinimumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
+		WorkingContext->MaximumPoint = BoneComponent->GetMaximumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
+	}
 	
 	// Create a separate list of components that we will operate on and clear out.
 	int GenerationOrderIndex = 0;
@@ -84,15 +99,35 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	GenerationOrder.Add(TArray<UNOrganComponent*>());
 	TArray<UNOrganComponent*> PossibleComponents;
 	TArray<UNOrganComponent*> ProcessedComponents;
-	for (auto& Pair : Components)
+	for (auto& Pair : OrganContext)
 	{
 		// TODO: DO we want to check if the component is actually in the current level here?
 		PossibleComponents.AddUnique(Pair.Key);
 	}
 
 	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
-	for (auto& Pair : Components)
+	for (auto& Pair : OrganContext)
 	{
+		// TODO : While were iterating we will also find out what components contain the known bones
+		if (Pair.Key->IsVolumeBased())
+		{
+			AVolume* Volume = Pair.Key->GetVolume();
+			
+			// TODO: How does this work for our odd-shaped volumes?	
+			for (const auto BoneMap : BoneContext)
+			{
+				if (Volume->EncompassesPoint(BoneMap.Value.MinimumPoint) || Volume->EncompassesPoint(BoneMap.Value.MaximumPoint))
+				{
+					Pair.Value.ContainedBones.Add(BoneMap.Key);
+				}
+			}
+		}
+		else
+		{
+			UE_LOG(LogNexusProcGen, Warning, TEXT("Component %s is not volume based, unable to determine if UNBoneComponents are contained."), *Pair.Key->GetName());
+		}
+		
+		// Handle "easy" work parallelization classification
 		if (FNOrganGenerationContext& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
@@ -100,6 +135,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			ProcessedComponents.Add(Pair.Key);
 			GenerationOrder[0].Add(Pair.Key);
 		}
+		
+		
 	}
 	
 	// Evaluate if we should bump the generation order
@@ -118,7 +155,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNOrganGenerationContext* ComponentContext = Components.Find(Component);
+			FNOrganGenerationContext* ComponentContext = OrganContext.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
@@ -147,14 +184,16 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			GenerationOrderIndex++;
 		}
 	}
-	
+
 	// TODO: Handle UNBoneComponents
 	// TODO: Find and block out used space?
 	
 	// We need to figure out what the space were working in looks like outside of the generation context
 	// - Bones (sockets) that need to be assigned to the Organ contexts they are in (if they have not already been as source)
 	// - Calculate obstructions in the world itself already that need to be accounted for.
-	TArray<UNBoneComponent*> BoneComponents = FNProcGenRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
+	
+	// need to get bounds?
+	
 }
 
 void FNProcGenOperationContext::OutputToLog()
@@ -170,8 +209,8 @@ void FNProcGenOperationContext::OutputToLog()
 		Builder.Append("\n");
 	}
 	
-	Builder.Appendf(TEXT("\tComponents (%i)\n"), Components.Num());
-	for (auto Component : Components)
+	Builder.Appendf(TEXT("\tComponents (%i)\n"), OrganContext.Num());
+	for (auto Component : OrganContext)
 	{
 		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Component.Value.SourceComponent->GetDebugLabel());
 		for (const auto IntersectComponent : Component.Value.IntersectComponents)
@@ -181,6 +220,10 @@ void FNProcGenOperationContext::OutputToLog()
 		for (const auto ContainedComponent : Component.Value.ContainedComponents)
 		{
 			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *ContainedComponent->GetDebugLabel());
+		}
+		for (const auto ContainedBone : Component.Value.ContainedBones)
+		{
+			Builder.Appendf(TEXT("\t\t\tBone: %s\n"), *ContainedBone->GetDebugLabel());
 		}
 	}
 	

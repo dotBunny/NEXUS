@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NProcGenSettings.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Macros/NActorMacros.h"
 #include "Types/NCardinalRotation.h"
@@ -31,22 +32,8 @@ class NEXUSPROCGEN_API UNBoneComponent : public USceneComponent
 	GENERATED_BODY()
 
 	explicit UNBoneComponent(const FObjectInitializer& ObjectInitializer);
-public:
-	
-#if WITH_EDITOR
 
-	virtual void OnRegister() override;
-	virtual void OnUnregister() override;
-	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
-	
-	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
-	void OnModeChanged(ENBoneMode NewMode);
-	void SetAutomaticTransform();
-	FVector FindSafeLocation(const FVector& WorldLocation) const;
-	
-#endif // WITH_EDITOR
-	
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+public:
 	
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	FIntVector2 SocketSize = FIntVector2(4, 4);
@@ -65,6 +52,25 @@ public:
 	
 	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
+
+	
+#if WITH_EDITOR
+
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	
+	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+	void OnModeChanged(ENBoneMode NewMode);
+	void SetAutomaticTransform();
+	FVector FindSafeLocation(const FVector& WorldLocation) const;
+	
+	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
+	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
+	
+#endif // WITH_EDITOR
+	FString GetDebugLabel() const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
 private:
 	N_WORLD_ICON_HEADER()

@@ -53,6 +53,32 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 	return FVector::ZeroVector;
 }
 
+FVector UNCellJunctionComponent::GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
+{
+	FVector MinimumPoint =
+	(FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * -0.5f);
+	
+	MinimumPoint = this->Details.RootRelativeCardinalRotation.ToRotator().RotateVector(MinimumPoint);
+	MinimumPoint = OffsetRotation.RotateVector(MinimumPoint);
+	MinimumPoint += BaseLocation;
+
+	return MoveTemp(MinimumPoint);
+	
+}
+
+FVector UNCellJunctionComponent::GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
+{
+	FVector MaximumPoint =
+				(FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * 0.5f);
+	
+	MaximumPoint = this->Details.RootRelativeCardinalRotation.ToRotator().RotateVector(MaximumPoint);
+	MaximumPoint = OffsetRotation.RotateVector(MaximumPoint);
+	MaximumPoint += BaseLocation;
+
+	return MoveTemp(MaximumPoint);
+}
+
+
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());

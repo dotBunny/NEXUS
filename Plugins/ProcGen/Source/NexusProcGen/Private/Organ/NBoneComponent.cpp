@@ -210,6 +210,35 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 	return WorkingLocation;
 }
 
+FVector UNBoneComponent::GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
+{
+	FVector MinimumPoint =
+		(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * -0.5f);
+	
+	MinimumPoint = this->WorldCardinalRotation.ToRotator().RotateVector(MinimumPoint);
+	MinimumPoint = OffsetRotation.RotateVector(MinimumPoint);
+	MinimumPoint += BaseLocation;
+
+	return MoveTemp(MinimumPoint);
+}
+
+FVector UNBoneComponent::GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
+{
+	FVector MaximumPoint =
+			(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * 0.5f);
+	
+	MaximumPoint = this->WorldCardinalRotation.ToRotator().RotateVector(MaximumPoint);
+	MaximumPoint = OffsetRotation.RotateVector(MaximumPoint);
+	MaximumPoint += BaseLocation;
+
+	return MoveTemp(MaximumPoint);
+}
+
+FString UNBoneComponent::GetDebugLabel() const
+{
+	return GetOwner()->GetActorNameOrLabel();
+}
+
 void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);

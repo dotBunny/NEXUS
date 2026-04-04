@@ -35,7 +35,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 		for (const auto Component : Pass)
 		{
 			// Create component context
-			FNOrganGenerationContext* ContextMap = Context->Components.Find(Component);
+			FNOrganGenerationContext* ContextMap = Context->OrganContext.Find(Component);
 			
 			// Create individual organ generator context object
 			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(ContextMap, BaseGenerator.UnsignedInteger64());
