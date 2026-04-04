@@ -45,9 +45,11 @@ public:
 	void OutputToLog();
 	void ResetContext();
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
-
+	void SetDisplayName(FString InDisplayName) { DisplayName = InDisplayName; }
+	
 private:
-
+	
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;
+	FString DisplayName;
 };

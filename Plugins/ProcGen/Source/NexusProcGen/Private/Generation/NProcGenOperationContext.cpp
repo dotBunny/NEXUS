@@ -199,10 +199,16 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 void FNProcGenOperationContext::OutputToLog()
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
-	Builder.Append(TEXT("\n[FNOrganContext]"));
+	Builder.Append(TEXT("\n[FNOrganContext] "));
+	if (!DisplayName.IsEmpty())
+	{
+		Builder.Append(*DisplayName);
+		Builder.Append(TEXT(" "));
+	}
+	
 	if (bIsLocked)
 	{
-		Builder.Append(TEXT(" LOCKED\n"));
+		Builder.Append(TEXT("LOCKED\n"));
 	}
 	else
 	{

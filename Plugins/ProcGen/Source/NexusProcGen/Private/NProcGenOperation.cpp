@@ -32,6 +32,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		Operation->DisplayName = DisplayName;
 	}
+	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
 	Operation->SetSeedOnContext(Seed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
@@ -64,6 +65,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	{
 		Operation->DisplayName = DisplayName;
 	}
+	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
 	Operation->SetSeedOnContext(Seed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
@@ -86,6 +88,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	{
 		Operation->DisplayName = DisplayName;
 	}
+	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
 	Operation->SetSeedOnContext(Seed);
 	
 	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
