@@ -108,25 +108,6 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
 	for (auto& Pair : OrganContext)
 	{
-		// TODO : While were iterating we will also find out what components contain the known bones
-		if (Pair.Key->IsVolumeBased())
-		{
-			AVolume* Volume = Pair.Key->GetVolume();
-			
-			// TODO: How does this work for our odd-shaped volumes?	
-			for (const auto BoneMap : BoneContext)
-			{
-				if (Volume->EncompassesPoint(BoneMap.Value.MinimumPoint) || Volume->EncompassesPoint(BoneMap.Value.MaximumPoint))
-				{
-					Pair.Value.ContainedBones.Add(BoneMap.Key);
-				}
-			}
-		}
-		else
-		{
-			UE_LOG(LogNexusProcGen, Warning, TEXT("Component %s is not volume based, unable to determine if UNBoneComponents are contained."), *Pair.Key->GetName());
-		}
-		
 		// Handle "easy" work parallelization classification
 		if (FNOrganGenerationContext& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
@@ -135,8 +116,6 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			ProcessedComponents.Add(Pair.Key);
 			GenerationOrder[0].Add(Pair.Key);
 		}
-		
-		
 	}
 	
 	// Evaluate if we should bump the generation order
@@ -184,14 +163,35 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			GenerationOrderIndex++;
 		}
 	}
+	
+	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
+	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
+	int BoneCount = BoneComponents.Num();
+	for (const auto& Phase : GenerationOrder)
+	{
+		for (auto& Component : Phase)
+		{
+			if (!Component->IsVolumeBased())
+			{
+				UE_LOG(LogNexusProcGen, Warning, TEXT("Component %s is not volume based, unable to determine if UNBoneComponents are contained."), *Component->GetName());
+				continue;
+			}
 
-	// TODO: Handle UNBoneComponents
-	// TODO: Find and block out used space?
-	
-	// We need to figure out what the space were working in looks like outside of the generation context
-	// - Bones (sockets) that need to be assigned to the Organ contexts they are in (if they have not already been as source)
+			const AVolume* Volume = Component->GetVolume();
+			for (int i = BoneCount - 1; i >= 0; i--)
+			{
+				const FNBoneGenerationContext* Context = BoneContext.Find(BoneComponents[i]);
+				if (Volume->EncompassesPoint(Context->MinimumPoint) || Volume->EncompassesPoint(Context->MaximumPoint))
+				{
+					OrganContext.Find(Component)->ContainedBones.Add(Context->SourceComponent);
+					BoneComponents.RemoveAt(i);
+					BoneCount--;
+				}
+			}
+		}
+	}
+
 	// - Calculate obstructions in the world itself already that need to be accounted for.
-	
 	// need to get bounds?
 	
 }
