@@ -65,11 +65,12 @@ public:
 	void SetAutomaticTransform();
 	FVector FindSafeLocation(const FVector& WorldLocation) const;
 	
+#endif // WITH_EDITOR
+
+	FString GetDebugLabel() const;
 	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
 	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
 	
-#endif // WITH_EDITOR
-	FString GetDebugLabel() const;
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
 private:
