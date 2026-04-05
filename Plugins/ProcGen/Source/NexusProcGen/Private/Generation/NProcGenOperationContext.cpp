@@ -80,7 +80,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// This is the world where generation ultimately takes place
 	TargetWorld = World;
 	
-	// Gather our bone components so we can add them to a specific organs context
+	// Gather our bone components so we can add them to a specific organs context later
 	TArray<UNBoneComponent*> BoneComponents = FNProcGenRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
 	BoneContext.Empty();
 	BoneContext.Reserve(BoneComponents.Num());
@@ -171,19 +171,22 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (auto& Component : Phase)
 		{
+			FNOrganGenerationContext* OrganGenerationContext = OrganContext.Find(Component);
+			
 			if (!Component->IsVolumeBased())
 			{
 				UE_LOG(LogNexusProcGen, Warning, TEXT("Component %s is not volume based, unable to determine if UNBoneComponents are contained."), *Component->GetName());
 				continue;
 			}
-
+			
 			const AVolume* Volume = Component->GetVolume();
+			
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
 				const FNBoneGenerationContext* Context = BoneContext.Find(BoneComponents[i]);
 				if (Volume->EncompassesPoint(Context->MinimumPoint) || Volume->EncompassesPoint(Context->MaximumPoint))
 				{
-					OrganContext.Find(Component)->ContainedBones.Add(Context->SourceComponent);
+					OrganGenerationContext->ContainedBones.Add(Context->SourceComponent);
 					BoneComponents.RemoveAt(i);
 					BoneCount--;
 				}
@@ -191,6 +194,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 
+	// TODO: Search voxelized? inside known spaces for other objects
+	// Capture their convex hulls?
 	// - Calculate obstructions in the world itself already that need to be accounted for.
 	// need to get bounds?
 	

@@ -14,5 +14,8 @@ FNProcGenOperationFinalizeTask::FNProcGenOperationFinalizeTask(UNProcGenOperatio
 
 void FNProcGenOperationFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	// SPAWN STUFF from context?
+	// This is run on main thread so we should be able to spawn
+	
 	Operation->FinishBuild();
 }

@@ -78,13 +78,17 @@ void UNOrganComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
+// TODO: Return is null on key
+UE_DISABLE_OPTIMIZATION
 TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 {
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
 	TArray<UNTissue*> ReferencedTissues;
 	for (auto Tissue : Tissues)
 	{
-		UNTissue::BuildTissueMap(Tissue, TissueMap, ReferencedTissues);
+		TObjectPtr<UNTissue> LoadedTissue = Tissue.LoadSynchronous();
+		UNTissue::BuildTissueMap(LoadedTissue, TissueMap, ReferencedTissues);
 	}
 	return MoveTemp(TissueMap);
 }
+UE_ENABLE_OPTIMIZATION

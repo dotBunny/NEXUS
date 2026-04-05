@@ -12,6 +12,7 @@ class UNOrganComponent;
 struct NEXUSPROCGEN_API FNOrganGenerationContext
 {
 	UNOrganComponent* SourceComponent;
+	
 	TArray<UNOrganComponent*> IntersectComponents;
 	TArray<UNOrganComponent*> ContainedComponents;
 	TArray<UNBoneComponent*> ContainedBones;

@@ -26,6 +26,7 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, 
 class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {
 	friend class NOrganGenerator;
+	friend class FNOrganGeneratorTaskContext;
 	
 	GENERATED_BODY()
 	
@@ -40,7 +41,7 @@ public:
 	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::GenerateOnLoad;
 
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
-	TArray<TObjectPtr<UNTissue>> Tissues;
+	TArray<TSoftObjectPtr<UNTissue>> Tissues;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }

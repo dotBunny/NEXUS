@@ -8,17 +8,19 @@
 
 class UNCell;
 
+
+
 USTRUCT()
 struct NEXUSPROCGEN_API FNTissueEntry
 {
 	GENERATED_BODY()
-
-	/**
-	 * Can only be used once during the generation process from this set.
-	 */
+	
 	UPROPERTY(EditAnywhere)
-	bool bIsUnique = false;
-
+	int MinimumCount = -1;
+	
+	UPROPERTY(EditAnywhere)
+	int MaximumCount = -1;
+	
 	UPROPERTY(EditAnywhere)
 	int Weighting = 1;
 	
@@ -43,5 +45,5 @@ public:
 	TArray<FNTissueEntry> Cells;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UNTissue>> AdditionalTissue;
+	TArray<TSoftObjectPtr<UNTissue>> AdditionalTissue;
 };
