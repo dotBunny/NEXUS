@@ -29,6 +29,7 @@ struct NEXUSPROCGEN_API FNCellInputData
 class FNOrganGeneratorTaskContext
 {
 	friend struct FNOrganGeneratorTask;
+	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
 	
