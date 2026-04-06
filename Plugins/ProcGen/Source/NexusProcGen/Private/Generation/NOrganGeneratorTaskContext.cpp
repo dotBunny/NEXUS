@@ -9,8 +9,6 @@
 #include "Organ/NOrganComponent.h"
 
 
-// TODO: Return is null on key of TissueMap
-UE_DISABLE_OPTIMIZATION
 FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNOrganGenerationContext* GeneratorContextMap, const uint64 TaskSeed)
 	: Seed(TaskSeed)
 {
@@ -53,4 +51,3 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNOrganGeneration
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION

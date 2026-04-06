@@ -78,8 +78,6 @@ void UNOrganComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
-// TODO: Return is null on key
-UE_DISABLE_OPTIMIZATION
 TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 {
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
@@ -91,4 +89,3 @@ TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 	}
 	return MoveTemp(TissueMap);
 }
-UE_ENABLE_OPTIMIZATION
