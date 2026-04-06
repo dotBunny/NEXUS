@@ -39,7 +39,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
 	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::GenerateOnLoad;
-
+	
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
 	TArray<TSoftObjectPtr<UNTissue>> Tissues;
 

@@ -10,9 +10,10 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 	
 	for (FNTissueEntry Entry : Tissue->Cells)
 	{
-		if (!OutCellMap.Find(Entry.Cell.Get()))
+		TObjectPtr<UNCell> Cell = Entry.Cell.LoadSynchronous();
+		if (!OutCellMap.Find(Cell))
 		{
-			OutCellMap.Add(Entry.Cell.Get(), Entry);
+			OutCellMap.Add(Cell, Entry);
 		}
 		else
 		{
