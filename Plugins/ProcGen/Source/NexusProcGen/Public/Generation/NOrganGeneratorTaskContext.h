@@ -18,7 +18,7 @@ struct NEXUSPROCGEN_API FNCellInputData
 	TMap<int32, FNCellJunctionDetails> Junctions;
 	
 	// MAIN-THREAD USE ONLY
-	TSoftObjectPtr<UWorld> Cell;
+	TSoftObjectPtr<UWorld> Template;
 	
 	bool HasMinimumCount() const { return MinimumCount > -1; }
 	bool HasMaximumCount() const { return MaximumCount > -1; }

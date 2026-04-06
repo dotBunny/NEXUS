@@ -25,7 +25,9 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	// This should only figure out placement of items in side of the graph
 	// We need to look at tissue ? get items / etc
-	
+
+	// Use hulls
+	//	Context->CellInputData[0].CellDetails.Hull
 	
 	
 	// TODO: lets just make it do something

@@ -42,7 +42,7 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNOrganGeneration
 		SafeDetails.Weighting = Cell.Value.Weighting;
 		
 		// We won't touch this till later
-		SafeDetails.Cell = Cell.Key->World;
+		SafeDetails.Template = Cell.Key->World;
 		
 		Cell.Key->Root.CopyTo(SafeDetails.CellDetails);
 		for (const TPair<int32, FNCellJunctionDetails>& Junction :  Cell.Key->Junctions)
