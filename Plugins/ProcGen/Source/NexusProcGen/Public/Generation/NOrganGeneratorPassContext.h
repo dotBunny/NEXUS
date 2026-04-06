@@ -3,7 +3,7 @@
 
 #pragma once
 
-struct FNOrganGenerationContext;
+struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
 
 class FNOrganGeneratorPassContext

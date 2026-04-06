@@ -4,26 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NProcGenOperationBoneContext.h"
+#include "NProcGenOperationOrganContext.h"
 #include "Organ/NBoneComponent.h"
-
 
 class UNOrganComponent;
 
-struct NEXUSPROCGEN_API FNOrganGenerationContext
-{
-	UNOrganComponent* SourceComponent;
-	
-	TArray<UNOrganComponent*> IntersectComponents;
-	TArray<UNOrganComponent*> ContainedComponents;
-	TArray<UNBoneComponent*> ContainedBones;
-};
-
-struct NEXUSPROCGEN_API FNBoneGenerationContext
-{
-	UNBoneComponent* SourceComponent;
-	FVector MinimumPoint;
-	FVector MaximumPoint;
-};
 
 /**
  * Game-thread context of the entire generation process.
@@ -32,8 +18,8 @@ class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
 	
-	TMap<UNOrganComponent*, FNOrganGenerationContext> OrganContext;
-	TMap<UNBoneComponent*, FNBoneGenerationContext> BoneContext;
+	TMap<UNOrganComponent*, FNProcGenOperationOrganContext> OrganContext;
+	TMap<UNBoneComponent*, FNProcGenOperationBoneContext> BoneContext;
 	
 	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;

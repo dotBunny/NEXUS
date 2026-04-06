@@ -30,8 +30,8 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 		return true;
 	}
 	
-	OrganContext.Add(Component, FNOrganGenerationContext());
-	FNOrganGenerationContext* WorkingContext = OrganContext.Find(Component);
+	OrganContext.Add(Component, FNProcGenOperationOrganContext());
+	FNProcGenOperationOrganContext* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;
 
 	// We're going to capture all the other components in the level
@@ -86,8 +86,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	BoneContext.Reserve(BoneComponents.Num());
 	for (const auto& BoneComponent : BoneComponents)
 	{
-		BoneContext.Add(BoneComponent, FNBoneGenerationContext());
-		FNBoneGenerationContext* WorkingContext = BoneContext.Find(BoneComponent);
+		BoneContext.Add(BoneComponent, FNProcGenOperationBoneContext());
+		FNProcGenOperationBoneContext* WorkingContext = BoneContext.Find(BoneComponent);
 		WorkingContext->SourceComponent = BoneComponent;
 		WorkingContext->MinimumPoint = BoneComponent->GetMinimumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
 		WorkingContext->MaximumPoint = BoneComponent->GetMaximumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
@@ -109,7 +109,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	for (auto& Pair : OrganContext)
 	{
 		// Handle "easy" work parallelization classification
-		if (FNOrganGenerationContext& ComponentContext = Pair.Value; 
+		if (FNProcGenOperationOrganContext& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
 			PossibleComponents.Remove(Pair.Key);
@@ -134,7 +134,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNOrganGenerationContext* ComponentContext = OrganContext.Find(Component);
+			FNProcGenOperationOrganContext* ComponentContext = OrganContext.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
@@ -171,7 +171,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (auto& Component : Phase)
 		{
-			FNOrganGenerationContext* OrganGenerationContext = OrganContext.Find(Component);
+			FNProcGenOperationOrganContext* OrganGenerationContext = OrganContext.Find(Component);
 			
 			if (!Component->IsVolumeBased())
 			{
@@ -183,10 +183,10 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
-				const FNBoneGenerationContext* Context = BoneContext.Find(BoneComponents[i]);
+				 FNProcGenOperationBoneContext* Context = BoneContext.Find(BoneComponents[i]);
 				if (Volume->EncompassesPoint(Context->MinimumPoint) || Volume->EncompassesPoint(Context->MaximumPoint))
 				{
-					OrganGenerationContext->ContainedBones.Add(Context->SourceComponent);
+					OrganGenerationContext->ContainedBones.Add(Context);
 					BoneComponents.RemoveAt(i);
 					BoneCount--;
 				}
@@ -234,7 +234,7 @@ void FNProcGenOperationContext::OutputToLog()
 		}
 		for (const auto ContainedBone : Component.Value.ContainedBones)
 		{
-			Builder.Appendf(TEXT("\t\t\tBone: %s\n"), *ContainedBone->GetDebugLabel());
+			Builder.Appendf(TEXT("\t\t\tBone: %s\n"), *ContainedBone->SourceComponent->GetDebugLabel());
 		}
 	}
 	

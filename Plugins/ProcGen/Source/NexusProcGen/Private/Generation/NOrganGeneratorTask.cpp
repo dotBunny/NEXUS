@@ -19,6 +19,8 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	// TODO: Spin up multiple tasks? with different subseeds? t0 do the builds?
 	
+	//Context->BoneInputData
+	
 	
 	
 	
