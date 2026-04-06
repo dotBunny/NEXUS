@@ -6,4 +6,8 @@
 FNProcGenOperationSharedContext::FNProcGenOperationSharedContext()
 {
 	// TBD
+	
+	// What is useful cross pass for generation? 
+	// - Key location?
+	
 }

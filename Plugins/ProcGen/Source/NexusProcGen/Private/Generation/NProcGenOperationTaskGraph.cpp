@@ -24,26 +24,26 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	uint32 SubTaskIndex = 0;
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext>();
+	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(); // Pin when used
 	
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
-		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext>();
+		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext, ESPMode::ThreadSafe>(); // Pin when used
 		
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
-			// Create component context
+			// Get the context generated during pre-generation process
 			FNOrganGenerationContext* ContextMap = Context->OrganContext.Find(Component);
 			
-			// Create individual organ generator context object
+			// Create individual organ generator context object, this builds out a list of all available cells to use to fill the space
 			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(ContextMap, BaseGenerator.UnsignedInteger64());
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
-				ENamedThreads::AnyNormalThreadNormalTask) // ENamedThreads::GameThread
+				ENamedThreads::AnyNormalThreadNormalTask) // Doesnt need to run on main thread
 				.ConstructAndHold(ContextPtr, PassContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
 			Tasks.Add(OrganTask);
 			
@@ -58,9 +58,11 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 		
 		SubTaskIndex++;
 
-		/// Ensure we track a passes tasks
+		/// Ensure we track a passes tasksman 
 		PassTasks.Add(Tasks);
-	};
+	};//
+	
+	// TODO: Validate task to ensure generation is completable?
 	
 	// Create our finalizer task on the main thread
 	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation);

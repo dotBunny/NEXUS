@@ -17,6 +17,12 @@ FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	
+	// Create objects from context?
+	// Write details to pass context?
+	// Write to shared?
+	
+	
 //	FPlatformProcess::Sleep(5.0f); 
 // Dont sleep on main thread K thnx	
 	
