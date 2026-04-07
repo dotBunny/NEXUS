@@ -3,6 +3,8 @@
 
 #include "Generation/NOrganGeneratorTask.h"
 
+#include "NBoxPicker.h"
+#include "Generation/NCellOutputData.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
@@ -19,7 +21,30 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	// TODO: Spin up multiple tasks? with different subseeds? t0 do the builds?
 	
-	//Context->BoneInputData
+	// TEMP: Were just going to pick some random spots inside of the bounds to put things for now
+	
+	TArray<FVector> Locations;
+	FNBoxPickerParams Params;
+	
+	Params.Origin = Context->Bounds.Origin;
+	Params.MaximumBox = Context->Bounds.GetBox();
+	
+	// Pick the origin points (were gonna overlap for now)
+	FNBoxPicker::Twisted(Locations, Random, Params);
+	
+	for (int i = 0; i < Context->CellInputData.Num(); i++)
+	{
+		FNCellOutputData CellOutput;
+		
+		CellOutput.WorldPosition = Locations[i];
+		CellOutput.Template = Context->CellInputData[i].Template;
+	
+		Context->CellOutputData.Add(CellOutput);
+	}
+	
+
+	
+	//Context->CellOutputData.Add()
 	
 	
 	
@@ -33,7 +58,5 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	// Use hulls
 	//	Context->CellInputData[0].CellDetails.Hull
 	
-	
-	// TODO: lets just make it do something
-	FPlatformProcess::Sleep(Random.RandRange(0.25f, 1.5f)); 
+
 }

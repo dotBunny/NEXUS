@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Cell/NCell.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellRootDetails.h"
 
@@ -15,8 +16,8 @@ struct NEXUSPROCGEN_API FNCellInputData
 	FNCellRootDetails CellDetails;
 	TMap<int32, FNCellJunctionDetails> Junctions;
 	
-	// MAIN-THREAD USE ONLY
-	TSoftObjectPtr<UWorld> Template;
+	// MAIN-THREAD USE ONLY // ROOT OBJECT NEEDS TO BE UNLOADED LATER
+	TObjectPtr<UNCell> Template;
 	
 	bool HasMinimumCount() const { return MinimumCount > -1; }
 	bool HasMaximumCount() const { return MaximumCount > -1; }

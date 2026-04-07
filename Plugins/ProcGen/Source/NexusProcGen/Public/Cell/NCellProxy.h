@@ -27,6 +27,9 @@ class NEXUSPROCGEN_API ANCellProxy : public AActor
 	explicit ANCellProxy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 public:
+	
+	static ANCellProxy* CreateInstance(UWorld* World, UNCell* Cell, const FVector& Location, const FRotator& Rotation, bool bPreLoadLevel = true);
+	
 	void CreateLevelInstance();
 	void LoadLevelInstance();
 	void UnloadLevelInstance() const;
@@ -35,6 +38,7 @@ public:
 protected:
 	void OnProxyMaterialLoaded();
 	void InitializeFromNCell(UNCell* InNCell);
+
 private:
 
 	void Show() const;

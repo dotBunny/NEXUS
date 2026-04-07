@@ -24,12 +24,12 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	uint32 SubTaskIndex = 0;
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(); // Pin when used
+	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(Context->GetTargetWorld()); // TODO: Pin when used?
 	
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
-		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext, ESPMode::ThreadSafe>(); // Pin when used
+		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext, ESPMode::ThreadSafe>(); // TODO: Pin when used?
 		
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
@@ -65,7 +65,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	// TODO: Validate task to ensure generation is completable?
 	
 	// Create our finalizer task on the main thread
-	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation);
+	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation, SharedContextPtr);
 }
 
 void FNProcGenOperationTaskGraph::UnlockTasks()

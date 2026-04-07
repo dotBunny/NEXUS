@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NBoxPickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points inside or on the surface of the FBox using different
@@ -31,7 +32,6 @@ public:
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
 	
-
 	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Useful for one-time random point generation with reproducible results.
@@ -54,6 +54,8 @@ public:
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params);
 
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNBoxPickerParams& Params);
+	
 	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
 	 * @param Origin The center point of the FBox.

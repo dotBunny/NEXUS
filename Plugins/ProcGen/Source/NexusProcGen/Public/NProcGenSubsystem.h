@@ -21,11 +21,11 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 	
 public:
 	
-	bool RegisterCellActor(ANCellActor* CellActor);
-	bool UnregisterCellActor(ANCellActor* CellActor);
+	bool RegisterCellActor(ANCellActor* CellActor); // TODO
+	bool UnregisterCellActor(ANCellActor* CellActor); // TODO
 
-	bool RegisterCellProxy(ANCellProxy* CellProxy);
-	bool UnregisterCellProxy(ANCellProxy* CellProxy);
+	bool RegisterCellProxy(ANCellProxy* CellProxy); // TODO
+	bool UnregisterCellProxy(ANCellProxy* CellProxy); // TODO
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
@@ -33,7 +33,7 @@ public:
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
-	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	virtual UWorld* GetDefaultWorld() override { return GetWorld(); };
 	

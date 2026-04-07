@@ -75,7 +75,7 @@ void UNProcGenSubsystem::StartOperation(UNProcGenOperation* Operation)
 	Operation->StartBuild(this);
 }
 
-void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation)
+void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext)
 {
 	KnownOperations.Remove(Operation);
 }

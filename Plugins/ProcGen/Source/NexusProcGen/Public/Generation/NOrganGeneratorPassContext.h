@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "Cell/NCellProxy.h"
 
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
@@ -10,4 +11,6 @@ class FNOrganGeneratorPassContext
 {
 public:
 	FNOrganGeneratorPassContext();
+	
+	TArray<ANCellProxy*> Proxies;
 };

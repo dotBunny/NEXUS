@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 class UNProcGenOperation;
@@ -11,7 +12,7 @@ struct FNProcGenOperationFinalizeTask
 {
 public:
 	
-	explicit FNProcGenOperationFinalizeTask(UNProcGenOperation* TargetOperation);
+	explicit FNProcGenOperationFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenOperationFinalizeTask, STATGROUP_TaskGraphTasks); }
     
@@ -22,4 +23,5 @@ public:
 
 private:
 	UNProcGenOperation* Operation;
+	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };

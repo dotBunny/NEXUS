@@ -40,6 +40,23 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
+ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, UNCell* Cell, const FVector& Location, const FRotator& Rotation, bool bPreLoadLevel)
+{
+	FActorSpawnParameters SpawnInfo;
+	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(Location, Rotation, SpawnInfo);
+	Proxy->InitializeFromNCell(Cell);
+	
+	// TODO: Do something with this
+	if (bPreLoadLevel)
+	{
+		Cell->World.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda(
+								[](const FSoftObjectPath&, UObject* InLoadedObject)
+								{
+								}));	
+	}
+	return Proxy;
+}
+
 void ANCellProxy::CreateLevelInstance()
 {
 	if (LevelInstance != nullptr)

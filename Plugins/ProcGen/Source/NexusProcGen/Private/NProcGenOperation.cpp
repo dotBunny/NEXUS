@@ -161,12 +161,12 @@ void UNProcGenOperation::Tick()
 	}
 }
 
-void UNProcGenOperation::FinishBuild()
+void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenOperationSharedContext> SharedContext)
 {
 
 	if (Owner != nullptr)
 	{
-		Owner->OnOperationFinished(this);
+		Owner->OnOperationFinished(this, SharedContext);
 	}
 	
 	// Were going to delete this object

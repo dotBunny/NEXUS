@@ -10,6 +10,7 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
 
+class ANCellProxy;
 class UNProcGenOperation;
 
 UCLASS()
@@ -48,7 +49,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual bool IsTickableInEditor() const override { return true; }
 
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
-	virtual void OnOperationFinished(UNProcGenOperation* Operation) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
@@ -57,6 +58,8 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNProcGenOperation*> KnownOperations;
+	
+	TMap<FString, TArray<ANCellProxy*>> KnownProxies;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };

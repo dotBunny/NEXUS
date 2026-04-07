@@ -32,6 +32,7 @@ public:
 	void OutputToLog();
 	void ResetContext();
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
+	UWorld* GetTargetWorld() const { return TargetWorld; }
 	void SetDisplayName(FString InDisplayName) { DisplayName = InDisplayName; }
 	
 private:

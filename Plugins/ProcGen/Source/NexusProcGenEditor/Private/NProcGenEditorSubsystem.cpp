@@ -4,15 +4,31 @@
 #include "NProcGenEditorSubsystem.h"
 
 #include "NProcGenOperation.h"
+#include "Generation/NProcGenOperationSharedContext.h"
 
 void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
+	if (KnownProxies.Num() > 0)
+	{
+		for (auto k : KnownProxies)
+		{
+			for (auto p : k.Value)
+			{
+				p->Destroy(true, false);
+			}
+		}
+		KnownProxies.Empty();
+	}
+	
+	
 	KnownOperations.AddUnique(Operation);
 	Operation->StartBuild(this);
 }
 
-void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation)
+void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext)
 {
+	
+	KnownProxies.Add(Operation->GetName(), TArray<ANCellProxy*>(SharedContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
 }
 

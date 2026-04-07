@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 
+class FNProcGenOperationSharedContext;
 class UNProcGenOperation;
 
 class INProcGenOperationOwner
@@ -13,7 +14,8 @@ public:
 	INProcGenOperationOwner() = default;
 	virtual ~INProcGenOperationOwner() = default;
 	virtual void StartOperation(UNProcGenOperation* Operation) = 0;
-	virtual void  OnOperationFinished(UNProcGenOperation* Operation) = 0;
+	virtual void  OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext) = 0;
 	virtual void  OnOperationDestroyed(UNProcGenOperation* Operation) = 0;
+	
 	virtual UWorld* GetDefaultWorld() = 0;
 };

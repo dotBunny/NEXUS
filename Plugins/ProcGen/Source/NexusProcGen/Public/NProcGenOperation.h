@@ -10,6 +10,7 @@
 #include "Generation/NProcGenOperationTaskGraph.h"
 #include "NProcGenOperation.generated.h"
 
+class FNProcGenOperationSharedContext;
 class UNOrganComponent;
 
 UENUM(BlueprintType)
@@ -106,7 +107,7 @@ public:
 
 protected:
 	void Tick();
-	void FinishBuild();
+	void FinishBuild(TSharedRef<FNProcGenOperationSharedContext> SharedContext);
 	FNProcGenOperationTaskGraph* GetGraph() const { return Graph.Get(); }
 	
 private:
@@ -114,6 +115,7 @@ private:
 	INProcGenOperationOwner* Owner = nullptr;
 	TUniquePtr<FNProcGenOperationTaskGraph> Graph;
 	TUniquePtr<FNProcGenOperationContext> Context;
+	
 	
 	bool bIsContextLocked;
 	FText DisplayName;

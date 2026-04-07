@@ -2,9 +2,13 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "Cell/NCellProxy.h"
 
 class FNProcGenOperationSharedContext
 {
 public:
-	FNProcGenOperationSharedContext();
+	UWorld* TargetWorld;
+	TArray<ANCellProxy*> CreatedProxies;
+
+	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld);
 };

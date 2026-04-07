@@ -294,4 +294,81 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+#define RANDOM_INDEX Twister.IntegerRange
+void FNBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNBoxPickerParams& Params)
+{
+	N_PICKER_BOX_PREFIX
+	
+	if (bSimpleMode)
+	{
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				OutLocations.Add(N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE));
+			}
+		}
+	}
+	else
+	{
+		N_PICKER_BOX_VALID_BOXES
+		
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+				OutLocations.Add(N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE));
+			}
+		}
+	}
+	
+	N_PICKER_BOX_VLOG(!bSimpleMode)
+}
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_INDEX
+
 // #SONARQUBE-ENABLE

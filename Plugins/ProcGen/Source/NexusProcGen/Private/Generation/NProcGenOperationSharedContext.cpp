@@ -3,8 +3,9 @@
 
 #include "Generation/NProcGenOperationSharedContext.h"
 
-FNProcGenOperationSharedContext::FNProcGenOperationSharedContext()
+FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld)
 {
+	TargetWorld = OutputWorld;
 	// TBD
 	
 	// What is useful cross pass for generation? 

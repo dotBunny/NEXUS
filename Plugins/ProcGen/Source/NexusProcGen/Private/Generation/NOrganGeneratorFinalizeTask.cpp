@@ -4,6 +4,7 @@
 #include "Generation/NOrganGeneratorFinalizeTask.h"
 
 #include "NProcGenOperation.h"
+#include "Cell/NCellProxy.h"
 
 
 FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
@@ -17,6 +18,18 @@ FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	
+	
+	// NOT SURE IF THIS IS WHERE WE WANT TO DO THE BUILD, BUT FOR NOW LETS GO
+	for (auto Cell : Context->CellOutputData)
+	{
+		// Spawn proxy instance
+		ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, Cell.Template, Cell.WorldPosition, Cell.WorldRotation, false);
+		
+		// Registered with global?
+		SharedContext->CreatedProxies.Add(Proxy);
+	}
+	
 	
 	// Create objects from context?
 	// Write details to pass context?

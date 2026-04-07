@@ -46,7 +46,7 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		CellDetails.Weighting = Cell.Value.Weighting;
 		
 		// We won't touch this till later
-		CellDetails.Template = Cell.Key->World;
+		CellDetails.Template = Cell.Key;
 		
 		Cell.Key->Root.CopyTo(CellDetails.CellDetails);
 		for (const TPair<int32, FNCellJunctionDetails>& Junction :  Cell.Key->Junctions)

@@ -5,6 +5,7 @@
 
 #include "NBoneInputData.h"
 #include "NCellInputData.h"
+#include "NCellOutputData.h"
 
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
@@ -20,6 +21,8 @@ public:
 	FVector Origin;
 	TArray<FNBoneInputData> BoneInputData;
 	TArray<FNCellInputData> CellInputData;
+	
+	TArray<FNCellOutputData> CellOutputData;
 	
 	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
 	
