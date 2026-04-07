@@ -20,6 +20,7 @@ public:
 		
 		// Force the logs to be written to disk prior to the operation
 		GLog->Flush();
+		FVisualLogger::Get().Flush();
 	}
 	
 	FORCEINLINE static void PostPerformanceTest()
