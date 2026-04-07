@@ -38,12 +38,11 @@ void UNProcGenEditorSubsystem::ClearAllGeneratedProxies()
 {
 	if (KnownProxies.Num() > 0)
 	{
-		for (auto KVP : KnownProxies)
+		TArray<FName> KnownKeys;
+		KnownProxies.GetKeys(KnownKeys);
+		for (auto Key : KnownKeys)
 		{
-			for (const auto Proxy : KVP.Value)
-			{
-				Proxy->Destroy(true, false);
-			}
+			ClearGeneratedProxies(Key);
 		}
 		KnownProxies.Empty();
 	}
@@ -57,8 +56,61 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FName& Key)
 		const int FoundCount = ProxiesArray.Num();
 		for (int i = 0; i < FoundCount; i++)
 		{
+			ProxiesArray[i]->DestroyLevelInstance();
 			ProxiesArray[i]->Destroy(true, false);
 		}
 		KnownProxies.Remove(Key);
+	}
+}
+
+void UNProcGenEditorSubsystem::LoadAllGeneratedProxies()
+{
+	if (KnownProxies.Num() > 0)
+	{
+		TArray<FName> KnownKeys;
+		KnownProxies.GetKeys(KnownKeys);
+		for (auto Key : KnownKeys)
+		{
+			LoadGeneratedProxies(Key);
+		}
+	}
+}
+
+void UNProcGenEditorSubsystem::LoadGeneratedProxies(const FName& Key)
+{
+	if (KnownProxies.Num() > 0 && KnownProxies.Contains(Key))
+	{
+		TArray<ANCellProxy*> ProxiesArray = *KnownProxies.Find(Key);
+		const int FoundCount = ProxiesArray.Num();
+		for (int i = 0; i < FoundCount; i++)
+		{
+			ProxiesArray[i]->LoadLevelInstance();
+		}
+	}
+}
+
+void UNProcGenEditorSubsystem::UnloadAllGeneratedProxies()
+{
+	if (KnownProxies.Num() > 0)
+	{
+		TArray<FName> KnownKeys;
+		KnownProxies.GetKeys(KnownKeys);
+		for (auto Key : KnownKeys)
+		{
+			UnloadGeneratedProxies(Key);
+		}
+	}
+}
+
+void UNProcGenEditorSubsystem::UnloadGeneratedProxies(const FName& Key)
+{
+	if (KnownProxies.Num() > 0 && KnownProxies.Contains(Key))
+	{
+		TArray<ANCellProxy*> ProxiesArray = *KnownProxies.Find(Key);
+		const int FoundCount = ProxiesArray.Num();
+		for (int i = 0; i < FoundCount; i++)
+		{
+			ProxiesArray[i]->UnloadLevelInstance();
+		}
 	}
 }

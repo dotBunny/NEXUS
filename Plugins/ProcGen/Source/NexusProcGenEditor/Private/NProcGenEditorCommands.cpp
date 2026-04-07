@@ -203,6 +203,36 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganLoadProxies,
+	"NProcGen.NOrganComponent.LoadProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies", "Load Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies_Tooltip", "Load the level instance from the selected proxies."),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganLoadAllProxies,
+	"NProcGen.NOrganComponent.LoadAllProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Load All Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies_Tooltip", "Load all level instances."),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadProxies,
+	"NProcGen.NOrganComponent.UnloadProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies", "Unload Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies_Tooltip", "Unload the level instances from the selected proxies"),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadAllProxies,
+	"NProcGen.NOrganComponent.UnloadAllProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies", "Unload All Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies_Tooltip", "Unload all level instances."),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	
+	
 	CommandList_Organ = MakeShared<FUICommandList>();
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateProxies,
 		FExecuteAction::CreateStatic(&OrganGenerateProxies),
@@ -212,6 +242,18 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearAllProxies,
 	FExecuteAction::CreateStatic(&OrganClearAllProxies),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganLoadProxies,
+FExecuteAction::CreateStatic(&OrganLoadProxyLevels),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganLoadAllProxies,
+	FExecuteAction::CreateStatic(&OrganLoadAllProxyLevels),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadProxies,
+FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadAllProxies,
+	FExecuteAction::CreateStatic(&OrganUnloadAllProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
 }
 
@@ -331,6 +373,36 @@ void FNProcGenEditorCommands::OrganClearProxies()
 void FNProcGenEditorCommands::OrganClearAllProxies()
 {
 	UNProcGenEditorSubsystem::Get()->ClearAllGeneratedProxies();
+}
+
+void FNProcGenEditorCommands::OrganLoadProxyLevels()
+{
+	TArray<UNOrganComponent*> SelectedOrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
+	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
+	for (const UNOrganComponent* Component : SelectedOrganComponents)
+	{
+		Subsystem->LoadGeneratedProxies(Component->GetLastGenerationOperationKey());
+	}
+}
+
+void FNProcGenEditorCommands::OrganLoadAllProxyLevels()
+{
+	UNProcGenEditorSubsystem::Get()->LoadAllGeneratedProxies();
+}
+
+void FNProcGenEditorCommands::OrganUnloadProxyLevels()
+{
+	TArray<UNOrganComponent*> SelectedOrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
+	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
+	for (const UNOrganComponent* Component : SelectedOrganComponents)
+	{
+		Subsystem->UnloadGeneratedProxies(Component->GetLastGenerationOperationKey());
+	}
+}
+
+void FNProcGenEditorCommands::OrganUnloadAllProxyLevels()
+{
+	UNProcGenEditorSubsystem::Get()->UnloadAllGeneratedProxies();
 }
 
 void FNProcGenEditorCommands::CellSelectActor()

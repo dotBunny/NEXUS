@@ -59,6 +59,11 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	void ClearAllGeneratedProxies();
 	void ClearGeneratedProxies(const FName& Key);
 
+	void LoadAllGeneratedProxies();
+	void LoadGeneratedProxies(const FName& Key);
+	void UnloadAllGeneratedProxies();
+	void UnloadGeneratedProxies(const FName& Key);
+	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNProcGenOperation*> KnownOperations;
