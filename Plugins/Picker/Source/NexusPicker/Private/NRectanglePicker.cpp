@@ -524,6 +524,155 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
 	Seed = RandomStream.GetCurrentSeed();
 }
+
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_INDEX
+
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+#define RANDOM_INDEX Twister.IntegerRange
+void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNRectanglePickerParams& Params)
+{
+	N_PICKER_RECTANGLE_PREFIX
+	if (bSimpleMode)
+	{
+		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					OutLocations.Add(Location);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					OutLocations.Add(Location);
+				}
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					OutLocations.Add(Location);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					OutLocations.Add(Location);
+				}
+			}
+		}
+		else
+		{
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE));
+				}
+			}
+		}
+	}
+	else
+	{
+		N_PICKER_RECTANGLE_VALID_RANGES
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					OutLocations.Add(Location);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					OutLocations.Add(Location);
+				}
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					
+					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					OutLocations.Add(Location);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
+					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					OutLocations.Add(Location);
+				}
+			}
+		}
+		else
+		{
+			if (bHasRotation)
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
+				}
+			}
+			else
+			{
+				for (int i = 0; i < Params.Count; i++)
+				{
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE));
+				}
+			}
+		}
+	}
+	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
+}
+
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 

@@ -249,4 +249,74 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 #undef RANDOM_VECTOR
 #undef RANDOM_FLOAT_RANGE
 
+#define RANDOM_VECTOR Twister.VectorNormalized
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNSpherePickerParams& Params)
+{
+	N_PICKER_SPHERE_PREFIX
+	if (bSimpleMode)
+	{
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_SPHERE_LOCATION_SIMPLE(RANDOM_VECTOR);
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_SPHERE_LOCATION_SIMPLE(RANDOM_VECTOR);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				OutLocations.Add(N_PICKER_SPHERE_LOCATION_SIMPLE(RANDOM_VECTOR));
+			}
+		}
+	}
+	else
+	{
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE));
+			}
+		}
+	}
+	N_PICKER_SPHERE_VLOG(!bSimpleMode)
+}
+#undef RANDOM_VECTOR
+#undef RANDOM_FLOAT_RANGE
+
 // #SONARQUBE-ENABLE

@@ -153,4 +153,39 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 }
 #undef RANDOM_FLOAT_RANGE
 
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNSplinePickerParams& Params)
+{
+	N_PICKER_SPLINE_PREFIX
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		for (int i = 0; i < Params.Count; i++)
+		{
+			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			OutLocations.Add(Location);
+		}
+	}
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		for (int i = 0; i < Params.Count; i++)
+		{
+			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			OutLocations.Add(Location);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < Params.Count; i++)
+		{
+			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
+		}
+	}
+	N_IMPLEMENT_VLOG_SPLINE
+}
+#undef RANDOM_FLOAT_RANGE
+
 // #SONARQUBE-ENABLE

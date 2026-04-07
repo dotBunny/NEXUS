@@ -151,3 +151,40 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 	Seed = RandomStream.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
+
+
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+void FNArcPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNArcPickerParams& Params)
+{
+	N_PICKER_ARC_PREFIX
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		for (int i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			OutLocations.Add(Location);
+		}
+	}
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		for (int i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			OutLocations.Add(Location);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			OutLocations.Add(Location);
+		}
+	}
+	N_PICKER_RADIAL_VLOG
+}
+#undef RANDOM_FLOAT_RANGE

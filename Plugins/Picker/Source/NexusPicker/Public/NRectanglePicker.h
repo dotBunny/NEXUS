@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NRectanglePickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points the plane of a rectangle using different
@@ -52,6 +53,14 @@ public:
 	 * @param Params The parameters for the point generation.
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params);
+	
+	/**
+	 * Generate random points inside or on the plane of a rectangle using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Twister The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNRectanglePickerParams& Params);
 	
 	/**
 	 * Checks if a point is inside or on the plane of a rectangle.

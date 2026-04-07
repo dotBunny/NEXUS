@@ -292,4 +292,87 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_FLOAT
 
+#define RANDOM_FLOAT_RANGE Twister.FloatRange
+#define RANDOM_FLOAT Twister.Float
+void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNCirclePickerParams& Params)
+{
+	N_PICKER_CIRCLE_PREFIX
+	if (bSimpleMode)
+	{
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				FVector Location = N_PICKER_CIRCLE_LOCATION_SIMPLE;
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				OutLocations.Add(N_PICKER_CIRCLE_LOCATION_SIMPLE);
+			}
+		}
+	}
+	else
+	{
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				FVector Location = N_PICKER_CIRCLE_LOCATION;
+				N_IMPLEMENT_PICKER_PROJECTION_TRACE
+				OutLocations.Add(Location);
+			}
+		}
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		{
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				FVector Location = N_PICKER_CIRCLE_LOCATION;
+				N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+				OutLocations.Add(Location);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < Params.Count; i++)
+			{
+				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
+				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
+				OutLocations.Add(N_PICKER_CIRCLE_LOCATION);
+			}
+		}
+	}
+	
+	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
+}
+#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
+
 // #SONARQUBE-ENABLE

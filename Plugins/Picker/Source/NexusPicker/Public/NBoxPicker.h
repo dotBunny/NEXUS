@@ -54,6 +54,12 @@ public:
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params);
 
+	/**
+	 * Generate random points in relation to an axis-aligned FBox using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Twister The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
 	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNBoxPickerParams& Params);
 	
 	/**
