@@ -41,14 +41,14 @@ public:
 	static void CellAddActor();
 	static bool CellAddActor_CanShow();
 	
-	static void OrganDispatchProcGenOperation();
+	static void OrganGenerateProxies();
+	static void OrganGenerateAllProxies();
 	static void OrganClearProxies();
 	static void OrganClearAllProxies();
 	static void OrganLoadProxyLevels();
 	static void OrganLoadAllProxyLevels();
 	static void OrganUnloadProxyLevels();
 	static void OrganUnloadAllProxyLevels();
-
 	
 	static void CellSelectActor();
 	static bool CellSelectActor_CanExecute();
@@ -91,7 +91,6 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
 	
-	
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
@@ -99,13 +98,13 @@ private:
 	
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateAllProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearAllProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganCreateLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganCreateAllLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadLevelInstances;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganUnloadAllLevelInstances;
-	
 	
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;

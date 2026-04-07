@@ -32,6 +32,7 @@ public:
 	static ENProcGenSelectionFlags GetSelectionFlags();
 	
 	static bool HasGeneratedCellProxies();
+	static bool HasSelectedGeneratedCellProxies();
 	
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr);
 	static bool UpdateCell(UNCell* Cell, ANCellActor* CellActor);

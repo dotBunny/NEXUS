@@ -70,6 +70,12 @@ public:
 	
 	void SetLastGenerationOperationKey(const FName Key) { LastGenerationOperationKey = Key; }
 	FName GetLastGenerationOperationKey() const { return LastGenerationOperationKey; }
+	FName GetAndResetGenerationOperationKey()
+	{
+		FName ReturnName = LastGenerationOperationKey;
+		LastGenerationOperationKey = NAME_None;
+		return MoveTemp(ReturnName);
+	}
 
 protected:
 

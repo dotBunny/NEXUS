@@ -94,7 +94,7 @@ FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObje
 	TArray<FName> UniqueGenerations;
 	for (auto Component : OrganComponents)
 	{
-		FName LastGenerationName = Component->GetLastGenerationOperationKey();
+		FName LastGenerationName = Component->GetAndResetGenerationOperationKey();
 		if (LastGenerationName != NAME_None && !UniqueGenerations.Contains(LastGenerationName))
 		{
 			UniqueGenerations.Add(LastGenerationName);

@@ -10,9 +10,9 @@
 void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
 	// Clear for anything in operation
-	for (const UNOrganComponent* Component :  Operation->Context->InputComponents)
+	for (UNOrganComponent* Component :  Operation->Context->InputComponents)
 	{
-		FName LastGenerationKey = Component->GetLastGenerationOperationKey();
+		FName LastGenerationKey = Component->GetAndResetGenerationOperationKey();
 		if (LastGenerationKey != NAME_None)
 		{
 			ClearGeneratedProxies(LastGenerationKey);

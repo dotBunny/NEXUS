@@ -119,6 +119,19 @@ bool FNProcGenEditorUtils::HasGeneratedCellProxies()
 	return UNProcGenEditorSubsystem::Get()->HasGeneratedCellProxies();
 }
 
+bool FNProcGenEditorUtils::HasSelectedGeneratedCellProxies()
+{
+	TArray<UNOrganComponent*> OrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
+	for (UNOrganComponent* OrganComponent : OrganComponents)
+	{
+		if (OrganComponent->GetLastGenerationOperationKey() != NAME_None)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 {
 	if (CellActor == nullptr)
