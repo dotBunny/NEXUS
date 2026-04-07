@@ -9,6 +9,7 @@
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorMinimal.h"
+#include "NProcGenEditorSubsystem.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenUtils.h"
@@ -111,6 +112,11 @@ ENProcGenSelectionFlags FNProcGenEditorUtils::GetSelectionFlags()
 		}
 	}
 	return static_cast<ENProcGenSelectionFlags>(Flags);
+}
+
+bool FNProcGenEditorUtils::HasGeneratedCellProxies()
+{
+	return UNProcGenEditorSubsystem::Get()->HasGeneratedCellProxies();
 }
 
 void FNProcGenEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)

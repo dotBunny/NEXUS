@@ -182,17 +182,27 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FCanExecuteAction::CreateStatic(&FNEditorUtils::HasActorsSelected));
 	
 	// Organ
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerate,
-	"NProcGen.NOrganComponent.Generate",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_Generate", "Generate"),
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_Generate_Tooltip", "Generate thingy"),
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerateProxies,
+	"NProcGen.NOrganComponent.GenerateProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies", "Generate Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies_Tooltip", "Generate NCellProxy actors for all selected organs."),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearProxies,
+	"NProcGen.NOrganComponent.ClearProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies", "Clear Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies_Tooltip", "Remove generated NCellProxy actors from the world"),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
 	CommandList_Organ = MakeShared<FUICommandList>();
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerate,
-		FExecuteAction::CreateStatic(&OrganGenerate),
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateProxies,
+		FExecuteAction::CreateStatic(&OrganGenerateProxies),
 		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsOrganVolumeSelected));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
+	FExecuteAction::CreateStatic(&OrganClearProxies),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
 }
 
 void FNProcGenEditorCommands::ProcGenEdMode()
@@ -292,10 +302,15 @@ bool FNProcGenEditorCommands::CellAddActor_CanShow()
 	return FNProcGenEdMode::IsActive() && !FNProcGenEdMode::HasCellActor() && !FNProcGenEditorUtils::IsOrganComponentPresentInCurrentWorld();
 }
 
-void FNProcGenEditorCommands::OrganGenerate()
+void FNProcGenEditorCommands::OrganGenerateProxies()
 {
 	UNProcGenEditorSubsystem::Get()->StartOperation(
 		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));
+}
+
+void FNProcGenEditorCommands::OrganClearProxies()
+{
+	UNProcGenEditorSubsystem::Get()->ClearGeneratedProxies();
 }
 
 void FNProcGenEditorCommands::CellSelectActor()

@@ -42,8 +42,14 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 
 ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, UNCell* Cell, const FVector& Location, const FRotator& Rotation, bool bPreLoadLevel)
 {
+	// TODO: Make const?
 	FActorSpawnParameters SpawnInfo;
+	
+	SpawnInfo.ObjectFlags |= RF_Transient;
+	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	
 	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(Location, Rotation, SpawnInfo);
+	
 	Proxy->InitializeFromNCell(Cell);
 	
 	// TODO: Do something with this

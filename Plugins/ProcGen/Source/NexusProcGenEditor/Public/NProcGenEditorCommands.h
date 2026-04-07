@@ -41,7 +41,8 @@ public:
 	static void CellAddActor();
 	static bool CellAddActor_CanShow();
 	
-	static void OrganGenerate();
+	static void OrganGenerateProxies();
+	static void OrganClearProxies();
 
 	static void CellSelectActor();
 	static bool CellSelectActor_CanExecute();
@@ -91,7 +92,8 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
 	
 	TSharedPtr<FUICommandList> CommandList_Organ;
-	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerate;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearProxies;
 	
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;

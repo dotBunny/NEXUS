@@ -54,6 +54,9 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
+	
+	void ClearGeneratedProxies();
 
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
@@ -63,3 +66,6 @@ private:
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };
+
+
+// TODO: Clear generated stuff going into play?
