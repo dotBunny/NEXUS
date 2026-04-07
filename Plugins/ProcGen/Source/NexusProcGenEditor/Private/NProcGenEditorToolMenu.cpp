@@ -44,7 +44,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 						MenuBuilder.AddMenuEntry(
 							OrganName,
 							FText::Format(NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
-							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
+							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NOrganComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent, Organ),
 								FCanExecuteAction(),
 								FIsActionChecked()));
@@ -52,15 +52,19 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 					}
 					MenuBuilder.EndSection();
 					
-					MenuBuilder.BeginSection("NOrganExtensions_ActionSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_ActionSection", "Actions"));
+					// Selected
+					MenuBuilder.BeginSection("NOrganExtensions_SelectedActionSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectedActionSection", "Selected Actions"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganGenerateProxies);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganClearProxies);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganLoadProxies);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganUnloadProxies);
-					MenuBuilder.AddSeparator();
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganCreateLevelInstances);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganUnloadLevelInstances);
+					MenuBuilder.EndSection();
+					
+					// World
+					MenuBuilder.BeginSection("NOrganExtensions_WorldActionSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_WorldActionSection", "World Actions"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganClearAllProxies);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganLoadAllProxies);
-					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganUnloadAllProxies);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganCreateAllLevelInstances);
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganUnloadAllLevelInstances);
 					MenuBuilder.EndSection();
 					
 					return MenuBuilder.MakeWidget();

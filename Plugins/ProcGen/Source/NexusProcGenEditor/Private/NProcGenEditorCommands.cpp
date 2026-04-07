@@ -185,8 +185,15 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerateProxies,
 	"NProcGen.NOrganComponent.GenerateProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies", "Generate Proxies"),
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies_Tooltip", "Generate NCellProxy actors for all selected organs."),
-	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Calculate"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies_Tooltip", "Dispatches an NProcGenOperation via the UNProcGenEditorSubsystem to generate the selected UNOrganComponents output NCellProxy actors."),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateLevelInstances,
+	"NProcGen.NOrganComponent.LoadProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies", "Create Level Instances"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies_Tooltip", "Load the level instance from the selected proxies."),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearProxies,
@@ -196,6 +203,8 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
+	
+	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearAllProxies,
 	"NProcGen.NOrganComponent.ClearAllProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearAllProxies", "Clear All Proxies"),
@@ -203,30 +212,23 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganLoadProxies,
-	"NProcGen.NOrganComponent.LoadProxies",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies", "Load Proxies"),
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies_Tooltip", "Load the level instance from the selected proxies."),
-	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
-	EUserInterfaceActionType::Button, FInputChord());
-	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganLoadAllProxies,
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateAllLevelInstances,
 	"NProcGen.NOrganComponent.LoadAllProxies",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Load All Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Create All Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies_Tooltip", "Load all level instances."),
-	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadProxies,
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadLevelInstances,
 	"NProcGen.NOrganComponent.UnloadProxies",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies", "Unload Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies", "Unload Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies_Tooltip", "Unload the level instances from the selected proxies"),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
-	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadAllProxies,
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadAllLevelInstances,
 	"NProcGen.NOrganComponent.UnloadAllProxies",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies", "Unload All Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies", "Unload All Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies_Tooltip", "Unload all level instances."),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
@@ -235,7 +237,7 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	
 	CommandList_Organ = MakeShared<FUICommandList>();
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateProxies,
-		FExecuteAction::CreateStatic(&OrganGenerateProxies),
+		FExecuteAction::CreateStatic(&OrganDispatchProcGenOperation),
 		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsOrganVolumeSelected));
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
 	FExecuteAction::CreateStatic(&OrganClearProxies),
@@ -243,16 +245,16 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearAllProxies,
 	FExecuteAction::CreateStatic(&OrganClearAllProxies),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganLoadProxies,
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganCreateLevelInstances,
 FExecuteAction::CreateStatic(&OrganLoadProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganLoadAllProxies,
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganCreateAllLevelInstances,
 	FExecuteAction::CreateStatic(&OrganLoadAllProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadProxies,
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadLevelInstances,
 FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadAllProxies,
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadAllLevelInstances,
 	FExecuteAction::CreateStatic(&OrganUnloadAllProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
 }
@@ -354,7 +356,7 @@ bool FNProcGenEditorCommands::CellAddActor_CanShow()
 	return FNProcGenEdMode::IsActive() && !FNProcGenEdMode::HasCellActor() && !FNProcGenEditorUtils::IsOrganComponentPresentInCurrentWorld();
 }
 
-void FNProcGenEditorCommands::OrganGenerateProxies()
+void FNProcGenEditorCommands::OrganDispatchProcGenOperation()
 {
 	UNProcGenEditorSubsystem::Get()->StartOperation(
 		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents()));

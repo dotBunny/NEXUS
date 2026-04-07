@@ -16,97 +16,69 @@ TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 
 void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
-	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("NProcGen Actions"),
+	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Actions"),
 		FText::GetEmpty(), ECategoryPriority::Important);
 
 	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
 	DetailBuilder.GetObjectsBeingCustomized(ObjectsBeingCustomized);
 	
-	FDetailWidgetRow& NewRow = NexusCategory.AddCustomRow(FText::GetEmpty());
-
+	FDetailWidgetRow& NewRow = NexusCategory.AddCustomRow(FText::FromString("actions"));
+	
+	NewRow.NameContent()
+		[
+			SNew(STextBlock)
+				.Text(NSLOCTEXT("NexusProcGenEditor", "OrganComponent", "Organ"))
+				.Font(IDetailLayoutBuilder::GetDetailFont())
+		];
 	NewRow.ValueContent()
-		.MaxDesiredWidth(120.f)
+		.MinDesiredWidth(500.f)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
-			.Padding(2.0f, 0.0f)
-			.VAlign(VAlign_Fill)
+			.FillWidth(0.5)
+			.Padding(0,5,5,5)
 			[
 				SNew(SButton)
-				.OnClicked(this, &FNOrganComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
-				.ToolTipText(FText::FromString("Generate content for volume and contained volumes."))
-				.Visibility(this, &FNOrganComponentCustomization::GenerateButtonVisible)
-				[
-					SNew(SHorizontalBox)
-					+SHorizontalBox::Slot()
-					.Padding(0.0f, 0.0f, 6.0f, 0.0f)
+					.ButtonStyle(&FAppStyle::Get().GetWidgetStyle<FButtonStyle>("PrimaryButton"))
 					.VAlign(VAlign_Center)
-					.AutoWidth()
-					+SHorizontalBox::Slot()
-					.VAlign(VAlign_Center)
-					.AutoWidth()
-					[
-						SNew(STextBlock)
-						.Font(IDetailLayoutBuilder::GetDetailFont())
-						.Text(NSLOCTEXT("NexusProcGenEditor", "GenerateButton", "Generate"))
-					]
-				]
+					.HAlign(HAlign_Left)
+					.Text(NSLOCTEXT("NexusProcGenEditor", "OrganComponentGenerate", "Generate"))
+					.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "OrganComponentGenerateTooltip", "Generate content for volume and contained volumes."))
+					.Visibility(this, &FNOrganComponentCustomization::GenerateButtonVisible)
+					.OnClicked(this, &FNOrganComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
-			.Padding(2.0f, 0.0f)
-			.VAlign(VAlign_Fill)
+			.FillWidth(0.5)
+			.Padding(0,5,5,5)
 			[
 				SNew(SButton)
-				.OnClicked(this, &FNOrganComponentCustomization::OnCancelClicked, ObjectsBeingCustomized)
-				.Visibility(this, &FNOrganComponentCustomization::CancelButtonVisible)
-				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-					.Padding(0.0f, 0.0f, 6.0f, 0.0f)
 					.VAlign(VAlign_Center)
-					.AutoWidth()
-					[
-						SNew(SImage)
-						.DesiredSizeOverride(FVector2D(16, 16))
-						.ColorAndOpacity(FSlateColor::UseForeground())
-					]
-					+ SHorizontalBox::Slot()
-					.VAlign(VAlign_Center)
-					.AutoWidth()
-					[
-						SNew(STextBlock)
-						.Font(IDetailLayoutBuilder::GetDetailFont())
-						.Text(NSLOCTEXT("NexusProcGenEditor", "CancelButton", "Cancel"))
-					]
-				]
+					.HAlign(HAlign_Left)
+					.Text(NSLOCTEXT("NexusProcGenEditor", "OrganComponentCancel", "Cancel"))
+					.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "OrganComponentCancelTooltip", "Cancel on-going generation for this."))
+					.Visibility(this, &FNOrganComponentCustomization::CancelButtonVisible)
+					.OnClicked(this, &FNOrganComponentCustomization::OnCancelClicked, ObjectsBeingCustomized)
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
-			.VAlign(VAlign_Fill)
-			.Padding(2.0f, 0.0f)
+			.FillWidth(0.5)
+			.Padding(0,5,5,5)
 			[
 				SNew(SButton)
-				.VAlign(VAlign_Center)
-				.OnClicked(this, &FNOrganComponentCustomization::OnCleanupClicked, ObjectsBeingCustomized)
-				.ToolTipText(FText::FromString("Clears previously generated content for operation involving this component."))
-				.Visibility(this, &FNOrganComponentCustomization::CleanupButtonVisible)
-				[
-					SNew(STextBlock)
-					.Font(IDetailLayoutBuilder::GetDetailFont())
-					.Text(NSLOCTEXT("NexusProcGenEditor", "CleanupButton", "Cleanup"))
-				]
+					.VAlign(VAlign_Center)
+					.HAlign(HAlign_Left)
+					.Text(NSLOCTEXT("NexusProcGenEditor", "OrganComponentClear", "Clear"))
+					.ToolTipText(NSLOCTEXT("NexusProcGenEditor", "OrganComponentClearTooltip", "Clears previously generated content for operation involving this component."))
+					.Visibility(this, &FNOrganComponentCustomization::ClearButtonVisible)
+					.OnClicked(this, &FNOrganComponentCustomization::OnClearClicked, ObjectsBeingCustomized)
 			]
 		];
 }
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
-	// TODO: should we be clearing the previous?
-	
-	// Create and start generation operation
-	
 	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects));
 	return FReply::Handled();
 }
@@ -116,7 +88,7 @@ FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObj
 	return FReply::Handled();
 }
 
-FReply FNOrganComponentCustomization::OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object)
+FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Object);
 	TArray<FName> UniqueGenerations;
@@ -147,7 +119,7 @@ EVisibility FNOrganComponentCustomization::CancelButtonVisible() const
 	return EVisibility::Collapsed;
 }
 
-EVisibility FNOrganComponentCustomization::CleanupButtonVisible() const
+EVisibility FNOrganComponentCustomization::ClearButtonVisible() const
 {
 	return EVisibility::Visible;
 }

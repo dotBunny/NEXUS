@@ -94,6 +94,10 @@ TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 	Style.Set("ClassThumbnail.NTissue",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NTissue"), Icon128x128));
 	
 	Style.Set("Icon.ProcGen", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_ProcGen"), Icon128x128));
+	
+	Style.Set("Command.ProGenEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
+	Style.Set("Command.ProGenEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
+	Style.Set("Command.ProGenEd.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NOrganComponent"), Icon16x16));
 
 	Style.Set("Command.ProGenEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
 	Style.Set("Command.ProGenEd.AddNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_AddNCellActor"), Icon16x16));
