@@ -21,7 +21,7 @@ FString UNCellJunctionComponent::GetJunctionName() const
 	
 	TArray<USceneComponent*> ParentComponents;
 	GetParentComponents(ParentComponents);
-	for (USceneComponent* Parent : ParentComponents)
+	for (const USceneComponent* Parent : ParentComponents)
 	{
 		ReturnString.Append(" > ");
 		ReturnString.Append(Parent->GetName());
@@ -55,10 +55,9 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 
 FVector UNCellJunctionComponent::GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
 {
-	FVector MinimumPoint =
-	(FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * -0.5f);
+	FVector MinimumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * -0.5f;
 	
-	MinimumPoint = this->Details.RootRelativeCardinalRotation.ToRotator().RotateVector(MinimumPoint);
+	MinimumPoint = this->Details.RootRelativeRotation.RotateVector(MinimumPoint);
 	MinimumPoint = OffsetRotation.RotateVector(MinimumPoint);
 	MinimumPoint += BaseLocation;
 
@@ -68,10 +67,9 @@ FVector UNCellJunctionComponent::GetMinimumPoint(const FVector& BaseLocation, co
 
 FVector UNCellJunctionComponent::GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
 {
-	FVector MaximumPoint =
-				(FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * 0.5f);
+	FVector MaximumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * 0.5f;
 	
-	MaximumPoint = this->Details.RootRelativeCardinalRotation.ToRotator().RotateVector(MaximumPoint);
+	MaximumPoint = this->Details.RootRelativeRotation.RotateVector(MaximumPoint);
 	MaximumPoint = OffsetRotation.RotateVector(MaximumPoint);
 	MaximumPoint += BaseLocation;
 
@@ -88,28 +86,22 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
 	
 	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.RootRelativeLocation, RootRotation, RootLocation);
-
-	const FRotator Rotation = Details.RootRelativeCardinalRotation.ToRotatorNormalized();
+	const FRotator Rotation = Details.RootRelativeRotation.GetNormalized();
+	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.SocketSize, Settings->SocketSize);
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.SocketSize, Settings->SocketSize);
-	
-	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
-	
-	const FRotator JunctionRotator = Rotation;// (Rotation.Quaternion()).Rotator();
-	// const FRotator JunctionRotator = (Rotation.Quaternion() *
-	// 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, JunctionRotator, Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, Rotation, Size.X,Size.Y, ENAxis::Z);
 
 	const FLinearColor Color = GetColor();
 	
 	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, JunctionRotator, NubPoints,  Color);
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  Color);
 
 	const float LineLength = Settings->SocketSize.X * 0.25f;
-
 	const FRotator SocketTypeRotation =  (Rotation.Quaternion() * FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
+
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, Color, Details.Type, LineLength);
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotation, Color, Details.Type, LineLength);
 	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotation, Color, Details.Type, LineLength);
@@ -126,7 +118,6 @@ void UNCellJunctionComponent::OnRegister()
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
 
-	
 #if WITH_EDITOR
 	const ULevel* Level = GetComponentLevel();
 	
@@ -148,7 +139,6 @@ void UNCellJunctionComponent::OnRegister()
 		{
 			Actor->Modify();
 			Details.InstanceIdentifier = Actor->GetCellJunctionNextIdentifier();
-		
 			Actor->SetActorDirty();
 		}
 		if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
@@ -196,37 +186,24 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;
-		const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 		
 		// LOCATION
 		const FVector ComponentLocation = GetComponentLocation();
-		
-		// WE ARE NOT GOING TO LOCK TO GRID
-		//const FVector GridLocation = FNVectorUtils::GetClosestGridIntersection(ComponentLocation, Settings->VoxelSize);
 		if (ComponentLocation != Details.RootRelativeLocation)
 		{
 			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
 			Details.RootRelativeLocation = ComponentLocation;
-		
 			bHasMadeChanges = true;
 		}
 
 		// ROTATOR
-		
-		// There should be no root rotation as we haven't been spawned.
-		FRotator StartRotator = GetComponentRotation();
-		StartRotator.Normalize();
-		FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
-		FinalRotator.Normalize();
-		
-		const FNCardinalRotation CardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
-		
-		if (!Details.RootRelativeCardinalRotation.IsEqual(CardinalRotation))
+		const FRotator ComponentRotation = GetComponentRotation();
+		if (ComponentRotation != Details.RootRelativeRotation)
 		{
-			Details.RootRelativeCardinalRotation = CardinalRotation;
+			Details.RootRelativeRotation = ComponentRotation;
 			bHasMadeChanges = true;
 		}
-		
+
 		// Have we made changes, let the people know!
 		if (bHasMadeChanges)
 		{
@@ -235,7 +212,6 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		}
 	}
 }
-
 
 void UNCellJunctionComponent::PostEditImport()
 {

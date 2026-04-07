@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
-#include "NProcGenSettings.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "NCellJunctionComponent.generated.h"

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NProcGenSettings.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Macros/NActorMacros.h"
 #include "Types/NCardinalRotation.h"
@@ -37,9 +36,6 @@ public:
 	
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	FIntVector2 SocketSize = FIntVector2(4, 4);
-
-	UPROPERTY(VisibleAnywhere, Category = "Bone Component")
-	FNCardinalRotation WorldCardinalRotation;
 	
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;

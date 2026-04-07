@@ -108,15 +108,3 @@ struct NEXUSCORE_API FNCardinalRotation
 		return RotatedSize;
 	}
 };
-
-USTRUCT(BlueprintType)
-struct FNCardinalDirectionDataRow : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	ENCardinalDirection Direction = ENCardinalDirection::North;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
-	float Rotation = 0.f;
-};

@@ -73,20 +73,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		return;
 	}
 	
-	FRotator StartRotator = GetComponentRotation();
-	StartRotator.Normalize();
-	FRotator FinalRotator = FNCardinalDirectionUtils::GetClosestCardinalRotator(StartRotator);
-	FinalRotator.Normalize();
-	WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(FinalRotator);
-	
-	FRotator UpdatedRotator = WorldCardinalRotation.ToRotator();
-	if (StartRotator != UpdatedRotator)
-	{
-		SetWorldRotation(UpdatedRotator);
-		// ReSharper disable once CppExpressionWithoutSideEffects
-		MarkPackageDirty();
-	}
-	
+	// LOCATION
 	const FVector BoneLocation = GetComponentLocation();
 	const FVector WorkingLocation = FindSafeLocation(BoneLocation);
 	if (WorkingLocation != BoneLocation)
@@ -132,7 +119,6 @@ void UNBoneComponent::SetAutomaticTransform()
 		if (GetComponentRotation() != UpdatedRotator)
 		{
 			SetWorldRotation(UpdatedRotator);	
-			WorldCardinalRotation = FNCardinalRotation::CreateFromNormalized(UpdatedRotator);
 				
 			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
@@ -267,7 +253,7 @@ FVector UNBoneComponent::GetMinimumPoint(const FVector& BaseLocation, const FRot
 	FVector MinimumPoint =
 		(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * -0.5f);
 	
-	MinimumPoint = this->WorldCardinalRotation.ToRotator().RotateVector(MinimumPoint);
+	MinimumPoint = this->GetComponentRotation().RotateVector(MinimumPoint);
 	MinimumPoint = OffsetRotation.RotateVector(MinimumPoint);
 	MinimumPoint += BaseLocation;
 
@@ -279,7 +265,7 @@ FVector UNBoneComponent::GetMaximumPoint(const FVector& BaseLocation, const FRot
 	FVector MaximumPoint =
 			(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * 0.5f);
 	
-	MaximumPoint = this->WorldCardinalRotation.ToRotator().RotateVector(MaximumPoint);
+	MaximumPoint = this->GetComponentRotation().RotateVector(MaximumPoint);
 	MaximumPoint = OffsetRotation.RotateVector(MaximumPoint);
 	MaximumPoint += BaseLocation;
 
@@ -295,7 +281,7 @@ FString UNBoneComponent::GetDebugLabel() const
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	const FVector RootLocation = GetComponentLocation();
-	const FRotator Rotation = WorldCardinalRotation.ToRotatorNormalized();
+	const FRotator Rotation = this->GetComponentRotation().GetNormalized();
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(SocketSize, Settings->SocketSize);
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(SocketSize, Settings->SocketSize);

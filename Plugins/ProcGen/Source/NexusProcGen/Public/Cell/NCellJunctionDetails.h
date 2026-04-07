@@ -42,9 +42,9 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector RootRelativeLocation = FVector::ZeroVector;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FNCardinalRotation RootRelativeCardinalRotation;
+	FRotator RootRelativeRotation = FRotator::ZeroRotator;
 
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
@@ -63,8 +63,8 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
 			&& RootRelativeLocation == Other.RootRelativeLocation
-			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers)
-			&& RootRelativeCardinalRotation.IsEqual(Other.RootRelativeCardinalRotation);
+			&& RootRelativeRotation == Other.RootRelativeRotation
+			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers);
 	}
 };
 

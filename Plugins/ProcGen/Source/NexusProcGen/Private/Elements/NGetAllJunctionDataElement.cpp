@@ -39,7 +39,7 @@ void FNGetAllJunctionDataElement::GetDependenciesCrc(const FPCGGetDependenciesCr
 		{
 			OutCrc.Combine(GetTypeHash(JunctionComponent->Details.RootRelativeLocation));
 			OutCrc.Combine(GetTypeHash(JunctionComponent->Details.SocketSize));
-			OutCrc.Combine(GetTypeHash(JunctionComponent->Details.RootRelativeCardinalRotation.ToIntVector3()));
+			OutCrc.Combine(GetTypeHash(JunctionComponent->Details.RootRelativeRotation.Euler()));
 		}
 	}
 }
