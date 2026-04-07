@@ -29,9 +29,9 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	Mesh->SetTangentsType(EDynamicMeshComponentTangentsMode::AutoCalculated);
 	
 	// Mesh Collisions
-	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	Mesh->SetCollisionObjectType(ECC_WorldStatic);
-	Mesh->EnableComplexAsSimpleCollision();
+	//Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//Mesh->SetCollisionObjectType(ECC_WorldStatic);
+	//Mesh->EnableComplexAsSimpleCollision();
 	
 #if WITH_EDITOR	
 	bCanPlayFromHere = 0;
@@ -144,23 +144,29 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 
 	// Convert our mesh data to UE
 	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));
-	
-	// Setup collision
-	UBodySetup* BodySetup = Mesh->GetBodySetup();
-	if (BodySetup != nullptr)
-	{
-		BodySetup->Modify();
-	}
-	
-	FKConvexElem ConvexHull;
-	ConvexHull.VertexData = NCell->Root.Hull.Vertices;
-	ConvexHull.IndexData = NCell->Root.Hull.GetFlatIndices();
-	ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
 
-	FKAggregateGeom AggGeom;;
-	AggGeom.ConvexElems.Add(ConvexHull);
 	
-	Mesh->SetSimpleCollisionShapes(AggGeom, true);		
+	// DISABLE IT FOR NOW? WHY DO WE NEED IT?
+	SetActorEnableCollision(false);
+	Mesh->SetCanEverAffectNavigation(false);
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	
+	// // Setup collision
+	// UBodySetup* BodySetup = Mesh->GetBodySetup();
+	// if (BodySetup != nullptr)
+	// {
+	// 	BodySetup->Modify();
+	// }
+	//
+	// FKConvexElem ConvexHull;
+	// ConvexHull.VertexData = NCell->Root.Hull.Vertices;
+	// ConvexHull.IndexData = NCell->Root.Hull.GetFlatIndices();
+	// ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
+	//
+	// FKAggregateGeom AggGeom;;
+	// AggGeom.ConvexElems.Add(ConvexHull);
+	//
+	// Mesh->SetSimpleCollisionShapes(AggGeom, true);		
 
 	// Let's rock some colors
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
