@@ -25,9 +25,11 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	TArray<FVector> Locations;
 	FNBoxPickerParams Params;
+	Params.Count = Context->CellInputData.Num();
 	
 	Params.Origin = Context->Bounds.Origin;
 	Params.MaximumBox = Context->Bounds.GetBox();
+	
 	
 	// Pick the origin points (were gonna overlap for now)
 	FNBoxPicker::Twisted(Locations, Random, Params);
