@@ -43,6 +43,7 @@ public:
 	
 	static void OrganGenerateProxies();
 	static void OrganClearProxies();
+	static void OrganClearAllProxies();
 
 	static void CellSelectActor();
 	static bool CellSelectActor_CanExecute();
@@ -94,6 +95,7 @@ private:
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearProxies;
+	TSharedPtr<FUICommandInfo> CommandInfo_OrganClearAllProxies;
 	
 	TSharedPtr<FUICommandList> CommandList_CellJunction;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellJunctionAddComponent;

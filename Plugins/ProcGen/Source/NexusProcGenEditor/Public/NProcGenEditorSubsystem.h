@@ -7,7 +7,6 @@
 #include "NEditorUtils.h"
 #include "NProcGenOperation.h"
 #include "Macros/NEditorSubsystemMacros.h"
-#include "Macros/NSubsystemMacros.h"
 #include "NProcGenEditorSubsystem.generated.h"
 
 class ANCellProxy;
@@ -54,15 +53,17 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
-	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
 	
-	void ClearGeneratedProxies();
+	
+	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
+	void ClearAllGeneratedProxies();
+	void ClearGeneratedProxies(const FName& Key);
 
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNProcGenOperation*> KnownOperations;
 	
-	TMap<FString, TArray<ANCellProxy*>> KnownProxies;
+	TMap<FName, TArray<ANCellProxy*>> KnownProxies;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };

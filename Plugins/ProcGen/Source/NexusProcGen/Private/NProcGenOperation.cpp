@@ -36,19 +36,11 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	Operation->SetSeedOnContext(Seed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
 	
-	
 	// Add all organs (as context) to the created generation operation
-	for (TWeakObjectPtr<UObject> WeakObject : Objects)
+	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Objects);
+	for (const auto Organ : OrganComponents)
 	{
-		UObject* Object = WeakObject.Get();
-		if (Object != nullptr && Object->IsA<UNOrganComponent>())
-		{
-			UNOrganComponent* Component = Cast<UNOrganComponent>(Object);
-			if (Component != nullptr)
-			{
-				Operation->AddToContext(Component);
-			}
-		}
+		Operation->AddToContext(Organ);
 	}
 	
 	return Operation;
@@ -167,6 +159,11 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenOperationSharedCo
 	if (Owner != nullptr)
 	{
 		Owner->OnOperationFinished(this, SharedContext);
+	}
+	
+	for (const auto Component : Context->InputComponents)
+	{
+		Component->SetLastGenerationOperationKey(this->GetFName());
 	}
 	
 	// Were going to delete this object

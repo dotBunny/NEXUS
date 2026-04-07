@@ -192,7 +192,14 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearProxies,
 	"NProcGen.NOrganComponent.ClearProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies", "Clear Proxies"),
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies_Tooltip", "Remove generated NCellProxy actors from the world"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies_Tooltip", "Remove generated NCellProxy actors from the world for the selected components operations."),
+	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
+	EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearAllProxies,
+	"NProcGen.NOrganComponent.ClearAllProxies",
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearAllProxies", "Clear All Proxies"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearAllProxies_Tooltip", "Remove all generated NCellProxy actors from the world."),
 	FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
@@ -202,6 +209,9 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 		FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::IsOrganVolumeSelected));
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
 	FExecuteAction::CreateStatic(&OrganClearProxies),
+	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
+	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearAllProxies,
+	FExecuteAction::CreateStatic(&OrganClearAllProxies),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasGeneratedCellProxies));
 }
 
@@ -310,7 +320,17 @@ void FNProcGenEditorCommands::OrganGenerateProxies()
 
 void FNProcGenEditorCommands::OrganClearProxies()
 {
-	UNProcGenEditorSubsystem::Get()->ClearGeneratedProxies();
+	TArray<UNOrganComponent*> SelectedOrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
+	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
+	for (const UNOrganComponent* Component : SelectedOrganComponents)
+	{
+		Subsystem->ClearGeneratedProxies(Component->GetLastGenerationOperationKey());
+	}
+}
+
+void FNProcGenEditorCommands::OrganClearAllProxies()
+{
+	UNProcGenEditorSubsystem::Get()->ClearAllGeneratedProxies();
 }
 
 void FNProcGenEditorCommands::CellSelectActor()

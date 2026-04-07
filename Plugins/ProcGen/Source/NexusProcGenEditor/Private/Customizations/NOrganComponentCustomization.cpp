@@ -7,6 +7,7 @@
 #include "DetailWidgetRow.h"
 #include "NProcGenEditorSubsystem.h"
 #include "NProcGenOperation.h"
+#include "Organ/NOrganComponent.h"
 
 TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 {
@@ -89,28 +90,12 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 				SNew(SButton)
 				.VAlign(VAlign_Center)
 				.OnClicked(this, &FNOrganComponentCustomization::OnCleanupClicked, ObjectsBeingCustomized)
-				.ToolTipText(FText::FromString("Cleans up generated content."))
+				.ToolTipText(FText::FromString("Clears previously generated content for operation involving this component."))
 				.Visibility(this, &FNOrganComponentCustomization::CleanupButtonVisible)
 				[
 					SNew(STextBlock)
 					.Font(IDetailLayoutBuilder::GetDetailFont())
 					.Text(NSLOCTEXT("NexusProcGenEditor", "CleanupButton", "Cleanup"))
-				]
-			]
-			+ SHorizontalBox::Slot()
-			.AutoWidth()
-			.VAlign(VAlign_Fill)
-			.Padding(2.0f, 0.0f)
-			[
-				SNew(SButton)
-				.VAlign(VAlign_Center)
-				.OnClicked(this, &FNOrganComponentCustomization::OnRefreshClicked, ObjectsBeingCustomized)
-				.ToolTipText(FText::FromString("Cleanup previously generated content and generate it again."))
-				.Visibility(this, &FNOrganComponentCustomization::RefreshButtonVisible)
-				[
-					SNew(STextBlock)
-					.Font(IDetailLayoutBuilder::GetDetailFont())
-					.Text(NSLOCTEXT("NexusProcGenEditor", "RefreshButton", "Refresh"))
 				]
 			]
 		];
@@ -121,6 +106,7 @@ FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObject
 	// TODO: should we be clearing the previous?
 	
 	// Create and start generation operation
+	
 	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects));
 	return FReply::Handled();
 }
@@ -132,13 +118,24 @@ FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObj
 
 FReply FNOrganComponentCustomization::OnCleanupClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
+	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Object);
+	TArray<FName> UniqueGenerations;
+	for (auto Component : OrganComponents)
+	{
+		FName LastGenerationName = Component->GetLastGenerationOperationKey();
+		if (LastGenerationName != NAME_None && !UniqueGenerations.Contains(LastGenerationName))
+		{
+			UniqueGenerations.Add(LastGenerationName);
+		}
+	}
+	for (auto Key : UniqueGenerations)
+	{
+		UNProcGenEditorSubsystem::Get()->ClearGeneratedProxies(Key);
+	}
+	
 	return FReply::Handled();
 }
 
-FReply FNOrganComponentCustomization::OnRefreshClicked(TArray<TWeakObjectPtr<UObject>> Object)
-{
-	return FReply::Handled();
-}
 
 EVisibility FNOrganComponentCustomization::GenerateButtonVisible() const
 {
@@ -151,11 +148,6 @@ EVisibility FNOrganComponentCustomization::CancelButtonVisible() const
 }
 
 EVisibility FNOrganComponentCustomization::CleanupButtonVisible() const
-{
-	return EVisibility::Visible;
-}
-
-EVisibility FNOrganComponentCustomization::RefreshButtonVisible() const
 {
 	return EVisibility::Visible;
 }

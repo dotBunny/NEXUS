@@ -52,8 +52,24 @@ public:
 	FString GetDebugLabel() const;
 	FNPositionRotation GetDebugLabelPositionRotation() const;
 	
+	FORCEINLINE static TArray<UNOrganComponent*> GetOrganComponents(TArray<TWeakObjectPtr<UObject>> Objects)
+	{
+		TArray<UNOrganComponent*> Components;
+		for (TWeakObjectPtr WeakObject : Objects)
+		{
+			UObject* Object = WeakObject.Get();
+			if (Object != nullptr && Object->IsA<UNOrganComponent>())
+			{
+				Components.Add(Cast<UNOrganComponent>(Object));
+			}
+		}
+		return MoveTemp(Components);
+	}
+	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
-
+	
+	void SetLastGenerationOperationKey(const FName Key) { LastGenerationOperationKey = Key; }
+	FName GetLastGenerationOperationKey() const { return LastGenerationOperationKey; }
 
 protected:
 
@@ -61,4 +77,5 @@ protected:
 	virtual void OnUnregister() override;
 
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
+	FName LastGenerationOperationKey = NAME_None;
 };

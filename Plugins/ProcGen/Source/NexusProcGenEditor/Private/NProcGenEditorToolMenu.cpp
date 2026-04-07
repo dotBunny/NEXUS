@@ -55,6 +55,8 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 					MenuBuilder.BeginSection("NOrganExtensions_ActionSection", NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_ActionSection", "Actions"));
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganGenerateProxies);
 					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganClearProxies);
+					MenuBuilder.AddSeparator();
+					MenuBuilder.AddMenuEntry(FNProcGenEditorCommands::Get().CommandInfo_OrganClearAllProxies);
 					MenuBuilder.EndSection();
 					
 					return MenuBuilder.MakeWidget();

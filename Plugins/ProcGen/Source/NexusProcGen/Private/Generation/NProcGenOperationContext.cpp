@@ -30,6 +30,7 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 		return true;
 	}
 	
+	InputComponents.Add(Component);
 	OrganContext.Add(Component, FNProcGenOperationOrganContext());
 	FNProcGenOperationOrganContext* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;

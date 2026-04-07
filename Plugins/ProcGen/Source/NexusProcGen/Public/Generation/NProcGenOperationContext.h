@@ -18,6 +18,7 @@ class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 public:
 	
+	TArray<UNOrganComponent*> InputComponents;
 	TMap<UNOrganComponent*, FNProcGenOperationOrganContext> OrganContext;
 	TMap<UNBoneComponent*, FNProcGenOperationBoneContext> BoneContext;
 	
