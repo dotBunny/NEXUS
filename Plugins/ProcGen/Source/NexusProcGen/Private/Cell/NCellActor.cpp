@@ -78,11 +78,16 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 void ANCellActor::InitializeFromProxy()
 {
 	bSpawnedFromProxy = true;
+	
+	// Disable all actors flagged for editor only
+	for (auto Actor : EditorOnlyActors)
+	{
+		Actor->Destroy(true, false);
+	}
 
 	// Callback
 	OnInitializedFromProxy.Broadcast();
 }
-
 
 void ANCellActor::CalculateBounds()
 {
