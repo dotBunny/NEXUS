@@ -73,6 +73,14 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 	return false;
 }
 
+void ANCellActor::UpdateHullDerivedData()
+{
+	for (const auto Pair : CellJunctions)
+	{
+		Pair.Value->UpdateHullDerivedData(CellRoot);
+	}
+}
+
 #endif // WITH_EDITOR
 
 void ANCellActor::InitializeFromProxy()
@@ -80,7 +88,7 @@ void ANCellActor::InitializeFromProxy()
 	bSpawnedFromProxy = true;
 	
 	// Disable all actors flagged for editor only
-	for (auto Actor : EditorOnlyActors)
+	for (auto Actor : AuthorTimeActors)
 	{
 		Actor->Destroy(true, false);
 	}
@@ -101,7 +109,6 @@ void ANCellActor::CalculateBounds()
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Max, UnitSize));
 	
-	
 	CellRoot->Details.UnitSize = FVector(
 		FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.X) + FMath::Abs(CellRoot->Details.UnitBounds.Max.X)),
 	FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.Y) + FMath::Abs(CellRoot->Details.UnitBounds.Max.Y)),
@@ -114,6 +121,9 @@ void ANCellActor::CalculateHull()
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull = FNProcGenUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
+	
+	UpdateHullDerivedData();
+	
 	SetActorDirty();
 }
 

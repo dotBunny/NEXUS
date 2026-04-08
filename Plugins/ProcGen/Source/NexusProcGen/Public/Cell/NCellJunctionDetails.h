@@ -49,6 +49,9 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
 	
+	UPROPERTY(VisibleAnywhere)
+	bool bInsideHull = false;
+	
 	bool CopyTo(FNCellJunctionDetails& Other) const
 	{
 		Other = *this;
@@ -59,11 +62,15 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	{
 		return
 			InstanceIdentifier == Other.InstanceIdentifier
+			&& bInsideHull == Other.bInsideHull
+			
 			&& Requirements == Other.Requirements
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
+			
 			&& RootRelativeLocation == Other.RootRelativeLocation
 			&& RootRelativeRotation == Other.RootRelativeRotation
+			
 			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers);
 	}
 };

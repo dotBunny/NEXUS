@@ -80,6 +80,7 @@ FVector UNCellJunctionComponent::GetMaximumPoint(const FVector& BaseLocation, co
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
+	
 	if (RootComponent == nullptr) return;
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
@@ -94,19 +95,25 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.SocketSize, Settings->SocketSize);
 	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, Rotation, Size.X,Size.Y, ENAxis::Z);
 
-	const FLinearColor Color = GetColor();
+	const FLinearColor DefaultColor = GetColor();
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  Color);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, DefaultColor);
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  DefaultColor);
 
 	const float LineLength = Settings->SocketSize.X * 0.25f;
 	const FRotator SocketTypeRotation =  (Rotation.Quaternion() * FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], SocketTypeRotation, Color, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], SocketTypeRotation, Color, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	
+	// Check if we have a hull and if points are in it
+	// Check voxel?
+	// If we didn't have a hull, check the bounds and use that
+	
+	// TODO: If junction is inside hull RED X?
 }
 
 void UNCellJunctionComponent::OnRegister()
@@ -166,6 +173,10 @@ void UNCellJunctionComponent::OnUnregister()
 
 FLinearColor UNCellJunctionComponent::GetColor() const
 {
+	if (Details.bInsideHull)
+	{
+		return FNColor::Pink;
+	}
 	switch (Details.Requirements)
 	{
 		using enum ENCellJunctionRequirements;
@@ -207,9 +218,30 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		// Have we made changes, let the people know!
 		if (bHasMadeChanges)
 		{
+			UpdateHullDerivedData(RootComponent);
+			
 			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
 		}
+	}
+}
+
+void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)
+{
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const FRotator ComponentRotation = GetComponentRotation();
+	const FVector ComponentLocation = GetComponentLocation();
+	
+	const TArray<FVector> RelativePoints {
+		GetMinimumPoint(ComponentLocation, ComponentRotation, Settings->SocketSize),
+		GetMaximumPoint(ComponentLocation, ComponentRotation, Settings->SocketSize)
+	};
+
+	const bool bIsInside = RootComponent->Details.Hull.AnyRelativePointsInside(RelativePoints);
+	if (Details.bInsideHull != bIsInside)
+	{
+		Details.bInsideHull = bIsInside;
+		MarkPackageDirty();
 	}
 }
 

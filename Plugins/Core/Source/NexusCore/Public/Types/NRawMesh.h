@@ -66,6 +66,9 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false);
+
+	bool IsRelativePointInside(const FVector& RelativePoint) const;
+	bool AnyRelativePointsInside(const TArray<FVector>& RelativePoints) const;
 	
 private:
 	bool CheckConvex();

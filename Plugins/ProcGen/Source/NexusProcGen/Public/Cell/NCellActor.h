@@ -88,6 +88,8 @@ public:
 	virtual void PostRegisterAllComponents() override;
 	bool HasDifferencesFromSidecar() const;
 	
+	void UpdateHullDerivedData();
+	
 #endif // WITH_EDITOR
 
 	void CalculateBounds();
@@ -110,7 +112,7 @@ private:
 	* This is something that needs to be turned off when we spawn
 	*/
 	UPROPERTY(EditInstanceOnly)
-	TArray<TObjectPtr<AActor>> EditorOnlyActors;
+	TArray<TObjectPtr<AActor>> AuthorTimeActors;
 	
 	UPROPERTY(VisibleInstanceOnly)
 	TSoftObjectPtr<UNCell> Sidecar = nullptr;

@@ -9,6 +9,7 @@
 #include "Macros/NActorMacros.h"
 #include "NCellJunctionComponent.generated.h"
 
+class UNCellRootComponent;
 class ALevelInstance;
 class UNCell;
 
@@ -26,6 +27,7 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 		PrimaryComponentTick.bStartWithTickEnabled = false;
 		bAutoActivate = 0;
 		
+		
 		Mobility = EComponentMobility::Static;
 #if WITH_EDITOR
 		TArray<USceneComponent*> ParentComponents;
@@ -41,35 +43,32 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 #endif // WITH_EDITOR
 
 		N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
-		
-		// TODO: add preexisting rotation?
-		//-90 on Z
 	}
 
 public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
 	FNCellJunctionDetails Details;
+
+	virtual void OnRegister() override;
+	virtual void OnUnregister() override;
 	
 	FRotator GetOffsetRotator() const;
 	FVector GetOffsetLocation() const;
-	
 	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
 	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
-
-	// TODO: Assess if we need to actually register them
-	virtual void OnRegister() override;
-	virtual void OnUnregister() override;
-
 	FLinearColor GetColor() const;
 
 #if WITH_EDITOR
-	FString GetJunctionName() const;
-
+	
 	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
-	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
-
 	virtual void PostEditImport() override;
+	
+	FString GetJunctionName() const;
+	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
+	
+	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
+	
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
