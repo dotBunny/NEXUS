@@ -24,8 +24,53 @@ bool FNRawMeshUtils::DoesIntersect(FNRawMesh& LeftMesh, const FVector& LeftOrigi
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
+bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
+{
+	if (!Mesh.IsConvex() || Mesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine IsRelativePointInside; returning false."));
+		return false;
+	}
+	
+	for (const FNRawMeshLoop& Loop : Mesh.Loops)
+	{
+		const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
+		const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
+		const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
+		
+		const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
+		const float CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
+		const float PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
+		
+		if (CenterSide * PointSide < 0.0f)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray<FVector>& RelativePoints)
+{
+	if (!Mesh.IsConvex() || Mesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine AnyRelativePointsInside; returning false."));
+		return false;
+	}
+
+	for (const FVector& Point : RelativePoints)
+	{
+		if (IsRelativePointInside(Mesh, Point))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool FNRawMeshUtils::DoesIntersectTriangles(FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-	FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+                                            FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
 {
 	// Transform vertices of both meshes to world space
 	TArray<FVector> LeftVerticesWorld;

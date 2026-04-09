@@ -95,10 +95,12 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	BuildTask.MakeDialog(false);
 	
 	Mesh.Vertices.Reserve(VerticesCount);
+	FVector CenterCalc;
 	for (int i = 0; i < VerticesCount; i++)
 	{
 		BuildTask.EnterProgressFrame(1);
 		Mesh.Vertices.Add(FVector(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]));
+		CenterCalc += Mesh.Vertices.Last();
 	}
 
 	// Build Loops
@@ -110,6 +112,8 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 		// Right now we are 
 		Mesh.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));	
 	}
+	
+	Mesh.Center = CenterCalc / VerticesCount;
 	
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
 	Mesh.bIsChaosGenerated = true;

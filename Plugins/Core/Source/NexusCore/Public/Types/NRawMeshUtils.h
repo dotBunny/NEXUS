@@ -5,13 +5,19 @@
 
 #include "NRawMesh.h"
 
-class FNRawMeshUtils
+class NEXUSCORE_API FNRawMeshUtils
 {
 public:
 	static bool DoesIntersect(
 		FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+	
+	static bool IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint);
+	
+	static bool AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray<FVector>& RelativePoints);
+	
 private:
+
 	static bool DoesIntersectTriangles(
 		FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);

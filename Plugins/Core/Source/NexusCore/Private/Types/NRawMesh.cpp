@@ -82,16 +82,6 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	// So we need to process it
 	if (bProcessMesh)
 	{
-		// Calculate mesh center if we need too?
-		if (Center == FVector::ZeroVector)
-		{
-			for (int32 VertexID : DynamicMesh.VertexIndicesItr())
-			{
-				Center += DynamicMesh.GetVertex(VertexID);
-			}
-			Center /= DynamicMesh.VertexCount();
-		}
-
 		// Check and flip triangles if needed
 		for (const int32 TriangleID : DynamicMesh.TriangleIndicesItr())
 		{
@@ -118,68 +108,6 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	return MoveTemp(DynamicMesh);
 }
 
-bool FNRawMesh::IsRelativePointInside(const FVector& RelativePoint) const
-{
-	if (!IsConvex() || HasNonTris())
-	{
-		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine IsRelativePointInside; returning false."));
-		return false;
-	}
-	
-	for (const FNRawMeshLoop& Loop : Loops)
-	{
-		const FVector& V0 = Vertices[Loop.Indices[0]];
-		const FVector& V1 = Vertices[Loop.Indices[1]];
-		const FVector& V2 = Vertices[Loop.Indices[2]];
-
-		// Calculate the outward normal (assuming CCW winding)
-		const FVector Edge1 = V1 - V0;
-		const FVector Edge2 = V2 - V0;
-		const FVector Normal = FVector::CrossProduct(Edge1, Edge2);
-
-		const FVector ToPoint = RelativePoint - V0;
-		
-		if (FVector::DotProduct(ToPoint, Normal) > 0)
-		{
-			return false;
-		}
-	}
-	
-	return true;
-}
-
-bool FNRawMesh::AnyRelativePointsInside(const TArray<FVector>& RelativePoints) const
-{
-	if (!IsConvex() || HasNonTris())
-	{
-		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine AnyRelativePointsInside; returning false."));
-		return false;
-	}
-	
-	for (const FNRawMeshLoop& Loop : Loops)
-	{
-		const FVector& V0 = Vertices[Loop.Indices[0]];
-		const FVector& V1 = Vertices[Loop.Indices[1]];
-		const FVector& V2 = Vertices[Loop.Indices[2]];
-
-		// Calculate the outward normal (assuming CCW winding)
-		const FVector Edge1 = V1 - V0;
-		const FVector Edge2 = V2 - V0;
-		const FVector Normal = FVector::CrossProduct(Edge1, Edge2);
-
-		for (const FVector& RelativePoint : RelativePoints)
-		{
-			const FVector ToPoint = RelativePoint - V0;
-			if (FVector::DotProduct(ToPoint, Normal) > 0)
-			{
-				return false;
-			}
-		}
-	}
-	
-	return true;
-}
-
 bool FNRawMesh::CheckConvex()
 {
 	if (Vertices.Num() == 0 || Loops.Num() == 0)
@@ -187,13 +115,6 @@ bool FNRawMesh::CheckConvex()
 		UE_LOG(LogNexusCore, Warning, TEXT("No vertices or loops were found in the FNRawMesh when checking if it was convex."));
 		return false;
 	}
-
-	Center = FVector::ZeroVector;
-	for (const FVector& Vertex : Vertices)
-	{
-		Center += Vertex;
-	}
-	Center /= Vertices.Num();
 
 	for (int32 i = 0; i < Loops.Num(); i++)
 	{

@@ -4,7 +4,6 @@
 #include "Organ/NOrganComponent.h"
 
 #include "DynamicMeshBuilder.h"
-#include "NCoreMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"

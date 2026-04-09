@@ -52,7 +52,8 @@ struct NEXUSCORE_API FNRawMesh
 		return Vertices == Other.Vertices 
 			&& bIsConvex == Other.bIsConvex 
 			&& bHasNonTris == Other.bHasNonTris 
-			&& bIsChaosGenerated == Other.bIsChaosGenerated;
+			&& bIsChaosGenerated == Other.bIsChaosGenerated
+			&& Center == Other.Center;
 	}
 	
 	void Validate()
@@ -66,9 +67,6 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false);
-
-	bool IsRelativePointInside(const FVector& RelativePoint) const;
-	bool AnyRelativePointsInside(const TArray<FVector>& RelativePoints) const;
 	
 private:
 	bool CheckConvex();
