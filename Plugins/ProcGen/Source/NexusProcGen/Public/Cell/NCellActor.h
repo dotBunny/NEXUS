@@ -88,12 +88,12 @@ public:
 	virtual void PostRegisterAllComponents() override;
 	bool HasDifferencesFromSidecar() const;
 	
-	void UpdateHullDerivedData();
+	
 	
 #endif // WITH_EDITOR
 
 	void CalculateBounds();
-	void CalculateHull();
+	void CalculateHull(bool bUpdateDerivedData = true);
 	void CalculateVoxelData();
 	
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }

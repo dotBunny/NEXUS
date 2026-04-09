@@ -70,11 +70,12 @@ public:
 	FString GetJunctionName() const;
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 	
-	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
+	
 	
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
 	
 private:
 	ALevelInstance* LevelInstance;

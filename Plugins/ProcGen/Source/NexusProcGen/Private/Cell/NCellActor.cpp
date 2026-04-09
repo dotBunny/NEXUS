@@ -73,13 +73,6 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 	return false;
 }
 
-void ANCellActor::UpdateHullDerivedData()
-{
-	for (const auto Pair : CellJunctions)
-	{
-		Pair.Value->UpdateHullDerivedData(CellRoot);
-	}
-}
 
 #endif // WITH_EDITOR
 
@@ -117,12 +110,18 @@ void ANCellActor::CalculateBounds()
 	SetActorDirty();
 }
 
-void ANCellActor::CalculateHull()
+void ANCellActor::CalculateHull(const bool bUpdateDerivedData)
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull = FNProcGenUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
 	
-	UpdateHullDerivedData();
+	if (bUpdateDerivedData)
+	{
+		for (const auto Pair : CellJunctions)
+		{
+			Pair.Value->UpdateHullDerivedData(CellRoot);
+		}
+	}
 	
 	SetActorDirty();
 }

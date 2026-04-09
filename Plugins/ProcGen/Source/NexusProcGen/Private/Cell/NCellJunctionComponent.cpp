@@ -232,6 +232,19 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 	}
 }
 
+void UNCellJunctionComponent::PostEditImport()
+{
+	// Forces the instance identifier
+	Details.InstanceIdentifier = -1;
+}
+
+void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
+{
+	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
+}
+
+#endif // WITH_EDITOR
+
 void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)
 {
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
@@ -248,16 +261,3 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 		MarkPackageDirty();
 	}
 }
-
-void UNCellJunctionComponent::PostEditImport()
-{
-	// Forces the instance identifier
-	Details.InstanceIdentifier = -1;
-}
-
-void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
-{
-	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
-}
-
-#endif // WITH_EDITOR
