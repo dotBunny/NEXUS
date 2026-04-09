@@ -5,6 +5,7 @@
 
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
+#include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
