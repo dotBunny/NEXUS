@@ -6,6 +6,7 @@
 #include "NBoneInputData.h"
 #include "NCellInputData.h"
 #include "NCellOutputData.h"
+#include "Collections/NWeightedIntegerArray.h"
 
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
@@ -25,10 +26,16 @@ public:
 	TArray<FNBoneInputData> BoneInputData;
 	TArray<FNCellInputData> CellInputData;
 	
+	// Maybe this gets made a seperate context (output context) so we can singular input context
 	TArray<FNCellOutputData> CellOutputData;
 	
-	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
+	bool bSuccessful = false;
 	
+	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
+	FNWeightedIntegerArray GenerateWeightedCellInputIndices();
+
+
 private:
+	
 	uint64 Seed;
 };

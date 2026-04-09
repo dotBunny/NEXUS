@@ -22,6 +22,7 @@ struct FNOrganGeneratorTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
+	
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
 	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };

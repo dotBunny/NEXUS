@@ -16,6 +16,12 @@ struct NEXUSPROCGEN_API FNTissueEntry
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
+	bool bCanBeStartNode = true;
+	
+	UPROPERTY(EditAnywhere)
+	bool bCanBeEndNode = true;
+	
+	UPROPERTY(EditAnywhere)
 	int MinimumCount = -1;
 	
 	UPROPERTY(EditAnywhere)

@@ -61,13 +61,23 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	 * Get a random value from the array creating an instance FRandomStream from the Seed;
 	 * additionally settings the Seed with the mutated seed.	 
 	 */
-	int RandomTrackedValue(int32& Seed) const
+	int32 RandomTrackedValue(int32& Seed) const
 	{
 		const FRandomStream Random(Seed);
 		const int RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
 		return Data[RandomIndex];
 	};
+
+	/**
+	 * Get a random value from the array from a deterministic input.
+	 * @param Twister The Mersenne Twister to query for random.
+	 */
+	int32 TwistedValue(FNMersenneTwister& Twister) const
+	{
+		const int RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
+		return Data[RandomIndex];
+	}
 
 	/**
 	 * Is there any data in the array?
@@ -84,6 +94,6 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	int32 Count() const { return Data.Num(); }
 
 private:	
-	TArray<int> Data;
+	TArray<int32> Data;
 	int32 CachedMaxIndex = 0;
 };

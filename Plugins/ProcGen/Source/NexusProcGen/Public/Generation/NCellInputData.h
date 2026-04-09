@@ -9,11 +9,15 @@
 
 struct NEXUSPROCGEN_API FNCellInputData
 {
+	bool bCanBeStartNode= true;
+	bool bCanBeEndNode = true;
+	
 	int MinimumCount = -1;
 	int MaximumCount = -1;
 	int Weighting = 1;
 	
 	FNCellRootDetails CellDetails;
+	
 	TMap<int32, FNCellJunctionDetails> Junctions;
 	
 	// MAIN-THREAD USE ONLY // ROOT OBJECT NEEDS TO BE UNLOADED LATER

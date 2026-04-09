@@ -18,7 +18,10 @@ FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	
+	if (!Context->bSuccessful)
+	{
+		return;
+	}
 	
 	// NOT SURE IF THIS IS WHERE WE WANT TO DO THE BUILD, BUT FOR NOW LETS GO
 	for (auto Cell : Context->CellOutputData)

@@ -5,6 +5,7 @@
 
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
+#include "Collections/NWeightedIntegerArray.h"
 #include "Generation/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
@@ -43,6 +44,8 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		// TODO: We could implement some checks on the UNCell about cross referencing and what happens?
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
+		CellDetails.bCanBeStartNode = Cell.Value.bCanBeStartNode;
+		CellDetails.bCanBeEndNode = Cell.Value.bCanBeEndNode;
 		CellDetails.Weighting = Cell.Value.Weighting;
 		
 		// We won't touch this till later
@@ -73,4 +76,19 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		
 		BoneInputData.Add(BoneDetails);
 	}
+}
+
+FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices()
+{
+	FNWeightedIntegerArray WeightedIntegers;
+	
+	for (int i = 0; i < CellInputData.Num(); i++)
+	{
+		FNCellInputData* CellData = &CellInputData[i];
+		if (CellData->MaximumCount == 0) continue;
+		
+		WeightedIntegers.Add(i, CellData->Weighting);
+	}
+
+	return MoveTemp(WeightedIntegers);
 }
