@@ -39,7 +39,7 @@ void FNRawMesh::ConvertToTriangles()
 			Loops.RemoveAt(i);
 		}
 		
-		// TODO: we could add support to convert out the ngon shapes
+		// TODO: we could add support to convert out the NGon shapes
 	}
 }
 

@@ -14,6 +14,7 @@
 
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
+#include "Organ/NOrganComponent.h"
 
 FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
@@ -36,6 +37,9 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 		{
 			// Get the context generated during pre-generation process
 			FNProcGenOperationOrganContext* ContextMap = Context->OrganContext.Find(Component);
+			
+			// Do not generate a component if it is not activated, don't make the tasks
+			if (!ContextMap->SourceComponent->bActivated) continue;
 			
 			// Create individual organ generator context object, this builds out a list of all available cells to use to fill the space
 			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(ContextMap, BaseGenerator.UnsignedInteger64());

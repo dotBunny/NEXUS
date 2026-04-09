@@ -63,7 +63,7 @@ public:
 		{
 			if (bActorDirty)
 			{
-				// We cant actually unmark a package (without saving?) so we just get rid of our flag.
+				// We can't actually unmark a package (without saving?), so we just get rid of our flag.
 				bActorDirty = false;
 			}
 		}

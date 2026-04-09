@@ -28,8 +28,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
-
-	// TODO: Explicit data structure populated to work with PCG (FPCGDataCollection)
 	
 private:
 	

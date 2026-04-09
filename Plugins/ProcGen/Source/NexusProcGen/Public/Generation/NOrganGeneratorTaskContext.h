@@ -17,6 +17,9 @@ class FNOrganGeneratorTaskContext
 
 public:
 	
+	int32 MinimumCellCount = -1;
+	int32 MaximumCellCount = -1;
+	
 	FBoxSphereBounds Bounds;
 	FVector Origin;
 	TArray<FNBoneInputData> BoneInputData;

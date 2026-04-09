@@ -34,6 +34,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
 	bool bActivated = true;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
+	int32 MinimumCellCount = -1;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
+	int32 MaximumCellCount = -1;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
 	int Seed = 42;
 

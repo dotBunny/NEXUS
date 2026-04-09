@@ -258,6 +258,8 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 	if (Details.bInsideHull != bIsInside)
 	{
 		Details.bInsideHull = bIsInside;
+
+		// ReSharper disable once CppExpressionWithoutSideEffects
 		MarkPackageDirty();
 	}
 }
