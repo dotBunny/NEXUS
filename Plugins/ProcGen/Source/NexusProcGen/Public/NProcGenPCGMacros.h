@@ -20,6 +20,25 @@
 	SocketSizeAtr->SetValue(NewPoint.MetadataEntry, JunctionComponent->Details.SocketSize); \
 	FVector2D WorldSize = FVector2D(JunctionComponent->Details.SocketSize.X * SocketSize.X, JunctionComponent->Details.SocketSize.Y * SocketSize.Y); \
 	WorldSizeAttr->SetValue(NewPoint.MetadataEntry, WorldSize); \
-	NewPoint.BoundsMin = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * -0.5f; \
-	NewPoint.BoundsMax = FVector(WorldSize.X, (JunctionComponent->Details.Type == ENCellJunctionType::TwoWaySocket) ? SocketDepth : 0, WorldSize.Y) * 0.5f; \
+	switch (JunctionComponent->Details.Type) \
+	{ \
+		using enum ENCellJunctionType; \
+		case TwoWaySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * 0.5f; \
+			break; \
+		case InOnlySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, 0, WorldSize.Y) * 0.5f; \
+			break; \
+		case OutOnlySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, 0, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * 0.5f; \
+			break; \
+		case OneWaySocket: \
+		default: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, 0, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, 0, WorldSize.Y) * 0.5f; \
+			break; \
+	} \
 	NewPoint.Seed = 0;

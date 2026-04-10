@@ -95,24 +95,26 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	const FRotator Rotation = Details.RootRelativeRotation.GetNormalized();
 	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	
+	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.SocketSize, Settings->SocketSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(Details.SocketSize, Settings->SocketSize);
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Location, Rotation, Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, DisplayRotation, Location);
 
 	const FLinearColor DefaultColor = GetColor();
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, DefaultColor);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, RotatedPoints, DefaultColor);
+	
+	// Special Caste
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetSocketNubPoints(Details.SocketSize, Settings->SocketSize); // Unrotated
 	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  DefaultColor);
+	
+	FNProcGenDebugDraw::DrawJunctionDirection(PDI, Location, Rotation, DefaultColor);
 
 	const float LineLength = Settings->SocketSize.X * 0.25f;
-	const FRotator SocketTypeRotation =  (Rotation.Quaternion() * FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Location, SocketTypeRotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], SocketTypeRotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[0], Rotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[1], Rotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[2], Rotation, DefaultColor, Details.Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[3], Rotation, DefaultColor, Details.Type, LineLength);
 	
 	// Check if we have a hull and if points are in it
 	// Check voxel?
@@ -250,6 +252,8 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	const FRotator ComponentRotation = GetComponentRotation();
 	const FVector ComponentLocation = GetComponentLocation();
+	
+	// TODO: THIS NEEDS TO BE FIXED WITH THE NEW ROTATION STUFF 
 	
 	const bool bIsInside = FNRawMeshUtils::AnyRelativePointsInside(
 		RootComponent->Details.Hull, 

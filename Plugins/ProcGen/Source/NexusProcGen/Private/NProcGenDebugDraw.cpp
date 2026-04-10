@@ -13,23 +13,23 @@ void FNProcGenDebugDraw::DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const F
 	const FRotator& Rotation, const TArray<FVector2D>& Points, const FLinearColor& Color, const float Radius,  const ENAxis Axis,
 	const ESceneDepthPriorityGroup Priority)
 {
-	
+	const FRotator AdditionalRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
 	const int PointCount = Points.Num();
 	for (int i = 0; i < PointCount; i++)
 	{
-		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, 0.0f, Points[i].Y), WorldCenter, Rotation);
+		FVector Location = FNVectorUtils::RotatedAroundPivot(WorldCenter + FVector(Points[i].X, 0.0f, Points[i].Y), WorldCenter, AdditionalRotation);
 		switch (Axis)
 		{
 			using enum ENAxis;
 		case X:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
+			DrawCircle(PDI, Location, FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::Y), FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::X), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		case Y:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
+			DrawCircle(PDI, Location, FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::X), FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::Y), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		case Z:
 		default:
-			DrawCircle(PDI, Location, FRotationMatrix(Rotation).GetScaledAxis(EAxis::X), FRotationMatrix(Rotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
+			DrawCircle(PDI, Location, FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::X), FRotationMatrix(AdditionalRotation).GetScaledAxis(EAxis::Z), Color, Radius, 32, Priority, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		}
 	}
@@ -52,16 +52,33 @@ void FNProcGenDebugDraw::DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PD
 {
 	switch (Type)
 	{
-	case ENCellJunctionType::TwoWaySocket:
+		using enum ENCellJunctionType;
+	case TwoWaySocket:
 		const FVector TwoWayPointA = Location + (Rotation.Vector() * Length);
 		const FVector TwoWayPointB = Location + (Rotation.Vector() * -Length);
 		PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 		break;
-	case ENCellJunctionType::OneWaySocket:
-		const FVector OneWayPoint = Location + (Rotation.Vector() * -Length);
-		PDI->DrawLine(Location, OneWayPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+		
+	case InOnlySocket:
+		const FVector InOnlySocketPoint = Location + (Rotation.Vector() * -Length);
+		PDI->DrawLine(Location, InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+		break;	
+		
+	case OutOnlySocket:
+		const FVector OutOnlySocketPoint = Location + (Rotation.Vector() * Length);
+		PDI->DrawLine(Location, OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+		break;		
+
+	case OneWaySocket:
 		break;
 	}
+}
+
+void FNProcGenDebugDraw::DrawJunctionDirection(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FLinearColor& Color)
+{
+	FVector EndPoint = Location + (Rotation.Vector() * 42.f);
+	PDI->DrawLine(Location, EndPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawPoint(EndPoint, Color, 10.f, SDPG_Foreground);
 }
 
 void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)

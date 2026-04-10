@@ -313,7 +313,7 @@ TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromWorld(const UWorld* Wo
 	return Result;
 }
 
-TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector2D& UnitSize)
+TArray<FVector2D> FNProcGenUtils::GetSocketNubPoints(const FIntVector2& Units, const FVector2D& UnitSize)
 {
 	TArray<FVector2D> Points;
 	Points.Reserve( Units.X * Units.Y);
@@ -332,7 +332,7 @@ TArray<FVector2D> FNProcGenUtils::GetCenteredWorldPoints2D(const FIntVector2& Un
 	return MoveTemp(Points);
 }
 
-TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(const FVector& WorldCenter, const FRotator& Rotation,
+TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(
 	const float Width, const float Height, const ENAxis Axis)
 {
 	const float HalfWidth = Width * 0.5f;
@@ -361,11 +361,6 @@ TArray<FVector> FNProcGenUtils::GetCenteredWorldCornerPoints2D(const FVector& Wo
 		ReturnPositions[2] = FVector(-HalfWidth,-HalfHeight,0);
 		ReturnPositions[3] = FVector(-HalfWidth,HalfHeight, 0);
 	}
-	
-	ReturnPositions[0] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[0], WorldCenter, Rotation);
-	ReturnPositions[1] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[1], WorldCenter, Rotation);
-	ReturnPositions[2] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[2], WorldCenter, Rotation);
-	ReturnPositions[3] = FNVectorUtils::RotatedAroundPivot(WorldCenter + ReturnPositions[3], WorldCenter, Rotation);
 
 	return MoveTemp(ReturnPositions);
 }

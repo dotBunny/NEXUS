@@ -162,7 +162,10 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 	const FRotator JunctionRotator = (GetComponentQuat() *
 	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
 	
-	TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(WorldLocation, JunctionRotator, UnitSizeX,UnitSizeY, ENAxis::Z);
+	// TODO: THIS NEEDS TO BE FIXED WITH THE NEW ROTATION STUFF 
+	TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(UnitSizeX,UnitSizeY, ENAxis::Z);
+	TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, JunctionRotator, WorldLocation);
+	
 	int32 IterationCount = 12;
 	FVector ClosestLocation;
 	bool bDidAdjust = true;
@@ -172,19 +175,19 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 		for (int i = 0; i < 4; i++)
 		{
 			const float Distance = BrushComponent->GetClosestPointOnCollision(
-				Points[i], ClosestLocation, NAME_None);
+				RotatedPoints[i], ClosestLocation, NAME_None);
 			
 			if (Distance <= 0.f)
 			{
 				continue;
 			}
 			// Point is outside we need to now find the closest point and bring it in
-			const FVector Delta = ClosestLocation - Points[i];
+			const FVector Delta = ClosestLocation - RotatedPoints[i];
 			
-			Points[0] += Delta;
-			Points[1] += Delta;
-			Points[2] += Delta;
-			Points[3] += Delta;
+			RotatedPoints[0] += Delta;
+			RotatedPoints[1] += Delta;
+			RotatedPoints[2] += Delta;
+			RotatedPoints[3] += Delta;
 			
 			WorkingLocation += Delta;
 			bDidAdjust = true;
@@ -280,38 +283,39 @@ FString UNBoneComponent::GetDebugLabel() const
 
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
-	const FVector RootLocation = GetComponentLocation();
+	const FVector Location = this->GetComponentLocation();
 	const FRotator Rotation = this->GetComponentRotation().GetNormalized();
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	
+	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(SocketSize, Settings->SocketSize);
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetCenteredWorldPoints2D(SocketSize, Settings->SocketSize);
+	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, DisplayRotation, Location);
 	
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(RootLocation, Rotation, Size.X,Size.Y, ENAxis::Z);
 	
-	FLinearColor Color = FLinearColor::White;
+	FLinearColor DefaultColor = FLinearColor::White;
 	switch (Mode)
 	{
 		using enum ENBoneMode;
 	case Manual:
 		break;
 	case Automatic:
-		Color = FNColor::NexusLightBlue;
+		DefaultColor = FNColor::NexusLightBlue;
 		break;
 	case Disabled:
 		return;
 	}
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, Points, Color);
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, RootLocation, Rotation, NubPoints,  Color);
+	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, RotatedPoints, DefaultColor);
+	
+	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetSocketNubPoints(SocketSize, Settings->SocketSize); // Unrotated
+	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  DefaultColor);
+	
+	FNProcGenDebugDraw::DrawJunctionDirection(PDI, Location, Rotation, DefaultColor);
 
 	const float LineLength = Settings->SocketSize.X * 0.25f;
-	
-	// Create a 90-degree yaw rotation for the box to render so that it gives a better representation
-	const FRotator SocketTypeRotator = (Rotation.Quaternion() *
-		FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RootLocation, SocketTypeRotator, Color, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[0], SocketTypeRotator, Color, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[1], SocketTypeRotator, Color, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[2], SocketTypeRotator, Color, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, Points[3], SocketTypeRotator, Color, Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[0], Rotation, DefaultColor, Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[1], Rotation, DefaultColor, Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[2], Rotation, DefaultColor, Type, LineLength);
+	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[3], Rotation, DefaultColor, Type, LineLength);
 }

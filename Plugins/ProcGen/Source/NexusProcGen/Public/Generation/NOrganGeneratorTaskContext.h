@@ -26,7 +26,7 @@ public:
 	TArray<FNBoneInputData> BoneInputData;
 	TArray<FNCellInputData> CellInputData;
 	
-	// Maybe this gets made a seperate context (output context) so we can singular input context
+	// Maybe this gets made a separate context (output context) so we can singular input context
 	TArray<FNCellOutputData> CellOutputData;
 	
 	
@@ -39,7 +39,7 @@ public:
 	
 	FNWeightedIntegerArray GenerateWeightedCellInputIndices();
 	
-	// TODO: Can we do something to preunderstand the socket sizes of all the junctions on a specific thing? 
+	// TODO: Can we do something to pre-understand the socket sizes of all the junctions on a specific thing? 
 	// TODO: Need to make this a working set we remove from cause of unique
 	FNWeightedIntegerArray GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize);
 	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize);

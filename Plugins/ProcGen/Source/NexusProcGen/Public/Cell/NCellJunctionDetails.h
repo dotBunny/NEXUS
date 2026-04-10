@@ -5,14 +5,15 @@
 
 #include "NArrayUtils.h"
 #include "NCellJunctionBlockerActor.h"
-#include "Types/NCardinalRotation.h"
 #include "NCellJunctionDetails.generated.h"
 
 UENUM()
 enum class ENCellJunctionType : uint8
 {
-	TwoWaySocket = 0,
-	OneWaySocket = 1,
+	TwoWaySocket = 0 UMETA(DisplayName="Two-Way", ToolTip="Passage, accessible both directions."),
+	InOnlySocket = 1 UMETA(DisplayName="In-Only", ToolTip="Inward passage only."),
+	OutOnlySocket = 2 UMETA(DisplayName="Out-Only", ToolTip="Outward passage only."),
+	OneWaySocket = 3 UMETA(DisplayName="One-Way", ToolTip="A passage can only happen once, in either direction.")
 };
 
 UENUM()

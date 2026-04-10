@@ -47,9 +47,9 @@ public:
 		return FVector2D(Units.X*UnitSize.X, Units.Y*UnitSize.Y);
 	}
 
-	static TArray<FVector2D> GetCenteredWorldPoints2D(const FIntVector2& Units, const FVector2D& UnitSize);
+	static TArray<FVector2D> GetSocketNubPoints(const FIntVector2& Units, const FVector2D& UnitSize);
 
-	static TArray<FVector> GetCenteredWorldCornerPoints2D(const FVector& WorldCenter, const FRotator& Rotation, const float Width, const float Height, const ENAxis Axis = ENAxis::Z);
+	static TArray<FVector> GetCenteredWorldCornerPoints2D(const float Width, const float Height, const ENAxis Axis = ENAxis::Z);
 
 	/**
 	 * Axis-aligned box ray intersection detection
