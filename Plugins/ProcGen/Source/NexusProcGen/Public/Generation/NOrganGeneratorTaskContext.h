@@ -29,13 +29,24 @@ public:
 	// Maybe this gets made a seperate context (output context) so we can singular input context
 	TArray<FNCellOutputData> CellOutputData;
 	
-	bool bSuccessful = false;
 	
 	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
+	
+	
+	bool IsValid() const { return bIsValid; };
+	bool IsSuccessful() const { return bSuccessful; };
+	
+	
 	FNWeightedIntegerArray GenerateWeightedCellInputIndices();
-
+	
+	// TODO: Can we do something to preunderstand the socket sizes of all the junctions on a specific thing? 
+	// TODO: Need to make this a working set we remove from cause of unique
+	FNWeightedIntegerArray GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize);
+	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize);
 
 private:
 	
+	bool bIsValid = false;
+	bool bSuccessful = false;
 	uint64 Seed;
 };

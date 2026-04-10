@@ -18,7 +18,7 @@ FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	if (!Context->bSuccessful)
+	if (!Context->IsSuccessful())
 	{
 		return;
 	}

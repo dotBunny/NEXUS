@@ -26,4 +26,17 @@ struct NEXUSPROCGEN_API FNCellInputData
 	bool HasMinimumCount() const { return MinimumCount > -1; }
 	bool HasMaximumCount() const { return MaximumCount > -1; }
 	bool IsUnique() const { return MinimumCount == 1 && MaximumCount == 1; }
+	
+	TArray<int32> GetJunctionKeys(const FIntVector2 SocketSize)
+	{
+		TArray<int32> Keys;
+		for (auto& Junction : Junctions)
+		{
+			if (Junction.Value.SocketSize == SocketSize)
+			{
+				Keys.Add(Junction.Key);
+			}
+		}
+		return Keys;
+	}
 };
