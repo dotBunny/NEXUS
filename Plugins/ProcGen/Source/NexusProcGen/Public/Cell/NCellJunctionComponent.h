@@ -56,10 +56,7 @@ public:
 	FRotator GetOffsetRotator() const;
 	FVector GetOffsetLocation() const;
 	
-	TArray<FVector> GetCornerPoints(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
-	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
-	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
-	
+	TArray<FVector> GetCornerPoints() const;
 	FLinearColor GetColor() const;
 
 #if WITH_EDITOR

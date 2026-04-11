@@ -54,31 +54,16 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 	return FVector::ZeroVector;
 }
 
-TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
+TArray<FVector> UNCellJunctionComponent::GetCornerPoints() const
 {
-	const FVector MinimumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * -0.5f;
-	const FVector MaximumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * 0.5f;
-	const FVector MinMaxPoint = FVector(MinimumPoint.X, 0, MaximumPoint.Z);
-	const FVector MaxMinPoint = FVector(MaximumPoint.X, 0, MinimumPoint.Z);
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
+		this->Details.SocketSize.X * Settings->SocketSize.X,this->Details.SocketSize.Y * Settings->SocketSize.Y, ENAxis::Z);
+
+	const FRotator DisplayRotation = GetComponentRotation() + FRotator(0.0f, 90.0f, 0.0f);
+	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
 	
-	return {
-		FNVectorUtils::RotatedAroundPivot(BaseLocation + MinimumPoint, BaseLocation, OffsetRotation), 
-		FNVectorUtils::RotatedAroundPivot(BaseLocation + MinMaxPoint, BaseLocation, OffsetRotation),
-		FNVectorUtils::RotatedAroundPivot(BaseLocation + MaximumPoint, BaseLocation, OffsetRotation), 
-		FNVectorUtils::RotatedAroundPivot(BaseLocation + MaxMinPoint, BaseLocation, OffsetRotation),
-	};
-}
-
-FVector UNCellJunctionComponent::GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
-{
-	const FVector MinimumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * -0.5f;
-	return FNVectorUtils::RotatedAroundPivot(BaseLocation + MinimumPoint, BaseLocation, OffsetRotation);
-}
-
-FVector UNCellJunctionComponent::GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
-{
-	const FVector MaximumPoint = FVector(this->Details.SocketSize.X * SocketUnitSize.X, 0, this->Details.SocketSize.Y * SocketUnitSize.Y) * 0.5f;
-	return FNVectorUtils::RotatedAroundPivot(BaseLocation + MaximumPoint, BaseLocation, OffsetRotation);
+	return RotatedCornerPoints;
 }
 
 
@@ -223,15 +208,16 @@ void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)
 {
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FRotator ComponentRotation = GetComponentRotation();
-	const FVector ComponentLocation = GetComponentLocation();
+	const TArray<FVector> RotatedCornerPoints = GetCornerPoints();
 	
-	// TODO: THIS NEEDS TO BE FIXED WITH THE NEW ROTATION STUFF 
+	DrawDebugPoint(GetWorld(), RotatedCornerPoints[0], 10.f, FColor::Red, false, 0.5f);
+	DrawDebugPoint(GetWorld(), RotatedCornerPoints[1], 10.f, FColor::Red, false, 0.5f);
+	DrawDebugPoint(GetWorld(), RotatedCornerPoints[2], 10.f, FColor::Red, false, 0.5f);
+	DrawDebugPoint(GetWorld(), RotatedCornerPoints[3], 10.f, FColor::Red, false, 0.5f);
 	
 	const bool bIsInside = FNRawMeshUtils::AnyRelativePointsInside(
 		RootComponent->Details.Hull, 
-		GetCornerPoints(ComponentLocation, ComponentRotation, Settings->SocketSize));
+		RotatedCornerPoints);
 	
 	if (Details.bInsideHull != bIsInside)
 	{

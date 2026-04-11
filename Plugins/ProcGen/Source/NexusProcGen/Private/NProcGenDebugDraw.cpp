@@ -14,33 +14,42 @@ void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector&
 {
 	// Create our sideways rotation to align visuals
 	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
+	const FVector FacingRotation = Rotation.Vector();
+	
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(UnitSize, SocketSize);
 	const float LineLength = SocketSize.X * 0.25f;
 	
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
-	const TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, DisplayRotation, Location);
-	const TArray<FVector2D> SocketPoints = FNProcGenUtils::GetSocketPoints2D(UnitSize, SocketSize); // Unrotated
-	const int32 SocketPointsCount = SocketPoints.Num();
+	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, Location);
+	const TArray<FVector2D> UnrotatedSocketPoints = FNProcGenUtils::GetSocketPoints2D(UnitSize, SocketSize);
+	const int32 SocketPointsCount = UnrotatedSocketPoints.Num();
 	
-	const FVector DirectionEndPoint = Location + (Rotation.Vector() * 42.f);
+	const FVector DirectionEndPoint = Location + (FacingRotation * 42.f);
 	const FVector DirectionTop = Location + (FVector::UpVector * 5.f);
-	const FVector DirectionTopPoint = DirectionTop + (Rotation.Vector() * 35.f);
+	const FVector DirectionTopPoint = DirectionTop + (FacingRotation * 35.f);
 	
 	const FVector DirectionBottom = Location - (FVector::UpVector * 5.f);
-	const FVector DirectionBottomPoint = DirectionBottom + (Rotation.Vector() * 35.f);
+	const FVector DirectionBottomPoint = DirectionBottom + (FacingRotation * 35.f);
+	
+	// Estimate of lines: Rectangle(4) + Corner Lines(4) + Direction Arrow(3)
+	const int ReserveLineCount = 11 + (SocketPointsCount*32);
+	PDI->AddReserveLines(SDPG_Foreground, ReserveLineCount, false, false);
 	
 	// Draw Rectangle
-	PDI->AddReserveLines(SDPG_Foreground, 4, false, false);
-	PDI->DrawLine(RotatedPoints[1], RotatedPoints[2], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
-	PDI->DrawLine(RotatedPoints[2], RotatedPoints[3], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
-	PDI->DrawLine(RotatedPoints[3], RotatedPoints[0], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
-	PDI->DrawLine(RotatedPoints[0], RotatedPoints[1], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(RotatedCornerPoints[1], RotatedCornerPoints[2], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(RotatedCornerPoints[2], RotatedCornerPoints[3], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(RotatedCornerPoints[3], RotatedCornerPoints[0], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+	PDI->DrawLine(RotatedCornerPoints[0], RotatedCornerPoints[1], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 	
 	// Draw Socket Points
 	for (int i = 0; i < SocketPointsCount; i++)
 	{
-		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location + FVector(SocketPoints[i].X, 0.0f, SocketPoints[i].Y), Location, DisplayRotation);
-		DrawCircle(PDI, RotatedNubPoint, FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z), Color, 10.f, 32, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location + 
+			FVector(UnrotatedSocketPoints[i].X, 0.0f, UnrotatedSocketPoints[i].Y), Location, DisplayRotation);
+		
+		DrawCircle(PDI, RotatedNubPoint, 
+			FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::X), FRotationMatrix(DisplayRotation).GetScaledAxis(EAxis::Z), 
+			Color, 10.f, 32, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 	}
 	
 	// Draw Corner Lines
@@ -50,19 +59,19 @@ void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector&
 		{
 			using enum ENCellJunctionType;
 		case TwoWaySocket:
-			const FVector TwoWayPointA = RotatedPoints[i] + (Rotation.Vector() * LineLength);
-			const FVector TwoWayPointB = RotatedPoints[i] + (Rotation.Vector() * -LineLength);
+			const FVector TwoWayPointA = RotatedCornerPoints[i] + (FacingRotation * LineLength);
+			const FVector TwoWayPointB = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
 			PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 			break;
 		
 		case InOnlySocket:
-			const FVector InOnlySocketPoint = RotatedPoints[i] + (Rotation.Vector() * -LineLength);
-			PDI->DrawLine(RotatedPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+			const FVector InOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
+			PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 			break;	
 		
 		case OutOnlySocket:
-			const FVector OutOnlySocketPoint = RotatedPoints[i] + (Rotation.Vector() * LineLength);
-			PDI->DrawLine(RotatedPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
+			const FVector OutOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * LineLength);
+			PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 			break;		
 
 		case OneWaySocket:
