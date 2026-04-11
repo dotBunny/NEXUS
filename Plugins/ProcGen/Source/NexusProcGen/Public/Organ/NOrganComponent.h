@@ -89,5 +89,7 @@ protected:
 	virtual void OnUnregister() override;
 
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
+	
+private:	
 	FName LastGenerationOperationKey = NAME_None;
 };
