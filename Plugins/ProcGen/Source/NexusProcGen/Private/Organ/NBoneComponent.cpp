@@ -115,7 +115,7 @@ void UNBoneComponent::SetAutomaticTransform()
 		true, false, false, 
 		HitLocation, HitNormal, HitBone, HitResult))
 	{
-		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator() + FRotator(0,-90,0);
+		const FRotator UpdatedRotator = OrganBoneDirection.ToOrientationRotator() + FRotator(0,-180,0);
 		if (GetComponentRotation() != UpdatedRotator)
 		{
 			SetWorldRotation(UpdatedRotator);	
@@ -155,16 +155,7 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 	
 	// We have a brush that we can use
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const auto UnitSizeX = static_cast<float>(SocketSize.X * Settings->SocketSize.X);
-	const auto UnitSizeY = static_cast<float>(SocketSize.Y * Settings->SocketSize.Y);
-	
-	// Create a 90-degree yaw rotation for the box that we can use to offset later.
-	const FRotator JunctionRotator = (GetComponentQuat() *
-	FQuat(FVector(0, 0, 1), FMath::DegreesToRadians(90))).Rotator();
-	
-	// TODO: THIS NEEDS TO BE FIXED WITH THE NEW ROTATION STUFF 
-	TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(UnitSizeX,UnitSizeY, ENAxis::Z);
-	TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, JunctionRotator, WorldLocation);
+	TArray<FVector> CornerPoints = GetCornerPoints(Settings->SocketSize);
 	
 	int32 IterationCount = 12;
 	FVector ClosestLocation;
@@ -175,19 +166,19 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 		for (int i = 0; i < 4; i++)
 		{
 			const float Distance = BrushComponent->GetClosestPointOnCollision(
-				RotatedPoints[i], ClosestLocation, NAME_None);
+				CornerPoints[i], ClosestLocation, NAME_None);
 			
 			if (Distance <= 0.f)
 			{
 				continue;
 			}
 			// Point is outside we need to now find the closest point and bring it in
-			const FVector Delta = ClosestLocation - RotatedPoints[i];
+			const FVector Delta = ClosestLocation - CornerPoints[i];
 			
-			RotatedPoints[0] += Delta;
-			RotatedPoints[1] += Delta;
-			RotatedPoints[2] += Delta;
-			RotatedPoints[3] += Delta;
+			CornerPoints[0] += Delta;
+			CornerPoints[1] += Delta;
+			CornerPoints[2] += Delta;
+			CornerPoints[3] += Delta;
 			
 			WorkingLocation += Delta;
 			bDidAdjust = true;
@@ -250,34 +241,20 @@ void UNBoneComponent::OnModeChanged(const ENBoneMode NewMode)
 
 #endif // WITH_EDITOR
 
-
-FVector UNBoneComponent::GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
-{
-	FVector MinimumPoint =
-		(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * -0.5f);
-	
-	MinimumPoint = this->GetComponentRotation().RotateVector(MinimumPoint);
-	MinimumPoint = OffsetRotation.RotateVector(MinimumPoint);
-	MinimumPoint += BaseLocation;
-
-	return MoveTemp(MinimumPoint);
-}
-
-FVector UNBoneComponent::GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const
-{
-	FVector MaximumPoint =
-			(FVector(this->SocketSize.X * SocketUnitSize.X, 0, this->SocketSize.Y * SocketUnitSize.Y) * 0.5f);
-	
-	MaximumPoint = this->GetComponentRotation().RotateVector(MaximumPoint);
-	MaximumPoint = OffsetRotation.RotateVector(MaximumPoint);
-	MaximumPoint += BaseLocation;
-
-	return MoveTemp(MaximumPoint);
-}
-
 FString UNBoneComponent::GetDebugLabel() const
 {
 	return GetOwner()->GetActorNameOrLabel();
+}
+
+TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize) const
+{
+	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
+		this->SocketSize.X * SocketUnitSize.X,this->SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
+
+	const FRotator DisplayRotation = GetComponentRotation() + FRotator(0.0f, 90.0f, 0.0f);
+	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
+	
+	return RotatedCornerPoints;
 }
 
 

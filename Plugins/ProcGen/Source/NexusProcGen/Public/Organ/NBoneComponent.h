@@ -64,8 +64,7 @@ public:
 #endif // WITH_EDITOR
 
 	FString GetDebugLabel() const;
-	FVector GetMinimumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
-	FVector GetMaximumPoint(const FVector& BaseLocation, const FRotator& OffsetRotation, const FVector2D& SocketUnitSize) const;
+	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	

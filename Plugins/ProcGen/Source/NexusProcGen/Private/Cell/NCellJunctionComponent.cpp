@@ -54,11 +54,11 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 	return FVector::ZeroVector;
 }
 
-TArray<FVector> UNCellJunctionComponent::GetCornerPoints() const
+TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& SocketUnitSize) const
 {
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
-		this->Details.SocketSize.X * Settings->SocketSize.X,this->Details.SocketSize.Y * Settings->SocketSize.Y, ENAxis::Z);
+		this->Details.SocketSize.X * SocketUnitSize.X,this->Details.SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
 
 	const FRotator DisplayRotation = GetComponentRotation() + FRotator(0.0f, 90.0f, 0.0f);
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
@@ -208,7 +208,8 @@ void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
 
 void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)
 {
-	const TArray<FVector> RotatedCornerPoints = GetCornerPoints();
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const TArray<FVector> RotatedCornerPoints = GetCornerPoints(Settings->SocketSize);
 	
 	DrawDebugPoint(GetWorld(), RotatedCornerPoints[0], 10.f, FColor::Red, false, 0.5f);
 	DrawDebugPoint(GetWorld(), RotatedCornerPoints[1], 10.f, FColor::Red, false, 0.5f);

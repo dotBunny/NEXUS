@@ -91,8 +91,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		BoneContext.Add(BoneComponent, FNProcGenOperationBoneContext());
 		FNProcGenOperationBoneContext* WorkingContext = BoneContext.Find(BoneComponent);
 		WorkingContext->SourceComponent = BoneComponent;
-		WorkingContext->MinimumPoint = BoneComponent->GetMinimumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
-		WorkingContext->MaximumPoint = BoneComponent->GetMaximumPoint(BoneComponent->GetComponentLocation(), FRotator::ZeroRotator, Settings->SocketSize);
+		WorkingContext->CornerPoints = BoneComponent->GetCornerPoints(Settings->SocketSize);
 	}
 	
 	// Create a separate list of components that we will operate on and clear out.
@@ -186,7 +185,10 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
 				 FNProcGenOperationBoneContext* Context = BoneContext.Find(BoneComponents[i]);
-				if (Volume->EncompassesPoint(Context->MinimumPoint) || Volume->EncompassesPoint(Context->MaximumPoint))
+				if (Volume->EncompassesPoint(Context->CornerPoints[0]) || 
+					Volume->EncompassesPoint(Context->CornerPoints[1]) ||
+					Volume->EncompassesPoint(Context->CornerPoints[2]) ||
+					Volume->EncompassesPoint(Context->CornerPoints[3]))
 				{
 					OrganGenerationContext->ContainedBones.Add(Context);
 					BoneComponents.RemoveAt(i);

@@ -106,8 +106,7 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		BoneDetails.WorldPosition = Bone->SourceComponent->GetComponentLocation();
 		BoneDetails.WorldRotation = Bone->SourceComponent->GetComponentRotation();
 		
-		BoneDetails.MinimumPoint = Bone->MinimumPoint;
-		BoneDetails.MaximumPoint = Bone->MaximumPoint;		
+		BoneDetails.CornerPoints = Bone->CornerPoints;		
 		
 		BoneDetails.SocketSize = Bone->SourceComponent->SocketSize;
 		

@@ -8,8 +8,7 @@ struct NEXUSPROCGEN_API FNBoneInputData
 	FVector WorldPosition;
 	FRotator WorldRotation;
 	
-	FVector MinimumPoint;
-	FVector MaximumPoint;
+	TArray<FVector> CornerPoints;
 	
 	FIntVector2 SocketSize;
 };

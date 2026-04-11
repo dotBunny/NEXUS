@@ -9,7 +9,5 @@
 struct NEXUSPROCGEN_API FNProcGenOperationBoneContext
 {
 	UNBoneComponent* SourceComponent;
-	
-	FVector MinimumPoint;
-	FVector MaximumPoint;
+	TArray<FVector> CornerPoints;
 };
