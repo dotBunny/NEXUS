@@ -16,6 +16,9 @@ FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTask
 
 void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	// The context was not validated during creation, so we cannot process it
+	if (!Context->IsValid()) return;
+	
 	// Create our deterministic random for the task
 	FNMersenneTwister Random(Context->Seed);
 	
@@ -39,6 +42,7 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	// START figure out rotation
 	
 	
+	
 	// Establish a base understanding of the rotations/directions
 
 	FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
@@ -54,14 +58,18 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->RootRelativeLocation);
 	FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
 	
-	// END figure out rotaion
+	// END figure out rotation
 	
 	FNCellOutputData StartCellOutputData;
+	
 	StartCellOutputData.WorldPosition = CellWorldPosition;
 	StartCellOutputData.WorldRotation = CellWorldRotation;
 	StartCellOutputData.Template = StartCellInputData.Template;
 	Context->CellOutputData.Add(StartCellOutputData);
 	
+	// TODO: We need to create a dual structure
+	// 1 holds just the raw cell/position/rotation
+	// 2 holds more intrictate details about choices, junctions filled to start, and linking to OTHER cells?
 	
 	
 	// IMPLEMENT
