@@ -11,6 +11,7 @@ FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr)
 
 FNProcGenGraph::~FNProcGenGraph()
 {
+// #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory
 	const int NodeCount = Nodes.Num();
 	for (int i = NodeCount - 1; i >= 0; i--)
 	{
@@ -18,6 +19,7 @@ FNProcGenGraph::~FNProcGenGraph()
 	}
 	Nodes.Empty();
 	RootNode = nullptr;
+// #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
 void FNProcGenGraph::RegisterNode(FNProcGenGraphNode* Node)

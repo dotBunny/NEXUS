@@ -8,7 +8,7 @@
 class NEXUSPROCGEN_API FNProcGenGraph
 {
 public:
-	FNProcGenGraph(FNProcGenGraphNode* RootNodePtr);
+	explicit FNProcGenGraph(FNProcGenGraphNode* RootNodePtr);
 	~FNProcGenGraph();
 
 	FNProcGenGraphNode* GetLastNode() { return Nodes.Last(); }

@@ -469,7 +469,7 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 	{
 		Actor->SetActorTransform(Settings.StorageTransform, false, nullptr, ETeleportType::ResetPhysics);
 	}
-
+	
 	Actor->SetActorTickEnabled(false);
 	Actor->SetActorHiddenInGame(true);
 

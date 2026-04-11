@@ -5,6 +5,7 @@
 
 #include "Generation/NProcGenGraphBoneNode.h"
 #include "Generation/NProcGenGraphCellNode.h"
+#include "Generation/NProcGenGraphNodeFactory.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
@@ -64,13 +65,13 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	
 	// Create our bone node and build a graph around it.
-	FNProcGenGraphBoneNode* BoneNode = new FNProcGenGraphBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
+	FNProcGenGraphBoneNode* BoneNode = FNProcGenGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
 	Context->CellGraph = MakeUnique<FNProcGenGraph>(BoneNode);
 	
 	// Create our first cell node, attaching it to the bone node
-	FNProcGenGraphCellNode* StartNode = new FNProcGenGraphCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
-	
+	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
 	Context->CellGraph->RegisterNode(StartNode);
+	
 	BoneNode->Link(StartNode);
 	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
 	

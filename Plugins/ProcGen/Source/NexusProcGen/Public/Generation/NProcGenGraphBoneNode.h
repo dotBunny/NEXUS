@@ -10,17 +10,10 @@ class NEXUSPROCGEN_API FNProcGenGraphBoneNode  : public FNProcGenGraphNode
 {
 public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Bone; }
-	
-	FNProcGenGraphBoneNode(const FNBoneInputData* InputData)
+	FNProcGenGraphBoneNode(const FNBoneInputData* InputData, const FVector& Position, const FRotator& Rotation) 
+	: FNProcGenGraphNode(Position, Rotation)
 	{
 		SocketSize = InputData->SocketSize;
-	}
-	FNProcGenGraphBoneNode(const FNBoneInputData* InputData, const FVector& Position, const FRotator& Rotation)
-	{
-		SocketSize = InputData->SocketSize;
-
-		WorldPosition = Position;
-		WorldRotation = Rotation;
 	}
 	
 	void Link(FNProcGenGraphNode* Node);

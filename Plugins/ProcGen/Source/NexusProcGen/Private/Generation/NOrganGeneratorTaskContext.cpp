@@ -136,11 +136,13 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 
 FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
 {
+// #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
 	{
 		delete CellGraph.Release();
 		CellGraph = nullptr;
 	}
+// #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
 

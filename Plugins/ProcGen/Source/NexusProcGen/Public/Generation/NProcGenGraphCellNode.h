@@ -12,31 +12,18 @@ class NEXUSPROCGEN_API FNProcGenGraphCellNode : public FNProcGenGraphNode
 public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Cell; }
 	
-	FNProcGenGraphCellNode(FNCellInputData* InputData)
+	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation)
+		: FNProcGenGraphNode(Position, Rotation)
 	{
 		InputData->UsedCount++;
 
-		TemplatePtr = InputData->Template;	
+		TemplatePtr = InputData->Template;
 		FreeJunctionKeys = InputData->GetJunctionKeys();
-		
-		InputDataPtr = InputData;
-	}
-	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation)
-	{
-		InputData->UsedCount++;
-		
-		TemplatePtr = InputData->Template;	
-		FreeJunctionKeys = InputData->GetJunctionKeys();
-		
+
 		// Unsure if we want to have this ref
 		InputDataPtr = InputData;
-
-		WorldPosition = Position;
-		WorldRotation = Rotation;
-		
-		
 	}
-	
+
 	void UpdateWorldPosition(const FVector& Position);
 	void UpdateWorldRotation(const FRotator& Rotation);
 	

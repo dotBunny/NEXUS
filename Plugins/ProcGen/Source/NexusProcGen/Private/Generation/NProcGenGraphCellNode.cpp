@@ -8,13 +8,13 @@
 void FNProcGenGraphCellNode::UpdateWorldPosition(const FVector& Position)
 {
 	// TODO: Shift links?
-	WorldPosition = Position;
+	SetWorldPosition(Position);
 }
 
 void FNProcGenGraphCellNode::UpdateWorldRotation(const FRotator& Rotation)
 {
 	// TODO: Shift links?
-	WorldRotation = Rotation;
+	SetWorldRotation(Rotation);
 }
 
 void FNProcGenGraphCellNode::Link(const int32 JunctionKey, FNProcGenGraphNode* Node)
