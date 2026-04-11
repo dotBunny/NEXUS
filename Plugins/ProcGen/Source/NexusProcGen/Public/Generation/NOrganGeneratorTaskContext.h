@@ -4,7 +4,7 @@
 #pragma once
 
 #include "NBoneInputData.h"
-#include "NCellGraph.h"
+#include "NProcGenGraph.h"
 #include "NCellInputData.h"
 #include "Collections/NWeightedIntegerArray.h"
 
@@ -26,7 +26,7 @@ public:
 	TArray<FNBoneInputData> BoneInputData;
 	TArray<FNCellInputData> CellInputData;
 	
-	TUniquePtr<FNCellGraph> CellGraph = nullptr;
+	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 	
 	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
 	~FNOrganGeneratorTaskContext();

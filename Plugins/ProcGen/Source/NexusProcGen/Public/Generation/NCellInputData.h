@@ -16,6 +16,8 @@ struct NEXUSPROCGEN_API FNCellInputData
 	int MaximumCount = -1;
 	int Weighting = 1;
 	
+	int UsedCount = 0;
+	
 	FNCellRootDetails CellDetails;
 	
 	TMap<int32, FNCellJunctionDetails> Junctions;
@@ -38,5 +40,12 @@ struct NEXUSPROCGEN_API FNCellInputData
 			}
 		}
 		return Keys;
+	}
+	
+	TArray<int32> GetJunctionKeys() const
+	{
+		TArray<int32> Keys;
+		Junctions.GetKeys(Keys);
+		return MoveTemp(Keys);
 	}
 };

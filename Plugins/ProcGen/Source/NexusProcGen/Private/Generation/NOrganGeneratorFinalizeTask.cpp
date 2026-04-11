@@ -5,6 +5,7 @@
 
 #include "NProcGenOperation.h"
 #include "Cell/NCellProxy.h"
+#include "Generation/NProcGenGraphCellNode.h"
 
 
 FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
@@ -26,13 +27,16 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 	// NOT SURE IF THIS IS WHERE WE WANT TO DO THE BUILD, BUT FOR NOW LETS GO
 	for (const auto Node : Context->CellGraph->GetNodes())
 	{
+		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
+		{
+			const FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+			// Spawn proxy instance
+			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
+				CellNode->GetTemplate(), CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), false);
 		
-		// Spawn proxy instance
-		ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
-			Node->GetTemplate(), Node->GetWorldPosition(), Node->GetWorldRotation(), false);
-		
-		// Registered with global?
-		SharedContext->CreatedProxies.Add(Proxy);
+			// Registered with global?
+			SharedContext->CreatedProxies.Add(Proxy);
+		}
 	}
 	
 	

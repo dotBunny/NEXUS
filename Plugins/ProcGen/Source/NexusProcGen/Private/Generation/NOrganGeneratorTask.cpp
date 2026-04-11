@@ -2,6 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Generation/NOrganGeneratorTask.h"
+
+#include "Generation/NProcGenGraphBoneNode.h"
+#include "Generation/NProcGenGraphCellNode.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
@@ -34,8 +37,8 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	// Decide which appropriately sized junction is going to be used
 	// TODO: later this will need to check if filled when used again in the later (ie need tracking)
 	TArray<int32> StartCellJunctionKeys = StartCellInputData.GetJunctionKeys(BoneData.SocketSize);
-	int StartCellJunctionKeyIndex = Random.IntegerRange(0, StartCellJunctionKeys.Num()-1);
-	FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(StartCellJunctionKeyIndex);
+	const int StartCellJunctionKeyIndex = Random.IntegerRange(0, StartCellJunctionKeys.Num()-1); // need to flag this later
+	FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(StartCellJunctionKeys[StartCellJunctionKeyIndex]);
 	
 	
 	// START figure out rotation
@@ -59,8 +62,22 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	// END figure out rotation
 	
-	Context->CellGraph = MakeUnique<FNCellGraph>(
-		new FNCellGraphNode(StartCellInputData.Template, CellWorldPosition, CellWorldRotation));;
+	
+	// Create our bone node and build a graph around it.
+	FNProcGenGraphBoneNode* BoneNode = new FNProcGenGraphBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
+	Context->CellGraph = MakeUnique<FNProcGenGraph>(BoneNode);
+	
+	// Create our first cell node, attaching it to the bone node
+	FNProcGenGraphCellNode* StartNode = new FNProcGenGraphCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
+	
+	Context->CellGraph->RegisterNode(StartNode);
+	BoneNode->Link(StartNode);
+	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
+	
+	//FNProcGenGraphCellNode* StartNode = Context->CellGraph->GetLastNode();
+	
+	// GET Open Junctions // make method on node?
+	
 	
 	// TODO: We need to create a dual structure
 	// 1 holds just the raw cell/position/rotation

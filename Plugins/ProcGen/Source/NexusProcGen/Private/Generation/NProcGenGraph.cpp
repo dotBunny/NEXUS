@@ -1,17 +1,15 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NCellGraph.h"
+#include "Generation/NProcGenGraph.h"
 
-
-
-FNCellGraph::FNCellGraph(FNCellGraphNode* RootNodePtr)
+FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr)
 {
 	RootNode = RootNodePtr;
 	Nodes.Add(RootNodePtr);
 }
 
-FNCellGraph::~FNCellGraph()
+FNProcGenGraph::~FNProcGenGraph()
 {
 	const int NodeCount = Nodes.Num();
 	for (int i = NodeCount - 1; i >= 0; i--)
@@ -20,4 +18,10 @@ FNCellGraph::~FNCellGraph()
 	}
 	Nodes.Empty();
 	RootNode = nullptr;
+}
+
+void FNProcGenGraph::RegisterNode(FNProcGenGraphNode* Node)
+{
+	// TODO: Unique check overkill?
+	Nodes.AddUnique(Node);
 }
