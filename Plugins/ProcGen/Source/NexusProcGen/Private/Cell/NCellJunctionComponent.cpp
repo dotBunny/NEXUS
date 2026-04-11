@@ -90,37 +90,11 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
-	
 	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.RootRelativeLocation, RootRotation, RootLocation);
 	const FRotator Rotation = Details.RootRelativeRotation.GetNormalized();
 	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(Details.SocketSize, Settings->SocketSize);
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
-	const TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, DisplayRotation, Location);
-
-	const FLinearColor DefaultColor = GetColor();
-	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, RotatedPoints, DefaultColor);
-	
-	// Special Caste
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetSocketNubPoints(Details.SocketSize, Settings->SocketSize); // Unrotated
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  DefaultColor);
-	
-	FNProcGenDebugDraw::DrawJunctionDirection(PDI, Location, Rotation, DefaultColor);
-
-	const float LineLength = Settings->SocketSize.X * 0.25f;
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[0], Rotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[1], Rotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[2], Rotation, DefaultColor, Details.Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[3], Rotation, DefaultColor, Details.Type, LineLength);
-	
-	// Check if we have a hull and if points are in it
-	// Check voxel?
-	// If we didn't have a hull, check the bounds and use that
-	
-	// TODO: If junction is inside hull RED X?
+	FNProcGenDebugDraw::DrawSocket(PDI, Location, Rotation, Details.SocketSize, Settings->SocketSize, Details.Type, GetColor());
 }
 
 void UNCellJunctionComponent::OnRegister()

@@ -283,39 +283,22 @@ FString UNBoneComponent::GetDebugLabel() const
 
 void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
-	const FVector Location = this->GetComponentLocation();
-	const FRotator Rotation = this->GetComponentRotation().GetNormalized();
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	
-	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
-	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(SocketSize, Settings->SocketSize);
-	const TArray<FVector> Points = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
-	const TArray<FVector> RotatedPoints = FNVectorUtils::RotateAndOffsetPoints(Points, DisplayRotation, Location);
-	
-	
-	FLinearColor DefaultColor = FLinearColor::White;
+	FLinearColor Color = FLinearColor::White;
 	switch (Mode)
 	{
 		using enum ENBoneMode;
 	case Manual:
 		break;
 	case Automatic:
-		DefaultColor = FNColor::NexusLightBlue;
+		Color = FNColor::NexusLightBlue;
 		break;
 	case Disabled:
+		// Were not drawing this
 		return;
 	}
 	
-	FNProcGenDebugDraw::DrawJunctionRectangle(PDI, RotatedPoints, DefaultColor);
-	
-	const TArray<FVector2D> NubPoints = FNProcGenUtils::GetSocketNubPoints(SocketSize, Settings->SocketSize); // Unrotated
-	FNProcGenDebugDraw::DrawJunctionUnits(PDI, Location, Rotation, NubPoints,  DefaultColor);
-	
-	FNProcGenDebugDraw::DrawJunctionDirection(PDI, Location, Rotation, DefaultColor);
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 
-	const float LineLength = Settings->SocketSize.X * 0.25f;
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[0], Rotation, DefaultColor, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[1], Rotation, DefaultColor, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[2], Rotation, DefaultColor, Type, LineLength);
-	FNProcGenDebugDraw::DrawJunctionSocketTypePoint(PDI, RotatedPoints[3], Rotation, DefaultColor, Type, LineLength);
+	FNProcGenDebugDraw::DrawSocket(PDI,  this->GetComponentLocation(), this->GetComponentRotation().GetNormalized(), 
+		SocketSize, Settings->SocketSize, Type, Color);
 }

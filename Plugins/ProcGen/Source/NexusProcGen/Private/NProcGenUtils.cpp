@@ -313,7 +313,7 @@ TArray<ANOrganVolume*> FNProcGenUtils::GetOrganVolumesFromWorld(const UWorld* Wo
 	return Result;
 }
 
-TArray<FVector2D> FNProcGenUtils::GetSocketNubPoints(const FIntVector2& Units, const FVector2D& UnitSize)
+TArray<FVector2D> FNProcGenUtils::GetSocketPoints2D(const FIntVector2& Units, const FVector2D& UnitSize)
 {
 	TArray<FVector2D> Points;
 	Points.Reserve( Units.X * Units.Y);

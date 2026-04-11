@@ -12,18 +12,9 @@ struct FNRawMesh;
 class NEXUSPROCGEN_API FNProcGenDebugDraw
 {
 public:
-	
-	static void DrawJunctionUnits(FPrimitiveDrawInterface* PDI, const FVector& WorldCenter, const FRotator& Rotation,
-		const TArray<FVector2D>& Points, const FLinearColor& Color,  const float Radius = 10.0f,
-		const ENAxis Axis = ENAxis::Z, ESceneDepthPriorityGroup Priority = SDPG_Foreground);	
 
-	static auto DrawJunctionRectangle(FPrimitiveDrawInterface* PDI, const TArray<FVector>& Points,
-	                                  const FLinearColor& Color,
-	                                  const ENAxis Axis = ENAxis::Z,
-	                                  ESceneDepthPriorityGroup Priority = SDPG_Foreground) -> void;
-
-	static void DrawJunctionSocketTypePoint(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FLinearColor& Color, const ENCellJunctionType& Type, const float Length);
-	static void DrawJunctionDirection(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, const FLinearColor& Color);
+	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, 
+		const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color);
 	
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
