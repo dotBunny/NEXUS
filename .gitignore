@@ -83,6 +83,7 @@ TestProject/DerivedDataCache/*
 TestProject/Saved/*
 TestProject/Build/*
 TestProject/.vsconfig
+TestProject/.claude
 TestProject/NEXUS.unrealvs
 *.DotSettings.user
 
