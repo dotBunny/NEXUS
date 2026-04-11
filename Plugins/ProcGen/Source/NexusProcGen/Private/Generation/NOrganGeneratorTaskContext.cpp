@@ -134,6 +134,15 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 	bIsValid = true;
 }
 
+FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
+{
+	if (CellGraph != nullptr)
+	{
+		delete CellGraph.Release();
+		CellGraph = nullptr;
+	}
+}
+
 
 FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices()
 {

@@ -18,16 +18,18 @@ FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 
 void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	if (!Context->IsSuccessful())
+	if (!Context->IsSuccessful() || Context->CellGraph == nullptr)
 	{
 		return;
 	}
 	
 	// NOT SURE IF THIS IS WHERE WE WANT TO DO THE BUILD, BUT FOR NOW LETS GO
-	for (auto Cell : Context->CellOutputData)
+	for (const auto Node : Context->CellGraph->GetNodes())
 	{
+		
 		// Spawn proxy instance
-		ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, Cell.Template, Cell.WorldPosition, Cell.WorldRotation, false);
+		ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
+			Node->GetTemplate(), Node->GetWorldPosition(), Node->GetWorldRotation(), false);
 		
 		// Registered with global?
 		SharedContext->CreatedProxies.Add(Proxy);

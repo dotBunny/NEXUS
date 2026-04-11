@@ -4,8 +4,8 @@
 #pragma once
 
 #include "NBoneInputData.h"
+#include "NCellGraph.h"
 #include "NCellInputData.h"
-#include "NCellOutputData.h"
 #include "Collections/NWeightedIntegerArray.h"
 
 struct FNProcGenOperationOrganContext;
@@ -26,16 +26,13 @@ public:
 	TArray<FNBoneInputData> BoneInputData;
 	TArray<FNCellInputData> CellInputData;
 	
-	// Maybe this gets made a separate context (output context) so we can singular input context
-	TArray<FNCellOutputData> CellOutputData;
-	
+	TUniquePtr<FNCellGraph> CellGraph = nullptr;
 	
 	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed);
-	
+	~FNOrganGeneratorTaskContext();
 	
 	bool IsValid() const { return bIsValid; };
 	bool IsSuccessful() const { return bSuccessful; };
-	
 	
 	FNWeightedIntegerArray GenerateWeightedCellInputIndices();
 	

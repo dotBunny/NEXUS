@@ -2,7 +2,6 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Generation/NOrganGeneratorTask.h"
-#include "Generation/NCellOutputData.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
@@ -60,12 +59,8 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	// END figure out rotation
 	
-	FNCellOutputData StartCellOutputData;
-	
-	StartCellOutputData.WorldPosition = CellWorldPosition;
-	StartCellOutputData.WorldRotation = CellWorldRotation;
-	StartCellOutputData.Template = StartCellInputData.Template;
-	Context->CellOutputData.Add(StartCellOutputData);
+	Context->CellGraph = MakeUnique<FNCellGraph>(
+		new FNCellGraphNode(StartCellInputData.Template, CellWorldPosition, CellWorldRotation));;
 	
 	// TODO: We need to create a dual structure
 	// 1 holds just the raw cell/position/rotation
