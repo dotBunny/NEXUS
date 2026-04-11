@@ -190,7 +190,7 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	}
 	
 	// TODO: Temp output
-	Context->OutputToLog();
+	Context->OutputToLog(true);
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);

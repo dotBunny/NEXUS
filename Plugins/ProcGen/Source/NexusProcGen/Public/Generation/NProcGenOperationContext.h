@@ -30,7 +30,7 @@ public:
 	bool AddOrganComponent(UNOrganComponent* Component);
 	bool IsLocked() const { return bIsLocked; }
 	void LockAndPreprocess(UWorld* World);
-	void OutputToLog();
+	void OutputToLog(bool bBuildTissues = false);
 	void ResetContext();
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
 	UWorld* GetTargetWorld() const { return TargetWorld; }

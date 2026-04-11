@@ -27,6 +27,7 @@ class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {
 	friend class NOrganGenerator;
 	friend class FNOrganGeneratorTaskContext;
+	friend class FNProcGenOperationContext;
 	
 	GENERATED_BODY()
 	

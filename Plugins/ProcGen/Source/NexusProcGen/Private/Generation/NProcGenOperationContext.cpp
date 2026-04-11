@@ -7,6 +7,7 @@
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
+#include "Cell/NTissue.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
@@ -205,7 +206,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	
 }
 
-void FNProcGenOperationContext::OutputToLog()
+void FNProcGenOperationContext::OutputToLog(bool bBuildTissues)
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
 	Builder.Append(TEXT("\n[FNOrganContext] "));
@@ -239,6 +240,18 @@ void FNProcGenOperationContext::OutputToLog()
 		for (const auto ContainedBone : Component.Value.ContainedBones)
 		{
 			Builder.Appendf(TEXT("\t\t\tBone: %s\n"), *ContainedBone->SourceComponent->GetDebugLabel());
+		}
+		
+		// Optionally list tissue buildout
+		if (bBuildTissues)
+		{
+			Builder.Append(TEXT("\t\t\tTissues:\n"));
+			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue = Component.Value.SourceComponent->GetTissueMap();
+		
+			for (const auto& TissuePair : BuildTissue)
+			{
+				Builder.Appendf(TEXT("\t\t\t\t- %s (%i)\n"), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting);
+			}
 		}
 	}
 	
