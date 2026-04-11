@@ -8,7 +8,7 @@
 FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
 	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
 	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
-	: Context(ContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
+	: Context(ContextPtr.ToSharedRef()), PassContext(PassContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
 {
 }
 
@@ -40,8 +40,7 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	
 	// Establish a base understanding of the rotations/directions
-	FVector JunctionForward = StartCellJunctionDetails->RootRelativeRotation.Vector();
-	FVector BoneForward = BoneData.WorldRotation.Vector();
+
 	FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
 	FQuat JunctionQuat = StartCellJunctionDetails->RootRelativeRotation.Quaternion();
 

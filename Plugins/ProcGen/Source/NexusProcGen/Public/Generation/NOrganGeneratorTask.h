@@ -24,5 +24,6 @@ struct FNOrganGeneratorTask
 private:
 	
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
+	TSharedRef<FNOrganGeneratorPassContext> PassContext;
 	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };
