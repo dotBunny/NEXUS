@@ -28,7 +28,9 @@ struct NEXUSCORE_API FNCardinalRotation
 	}
 	FIntVector3 ToIntVector3()
 	{
+// #SONARQUBE-DISABLE-CPP_S7035 C++ 23 feature to use to_underlying	
 		return FIntVector3(static_cast<uint8>(Roll), static_cast<uint8>(Pitch), static_cast<uint8>(Yaw));
+// #SONARQUBE-ENABLE-CPP_S7035 C++ 23 feature to use to_underlying	
 	}
 
 	FRotator ToRotator() const
