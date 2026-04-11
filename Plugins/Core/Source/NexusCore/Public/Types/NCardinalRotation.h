@@ -28,7 +28,7 @@ struct NEXUSCORE_API FNCardinalRotation
 	}
 	FIntVector3 ToIntVector3()
 	{
-		return FIntVector3(static_cast<int>(Roll), static_cast<int>(Pitch), static_cast<int>(Yaw));
+		return FIntVector3(static_cast<uint8>(Roll), static_cast<uint8>(Pitch), static_cast<uint8>(Yaw));
 	}
 
 	FRotator ToRotator() const

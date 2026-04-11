@@ -17,6 +17,7 @@ public:
 	
 	void RegisterNode(FNProcGenGraphNode* Node);
 private:
+	
 	FNProcGenGraphNode* RootNode = nullptr;
 	TArray<FNProcGenGraphNode*> Nodes;
 };

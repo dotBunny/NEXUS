@@ -3,9 +3,8 @@
 
 #include "Generation/NProcGenGraph.h"
 
-FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr)
+FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr) : RootNode(RootNodePtr)
 {
-	RootNode = RootNodePtr;
 	Nodes.Add(RootNodePtr);
 }
 
