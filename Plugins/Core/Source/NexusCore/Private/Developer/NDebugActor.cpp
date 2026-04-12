@@ -1,9 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Developer/NDebugPointActor.h"
+#include "Developer/NDebugActor.h"
 
-ANDebugPointActor::ANDebugPointActor()
+ANDebugActor::ANDebugActor()
 {
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = SphereMesh;
@@ -16,13 +16,16 @@ ANDebugPointActor::ANDebugPointActor()
 	}
 }
 
-ANDebugPointActor* ANDebugPointActor::CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label)
+ANDebugActor* ANDebugActor::CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label, const FVector& Scale)
 {
 	FActorSpawnParameters SpawnInfo;
 	
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+#if WITH_EDITOR	
 	SpawnInfo.InitialActorLabel = Label; 
-	
-	return World->SpawnActor<ANDebugPointActor>(Position, Rotation, SpawnInfo);
+#endif // WITH_EDITOR
+
+	const FTransform SpawnTransform(Rotation, Position, Scale);
+	return World->SpawnActor<ANDebugActor>(StaticClass(), SpawnTransform, SpawnInfo);
 }

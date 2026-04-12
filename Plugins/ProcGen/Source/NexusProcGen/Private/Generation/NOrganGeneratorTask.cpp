@@ -124,12 +124,12 @@ bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenG
 		const int TargetJunctionKeyIndex = Random.IntegerRange(0, TargetJunctionKeys.Num()-1);
 		const int TargetJunctionKey = TargetJunctionKeys[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
-		
+	
 		// Figure out rotations
-		// TODO: This seems to be broken
-		FQuat SourceJunctionQuat = Junction.Value->RootRelativeRotation.Quaternion();
-		FQuat TargetJunctionQuat = TargetJunctionDetails->RootRelativeRotation.Quaternion();
-		FQuat TargetJunctionWorldQuat = SourceJunctionQuat * TargetJunctionQuat.Inverse();
+		// TODO: This seems to be broken - maybe? 
+		FQuat SourceJunctionWorldQuat = Junction.Value->RootRelativeRotation.Quaternion();
+		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->RootRelativeRotation.Quaternion();
+		FQuat TargetJunctionWorldQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
 		FRotator TargetJunctionWorldRotation = TargetJunctionWorldQuat.Rotator(); 
 		
 		FVector TargetJunctionWorldOffset = TargetJunctionWorldQuat.RotateVector(TargetJunctionDetails->RootRelativeLocation);

@@ -4,6 +4,7 @@
 #include "Generation/NProcGenGraphCellNode.h"
 
 #include "NProcGenMinimal.h"
+#include "Math/NVectorUtils.h"
 
 FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
 {
@@ -15,16 +16,12 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
 	for (int i = 0; i < FreeJunctionKeys.Num(); i++)
 	{
-		const int JunctionKey = FreeJunctionKeys[i];
-		WorldJunctions.Add(FreeJunctionKeys[i], InputData->Junctions[JunctionKey]);
-	}
-	
-	// TODO: This needs fixing ? 
-	// TODO: Maybe hack in something to draw where we think they are ? 
-	for (auto& Pair : WorldJunctions)
-	{
-		Pair.Value.RootRelativeRotation += Rotation;
-		Pair.Value.RootRelativeLocation += Position;
+		const int32 JunctionKey = FreeJunctionKeys[i];
+		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
+		
+		// Update position/rotation to reflect actual world placement
+		Details.RootRelativeRotation += Rotation;
+		Details.RootRelativeLocation = FNVectorUtils::RotatedAroundPivot(Details.RootRelativeLocation + Position, Position, Rotation);
 	}
 	
 	InputDataPtr = InputData;
@@ -48,7 +45,8 @@ TMap<int32, FNCellJunctionDetails*> FNProcGenGraphCellNode::GetOpenJunctions()
 	const int FreeCount = FreeJunctionKeys.Num();
 	for (int i = 0; i < FreeCount; i++)
 	{
-		Junctions.Add(FreeJunctionKeys[i], &WorldJunctions[FreeJunctionKeys[i]]);
+		uint32 Key = FreeJunctionKeys[i];
+		Junctions.Add(Key, &WorldJunctions[Key]);
 	}
 	return Junctions;
 }

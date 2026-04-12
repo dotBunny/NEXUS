@@ -394,7 +394,7 @@ void FNProcGenEditorCommands::OrganClearGenerated()
 
 void FNProcGenEditorCommands::OrganClearAllProxies()
 {
-	UNProcGenEditorSubsystem::Get()->ClearAllGenerated();
+	UNProcGenEditorSubsystem::Get()->ClearAllProxies();
 }
 
 void FNProcGenEditorCommands::OrganLoadProxyLevels()

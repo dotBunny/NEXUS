@@ -5,7 +5,7 @@
 
 #include "NProcGenOperation.h"
 #include "Cell/NCellProxy.h"
-#include "Developer/NDebugPointActor.h"
+#include "Developer/NDebugActor.h"
 #include "Generation/NProcGenGraphCellNode.h"
 
 
@@ -33,18 +33,15 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 			const FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
 			
 			// TODO: Temp DRAWING
-			const TMap<int32, FNCellJunctionDetails>& Junctions = CellNode->GetJunctions();
-			for (const auto JunctionPair : Junctions)
-			{
-				FString Junction = FString::Printf(TEXT("%s Junction %d"), *CellNode->GetTemplate()->World.GetAssetName(),  JunctionPair.Key);
-				
-				ANDebugPointActor* DebugPoint = ANDebugPointActor::CreateInstance(SharedContext->TargetWorld, 
-						JunctionPair.Value.RootRelativeLocation, 
-						JunctionPair.Value.RootRelativeRotation, Junction);
-				
-				
-				SharedContext->CreatedActors.Add(DebugPoint);
-			}
+			// const TMap<int32, FNCellJunctionDetails>& Junctions = CellNode->GetJunctions();
+			// for (const auto JunctionPair : Junctions)
+			// {
+			// 	FString Junction = FString::Printf(TEXT("%s Junction %d"), *CellNode->GetTemplate()->World.GetAssetName(),  JunctionPair.Key);
+			// 	ANDebugActor::CreateInstance(SharedContext->TargetWorld, 
+			// 			JunctionPair.Value.RootRelativeLocation, 
+			// 			JunctionPair.Value.RootRelativeRotation, Junction, FVector(0.5f, 0.5f, 0.5f));
+			// 	
+			// }
 			
 			// Spawn proxy instance
 			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
