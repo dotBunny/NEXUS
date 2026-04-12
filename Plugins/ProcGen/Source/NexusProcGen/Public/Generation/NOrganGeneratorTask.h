@@ -23,7 +23,7 @@ struct FNOrganGeneratorTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	
+
 	void StartGraph(FNMersenneTwister& Random) const;
 	
 	TArray<FNProcGenGraphNode*> ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;

@@ -57,7 +57,10 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	const int StartCellJunctionKeyIndex = Random.IntegerRange(0, StartCellJunctionKeys.Num()-1); // need to flag this later
 	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(StartCellJunctionKeys[StartCellJunctionKeyIndex]);
 	
-	// Figure out rotation
+	// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
+	// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
+	// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
+	
 	const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
 	const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
 	
@@ -125,12 +128,13 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		const int TargetJunctionKeyIndex = Random.IntegerRange(0, TargetJunctionKeys.Num()-1);
 		const int TargetJunctionKey = TargetJunctionKeys[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
-	
-		// Figure out rotations
+		
+		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
+		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
+		// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
 		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
 		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
-		
-		FQuat RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
+		FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
 		
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
