@@ -18,6 +18,7 @@ public:
 	
 	void RegisterNode(FNProcGenGraphNode* Node);
 	
+	
 	int GetNodeCount() const
 	{
 		return Nodes.Num();

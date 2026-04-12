@@ -8,10 +8,22 @@
 
 FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
 {
-	InputData->UsedCount++;
-
-	TemplatePtr = InputData->Template;
-	FreeJunctionKeys = InputData->GetJunctionKeys();
+	InputDataPtr = InputData;
+	TemplatePtr = InputDataPtr->Template; // Might not need in future
+	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
+	
+	// Copy bounds and rotate into their new world-space position/rotation
+	WorldBounds = InputData->CellDetails.Bounds;
+	WorldBounds.Min = FNVectorUtils::RotatedAroundPivot(WorldBounds.Min + Position, Position, Rotation);
+	WorldBounds.Max = FNVectorUtils::RotatedAroundPivot(WorldBounds.Max + Position, Position, Rotation);
+	
+	// Copy our hull data and rotate it into its new world-space position/rotation
+	Hull = InputData->CellDetails.Hull;
+	//WorldHull.RotatedAroundPivot(Position, Rotation); // dont think we need to move these as they are local and the comparison is in local space
+	
+	// Copy our voxel data and rotate it into its new world-space position/rotation
+	WorldVoxel = InputData->CellDetails.VoxelData;
+	WorldVoxel.RotatedAroundPivot(Position, Rotation); // TODO: Implement
 	
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
 	for (int i = 0; i < FreeJunctionKeys.Num(); i++)
@@ -24,7 +36,7 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
 	}
 	
-	InputDataPtr = InputData;
+	
 }
 
 void FNProcGenGraphCellNode::UpdateWorldPosition(const FVector& Position)
@@ -79,6 +91,12 @@ void FNProcGenGraphCellNode::Link(const int32 JunctionKey, FNProcGenGraphNode* N
 	if (!FreeJunctionKeys.Contains(JunctionKey))
 	{
 		UE_LOG(LogNexusProcGen, Error, TEXT("Cannot link junction key %d to node, key is not free"), JunctionKey);
+		return;
+	}
+	
+	if (InputDataPtr != nullptr)
+	{
+		InputDataPtr->UsedCount++;
 	}
 	FreeJunctionKeys.Remove(JunctionKey);
 	Links.Add(JunctionKey, Node);
@@ -90,6 +108,11 @@ void FNProcGenGraphCellNode::Unlink(const int32 JunctionKey)
 	{
 		UE_LOG(LogNexusProcGen, Error, TEXT("Cannot unlink junction key %d from node, key is not linked"), JunctionKey);
 		return;
+	}
+	
+	if (InputDataPtr != nullptr)
+	{
+		InputDataPtr->UsedCount--;
 	}
 	Links.Remove(JunctionKey);
 	FreeJunctionKeys.Add(JunctionKey);

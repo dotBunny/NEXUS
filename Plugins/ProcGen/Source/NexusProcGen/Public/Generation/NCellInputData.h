@@ -127,6 +127,8 @@ struct NEXUSPROCGEN_API FNCellInputData
 		return false;
 	}
 	
+	// TODO: Implement Required/etc to junctions here and in the cell node version
+	
 	/**
 	 * Gets all junction keys that match a specific socket size.
 	 * @param SocketSize The socket size to filter by.

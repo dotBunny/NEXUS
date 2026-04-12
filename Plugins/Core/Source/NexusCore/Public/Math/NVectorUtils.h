@@ -33,7 +33,7 @@ public:
 	static TArray<FVector> OffsetPoints(const TArray<FVector>& Vectors, const FVector& Offset);
 
 
-	static FVector RotatedAroundPivot(const FVector& WorldVector, const FVector& WorldPoint, const FRotator& Rotation)
+	FORCEINLINE static FVector RotatedAroundPivot(const FVector& WorldVector, const FVector& WorldPoint, const FRotator& Rotation)
 	{
 		return Rotation.RotateVector(WorldVector - WorldPoint) + WorldPoint;
 	}

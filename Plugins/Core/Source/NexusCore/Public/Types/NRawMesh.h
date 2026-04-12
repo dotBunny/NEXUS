@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Components/BaseDynamicMeshComponent.h"
+#include "Math/NVectorUtils.h"
 #include "Types/NRawMeshLoop.h"
 #include "NRawMesh.generated.h"
 
@@ -54,6 +55,16 @@ struct NEXUSCORE_API FNRawMesh
 			&& bHasNonTris == Other.bHasNonTris 
 			&& bIsChaosGenerated == Other.bIsChaosGenerated
 			&& Center == Other.Center;
+	}
+	
+	void RotatedAroundPivot(const FVector& WorldPoint, const FRotator& Rotation)
+	{
+		const int Count = Vertices.Num();
+		for (int i = 0; i < Count; i++)
+		{
+			Vertices[i] = FNVectorUtils::RotatedAroundPivot(Vertices[i] + WorldPoint, WorldPoint, Rotation);
+		}
+		Center = FNVectorUtils::RotatedAroundPivot(Center + WorldPoint, WorldPoint, Rotation);
 	}
 	
 	void Validate()

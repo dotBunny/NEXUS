@@ -7,8 +7,8 @@
 #include "Math/NTriangleUtils.h"
 #include "Math/NVectorUtils.h"
 
-bool FNRawMeshUtils::DoesIntersect(FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-                                   FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+                                   const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
 {
 	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
 	{
@@ -69,8 +69,8 @@ bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray
 	return false;
 }
 
-bool FNRawMeshUtils::DoesIntersectTriangles(FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-                                            FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+                                            const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
 {
 	// Transform vertices of both meshes to world space
 	TArray<FVector> LeftVerticesWorld;

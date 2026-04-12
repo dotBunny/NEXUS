@@ -6,6 +6,7 @@
 #include "NCellInputData.h"
 #include "NProcGenGraphNode.h"
 #include "Cell/NCell.h"
+#include "Types/NRawMeshUtils.h"
 
 class NEXUSPROCGEN_API FNProcGenGraphCellNode : public FNProcGenGraphNode
 {
@@ -27,7 +28,21 @@ public:
 	
 	void Link(int32 JunctionKey, FNProcGenGraphNode* Node);
 	void Unlink(int32 JunctionKey);
+	
+	
+	bool CheckBounds(const FNProcGenGraphCellNode* Other) const
+	{
+		return WorldBounds.Intersect(Other->WorldBounds);
+	}
+	bool CheckHull(FNProcGenGraphCellNode* Other) const
+	{
+		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
+			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
+	}
 
+protected:
+	FNRawMesh& GetHull() { return Hull; }
+	
 private:
 	
 	FNCellInputData* InputDataPtr;
@@ -35,6 +50,11 @@ private:
 	TArray<int32> FreeJunctionKeys;
 	TMap<int32, FNProcGenGraphNode*> Links;
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
+	
+	FBox WorldBounds;
+	FNRawMesh Hull;
+	FNCellVoxelData WorldVoxel;
+	
 	
 	TObjectPtr<UNCell> TemplatePtr;
 };

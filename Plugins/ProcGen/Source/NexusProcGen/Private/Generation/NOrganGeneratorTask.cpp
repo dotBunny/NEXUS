@@ -36,9 +36,24 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	int NodeCount = Context->CellGraph->GetNodeCount();
 	
 	// TEMP TEST: Process our starting node
+	// --- We could make a thing that randomly picks an open node? to process next?
+	
+	// TEMP Itteration count generation
 	TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
-	
-	
+	for (int i = 0; i < 3; i++)
+	{
+		TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
+		NewNodes.Empty();
+		for (int j = 0; j < NextBatch.Num(); j++)
+		{
+			TArray<FNProcGenGraphNode*> BatchNodes = ProcessNode(Random, NextBatch[j]);
+			for (int k = 0; k < BatchNodes.Num(); k++)
+			{
+				NewNodes.Add(BatchNodes[k]);
+			}
+		}
+	}
+
 	Context->bSuccessful = true;
 }
 
@@ -75,11 +90,44 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Create our first cell node, attaching it to the bone node
 	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
+	// TODO: Retry if the bounds result in outside the organ volume?
 	Context->CellGraph->RegisterNode(StartNode);
 	
 	// Link our nodes
 	BoneNode->Link(StartNode);
 	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
+}
+
+TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
+{
+	TArray<FNProcGenGraphCellNode*> HitNodes;
+	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
+	{
+		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
+
+		const FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
+		if (SourceNode->CheckBounds(NewNode))
+		{
+			HitNodes.Add(NewNode);
+		}
+	}
+	return MoveTemp(HitNodes);
+}
+
+TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeHull(FNProcGenGraphCellNode* NewNode) const
+{
+	TArray<FNProcGenGraphCellNode*> HitNodes;
+	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
+	{
+		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
+
+		FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
+		if (SourceNode->CheckHull(NewNode))
+		{
+			HitNodes.Add(NewNode);
+		}
+	}
+	return MoveTemp(HitNodes);
 }
 
 TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
@@ -141,12 +189,30 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		FVector TargetJunctionWorldPosition = Junction.Value->WorldLocation - TargetJunctionWorldOffset;
 	
 		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, RequiredRotation);
-		Context->CellGraph->RegisterNode(TargetCellNode);
 		
-		SourceCellNode->Link(Junction.Key, TargetCellNode);
-		TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
+		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
+		for (int i = BoundsIntersectingNodes.Num() - 1; i >= 0; i--)
+		{
+			if (!BoundsIntersectingNodes[i]->CheckHull(TargetCellNode))
+			{
+				BoundsIntersectingNodes.RemoveAt(i);
+			}
+		}
 		
-		NewNodes.Add(TargetCellNode);
+		// Only build when we are not colliding with anything
+		if (BoundsIntersectingNodes.Num() == 0)
+		{
+			// We've passed validation, lets register it and move on
+			Context->CellGraph->RegisterNode(TargetCellNode);
+			SourceCellNode->Link(Junction.Key, TargetCellNode);
+			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
+			NewNodes.Add(TargetCellNode);
+		}
+		else
+		{
+			// TODO: this is gonna throw in SonarQube
+			delete TargetCellNode;
+		}
 	}
 	
 	return MoveTemp(NewNodes);

@@ -78,6 +78,11 @@ private:
 		return Size.X > 0 && Size.Y > 0 && Size.Z > 0;
 	}
 	
+	void RotatedAroundPivot(const FVector& WorldPoint, const FRotator& Rotation)
+	{
+		// TODO: Implement
+	}
+	
 	UPROPERTY(VisibleAnywhere)
 	FVector Origin = FVector::ZeroVector;
 };

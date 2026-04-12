@@ -26,6 +26,9 @@ private:
 
 	void StartGraph(FNMersenneTwister& Random) const;
 	
+	TArray<FNProcGenGraphCellNode*> CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const;
+	TArray<FNProcGenGraphCellNode*> CheckNodeHull(FNProcGenGraphCellNode* NewNode) const;
+	
 	TArray<FNProcGenGraphNode*> ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
 	TArray<FNProcGenGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
 	
