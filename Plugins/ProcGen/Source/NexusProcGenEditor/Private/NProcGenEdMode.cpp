@@ -102,7 +102,7 @@ void FNProcGenEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTim
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld(); CurrentWorld != nullptr)
 	{
 		CellActor = FNProcGenUtils::GetCellActorFromWorld(CurrentWorld, true);
-		if (CellActor != nullptr)
+		if (CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
 		{
 			UNCellRootComponent* RootComponent = CellActor->GetCellRoot();
 			const FRotator Rotation = RootComponent->GetOffsetRotator();;
@@ -133,14 +133,25 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		for (const auto RootComponent : FNProcGenRegistry::GetCellRootComponents())
 		{
 			if (RootComponent == nullptr) continue;
-			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode())); // We can't use caching because we are drawing ALL of the possible roots
 
-			// Notice ON Dirty
-			const ANCellActor* Actor = Cast<ANCellActor>(RootComponent->GetOwner());
-			if (Actor != nullptr && Actor->IsActorDirty())
+			const ANCellActor* Actor = RootComponent->GetNCellActor();
+			if (Actor != nullptr)
 			{
-				bHasDirtyActors = true;
+				// Do not draw cell actors when in editor mode when spawned from proxy
+				if (Actor->WasSpawnedFromProxy())
+				{
+					continue;
+				}
+				
+				// Notice ON Dirty
+				if (Actor->IsActorDirty())
+				{
+					bHasDirtyActors = true;
+				}
 			}
+			
+			// Draw debug information
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode())); // We can't use caching because we are drawing ALL of the possible roots
 		}
 	}
 	if (FNProcGenRegistry::HasJunctionComponents())

@@ -17,10 +17,10 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		return;
 	}
 	
-	ANCellActor* CellActor = CellRootComponent->GetNCellActor();
+	// We're not going to draw proxies, but its unlikely this is gonna be ever hit
+	const ANCellActor* CellActor = CellRootComponent->GetNCellActor();
 	if (CellActor != nullptr && CellActor->WasSpawnedFromProxy())
 	{
-		// TODO: Proxy specific drawing?
 		return;
 	}
 	
