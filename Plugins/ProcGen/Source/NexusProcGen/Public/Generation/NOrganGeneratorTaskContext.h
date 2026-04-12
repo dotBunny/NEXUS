@@ -38,6 +38,7 @@ public:
 	
 	// TODO: Can we do something to pre-understand the socket sizes of all the junctions on a specific thing? 
 	// TODO: Need to make this a working set we remove from cause of unique
+	// TODO: These Generate functions of indices should also take into account rotation of the socket, and the rotational limits on the cell settings
 	FNWeightedIntegerArray GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize);
 	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize);
 

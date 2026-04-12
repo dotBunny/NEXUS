@@ -5,6 +5,34 @@
 
 #include "NProcGenMinimal.h"
 
+FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
+{
+	InputData->UsedCount++;
+
+	TemplatePtr = InputData->Template;
+	FreeJunctionKeys = InputData->GetJunctionKeys();
+	
+	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
+	for (int i = 0; i < FreeJunctionKeys.Num(); i++)
+	{
+		const int JunctionKey = FreeJunctionKeys[i];
+		WorldJunctions.Add(FreeJunctionKeys[i], InputData->Junctions[JunctionKey]);
+	}
+
+	// TODO: Unsure if we want to have this ref
+	InputDataPtr = InputData;
+}
+
+void FNProcGenGraphCellNode::ApplyJunctionsOffset(const FVector& Position, const FRotator& Rotation)
+{
+	for (auto& Pair : WorldJunctions)
+	{
+		Pair.Value.RootRelativeRotation = Pair.Value.RootRelativeRotation + Rotation;
+		Pair.Value.RootRelativeLocation = Pair.Value.RootRelativeLocation + Position;
+	}
+}
+
+
 void FNProcGenGraphCellNode::UpdateWorldPosition(const FVector& Position)
 {
 	// TODO: Shift links?

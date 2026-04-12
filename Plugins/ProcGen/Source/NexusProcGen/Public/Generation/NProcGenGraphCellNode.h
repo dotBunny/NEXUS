@@ -12,31 +12,10 @@ class NEXUSPROCGEN_API FNProcGenGraphCellNode : public FNProcGenGraphNode
 public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Cell; }
 	
-	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation)
-		: FNProcGenGraphNode(Position, Rotation)
-	{
-		InputData->UsedCount++;
+	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation);
 
-		TemplatePtr = InputData->Template;
-		FreeJunctionKeys = InputData->GetJunctionKeys();
-		
-		// We need to copy all the template junction data into our own local copy of the details that we will manipulate
-		for (int i = 0; i < FreeJunctionKeys.Num(); i++)
-		{
-			const int JunctionKey = FreeJunctionKeys[i];
-			WorldJunctions.Add(FreeJunctionKeys[i], InputData->Junctions[JunctionKey]);
-			
-			// We're going to manipulate the data bit to cache future calculations
-			// TODO: We need to ...draw these?
-			FNCellJunctionDetails& JunctionDetails = WorldJunctions.FindChecked(FreeJunctionKeys[i]);
-			JunctionDetails.RootRelativeRotation = JunctionDetails.RootRelativeRotation + Rotation;
-			JunctionDetails.RootRelativeLocation = JunctionDetails.RootRelativeLocation + Position;
-		}
-
-		// TODO: Unsure if we want to have this ref
-		InputDataPtr = InputData;
-	}
-
+	void ApplyJunctionsOffset(const FVector& Position, const FRotator& Rotation);
+	
 	void UpdateWorldPosition(const FVector& Position);
 	void UpdateWorldRotation(const FRotator& Rotation);
 	

@@ -5,6 +5,7 @@
 
 #include "NOrganGeneratorPassContext.h"
 #include "NOrganGeneratorTaskContext.h"
+#include "NProcGenGraphCellNode.h"
 #include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
@@ -22,6 +23,11 @@ struct FNOrganGeneratorTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
+	
+	void StartGraph(FNMersenneTwister& Random) const;
+	
+	bool ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
+	bool ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
 	
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
 	TSharedRef<FNOrganGeneratorPassContext> PassContext;
