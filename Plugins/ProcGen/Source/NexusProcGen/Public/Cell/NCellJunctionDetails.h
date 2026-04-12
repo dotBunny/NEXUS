@@ -43,10 +43,10 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	FIntVector2 SocketSize = FIntVector2(2, 4);
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FVector RootRelativeLocation = FVector::ZeroVector;
+	FVector WorldLocation = FVector::ZeroVector;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FRotator RootRelativeRotation = FRotator::ZeroRotator;
+	FRotator WorldRotation = FRotator::ZeroRotator;
 
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
@@ -70,8 +70,8 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 			&& Type == Other.Type
 			&& SocketSize == Other.SocketSize
 			
-			&& RootRelativeLocation == Other.RootRelativeLocation
-			&& RootRelativeRotation == Other.RootRelativeRotation
+			&& WorldLocation == Other.WorldLocation
+			&& WorldRotation == Other.WorldRotation
 			
 			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers);
 	}

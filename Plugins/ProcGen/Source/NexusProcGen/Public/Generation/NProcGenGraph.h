@@ -23,7 +23,7 @@ public:
 		return Nodes.Num();
 	}
 private:
-	
+	uint32 Ticket = 0;
 	FNProcGenGraphNode* RootNode = nullptr;
 	TArray<FNProcGenGraphNode*> Nodes;
 };

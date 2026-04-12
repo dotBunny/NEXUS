@@ -3,6 +3,7 @@
 
 #include "Generation/NOrganGeneratorTask.h"
 
+#include "NProcGenMinimal.h"
 #include "Generation/NProcGenGraphBoneNode.h"
 #include "Generation/NProcGenGraphCellNode.h"
 #include "Generation/NProcGenGraphNodeFactory.h"
@@ -35,7 +36,7 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	int NodeCount = Context->CellGraph->GetNodeCount();
 	
 	// TEMP TEST: Process our starting node
-	ProcessNode(Random, Context->CellGraph->GetLastNode());
+	TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
 	
 	
 	Context->bSuccessful = true;
@@ -58,10 +59,12 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Figure out rotation
 	const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
-	const FQuat JunctionQuat = StartCellJunctionDetails->RootRelativeRotation.Quaternion();
+	const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
+	
+	// TODO : HANDLE IDENTITY! x0
 	const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
 	const FRotator CellWorldRotation = CellWorldQuat.Rotator();
-	const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->RootRelativeLocation);
+	const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
 	const FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
 	
 	// Create our bone node and build a graph around it.
@@ -77,7 +80,7 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
 }
 
-bool FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
+TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
 {
 	switch (SourceNode->GetNodeType())
 	{
@@ -85,17 +88,17 @@ bool FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraph
 	case Cell:
 		return ProcessCellNode(Random, static_cast<FNProcGenGraphCellNode*>(SourceNode));
 	case Bone:
-		return false;
 	case Null:
-		return false;
+	default:
+		break;
 	}
-	return false;
+	return TArray<FNProcGenGraphNode*>();
 }
 
-bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
+TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
 {
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
-	int AddedNodeCount = 0;
+	TArray<FNProcGenGraphNode*> NewNodes;
 	
 	for (const auto Junction : OpenJunctions)
 	{
@@ -106,12 +109,11 @@ bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenG
 		if (CellInputWeightedIndices.Count() == 0)
 		{
 			// TODO: We will later go back and fill this with something.
-			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->RootRelativeLocation, Junction.Value->RootRelativeRotation);
+			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->WorldLocation, Junction.Value->WorldRotation);
 			Context->CellGraph->RegisterNode(NullNode);
 			
 			SourceCellNode->Link(Junction.Key, NullNode);
 			NullNode->Link(SourceCellNode);
-			
 			continue;
 		}
 		
@@ -126,23 +128,40 @@ bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenG
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
 	
 		// Figure out rotations
-		// TODO: This seems to be broken - maybe? 
-		FQuat SourceJunctionWorldQuat = Junction.Value->RootRelativeRotation.Quaternion();
-		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->RootRelativeRotation.Quaternion();
-		FQuat TargetJunctionWorldQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
-		FRotator TargetJunctionWorldRotation = TargetJunctionWorldQuat.Rotator(); 
+		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
+		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
 		
-		FVector TargetJunctionWorldOffset = TargetJunctionWorldQuat.RotateVector(TargetJunctionDetails->RootRelativeLocation);
-		FVector TargetJunctionWorldPosition = Junction.Value->RootRelativeLocation - TargetJunctionWorldOffset;
+		
+		// TODO : HANDLE IDENTITY! x0
+		FQuat RequiredRotationQuat;
+		if (TargetJunctionLocalQuat.IsIdentity())
+		{
+			UE_LOG(LogNexusProcGen, Error, TEXT("IDENTITY ROTATION %i"), TargetJunctionKey);
+			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
+		}
+		else if(SourceJunctionWorldQuat.IsIdentity())
+		{
+			UE_LOG(LogNexusProcGen, Error, TEXT("IDENTITY ROTATION %i"), TargetJunctionKey);
+			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
+		}
+		else
+		{
+			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
+		}
+		
+		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
+		
+		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
+		FVector TargetJunctionWorldPosition = Junction.Value->WorldLocation - TargetJunctionWorldOffset;
 	
-		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, TargetJunctionWorldRotation);
+		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, RequiredRotation);
 		Context->CellGraph->RegisterNode(TargetCellNode);
 		
 		SourceCellNode->Link(Junction.Key, TargetCellNode);
 		TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
 		
-		AddedNodeCount++;
+		NewNodes.Add(TargetCellNode);
 	}
 	
-	return AddedNodeCount > 0;
+	return MoveTemp(NewNodes);
 }

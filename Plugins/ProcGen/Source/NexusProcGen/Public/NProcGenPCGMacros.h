@@ -15,8 +15,8 @@
 #define N_PCG_JUNCTION_DATA \
 	FPCGPoint& NewPoint = MutablePoints.Emplace_GetRef(); \
 	OutputData->Metadata->InitializeOnSet(NewPoint.MetadataEntry); \
-	NewPoint.Transform.SetLocation(JunctionComponent->Details.RootRelativeLocation); \
-	NewPoint.Transform.SetRotation(JunctionComponent->Details.RootRelativeRotation.Quaternion()); \
+	NewPoint.Transform.SetLocation(JunctionComponent->Details.WorldLocation); \
+	NewPoint.Transform.SetRotation(JunctionComponent->Details.WorldRotation.Quaternion()); \
 	SocketSizeAtr->SetValue(NewPoint.MetadataEntry, JunctionComponent->Details.SocketSize); \
 	FVector2D WorldSize = FVector2D(JunctionComponent->Details.SocketSize.X * SocketSize.X, JunctionComponent->Details.SocketSize.Y * SocketSize.Y); \
 	WorldSizeAttr->SetValue(NewPoint.MetadataEntry, WorldSize); \

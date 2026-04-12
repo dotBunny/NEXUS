@@ -26,8 +26,8 @@ private:
 	
 	void StartGraph(FNMersenneTwister& Random) const;
 	
-	bool ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
-	bool ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
+	TArray<FNProcGenGraphNode*> ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
+	TArray<FNProcGenGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
 	
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
 	TSharedRef<FNOrganGeneratorPassContext> PassContext;

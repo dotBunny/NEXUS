@@ -23,6 +23,7 @@ FNProcGenGraph::~FNProcGenGraph()
 
 void FNProcGenGraph::RegisterNode(FNProcGenGraphNode* Node)
 {
-	// TODO: Unique check overkill?
-	Nodes.AddUnique(Node);
+	
+	Nodes.Add(Node);
+	Node->NodeID = Ticket++;
 }

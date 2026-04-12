@@ -12,6 +12,7 @@ enum class ENProcGenGraphNodeType
 
 class NEXUSPROCGEN_API FNProcGenGraphNode
 {
+	friend class FNProcGenGraph;
 public:
 	FNProcGenGraphNode(const FVector& Position, const FRotator& Rotation);
 	
@@ -20,14 +21,14 @@ public:
 
 	FVector GetWorldPosition() const { return WorldPosition; }
 	FRotator GetWorldRotation() const { return WorldRotation; }
-	
+	uint32 GetNodeID() const { return NodeID; }
 	
 protected:
 	void SetWorldPosition(const FVector& Position);
 	void SetWorldRotation(const FRotator& Rotation);
-	
-	
+	uint32 NodeID = 0;
 private:
+	
 	FVector WorldPosition;
 	FRotator WorldRotation;
 };

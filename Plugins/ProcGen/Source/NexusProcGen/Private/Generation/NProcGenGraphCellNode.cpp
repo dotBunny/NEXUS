@@ -20,8 +20,8 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
 		
 		// Update position/rotation to reflect actual world placement
-		Details.RootRelativeRotation += Rotation;
-		Details.RootRelativeLocation = FNVectorUtils::RotatedAroundPivot(Details.RootRelativeLocation + Position, Position, Rotation);
+		Details.WorldRotation += Rotation;
+		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
 	}
 	
 	InputDataPtr = InputData;

@@ -75,8 +75,8 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 	const FVector RootLocation = RootComponent->GetOffsetLocation();
 	const FRotator RootRotation = RootComponent->GetOffsetRotator();
-	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.RootRelativeLocation, RootRotation, RootLocation);
-	const FRotator Rotation = Details.RootRelativeRotation.GetNormalized();
+	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.WorldLocation, RootRotation, RootLocation);
+	const FRotator Rotation = Details.WorldRotation.GetNormalized();
 	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 	FNProcGenDebugDraw::DrawSocket(PDI, Location, Rotation, Details.SocketSize, Settings->SocketSize, Details.Type, GetColor());
@@ -167,18 +167,18 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		
 		// LOCATION
 		const FVector ComponentLocation = GetComponentLocation();
-		if (ComponentLocation != Details.RootRelativeLocation)
+		if (ComponentLocation != Details.WorldLocation)
 		{
 			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
-			Details.RootRelativeLocation = ComponentLocation;
+			Details.WorldLocation = ComponentLocation;
 			bHasMadeChanges = true;
 		}
 
 		// ROTATOR
 		const FRotator ComponentRotation = GetComponentRotation();
-		if (ComponentRotation != Details.RootRelativeRotation)
+		if (ComponentRotation != Details.WorldRotation)
 		{
-			Details.RootRelativeRotation = ComponentRotation;
+			Details.WorldRotation = ComponentRotation;
 			bHasMadeChanges = true;
 		}
 
