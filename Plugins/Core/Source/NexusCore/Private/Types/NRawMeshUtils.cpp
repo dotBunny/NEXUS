@@ -90,7 +90,7 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	// Check every triangle against every other triangle
 	const int32 LeftLoopCount = LeftMesh.Loops.Num();
 	const int32 RightLoopCount = RightMesh.Loops.Num();
-	
+
 	for (int32 i = 0; i < LeftLoopCount; ++i)
 	{
 		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
@@ -108,6 +108,24 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 				return true;
 			}
 		}
+	}
+
+	// Triangle-triangle tests only catch surface crossings. If one convex mesh is entirely
+	// contained within the other, no triangles will intersect but the meshes still overlap.
+	// Check containment by testing one vertex from each mesh against the other mesh.
+	const FQuat LeftInvQuat = LeftRotation.Quaternion().Inverse();
+	const FQuat RightInvQuat = RightRotation.Quaternion().Inverse();
+
+	const FVector LeftSample = LeftInvQuat.RotateVector(LeftVerticesWorld[0] - RightOrigin);
+	if (IsRelativePointInside(RightMesh, LeftSample))
+	{
+		return true;
+	}
+
+	const FVector RightSample = RightInvQuat.RotateVector(RightVerticesWorld[0] - LeftOrigin);
+	if (IsRelativePointInside(LeftMesh, RightSample))
+	{
+		return true;
 	}
 
 	return false;

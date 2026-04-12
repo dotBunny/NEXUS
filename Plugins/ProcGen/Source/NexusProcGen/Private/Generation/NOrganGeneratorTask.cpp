@@ -3,7 +3,6 @@
 
 #include "Generation/NOrganGeneratorTask.h"
 
-#include "NProcGenMinimal.h"
 #include "Generation/NProcGenGraphBoneNode.h"
 #include "Generation/NProcGenGraphCellNode.h"
 #include "Generation/NProcGenGraphNodeFactory.h"
@@ -38,9 +37,9 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	// TEMP TEST: Process our starting node
 	// --- We could make a thing that randomly picks an open node? to process next?
 	
-	// TEMP Itteration count generation
+	// TEMP Iteration count generation
 	TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < 5; i++)
 	{
 		TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
 		NewNodes.Empty();
@@ -105,10 +104,10 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenG
 	{
 		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
 
-		const FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
+		FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
 		if (SourceNode->CheckBounds(NewNode))
 		{
-			HitNodes.Add(NewNode);
+			HitNodes.Add(SourceNode);
 		}
 	}
 	return MoveTemp(HitNodes);
@@ -124,7 +123,7 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeHull(FNProcGenGra
 		FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
 		if (SourceNode->CheckHull(NewNode))
 		{
-			HitNodes.Add(NewNode);
+			HitNodes.Add(SourceNode);
 		}
 	}
 	return MoveTemp(HitNodes);

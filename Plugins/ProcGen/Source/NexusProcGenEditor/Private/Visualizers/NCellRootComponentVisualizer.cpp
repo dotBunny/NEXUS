@@ -16,6 +16,14 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	{
 		return;
 	}
+	
+	ANCellActor* CellActor = CellRootComponent->GetNCellActor();
+	if (CellActor != nullptr && CellActor->WasSpawnedFromProxy())
+	{
+		// TODO: Proxy specific drawing?
+		return;
+	}
+	
 
 	// We need to draw the base wireframes
 	if (!FNProcGenEdMode::IsActive())

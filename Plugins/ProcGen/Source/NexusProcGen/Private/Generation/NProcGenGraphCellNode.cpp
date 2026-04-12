@@ -12,14 +12,18 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	
-	// Copy bounds and rotate into their new world-space position/rotation
-	WorldBounds = InputData->CellDetails.Bounds;
-	WorldBounds.Min = FNVectorUtils::RotatedAroundPivot(WorldBounds.Min + Position, Position, Rotation);
-	WorldBounds.Max = FNVectorUtils::RotatedAroundPivot(WorldBounds.Max + Position, Position, Rotation);
+	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
+	// but will follow the defined bounds previously defined at author-time, but rotated.
+	FVector Corners[8];
+	InputData->CellDetails.Bounds.GetVertices(Corners);
+	WorldBounds = FBox(ForceInit);
+	for (const FVector& Corner : Corners)
+	{
+		WorldBounds += Rotation.RotateVector(Corner) + Position;
+	}
 	
 	// Copy our hull data and rotate it into its new world-space position/rotation
 	Hull = InputData->CellDetails.Hull;
-	//WorldHull.RotatedAroundPivot(Position, Rotation); // dont think we need to move these as they are local and the comparison is in local space
 	
 	// Copy our voxel data and rotate it into its new world-space position/rotation
 	WorldVoxel = InputData->CellDetails.VoxelData;
