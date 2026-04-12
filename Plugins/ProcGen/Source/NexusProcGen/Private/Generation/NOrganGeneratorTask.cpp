@@ -61,7 +61,6 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
 	const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
 	
-	// TODO : HANDLE IDENTITY! x0
 	const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
 	const FRotator CellWorldRotation = CellWorldQuat.Rotator();
 	const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
@@ -131,24 +130,7 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
 		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
 		
-		
-		// TODO : HANDLE IDENTITY! x0
-		FQuat RequiredRotationQuat;
-		if (TargetJunctionLocalQuat.IsIdentity())
-		{
-			UE_LOG(LogNexusProcGen, Error, TEXT("IDENTITY ROTATION %i"), TargetJunctionKey);
-			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
-		}
-		else if(SourceJunctionWorldQuat.IsIdentity())
-		{
-			UE_LOG(LogNexusProcGen, Error, TEXT("IDENTITY ROTATION %i"), TargetJunctionKey);
-			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
-		}
-		else
-		{
-			RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
-		}
-		
+		FQuat RequiredRotationQuat = TargetJunctionLocalQuat * SourceJunctionWorldQuat;
 		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
 		
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
