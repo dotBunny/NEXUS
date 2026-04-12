@@ -35,6 +35,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
 
+	// TODO: this is not prolly gonna get used
 	UPROPERTY(EditAnywhere, meta = (EditCondition="Requirements==ENCellJunctionRequirements::AllowBlocking", ToolTip = "The blocker(s) that can be used to fill this junction.", EditConditionHides))
 	TArray<TSubclassOf<ANCellJunctionBlockerActor>> Blockers;
 	

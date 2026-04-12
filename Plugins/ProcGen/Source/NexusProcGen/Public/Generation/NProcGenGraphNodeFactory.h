@@ -5,6 +5,7 @@
 #include "NCellInputData.h"
 #include "NProcGenGraphBoneNode.h"
 #include "NProcGenGraphCellNode.h"
+#include "NProcGenGraphNullNode.h"
 
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory
 class FNProcGenGraphNodeFactory
@@ -21,6 +22,12 @@ public:
 	{
 		FNProcGenGraphCellNode* CellNode = new FNProcGenGraphCellNode(Cell, Position, Rotation);
 		return CellNode;
+	}
+	
+	FORCEINLINE static FNProcGenGraphNullNode* CreateNullNode(const FVector& Position, const FRotator& Rotation)
+	{
+		FNProcGenGraphNullNode* NullNode = new FNProcGenGraphNullNode(Position, Rotation);
+		return NullNode;
 	}
 };
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory

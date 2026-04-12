@@ -46,6 +46,7 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	
 	
 	
+	
 	// Establish a base understanding of the rotations/directions
 
 	FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
@@ -75,7 +76,66 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	BoneNode->Link(StartNode);
 	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
 	
-	//FNProcGenGraphCellNode* StartNode = Context->CellGraph->GetLastNode();
+	int NodeCount = Context->CellGraph->GetNodeCount();
+	
+	
+	// --- THIS IS GONNA BE A METHOD? -- this is just a test of building off the first spawn
+	
+	FNProcGenGraphCellNode* TargetNode =  StartNode;
+	TMap<int32, FNCellJunctionDetails*> OpenJunctions = TargetNode->GetOpenJunctions();
+	
+	for (const auto Junction : OpenJunctions)
+	{
+		// Build our possible list of cells
+		FNWeightedIntegerArray CellInputWeightedIndices = Context->GenerateWeightedCellInputIndices(Junction.Value->SocketSize);
+		
+		// We dont have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
+		if (CellInputWeightedIndices.Count() == 0)
+		{
+			// TODO: We will later go back and fill this with something.
+			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->RootRelativeLocation, Junction.Value->RootRelativeRotation);
+			Context->CellGraph->RegisterNode(NullNode);
+			
+			TargetNode->Link(Junction.Key, NullNode);
+			NullNode->Link(TargetNode);
+			
+			continue;
+		}
+		
+		// Pick our cell to use to spawn
+		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
+		FNCellInputData CellInputData = Context->CellInputData[CellInputIndex];
+		
+		// Pick the junction of the cell we are going to use
+		TArray<int32> TargetJunctionKeys = CellInputData.GetJunctionKeys(Junction.Value->SocketSize);
+		const int TargetJunctionKeyIndex = Random.IntegerRange(0, TargetJunctionKeys.Num()-1);
+		const int TargetJunctionKey = TargetJunctionKeys[TargetJunctionKeyIndex];
+		FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
+		
+		// Figure out rotations
+		FQuat SourceJunctionQuat = Junction.Value->RootRelativeRotation.Quaternion();
+		FQuat TargetJunctionQuat = TargetJunctionDetails->RootRelativeRotation.Quaternion();
+
+		// The cell's world rotation = BoneRotation * Inverse(JunctionRelativeRotation)
+		// This makes the junction align with the bone socket
+		FQuat TargetJunctionWorldQuat = SourceJunctionQuat * TargetJunctionQuat.Inverse();
+		FRotator TargetJunctionWorldRotation = TargetJunctionWorldQuat.Rotator(); 
+
+		// Step 3: Calculate the cell's world position
+		// Transform the junction's relative location by the cell's world rotation, then offset from bone position
+		FVector TargetJunctionWorldOffset = TargetJunctionWorldQuat.RotateVector(Junction.Value->RootRelativeLocation);
+		FVector TargetJunctionWorldPosition = Junction.Value->RootRelativeLocation - TargetJunctionWorldOffset;
+	
+		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, TargetJunctionWorldRotation);
+		Context->CellGraph->RegisterNode(TargetCellNode);
+		
+		TargetNode->Link(Junction.Key, TargetCellNode);
+		TargetCellNode->Link(TargetJunctionKey, TargetNode);
+	}
+	
+	
+	// TODO: Recursive looking now?
+	
 	
 	// GET Open Junctions // make method on node?
 	

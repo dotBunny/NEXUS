@@ -6,7 +6,8 @@
 enum class ENProcGenGraphNodeType
 {
 	Bone,
-	Cell
+	Cell,
+	Null
 };
 
 class NEXUSPROCGEN_API FNProcGenGraphNode

@@ -161,17 +161,17 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputInd
 	return MoveTemp(WeightedIntegers);
 }
 
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize)
+FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedStartCellIndices(const FIntVector2 RequestedSocketSize)
 {
 	FNWeightedIntegerArray WeightedIntegers;
 	
 	for (int i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNCellInputData* CellData = &CellInputData[i];
-		if (CellData->MaximumCount == 0 || !CellData->bCanBeStartNode) continue;
+		if (!CellData->IsValidSelection(RequestedSocketSize)) continue;
+		if (!CellData->bCanBeStartNode) continue;
 		
 		// Parse Junctions
-		if (CellData->Junctions.Num() == 0) continue;
 		for (auto Pair : CellData->Junctions)
 		{
 			if (Pair.Value.SocketSize == RequestedSocketSize)
@@ -185,17 +185,16 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedStartCellInd
 	return MoveTemp(WeightedIntegers);
 }
 
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize)
+FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices(const FIntVector2 RequestedSocketSize)
 {
 	FNWeightedIntegerArray WeightedIntegers;
 	
 	for (int i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNCellInputData* CellData = &CellInputData[i];
-		if (CellData->MaximumCount == 0) continue;
+		if (!CellData->IsValidSelection(RequestedSocketSize)) continue;
 		
 		// Parse Junctions
-		if (CellData->Junctions.Num() == 0) continue;
 		for (auto Pair : CellData->Junctions)
 		{
 			if (Pair.Value.SocketSize == RequestedSocketSize)
@@ -205,6 +204,5 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputInd
 			}
 		}
 	}
-
 	return MoveTemp(WeightedIntegers);
 }

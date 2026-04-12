@@ -12,10 +12,16 @@ public:
 	~FNProcGenGraph();
 
 	FNProcGenGraphNode* GetLastNode() { return Nodes.Last(); }
+
 	const TArray<FNProcGenGraphNode*>& GetNodes() const { return Nodes; }
 	TArray<FNProcGenGraphNode*>& GetMutableNodes() { return Nodes; }
 	
 	void RegisterNode(FNProcGenGraphNode* Node);
+	
+	int GetNodeCount() const
+	{
+		return Nodes.Num();
+	}
 private:
 	
 	FNProcGenGraphNode* RootNode = nullptr;
