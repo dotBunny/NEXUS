@@ -102,7 +102,7 @@ FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObje
 	}
 	for (auto Key : UniqueGenerations)
 	{
-		UNProcGenEditorSubsystem::Get()->ClearGeneratedProxies(Key);
+		UNProcGenEditorSubsystem::Get()->ClearGenerated(Key);
 	}
 	
 	return FReply::Handled();

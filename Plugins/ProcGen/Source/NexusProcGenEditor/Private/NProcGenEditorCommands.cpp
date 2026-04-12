@@ -249,7 +249,7 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 		FCanExecuteAction::CreateStatic(&FNProcGenRegistry::HasOrganComponents));
 	
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
-	FExecuteAction::CreateStatic(&OrganClearProxies),
+	FExecuteAction::CreateStatic(&OrganClearGenerated),
 	FCanExecuteAction::CreateStatic(&FNProcGenEditorUtils::HasSelectedGeneratedCellProxies));
 	
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearAllProxies,
@@ -382,19 +382,19 @@ void FNProcGenEditorCommands::OrganGenerateAllProxies()
 		UNProcGenOperation::CreateInstance(FNProcGenRegistry::GetOrganComponents()));
 }
 
-void FNProcGenEditorCommands::OrganClearProxies()
+void FNProcGenEditorCommands::OrganClearGenerated()
 {
 	TArray<UNOrganComponent*> SelectedOrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
 	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
 	for (UNOrganComponent* Component : SelectedOrganComponents)
 	{
-		Subsystem->ClearGeneratedProxies(Component->GetAndResetGenerationOperationKey());
+		Subsystem->ClearGenerated(Component->GetAndResetGenerationOperationKey());
 	}
 }
 
 void FNProcGenEditorCommands::OrganClearAllProxies()
 {
-	UNProcGenEditorSubsystem::Get()->ClearAllGeneratedProxies();
+	UNProcGenEditorSubsystem::Get()->ClearAllGenerated();
 }
 
 void FNProcGenEditorCommands::OrganLoadProxyLevels()

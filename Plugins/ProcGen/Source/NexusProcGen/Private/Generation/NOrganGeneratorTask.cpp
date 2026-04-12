@@ -72,10 +72,9 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
 	Context->CellGraph->RegisterNode(StartNode);
 	
+	// Link our nodes
 	BoneNode->Link(StartNode);
 	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
-	
-	// TODO: StartNode->ApplyJunctionsOffset()
 }
 
 bool FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
@@ -127,11 +126,13 @@ bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenG
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
 		
 		// Figure out rotations
+		// TODO: This seems to be broken
 		FQuat SourceJunctionQuat = Junction.Value->RootRelativeRotation.Quaternion();
 		FQuat TargetJunctionQuat = TargetJunctionDetails->RootRelativeRotation.Quaternion();
 		FQuat TargetJunctionWorldQuat = SourceJunctionQuat * TargetJunctionQuat.Inverse();
 		FRotator TargetJunctionWorldRotation = TargetJunctionWorldQuat.Rotator(); 
-		FVector TargetJunctionWorldOffset = TargetJunctionWorldQuat.RotateVector(Junction.Value->RootRelativeLocation);
+		
+		FVector TargetJunctionWorldOffset = TargetJunctionWorldQuat.RotateVector(TargetJunctionDetails->RootRelativeLocation);
 		FVector TargetJunctionWorldPosition = Junction.Value->RootRelativeLocation - TargetJunctionWorldOffset;
 	
 		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, TargetJunctionWorldRotation);
@@ -141,8 +142,6 @@ bool FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenG
 		TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
 		
 		AddedNodeCount++;
-		// TODO: Calculate offset
-		//TargetCellNode->ApplyJunctionsOffset()
 	}
 	
 	return AddedNodeCount > 0;

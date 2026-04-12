@@ -13,13 +13,13 @@ public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Cell; }
 	
 	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation);
-
-	void ApplyJunctionsOffset(const FVector& Position, const FRotator& Rotation);
 	
 	void UpdateWorldPosition(const FVector& Position);
 	void UpdateWorldRotation(const FRotator& Rotation);
 	
 	TMap<int32, FNCellJunctionDetails*> GetOpenJunctions();
+	const TMap<int32, FNCellJunctionDetails>& GetJunctions() const;
+	
 	FNCellJunctionDetails* GetJunctionDetails(int32 JunctionKey);
 	FNProcGenGraphNode* GetLinkedNode(int32 JunctionKey);
 	

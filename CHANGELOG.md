@@ -9,6 +9,7 @@
 - Preference to clean logs folder prior to launching `MultiplayerTest`.
 - `FNDeveloperUtils` and `UNDeveloperLibrary` now have `IsBuildDemo()` methods to support `IS_BUILD_DEMO` definitions from build targets.
 - Pickers all now have a `Twisted` method to support passing a `FNMersenneTwister`.
+- `ANDebugPointActor` for quick point debugging.
 
 ### Changed
 

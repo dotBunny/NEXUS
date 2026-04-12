@@ -18,20 +18,17 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 		const int JunctionKey = FreeJunctionKeys[i];
 		WorldJunctions.Add(FreeJunctionKeys[i], InputData->Junctions[JunctionKey]);
 	}
-
-	// TODO: Unsure if we want to have this ref
-	InputDataPtr = InputData;
-}
-
-void FNProcGenGraphCellNode::ApplyJunctionsOffset(const FVector& Position, const FRotator& Rotation)
-{
+	
+	// TODO: This needs fixing ? 
+	// TODO: Maybe hack in something to draw where we think they are ? 
 	for (auto& Pair : WorldJunctions)
 	{
-		Pair.Value.RootRelativeRotation = Pair.Value.RootRelativeRotation + Rotation;
-		Pair.Value.RootRelativeLocation = Pair.Value.RootRelativeLocation + Position;
+		Pair.Value.RootRelativeRotation += Rotation;
+		Pair.Value.RootRelativeLocation += Position;
 	}
+	
+	InputDataPtr = InputData;
 }
-
 
 void FNProcGenGraphCellNode::UpdateWorldPosition(const FVector& Position)
 {
@@ -54,6 +51,11 @@ TMap<int32, FNCellJunctionDetails*> FNProcGenGraphCellNode::GetOpenJunctions()
 		Junctions.Add(FreeJunctionKeys[i], &WorldJunctions[FreeJunctionKeys[i]]);
 	}
 	return Junctions;
+}
+
+const TMap<int32, FNCellJunctionDetails>& FNProcGenGraphCellNode::GetJunctions() const
+{
+	return WorldJunctions;
 }
 
 FNCellJunctionDetails* FNProcGenGraphCellNode::GetJunctionDetails(const int32 JunctionKey)

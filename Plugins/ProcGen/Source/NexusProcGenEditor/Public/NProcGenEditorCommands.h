@@ -43,7 +43,7 @@ public:
 	
 	static void OrganGenerateProxies();
 	static void OrganGenerateAllProxies();
-	static void OrganClearProxies();
+	static void OrganClearGenerated();
 	static void OrganClearAllProxies();
 	static void OrganLoadProxyLevels();
 	static void OrganLoadAllProxyLevels();

@@ -53,12 +53,20 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
-	
-	
 	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
-	void ClearAllGeneratedProxies();
+	
+	void ClearAllGenerated();
+	
+	void ClearGenerated(const FName& Key)
+	{
+		ClearGeneratedProxies(Key);
+		ClearGeneratedActors(Key);
+	}
+	
 	void ClearGeneratedProxies(const FName& Key);
+	void ClearGeneratedActors(const FName& Key);
 
+	
 	void LoadAllGeneratedProxies();
 	void LoadGeneratedProxies(const FName& Key);
 	void UnloadAllGeneratedProxies();
@@ -69,6 +77,7 @@ private:
 	TArray<UNProcGenOperation*> KnownOperations;
 	
 	TMap<FName, TArray<ANCellProxy*>> KnownProxies;
+	TMap<FName, TArray<AActor*>> KnownActors;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };

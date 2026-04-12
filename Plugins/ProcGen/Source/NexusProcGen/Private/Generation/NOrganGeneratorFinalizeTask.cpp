@@ -5,6 +5,7 @@
 
 #include "NProcGenOperation.h"
 #include "Cell/NCellProxy.h"
+#include "Developer/NDebugPointActor.h"
 #include "Generation/NProcGenGraphCellNode.h"
 
 
@@ -30,6 +31,21 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
 		{
 			const FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+			
+			// TODO: Temp DRAWING
+			const TMap<int32, FNCellJunctionDetails>& Junctions = CellNode->GetJunctions();
+			for (const auto JunctionPair : Junctions)
+			{
+				FString Junction = FString::Printf(TEXT("%s Junction %d"), *CellNode->GetTemplate()->World.GetAssetName(),  JunctionPair.Key);
+				
+				ANDebugPointActor* DebugPoint = ANDebugPointActor::CreateInstance(SharedContext->TargetWorld, 
+						JunctionPair.Value.RootRelativeLocation, 
+						JunctionPair.Value.RootRelativeRotation, Junction);
+				
+				
+				SharedContext->CreatedActors.Add(DebugPoint);
+			}
+			
 			// Spawn proxy instance
 			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
 				CellNode->GetTemplate(), CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), false);
@@ -50,3 +66,4 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 	
 //	Operation->FinishOrgan();
 }
+

@@ -28,6 +28,7 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
+	
 	UNProcGenOperation* Operation;
 	TSharedRef<FNOrganGeneratorTaskContext> Context;
 	TSharedRef<FNProcGenOperationSharedContext> SharedContext;

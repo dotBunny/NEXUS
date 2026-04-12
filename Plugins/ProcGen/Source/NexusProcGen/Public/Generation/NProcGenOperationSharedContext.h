@@ -9,6 +9,7 @@ class FNProcGenOperationSharedContext
 public:
 	UWorld* TargetWorld;
 	TArray<ANCellProxy*> CreatedProxies;
+	TArray<AActor*> CreatedActors;
 
 	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld);
 };
