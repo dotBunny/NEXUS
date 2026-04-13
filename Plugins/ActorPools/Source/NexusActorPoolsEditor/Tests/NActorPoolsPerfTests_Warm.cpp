@@ -8,7 +8,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::ActorPoolTests
+namespace NEXUS::ActorPoolTests::Warm
 {
 	constexpr int32 ObjectCount = 1000;
 	constexpr float PrewarmMaxDuration = 20.0f;
@@ -27,9 +27,9 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm,
 
 		//TEST
 		{
-			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, NEXUS::ActorPoolTests::PrewarmMaxDuration)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, NEXUS::ActorPoolTests::Warm::PrewarmMaxDuration)
 
-			Pool.Prewarm(NEXUS::ActorPoolTests::ObjectCount);
+			Pool.Prewarm(NEXUS::ActorPoolTests::Warm::ObjectCount);
 
 			// Explicitly stop the timer
 			NTestTimer.ManualStop();

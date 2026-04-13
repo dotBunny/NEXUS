@@ -9,7 +9,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::DynamicRefsTests::Perf
+namespace NEXUS::DynamicRefsTests::Subsystem
 {
     constexpr int32 ObjectCount = 1000;
 	constexpr int32 QueryCount = 100;
@@ -35,8 +35,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObject,
 
         // Pre-spawn actors outside the timed region.
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             Actors.Add(World->SpawnActor<AActor>());
         }
@@ -44,8 +44,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObject,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_AddObject,
-                NEXUS::DynamicRefsTests::Perf::AddObjectMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::AddObjectMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
             {
                 Subsystem->AddObject(NDR_Enemy_A, Actors[i]);
             }
@@ -67,8 +67,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_RemoveObject,
         if (!Subsystem) return;
 
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             AActor* A = World->SpawnActor<AActor>();
             Subsystem->AddObject(NDR_Enemy_B, A);
@@ -78,8 +78,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_RemoveObject,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_RemoveObject,
-                NEXUS::DynamicRefsTests::Perf::RemoveObjectMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::RemoveObjectMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
             {
                 Subsystem->RemoveObject(NDR_Enemy_B, Actors[i]);
             }
@@ -101,8 +101,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetObjects,
         if (!Subsystem) return;
 
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             AActor* A = World->SpawnActor<AActor>();
             Subsystem->AddObject(NDR_Enemy_C, A);
@@ -112,8 +112,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetObjects,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_GetObjects,
-                NEXUS::DynamicRefsTests::Perf::GetObjectsMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::QueryCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::GetObjectsMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::QueryCount; ++i)
             {
                 Subsystem->GetObjects(NDR_Enemy_C);
             }
@@ -135,8 +135,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetFirstObject,
         if (!Subsystem) return;
 
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             AActor* A = World->SpawnActor<AActor>();
             Subsystem->AddObject(NDR_Enemy_D, A);
@@ -146,8 +146,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetFirstObject,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_GetFirstObject,
-                NEXUS::DynamicRefsTests::Perf::GetObjectsMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::QueryCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::GetObjectsMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::QueryCount; ++i)
             {
                 Subsystem->GetFirstObject(NDR_Enemy_D);
             }
@@ -172,8 +172,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObjectByName,
 
         const FName TestName = TEXT("PerfTestAddByName");
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             Actors.Add(World->SpawnActor<AActor>());
         }
@@ -181,8 +181,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObjectByName,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_AddObjectByName,
-                NEXUS::DynamicRefsTests::Perf::AddObjectMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::AddObjectMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
             {
                 Subsystem->AddObjectByName(TestName, Actors[i]);
             }
@@ -205,8 +205,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_RemoveObjectByName,
 
         const FName TestName = TEXT("PerfTestRemoveByName");
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             AActor* A = World->SpawnActor<AActor>();
             Subsystem->AddObjectByName(TestName, A);
@@ -216,8 +216,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_RemoveObjectByName,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_RemoveObjectByName,
-                NEXUS::DynamicRefsTests::Perf::RemoveObjectMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::RemoveObjectMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
             {
                 Subsystem->RemoveObjectByName(TestName, Actors[i]);
             }
@@ -240,8 +240,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetObjectsByName,
 
         const FName TestName = TEXT("PerfTestGetByName");
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::DynamicRefsTests::Perf::ObjectCount);
-        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::DynamicRefsTests::Subsystem::ObjectCount);
+        for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::ObjectCount; ++i)
         {
             AActor* A = World->SpawnActor<AActor>();
             Subsystem->AddObjectByName(TestName, A);
@@ -251,8 +251,8 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetObjectsByName,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNDynamicRefsPerfTests_Subsystem_GetObjectsByName,
-                NEXUS::DynamicRefsTests::Perf::GetByNameMaxDuration)
-            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Perf::QueryCount; ++i)
+                NEXUS::DynamicRefsTests::Subsystem::GetByNameMaxDuration)
+            for (int32 i = 0; i < NEXUS::DynamicRefsTests::Subsystem::QueryCount; ++i)
             {
                 Subsystem->GetObjectsByName(TestName);
             }
