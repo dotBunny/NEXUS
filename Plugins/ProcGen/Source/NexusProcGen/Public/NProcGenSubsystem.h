@@ -21,11 +21,8 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 	
 public:
 	
-	bool RegisterCellActor(ANCellActor* CellActor); // TODO
-	bool UnregisterCellActor(ANCellActor* CellActor); // TODO
-
-	bool RegisterCellProxy(ANCellProxy* CellProxy); // TODO
-	bool UnregisterCellProxy(ANCellProxy* CellProxy); // TODO
+	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|ProcGen")
+	void Generate(FString Seed, FText OperationName, bool bLoadAll = false);
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
@@ -44,6 +41,7 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNProcGenOperation>> KnownOperations;
+	
 	
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellActor>> KnownCellActors;

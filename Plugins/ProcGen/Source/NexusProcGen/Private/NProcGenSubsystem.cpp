@@ -2,57 +2,21 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NProcGenSubsystem.h"
-#include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
-#include "Cell/NCellActor.h"
-#include "Cell/NCellProxy.h"
+#include "NProcGenRegistry.h"
 
-bool UNProcGenSubsystem::RegisterCellActor(ANCellActor* CellActor)
+void UNProcGenSubsystem::Generate(FString Seed, FText OperationName, const bool bLoadAll)
 {
-	if (KnownCellActors.Contains(CellActor))
+	UNProcGenOperation* Operation = UNProcGenOperation::CreateInstance(
+		FNProcGenRegistry::GetOrganComponentsFromLevel(GetWorld()->GetCurrentLevel()), Seed, OperationName); 
+	
+	if (bLoadAll)
 	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellActor(%s) as it is already registered."), *CellActor->GetName());
-		return false;
+		Operation->SetCreateLevelInstances(true);
+		Operation->SetLoadLevelInstances(true);
 	}
-	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Registered ANCellActor(%s)."), *CellActor->GetName());
-	KnownCellActors.Add(CellActor);
-	return true;
-}
-
-bool UNProcGenSubsystem::UnregisterCellActor(ANCellActor* CellActor)
-{
-	if (!KnownCellActors.Contains(CellActor))
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellActor(%s) when attempting to unregister it."), *CellActor->GetName());
-		return false;
-	}
-	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Unregistered ANCellActor(%s)."), *CellActor->GetName());
-	KnownCellActors.RemoveSwap(CellActor);
-	return true;
-}
-
-bool UNProcGenSubsystem::RegisterCellProxy(ANCellProxy* CellProxy)
-{
-	if (KnownCellProxies.Contains(CellProxy))
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellProxy(%s) as it is already registered."), *CellProxy->GetName());
-		return false;
-	}
-	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Registered ANCellProxy(%s)."), *CellProxy->GetName());
-	KnownCellProxies.Add(CellProxy);
-	return true;
-}
-
-bool UNProcGenSubsystem::UnregisterCellProxy(ANCellProxy* CellProxy)
-{
-	if (!KnownCellProxies.Contains(CellProxy))
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellProxy(%s) when attempting to unregister it."), *CellProxy->GetName());
-		return false;
-	}
-	UE_LOG(LogNexusProcGen, VeryVerbose, TEXT("Unregistered ANCellProxy(%s)."), *CellProxy->GetName());
-	KnownCellProxies.RemoveSwap(CellProxy);
-	return true;
+	
+	StartOperation(Operation);
 }
 
 void UNProcGenSubsystem::Tick(float DeltaTime)

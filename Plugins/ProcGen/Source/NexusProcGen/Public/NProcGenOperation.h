@@ -97,6 +97,9 @@ public:
 	const FString& GetDisplayMessage() const { return DisplayMessage; }
 	void SetDisplayMessage(FString NewDisplayMessage);
 	
+	void SetCreateLevelInstances(const bool bCreateInstances) const { Context->SetCreateInstances(bCreateInstances); }
+	void SetLoadLevelInstances(const bool bLoadInstances) const { Context->SetLoadInstances(bLoadInstances); };
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnNProcGenOperationDisplayMessageChanged OnDisplayMessageChanged;
 	
@@ -115,7 +118,6 @@ private:
 	INProcGenOperationOwner* Owner = nullptr;
 	TUniquePtr<FNProcGenOperationTaskGraph> Graph;
 	TUniquePtr<FNProcGenOperationContext> Context;
-	
 	
 	bool bIsContextLocked;
 	FText DisplayName;

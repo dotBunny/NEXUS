@@ -32,11 +32,21 @@ public:
 	void LockAndPreprocess(UWorld* World);
 	void OutputToLog(bool bBuildTissues = false);
 	void ResetContext();
+	
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
 	UWorld* GetTargetWorld() const { return TargetWorld; }
+	
 	void SetDisplayName(FString InDisplayName) { DisplayName = InDisplayName; }
 	
+	bool GetCreateInstances() const { return bCreateLevelInstances; }
+	void SetCreateInstances(const bool bCreateInstances) { bCreateLevelInstances = bCreateInstances; }
+	bool GetLoadInstances() const { return bLoadLevelInstances; }
+	void SetLoadInstances(const bool bLoadInstances) { bLoadLevelInstances = bLoadInstances; }
+	
 private:
+	
+	bool bCreateLevelInstances = false;
+	bool bLoadLevelInstances = false;
 	
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;

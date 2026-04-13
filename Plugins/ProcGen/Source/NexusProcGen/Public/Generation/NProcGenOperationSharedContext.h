@@ -9,6 +9,8 @@ class FNProcGenOperationSharedContext
 public:
 	UWorld* TargetWorld;
 	TArray<ANCellProxy*> CreatedProxies;
-
-	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld);
+	bool bCreateLevelInstances = false;
+	bool bLoadLevelInstances = false;
+	
+	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld, bool bCreateInstances= false, bool bLoadInstances = false);
 };

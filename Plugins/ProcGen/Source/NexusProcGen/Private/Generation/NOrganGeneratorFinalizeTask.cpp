@@ -37,6 +37,20 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 		
 			// Registered with global?
 			SharedContext->CreatedProxies.Add(Proxy);
+			
+			
+			
+			// What about creating the instance?
+			if  (SharedContext->bCreateLevelInstances)
+			{
+				Proxy->CreateLevelInstance();
+			}
+			
+			// Do we want to load these now?
+			if (SharedContext->bLoadLevelInstances)
+			{
+				Proxy->LoadLevelInstance();
+			}
 		}
 	}
 	

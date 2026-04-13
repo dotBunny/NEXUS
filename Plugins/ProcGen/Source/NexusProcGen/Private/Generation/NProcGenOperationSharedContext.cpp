@@ -3,9 +3,12 @@
 
 #include "Generation/NProcGenOperationSharedContext.h"
 
-FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld)
+FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld, bool bCreateInstances, bool bLoadInstances)
 {
 	TargetWorld = OutputWorld;
+	bCreateLevelInstances = bCreateInstances;
+	bLoadLevelInstances = bLoadInstances;
+	
 	// TBD
 	
 	// What is useful cross pass for generation? 

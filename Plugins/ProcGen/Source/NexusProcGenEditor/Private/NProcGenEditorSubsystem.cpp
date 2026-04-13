@@ -77,6 +77,11 @@ void UNProcGenEditorSubsystem::ClearAllProxies()
 	KnownProxies.Empty();
 }
 
+void UNProcGenEditorSubsystem::ClearGenerated(const FName& Key)
+{
+	ClearGeneratedProxies(Key);
+}
+
 void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FName& Key)
 {
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(Key))

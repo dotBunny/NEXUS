@@ -25,7 +25,8 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	uint32 SubTaskIndex = 0;
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(Context->GetTargetWorld()); // TODO: Pin when used?
+	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(
+		Context->GetTargetWorld(), Context->GetCreateInstances(), Context->GetLoadInstances());
 	
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
