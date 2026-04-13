@@ -18,6 +18,7 @@ NEXUS/
 ```
 
 The `TestProject` is a thin host project. Actual feature work lives in `../Plugins/<PluginName>/Source/`.
+The Unreal Engine source can be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7`, when found this is known as the <UE_ROOT>.
 
 ## Build
 
@@ -25,12 +26,12 @@ UE installation can be found at `C:\UE\UE_5.7` (defined in `.github/branch.json`
 
 **Build (Editor target):**
 ```powershell
-<UE Installation>\Engine\Build\BatchFiles\Build.bat NEXUSEditor Win64 Development "<this repo root>\NEXUS.uproject" -progress
+<UE_ROOT>\Engine\Build\BatchFiles\Build.bat NEXUSEditor Win64 Development "<this repo root>\NEXUS.uproject" -progress
 ```
 
 **Build (Game target):**
 ```powershell
-<UE Installation>\Engine\Build\BatchFiles\Build.bat NEXUS Win64 Development "<this repo root>\NEXUS.uproject" -progress
+<UE_ROOT>\Engine\Build\BatchFiles\Build.bat NEXUS Win64 Development "<this repo root>\NEXUS.uproject" -progress
 ```
 
 ## Tests
@@ -39,13 +40,13 @@ Tests live in `Editor` module `Tests/` subdirectories (e.g., `Plugins/Core/Sourc
 
 ```powershell
 # Unit tests
-& "<UE Installation>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi
+& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi
 
 # Functional tests (requires RHI - no -nullrhi)
-& "<UE Installation>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest Tests.Nexus;Quit"
+& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest Tests.Nexus;Quit"
 
 # Performance tests
-& "<UE Installation>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.PerfTests;Quit" -nullrhi
+& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.PerfTests;Quit" -nullrhi
 ```
 
 Results are written to `Staging/TestResults/index.json`.
@@ -158,14 +159,3 @@ Each module has a `Nexus<Name>Minimal.h` that declares the module's log category
 **Settings**: Plugin-level settings derive from `UDeveloperSettings` and use `N_IMPLEMENT_SETTINGS`, giving a cached `::Get()` singleton. Project-level overrides live in `Config/`.
 
 **Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).
-
-## CI/CD
-
-Workflows are in `.github/workflows/`. The self-hosted runner expects the UE installation path from `.github/branch.json`.
-
-- **push-unit-tests.yml** — triggers on pushes to `main` that touch `Plugins/**/Source/**` or `TestProject/Source/**`
-- **manual-buildcookrun.yml** / **dispatch-buildcookrun.yml** — BuildCookRun (Development/DebugGame/Shipping)
-- **manual-tests.yml** / **dispatch-functional-tests.yml** — functional test runs
-- **schedule-performance-tests.yml** — scheduled perf test runs
-
-Reusable actions are in `.github/actions/` (build-project, ue-cmd-tests, workspace-clean, ue-parse-log, ue-parse-results, upload-artifacts).
