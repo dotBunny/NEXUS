@@ -17,9 +17,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 {
 	GENERATED_BODY()
 	N_EDITOR_TICKABLE_SUBSYSTEM(UNProcGenEditorSubsystem)
-
-
-
+	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override
@@ -77,17 +75,17 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 protected:
 	void OnPreBeginPIE(bool bArg);
 	void OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap);
-private:
 
+private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	
 	UPROPERTY()
 	TArray<TObjectPtr<UNProcGenOperation>> KnownOperations;
 
 	/**
 	 * An array of all known proxies that have been put into the level, this ensures that they are not
-	 * garbage collected and that their spawned level instances are protected as well. We have to manage
-	 * them directly for cases like going into PIE and loading a different level.
+	 * garbage collected and that their spawned level instances are protected as well. However, because 
+	 * they are marked transient we need to manage their cleanup explicitly when going into things like PIE
+	 * or transitioning to new levels.
 	 */
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
@@ -99,6 +97,3 @@ private:
 	FDelegateHandle OnMapLoadHandle;
 	FDelegateHandle PreBeginPIEHandle;
 };
-
-
-// TODO: Clear generated stuff going into play?
