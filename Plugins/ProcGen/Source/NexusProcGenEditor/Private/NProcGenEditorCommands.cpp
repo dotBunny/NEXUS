@@ -194,7 +194,7 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateAllProxies", "Generate All Proxies"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateAllProxies_Tooltip", "Dispatches an NProcGenOperation via the UNProcGenEditorSubsystem to generate all UNOrganComponents in the world outputing NCellProxy actors."),
 	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
-	EUserInterfaceActionType::Button, FInputChord());
+	EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::Home));
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateLevelInstances,
 	"NProcGen.NOrganComponent.LoadProxies",
@@ -219,10 +219,10 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateAllLevelInstances,
 	"NProcGen.NOrganComponent.LoadAllProxies",
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Create All Level Instances"),
-	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies_Tooltip", "Load all level instances."),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Create & Load All Level Instances"),
+	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies_Tooltip", "Creates and then loads all level instances."),
 	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
-	EUserInterfaceActionType::Button, FInputChord());
+	EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::End));
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadLevelInstances,
 	"NProcGen.NOrganComponent.UnloadProxies",

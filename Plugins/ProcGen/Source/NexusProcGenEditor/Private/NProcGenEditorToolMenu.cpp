@@ -3,6 +3,7 @@
 
 #include "NProcGenEditorToolMenu.h"
 
+#include "LevelEditor.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "Cell/NCellJunctionComponent.h"
@@ -76,6 +77,10 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 		);
 		NOrganDropdownMenu.StyleNameOverride = "CalloutToolbar";
 		NexusSection.AddEntry(NOrganDropdownMenu);
+		
+		// Register command lists with the level editor so input chords work globally
+		FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+		LevelEditorModule.GetGlobalLevelEditorActions()->Append(FNProcGenEditorCommands::Get().CommandList_Organ.ToSharedRef());
 		
 		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
 		const FToolMenuEntry NProcGenEdMode_Button = FToolMenuEntry::InitToolBarButton(
