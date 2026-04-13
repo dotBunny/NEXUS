@@ -7,6 +7,31 @@
 #include "Generation/NProcGenOperationSharedContext.h"
 #include "Organ/NOrganComponent.h"
 
+void UNProcGenEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
+{
+	Super::Initialize(Collection);
+
+	OnMapLoadHandle = FEditorDelegates::OnMapLoad.AddUObject(this, &UNProcGenEditorSubsystem::OnMapLoad);
+	PreBeginPIEHandle = FEditorDelegates::PreBeginPIE.AddUObject(this, &UNProcGenEditorSubsystem::OnPreBeginPIE);
+}
+
+void UNProcGenEditorSubsystem::Deinitialize()
+{
+	if (HasGeneratedCellProxies())
+	{
+		ClearAllProxies();
+	}
+
+	FEditorDelegates::OnMapLoad.Remove(OnMapLoadHandle);
+	OnMapLoadHandle.Reset();
+	
+	FEditorDelegates::PreBeginPIE.Remove(PreBeginPIEHandle);
+	PreBeginPIEHandle.Reset();
+	
+	Super::Deinitialize();
+}
+
+
 void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
 	// Clear for anything in operation
@@ -40,17 +65,16 @@ void UNProcGenEditorSubsystem::OnOperationDestroyed(UNProcGenOperation* Operatio
 
 void UNProcGenEditorSubsystem::ClearAllProxies()
 {
-	if (ProxyMap.Num() > 0)
+	for (int i = 0; i < KnownProxies.Num(); i++)
 	{
-		TArray<FName> KnownKeys;
-		ProxyMap.GetKeys(KnownKeys);
-		for (auto Key : KnownKeys)
+		if (IsValid(KnownProxies[i]))
 		{
-			ClearGeneratedProxies(Key);
+			KnownProxies[i]->DestroyLevelInstance();
+			KnownProxies[i]->Destroy(true, false);
 		}
-		ProxyMap.Empty();
-		KnownProxies.Empty();
 	}
+	ProxyMap.Empty();
+	KnownProxies.Empty();
 }
 
 void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FName& Key)
@@ -62,8 +86,11 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FName& Key)
 		for (int i = 0; i < FoundCount; i++)
 		{
 			KnownProxies.Remove(ProxiesArray[i]);
-			ProxiesArray[i]->DestroyLevelInstance();
-			ProxiesArray[i]->Destroy(true, false);
+			if (IsValid(ProxiesArray[i]))
+			{
+				ProxiesArray[i]->DestroyLevelInstance();
+				ProxiesArray[i]->Destroy(true, false);
+			}
 		}
 		ProxyMap.Remove(Key);
 	}
@@ -71,14 +98,9 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FName& Key)
 
 void UNProcGenEditorSubsystem::LoadAllGeneratedProxies()
 {
-	if (ProxyMap.Num() > 0)
+	for (int i = 0; i < KnownProxies.Num(); i++)
 	{
-		TArray<FName> KnownKeys;
-		ProxyMap.GetKeys(KnownKeys);
-		for (auto Key : KnownKeys)
-		{
-			LoadGeneratedProxies(Key);
-		}
+		KnownProxies[i]->LoadLevelInstance();
 	}
 }
 
@@ -119,4 +141,14 @@ void UNProcGenEditorSubsystem::UnloadGeneratedProxies(const FName& Key)
 			ProxiesArray[i]->UnloadLevelInstance();
 		}
 	}
+}
+
+void UNProcGenEditorSubsystem::OnPreBeginPIE(bool bArg)
+{
+	ClearAllProxies();
+}
+
+void UNProcGenEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap)
+{
+	ClearAllProxies();
 }

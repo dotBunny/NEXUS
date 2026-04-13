@@ -47,7 +47,6 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCell
 	FActorSpawnParameters SpawnInfo;
 	
 	SpawnInfo.ObjectFlags |= RF_Transient;
-//	SpawnInfo.ObjectFlags |= RF_MarkAsRootSet;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), SpawnInfo);
@@ -135,7 +134,7 @@ void ANCellProxy::DestroyLevelInstance()
 		{
 			LevelInstance->UnloadLevelInstance();
 		}
-		LevelInstance->Destroy();
+		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
 	}
 	Show();

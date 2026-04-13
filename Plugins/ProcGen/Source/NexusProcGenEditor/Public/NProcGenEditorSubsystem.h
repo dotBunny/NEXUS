@@ -18,6 +18,10 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	GENERATED_BODY()
 	N_EDITOR_TICKABLE_SUBSYSTEM(UNProcGenEditorSubsystem)
 
+
+
+	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+	virtual void Deinitialize() override;
 	virtual void Tick(float DeltaTime) override
 	{
 		for (const auto Operation : KnownOperations)
@@ -70,18 +74,30 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	void UnloadAllGeneratedProxies();
 	void UnloadGeneratedProxies(const FName& Key);
 	
+protected:
+	void OnPreBeginPIE(bool bArg);
+	void OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap);
 private:
+
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	
 	UPROPERTY()
 	TArray<TObjectPtr<UNProcGenOperation>> KnownOperations;
-	
+
+	/**
+	 * An array of all known proxies that have been put into the level, this ensures that they are not
+	 * garbage collected and that their spawned level instances are protected as well. We have to manage
+	 * them directly for cases like going into PIE and loading a different level.
+	 */
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
 	
 	TMap<FName, TArray<ANCellProxy*>> ProxyMap;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
+	
+	FDelegateHandle OnMapLoadHandle;
+	FDelegateHandle PreBeginPIEHandle;
 };
 
 
