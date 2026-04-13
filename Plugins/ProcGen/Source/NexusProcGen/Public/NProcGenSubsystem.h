@@ -42,8 +42,12 @@ public:
 private:	
 	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNProcGenOperation*> KnownOperations;
+	UPROPERTY()
+	TArray<TObjectPtr<UNProcGenOperation>> KnownOperations;
 	
-	TArray<ANCellActor*> KnownCellActors;
-	TArray<ANCellProxy*> KnownCellProxies;
+	UPROPERTY()
+	TArray<TObjectPtr<ANCellActor>> KnownCellActors;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<ANCellProxy>> KnownCellProxies;
 };

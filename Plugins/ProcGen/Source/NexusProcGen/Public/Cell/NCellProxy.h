@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NCellJunctionDetails.h"
+#include "Generation/NProcGenGraphCellNode.h"
 #include "Macros/NActorMacros.h"
 #include "NCellProxy.generated.h"
 
@@ -27,7 +29,7 @@ class NEXUSPROCGEN_API ANCellProxy : public AActor
 
 public:
 	
-	static ANCellProxy* CreateInstance(UWorld* World, UNCell* Cell, const FVector& Location, const FRotator& Rotation, bool bPreLoadLevel = true);
+	static ANCellProxy* CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, bool bPreLoadLevel = true);
 	
 	void CreateLevelInstance();
 	void LoadLevelInstance();
@@ -37,6 +39,7 @@ public:
 protected:
 	void OnProxyMaterialLoaded();
 	void InitializeFromNCell(UNCell* InNCell);
+	void InitializeFromCellNode(const FNProcGenGraphCellNode* CellNode);
 
 private:
 
@@ -58,5 +61,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 
+	UPROPERTY(VisibleAnywhere)
+	TMap<int32, FNCellJunctionDetails> JunctionsData;
+	
 	N_WORLD_ICON_HEADER()
 };

@@ -10,6 +10,7 @@
 #include "NProcGenMinimal.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
+#include "Cell/NCellLevelInstance.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "Math/NVectorUtils.h"
@@ -90,9 +91,11 @@ void UNCellJunctionComponent::OnRegister()
 	{
 		LevelInstance = Cast<ALevelInstance>(Interface);
 	}
+	
+	const ULevel* Level = GetComponentLevel();
+	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(Level);
 
 #if WITH_EDITOR
-	const ULevel* Level = GetComponentLevel();
 	
 	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
 	if (RootComponent == nullptr)
@@ -104,7 +107,6 @@ void UNCellJunctionComponent::OnRegister()
 		}));
 	}
 	
-	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(Level);
 	if (Actor != nullptr && !Actor->WasSpawnedFromProxy())
 	{
 		// Whilst in the editor we want to make sure that we uniquely identify our junctions
@@ -120,7 +122,18 @@ void UNCellJunctionComponent::OnRegister()
 			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
 		}
 	}
+
+	
 #endif // WITH_EDITOR
+	
+	// Update details based on generation.
+	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance->IsA<ANCellLevelInstance>())
+	{
+		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
+		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData->Find(Details.InstanceIdentifier);
+		
+		Details.WorldRotation = UpdatedDetails->WorldRotation;
+	}
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);
 	Super::OnRegister();

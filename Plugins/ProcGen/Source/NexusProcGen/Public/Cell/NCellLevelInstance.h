@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NCellJunctionDetails.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
 
@@ -13,6 +14,7 @@ class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 {
 	GENERATED_BODY()
 
-protected:
+public:
+	TMap<int32, FNCellJunctionDetails>* JunctionData;
 	virtual void OnLevelInstanceLoaded() override;
 };

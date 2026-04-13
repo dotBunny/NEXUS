@@ -53,7 +53,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
 	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
-	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
+	bool HasGeneratedCellProxies() const { return ProxyMap.Num() > 0; }
 	
 	void ClearAllProxies();
 	
@@ -72,9 +72,14 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNProcGenOperation*> KnownOperations;
 	
-	TMap<FName, TArray<ANCellProxy*>> KnownProxies;
+	UPROPERTY()
+	TArray<TObjectPtr<UNProcGenOperation>> KnownOperations;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
+	
+	TMap<FName, TArray<ANCellProxy*>> ProxyMap;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 };

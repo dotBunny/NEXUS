@@ -9,6 +9,7 @@
 #include "Components/BillboardComponent.h"
 #include "Components/DynamicMeshComponent.h"
 #include "Engine/AssetManager.h"
+#include "Generation/NProcGenGraphCellNode.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
@@ -40,21 +41,28 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
-ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, UNCell* Cell, const FVector& Location, const FRotator& Rotation, bool bPreLoadLevel)
+ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, const bool bPreLoadLevel)
 {
+
 	FActorSpawnParameters SpawnInfo;
 	
 	SpawnInfo.ObjectFlags |= RF_Transient;
+//	SpawnInfo.ObjectFlags |= RF_MarkAsRootSet;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
-	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(Location, Rotation, SpawnInfo);
+	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), SpawnInfo);
 	
-	Proxy->InitializeFromNCell(Cell);
+	// Context initialization
+	Proxy->InitializeFromCellNode(CellNode);
+	
+	// Default initialization
+	Proxy->InitializeFromNCell(CellNode->GetTemplate());
 	
 	// TODO: Do something with this
 	if (bPreLoadLevel)
 	{
-		Cell->World.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda(
+		
+		CellNode->GetTemplate()->World.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda(
 								[](const FSoftObjectPath&, UObject* InLoadedObject)
 								{
 								}));	
@@ -88,6 +96,8 @@ void ANCellProxy::CreateLevelInstance()
 #if WITH_EDITOR
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif // WITH_EDITOR
+	
+	LevelInstance->JunctionData = &JunctionsData;
 }
 
 void ANCellProxy::LoadLevelInstance()
@@ -96,6 +106,8 @@ void ANCellProxy::LoadLevelInstance()
 	{
 		CreateLevelInstance();
 	}
+	
+	// Something about IsLoaded occasionally causes a crash?
 	if (!LevelInstance->IsLoaded())
 	{
 		LevelInstance->LoadLevelInstance();
@@ -173,6 +185,11 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	// Create the material on placement (CDO settings access = bad)
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	Streamable.RequestAsyncLoad(UNProcGenSettings::Get()->ProxyMaterial.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ANCellProxy::OnProxyMaterialLoaded));
+}
+
+void ANCellProxy::InitializeFromCellNode(const FNProcGenGraphCellNode* CellNode)
+{
+	JunctionsData = CellNode->GetJunctions();
 }
 
 void ANCellProxy::OnProxyMaterialLoaded()

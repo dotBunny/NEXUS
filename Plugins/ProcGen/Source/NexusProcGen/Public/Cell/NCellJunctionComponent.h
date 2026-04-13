@@ -67,8 +67,6 @@ public:
 	FString GetJunctionName() const;
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 	
-	
-	
 #endif // WITH_EDITOR
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;

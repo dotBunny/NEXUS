@@ -30,23 +30,10 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 	{
 		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
 		{
-			const FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
-			
-			// // TODO: Temp DRAWING
-			// const TMap<int32, FNCellJunctionDetails>& Junctions = CellNode->GetJunctions();
-			// for (const auto JunctionPair : Junctions)
-			// {
-			// 	FString Junction = FString::Printf(TEXT("%i_%s_J%d"), Node->GetNodeID(), *CellNode->GetTemplate()->World.GetAssetName(),  JunctionPair.Key);
-			// 	ANDebugActor::CreateInstance(SharedContext->TargetWorld, 
-			// 			JunctionPair.Value.WorldLocation, 
-			// 			JunctionPair.Value.WorldRotation, Junction, FVector(0.25f, 0.25f, 0.25f));
-			// 	
-			// }
-			//
+			FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
 			
 			// Spawn proxy instance
-			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, 
-				CellNode->GetTemplate(), CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), false);
+			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, CellNode, false);
 		
 			// Registered with global?
 			SharedContext->CreatedProxies.Add(Proxy);
