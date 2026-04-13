@@ -52,6 +52,15 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 			}
 		}
 	}
+	
+	if (Context->CellGraph->GetNodeCount() < 10)
+	{
+		TArray<FNProcGenGraphNode*> OpenNodes = Context->CellGraph->GetNodesWithOpenJunctions();
+		for (int j = 0; j < OpenNodes.Num(); j++)
+		{
+			ProcessNode(Random, OpenNodes[j]);
+		}
+	}
 
 	Context->bSuccessful = true;
 }
@@ -105,7 +114,7 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenG
 		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
 
 		FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
-		if (SourceNode->CheckBounds(NewNode))
+		if (SourceNode->CheckBoundsIntersects(NewNode))
 		{
 			HitNodes.Add(SourceNode);
 		}
@@ -121,7 +130,7 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeHull(FNProcGenGra
 		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
 
 		FNProcGenGraphCellNode* SourceNode = static_cast<FNProcGenGraphCellNode*>(RegisteredNode);
-		if (SourceNode->CheckHull(NewNode))
+		if (SourceNode->CheckHullIntersects(NewNode))
 		{
 			HitNodes.Add(SourceNode);
 		}
@@ -189,10 +198,21 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 	
 		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, RequiredRotation);
 		
+		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
+		// tighter hull check. If neither fits inside Context->Bounds we discard and move on.
+		const FBox ContextBoundsBox = Context->Bounds.GetBox();
+		if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
+		{
+			delete TargetCellNode;
+			continue;
+		}
+		
+		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
 		for (int i = BoundsIntersectingNodes.Num() - 1; i >= 0; i--)
 		{
-			if (!BoundsIntersectingNodes[i]->CheckHull(TargetCellNode))
+			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
+			if (!BoundsIntersectingNodes[i]->CheckHullIntersects(TargetCellNode))
 			{
 				BoundsIntersectingNodes.RemoveAt(i);
 			}

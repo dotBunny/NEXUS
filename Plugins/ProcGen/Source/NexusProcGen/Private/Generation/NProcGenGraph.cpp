@@ -27,3 +27,22 @@ void FNProcGenGraph::RegisterNode(FNProcGenGraphNode* Node)
 	Nodes.Add(Node);
 	Node->NodeID = Ticket++;
 }
+
+TArray<FNProcGenGraphNode*> FNProcGenGraph::GetNodesWithOpenJunctions()
+{
+	TArray<FNProcGenGraphNode*> ReturnNodes;
+	for (FNProcGenGraphNode* Node : Nodes)
+	{
+		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
+		{
+			FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+			if (CellNode->HasOpenJunctions())
+			{
+				ReturnNodes.Add(CellNode);
+			}
+		}
+	}
+	return MoveTemp(ReturnNodes);
+}
+
+

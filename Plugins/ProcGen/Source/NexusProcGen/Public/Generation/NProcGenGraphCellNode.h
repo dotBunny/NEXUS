@@ -15,26 +15,30 @@ public:
 	
 	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation);
 	
-	void UpdateWorldPosition(const FVector& Position);
-	void UpdateWorldRotation(const FRotator& Rotation);
-	
+	bool HasOpenJunctions() const;
 	TMap<int32, FNCellJunctionDetails*> GetOpenJunctions();
 	const TMap<int32, FNCellJunctionDetails>& GetJunctions() const;
 	
 	FNCellJunctionDetails* GetJunctionDetails(int32 JunctionKey);
 	FNProcGenGraphNode* GetLinkedNode(int32 JunctionKey);
-	
 	TObjectPtr<UNCell> GetTemplate() const { return TemplatePtr; }
 	
 	void Link(int32 JunctionKey, FNProcGenGraphNode* Node);
 	void Unlink(int32 JunctionKey);
 	
-	
-	bool CheckBounds(const FNProcGenGraphCellNode* Other) const
+	bool CheckBoundsIntersects(const FNProcGenGraphCellNode* Other) const
 	{
 		return WorldBounds.Intersect(Other->WorldBounds);
 	}
-	bool CheckHull(FNProcGenGraphCellNode* Other) const
+	
+	bool IsBoundsInside(const FBox& Bounds) const
+	{
+		return Bounds.IsInside(WorldBounds);
+	}
+	
+	bool IsHullInside(const FBox& Bounds) const;
+	
+	bool CheckHullIntersects(FNProcGenGraphCellNode* Other) const
 	{
 		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
 			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
@@ -46,7 +50,6 @@ protected:
 private:
 	
 	FNCellInputData* InputDataPtr;
-	
 	TArray<int32> FreeJunctionKeys;
 	TMap<int32, FNProcGenGraphNode*> Links;
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
@@ -54,7 +57,5 @@ private:
 	FBox WorldBounds;
 	FNRawMesh Hull;
 	FNCellVoxelData WorldVoxel;
-	
-	
 	TObjectPtr<UNCell> TemplatePtr;
 };

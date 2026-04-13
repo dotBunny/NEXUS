@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "NProcGenGraphCellNode.h"
 #include "NProcGenGraphNode.h"
 
 class NEXUSPROCGEN_API FNProcGenGraph
@@ -17,7 +18,7 @@ public:
 	TArray<FNProcGenGraphNode*>& GetMutableNodes() { return Nodes; }
 	
 	void RegisterNode(FNProcGenGraphNode* Node);
-	
+	TArray<FNProcGenGraphNode*> GetNodesWithOpenJunctions();
 	
 	int GetNodeCount() const
 	{

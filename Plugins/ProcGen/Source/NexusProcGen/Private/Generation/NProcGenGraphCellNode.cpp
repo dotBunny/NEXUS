@@ -43,16 +43,10 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 	
 }
 
-void FNProcGenGraphCellNode::UpdateWorldPosition(const FVector& Position)
+bool FNProcGenGraphCellNode::HasOpenJunctions() const
 {
-	// TODO: Shift links?
-	SetWorldPosition(Position);
-}
-
-void FNProcGenGraphCellNode::UpdateWorldRotation(const FRotator& Rotation)
-{
-	// TODO: Shift links?
-	SetWorldRotation(Rotation);
+	// TODO: some sort of thing will need to be added for requirements
+	return FreeJunctionKeys.Num() > 0;
 }
 
 TMap<int32, FNCellJunctionDetails*> FNProcGenGraphCellNode::GetOpenJunctions()
@@ -88,6 +82,19 @@ FNProcGenGraphNode* FNProcGenGraphCellNode::GetLinkedNode(const int32 JunctionKe
 		return nullptr;
 	}
 	return Links[JunctionKey];
+}
+
+bool FNProcGenGraphCellNode::IsHullInside(const FBox& Bounds) const
+{
+	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Hull.Vertices, GetWorldRotation(), GetWorldPosition());
+	for (const FVector& Vertex : WorldVertices)
+	{
+		if (!Bounds.IsInside(Vertex))
+		{
+			return false;
+		}
+	}
+	return WorldVertices.Num() > 0;
 }
 
 void FNProcGenGraphCellNode::Link(const int32 JunctionKey, FNProcGenGraphNode* Node)
