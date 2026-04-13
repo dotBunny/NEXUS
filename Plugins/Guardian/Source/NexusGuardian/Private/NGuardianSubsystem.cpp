@@ -50,7 +50,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	
 	if (LastObjectCount >= ObjectCountWarningThreshold && !bPassedObjectCountWarningThreshold)
 	{
-		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met met with %d/%d objects."), LastObjectCount, ObjectCountWarningThreshold);
+		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountWarningThreshold);
 		bPassedObjectCountWarningThreshold = true;
 		return;
 	}
@@ -74,7 +74,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	if (LastObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
-		UE_LOG(LogNexusGuardian, Error, TEXT("Object count compare threshold met with %d objects."), LastObjectCount);
+		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count compare threshold met with %d objects."), LastObjectCount);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
@@ -83,7 +83,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		FString::Printf(TEXT("NEXUS_Compare_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 		
-		UE_LOG(LogNexusGuardian, Error, TEXT("Object count comparison written to %s."), *DumpFilePath);
+		UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
 		bPassedObjectCountCompareThreshold = true;
 	}
 }
