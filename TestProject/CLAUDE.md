@@ -108,6 +108,7 @@ N_TEST_CRITICAL(FMyTests, "NEXUS::UnitTests::MyPlugin::MyTest", N_TEST_CONTEXT_E
 ```
 
 The test name string prefix `NEXUS::UnitTests` is what the CI automation filter `NEXUS.UnitTests` matches against.
+The `MyPlugin` name is a shortened version of the Plugins full name, for example NexusDynamicRefs becomes NDynamicRefs, replacing Nexus with just the letter N.
 
 ## Code Style & Naming Conventions
 

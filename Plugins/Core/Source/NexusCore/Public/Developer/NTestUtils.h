@@ -28,7 +28,10 @@ public:
 		// Force garbage collection to ensure the next test is already prepared / faster
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 	}
-	
+
+	/**
+	 * Creates a test world, runs test functionality, and tears down the world after, destroying all created actors and  objects associated to it.
+	 */
 	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
 		// Create World
@@ -69,6 +72,10 @@ public:
 		TestGameInstance->ConditionalBeginDestroy();
 	}
 	
+	/**
+	 * Takes a UObject snapshot prior to creating a test world. Runs test functionality, and then tears down the world destroying all actors and objects associated to it. 
+	 * Making an object snapshot afterward to validate that the number of UObjects has not changed. Used to detect leaks.
+	 */
 	FORCEINLINE static void WorldTestChecked(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bShouldGarbageCollect = true)
 	{
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);

@@ -11,9 +11,11 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-N_TEST(FNActorPoolsTests_Interface_Events, "NEXUS::UnitTests::NActorPools::Interface::Events", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolsTests_Interface_Events, 
+	"NEXUS::UnitTests::NActorPools::Interface::Events", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 1;

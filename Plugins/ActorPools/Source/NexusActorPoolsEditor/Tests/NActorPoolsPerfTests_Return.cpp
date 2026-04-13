@@ -8,28 +8,35 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::Return", N_TEST_CONTEXT_EDITOR)
+namespace NEXUS::ActorPoolTests
+{
+	constexpr int32 ObjectCount = 1000;
+	constexpr float ReturnMaxDuration = 2.5f;
+}
+
+N_TEST_PERF(FNActorPoolPerfTests_Return, 
+	"NEXUS::PerfTests::NActorPools::Return", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::PrePerformanceTest();
-	constexpr int32 TestSize = 1000;
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
-		Pool.Prewarm(TestSize);
+		Pool.Prewarm(NEXUS::ActorPoolTests::ObjectCount);
 		
 		TArray<AActor*> Actors;
-		Actors.Reserve(TestSize);
-		for (int32 i = 0; i < TestSize; i++)
+		Actors.Reserve(NEXUS::ActorPoolTests::ObjectCount);
+		for (int32 i = 0; i < NEXUS::ActorPoolTests::ObjectCount; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
 		}
 
 		// TEST
 		{
-			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Return, 2.5f)
-			for (int32 i = 0; i < TestSize; i++)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Return, NEXUS::ActorPoolTests::ReturnMaxDuration);
+			for (int32 i = 0; i < NEXUS::ActorPoolTests::ObjectCount; i++)
 			{
 				Pool.Return(Actors[i]);
 			}

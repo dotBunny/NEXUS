@@ -10,6 +10,7 @@
 - `FNDeveloperUtils` and `UNDeveloperLibrary` now have `IsBuildDemo()` methods to support `IS_BUILD_DEMO` definitions from build targets.
 - Pickers all now have a `Twisted` method to support passing a `FNMersenneTwister`.
 - `ANDebugPointActor` for quick point debugging.
+- `NDynamicRefs` suite of tests.
 
 ### Changed
 
@@ -17,6 +18,7 @@
 - `MultiplayerTest` now monitors the status of the spawned processes and updates state accordingly.
 - `ANSamplesPawn` now replicates movement.
 - Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
+- `NActorPool` tests now run in PIE worlds.
 
 ### Fixed
 

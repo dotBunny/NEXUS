@@ -10,10 +10,12 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, "NEXUS::UnitTests::NActorPools::LeakCheck::DontForceDestroy", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, 
+	"NEXUS::UnitTests::NActorPools::LeakCheck::DontForceDestroy", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests for leaks when a pool is filled and created, but we do not force the destruction of the created objects.
-	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
@@ -30,10 +32,12 @@ N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, "NEXUS::UnitTests::NActorPoo
 		Pool.Clear(false);
 	});
 }
-N_TEST(FNActorPoolTests_LeakCheck, "NEXUS::UnitTests::NActorPools::LeakCheck::ForceDestroy", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_LeakCheck, 
+	"NEXUS::UnitTests::NActorPools::LeakCheck::ForceDestroy", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests for leaks when a pool is filled and created, but we let GC run.
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();

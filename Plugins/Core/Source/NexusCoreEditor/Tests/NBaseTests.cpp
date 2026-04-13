@@ -10,7 +10,7 @@
 
 N_TEST_CRITICAL(FNBaseTests, "NEXUS::UnitTests::NCore::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 	});
 }

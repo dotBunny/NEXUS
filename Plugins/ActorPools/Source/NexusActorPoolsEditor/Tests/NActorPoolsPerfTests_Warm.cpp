@@ -8,11 +8,18 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_TEST_CONTEXT_EDITOR)
+namespace NEXUS::ActorPoolTests
+{
+	constexpr int32 ObjectCount = 1000;
+	constexpr float PrewarmMaxDuration = 20.0f;
+}
+
+N_TEST_PERF(FNActorPoolPerfTests_Warm, 
+	"NEXUS::PerfTests::NActorPools::Warm", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::PrePerformanceTest();
-	constexpr int32 TestSize = 1000;
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
@@ -20,9 +27,9 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::Warm", N_
 
 		//TEST
 		{
-			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, 20.0f)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, NEXUS::ActorPoolTests::PrewarmMaxDuration)
 
-			Pool.Prewarm(TestSize);
+			Pool.Prewarm(NEXUS::ActorPoolTests::ObjectCount);
 
 			// Explicitly stop the timer
 			NTestTimer.ManualStop();

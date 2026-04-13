@@ -9,10 +9,12 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-N_TEST(FNActorPoolTests_Strategy_Create, "NEXUS::UnitTests::NActorPools::Strategy::Create", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_Create, 
+	"NEXUS::UnitTests::NActorPools::Strategy::Create", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests the Create fill strategy of an actor pool; verifies that it will make above the maximum count if requested.
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 0;
@@ -51,10 +53,12 @@ N_TEST(FNActorPoolTests_Strategy_Create, "NEXUS::UnitTests::NActorPools::Strateg
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_CreateLimited, "NEXUS::UnitTests::NActorPools::Strategy::CreateLimited", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_CreateLimited, 
+	"NEXUS::UnitTests::NActorPools::Strategy::CreateLimited", 
+	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests the CreateLimited fill strategy of an actor pool; verifies that it will stop when the maximum count is hit.
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 0;
@@ -96,9 +100,11 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited, "NEXUS::UnitTests::NActorPools::
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, "NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleFirst", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, 
+	"NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleFirst", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 5;
@@ -139,9 +145,11 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, "NEXUS::UnitTests::NActorPo
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleLast", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, 
+	"NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleLast", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 5;
@@ -186,9 +194,11 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, "NEXUS::UnitTests::NActorPoo
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_Fixed, "NEXUS::UnitTests::NActorPools::Strategy::Fixed", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_Fixed, 
+	"NEXUS::UnitTests::NActorPools::Strategy::Fixed", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 3;
@@ -221,9 +231,11 @@ N_TEST(FNActorPoolTests_Strategy_Fixed, "NEXUS::UnitTests::NActorPools::Strategy
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, "NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleFirst", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, 
+	"NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleFirst", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 2;
@@ -264,9 +276,11 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, "NEXUS::UnitTests::NActorPoo
 	});
 }
 
-N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, "NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleLast", N_TEST_CONTEXT_EDITOR)
+N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, 
+	"NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleLast", 
+	N_TEST_CONTEXT_EDITOR)
 {
-	FNTestUtils::WorldTest(EWorldType::Editor, [this](UWorld* World)
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 3;

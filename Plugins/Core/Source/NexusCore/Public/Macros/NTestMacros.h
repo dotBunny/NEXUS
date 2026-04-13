@@ -11,7 +11,7 @@
 #define N_TEST_CONTEXT_CLIENT_SERVER [ClientContext][ServerContext]
 #define N_TEST_CONTEXT_SERVER [ServerContext]
 #define N_TEST_CONTEXT_EDITOR [EditorContext]
-#define N_TEST_CONTEXT_COMMANDLET [CommandletContext] // Test is suitable for running within a commandlet
+#define N_TEST_CONTEXT_COMMANDLET [CommandletContext]
 
 #define N_TEST(ClassName, PrettyName, Flags)\
 	TEST_CASE_NAMED(ClassName, PrettyName, N_STRINGIFY([NEXUS]Flags))
