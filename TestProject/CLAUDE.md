@@ -86,6 +86,7 @@ Active plugins loaded by the TestProject:
 Tests belong in the `Editor` module under a `Tests/` subdirectory. Wrap all test code in `#if WITH_TESTS / #endif`.
 Tests use the NEXUS test macros from `NexusCore/Public/Macros/NTestMacros.h`. All tests are prefixed `[NEXUS]` in the automation system.
 Use `FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World) { ... })` when a test needs a world context.
+Use the CHECK_MESSAGE macro instead of CHECK_TRUE when providing a message, use the CHECK_FALSE_MESSAGE macro instead of CHECK_FALSE when providing a message.
 
 ```cpp
 #if WITH_TESTS

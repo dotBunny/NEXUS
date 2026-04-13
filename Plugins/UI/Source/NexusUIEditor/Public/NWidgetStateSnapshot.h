@@ -89,7 +89,7 @@ struct FNWidgetStateSnapshot
 			WidgetStates[WorkingIndex] = WidgetState;
 			return true;
 		}
-		UE_LOG(LogNexusUIEditor, Log, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Failed to update widget(%s)' state; no registered widget was found."), *Identifier.ToString());
 		return false;
 	}
 	

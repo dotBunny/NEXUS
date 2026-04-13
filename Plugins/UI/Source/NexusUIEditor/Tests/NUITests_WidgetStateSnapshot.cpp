@@ -111,6 +111,9 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_UpdateUnknown,
     FNWidgetStateSnapshot Snapshot;
     const FNWidgetState State = NEXUS::UITests::WidgetStateSnapshot::MakeState(TEXT("K"), TEXT("V"));
 
+	// We're going to throw a warning it is expected
+	AddExpectedMessage("Failed to update widget", ELogVerbosity::Type::Warning);
+	
     const bool bResult = Snapshot.UpdateWidgetState(TEXT("NonExistent"), State);
 
     CHECK_FALSE_MESSAGE("UpdateWidgetState should return false for an unknown identifier.", bResult)
