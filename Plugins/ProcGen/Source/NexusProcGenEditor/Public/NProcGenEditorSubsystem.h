@@ -12,6 +12,8 @@
 class ANCellProxy;
 class UNProcGenOperation;
 
+// TODO: Is there a way to save the keys and pass them through to playmode based on the last generation? so 
+// a user could generate and then visually see in game what they were hammering to
 UCLASS()
 class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem, public FTickableGameObject, public INProcGenOperationOwner
 {
