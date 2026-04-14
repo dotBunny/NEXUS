@@ -163,7 +163,7 @@ N_TEST_HIGH(FNMyClassTests_Feature_Case,
 If the test needs a helper struct, declare it in a namespace that mirrors the test hierarchy, above the first test:
 
 ```cpp
-namespace NEXUS::UnitTests::NMyPlugin::FNMyClass
+namespace NEXUS::UnitTests::NMyPlugin::FNMyClassHarness
 {
     struct FTestFixture
     {
@@ -267,7 +267,7 @@ Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` 
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::PerfTests::NMyPlugin::UNMySubsystem
+namespace NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness
 {
     constexpr int32 ObjectCount = 1000;
     constexpr float AddMaxDuration = 0.5f;

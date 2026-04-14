@@ -4,10 +4,11 @@
 #if WITH_TESTS
 
 #include "NWidgetUtils.h"
+#include "Tests/TestHarnessAdapter.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Visible,
-    "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::Visible",
+N_TEST_CRITICAL(FNWidgetUtilsTests_ToEVisibility_Visible,
+    "NEXUS::UnitTests::NUI::FNWidgetUtils::ToEVisibility::Visible",
     N_TEST_CONTEXT_ANYWHERE)
 {
     CHECK_EQUALS("ESlateVisibility::Visible should map to EVisibility::Visible.",
@@ -15,8 +16,8 @@ N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Visible,
         EVisibility::Visible)
 }
 
-N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Collapsed,
-    "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::Collapsed",
+N_TEST_CRITICAL(FNWidgetUtilsTests_ToEVisibility_Collapsed,
+    "NEXUS::UnitTests::NUI::FNWidgetUtils::ToEVisibility::Collapsed",
     N_TEST_CONTEXT_ANYWHERE)
 {
     CHECK_EQUALS("ESlateVisibility::Collapsed should map to EVisibility::Collapsed.",
@@ -24,8 +25,8 @@ N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Collapsed,
         EVisibility::Collapsed)
 }
 
-N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Hidden,
-    "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::Hidden",
+N_TEST_CRITICAL(FNWidgetUtilsTests_ToEVisibility_Hidden,
+    "NEXUS::UnitTests::NUI::FNWidgetUtils::ToEVisibility::Hidden",
     N_TEST_CONTEXT_ANYWHERE)
 {
     CHECK_EQUALS("ESlateVisibility::Hidden should map to EVisibility::Hidden.",
@@ -33,8 +34,8 @@ N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Hidden,
         EVisibility::Hidden)
 }
 
-N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_HitTestInvisible,
-    "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::HitTestInvisible",
+N_TEST_CRITICAL(FNWidgetUtilsTests_ToEVisibility_HitTestInvisible,
+    "NEXUS::UnitTests::NUI::FNWidgetUtils::ToEVisibility::HitTestInvisible",
     N_TEST_CONTEXT_ANYWHERE)
 {
     CHECK_EQUALS("ESlateVisibility::HitTestInvisible should map to EVisibility::HitTestInvisible.",
@@ -42,8 +43,8 @@ N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_HitTestInvisible,
         EVisibility::HitTestInvisible)
 }
 
-N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_SelfHitTestInvisible,
-    "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::SelfHitTestInvisible",
+N_TEST_CRITICAL(FNWidgetUtilsTests_ToEVisibility_SelfHitTestInvisible,
+    "NEXUS::UnitTests::NUI::FNWidgetUtils::ToEVisibility::SelfHitTestInvisible",
     N_TEST_CONTEXT_ANYWHERE)
 {
     CHECK_EQUALS("ESlateVisibility::SelfHitTestInvisible should map to EVisibility::SelfHitTestInvisible.",

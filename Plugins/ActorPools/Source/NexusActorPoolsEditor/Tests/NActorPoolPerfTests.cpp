@@ -8,7 +8,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::PerfTests::NActorPools::FNActorPool
+namespace NEXUS::PerfTests::NActorPools::FNActorPoolHarness
 {
 	constexpr int32 ObjectCount = 1000;
 	constexpr float ReturnMaxDuration = 2.5f;
@@ -23,19 +23,19 @@ N_TEST_PERF(FNActorPoolPerfTests_Return, "NEXUS::PerfTests::NActorPools::FNActor
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
-		Pool.Prewarm(NEXUS::PerfTests::NActorPools::FNActorPool::ObjectCount);
+		Pool.Prewarm(NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount);
 		
 		TArray<AActor*> Actors;
-		Actors.Reserve(NEXUS::PerfTests::NActorPools::FNActorPool::ObjectCount);
-		for (int32 i = 0; i < NEXUS::PerfTests::NActorPools::FNActorPool::ObjectCount; i++)
+		Actors.Reserve(NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount);
+		for (int32 i = 0; i < NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount; i++)
 		{
 			Actors.Add(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
 		}
 
 		// TEST
 		{
-			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Return, NEXUS::PerfTests::NActorPools::FNActorPool::ReturnMaxDuration);
-			for (int32 i = 0; i < NEXUS::PerfTests::NActorPools::FNActorPool::ObjectCount; i++)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Return, NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ReturnMaxDuration);
+			for (int32 i = 0; i < NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount; i++)
 			{
 				Pool.Return(Actors[i]);
 			}
@@ -61,9 +61,9 @@ N_TEST_PERF(FNActorPoolPerfTests_Warm, "NEXUS::PerfTests::NActorPools::FNActorPo
 
 		//TEST
 		{
-			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, NEXUS::PerfTests::NActorPools::FNActorPool::PrewarmMaxDuration)
+			N_TEST_TIMER_SCOPE(FNActorPoolPerfTests_Warm, NEXUS::PerfTests::NActorPools::FNActorPoolHarness::PrewarmMaxDuration)
 
-			Pool.Prewarm(NEXUS::PerfTests::NActorPools::FNActorPool::ObjectCount);
+			Pool.Prewarm(NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount);
 
 			// Explicitly stop the timer
 			NTestTimer.ManualStop();

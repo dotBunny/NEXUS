@@ -6,7 +6,7 @@
 #include "Macros/NArrayMacros.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::UnitTests::NCore::NArrayMacros
+namespace NEXUS::UnitTests::NCore::NArrayMacrosHarness
 {
 	struct FTestFlat2DArray
 	{
@@ -20,14 +20,14 @@ namespace NEXUS::UnitTests::NCore::NArrayMacros
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Reset_SetsCorrectCount, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::Reset_SetsCorrectCount", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(4, 3);
 	CHECK_MESSAGE(TEXT("Reset(4,3) should produce 12 elements"), Grid.GetCount() == 12);
 }
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Reset_ZeroInitializes, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::Reset_ZeroInitializes", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(3, 3);
 	for (int32 i = 0; i < 9; ++i)
 	{
@@ -37,7 +37,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Reset_ZeroInitializes, "NEXUS::UnitTes
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_LinearMapping, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetIndex_LinearMapping", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(5, 4);
 
 	// Index formula: X + Y * SizeX
@@ -49,7 +49,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_LinearMapping, "NEXUS::UnitTe
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetInverseIndex_RoundTrip, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetInverseIndex_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(5, 4);
 
 	for (int32 y = 0; y < 4; ++y)
@@ -66,7 +66,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetInverseIndex_RoundTrip, "NEXUS::Uni
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_FVector2D, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetIndex_FVector2D", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(5, 4);
 	// (2.9, 1.0) should floor to (2, 1) → 2 + 1*5 = 7
 	CHECK_MESSAGE(TEXT("FVector2D index should floor to int coords"), Grid.GetIndex(FVector2D(2.9, 1.0)) == 7);
@@ -74,7 +74,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_FVector2D, "NEXUS::UnitTests:
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_FIntVector2, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetIndex_FIntVector2", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(5, 4);
 	// (3, 2) → 3 + 2*5 = 13
 	CHECK_MESSAGE(TEXT("FIntVector2 index should match XY coords"), Grid.GetIndex(FIntVector2(3, 2)) == 13);
@@ -82,7 +82,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetIndex_FIntVector2, "NEXUS::UnitTest
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_SetGetData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::SetGetData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(4, 4);
 
 	Grid.SetData(2, 3, 99);
@@ -94,7 +94,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_SetGetData, "NEXUS::UnitTests::NCore::
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Center, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetSurroundingIndices_Center", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(3, 3);
 
 	TArray<int32> Neighbors;
@@ -104,7 +104,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Center, "NEXUS::
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Corner, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetSurroundingIndices_Corner", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(3, 3);
 
 	TArray<int32> Neighbors;
@@ -114,7 +114,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Corner, "NEXUS::
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Edge, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::GetSurroundingIndices_Edge", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(3, 3);
 
 	TArray<int32> Neighbors;
@@ -124,7 +124,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_GetSurroundingIndices_Edge, "NEXUS::Un
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Resize_GrowPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::Resize_GrowPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(3, 3);
 
 	// Write a known value at every cell
@@ -152,7 +152,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Resize_GrowPreservesData, "NEXUS::Unit
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Resize_ShrinkPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::Resize_ShrinkPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(4, 4);
 
 	for (int32 y = 0; y < 4; ++y)
@@ -179,7 +179,7 @@ N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Resize_ShrinkPreservesData, "NEXUS::Un
 
 N_TEST_HIGH(NArrayMacrosTests_FlatArray2D_Resize_AsymmetricGrow, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray2D::Resize_AsymmetricGrow", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat2DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat2DArray Grid;
 	Grid.Reset(2, 2);
 	Grid.SetData(0, 0, 10);
 	Grid.SetData(1, 0, 20);

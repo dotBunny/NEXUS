@@ -9,7 +9,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystem
+namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness
 {
     constexpr int32 IterationCount = 1000;
     constexpr float SetBaselineMaxDuration = 1.5f;   // SetBaseline reads GUObjectArray — allow generous budget
@@ -42,8 +42,8 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_SetBaseline,
-                NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::SetBaselineMaxDuration)
-            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::IterationCount; ++i)
+                NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::SetBaselineMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::IterationCount; ++i)
             {
                 Subsystem->SetBaseline();
             }
@@ -82,8 +82,8 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
-                NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::TickBelowMaxDuration)
-            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::IterationCount; ++i)
+                NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::TickBelowMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::IterationCount; ++i)
             {
                 Subsystem->Tick(0.016f);
             }

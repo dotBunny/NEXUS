@@ -10,12 +10,12 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::PerfTests::NPicker::FNRectanglePicker
+namespace NEXUS::PerfTests::NPicker::FNRectanglePickerHarness
 {
 	constexpr float MaxDuration = 0.2f;
 }
 
-N_TEST_PERF(FNRectanglePickerPerfTests__NextSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::NextSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_NextSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -26,7 +26,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__NextSimple, "NEXUS::PerfTests::NPicker::
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__NextSimple, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -35,7 +35,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__NextSimple, "NEXUS::PerfTests::NPicker::
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNRectanglePickerPerfTests__Next, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Next", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_Next, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Next", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -47,7 +47,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__Next, "NEXUS::PerfTests::NPicker::FNRect
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__Next, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -56,7 +56,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__Next, "NEXUS::PerfTests::NPicker::FNRect
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNRectanglePickerPerfTests__RandomSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::RandomSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_RandomSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::RandomSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -67,7 +67,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__RandomSimple, "NEXUS::PerfTests::NPicker
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__RandomSimple, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_RandomSimple, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -76,7 +76,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__RandomSimple, "NEXUS::PerfTests::NPicker
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNRectanglePickerPerfTests__Random, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Random", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_Random, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Random", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -88,7 +88,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__Random, "NEXUS::PerfTests::NPicker::FNRe
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__Random, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_Random, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -97,7 +97,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__Random, "NEXUS::PerfTests::NPicker::FNRe
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNRectanglePickerPerfTests__TrackedSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::TrackedSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_TrackedSimple, "NEXUS::PerfTests::NPicker::FNRectanglePicker::TrackedSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -109,7 +109,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__TrackedSimple, "NEXUS::PerfTests::NPicke
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__TrackedSimple, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_TrackedSimple, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -118,7 +118,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__TrackedSimple, "NEXUS::PerfTests::NPicke
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNRectanglePickerPerfTests__Tracked, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Tracked", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF( FNRectanglePickerPerfTests_Tracked, "NEXUS::PerfTests::NPicker::FNRectanglePicker::Tracked", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -131,7 +131,7 @@ N_TEST_PERF(FNRectanglePickerPerfTests__Tracked, "NEXUS::PerfTests::NPicker::FNR
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests__Tracked, NEXUS::PerfTests::NPicker::FNRectanglePicker::MaxDuration)
+		N_TEST_TIMER_SCOPE( FNRectanglePickerPerfTests_Tracked, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
 		FNRectanglePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer

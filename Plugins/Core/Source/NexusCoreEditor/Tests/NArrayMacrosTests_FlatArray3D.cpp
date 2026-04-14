@@ -6,7 +6,7 @@
 #include "Macros/NArrayMacros.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::UnitTests::NCore::NArrayMacros
+namespace NEXUS::UnitTests::NCore::NArrayMacrosHarness
 {
 	struct FTestFlat3DArray
 	{
@@ -22,14 +22,14 @@ namespace NEXUS::UnitTests::NCore::NArrayMacros
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Reset_SetsCorrectCount, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Reset_SetsCorrectCount", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(2, 3, 4);
 	CHECK_MESSAGE(TEXT("Reset(2,3,4) should produce 24 elements"), Grid.GetCount() == 24);
 }
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetIndex_LinearMapping, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetIndex_LinearMapping", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
 
 	// Index formula: X + Y*SizeX + Z*SizeX*SizeY
@@ -42,7 +42,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetIndex_LinearMapping, "NEXUS::UnitT
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetInverseIndex_RoundTrip, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetInverseIndex_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
 
 	for (int32 z = 0; z < 2; ++z)
@@ -63,7 +63,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetInverseIndex_RoundTrip, "NEXUS::Un
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_SetGetData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::SetGetData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
 
 	Grid.SetData(2, 1, 1, 42);
@@ -75,7 +75,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_SetGetData, "NEXUS::UnitTests::NCore:
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_GrowPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_GrowPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(2, 2, 2);
 
 	for (int32 z = 0; z < 2; ++z)
@@ -108,7 +108,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_GrowPreservesData, "NEXUS::Uni
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_ShrinkPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_ShrinkPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);
 
 	for (int32 z = 0; z < 3; ++z)
@@ -140,7 +140,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_ShrinkPreservesData, "NEXUS::U
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Center, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Center", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);
 
 	TArray<int32> Neighbors;
@@ -151,7 +151,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Center, "NEXUS:
 
 N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Corner, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Corner", N_TEST_CONTEXT_ANYWHERE)
 {
-	NEXUS::UnitTests::NCore::NArrayMacros::FTestFlat3DArray Grid;
+	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);
 
 	TArray<int32> Neighbors;

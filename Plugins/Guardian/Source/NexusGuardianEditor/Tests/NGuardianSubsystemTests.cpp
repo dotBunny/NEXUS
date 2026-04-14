@@ -8,7 +8,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystem
+namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
 {
     // RAII guard that saves and restores UNGuardianSettings threshold offsets so
     // individual tests can modify them without polluting subsequent tests.
@@ -81,7 +81,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
             return;
         }
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 100;
         Settings->ObjectCountSnapshotThreshold = 200;
@@ -146,7 +146,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
             return;
         }
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
 
         // Set a zero offset so the current object count already meets the threshold.
@@ -194,7 +194,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 99999999;
@@ -228,7 +228,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 		AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
     	
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -259,7 +259,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
             return;
         }
 
-		NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+		NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -297,7 +297,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
             return;
         }
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -340,7 +340,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
         }
 
         // Use a large threshold so no flags are triggered.
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 99999999;
         Settings->ObjectCountSnapshotThreshold = 99999999;
