@@ -4,8 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Layout
 
-This is the **NEXUS Framework** monorepo. The working directory (`TestProject/`) is an Unreal Engine 5.7 project used to test and validate the framework. Source code lives in the parent directories:
+This is the **NEXUS Framework** monorepo. The working directory (`TestProject/`) is an Unreal Engine 5.7 project used to test and validate the framework.
 
+Source code lives in the parent directories:
 ```
 NEXUS/
 ├── Plugins/        # Core framework plugins (Runtime + Editor modules, the source of truth))
@@ -17,39 +18,23 @@ NEXUS/
 └── Staging/        # Build output and test results (generated)
 ```
 
-The `TestProject` is a thin host project. Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-The Unreal Engine source can be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7`, when found this is known as the <UE_ROOT>.
+- The `TestProject` is a thin host project.
+- Actual feature work lives in `../Plugins/<PluginName>/Source/`.
+- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer.
+- The found Unreal Engine source path is referred to as `$UEROOT`.
+- The working directory is referred to as `$PROJECTROOT`.
 
 ## Build
 
-UE installation can be found at `C:\UE\UE_5.7` (defined in `.github/branch.json`), or `D:\EGS\UE_5.7`.
-
 **Build (Editor target):**
 ```powershell
-<UE_ROOT>\Engine\Build\BatchFiles\Build.bat NEXUSEditor Win64 Development "<this repo root>\NEXUS.uproject" -progress
+$UEROOT\Engine\Build\BatchFiles\Build.bat NEXUSEditor Win64 Development "$PROJECTROOT\NEXUS.uproject" -progress
 ```
 
 **Build (Game target):**
 ```powershell
-<UE_ROOT>\Engine\Build\BatchFiles\Build.bat NEXUS Win64 Development "<this repo root>\NEXUS.uproject" -progress
+$UEROOT\Engine\Build\BatchFiles\Build.bat NEXUS Win64 Development "$PROJECTROOT\NEXUS.uproject" -progress
 ```
-
-## Tests
-
-Tests live in `Editor` module `Tests/` subdirectories (e.g., `Plugins/Core/Source/NexusCoreEditor/Tests/`). They are compiled only when `WITH_TESTS` is defined and run via the Unreal Automation Framework.
-
-```powershell
-# Unit tests
-& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi
-
-# Functional tests (requires RHI - no -nullrhi)
-& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest Tests.Nexus;Quit"
-
-# Performance tests
-& "<UE_ROOT>\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "TestProject\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.PerfTests;Quit" -nullrhi
-```
-
-Results are written to `Staging/TestResults/index.json`.
 
 ## Plugin Architecture
 
@@ -62,9 +47,9 @@ Plugins/<Name>/
 └── Nexus<Name>.uplugin
 ```
 
-Tests live in `Nexus<Name>Editor/Tests/` and are gated with `#if WITH_TESTS`.
+## Plugin Overview
 
-Active plugins loaded by the TestProject:
+Active plugins loaded by the `TestProject`:
 
 | Plugin | Purpose |
 |--------|---------|
@@ -80,54 +65,6 @@ Active plugins loaded by the TestProject:
 | **NexusUI** | UMG/Slate UI components (depends on CommonUI) |
 
 `NexusCore` is a dependency of all other plugins and provides shared utilities: math helpers, collections, debug draw, actor/level libraries, and the developer-only headers in `Public/Developer/` (test utilities, object snapshots, scope timers, `NDebugActor`).
-
-## Writing Tests
-
-Tests belong in the `Editor` module under a `Tests/` subdirectory. Wrap all test code in `#if WITH_TESTS / #endif`.
-Tests use the NEXUS test macros from `NexusCore/Public/Macros/NTestMacros.h`. All tests are prefixed `[NEXUS]` in the automation system.
-Use `FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World) { ... })` when a test needs a world context.
-Use the CHECK_MESSAGE macro instead of CHECK_TRUE when providing a message, use the CHECK_FALSE_MESSAGE macro instead of CHECK_FALSE when providing a message.
-
-```cpp
-#if WITH_TESTS
-
-#include "Developer/NTestUtils.h"
-#include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
-
-// Priority macros: N_TEST_CRITICAL, N_TEST_HIGH, N_TEST_MEDIUM, N_TEST_LOW
-// Filter macros: N_TEST_SMOKE_*, N_TEST_STRESS_*, N_TEST_PERF_*
-// Context tags: N_TEST_CONTEXT_EDITOR, N_TEST_CONTEXT_ANYWHERE, N_TEST_CONTEXT_CLIENT, N_TEST_CONTEXT_SERVER
-
-N_TEST_CRITICAL(FMyTests, "NEXUS::UnitTests::MyPlugin::MyTest", N_TEST_CONTEXT_EDITOR)
-{
-   
-	// test body
-
-}
-
-#endif //WITH_TESTS
-```
-
-The test name string prefix `NEXUS::UnitTests` is what the CI automation filter `NEXUS.UnitTests` matches against.
-The `MyPlugin` name is a shortened version of the Plugins full name, for example NexusDynamicRefs becomes NDynamicRefs, replacing Nexus with just the letter N.
-
-## Code Style & Naming Conventions
-
-Style is enforced via `.editorconfig`. Key rules:
-- Tabs, width 4; max line length 150
-- Inline brace style — no brace-on-new-line for namespaces, types, or functions
-- Pointer/reference alignment: left (`int* Ptr`, not `int *Ptr`)
-- Doxygen-style doc comments (`/** */`)
-- Every `.cpp` and `.h` must start with:
-  ```cpp
-  // Copyright dotBunny Inc. All Rights Reserved.
-  // See the LICENSE file at the repository root for more information.
-  ```
-
-Standard UE prefixes: `A` (AActor), `U` (UObject), `F` (structs), `E` (enums), `T` (templates), `S` (SWidget), `b` (bool fields). NEXUS adds `N` after the type prefix: `ANDebugActor`, `FNActorPool`, `UNDynamicRef`.
-
-Each module has a `Nexus<Name>Minimal.h` that declares the module's log category (e.g. `LogNexusActorPools`, `LogNexusCoreEditor`). Include this instead of pulling in the full module header.
 
 ## NexusCore Macro Library
 
@@ -160,3 +97,41 @@ Each module has a `Nexus<Name>Minimal.h` that declares the module's log category
 **Settings**: Plugin-level settings derive from `UDeveloperSettings` and use `N_IMPLEMENT_SETTINGS`, giving a cached `::Get()` singleton. Project-level overrides live in `Config/`.
 
 **Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).
+
+## Writing Tests
+
+Reference `generating-unit-tests` skill.
+
+## Running Tests
+
+Tests are compiled only when `WITH_TESTS` is defined and run via the Unreal Automation Framework.
+
+```powershell
+# Unit tests
+& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi
+
+# Functional tests (requires RHI - no -nullrhi)
+& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest Tests.Nexus;Quit"
+
+# Performance tests
+& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.PerfTests;Quit" -nullrhi
+```
+
+Results are written to `Staging/TestResults/index.json`.
+
+## Code Style & Naming Conventions
+
+Style is enforced via `.editorconfig`. Key rules:
+- Tabs, width 4; max line length 150
+- Inline brace style — no brace-on-new-line for namespaces, types, or functions
+- Pointer/reference alignment: left (`int* Ptr`, not `int *Ptr`)
+- Doxygen-style doc comments (`/** */`)
+- Every `.cpp` and `.h` must start with:
+  ```cpp
+  // Copyright dotBunny Inc. All Rights Reserved.
+  // See the LICENSE file at the repository root for more information.
+  ```
+- Standard UE prefixes: `A` (AActor), `U` (UObject), `F` (structs), `E` (enums), `T` (templates), `S` (SWidget), `b` (bool fields). 
+- NEXUS adds `N` after the type prefix: `ANDebugActor`, `FNActorPool`, `UNDynamicRef`.
+
+Each module has a `Nexus<Name>Minimal.h` that declares the module's log category (e.g. `LogNexusActorPools`, `LogNexusCoreEditor`). Include this instead of pulling in the full module header.
