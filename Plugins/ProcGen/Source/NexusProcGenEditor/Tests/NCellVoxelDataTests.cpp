@@ -7,7 +7,7 @@
 #include "Misc/Timespan.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNProcGenTests_CellVoxelData_Uniform, "NEXUS::UnitTests::NProcGen::NCellVoxelData_Uniform", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_CRITICAL(FNCellVoxelDataTests_Uniform, "NEXUS::UnitTests::NProcGen::NCellVoxelData::Uniform", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNCellVoxelData VoxelData;
 	

@@ -5,11 +5,58 @@
 
 #include "Misc/Timespan.h"
 #include "NActorPool.h"
+#include "Developer/NDeveloperUtils.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
+#include "Tests/TestHarnessAdapter.h"
+
+N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::LeakCheck::DontForceDestroy", 
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Tests for leaks when a pool is filled and created, but we do not force the destruction of the created objects.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
+		Pool.Fill();
+		
+		const int32 PostPoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
+		CHECK_EQUALS("Check that no additional objects were created when filling the pool.", PostPoolObjects, PrePoolObjects+Pool.GetSettings().MinimumActorCount);
+		
+		const int32 PooledActorCount =  Pool.GetInCount();
+		CHECK_EQUALS("Check that the expected number of Actors were made.", PooledActorCount, Pool.GetSettings().MinimumActorCount);
+
+		Pool.Clear(false);
+	});
+}
+N_TEST(FNActorPoolTests_LeakCheck_ForceDestroy, 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::LeakCheck::ForceDestroy", 
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Tests for leaks when a pool is filled and created, but we let GC run.
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	{
+		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
+		
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass());
+		Pool.Fill();
+		Pool.Clear(true);
+	
+		// Force destroy tells the actors to be destroyed; it doesn't mean we actually will have them cleaned up unless we do a GC pass
+		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+		const int32 PostClearObjects = FNDeveloperUtils::GetCurrentObjectCount();
+		
+		CHECK_EQUALS("Check the number of objects matches the previous count when forcibly destroying the pool.", PostClearObjects, PrePoolObjects);
+	}, true);
+}
+
 
 N_TEST(FNActorPoolTests_Strategy_Create, 
-	"NEXUS::UnitTests::NActorPools::Strategy::Create", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::Create", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests the Create fill strategy of an actor pool; verifies that it will make above the maximum count if requested.
@@ -53,7 +100,7 @@ N_TEST(FNActorPoolTests_Strategy_Create,
 }
 
 N_TEST(FNActorPoolTests_Strategy_CreateLimited, 
-	"NEXUS::UnitTests::NActorPools::Strategy::CreateLimited", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::CreateLimited", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Tests the CreateLimited fill strategy of an actor pool; verifies that it will stop when the maximum count is hit.
@@ -100,7 +147,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited,
 }
 
 N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst, 
-	"NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleFirst", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::CreateRecycleFirst", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
@@ -145,7 +192,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst,
 }
 
 N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast, 
-	"NEXUS::UnitTests::NActorPools::Strategy::CreateRecycleLast", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::CreateRecycleLast", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
@@ -194,7 +241,7 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast,
 }
 
 N_TEST(FNActorPoolTests_Strategy_Fixed, 
-	"NEXUS::UnitTests::NActorPools::Strategy::Fixed", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::Fixed", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
@@ -231,7 +278,7 @@ N_TEST(FNActorPoolTests_Strategy_Fixed,
 }
 
 N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst, 
-	"NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleFirst", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::FixedRecycleFirst", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
@@ -276,7 +323,7 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst,
 }
 
 N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast, 
-	"NEXUS::UnitTests::NActorPools::Strategy::FixedRecycleLast", 
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Strategy::FixedRecycleLast", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)

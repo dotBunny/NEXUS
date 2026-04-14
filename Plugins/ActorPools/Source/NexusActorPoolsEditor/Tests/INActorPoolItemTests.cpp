@@ -10,8 +10,8 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST(FNActorPoolsTests_Interface_Events, 
-	"NEXUS::UnitTests::NActorPools::Interface::Events", 
+N_TEST(INActorPoolItemTests_Events, 
+"NEXUS::UnitTests::NActorPools::INActorPoolItem::Events", 
 	N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)

@@ -8,7 +8,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::GuardianTests
+namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystem
 {
     // RAII guard that saves and restores UNGuardianSettings threshold offsets so
     // individual tests can modify them without polluting subsequent tests.
@@ -36,8 +36,8 @@ namespace NEXUS::GuardianTests
     };
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_InitialState,
-    "NEXUS::UnitTests::NGuardian::Subsystem::SetBaseline::InitialState",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::InitialState",
     N_TEST_CONTEXT_EDITOR)
 {
     // OnWorldBeginPlay calls SetBaseline() automatically. Verify the post-conditions:
@@ -67,8 +67,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_InitialState,
     });
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ThresholdCalculation,
-    "NEXUS::UnitTests::NGuardian::Subsystem::SetBaseline::ThresholdCalculation",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::ThresholdCalculation",
     N_TEST_CONTEXT_EDITOR)
 {
     // Thresholds must equal BaseObjectCount + the respective settings offset.
@@ -81,7 +81,7 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ThresholdCalculation,
             return;
         }
 
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 100;
         Settings->ObjectCountSnapshotThreshold = 200;
@@ -99,8 +99,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ThresholdCalculation,
     });
 }
 
-N_TEST_HIGH(FNGuardianTests_Subsystem_SetBaseline_ThresholdOrdering,
-    "NEXUS::UnitTests::NGuardian::Subsystem::SetBaseline::ThresholdOrdering",
+N_TEST_HIGH(UNGuardianSubsystemTests_SetBaseline_ThresholdOrdering,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::ThresholdOrdering",
     N_TEST_CONTEXT_EDITOR)
 {
     // With default settings (Warning < Snapshot < Compare offsets) the absolute
@@ -131,8 +131,8 @@ N_TEST_HIGH(FNGuardianTests_Subsystem_SetBaseline_ThresholdOrdering,
     });
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ResetsFlags,
-    "NEXUS::UnitTests::NGuardian::Subsystem::SetBaseline::ResetsFlags",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::ResetsFlags",
     N_TEST_CONTEXT_EDITOR)
 {
     // After triggering the warning threshold via Tick(), calling SetBaseline()
@@ -146,7 +146,7 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ResetsFlags,
             return;
         }
 
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
 
         // Set a zero offset so the current object count already meets the threshold.
@@ -176,8 +176,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ResetsFlags,
     }, true);
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_WarningThreshold,
-    "NEXUS::UnitTests::NGuardian::Subsystem::Tick::WarningThreshold",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::WarningThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
     // With a zero warning offset, the first Tick() must set the warning flag.
@@ -194,7 +194,7 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_WarningThreshold,
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 99999999;
@@ -209,8 +209,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_WarningThreshold,
     }, true);
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_SnapshotThreshold,
-    "NEXUS::UnitTests::NGuardian::Subsystem::Tick::SnapshotThreshold",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::SnapshotThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
     // With zero offsets for warning and snapshot, two Ticks must set both flags.
@@ -228,7 +228,7 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_SnapshotThreshold,
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 		AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
     	
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -244,8 +244,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_SnapshotThreshold,
     }, true);
 }
 
-N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_CompareThreshold,
-    "NEXUS::UnitTests::NGuardian::Subsystem::Tick::CompareThreshold",
+N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::CompareThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
     // With all three offsets at zero, three Ticks must set all three flags.
@@ -259,7 +259,7 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_CompareThreshold,
             return;
         }
 
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+		NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -282,8 +282,8 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_CompareThreshold,
     }, true);
 }
 
-N_TEST_HIGH(FNGuardianTests_Subsystem_Tick_FlagsStableOnceSet,
-    "NEXUS::UnitTests::NGuardian::Subsystem::Tick::FlagsStableOnceSet",
+N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::FlagsStableOnceSet",
     N_TEST_CONTEXT_EDITOR)
 {
     // Once all three flags are set, additional Ticks must not change them (as long
@@ -297,7 +297,7 @@ N_TEST_HIGH(FNGuardianTests_Subsystem_Tick_FlagsStableOnceSet,
             return;
         }
 
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
@@ -325,8 +325,8 @@ N_TEST_HIGH(FNGuardianTests_Subsystem_Tick_FlagsStableOnceSet,
     }, true);
 }
 
-N_TEST_HIGH(FNGuardianTests_Subsystem_Tick_LastObjectCountUpdated,
-    "NEXUS::UnitTests::NGuardian::Subsystem::Tick::LastObjectCountUpdated",
+N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::LastObjectCountUpdated",
     N_TEST_CONTEXT_EDITOR)
 {
     // GetLastObjectCount() must reflect the most recent object count read during Tick.
@@ -340,7 +340,7 @@ N_TEST_HIGH(FNGuardianTests_Subsystem_Tick_LastObjectCountUpdated,
         }
 
         // Use a large threshold so no flags are triggered.
-        NEXUS::GuardianTests::FSettingsGuard Guard;
+        NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 99999999;
         Settings->ObjectCountSnapshotThreshold = 99999999;

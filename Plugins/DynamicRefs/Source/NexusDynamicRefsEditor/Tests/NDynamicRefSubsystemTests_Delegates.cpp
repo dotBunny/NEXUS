@@ -9,8 +9,8 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAdded,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAdded",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnAdded,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnAdded",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that AddObject fires the OnAdded delegate exactly once per call
@@ -52,8 +52,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAdded,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnRemoved,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnRemoved",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnRemoved,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnRemoved",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that RemoveObject fires the OnRemoved delegate exactly once per call
@@ -96,8 +96,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnRemoved,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnAdded_BulkFiresPerObject,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAdded::BulkFiresPerObject",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAdded_BulkFiresPerObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnAdded::BulkFiresPerObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies AddObjects fires OnAdded once per object in the supplied array.
@@ -133,8 +133,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnAdded_BulkFiresPerObject,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnRemoved_DoesNotFireForMissingObject,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnRemoved::DoesNotFireForMissingObject",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemoved_DoesNotFireForMissingObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnRemoved::DoesNotFireForMissingObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies RemoveObject still fires OnRemoved even when the object was never
@@ -163,8 +163,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnRemoved_DoesNotFireForMissingObject,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAddedByName,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAddedByName",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnAddedByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnAddedByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that AddObjectByName fires the OnAddedByName delegate with the
@@ -207,8 +207,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAddedByName,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnRemovedByName,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnRemovedByName",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnRemovedByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnRemovedByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that RemoveObjectByName fires the OnRemovedByName delegate with
@@ -252,8 +252,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnRemovedByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnRemovedByName_NotFiredForUnknownBucket,
-    "NEXUS::UnitTests::NDynamicRefs::Delegates::OnRemovedByName::NotFiredForUnknownBucket",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemovedByName_NotFiredForUnknownBucket,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnRemovedByName::NotFiredForUnknownBucket",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that RemoveObjectByName does NOT fire OnRemovedByName when the

@@ -10,12 +10,12 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::PickerTests::Circle
+namespace NEXUS::PerfTests::NPicker::FNCirclePicker
 {
 	constexpr float MaxDuration = 0.2f;
 }
 
-N_TEST_PERF(FNPickerPerfTests_Circle_NextSimple, "NEXUS::PerfTests::NPicker::Circle::NextSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_NextSimple, "NEXUS::PerfTests::NPicker::FNCirclePicker::NextSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -27,7 +27,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_NextSimple, "NEXUS::PerfTests::NPicker::Cir
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_NextSimple, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -36,7 +36,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_NextSimple, "NEXUS::PerfTests::NPicker::Cir
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNPickerPerfTests_Circle_Next, "NEXUS::PerfTests::NPicker::Circle::Next", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_Next, "NEXUS::PerfTests::NPicker::FNCirclePicker::Next", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -49,7 +49,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Next, "NEXUS::PerfTests::NPicker::Circle::N
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Next, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Next(Points, Params);
 		
 		// Explicitly stop the timer
@@ -58,7 +58,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Next, "NEXUS::PerfTests::NPicker::Circle::N
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNPickerPerfTests_Circle_RandomSimple, "NEXUS::PerfTests::NPicker::Circle::RandomSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_RandomSimple, "NEXUS::PerfTests::NPicker::FNCirclePicker::RandomSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -69,7 +69,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_RandomSimple, "NEXUS::PerfTests::NPicker::C
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_RandomSimple, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_RandomSimple, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -78,7 +78,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_RandomSimple, "NEXUS::PerfTests::NPicker::C
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNPickerPerfTests_Circle_Random, "NEXUS::PerfTests::NPicker::Circle::Random", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_Random, "NEXUS::PerfTests::NPicker::FNCirclePicker::Random", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -91,7 +91,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Random, "NEXUS::PerfTests::NPicker::Circle:
 	TArray<FVector> Points;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Random, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_Random, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Random(Points, Params);
 		
 		// Explicitly stop the timer
@@ -100,7 +100,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Random, "NEXUS::PerfTests::NPicker::Circle:
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNPickerPerfTests_Circle_TrackedSimple, "NEXUS::PerfTests::NPicker::Circle::TrackedSimple", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_TrackedSimple, "NEXUS::PerfTests::NPicker::FNCirclePicker::TrackedSimple", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -113,7 +113,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_TrackedSimple, "NEXUS::PerfTests::NPicker::
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_TrackedSimple, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_TrackedSimple, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Tracked(Points, Seed, Params);
 		
 		// Explicitly stop the timer
@@ -122,7 +122,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_TrackedSimple, "NEXUS::PerfTests::NPicker::
 	
 	FNTestUtils::PostPerformanceTest();
 }
-N_TEST_PERF(FNPickerPerfTests_Circle_Tracked, "NEXUS::PerfTests::NPicker::Circle::Tracked", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF(FNCirclePickerPerfTests_Tracked, "NEXUS::PerfTests::NPicker::FNCirclePicker::Tracked", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 	
@@ -136,7 +136,7 @@ N_TEST_PERF(FNPickerPerfTests_Circle_Tracked, "NEXUS::PerfTests::NPicker::Circle
 	int32 Seed = 123456789;
 	// TEST
 	{
-		N_TEST_TIMER_SCOPE(FNPickerPerfTests_Circle_Tracked, NEXUS::PickerTests::Circle::MaxDuration)
+		N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_Tracked, NEXUS::PerfTests::NPicker::FNCirclePicker::MaxDuration)
 		FNCirclePicker::Tracked(Points,Seed, Params);
 		
 		// Explicitly stop the timer

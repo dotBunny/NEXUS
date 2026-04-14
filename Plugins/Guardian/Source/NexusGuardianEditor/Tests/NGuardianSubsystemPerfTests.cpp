@@ -9,7 +9,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-namespace NEXUS::GuardianTests::Perf
+namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystem
 {
     constexpr int32 IterationCount = 1000;
     constexpr float SetBaselineMaxDuration = 1.5f;   // SetBaseline reads GUObjectArray — allow generous budget
@@ -17,7 +17,7 @@ namespace NEXUS::GuardianTests::Perf
 }
 
 N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
-    "NEXUS::PerfTests::NGuardian::Subsystem::SetBaseline",
+    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::SetBaseline",
     N_TEST_CONTEXT_EDITOR)
 {
     // Measures the cost of calling SetBaseline() IterationCount times.
@@ -42,8 +42,8 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_SetBaseline,
-                NEXUS::GuardianTests::Perf::SetBaselineMaxDuration)
-            for (int32 i = 0; i < NEXUS::GuardianTests::Perf::IterationCount; ++i)
+                NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::SetBaselineMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::IterationCount; ++i)
             {
                 Subsystem->SetBaseline();
             }
@@ -59,7 +59,7 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
 }
 
 N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
-    "NEXUS::PerfTests::NGuardian::Subsystem::Tick::BelowThresholds",
+    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::Tick::BelowThresholds",
     N_TEST_CONTEXT_EDITOR)
 {
     // Measures the per-frame monitoring cost when the object count is well below
@@ -82,8 +82,8 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
-                NEXUS::GuardianTests::Perf::TickBelowMaxDuration)
-            for (int32 i = 0; i < NEXUS::GuardianTests::Perf::IterationCount; ++i)
+                NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::TickBelowMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::IterationCount; ++i)
             {
                 Subsystem->Tick(0.016f);
             }

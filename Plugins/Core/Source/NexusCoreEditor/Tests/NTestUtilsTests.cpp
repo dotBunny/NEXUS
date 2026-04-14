@@ -7,7 +7,7 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNTestUtilsTests, "NEXUS::UnitTests::NCore::TestUtils::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
+N_TEST_CRITICAL(FNTestUtilsTests, "NEXUS::UnitTests::NCore::FNTestUtils::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{

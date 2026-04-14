@@ -6,7 +6,7 @@
 #include "Types/NCardinalDirection.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_HIGH(FNCardinalDirectionTests_IsCardinalAngle_ExactAngles, "NEXUS::UnitTests::NCore::CardinalDirection::IsCardinalAngle_ExactAngles", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCardinalAngle_ExactAngles, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCardinalAngle_ExactAngles", N_TEST_CONTEXT_ANYWHERE)
 {
 	// All 22.5-degree increments are cardinal angles
 	CHECK_MESSAGE(TEXT("0 degrees should be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(0.f));
@@ -18,7 +18,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_IsCardinalAngle_ExactAngles, "NEXUS::UnitTe
 	CHECK_MESSAGE(TEXT("337.5 degrees should be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(337.5f));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_IsCardinalAngle_NonCardinalAngles, "NEXUS::UnitTests::NCore::CardinalDirection::IsCardinalAngle_NonCardinalAngles", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCardinalAngle_NonCardinalAngles, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCardinalAngle_NonCardinalAngles", N_TEST_CONTEXT_ANYWHERE)
 {
 	CHECK_FALSE_MESSAGE(TEXT("10 degrees should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(10.f));
 	CHECK_FALSE_MESSAGE(TEXT("15 degrees should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(15.f));
@@ -26,7 +26,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_IsCardinalAngle_NonCardinalAngles, "NEXUS::
 	CHECK_FALSE_MESSAGE(TEXT("123.7 degrees should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(123.7f));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalAngle_OnCardinal, "NEXUS::UnitTests::NCore::CardinalDirection::GetClosestCardinalAngle_OnCardinal", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_GetClosestCardinalAngle_OnCardinal, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::GetClosestCardinalAngle_OnCardinal", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Exact cardinal angles should return themselves
 	CHECK_MESSAGE(TEXT("0 degrees should snap to 0"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::GetClosestCardinalAngle(0.f), 0.0, 0.01));
@@ -34,7 +34,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalAngle_OnCardinal, "NEXUS:
 	CHECK_MESSAGE(TEXT("180 degrees should snap to 180"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::GetClosestCardinalAngle(180.f), 180.0, 0.01));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalAngle_OffCardinal, "NEXUS::UnitTests::NCore::CardinalDirection::GetClosestCardinalAngle_OffCardinal", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_GetClosestCardinalAngle_OffCardinal, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::GetClosestCardinalAngle_OffCardinal", N_TEST_CONTEXT_ANYWHERE)
 {
 	// 10 degrees is closer to 0 than to 22.5
 	CHECK_MESSAGE(TEXT("10 degrees should snap to nearest cardinal (0)"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::GetClosestCardinalAngle(10.f), 0.0, 0.01));
@@ -44,7 +44,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalAngle_OffCardinal, "NEXUS
 	CHECK_MESSAGE(TEXT("34 degrees should snap to nearest cardinal (45)"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::GetClosestCardinalAngle(34.f), 45.0, 0.01));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalRotator, "NEXUS::UnitTests::NCore::CardinalDirection::GetClosestCardinalRotator", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_GetClosestCardinalRotator, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::GetClosestCardinalRotator", N_TEST_CONTEXT_ANYWHERE)
 {
 	const FRotator Input(10.f, 80.f, 34.f);
 	const FRotator Result = FNCardinalDirectionUtils::GetClosestCardinalRotator(Input);
@@ -53,7 +53,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_GetClosestCardinalRotator, "NEXUS::UnitTest
 	CHECK_MESSAGE(TEXT("Rotator roll should snap to nearest cardinal"), FMath::IsNearlyEqual(Result.Roll, 45.0, 0.01));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_ToCardinalDirection_AllDirections, "NEXUS::UnitTests::NCore::CardinalDirection::ToCardinalDirection_AllDirections", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToCardinalDirection_AllDirections, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::ToCardinalDirection_AllDirections", N_TEST_CONTEXT_ANYWHERE)
 {
 	CHECK_MESSAGE(TEXT("0 should map to North"), FNCardinalDirectionUtils::ToCardinalDirection(0.f) == ENCardinalDirection::North);
 	CHECK_MESSAGE(TEXT("22.5 should map to NorthNorthEast"), FNCardinalDirectionUtils::ToCardinalDirection(22.5f) == ENCardinalDirection::NorthNorthEast);
@@ -68,7 +68,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_ToCardinalDirection_AllDirections, "NEXUS::
 	CHECK_MESSAGE(TEXT("337.5 should map to NorthNorthWest"), FNCardinalDirectionUtils::ToCardinalDirection(337.5f) == ENCardinalDirection::NorthNorthWest);
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_ToDecimalDegrees_RoundTrip, "NEXUS::UnitTests::NCore::CardinalDirection::ToDecimalDegrees_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToDecimalDegrees_RoundTrip, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::ToDecimalDegrees_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
 {
 	// ToCardinalDirection and ToDecimalDegrees should form a round-trip for exact angles
 	constexpr float Epsilon = 0.01f;
@@ -81,7 +81,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_ToDecimalDegrees_RoundTrip, "NEXUS::UnitTes
 	}
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_ToCardinalDirectionNormalized_NegativeAngles, "NEXUS::UnitTests::NCore::CardinalDirection::ToCardinalDirectionNormalized_NegativeAngles", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToCardinalDirectionNormalized_NegativeAngles, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::ToCardinalDirectionNormalized_NegativeAngles", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Normalized range uses negative values for angles > 180
 	CHECK_MESSAGE(TEXT("-90 should map to West"), FNCardinalDirectionUtils::ToCardinalDirectionNormalized(-90.f) == ENCardinalDirection::West);
@@ -90,7 +90,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_ToCardinalDirectionNormalized_NegativeAngle
 	CHECK_MESSAGE(TEXT("-22.5 should map to NorthNorthWest"), FNCardinalDirectionUtils::ToCardinalDirectionNormalized(-22.5f) == ENCardinalDirection::NorthNorthWest);
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_ToDecimalDegreesNormalized_WesternDirections, "NEXUS::UnitTests::NCore::CardinalDirection::ToDecimalDegreesNormalized_WesternDirections", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToDecimalDegreesNormalized_WesternDirections, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::ToDecimalDegreesNormalized_WesternDirections", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Western directions return negative values in normalized form
 	CHECK_MESSAGE(TEXT("West should normalize to -90"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::ToDecimalDegreesNormalized(ENCardinalDirection::West), -90.f, 0.01f));
@@ -98,7 +98,7 @@ N_TEST_HIGH(FNCardinalDirectionTests_ToDecimalDegreesNormalized_WesternDirection
 	CHECK_MESSAGE(TEXT("NorthWest should normalize to -45"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::ToDecimalDegreesNormalized(ENCardinalDirection::NorthWest), -45.f, 0.01f));
 }
 
-N_TEST_HIGH(FNCardinalDirectionTests_ToDecimalDegreesNormalized_EasternDirections, "NEXUS::UnitTests::NCore::CardinalDirection::ToDecimalDegreesNormalized_EasternDirections", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToDecimalDegreesNormalized_EasternDirections, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::ToDecimalDegreesNormalized_EasternDirections", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Eastern directions remain positive in normalized form
 	CHECK_MESSAGE(TEXT("North should normalize to 0"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::ToDecimalDegreesNormalized(ENCardinalDirection::North), 0.f, 0.01f));

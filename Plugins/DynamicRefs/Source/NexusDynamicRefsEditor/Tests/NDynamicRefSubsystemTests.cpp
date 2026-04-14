@@ -9,8 +9,8 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_PreAllocated,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::PreAllocated",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_PreAllocated,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::PreAllocated",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that Initialize() pre-allocates exactly NDR_Max buckets so every
@@ -34,8 +34,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_PreAllocated,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_AddObject,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::AddObject",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_AddObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::AddObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that AddObject increases the count and GetObjects returns the object.
@@ -62,8 +62,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_AddObject,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_AddObjectsDeduplication,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::AddObjectsDeduplication",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_AddObjectsDeduplication,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::AddObjectsDeduplication",
     N_TEST_CONTEXT_EDITOR)
 {
     // FNDynamicRefCollection::Add uses AddUnique; adding the same object twice
@@ -85,8 +85,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_AddObjectsDeduplicat
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_RemoveObject,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::RemoveObject",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_RemoveObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::RemoveObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that RemoveObject decreases the count back to zero.
@@ -107,8 +107,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_RemoveObject,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_AddObjectsArray,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::AddObjectsArray",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_AddObjectsArray,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::AddObjectsArray",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that AddObjects (bulk) registers all supplied objects.
@@ -138,8 +138,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_AddObjectsArray,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_RemoveObjectsArray,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::RemoveObjectsArray",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_RemoveObjectsArray,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::RemoveObjectsArray",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies that RemoveObjects (bulk) clears all supplied objects at once.
@@ -171,8 +171,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_RemoveObjectsArray,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_GetFirstObject,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetFirstObject",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_GetFirstObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetFirstObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetFirstObject returns the first added object and nullptr when empty.
@@ -205,8 +205,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_GetFirstObject,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_GetLastObject,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetLastObject",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_GetLastObject,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetLastObject",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetLastObject returns the last added object and nullptr when empty.
@@ -238,8 +238,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_GetLastObject,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetFirstActor,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetFirstActor",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetFirstActor,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetFirstActor",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetFirstActor skips non-AActor objects and returns the first actor.
@@ -266,8 +266,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetFirstActor,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetLastActor,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetLastActor",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetLastActor,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetLastActor",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetLastActor iterates in reverse and returns the last actor.
@@ -293,8 +293,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetLastActor,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetActors_FiltersNonActors,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetActors::FiltersNonActors",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetActors_FiltersNonActors,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetActors::FiltersNonActors",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetActors only returns AActor objects, silently dropping plain UObjects.
@@ -321,8 +321,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetActors_FiltersNonActo
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetDynamicRefs,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetDynamicRefs",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetDynamicRefs,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::GetDynamicRefs",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetDynamicRefs only lists non-empty buckets.
@@ -351,8 +351,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetDynamicRefs,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_NamedCollection_AddObjectByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::AddObjectByName",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_NamedCollection_AddObjectByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::AddObjectByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies AddObjectByName lazily creates a bucket and registers the object.
@@ -380,8 +380,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_NamedCollection_AddObjectByName,
     });
 }
 
-N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_NamedCollection_RemoveObjectByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::RemoveObjectByName",
+N_TEST_CRITICAL(UNDynamicRefSubsystemTests_NamedCollection_RemoveObjectByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::RemoveObjectByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies RemoveObjectByName decreases the count to zero.
@@ -403,8 +403,8 @@ N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_NamedCollection_RemoveObjectByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_RemoveNonExistentBucket,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::RemoveNonExistentBucket",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_RemoveNonExistentBucket,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::RemoveNonExistentBucket",
     N_TEST_CONTEXT_EDITOR)
 {
     // RemoveObjectByName on a name that was never added should not crash.
@@ -425,8 +425,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_RemoveNonExistentBucket
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_AddObjectsByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::AddObjectsByName",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_AddObjectsByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::AddObjectsByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies AddObjectsByName bulk-registers all supplied objects under a name.
@@ -457,8 +457,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_AddObjectsByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetFirstObjectByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::GetFirstObjectByName",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetFirstObjectByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::GetFirstObjectByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetFirstObjectByName returns the first added object; nullptr for unknown names.
@@ -491,8 +491,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetFirstObjectByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetLastObjectByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::GetLastObjectByName",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetLastObjectByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::GetLastObjectByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetLastObjectByName returns the last added object; nullptr for unknown names.
@@ -525,8 +525,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetLastObjectByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetActorsByName,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::GetActorsByName",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetActorsByName,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::GetActorsByName",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetActorsByName filters out non-AActor objects.
@@ -550,8 +550,8 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetActorsByName,
     });
 }
 
-N_TEST_HIGH(FNDynamicRefsTests_Subsystem_NamedCollection_GetNames,
-    "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::GetNames",
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetNames,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::GetNames",
     N_TEST_CONTEXT_EDITOR)
 {
     // Verifies GetNames includes any name that has been added.
