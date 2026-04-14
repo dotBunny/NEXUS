@@ -88,12 +88,12 @@ void ANCellProxy::CreateLevelInstance()
 		ANCellLevelInstance::StaticClass(), &SpawnLocation, &SpawnRotation, SpawnInfo);
 
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
-	
-	// TODO: I suspect this might need work as the actual level instance has a CookedWorldAsset
-	LevelInstance->SetWorldAsset(NCell->World);
 
 #if WITH_EDITOR
+	LevelInstance->SetWorldAsset(NCell->World);
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
+#else
+	LevelInstance->SetCookedWorldAsset(NCell->World);
 #endif // WITH_EDITOR
 	
 	LevelInstance->JunctionData = &JunctionsData;

@@ -17,4 +17,8 @@ class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 public:
 	TMap<int32, FNCellJunctionDetails>* JunctionData;
 	virtual void OnLevelInstanceLoaded() override;
+	void SetCookedWorldAsset(TSoftObjectPtr<UWorld> InWorldAsset)
+	{
+		CookedWorldAsset = InWorldAsset;
+	}
 };
