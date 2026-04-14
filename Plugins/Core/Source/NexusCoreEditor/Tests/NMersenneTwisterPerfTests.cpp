@@ -1,0 +1,75 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#if WITH_TESTS
+
+#include "Math/NMersenneTwister.h"
+#include "Developer/NTestUtils.h"
+#include "Macros/NTestMacros.h"
+#include "Tests/TestHarnessAdapter.h"
+
+N_TEST_PERF_HIGH(FNMersenneTwister_Perf_FloatGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::FloatGeneration", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+
+	FNMersenneTwister Twister(12345ull);
+	{
+		N_TEST_TIMER_SCOPE("MersenneTwister_Float_10k", 10.f)
+		for (int32 i = 0; i < 10000; ++i)
+		{
+			Twister.Float();
+		}
+	}
+
+	FNTestUtils::PostPerformanceTest();
+}
+
+N_TEST_PERF_HIGH(FNMersenneTwister_Perf_IntegerRangeGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::IntegerRangeGeneration", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+
+	FNMersenneTwister Twister(67890ull);
+	{
+		N_TEST_TIMER_SCOPE("MersenneTwister_IntegerRange_10k", 10.f)
+		for (int32 i = 0; i < 10000; ++i)
+		{
+			Twister.IntegerRange(0, 1000);
+		}
+	}
+
+	FNTestUtils::PostPerformanceTest();
+}
+
+N_TEST_PERF_HIGH(FNMersenneTwister_Perf_BulkFloatArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkFloatArray", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+
+	FNMersenneTwister Twister(11111ull);
+	TArray<float> Output;
+	Output.SetNum(10000);
+
+	{
+		N_TEST_TIMER_SCOPE("MersenneTwister_BulkFloat_10k", 10.f)
+		Twister.Float(Output, 10000);
+	}
+
+	FNTestUtils::PostPerformanceTest();
+}
+
+N_TEST_PERF_HIGH(FNMersenneTwister_Perf_BulkBoolArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkBoolArray", N_TEST_CONTEXT_ANYWHERE)
+{
+	FNTestUtils::PrePerformanceTest();
+
+	FNMersenneTwister Twister(22222ull);
+	TArray<bool> Output;
+	Output.SetNum(10000);
+
+	{
+		N_TEST_TIMER_SCOPE("MersenneTwister_BulkBool_10k", 10.f)
+		Twister.Bool(Output, 10000);
+	}
+
+	FNTestUtils::PostPerformanceTest();
+}
+
+#endif //WITH_TESTS

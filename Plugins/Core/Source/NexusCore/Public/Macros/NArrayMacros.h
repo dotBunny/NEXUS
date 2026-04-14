@@ -16,7 +16,7 @@ public: \
 	{ \
 		TArray<DataType> NewData; \
 		NewData.Empty(); \
-		NewData.SetNum(NewSizeX * NewSizeY * NewSizeZ); \
+		NewData.SetNum(NewSizeX * NewSizeY); \
 		for (IndexType x = 0; x < SizeX; x++) \
 		{ \
 			if (x >= NewSizeX) continue; \
