@@ -20,21 +20,8 @@ NEXUS/
 
 - The `TestProject` is a thin host project.
 - Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer.
-- The found Unreal Engine source path is referred to as `$UEROOT`.
-- The working directory is referred to as `$PROJECTROOT`.
-
-## Build
-
-**Build (Editor target):**
-```powershell
-$UEROOT\Engine\Build\BatchFiles\Build.bat NEXUSEditor Win64 Development "$PROJECTROOT\NEXUS.uproject" -progress
-```
-
-**Build (Game target):**
-```powershell
-$UEROOT\Engine\Build\BatchFiles\Build.bat NEXUS Win64 Development "$PROJECTROOT\NEXUS.uproject" -progress
-```
+- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer. Before using any command that contains `___UEROOT___`, check each candidate path in order and use the first one that exists on disk.
+- `___PROJECTROOT___` is the absolute path to the `TestProject/` directory — the current working directory. Resolve it from the working directory rather than hardcoding a path.
 
 ## Plugin Architecture
 
@@ -100,38 +87,12 @@ Active plugins loaded by the `TestProject`:
 
 ## Writing Tests
 
-Use the `generating-tests` skill. Invoke it before writing any test code.
+Use the project-specific `writing-tests` skill. Invoke it before writing any test code.
 
 ## Running Tests
 
-Tests are compiled only when `WITH_TESTS` is defined and run via the Unreal Automation Framework.
+Use the project-specific `running-tests` skill. Invoke it before running any test.
 
-```powershell
-# Unit tests
-& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi
+# Coding Style & Naming Conventions
 
-# Functional tests (requires RHI - no -nullrhi)
-& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest Tests.Nexus;Quit"
-
-# Performance tests
-& "$UEROOT\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "$PROJECTROOT\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.PerfTests;Quit" -nullrhi
-```
-
-Results are written to `Staging/TestResults/index.json`.
-
-## Code Style & Naming Conventions
-
-Style is enforced via `.editorconfig`. Key rules:
-- Tabs, width 4; max line length 150
-- Inline brace style — no brace-on-new-line for namespaces, types, or functions
-- Pointer/reference alignment: left (`int* Ptr`, not `int *Ptr`)
-- Doxygen-style doc comments (`/** */`)
-- Every `.cpp` and `.h` must start with:
-  ```cpp
-  // Copyright dotBunny Inc. All Rights Reserved.
-  // See the LICENSE file at the repository root for more information.
-  ```
-- Standard UE prefixes: `A` (AActor), `U` (UObject), `F` (structs), `E` (enums), `T` (templates), `S` (SWidget), `b` (bool fields). 
-- NEXUS adds `N` after the type prefix: `ANDebugActor`, `FNActorPool`, `UNDynamicRef`.
-
-Each module has a `Nexus<Name>Minimal.h` that declares the module's log category (e.g. `LogNexusActorPools`, `LogNexusCoreEditor`). Include this instead of pulling in the full module header.
+Use the project-specific `coding-style` skill. Invoke it before writing any code.

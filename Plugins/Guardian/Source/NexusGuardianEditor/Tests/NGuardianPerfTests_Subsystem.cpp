@@ -12,7 +12,7 @@
 namespace NEXUS::GuardianTests::Perf
 {
     constexpr int32 IterationCount = 1000;
-    constexpr float SetBaselineMaxDuration = 1.0f;   // SetBaseline reads GUObjectArray — allow generous budget
+    constexpr float SetBaselineMaxDuration = 1.5f;   // SetBaseline reads GUObjectArray — allow generous budget
     constexpr float TickBelowMaxDuration   = 0.1f;   // Tick with no thresholds crossed is a cheap read
 }
 

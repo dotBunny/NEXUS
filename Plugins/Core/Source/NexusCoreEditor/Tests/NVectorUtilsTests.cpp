@@ -5,7 +5,6 @@
 
 #include "Math/NVectorUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_NoRotation, "NEXUS::UnitTests::NCore::VectorUtils::TransformPoint_NoRotation", N_TEST_CONTEXT_ANYWHERE)
 {

@@ -5,7 +5,6 @@
 
 #include "NWidgetUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Visible,
     "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::Visible",

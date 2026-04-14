@@ -8,7 +8,6 @@
 #include "Developer/NTestObject.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAdded,
     "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAdded",

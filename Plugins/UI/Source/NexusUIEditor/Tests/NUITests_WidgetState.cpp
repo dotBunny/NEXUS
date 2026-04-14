@@ -5,7 +5,6 @@
 
 #include "NWidgetState.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_CRITICAL(FNUITests_WidgetState_Boolean_AddAndGet,
     "NEXUS::UnitTests::NUI::WidgetState::Boolean::AddAndGet",

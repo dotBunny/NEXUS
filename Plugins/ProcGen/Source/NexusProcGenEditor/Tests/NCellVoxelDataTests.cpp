@@ -6,7 +6,6 @@
 #include "Cell/NCellVoxelData.h"
 #include "Misc/Timespan.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_CRITICAL(FNProcGenTests_CellVoxelData_Uniform, "NEXUS::UnitTests::NProcGen::NCellVoxelData_Uniform", N_TEST_CONTEXT_ANYWHERE)
 {

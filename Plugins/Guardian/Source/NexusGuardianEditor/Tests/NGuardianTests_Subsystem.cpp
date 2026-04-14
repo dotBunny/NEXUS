@@ -7,7 +7,6 @@
 #include "NGuardianSubsystem.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 namespace NEXUS::GuardianTests
 {

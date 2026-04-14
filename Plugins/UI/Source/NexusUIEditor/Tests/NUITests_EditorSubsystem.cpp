@@ -6,7 +6,6 @@
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "NWidgetState.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 namespace NEXUS::UITests::EditorSubsystem
 {

@@ -8,7 +8,6 @@
 #include "Developer/NDeveloperUtils.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy, 
 	"NEXUS::UnitTests::NActorPools::LeakCheck::DontForceDestroy", 

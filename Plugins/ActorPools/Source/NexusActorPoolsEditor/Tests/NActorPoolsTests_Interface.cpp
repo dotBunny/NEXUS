@@ -9,7 +9,6 @@
 #include "Developer/NTestObject.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST(FNActorPoolsTests_Interface_Events, 
 	"NEXUS::UnitTests::NActorPools::Interface::Events", 

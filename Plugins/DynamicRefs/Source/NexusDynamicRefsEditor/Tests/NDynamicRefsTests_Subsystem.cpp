@@ -8,7 +8,6 @@
 #include "Developer/NTestUObject.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_PreAllocated,
     "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::PreAllocated",

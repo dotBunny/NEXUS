@@ -7,7 +7,6 @@
 #include "NActorPool.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST(FNActorPoolTests_Strategy_Create, 
 	"NEXUS::UnitTests::NActorPools::Strategy::Create", 

@@ -5,7 +5,6 @@
 
 #include "Math/NMersenneTwister.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_HIGH(FNMersenneTwisterTests_Determinism_SameSeedSameSequence, "NEXUS::UnitTests::NCore::MersenneTwister::Determinism_SameSeedSameSequence", N_TEST_CONTEXT_ANYWHERE)
 {

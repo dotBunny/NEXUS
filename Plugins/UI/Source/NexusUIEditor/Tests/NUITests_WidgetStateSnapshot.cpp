@@ -6,7 +6,6 @@
 #include "NWidgetState.h"
 #include "NWidgetStateSnapshot.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
 namespace NEXUS::UITests::WidgetStateSnapshot
 {
