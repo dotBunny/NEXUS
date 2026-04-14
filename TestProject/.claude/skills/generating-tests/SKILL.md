@@ -1,5 +1,5 @@
 ---
-name: Generating Unit Test
+name: generating-tests
 description:  Creating new unit tests, test cases, or performance tests. Invoke this skill whenever writing tests for any NEXUS plugin.
 ---
 
