@@ -31,10 +31,12 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NBoneComponent", this, false, 0.35f)
 }
 
-#if WITH_EDITOR
+
 
 void UNBoneComponent::OnRegister()
 {
+
+#if WITH_EDITOR
 	const ULevel* Level = GetComponentLevel();
 	if (const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level); 
 		RootComponent != nullptr)
@@ -53,6 +55,7 @@ void UNBoneComponent::OnRegister()
 			this->DestroyComponent();
 		}));
 	}
+#endif // WITH_EDITOR	
 
 	FNProcGenRegistry::RegisterBoneComponent(this);
 	Super::OnRegister();
@@ -64,6 +67,7 @@ void UNBoneComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
+#if WITH_EDITOR
 void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags,
                                          ETeleportType Teleport)
 {

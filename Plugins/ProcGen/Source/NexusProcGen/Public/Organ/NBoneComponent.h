@@ -49,18 +49,16 @@ public:
 	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
 
-	
-#if WITH_EDITOR
-
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
+	
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 	
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 	void OnModeChanged(ENBoneMode NewMode);
 	void SetAutomaticTransform();
 	FVector FindSafeLocation(const FVector& WorldLocation) const;
-	
 #endif // WITH_EDITOR
 
 	FString GetDebugLabel() const;
