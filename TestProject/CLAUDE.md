@@ -100,7 +100,7 @@ Active plugins loaded by the `TestProject`:
 
 ## Writing Tests
 
-Reference `generating-unit-tests` skill.
+Use the `generating-unit-tests` skill. Invoke it before writing any test code.
 
 ## Running Tests
 
