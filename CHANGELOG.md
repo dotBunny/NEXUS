@@ -35,14 +35,14 @@
 - `ANSamplesLevelActor` now has `bShowLevelName` and `bShowLogo` properties to control whether the level name and logo are shown.
 - `ANSamplesDisplayActor` title settings now has `bShowTitleHorizontalRule` allowing for the title to be drawn with or without a horizontal rule.
 - `ANSamplesDisplayActor` title settings now has `TitleTextPadding` allowing for the title to have some padding from the edges.
-- `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
+- `Window > Log > Clean Logs Folder` will remove much of the chaff in the projects saved/logs folder.
 - `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
 - `FNOrientedBoxPicker` for generating points in a box with rotation.
 - `FNEditorSlateUtils` and `FNSlateUtils`.
 - [#117](https://github.com/dotBunny/NEXUS/issues/117)`Collision Visualizer` added to `Tools -> Debug`.
 - [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
 - [#70](https://github.com/dotBunny/NEXUS/issues/70) Add `Create Actor Pool Set` button to `UNActorPoolsEditorUtilityWidget` to create an `UNActorPoolSet` based on the currently found pools in **PIE**. 
-- `Invoke UFunctions` flag to `UNActorPoolSettings` to enable `UFUNCTION` invoking on non-interfaced `AActors`, specifically invoking `OnCreatedByActorPool`, `OnSpawnedFromActorPool`, `OnReturnToActorPool`, and `OnDestroyedByActorPool` (when enabled) named `UFUNCTION` on the `AActor` if it does not implement the `INActorPoolItem` interface..
+- `Invoke UFunctions` flag to `UNActorPoolSettings` to enable `UFUNCTION` invoking on non-interfaced `AActors`, specifically invoking `OnCreatedByActorPool`, `OnSpawnedFromActorPool`, `OnReturnToActorPool`, and `OnDestroyedByActorPool` (when enabled) named `UFUNCTION` on the `AActor` if it does not implement the `INActorPoolItem` interface.
 - `UNActorPoolsDeveloperOverlay` now has tooltips with detailed information about the behavior of the associated `FNActorPool`.
 
 ### Changed
@@ -53,7 +53,7 @@
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
 - [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
-- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full FTransfrom set.
+- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full `FTransfrom` set.
 - `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
 - `ANPooledActor` now has `OnCreatedByActorPoolEvent`, `OnSpawnedFromActorPoolEvent`, `OnReturnToActorPoolEvent`, and `OnDestroyedByActorPoolEvent` bindable events.
 - `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
@@ -210,7 +210,7 @@
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
-- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
+- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` respectively.
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
 - Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 - Lowered warning level to `Log` when creating a new `FNActorPool` that already exists in a nested `UNActorPoolSet`.
@@ -306,7 +306,7 @@
 - Moved `Leak Check` duration setting to user level preference.
 - Clearly defined usage of `FNMetaUtils` static methods in helper macros.
 - `NEXUS: Material Library` renamed to `NEXUS: Blockout`.
-- External documentation now supports comma delimited multiple entries.
+- External documentation now supports comma-delimited multiple entries.
 
 
 ### Removed
@@ -323,7 +323,7 @@
 ### Experimental
 
 - `NEXUS: Developer Console` renamed to `NEXUS: Developer Menu` still not functioning stub.
-- `NEXUS: ProcGen` has some intial structural work done, but is still not functioanl.
+- `NEXUS: ProcGen` has some initial structural work done, but is still not functional.
 
 
 ## [0.1.1] - 2025-08-01
