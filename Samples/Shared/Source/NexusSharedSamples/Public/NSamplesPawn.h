@@ -66,26 +66,22 @@ private:
 		"/Game/Maps/"
 	};
 	
-	bool HasHUD();
-	void ChangeView(ANSamplesDisplayActor* DisplayActor);
-	void CheckScreenshotState();
-	
 	int CameraIndex = -1;
 	int ResolutionMultiplier = 1;
 	int FrameSkipDefault = 5;
 	int FrameSkipCounter = FrameSkipDefault;
 	ENSamplesScreenshotState ScreenshotState;
-	
 	FVector CachedLocation;
+	TArray<FString> MapList;
+	int MapIndex = 0;
 	
 	UPROPERTY()
 	TObjectPtr<ANSamplesHUD> HUD;
 	
-	TArray<FString> MapList;
-	int MapIndex = 0;
-	
-	
 	UFUNCTION(Server, Unreliable)
 	void Server_SetLocation(FVector Location);
 	
+	bool HasHUD();
+	void ChangeView(ANSamplesDisplayActor* DisplayActor);
+	void CheckScreenshotState();
 };
