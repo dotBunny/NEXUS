@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NSamplesHUD.h"
 #include "GameFramework/DefaultPawn.h"
 #include "NSamplesPawn.generated.h"
 
@@ -29,7 +30,9 @@ class NEXUSSHAREDSAMPLES_API ANSamplesPawn : public ADefaultPawn
 	GENERATED_BODY()
 
 	ANSamplesPawn(const FObjectInitializer& ObjectInitializer);
-	
+
+public:
+
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
@@ -44,12 +47,26 @@ protected:
 	void OnResolutionIncrease();
 	void OnResolutionDecrease();
 	void OnAutoScreenshot();
+	void OnPreviousMap();
+	void OnNextMap();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="NEXUS")
 	TObjectPtr<UWidgetInteractionComponent> WidgetInteraction;
 
 private:
-
+	
+	TArray<FString> MapPaths = {
+		"/NexusActorPoolsSamples/",
+		"/NexusBlockoutSamples/",
+		"/NexusDynamicRefsSamples/"
+		"/NexusMultiplayerSamples/",
+		"/NexusPickerSamples/",
+		"/NexusProcGenSamples/",
+		"/NexusUISamples/",
+		"/Game/Maps/"
+	};
+	
+	bool HasHUD();
 	void ChangeView(ANSamplesDisplayActor* DisplayActor);
 	void CheckScreenshotState();
 	
@@ -60,6 +77,13 @@ private:
 	ENSamplesScreenshotState ScreenshotState;
 	
 	FVector CachedLocation;
+	
+	UPROPERTY()
+	TObjectPtr<ANSamplesHUD> HUD;
+	
+	TArray<FString> MapList;
+	int MapIndex = 0;
+	
 	
 	UFUNCTION(Server, Unreliable)
 	void Server_SetLocation(FVector Location);

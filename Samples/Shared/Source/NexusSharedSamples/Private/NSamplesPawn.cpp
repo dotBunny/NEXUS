@@ -4,6 +4,7 @@
 #include "NSamplesPawn.h"
 
 #include "HighResScreenshot.h"
+#include "NLevelUtils.h"
 #include "NSamplesDisplayActor.h"
 #include "NSamplesHUD.h"
 #include "Components/WidgetInteractionComponent.h"
@@ -29,6 +30,8 @@ void ANSamplesPawn::BeginPlay()
 		InputComponent->BindKey(EKeys::Tab, IE_Released, this, &ANSamplesPawn::OnNextDisplay);
 		InputComponent->BindKey(EKeys::LeftBracket, IE_Released, this, &ANSamplesPawn::OnPreviousDisplay);
 		InputComponent->BindKey(EKeys::RightBracket, IE_Released, this, &ANSamplesPawn::OnNextDisplay);
+		InputComponent->BindKey(EKeys::Comma, IE_Released, this, &ANSamplesPawn::OnPreviousMap);
+		InputComponent->BindKey(EKeys::Period, IE_Released, this, &ANSamplesPawn::OnNextMap);		
 		InputComponent->BindKey(EKeys::BackSpace, IE_Released, this, &ANSamplesPawn::OnToggleHUD);
 		InputComponent->BindKey(EKeys::F12, IE_Released, this, &ANSamplesPawn::OnScreenshot);
 		InputComponent->BindKey(EKeys::Backslash, IE_Released, this, &ANSamplesPawn::OnReturnToPawn);
@@ -38,6 +41,29 @@ void ANSamplesPawn::BeginPlay()
 	}
 
 	ChangeView(nullptr);
+	
+	MapList = FNLevelUtils::GetAllMapNames(MapPaths);
+	
+	// Filter maps
+	const FString CurrentMapName = GetWorld()->GetName();
+	for (int i = MapList.Num() - 1; i >= 0; i--)
+	{
+		if (MapList[i].StartsWith(TEXT("CELL_")) || 
+			MapList[i].StartsWith(TEXT("TESTS_")))
+		{
+			MapList.RemoveAt(i);
+		}
+	}
+	
+	// We have to find actual level that were on after we have removed everything
+	for (int i = MapList.Num() - 1; i >= 0; i--)
+	{
+		// Figure out current level
+		if (MapList[i].Equals(CurrentMapName))
+		{
+			MapIndex = i;
+		}
+	}
 	
 	Super::BeginPlay();
 }
@@ -56,15 +82,21 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	
-	// Simple way of handling network sync of pawns position since we dont have a CMC
+	// Simple way of handling network sync of pawns position since we don't have a CMC
+	const FVector CurrentLocation = GetActorLocation();
 	if (GetLocalRole() == ROLE_AutonomousProxy)
 	{
-		const FVector CurrentLocation = GetActorLocation();
 		if (CurrentLocation != CachedLocation)
 		{
 			CachedLocation = CurrentLocation;
 			Server_SetLocation(CachedLocation);
 		}
+	}
+	
+	if (HasHUD())
+	{
+		HUD->SetPlayerPosition(CurrentLocation);
+		HUD->SetPlayerRotation(GetControlRotation());
 	}
 	
 	// Handle screenshot logic 
@@ -105,8 +137,10 @@ void ANSamplesPawn::OnPreviousDisplay()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void ANSamplesPawn::OnToggleHUD()
 {
-	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-	HUD->ToggleVisibility();
+	if (HasHUD())
+	{
+		HUD->ToggleVisibility();
+	}
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -139,16 +173,20 @@ void ANSamplesPawn::OnReturnToPawn()
 void ANSamplesPawn::OnResolutionIncrease()
 {
 	ResolutionMultiplier++;
-	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-	HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+	if (HasHUD())
+	{
+		HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+	}
 }
 
 void ANSamplesPawn::OnResolutionDecrease()
 {
 	ResolutionMultiplier--;
 	if (ResolutionMultiplier < 1) ResolutionMultiplier = 1;
-	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-	HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+	if (HasHUD())
+	{
+		HUD->SetScreenshotMultiplier(ResolutionMultiplier);
+	}
 }
 
 void ANSamplesPawn::OnAutoScreenshot()
@@ -157,26 +195,77 @@ void ANSamplesPawn::OnAutoScreenshot()
 	ScreenshotState = ENSamplesScreenshotState::Prepare;
 }
 
+void ANSamplesPawn::OnPreviousMap()
+{
+	if (MapList.Num() == 0) return;
+	MapIndex--;
+	if (MapIndex < 0)
+	{
+		MapIndex = MapList.Num() - 1;
+	}
+	UGameplayStatics::OpenLevel(this, FName(*MapList[MapIndex]));    
+	
+}
+
+void ANSamplesPawn::OnNextMap()
+{
+	if (MapList.Num() == 0) return;
+	
+	MapIndex++;
+	if (MapIndex >= MapList.Num())
+	{
+		MapIndex = 0;
+	}
+	UGameplayStatics::OpenLevel(this, FName(*MapList[MapIndex]));    
+}
+
+bool ANSamplesPawn::HasHUD()
+{
+	if (HUD != nullptr) return true;
+	if (HUD == nullptr)
+	{
+		const APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (PlayerController != nullptr)
+		{
+			HUD = Cast<ANSamplesHUD>(PlayerController->GetHUD());	
+		}
+		
+		if (HUD == nullptr)
+		{
+			
+		}
+		
+		if (HUD != nullptr)
+		{
+			return true;
+		}
+		
+	}
+	return false;
+}
+
 void ANSamplesPawn::ChangeView(ANSamplesDisplayActor* DisplayActor)
 {
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController == nullptr) return;
-	ANSamplesHUD* HUD = Cast<ANSamplesHUD>(PlayerController->GetHUD());
 	
 	// No display, go back to pawn
 	if (DisplayActor == nullptr)
 	{
 		PlayerController->SetViewTargetWithBlend(this);
-		HUD->SetCurrentCameraName(TEXT("Pawn"));
+		if (HasHUD())
+		{
+			HUD->SetCurrentCameraName(TEXT("Pawn"));
+		}
 		return;
 	}
 	
 	PlayerController->SetViewTargetWithBlend(DisplayActor);
-	if (!DisplayActor->ScreenshotSettings.CameraNameOverride.IsEmpty())
+	if (!DisplayActor->ScreenshotSettings.CameraNameOverride.IsEmpty() && HasHUD())
 	{
 		HUD->SetCurrentCameraName(DisplayActor->ScreenshotSettings.CameraNameOverride.ToString());
 	}
-	else
+	else if (HasHUD())
 	{
 		HUD->SetCurrentCameraName(DisplayActor->TitleSettings.TitleText.ToString());
 	}
@@ -193,8 +282,10 @@ void ANSamplesPawn::CheckScreenshotState()
 	case Prepare:
 		{
 			ANSamplesDisplayActor::SortKnownDisplays();	
-			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-			HUD->SetVisibility(false);
+			if (HasHUD())
+			{
+				HUD->SetVisibility(false);
+			}
 			CameraIndex = 0;
 			ScreenshotState = SelectView;
 			FrameSkipCounter = FrameSkipDefault;
@@ -243,8 +334,10 @@ void ANSamplesPawn::CheckScreenshotState()
 		{
 			CameraIndex = 0;
 			ChangeView(ANSamplesDisplayActor::KnownDisplays[CameraIndex]);
-			ANSamplesHUD* HUD = Cast<ANSamplesHUD>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-			HUD->SetVisibility(true);
+			if (HasHUD())
+			{
+				HUD->SetVisibility(true);
+			}
 			ScreenshotState = NotRunning;
 			break;
 		}
