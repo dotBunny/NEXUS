@@ -10,8 +10,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── ENDynamicRef Delegate Broadcasts ────────────────────────────────────────
-
 N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAdded,
     "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAdded",
     N_TEST_CONTEXT_EDITOR)
@@ -165,8 +163,6 @@ N_TEST_HIGH(FNDynamicRefsTests_Delegates_OnRemoved_DoesNotFireForMissingObject,
         CHECK_EQUALS("OnRemoved fires once even for an object that was never added.", Tracker->Counter, 1)
     });
 }
-
-// ─── FName Delegate Broadcasts ───────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNDynamicRefsTests_Delegates_OnAddedByName,
     "NEXUS::UnitTests::NDynamicRefs::Delegates::OnAddedByName",

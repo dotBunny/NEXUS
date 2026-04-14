@@ -6,9 +6,8 @@
 #include "Misc/Timespan.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
-N_TEST_CRITICAL(FNBaseTests, "NEXUS::UnitTests::NCore::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
+N_TEST_CRITICAL(FNTestUtilsTests, "NEXUS::UnitTests::NCore::TestUtils::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
 {
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{

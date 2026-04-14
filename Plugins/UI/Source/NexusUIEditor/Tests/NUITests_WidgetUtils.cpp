@@ -7,8 +7,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── FNWidgetUtils::ToEVisibility ─────────────────────────────────────────────
-
 N_TEST_CRITICAL(FNUITests_WidgetUtils_ToEVisibility_Visible,
     "NEXUS::UnitTests::NUI::WidgetUtils::ToEVisibility::Visible",
     N_TEST_CONTEXT_ANYWHERE)

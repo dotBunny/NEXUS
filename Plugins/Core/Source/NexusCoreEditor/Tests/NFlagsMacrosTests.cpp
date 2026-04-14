@@ -5,9 +5,8 @@
 
 #include "Macros/NFlagsMacros.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
-N_TEST_HIGH(FNFlagsMacros_Has_BitsSet, "NEXUS::UnitTests::NCore::FlagsMacros::Has_BitsSet", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_Has_BitsSet, "NEXUS::UnitTests::NCore::FlagsMacros::Has_BitsSet", N_TEST_CONTEXT_ANYWHERE)
 {
 	const uint32 Flags = 0b1010u;
 	CHECK_MESSAGE(TEXT("N_FLAGS_HAS should return true when all mask bits are set"), N_FLAGS_HAS(Flags, 0b1010u));
@@ -15,7 +14,7 @@ N_TEST_HIGH(FNFlagsMacros_Has_BitsSet, "NEXUS::UnitTests::NCore::FlagsMacros::Ha
 	CHECK_MESSAGE(TEXT("N_FLAGS_HAS should return true for single matching bit"), N_FLAGS_HAS(Flags, 0b1000u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_Has_BitsNotSet, "NEXUS::UnitTests::NCore::FlagsMacros::Has_BitsNotSet", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_Has_BitsNotSet, "NEXUS::UnitTests::NCore::FlagsMacros::Has_BitsNotSet", N_TEST_CONTEXT_ANYWHERE)
 {
 	const uint32 Flags = 0b1010u;
 	CHECK_FALSE_MESSAGE(TEXT("N_FLAGS_HAS should return false when mask bits are not set"), N_FLAGS_HAS(Flags, 0b0001u));
@@ -23,7 +22,7 @@ N_TEST_HIGH(FNFlagsMacros_Has_BitsNotSet, "NEXUS::UnitTests::NCore::FlagsMacros:
 	CHECK_FALSE_MESSAGE(TEXT("N_FLAGS_HAS should return false when no flags are set"), N_FLAGS_HAS(0u, 0b1010u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_HasAllOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAllOf", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_HasAllOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAllOf", N_TEST_CONTEXT_ANYWHERE)
 {
 	const uint32 Flags = 0b1010u;
 	CHECK_MESSAGE(TEXT("N_FLAGS_HAS_ALL_OF should return true when all mask bits present"), N_FLAGS_HAS_ALL_OF(Flags, 0b1010u));
@@ -31,7 +30,7 @@ N_TEST_HIGH(FNFlagsMacros_HasAllOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAl
 	CHECK_FALSE_MESSAGE(TEXT("N_FLAGS_HAS_ALL_OF should return false if zero flags"), N_FLAGS_HAS_ALL_OF(0u, 0b1010u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_HasAnyOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAnyOf", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_HasAnyOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAnyOf", N_TEST_CONTEXT_ANYWHERE)
 {
 	const uint32 Flags = 0b1010u;
 	CHECK_MESSAGE(TEXT("N_FLAGS_HAS_ANY_OF should return true if first bit matches"), N_FLAGS_HAS_ANY_OF(Flags, 0b1000u));
@@ -41,7 +40,7 @@ N_TEST_HIGH(FNFlagsMacros_HasAnyOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasAn
 	CHECK_FALSE_MESSAGE(TEXT("N_FLAGS_HAS_ANY_OF with zero mask should return false"), N_FLAGS_HAS_ANY_OF(Flags, 0u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_HasNoneOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasNoneOf", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_HasNoneOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasNoneOf", N_TEST_CONTEXT_ANYWHERE)
 {
 	const uint32 Flags = 0b1010u;
 	CHECK_MESSAGE(TEXT("N_FLAGS_HAS_NONE_OF should return true if no bits match"), N_FLAGS_HAS_NONE_OF(Flags, 0b0101u));
@@ -50,7 +49,7 @@ N_TEST_HIGH(FNFlagsMacros_HasNoneOf, "NEXUS::UnitTests::NCore::FlagsMacros::HasN
 	CHECK_FALSE_MESSAGE(TEXT("N_FLAGS_HAS_NONE_OF should return false if all bits match"), N_FLAGS_HAS_NONE_OF(Flags, 0b1010u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_Add, "NEXUS::UnitTests::NCore::FlagsMacros::Add", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_Add, "NEXUS::UnitTests::NCore::FlagsMacros::Add", N_TEST_CONTEXT_ANYWHERE)
 {
 	uint32 Flags = 0u;
 
@@ -66,7 +65,7 @@ N_TEST_HIGH(FNFlagsMacros_Add, "NEXUS::UnitTests::NCore::FlagsMacros::Add", N_TE
 	CHECK_MESSAGE(TEXT("N_FLAGS_ADD on already-set bit should be idempotent"), N_FLAGS_HAS(Flags, 0b0001u));
 }
 
-N_TEST_HIGH(FNFlagsMacros_Remove, "NEXUS::UnitTests::NCore::FlagsMacros::Remove", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_Remove, "NEXUS::UnitTests::NCore::FlagsMacros::Remove", N_TEST_CONTEXT_ANYWHERE)
 {
 	uint32 Flags = 0b1010u;
 
@@ -83,7 +82,7 @@ N_TEST_HIGH(FNFlagsMacros_Remove, "NEXUS::UnitTests::NCore::FlagsMacros::Remove"
 	CHECK_MESSAGE(TEXT("All bits removed should equal zero"), Flags == 0u);
 }
 
-N_TEST_HIGH(FNFlagsMacros_AddRemove_UInt8, "NEXUS::UnitTests::NCore::FlagsMacros::AddRemove_UInt8", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNFlagsMacrosTests_AddRemove_UInt8, "NEXUS::UnitTests::NCore::FlagsMacros::AddRemove_UInt8", N_TEST_CONTEXT_ANYWHERE)
 {
 	uint8 Flags = 0u;
 

@@ -10,8 +10,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── FastCollection (ENDynamicRef) ───────────────────────────────────────────
-
 N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_PreAllocated,
     "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::PreAllocated",
     N_TEST_CONTEXT_EDITOR)
@@ -173,8 +171,6 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_RemoveObjectsArray,
         CHECK_EQUALS("Count should be 0 after bulk removal.", Subsystem->GetCount(NDR_Spawn_A), 0)
     });
 }
-
-// ─── Get First / Last (ENDynamicRef) ─────────────────────────────────────────
 
 N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_FastCollection_GetFirstObject,
     "NEXUS::UnitTests::NDynamicRefs::Subsystem::FastCollection::GetFirstObject",
@@ -355,8 +351,6 @@ N_TEST_HIGH(FNDynamicRefsTests_Subsystem_FastCollection_GetDynamicRefs,
         }
     });
 }
-
-// ─── NamedCollection (FName) ──────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNDynamicRefsTests_Subsystem_NamedCollection_AddObjectByName,
     "NEXUS::UnitTests::NDynamicRefs::Subsystem::NamedCollection::AddObjectByName",

@@ -7,8 +7,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── Boolean Operations ───────────────────────────────────────────────────────
-
 N_TEST_CRITICAL(FNUITests_WidgetState_Boolean_AddAndGet,
     "NEXUS::UnitTests::NUI::WidgetState::Boolean::AddAndGet",
     N_TEST_CONTEXT_ANYWHERE)
@@ -88,8 +86,6 @@ N_TEST_HIGH(FNUITests_WidgetState_Boolean_Clear,
     CHECK_FALSE_MESSAGE("HasBoolean should return false after ClearBooleans.", State.HasBoolean(TEXT("bB")))
 }
 
-// ─── Float Operations ─────────────────────────────────────────────────────────
-
 N_TEST_CRITICAL(FNUITests_WidgetState_Float_AddAndGet,
     "NEXUS::UnitTests::NUI::WidgetState::Float::AddAndGet",
     N_TEST_CONTEXT_ANYWHERE)
@@ -157,8 +153,6 @@ N_TEST_HIGH(FNUITests_WidgetState_Float_Clear,
     CHECK_FALSE_MESSAGE("HasFloat should return false after ClearFloats.", State.HasFloat(TEXT("A")))
     CHECK_FALSE_MESSAGE("HasFloat should return false after ClearFloats.", State.HasFloat(TEXT("B")))
 }
-
-// ─── String Operations ────────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_WidgetState_String_AddAndGet,
     "NEXUS::UnitTests::NUI::WidgetState::String::AddAndGet",
@@ -240,8 +234,6 @@ N_TEST_HIGH(FNUITests_WidgetState_String_Clear,
     CHECK_FALSE_MESSAGE("HasString should return false after ClearStrings.", State.HasString(TEXT("Y")))
 }
 
-// ─── ClearAll ─────────────────────────────────────────────────────────────────
-
 N_TEST_HIGH(FNUITests_WidgetState_ClearAll,
     "NEXUS::UnitTests::NUI::WidgetState::ClearAll",
     N_TEST_CONTEXT_ANYWHERE)
@@ -257,8 +249,6 @@ N_TEST_HIGH(FNUITests_WidgetState_ClearAll,
     CHECK_FALSE_MESSAGE("HasFloat should return false after ClearAll.", State.HasFloat(TEXT("Value")))
     CHECK_FALSE_MESSAGE("HasString should return false after ClearAll.", State.HasString(TEXT("Label")))
 }
-
-// ─── OverlayState ─────────────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_WidgetState_OverlayState_MergeNoReplace,
     "NEXUS::UnitTests::NUI::WidgetState::OverlayState::MergeNoReplace",

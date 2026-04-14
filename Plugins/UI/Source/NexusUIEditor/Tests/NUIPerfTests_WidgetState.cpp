@@ -17,8 +17,6 @@ namespace NEXUS::UITests::Perf
     constexpr float OverlayMaxDuration = 0.5f;
 }
 
-// ─── AddString / AddBoolean / AddFloat ───────────────────────────────────────
-
 N_TEST_PERF(FNUIPerfTests_WidgetState_AddString,
     "NEXUS::PerfTests::NUI::WidgetState::AddString",
     N_TEST_CONTEXT_ANYWHERE)
@@ -106,8 +104,6 @@ N_TEST_PERF(FNUIPerfTests_WidgetState_AddFloat,
 
     FNTestUtils::PostPerformanceTest();
 }
-
-// ─── GetString / GetBoolean / GetFloat ───────────────────────────────────────
 
 N_TEST_PERF(FNUIPerfTests_WidgetState_GetString,
     "NEXUS::PerfTests::NUI::WidgetState::GetString",
@@ -200,8 +196,6 @@ N_TEST_PERF(FNUIPerfTests_WidgetState_GetFloat,
 
     FNTestUtils::PostPerformanceTest();
 }
-
-// ─── OverlayState ─────────────────────────────────────────────────────────────
 
 N_TEST_PERF(FNUIPerfTests_WidgetState_OverlayState_Merge,
     "NEXUS::PerfTests::NUI::WidgetState::OverlayState::Merge",

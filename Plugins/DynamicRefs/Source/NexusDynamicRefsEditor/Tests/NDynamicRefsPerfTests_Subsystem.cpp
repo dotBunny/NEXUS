@@ -21,7 +21,6 @@ namespace NEXUS::DynamicRefsTests::Subsystem
     constexpr float GetByNameMaxDuration = 0.1f;
 }
 
-
 N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObject,
     "NEXUS::PerfTests::NDynamicRefs::Subsystem::AddObject",
     N_TEST_CONTEXT_EDITOR)
@@ -156,8 +155,6 @@ N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_GetFirstObject,
     }, true);
     FNTestUtils::PostPerformanceTest();
 }
-
-// ─── NamedCollection (FName) ──────────────────────────────────────────────────
 
 N_TEST_PERF(FNDynamicRefsPerfTests_Subsystem_AddObjectByName,
     "NEXUS::PerfTests::NDynamicRefs::Subsystem::AddObjectByName",

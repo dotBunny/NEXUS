@@ -7,7 +7,7 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-N_TEST_HIGH(FNMersenneTwister_Determinism_SameSeedSameSequence, "NEXUS::UnitTests::NCore::MersenneTwister::Determinism_SameSeedSameSequence", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Determinism_SameSeedSameSequence, "NEXUS::UnitTests::NCore::MersenneTwister::Determinism_SameSeedSameSequence", N_TEST_CONTEXT_ANYWHERE)
 {
 	constexpr uint64 Seed = 12345678ull;
 	FNMersenneTwister TwisterA(Seed);
@@ -21,7 +21,7 @@ N_TEST_HIGH(FNMersenneTwister_Determinism_SameSeedSameSequence, "NEXUS::UnitTest
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_Determinism_DifferentSeedsDifferentSequence, "NEXUS::UnitTests::NCore::MersenneTwister::Determinism_DifferentSeedsDifferentSequence", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Determinism_DifferentSeedsDifferentSequence, "NEXUS::UnitTests::NCore::MersenneTwister::Determinism_DifferentSeedsDifferentSequence", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister TwisterA(11111ull);
 	FNMersenneTwister TwisterB(99999ull);
@@ -38,7 +38,7 @@ N_TEST_HIGH(FNMersenneTwister_Determinism_DifferentSeedsDifferentSequence, "NEXU
 	CHECK_MESSAGE(TEXT("Different seeds should produce different sequences"), bFoundDifference);
 }
 
-N_TEST_HIGH(FNMersenneTwister_Reset_RestoresInitialState, "NEXUS::UnitTests::NCore::MersenneTwister::Reset_RestoresInitialState", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Reset_RestoresInitialState, "NEXUS::UnitTests::NCore::MersenneTwister::Reset_RestoresInitialState", N_TEST_CONTEXT_ANYWHERE)
 {
 	constexpr uint64 Seed = 42ull;
 	FNMersenneTwister Twister(Seed);
@@ -60,7 +60,7 @@ N_TEST_HIGH(FNMersenneTwister_Reset_RestoresInitialState, "NEXUS::UnitTests::NCo
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_GetInitialSeed, "NEXUS::UnitTests::NCore::MersenneTwister::GetInitialSeed", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_GetInitialSeed, "NEXUS::UnitTests::NCore::MersenneTwister::GetInitialSeed", N_TEST_CONTEXT_ANYWHERE)
 {
 	constexpr uint64 Seed = 987654321ull;
 	FNMersenneTwister Twister(Seed);
@@ -71,7 +71,7 @@ N_TEST_HIGH(FNMersenneTwister_GetInitialSeed, "NEXUS::UnitTests::NCore::Mersenne
 	CHECK_MESSAGE(TEXT("GetInitialSeed should return the original seed after many calls"), Twister.GetInitialSeed() == Seed);
 }
 
-N_TEST_HIGH(FNMersenneTwister_Float_Range, "NEXUS::UnitTests::NCore::MersenneTwister::Float_Range", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Float_Range, "NEXUS::UnitTests::NCore::MersenneTwister::Float_Range", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(100ull);
 	for (int32 i = 0; i < 1000; ++i)
@@ -82,7 +82,7 @@ N_TEST_HIGH(FNMersenneTwister_Float_Range, "NEXUS::UnitTests::NCore::MersenneTwi
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_Double_Range, "NEXUS::UnitTests::NCore::MersenneTwister::Double_Range", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Double_Range, "NEXUS::UnitTests::NCore::MersenneTwister::Double_Range", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(200ull);
 	for (int32 i = 0; i < 1000; ++i)
@@ -93,7 +93,7 @@ N_TEST_HIGH(FNMersenneTwister_Double_Range, "NEXUS::UnitTests::NCore::MersenneTw
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_FloatRange_Bounds, "NEXUS::UnitTests::NCore::MersenneTwister::FloatRange_Bounds", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_FloatRange_Bounds, "NEXUS::UnitTests::NCore::MersenneTwister::FloatRange_Bounds", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(300ull);
 	constexpr float Min = -5.f;
@@ -106,7 +106,7 @@ N_TEST_HIGH(FNMersenneTwister_FloatRange_Bounds, "NEXUS::UnitTests::NCore::Merse
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_IntegerRange_Bounds, "NEXUS::UnitTests::NCore::MersenneTwister::IntegerRange_Bounds", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_IntegerRange_Bounds, "NEXUS::UnitTests::NCore::MersenneTwister::IntegerRange_Bounds", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(400ull);
 	constexpr int32 Min = -10;
@@ -119,7 +119,7 @@ N_TEST_HIGH(FNMersenneTwister_IntegerRange_Bounds, "NEXUS::UnitTests::NCore::Mer
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_Bias_ExtremeValues, "NEXUS::UnitTests::NCore::MersenneTwister::Bias_ExtremeValues", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_Bias_ExtremeValues, "NEXUS::UnitTests::NCore::MersenneTwister::Bias_ExtremeValues", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(500ull);
 
@@ -136,7 +136,7 @@ N_TEST_HIGH(FNMersenneTwister_Bias_ExtremeValues, "NEXUS::UnitTests::NCore::Mers
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_CallCounter_Increments, "NEXUS::UnitTests::NCore::MersenneTwister::CallCounter_Increments", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_CallCounter_Increments, "NEXUS::UnitTests::NCore::MersenneTwister::CallCounter_Increments", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(600ull);
 	CHECK_MESSAGE(TEXT("Call counter should start at 0"), Twister.GetCallCounter() == 0u);
@@ -152,7 +152,7 @@ N_TEST_HIGH(FNMersenneTwister_CallCounter_Increments, "NEXUS::UnitTests::NCore::
 	CHECK_MESSAGE(TEXT("Call counter should reset to 0 after Reset()"), Twister.GetCallCounter() == 0u);
 }
 
-N_TEST_HIGH(FNMersenneTwister_ArrayBulk_Float, "NEXUS::UnitTests::NCore::MersenneTwister::ArrayBulk_Float", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_ArrayBulk_Float, "NEXUS::UnitTests::NCore::MersenneTwister::ArrayBulk_Float", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(700ull);
 	constexpr int32 Count = 100;
@@ -167,7 +167,7 @@ N_TEST_HIGH(FNMersenneTwister_ArrayBulk_Float, "NEXUS::UnitTests::NCore::Mersenn
 	}
 }
 
-N_TEST_HIGH(FNMersenneTwister_ArrayBulk_IntegerRange, "NEXUS::UnitTests::NCore::MersenneTwister::ArrayBulk_IntegerRange", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNMersenneTwisterTests_ArrayBulk_IntegerRange, "NEXUS::UnitTests::NCore::MersenneTwister::ArrayBulk_IntegerRange", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNMersenneTwister Twister(800ull);
 	constexpr int32 Count = 100;

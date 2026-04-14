@@ -6,9 +6,8 @@
 #include "Math/NMersenneTwister.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-#include "Tests/TestHarnessAdapter.h"
 
-N_TEST_PERF_HIGH(FNMersenneTwister_Perf_FloatGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::FloatGeneration", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF_HIGH(FNMersenneTwisterPerfTests_FloatGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::FloatGeneration", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 
@@ -24,7 +23,7 @@ N_TEST_PERF_HIGH(FNMersenneTwister_Perf_FloatGeneration, "NEXUS::PerfTests::NCor
 	FNTestUtils::PostPerformanceTest();
 }
 
-N_TEST_PERF_HIGH(FNMersenneTwister_Perf_IntegerRangeGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::IntegerRangeGeneration", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF_HIGH(FNMersenneTwisterPerfTests_IntegerRangeGeneration, "NEXUS::PerfTests::NCore::MersenneTwister::IntegerRangeGeneration", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 
@@ -40,7 +39,7 @@ N_TEST_PERF_HIGH(FNMersenneTwister_Perf_IntegerRangeGeneration, "NEXUS::PerfTest
 	FNTestUtils::PostPerformanceTest();
 }
 
-N_TEST_PERF_HIGH(FNMersenneTwister_Perf_BulkFloatArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkFloatArray", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF_HIGH(FNMersenneTwisterPerfTests_BulkFloatArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkFloatArray", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 
@@ -56,7 +55,7 @@ N_TEST_PERF_HIGH(FNMersenneTwister_Perf_BulkFloatArray, "NEXUS::PerfTests::NCore
 	FNTestUtils::PostPerformanceTest();
 }
 
-N_TEST_PERF_HIGH(FNMersenneTwister_Perf_BulkBoolArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkBoolArray", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_PERF_HIGH(FNMersenneTwisterPerfTests_BulkBoolArray, "NEXUS::PerfTests::NCore::MersenneTwister::BulkBoolArray", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNTestUtils::PrePerformanceTest();
 

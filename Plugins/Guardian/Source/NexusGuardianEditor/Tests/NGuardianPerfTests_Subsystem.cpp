@@ -16,8 +16,6 @@ namespace NEXUS::GuardianTests::Perf
     constexpr float TickBelowMaxDuration   = 0.1f;   // Tick with no thresholds crossed is a cheap read
 }
 
-// ─── SetBaseline Performance ──────────────────────────────────────────────────
-
 N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
     "NEXUS::PerfTests::NGuardian::Subsystem::SetBaseline",
     N_TEST_CONTEXT_EDITOR)
@@ -59,8 +57,6 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
     }, true);
     FNTestUtils::PostPerformanceTest();
 }
-
-// ─── Tick Performance (below all thresholds) ─────────────────────────────────
 
 N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
     "NEXUS::PerfTests::NGuardian::Subsystem::Tick::BelowThresholds",

@@ -9,8 +9,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 namespace NEXUS::GuardianTests
 {
     // RAII guard that saves and restores UNGuardianSettings threshold offsets so
@@ -38,8 +36,6 @@ namespace NEXUS::GuardianTests
         }
     };
 }
-
-// ─── SetBaseline Post-Conditions ─────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_InitialState,
     "NEXUS::UnitTests::NGuardian::Subsystem::SetBaseline::InitialState",
@@ -180,8 +176,6 @@ N_TEST_CRITICAL(FNGuardianTests_Subsystem_SetBaseline_ResetsFlags,
         CHECK_FALSE_MESSAGE("Compare flag must be false after SetBaseline.", Subsystem->HasPassedCompareThreshold())
     }, true);
 }
-
-// ─── Tick Threshold State Machine ────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNGuardianTests_Subsystem_Tick_WarningThreshold,
     "NEXUS::UnitTests::NGuardian::Subsystem::Tick::WarningThreshold",

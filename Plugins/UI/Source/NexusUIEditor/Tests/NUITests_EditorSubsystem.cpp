@@ -5,11 +5,8 @@
 
 #include "NEditorUtilityWidgetSubsystem.h"
 #include "NWidgetState.h"
-#include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 namespace NEXUS::UITests::EditorSubsystem
 {
@@ -26,8 +23,6 @@ namespace NEXUS::UITests::EditorSubsystem
         return S;
     }
 }
-
-// ─── Widget State CRUD ────────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_EditorSubsystem_WidgetState_AddAndHas,
     "NEXUS::UnitTests::NUI::EditorSubsystem::WidgetState::AddAndHas",
@@ -123,8 +118,6 @@ N_TEST_HIGH(FNUITests_EditorSubsystem_WidgetState_Update,
 
     Subsystem->RemoveWidgetState(NEXUS::UITests::EditorSubsystem::WidgetA);
 }
-
-// ─── Tab Identifier CRUD ──────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_EditorSubsystem_TabIdentifier_SetAndGet,
     "NEXUS::UnitTests::NUI::EditorSubsystem::TabIdentifier::SetAndGet",

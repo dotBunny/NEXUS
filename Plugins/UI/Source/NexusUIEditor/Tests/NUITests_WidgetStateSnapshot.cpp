@@ -8,8 +8,6 @@
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 namespace NEXUS::UITests::WidgetStateSnapshot
 {
     static FNWidgetState MakeState(const FString& Key, const FString& Value)
@@ -19,8 +17,6 @@ namespace NEXUS::UITests::WidgetStateSnapshot
         return S;
     }
 }
-
-// ─── Add / Has ────────────────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_WidgetStateSnapshot_AddAndHas,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::AddAndHas",
@@ -56,8 +52,6 @@ N_TEST_CRITICAL(FNUITests_WidgetStateSnapshot_AddExistingUpdates,
     CHECK_MESSAGE("New key should be present after update.", Stored.HasString(TEXT("Updated")))
 }
 
-// ─── Remove ───────────────────────────────────────────────────────────────────
-
 N_TEST_CRITICAL(FNUITests_WidgetStateSnapshot_Remove,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::Remove",
     N_TEST_CONTEXT_ANYWHERE)
@@ -83,8 +77,6 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_RemoveUnknown,
     CHECK_FALSE_MESSAGE("RemoveWidgetState should return false for an unknown identifier.", bResult)
     CHECK_EQUALS("GetCount should remain 0 when removing a non-existent entry.", Snapshot.GetCount(), 0)
 }
-
-// ─── Update ───────────────────────────────────────────────────────────────────
 
 N_TEST_CRITICAL(FNUITests_WidgetStateSnapshot_Update,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::Update",
@@ -120,8 +112,6 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_UpdateUnknown,
     CHECK_EQUALS("GetCount should remain 0 when updating a non-existent entry.", Snapshot.GetCount(), 0)
 }
 
-// ─── GetState ────────────────────────────────────────────────────────────────
-
 N_TEST_HIGH(FNUITests_WidgetStateSnapshot_GetWidgetState,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::GetWidgetState",
     N_TEST_CONTEXT_ANYWHERE)
@@ -138,8 +128,6 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_GetWidgetState,
     CHECK_MESSAGE("Retrieved boolean value should match.", Retrieved.GetBoolean(TEXT("bFlag")))
     CHECK_EQUALS("Retrieved float value should match.", Retrieved.GetFloat(TEXT("Scale")), 2.5f)
 }
-
-// ─── Count / Clear ────────────────────────────────────────────────────────────
 
 N_TEST_HIGH(FNUITests_WidgetStateSnapshot_CountAndClear,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::CountAndClear",
@@ -159,8 +147,6 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_CountAndClear,
     CHECK_EQUALS("GetCount should be 0 after Clear.", Snapshot.GetCount(), 0)
     CHECK_FALSE_MESSAGE("HasWidgetState should return false after Clear.", Snapshot.HasWidgetState(TEXT("A")))
 }
-
-// ─── Array Synchronisation ────────────────────────────────────────────────────
 
 N_TEST_HIGH(FNUITests_WidgetStateSnapshot_ArraySyncAfterRemove,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::ArraySyncAfterRemove",
@@ -186,8 +172,6 @@ N_TEST_HIGH(FNUITests_WidgetStateSnapshot_ArraySyncAfterRemove,
     CHECK_EQUALS("Last entry state should still be intact.",
         Snapshot.GetWidgetState(TEXT("Last")).GetString(TEXT("Idx")), FString(TEXT("2")))
 }
-
-// ─── GetIdentifierIndex ───────────────────────────────────────────────────────
 
 N_TEST_HIGH(FNUITests_WidgetStateSnapshot_GetIdentifierIndex,
     "NEXUS::UnitTests::NUI::WidgetStateSnapshot::GetIdentifierIndex",
