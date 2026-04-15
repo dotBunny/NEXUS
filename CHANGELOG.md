@@ -23,6 +23,7 @@
 ### Fixed
 
 - `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
+- `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
 
 ### Removed
 
