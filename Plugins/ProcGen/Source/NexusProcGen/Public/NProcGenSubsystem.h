@@ -25,7 +25,7 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 public:
 	
 	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|ProcGen")
-	void Generate(const FNProcGenOperationSettings& Settings);
+	void Generate(UPARAM(ref) FNProcGenOperationSettings& Settings);
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;

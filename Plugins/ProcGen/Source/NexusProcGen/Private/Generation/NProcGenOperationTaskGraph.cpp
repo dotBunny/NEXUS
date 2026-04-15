@@ -19,17 +19,14 @@
 FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
 	// Convert our friendly seed to something more appropriate
-	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->FriendlySeed);
-	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->FriendlySeed, BaseSeed);
+	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->GetOperationSettings().Seed);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->GetOperationSettings().Seed, BaseSeed);
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	uint32 SubTaskIndex = 0;
 	
 	// We need something that each task can share context to others with
 	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(
-		Context->GetTargetWorld(), 
-		Context->GetReplicateLevelInstances(), 
-		Context->GetCreateLevelInstances(), 
-		Context->GetLoadLevelInstances());
+		Context->GetTargetWorld(), Context->GetOperationSettings());
 	
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)

@@ -21,7 +21,7 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	Operation->ApplySettings(Settings);
@@ -33,7 +33,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	return Operation;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	Operation->ApplySettings(Settings);
@@ -46,7 +46,7 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	return Operation;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	Operation->ApplySettings(Settings);
@@ -56,21 +56,16 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	return Operation;
 }
 
-void UNProcGenOperation::ApplySettings(const FNProcGenOperationSettings& Settings)
+void UNProcGenOperation::ApplySettings(FNProcGenOperationSettings& Settings)
 {
+	// Validate the Display Name, otherwise assign the operation name to it.
 	if (Settings.DisplayName.IsEmpty())
 	{
-		DisplayName = FText::FromString(GetName());
+		Settings.DisplayName = FText::FromString(GetName());
 	}
-	else
-	{
-		DisplayName = Settings.DisplayName;
-	}
-	
-	// TODO: Add settings to context?
-	
-	Context->SetDisplayName(DisplayName.ToString());
-	Context->ApplySettings(Settings);
+	// Copy so it is detached
+	DisplayName = Settings.DisplayName;
+	Context->CopySettings(Settings);
 }
 
 void UNProcGenOperation::Reset() const

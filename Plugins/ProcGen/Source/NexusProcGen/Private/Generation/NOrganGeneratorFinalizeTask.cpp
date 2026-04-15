@@ -39,15 +39,14 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 			SharedContext->CreatedProxies.Add(Proxy);
 			
 			
-			
 			// What about creating the instance?
-			if  (SharedContext->bCreateLevelInstances)
+			if  (SharedContext->OperationSettings.bCreateLevelInstances)
 			{
 				Proxy->CreateLevelInstance();
 			}
 			
 			// Do we want to load these now?
-			if (SharedContext->bLoadLevelInstances)
+			if (SharedContext->OperationSettings.bLoadLevelInstances)
 			{
 				Proxy->LoadLevelInstance();
 			}

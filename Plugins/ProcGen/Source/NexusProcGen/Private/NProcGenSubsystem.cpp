@@ -5,7 +5,7 @@
 #include "NProcGenOperation.h"
 #include "NProcGenRegistry.h"
 
-void UNProcGenSubsystem::Generate(const FNProcGenOperationSettings& Settings)
+void UNProcGenSubsystem::Generate(FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = UNProcGenOperation::CreateInstance(
 		FNProcGenRegistry::GetOrganComponentsFromLevel(GetWorld()->GetCurrentLevel()), Settings);

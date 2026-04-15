@@ -64,13 +64,14 @@ public:
 		}		
 	}
 	
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FNProcGenOperationSettings& Settings);
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FNProcGenOperationSettings& Settings);
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& Settings);
 	
-	void ApplySettings(const FNProcGenOperationSettings& Settings);
 	
 	virtual void BeginDestroy() override;
+	
+	void ApplySettings(FNProcGenOperationSettings& Settings);
 	
 	void Reset() const;
 

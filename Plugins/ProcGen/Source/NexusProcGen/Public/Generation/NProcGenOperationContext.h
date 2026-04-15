@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NProcGenOperation.h"
+#include "NProcGenOperationSettings.h"
 #include "NProcGenOperationBoneContext.h"
 #include "NProcGenOperationOrganContext.h"
 #include "Organ/NBoneComponent.h"
@@ -26,10 +26,8 @@ public:
 	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 	
-	FString FriendlySeed;
-	
 	bool AddOrganComponent(UNOrganComponent* Component);
-	void ApplySettings(const FNProcGenOperationSettings& Settings);
+	void CopySettings(const FNProcGenOperationSettings& InSettings);
 	bool IsLocked() const { return bIsLocked; }
 	void LockAndPreprocess(UWorld* World);
 	void OutputToLog(bool bBuildTissues = false);
@@ -37,20 +35,10 @@ public:
 	
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
 	UWorld* GetTargetWorld() const { return TargetWorld; }
-	
-	void SetDisplayName(FString InDisplayName) { DisplayName = InDisplayName; }
-	
-	bool GetCreateLevelInstances() const { return bCreateLevelInstances; }
-	bool GetLoadLevelInstances() const { return bLoadLevelInstances; }
-	bool GetReplicateLevelInstances() const { return bReplicateLevelInstances; }
+	const FNProcGenOperationSettings& GetOperationSettings() { return OperationSettings; }
 	
 private:
-	
-	bool bCreateLevelInstances = false;
-	bool bLoadLevelInstances = false;
-	bool bReplicateLevelInstances = true;
-	
+	FNProcGenOperationSettings OperationSettings;
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;
-	FString DisplayName;
 };

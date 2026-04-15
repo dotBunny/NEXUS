@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "NProcGenOperationSettings.h"
 #include "Cell/NCellProxy.h"
 
 class FNProcGenOperationSharedContext
@@ -9,9 +10,7 @@ class FNProcGenOperationSharedContext
 public:
 	UWorld* TargetWorld;
 	TArray<ANCellProxy*> CreatedProxies;
-	bool bCreateLevelInstances = false;
-	bool bLoadLevelInstances = false;
-	bool bReplicateLevelInstances = true;
+	FNProcGenOperationSettings OperationSettings;
 	
-	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld, bool bReplicateInstances = true, bool bCreateInstances = false,  bool bLoadInstances = false);
+	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings);
 };

@@ -3,13 +3,10 @@
 
 #include "Generation/NProcGenOperationSharedContext.h"
 
-FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld, const bool bReplicateInstances, const bool bCreateInstances, const bool bLoadInstances)
+FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings)
 {
 	TargetWorld = OutputWorld;
-	
-	bCreateLevelInstances = bCreateInstances;
-	bLoadLevelInstances = bLoadInstances;
-	bReplicateLevelInstances = bReplicateInstances;
+	OperationSettings = Settings;
 	
 	// TBD
 	

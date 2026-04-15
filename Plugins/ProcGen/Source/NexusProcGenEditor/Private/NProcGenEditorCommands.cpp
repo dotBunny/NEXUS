@@ -372,14 +372,16 @@ bool FNProcGenEditorCommands::CellAddActor_CanShow()
 
 void FNProcGenEditorCommands::OrganGenerateProxies()
 {
+	FNProcGenOperationSettings EditorSettings = FNProcGenOperationSettings::GetDefaultEditorSettings();
 	UNProcGenEditorSubsystem::Get()->StartOperation(
-		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents(), FNProcGenOperationSettings::GetDefaultEditorSettings()));
+		UNProcGenOperation::CreateInstance(FNProcGenEditorUtils::GetSelectedOrganComponents(), EditorSettings));
 }
 
 void FNProcGenEditorCommands::OrganGenerateAllProxies()
 {
+	FNProcGenOperationSettings EditorSettings = FNProcGenOperationSettings::GetDefaultEditorSettings();
 	UNProcGenEditorSubsystem::Get()->StartOperation(
-		UNProcGenOperation::CreateInstance(FNProcGenRegistry::GetOrganComponents(), FNProcGenOperationSettings::GetDefaultEditorSettings()));
+		UNProcGenOperation::CreateInstance(FNProcGenRegistry::GetOrganComponents(), EditorSettings));
 }
 
 void FNProcGenEditorCommands::OrganClearGenerated()

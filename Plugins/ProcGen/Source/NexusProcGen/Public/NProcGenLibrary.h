@@ -29,6 +29,6 @@ public:
 	 *       regardless of their order in the arrays. Each actor in array A must only have exactly one matching
 	 *       actor in array B, and vice versa.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|ProcGen", DisplayName="Get New Friendly Seed")
+	UFUNCTION(BlueprintPure, Category = "NEXUS|ProcGen", DisplayName="Get New Friendly Seed")
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); } 
 };

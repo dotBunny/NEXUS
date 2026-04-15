@@ -18,19 +18,16 @@ void FNProcGenOperationContext::ResetContext()
 	bIsLocked = false;
 }
 
-void FNProcGenOperationContext::ApplySettings(const FNProcGenOperationSettings& Settings)
+void FNProcGenOperationContext::CopySettings(const FNProcGenOperationSettings& InSettings)
 {
-	bCreateLevelInstances = Settings.bCreateLevelInstances;
-	bLoadLevelInstances = Settings.bLoadLevelInstances;
-	bReplicateLevelInstances = Settings.bReplicateLevelInstances;
 	
 	if (IsLocked())
 	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to set the friendly seed on FNOrganGenerationContext when it has already been locked."));
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to copy settings on FNOrganGenerationContext when it has already been locked."));
 	}
 	else
 	{
-		FriendlySeed = Settings.Seed;
+		OperationSettings = InSettings; 
 	}
 }
 
@@ -226,9 +223,9 @@ void FNProcGenOperationContext::OutputToLog(bool bBuildTissues)
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
 	Builder.Append(TEXT("\n[FNOrganContext] "));
-	if (!DisplayName.IsEmpty())
+	if (!OperationSettings.DisplayName.IsEmpty())
 	{
-		Builder.Append(*DisplayName);
+		Builder.Append(*OperationSettings.DisplayName.ToString());
 		Builder.Append(TEXT(" "));
 	}
 	

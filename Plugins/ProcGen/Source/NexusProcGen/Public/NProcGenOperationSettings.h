@@ -11,19 +11,19 @@ struct NEXUSPROCGEN_API FNProcGenOperationSettings
 {
 	GENERATED_BODY()
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	FString Seed;
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	FText DisplayName;
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bReplicateLevelInstances = true;
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bLoadLevelInstances = true;
 	
-	UPROPERTY()
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite)
 	bool bCreateLevelInstances = true;
 
 	static FNProcGenOperationSettings GetDefaultSettings()

@@ -79,7 +79,8 @@ void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& Detai
 
 FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects)
 {
-	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects, FNProcGenOperationSettings::GetDefaultEditorSettings()));
+	FNProcGenOperationSettings EditorSettings = FNProcGenOperationSettings::GetDefaultEditorSettings();
+	UNProcGenEditorSubsystem::Get()->StartOperation(UNProcGenOperation::CreateInstance(Objects, EditorSettings));
 	return FReply::Handled();
 }
 
