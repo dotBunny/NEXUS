@@ -40,23 +40,10 @@ private:
 	FVector PlayerPosition;
 	FRotator PlayerRotation;
 	
+	float CachedBackgroundWidth = 0.f;
+	
 	UPROPERTY()
 	TObjectPtr<UFont> MonospaceFont = nullptr;
 	
-	UPROPERTY()
-	TObjectPtr<UFont> MediumFont = nullptr;
-	
-	UPROPERTY()
-	TObjectPtr<UFont> LargeFont = nullptr;
-
-	const FLinearColor TextColor = FNColor::BlueLight;
-	const FLinearColor TitleColor = FLinearColor::White;
-	const FLinearColor BackgroundColor = FNColor::HalfBlack;
-	const float TextScale = 1.f;
-	const float TitleScale = 1.f;
-	const float ScreenSafeZone = 50.f;
-	const float BackgroundPadding = 20.f;
-	
-	void DrawMonoText(FString const& Text, FLinearColor Color, float ScreenPositionX, float ScreenPositionY, FVector2D& OutColumnCursor);
-	static void NextColumn(float& ColumnSpacing, FVector2D& LineCursor);
+	void DrawMonoText(const FString& Text, const float TextScale, FLinearColor Color, float Indent, FVector2D& OutCursor);
 };

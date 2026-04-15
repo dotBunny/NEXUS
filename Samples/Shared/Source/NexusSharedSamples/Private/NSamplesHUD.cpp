@@ -18,55 +18,53 @@ void ANSamplesHUD::DrawHUD()
 	
 	if (Canvas)
 	{
-		constexpr float BottomBarHeight = 100.f;
-		constexpr float LineSpacing = 2;
+		DrawRect(FNColor::HalfBlack, 0,  0, CachedBackgroundWidth, Canvas->SizeY);
+		FVector2D LineCursor =  FVector2D(CachedBackgroundWidth, 20);
+
+		constexpr FLinearColor TextColor = FNColor::BlueLight;
+		const FLinearColor TitleColor = FLinearColor::White;
 		
-		DrawRect(BackgroundColor, 0,  Canvas->SizeY - BottomBarHeight, Canvas->SizeX, BottomBarHeight);
-		
-		const float TopLine = Canvas->SizeY - BottomBarHeight + 10;
-		float ColumnSpacing  = 10;
-		FVector2D LineCursor;
-		
-		DrawMonoText("Map", TitleColor, ColumnSpacing, TopLine, LineCursor);
+		DrawMonoText("Map", 1.1f, TitleColor, 15, LineCursor);
 		if (bIsLoading)
 		{
-			DrawMonoText(FString::Printf(TEXT("%i: Loading Map"), MapIndex), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+			DrawMonoText(FString::Printf(TEXT("%i: Loading Map"), MapIndex), 1.0f, TextColor, 20, LineCursor);
 		}
 		else
 		{
-			DrawMonoText(FString::Printf(TEXT("%i: %s"), MapIndex, *GetWorld()->GetMapName()), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+			DrawMonoText(FString::Printf(TEXT("%i: %s"), MapIndex, *GetWorld()->GetMapName()), 1.0f, TextColor, 20, LineCursor);
 		}
-		DrawMonoText(TEXT("Change Map (,) / Next Map (.)"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+		DrawMonoText(TEXT("Change Map (,) / Next Map (.)"), 1.0f, TextColor, 20, LineCursor);
 		
-		NextColumn(ColumnSpacing, LineCursor);
+		LineCursor.Y += 20;
 		
-		DrawMonoText("Camera", TitleColor, ColumnSpacing, TopLine, LineCursor);
-		DrawMonoText(CurrentCameraName, TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
-		DrawMonoText(TEXT("Previous Display (Tab,[) / Next Display (])"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
-		DrawMonoText(TEXT("Select Pawn (Backslash)"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+		DrawMonoText("Player", 1.1f,  TitleColor, 15, LineCursor);		
+		DrawMonoText(PlayerPosition.ToString(),1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(PlayerRotation.ToString(),1.0f, TextColor, 20, LineCursor);
 		
-		NextColumn(ColumnSpacing, LineCursor);
+		LineCursor.Y += 20;
 		
-		DrawMonoText("Player", TitleColor, ColumnSpacing, TopLine, LineCursor);		
-		DrawMonoText(PlayerPosition.ToString(), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
-		DrawMonoText(PlayerRotation.ToString(), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+		DrawMonoText("Camera", 1.1f,  TitleColor, 15, LineCursor);
+		DrawMonoText(CurrentCameraName, 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Previous Display (Tab,[) / Next Display (])"), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Select Pawn (Backslash)"), 1.0f, TextColor, 20, LineCursor);
 		
-		NextColumn(ColumnSpacing, LineCursor);
+		LineCursor.Y += 20;
 		
-		DrawMonoText("Screenshot", TitleColor, ColumnSpacing, TopLine, LineCursor);
-		DrawMonoText(FString::Printf(TEXT("Multiplier (x%i): - / ="), ScreenshotMultiplier), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
-		DrawMonoText(TEXT("Capture (F12)"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
-		DrawMonoText(TEXT("Capture Sequence (F10)"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+		DrawMonoText("Screenshot", 1.1f, TitleColor, 15, LineCursor);
+		DrawMonoText(FString::Printf(TEXT("Multiplier (x%i): - / ="), ScreenshotMultiplier), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Capture (F12)"), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Capture Sequence (F10)"), 1.0f, TextColor, 20, LineCursor);
 		
-		NextColumn(ColumnSpacing, LineCursor);
+
+		// Footer
+		LineCursor.Y = Canvas->SizeY - 40;
+		DrawMonoText(TEXT("Toggle (Backspace)"), 1.1f, FLinearColor::Yellow, 20, LineCursor);
 		
-		DrawMonoText("Extras", TitleColor, ColumnSpacing, TopLine, LineCursor);
-		DrawMonoText(TEXT("Toggle HUD (Backspace)"), TextColor, ColumnSpacing, LineCursor.Y + LineSpacing, LineCursor);
+		CachedBackgroundWidth = LineCursor.X;
 	}
 }
 
-void ANSamplesHUD::DrawMonoText(FString const& Text, const FLinearColor Color, const float ScreenPositionX,
-                                const float ScreenPositionY, FVector2D& OutColumnCursor)
+void ANSamplesHUD::DrawMonoText(const FString& Text, const float TextScale, const FLinearColor Color, const float Indent, FVector2D& OutCursor)
 {
 	if (MonospaceFont == nullptr)
 	{
@@ -75,22 +73,9 @@ void ANSamplesHUD::DrawMonoText(FString const& Text, const FLinearColor Color, c
 
 	float OutWidth, OutHeight;
 	GetTextSize(Text, OutWidth, OutHeight, MonospaceFont, TextScale);
-	DrawText(Text, Color, ScreenPositionX, ScreenPositionY, MonospaceFont, TextScale);
-	
-	if (OutWidth > OutColumnCursor.X) { OutColumnCursor.X = OutWidth; }
-	OutColumnCursor.Y = ScreenPositionY+OutHeight;
-}
+	DrawText(Text, Color, Indent, OutCursor.Y, MonospaceFont, TextScale);
 
-void ANSamplesHUD::NextColumn(float& ColumnSpacing, FVector2D& LineCursor)
-{
-	if (LineCursor.X < 300)
-	{
-		ColumnSpacing += 350;	
-	}
-	else
-	{
-		ColumnSpacing += LineCursor.X + 50;	
-	}
-	LineCursor.X = 0;
-	LineCursor.Y = 0;
-}
+	const float WidthWithPadding = OutWidth + 40;
+	if (WidthWithPadding > OutCursor.X) { OutCursor.X = WidthWithPadding; }
+	OutCursor.Y = OutCursor.Y + OutHeight + 2; // Line Spaceing
+};
