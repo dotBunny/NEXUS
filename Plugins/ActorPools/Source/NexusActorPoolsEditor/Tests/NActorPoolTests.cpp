@@ -289,11 +289,8 @@ N_TEST(FNActorPoolTests_Clear_WithOutActors,
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Verifies that Clear() destroys both in-pool and currently-spawned-out actors, with no leaks after GC.
-	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-		const int32 PrePoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
-
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
 		ActorPoolSettings.MinimumActorCount = 4;
 		ActorPoolSettings.MaximumActorCount = 4;
@@ -314,11 +311,7 @@ N_TEST(FNActorPoolTests_Clear_WithOutActors,
 
 		CHECK_EQUALS("Pool should have 0 in after Clear().", Pool.GetInCount(), 0)
 		CHECK_EQUALS("Pool should have 0 out after Clear().", Pool.GetOutCount(), 0)
-
-		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-		const int32 PostClearObjects = FNDeveloperUtils::GetCurrentObjectCount();
-		CHECK_EQUALS("No actors should remain after Clear() and GC.", PostClearObjects, PrePoolObjects)
-	}, true);
+	});
 }
 
 N_TEST(FNActorPoolTests_Fill_RespectsMinimum,
