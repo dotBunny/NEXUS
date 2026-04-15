@@ -12,7 +12,7 @@
 #include "Generation/NProcGenGraphCellNode.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
-ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer)
+ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
@@ -80,22 +80,24 @@ void ANCellProxy::CreateLevelInstance()
 	SpawnInfo.Owner = this; 
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+	
+	// Spawn Actor
 	const FVector SpawnLocation = this->GetActorLocation();
 	const FRotator SpawnRotation = this->GetActorRotation();
-
 	AActor* SpawnedLevelInstanceActor = GetWorld()->SpawnActor(
 		ANCellLevelInstance::StaticClass(), &SpawnLocation, &SpawnRotation, SpawnInfo);
-
+	
+	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
-
+	
+	// Setup actor with our details
 #if WITH_EDITOR
 	LevelInstance->SetWorldAsset(NCell->World);
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
-#else
-	LevelInstance->SetCookedWorldAsset(NCell->World);
 #endif // WITH_EDITOR
+	LevelInstance->SetCookedWorldAsset(NCell->World);
 	
+	// Add data for junction (not synced!!)
 	LevelInstance->JunctionData = &JunctionsData;
 }
 

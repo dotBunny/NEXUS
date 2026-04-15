@@ -13,6 +13,8 @@ class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 {
 	GENERATED_BODY()
 
+	explicit ANCellLevelInstance();
+	
 public:
 	TMap<int32, FNCellJunctionDetails>* JunctionData;
 	
@@ -23,7 +25,7 @@ public:
 	 * @note At author time we use the SetWorldAsset method, but that no-ops in build.
 	 * @param InWorldAsset World asset reference.
 	 */
-	void SetCookedWorldAsset(TSoftObjectPtr<UWorld> InWorldAsset)
+	void SetCookedWorldAsset(const TSoftObjectPtr<UWorld> InWorldAsset)
 	{
 		CookedWorldAsset = InWorldAsset;
 	}

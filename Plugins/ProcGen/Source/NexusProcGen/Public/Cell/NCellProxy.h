@@ -61,6 +61,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 
+	// TODO: if we want to replicate we need to make a FastArraySerializer
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> JunctionsData;
 	
