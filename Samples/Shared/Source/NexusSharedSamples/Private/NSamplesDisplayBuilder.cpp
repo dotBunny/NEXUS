@@ -6,7 +6,7 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
-void FNSamplesDisplayBuilder::CreateDisplayInstances(FNSamplesDisplayComponents* Components,
+void FNSamplesDisplayBuilder::CreateDisplayInstances(UNSamplesDisplayComponents* Components,
 	FTransform& MainPanelTransform, FTransform& FloorPanelTransform, float Depth, float Width, float Height)
 {
 	// Ensure width
@@ -70,7 +70,7 @@ void FNSamplesDisplayBuilder::CreateDisplayInstances(FNSamplesDisplayComponents*
 }
 
 void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& BaseTransform,
-	const FNSamplesDisplayComponents* Components, const float Depth, const float Width, const bool bIgnoreMainPanel)
+	const UNSamplesDisplayComponents* Components, const float Depth, const float Width, const bool bIgnoreMainPanel)
 {
 	const float PrimaryScaleY = (Width - 2) * 0.5f;
 	const float PrimaryScaleZ = (Depth - 2) * 0.5f;
@@ -121,7 +121,7 @@ void FNSamplesDisplayBuilder::CreateScalablePanelInstances(const FTransform& Bas
 			FVector(1.f, PrimaryScaleY, 1.f)), BaseTransform));
 }
 
-void FNSamplesDisplayBuilder::CreateShadowBoxInstances(const FNSamplesDisplayComponents* Components, 
+void FNSamplesDisplayBuilder::CreateShadowBoxInstances(const UNSamplesDisplayComponents* Components, 
 	float ShadowBoxCoverDepthPercentage, float Depth, float Width, float Height)
 {
 	// Ensure the cover is only there when we need it and it will behave appropriately
@@ -160,7 +160,7 @@ void FNSamplesDisplayBuilder::CreateShadowBoxInstances(const FNSamplesDisplayCom
 	Components->ShadowBoxRound->AddInstances(InstanceTransforms, false, false, true);
 }
 
-void FNSamplesDisplayBuilder::CreateTitlePanelInstances(const FNSamplesDisplayComponents* Components,
+void FNSamplesDisplayBuilder::CreateTitlePanelInstances(const UNSamplesDisplayComponents* Components,
 	const float Depth, const float Width)
 {
 	// Ensure width doesn't make it look bad

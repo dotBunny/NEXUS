@@ -14,7 +14,8 @@
 
 ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Components = MakeUnique<FNSamplesLevelActorComponents>();
+	// Create reference storage
+	Components = CreateDefaultSubobject<UNSamplesLevelComponents>(TEXT("ComponentsObject"));
 	
 	Components->SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"), false);
 	Components->SceneRoot->SetMobility(EComponentMobility::Static);
@@ -182,15 +183,6 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 	Components->DemoName->SetVisibility(bShowLevelName);
 	
 	Super::OnConstruction(Transform);
-}
-
-void ANSamplesLevelActor::BeginDestroy()
-{
-	if (Components != nullptr)
-	{
-		Components.Reset();
-	}
-	Super::BeginDestroy();
 }
 
 void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const

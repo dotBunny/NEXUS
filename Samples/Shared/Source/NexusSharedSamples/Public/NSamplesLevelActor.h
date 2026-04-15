@@ -30,7 +30,6 @@ public:
 
 	explicit ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
-	virtual void BeginDestroy() override;
 
 protected:
 
@@ -75,5 +74,6 @@ private:
 	const FVector DemoNameBaseLocation = FVector(-125.f , 0, 10);
 	const FRotator DemoNameBaseRotation = FRotator(90.f, -180.f, 0);
 	
-	TUniquePtr<FNSamplesLevelActorComponents> Components;
+	UPROPERTY()
+	TObjectPtr<UNSamplesLevelComponents> Components;
 };

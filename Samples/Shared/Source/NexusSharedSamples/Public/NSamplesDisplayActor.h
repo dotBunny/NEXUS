@@ -114,8 +114,11 @@ private:
 
 	FTimerHandle TimerHandle;
 	
-	TUniquePtr<FNSamplesDisplayComponents> Parts;
-	TUniquePtr<FNSamplesDisplayMaterials> Materials;
+	UPROPERTY()
+	TObjectPtr<UNSamplesDisplayComponents> Parts;
+	
+	UPROPERTY()
+	TObjectPtr<UNSamplesDisplayMaterials> Materials;
 
 	FTransform MainPanelTransform;
 	FTransform FloorPanelTransform;

@@ -4,14 +4,23 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NSamplesDisplayMaterials.generated.h"
 
-class FNSamplesDisplayMaterials
+UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Samples Display Materials")
+class UNSamplesDisplayMaterials : public UObject
 {
-public:
-	TObjectPtr<UMaterialInstanceDynamic> DisplayMaterial;
-	TObjectPtr<UMaterialInterface> DisplayMaterialInterface;
-	TObjectPtr<UMaterialInstanceDynamic> NoticeMaterial;
-	TObjectPtr<UMaterialInterface> NoticeMaterialInterface;
+	GENERATED_BODY()
 	
+public:
+	
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DisplayMaterial;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> DisplayMaterialInterface;
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> NoticeMaterial;
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> NoticeMaterialInterface;
+	UPROPERTY()
 	TObjectPtr<UTextureLightProfile> SpotlightLightProfile;
 };
