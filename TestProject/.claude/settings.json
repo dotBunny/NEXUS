@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Read",
+      "Edit",
+      "Write",
+      "Bash(D:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
+      "Bash(C:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)"
+    ],
+    "ask": [
+      "Bash(git push *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)"
+    ],
+    "additionalDirectories": ["../Plugins/"]
+  }
+}

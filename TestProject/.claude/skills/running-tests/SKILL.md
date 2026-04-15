@@ -3,11 +3,6 @@ name: running-tests
 description: Describes how to run unit tests, test cases, or performance tests. Invoke this skill whenever running tests for any NEXUS plugin.
 ---
 
-## Build
-
-The project uses precompiled editor binaries found in the `___UEROOT___\Engine\Binaries\Win64` directory. 
-There is no reason to compile the Unreal Engine or the project before executing tests.
-
 # Running Tests
 
 When running tests, follow these guidelines exactly.

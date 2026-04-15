@@ -22,7 +22,7 @@ void FNWeightedIntegerArray::Empty()
 
 void FNWeightedIntegerArray::Remove(const int Value)
 {
-	for (int i = Data.Num(); i >= 0; i--)
+	for (int i = CachedMaxIndex; i >= 0; i--)
 	{
 		if (Data[i] == Value)
 		{
@@ -34,7 +34,7 @@ void FNWeightedIntegerArray::Remove(const int Value)
 
 void FNWeightedIntegerArray::RemoveSome(const int Value,  int Limit)
 {
-	for (int i = Data.Num(); i >= 0; i--)
+	for (int i = CachedMaxIndex; i >= 0; i--)
 	{
 		if (Data[i] == Value)
 		{

@@ -24,6 +24,8 @@
 
 - `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
 - `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
+- Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.
+- Fixed `FNSpherePicker` scenarios where points could be ever-so-slightly out of the `MaximumRadius`.
 
 ### Removed
 

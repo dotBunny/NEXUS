@@ -59,7 +59,7 @@ private:
 	static int32 HexToInteger(const TCHAR Char);
 
 	/**
-	 * Removes all non-valid characters from the provided seed.
+	 * Removes all non-valid characters from the provided seed, including spaces.
 	 * @param InHexSeed - The FString input seed
 	 * @return a cleaned-up version of the provided seed
 	 */

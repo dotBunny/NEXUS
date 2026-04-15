@@ -66,14 +66,14 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 	// Sanitize
 	const FString ParsedSeed = SanitizeHexSeed(InHexSeed);
 	const int SeedLength = ParsedSeed.Len();
-
-	if (SeedLength == 0 || SeedLength == 1)
+	
+	if (SeedLength == 0)
 	{
 		return false;
 	}
 
 	// Check that we have an equal number of sets
-	if (SeedLength % 2 != 0)
+	if (SeedLength != 1 && SeedLength % 2 != 0)
 	{
 		return false;
 	}
@@ -133,6 +133,11 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 	if (Builder.Len() > 16)
 	{
 		Builder = Builder.Mid(0, 16);
+	}
+	
+	if (Builder.Len() == 1)
+	{
+		Builder.InsertAt(0, "0");
 	}
 
 	return Builder;
@@ -241,6 +246,11 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 		{
 			FancySeed.AppendChar(':');
 		}
+	}
+	
+	if (FancySeed.Len() == 0)
+	{
+		return TEXT("0");
 	}
 
 	return FancySeed;

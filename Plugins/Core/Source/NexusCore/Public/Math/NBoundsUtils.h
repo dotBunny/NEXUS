@@ -26,7 +26,7 @@ public:
 		{
 			return false;
 		}
-		return Bounds.GetBox().IsInside(Point);
+		return Bounds.GetBox().IsInsideOrOn(Point);
 	}
 	
 	static FORCEINLINE FVector GetPointInBounds(const FVector& Point, const FBoxSphereBounds& Bounds)
