@@ -16,6 +16,7 @@ class NEXUSSHAREDSAMPLES_API ANSamplesHUD : public AHUD
 {
 	GENERATED_BODY()
 public:
+	
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void DrawHUD() override;
@@ -26,10 +27,15 @@ public:
 	void SetCurrentCameraName(FString Name) { CurrentCameraName = Name; };
 	void SetPlayerPosition(const FVector& UpdatePosition) { PlayerPosition = UpdatePosition; };
 	void SetPlayerRotation(const FRotator& UpdateRotation) { PlayerRotation = UpdateRotation; };
+	void SetMapIndex(const int Index) { MapIndex = Index; };
+	void SetMapChangeFlag() { bIsLoading = true; };
+
 
 private:
 	bool bHideHUD = false;
+	bool bIsLoading = false;
 	int ScreenshotMultiplier = 1;
+	int MapIndex = 0;
 	FString CurrentCameraName;
 	FVector PlayerPosition;
 	FRotator PlayerRotation;
@@ -52,4 +58,5 @@ private:
 	const float BackgroundPadding = 20.f;
 	
 	void DrawMonoText(FString const& Text, FLinearColor Color, float ScreenPositionX, float ScreenPositionY, FVector2D& OutColumnCursor);
+	static void NextColumn(float& ColumnSpacing, FVector2D& LineCursor);
 };

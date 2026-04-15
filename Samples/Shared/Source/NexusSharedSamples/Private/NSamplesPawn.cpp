@@ -97,6 +97,7 @@ void ANSamplesPawn::Tick(float DeltaSeconds)
 	{
 		HUD->SetPlayerPosition(CurrentLocation);
 		HUD->SetPlayerRotation(GetControlRotation());
+		HUD->SetMapIndex(MapIndex);
 	}
 	
 	// Handle screenshot logic 
@@ -198,25 +199,39 @@ void ANSamplesPawn::OnAutoScreenshot()
 void ANSamplesPawn::OnPreviousMap()
 {
 	if (MapList.Num() == 0) return;
+	UWorld* World = GetWorld();
+	if (World->GetAuthGameMode() == nullptr)
+	{
+		return;
+	}
+	
 	MapIndex--;
 	if (MapIndex < 0)
 	{
 		MapIndex = MapList.Num() - 1;
 	}
-	UGameplayStatics::OpenLevel(this, FName(*MapList[MapIndex]));    
-	
+
+	if (HasHUD()) { HUD->SetMapChangeFlag(); }
+	World->ServerTravel( FName(*MapList[MapIndex]).ToString());
 }
 
 void ANSamplesPawn::OnNextMap()
 {
 	if (MapList.Num() == 0) return;
-	
+	UWorld* World = GetWorld();
+	if (World->GetAuthGameMode() == nullptr)
+	{
+		return;
+	}
+
 	MapIndex++;
 	if (MapIndex >= MapList.Num())
 	{
 		MapIndex = 0;
 	}
-	UGameplayStatics::OpenLevel(this, FName(*MapList[MapIndex]));    
+	
+	if (HasHUD()) { HUD->SetMapChangeFlag(); }
+	World->ServerTravel(FName(*MapList[MapIndex]).ToString());
 }
 
 bool ANSamplesPawn::HasHUD()
