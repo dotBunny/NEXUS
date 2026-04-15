@@ -324,4 +324,6 @@ N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
 
 **Brief intent comment**: Start the test body (or lambda body for world tests) with a `// Verifies that …` comment when the test name alone doesn't make the intent obvious. Especially valuable for edge-case and delegate tests.
 
+**Feature divider comments**: Do not add section divider commments like: `// ----- Feature ----------------------------`.
+
 **Reading existing tests before writing**: Always read the existing `Tests/` files for the target plugin before writing new ones to match established patterns and avoid conflicting enum/name values used as test fixtures.
