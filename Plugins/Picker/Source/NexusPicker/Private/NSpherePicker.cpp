@@ -25,7 +25,7 @@
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
-#define N_PICKER_SPHERE_VLOG(HasMinimumDimensions)
+#define N_PICKER_SPHERE_VLOG
 #endif // ENABLE_VISUAL_LOG
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
