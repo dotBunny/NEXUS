@@ -11,6 +11,7 @@ public:
 	TArray<ANCellProxy*> CreatedProxies;
 	bool bCreateLevelInstances = false;
 	bool bLoadLevelInstances = false;
+	bool bReplicateLevelInstances = true;
 	
-	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld, bool bCreateInstances= false, bool bLoadInstances = false);
+	explicit FNProcGenOperationSharedContext(UWorld* OutputWorld, bool bReplicateInstances = true, bool bCreateInstances = false,  bool bLoadInstances = false);
 };

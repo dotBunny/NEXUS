@@ -18,6 +18,22 @@ void FNProcGenOperationContext::ResetContext()
 	bIsLocked = false;
 }
 
+void FNProcGenOperationContext::ApplySettings(const FNProcGenOperationSettings& Settings)
+{
+	bCreateLevelInstances = Settings.bCreateLevelInstances;
+	bLoadLevelInstances = Settings.bLoadLevelInstances;
+	bReplicateLevelInstances = Settings.bReplicateLevelInstances;
+	
+	if (IsLocked())
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to set the friendly seed on FNOrganGenerationContext when it has already been locked."));
+	}
+	else
+	{
+		FriendlySeed = Settings.Seed;
+	}
+}
+
 bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 {
 	if (IsLocked())

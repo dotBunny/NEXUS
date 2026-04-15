@@ -5,16 +5,10 @@
 #include "NProcGenOperation.h"
 #include "NProcGenRegistry.h"
 
-void UNProcGenSubsystem::Generate(FString Seed, FText OperationName, const bool bLoadAll)
+void UNProcGenSubsystem::Generate(const FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = UNProcGenOperation::CreateInstance(
-		FNProcGenRegistry::GetOrganComponentsFromLevel(GetWorld()->GetCurrentLevel()), Seed, OperationName); 
-	
-	if (bLoadAll)
-	{
-		Operation->SetCreateLevelInstances(true);
-		Operation->SetLoadLevelInstances(true);
-	}
+		FNProcGenRegistry::GetOrganComponentsFromLevel(GetWorld()->GetCurrentLevel()), Settings);
 	
 	StartOperation(Operation);
 }

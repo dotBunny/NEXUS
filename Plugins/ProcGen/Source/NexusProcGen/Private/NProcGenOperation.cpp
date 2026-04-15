@@ -21,73 +21,56 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FString& Seed, const FText& DisplayName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	if (DisplayName.IsEmpty())
+	Operation->ApplySettings(Settings);
+	for (const auto Component : Components)
 	{
-		Operation->DisplayName = FText::FromString(Operation->GetName());
+		Operation->AddToContext(Component);
 	}
-	else
-	{
-		Operation->DisplayName = DisplayName;
-	}
-	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
-	Operation->SetSeedOnContext(Seed);
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
-	
-	// Add all organs (as context) to the created generation operation
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
+	return Operation;
+}
+
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FNProcGenOperationSettings& Settings)
+{
+	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
+	Operation->ApplySettings(Settings);
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Objects);
 	for (const auto Organ : OrganComponents)
 	{
 		Operation->AddToContext(Organ);
 	}
-	
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
 	return Operation;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed, const FText& DisplayName)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FNProcGenOperationSettings& Settings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	if (DisplayName.IsEmpty())
-	{
-		Operation->DisplayName = FText::FromString(Operation->GetName());
-	}
-	else
-	{
-		Operation->DisplayName = DisplayName;
-	}
-	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
-	Operation->SetSeedOnContext(Seed);
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
-	
-	for (const auto Component : Components)
-	{
-		Operation->AddToContext(Component);
-	}
-	
-	return Operation;
-}
-
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed, const FText& DisplayName)
-{
-	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	if (DisplayName.IsEmpty())
-	{
-		Operation->DisplayName = FText::FromString(Operation->GetName());
-	}
-	else
-	{
-		Operation->DisplayName = DisplayName;
-	}
-	Operation->Context->SetDisplayName(Operation->DisplayName.ToString());
-	Operation->SetSeedOnContext(Seed);
-	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Seed)
-	
+	Operation->ApplySettings(Settings);
 	Operation->AddToContext(BaseComponent);
 	
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
 	return Operation;
+}
+
+void UNProcGenOperation::ApplySettings(const FNProcGenOperationSettings& Settings)
+{
+	if (Settings.DisplayName.IsEmpty())
+	{
+		DisplayName = FText::FromString(GetName());
+	}
+	else
+	{
+		DisplayName = Settings.DisplayName;
+	}
+	
+	// TODO: Add settings to context?
+	
+	Context->SetDisplayName(DisplayName.ToString());
+	Context->ApplySettings(Settings);
 }
 
 void UNProcGenOperation::Reset() const
@@ -127,8 +110,7 @@ void UNProcGenOperation::BeginDestroy()
 		Graph->ResetGraph();
 		Graph.Reset();
 	}
-
-
+	
 	if (!this->IsTemplate())
 	{
 		FNProcGenRegistry::UnregisterOperation(this);
@@ -155,7 +137,6 @@ void UNProcGenOperation::Tick()
 
 void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenOperationSharedContext> SharedContext)
 {
-
 	if (Owner != nullptr)
 	{
 		Owner->OnOperationFinished(this, SharedContext);
@@ -182,36 +163,24 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 		SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 	}
 	
-	// TODO: We shouldn't have a graph, but maybe we do?
 	if (Graph.IsValid())
 	{
 		Graph->ResetGraph();
 		Graph.Reset();
 	}
 	
-	// TODO: Temp output
+	// Output debug in our editor only
+#if WITH_EDITOR	
 	Context->OutputToLog(true);
+#endif // WITH_EDITOR	
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
 	Graph = MakeUnique<FNProcGenOperationTaskGraph>(this, Context.Get());
 	
-	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
 	Graph->UnlockTasks();
-}
-
-void UNProcGenOperation::SetSeedOnContext(const FString& NewSeed) const
-{
-	if (Context->IsLocked())
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to set the friendly seed on FNOrganGenerationContext when it has already been locked."));
-	}
-	else
-	{
-		Context->FriendlySeed = NewSeed;
-	}
 }
 
 bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const

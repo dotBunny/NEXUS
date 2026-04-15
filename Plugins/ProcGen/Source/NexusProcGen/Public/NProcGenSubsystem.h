@@ -5,6 +5,8 @@
 
 #include "INProcGenOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
+#include "NProcGenOperationSettings.h"
+#include "Math/NSeedGenerator.h"
 #include "NProcGenSubsystem.generated.h"
 
 class UNProcGenOperation;
@@ -12,6 +14,7 @@ class FNProcGenOperationTaskGraph;
 class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;
+
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProcGen Subsystem")
 class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, public INProcGenOperationOwner
@@ -22,7 +25,7 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 public:
 	
 	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|ProcGen")
-	void Generate(FString Seed, FText OperationName, bool bLoadAll = false);
+	void Generate(const FNProcGenOperationSettings& Settings);
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;

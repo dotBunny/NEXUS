@@ -5,10 +5,11 @@
 
 #include "INProcGenOperationOwner.h"
 #include "NProcGenMinimal.h"
-#include "Math/NSeedGenerator.h"
+#include "NProcGenOperationSettings.h"
 #include "Generation/NProcGenOperationContext.h"
 #include "Generation/NProcGenOperationTaskGraph.h"
 #include "NProcGenOperation.generated.h"
+
 
 class FNProcGenOperationSharedContext;
 class UNOrganComponent;
@@ -63,10 +64,11 @@ public:
 		}		
 	}
 	
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName = FText::GetEmpty());
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName = FText::GetEmpty());
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FString& Seed = FNSeedGenerator::RandomFriendlySeed(), const FText& DisplayName= FText::GetEmpty());
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, const FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, const FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, const FNProcGenOperationSettings& Settings);
 	
+	void ApplySettings(const FNProcGenOperationSettings& Settings);
 	
 	virtual void BeginDestroy() override;
 	
@@ -77,8 +79,6 @@ public:
 	 * @param Caller Owning system that will get callbacks for building process
 	 */
 	void StartBuild(INProcGenOperationOwner* Caller);
-	
-	void SetSeedOnContext(const FString& NewSeed) const;
 	bool AddToContext(UNOrganComponent* Component) const;
 	
 	bool IsLocked() const { return Context->IsLocked(); }
@@ -87,18 +87,15 @@ public:
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
 	 */
 	void LockContext(UWorld* World);
+	
 	TArray<TArray<UNOrganComponent*>>& GetGenerationOrder() const
 	{
 		return Context->GenerationOrder;
 	}
 	
-	
 	const FText& GetDisplayName() const { return DisplayName; }
 	const FString& GetDisplayMessage() const { return DisplayMessage; }
 	void SetDisplayMessage(FString NewDisplayMessage);
-	
-	void SetCreateLevelInstances(const bool bCreateInstances) const { Context->SetCreateInstances(bCreateInstances); }
-	void SetLoadLevelInstances(const bool bLoadInstances) const { Context->SetLoadInstances(bLoadInstances); };
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnNProcGenOperationDisplayMessageChanged OnDisplayMessageChanged;

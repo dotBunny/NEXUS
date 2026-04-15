@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NProcGenOperation.h"
 #include "NProcGenOperationBoneContext.h"
 #include "NProcGenOperationOrganContext.h"
 #include "Organ/NBoneComponent.h"
@@ -28,6 +29,7 @@ public:
 	FString FriendlySeed;
 	
 	bool AddOrganComponent(UNOrganComponent* Component);
+	void ApplySettings(const FNProcGenOperationSettings& Settings);
 	bool IsLocked() const { return bIsLocked; }
 	void LockAndPreprocess(UWorld* World);
 	void OutputToLog(bool bBuildTissues = false);
@@ -38,15 +40,15 @@ public:
 	
 	void SetDisplayName(FString InDisplayName) { DisplayName = InDisplayName; }
 	
-	bool GetCreateInstances() const { return bCreateLevelInstances; }
-	void SetCreateInstances(const bool bCreateInstances) { bCreateLevelInstances = bCreateInstances; }
-	bool GetLoadInstances() const { return bLoadLevelInstances; }
-	void SetLoadInstances(const bool bLoadInstances) { bLoadLevelInstances = bLoadInstances; }
+	bool GetCreateLevelInstances() const { return bCreateLevelInstances; }
+	bool GetLoadLevelInstances() const { return bLoadLevelInstances; }
+	bool GetReplicateLevelInstances() const { return bReplicateLevelInstances; }
 	
 private:
 	
 	bool bCreateLevelInstances = false;
 	bool bLoadLevelInstances = false;
+	bool bReplicateLevelInstances = true;
 	
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;
