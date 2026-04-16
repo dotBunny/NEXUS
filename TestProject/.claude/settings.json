@@ -6,7 +6,8 @@
       "Edit",
       "Write",
       "Bash(D:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
-      "Bash(C:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)"
+      "Bash(C:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
+      "Bash(E:/UE/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)"
     ],
     "ask": [
       "Bash(git push *)"
