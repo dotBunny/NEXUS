@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Skills
+
+This project defines skills that provide authoritative, always-current guidance. **Invoke the relevant skill before performing these tasks** — do not rely solely on the summaries in this file:
+
+| Task | Skill to invoke |
+|---|---|
+| Building or compiling the project or any plugin | `build` |
+| Running unit, performance, or functional tests | `running-tests` |
+| Writing new tests | `writing-tests` |
+| Writing any C++ code for a NEXUS plugin | `coding-style` |
+
 ## Repository Layout
 
 This is the **NEXUS Framework** monorepo. The working directory (`TestProject/`) is an Unreal Engine 5.7 project used to test and validate the framework.
