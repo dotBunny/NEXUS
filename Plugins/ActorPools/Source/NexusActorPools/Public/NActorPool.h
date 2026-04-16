@@ -22,6 +22,9 @@ namespace NEXUS::ActorPools::InvokeMethods
  */
 class NEXUSACTORPOOLS_API FNActorPool
 {
+	// Allow to test w/ deep access
+	friend class FNActorPoolTests_Return_StorageLocation;
+	
 public:
 	/**
 	 * Create an ActorPool.
