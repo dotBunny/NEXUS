@@ -2,6 +2,17 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Skills
+
+This project defines skills that provide authoritative, always-current guidance. **Invoke the relevant skill before performing these tasks** — do not rely solely on the summaries in this file:
+
+| Task | Skill to invoke |
+|---|---|
+| Building or compiling the project or any plugin | `build` |
+| Running unit, performance, or functional tests | `running-tests` |
+| Writing new tests | `writing-tests` |
+| Writing any C++ code for a NEXUS plugin | `coding-style` |
+
 ## Repository Layout
 
 This is the **NEXUS Framework** monorepo. The working directory (`TestProject/`) is an Unreal Engine 5.7 project used to test and validate the framework.
@@ -84,4 +95,3 @@ Active plugins loaded by the `TestProject`:
 **Settings**: Plugin-level settings derive from `UDeveloperSettings` and use `N_IMPLEMENT_SETTINGS`, giving a cached `::Get()` singleton. Project-level overrides live in `Config/`.
 
 **Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).
-
