@@ -13,7 +13,12 @@
       "Bash(git push *)"
     ],
     "deny": [
-      "Bash(rm -rf *)"
+      "Bash(rm -rf *)",
+      "Read(Binaries)",
+      "Read(Intermediate)",
+      "Read(DerivedDataCache)",
+      "Read(*.uasset)",
+      "Read(*.umap)"
     ],
     "additionalDirectories": ["../Plugins/"]
   }
