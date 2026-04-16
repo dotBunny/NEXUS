@@ -61,7 +61,9 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
 		this->Details.SocketSize.X * SocketUnitSize.X,this->Details.SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
 
-	const FRotator DisplayRotation = GetComponentRotation() + FRotator(0.0f, 90.0f, 0.0f);
+	// Compose with quaternions; rotator addition only matches composition for yaw-only rotations.
+	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
 	
 	return RotatedCornerPoints;
@@ -70,17 +72,8 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 {
-	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
-	
-	if (RootComponent == nullptr) return;
-
-	const FVector RootLocation = RootComponent->GetOffsetLocation();
-	const FRotator RootRotation = RootComponent->GetOffsetRotator();
-	const FVector Location =  FNVectorUtils::RotateAndOffsetPoint(this->Details.WorldLocation, RootRotation, RootLocation);
-	const FRotator Rotation = Details.WorldRotation.GetNormalized();
-	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	FNProcGenDebugDraw::DrawSocket(PDI, Location, Rotation, Details.SocketSize, Settings->SocketSize, Details.Type, GetColor());
+	FNProcGenDebugDraw::DrawSocket(PDI, GetComponentLocation(), GetComponentRotation(), Details.SocketSize, Settings->SocketSize, Details.Type, GetColor());
 }
 
 void UNCellJunctionComponent::OnRegister()

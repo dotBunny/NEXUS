@@ -255,7 +255,9 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
 		this->SocketSize.X * SocketUnitSize.X,this->SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
 
-	const FRotator DisplayRotation = GetComponentRotation() + FRotator(0.0f, 90.0f, 0.0f);
+	// Compose with quaternions; rotator addition only matches composition for yaw-only rotations.
+	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
 	
 	return RotatedCornerPoints;
@@ -280,6 +282,5 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
 
-	FNProcGenDebugDraw::DrawSocket(PDI,  this->GetComponentLocation(), this->GetComponentRotation().GetNormalized(), 
-		SocketSize, Settings->SocketSize, Type, Color);
+	FNProcGenDebugDraw::DrawSocket(PDI,  GetComponentLocation(), GetComponentRotation(), SocketSize, Settings->SocketSize, Type, Color);
 }

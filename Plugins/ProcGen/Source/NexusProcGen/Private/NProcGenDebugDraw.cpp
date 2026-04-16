@@ -12,13 +12,16 @@
 void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, 
 	const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color)
 {
-	// Create our sideways rotation to align visuals
-	const FRotator DisplayRotation = Rotation + FRotator(0.0f, 90.0f, 0.0f);
+	// Compose: yaw-align the local XZ-plane corners into the YZ-plane (rect normal becomes +X),
+	// then apply the socket rotation. Rotator addition is component-wise and only matches
+	// composition for yaw-only inputs; quaternions compose correctly for pitch and roll too.
+	const FQuat DisplayQuat = FQuat(Rotation) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const FVector FacingRotation = Rotation.Vector();
-	
+
 	const FVector2D Size = FNProcGenUtils::GetWorldSize2D(UnitSize, SocketSize);
 	const float LineLength = SocketSize.X * 0.25f;
-	
+
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, Location);
 	const TArray<FVector2D> UnrotatedSocketPoints = FNProcGenUtils::GetSocketPoints2D(UnitSize, SocketSize);
