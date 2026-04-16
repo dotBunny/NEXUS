@@ -64,9 +64,9 @@ public:
 		}		
 	}
 	
-	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& Settings);
-	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& Settings);
-	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& Settings);
+	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings);
+	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& OperationSettings);
+	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& OperationSettings);
 	
 	
 	virtual void BeginDestroy() override;

@@ -141,6 +141,14 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.Added.RemoveAt(i, EAllowShrinking::No);
 			Diff.AddedCount--;
 		}
+		
+		// UBoxComponent lazily creates a UBodySetup the first time an instance is registered with the physics system. 
+		// That body setup lives in the transient package — not the world — so it survives the world teardown and shows up as a "leak".
+		if (Entry.Name.StartsWith(TEXT("BodySetup")) && Entry.Name.EndsWith(TEXT("BodySetup_0")))
+		{
+			Diff.Added.RemoveAt(i, EAllowShrinking::No);
+			Diff.AddedCount--;
+		}
 	}
 }
 

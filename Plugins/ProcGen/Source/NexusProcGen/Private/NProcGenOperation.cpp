@@ -21,38 +21,38 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 	}
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	Operation->ApplySettings(Settings);
+	Operation->ApplySettings(OperationSettings);
 	for (const auto Component : Components)
 	{
 		Operation->AddToContext(Component);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& OperationSettings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	Operation->ApplySettings(Settings);
+	Operation->ApplySettings(OperationSettings);
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Objects);
 	for (const auto Organ : OrganComponents)
 	{
 		Operation->AddToContext(Organ);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
-UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& Settings)
+UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& OperationSettings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
-	Operation->ApplySettings(Settings);
+	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
 	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *Settings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -65,7 +65,7 @@ void UNProcGenOperation::ApplySettings(FNProcGenOperationSettings& Settings)
 	}
 	// Copy so it is detached
 	DisplayName = Settings.DisplayName;
-	Context->CopySettings(Settings);
+	Context->SetOperationSettings(Settings);
 }
 
 void UNProcGenOperation::Reset() const

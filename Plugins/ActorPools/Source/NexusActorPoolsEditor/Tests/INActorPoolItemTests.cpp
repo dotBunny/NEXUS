@@ -5,7 +5,7 @@
 
 #include "Misc/Timespan.h"
 #include "NActorPool.h"
-#include "NPooledActor.h"
+#include "NTestPooledActor.h"
 #include "Developer/NTestObject.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
@@ -22,10 +22,10 @@ N_TEST(INActorPoolItemTests_Events,
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Create;
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::BroadcastDestroy);
 
-		FNActorPool Pool = FNActorPool(World, ANPooledActor::StaticClass(), ActorPoolSettings);
+		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		ANPooledActor* SpawnedActor = Cast<ANPooledActor>(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
+		ANTestPooledActor* SpawnedActor = Cast<ANTestPooledActor>(Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator));
 
 		const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
 		FNTestObject* TestObjectPtr = TestObject.Get();

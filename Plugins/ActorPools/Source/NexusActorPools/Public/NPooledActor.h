@@ -11,7 +11,7 @@
  * A specialized AActor base-class designed to work seamlessly with a FNActorPool.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor/">ANPooledActor</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Pooled Actor", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
+UCLASS(Abstract, ClassGroup = "NEXUS", DisplayName = "NEXUS | Pooled Actor", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
 class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 {
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActorPoolDelegate);

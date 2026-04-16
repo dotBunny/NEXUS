@@ -36,10 +36,11 @@ void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
-	if (bIgnoreStaticActors && !OtherActor->IsRootComponentMovable()) return;
+	// If theres no root object its not moving so were considering it static
+	if (bIgnoreStaticActors && (!OtherActor->IsRootComponentMovable() || OtherActor->GetRootComponent() == nullptr)) return;
 
 	// Check if in an actor pool, return to the pool
-	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor); 
+	INActorPoolItem* ActorItem = Cast<INActorPoolItem>(OtherActor);
 	if (ActorItem != nullptr)
 	{
 		if (!ActorItem->ReturnToActorPool())

@@ -215,7 +215,7 @@ N_TEST_CRITICAL(UNMySubsystemTests_Category_Case,
 #endif //WITH_TESTS
 ```
 
-Use `WorldTest` (without "Checked") when you need explicit GC control or accept less strict world validation. Pass `true` as the final argument to force world teardown after the lambda.
+Use `WorldTest` (without "Checked") when you need explicit GC control or accept less strict world validation. Pass `true` as the final argument to disable garbage collection during the test.
 
 ## Performance Test Format — Pure Logic (`N_TEST_CONTEXT_ANYWHERE`)
 
@@ -254,7 +254,7 @@ N_TEST_PERF_HIGH(FNMyClassPerfTests_OperationName,
 
 ## Performance Test Format — World-Based (`N_TEST_CONTEXT_EDITOR`)
 
-Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` block above the tests. Use `WorldTest(..., true)` (the `true` forces world teardown). Mark the timed region with a `// TEST` comment. Call `NTestTimer.ManualStop()` inside the timer scope when cleanup follows inside the same scope; omit it when the scope naturally ends after the measured work.
+Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` block above the tests. Use `WorldTest(..., true)` (the `true` disables garbage collection while the test is running). Mark the timed region with a `// TEST` comment. Call `NTestTimer.ManualStop()` inside the timer scope when cleanup follows inside the same scope; omit it when the scope naturally ends after the measured work.
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -311,6 +311,8 @@ N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
 ```
 
 ## Common Patterns
+
+**Debug Actor**: Use `ANDebugActor` instead of `AActor`.
 
 **Multiple tests in one file**: Group related tests in a single file. Each test still gets its own `N_TEST_*` block.
 

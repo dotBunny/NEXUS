@@ -27,5 +27,5 @@ protected:
 	FString Message;
 	
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* SphereMesh;
+	TObjectPtr<UStaticMeshComponent> SphereMesh;
 };

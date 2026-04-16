@@ -19,6 +19,7 @@
 - `ANSamplesPawn` now replicates movement.
 - Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
 - `NActorPool` tests now run in PIE worlds.
+- Forces `ANPooledActor` to be `abstract`.
 
 ### Fixed
 

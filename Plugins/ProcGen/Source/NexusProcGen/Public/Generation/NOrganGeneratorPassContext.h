@@ -7,6 +7,7 @@
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
 
+
 class FNOrganGeneratorPassContext
 {
 public:

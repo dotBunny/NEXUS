@@ -5,7 +5,7 @@
 
 #include "Misc/Timespan.h"
 #include "NActorPool.h"
-#include "NPooledActor.h"
+#include "NTestPooledActor.h"
 #include "Developer/NDebugActor.h"
 #include "Developer/NDeveloperUtils.h"
 #include "Developer/NTestUtils.h"
@@ -104,10 +104,10 @@ N_TEST(FNActorPoolTests_Get_DoesNotTriggerSpawnEvents,
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
 		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 
-		FNActorPool Pool = FNActorPool(World, ANPooledActor::StaticClass(), ActorPoolSettings);
+		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		ANPooledActor* Actor = Cast<ANPooledActor>(Pool.Get());
+		ANTestPooledActor* Actor = Cast<ANTestPooledActor>(Pool.Get());
 		if (Actor == nullptr)
 		{
 			ADD_ERROR("Get() returned nullptr unexpectedly.");

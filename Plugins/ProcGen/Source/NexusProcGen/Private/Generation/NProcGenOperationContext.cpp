@@ -18,7 +18,7 @@ void FNProcGenOperationContext::ResetContext()
 	bIsLocked = false;
 }
 
-void FNProcGenOperationContext::CopySettings(const FNProcGenOperationSettings& InSettings)
+void FNProcGenOperationContext::SetOperationSettings(const FNProcGenOperationSettings& InSettings)
 {
 	
 	if (IsLocked())
@@ -219,7 +219,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	
 }
 
-void FNProcGenOperationContext::OutputToLog(bool bBuildTissues)
+void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
 	Builder.Append(TEXT("\n[FNOrganContext] "));

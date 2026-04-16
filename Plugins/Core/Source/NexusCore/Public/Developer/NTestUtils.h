@@ -30,7 +30,7 @@ public:
 	}
 
 	/**
-	 * Creates a test world, runs test functionality, and tears down the world after, destroying all created actors and  objects associated to it.
+	 * Creates a test world, runs test functionality, and tears down the world after, destroying all created actors and objects associated to it.
 	 */
 	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
@@ -58,7 +58,9 @@ public:
 		if (bDisableGarbageCollection)
 		{
 			FGCScopeGuard Guard;
-			TestFunctionality(World);
+			{
+				TestFunctionality(World);
+			}
 		}
 		else
 		{
@@ -108,6 +110,9 @@ public:
 					ADD_ERROR(FString::Printf(TEXT("Leaked %s"), *Diff.Added[i].ToString()));
 				}
 			}
+			
+			// Always cleanup after the check
+			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		}
 	}
 };

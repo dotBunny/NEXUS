@@ -27,7 +27,7 @@ public:
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 	
 	bool AddOrganComponent(UNOrganComponent* Component);
-	void CopySettings(const FNProcGenOperationSettings& InSettings);
+	void SetOperationSettings(const FNProcGenOperationSettings& InSettings);
 	bool IsLocked() const { return bIsLocked; }
 	void LockAndPreprocess(UWorld* World);
 	void OutputToLog(bool bBuildTissues = false);

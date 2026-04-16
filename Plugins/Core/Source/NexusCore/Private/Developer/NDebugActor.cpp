@@ -7,7 +7,7 @@ ANDebugActor::ANDebugActor()
 {
 	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = SphereMesh;
-
+	
 	// Load the engine's default sphere mesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	if (SphereMeshAsset.Succeeded())
