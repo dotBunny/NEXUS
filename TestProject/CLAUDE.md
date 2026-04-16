@@ -9,7 +9,7 @@ This is the **NEXUS Framework** monorepo. The working directory (`TestProject/`)
 Source code lives in the parent directories:
 ```
 NEXUS/
-├── Plugins/        # Core framework plugins (Runtime + Editor modules, the source of truth))
+├── Plugins/        # Core framework plugins (Runtime + Editor modules, the source of truth)
 ├── Samples/        # Sample content plugins per feature area
 ├── TestProject/    # UE5.7 test project (this repo root for Claude Code)
 │   ├── Source/NEXUS/   # Minimal game module (just module boilerplate)
@@ -85,14 +85,3 @@ Active plugins loaded by the `TestProject`:
 
 **Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).
 
-## Writing Tests
-
-Use the project-specific `writing-tests` skill. Invoke it before writing any test code.
-
-## Running Tests
-
-Use the project-specific `running-tests` skill. Invoke it before running any test.
-
-# Coding Style & Naming Conventions
-
-Use the project-specific `coding-style` skill. Invoke it before writing any code.

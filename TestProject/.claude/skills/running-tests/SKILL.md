@@ -7,6 +7,10 @@ description: Describes how to run unit tests, test cases, or performance tests. 
 
 When running tests, follow these guidelines exactly.
 
+## Prerequisites
+
+The project must be built before running tests. Use the `build` skill to compile `NEXUSEditor` if any source files have changed since the last build.
+
 ```powershell
 # Unit tests
 & "___UEROOT___\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "___PROJECTROOT___\NEXUS.uproject" -unattended -nopause -testexit="Automation Test Queue Empty" -ReportExportPath="Staging\TestResults" -log -ExecCmds="Automation RunTest NEXUS.UnitTests;Quit" -nullrhi

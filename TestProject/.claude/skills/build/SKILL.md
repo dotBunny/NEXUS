@@ -55,7 +55,7 @@ Runs the full BuildCookRun pipeline. `clientconfig` accepts any configuration fr
 Build output is written to the terminal. For a more detailed log, check:
 
 ```
-TestProject/Saved/Logs/NEXUS.log
+Saved/Logs/NEXUS.log
 ```
 
 Look for lines containing `error:` to identify the root cause. Common causes:
