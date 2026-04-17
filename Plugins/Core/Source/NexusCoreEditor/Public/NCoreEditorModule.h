@@ -16,8 +16,8 @@ class FNCoreEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
+
+private:
+	void OnPostEngineInit();
 };

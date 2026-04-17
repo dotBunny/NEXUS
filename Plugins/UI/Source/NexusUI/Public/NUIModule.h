@@ -12,8 +12,10 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNUIModule final : public IModuleInterface
 {
+public:
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
-
 	N_IMPLEMENT_MODULE(FNUIModule, "NexusUI")
+
+private:	
+	void OnPostEngineInit();
 };

@@ -11,5 +11,6 @@
  */
 class FNSharedSamplesTestsModule final : public IModuleInterface
 {
+public:
 	N_IMPLEMENT_MODULE(FNSharedSamplesTestsModule, "NexusSharedSamplesTests")
 };

@@ -12,8 +12,10 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNProcGenModule final : public IModuleInterface
 {
+public:
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNProcGenModule, "NexusProcGen")
+
+private:
+	void OnPostEngineInit();
 };

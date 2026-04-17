@@ -12,16 +12,16 @@
 class FNMultiplayerEditorModule final : public IModuleInterface
 {
 	DECLARE_DELEGATE_RetVal(FString, FCollectParametersDelegate);
+
+public:
+	FCollectParametersDelegate OnCollectParameters;
+	FSimpleMulticastDelegate OnMultiplayerTestStarted;
+	FSimpleMulticastDelegate OnMultiplayerTestEnded;
 	
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
-	void OnPostEngineInit();
-
 	N_IMPLEMENT_MODULE(FNMultiplayerEditorModule, "NexusMultiplayerEditor")
-	
-	FCollectParametersDelegate OnCollectParameters;
 
-	FSimpleMulticastDelegate OnMultiplayerTestStarted;
-	FSimpleMulticastDelegate OnMultiplayerTestEnded;
+private:
+	void OnPostEngineInit();
 };

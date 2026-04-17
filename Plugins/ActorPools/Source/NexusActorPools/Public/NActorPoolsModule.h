@@ -11,8 +11,10 @@
  */
 class FNActorPoolsModule final : public IModuleInterface
 {
+public:	
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNActorPoolsModule, "NexusActorPools")
+
+private:
+	void OnPostEngineInit();
 };

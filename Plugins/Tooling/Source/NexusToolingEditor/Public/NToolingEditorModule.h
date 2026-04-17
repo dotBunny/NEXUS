@@ -10,28 +10,24 @@
 /**
  * NEXUS: Tools Editor Module
  */
-
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNToolingEditorModule final : public IModuleInterface
 {
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
-	void OnPostEngineInit();
-	
-	static void ApplyAppIcon(const FString& IconPath);
-	void ApplyWindowIcon(const FString& IconPath);
-	void ApplyWindowIconPostEditorTick(float Time) const;
-
-public:
+	N_IMPLEMENT_MODULE(FNToolingEditorModule, "NexusToolingEditor")
 	FNEditorInputProcessor* GetInputProcessor() const
 	{
 		return InputProcessor.Get();
 	}
 
-	N_IMPLEMENT_MODULE(FNToolingEditorModule, "NexusToolingEditor")
-	
-private:
+private:	
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
 	FDelegateHandle WindowIconDelegateHandle;
+
+	static void ApplyAppIcon(const FString& IconPath);
+	void ApplyWindowIcon(const FString& IconPath);
+	void ApplyWindowIconPostEditorTick(float Time) const;
+	void OnPostEngineInit();
 };

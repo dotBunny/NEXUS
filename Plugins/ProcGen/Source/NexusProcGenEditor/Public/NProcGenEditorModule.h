@@ -13,14 +13,14 @@ class FNProcGenEditorUndo;
  */
 class FNProcGenEditorModule final : public IModuleInterface
 {
+public:	
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNProcGenEditorModule, "NexusProcGenEditor")
 
 private:
 	TSharedPtr<FNProcGenEditorUndo> UndoHandler;
 	TArray<TOptional<FPlacementModeID>> PlacementActors;
+	
+	void OnPostEngineInit();
 };

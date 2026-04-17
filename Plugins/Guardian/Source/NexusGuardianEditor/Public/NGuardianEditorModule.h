@@ -11,12 +11,13 @@
  */
 class FNGuardianEditorModule final : public IModuleInterface
 {
+public:	
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNGuardianEditorModule, "NexusGuardianEditor")
+	
+private:	
+	void OnPostEngineInit();
 };
 
 

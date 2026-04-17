@@ -11,8 +11,10 @@
  */
 class FNBlockoutModule final : public IModuleInterface
 {
+public:	
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
-	
 	N_IMPLEMENT_MODULE(FNBlockoutModule, "NexusBlockout")
+	
+private:
+	void OnPostEngineInit();
 };

@@ -11,7 +11,7 @@
  */
 class FNCoreModule final : public IModuleInterface
 {
+public:	
 	virtual void StartupModule() override;
-
 	N_IMPLEMENT_MODULE(FNCoreModule, "NexusCore")
 };

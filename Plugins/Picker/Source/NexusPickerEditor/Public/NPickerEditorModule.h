@@ -11,5 +11,6 @@
  */
 class FNPickerEditorModule final : public IModuleInterface
 {	
+public:	
 	N_IMPLEMENT_MODULE(FNPickerEditorModule, "NexusPickerEditor")
 };
