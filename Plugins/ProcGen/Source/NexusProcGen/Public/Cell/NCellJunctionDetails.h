@@ -5,6 +5,7 @@
 
 #include "NArrayUtils.h"
 #include "NCellJunctionBlockerActor.h"
+#include "Types/NRotationConstraints.h"
 #include "NCellJunctionDetails.generated.h"
 
 UENUM()
@@ -47,6 +48,9 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator WorldRotation = FRotator::ZeroRotator;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	FNRotationConstraints RotationConstraints{true,true, true};
 
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
@@ -72,6 +76,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 			
 			&& WorldLocation == Other.WorldLocation
 			&& WorldRotation == Other.WorldRotation
+			&& RotationConstraints.IsEqual(Other.RotationConstraints)
 			
 			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers);
 	}

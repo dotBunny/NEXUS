@@ -8,7 +8,7 @@
 #include "NCellVoxelGenerationSettings.h"
 #include "NColor.h"
 #include "Types/NRawMesh.h"
-#include "Types/NRotationConstraint.h"
+#include "Types/NRotationConstraints.h"
 #include "NCellVoxelData.h"
 
 #include "NCellRootDetails.generated.h"
@@ -31,7 +31,7 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	FVector UnitSize = FVector::ZeroVector;
 
 	UPROPERTY(EditAnywhere)
-	FNRotationConstraint RotationConstraints;
+	FNRotationConstraints RotationConstraints;
 
 	UPROPERTY(EditAnywhere)
 	FNCellHullGenerationSettings HullSettings;

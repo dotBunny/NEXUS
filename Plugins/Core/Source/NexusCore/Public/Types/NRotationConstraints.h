@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "NRotationConstraint.generated.h"
+#include "NRotationConstraints.generated.h"
 
 USTRUCT(BlueprintType)
-struct NEXUSCORE_API FNRotationConstraint
+struct NEXUSCORE_API FNRotationConstraints
 {
 	GENERATED_BODY()
 
@@ -19,14 +19,24 @@ struct NEXUSCORE_API FNRotationConstraint
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, DisplayName = "Allow Yaw (Z)")
 	bool bYaw = true;
 
-	bool CopyTo(FNRotationConstraint& Other) const
+	bool CopyTo(FNRotationConstraints& Other) const
 	{
 		Other = *this;
 		return true;
 	}
 
-	bool IsEqual(const FNRotationConstraint& Other) const
+	bool IsEqual(const FNRotationConstraints& Other) const
 	{
 		return  bRoll == Other.bRoll && bPitch == Other.bPitch && bYaw == Other.bYaw;
+	}
+	
+	bool IsAll() const
+	{
+		return bYaw && bPitch && bRoll;
+	}
+	
+	bool IsNone() const
+	{
+		return !bYaw && !bPitch && !bRoll;
 	}
 };

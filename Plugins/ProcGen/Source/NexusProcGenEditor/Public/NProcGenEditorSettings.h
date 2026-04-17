@@ -10,7 +10,7 @@
 #include "Cell/NCellHullGenerationSettings.h"
 #include "Cell/NCellVoxelGenerationSettings.h"
 #include "Cell/NCellRootComponent.h"
-#include "Types/NRotationConstraint.h"
+#include "Types/NRotationConstraints.h"
 #include "NProcGenEditorSettings.generated.h"
 
 UCLASS(config = NexusEditor, defaultconfig)
@@ -35,7 +35,7 @@ public:
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Rotation Constraints",
 		meta=(ToolTip=""))
-	FNRotationConstraint CellRotationConstraints;
+	FNRotationConstraints CellRotationConstraints;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Bounds Generation",
 		meta=(ToolTip=""))

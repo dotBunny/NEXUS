@@ -199,15 +199,20 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputInd
 		{
 			if (Pair.Value.SocketSize == RequestedSocketSize)
 			{
-				// Check for rotational constraint
+				// Determine the required restraint for this piece to match
 				FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
 				FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
-				FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
 				
-				const FNRotationConstraint& RotationConstraints = CellData->CellDetails.RotationConstraints;
-				if ((!RotationConstraints.bRoll && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll))) ||
-					(!RotationConstraints.bPitch && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch))) ||
-					(!RotationConstraints.bYaw && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw))))
+				// Check the cell and junction level restraints
+				const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
+				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
+				if (((!CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll) && 
+						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll))) ||
+					((!CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch) && 
+						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch))) ||
+					((!CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw) && 
+						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw))))
 				{
 					continue;
 				}
