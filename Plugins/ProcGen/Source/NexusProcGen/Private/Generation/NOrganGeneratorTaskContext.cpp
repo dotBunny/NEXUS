@@ -185,7 +185,7 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedStartCellInd
 	return MoveTemp(WeightedIntegers);
 }
 
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices(const FIntVector2 RequestedSocketSize)
+FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices(const FIntVector2 RequestedSocketSize, const FQuat& SourceQuat)
 {
 	FNWeightedIntegerArray WeightedIntegers;
 	
@@ -199,6 +199,19 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputInd
 		{
 			if (Pair.Value.SocketSize == RequestedSocketSize)
 			{
+				// Check for rotational constraint
+				FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
+				FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+				FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+				
+				const FNRotationConstraint& RotationConstraints = CellData->CellDetails.RotationConstraints;
+				if ((!RotationConstraints.bRoll && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll))) ||
+					(!RotationConstraints.bPitch && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch))) ||
+					(!RotationConstraints.bYaw && !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw))))
+				{
+					continue;
+				}
+
 				WeightedIntegers.Add(i, CellData->Weighting);
 				break;
 			}

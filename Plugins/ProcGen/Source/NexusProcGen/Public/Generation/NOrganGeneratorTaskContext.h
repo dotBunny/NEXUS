@@ -40,7 +40,9 @@ public:
 	// TODO: Need to make this a working set we remove from cause of unique
 	// TODO: These Generate functions of indices should also take into account rotation of the socket, and the rotational limits on the cell settings
 	FNWeightedIntegerArray GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize);
-	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize);
+	
+	
+	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize, const FQuat& SourceQuat);
 
 private:
 	

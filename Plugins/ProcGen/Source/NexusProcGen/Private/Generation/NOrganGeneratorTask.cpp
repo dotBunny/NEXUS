@@ -160,8 +160,11 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 	
 	for (const auto Junction : OpenJunctions)
 	{
+		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
+		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
+		
 		// Build our possible list of cells
-		FNWeightedIntegerArray CellInputWeightedIndices = Context->GenerateWeightedCellInputIndices(Junction.Value->SocketSize);
+		FNWeightedIntegerArray CellInputWeightedIndices = Context->GenerateWeightedCellInputIndices(Junction.Value->SocketSize, SourceJunctionWorldQuat);
 		
 		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
 		if (CellInputWeightedIndices.Count() == 0)
@@ -188,7 +191,7 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
 		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
 		// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
-		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
+		// TODO: It is less than ideal that we do this math here, and in GenerateWeightedCellInputIndices.
 		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
 		FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
