@@ -11,13 +11,9 @@
 #include "Engine/AssetManager.h"
 #include "Generation/NProcGenGraphCellNode.h"
 #include "LevelInstance/LevelInstanceActor.h"
-#include "Net/UnrealNetwork.h"
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	bReplicates = true;
-	bAlwaysRelevant = true;
-	
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 	
@@ -43,12 +39,6 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 #endif // WITH_EDITOR
 	
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
-}
-
-void ANCellProxy::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ANCellProxy, bIsShowing);
 }
 
 ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, const bool bPreLoadLevel)
@@ -129,7 +119,7 @@ void ANCellProxy::LoadLevelInstance()
 	}
 }
 
-void ANCellProxy::UnloadLevelInstance()
+void ANCellProxy::UnloadLevelInstance() const
 {
 	if (LevelInstance != nullptr && LevelInstance->IsLoaded())
 	{
@@ -212,29 +202,14 @@ void ANCellProxy::OnProxyMaterialLoaded()
 	Mesh->MarkRenderStateDirty();
 }
 
-void ANCellProxy::Show()
+void ANCellProxy::Show() const
 {
 	Mesh->SetVisibility(true);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	bIsShowing = true;
 }
 
-void ANCellProxy::Hide()
+void ANCellProxy::Hide() const
 {
 	Mesh->SetVisibility(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	bIsShowing = false;
-}
-
-void ANCellProxy::OnRep_IsShowing()
-{
-	// Replicated hiding based on loading state?
-	if (bIsShowing && !Mesh->GetVisibleFlag())
-	{
-		Show();
-	}
-	else if (!bIsShowing && Mesh->GetVisibleFlag())
-	{
-		Hide();
-	}
 }

@@ -26,13 +26,14 @@ class NEXUSPROCGEN_API ANCellProxy : public AActor
 	GENERATED_BODY()
 
 	explicit ANCellProxy(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
 public:
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	static ANCellProxy* CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, bool bPreLoadLevel = true);
 	
 	void CreateLevelInstance();
 	void LoadLevelInstance();
-	void UnloadLevelInstance();
+	void UnloadLevelInstance() const;
 	void DestroyLevelInstance();
 	
 protected:
@@ -41,6 +42,9 @@ protected:
 	void InitializeFromCellNode(const FNProcGenGraphCellNode* CellNode);
 
 private:
+
+	void Show() const;
+	void Hide() const;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDynamicMeshComponent> Mesh;
@@ -62,13 +66,4 @@ private:
 	TMap<int32, FNCellJunctionDetails> JunctionsData;
 	
 	N_WORLD_ICON_HEADER()
-	
-	UPROPERTY(Replicated, ReplicatedUsing = OnRep_IsShowing)
-	bool bIsShowing = false;
-	
-	void Show();
-	void Hide();
-	
-	UFUNCTION()
-	void OnRep_IsShowing();
 };
