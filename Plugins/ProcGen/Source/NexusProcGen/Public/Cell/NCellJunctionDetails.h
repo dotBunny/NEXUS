@@ -49,8 +49,8 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FRotator WorldRotation = FRotator::ZeroRotator;
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FNRotationConstraints RotationConstraints{true,true, true};
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
+	FNRotationConstraints RotationConstraints{true,true,true};
 
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;

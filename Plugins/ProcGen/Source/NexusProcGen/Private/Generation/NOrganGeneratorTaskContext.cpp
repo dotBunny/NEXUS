@@ -18,8 +18,13 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 	// This is our last chance to read anything off the main-thread
 	//TODO: There is a Seed on the component? What do we do here with it?
 	
+	// Cache out some settings
+	MinimumCellCount = GeneratorContextMap->SourceComponent->MinimumCellCount;
+	MaximumCellCount = GeneratorContextMap->SourceComponent->MaximumCellCount;
+	bUnbounded = GeneratorContextMap->SourceComponent->bUnbounded;
+	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
-	if (GeneratorContextMap->SourceComponent->IsVolumeBased())
+	if (!bUnbounded && GeneratorContextMap->SourceComponent->IsVolumeBased())
 	{
 		const AVolume* Volume = GeneratorContextMap->SourceComponent->GetVolume();
 		
@@ -33,6 +38,8 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		Origin = FVector::ZeroVector;
 	}
+	
+
 	
 	// Build a safe reference to all the data so we can operate off-thread without issue
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = GeneratorContextMap->SourceComponent->GetTissueMap();
@@ -203,10 +210,11 @@ FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputInd
 				FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
 				FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
-				
-				// Check the cell and junction level restraints
 				const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
+				
+				// TODO: Junction Level Restraints arent exactly working as intended
+				// Check the cell and junction level restraints
 				if (((!CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll) && 
 						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll))) ||
 					((!CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch) && 

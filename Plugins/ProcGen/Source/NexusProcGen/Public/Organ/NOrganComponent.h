@@ -35,6 +35,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
 	bool bActivated = true;
 	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component")
+	bool bUnbounded = false;
+	
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
 	int32 MinimumCellCount = -1;
 	

@@ -60,8 +60,17 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 				Data.Indices[i+2]
 			);
 		}
-		MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+		if (bUnbounded)
+		{
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
+			GEngine->ConstraintLimitMaterial->GetRenderProxy(), SDPG_World);
+		}
+		else
+		{
+			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
 			GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World);
+		}
+		
 	}
 }
 

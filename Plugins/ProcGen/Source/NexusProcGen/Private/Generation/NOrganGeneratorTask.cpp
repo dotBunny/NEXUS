@@ -202,12 +202,15 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, RequiredRotation);
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
-		// tighter hull check. If neither fits inside Context->Bounds we discard and move on.
-		const FBox ContextBoundsBox = Context->Bounds.GetBox();
-		if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
+		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
+		if (!Context->bUnbounded)
 		{
-			delete TargetCellNode;
-			continue;
+			const FBox ContextBoundsBox = Context->Bounds.GetBox();
+			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
+			{
+				delete TargetCellNode;
+				continue;
+			}
 		}
 		
 		// Now check the bounds of other existing nodes

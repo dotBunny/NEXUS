@@ -20,6 +20,7 @@ public:
 	
 	int32 MinimumCellCount = -1;
 	int32 MaximumCellCount = -1;
+	bool bUnbounded = false;
 	
 	FBoxSphereBounds Bounds;
 	FVector Origin;
