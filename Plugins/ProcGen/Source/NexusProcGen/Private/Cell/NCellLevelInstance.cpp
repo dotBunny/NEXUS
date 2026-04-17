@@ -3,20 +3,21 @@
 
 #include "Cell/NCellLevelInstance.h"
 
+#include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
 
 ANCellLevelInstance::ANCellLevelInstance()
 {
-	// We could setup a global setting to disable replication, some folks might want both sides generating?
 	bReplicates = true;
-	bAlwaysRelevant = true;
+	if (UNProcGenSettings::Get()->NetworkingMode == ENProcGenNetworkMode::AlwaysRelevantLevelInstances)
+	{
+		bAlwaysRelevant = true;
+	}
 }
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
 {
 	ANCellActor* CellActor = FNProcGenUtils::GetCellActorFromLevel(GetLoadedLevel());
-	
-	CellActor->InitializeFromProxy();
-	
+	CellActor->InitializeFromProxy(this);
 	Super::OnLevelInstanceLoaded();
 }

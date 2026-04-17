@@ -19,6 +19,9 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
+	bool bAlwaysRelevant = false;
+	
+	UPROPERTY(EditAnywhere)
 	FNCellBoundsGenerationSettings BoundsSettings;
 	 
 	UPROPERTY(VisibleAnywhere)

@@ -8,6 +8,7 @@
 #include "NProcGenUtils.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
+#include "Cell/NCellLevelInstance.h"
 
 #if WITH_EDITOR
 void ANCellActor::PostEditMove(bool bFinished)
@@ -73,10 +74,9 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 	return false;
 }
 
-
 #endif // WITH_EDITOR
 
-void ANCellActor::InitializeFromProxy()
+void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 {
 	bSpawnedFromProxy = true;
 	
@@ -84,6 +84,12 @@ void ANCellActor::InitializeFromProxy()
 	for (auto Actor : AuthorTimeActors)
 	{
 		Actor->Destroy(true, false);
+	}
+	
+	// Flag level instance for always relevant based on override
+	if (GetCellRoot()->Details.bAlwaysRelevant)
+	{
+		LevelInstance->bAlwaysRelevant = true;
 	}
 
 	// Callback

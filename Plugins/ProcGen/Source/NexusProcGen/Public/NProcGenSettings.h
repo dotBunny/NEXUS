@@ -8,6 +8,13 @@
 #include "Types/NDirection.h"
 #include "NProcGenSettings.generated.h"
 
+UENUM(BlueprintType)
+enum class ENProcGenNetworkMode : uint8
+{
+	ReplicatedLevelInstances UMETA(DisplayName = "Replicated Level Instances", ToolTip = "Default behaviour replicating level instances based on Replicated Level Instances for all procedures."),
+	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
+	// AlwaysRelevantCellProxies UMETA(DisplayName = "Always Replicate Cell Proxies", ToolTip="Enables replication of NCellProxy actors, making them always relevant, whilst leaving LevelInstances to be replicated based on relevancy."),
+};
 
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame, defaultconfig)
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
@@ -59,6 +66,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Player Size",
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Networking Mode")
+	ENProcGenNetworkMode NetworkingMode = ENProcGenNetworkMode::ReplicatedLevelInstances;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
 	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))

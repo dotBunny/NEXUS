@@ -8,6 +8,7 @@
 #include "NCellActor.generated.h"
 
 class UNCellJunctionComponent;
+class ANCellLevelInstance;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInitializedFromProxy);
 
@@ -70,7 +71,7 @@ public:
 	}
 	bool WasSpawnedFromProxy() const { return bSpawnedFromProxy; }
 
-	void InitializeFromProxy();
+	void InitializeFromProxy(ANCellLevelInstance* LevelInstance);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInitializedFromProxy OnInitializedFromProxy;
