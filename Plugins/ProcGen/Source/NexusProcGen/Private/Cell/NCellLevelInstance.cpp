@@ -9,6 +9,7 @@ ANCellLevelInstance::ANCellLevelInstance()
 {
 	// We could setup a global setting to disable replication, some folks might want both sides generating?
 	bReplicates = true;
+	bAlwaysRelevant = true;
 }
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
