@@ -39,6 +39,8 @@ struct NEXUSPROCGEN_API FNProcGenOperationSettings
 	static FNProcGenOperationSettings GetDefaultEditorSettings()
 	{
 		FNProcGenOperationSettings Settings;
+		Settings.bLoadLevelInstances = false;
+		Settings.bCreateLevelInstances = false;
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		return MoveTemp(Settings);
 	}
