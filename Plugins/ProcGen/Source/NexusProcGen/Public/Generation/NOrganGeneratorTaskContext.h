@@ -11,6 +11,15 @@
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
 
+struct FNCellInputDataFilter
+{
+	bool bRequireStart;
+	bool bRequireEnd;
+	
+	FIntVector2 SocketSize;
+	FQuat SourceQuat;
+};
+
 class FNOrganGeneratorTaskContext
 {
 	friend struct FNOrganGeneratorTask;
@@ -35,15 +44,7 @@ public:
 	bool IsValid() const { return bIsValid; };
 	bool IsSuccessful() const { return bSuccessful; };
 	
-	FNWeightedIntegerArray GenerateWeightedCellInputIndices();
-	
-	// TODO: Can we do something to pre-understand the socket sizes of all the junctions on a specific thing? 
-	// TODO: Need to make this a working set we remove from cause of unique
-	// TODO: These Generate functions of indices should also take into account rotation of the socket, and the rotational limits on the cell settings
-	FNWeightedIntegerArray GenerateWeightedStartCellIndices(FIntVector2 RequestedSocketSize);
-	
-	
-	FNWeightedIntegerArray GenerateWeightedCellInputIndices(FIntVector2 RequestedSocketSize, const FQuat& SourceQuat);
+	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
 private:
 	

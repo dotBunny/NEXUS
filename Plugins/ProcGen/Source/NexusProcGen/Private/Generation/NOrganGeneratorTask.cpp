@@ -70,15 +70,25 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
 	FNBoneInputData& BoneData = Context->BoneInputData[0];
 	
+	FNCellInputDataFilter PreFilter;
+	PreFilter.SocketSize = BoneData.SocketSize;
+	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
+	PreFilter.bRequireStart = true;
+	
+	FNWeightedIntegerArray WeightedStartIndices;
+	TMap<int32, TArray<int32>> ValidJunctions;
+	Context->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
+	
 	// Get a weighted array of indices representing possible starting cells, and reference the cell data
-	FNWeightedIntegerArray WeightedStartIndices = Context->GenerateWeightedStartCellIndices(BoneData.SocketSize);
 	const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
 	FNCellInputData StartCellInputData = Context->CellInputData[StartCellIndex];
 	
 	// Decide which appropriately sized junction is going to be used
-	TArray<int32> StartCellJunctionKeys = StartCellInputData.GetJunctionKeys(BoneData.SocketSize);
-	const int StartCellJunctionKeyIndex = Random.IntegerRange(0, StartCellJunctionKeys.Num()-1); // need to flag this later
-	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(StartCellJunctionKeys[StartCellJunctionKeyIndex]);
+	TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
+	const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+	const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+	
+	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(TargetJunctionKey);
 	
 	// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
 	// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
@@ -103,7 +113,7 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Link our nodes
 	BoneNode->Link(StartNode);
-	StartNode->Link(StartCellJunctionKeys[StartCellJunctionKeyIndex], BoneNode);
+	StartNode->Link(TargetJunctionKey, BoneNode);
 }
 
 TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
@@ -158,13 +168,19 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
 	TArray<FNProcGenGraphNode*> NewNodes;
 	
+	FNWeightedIntegerArray CellInputWeightedIndices;
+	TMap<int32, TArray<int32>> ValidJunctions;
+	
 	for (const auto Junction : OpenJunctions)
 	{
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
 		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
 		
-		// Build our possible list of cells
-		FNWeightedIntegerArray CellInputWeightedIndices = Context->GenerateWeightedCellInputIndices(Junction.Value->SocketSize, SourceJunctionWorldQuat);
+		// Build our possible list of cells (and cache out the valid junctions)
+		FNCellInputDataFilter NodeFilter;
+		NodeFilter.SocketSize = Junction.Value->SocketSize;
+		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
+		Context->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
 		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
 		if (CellInputWeightedIndices.Count() == 0)
@@ -183,9 +199,9 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		FNCellInputData CellInputData = Context->CellInputData[CellInputIndex];
 		
 		// Pick the junction of the cell we are going to use
-		TArray<int32> TargetJunctionKeys = CellInputData.GetJunctionKeys(Junction.Value->SocketSize);
-		const int TargetJunctionKeyIndex = Random.IntegerRange(0, TargetJunctionKeys.Num()-1);
-		const int TargetJunctionKey = TargetJunctionKeys[TargetJunctionKeyIndex];
+		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
+		const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+		const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
 		
 		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the

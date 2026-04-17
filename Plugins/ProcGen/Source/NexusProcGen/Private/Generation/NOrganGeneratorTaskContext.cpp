@@ -4,13 +4,11 @@
 #include "Generation/NOrganGeneratorTaskContext.h"
 
 #include "NProcGenMinimal.h"
-#include "ParticleHelper.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Generation/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
-
 
 FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed)
 	: Seed(TaskSeed)
@@ -127,10 +125,18 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 		return;
 	}
 	
-	// Check that we have something of size to socket
 	// TODO: handle more then 1 bone
-	FNWeightedIntegerArray WeightedStartIndices = GenerateWeightedStartCellIndices(BoneInputData[0].SocketSize);
-	if (WeightedStartIndices.Count() == 0)
+	FNCellInputDataFilter PreFilter;
+	PreFilter.SocketSize = BoneInputData[0].SocketSize;
+	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
+	PreFilter.bRequireStart = true;
+	
+	FNWeightedIntegerArray PreIndices;
+	TMap<int32, TArray<int32>> ValidJunctions;
+	
+	FilterCellInputData(PreFilter, PreIndices, ValidJunctions);
+
+	if (PreIndices.Count() == 0)
 	{
 		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no starting junctions are sized to the provided UNBoneComponent."))
 		return;
@@ -152,83 +158,62 @@ FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices()
+void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
-	FNWeightedIntegerArray WeightedIntegers;
+	CellIndices.Empty();
+	JunctionIndices.Empty();
 	
 	for (int i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNCellInputData* CellData = &CellInputData[i];
-		if (CellData->MaximumCount == 0) continue;
 		
-		WeightedIntegers.Add(i, CellData->Weighting);
-	}
-
-	return MoveTemp(WeightedIntegers);
-}
-
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedStartCellIndices(const FIntVector2 RequestedSocketSize)
-{
-	FNWeightedIntegerArray WeightedIntegers;
-	
-	for (int i = 0; i < CellInputData.Num(); i++)
-	{
-		const FNCellInputData* CellData = &CellInputData[i];
-		if (!CellData->IsValidSelection(RequestedSocketSize)) continue;
-		if (!CellData->bCanBeStartNode) continue;
+		// Early out on some simple filters
+		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
+		if (Filter.bRequireStart && !CellData->bCanBeStartNode) continue;
+		if (Filter.bRequireEnd && !CellData->bCanBeEndNode) continue;
+		
+		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 		
 		// Parse Junctions
+		TArray<int32> GoodJunctions;
 		for (auto Pair : CellData->Junctions)
 		{
-			if (Pair.Value.SocketSize == RequestedSocketSize)
-			{
-				WeightedIntegers.Add(i, CellData->Weighting);
-				break;
-			}
-		}
-	}
-
-	return MoveTemp(WeightedIntegers);
-}
-
-FNWeightedIntegerArray FNOrganGeneratorTaskContext::GenerateWeightedCellInputIndices(const FIntVector2 RequestedSocketSize, const FQuat& SourceQuat)
-{
-	FNWeightedIntegerArray WeightedIntegers;
-	
-	for (int i = 0; i < CellInputData.Num(); i++)
-	{
-		const FNCellInputData* CellData = &CellInputData[i];
-		if (!CellData->IsValidSelection(RequestedSocketSize)) continue;
-		
-		// Parse Junctions
-		for (auto Pair : CellData->Junctions)
-		{
-			if (Pair.Value.SocketSize == RequestedSocketSize)
+			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
 				// Determine the required restraint for this piece to match
 				FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
-				FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+				FQuat RequiredRotationQuat = Filter.SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
-				const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
 				
-				// TODO: Junction Level Restraints arent exactly working as intended
-				// Check the cell and junction level restraints
-				if (((!CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll) && 
-						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll))) ||
-					((!CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch) && 
-						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch))) ||
-					((!CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw) && 
-						!FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw))))
+				const bool bRollRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll));
+				const bool bPitchRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch));
+				const bool bYawRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw));
+				
+				// Impose Rotation Constraints
+				if (((!CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll) && bRollRequired) ||
+					((!CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch) && bPitchRequired) ||
+					((!CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw) || bYawRequired))
 				{
-					continue;
+					//continue;
 				}
-
-				WeightedIntegers.Add(i, CellData->Weighting);
-				break;
+				
+				
+				GoodJunctions.Add(Pair.Key);
+			}
+		}
+		
+		if (GoodJunctions.Num() > 0)
+		{
+			// Add weighting
+			CellIndices.Add(i, CellData->Weighting);
+			
+			// Fill out selectable junctions
+			TArray<int32>& Junctions = JunctionIndices.Add(i, TArray<int32>());
+			for (auto Index : GoodJunctions)
+			{
+				Junctions.Add(Index);
 			}
 		}
 	}
-	return MoveTemp(WeightedIntegers);
 }
