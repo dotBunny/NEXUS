@@ -101,3 +101,6 @@ _site/*
 .github/pages/.jekyll-cache
 .github/pages/.jekyll-metadata
 .github/pages/vendor
+
+# Coverage
+LastCoverageResults.log
