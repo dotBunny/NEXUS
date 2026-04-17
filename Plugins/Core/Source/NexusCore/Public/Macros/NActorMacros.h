@@ -16,7 +16,7 @@
 
 #if WITH_EDITORONLY_DATA
 #define N_WORLD_ICON_CLEANUP(bDestroyingHierarchy) \
-	if (!bDestroyingHierarchy && SpriteComponent != nullptr && !SpriteComponent->IsBeingDestroyed()) \
+	if (!bDestroyingHierarchy && IsValid(SpriteComponent) && !SpriteComponent->IsBeingDestroyed()) \
 	{ \
 		SpriteComponent->DestroyComponent(); \
 		SpriteComponent = nullptr; \
