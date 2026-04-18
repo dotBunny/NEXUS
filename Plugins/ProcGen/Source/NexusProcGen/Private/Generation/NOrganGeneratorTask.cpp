@@ -34,7 +34,9 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 		int NodeCount = Context->CellGraph->GetNodeCount();
 		if (NodeCount == 0) { return; }
 	
-		// TEMP Iteration count generation
+		
+		// TODO: Create better logic for placement / etc.
+		// #START Temp Generation -------------------------------------------------------------------------------------------------------------------
 		TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
 		for (int i = 0; i < 5; i++)
 		{
@@ -58,13 +60,14 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 				ProcessNode(Random, OpenNodes[j]);
 			}
 		}
-
-		if (!Context->ValidateGraph())
+		// #END Temp Generation ---------------------------------------------------------------------------------------------------------------------
+		
+		// At this point we need to validate the graph against the overall requirements from the input settings.
+		// The bSuccessful flag gets set at this point, but if it isn't valid we then need to take our chances and regenerate,
+		// but only if we have not run out of attempts.
+		if (!Context->ValidateGraph() && !Context->ResetForRetry())
 		{
-			if (!Context->ResetForRetry())
-			{
-				break;
-			}
+			break;
 		}
 	}
 }
