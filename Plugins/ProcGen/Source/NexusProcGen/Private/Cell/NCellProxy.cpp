@@ -64,7 +64,7 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCell
 	// Default initialization
 	Proxy->InitializeFromNCell(CellNode->GetTemplate());
 	
-	// TODO: Do something with this
+	// TODO: Do something with this || this only works on server, clients wont get preload, is it even worth it?
 	if (bPreLoadLevel)
 	{
 		

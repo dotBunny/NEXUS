@@ -3,6 +3,7 @@
 
 #include "Generation/NOrganGeneratorTask.h"
 
+#include "NProcGenMinimal.h"
 #include "Generation/NProcGenGraphBoneNode.h"
 #include "Generation/NProcGenGraphCellNode.h"
 #include "Generation/NProcGenGraphNodeFactory.h"
@@ -32,7 +33,9 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	// Find the bone and build our starting cell
 	StartGraph(Random);
 	
+	// Check for start placement
 	int NodeCount = Context->CellGraph->GetNodeCount();
+	if (NodeCount == 0) { return; }
 	
 	// TEMP TEST: Process our starting node
 	// --- We could make a thing that randomly picks an open node? to process next?
@@ -79,6 +82,13 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	TMap<int32, TArray<int32>> ValidJunctions;
 	Context->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
 	
+	// Unable to generate
+	if (WeightedStartIndices.Count() == 0)
+	{
+		UE_LOG(LogNexusProcGen, Error, TEXT("Unable to place starting cell, due to no valid cells available."))
+		return;
+	}
+	
 	// Get a weighted array of indices representing possible starting cells, and reference the cell data
 	const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
 	FNCellInputData StartCellInputData = Context->CellInputData[StartCellIndex];
@@ -93,7 +103,6 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
 	// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
 	// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
-	
 	const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
 	const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
 	
@@ -108,7 +117,6 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Create our first cell node, attaching it to the bone node
 	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
-	// TODO: Retry if the bounds result in outside the organ volume?
 	Context->CellGraph->RegisterNode(StartNode);
 	
 	// Link our nodes
@@ -207,7 +215,6 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
 		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
 		// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
-		// TODO: It is less than ideal that we do this math here, and in GenerateWeightedCellInputIndices.
 		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
 		FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 

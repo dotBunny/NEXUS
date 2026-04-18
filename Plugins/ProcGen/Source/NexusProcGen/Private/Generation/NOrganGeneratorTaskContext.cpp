@@ -31,7 +31,6 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 	}
 	else
 	{
-		// TODO: Handle non-volume based generation
 		// Unbounded
 		Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		Origin = FVector::ZeroVector;
@@ -190,14 +189,15 @@ void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilte
 				const bool bPitchRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch));
 				const bool bYawRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw));
 				
-				// Impose Rotation Constraints
-				if (((!CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll) && bRollRequired) ||
-					((!CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch) && bPitchRequired) ||
-					((!CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw) || bYawRequired))
-				{
-					//continue;
-				}
+				const bool bCheckRoll = !CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll;
+				const bool bCheckPitch = !CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch;
+				const bool bCheckYaw = !CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw;
 				
+				// Impose Rotation Constraints
+				if ((bCheckRoll && bRollRequired) || (bCheckPitch && bPitchRequired) || (bCheckYaw && bYawRequired))
+				{
+					continue;
+				}
 				
 				GoodJunctions.Add(Pair.Key);
 			}
