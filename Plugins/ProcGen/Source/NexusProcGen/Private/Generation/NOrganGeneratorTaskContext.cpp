@@ -10,8 +10,8 @@
 #include "Generation/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed)
-	: Seed(TaskSeed)
+FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
 	//TODO: There is a Seed on the component? What do we do here with it?
@@ -19,7 +19,13 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 	// Cache out some settings
 	MinimumCellCount = GeneratorContextMap->SourceComponent->MinimumCellCount;
 	MaximumCellCount = GeneratorContextMap->SourceComponent->MaximumCellCount;
+	MaximumRetryCount = GeneratorContextMap->MaximumRetryCount;
+	
 	bUnbounded = GeneratorContextMap->SourceComponent->bUnbounded;
+	
+	// Assign our task name for reference
+	Analytics.Init(TaskName, MinimumCellCount, MaximumCellCount, MaximumRetryCount);
+	
 	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
 	if (!bUnbounded && GeneratorContextMap->SourceComponent->IsVolumeBased())
@@ -157,7 +163,32 @@ FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-UE_DISABLE_OPTIMIZATION
+bool FNOrganGeneratorTaskContext::CheckGraph() const
+{
+	// We're going to look over all the nodes
+	int CellNodeCount = 0;
+	for (const auto Pair : CellGraph->GetNodes())
+	{
+		if (Pair->GetNodeType() == ENProcGenGraphNodeType::Cell)
+		{
+			CellNodeCount++;
+		}
+	}
+	
+	// TODO: Not checking MaximumCellCount atm
+	if (MinimumCellCount > 0 && CellNodeCount > MinimumCellCount)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool FNOrganGeneratorTaskContext::ValidateGraph()
+{
+	bSuccessful = CheckGraph();
+	return bSuccessful;
+}
+
 void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
@@ -218,4 +249,30 @@ void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilte
 		}
 	}
 }
-UE_ENABLE_OPTIMIZATION
+
+bool FNOrganGeneratorTaskContext::ResetForRetry()
+{
+	// Reset counters
+	for (int i = 0; i < CellInputData.Num(); i++)
+	{
+		CellInputData[i].UsedCount = 0;
+	}
+		
+	// Update analytics
+	Analytics.Retry();
+		
+	// Clear Graph
+	if (CellGraph != nullptr)
+	{
+		delete CellGraph.Release();
+		CellGraph = nullptr;
+	}
+	
+	RetryCount++;
+	
+	if (RetryCount > MaximumRetryCount)
+	{
+		return false;
+	}
+	return true;
+}

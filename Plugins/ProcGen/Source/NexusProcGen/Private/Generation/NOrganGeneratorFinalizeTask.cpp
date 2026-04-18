@@ -5,7 +5,6 @@
 
 #include "NProcGenOperation.h"
 #include "Cell/NCellProxy.h"
-#include "Developer/NDebugActor.h"
 #include "Generation/NProcGenGraphCellNode.h"
 
 
@@ -22,8 +21,11 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 {
 	if (!Context->IsSuccessful() || Context->CellGraph == nullptr)
 	{
+		UE_LOG(LogNexusProcGen, Error, TEXT("Unable to process FNOrganGeneratorTaskContext as the generation process failed."))
 		return;
 	}
+	
+	Context->Analytics.OutputToLog();
 	
 	const FNProcGenOperationSettings& Settings = SharedContext->OperationSettings;
 	

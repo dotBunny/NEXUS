@@ -22,17 +22,18 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->GetOperationSettings().Seed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->GetOperationSettings().Seed, BaseSeed);
 	FNMersenneTwister BaseGenerator(BaseSeed);
-	uint32 SubTaskIndex = 0;
 	
 	// We need something that each task can share context to others with
 	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationSettings());
 	
+	int PassCount = 0;
 	// Build out the organ generation tasks, with finalizers
 	for (auto Pass : Context->GenerationOrder)
 	{
 		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext, ESPMode::ThreadSafe>();
 		
+		int ComponentCount = 0;
 		FGraphEventArray Tasks;
 		for (const auto Component : Pass)
 		{
@@ -43,7 +44,8 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 			if (!ContextMap->SourceComponent->bActivated) continue;
 			
 			// Create individual organ generator context object, this builds out a list of all available cells to use to fill the space
-			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(ContextMap, BaseGenerator.UnsignedInteger64());
+			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(
+				ContextMap, BaseGenerator.UnsignedInteger64(), FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
@@ -59,10 +61,11 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 				ENamedThreads::GameThread)
 				.ConstructAndHold(Operation, ContextPtr, PassContextPtr, SharedContextPtr);
 			Tasks.Add(OrganFinalizeTask);
+			
+			ComponentCount++;
 		}
+		PassCount++;
 		
-		SubTaskIndex++;
-
 		/// Ensure we track a passes tasksman 
 		PassTasks.Add(Tasks);
 	};//

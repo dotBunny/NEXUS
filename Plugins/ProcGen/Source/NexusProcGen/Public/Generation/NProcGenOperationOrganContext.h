@@ -5,7 +5,6 @@
 
 #include "CoreMinimal.h"
 #include "NProcGenOperationBoneContext.h"
-#include "Organ/NBoneComponent.h"
 
 class UNOrganComponent;
 
@@ -17,4 +16,5 @@ struct NEXUSPROCGEN_API FNProcGenOperationOrganContext
 	TArray<UNOrganComponent*> ContainedComponents;
 	
 	TArray<FNProcGenOperationBoneContext*> ContainedBones;
+	int32 MaximumRetryCount = 3;
 };

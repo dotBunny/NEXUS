@@ -55,12 +55,12 @@ struct NEXUSCORE_API FNRotationConstraints
 		const float Pitch = FRotator::NormalizeAxis(Rotation.Pitch);
 		const float Yaw   = FRotator::NormalizeAxis(Rotation.Yaw);
 
-		return Roll  >= MinimumMatchingRotation.Roll  - KINDA_SMALL_NUMBER &&
-			   Roll  <= MaximumMatchingRotation.Roll  + KINDA_SMALL_NUMBER &&
-			   Pitch >= MinimumMatchingRotation.Pitch - KINDA_SMALL_NUMBER &&
-			   Pitch <= MaximumMatchingRotation.Pitch + KINDA_SMALL_NUMBER &&
-			   Yaw   >= MinimumMatchingRotation.Yaw   - KINDA_SMALL_NUMBER &&
-			   Yaw   <= MaximumMatchingRotation.Yaw   + KINDA_SMALL_NUMBER;
+		return Roll  >= MinimumMatchingRotation.Roll  - UE_KINDA_SMALL_NUMBER &&
+			   Roll  <= MaximumMatchingRotation.Roll  + UE_KINDA_SMALL_NUMBER &&
+			   Pitch >= MinimumMatchingRotation.Pitch - UE_KINDA_SMALL_NUMBER &&
+			   Pitch <= MaximumMatchingRotation.Pitch + UE_KINDA_SMALL_NUMBER &&
+			   Yaw   >= MinimumMatchingRotation.Yaw   - UE_KINDA_SMALL_NUMBER &&
+			   Yaw   <= MaximumMatchingRotation.Yaw   + UE_KINDA_SMALL_NUMBER;
 	}
 	
 	bool IsMatchingRotationAllowed(const float NormalizedRoll, const float NormalizedPitch, const float NormalizedYaw) const
@@ -70,11 +70,11 @@ struct NEXUSCORE_API FNRotationConstraints
 			return true;
 		}
 
-		return NormalizedRoll  >= MinimumMatchingRotation.Roll  - KINDA_SMALL_NUMBER &&
-			   NormalizedRoll  <= MaximumMatchingRotation.Roll  + KINDA_SMALL_NUMBER &&
-			   NormalizedPitch >= MinimumMatchingRotation.Pitch - KINDA_SMALL_NUMBER &&
-			   NormalizedPitch <= MaximumMatchingRotation.Pitch + KINDA_SMALL_NUMBER &&
-			   NormalizedYaw   >= MinimumMatchingRotation.Yaw   - KINDA_SMALL_NUMBER &&
-			   NormalizedYaw   <= MaximumMatchingRotation.Yaw   + KINDA_SMALL_NUMBER;
+		return NormalizedRoll  >= MinimumMatchingRotation.Roll  - UE_KINDA_SMALL_NUMBER &&
+			   NormalizedRoll  <= MaximumMatchingRotation.Roll  + UE_KINDA_SMALL_NUMBER &&
+			   NormalizedPitch >= MinimumMatchingRotation.Pitch - UE_KINDA_SMALL_NUMBER &&
+			   NormalizedPitch <= MaximumMatchingRotation.Pitch + UE_KINDA_SMALL_NUMBER &&
+			   NormalizedYaw   >= MinimumMatchingRotation.Yaw   - UE_KINDA_SMALL_NUMBER &&
+			   NormalizedYaw   <= MaximumMatchingRotation.Yaw   + UE_KINDA_SMALL_NUMBER;
 	}
 };

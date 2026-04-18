@@ -116,6 +116,9 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	TArray<UNOrganComponent*> ProcessedComponents;
 	for (auto& Pair : OrganContext)
 	{
+		// Assign values while we are iterating for defaults
+		Pair.Value.MaximumRetryCount = Settings->OrganGenerationRetryCount;
+		
 		// TODO: DO we want to check if the component is actually in the current level here?
 		PossibleComponents.AddUnique(Pair.Key);
 	}

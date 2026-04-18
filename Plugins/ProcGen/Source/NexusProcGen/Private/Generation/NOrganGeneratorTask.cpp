@@ -16,56 +16,57 @@ FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTask
 {
 }
 
-// TODO: Spin up multiple of these tasks? with different sub-seeds? Maybe we make a seperate task under this
-
-// REMINDERS
-// - Need a quick way to make sure that a spawned cell is INSIDE the volume
-
-
 void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	// The context was not validated during creation, so we cannot process it
 	if (!Context->IsValid()) return;
 	
 	// Create our deterministic random for the task which will get passed byref to sub-methods
-	FNMersenneTwister Random(Context->Seed);
+	FNMersenneTwister Random(Context->GetSeed());
 	
-	// Find the bone and build our starting cell
-	StartGraph(Random);
 	
-	// Check for start placement
-	int NodeCount = Context->CellGraph->GetNodeCount();
-	if (NodeCount == 0) { return; }
-	
-	// TEMP TEST: Process our starting node
-	// --- We could make a thing that randomly picks an open node? to process next?
-	
-	// TEMP Iteration count generation
-	TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
-	for (int i = 0; i < 5; i++)
+	while (!Context->IsSuccessful())
 	{
-		TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
-		NewNodes.Empty();
-		for (int j = 0; j < NextBatch.Num(); j++)
+		// Find the bone and build our starting cell
+		StartGraph(Random);
+	
+		// Check for start placement
+		int NodeCount = Context->CellGraph->GetNodeCount();
+		if (NodeCount == 0) { return; }
+	
+		// TEMP Iteration count generation
+		TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
+		for (int i = 0; i < 5; i++)
 		{
-			TArray<FNProcGenGraphNode*> BatchNodes = ProcessNode(Random, NextBatch[j]);
-			for (int k = 0; k < BatchNodes.Num(); k++)
+			TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
+			NewNodes.Empty();
+			for (int j = 0; j < NextBatch.Num(); j++)
 			{
-				NewNodes.Add(BatchNodes[k]);
+				TArray<FNProcGenGraphNode*> BatchNodes = ProcessNode(Random, NextBatch[j]);
+				for (int k = 0; k < BatchNodes.Num(); k++)
+				{
+					NewNodes.Add(BatchNodes[k]);
+				}
+			}
+		}
+	
+		if (Context->CellGraph->GetNodeCount() < 10)
+		{
+			TArray<FNProcGenGraphNode*> OpenNodes = Context->CellGraph->GetNodesWithOpenJunctions();
+			for (int j = 0; j < OpenNodes.Num(); j++)
+			{
+				ProcessNode(Random, OpenNodes[j]);
+			}
+		}
+
+		if (!Context->ValidateGraph())
+		{
+			if (!Context->ResetForRetry())
+			{
+				break;
 			}
 		}
 	}
-	
-	if (Context->CellGraph->GetNodeCount() < 10)
-	{
-		TArray<FNProcGenGraphNode*> OpenNodes = Context->CellGraph->GetNodesWithOpenJunctions();
-		for (int j = 0; j < OpenNodes.Num(); j++)
-		{
-			ProcessNode(Random, OpenNodes[j]);
-		}
-	}
-
-	Context->bSuccessful = true;
 }
 
 void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
@@ -195,6 +196,7 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 		{
 			// TODO: We will later go back and fill this with something.
 			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->WorldLocation, Junction.Value->WorldRotation);
+			Context->Analytics.AddedNullNode();
 			Context->CellGraph->RegisterNode(NullNode);
 			
 			SourceCellNode->Link(Junction.Key, NullNode);
@@ -231,6 +233,7 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 			const FBox ContextBoundsBox = Context->Bounds.GetBox();
 			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 			{
+				Context->Analytics.DiscardOutOfBounds();
 				delete TargetCellNode;
 				continue;
 			}
@@ -254,11 +257,12 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwis
 			Context->CellGraph->RegisterNode(TargetCellNode);
 			SourceCellNode->Link(Junction.Key, TargetCellNode);
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
+			Context->Analytics.AddedCellNode();
 			NewNodes.Add(TargetCellNode);
 		}
 		else
 		{
-			// TODO: this is gonna throw in SonarQube
+			Context->Analytics.DiscardIntersecting();
 			delete TargetCellNode;
 		}
 	}

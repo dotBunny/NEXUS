@@ -19,8 +19,6 @@ enum class ENOrganGenerationTrigger : uint8
 	GenerateAtRuntime = 2	UMETA(DisplayName="Generate At Runtime", ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
 };
 
-// TODO: Need to get size from parent volume? or whatever its on?
-
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input))
 class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
