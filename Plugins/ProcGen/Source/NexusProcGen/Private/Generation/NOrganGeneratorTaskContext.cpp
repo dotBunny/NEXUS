@@ -175,12 +175,19 @@ bool FNOrganGeneratorTaskContext::CheckGraph() const
 		}
 	}
 	
-	// TODO: Not checking MaximumCellCount atm
-	if (MinimumCellCount > 0 && CellNodeCount > MinimumCellCount)
+	// Enforce check for the minimum amount of cells wanted
+	if (MinimumCellCount > 0 && CellNodeCount < MinimumCellCount)
 	{
-		return true;
+		return false;
 	}
-	return false;
+	
+	// Enforce check for maximum amount of cells wanted
+	if (MaximumCellCount > 0 && CellNodeCount > MaximumCellCount)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 bool FNOrganGeneratorTaskContext::ValidateGraph()
