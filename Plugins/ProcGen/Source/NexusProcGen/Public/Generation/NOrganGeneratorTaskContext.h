@@ -13,11 +13,11 @@ class UNOrganComponent;
 
 struct FNCellInputDataFilter
 {
-	bool bRequireStart;
-	bool bRequireEnd;
+	bool bRequireStart = false;
+	bool bRequireEnd = false;
 	
-	FIntVector2 SocketSize;
-	FQuat SourceQuat;
+	FIntVector2 SocketSize = FIntVector2(0, 0);
+	FQuat SourceQuat = FQuat();
 };
 
 class FNOrganGeneratorTaskContext

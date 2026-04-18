@@ -11,27 +11,15 @@ USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRotationConstraints
 {
 	GENERATED_BODY()
-
-	// TODO: Replace with MinimumMatchingRotation.Roll & MinimumMatchingRotation.Roll based constraint
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Legacy", DisplayName = "Allow Roll (X)")
-	bool bRoll = false;
-
-	// TODO: Replace with MinimumMatchingRotation.Roll & MinimumMatchingRotation.Roll based constraint
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Legacy", DisplayName = "Allow Pitch (Y)")
-	bool bPitch = false;
-	
-	// TODO: Replace with MinimumMatchingRotation.Roll & MinimumMatchingRotation.Roll based constraint
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Legacy", DisplayName = "Allow Yaw (Z)")
-	bool bYaw = true;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Matching", DisplayName = "Enforce Matching?")
 	bool bEnforceMatchingRotation = true;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Matching", DisplayName = "Minimum Matching Rotation")
-	FQuat MinimumMatchingRotation = FQuat(0.f,0.f,0.f, 0.f);
-	
+	FRotator MinimumMatchingRotation = FRotator(0.f, -180.f, 0.f);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Matching", DisplayName = "Maximum Matching Rotation")
-	FQuat MaximumMatchingRotation = FQuat(0.f,0.f,180.f, 0.f);
+	FRotator MaximumMatchingRotation = FRotator(0.f, 180.f, 0.f);
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Difference", DisplayName = "Enforce Difference?")
 	bool bEnforceDifferenceRotation = false;
@@ -50,11 +38,43 @@ struct NEXUSCORE_API FNRotationConstraints
 
 	bool IsEqual(const FNRotationConstraints& Other) const
 	{
-		return  bRoll == Other.bRoll && bPitch == Other.bPitch && bYaw == Other.bYaw &&
-				
-				MinimumMatchingRotation == Other.MinimumMatchingRotation &&
+		return  MinimumMatchingRotation == Other.MinimumMatchingRotation &&
 				MaximumMatchingRotation == Other.MaximumMatchingRotation &&
 				MinimumDifferenceRotation == Other.MinimumDifferenceRotation &&
 				MaximumDifferenceRotation == Other.MaximumDifferenceRotation;
+	}
+
+	bool IsMatchingRotationAllowed(const FRotator& Rotation) const
+	{
+		if (!bEnforceMatchingRotation)
+		{
+			return true;
+		}
+
+		const float Roll  = FRotator::NormalizeAxis(Rotation.Roll);
+		const float Pitch = FRotator::NormalizeAxis(Rotation.Pitch);
+		const float Yaw   = FRotator::NormalizeAxis(Rotation.Yaw);
+
+		return Roll  >= MinimumMatchingRotation.Roll  - KINDA_SMALL_NUMBER &&
+			   Roll  <= MaximumMatchingRotation.Roll  + KINDA_SMALL_NUMBER &&
+			   Pitch >= MinimumMatchingRotation.Pitch - KINDA_SMALL_NUMBER &&
+			   Pitch <= MaximumMatchingRotation.Pitch + KINDA_SMALL_NUMBER &&
+			   Yaw   >= MinimumMatchingRotation.Yaw   - KINDA_SMALL_NUMBER &&
+			   Yaw   <= MaximumMatchingRotation.Yaw   + KINDA_SMALL_NUMBER;
+	}
+	
+	bool IsMatchingRotationAllowed(const float NormalizedRoll, const float NormalizedPitch, const float NormalizedYaw) const
+	{
+		if (!bEnforceMatchingRotation)
+		{
+			return true;
+		}
+
+		return NormalizedRoll  >= MinimumMatchingRotation.Roll  - KINDA_SMALL_NUMBER &&
+			   NormalizedRoll  <= MaximumMatchingRotation.Roll  + KINDA_SMALL_NUMBER &&
+			   NormalizedPitch >= MinimumMatchingRotation.Pitch - KINDA_SMALL_NUMBER &&
+			   NormalizedPitch <= MaximumMatchingRotation.Pitch + KINDA_SMALL_NUMBER &&
+			   NormalizedYaw   >= MinimumMatchingRotation.Yaw   - KINDA_SMALL_NUMBER &&
+			   NormalizedYaw   <= MaximumMatchingRotation.Yaw   + KINDA_SMALL_NUMBER;
 	}
 };

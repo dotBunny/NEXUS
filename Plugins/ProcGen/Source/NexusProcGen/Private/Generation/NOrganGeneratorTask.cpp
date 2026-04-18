@@ -77,7 +77,7 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	PreFilter.SocketSize = BoneData.SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
 	PreFilter.bRequireStart = true;
-	
+
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
 	Context->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);

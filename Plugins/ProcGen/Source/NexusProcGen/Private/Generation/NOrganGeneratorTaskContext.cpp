@@ -157,6 +157,7 @@ FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
+UE_DISABLE_OPTIMIZATION
 void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
@@ -179,26 +180,26 @@ void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilte
 		{
 			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
-				// Determine the required restraint for this piece to match
-				FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
-				FQuat RequiredRotationQuat = Filter.SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+				// Determine the rotation this junction would have to take on to match Filter.SourceQuat. Same math used in
+				// ProcessCellNode when actually placing the cell: flip 180 around Up to oppose the source's facing direction,
+				// then undo the junction's local rotation so only the delta we need to apply to the cell remains.
+				const FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
+				const FQuat RequiredRotationQuat = Filter.SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
 				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
 				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
 				
-				const bool bRollRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Roll));
-				const bool bPitchRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Pitch));
-				const bool bYawRequired = !FMath::IsNearlyZero(FRotator::NormalizeAxis(RequiredRotation.Yaw));
-				
-				const bool bCheckRoll = !CellRotationConstraints.bRoll || !JunctionRotationConstraints.bRoll;
-				const bool bCheckPitch = !CellRotationConstraints.bPitch || !JunctionRotationConstraints.bPitch;
-				const bool bCheckYaw = !CellRotationConstraints.bYaw || !JunctionRotationConstraints.bYaw;
-				
-				// Impose Rotation Constraints
-				if ((bCheckRoll && bRollRequired) || (bCheckPitch && bPitchRequired) || (bCheckYaw && bYawRequired))
+				const float RequiredRoll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
+				const float RequiredPitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
+				const float RequiredYaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
+
+				// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
+				// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
+				if (!CellRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw) ||
+					!JunctionRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw))
 				{
 					continue;
 				}
-				
+
 				GoodJunctions.Add(Pair.Key);
 			}
 		}
@@ -217,3 +218,4 @@ void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilte
 		}
 	}
 }
+UE_ENABLE_OPTIMIZATION
