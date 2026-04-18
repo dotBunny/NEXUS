@@ -89,16 +89,20 @@ void UNCellJunctionComponent::OnRegister()
 	ANCellActor* Actor = FNProcGenUtils::GetCellActorFromLevel(Level);
 
 #if WITH_EDITOR
-	
-	const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
-	if (RootComponent == nullptr)
+	// Delay check for root component by a frame, and then will remove the frame after that if not found
+	Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
 	{
-		UE_LOG(LogNexusProcGen, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update."), *Level->GetName())
-		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+		const ULevel* Level = GetComponentLevel();
+		const UNCellRootComponent* RootComponent = FNProcGenRegistry::GetCellRootComponentFromLevel(Level);
+		if (RootComponent == nullptr)
 		{
-			this->DestroyComponent();
-		}));
-	}
+			UE_LOG(LogNexusProcGen, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update."), *Level->GetName())
+			Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+			{
+				this->DestroyComponent();
+			}));
+		}
+	}));
 	
 	if (Actor != nullptr && !Actor->WasSpawnedFromProxy())
 	{
