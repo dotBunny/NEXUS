@@ -4,7 +4,8 @@
 #include "Generation/Graph/NProcGenGraph.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 
-FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr) : RootNode(RootNodePtr)
+FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr, const FVector& Origin, const FBoxSphereBounds& Bounds, const bool bUnbounded)
+: bUnbounded(bUnbounded), Bounds(Bounds), Origin(Origin), RootNode(RootNodePtr)
 {
 	Nodes.Add(RootNodePtr);
 }

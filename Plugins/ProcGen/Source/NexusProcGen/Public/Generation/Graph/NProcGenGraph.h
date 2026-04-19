@@ -8,7 +8,7 @@
 class NEXUSPROCGEN_API FNProcGenGraph
 {
 public:
-	explicit FNProcGenGraph(FNProcGenGraphNode* RootNodePtr);
+	explicit FNProcGenGraph(FNProcGenGraphNode* RootNodePtr, const FVector& Origin, const FBoxSphereBounds& Bounds, bool bUnbounded = false);
 	~FNProcGenGraph();
 
 	FNProcGenGraphNode* GetLastNode() { return Nodes.Last(); }
@@ -24,7 +24,13 @@ public:
 		return Nodes.Num();
 	}
 	
+	bool IsUnbounded() const { return bUnbounded; }
+	
 private:
+	bool bUnbounded = false;
+	FBoxSphereBounds Bounds;
+	FVector Origin;
+	
 	uint32 Ticket = 0;
 	FNProcGenGraphNode* RootNode = nullptr;
 	TArray<FNProcGenGraphNode*> Nodes;

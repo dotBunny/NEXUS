@@ -117,7 +117,10 @@ void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Create our bone node and build a graph around it.
 	FNProcGenGraphBoneNode* BoneNode = FNProcGenGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
-	Context->CellGraph = MakeUnique<FNProcGenGraph>(BoneNode);
+	
+	// Create our graph
+	Context->CellGraph = MakeUnique<FNProcGenGraph>(
+		BoneNode, Context->Origin, Context->Bounds, Context->bUnbounded);
 	
 	// Create our first cell node, attaching it to the bone node
 	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
