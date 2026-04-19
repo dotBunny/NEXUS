@@ -28,14 +28,11 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationSettings());
 	
-	// ----------------------------------------------------------------------------------------------------------------------------------------------
 	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
-	// ----------------------------------------------------------------------------------------------------------------------------------------------
 	int PassCount = 0;
 	FGraphEventRef LastPassTask = nullptr;
 	
-	// Build out the organ generation tasks, with finalizers
-	
+	// Itterate over the different bespoke passes that can occur and create dependency-chained tasks
 	for (auto Pass : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
