@@ -15,6 +15,11 @@ void FNProcGenOperationContext::ResetContext()
 {
 	OrganContext.Empty();
 	BoneContext.Empty();
+	
+	ComponentBoneMap.Empty();
+	GenerationOrder.Empty();
+	InputComponents.Empty();
+	
 	bIsLocked = false;
 }
 

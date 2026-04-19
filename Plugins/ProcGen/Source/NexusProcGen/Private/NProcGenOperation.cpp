@@ -132,6 +132,8 @@ void UNProcGenOperation::Tick()
 
 void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext)
 {
+	bIsRunning = false;
+	
 	if (Owner != nullptr)
 	{
 		Owner->OnOperationFinished(this, TaskGraphContext);
@@ -148,6 +150,9 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext>
 
 void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 {
+	// Don't double run
+	if (bIsRunning) return;
+	
 	// Cache our caller
 	Owner = Caller;
 	
@@ -175,7 +180,10 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
+	
+	bIsRunning = true;
 	TaskGraph->UnlockTasks();
+	
 }
 
 bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const

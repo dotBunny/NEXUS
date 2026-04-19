@@ -83,6 +83,7 @@ public:
 	bool AddToContext(UNOrganComponent* Component) const;
 	
 	bool IsLocked() const { return Context->IsLocked(); }
+	bool IsRunning() const { return bIsRunning; }
 	
 	/**
 	 * Lock the context added to the generator and figure out all the generation dependencies and order.
@@ -117,6 +118,7 @@ private:
 	TUniquePtr<FNProcGenTaskGraph> TaskGraph;
 	TUniquePtr<FNProcGenOperationContext> Context;
 	
+	bool bIsRunning;
 	bool bIsContextLocked;
 	FText DisplayName;
 	FString DisplayMessage;

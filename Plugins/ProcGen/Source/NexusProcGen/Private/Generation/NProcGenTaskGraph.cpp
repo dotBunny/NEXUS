@@ -110,6 +110,14 @@ void FNProcGenTaskGraph::WaitForTasks()
 
 void FNProcGenTaskGraph::ResetGraph()
 {
+	// Remove all references
+	AllTasks.Empty();
+	CollectionTasks.Empty();
+	FinalizerTasks.Empty();
+	GraphBuilderTasks.Empty();
+	FinalizeTask = nullptr;
+	
+	// Reset flag
 	bTasksUnlocked = false;
 }
 
