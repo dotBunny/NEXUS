@@ -97,6 +97,12 @@ void ANCellProxy::CreateLevelInstance()
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
 	
+	// Apply relevancy flag to created actor
+	if (bAlwaysRelevant)
+	{
+		LevelInstance->bAlwaysRelevant = true;
+	}
+	
 	// Setup actor with our details
 #if WITH_EDITOR
 	LevelInstance->SetWorldAsset(NCell->World);
@@ -105,6 +111,7 @@ void ANCellProxy::CreateLevelInstance()
 	LevelInstance->SetCookedWorldAsset(NCell->World);
 	
 	// Add data for junction (not synced!!)
+
 	LevelInstance->JunctionData = &JunctionsData;
 }
 

@@ -31,11 +31,12 @@ public:
 		return WorldBounds.Intersect(Other->WorldBounds);
 	}
 	
+	bool SearchForMatchingCellInputData(const FNCellInputData* InputData, int32 MaxDepth) const;
+	
 	bool IsBoundsInside(const FBox& Bounds) const
 	{
 		return Bounds.IsInside(WorldBounds);
 	}
-	bool CanConnectToSelf() const { return bCanConnectToSelf; }
 	
 	bool IsHullInside(const FBox& Bounds) const;
 	
@@ -48,6 +49,10 @@ public:
 	// Do not access after graph generation, maybe change comparison to template? (TObjectPtr<UNCell>)
 	FNCellInputData* GetInputDataPtr() const { return InputDataPtr; }
 
+	void CleanupBuilderReferences()
+	{
+		InputDataPtr = nullptr;
+	}
 protected:
 	FNRawMesh& GetHull() { return Hull; }
 	
@@ -55,10 +60,11 @@ private:
 	
 	FNCellInputData* InputDataPtr;
 	
+	
+	bool bAlwaysRelevant;
 	TArray<int32> FreeJunctionKeys;
 	TMap<int32, FNProcGenGraphNode*> Links;
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
-	bool bCanConnectToSelf = false;
 	
 	FBox WorldBounds;
 	FNRawMesh Hull;

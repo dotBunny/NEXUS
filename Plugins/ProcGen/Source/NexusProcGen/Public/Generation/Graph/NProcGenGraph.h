@@ -26,6 +26,8 @@ public:
 	
 	bool IsUnbounded() const { return bUnbounded; }
 	
+	void CleanupBuilderReferences();
+	
 private:
 	bool bUnbounded = false;
 	FBoxSphereBounds Bounds;

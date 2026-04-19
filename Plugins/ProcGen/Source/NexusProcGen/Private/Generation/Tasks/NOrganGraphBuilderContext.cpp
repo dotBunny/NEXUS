@@ -89,6 +89,8 @@ FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNProcGenOperationO
 		CellDetails.bCanBeStartNode = Cell.Value.bCanBeStartNode;
 		CellDetails.bCanBeEndNode = Cell.Value.bCanBeEndNode;
 		CellDetails.Weighting = Cell.Value.Weighting;
+		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
+		CellDetails.bAlwaysRelevant = Cell.Value.bAlwaysRelevant;
 		
 		// We won't touch this till later
 		CellDetails.Template = Cell.Key;
@@ -200,14 +202,18 @@ void FNOrganGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter
 	{
 		const FNCellInputData* CellData = &CellInputData[i];
 		
-		
 		// Early out on some simple filters
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
 		if (Filter.bRequireStart && !CellData->bCanBeStartNode) continue;
 		if (Filter.bRequireEnd && !CellData->bCanBeEndNode) continue;
 		
-		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellInputData == CellData) continue;
-		
+		// Check minimum distance in current graph for reusing the cell piece
+		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&
+			Filter.SourceCellInputData->MinimumNodeDistance >= 1 &&
+			Filter.SourceCellNode->SearchForMatchingCellInputData(CellData, Filter.SourceCellInputData->MinimumNodeDistance - 1))
+		{
+			continue;
+		}
 		
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 		

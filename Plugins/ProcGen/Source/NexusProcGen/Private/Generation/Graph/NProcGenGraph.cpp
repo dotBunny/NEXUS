@@ -47,4 +47,16 @@ TArray<FNProcGenGraphNode*> FNProcGenGraph::GetNodesWithOpenJunctions()
 	return MoveTemp(ReturnNodes);
 }
 
+void FNProcGenGraph::CleanupBuilderReferences()
+{
+	for (FNProcGenGraphNode* Node : Nodes)
+	{
+		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
+		{
+			FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+			CellNode->CleanupBuilderReferences();
+		}
+	}
+}
+
 

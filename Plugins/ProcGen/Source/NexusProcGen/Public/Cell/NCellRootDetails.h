@@ -19,12 +19,6 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere)
-	bool bAlwaysRelevant = false;
-	
-	UPROPERTY(EditAnywhere)
-	bool bAllowSelfConnection = false;
-	
-	UPROPERTY(EditAnywhere)
 	FNCellBoundsGenerationSettings BoundsSettings;
 	 
 	UPROPERTY(VisibleAnywhere)
@@ -62,9 +56,7 @@ struct NEXUSPROCGEN_API FNCellRootDetails
 
 	bool IsEqual(const FNCellRootDetails& Other) const
 	{
-		return  bAlwaysRelevant == Other.bAlwaysRelevant &&
-				bAllowSelfConnection == Other.bAllowSelfConnection &&
-				ProxyColor == Other.ProxyColor &&
+		return  ProxyColor == Other.ProxyColor &&
 				Bounds == Other.Bounds &&
 				BoundsSettings.Equals(Other.BoundsSettings) &&
 				UnitBounds == Other.UnitBounds &&

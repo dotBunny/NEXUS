@@ -16,6 +16,11 @@
  */
 struct NEXUSPROCGEN_API FNCellInputData
 {
+	/**
+	 * Whether the NCellLevelInstance should be spawned always relevant for networking purposes.
+	 */
+	bool bAlwaysRelevant = false;
+	
 	/** 
 	 * Whether this cell can be used as a starting node in the generated FNProcGenGraph. 
 	 */
@@ -37,6 +42,12 @@ struct NEXUSPROCGEN_API FNCellInputData
 	 * @note A value of -1 indicates no maximum constraint.
 	 */
 	int MaximumCount = -1;
+
+	/**
+	 * The minimum number of cell links away this cell must be to be used again.
+	 * @note A value of 0 indicates no constraint.
+	 */
+	int MinimumNodeDistance = 1;
 
 	/** 
 	 * Relative weight for random selection during generation.

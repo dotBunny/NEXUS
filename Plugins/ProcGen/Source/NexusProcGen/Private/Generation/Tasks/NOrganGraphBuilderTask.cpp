@@ -75,6 +75,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	
 	Analytics.OutputToLog();
 	
+	// Clean up graph of pointers that can't be kept
+	ContextPtr->CellGraph->CleanupBuilderReferences();
+	
 	// Only hand off graph if it's good
 	if (ContextPtr->IsSuccessful())
 	{
@@ -105,14 +108,14 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Get a weighted array of indices representing possible starting cells, and reference the cell data
 	const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
-	FNCellInputData StartCellInputData = ContextPtr->CellInputData[StartCellIndex];
+	FNCellInputData* StartCellInputData = &ContextPtr->CellInputData[StartCellIndex];
 	
 	// Decide which appropriately sized junction is going to be used
 	TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
 	const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
 	const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 	
-	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData.Junctions.Find(TargetJunctionKey);
+	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
 	
 	// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
 	// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
@@ -133,7 +136,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 		BoneNode, ContextPtr->Origin, ContextPtr->Bounds, ContextPtr->bUnbounded);
 	
 	// Create our first cell node, attaching it to the bone node
-	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
+	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(StartCellInputData, CellWorldPosition, CellWorldRotation);
 	ContextPtr->CellGraph->RegisterNode(StartNode);
 	
 	// Link our nodes
@@ -206,12 +209,8 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		NodeFilter.SocketSize = Junction.Value->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
-		
-		// Dont allow self connection
-		if (!SourceCellNode->CanConnectToSelf())
-		{
-			NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
-		}
+		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr(); 
+		NodeFilter.SourceCellNode = SourceCellNode;
 		
 		ContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
@@ -230,13 +229,13 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Pick our cell to use to spawn
 		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
-		FNCellInputData CellInputData = ContextPtr->CellInputData[CellInputIndex];
+		FNCellInputData* CellInputData = &ContextPtr->CellInputData[CellInputIndex];
 		
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
 		const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
 		const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData.Junctions.Find(TargetJunctionKey);
+		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
 		
 		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
 		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
@@ -248,7 +247,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
 		FVector TargetJunctionWorldPosition = Junction.Value->WorldLocation - TargetJunctionWorldOffset;
 	
-		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(&CellInputData, TargetJunctionWorldPosition, RequiredRotation);
+		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(CellInputData, TargetJunctionWorldPosition, RequiredRotation);
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
 		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.

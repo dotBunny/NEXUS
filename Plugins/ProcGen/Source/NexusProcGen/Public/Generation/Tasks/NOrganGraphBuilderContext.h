@@ -8,6 +8,7 @@
 #include "Generation/NCellInputData.h"
 #include "Generation/Tasks/NOrganGraphBuilderAnalytics.h"
 #include "Collections/NWeightedIntegerArray.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 
 struct FNProcGenOperationOrganContext;
 class UNOrganComponent;
@@ -18,6 +19,7 @@ struct FNCellInputDataFilter
 	bool bRequireEnd = false;
 	
 	FNCellInputData* SourceCellInputData = nullptr;
+	FNProcGenGraphCellNode* SourceCellNode = nullptr;
 	
 	FIntVector2 SocketSize = FIntVector2(0, 0);
 	FQuat SourceQuat = FQuat();
@@ -56,6 +58,7 @@ public:
 	bool IsValid() const { return bIsValid; };
 	
 	bool CheckGraph() const;
+	
 	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 	bool ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics);
 	bool ValidateGraph();

@@ -8,10 +8,9 @@
 
 FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
 {
+	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
-	
-	bCanConnectToSelf = InputData->CellDetails.bAllowSelfConnection;
-	
+	bAlwaysRelevant = InputData->bAlwaysRelevant;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	
@@ -85,6 +84,41 @@ FNProcGenGraphNode* FNProcGenGraphCellNode::GetLinkedNode(const int32 JunctionKe
 		return nullptr;
 	}
 	return Links[JunctionKey];
+}
+
+bool FNProcGenGraphCellNode::SearchForMatchingCellInputData(const FNCellInputData* InputData, const int32 MaxDepth) const
+{
+	if (InputData == nullptr) return false;
+	if (InputDataPtr == InputData) return true;
+	if (MaxDepth <= 0) return false;
+
+	TSet<const FNProcGenGraphCellNode*> Visited;
+	Visited.Add(this);
+
+	TQueue<TPair<const FNProcGenGraphCellNode*, int32>> Frontier;
+	Frontier.Enqueue({this, 0});
+
+	TPair<const FNProcGenGraphCellNode*, int32> Current;
+	while (Frontier.Dequeue(Current))
+	{
+		if (Current.Value >= MaxDepth) continue;
+
+		for (const TPair<int32, FNProcGenGraphNode*>& Link : Current.Key->Links)
+		{
+			const FNProcGenGraphNode* Linked = Link.Value;
+			if (Linked == nullptr || Linked->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
+
+			const FNProcGenGraphCellNode* CellNode = static_cast<const FNProcGenGraphCellNode*>(Linked);
+			if (Visited.Contains(CellNode)) continue;
+			Visited.Add(CellNode);
+
+			if (CellNode->InputDataPtr == InputData) return true;
+
+			Frontier.Enqueue({CellNode, Current.Value + 1});
+		}
+	}
+
+	return false;
 }
 
 bool FNProcGenGraphCellNode::IsHullInside(const FBox& Bounds) const

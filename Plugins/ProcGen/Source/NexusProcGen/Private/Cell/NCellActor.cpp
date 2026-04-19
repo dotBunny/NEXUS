@@ -85,12 +85,6 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 	{
 		Actor->Destroy(true, false);
 	}
-	
-	// Flag level instance for always relevant based on override
-	if (GetCellRoot()->Details.bAlwaysRelevant)
-	{
-		LevelInstance->bAlwaysRelevant = true;
-	}
 
 	// Callback
 	OnInitializedFromProxy.Broadcast();
