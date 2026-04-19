@@ -14,7 +14,7 @@ void ANSamplesHUD::DrawHUD()
 {
 	Super::DrawHUD();
 	
-	// Dont show if noone wants it or is around
+	// Don't show if no one wants it or is around
 	if (bHideHUD || FApp::IsUnattended()) return;
 	
 	if (Canvas)
@@ -78,5 +78,5 @@ void ANSamplesHUD::DrawMonoText(const FString& Text, const float TextScale, cons
 
 	const float WidthWithPadding = OutWidth + 40;
 	if (WidthWithPadding > OutCursor.X) { OutCursor.X = WidthWithPadding; }
-	OutCursor.Y = OutCursor.Y + OutHeight + 2; // Line Spaceing
+	OutCursor.Y = OutCursor.Y + OutHeight + 2; // Line Spacing
 };
