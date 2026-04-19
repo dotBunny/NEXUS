@@ -35,6 +35,7 @@ public:
 	{
 		return Bounds.IsInside(WorldBounds);
 	}
+	bool CanConnectToSelf() const { return bCanConnectToSelf; }
 	
 	bool IsHullInside(const FBox& Bounds) const;
 	
@@ -43,6 +44,9 @@ public:
 		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
 			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
 	}
+	
+	// Do not access after graph generation, maybe change comparison to template? (TObjectPtr<UNCell>)
+	FNCellInputData* GetInputDataPtr() const { return InputDataPtr; }
 
 protected:
 	FNRawMesh& GetHull() { return Hull; }
@@ -50,9 +54,11 @@ protected:
 private:
 	
 	FNCellInputData* InputDataPtr;
+	
 	TArray<int32> FreeJunctionKeys;
 	TMap<int32, FNProcGenGraphNode*> Links;
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
+	bool bCanConnectToSelf = false;
 	
 	FBox WorldBounds;
 	FNRawMesh Hull;

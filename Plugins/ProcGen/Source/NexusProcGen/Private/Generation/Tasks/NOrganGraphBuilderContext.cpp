@@ -200,10 +200,14 @@ void FNOrganGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter
 	{
 		const FNCellInputData* CellData = &CellInputData[i];
 		
+		
 		// Early out on some simple filters
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
 		if (Filter.bRequireStart && !CellData->bCanBeStartNode) continue;
 		if (Filter.bRequireEnd && !CellData->bCanBeEndNode) continue;
+		
+		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellInputData == CellData) continue;
+		
 		
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 		

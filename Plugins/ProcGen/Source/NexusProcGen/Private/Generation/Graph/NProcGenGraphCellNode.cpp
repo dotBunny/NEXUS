@@ -9,6 +9,9 @@
 FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
 {
 	InputDataPtr = InputData;
+	
+	bCanConnectToSelf = InputData->CellDetails.bAllowSelfConnection;
+	
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	

@@ -203,8 +203,16 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
+		
 		NodeFilter.SocketSize = Junction.Value->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
+		
+		// Dont allow self connection
+		if (!SourceCellNode->CanConnectToSelf())
+		{
+			NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
+		}
+		
 		ContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
 		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.

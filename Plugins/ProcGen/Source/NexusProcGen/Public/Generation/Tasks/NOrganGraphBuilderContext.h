@@ -17,6 +17,8 @@ struct FNCellInputDataFilter
 	bool bRequireStart = false;
 	bool bRequireEnd = false;
 	
+	FNCellInputData* SourceCellInputData = nullptr;
+	
 	FIntVector2 SocketSize = FIntVector2(0, 0);
 	FQuat SourceQuat = FQuat();
 };
