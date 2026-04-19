@@ -13,8 +13,9 @@ void ANSamplesHUD::Tick(float DeltaSeconds)
 void ANSamplesHUD::DrawHUD()
 {
 	Super::DrawHUD();
-
-	if (bHideHUD) return;
+	
+	// Dont show if noone wants it or is around
+	if (bHideHUD || FApp::IsUnattended()) return;
 	
 	if (Canvas)
 	{
