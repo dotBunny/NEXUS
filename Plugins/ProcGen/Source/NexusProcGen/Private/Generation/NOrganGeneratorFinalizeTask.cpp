@@ -11,8 +11,8 @@
 FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
 	UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr,
 	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
-	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
-		: Operation(TargetOperation), Context(ContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
+		: Operation(TargetOperation), Context(ContextPtr.ToSharedRef()), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
 {
 
 }
@@ -27,7 +27,7 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 	
 	Context->Analytics.OutputToLog();
 	
-	const FNProcGenOperationSettings& Settings = SharedContext->OperationSettings;
+	const FNProcGenOperationSettings& Settings = TaskGraphContextPtr->OperationSettings;
 	
 	// NOT SURE IF THIS IS WHERE WE WANT TO DO THE BUILD, BUT FOR NOW LETS GO
 	for (const auto Node : Context->CellGraph->GetNodes())
@@ -44,10 +44,10 @@ void FNOrganGeneratorFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, con
 
 			
 			// Spawn proxy instance
-			ANCellProxy* Proxy = ANCellProxy::CreateInstance(SharedContext->TargetWorld, CellNode, Settings.bPreLoadLevelInstances);
+			ANCellProxy* Proxy = ANCellProxy::CreateInstance(TaskGraphContextPtr->TargetWorld, CellNode, Settings.bPreLoadLevelInstances);
 		
 			// Registered with global?
-			SharedContext->CreatedProxies.Add(Proxy);
+			TaskGraphContextPtr->CreatedProxies.Add(Proxy);
 			
 			
 			// What about creating the instance?

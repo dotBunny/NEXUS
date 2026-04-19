@@ -5,7 +5,7 @@
 
 #include "NOrganGeneratorPassContext.h"
 #include "Generation/Tasks/NProcGenGraphBuilderContext.h"
-#include "NProcGenOperationSharedContext.h"
+#include "NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 class UNProcGenOperation;
@@ -18,7 +18,7 @@ public:
 	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, 
 		const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr, 
 		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr, 
-		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphFinalizeTask, STATGROUP_TaskGraphTasks); }
     
@@ -31,5 +31,5 @@ private:
 	
 	UNProcGenOperation* Operation;
 	TSharedRef<FNProcGenGraphBuilderContext> Context;
-	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
+	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 };

@@ -3,15 +3,14 @@
 
 #pragma once
 
-#include "Generation/NProcGenOperationSharedContext.h"
+#include "Generation/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
-#include "Generation/Graph/NProcGenGraph.h"
 
 class UNProcGenOperation;
 
 struct FNProcGenCreateProxiesTask
 {
-	explicit FNProcGenCreateProxiesTask(TUniquePtr<FNProcGenGraph> CellGraph, TSharedRef<FNProcGenOperationSharedContext> SharedContext);
+	explicit FNProcGenCreateProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
 	~FNProcGenCreateProxiesTask();
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenCreateProxiesTask, STATGROUP_TaskGraphTasks); }
@@ -22,5 +21,5 @@ struct FNProcGenCreateProxiesTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	TUniquePtr<FNProcGenGraph> CellGraph;
+	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 };

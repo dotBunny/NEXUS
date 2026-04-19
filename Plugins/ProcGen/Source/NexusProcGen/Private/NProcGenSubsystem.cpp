@@ -33,7 +33,7 @@ void UNProcGenSubsystem::StartOperation(UNProcGenOperation* Operation)
 	Operation->StartBuild(this);
 }
 
-void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext)
+void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext)
 {
 	KnownOperations.Remove(Operation);
 }

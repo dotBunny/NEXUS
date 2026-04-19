@@ -130,11 +130,11 @@ void UNProcGenOperation::Tick()
 	}
 }
 
-void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenOperationSharedContext> SharedContext)
+void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext)
 {
 	if (Owner != nullptr)
 	{
-		Owner->OnOperationFinished(this, SharedContext);
+		Owner->OnOperationFinished(this, TaskGraphContext);
 	}
 	
 	for (const auto Component : Context->InputComponents)

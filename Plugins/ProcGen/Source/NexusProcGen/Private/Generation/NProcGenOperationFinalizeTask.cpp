@@ -6,8 +6,8 @@
 
 
 FNProcGenOperationFinalizeTask::FNProcGenOperationFinalizeTask(UNProcGenOperation* TargetOperation, 
-	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
-	: Operation(TargetOperation), SharedContext(SharedContextPtr.ToSharedRef())
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
+	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
 {
 	
 }
@@ -21,5 +21,5 @@ void FNProcGenOperationFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, c
 	
 	// TODO: We need to save these created context stuff from shared somewhere?
 	
-	Operation->FinishBuild(SharedContext);
+	Operation->FinishBuild(TaskGraphContextPtr);
 }

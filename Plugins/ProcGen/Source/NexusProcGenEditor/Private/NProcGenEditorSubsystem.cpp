@@ -4,7 +4,7 @@
 #include "NProcGenEditorSubsystem.h"
 
 #include "NProcGenOperation.h"
-#include "Generation/NProcGenOperationSharedContext.h"
+#include "Generation/NProcGenTaskGraphContext.h"
 #include "Organ/NOrganComponent.h"
 
 void UNProcGenEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -48,13 +48,13 @@ void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 	Operation->StartBuild(this);
 }
 
-void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext)
+void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext)
 {
-	for (ANCellProxy* Proxy : SharedContext->CreatedProxies)
+	for (ANCellProxy* Proxy : TaskGraphContext->CreatedProxies)
 	{
 		KnownProxies.Add(Proxy);
 	}
-	ProxyMap.Add(Operation->GetFName(), TArray<ANCellProxy*>(SharedContext->CreatedProxies)); // TODO : Check this copies?
+	ProxyMap.Add(Operation->GetFName(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies)); // TODO : Check this copies?
 	KnownOperations.Remove(Operation);
 }
 

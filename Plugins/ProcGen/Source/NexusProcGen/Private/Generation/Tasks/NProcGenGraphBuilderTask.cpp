@@ -11,8 +11,8 @@
 
 FNProcGenGraphBuilderTask::FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr,
 	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
-	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
-	: Context(ContextPtr.ToSharedRef()), PassContext(PassContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
+	: Context(ContextPtr.ToSharedRef()), PassContext(PassContextPtr.ToSharedRef()), TaskGraphContext(TaskGraphContextPtr.ToSharedRef())
 {
 }
 

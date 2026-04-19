@@ -6,14 +6,14 @@
 #include "Generation/NOrganGeneratorPassContext.h"
 #include "Generation/Tasks/NProcGenGraphBuilderContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
-#include "Generation/NProcGenOperationSharedContext.h"
+#include "Generation/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 struct FNProcGenGraphBuilderTask
 {
 	explicit FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr, 
 		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
-		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
     
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
     
@@ -34,5 +34,5 @@ private:
 	
 	TSharedRef<FNProcGenGraphBuilderContext> Context;
 	TSharedRef<FNOrganGeneratorPassContext> PassContext;
-	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
+	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext;
 };

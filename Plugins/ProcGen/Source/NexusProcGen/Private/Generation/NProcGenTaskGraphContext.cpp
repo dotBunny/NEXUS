@@ -1,9 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenOperationSharedContext.h"
+#include "Generation/NProcGenTaskGraphContext.h"
 
-FNProcGenOperationSharedContext::FNProcGenOperationSharedContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings)
+FNProcGenTaskGraphContext::FNProcGenTaskGraphContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings)
 {
 	TargetWorld = OutputWorld;
 	OperationSettings = Settings;

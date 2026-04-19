@@ -11,7 +11,7 @@
 #include "NProcGenOperation.generated.h"
 
 
-class FNProcGenOperationSharedContext;
+class FNProcGenTaskGraphContext;
 class UNOrganComponent;
 
 UENUM(BlueprintType)
@@ -108,7 +108,7 @@ public:
 
 protected:
 	void Tick();
-	void FinishBuild(TSharedRef<FNProcGenOperationSharedContext> SharedContext);
+	void FinishBuild(TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext);
 	FNProcGenTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
 	
 private:

@@ -10,7 +10,7 @@
 #include "Generation/NOrganGeneratorPassContext.h"
 #include "Generation/Tasks/NProcGenGraphBuilderTask.h"
 #include "Generation/NProcGenOperationFinalizeTask.h"
-#include "Generation/NProcGenOperationSharedContext.h"
+#include "Generation/NProcGenTaskGraphContext.h"
 
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
@@ -24,7 +24,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNProcGenOperationSharedContext> SharedContextPtr = MakeShared<FNProcGenOperationSharedContext, ESPMode::ThreadSafe>(
+	TSharedPtr<FNProcGenTaskGraphContext> SharedContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationSettings());
 	
 	int PassCount = 0;

@@ -33,7 +33,7 @@ public:
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
-	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	virtual UWorld* GetDefaultWorld() override { return GetWorld(); };
 	

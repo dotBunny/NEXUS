@@ -52,7 +52,7 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	virtual bool IsTickableInEditor() const override { return true; }
 
 	virtual void StartOperation(UNProcGenOperation* Operation) override;
-	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenOperationSharedContext> SharedContext) override;
+	virtual void OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext) override;
 	virtual void OnOperationDestroyed(UNProcGenOperation* Operation) override;
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	
