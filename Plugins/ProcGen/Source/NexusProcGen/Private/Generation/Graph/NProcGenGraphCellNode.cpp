@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenGraphCellNode.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 
 #include "NProcGenMinimal.h"
 #include "Math/NVectorUtils.h"

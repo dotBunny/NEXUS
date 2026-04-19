@@ -5,7 +5,7 @@
 
 #include "NProcGenMinimal.h"
 
-struct FNOrganGeneratorTaskAnalytics
+struct FNProcGenGraphBuilderAnalytics
 {
 
 	

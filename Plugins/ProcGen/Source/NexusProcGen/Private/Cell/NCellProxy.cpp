@@ -9,7 +9,7 @@
 #include "Components/BillboardComponent.h"
 #include "Components/DynamicMeshComponent.h"
 #include "Engine/AssetManager.h"
-#include "Generation/NProcGenGraphCellNode.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

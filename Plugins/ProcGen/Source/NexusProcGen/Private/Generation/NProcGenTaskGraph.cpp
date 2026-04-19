@@ -1,14 +1,14 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenOperationTaskGraph.h"
+#include "Generation/NProcGenTaskGraph.h"
 
 #include "NProcGenMinimal.h"
 
 #include "Generation/NProcGenOperationContext.h"
 #include "Generation/NOrganGeneratorFinalizeTask.h"
 #include "Generation/NOrganGeneratorPassContext.h"
-#include "Generation/NOrganGeneratorTask.h"
+#include "Generation/Tasks/NProcGenGraphBuilderTask.h"
 #include "Generation/NProcGenOperationFinalizeTask.h"
 #include "Generation/NProcGenOperationSharedContext.h"
 
@@ -16,7 +16,7 @@
 #include "Math/NSeedGenerator.h"
 #include "Organ/NOrganComponent.h"
 
-FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
+FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
 	// Convert our friendly seed to something more appropriate
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->GetOperationSettings().Seed);
@@ -44,19 +44,19 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 			if (!ContextMap->SourceComponent->bActivated) continue;
 			
 			// Create individual organ generator context object, this builds out a list of all available cells to use to fill the space
-			TSharedPtr<FNOrganGeneratorTaskContext> ContextPtr = MakeShared<FNOrganGeneratorTaskContext>(
+			TSharedPtr<FNProcGenGraphBuilderContext> ContextPtr = MakeShared<FNProcGenGraphBuilderContext>(
 				ContextMap, BaseGenerator.UnsignedInteger64(), FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
-			FGraphEventRef OrganTask = TGraphTask<FNOrganGeneratorTask>::CreateTask(
+			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNProcGenGraphBuilderTask>::CreateTask(
 				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesnt need to run on main thread
 				.ConstructAndHold(ContextPtr, PassContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
-			Tasks.Add(OrganTask);
+			Tasks.Add(OrganGraphBuilderTask);
 			
 			// Create a task to finalize the previous organ task on the main thread
 			FGraphEventArray SubTasks;
-			SubTasks.Add(OrganTask);
+			SubTasks.Add(OrganGraphBuilderTask);
 			FGraphEventRef OrganFinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&SubTasks, 
 				ENamedThreads::GameThread)
 				.ConstructAndHold(Operation, ContextPtr, PassContextPtr, SharedContextPtr);
@@ -76,7 +76,7 @@ FNProcGenOperationTaskGraph::FNProcGenOperationTaskGraph(UNProcGenOperation* Ope
 	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation, SharedContextPtr);
 }
 
-void FNProcGenOperationTaskGraph::UnlockTasks()
+void FNProcGenTaskGraph::UnlockTasks()
 {
 	// Start running the tasks
 	for (const auto Tasks : PassTasks)
@@ -91,7 +91,7 @@ void FNProcGenOperationTaskGraph::UnlockTasks()
 	bTasksUnlocked = true;
 }
 
-void FNProcGenOperationTaskGraph::WaitForTasks()
+void FNProcGenTaskGraph::WaitForTasks()
 {
 	if (!bTasksUnlocked)
 	{
@@ -101,17 +101,17 @@ void FNProcGenOperationTaskGraph::WaitForTasks()
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 
-void FNProcGenOperationTaskGraph::ResetGraph()
+void FNProcGenTaskGraph::ResetGraph()
 {
 	bTasksUnlocked = false;
 }
 
-int FNProcGenOperationTaskGraph::GetTotalPasses() const
+int FNProcGenTaskGraph::GetTotalPasses() const
 {
 	return PassTasks.Num();
 }
 
-int FNProcGenOperationTaskGraph::GetCompletedPasses()
+int FNProcGenTaskGraph::GetCompletedPasses()
 {
 	int CompletedPasses = 0;
 	for (auto Pass : PassTasks)
@@ -135,7 +135,7 @@ int FNProcGenOperationTaskGraph::GetCompletedPasses()
 	return CompletedPasses;
 }
 
-FIntVector2 FNProcGenOperationTaskGraph::GetTaskStatus() const
+FIntVector2 FNProcGenTaskGraph::GetTaskStatus() const
 {
 	int TotalTasks = 0;
 	int CompletedTasks = 0;

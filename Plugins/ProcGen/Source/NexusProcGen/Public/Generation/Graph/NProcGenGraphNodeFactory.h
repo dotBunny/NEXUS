@@ -2,7 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
-#include "NCellInputData.h"
+
+#include "Generation/NCellInputData.h"
 #include "NProcGenGraphBoneNode.h"
 #include "NProcGenGraphCellNode.h"
 #include "NProcGenGraphNullNode.h"

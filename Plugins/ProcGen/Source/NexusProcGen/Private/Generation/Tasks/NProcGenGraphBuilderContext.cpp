@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NOrganGeneratorTaskContext.h"
+#include "Generation/Tasks/NProcGenGraphBuilderContext.h"
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCell.h"
@@ -10,7 +10,7 @@
 #include "Generation/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+FNProcGenGraphBuilderContext::FNProcGenGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
@@ -152,7 +152,7 @@ FNOrganGeneratorTaskContext::FNOrganGeneratorTaskContext(const FNProcGenOperatio
 	bIsValid = true;
 }
 
-FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
+FNProcGenGraphBuilderContext::~FNProcGenGraphBuilderContext()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
@@ -163,7 +163,7 @@ FNOrganGeneratorTaskContext::~FNOrganGeneratorTaskContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-bool FNOrganGeneratorTaskContext::CheckGraph() const
+bool FNProcGenGraphBuilderContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
 	int CellNodeCount = 0;
@@ -190,13 +190,13 @@ bool FNOrganGeneratorTaskContext::CheckGraph() const
 	return true;
 }
 
-bool FNOrganGeneratorTaskContext::ValidateGraph()
+bool FNProcGenGraphBuilderContext::ValidateGraph()
 {
 	bSuccessful = CheckGraph();
 	return bSuccessful;
 }
 
-void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
+void FNProcGenGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
 	JunctionIndices.Empty();
@@ -257,7 +257,7 @@ void FNOrganGeneratorTaskContext::FilterCellInputData(const FNCellInputDataFilte
 	}
 }
 
-bool FNOrganGeneratorTaskContext::ResetForRetry()
+bool FNProcGenGraphBuilderContext::ResetForRetry()
 {
 	// Reset counters
 	for (int i = 0; i < CellInputData.Num(); i++)

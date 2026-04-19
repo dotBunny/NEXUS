@@ -4,7 +4,7 @@
 #pragma once
 
 #include "NOrganGeneratorPassContext.h"
-#include "NOrganGeneratorTaskContext.h"
+#include "Generation/Tasks/NProcGenGraphBuilderContext.h"
 #include "NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
@@ -16,7 +16,7 @@ struct FNOrganGeneratorFinalizeTask
 {
 public:
 	explicit FNOrganGeneratorFinalizeTask(UNProcGenOperation* TargetOperation, 
-		const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr, 
+		const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr, 
 		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr, 
 		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
 	
@@ -30,6 +30,6 @@ public:
 private:
 	
 	UNProcGenOperation* Operation;
-	TSharedRef<FNOrganGeneratorTaskContext> Context;
+	TSharedRef<FNProcGenGraphBuilderContext> Context;
 	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };

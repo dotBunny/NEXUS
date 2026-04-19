@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NBoneInputData.h"
+#include "Generation/NBoneInputData.h"
 #include "NProcGenGraphNode.h"
 
 class NEXUSPROCGEN_API FNProcGenGraphBoneNode  : public FNProcGenGraphNode

@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "NBoneInputData.h"
-#include "NProcGenGraph.h"
-#include "NCellInputData.h"
-#include "NOrganGeneratorTaskAnalytics.h"
+#include "Generation/NBoneInputData.h"
+#include "Generation/Graph/NProcGenGraph.h"
+#include "Generation/NCellInputData.h"
+#include "Generation/Tasks/NProcGenGraphBuilderAnalytics.h"
 #include "Collections/NWeightedIntegerArray.h"
 
 struct FNProcGenOperationOrganContext;
@@ -21,14 +21,14 @@ struct FNCellInputDataFilter
 	FQuat SourceQuat = FQuat();
 };
 
-class FNOrganGeneratorTaskContext
+class FNProcGenGraphBuilderContext
 {
 	//friend struct FNOrganGeneratorTask;
 	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
 	
-	FNOrganGeneratorTaskAnalytics Analytics;
+	FNProcGenGraphBuilderAnalytics Analytics;
 	
 	int32 MinimumCellCount = -1;
 	int32 MaximumCellCount = -1;
@@ -42,8 +42,9 @@ public:
 	
 	
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
-	FNOrganGeneratorTaskContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
-	~FNOrganGeneratorTaskContext();
+	
+	FNProcGenGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
+	~FNProcGenGraphBuilderContext();
 	
 	uint64 GetSeed() const { return Seed; };
 	bool IsSuccessful() const { return bSuccessful; };

@@ -6,7 +6,7 @@
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "Organ/NOrganComponent.h"
-#include "Generation/NProcGenOperationTaskGraph.h"
+#include "Generation/NProcGenTaskGraph.h"
 
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -100,10 +100,10 @@ void UNProcGenOperation::BeginDestroy()
 		Context.Reset();
 	}
 	
-	if (Graph.IsValid())
+	if (TaskGraph.IsValid())
 	{
-		Graph->ResetGraph();
-		Graph.Reset();
+		TaskGraph->ResetGraph();
+		TaskGraph.Reset();
 	}
 	
 	if (!this->IsTemplate())
@@ -118,9 +118,9 @@ void UNProcGenOperation::BeginDestroy()
 
 void UNProcGenOperation::Tick()
 {
-	if (!Graph.IsValid()) return;
+	if (!TaskGraph.IsValid()) return;
 	
-	if (const FIntVector2 Status = Graph->GetTaskStatus(); 
+	if (const FIntVector2 Status = TaskGraph->GetTaskStatus(); 
 		Status.Y != CachedTotalTasks || Status.X != CachedCompletedTasks)
 	{
 		CachedTotalTasks = Status.Y;
@@ -158,10 +158,10 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 		SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::ContextLocked);
 	}
 	
-	if (Graph.IsValid())
+	if (TaskGraph.IsValid())
 	{
-		Graph->ResetGraph();
-		Graph.Reset();
+		TaskGraph->ResetGraph();
+		TaskGraph.Reset();
 	}
 	
 	// Output debug in our editor only
@@ -171,11 +171,11 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);
-	Graph = MakeUnique<FNProcGenOperationTaskGraph>(this, Context.Get());
+	TaskGraph = MakeUnique<FNProcGenTaskGraph>(this, Context.Get());
 	
 	// Add callback to tasks?
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::StartingTasks);
-	Graph->UnlockTasks();
+	TaskGraph->UnlockTasks();
 }
 
 bool UNProcGenOperation::AddToContext(UNOrganComponent* Component) const

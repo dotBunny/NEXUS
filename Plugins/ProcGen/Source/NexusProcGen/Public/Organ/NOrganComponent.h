@@ -24,7 +24,7 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Organ", HideCategories=(Tags, 
 class NEXUSPROCGEN_API UNOrganComponent : public UActorComponent
 {
 	friend class NOrganGenerator;
-	friend class FNOrganGeneratorTaskContext;
+	friend class FNProcGenGraphBuilderContext;
 	friend class FNProcGenOperationContext;
 	
 	GENERATED_BODY()

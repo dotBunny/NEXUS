@@ -3,19 +3,19 @@
 
 #pragma once
 
-#include "NOrganGeneratorPassContext.h"
-#include "NOrganGeneratorTaskContext.h"
-#include "NProcGenGraphCellNode.h"
-#include "NProcGenOperationSharedContext.h"
+#include "Generation/NOrganGeneratorPassContext.h"
+#include "Generation/Tasks/NProcGenGraphBuilderContext.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
+#include "Generation/NProcGenOperationSharedContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
-struct FNOrganGeneratorTask
+struct FNProcGenGraphBuilderTask
 {
-	explicit FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr, 
+	explicit FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr, 
 		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
 		const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr);
     
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNOrganGraphTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
     
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -32,7 +32,7 @@ private:
 	TArray<FNProcGenGraphNode*> ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
 	TArray<FNProcGenGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
 	
-	TSharedRef<FNOrganGeneratorTaskContext> Context;
+	TSharedRef<FNProcGenGraphBuilderContext> Context;
 	TSharedRef<FNOrganGeneratorPassContext> PassContext;
 	TSharedRef<FNProcGenOperationSharedContext> SharedContext;
 };

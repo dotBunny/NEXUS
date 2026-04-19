@@ -10,7 +10,7 @@
 #include "NProcGenSubsystem.generated.h"
 
 class UNProcGenOperation;
-class FNProcGenOperationTaskGraph;
+class FNProcGenTaskGraph;
 class ANCellProxy;
 class ANCellActor;
 class UNProcGenContext;

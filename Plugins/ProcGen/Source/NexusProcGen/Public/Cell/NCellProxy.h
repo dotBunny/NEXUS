@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
-#include "Generation/NProcGenGraphCellNode.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Macros/NActorMacros.h"
 #include "NCellProxy.generated.h"
 

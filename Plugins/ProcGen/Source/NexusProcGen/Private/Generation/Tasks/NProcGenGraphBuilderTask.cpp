@@ -1,22 +1,22 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NOrganGeneratorTask.h"
+#include "Generation/Tasks/NProcGenGraphBuilderTask.h"
 
 #include "NProcGenMinimal.h"
-#include "Generation/NProcGenGraphBoneNode.h"
-#include "Generation/NProcGenGraphCellNode.h"
-#include "Generation/NProcGenGraphNodeFactory.h"
+#include "Generation/Graph/NProcGenGraphBoneNode.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
+#include "Generation/Graph/NProcGenGraphNodeFactory.h"
 #include "Math/NMersenneTwister.h"
 
-FNOrganGeneratorTask::FNOrganGeneratorTask(const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
+FNProcGenGraphBuilderTask::FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr,
 	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
 	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
 	: Context(ContextPtr.ToSharedRef()), PassContext(PassContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())
 {
 }
 
-void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
+void FNProcGenGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	// The context was not validated during creation, so we cannot process it
 	if (!Context->IsValid()) return;
@@ -72,7 +72,7 @@ void FNOrganGeneratorTask::DoTask(ENamedThreads::Type CurrentThread, const FGrap
 	}
 }
 
-void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
+void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 {
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
 	FNBoneInputData& BoneData = Context->BoneInputData[0];
@@ -128,7 +128,7 @@ void FNOrganGeneratorTask::StartGraph(FNMersenneTwister& Random) const
 	StartNode->Link(TargetJunctionKey, BoneNode);
 }
 
-TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
+TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
 {
 	TArray<FNProcGenGraphCellNode*> HitNodes;
 	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
@@ -144,7 +144,7 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeBounds(FNProcGenG
 	return MoveTemp(HitNodes);
 }
 
-TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeHull(FNProcGenGraphCellNode* NewNode) const
+TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeHull(FNProcGenGraphCellNode* NewNode) const
 {
 	TArray<FNProcGenGraphCellNode*> HitNodes;
 	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
@@ -160,7 +160,7 @@ TArray<FNProcGenGraphCellNode*> FNOrganGeneratorTask::CheckNodeHull(FNProcGenGra
 	return MoveTemp(HitNodes);
 }
 
-TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
+TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
 {
 	switch (SourceNode->GetNodeType())
 	{
@@ -175,7 +175,7 @@ TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessNode(FNMersenneTwister&
 	return TArray<FNProcGenGraphNode*>();
 }
 
-TArray<FNProcGenGraphNode*> FNOrganGeneratorTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
+TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
 {
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
 	TArray<FNProcGenGraphNode*> NewNodes;

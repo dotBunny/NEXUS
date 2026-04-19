@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "NProcGenGraphCellNode.h"
 #include "NProcGenGraphNode.h"
 
 class NEXUSPROCGEN_API FNProcGenGraph

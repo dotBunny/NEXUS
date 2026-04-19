@@ -5,11 +5,11 @@
 
 #include "NProcGenOperation.h"
 #include "Cell/NCellProxy.h"
-#include "Generation/NProcGenGraphCellNode.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 
 
 FNOrganGeneratorFinalizeTask::FNOrganGeneratorFinalizeTask(
-	UNProcGenOperation* TargetOperation, const TSharedPtr<FNOrganGeneratorTaskContext>& ContextPtr,
+	UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr,
 	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
 	const TSharedPtr<FNProcGenOperationSharedContext>& SharedContextPtr)
 		: Operation(TargetOperation), Context(ContextPtr.ToSharedRef()), SharedContext(SharedContextPtr.ToSharedRef())

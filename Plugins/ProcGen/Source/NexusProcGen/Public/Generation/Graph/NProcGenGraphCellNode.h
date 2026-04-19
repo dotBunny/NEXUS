@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "NCellInputData.h"
+#include "Generation/NCellInputData.h"
 #include "NProcGenGraphNode.h"
 #include "Cell/NCell.h"
 #include "Types/NRawMeshUtils.h"

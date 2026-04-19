@@ -7,7 +7,7 @@
 #include "NProcGenMinimal.h"
 #include "NProcGenOperationSettings.h"
 #include "Generation/NProcGenOperationContext.h"
-#include "Generation/NProcGenOperationTaskGraph.h"
+#include "Generation/NProcGenTaskGraph.h"
 #include "NProcGenOperation.generated.h"
 
 
@@ -109,12 +109,12 @@ public:
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNProcGenOperationSharedContext> SharedContext);
-	FNProcGenOperationTaskGraph* GetGraph() const { return Graph.Get(); }
+	FNProcGenTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
 	
 private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	INProcGenOperationOwner* Owner = nullptr;
-	TUniquePtr<FNProcGenOperationTaskGraph> Graph;
+	TUniquePtr<FNProcGenTaskGraph> TaskGraph;
 	TUniquePtr<FNProcGenOperationContext> Context;
 	
 	bool bIsContextLocked;

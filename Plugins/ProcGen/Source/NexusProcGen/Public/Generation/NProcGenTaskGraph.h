@@ -8,10 +8,10 @@
 class UNProcGenOperation;
 class FNProcGenOperationContext;
 
-class NEXUSPROCGEN_API FNProcGenOperationTaskGraph
+class NEXUSPROCGEN_API FNProcGenTaskGraph
 {
 public:
-	explicit FNProcGenOperationTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context);
+	explicit FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context);
 	
 	void UnlockTasks();
 	

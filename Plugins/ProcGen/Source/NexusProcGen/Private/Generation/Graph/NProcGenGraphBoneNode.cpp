@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenGraphBoneNode.h"
+#include "Generation/Graph/NProcGenGraphBoneNode.h"
 
 #include "NProcGenMinimal.h"
 
