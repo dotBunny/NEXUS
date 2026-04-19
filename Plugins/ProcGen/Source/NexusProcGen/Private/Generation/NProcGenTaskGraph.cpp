@@ -6,11 +6,12 @@
 #include "NProcGenMinimal.h"
 
 #include "Generation/NProcGenOperationContext.h"
-#include "Generation/NOrganGeneratorFinalizeTask.h"
-#include "Generation/NOrganGeneratorPassContext.h"
-#include "Generation/Tasks/NProcGenGraphBuilderTask.h"
-#include "Generation/NProcGenOperationFinalizeTask.h"
+#include "Generation/Tasks/NCollectPassContext.h"
+#include "Generation/Tasks/NOrganGraphBuilderTask.h"
+#include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Tasks/NCollectPassTask.h"
+#include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
 #include "Math/NMersenneTwister.h"
 #include "Math/NSeedGenerator.h"
@@ -24,17 +25,24 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNProcGenTaskGraphContext> SharedContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
+	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationSettings());
 	
+	// ----------------------------------------------------------------------------------------------------------------------------------------------
+	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
+	// ----------------------------------------------------------------------------------------------------------------------------------------------
 	int PassCount = 0;
+	FGraphEventRef LastPassTask = nullptr;
+	
 	// Build out the organ generation tasks, with finalizers
+	
 	for (auto Pass : Context->GenerationOrder)
 	{
-		TSharedPtr<FNOrganGeneratorPassContext> PassContextPtr = MakeShared<FNOrganGeneratorPassContext, ESPMode::ThreadSafe>();
+		// Create context for the pass itself that organ builders will hand off their generated graph too
+		TSharedPtr<FNCollectPassContext> PassContextPtr = MakeShared<FNCollectPassContext, ESPMode::ThreadSafe>();
 		
 		int ComponentCount = 0;
-		FGraphEventArray Tasks;
+		FGraphEventArray PassTasks;
 		for (const auto Component : Pass)
 		{
 			// Get the context generated during pre-generation process
@@ -43,51 +51,53 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			// Do not generate a component if it is not activated, don't make the tasks
 			if (!ContextMap->SourceComponent->bActivated) continue;
 			
-			// Create individual organ generator context object, this builds out a list of all available cells to use to fill the space
-			TSharedPtr<FNProcGenGraphBuilderContext> ContextPtr = MakeShared<FNProcGenGraphBuilderContext>(
-				ContextMap, BaseGenerator.UnsignedInteger64(), FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
+			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
+			TSharedPtr<FNOrganGraphBuilderContext> ContextPtr = MakeShared<FNOrganGraphBuilderContext>(
+				ContextMap, BaseGenerator.UnsignedInteger64(), 
+				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
-			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNProcGenGraphBuilderTask>::CreateTask(
-				(PassTasks.Num() > 0) ? &PassTasks.Last() : nullptr, 
-				ENamedThreads::AnyNormalThreadNormalTask) // Doesnt need to run on main thread
-				.ConstructAndHold(ContextPtr, PassContextPtr, SharedContextPtr); // ConstructAndDispatchWhenReady
-			Tasks.Add(OrganGraphBuilderTask);
-			
-			// Create a task to finalize the previous organ task on the main thread
-			FGraphEventArray SubTasks;
-			SubTasks.Add(OrganGraphBuilderTask);
-			FGraphEventRef OrganFinalizeTask = TGraphTask<FNOrganGeneratorFinalizeTask>::CreateTask(&SubTasks, 
-				ENamedThreads::GameThread)
-				.ConstructAndHold(Operation, ContextPtr, PassContextPtr, SharedContextPtr);
-			Tasks.Add(OrganFinalizeTask);
-			
+			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
+				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : nullptr,  // Ensures we are waiting for the last pass to complete
+				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
+				.ConstructAndHold(ContextPtr, PassContextPtr);
+			PassTasks.Add(OrganGraphBuilderTask);
+			AllTasks.Add(OrganGraphBuilderTask);
+
 			ComponentCount++;
 		}
-		PassCount++;
+		//  Record builder tasks to create dependency on previous phase
+		GraphBuilderTasks.Add(PassTasks);
 		
-		/// Ensure we track a passes tasksman 
-		PassTasks.Add(Tasks);
-	};//
+		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream.
+		FGraphEventRef CollectTask = TGraphTask<FNCollectPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
+			.ConstructAndHold(PassContextPtr, TaskGraphContextPtr);
+		CollectionTasks.Add(CollectTask);
+		AllTasks.Add(CollectTask);
+		
+		// Increment pass count for labeling
+		PassCount++;
+	};
 	
 	// TODO: Validate task to ensure generation is completable?
 	
-	// Create our finalizer task on the main thread
-	FinalizeTask = TGraphTask<FNProcGenOperationFinalizeTask>::CreateTask(&PassTasks.Last(), ENamedThreads::GameThread).ConstructAndHold(Operation, SharedContextPtr);
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::GameThread).ConstructAndHold(TaskGraphContextPtr);
+	FinalizerTasks.Add(SpawnCellProxiesTask);
+	AllTasks.Add(SpawnCellProxiesTask);
+	
+	// Create our finalizer task on the main thread that will wait for all of the other finalizers to complete
+	FinalizeTask = TGraphTask<FNProcGenFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr);
+	AllTasks.Add(FinalizeTask);
 }
 
 void FNProcGenTaskGraph::UnlockTasks()
 {
 	// Start running the tasks
-	for (const auto Tasks : PassTasks)
+	// We can unlock in order as they would have been created in order
+	for (const auto Task  : AllTasks)
 	{
-		for (const auto Task : Tasks)
-		{
-			Task->Unlock();
-		}
+		Task->Unlock();
 	}
-	FinalizeTask->Unlock();
-	
 	bTasksUnlocked = true;
 }
 
@@ -106,49 +116,17 @@ void FNProcGenTaskGraph::ResetGraph()
 	bTasksUnlocked = false;
 }
 
-int FNProcGenTaskGraph::GetTotalPasses() const
-{
-	return PassTasks.Num();
-}
-
-int FNProcGenTaskGraph::GetCompletedPasses()
-{
-	int CompletedPasses = 0;
-	for (auto Pass : PassTasks)
-	{
-		bool bPassComplete = true;
-		for (const FGraphEventRef& Task : Pass)
-		{
-			if (!Task->IsComplete())
-			{
-				bPassComplete = false;
-				break;
-			}
-		}
-		if (!bPassComplete)
-		{
-			break;
-		}
-		CompletedPasses++;
-	}
-	
-	return CompletedPasses;
-}
-
 FIntVector2 FNProcGenTaskGraph::GetTaskStatus() const
 {
 	int TotalTasks = 0;
 	int CompletedTasks = 0;
-	for (auto Pass : PassTasks)
+	for (const FGraphEventRef& Task  : AllTasks)
 	{
-		for (const FGraphEventRef& Task : Pass)
+		if (Task->IsComplete())
 		{
-			if (Task->IsComplete())
-			{
-				CompletedTasks++;
-			}
-			TotalTasks++;
+			CompletedTasks++;
 		}
+		TotalTasks++;
 	}
 	return FIntVector2(CompletedTasks, TotalTasks);
 }

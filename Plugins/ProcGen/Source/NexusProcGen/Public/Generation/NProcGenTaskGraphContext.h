@@ -4,6 +4,7 @@
 #pragma once
 #include "NProcGenOperationSettings.h"
 #include "Cell/NCellProxy.h"
+#include "Generation/Graph/NProcGenGraph.h"
 
 class FNProcGenTaskGraphContext
 {
@@ -22,6 +23,12 @@ public:
 	 * Operation-specific settings effecting the behavior of some bits of the graph.
 	 */
 	FNProcGenOperationSettings OperationSettings;
+	
+	void TakeGraph(TUniquePtr<FNProcGenGraph> Graph)
+	{
+		Graphs.Add(MoveTemp(Graph));
+	}
+	TArray<TUniquePtr<FNProcGenGraph>> Graphs;
 	
 	explicit FNProcGenTaskGraphContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings);
 };

@@ -37,7 +37,7 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	friend class FNProcGenEdMode;
 	
 	friend struct FNOrganGeneratorFinalizeTask;
-	friend struct FNProcGenOperationFinalizeTask;
+	friend struct FNProcGenFinalizeTask;
 	
 	GENERATED_BODY()
 

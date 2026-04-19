@@ -6,7 +6,7 @@
 #include "Generation/NBoneInputData.h"
 #include "Generation/Graph/NProcGenGraph.h"
 #include "Generation/NCellInputData.h"
-#include "Generation/Tasks/NProcGenGraphBuilderAnalytics.h"
+#include "Generation/Tasks/NOrganGraphBuilderAnalytics.h"
 #include "Collections/NWeightedIntegerArray.h"
 
 struct FNProcGenOperationOrganContext;
@@ -21,14 +21,14 @@ struct FNCellInputDataFilter
 	FQuat SourceQuat = FQuat();
 };
 
-class FNProcGenGraphBuilderContext
+class FNOrganGraphBuilderContext
 {
 	//friend struct FNOrganGeneratorTask;
 	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
 	
-	FNProcGenGraphBuilderAnalytics Analytics;
+	//FNProcGenGraphBuilderAnalytics Analytics;
 	
 	int32 MinimumCellCount = -1;
 	int32 MaximumCellCount = -1;
@@ -43,16 +43,19 @@ public:
 	
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 	
-	FNProcGenGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
-	~FNProcGenGraphBuilderContext();
+	FNOrganGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
+	~FNOrganGraphBuilderContext();
 	
 	uint64 GetSeed() const { return Seed; };
+	const FString& GetName() { return Name; };
+	
+	
 	bool IsSuccessful() const { return bSuccessful; };
 	bool IsValid() const { return bIsValid; };
 	
 	bool CheckGraph() const;
 	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
-	bool ResetForRetry();
+	bool ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics);
 	bool ValidateGraph();
 	
 private:

@@ -3,17 +3,15 @@
 
 #pragma once
 
-#include "Generation/NOrganGeneratorPassContext.h"
-#include "Generation/Tasks/NProcGenGraphBuilderContext.h"
+#include "NCollectPassContext.h"
+#include "Generation/Tasks/NOrganGraphBuilderContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
-#include "Generation/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
-struct FNProcGenGraphBuilderTask
+struct FNOrganGraphBuilderTask
 {
-	explicit FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr, 
-		const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
-		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
+	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr, 
+		const TSharedPtr<FNCollectPassContext>& PassContextPtr);
     
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
     
@@ -23,7 +21,12 @@ struct FNProcGenGraphBuilderTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-
+	
+	TSharedRef<FNOrganGraphBuilderContext> ContextPtr;
+	TSharedRef<FNCollectPassContext> PassContextPtr;
+	
+	mutable FNOrganGraphBuilderAnalytics Analytics;
+	
 	void StartGraph(FNMersenneTwister& Random) const;
 	
 	TArray<FNProcGenGraphCellNode*> CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const;
@@ -31,8 +34,4 @@ private:
 	
 	TArray<FNProcGenGraphNode*> ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const;
 	TArray<FNProcGenGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const;
-	
-	TSharedRef<FNProcGenGraphBuilderContext> Context;
-	TSharedRef<FNOrganGeneratorPassContext> PassContext;
-	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext;
 };

@@ -8,10 +8,9 @@
 
 class UNProcGenOperation;
 
-struct FNProcGenCreateProxiesTask
+struct FNSpawnCellProxiesTask
 {
-	explicit FNProcGenCreateProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
-	~FNProcGenCreateProxiesTask();
+	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
 	
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenCreateProxiesTask, STATGROUP_TaskGraphTasks); }
     

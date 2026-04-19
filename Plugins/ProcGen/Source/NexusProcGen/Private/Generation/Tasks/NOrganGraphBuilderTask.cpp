@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Tasks/NProcGenGraphBuilderTask.h"
+#include "Generation/Tasks/NOrganGraphBuilderTask.h"
 
 #include "NProcGenMinimal.h"
 #include "Generation/Graph/NProcGenGraphBoneNode.h"
@@ -9,35 +9,37 @@
 #include "Generation/Graph/NProcGenGraphNodeFactory.h"
 #include "Math/NMersenneTwister.h"
 
-FNProcGenGraphBuilderTask::FNProcGenGraphBuilderTask(const TSharedPtr<FNProcGenGraphBuilderContext>& ContextPtr,
-	const TSharedPtr<FNOrganGeneratorPassContext>& PassContextPtr,
-	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
-	: Context(ContextPtr.ToSharedRef()), PassContext(PassContextPtr.ToSharedRef()), TaskGraphContext(TaskGraphContextPtr.ToSharedRef())
+FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr,
+	const TSharedPtr<FNCollectPassContext>& PassContextPtr)
+	: ContextPtr(ContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef())
 {
 }
 
-void FNProcGenGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
+void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	// The context was not validated during creation, so we cannot process it
-	if (!Context->IsValid()) return;
+	if (!ContextPtr->IsValid()) return;
 	
 	// Create our deterministic random for the task which will get passed byref to sub-methods
-	FNMersenneTwister Random(Context->GetSeed());
+	FNMersenneTwister Random(ContextPtr->GetSeed());
 	
 	
-	while (!Context->IsSuccessful())
+	while (!ContextPtr->IsSuccessful())
 	{
 		// Find the bone and build our starting cell
 		StartGraph(Random);
 	
 		// Check for start placement
-		int NodeCount = Context->CellGraph->GetNodeCount();
+		int NodeCount = ContextPtr->CellGraph->GetNodeCount();
 		if (NodeCount == 0) { return; }
 	
+		// Initialize Analytics
+		Analytics.Init(ContextPtr->GetName(), ContextPtr->MinimumCellCount, ContextPtr->MaximumCellCount, ContextPtr->MaximumRetryCount);
+		
 		
 		// TODO: Create better logic for placement / etc.
 		// #START Temp Generation -------------------------------------------------------------------------------------------------------------------
-		TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, Context->CellGraph->GetLastNode());
+		TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, ContextPtr->CellGraph->GetLastNode());
 		for (int i = 0; i < 5; i++)
 		{
 			TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
@@ -52,9 +54,9 @@ void FNProcGenGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const 
 			}
 		}
 	
-		if (Context->CellGraph->GetNodeCount() < 10)
+		if (ContextPtr->CellGraph->GetNodeCount() < 10)
 		{
-			TArray<FNProcGenGraphNode*> OpenNodes = Context->CellGraph->GetNodesWithOpenJunctions();
+			TArray<FNProcGenGraphNode*> OpenNodes = ContextPtr->CellGraph->GetNodesWithOpenJunctions();
 			for (int j = 0; j < OpenNodes.Num(); j++)
 			{
 				ProcessNode(Random, OpenNodes[j]);
@@ -65,17 +67,25 @@ void FNProcGenGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
 		// The bSuccessful flag gets set at this point, but if it isn't valid we then need to take our chances and regenerate,
 		// but only if we have not run out of attempts.
-		if (!Context->ValidateGraph() && !Context->ResetForRetry())
+		if (!ContextPtr->ValidateGraph() && !ContextPtr->ResetForRetry(Analytics))
 		{
 			break;
 		}
 	}
+	
+	Analytics.OutputToLog();
+	
+	// Only hand off graph if it's good
+	if (ContextPtr->IsSuccessful())
+	{
+		PassContextPtr->TakeGraph(MoveTemp(ContextPtr->CellGraph));
+	}
 }
 
-void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
+void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 {
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
-	FNBoneInputData& BoneData = Context->BoneInputData[0];
+	FNBoneInputData& BoneData = ContextPtr->BoneInputData[0];
 	
 	FNCellInputDataFilter PreFilter;
 	PreFilter.SocketSize = BoneData.SocketSize;
@@ -84,7 +94,7 @@ void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
-	Context->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
+	ContextPtr->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
 	
 	// Unable to generate
 	if (WeightedStartIndices.Count() == 0)
@@ -95,7 +105,7 @@ void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 	
 	// Get a weighted array of indices representing possible starting cells, and reference the cell data
 	const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
-	FNCellInputData StartCellInputData = Context->CellInputData[StartCellIndex];
+	FNCellInputData StartCellInputData = ContextPtr->CellInputData[StartCellIndex];
 	
 	// Decide which appropriately sized junction is going to be used
 	TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
@@ -119,22 +129,22 @@ void FNProcGenGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 	FNProcGenGraphBoneNode* BoneNode = FNProcGenGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
 	
 	// Create our graph
-	Context->CellGraph = MakeUnique<FNProcGenGraph>(
-		BoneNode, Context->Origin, Context->Bounds, Context->bUnbounded);
+	ContextPtr->CellGraph = MakeUnique<FNProcGenGraph>(
+		BoneNode, ContextPtr->Origin, ContextPtr->Bounds, ContextPtr->bUnbounded);
 	
 	// Create our first cell node, attaching it to the bone node
 	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(&StartCellInputData, CellWorldPosition, CellWorldRotation);
-	Context->CellGraph->RegisterNode(StartNode);
+	ContextPtr->CellGraph->RegisterNode(StartNode);
 	
 	// Link our nodes
 	BoneNode->Link(StartNode);
 	StartNode->Link(TargetJunctionKey, BoneNode);
 }
 
-TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
+TArray<FNProcGenGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
 {
 	TArray<FNProcGenGraphCellNode*> HitNodes;
-	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
+	for (const auto RegisteredNode : ContextPtr->CellGraph->GetNodes())
 	{
 		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
 
@@ -147,10 +157,10 @@ TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeBounds(FNPro
 	return MoveTemp(HitNodes);
 }
 
-TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeHull(FNProcGenGraphCellNode* NewNode) const
+TArray<FNProcGenGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNProcGenGraphCellNode* NewNode) const
 {
 	TArray<FNProcGenGraphCellNode*> HitNodes;
-	for (const auto RegisteredNode : Context->CellGraph->GetNodes())
+	for (const auto RegisteredNode : ContextPtr->CellGraph->GetNodes())
 	{
 		if (RegisteredNode->GetNodeType() != ENProcGenGraphNodeType::Cell) continue;
 
@@ -163,7 +173,7 @@ TArray<FNProcGenGraphCellNode*> FNProcGenGraphBuilderTask::CheckNodeHull(FNProcG
 	return MoveTemp(HitNodes);
 }
 
-TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
+TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNProcGenGraphNode* SourceNode) const
 {
 	switch (SourceNode->GetNodeType())
 	{
@@ -178,7 +188,7 @@ TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessNode(FNMersenneTwi
 	return TArray<FNProcGenGraphNode*>();
 }
 
-TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
+TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
 {
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
 	TArray<FNProcGenGraphNode*> NewNodes;
@@ -195,15 +205,15 @@ TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenn
 		FNCellInputDataFilter NodeFilter;
 		NodeFilter.SocketSize = Junction.Value->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
-		Context->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
+		ContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
 		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
 		if (CellInputWeightedIndices.Count() == 0)
 		{
 			// TODO: We will later go back and fill this with something.
 			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->WorldLocation, Junction.Value->WorldRotation);
-			Context->Analytics.AddedNullNode();
-			Context->CellGraph->RegisterNode(NullNode);
+			Analytics.AddedNullNode();
+			ContextPtr->CellGraph->RegisterNode(NullNode);
 			
 			SourceCellNode->Link(Junction.Key, NullNode);
 			NullNode->Link(SourceCellNode);
@@ -212,7 +222,7 @@ TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenn
 		
 		// Pick our cell to use to spawn
 		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
-		FNCellInputData CellInputData = Context->CellInputData[CellInputIndex];
+		FNCellInputData CellInputData = ContextPtr->CellInputData[CellInputIndex];
 		
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
@@ -234,12 +244,12 @@ TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenn
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
 		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
-		if (!Context->bUnbounded)
+		if (!ContextPtr->bUnbounded)
 		{
-			const FBox ContextBoundsBox = Context->Bounds.GetBox();
+			const FBox ContextBoundsBox = ContextPtr->Bounds.GetBox();
 			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 			{
-				Context->Analytics.DiscardOutOfBounds();
+				Analytics.DiscardOutOfBounds();
 				delete TargetCellNode;
 				continue;
 			}
@@ -260,15 +270,15 @@ TArray<FNProcGenGraphNode*> FNProcGenGraphBuilderTask::ProcessCellNode(FNMersenn
 		if (BoundsIntersectingNodes.Num() == 0)
 		{
 			// We've passed validation, lets register it and move on
-			Context->CellGraph->RegisterNode(TargetCellNode);
+			ContextPtr->CellGraph->RegisterNode(TargetCellNode);
 			SourceCellNode->Link(Junction.Key, TargetCellNode);
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
-			Context->Analytics.AddedCellNode();
+			Analytics.AddedCellNode();
 			NewNodes.Add(TargetCellNode);
 		}
 		else
 		{
-			Context->Analytics.DiscardIntersecting();
+			Analytics.DiscardIntersecting();
 			delete TargetCellNode;
 		}
 	}

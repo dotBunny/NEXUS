@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Tasks/NProcGenGraphBuilderContext.h"
+#include "Generation/Tasks/NOrganGraphBuilderContext.h"
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCell.h"
@@ -10,7 +10,7 @@
 #include "Generation/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNProcGenGraphBuilderContext::FNProcGenGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
@@ -22,10 +22,6 @@ FNProcGenGraphBuilderContext::FNProcGenGraphBuilderContext(const FNProcGenOperat
 	MaximumRetryCount = GeneratorContextMap->MaximumRetryCount;
 	
 	bUnbounded = GeneratorContextMap->SourceComponent->bUnbounded;
-	
-	// Assign our task name for reference
-	Analytics.Init(TaskName, MinimumCellCount, MaximumCellCount, MaximumRetryCount);
-	
 	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
 	if (!bUnbounded && GeneratorContextMap->SourceComponent->IsVolumeBased())
@@ -41,7 +37,6 @@ FNProcGenGraphBuilderContext::FNProcGenGraphBuilderContext(const FNProcGenOperat
 		Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		Origin = FVector::ZeroVector;
 	}
-	
 
 	
 	// Build a safe reference to all the data so we can operate off-thread without issue
@@ -152,7 +147,7 @@ FNProcGenGraphBuilderContext::FNProcGenGraphBuilderContext(const FNProcGenOperat
 	bIsValid = true;
 }
 
-FNProcGenGraphBuilderContext::~FNProcGenGraphBuilderContext()
+FNOrganGraphBuilderContext::~FNOrganGraphBuilderContext()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
@@ -163,7 +158,7 @@ FNProcGenGraphBuilderContext::~FNProcGenGraphBuilderContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-bool FNProcGenGraphBuilderContext::CheckGraph() const
+bool FNOrganGraphBuilderContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
 	int CellNodeCount = 0;
@@ -190,13 +185,13 @@ bool FNProcGenGraphBuilderContext::CheckGraph() const
 	return true;
 }
 
-bool FNProcGenGraphBuilderContext::ValidateGraph()
+bool FNOrganGraphBuilderContext::ValidateGraph()
 {
 	bSuccessful = CheckGraph();
 	return bSuccessful;
 }
 
-void FNProcGenGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
+void FNOrganGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
 	JunctionIndices.Empty();
@@ -257,7 +252,7 @@ void FNProcGenGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilt
 	}
 }
 
-bool FNProcGenGraphBuilderContext::ResetForRetry()
+bool FNOrganGraphBuilderContext::ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics)
 {
 	// Reset counters
 	for (int i = 0; i < CellInputData.Num(); i++)

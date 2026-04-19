@@ -5,11 +5,8 @@
 
 #include "NProcGenMinimal.h"
 
-struct FNProcGenGraphBuilderAnalytics
+struct FNOrganGraphBuilderAnalytics
 {
-
-	
-	
 	void AddedNullNode()
 	{
 		NullNodes++;
@@ -34,7 +31,7 @@ struct FNProcGenGraphBuilderAnalytics
 		CellNodes = 0;
 		NullNodes = 0;
 	}
-	
+
 	void Init(FString Name, const int MinimumCells, const int MaximumCells, const int MaximumRetries)
 	{
 		DisplayName = Name;
@@ -42,10 +39,11 @@ struct FNProcGenGraphBuilderAnalytics
 		InputMaximumCells = MaximumCells;
 		InputMaximumRetries = MaximumRetries;
 	}
-	
+
 	void OutputToLog() const
 	{
 		FStringBuilderBase Builder = FStringBuilderBase();
+
 		Builder.Appendf(TEXT("\n[FNOrganGeneratorTaskAnalytics] %s\n"), *DisplayName);
 		Builder.Append(TEXT("\tResets:\n"));
 		Builder.Appendf(TEXT("\t\tRetry Count: %i/%i\n"), RetryCount, InputMaximumRetries);
@@ -55,6 +53,7 @@ struct FNProcGenGraphBuilderAnalytics
 		Builder.Append(TEXT("\tDiscarded Nodes:\n"));
 		Builder.Appendf(TEXT("\t\tOut Of Bounds: %i (%i)\n"), DiscardedOutOfBoundsNodes, TotalDiscardedOutOfBoundsNodes);
 		Builder.Appendf(TEXT("\t\tIntersecting: %i (%i)\n"), DiscardedIntersectingNodes, TotalDiscardedIntersectingNodes);
+
 		UE_LOG(LogNexusProcGen, Log, TEXT("%s"), Builder.ToString());
 	}
 
@@ -74,7 +73,6 @@ private:
 	int TotalNullNodes = 0;
 	int TotalDiscardedOutOfBoundsNodes = 0;
 	int TotalDiscardedIntersectingNodes = 0;
-	
+
 	FString DisplayName;
-	
 };
