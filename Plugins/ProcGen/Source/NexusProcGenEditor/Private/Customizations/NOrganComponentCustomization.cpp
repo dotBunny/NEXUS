@@ -92,13 +92,13 @@ FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObj
 FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Object);
-	TArray<FName> UniqueGenerations;
+	TArray<FGuid> UniqueGenerations;
 	for (auto Component : OrganComponents)
 	{
-		FName LastGenerationName = Component->GetAndResetGenerationOperationKey();
-		if (LastGenerationName != NAME_None && !UniqueGenerations.Contains(LastGenerationName))
+		FGuid LastGuid = Component->GetAndResetOperationIdentifier();
+		if (LastGuid.IsValid() && !UniqueGenerations.Contains(LastGuid))
 		{
-			UniqueGenerations.Add(LastGenerationName);
+			UniqueGenerations.Add(LastGuid);
 		}
 	}
 	for (auto Key : UniqueGenerations)

@@ -98,6 +98,7 @@ public:
 	const FText& GetDisplayName() const { return DisplayName; }
 	const FString& GetDisplayMessage() const { return DisplayMessage; }
 	void SetDisplayMessage(FString NewDisplayMessage);
+	const FGuid& GetGuid() const { return Guid; }
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnNProcGenOperationDisplayMessageChanged OnDisplayMessageChanged;
@@ -125,4 +126,6 @@ private:
 
 	int CachedTotalTasks = 0;
 	int CachedCompletedTasks = 0;
+	
+	FGuid Guid = FGuid::NewGuid();
 };

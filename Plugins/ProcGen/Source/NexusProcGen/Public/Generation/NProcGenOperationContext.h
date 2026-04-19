@@ -17,6 +17,7 @@ class UNOrganComponent;
  */
 class NEXUSPROCGEN_API FNProcGenOperationContext
 {
+	friend class UNProcGenOperation;
 public:
 	
 	TArray<UNOrganComponent*> InputComponents;
@@ -38,6 +39,7 @@ public:
 	const FNProcGenOperationSettings& GetOperationSettings() { return OperationSettings; }
 	
 private:
+	FGuid OperationIdentifier;
 	FNProcGenOperationSettings OperationSettings;
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;

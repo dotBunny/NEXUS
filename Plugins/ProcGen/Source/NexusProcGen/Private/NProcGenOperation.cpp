@@ -11,6 +11,7 @@
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	Context = MakeUnique<FNProcGenOperationContext>();
+	Context->OperationIdentifier = Guid;
 	
 	// A generator should never be deleted
 	this->AddToRoot();
@@ -29,7 +30,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	{
 		Operation->AddToContext(Component);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -42,7 +44,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		Operation->AddToContext(Organ);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -52,7 +55,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
 	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Seed(%s)"), *Operation->DisplayName.ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -141,7 +145,7 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext>
 	
 	for (const auto Component : Context->InputComponents)
 	{
-		Component->SetLastGenerationOperationKey(this->GetFName());
+		Component->SetLastOperationIdentifier(GetGuid());
 	}
 	
 	// Were going to delete this object

@@ -76,14 +76,16 @@ public:
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
-	void SetLastGenerationOperationKey(const FName Key) { LastGenerationOperationKey = Key; }
-	FName GetLastGenerationOperationKey() const { return LastGenerationOperationKey; }
-	FName GetAndResetGenerationOperationKey()
+	void SetLastOperationIdentifier(const FGuid& Guid) { LastGenerationIdentifier = Guid; }
+	const FGuid& GetLastOperationIdentifier() const { return LastGenerationIdentifier; }
+	FGuid GetAndResetOperationIdentifier()
 	{
-		FName ReturnName = LastGenerationOperationKey;
-		LastGenerationOperationKey = NAME_None;
-		return MoveTemp(ReturnName);
+		FGuid ReturnIdentifier = LastGenerationIdentifier;
+		LastGenerationIdentifier.Invalidate();
+		return MoveTemp(ReturnIdentifier);
 	}
+	
+	
 
 protected:
 
@@ -93,5 +95,5 @@ protected:
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
 	
 private:	
-	FName LastGenerationOperationKey = NAME_None;
+	FGuid LastGenerationIdentifier;
 };

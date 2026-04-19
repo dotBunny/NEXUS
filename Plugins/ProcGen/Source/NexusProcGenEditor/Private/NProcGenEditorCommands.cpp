@@ -390,7 +390,7 @@ void FNProcGenEditorCommands::OrganClearGenerated()
 	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
 	for (UNOrganComponent* Component : SelectedOrganComponents)
 	{
-		Subsystem->ClearGenerated(Component->GetAndResetGenerationOperationKey());
+		Subsystem->ClearGenerated(Component->GetAndResetOperationIdentifier());
 	}
 }
 
@@ -405,7 +405,7 @@ void FNProcGenEditorCommands::OrganLoadProxyLevels()
 	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
 	for (const UNOrganComponent* Component : SelectedOrganComponents)
 	{
-		Subsystem->LoadGeneratedProxies(Component->GetLastGenerationOperationKey());
+		Subsystem->LoadGeneratedProxies(Component->GetLastOperationIdentifier());
 	}
 }
 
@@ -420,7 +420,7 @@ void FNProcGenEditorCommands::OrganUnloadProxyLevels()
 	UNProcGenEditorSubsystem* Subsystem = UNProcGenEditorSubsystem::Get();
 	for (const UNOrganComponent* Component : SelectedOrganComponents)
 	{
-		Subsystem->UnloadGeneratedProxies(Component->GetLastGenerationOperationKey());
+		Subsystem->UnloadGeneratedProxies(Component->GetLastOperationIdentifier());
 	}
 }
 

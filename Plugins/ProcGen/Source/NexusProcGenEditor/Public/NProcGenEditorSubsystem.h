@@ -60,12 +60,12 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
 	
 	void ClearAllProxies();
-	void ClearGenerated(const FName& Key);
-	void ClearGeneratedProxies(const FName& Key);
+	void ClearGenerated(const FGuid& Guid);
+	void ClearGeneratedProxies(const FGuid& Guid);
 	void LoadAllGeneratedProxies();
-	void LoadGeneratedProxies(const FName& Key);
+	void LoadGeneratedProxies(const FGuid& Guid);
 	void UnloadAllGeneratedProxies();
-	void UnloadGeneratedProxies(const FName& Key);
+	void UnloadGeneratedProxies(const FGuid& Guid);
 	
 protected:
 	void OnPreBeginPIE(bool bArg);
@@ -85,7 +85,7 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
 	
-	TMap<FName, TArray<ANCellProxy*>> ProxyMap;
+	TMap<FGuid, TArray<ANCellProxy*>> ProxyMap;
 	
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;
 	

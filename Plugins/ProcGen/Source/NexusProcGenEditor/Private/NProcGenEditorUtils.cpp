@@ -124,7 +124,7 @@ bool FNProcGenEditorUtils::HasSelectedGeneratedCellProxies()
 	TArray<UNOrganComponent*> OrganComponents = FNProcGenEditorUtils::GetSelectedOrganComponents();
 	for (UNOrganComponent* OrganComponent : OrganComponents)
 	{
-		if (OrganComponent->GetLastGenerationOperationKey() != NAME_None)
+		if (OrganComponent->GetLastOperationIdentifier().IsValid())
 		{
 			return true;
 		}

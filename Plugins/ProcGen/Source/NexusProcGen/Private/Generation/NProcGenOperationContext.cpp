@@ -233,13 +233,16 @@ void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 	Builder.Append(TEXT("\n[FNOrganContext] "));
 	if (!OperationSettings.DisplayName.IsEmpty())
 	{
-		Builder.Append(*OperationSettings.DisplayName.ToString());
-		Builder.Append(TEXT(" "));
+		Builder.Appendf(TEXT("%s|%s"), *OperationSettings.DisplayName.ToString(), *OperationIdentifier.ToString());
+	}
+	else
+	{
+		Builder.Appendf(TEXT("%s"), *OperationIdentifier.ToString());
 	}
 	
 	if (bIsLocked)
 	{
-		Builder.Append(TEXT("LOCKED\n"));
+		Builder.Append(TEXT(" LOCKED\n"));
 	}
 	else
 	{
