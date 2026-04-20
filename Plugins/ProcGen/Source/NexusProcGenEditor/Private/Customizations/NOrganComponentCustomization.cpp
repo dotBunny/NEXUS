@@ -16,18 +16,18 @@ TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 
 void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
-	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Actions"),
-		FText::GetEmpty(), ECategoryPriority::Important);
+	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Organ Component"),
+FText::FromString("Organ Component"), ECategoryPriority::Important);
 
 	TArray<TWeakObjectPtr<UObject>> ObjectsBeingCustomized;
 	DetailBuilder.GetObjectsBeingCustomized(ObjectsBeingCustomized);
 	
-	FDetailWidgetRow& NewRow = NexusCategory.AddCustomRow(FText::FromString("actions"));
+	FDetailWidgetRow& NewRow = NexusCategory.AddCustomRow(FText::FromString("Actions"));
 	
 	NewRow.NameContent()
 		[
 			SNew(STextBlock)
-				.Text(NSLOCTEXT("NexusProcGenEditor", "OrganComponent", "Organ"))
+				.Text(NSLOCTEXT("NexusProcGenEditor", "OrganActions", "Actions"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 		];
 	NewRow.ValueContent()

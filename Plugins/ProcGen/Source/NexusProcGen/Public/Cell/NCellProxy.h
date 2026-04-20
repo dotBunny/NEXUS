@@ -47,26 +47,23 @@ private:
 	void Hide() const;
 	void CreateCollisionMesh() const;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UDynamicMeshComponent> Mesh;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UNCell> NCell;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<ANCellActor> NCellActor;
-
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<ANCellLevelInstance> LevelInstance;
 	
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	uint32 OperationTicket = 0;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 
 	// TODO: if we want to replicate we need to make a FastArraySerializer
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TMap<int32, FNCellJunctionDetails> JunctionsData;
 	
 	N_WORLD_ICON_HEADER()

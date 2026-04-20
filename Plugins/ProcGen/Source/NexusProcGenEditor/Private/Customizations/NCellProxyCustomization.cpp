@@ -17,8 +17,8 @@ TSharedRef<IDetailCustomization> FNCellProxyCustomization::MakeInstance()
 void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
 	// Create or get the category
-	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Actions"),
-		FText::FromString("actions"), ECategoryPriority::Important);
+	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Cell Proxy"),
+		FText::FromString("Cell Proxy"), ECategoryPriority::Important);
 
 	// Figure out if we are editing multiple objects, in this case we don't want a special inspector if 
 	// more then one of the components is selected.
@@ -78,7 +78,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 		.NameContent()
 		[
 			SNew(STextBlock)
-				.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyActions", "Proxy"))
+				.Text(NSLOCTEXT("NexusProcGenEditor", "ProxyActions", "Actions"))
 				.Font(IDetailLayoutBuilder::GetDetailFont())
 		]
 		.ValueContent().MinDesiredWidth(500)
