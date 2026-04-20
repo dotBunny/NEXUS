@@ -3,8 +3,9 @@
 
 #include "Generation/NProcGenTaskGraphContext.h"
 
-FNProcGenTaskGraphContext::FNProcGenTaskGraphContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings)
+FNProcGenTaskGraphContext::FNProcGenTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNProcGenOperationSettings& Settings)
 {
+	this->OperationTicket = OperationTicket;
 	TargetWorld = OutputWorld;
 	OperationSettings = Settings;
 	

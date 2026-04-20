@@ -5,6 +5,7 @@
 #include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
 
+class ANCellLevelInstance;
 class UNOrganComponent;
 class UNCellJunctionComponent;
 class UNCellRootComponent;
@@ -33,18 +34,21 @@ public:
 	static bool HasOrganComponents();
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	static bool HasOperations();
+	static bool HasCellLevelInstances(uint32 OperationTicket = 0);
 	
 	static bool RegisterBoneComponent(UNBoneComponent* Component);
 	static bool RegisterCellRootComponent(UNCellRootComponent* Component);
 	static bool RegisterCellJunctionComponent(UNCellJunctionComponent* Component);
 	static bool RegisterOrganComponent(UNOrganComponent* Organ);
 	static bool RegisterOperation(UNProcGenOperation* Operation);
+	static bool RegisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance);
 	
 	static bool UnregisterBoneComponent(UNBoneComponent* Component);
 	static bool UnregisterCellRootComponent(UNCellRootComponent* Component);
 	static bool UnregisterCellJunctionComponent(UNCellJunctionComponent* Component);
 	static bool UnregisterOrganComponent(UNOrganComponent* Organ);
 	static bool UnregisterOperation(UNProcGenOperation* Operation);
+	static bool UnregisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance);
 	
 	static TArray<UNProcGenOperation*>& GetOperations() { return Operations; }
 	
@@ -56,11 +60,11 @@ private:
 		UE_CLOG(NewState != ENProcGenOperationState::Registered, LogNexusProcGen, Log, TEXT("[%s] Changed State(%s)"), *Operation->GetDisplayName().ToString(), *UNProcGenOperation::GetStringFromState(NewState));
 		OnOperationStateChanged.Broadcast(Operation, NewState);
 	}
-
 	
 	static TArray<UNBoneComponent*> Bones;
 	static TArray<UNCellRootComponent*> CellRoots;
 	static TArray<UNCellJunctionComponent*> CellJunctions;
 	static TArray<UNOrganComponent*> Organs;
 	static TArray<UNProcGenOperation*> Operations;
+	static TMap<uint32, TArray<ANCellLevelInstance*>> CellLevelInstances;
 };

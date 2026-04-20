@@ -14,6 +14,11 @@ FNSpawnCellProxiesTask::FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGra
 void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	const FNProcGenOperationSettings& Settings = TaskGraphContextPtr->OperationSettings;
+	const bool bPreLoadLevelInstances = Settings.bPreLoadLevelInstances;
+	const bool bCreateLevelInstances  = Settings.bCreateLevelInstances;
+	const bool bLoadLevelInstances = Settings.bLoadLevelInstances;
+	UWorld* TargetWorld = TaskGraphContextPtr->TargetWorld;
+	const uint32 OperationTicket = TaskGraphContextPtr->OperationTicket;
 	
 	// Iterate over all graphs that we have had generate
 	for (const TUniquePtr<FNProcGenGraph>& Graph : TaskGraphContextPtr->Graphs)
@@ -23,22 +28,22 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		{
 			if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
 			{
-				FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+				const FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
 				
 				// Spawn proxy instance
-				ANCellProxy* Proxy = ANCellProxy::CreateInstance(TaskGraphContextPtr->TargetWorld, CellNode, Settings.bPreLoadLevelInstances);
+				ANCellProxy* Proxy = ANCellProxy::CreateInstance(TargetWorld, OperationTicket, CellNode, bPreLoadLevelInstances);
 		
 				// Registered with global?
 				TaskGraphContextPtr->CreatedProxies.Add(Proxy);
 			
 				// What about creating the instance?
-				if  (Settings.bCreateLevelInstances)
+				if  (bCreateLevelInstances)
 				{
 					Proxy->CreateLevelInstance();
 				}
 			
 				// Do we want to load these now?
-				if (Settings.bLoadLevelInstances)
+				if (bLoadLevelInstances)
 				{
 					Proxy->LoadLevelInstance();
 				}

@@ -5,6 +5,7 @@
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCellJunctionComponent.h"
+#include "Cell/NCellLevelInstance.h"
 #include "Cell/NCellRootComponent.h"
 #include "Organ/NOrganComponent.h"
 
@@ -15,6 +16,7 @@ TArray<UNOrganComponent*> FNProcGenRegistry::Organs;
 
 TArray<UNProcGenOperation*> FNProcGenRegistry::Operations;
 FOnNProcGenOperationStateChanged FNProcGenRegistry::OnOperationStateChanged;
+TMap<uint32, TArray<ANCellLevelInstance*>> FNProcGenRegistry::CellLevelInstances;
 
 TArray<UNCellJunctionComponent*> FNProcGenRegistry::GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted)
 {
@@ -127,6 +129,20 @@ bool FNProcGenRegistry::HasOperations()
 	return Operations.Num() > 0;
 }
 
+bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket)
+{
+	if (OperationTicket == 0)
+	{
+		return CellLevelInstances.Num() > 0;
+	}
+	
+	if (CellLevelInstances.Contains(OperationTicket))
+	{
+		return CellLevelInstances[OperationTicket].Num() > 0;
+	}
+	return false;
+}
+
 bool FNProcGenRegistry::RegisterBoneComponent(UNBoneComponent* Component)
 {
 	if (Bones.Contains(Component))
@@ -189,6 +205,27 @@ bool FNProcGenRegistry::RegisterOperation(UNProcGenOperation* Operation)
 	return true;
 }
 
+bool FNProcGenRegistry::RegisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
+{
+	
+	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
+	if (!CellLevelInstances.Contains(OperationTicket))
+	{
+		CellLevelInstances.Add(OperationTicket, TArray<ANCellLevelInstance*>());
+		CellLevelInstances[OperationTicket].Add(CellLevelInstance);
+		return true;
+	}
+	
+	if (CellLevelInstances[OperationTicket].Contains(CellLevelInstance))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellLevelInstance(%s) as it already exists registered to OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
+		return false;
+	}
+	
+	CellLevelInstances[OperationTicket].Add(CellLevelInstance);
+	return true;
+}
+
 bool FNProcGenRegistry::UnregisterBoneComponent(UNBoneComponent* Component)
 {
 	if (!Bones.Contains(Component))
@@ -247,5 +284,28 @@ bool FNProcGenRegistry::UnregisterOperation(UNProcGenOperation* Operation)
 
 	Operations.RemoveSwap(Operation);
 	NotifyOfStateChange(Operation, ENProcGenOperationState::Unregistered);
+	return true;
+}
+
+bool FNProcGenRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
+{
+	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
+	if (!CellLevelInstances.Contains(OperationTicket))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find the OperationTicket(%i) for ANCellLevelInstance(%s) when attempting to unregister it."), OperationTicket, *CellLevelInstance->GetName());
+		return false;
+	}
+	
+	if (CellLevelInstances[OperationTicket].Contains(CellLevelInstance))
+	{
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellLevelInstance(%s) when attempting to unregister it from OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
+		return false;
+	}
+	
+	CellLevelInstances[OperationTicket].RemoveSwap(CellLevelInstance);
+	if (CellLevelInstances[OperationTicket].Num() == 0)
+	{
+		CellLevelInstances.Remove(OperationTicket);
+	}
 	return true;
 }

@@ -29,7 +29,7 @@ class NEXUSPROCGEN_API ANCellProxy : public AActor
 
 public:
 	
-	static ANCellProxy* CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, bool bPreLoadLevel = true);
+	static ANCellProxy* CreateInstance(UWorld* World, const uint32& OperationTicket, const FNProcGenGraphCellNode* CellNode, bool bPreLoadLevel = true);
 	
 	void CreateLevelInstance();
 	void LoadLevelInstance();
@@ -45,6 +45,7 @@ private:
 
 	void Show() const;
 	void Hide() const;
+	void CreateCollisionMesh() const;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDynamicMeshComponent> Mesh;
@@ -57,6 +58,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<ANCellLevelInstance> LevelInstance;
+	
+	UPROPERTY(VisibleAnywhere)
+	uint32 OperationTicket = 0;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;

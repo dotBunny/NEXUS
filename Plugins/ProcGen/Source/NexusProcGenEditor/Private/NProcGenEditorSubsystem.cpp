@@ -37,10 +37,10 @@ void UNProcGenEditorSubsystem::StartOperation(UNProcGenOperation* Operation)
 	// Clear for anything in operation
 	for (UNOrganComponent* Component :  Operation->Context->InputComponents)
 	{
-		FGuid Guid = Component->GetAndResetOperationIdentifier();
-		if (Guid.IsValid())
+		uint32 LastOperationTicket = Component->GetAndResetLastOperationTicket();
+		if (LastOperationTicket != 0)
 		{
-			ClearGenerated(Guid);
+			ClearGenerated(LastOperationTicket);
 		}
 	}
 	
@@ -54,7 +54,7 @@ void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation
 	{
 		KnownProxies.Add(Proxy);
 	}
-	ProxyMap.Add(Operation->GetGuid(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies)); // TODO : Check this copies?
+	ProxyMap.Add(Operation->GetTicket(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies)); // TODO : Check this copies?
 	KnownOperations.Remove(Operation);
 }
 
@@ -77,16 +77,16 @@ void UNProcGenEditorSubsystem::ClearAllProxies()
 	KnownProxies.Empty();
 }
 
-void UNProcGenEditorSubsystem::ClearGenerated(const FGuid& Guid)
+void UNProcGenEditorSubsystem::ClearGenerated(const uint32& OperationTicket)
 {
-	ClearGeneratedProxies(Guid);
+	ClearGeneratedProxies(OperationTicket);
 }
 
-void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FGuid& Guid)
+void UNProcGenEditorSubsystem::ClearGeneratedProxies(const uint32& OperationTicket)
 {
-	if (ProxyMap.Num() > 0 && ProxyMap.Contains(Guid))
+	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
-		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(Guid);
+		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
 		const int FoundCount = ProxiesArray.Num();
 		for (int i = 0; i < FoundCount; i++)
 		{
@@ -97,7 +97,7 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const FGuid& Guid)
 				ProxiesArray[i]->Destroy(true, false);
 			}
 		}
-		ProxyMap.Remove(Guid);
+		ProxyMap.Remove(OperationTicket);
 	}
 }
 
@@ -109,11 +109,11 @@ void UNProcGenEditorSubsystem::LoadAllGeneratedProxies()
 	}
 }
 
-void UNProcGenEditorSubsystem::LoadGeneratedProxies(const FGuid& Guid)
+void UNProcGenEditorSubsystem::LoadGeneratedProxies(const uint32& OperationTicket)
 {
-	if (ProxyMap.Num() > 0 && ProxyMap.Contains(Guid))
+	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
-		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(Guid);
+		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
 		const int FoundCount = ProxiesArray.Num();
 		for (int i = 0; i < FoundCount; i++)
 		{
@@ -126,7 +126,7 @@ void UNProcGenEditorSubsystem::UnloadAllGeneratedProxies()
 {
 	if (ProxyMap.Num() > 0)
 	{
-		TArray<FGuid> KnownKeys;
+		TArray<uint32> KnownKeys;
 		ProxyMap.GetKeys(KnownKeys);
 		for (auto Key : KnownKeys)
 		{
@@ -135,11 +135,11 @@ void UNProcGenEditorSubsystem::UnloadAllGeneratedProxies()
 	}
 }
 
-void UNProcGenEditorSubsystem::UnloadGeneratedProxies(const FGuid& Guid)
+void UNProcGenEditorSubsystem::UnloadGeneratedProxies(const uint32& OperationTicket)
 {
-	if (ProxyMap.Num() > 0 && ProxyMap.Contains(Guid))
+	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
-		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(Guid);
+		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
 		const int FoundCount = ProxiesArray.Num();
 		for (int i = 0; i < FoundCount; i++)
 		{

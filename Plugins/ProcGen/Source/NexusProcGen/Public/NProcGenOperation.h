@@ -98,7 +98,6 @@ public:
 	const FText& GetDisplayName() const { return DisplayName; }
 	const FString& GetDisplayMessage() const { return DisplayMessage; }
 	void SetDisplayMessage(FString NewDisplayMessage);
-	const FGuid& GetGuid() const { return Guid; }
 	
 	UPROPERTY(BlueprintAssignable)
 	FOnNProcGenOperationDisplayMessageChanged OnDisplayMessageChanged;
@@ -107,13 +106,15 @@ public:
 	FOnNProcGenOperationTasksChanged OnTasksChanged;
 
 	FIntVector2 GetCachedTasksStatus() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
-
+	uint32 GetTicket() const { return Ticket; }
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext);
 	FNProcGenTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
 	
 private:
+	static uint32 NextTicket;
+	
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	INProcGenOperationOwner* Owner = nullptr;
 	TUniquePtr<FNProcGenTaskGraph> TaskGraph;
@@ -127,5 +128,5 @@ private:
 	int CachedTotalTasks = 0;
 	int CachedCompletedTasks = 0;
 	
-	FGuid Guid = FGuid::NewGuid();
+	uint32 Ticket;
 };

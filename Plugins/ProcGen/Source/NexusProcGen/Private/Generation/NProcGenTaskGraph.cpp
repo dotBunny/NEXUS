@@ -4,6 +4,7 @@
 #include "Generation/NProcGenTaskGraph.h"
 
 #include "NProcGenMinimal.h"
+#include "NProcGenOperation.h"
 
 #include "Generation/NProcGenOperationContext.h"
 #include "Generation/Tasks/NCollectPassContext.h"
@@ -26,7 +27,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	
 	// We need something that each task can share context to others with
 	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
-		Context->GetTargetWorld(), Context->GetOperationSettings());
+		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
 	
 	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;

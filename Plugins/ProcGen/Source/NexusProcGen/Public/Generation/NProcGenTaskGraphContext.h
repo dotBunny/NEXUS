@@ -20,6 +20,11 @@ public:
 	TArray<ANCellProxy*> CreatedProxies;
 
 	/**
+	 * The operation identifier for this graph.
+	 */
+	uint32 OperationTicket;
+	
+	/**
 	 * Operation-specific settings effecting the behavior of some bits of the graph.
 	 */
 	FNProcGenOperationSettings OperationSettings;
@@ -28,7 +33,8 @@ public:
 	{
 		Graphs.Add(MoveTemp(Graph));
 	}
+	
 	TArray<TUniquePtr<FNProcGenGraph>> Graphs;
 	
-	explicit FNProcGenTaskGraphContext(UWorld* OutputWorld, const FNProcGenOperationSettings& Settings);
+	explicit FNProcGenTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNProcGenOperationSettings& Settings);
 };

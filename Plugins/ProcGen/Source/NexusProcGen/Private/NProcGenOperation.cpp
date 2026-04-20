@@ -8,10 +8,12 @@
 #include "Organ/NOrganComponent.h"
 #include "Generation/NProcGenTaskGraph.h"
 
+uint32 UNProcGenOperation::NextTicket = 1;
+
 UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Context = MakeUnique<FNProcGenOperationContext>();
-	Context->OperationIdentifier = Guid;
+	Ticket = NextTicket++;
+	Context = MakeUnique<FNProcGenOperationContext>(Ticket);
 	
 	// A generator should never be deleted
 	this->AddToRoot();
@@ -25,13 +27,14 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings)
 {
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
+	Operation->NextTicket = UNProcGenOperation::NextTicket;
 	Operation->ApplySettings(OperationSettings);
 	for (const auto Component : Components)
 	{
 		Operation->AddToContext(Component);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -44,8 +47,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		Operation->AddToContext(Organ);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%i) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -55,8 +58,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
 	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%s) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), *Operation->GetGuid().ToString(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"), 
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
 	return Operation;
 }
 
@@ -145,7 +148,7 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext>
 	
 	for (const auto Component : Context->InputComponents)
 	{
-		Component->SetLastOperationIdentifier(GetGuid());
+		Component->SetLastOperationTicket(GetTicket());
 	}
 	
 	// Were going to delete this object

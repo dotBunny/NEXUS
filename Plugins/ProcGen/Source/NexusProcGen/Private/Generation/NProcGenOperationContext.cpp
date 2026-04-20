@@ -11,6 +11,11 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
+FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
+{
+	OperationTicket = NewOperationTicket;
+}
+
 void FNProcGenOperationContext::ResetContext()
 {
 	OrganContext.Empty();
@@ -233,11 +238,11 @@ void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 	Builder.Append(TEXT("\n[FNOrganContext] "));
 	if (!OperationSettings.DisplayName.IsEmpty())
 	{
-		Builder.Appendf(TEXT("%s|%s"), *OperationSettings.DisplayName.ToString(), *OperationIdentifier.ToString());
+		Builder.Appendf(TEXT("%s|%i"), *OperationSettings.DisplayName.ToString(), OperationTicket);
 	}
 	else
 	{
-		Builder.Appendf(TEXT("%s"), *OperationIdentifier.ToString());
+		Builder.Appendf(TEXT("%i"), OperationTicket);
 	}
 	
 	if (bIsLocked)

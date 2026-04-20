@@ -11,6 +11,8 @@
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell LevelInstance")
 class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 {
+	friend class ANCellProxy;
+	
 	GENERATED_BODY()
 
 	explicit ANCellLevelInstance();
@@ -19,14 +21,17 @@ public:
 	TMap<int32, FNCellJunctionDetails>* JunctionData;
 	
 	virtual void OnLevelInstanceLoaded() override;
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
+	uint32 GetOperationTicket() const { return OperationTicket; }
 
+protected:
 	/**
-	 * Expose ability to set the CookedWorldAsset in build so that LevelInstance is able to load the level.
-	 * @note At author time we use the SetWorldAsset method, but that no-ops in build.
-	 * @param InWorldAsset World asset reference.
+	 * The replicated identifier that created this ANCellLevelInstance on the server.
 	 */
-	void SetCookedWorldAsset(const TSoftObjectPtr<UWorld> InWorldAsset)
-	{
-		CookedWorldAsset = InWorldAsset;
-	}
+	UPROPERTY(Replicated)
+	uint32 OperationTicket = 0;
+	
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

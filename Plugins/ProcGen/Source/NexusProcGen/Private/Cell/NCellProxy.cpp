@@ -48,7 +48,7 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusProcGen/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
-ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCellNode* CellNode, const bool bPreLoadLevel)
+ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationTicket, const FNProcGenGraphCellNode* CellNode, const bool bPreLoadLevel)
 {
 
 	FActorSpawnParameters SpawnInfo;
@@ -57,6 +57,9 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const FNProcGenGraphCell
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	
 	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), SpawnInfo);
+	
+	// Straight application of settings
+	Proxy->OperationTicket = OperationTicket;
 	
 	// Context initialization
 	Proxy->InitializeFromCellNode(CellNode);
@@ -96,6 +99,7 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
+	LevelInstance->OperationTicket = OperationTicket;
 	
 	// Apply relevancy flag to created actor
 	if (bAlwaysRelevant)
@@ -108,8 +112,7 @@ void ANCellProxy::CreateLevelInstance()
 	LevelInstance->SetWorldAsset(NCell->World);
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif // WITH_EDITOR
-	LevelInstance->SetCookedWorldAsset(NCell->World);
-	
+	LevelInstance->CookedWorldAsset = NCell->World;
 	// Add data for junction (not synced!!)
 
 	LevelInstance->JunctionData = &JunctionsData;
@@ -126,9 +129,6 @@ void ANCellProxy::LoadLevelInstance()
 	if (!LevelInstance->IsLoaded())
 	{
 		LevelInstance->LoadLevelInstance();
-
-		// TODO: Hook up Actor? / Root Component / Flag as being sapwned?
-		
 		Hide();
 	}
 }
@@ -177,22 +177,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	Mesh->SetCanEverAffectNavigation(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	// // Setup collision
-	// UBodySetup* BodySetup = Mesh->GetBodySetup();
-	// if (BodySetup != nullptr)
-	// {
-	// 	BodySetup->Modify();
-	// }
-	//
-	// FKConvexElem ConvexHull;
-	// ConvexHull.VertexData = NCell->Root.Hull.Vertices;
-	// ConvexHull.IndexData = NCell->Root.Hull.GetFlatIndices();
-	// ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
-	//
-	// FKAggregateGeom AggGeom;;
-	// AggGeom.ConvexElems.Add(ConvexHull);
-	//
-	// Mesh->SetSimpleCollisionShapes(AggGeom, true);		
+	
 
 	// Let's rock some colors
 	Mesh->WireframeColor = NCell->Root.ProxyColor;
@@ -226,4 +211,23 @@ void ANCellProxy::Hide() const
 {
 	Mesh->SetVisibility(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ANCellProxy::CreateCollisionMesh() const
+{
+	UBodySetup* BodySetup = Mesh->GetBodySetup();
+	if (BodySetup != nullptr)
+	{
+		BodySetup->Modify();
+	}
+	
+	FKConvexElem ConvexHull;
+	ConvexHull.VertexData = NCell->Root.Hull.Vertices;
+	ConvexHull.IndexData = NCell->Root.Hull.GetFlatIndices();
+	ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
+	
+	FKAggregateGeom AggGeom;;
+	AggGeom.ConvexElems.Add(ConvexHull);
+	
+	Mesh->SetSimpleCollisionShapes(AggGeom, true);		
 }

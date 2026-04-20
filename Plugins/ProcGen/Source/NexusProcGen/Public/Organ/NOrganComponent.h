@@ -76,13 +76,13 @@ public:
 	
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 	
-	void SetLastOperationIdentifier(const FGuid& Guid) { LastGenerationIdentifier = Guid; }
-	const FGuid& GetLastOperationIdentifier() const { return LastGenerationIdentifier; }
-	FGuid GetAndResetOperationIdentifier()
+	void SetLastOperationTicket(const uint32& Ticket) { LastOperationTicket = Ticket; }
+	const uint32& GetLastOperationTicket() const { return LastOperationTicket; }
+	uint32 GetAndResetLastOperationTicket()
 	{
-		FGuid ReturnIdentifier = LastGenerationIdentifier;
-		LastGenerationIdentifier.Invalidate();
-		return MoveTemp(ReturnIdentifier);
+		const uint32 ReturnTicket = LastOperationTicket;
+		LastOperationTicket = 0;
+		return ReturnTicket;
 	}
 	
 	
@@ -94,6 +94,6 @@ protected:
 
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
 	
-private:	
-	FGuid LastGenerationIdentifier;
+private:
+	uint32 LastOperationTicket;
 };

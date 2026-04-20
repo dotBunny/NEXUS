@@ -19,6 +19,7 @@ class NEXUSPROCGEN_API FNProcGenOperationContext
 {
 	friend class UNProcGenOperation;
 public:
+	explicit FNProcGenOperationContext(uint32 NewOperationTicket);
 	
 	TArray<UNOrganComponent*> InputComponents;
 	TMap<UNOrganComponent*, FNProcGenOperationOrganContext> OrganContext;
@@ -36,10 +37,15 @@ public:
 	
 	void SetTargetWorld(UWorld* World) { TargetWorld = World; }
 	UWorld* GetTargetWorld() const { return TargetWorld; }
+	uint32 GetOperationTicket() const { return OperationTicket; }
 	const FNProcGenOperationSettings& GetOperationSettings() { return OperationSettings; }
 	
 private:
-	FGuid OperationIdentifier;
+	/**
+	 * The identifier of the UNProcGenOperation that owns this context.
+	 */
+	uint32 OperationTicket;
+
 	FNProcGenOperationSettings OperationSettings;
 	bool bIsLocked = false;
 	UWorld* TargetWorld = nullptr;
