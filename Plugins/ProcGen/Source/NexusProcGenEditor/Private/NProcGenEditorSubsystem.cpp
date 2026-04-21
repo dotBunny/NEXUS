@@ -69,7 +69,7 @@ void UNProcGenEditorSubsystem::ClearAllProxies()
 	{
 		if (IsValid(KnownProxies[i]))
 		{
-			KnownProxies[i]->DestroyLevelInstance();
+			KnownProxies[i]->DestroyLevelInstance(true);
 			KnownProxies[i]->Destroy(true, false);
 		}
 	}
@@ -93,7 +93,7 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const uint32& OperationTick
 			KnownProxies.Remove(ProxiesArray[i]);
 			if (IsValid(ProxiesArray[i]))
 			{
-				ProxiesArray[i]->DestroyLevelInstance();
+				ProxiesArray[i]->DestroyLevelInstance(true);
 				ProxiesArray[i]->Destroy(true, false);
 			}
 		}

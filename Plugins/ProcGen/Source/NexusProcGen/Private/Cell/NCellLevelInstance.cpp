@@ -34,12 +34,6 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OperationTicket, Params);
 }
 
-void ANCellLevelInstance::BeginPlay()
-{
-	FNProcGenRegistry::RegisterCellLevelInstance(this);
-	Super::BeginPlay();
-}
-
 void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	FNProcGenRegistry::UnregisterCellLevelInstance(this);

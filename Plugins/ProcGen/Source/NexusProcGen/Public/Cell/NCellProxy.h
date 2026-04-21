@@ -34,7 +34,7 @@ public:
 	void CreateLevelInstance();
 	void LoadLevelInstance();
 	void UnloadLevelInstance() const;
-	void DestroyLevelInstance();
+	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false);
 	
 protected:
 	void OnProxyMaterialLoaded();

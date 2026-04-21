@@ -28,13 +28,13 @@ namespace UnrealBuildTool.Rules
 					"DeveloperSettings",					
 					"Engine",
 					"GeometryFramework",
-					"Projects"
-				]
+					"Projects", 
+		]
 			);
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker", "NexusUI"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusMultiplayer", "NexusPicker", "NexusUI"]);
 
 			ShortName = "NexusProcGen";						
 		}

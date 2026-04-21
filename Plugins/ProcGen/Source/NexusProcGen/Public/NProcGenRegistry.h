@@ -4,6 +4,7 @@
 #pragma once
 #include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
+#include "Cell/NCellLevelInstanceLocator.h"
 
 class ANCellLevelInstance;
 class UNOrganComponent;
@@ -11,6 +12,8 @@ class UNCellJunctionComponent;
 class UNCellRootComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnNProcGenOperationStateChanged, UNProcGenOperation* Operation, const ENProcGenOperationState NewState);
+
+
 
 class NEXUSPROCGEN_API FNProcGenRegistry
 {
@@ -27,6 +30,15 @@ public:
 	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* Level);
 	static TArray<UNBoneComponent*> GetBoneComponentsFromLevel(const ULevel* Level);
 	static UNCellRootComponent* GetCellRootComponentFromLevel(const ULevel* Level);
+
+	/**
+	 * Get an array of ANCellLevelInstance pointers in proximity to the provided Location.
+	 * @param Location The base location to determine the distance from in world space.
+	 * @param Range The maximum range to look for ANCellLevelInstances, based on the Actor transform of the ANCellLevelInstance.
+	 * @param OperationTicket The operation ticket to query for ANCellLevelInstances, if you provide 0 in this case it will search all known ANCellLevelInstance.
+	 * @return An array of ANCellLevelInstance pointers.
+	 */
+	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, uint32 OperationTicket = 0);
 	
 	static bool HasBoneComponents();
 	static bool HasRootComponents();
@@ -35,6 +47,9 @@ public:
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	static bool HasOperations();
 	static bool HasCellLevelInstances(uint32 OperationTicket = 0);
+	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances);
+	static bool HasCellLevelInstance(uint32 OperationTicket, FGuid LevelInstanceSpawnGuid);
+	
 	
 	static bool RegisterBoneComponent(UNBoneComponent* Component);
 	static bool RegisterCellRootComponent(UNCellRootComponent* Component);

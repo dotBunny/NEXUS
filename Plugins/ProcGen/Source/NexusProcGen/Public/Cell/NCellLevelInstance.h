@@ -16,6 +16,7 @@ class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 	GENERATED_BODY()
 
 	explicit ANCellLevelInstance();
+
 	
 public:
 	TMap<int32, FNCellJunctionDetails>* JunctionData;
@@ -23,7 +24,9 @@ public:
 	virtual void OnLevelInstanceLoaded() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
+	
 	uint32 GetOperationTicket() const { return OperationTicket; }
+	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 
 protected:
 	/**
@@ -32,6 +35,5 @@ protected:
 	UPROPERTY(Replicated)
 	uint32 OperationTicket = 0;
 	
-	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 };

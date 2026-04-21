@@ -49,6 +49,8 @@ TArray<FNProcGenGraphNode*> FNProcGenGraph::GetNodesWithOpenJunctions()
 
 void FNProcGenGraph::CleanupBuilderReferences()
 {
+	if (Nodes.Num() == 0) return;
+	
 	for (FNProcGenGraphNode* Node : Nodes)
 	{
 		if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)

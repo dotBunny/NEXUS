@@ -67,8 +67,20 @@ public:
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Networking Mode")
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Mode")
 	ENProcGenNetworkMode NetworkingMode = ENProcGenNetworkMode::ReplicatedLevelInstances;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Initial Range",
+	meta=(ToolTip="The range to query initially for replciating ANCellLevelInstances to trip the ANProcGenRelay loaded flag."))
+	float NetworkInitialRange = 100000.f;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Query Max Range",
+		meta=(ToolTip="Maximum distance (cm) a client may ask the server to search for nearby ANCellLevelInstances. Clamps any larger value to defend against client-side tampering."))
+	float NetworkQueryMaxRange = 200000.f;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Query Max Range",
+	meta=(ToolTip="Maximum distance (cm) a client may ask the server to search for nearby ANCellLevelInstances. Clamps any larger value to defend against client-side tampering."))
+	float Network = 200000.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Generation Retry Count",
 	meta=(ToolTip="The maximum amount of full attempts at generating a space before it is considered a complete failure."))

@@ -3,6 +3,7 @@
 
 #include "Cell/NCellProxy.h"
 
+#include "NProcGenRegistry.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellLevelInstance.h"
 #include "NProcGenSettings.h"
@@ -90,10 +91,12 @@ void ANCellProxy::CreateLevelInstance()
 	SpawnInfo.Owner = this; 
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnInfo.bDeferConstruction = true;
 	
 	// Spawn Actor
 	const FVector SpawnLocation = this->GetActorLocation();
 	const FRotator SpawnRotation = this->GetActorRotation();
+	
 	AActor* SpawnedLevelInstanceActor = GetWorld()->SpawnActor(
 		ANCellLevelInstance::StaticClass(), &SpawnLocation, &SpawnRotation, SpawnInfo);
 	
@@ -116,6 +119,12 @@ void ANCellProxy::CreateLevelInstance()
 	// Add data for junction (not synced!!)
 
 	LevelInstance->JunctionData = &JunctionsData;
+	
+	// Finalize the spawn, BeginPlay can now be called
+	SpawnedLevelInstanceActor->FinishSpawning(this->GetActorTransform());
+	
+	// Register the CellLevelInstance
+	FNProcGenRegistry::RegisterCellLevelInstance(LevelInstance);
 }
 
 void ANCellProxy::LoadLevelInstance()
@@ -142,7 +151,7 @@ void ANCellProxy::UnloadLevelInstance() const
 	Show();
 }
 
-void ANCellProxy::DestroyLevelInstance()
+void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance)
 {
 	if (LevelInstance != nullptr)
 	{
@@ -150,7 +159,14 @@ void ANCellProxy::DestroyLevelInstance()
 		{
 			LevelInstance->UnloadLevelInstance();
 		}
+		
+		if (bUnregisterCellLevelInstance)
+		{
+			FNProcGenRegistry::UnregisterCellLevelInstance(LevelInstance);
+		}
+		
 		LevelInstance->Destroy(true, false);
+		
 		LevelInstance = nullptr;
 	}
 	Show();

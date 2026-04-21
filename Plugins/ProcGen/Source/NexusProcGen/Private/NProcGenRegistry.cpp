@@ -143,6 +143,71 @@ bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket)
 	return false;
 }
 
+TArray<ANCellLevelInstance*> FNProcGenRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const uint32 OperationTicket)
+{
+	TArray<ANCellLevelInstance*> Results;
+	const double RangeSquared = Range * Range;
+
+	// Distance check method
+	auto AppendInRange = [&Results, &Location, RangeSquared](const TArray<ANCellLevelInstance*>& Instances)
+	{
+		for (ANCellLevelInstance* Instance : Instances)
+		{
+			if (Instance == nullptr) continue;
+			if (FVector::DistSquared(Location, Instance->GetActorLocation()) <= RangeSquared)
+			{
+				Results.Add(Instance);
+			}
+		}
+	};
+
+	if (OperationTicket != 0)
+	{
+		// Specific-only
+		if (const TArray<ANCellLevelInstance*>* Ptr = CellLevelInstances.Find(OperationTicket))
+		{
+			AppendInRange(*Ptr);
+		}
+	}
+	else
+	{
+		// Search them all
+		for (const auto& Pair : CellLevelInstances)
+		{
+			AppendInRange(Pair.Value);
+		}
+	}
+
+	return MoveTemp(Results);
+}
+
+bool FNProcGenRegistry::HasCellLevelInstance(const uint32 OperationTicket, const FGuid LevelInstanceSpawnGuid)
+{
+	if (TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
+	{
+		for (ANCellLevelInstance* LevelInstance : *LevelInstances)
+		{
+			if (LevelInstance->GetLevelInstanceSpawnGuid() == LevelInstanceSpawnGuid)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool FNProcGenRegistry::HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances)
+{
+	for (const auto Locator : LevelInstances)
+	{
+		if (!HasCellLevelInstance(Locator.OperationTicket, Locator.LevelInstanceSpawnGuid))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 bool FNProcGenRegistry::RegisterBoneComponent(UNBoneComponent* Component)
 {
 	if (Bones.Contains(Component))
@@ -207,23 +272,21 @@ bool FNProcGenRegistry::RegisterOperation(UNProcGenOperation* Operation)
 
 bool FNProcGenRegistry::RegisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
-	
 	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
-	if (!CellLevelInstances.Contains(OperationTicket))
+	if (const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
 	{
-		CellLevelInstances.Add(OperationTicket, TArray<ANCellLevelInstance*>());
+		if (LevelInstances->Contains(CellLevelInstance))
+		{
+			UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellLevelInstance(%s) as it already exists registered to OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
+			return false;
+		}
 		CellLevelInstances[OperationTicket].Add(CellLevelInstance);
 		return true;
 	}
-	
-	if (CellLevelInstances[OperationTicket].Contains(CellLevelInstance))
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to register ANCellLevelInstance(%s) as it already exists registered to OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
-		return false;
-	}
-	
+	CellLevelInstances.Add(OperationTicket, TArray<ANCellLevelInstance*>());
 	CellLevelInstances[OperationTicket].Add(CellLevelInstance);
 	return true;
+
 }
 
 bool FNProcGenRegistry::UnregisterBoneComponent(UNBoneComponent* Component)
@@ -290,22 +353,26 @@ bool FNProcGenRegistry::UnregisterOperation(UNProcGenOperation* Operation)
 bool FNProcGenRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
 	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
-	if (!CellLevelInstances.Contains(OperationTicket))
+	if (TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
+	{
+		if (LevelInstances->Contains(CellLevelInstance))
+		{
+			LevelInstances->RemoveSwap(CellLevelInstance);
+			if (LevelInstances->Num() == 0)
+			{
+				CellLevelInstances.Remove(OperationTicket);
+			}
+		}
+		else
+		{
+			UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellLevelInstance(%s) when attempting to unregister it from OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
+			return false;
+		}
+	}
+	else
 	{
 		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find the OperationTicket(%i) for ANCellLevelInstance(%s) when attempting to unregister it."), OperationTicket, *CellLevelInstance->GetName());
 		return false;
-	}
-	
-	if (CellLevelInstances[OperationTicket].Contains(CellLevelInstance))
-	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Failed to find ANCellLevelInstance(%s) when attempting to unregister it from OperationTicket(%i)."), *CellLevelInstance->GetName(), OperationTicket);
-		return false;
-	}
-	
-	CellLevelInstances[OperationTicket].RemoveSwap(CellLevelInstance);
-	if (CellLevelInstances[OperationTicket].Num() == 0)
-	{
-		CellLevelInstances.Remove(OperationTicket);
 	}
 	return true;
 }

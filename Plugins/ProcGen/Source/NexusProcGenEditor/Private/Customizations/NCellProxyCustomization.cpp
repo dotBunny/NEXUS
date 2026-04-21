@@ -69,7 +69,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 	{
 		for (auto & CellProxy : Proxies)
 		{
-			CellProxy->DestroyLevelInstance();
+			CellProxy->DestroyLevelInstance(true);
 		}
 		return FReply::Handled();
 	};
