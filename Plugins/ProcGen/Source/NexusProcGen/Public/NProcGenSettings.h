@@ -72,7 +72,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Initial Range",
 	meta=(ToolTip="The range to query for nearby ANCellLevelInstances by ANProcGenRelay, used to determine if the client is considered loaded."))
-	float NetworkNearbyRange = 2000000.f;
+	float NetworkNearbyRange = 20000.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Generation Retry Count",
 	meta=(ToolTip="The maximum amount of full attempts at generating a space before it is considered a complete failure."))

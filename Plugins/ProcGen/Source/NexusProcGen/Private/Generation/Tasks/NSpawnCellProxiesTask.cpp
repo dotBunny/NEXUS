@@ -15,8 +15,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 {
 	const FNProcGenOperationSettings& Settings = TaskGraphContextPtr->OperationSettings;
 	const bool bPreLoadLevelInstances = Settings.bPreLoadLevelInstances;
-	const bool bCreateLevelInstances  = Settings.bCreateLevelInstances;
-	const bool bLoadLevelInstances = Settings.bLoadLevelInstances;
+	const bool bSpawnLevelInstances  = Settings.bCreateLevelInstances;
 	UWorld* TargetWorld = TaskGraphContextPtr->TargetWorld;
 	const uint32 OperationTicket = TaskGraphContextPtr->OperationTicket;
 	
@@ -37,14 +36,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 				TaskGraphContextPtr->CreatedProxies.Add(Proxy);
 			
 				// What about creating the instance?
-				if  (bCreateLevelInstances)
+				if  (bSpawnLevelInstances)
 				{
 					Proxy->CreateLevelInstance();
-				}
-			
-				// Do we want to load these now?
-				if (bLoadLevelInstances)
-				{
 					Proxy->LoadLevelInstance();
 				}
 			}

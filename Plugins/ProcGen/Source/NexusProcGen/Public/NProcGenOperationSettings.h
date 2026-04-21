@@ -24,9 +24,6 @@ struct NEXUSPROCGEN_API FNProcGenOperationSettings
 	bool bPreLoadLevelInstances = false;
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
-	bool bLoadLevelInstances = true;
-	
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
 	bool bCreateLevelInstances = true;
 
 	static FNProcGenOperationSettings GetDefaultSettings()
@@ -39,7 +36,6 @@ struct NEXUSPROCGEN_API FNProcGenOperationSettings
 	static FNProcGenOperationSettings GetDefaultEditorSettings()
 	{
 		FNProcGenOperationSettings Settings;
-		Settings.bLoadLevelInstances = false;
 		Settings.bCreateLevelInstances = false;
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		return MoveTemp(Settings);

@@ -21,7 +21,7 @@ ANProcGenRelay::ANProcGenRelay()
 
 bool ANProcGenRelay::IsReady()
 {
-	return HasNearbyCellLevelInstances() && KnownOperations.Num() == 0;
+	return KnownOperations.Num() == 0 && HasNearbyCellLevelInstances();
 }
 
 bool ANProcGenRelay::HasNearbyCellLevelInstances()
@@ -48,7 +48,7 @@ void ANProcGenRelay::BeginPlay()
 			Subsystem->RegisterLocalRelay(this);
 		}
 		
-		// TODO: This doesnt work because generation happens on begin play usually and can span multiple frames.
+		// Initial check
 		UpdateNearbyCells();
 	}
 }
@@ -67,7 +67,7 @@ void ANProcGenRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANProcGenRelay::UpdateNearbyCells()
+void ANProcGenRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 {
 	bHasNearbyCellLevelInstances = false;
 	CachedNearbyCellLevelInstances.Empty();
@@ -82,29 +82,38 @@ void ANProcGenRelay::UpdateNearbyCells()
 		Location = SafePawn->GetActorLocation();
 	}
 	UE_LOG(LogNexusProcGen, Log, TEXT("Request nearby(%s) ANCellLevelInstances list."), *Location.ToString());
-	Server_RequestNearbyCells(Location, 0);
+	Server_RequestNearbyCells(Location, 0, bIsLevelLoaded);
 }
 
 void ANProcGenRelay::Client_OperationFinished_Implementation(const uint32 OperationTicket)
 {
+	UE_LOG(LogNexusProcGen, Log, TEXT("Received finished notification for operation(%i)."), OperationTicket);	
 	KnownOperations.RemoveSwap(OperationTicket);
+	
+	UpdateNearbyCells(true);
 }
 
 void ANProcGenRelay::Client_OperationStarted_Implementation(const uint32 OperationTicket)
 {
+	UE_LOG(LogNexusProcGen, Log, TEXT("Received starting notification for operation(%i)."), OperationTicket);
 	KnownOperations.AddUnique(OperationTicket);
 }
 
 void ANProcGenRelay::Client_OperationDestroyed_Implementation(const uint32 OperationTicket)
 {
+	UE_LOG(LogNexusProcGen, Log, TEXT("Received destruction notification for operation(%i)."), OperationTicket);
 	KnownOperations.RemoveSwap(OperationTicket);
 }
+
 
 void ANProcGenRelay::Server_RequestNearbyCells_Implementation(const FVector Location, const uint32 OperationTicket, const bool bIsLevelLoaded)
 {
 	// Find our instances
 	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const TArray<ANCellLevelInstance*> Instances = FNProcGenRegistry::GetCellLevelInstancesInRange(Location, Settings->NetworkNearbyRange, bIsLevelLoaded, OperationTicket);
+	
+	// The server often will get this call before the levels have streamed, thus we need to flag that the search is not looking to see if they are
+	// loaded when we send it back to the player, but instead just that they are there in place.
+	const TArray<ANCellLevelInstance*> Instances = FNProcGenRegistry::GetCellLevelInstancesInRange(Location, Settings->NetworkNearbyRange, false, OperationTicket);
 
 	// Create our return array
 	TArray<FNCellLevelInstanceLocator> Results;

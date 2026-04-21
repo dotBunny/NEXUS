@@ -146,6 +146,8 @@ bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket, cons
 TArray<ANCellLevelInstance*> FNProcGenRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const uint32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
+	if (CellLevelInstances.Num() == 0) return MoveTemp(Results);
+	
 	const double RangeSquared = Range * Range;
 
 	// Distance check method

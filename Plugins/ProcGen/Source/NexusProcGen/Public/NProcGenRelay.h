@@ -21,7 +21,7 @@ public:
 	
 	int32 GetPlayerIdentifier() const { return CachedPlayerIdentifier; }
 	
-	void UpdateNearbyCells();
+	void UpdateNearbyCells(bool bIsLevelLoaded = true);
 
 	UFUNCTION(Client, Reliable)
 	void Client_OperationStarted(uint32 OperationTicket);
