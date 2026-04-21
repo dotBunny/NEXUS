@@ -24,7 +24,6 @@ public:
 	virtual void OnLevelInstanceLoaded() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	
 	uint32 GetOperationTicket() const { return OperationTicket; }
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 

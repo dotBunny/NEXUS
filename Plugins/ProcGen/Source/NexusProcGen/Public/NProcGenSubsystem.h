@@ -34,8 +34,8 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get Local Relay", Category = "NEXUS|ProcGen")
 	ANProcGenRelay* GetLocalRelay() const { return LocalRelay; }
 	
-	UFUNCTION(blueprintCallable, DisplayName="Has Initial NCellLevelInstances?", Category = "NEXUS|ProcGen")
-	bool HasInitialCellLevelInstances();
+	UFUNCTION(blueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|ProcGen")
+	bool IsReady();
 	
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;

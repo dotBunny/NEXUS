@@ -129,7 +129,7 @@ bool FNProcGenRegistry::HasOperations()
 	return Operations.Num() > 0;
 }
 
-bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket)
+bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket, const bool bIsLevelLoaded)
 {
 	if (OperationTicket == 0)
 	{
@@ -143,17 +143,18 @@ bool FNProcGenRegistry::HasCellLevelInstances(const uint32 OperationTicket)
 	return false;
 }
 
-TArray<ANCellLevelInstance*> FNProcGenRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const uint32 OperationTicket)
+TArray<ANCellLevelInstance*> FNProcGenRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const uint32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
 	const double RangeSquared = Range * Range;
 
 	// Distance check method
-	auto AppendInRange = [&Results, &Location, RangeSquared](const TArray<ANCellLevelInstance*>& Instances)
+	auto AppendInRange = [&Results, &Location, RangeSquared, &bIsLevelLoaded](const TArray<ANCellLevelInstance*>& Instances)
 	{
 		for (ANCellLevelInstance* Instance : Instances)
 		{
 			if (Instance == nullptr) continue;
+			if (bIsLevelLoaded && !Instance->IsLoaded()) continue;
 			if (FVector::DistSquared(Location, Instance->GetActorLocation()) <= RangeSquared)
 			{
 				Results.Add(Instance);
@@ -181,7 +182,7 @@ TArray<ANCellLevelInstance*> FNProcGenRegistry::GetCellLevelInstancesInRange(con
 	return MoveTemp(Results);
 }
 
-bool FNProcGenRegistry::HasCellLevelInstance(const uint32 OperationTicket, const FGuid LevelInstanceSpawnGuid)
+bool FNProcGenRegistry::HasCellLevelInstance(const uint32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
 {
 	if (TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
 	{
@@ -189,6 +190,7 @@ bool FNProcGenRegistry::HasCellLevelInstance(const uint32 OperationTicket, const
 		{
 			if (LevelInstance->GetLevelInstanceSpawnGuid() == LevelInstanceSpawnGuid)
 			{
+				if (bIsLevelLoaded && !LevelInstance->IsLoaded()) continue;
 				return true;
 			}
 		}
@@ -196,11 +198,11 @@ bool FNProcGenRegistry::HasCellLevelInstance(const uint32 OperationTicket, const
 	return false;
 }
 
-bool FNProcGenRegistry::HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances)
+bool FNProcGenRegistry::HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, const bool bIsLevelLoaded)
 {
 	for (const auto Locator : LevelInstances)
 	{
-		if (!HasCellLevelInstance(Locator.OperationTicket, Locator.LevelInstanceSpawnGuid))
+		if (!HasCellLevelInstance(Locator.OperationTicket, Locator.LevelInstanceSpawnGuid, bIsLevelLoaded))
 		{
 			return false;
 		}

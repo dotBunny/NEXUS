@@ -3,6 +3,7 @@
 
 #include "NProcGenRelay.h"
 
+#include "NMultiplayerUtils.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenSubsystem.h"
@@ -18,15 +19,20 @@ ANProcGenRelay::ANProcGenRelay()
 	SetReplicatingMovement(false);
 }
 
-bool ANProcGenRelay::HasInitialCellLevelInstances()
+bool ANProcGenRelay::IsReady()
+{
+	return HasNearbyCellLevelInstances() && KnownOperations.Num() == 0;
+}
+
+bool ANProcGenRelay::HasNearbyCellLevelInstances()
 {
 	// Early out the best we can
-	if (bHasInitialCellLevelInstances) return true;
-	if (CachedInitialCellLevelInstances.Num() == 0)  return false;
+	if (bHasNearbyCellLevelInstances) return true;
+	if (CachedNearbyCellLevelInstances.Num() == 0)  return false;
 	
 	// If we haven't got them lets reupdate and respond accordingly
-	bHasInitialCellLevelInstances = FNProcGenRegistry::HasCellLevelInstances(CachedInitialCellLevelInstances);
-	return bHasInitialCellLevelInstances;
+	bHasNearbyCellLevelInstances = FNProcGenRegistry::HasCellLevelInstances(CachedNearbyCellLevelInstances);
+	return bHasNearbyCellLevelInstances;
 }
 
 void ANProcGenRelay::BeginPlay()
@@ -36,13 +42,14 @@ void ANProcGenRelay::BeginPlay()
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
 	if (OwningPC != nullptr && OwningPC->IsLocalController())
 	{
+		CachedPlayerIdentifier = FNMultiplayerUtils::GetPlayerIdentifier(OwningPC);
 		if (UNProcGenSubsystem* Subsystem = UNProcGenSubsystem::Get(GetWorld()))
 		{
 			Subsystem->RegisterLocalRelay(this);
 		}
 		
-		// Setup initial query
-		OnInitialQueryHandle = OnQueryComplete.AddUObject(this, &ANProcGenRelay::OnInitialQueryComplete);
+		// TODO: This doesnt work because generation happens on begin play usually and can span multiple frames.
+		UpdateNearbyCells();
 	}
 }
 
@@ -60,19 +67,44 @@ void ANProcGenRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANProcGenRelay::OnInitialQueryComplete(const TArray<FNCellLevelInstanceLocator>& LevelInstances)
+void ANProcGenRelay::UpdateNearbyCells()
 {
-	CachedInitialCellLevelInstances = LevelInstances; // Copy
-	OnQueryComplete.Remove(OnInitialQueryHandle);
+	bHasNearbyCellLevelInstances = false;
+	CachedNearbyCellLevelInstances.Empty();
+	
+	// Setup initial query
+	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
+	
+	FVector Location  = OwningPC->GetSpawnLocation();
+	APawn* SafePawn = OwningPC->GetPawnOrSpectator();
+	if (SafePawn!= nullptr)
+	{
+		Location = SafePawn->GetActorLocation();
+	}
+	UE_LOG(LogNexusProcGen, Log, TEXT("Request nearby(%s) ANCellLevelInstances list."), *Location.ToString());
+	Server_RequestNearbyCells(Location, 0);
 }
 
-void ANProcGenRelay::Server_QueryNearbyCells_Implementation(const FVector Location, const float Range, const uint32 OperationTicket)
+void ANProcGenRelay::Client_OperationFinished_Implementation(const uint32 OperationTicket)
 {
-	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
-	const float ClampedRange = FMath::Min(Range, Settings->NetworkQueryMaxRange);
-	
+	KnownOperations.RemoveSwap(OperationTicket);
+}
+
+void ANProcGenRelay::Client_OperationStarted_Implementation(const uint32 OperationTicket)
+{
+	KnownOperations.AddUnique(OperationTicket);
+}
+
+void ANProcGenRelay::Client_OperationDestroyed_Implementation(const uint32 OperationTicket)
+{
+	KnownOperations.RemoveSwap(OperationTicket);
+}
+
+void ANProcGenRelay::Server_RequestNearbyCells_Implementation(const FVector Location, const uint32 OperationTicket, const bool bIsLevelLoaded)
+{
 	// Find our instances
-	const TArray<ANCellLevelInstance*> Instances = FNProcGenRegistry::GetCellLevelInstancesInRange(Location, ClampedRange, OperationTicket);
+	const UNProcGenSettings* Settings = UNProcGenSettings::Get();
+	const TArray<ANCellLevelInstance*> Instances = FNProcGenRegistry::GetCellLevelInstancesInRange(Location, Settings->NetworkNearbyRange, bIsLevelLoaded, OperationTicket);
 
 	// Create our return array
 	TArray<FNCellLevelInstanceLocator> Results;
@@ -91,5 +123,6 @@ void ANProcGenRelay::Server_QueryNearbyCells_Implementation(const FVector Locati
 
 void ANProcGenRelay::Client_ReceiveNearbyCells_Implementation(const TArray<FNCellLevelInstanceLocator>& Results)
 {
-	OnQueryComplete.Broadcast(Results);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Received nearby list(%i) of ANCellLevelInstances for player(%i)."), Results.Num(), CachedPlayerIdentifier);
+	CachedNearbyCellLevelInstances = Results; // Copy
 }

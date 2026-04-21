@@ -20,16 +20,19 @@ void UNProcGenSubsystem::Generate(FNProcGenOperationSettings& Settings)
 	StartOperation(Operation);
 }
 
-bool UNProcGenSubsystem::HasInitialCellLevelInstances()
+bool UNProcGenSubsystem::IsReady()
 {
 	// Server always has stuff replicated
-	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return true;
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	{
+		return KnownOperations.Num() == 0;
+	}
 	
 	// Client hasn't spawned the goodness yet
 	if (LocalRelay == nullptr) return false;
 	
 	// Client properly checking
-	return LocalRelay->HasInitialCellLevelInstances();
+	return LocalRelay->IsReady();
 }
 
 void UNProcGenSubsystem::Tick(float DeltaTime)
@@ -50,16 +53,34 @@ void UNProcGenSubsystem::StartOperation(UNProcGenOperation* Operation)
 {
 	KnownOperations.AddUnique(Operation);
 	Operation->StartBuild(this);
+
+	// Notify Relays
+	for (const auto Pair : RelayMap)
+	{
+		Pair.Value->Client_OperationStarted(Operation->GetTicket());
+	}
 }
 
 void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSharedRef<FNProcGenTaskGraphContext> TaskGraphContext)
 {
 	KnownOperations.Remove(Operation);
+
+	// Notify Relays
+	for (const auto Pair : RelayMap)
+	{
+		Pair.Value->Client_OperationFinished(Operation->GetTicket());
+	}
 }
 
 void UNProcGenSubsystem::OnOperationDestroyed(UNProcGenOperation* Operation)
 {
 	KnownOperations.Remove(Operation);
+	
+	// Notify Relays
+	for (const auto Pair : RelayMap)
+	{
+		Pair.Value->Client_OperationDestroyed(Operation->GetTicket());
+	}	
 }
 
 void UNProcGenSubsystem::RegisterLocalRelay(ANProcGenRelay* InRelay)

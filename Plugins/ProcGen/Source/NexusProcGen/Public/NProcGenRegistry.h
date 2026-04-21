@@ -35,10 +35,11 @@ public:
 	 * Get an array of ANCellLevelInstance pointers in proximity to the provided Location.
 	 * @param Location The base location to determine the distance from in world space.
 	 * @param Range The maximum range to look for ANCellLevelInstances, based on the Actor transform of the ANCellLevelInstance.
+	 * @param bIsLevelLoaded Is the level loaded attached to the ANCellLevelInstance?
 	 * @param OperationTicket The operation ticket to query for ANCellLevelInstances, if you provide 0 in this case it will search all known ANCellLevelInstance.
 	 * @return An array of ANCellLevelInstance pointers.
 	 */
-	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, uint32 OperationTicket = 0);
+	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, bool bIsLevelLoaded = true, uint32 OperationTicket = 0);
 	
 	static bool HasBoneComponents();
 	static bool HasRootComponents();
@@ -46,9 +47,9 @@ public:
 	static bool HasOrganComponents();
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	static bool HasOperations();
-	static bool HasCellLevelInstances(uint32 OperationTicket = 0);
-	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances);
-	static bool HasCellLevelInstance(uint32 OperationTicket, FGuid LevelInstanceSpawnGuid);
+	static bool HasCellLevelInstances(uint32 OperationTicket = 0, bool bIsLevelLoaded = true);
+	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
+	static bool HasCellLevelInstance(uint32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
 	
 	
 	static bool RegisterBoneComponent(UNBoneComponent* Component);

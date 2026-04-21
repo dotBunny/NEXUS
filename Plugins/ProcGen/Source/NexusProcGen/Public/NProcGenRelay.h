@@ -8,8 +8,6 @@
 #include "GameFramework/Actor.h"
 #include "NProcGenRelay.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnNCellLevelInstanceQueryComplete, const TArray<FNCellLevelInstanceLocator>&);
-
 UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", DisplayName = "NEXUS | ProcGen Relay")
 class NEXUSPROCGEN_API ANProcGenRelay : public AActor
 {
@@ -18,13 +16,22 @@ class NEXUSPROCGEN_API ANProcGenRelay : public AActor
 	explicit ANProcGenRelay();
 
 public:
-	/**
-	 * Fires when a query response arrives.	 
-	 */
-	FOnNCellLevelInstanceQueryComplete OnQueryComplete;
-	
-	bool HasInitialCellLevelInstances();
 
+	bool IsReady();
+	
+	int32 GetPlayerIdentifier() const { return CachedPlayerIdentifier; }
+	
+	void UpdateNearbyCells();
+
+	UFUNCTION(Client, Reliable)
+	void Client_OperationStarted(uint32 OperationTicket);
+	
+	UFUNCTION(Client, Reliable)
+	void Client_OperationFinished(uint32 OperationTicket);
+	
+	UFUNCTION(Client, Reliable)
+	void Client_OperationDestroyed(uint32 OperationTicket);
+	
 protected:
 	//~AActor
 	virtual void BeginPlay() override;
@@ -34,22 +41,22 @@ protected:
 	/**
 	 * Ask the server for ANCellLevelInstances within Range of Location.
 	 * @param Location World-space point to search from.
-	 * @param Range Maximum distance (cm). The server clamps this against UNProcGenSettings::NetworkQueryMaxRange.
 	 * @param OperationTicket Filter to one operation, or 0 for all.	 
+	 * @param bIsLevelLoaded Is the level loaded attached to the ANCellLevelInstance?
 	 * @remark Must be called on the owning client. On the server it is a no-op on remote relays.
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_QueryNearbyCells(FVector Location, float Range, uint32 OperationTicket);
+	void Server_RequestNearbyCells(FVector Location, uint32 OperationTicket, bool bIsLevelLoaded = true);
 
 	UFUNCTION(Client, Reliable)
 	void Client_ReceiveNearbyCells(const TArray<FNCellLevelInstanceLocator>& Results);
 
-	UFUNCTION()
-	void OnInitialQueryComplete(const TArray<FNCellLevelInstanceLocator>& LevelInstances);
-	
 private:
-	FDelegateHandle OnInitialQueryHandle;
-	bool bHasInitialCellLevelInstances = false;
-	TArray<FNCellLevelInstanceLocator> CachedInitialCellLevelInstances;
+	FDelegateHandle OnRequestNearbyHandle;
+	bool bHasNearbyCellLevelInstances = false;
+	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
+	int32 CachedPlayerIdentifier = -1;
+	TArray<uint32> KnownOperations;
 	
+	bool HasNearbyCellLevelInstances();
 };
