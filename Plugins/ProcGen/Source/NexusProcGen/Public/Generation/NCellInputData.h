@@ -16,19 +16,13 @@
  */
 struct NEXUSPROCGEN_API FNCellInputData
 {
-	/**
-	 * Whether the NCellLevelInstance should be spawned always relevant for networking purposes.
-	 */
+	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	bool bAlwaysRelevant = false;
 	
-	/** 
-	 * Whether this cell can be used as a starting node in the generated FNProcGenGraph. 
-	 */
+	/** Whether this cell can be used as a starting node in the generated FNProcGenGraph. */
 	bool bCanBeStartNode = true;
 
-	/** 
-	 * Whether this cell can be used as an ending/terminal node in the generated FNProcGenGraph.
-	 */
+	/** Whether this cell can be used as an ending/terminal node in the generated FNProcGenGraph. */
 	bool bCanBeEndNode = true;
 
 	/** 
@@ -55,14 +49,10 @@ struct NEXUSPROCGEN_API FNCellInputData
 	 */
 	int Weighting = 1;
 
-	/** 
-	 * Tracks how many times this cell has been used during the current generation pass. 
-	 */
+	/** Tracks how many times this cell has been used during the current generation pass. */
 	int UsedCount = 0;
 
-	/** 
-	 * Root-level details and properties of this cell. 
-	 */
+	/** Root-level details and properties of this cell. */
 	FNCellRootDetails CellDetails;
 
 	/** 

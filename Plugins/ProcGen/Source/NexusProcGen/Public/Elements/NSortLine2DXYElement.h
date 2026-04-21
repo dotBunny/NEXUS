@@ -7,6 +7,10 @@
 #include "PCGSettings.h"
 #include "NSortLine2DXYElement.generated.h"
 
+/**
+ * PCG settings node that orders a 2D point cloud into a nearest-neighbour chain along XY and
+ * optionally annotates every point with turn direction, cardinal facing, and segment metadata.
+ */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNSortLine2DXYSettings : public UPCGSettings
 {
@@ -79,6 +83,9 @@ protected:
 	virtual FPCGElementPtr CreateElement() const override;
 };
 
+/**
+ * Executor paired with UNSortLine2DXYSettings.
+ */
 class FNSortLine2DXYElement : public IPCGElement
 {
 protected:

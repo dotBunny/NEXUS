@@ -7,7 +7,7 @@
 #include "Modules/ModuleInterface.h"
 
 /**
- * NEXUS: Procedural Content Generation Module
+ * NEXUS: Procedural Generation Module
  */
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNProcGenModule final : public IModuleInterface

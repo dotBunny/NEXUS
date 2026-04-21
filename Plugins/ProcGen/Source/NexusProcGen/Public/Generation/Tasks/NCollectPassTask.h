@@ -15,15 +15,19 @@ class UNProcGenOperation;
 struct FNCollectPassTask
 {
 	explicit FNCollectPassTask(const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
-	
+
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCollectPassContextTask, STATGROUP_TaskGraphTasks); }
-    
+
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
-    
+
+	/** Executed by the task graph: moves collected graphs from the pass context up to the task-graph context. */
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
+	/** Pass-level collection being drained. */
 	TSharedRef<FNCollectPassContext> PassContextPtr;
+
+	/** Top-level task-graph context that receives the drained graphs. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 };

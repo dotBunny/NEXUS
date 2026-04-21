@@ -13,6 +13,12 @@ class UNCellRootComponent;
 class ALevelInstance;
 class UNCell;
 
+/**
+ * Scene component marking a junction on a cell — a connection point that lets one cell attach to another during generation.
+ *
+ * Carries the junction's shape (FNCellJunctionDetails) and provides derived data (corner points, color) used by
+ * the graph builder and debug visualizers to reason about cell connectivity.
+ */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Cell Junction", meta=(BlueprintSpawnableComponent),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
@@ -46,17 +52,26 @@ class NEXUSPROCGEN_API UNCellJunctionComponent : public USceneComponent
 	}
 
 public:
-	
+	/** Junction shape, orientation, and flags authored per junction. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
 	FNCellJunctionDetails Details;
 
+	//~USceneComponent
 	virtual void OnRegister() override;
 	virtual void OnUnregister() override;
-	
+	//End USceneComponent
+
+	/** @return The rotational offset authored on the junction's details. */
 	FRotator GetOffsetRotator() const;
+	/** @return The location offset authored on the junction's details. */
 	FVector GetOffsetLocation() const;
-	
+
+	/**
+	 * Compute the four corner points of the junction in component space.
+	 * @param SocketUnitSize Project-configured socket unit size used to size the junction.
+	 */
 	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
+	/** @return The visual-debug color derived from the junction's details. */
 	FLinearColor GetColor() const;
 
 #if WITH_EDITOR
@@ -69,10 +84,16 @@ public:
 	
 #endif // WITH_EDITOR
 	
+	/** Draw the junction's debug visualization through the supplied PDI. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+	/**
+	 * Recompute hull-derived data on the junction using the supplied root component.
+	 * @param RootComponent Root component of the owning cell.
+	 */
 	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
-	
+
 private:
+	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
 	ALevelInstance* LevelInstance;
 	N_WORLD_ICON_HEADER()
 };

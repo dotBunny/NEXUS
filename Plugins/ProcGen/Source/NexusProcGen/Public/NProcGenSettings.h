@@ -8,6 +8,9 @@
 #include "Types/NDirection.h"
 #include "NProcGenSettings.generated.h"
 
+/**
+ * Selects how generated content is replicated to clients during a ProcGen run.
+ */
 UENUM(BlueprintType)
 enum class ENProcGenNetworkMode : uint8
 {
@@ -16,6 +19,9 @@ enum class ENProcGenNetworkMode : uint8
 	// AlwaysRelevantCellProxies UMETA(DisplayName = "Always Replicate Cell Proxies", ToolTip="Enables replication of NCellProxy actors, making them always relevant, whilst leaving LevelInstances to be replicated based on relevancy."),
 };
 
+/**
+ * Project-wide settings for the NexusProcGen plugin.
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "ProcGen Settings", Config=NexusGame, defaultconfig)
 class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 {

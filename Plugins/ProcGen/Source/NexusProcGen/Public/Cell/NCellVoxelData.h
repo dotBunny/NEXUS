@@ -8,6 +8,9 @@
 
 #include "NCellVoxelData.generated.h"
 
+/**
+ * Per-voxel flags for the cell occupancy grid.
+ */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENCellVoxel : uint8
 {
@@ -16,6 +19,12 @@ enum class ENCellVoxel : uint8
 };
 ENUM_CLASS_FLAGS(ENCellVoxel)
 
+/**
+ * Flat 3D grid of ENCellVoxel flags describing occupancy inside a cell.
+ *
+ * Stored packed as a flat uint8 array keyed by (X, Y, Z); N_IMPLEMENT_FLAT_3D_ARRAY provides the
+ * indexing helpers. Sized from the cell's unit-bounds / unit-size.
+ */
 USTRUCT(BlueprintType)
 struct NEXUSPROCGEN_API FNCellVoxelData
 {

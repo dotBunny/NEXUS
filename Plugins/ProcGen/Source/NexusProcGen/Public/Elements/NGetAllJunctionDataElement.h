@@ -7,12 +7,16 @@
 #include "PCGSettings.h"
 #include "NGetAllJunctionDataElement.generated.h"
 
+/**
+ * PCG settings node that emits every junction registered with FNProcGenRegistry as a point attribute set.
+ */
 UCLASS(BlueprintType, Blueprintable, Category="NEXUS")
 class UNGetAllJunctionDataSettings : public UPCGSettings
 {
 	GENERATED_BODY()
 
 public:
+	/** Attribute name under which the junction data is emitted on the output point set. */
 	const FName JunctionsAttribute = FName("Junctions");
 
 #if WITH_EDITOR
@@ -20,11 +24,11 @@ public:
 	virtual FText GetNodeTooltipText() const override { return INVTEXT("Gets all registered Junction data from FNProcGenRegistry."); }
 	virtual FLinearColor GetNodeTitleColor() const override { return FNColor::GetElement; };
 	virtual EPCGSettingsType GetType() const override { return EPCGSettingsType::Spatial; }
-	
+
 	virtual void GetStaticTrackedKeys(FPCGSelectionKeyToSettingsMap& OutKeysToSettings, TArray<TObjectPtr<const UPCGGraph>>& OutVisitedGraphs) const override;
 	virtual bool CanDynamicallyTrackKeys() const override { return true; }
 #endif
-	
+
 	virtual TArray<FPCGPinProperties> InputPinProperties() const override { return {}; }
 	virtual TArray<FPCGPinProperties> OutputPinProperties() const override;
 
@@ -32,6 +36,9 @@ protected:
 	virtual FPCGElementPtr CreateElement() const override;
 };
 
+/**
+ * Executor paired with UNGetAllJunctionDataSettings; runs on the main thread because it touches the registry.
+ */
 class FNGetAllJunctionDataElement : public IPCGElement
 {
 public:

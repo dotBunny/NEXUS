@@ -6,21 +6,25 @@
 #include "ActorFactories/ActorFactory.h"
 #include "NCellActorFactory.generated.h"
 
+/**
+ * Actor factory for ANCellActor — spawns a cell actor from a UNCell asset drag-drop and applies
+ * the editor's default generation settings via UNProcGenEditorSettings::ApplyDefaultSettings.
+ */
 UCLASS()
 class UNCellActorFactory : public UActorFactory
 {
 	GENERATED_BODY()
-	
+
 public:
 	explicit UNCellActorFactory(const FObjectInitializer& ObjectInitializer);
-	
-	//~ Begin UActorFactory
+
+	//~UActorFactory
 	virtual bool CanCreateActorFrom(const FAssetData& AssetData, FText& OutErrorMsg) override;
-	//~ End UActorFactory
+	//End UActorFactory
 
 protected:
-	//~ Begin UActorFactory
+	//~UActorFactory
 	virtual void PostSpawnActor(UObject* Asset, AActor* NewActor) override;
 	virtual FString GetDefaultActorLabel(UObject* InAsset) const override;
-	//~ End UActorFactory
+	//End UActorFactory
 };

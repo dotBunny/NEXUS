@@ -12,7 +12,7 @@
 #include "Styling/SlateStyleRegistry.h"
 
 /**
- * Slate style set for the NexusActorPools editor module; registers brushes and icons used by its UI.
+ * Slate style set for the NexusActorPoolsEditor module.
  */
 class FNActorPoolsEditorStyle
 {

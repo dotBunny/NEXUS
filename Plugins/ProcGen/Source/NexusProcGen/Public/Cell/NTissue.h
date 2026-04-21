@@ -8,26 +8,25 @@
 
 class UNCell;
 
+/**
+ * A single cell entry within a UNTissue palette, carrying the generation constraints
+ * (counts, weighting, graph position rules) that control how often and where the cell
+ * is allowed to appear in the generated FNProcGenGraph.
+ */
 USTRUCT()
 struct NEXUSPROCGEN_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	/**
-	 * Whether the NCellLevelInstance should be spawned always relevant for networking purposes.
-	 */	
+	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	UPROPERTY(EditAnywhere)
 	bool bAlwaysRelevant = false;
 	
-	/** 
-	 * Whether this cell can be used as a starting node in the generated FNProcGenGraph. 
-	 */	
+	/** Whether this cell can be used as a starting node in the generated FNProcGenGraph. */
 	UPROPERTY(EditAnywhere)
 	bool bCanBeStartNode = true;
 	
-	/** 
-	 * Whether this cell can be used as an ending/terminal node in the generated FNProcGenGraph.
-	 */	
+	/** Whether this cell can be used as an ending/terminal node in the generated FNProcGenGraph. */
 	UPROPERTY(EditAnywhere)
 	bool bCanBeEndNode = true;
 	
@@ -59,6 +58,7 @@ struct NEXUSPROCGEN_API FNTissueEntry
 	UPROPERTY(EditAnywhere)
 	int Weighting = 1;
 	
+	/** The cell asset this entry refers to. */
 	UPROPERTY(EditAnywhere)
 	TSoftObjectPtr<UNCell> Cell;
 };
@@ -73,12 +73,19 @@ class NEXUSPROCGEN_API UNTissue : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	
+	/**
+	 * Flatten a tissue (and any referenced AdditionalTissue) into a single cell-to-entry map.
+	 * @param Tissue The root tissue to start from.
+	 * @param OutCellMap Populated with every cell reachable from Tissue and the effective entry to use.
+	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
+	 */
 	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets);
-	
+
+	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{Cell}"))
 	TArray<FNTissueEntry> Cells;
 
+	/** Additional tissue assets merged into this one during BuildTissueMap. */
 	UPROPERTY(EditAnywhere)
 	TArray<TSoftObjectPtr<UNTissue>> AdditionalTissue;
 };

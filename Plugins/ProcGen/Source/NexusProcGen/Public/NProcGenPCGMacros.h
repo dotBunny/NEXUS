@@ -3,6 +3,10 @@
 
 #pragma once
 
+/**
+ * Boilerplate for PCG element prologue: reads ProcGen settings, prepares the output point data,
+ * and creates the SocketSize / WorldSize metadata attributes that N_PCG_JUNCTION_DATA populates.
+ */
 #define N_PCG_JUNCTION_PREFIX \
 	const FVector2D SocketSize = UNProcGenSettings::Get()->SocketSize; \
 	const float SocketDepth = UNProcGenSettings::Get()->SocketDepth; \
@@ -12,6 +16,10 @@
 	FPCGMetadataAttribute<FVector2D>* SocketSizeAtr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(TEXT("SocketSize"),FVector2D::ZeroVector, false, true); \
 	FPCGMetadataAttribute<FVector2D>* WorldSizeAttr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(TEXT("WorldSize"), FVector2D::ZeroVector, false, true);
 
+/**
+ * Boilerplate for emitting a single junction as a PCG point, applying the socket's bounds
+ * based on its ENCellJunctionType. Expects the variables declared by N_PCG_JUNCTION_PREFIX.
+ */
 #define N_PCG_JUNCTION_DATA \
 	FPCGPoint& NewPoint = MutablePoints.Emplace_GetRef(); \
 	OutputData->Metadata->InitializeOnSet(NewPoint.MetadataEntry); \

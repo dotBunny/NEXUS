@@ -9,6 +9,9 @@
 
 struct FNRawMesh;
 
+/**
+ * Shared debug-draw helpers for cell/junction/voxel overlays used across editor-mode visualizers.
+ */
 class NEXUSPROCGEN_API FNProcGenDebugDraw
 {
 public:
@@ -22,15 +25,26 @@ public:
 	 * @param SocketType An indicator of the socket type determining what sort of additional information is drawn.
 	 * @param Color The color to draw the socket.
 	 */
-	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation, 
+	static void DrawSocket(FPrimitiveDrawInterface* PDI, const FVector& Location, const FRotator& Rotation,
 	                       const FIntVector2& UnitSize, const FVector2D& SocketSize, const ENCellJunctionType& SocketType, const FLinearColor& Color);
-	
+
+	/**
+	 * Draw the edges of Mesh as dashed line segments, offset and rotated into world space.
+	 * @param DashSize Length of each dash, in world units.
+	 */
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
 
+	/**
+	 * Draw the edges of Mesh as dashed line segments using pre-transformed world vertices.
+	 * @param WorldVertices Vertex positions already in world space; must parallel Mesh's vertex array.
+	 */
 	static void DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const TArray<FVector>& WorldVertices,
 		FLinearColor Color, float DashSize = 2, ESceneDepthPriorityGroup Priority = SDPG_World);
-	
+
+	/** Render the voxel grid as line segments between adjacent occupied voxels. */
 	static void DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
+
+	/** Render the voxel grid as a point cloud centered on each occupied voxel. */
 	static void DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const FNCellVoxelData& VoxelData, const FVector& Offset, const FRotator& Rotation);
 };

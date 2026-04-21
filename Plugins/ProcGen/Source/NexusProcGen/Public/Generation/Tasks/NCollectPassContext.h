@@ -5,13 +5,19 @@
 
 #include "Generation/Graph/NProcGenGraph.h"
 
+/**
+ * Shared collect-pass context — fans-in completed organ graphs from every parallel builder task
+ * so the subsequent collect/finalize stages have a single place to walk.
+ */
 class FNCollectPassContext
 {
 public:
+	/** Transfer ownership of a completed graph into this pass context. */
 	void TakeGraph(TUniquePtr<FNProcGenGraph> Graph)
 	{
 		Graphs.Add(MoveTemp(Graph));
 	}
-	
+
+	/** Graphs accumulated from this collect pass. */
 	TArray<TUniquePtr<FNProcGenGraph>> Graphs;
 };
