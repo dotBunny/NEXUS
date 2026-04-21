@@ -127,25 +127,14 @@ void UNCellJunctionComponent::OnRegister()
 	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance->IsA<ANCellLevelInstance>())
 	{
 		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
-		
-		// When this is replicated, we don't have junction data, so as a simple way (currently) it is something we might need to resolve,
-		// but for now instead of doing anything with this we just check if there's any junction data to find, and if not ignore updating.
-		if (CellLevelInstance->JunctionData != nullptr && 
-			CellLevelInstance->JunctionData->Num() == 0)
+		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
+		if (UpdatedDetails != nullptr)
 		{
-			const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData->Find(Details.InstanceIdentifier);
-			
-			if (UpdatedDetails == nullptr)
-			{
-				UE_LOG(LogNexusProcGen, Error, TEXT("No junction data was found for the provided instance identifier (%i)"), Details.InstanceIdentifier)
-				FNProcGenRegistry::RegisterCellJunctionComponent(this);
-				Super::OnRegister();
-				return;
-			}
-			
-			// Update local data (mainly for drawing really)
-			Details.WorldRotation = UpdatedDetails->WorldRotation;
+			// Copy details in-place
+			Details = *UpdatedDetails;
 		}
+		
+		//Details.WorldRotation = GetComponentRotation();
 	}
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);

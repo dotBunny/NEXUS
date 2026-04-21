@@ -32,10 +32,25 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	FDoRepLifetimeParams Params;
 	Params.Condition = COND_InitialOnly;
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OperationTicket, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, JunctionDetails, Params);
 }
 
 void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	FNProcGenRegistry::UnregisterCellLevelInstance(this);
 	Super::EndPlay(EndPlayReason);
+}
+
+void ANCellLevelInstance::OnRep_JunctionDetails()
+{
+	FillJunctionData();
+}
+
+void ANCellLevelInstance::FillJunctionData()
+{
+	JunctionData.Empty();
+	for (int i = 0; i < JunctionDetails.Num(); i++)
+	{
+		JunctionData.Add(JunctionDetails[i].InstanceIdentifier, JunctionDetails[i]);
+	}
 }

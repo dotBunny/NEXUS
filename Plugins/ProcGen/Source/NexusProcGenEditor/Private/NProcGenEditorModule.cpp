@@ -162,15 +162,6 @@ void FNProcGenEditorModule::OnPostEngineInit()
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
 		NSLOCTEXT("NexusProcGenEditor", "NOrganVolumePlacement", "Organ Volume"))));
-		
-		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
-			*ANCellJunctionBlockerActor::StaticClass(),
-			FAssetData(ANCellJunctionBlockerActor::StaticClass()),
-			NAME_None,
-			NAME_None,
-			TOptional<FLinearColor>(),
-			TOptional<int32>(),
-			NSLOCTEXT("NexusProcGenEditor", "NCellJunctionBlockerActorPlacement", "Cell Junction Blocker Actor"))));
 	}
 }
 
