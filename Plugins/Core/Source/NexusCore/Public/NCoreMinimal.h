@@ -5,8 +5,13 @@
 
 #include "CoreMinimal.h"
 
+/** Log category used by all NexusCore runtime logging. */
 NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCore, Log, All);
 
+/**
+ * Compile-time version information for the NEXUS framework.
+ * @note Number is a monotonically increasing build number; Major/Minor/Patch follow semantic versioning.
+ */
 namespace NEXUS::Version
 {
 	constexpr int Number = 12;

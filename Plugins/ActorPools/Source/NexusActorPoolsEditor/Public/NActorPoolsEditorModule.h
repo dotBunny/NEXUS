@@ -12,12 +12,13 @@ class FPlacementModeID;
  */
 class FNActorPoolsEditorModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	N_IMPLEMENT_MODULE(FNActorPoolsEditorModule, "NexusActorPoolsEditor")
 
 private:
+	/** Registered placement-mode entries, tracked so they can be unregistered on shutdown. */
 	TArray<TOptional<FPlacementModeID>> PlacementActors;
 	void OnPostEngineInit();
 };

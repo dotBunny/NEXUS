@@ -3,8 +3,22 @@
 
 #pragma once
 
+/**
+ * Defines the static FName storage for a named meta key in FNMetaUtils.
+ *
+ * Pair with N_IMPLEMENT_META_TYPE_HEADER in the class body; this macro lives in the .cpp file.
+ * @param Name The logical name used to generate accessors (e.g. ExternalDocumentation).
+ * @param MetaKey The actual meta tag string as it appears in UMETA/USTRUCT/UCLASS metadata.
+ */
 #define N_IMPLEMENT_META_TYPE(Name, MetaKey) \
 		FName FNMetaUtils::Name ## Key = FName(TEXT(#MetaKey));
+/**
+ * Declares strongly-typed Has/Get/TryGet accessors for a specific meta key across the four
+ * reflection targets FNMetaUtils supports (UEdGraphNode, UScriptStruct, UStruct, UClass).
+ *
+ * Use in the class header; pair with N_IMPLEMENT_META_TYPE in the .cpp to supply the key's FName.
+ * @param Name The logical name of the key — generates HasName / GetName / TryGetName / GetNameUnsafe.
+ */
 #define N_IMPLEMENT_META_TYPE_HEADER(Name) \
 	public: \
 		static bool Has ## Name(UEdGraphNode* Node) { return FNMetaUtils::HasKey(Node, Name ## Key); } \

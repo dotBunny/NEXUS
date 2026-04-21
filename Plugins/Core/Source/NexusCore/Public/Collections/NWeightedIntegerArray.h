@@ -6,27 +6,34 @@
 #include "NRandom.h"
 
 /**
- * An array of integers that are proportionally weighted in the entry count.
+ * An array of integers that are proportionally weighted via repeated entries.
+ *
+ * Rather than storing explicit weight tables, each value is inserted Weight times. Picking an
+ * entry then becomes a uniform random index lookup while still honouring the relative weights.
+ * This keeps selection fast at the cost of a larger memory footprint for heavily weighted entries.
  */
 struct NEXUSCORE_API FNWeightedIntegerArray
 {
 	/**
-	 * Add a value to the array, with an optional weight/count.
+	 * Add a value to the array, duplicated according to its weight.
+	 * @param Value The integer value to add.
+	 * @param Weight How many copies of Value to insert (the value's relative likelihood of selection).
 	 */
 	void Add(const int32 Value, const int32 Weight = 1);
 
-	/**
-	 * Empty the existing array.
-	 */
+	/** Clears all entries from the array. */
 	void Empty();
 
 	/**
-	 * Remove a value from the array.
+	 * Removes every copy of the supplied value from the array.
+	 * @param Value The value whose entries should all be removed.
 	 */
 	void Remove(const int32 Value);
 
 	/**
-	 * Remove a value from the array, with an optional count limit.
+	 * Removes up to Limit copies of the supplied value from the array.
+	 * @param Value The value whose entries should be partially removed.
+	 * @param Limit The maximum number of copies to remove.
 	 */
 	void RemoveSome(const int32 Value, int32 Limit = 1);
 
@@ -48,9 +55,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 		return Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
 	}
 
-	/**
-	 * Get a random value from the array creating an instance FRandomStream from the Seed.	 
-	 */
+	/** Get a random value from the array creating an instance FRandomStream from the Seed. */
 	int32 RandomOneShotValue(const int Seed) const
 	{
 		const FRandomStream RandomStream(Seed);
@@ -79,9 +84,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 		return Data[RandomIndex];
 	}
 
-	/**
-	 * Is there any data in the array?
-	 */
+	/** Is there any data in the array? */
 	bool HasData() const
 	{
 		return Data.Num() > 0;

@@ -7,20 +7,19 @@
 #include "Engine/DataAsset.h"
 #include "NActorPoolSet.generated.h"
 
+/**
+ * Pairs an Actor class with the settings an FNActorPool should use when pooling instances of that class.
+ */
 USTRUCT()
 struct NEXUSACTORPOOLS_API FNActorPoolDefinition
 {
 	GENERATED_BODY()
 
-	/**
-	 * The Actor to create a pool for.
-	 */
+	/** The Actor to create a pool for. */
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> ActorClass;
 
-	/**
-	 * The Actor Pool's settings.
-	 */
+	/** The Actor Pool's settings. */
 	UPROPERTY(EditAnywhere)
 	FNActorPoolSettings Settings;
 };
@@ -35,12 +34,19 @@ class NEXUSACTORPOOLS_API UNActorPoolSet : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	/** The Actor pool definitions declared directly by this set. */
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{ActorClass} ({MinimumActorCount})"))
 	TArray<FNActorPoolDefinition> ActorPools;
 
+	/** Additional sets whose definitions should also be created alongside this set. */
 	UPROPERTY(EditAnywhere)
 	TArray<TSoftObjectPtr<UNActorPoolSet>> NestedSets;
-	
+
+	/**
+	 * Recursively resolves this set plus every nested set into a flat, unique array (cycle-safe).
+	 * @param OutActorPoolSets Inout array receiving each unique set encountered.
+	 * @return true if at least one set (this one) was added.
+	 */
 	bool TryGetUniqueSets(TArray<UNActorPoolSet*>& OutActorPoolSets)
 	{
 		const int AdditionalCount = NestedSets.Num();

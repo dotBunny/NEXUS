@@ -4,8 +4,11 @@
 #pragma once
 #include "Macros/NFlagsMacros.h"
 
-/*
- * Build configuration flags to specify which builds a feature is available in.
+/**
+ * Bit flags identifying the Unreal build configurations a feature should be available in.
+ *
+ * Combine with ENUM_CLASS_FLAGS-style bitwise operators or the N_BUILD_CONFIGURATION_AVAILABILITY_*
+ * helper masks below to set a specific availability profile.
  */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENBuildConfigurationAvailability : uint8
@@ -19,6 +22,7 @@ enum class ENBuildConfigurationAvailability : uint8
 };
 ENUM_CLASS_FLAGS(ENBuildConfigurationAvailability)
 
+/** All build configurations, including Shipping. */
 #define N_BUILD_CONFIGURATION_AVAILABILITY_ALL \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Debug) | \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Development) | \
@@ -26,15 +30,24 @@ ENUM_CLASS_FLAGS(ENBuildConfigurationAvailability)
 	static_cast<uint8>(ENBuildConfigurationAvailability::Test) | \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Editor)
 
+/** Every build configuration except Shipping; use for developer-only features. */
 #define N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Debug) | \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Development) | \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Test) | \
 	static_cast<uint8>(ENBuildConfigurationAvailability::Editor)
 
+/**
+ * Runtime helper that compares an ENBuildConfigurationAvailability mask against the current build.
+ */
 class FNBuildConfigurationAvailability
 {
 public:
+	/**
+	 * Checks whether the current build configuration is included in BuildConfigurationAvailability.
+	 * @param BuildConfigurationAvailability Bit mask of permitted configurations.
+	 * @return true when the current build matches one of the flagged configurations.
+	 */
 	FORCEINLINE static bool IsAvailableInBuild(ENBuildConfigurationAvailability BuildConfigurationAvailability)
 	{
 #if WITH_EDITOR	

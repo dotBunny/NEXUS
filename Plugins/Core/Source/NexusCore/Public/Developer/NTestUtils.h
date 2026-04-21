@@ -6,23 +6,34 @@
 #include "NObjectSnapshotUtils.h"
 #include "Misc/LowLevelTestAdapter.h"
 
+/**
+ * Helpers that standardise how NEXUS tests set up and tear down worlds and measure performance.
+ *
+ * These utilities are only meaningful inside the Low-Level Test framework and therefore depend on
+ * its macros (REQUIRE_MESSAGE, ADD_ERROR). All methods are designed to be safely re-entrant — every
+ * world is disposed before the call returns.
+ */
 class NEXUSCORE_API FNTestUtils
 {
 public:
-	
+	/**
+	 * Prepares global state so a performance test can produce comparable, low-noise measurements.
+	 * @note Initialises stack walking, forces a GC and flushes the log/visual-log streams.
+	 */
 	FORCEINLINE static void PrePerformanceTest()
 	{
 		// Ensure that stack walking is initialized prior to performance testing to avoid library loading
 		FPlatformStackWalk::InitStackWalking();
-	
+
 		// Force garbage collection to ensure a clean slate for performance testing
 		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-		
+
 		// Force the logs to be written to disk prior to the operation
 		GLog->Flush();
 		FVisualLogger::Get().Flush();
 	}
-	
+
+	/** Matching teardown to PrePerformanceTest(); forces a GC so the next test starts clean. */
 	FORCEINLINE static void PostPerformanceTest()
 	{
 		// Force garbage collection to ensure the next test is already prepared / faster
@@ -30,7 +41,16 @@ public:
 	}
 
 	/**
-	 * Creates a test world, runs test functionality, and tears down the world after, destroying all created actors and objects associated to it.
+	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterwards.
+	 *
+	 * The world is fully booted through InitializeActorsForPlay/BeginPlay so it can host actor
+	 * behaviour, and is destroyed (along with its temporary UGameInstance) when the test body
+	 * returns. Every test that needs a world should go through this helper rather than rolling
+	 * its own world lifecycle.
+	 *
+	 * @param WorldType The EWorldType to create (typically Game or PIE).
+	 * @param TestFunctionality Callable that receives the created world and performs the test.
+	 * @param bDisableGarbageCollection Suppress GC for the duration of the test body when true.
 	 */
 	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
@@ -75,8 +95,16 @@ public:
 	}
 	
 	/**
-	 * Takes a UObject snapshot prior to creating a test world. Runs test functionality, and then tears down the world destroying all actors and objects associated to it. 
-	 * Making an object snapshot afterward to validate that the number of UObjects has not changed. Used to detect leaks.
+	 * Runs a world test and asserts that no UObjects leaked across the scope.
+	 *
+	 * Captures a baseline UObject snapshot, delegates to WorldTest(), and then compares a post-test
+	 * snapshot against the baseline. Any newly added objects are reported via ADD_ERROR and fail
+	 * the test. When bShouldGarbageCollect is true an additional GC pass runs between the test body
+	 * and the comparison so transient objects have a chance to be collected.
+	 *
+	 * @param WorldType The EWorldType to create for the world fixture.
+	 * @param TestFunctionality Callable that receives the created world and performs the test.
+	 * @param bShouldGarbageCollect Run GC between the test body and the leak check when true.
 	 */
 	FORCEINLINE static void WorldTestChecked(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bShouldGarbageCollect = true)
 	{

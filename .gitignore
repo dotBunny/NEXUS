@@ -83,7 +83,6 @@ TestProject/DerivedDataCache/*
 TestProject/Saved/*
 TestProject/Build/*
 TestProject/.vsconfig
-TestProject/.claude/settings.local.json
 TestProject/NEXUS.unrealvs
 *.DotSettings.user
 
@@ -101,6 +100,10 @@ _site/*
 .github/pages/.jekyll-cache
 .github/pages/.jekyll-metadata
 .github/pages/vendor
+
+# Claude
+TestProject/.claude/tmp
+TestProject/.claude/settings.local.json
 
 # Coverage
 LastCoverageResults.log

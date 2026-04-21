@@ -14,7 +14,7 @@ class FNPickerModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	N_IMPLEMENT_MODULE(FNPickerModule, "NexusPicker")
-	
-private:	
+
+private:
 	void OnPostEngineInit();
 };

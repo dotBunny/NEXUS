@@ -4,7 +4,6 @@
 #include "NActorPoolsEditorModule.h"
 #include "ComponentVisualizer.h"
 #include "IPlacementModeModule.h"
-#include "NActorPoolsEditorMinimal.h"
 #include "NActorPoolsEditorStyle.h"
 #include "NActorPoolsEditorToolMenu.h"
 #include "NActorPoolSpawnerComponent.h"

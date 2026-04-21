@@ -38,41 +38,31 @@ public:
 		return true;
 	}
 	
-	/**
-	 * Get the current editor map name.
-	 */
+	/** Get the current editor map name. */
 	FORCEINLINE static FString GetCurrentMapName()
 	{
 		return GEditor->GetEditorWorldContext().World()->GetMapName();
 	}
 
-	/**
-	 * Get the current editor map full path.
-	 */
+	/** Get the current editor map full path. */
 	FORCEINLINE static FString GetCurrentMapFullPath()
 	{
 		return GEditor->GetEditorWorldContext().World()->GetName();
 	}
 
-	/**
-	 * Is in PIE mode.
-	 */
+	/** Is in PIE mode. */
 	FORCEINLINE static bool IsPlayInEditor()
 	{
 		return GEditor->PlayWorld || GIsPlayInEditorWorld;
 	}
 
-	/**
-	 * Is not in PIE mode.
-	 */
+	/** Is not in PIE mode. */
 	FORCEINLINE static bool IsNotPlayInEditor()
 	{
 		return !IsPlayInEditor();
 	}
 
-	/**
-	 * Is in PIE and not paused.
-	 */
+	/** Is in PIE and not paused. */
 	FORCEINLINE static bool IsPlayInEditorRunning()
 	{
 		return IsPlayInEditor() && !GUnrealEd->PlayWorld->bDebugPauseExecution;
@@ -114,11 +104,19 @@ public:
 	 */
 	static UBlueprint* CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass);
 	
+	/**
+	 * Returns the active editor viewport's client.
+	 * @return The viewport client cast to FEditorViewportClient; does not check for null.
+	 */
 	FORCEINLINE static FEditorViewportClient* GetActiveViewportClient()
 	{
 		return static_cast<FEditorViewportClient*>(GEditor->GetActiveViewport()->GetClient());
 	}
-	
+
+	/**
+	 * Returns the current editor level.
+	 * @return The ULevel the user is editing, or nullptr while PIE is active.
+	 */
 	FORCEINLINE static ULevel* GetCurrentLevel()
 	{
 		if (IsPlayInEditor())
@@ -134,6 +132,10 @@ public:
 		return nullptr;
 	}
 	
+	/**
+	 * Returns the world that owns the current editor level.
+	 * @return The owning UWorld, or nullptr while PIE is active or no level is loaded.
+	 */
 	FORCEINLINE static UWorld* GetCurrentWorld()
 	{
 		ULevel* CurrentLevel = GetCurrentLevel();
@@ -144,6 +146,11 @@ public:
 		return nullptr;
 	}
 
+	/**
+	 * Tests whether World has never been saved (new map or in-memory only).
+	 * @param World The world to inspect.
+	 * @return true when World is null, has no package, or the package has never been written to disk.
+	 */
 	FORCEINLINE static bool IsUnsavedWorld(const UWorld* World)
 	{
 		if (World == nullptr) return true;
@@ -151,16 +158,24 @@ public:
 		if (Package == nullptr || Package->GetFileSize() == 0) return true;
 		return !FPackageName::DoesPackageExist(Package->GetName());
 	}
-	
+
+	/**
+	 * Replaces the current actor selection with Actor.
+	 * @param Actor The actor to select.
+	 */
 	FORCEINLINE static void SelectActor(AActor* Actor)
 	{
 		USelection* ActorSelection = GEditor->GetSelectedActors();
 		ActorSelection->Modify();
 		ActorSelection->DeselectAll();
-		
+
 		GEditor->SelectActor(Actor, true, true, true, true);
 	}
-	
+
+	/**
+	 * Returns the union of folders selected in the Content Browser's main view and path view.
+	 * @return A de-duplicated list of asset path roots.
+	 */
 	static TArray<FString> GetSelectedContentBrowserPaths()
 	{
 		TArray<FString> SelectedPaths;
@@ -177,19 +192,37 @@ public:
 		return MoveTemp(SelectedPaths);
 	}
 	
+	/** Marks Config so it will not be bundled with staged/packaged builds. */
 	static void DisallowConfigFileFromStaging(const FString& Config);
-	static void AllowConfigFileForStaging(const FString& Config);
-	
 
+	/** Marks Config so it will be bundled with staged/packaged builds (undoes DisallowConfigFileFromStaging). */
+	static void AllowConfigFileForStaging(const FString& Config);
+
+
+	/** Returns the absolute path to Engine/Binaries. */
 	FORCEINLINE static FString GetEngineBinariesPath()
 	{
 		return FPaths::Combine(FPaths::EngineDir(), "Binaries");
 	}
-	
+
+	/**
+	 * Registers or replaces a global workspace item under WidgetIdentifier.
+	 * @param WidgetIdentifier Unique name of the workspace item.
+	 * @param Label Display label shown in the tab picker.
+	 * @param Icon Icon shown alongside Label.
+	 */
 	static void UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon);
+
+	/** Unregisters the workspace item previously added under WidgetIdentifier. */
 	static void RemoveWorkspaceItem(const FName& WidgetIdentifier);
-	
+
+	/**
+	 * Registers a callback that fires when the tab with TabIdentifier is closed.
+	 * @param TabIdentifier Name of the tab to hook.
+	 * @param OnTabClosedCallback Delegate invoked on close.
+	 */
 	static void SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback);
-	
+
+	/** Deletes the contents of the project's Saved/Logs folder. */
 	static void CleanLogsFolder();
 };

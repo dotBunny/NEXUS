@@ -23,6 +23,7 @@ class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
 
+	/** The kill zone volume used as the Actor's root component. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UNKillZoneComponent> KillZoneComponent;
 };

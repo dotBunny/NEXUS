@@ -16,9 +16,7 @@ struct NEXUSPICKER_API FNSplinePickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 
-	/**
-	 * The spline component to generate points on.
-	 */
+	/** The spline component to generate points on. */
 	UPROPERTY(Category = "Spline", BlueprintReadWrite)
 	TObjectPtr<USplineComponent> SplineComponent = nullptr;
 };

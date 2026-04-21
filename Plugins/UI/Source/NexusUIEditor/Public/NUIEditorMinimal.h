@@ -3,4 +3,5 @@
 
 #pragma once
 
+/** Log category used by all NexusUIEditor module. */
 NEXUSUIEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusUIEditor, Log, All);

@@ -81,7 +81,16 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-actor"))
 	bool ReturnActor(AActor* Actor);
 
+	/**
+	 * Register a spawner component as tickable so the subsystem drives its periodic updates.
+	 * @param TargetComponent The spawner to register.
+	 */
 	void RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
+
+	/**
+	 * Unregister a previously registered tickable spawner.
+	 * @param TargetComponent The spawner to remove.
+	 */
 	void UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
 
 	//~UTickableWorldSubsystem
@@ -186,17 +195,28 @@ private:
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
 	bool HasTickableActorPool(FNActorPool* ActorPool) const;
 
+	/** All Actor pools managed by this subsystem, keyed by Actor class. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<UClass*, TUniquePtr<FNActorPool>> ActorPools;
+
+	/** Subset of pools that require per-frame ticking. */
 	TArray<FNActorPool*> TickableActorPools;
+
+	/** Spawners that require per-frame ticking. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TArray<UNActorPoolSpawnerComponent*> TickableSpawners;
-	
-	UPROPERTY()
-	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;	
 
+	/** Per-class default settings registered at runtime. */
+	UPROPERTY()
+	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;
+
+	/** Cached flag to skip the tickable-pool loop when empty. */
 	bool bHasTickableActorPools;
+
+	/** Cached flag to skip the tickable-spawner loop when empty. */
 	bool bHasTickableSpawners;
+
+	/** Policy used when ReturnActor is called with an Actor unknown to this subsystem. */
 	ENActorPoolUnknownBehaviour UnknownBehaviour = ENActorPoolUnknownBehaviour::Destroy;
 
 };

@@ -54,9 +54,7 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/#set-from-text"))
 	void SetFromText(const FText& NewValue);
 
-	/**
-	 * Delegate fired when the text is changed via any of the provided methods.
-	 */
+	/** Delegate fired when the text is changed via any of the provided methods. */
 	UPROPERTY(BlueprintAssignable)
 	FOnTextChanged OnTextChanged;	
 };

@@ -7,17 +7,25 @@
 #include "Macros/NSubsystemMacros.h"
 #include "NDynamicRefSubsystem.generated.h"
 
+/**
+ * Holds the set of UObjects registered for a single ENDynamicRef slot or FName bucket.
+ */
 USTRUCT()
 struct FNDynamicRefCollection
 {
 	GENERATED_BODY()
-	
+
+	/** The registered UObjects, in registration order. */
 	UPROPERTY()
 	TArray<TObjectPtr<UObject>> Objects;
-	
+
+	/** @return true if the collection has at least one registered object. */
 	bool HasObjects() const { return Objects.Num() > 0; }
+	/** @return A copy of the currently registered objects. */
 	TArray<UObject*> GetObjects() { return Objects; }
+	/** Add an object to the collection; duplicates are ignored. */
 	void Add(UObject* Object) { Objects.AddUnique(Object); }
+	/** Remove an object from the collection if present. */
 	void Remove(UObject* Object) { Objects.Remove(Object); }
 };
 
@@ -271,19 +279,27 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	*/
 	UObject* GetLastObjectByNameUnsafe(FName Name);
 
-	
+
+	/** @return All FName buckets that currently have at least one registered object. */
 	TArray<FName> GetNames() const;
+	/** @return All ENDynamicRef slots that currently have at least one registered object. */
 	TArray<ENDynamicRef> GetDynamicRefs() const;
-	
+
+	/** Fired when an object is added under an ENDynamicRef slot. */
 	OnDynamicRefChangeDelegate OnAdded;
+	/** Fired when an object is added under an FName bucket. */
 	OnDynamicRefNameChangeDelegate OnAddedByName;
+	/** Fired when an object is removed from an ENDynamicRef slot. */
 	OnDynamicRefChangeDelegate OnRemoved;
+	/** Fired when an object is removed from an FName bucket. */
 	OnDynamicRefNameChangeDelegate OnRemovedByName;
-	
+
 private:
+	/** Fast array of collections indexed by ENDynamicRef (size == NDR_Max). */
 	UPROPERTY()
 	TArray<FNDynamicRefCollection> FastCollection;
-	
+
+	/** Named collections, keyed by arbitrary FName. */
 	UPROPERTY()
 	TMap<FName, FNDynamicRefCollection> NamedCollection;
 };

@@ -16,14 +16,17 @@ UCLASS()
 class UNLevelBlueprintValidator : public UEditorValidatorBase
 {
 	GENERATED_BODY()
-	
+
+	//~UEditorValidatorBase
 	virtual bool CanValidateAsset_Implementation(
 		const FAssetData& InAssetData, UObject* InObject, FDataValidationContext& InContext) const override;
-	
+
 	virtual EDataValidationResult ValidateLoadedAsset_Implementation(
 		const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context) override;
-	
-	FTextFormat TextFormat = NSLOCTEXT("NexusToolingEditor", "LevelScriptBlueprintValidator", 
+	//End UEditorValidatorBase
+
+	/** Format string for the warning/error message; substitutes in the node count and level name. */
+	FTextFormat TextFormat = NSLOCTEXT("NexusToolingEditor", "LevelScriptBlueprintValidator",
 		"A LevelScriptBlueprint has been detected in use with {0} nodes in the level({1}).\nFor more information visit https://nexus-framework.com/docs/plugins/tooling/validators/level-blueprint-validator/");
-	
+
 };

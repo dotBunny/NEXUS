@@ -23,60 +23,84 @@ UCLASS(BlueprintType)
 class NEXUSTOOLINGEDITOR_API UNCollisionVisualizerWidget : public UNEditorUtilityWidget
 {
 	friend class ANCollisionVisualizerActor;
-	
+
 	GENERATED_BODY()
 
 public:
-	
+
+	//~UNEditorUtilityWidget
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
-	
+	//End UNEditorUtilityWidget
+
+	/** Per-frame callback driven by ANCollisionVisualizerActor::Tick to re-run the configured query. */
 	void OnWorldTick(const ANCollisionVisualizerActor* Actor);
+
+	/** Push current widget Settings onto Actor so its transform/draw state matches. */
 	void PushSettings(ANCollisionVisualizerActor* Actor) const;
+
+	/** Pull Actor state back into the widget's Settings (used after viewport-driven moves). */
 	void UpdateSettings(const ANCollisionVisualizerActor* Actor);
-	
+
 protected:
-	
+
+	/** Details-view callback that forwards per-property edits into the visualizer actor. */
 	UFUNCTION()
 	void OnPropertyValueChanged(FName Name);
-	
+
+	/** PIE-started hook — rebinds the visualizer actor to the PIE world. */
 	void OnPIEStarted(UGameInstance* GameInstance);
+
+	/** PIE-ready hook — finalises bindings once the PIE world is fully live. */
 	void OnPIEReady(UGameInstance* GameInstance);
+
+	/** PIE-ended hook — returns the visualizer to the editor world. */
 	void OnPIEEnded(UGameInstance* GameInstance);
-	
+
+	/** Focus/select the start-point scene component in the level editor. */
 	UFUNCTION()
 	void SelectStartPoint();
-	
+
+	/** Focus/select the end-point scene component in the level editor. */
 	UFUNCTION()
 	void SelectEndPoint();
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectEndButton;
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ActorNameText;
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNDetailsView> ObjectDetails;
-	
+
+	/** Actor that hosts the start/end points in the current world; recreated on PIE transitions. */
 	UPROPERTY()
 	TObjectPtr<ANCollisionVisualizerActor> QueryActor;
-	
+
+	/** Persisted configuration edited via the widget's details view. */
 	UPROPERTY(EditAnywhere)
 	FNCollisionVisualizerSettings Settings;
 
 private:
+	/** Load the previously-saved Settings from project config. */
 	void RestoreState();
+
+	/** Persist the current Settings to project config. */
 	void SaveState() const;
-	
+
+	/** Spawn the visualizer actor in TargetWorld (or the editor world if null). */
 	void CreateActor(UWorld* TargetWorld = nullptr);
+
+	/** Destroy the currently-bound visualizer actor. */
 	void DestroyActor();
 
+	/** @return true if a property change for Name requires PushSettings to the actor. */
 	static bool DoesPropertyAffectActor(FName Name);
-	
+
 	FDelegateHandle OnPIEStartedHandle;
 	FDelegateHandle OnPIEReadyHandle;
 	FDelegateHandle OnPIEEndedHandle;

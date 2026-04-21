@@ -3,6 +3,12 @@
 
 #pragma once
 
+/**
+ * Helpers for producing and converting seeds used by FNMersenneTwister.
+ *
+ * Supports three seed representations: raw 64-bit numeric, hexadecimal text, and human-friendly
+ * word-style strings. The From/To helpers convert between forms while sanitizing user input.
+ */
 class NEXUSCORE_API FNSeedGenerator
 {
 public:
@@ -33,6 +39,11 @@ public:
 	 */
 	static uint64 SeedFromString(const FString& InSeed);
 
+	/**
+	 * Converts a friendly-format seed string back into a numeric seed.
+	 * @param InSeed The human-friendly seed produced by RandomFriendlySeed.
+	 * @return a numeric seed suitable for FNMersenneTwister.
+	 */
 	static uint64 SeedFromFriendlySeed(const FString& InSeed);
 	
 	/**

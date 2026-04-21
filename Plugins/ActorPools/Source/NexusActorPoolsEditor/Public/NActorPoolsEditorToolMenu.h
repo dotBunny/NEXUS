@@ -3,13 +3,21 @@
 
 #pragma once
 
+/**
+ * Registers and drives the NexusActorPools entry in the editor's tool-menu, plus the
+ * companion editor utility window.
+ */
 class FNActorPoolsEditorToolMenu
 {
 public:
+	/** Register the tool-menu entries with UToolMenus. */
 	static void Register();
+	/** Unregister entries previously installed by Register. */
 	static void Unregister();
-	
+
+	/** Open the Actor Pools editor utility widget tab, creating it if necessary. */
 	static void CreateEditorUtilityWindow();
+	/** @return true if the editor utility widget tab is currently open. */
 	static bool HasEditorUtilityWindow();
 };
 

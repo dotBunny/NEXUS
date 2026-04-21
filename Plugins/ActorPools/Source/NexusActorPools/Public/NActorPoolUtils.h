@@ -5,9 +5,17 @@
 
 #include "INActorPoolItem.h"
 
+/**
+ * Static helper utilities for the Actor Pool system.
+ */
 class FNActorPoolUtils
 {
 public:
+	/**
+	 * Convert an ENActorOperationalState to a human-readable string.
+	 * @param State The operational state to convert.
+	 * @return The string representation of the state (e.g. "Enabled", "Disabled").
+	 */
 	static FString ToString(const ENActorOperationalState& State)
 	{
 		switch (State)

@@ -12,7 +12,7 @@ class NEXUSCORE_API FNDrawDebugHelpers
 {
 public:
 	/**
-	 * 
+	 * Draws a string using the FNPrimitiveFont.
 	 * @param InWorld Which world to operate in.
 	 * @param String The string to draw out.
 	 * @param Position The world position to start drawing the string at.
@@ -32,47 +32,111 @@ public:
 		FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, float LineHeight = 4.f, 
 		float Thickness = 8.f, const bool bInvertLineFeed = false, const bool bDrawBelowPosition = true);
 	
-	FORCEINLINE static void DrawSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition, 
+	/**
+	 * Draws a swept FCollisionShape from a start to an end position, dispatching to the correct shape helper.
+	 * @param InWorld Which world to operate in.
+	 * @param StartPosition World position where the sweep begins.
+	 * @param EndPosition World position where the sweep ends.
+	 * @param Quat Rotation of the swept shape.
+	 * @param Shape The collision shape to sweep (Line, Box, Sphere or Capsule).
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
+	FORCEINLINE static void DrawSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition,
 		const FQuat& Quat, const FCollisionShape& Shape, const FColor& Color, const bool bPersistentLines = false,
 		const float LifeTime = -1.f, const uint8 DepthPriority = SDPG_World, const float Thickness = 2.f)
 	{
 		switch (Shape.ShapeType)
 		{
 		case ECollisionShape::Line:
-			DrawDebugLine(InWorld, StartPosition, EndPosition, Color, bPersistentLines, LifeTime, 
+			DrawDebugLine(InWorld, StartPosition, EndPosition, Color, bPersistentLines, LifeTime,
 				DepthPriority, Thickness);
 			break;
 		case ECollisionShape::Box:
-			DrawBoxSweep(InWorld, StartPosition, EndPosition, Quat, Shape.GetBox(), Color, bPersistentLines, 
+			DrawBoxSweep(InWorld, StartPosition, EndPosition, Quat, Shape.GetBox(), Color, bPersistentLines,
 				LifeTime, DepthPriority, Thickness);
 			break;
 		case ECollisionShape::Sphere:
-			DrawSphereSweep(InWorld, StartPosition, EndPosition, Shape.GetSphereRadius(), Color, bPersistentLines, 
+			DrawSphereSweep(InWorld, StartPosition, EndPosition, Shape.GetSphereRadius(), Color, bPersistentLines,
 				LifeTime, DepthPriority, Thickness);
 			break;
 		case ECollisionShape::Capsule:
-			DrawCapsuleSweep(InWorld, StartPosition, EndPosition, Quat, Shape.GetCapsuleHalfHeight(), 
+			DrawCapsuleSweep(InWorld, StartPosition, EndPosition, Quat, Shape.GetCapsuleHalfHeight(),
 				Shape.GetCapsuleRadius(), Color, bPersistentLines, LifeTime, DepthPriority, Thickness);
 			break;
 		default:
 			break;
 		}
 	}
-	
-	static void DrawBoxSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition, 
-		const FQuat& Quat, const FVector& HalfSize, const FColor& Color, bool bPersistentLines = false, 
+
+	/**
+	 * Draws a swept box from a start to an end position, including the box at both endpoints and connecting edges.
+	 * @param InWorld Which world to operate in.
+	 * @param StartPosition World position where the sweep begins.
+	 * @param EndPosition World position where the sweep ends.
+	 * @param Quat Rotation of the swept box.
+	 * @param HalfSize Half-extents of the box.
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
+	static void DrawBoxSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition,
+		const FQuat& Quat, const FVector& HalfSize, const FColor& Color, bool bPersistentLines = false,
 		float LifeTime = -1.f, uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
-	
-	static void DrawSphereSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition, 
-		float Radius, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f, 
+
+	/**
+	 * Draws a swept sphere from a start to an end position with connecting capsule-style tangent lines.
+	 * @param InWorld Which world to operate in.
+	 * @param StartPosition World position where the sweep begins.
+	 * @param EndPosition World position where the sweep ends.
+	 * @param Radius Sphere radius.
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
+	static void DrawSphereSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition,
+		float Radius, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f,
 		uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
-	
-	static void DrawCapsuleSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition, 
-		const FQuat& Quat, float HalfHeight, float Radius, const FColor& Color, bool bPersistentLines = false, 
+
+	/**
+	 * Draws a swept capsule from a start to an end position, including the capsule at both endpoints.
+	 * @param InWorld Which world to operate in.
+	 * @param StartPosition World position where the sweep begins.
+	 * @param EndPosition World position where the sweep ends.
+	 * @param Quat Rotation of the swept capsule.
+	 * @param HalfHeight Half-height of the capsule along its local Z axis.
+	 * @param Radius Radius of the capsule.
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
+	static void DrawCapsuleSweep(const UWorld* InWorld, const FVector& StartPosition, const FVector& EndPosition,
+		const FQuat& Quat, float HalfHeight, float Radius, const FColor& Color, bool bPersistentLines = false,
 		float LifeTime = -1.f, uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
-	
+
+	/**
+	 * Draws a static (non-swept) collision shape at a given position and orientation.
+	 * @param InWorld Which world to operate in.
+	 * @param Position World position to draw the shape at.
+	 * @param Quat Rotation applied to the shape.
+	 * @param Shape The collision shape to render.
+	 * @param Color Color used for the drawn debug lines.
+	 * @param bPersistentLines Should the drawn lines be permanent?
+	 * @param LifeTime How long the lines should last if not permanent.
+	 * @param DepthPriority The scene depth priority group to draw into.
+	 * @param Thickness Line thickness in pixels.
+	 */
 	static void DrawCollisionShape(const UWorld* InWorld, const FVector& Position, const FQuat& Quat,
-		const FCollisionShape& Shape, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f, 
+		const FCollisionShape& Shape, const FColor& Color, bool bPersistentLines = false, float LifeTime = -1.f,
 		uint8 DepthPriority = SDPG_World, float Thickness = 2.f);
 	
 // #SONARQUBE-ENABLE

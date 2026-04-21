@@ -6,6 +6,9 @@
 #include "CoreMinimal.h"
 #include "NCollisionVisualizerSettings.generated.h"
 
+/**
+ * Which UWorld query flavour the collision visualizer should issue.
+ */
 UENUM()
 enum class ECollisionVisualizerMethod : uint8
 {
@@ -14,6 +17,9 @@ enum class ECollisionVisualizerMethod : uint8
 	Overlap
 };
 
+/**
+ * Trace/sweep result mode (single result, multi result, or boolean test).
+ */
 UENUM()
 enum class ECollisionVisualizerPrefix : uint8
 {
@@ -22,6 +28,9 @@ enum class ECollisionVisualizerPrefix : uint8
 	Test
 };
 
+/**
+ * Overlap flavour — blocking-only, any-overlap, or multi-overlap.
+ */
 UENUM()
 enum class ECollisionVisualizerOverlapBlocking : uint8
 {
@@ -30,6 +39,9 @@ enum class ECollisionVisualizerOverlapBlocking : uint8
 	Multi
 };
 
+/**
+ * Which UE collision query dispatch (channel / object type / named profile) to use.
+ */
 UENUM()
 enum class ECollisionVisualizerBy : uint8
 {
@@ -38,6 +50,9 @@ enum class ECollisionVisualizerBy : uint8
 	Profile
 };
 
+/**
+ * Mobility filter applied to the query — maps onto EQueryMobilityType.
+ */
 UENUM()
 enum class ECollisionVisualizerMobility : uint8
 {
@@ -47,6 +62,9 @@ enum class ECollisionVisualizerMobility : uint8
 };
 
 
+/**
+ * Primitive shape used by sweep/overlap queries.
+ */
 UENUM()
 enum class ECollisionVisualizerShape : uint8
 {
@@ -55,6 +73,9 @@ enum class ECollisionVisualizerShape : uint8
 	Sphere
 };
 
+/**
+ * Bitflag mask selecting which editor contexts the visualizer should render into.
+ */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ECollisionVisualizerDrawMode : uint8
 {
@@ -65,6 +86,9 @@ enum class ECollisionVisualizerDrawMode : uint8
 };
 ENUM_CLASS_FLAGS(ECollisionVisualizerDrawMode)
 
+/**
+ * Start/end positions and orientation used to drive a single collision-visualizer query.
+ */
 USTRUCT()
 struct FNCollisionVisualizerPoints
 {
@@ -80,6 +104,9 @@ struct FNCollisionVisualizerPoints
 	FRotator Rotation = FRotator(0,0,0);
 };
 
+/**
+ * Query parameters (method, channel/profile/type, shape) that describe what to trace for.
+ */
 USTRUCT()
 struct FNCollisionVisualizerQuery
 {
@@ -175,6 +202,9 @@ struct FNCollisionVisualizerQuery
 	}
 };
 
+/**
+ * Secondary FCollisionQueryParams toggles (complex, narrow-phase, mobility).
+ */
 USTRUCT()
 struct FNCollisionVisualizerOptions
 {
@@ -212,6 +242,9 @@ struct FNCollisionVisualizerOptions
 	}
 };
 
+/**
+ * Rendering controls for visualizer output — draw mode mask, thickness, colours, and cadence.
+ */
 USTRUCT()
 struct FNCollisionVisualizerDrawing
 {
@@ -241,6 +274,9 @@ struct FNCollisionVisualizerDrawing
 	FColor DrawMissColor = FColor(255,0,0);
 };
 
+/**
+ * Full settings bundle persisted by the collision-visualizer widget between sessions.
+ */
 USTRUCT()
 struct FNCollisionVisualizerSettings
 {

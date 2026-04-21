@@ -6,51 +6,52 @@
 #include "Macros/NFlagsMacros.h"
 #include "NActorPoolSettings.generated.h"
 
+/**
+ * Strategy used by an FNActorPool when a new Actor is requested but no free Actor is available.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-settings/#creation-strategies">ENActorPoolStrategy</a>
+ */
 UENUM(BlueprintType)
 enum class ENActorPoolStrategy : uint8
 {
-	// Create AActor as needed.
+	/** Create AActor as needed. */
 	Create = 0,
-	// Create AActor until MaximumActorCount is reached and stop returning a nullptr in such cases.
+	/** Create AActor until MaximumActorCount is reached and stop, returning a nullptr in such cases. */
 	CreateLimited = 1		UMETA(DisplayName = "Create Till Cap"),
-	// Create AActor until MaximumActorCount is reached, any requests beyond provide the oldest already spawned AActor in a FIFO behavior.
+	/** Create AActor until MaximumActorCount is reached, any requests beyond provide the oldest already spawned AActor in a FIFO behavior. */
 	CreateRecycleFirst = 2	UMETA(DisplayName = "Create Till Cap, Recycle First"),
-	// Create AActor until MaximumActorCount is reached, any requests beyond provide the newest already spawned AActor in a LIFO behavior.
+	/** Create AActor until MaximumActorCount is reached, any requests beyond provide the newest already spawned AActor in a LIFO behavior. */
 	CreateRecycleLast = 3	UMETA(DisplayName = "Create Till Cap, Recycle Last"),
-	// Deploys AActor as needed from fixed pools, exceeding availability results in a nullptr being returned.
+	/** Deploys AActor as needed from fixed pools, exceeding availability results in a nullptr being returned. */
 	Fixed = 4				UMETA(DisplayName = "Fixed Availability"),
-	// Deploys AActor as needed from fixed pools, exceeding availability will return the oldest already spawned AActor in a FIFO behavior.
+	/** Deploys AActor as needed from fixed pools, exceeding availability will return the oldest already spawned AActor in a FIFO behavior. */
 	FixedRecycleFirst = 5	UMETA(DisplayName = "Fixed Availability, Recycle First"),
-	// Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior.
+	/** Deploys AActor as needed from fixed pools, exceeding availability will return the newest already spawned AActor in a LIFO behavior. */
 	FixedRecycleLast = 6	UMETA(DisplayName = "Fixed Availability, Recycle Last")
 };
 
+/**
+ * Bitflag options that modify the behavior of an FNActorPool and the Actors it manages.
+ */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENActorPoolFlags : uint8
 {
 	None = 0 UMETA(Hidden),
-	// Should a sweep be done when setting the location of an Actor being spawned?
+	/** Should a sweep be done when setting the location of an Actor being spawned? */
 	SweepBeforeSettingLocation = 1 << 0,
-	// Should the Actor being returned to the pool be moved to a storage transform?
+	/** Should the Actor being returned to the pool be moved to a storage transform? */
 	ReturnToStorage = 1 << 1,
-	// Controls whether Actor construction is deferred when creating new Actors.
+	/** Controls whether Actor construction is deferred when creating new Actors. */
 	DeferConstruction = 1 << 2,
 	/**
 	 * Should FinishSpawning be called on the Actor when it does not implement INActorPoolItem?
 	 * @note This is not used by INActorPoolItems, they have a method which is called for logic to be applied before FinishSpawning is called.
 	 */
 	ShouldFinishSpawning = 1 << 3,
-	/**
-	 * Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked.
-	 */
+	/** Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked. */
 	ServerOnly = 1 << 4,
-	/**
-	 * Broadcast destroy event on the Actor through the operational change state delegate.
-	 */
+	/** Broadcast destroy event on the Actor through the operational change state delegate. */
 	BroadcastDestroy = 1 << 5,
-	/**
-	 * Should an Actor's network dormancy be updated based on state?
-	 */
+	/** Should an Actor's network dormancy be updated based on state? */
 	SetNetDormancy = 1 << 6,
 
 	/**
@@ -74,79 +75,73 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 
 public:
 
+	/** @return true if the DeferConstruction flag is set. */
 	FORCEINLINE bool HasFlag_DeferConstruction() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::DeferConstruction);
 	}
+	/** @return true if the ShouldFinishSpawning flag is set. */
 	FORCEINLINE bool HasFlag_ShouldFinishSpawning() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ShouldFinishSpawning);
 	}
+	/** @return true if the ReturnToStorage flag is set. */
 	FORCEINLINE bool HasFlag_ReturnToStorage() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ReturnToStorage);
 	}
+	/** @return true if the SweepBeforeSettingLocation flag is set. */
 	FORCEINLINE bool HasFlag_SweepBeforeSettingLocation() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SweepBeforeSettingLocation);
 	}
+	/** @return true if the ServerOnly flag is set. */
 	FORCEINLINE bool HasFlag_ServerOnly() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ServerOnly);
 	}
+	/** @return true if the BroadcastDestroy flag is set. */
 	FORCEINLINE bool HasFlag_BroadcastDestroy() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::BroadcastDestroy);
 	}
+	/** @return true if the SetNetDormancy flag is set. */
 	FORCEINLINE bool HasFlag_SetNetDormancy() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SetNetDormancy);
 	}
-	
+
+	/** @return true if the InvokeUFunctions flag is set. */
 	FORCEINLINE bool HasFlag_InvokeUFunctions() const
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::InvokeUFunctions);
 	}
 	
-	/**
-	 * When the pool is being filled during creation, what is the number of prewarmed Actor`s that should be created, either synchronously or divided across a number of frames.
-	 */
+	/** When the pool is being filled during creation, what is the number of prewarmed Actor`s that should be created, either synchronously or divided across a number of frames. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
 	int32 MinimumActorCount = 10;
 
-	/**
-	 * The number of pooled Actors that a pool can use/have. This is tied more to the Strategy being used for what happens when the pool has to create new Actors.
-	 */
+	/** The number of pooled Actors that a pool can use/have. This is tied more to the Strategy being used for what happens when the pool has to create new Actors. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
 	int32 MaximumActorCount = 100;
 
-	/**
-	 * Throttles the number of Actors that can be created per tick. This can be useful to spread the cost of warming a pool up across multiple frames (-1 for unlimited). 
-	 */
+	/** Throttles the number of Actors that can be created per tick. This can be useful to spread the cost of warming a pool up across multiple frames (-1 for unlimited). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="-1", ClampMax="500", UIMin="-1", UIMax="500", SliderExponent = 1))
 	int32 CreateObjectsPerTick = -1;
 
-	/**
-	 * Determines the approach taken when the pool does not have any Actors remaining in the "in" pool and needs to create one (or reuse)
-	 */
+	/** Determines the approach taken when the pool does not have any Actors remaining in the "in" pool and needs to create one (or reuse) */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	ENActorPoolStrategy Strategy = ENActorPoolStrategy::Create;
 	
-	/**
-	 * The behavioral flags to evaluate when doing operations with this pool.
-	 */
+	/** The behavioral flags to evaluate when doing operations with this pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
 	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::DefaultSettings);
 	
-	/**
-	 * The default applied transform when creating an actor, as well as where and how an actor is stored.
-	 */
+	/** The default applied transform when creating an actor, as well as where and how an actor is stored. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FTransform StorageTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
 	
-	/**
-	 * The base transform applied when spawning an actor.
-	 */
+	/** The base transform applied when spawning an actor. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
 	FTransform SpawnedTransform = FTransform(FRotator::ZeroRotator, FVector::Zero(), FVector::One());
 };

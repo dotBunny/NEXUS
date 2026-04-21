@@ -8,6 +8,7 @@
 
 class UGameInstance;
 
+/** Broadcast whenever the world-rendering toggle is flipped on or off. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam( FOnToggleWorldRenderingDelegate, bool, NewValue);
 
 /**
@@ -34,6 +35,7 @@ class NEXUSUI_API UNGameViewportClient : public UCommonGameViewportClient
 
 protected:
 
+	/** Fires when ToggleWorldRendering is called, before bDisableWorldRendering is updated. */
 	UPROPERTY(BlueprintAssignable, Category = "NEXUS|User Interface")
 	FOnToggleWorldRenderingDelegate OnDisableWorldRendering;
 };

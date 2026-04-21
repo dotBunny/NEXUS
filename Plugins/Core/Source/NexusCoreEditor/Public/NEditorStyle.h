@@ -9,6 +9,9 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
+/**
+ * Slate style set for the NexusCoreEditor module.
+ */
 class NEXUSCOREEDITOR_API FNEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusCore", "NEditorStyle")

@@ -17,9 +17,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 	
-	/**
-	 * The center point when attempting to generate new points.
-	 */
+	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
 	/**
@@ -29,15 +27,11 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MinimumDimensions = FVector::ZeroVector;
 	
-	/**
-	 * The maximum dimensions to use when generating a point.
-	 */
+	/** The maximum dimensions to use when generating a point. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MaximumDimensions = FVector::OneVector;
 	
-	/**
-	 * The rotation of the OrientedBox.
-	 */
+	/** The rotation of the OrientedBox. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FRotator Rotation = FRotator::ZeroRotator;
 

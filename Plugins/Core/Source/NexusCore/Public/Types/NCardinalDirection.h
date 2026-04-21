@@ -5,6 +5,12 @@
 
 // #SONARQUBE-DISABLE This file is ignored from duplication checks as this is meant as fast logic
 
+/**
+ * Decimal-degree constants for the 16-wind compass rose.
+ *
+ * Values in [0, 360) express the absolute-bearing form; the *Normalized variants express the
+ * equivalent bearing in [-180, 180), matching how FRotator reports yaw.
+ */
 namespace NEXUS::Core::CardinalDirection
 {
 	constexpr float North = 0.0f;
@@ -32,6 +38,9 @@ namespace NEXUS::Core::CardinalDirection
 	constexpr float NorthNorthWestNormalized = -22.5f;
 }
 
+/**
+ * 16-wind compass direction enum, ordered clockwise starting at North = 0.
+ */
 UENUM()
 enum class ENCardinalDirection : uint8
 {
@@ -53,17 +62,35 @@ enum class ENCardinalDirection : uint8
 	NorthNorthWest = 15,
 };
 
+/**
+ * Conversion helpers between decimal-degree angles and ENCardinalDirection values.
+ */
 class FNCardinalDirectionUtils
 {
 public:
+	/**
+	 * Returns true when Angle lies exactly on one of the 16 cardinal headings.
+	 * @param Angle Degrees to test.
+	 */
 	static bool IsCardinalAngle(const float Angle)
 	{
 		return FMath::Modulo(Angle, 22.5f) == 0.0f;
 	}
+
+	/**
+	 * Snaps Angle to the nearest 22.5° cardinal heading.
+	 * @param Angle Degrees to snap.
+	 */
 	static double GetClosestCardinalAngle(const float Angle)
 	{
 		return FMath::RoundToInt(Angle / 22.5f) * 22.5f;
 	}
+
+	/**
+	 * Per-component cardinal snap of Rotator's Pitch, Yaw and Roll.
+	 * @param Rotator Rotation to snap.
+	 * @return A new rotator with every component rounded to the nearest cardinal heading.
+	 */
 	static FRotator GetClosestCardinalRotator(const FRotator& Rotator)
 	{
 		return FRotator(
@@ -72,6 +99,11 @@ public:
 			GetClosestCardinalAngle(Rotator.Roll));
 	}
 
+	/**
+	 * Maps an unnormalized [0, 360) angle to its ENCardinalDirection value.
+	 * @param Angle Compass bearing in degrees.
+	 * @return The matching enum value, or ENCardinalDirection::North on fall-through.
+	 */
 	static ENCardinalDirection ToCardinalDirection(const float Angle)
 	{
 		using enum ENCardinalDirection;
@@ -142,6 +174,11 @@ public:
 		return North;
 	}
 
+	/**
+	 * Maps a signed [-180, 180) angle to its ENCardinalDirection value.
+	 * @param NormalizedAngle Signed compass bearing in degrees (FRotator-style).
+	 * @return The matching enum value, or ENCardinalDirection::North on fall-through.
+	 */
 	static ENCardinalDirection ToCardinalDirectionNormalized(const float NormalizedAngle)
 	{
 		using enum ENCardinalDirection;
@@ -213,6 +250,10 @@ public:
 
 	}
 	
+	/**
+	 * Returns the [0, 360) decimal-degree bearing of CardinalDirection.
+	 * @param CardinalDirection Enum value to convert.
+	 */
 	static float ToDecimalDegrees(const ENCardinalDirection CardinalDirection)
 	{
 		switch (CardinalDirection)
@@ -254,6 +295,10 @@ public:
 		return NEXUS::Core::CardinalDirection::North;
 	}
 
+	/**
+	 * Returns the signed [-180, 180) decimal-degree bearing of CardinalDirection.
+	 * @param CardinalDirection Enum value to convert.
+	 */
 	static float ToDecimalDegreesNormalized(const ENCardinalDirection CardinalDirection)
 	{
 		switch (CardinalDirection)

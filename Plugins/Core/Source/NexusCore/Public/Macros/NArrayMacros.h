@@ -3,6 +3,19 @@
 
 #pragma once
 
+/**
+ * Generates the member set used by classes that wrap a flat TArray as a logical 2D grid.
+ *
+ * Expands to public Reset/Resize helpers, index conversion helpers (GetIndex/GetInverseIndex),
+ * typed GetData/SetData overloads, GetCount, and GetSurroundingIndices. Expects the host to
+ * declare TArray<DataType> DataArray plus IndexType-typed SizeX and SizeY members.
+ *
+ * @param IndexType Integer type used for grid coordinates (e.g. int32, uint32).
+ * @param DataType Element type stored in the backing array.
+ * @param DataArray Name of the TArray<DataType> member holding the flat storage.
+ * @param SizeX Name of the member holding the grid width.
+ * @param SizeY Name of the member holding the grid height.
+ */
 #define N_IMPLEMENT_FLAT_2D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY) \
@@ -120,6 +133,21 @@ public: \
 		if (bCanYAdd) OutIndices.Add(GetIndex(X, YAdd)); \
 	}
 
+/**
+ * 3D analogue of N_IMPLEMENT_FLAT_2D_ARRAY — generates the wrapping accessors around a flat TArray
+ * exposed as a logical 3D grid.
+ *
+ * Expects the host class to declare TArray<DataType> DataArray plus IndexType-typed SizeX, SizeY,
+ * and SizeZ members. Generates Reset/Resize, GetIndex/GetInverseIndex overloads (for IndexType,
+ * FVector, FIntVector3), GetData/SetData overloads, GetCount, and 26-neighbour GetSurroundingIndices.
+ *
+ * @param IndexType Integer type used for grid coordinates (e.g. int32, uint32).
+ * @param DataType Element type stored in the backing array.
+ * @param DataArray Name of the TArray<DataType> member holding the flat storage.
+ * @param SizeX Name of the member holding the grid width.
+ * @param SizeY Name of the member holding the grid height.
+ * @param SizeZ Name of the member holding the grid depth.
+ */
 #define N_IMPLEMENT_FLAT_3D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY, const IndexType InSizeZ) \

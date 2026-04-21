@@ -25,5 +25,12 @@ public:
 	virtual FText GetAssetDescription(const FAssetData& AssetData) const override;
 	//~ End UAssetDefinition
 
+	/**
+	 * Validate a single UNActorPoolSet asset, reporting issues to the provided context.
+	 * @param InAssetData Registry-level metadata for the asset.
+	 * @param InAsset The loaded asset instance.
+	 * @param Context Validation context to accumulate messages into.
+	 * @return The resulting validation verdict.
+	 */
 	static EDataValidationResult ValidateAsset(const FAssetData& InAssetData, UObject* InAsset, FDataValidationContext& Context);
 };

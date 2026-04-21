@@ -10,6 +10,9 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
+/**
+ * Slate style set for the NexusDynamicRefsEditor module.
+ */
 class FNDynamicRefsEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusDynamicRefs", "NDynamicRefsEditorStyle")

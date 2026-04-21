@@ -3,4 +3,5 @@
 
 #pragma once
 
+/** Log category used by all NexusCoreEditor logging. */
 DECLARE_LOG_CATEGORY_EXTERN(LogNexusCoreEditor, Log, All);

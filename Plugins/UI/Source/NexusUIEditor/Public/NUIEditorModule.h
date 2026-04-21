@@ -12,11 +12,15 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNUIEditorModule final : public IModuleInterface
 {
-public:	
+public:
+	//~IModuleInterface
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
+	//End IModuleInterface
+
 	N_IMPLEMENT_MODULE(FNUIEditorModule, "NexusUIEditor")
 
 private:
+	/** Deferred initialization bound to FCoreDelegates::OnPostEngineInit; completes wiring that depends on the editor being fully started. */
 	void OnPostEngineInit();
 };

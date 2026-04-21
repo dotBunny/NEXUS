@@ -11,6 +11,11 @@
 class NEXUSCORE_API FNBoxUtils
 {
 public:
+	/**
+	 * Returns the eight world-space corners of the supplied box.
+	 * @param Box The box to enumerate.
+	 * @return An array containing all eight corner vertices of Box.
+	 */
 	static TArray<FVector> GetVertices(const FBox& Box);
-	
+
 };

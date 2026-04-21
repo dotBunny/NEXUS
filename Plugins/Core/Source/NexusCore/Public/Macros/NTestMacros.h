@@ -6,13 +6,36 @@
 #include "NGeneralMacros.h"
 #include "Developer/NTestScopeTimer.h"
 
+/**
+ * Macros that wrap Unreal's TEST_CASE_NAMED macro to declare NEXUS test cases.
+ *
+ * Every NEXUS test is tagged with [NEXUS] and (optionally) a priority ([CriticalPriority],
+ * [HighPriority], [MediumPriority], [LowPriority]) plus one or more filter tags (Smoke, Stress,
+ * Perf, Engine, Product, Negative). Context tags can be combined with the Flags argument at the
+ * call site to further scope a test to a particular environment.
+ *
+ * @see https://nexus-framework.com/docs/plugins/core/testing/
+ */
+
+/** Run-anywhere context; the test is valid in any environment. */
 #define N_TEST_CONTEXT_ANYWHERE [AnywhereContext]
+/** Client-only context. */
 #define N_TEST_CONTEXT_CLIENT [ClientContext]
+/** Combined client+server context. */
 #define N_TEST_CONTEXT_CLIENT_SERVER [ClientContext][ServerContext]
+/** Server-only context. */
 #define N_TEST_CONTEXT_SERVER [ServerContext]
+/** Editor-only context. */
 #define N_TEST_CONTEXT_EDITOR [EditorContext]
+/** Commandlet-only context. */
 #define N_TEST_CONTEXT_COMMANDLET [CommandletContext]
 
+/**
+ * Declares a NEXUS-tagged test case with no default priority.
+ * @param ClassName Identifier used for the test's generated class.
+ * @param PrettyName Human-readable name shown in the test browser.
+ * @param Flags Additional tag string (context, priority, filter) concatenated onto [NEXUS].
+ */
 #define N_TEST(ClassName, PrettyName, Flags)\
 	TEST_CASE_NAMED(ClassName, PrettyName, N_STRINGIFY([NEXUS]Flags))
 

@@ -47,16 +47,20 @@ class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 		OnSpawnedFromActorPoolEvent.Broadcast();
 	};
 
-public:	
+public:
+	/** Event broadcast when the Actor has been created by its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnCreatedByActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been spawned from its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnSpawnedFromActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been returned to its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnReturnToActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been destroyed by its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnDestroyedByActorPoolEvent;
 };

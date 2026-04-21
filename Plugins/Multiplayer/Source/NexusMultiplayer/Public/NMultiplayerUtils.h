@@ -18,6 +18,13 @@ class ALevelInstance;
 class FNMultiplayerUtils
 {
 public:
+	/**
+	 * Safe wrapper around UWorld::ServerTravel that resolves the world from any context object.
+	 * @param WorldContextObject An object used to resolve the UWorld.
+	 * @param InURL The URL to travel to.
+	 * @param bAbsolute true for an absolute travel; false for a relative travel.
+	 * @param bShouldSkipGameNotify true to skip notifying the current game mode.
+	 */
 	FORCEINLINE static void ServerTravel(const UObject *WorldContextObject, const FString& InURL, const bool bAbsolute = true, const bool bShouldSkipGameNotify = false)
 	{
 		if (UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject); IsValid(World))

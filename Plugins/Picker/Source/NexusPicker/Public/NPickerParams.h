@@ -24,33 +24,23 @@ struct NEXUSPICKER_API FNPickerParams
 {
 	GENERATED_BODY()
 	
-	/**
-	 * The number of points to generate in a single pass.
-	 */
+	/** The number of points to generate in a single pass. */
 	UPROPERTY(Category = "Base", BlueprintReadWrite)
 	int Count = 1;
 	
-	/**
-	 * The world for line tracing and drawing.
-	 */
+	/** The world for line tracing and drawing. */
 	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
 	TObjectPtr<UWorld> CachedWorld = nullptr;
 
-	/**
-	 * Should the point be projected somewhere?
-	 */
+	/** Should the point be projected somewhere? */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay)
 	ENPickerProjectionMode ProjectionMode = ENPickerProjectionMode::None;
 
-	/**
-	 * Direction and distance for the line trace.
-	 */
+	/** Direction and distance for the line trace. */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Trace"))
 	FVector Projection = FVector(0,0,-500.f);
 
-	/**
-	 * The collision channel to use for tracing.
-	 */
+	/** The collision channel to use for tracing. */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay, meta=(EditCondition="ProjectionMode==ENPickerProjectionMode::Trace"))
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECC_WorldStatic;
 };

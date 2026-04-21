@@ -12,11 +12,12 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNMultiplayerModule final : public IModuleInterface
 {
-public:	
+public:
 	virtual void StartupModule() override;
 	N_IMPLEMENT_MODULE(FNMultiplayerModule, "NexusMultiplayer")
 
 private:
+	/** Cached localized title used by the multiplayer test window. */
 	FText MultiplayerTestWindowTitle;
 	void OnPostEngineInit();
 };

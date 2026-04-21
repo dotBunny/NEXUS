@@ -3,26 +3,52 @@
 
 #pragma once
 
+/**
+ * A single glyph-grid point used when rasterising characters in FNPrimitiveFont.
+ *
+ * Coordinates are stored in the font's internal grid space (not world units); pairs of points
+ * are interpreted as line-segment endpoints by the drawing helpers.
+ */
 struct FNPrimitiveFontPoint
 {
+	/** X coordinate of the point within the glyph grid. */
 	int8 X;
+
+	/** Y coordinate of the point within the glyph grid. */
 	int8 Y;
 };
 
 // #SONARQUBE-DISABLE-CPP_S107 Necessary verbosity of methods to fully convey the drawing methods
 
 /**
- * A simple glyph collection that can be rendered via PDI or LineBatchComponent
+ * A simple glyph collection that can be rendered via PDI or LineBatchComponent.
+ *
+ * Provides line-based primitive rendering of ASCII strings for debug and developer visualisation,
+ * without relying on UE's Slate or UMG text systems. Glyph data is built once during module
+ * startup by FNCoreModule.
  */
 class NEXUSCORE_API FNPrimitiveFont
 {
 	friend class FNCoreModule;
 
 public:
+	/** Number of line-segment points used to draw an "undefined" fallback glyph. */
 	constexpr static int UndefinedPointCount = 12;
+
+	/**
+	 * Indicates whether the glyph table has been populated and the font is safe to use.
+	 * @return true once Initialize() has run successfully.
+	 */
 	static bool IsInitialized() { return bIsInitialized; }
+
+	/** Populates the glyph table; called once by FNCoreModule::StartupModule(). */
 	static void Initialize();
-	
+
+	/**
+	 * Returns the points that describe the glyph for a given ASCII character.
+	 * @param InChar The character to look up.
+	 * @return The array of glyph points; an "undefined" glyph is returned for non-printable input.
+	 */
 	FORCEINLINE static TArray<FNPrimitiveFontPoint>& GetGlyph(const char InChar)
 	{
 		if (InChar < 32 || InChar > 126) return Glyphs[0];

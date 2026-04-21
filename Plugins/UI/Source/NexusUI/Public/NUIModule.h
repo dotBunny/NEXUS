@@ -13,9 +13,13 @@
 class FNUIModule final : public IModuleInterface
 {
 public:
+	//~IModuleInterface
 	virtual void StartupModule() override;
+	//End IModuleInterface
+
 	N_IMPLEMENT_MODULE(FNUIModule, "NexusUI")
 
-private:	
+private:
+	/** Post-engine-init hook used to register things that depend on slate/umg being fully live. */
 	void OnPostEngineInit();
 };

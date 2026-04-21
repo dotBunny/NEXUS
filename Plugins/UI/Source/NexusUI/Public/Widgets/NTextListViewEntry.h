@@ -11,6 +11,11 @@
 #include "NTextListViewEntry.generated.h"
 
 
+/**
+ * Data model for a single row in a UNListView of text labels. Tracks text plus optional
+ * foreground/background colour overrides via the bHas* flags so unset colours fall through to
+ * the entry widget's defaults.
+ */
 UCLASS(BlueprintType)
 class NEXUSUI_API UNTextListViewEntryObject : public UObject
 {
@@ -66,6 +71,10 @@ private:
 };
 
 
+/**
+ * List-view entry widget that renders a UBorder + UCommonTextBlock driven by a bound
+ * UNTextListViewEntryObject. Used as a lightweight label row in UNListView controls.
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Text ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
 {

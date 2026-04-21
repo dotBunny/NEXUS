@@ -9,6 +9,10 @@
 #include "NEditorUtils.h"
 #include "NToolingEditorSettings.generated.h"
 
+/**
+ * Per-validator severity used by NexusTooling validators to decide how to respond to a match.
+ * Drives both the UE data-validation verdict (Valid/Invalid/NotValidated) and the message bus.
+ */
 UENUM(BlueprintType)
 enum class ENValidatorSeverity : uint8
 {
@@ -19,13 +23,21 @@ enum class ENValidatorSeverity : uint8
 	Message = 4
 };
 
+/**
+ * Project-wide editor settings for NexusTooling.
+ *
+ * Shipped in NexusEditor.ini so they travel with the project — per-user overrides live on
+ * UNToolingEditorUserSettings instead. Groups icon overrides, level bookmarks, and per-validator
+ * severities.
+ */
 UCLASS(config = NexusEditor, defaultconfig)
 class UNToolingEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
 	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings);
-	
+
+	//~UDeveloperSettings
 	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
 	virtual FText GetSectionText() const override
@@ -38,8 +50,10 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("A collection of tools for fixing content in the Unreal Editor."));
 		return SectionDescription;
 	}
-	
-#if WITH_EDITOR	
+	//End UDeveloperSettings
+
+#if WITH_EDITOR
+	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */
 	bool IsAssetIgnored(const FSoftObjectPath& AssetPath) const;
 #endif // WITH_EDITOR
 

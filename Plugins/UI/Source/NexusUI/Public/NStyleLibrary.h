@@ -9,6 +9,11 @@
 
 #include "NStyleLibrary.generated.h"
 
+/**
+ * Blueprint-visible style constants for NEXUS-branded warning/error/info UI treatments.
+ * Returns ENColor values rather than FLinearColor so downstream widgets can look up the exact
+ * palette entry via FNColor at the last moment.
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Style Library")
 class UNStyleLibrary : public UBlueprintFunctionLibrary
 {

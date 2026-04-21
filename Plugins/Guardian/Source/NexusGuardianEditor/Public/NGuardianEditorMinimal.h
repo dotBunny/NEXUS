@@ -3,11 +3,18 @@
 
 #pragma once
 
+/**
+ * Constants identifying the Guardian editor utility widget used by editor menus/commands.
+ */
 namespace NEXUS::Guardian::EUW
 {
+	/** Asset path of the Guardian editor utility widget. */
 	inline FString Path = TEXT("/NexusGuardian/EditorResources/EUW_NGuardian.EUW_NGuardian");
+	/** Stable identifier used when registering the widget's tab. */
 	inline FName Identifier = TEXT("EUW_NGuardian");
+	/** Slate icon used for the widget's menu/tab entry. */
 	inline FName Icon = TEXT("Icon.NGuardian");
 }
 
-DECLARE_LOG_CATEGORY_EXTERN(LogNexusGuardian, Log, All);
+/** Log category used by all NexusGuardianEditor module. */
+DECLARE_LOG_CATEGORY_EXTERN(LogNexusGuardianEditor, Log, All);

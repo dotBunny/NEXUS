@@ -39,12 +39,15 @@
 	}
 
 /**
- * Some of the project settings used by pickers.
+ * Shared picker configuration defaults used by all pickers when resolving a generated point onto geometry or navmesh via ENPickerProjectionMode.
  */
 class NEXUSPICKER_API FNPickerUtils
 {
 public:
+	/** Collision query parameters used by the trace-based projection path. */
 	static FCollisionQueryParams CollisionQueryParams;
+	/** Query extent used when projecting onto the navmesh; adjust if your navmesh tolerance needs widening. */
 	static FVector NavQueryExtent;
+	/** Nav agent properties used when resolving a navmesh location for a generated point. */
 	static FNavAgentProperties NavAgentProperties;
 };

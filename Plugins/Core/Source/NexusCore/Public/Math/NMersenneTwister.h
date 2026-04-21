@@ -14,9 +14,7 @@
 class NEXUSCORE_API FNMersenneTwister
 {
 public:
-	/**
-	 * Construct a new FMersenneTwister with a specific seed.
-	 */
+	/** Construct a new FMersenneTwister with a specific seed. */
 	explicit FNMersenneTwister(const uint64 InSeed)
 	{
 		this->Initialize(InSeed);
@@ -228,7 +226,11 @@ public:
 		return this->InitialSeed;
 	}
 
-	
+
+	/**
+	 * Generates a pseudo random unsigned 64-bit integer spanning the full range of uint64.
+	 * @return The next uint64 drawn from the underlying engine.
+	 */
 	uint64 UnsignedInteger64()
 	{
 		const uint64 PseudoRandomValue = PersistentUnsignedInteger64Distribution(this->Get());
@@ -245,9 +247,7 @@ public:
 		return FNSeedGenerator::HexFromSeed(this->InitialSeed);
 	}
 
-	/**
-	 *	Reset the FMersenneTwister to the initial seed.
-	 */
+	/** Reset the FMersenneTwister to the initial seed. */
 	void Reset()
 	{
 		Initialize(this->InitialSeed);
@@ -255,39 +255,25 @@ public:
 
 private:
 
-	/**
-	 * Bernoulli distribution probability function.
-	 */
+	/** Bernoulli distribution probability function. */
 	std::bernoulli_distribution BooleanDistribution{0.5};
 
-	/**
-	 * The number of times the Mersenne Twister has been called since the seed has been set.
-	 */
+	/** The number of times the Mersenne Twister has been called since the seed has been set. */
 	uint32 CallCounter; 
 
-	/**
- 	*  Single instance of the 64-bit Mersenne Twister pseudo random engine.
- 	*/
+	/** Single instance of the 64-bit Mersenne Twister pseudo random engine. */
 	std::mt19937_64 Engine;
 	
-	/**
-	 * Maintained a real float distribution probability function, explicitly used for 0-1.
-	 */
+	/** Maintained a real float distribution probability function, explicitly used for 0-1. */
 	std::uniform_real_distribution<float> PersistentFloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
 
-	/**
-	 * Maintained a real double distribution probability function, explicitly used for 0-1.
-	 */
+	/** Maintained a real double distribution probability function, explicitly used for 0-1. */
 	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
 
-	/**
-	 * Maintained a real unsigned 64-bit integer distribution probability function.
-	 */
+	/** Maintained a real unsigned 64-bit integer distribution probability function. */
 	std::uniform_int_distribution<uint64> PersistentUnsignedInteger64Distribution = std::uniform_int_distribution<uint64>(MIN_uint64, MAX_uint64);
 	
-	/**
-	 * The last seed set on the Mersenne Twister.
-	 */
+	/** The last seed set on the Mersenne Twister. */
 	uint64 InitialSeed;
 
 	/***

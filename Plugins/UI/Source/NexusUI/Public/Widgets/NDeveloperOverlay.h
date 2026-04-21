@@ -15,29 +15,37 @@ class UCommonHierarchicalScrollBox;
 class UNCheckBox;
 class UButton;
 
+/**
+ * Abstract base widget for NEXUS developer/diagnostic overlays. Supplies a banner row and a
+ * ContainerBox slot for subclasses to populate; bIsEditorUtilityWidget toggles editor-only
+ * behaviour when hosted inside an EUW.
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Developer Overlay", Abstract, Blueprintable)
 class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
+	/** Display the banner row with Text and the supplied foreground/background colour pair. */
 	UFUNCTION(BlueprintCallable)
-	void ShowContainerBanner(const FText& Text = FText::GetEmpty(), 
+	void ShowContainerBanner(const FText& Text = FText::GetEmpty(),
 		ENColor MessageColor = ENColor::NC_White, ENColor BannerColor = ENColor::NC_NexusDarkBlue) const;
-	
+
+	/** Collapse the banner row. */
 	UFUNCTION(BlueprintCallable)
 	void HideContainerBanner() const;
-	
+
+	/** When true the overlay is hosted inside an EUW and should avoid runtime-only assumptions. */
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsEditorUtilityWidget;
-	
+
 protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonBorder> ContainerBanner;
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ContainerBannerMessage;
-	
+
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UVerticalBox> ContainerBox;
 };

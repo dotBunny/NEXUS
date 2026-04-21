@@ -10,14 +10,26 @@
 #include "Macros/NSettingsMacros.h"
 #include "NActorPoolsSettings.generated.h"
 
+/**
+ * Policy applied when an Actor is returned to the Actor Pool Subsystem that is not known to any existing pool.
+ */
 UENUM(BlueprintType)
 enum class ENActorPoolUnknownBehaviour : uint8
 {
+	/** Destroy the unknown Actor. */
 	Destroy = 0,
+	/** Create a default pool on-the-fly for the Actor's class and return it there. */
 	CreateDefaultPool = 1,
+	/** Do nothing; leave the Actor as-is. */
 	Ignore = 2
 };
 
+/**
+ * Project-wide configuration for the NexusActorPools plugin.
+ *
+ * Exposed under Project Settings > NEXUS > Actor Pools; stored in DefaultNexusGame.ini.
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/project-settings/">UNActorPoolsSettings</a>
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pools Settings", Config=NexusGame, defaultconfig)
 class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 {

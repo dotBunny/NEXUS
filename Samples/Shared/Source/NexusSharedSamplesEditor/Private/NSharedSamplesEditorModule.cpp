@@ -4,12 +4,10 @@
 #include "NSharedSamplesEditorModule.h"
 
 #include "IPlacementModeModule.h"
-#include "NCoreEditorMinimal.h"
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
 #include "NSamplesDisplayActor.h"
 #include "NSamplesLevelActor.h"
-#include "NSamplesPawn.h"
 #include "NSharedSamplesEditorStyle.h"
 #include "Interfaces/IPluginManager.h"
 #include "Macros/NEditorModuleMacros.h"

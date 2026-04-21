@@ -20,6 +20,12 @@ class NEXUSDYNAMICREFS_API UNDynamicRefComponent : public UActorComponent
 
 public:
 
+	/**
+	 * Resolve an ENDynamicRef value to its human-readable display name via UE reflection.
+	 * @param DynamicReference The enum value to convert.
+	 * @return The display name (e.g. "Objective A").
+	 * @note Uses reflection; avoid in tight loops.
+	 */
 	static FString ToStringSlow(const ENDynamicRef& DynamicReference)
 	{
 		return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
@@ -32,25 +38,25 @@ public:
 	virtual void UninitializeComponent() override;
 
 protected:
-	/**
-	 * What phase of the component's lifecycle should the references be linked?
-	 */
+	/** What phase of the component's lifecycle should the references be linked? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	ENActorComponentLifecycleStart LinkPhase = ENActorComponentLifecycleStart::BeginPlay;
 
-	/**
-	 * What phase of the component's lifecycle should the references be broken?
-	 */
+	/** What phase of the component's lifecycle should the references be broken? */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	ENActorComponentLifecycleEnd BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
 	
+	/** The set of ENDynamicRef slot identifiers this Actor will claim (fast array-backed lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<TEnumAsByte<ENDynamicRef>> FastReferences;
-	
+
+	/** The set of named identifiers this Actor will claim (map-backed lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<FName> NamedReferences;
-	
+
 private:
+	/** Register this Actor with UNDynamicRefSubsystem under all configured references. */
 	void Register();
+	/** Unregister this Actor from UNDynamicRefSubsystem for all configured references. */
 	void Unregister();
 };

@@ -12,23 +12,17 @@
 class NEXUSCOREEDITOR_API FNEditorDefaults
 {
 public:
-	/**
-	 * A default category to use in the asset creation context menu for NEXUS related assets.
-	 */
+	/** A default category to use in the asset creation context menu for NEXUS related assets. */
 	static FAssetCategoryPath AssetCategory;
 
-	/**
-	 * A container name to use for the editor settings.
-	 */
+	/** A container name to use for the editor settings. */
 	static FName GetEditorSettingsContainerName()
 	{
 		const FName ContainerName = TEXT("Editor");
 		return ContainerName;
 	}
 
-	/**
-	 * A category name to use for the editor settings.
-	 */
+	/** A category name to use for the editor settings. */
 	static FName GetEditorSettingsCategoryName()
 	{
 		const FName CategoryName = TEXT("NEXUS");

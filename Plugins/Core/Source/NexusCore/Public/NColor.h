@@ -3,6 +3,12 @@
 
 #pragma once
 
+/**
+ * A named enumeration of the colors made available by FNColor.
+ *
+ * Each value maps to a matching FLinearColor constant on FNColor and is used so Blueprint-facing
+ * APIs and pickers can surface the curated NEXUS palette without exposing raw color values.
+ */
 UENUM(BlueprintType)
 enum class ENColor : uint8
 {
@@ -37,12 +43,27 @@ enum class ENColor : uint8
 };
 
 /**
- * A collection of color values used throughout the Nexus modules.
+ * A collection of color values used throughout the NEXUS modules.
+ *
+ * FNColor centralises the framework's palette so that debug drawing, editor tooling and runtime UI
+ * can share a consistent look. Callers can either use the strongly-typed FLinearColor constants
+ * below (preferred in C++) or resolve a color by ENColor value at runtime.
  */
 class NEXUSCORE_API FNColor
 {
 public:
+	/**
+	 * Resolves an ENColor enumeration value to its matching linear color.
+	 * @param Color The palette entry to resolve.
+	 * @return The FLinearColor associated with the supplied palette entry.
+	 */
 	static FLinearColor GetLinearColor(const ENColor& Color);
+
+	/**
+	 * Resolves an ENColor enumeration value to its matching sRGB color.
+	 * @param Color The palette entry to resolve.
+	 * @return The FColor associated with the supplied palette entry.
+	 */
 	static FColor GetColor(const ENColor& Color);
 	
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);

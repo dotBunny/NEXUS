@@ -8,6 +8,13 @@
 #include "Macros/NEditorSettingsMacros.h"
 #include "NMultiplayerEditorUserSettings.generated.h"
 
+/**
+ * Per-user editor settings for the NexusMultiplayer test workflow.
+ *
+ * Captures the client/server counts, window sizing, network-simulation knobs, and additional
+ * command-line parameters used when UNMultiplayerEditorSubsystem launches a test session.
+ * Stored in the NexusUserSettings config so it does not pollute project-shared settings.
+ */
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Multiplayer (User)"))
 class UNMultiplayerEditorUserSettings : public UDeveloperSettings
 {

@@ -10,11 +10,17 @@
 #include "Components/Button.h"
 #include "NButtonListViewEntry.generated.h"
 
+/**
+ * Data model for a single row in a UNListView of buttons. Carries label text, per-state colour
+ * slots (hover/pressed/unhovered) and a TargetObject passed back through OnPressedEvent so each
+ * button can act on a specific domain object.
+ */
 UCLASS(BlueprintType)
 class NEXUSUI_API UNButtonListViewEntryObject : public UObject
 {
 	GENERATED_BODY()
 
+	/** Button-press callback signature; receives the row's TargetObject. */
 	DECLARE_DELEGATE_OneParam( OnButtonPressedDelegate, UObject*);
 public:
 	
@@ -46,6 +52,11 @@ private:
 };
 
 
+/**
+ * List-view entry widget that renders a UButton + UCommonTextBlock pair driven by a bound
+ * UNButtonListViewEntryObject. Swaps background/foreground colours on hover/press/release
+ * using the palette slots on the bound object.
+ */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewEntry
 {

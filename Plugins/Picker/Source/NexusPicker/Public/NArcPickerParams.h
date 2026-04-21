@@ -16,33 +16,23 @@ struct NEXUSPICKER_API FNArcPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 	
-	/**
-	 * The center point when attempting to generate new points.
-	 */
+	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
 
-	/**
-	 * The base rotation used when trying to determine the arc angle.
-	 */
+	/** The base rotation used when trying to determine the arc angle. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	FRotator Rotation = FRotator::ZeroRotator;
 
-	/**
-	 * The degrees of the arc.
-	 */
+	/** The degrees of the arc. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float Degrees = 90.f;
 	
-	/**
-	 * The minimum distance to start finding points.
-	 */
+	/** The minimum distance to start finding points. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float MinimumDistance = 0.f;
 
-	/**
-	 * The maximum distance to find points.
-	 */
+	/** The maximum distance to find points. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float MaximumDistance = 500.f;
 };

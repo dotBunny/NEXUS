@@ -3,6 +3,11 @@
 
 #pragma once
 
+/**
+ * A minimal, non-UObject carrier used by unit tests that need a simple, stack-allocatable payload.
+ *
+ * Intentionally has no constructors, virtuals or invariants — tests populate it directly.
+ */
 class FNTestObject
 {
 public:

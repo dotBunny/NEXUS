@@ -142,7 +142,10 @@ public:
 	static void InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 private:
-	
+
+	/** Cached FText labels for each EWindowMode::Type; populated lazily, keeps localisation stable. */
 	static TArray<FText> DisplayModeTexts;
+
+	/** Cached FString labels for each EWindowMode::Type; parallel to DisplayModeTexts. */
 	static TArray<FString> DisplayModeLabels;
 };

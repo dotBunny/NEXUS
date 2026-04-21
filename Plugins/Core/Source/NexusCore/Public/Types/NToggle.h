@@ -22,6 +22,11 @@ enum ENToggle : int8
 class NEXUSCORE_API FNToggle
 {
 public:
+	/**
+	 * Returns a human-readable name for InToggle.
+	 * @param InToggle The enum value to stringify.
+	 * @return "Default", "False", "True", or "Unknown" for unrecognized values.
+	 */
 	static FString ToString(const ENToggle& InToggle)
 	{
 		switch (InToggle)

@@ -10,6 +10,11 @@
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "NEditorSettings.generated.h"
 
+/**
+ * Project-level NEXUS editor settings (updates channel, update-check cadence).
+ *
+ * Saved to the NexusEditor config hierarchy and surfaced under Project Settings → NEXUS → Core.
+ */
 UCLASS(config = NexusEditor, defaultconfig)
 class UNEditorSettings : public UDeveloperSettings
 {

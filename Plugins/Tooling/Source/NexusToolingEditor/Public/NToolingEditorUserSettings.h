@@ -8,15 +8,22 @@
 #include "Macros/NEditorSettingsMacros.h"
 #include "NToolingEditorUserSettings.generated.h"
 
+/**
+ * Per-user editor preferences for NexusTooling. Stored in NexusUserSettings.ini so each developer
+ * keeps their own values (frame-rate cap, visualization colours, graph navigation ergonomics).
+ * Property edits re-apply immediately via PostEditChangeProperty.
+ */
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Tooling (User)"))
 class NEXUSTOOLINGEDITOR_API UNToolingEditorUserSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
 	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorUserSettings);
-	
+
+	/** Post-engine-init hook that applies the persisted values to their respective editor systems. */
 	static void OnPostEngineInit();
-	
+
+	//~UDeveloperSettings
 	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
 	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
 	virtual FText GetSectionText() const override
@@ -29,9 +36,12 @@ public:
 		const FText SectionDescription = FText::FromString(TEXT("Specific settings for NEXUS: Tooling included with the framework."));
 		return SectionDescription;
 	}
-	
+	//End UDeveloperSettings
+
 #if WITH_EDITOR
+	//~UObject
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
+	//End UObject
 #endif // WITH_EDITOR
 
 #if WITH_EDITORONLY_DATA
@@ -66,7 +76,12 @@ public:
 #endif // WITH_EDITORONLY_DATA
 
 private:
+	/** Apply EditorFrameRateLimit to the engine's MaxFPS cvar. */
 	void ApplyEditorFrameRateLimit() const;
+
+	/** Force the editor's show-frame-rate-and-memory toggle on when bAlwaysShowFrameRateAndMemory is true. */
 	void ApplyAlwaysShowFrameRateAndMemory() const;
+
+	/** Publish bGraphNavigationSpaceToPan and GraphNavigationPanSpeedMultiplier to the shared input processor. */
 	void ApplySpaceToPan() const;
 };

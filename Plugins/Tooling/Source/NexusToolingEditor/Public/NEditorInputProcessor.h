@@ -14,19 +14,21 @@ class NEXUSTOOLINGEDITOR_API FNEditorInputProcessor : public IInputProcessor
 public:
 	FNEditorInputProcessor() = default;
 	virtual ~FNEditorInputProcessor() override = default;
-	
+
+	//~IInputProcessor
 	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 
 	virtual bool HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
 	virtual bool HandleMouseButtonDownEvent( FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
 	virtual bool HandleMouseButtonUpEvent( FSlateApplication& SlateApp, const FPointerEvent& MouseEvent) override;
-	
+
 	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override
 	{
 		// We do nothing here
 	};
 	virtual const TCHAR* GetDebugName() const override { return TEXT("FNEditorInputProcessor"); }
+	//End IInputProcessor
 
 	/**
 	 * Is the left shift-key pressed?
@@ -94,11 +96,14 @@ public:
 	 */	
 	bool IsAnyMouseButtonDown() const;
 
+	/** Cached UNToolingEditorUserSettings::bGraphNavigationSpaceToPan, pushed here on settings change. */
 	bool bCachedGraphNavigationSpaceToPan;
+
+	/** Cached UNToolingEditorUserSettings::GraphNavigationPanSpeedMultiplier. */
 	float CachedGraphNavigationPanSpeedMultiplier;
-	
+
 private:
-	
+
 	bool bLeftMouse = false;
 	bool bRightMouse = false;
 	bool bMiddleMouse = false;
@@ -107,6 +112,7 @@ private:
 	bool bLeftControl = false;
 	bool bRightControl = false;
 	bool bSpaceBar = false;
-	
+
+	/** Most recent pointer event dispatched synthetically during space-to-pan drag. */
 	FPointerEvent LastSyntheticEvent;
 };
