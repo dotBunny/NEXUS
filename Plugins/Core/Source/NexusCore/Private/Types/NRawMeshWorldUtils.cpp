@@ -406,10 +406,7 @@ void FNRawMeshWorldUtils::AppendComplexAsSimpleFromChaosTriMeshes(const UBodySet
 		{
 			for (const Chaos::TVec3<uint16>& Tri : IdxBuffer.GetSmallIndexBuffer())
 			{
-				Mesh.Loops.Add(FNRawMeshLoop(
-					static_cast<int32>(Tri[0]),
-					static_cast<int32>(Tri[1]),
-					static_cast<int32>(Tri[2])));
+				Mesh.Loops.Add(FNRawMeshLoop(Tri[0], Tri[1],Tri[2]));
 			}
 		}
 		Mesh.Validate();
