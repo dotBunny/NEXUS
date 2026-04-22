@@ -25,10 +25,10 @@ namespace UnrealBuildTool.Rules
 		[
 					"Chaos",
 					"CoreUObject",
-					"DeveloperSettings",					
+					"DeveloperSettings",
 					"Engine",
 					"GeometryFramework",
-					"Projects", 
+					"Projects",
 		]
 			);
 			

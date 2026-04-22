@@ -54,6 +54,7 @@ public:
 
 private:
 
+// #SONARQUBE-DISABLE-CPP_S107 Method required complexity
 	/**
 	 * Computes the two scalar endpoints where triangle edges cross the intersection line.
 	 * p0/p1/p2 are projections of the triangle vertices onto the intersection line.
@@ -80,4 +81,5 @@ private:
 			out1 = p0 + (p2 - p0) * (d0 / (d0 - d2));
 		}
 	}
+// #SONARQUBE-ENABLE-CPP_S107 Method required complexity
 };

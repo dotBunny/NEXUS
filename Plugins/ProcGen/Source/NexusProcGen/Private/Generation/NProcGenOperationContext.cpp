@@ -7,9 +7,14 @@
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
 #include "NProcGenUtils.h"
+#include "StaticMeshResources.h"
 #include "Cell/NTissue.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
+#include "Types/NRawMeshWorldUtils.h"
+
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
 {
@@ -20,11 +25,14 @@ void FNProcGenOperationContext::ResetContext()
 {
 	OrganContext.Empty();
 	BoneContext.Empty();
-	
+
 	ComponentBoneMap.Empty();
 	GenerationOrder.Empty();
 	InputComponents.Empty();
-	
+
+	WorldCollisionMeshes.Empty();
+	WorldCollisionMeshTransforms.Empty();
+
 	bIsLocked = false;
 }
 
@@ -192,6 +200,9 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 	
+	// World Bounds Check
+	TArray<FBoxSphereBounds> Bounds;
+	
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
 	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
 	int BoneCount = BoneComponents.Num();
@@ -208,6 +219,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			}
 			
 			const AVolume* Volume = Component->GetVolume();
+			Bounds.Add(Volume->GetBounds());
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
@@ -225,11 +237,11 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 
-	// TODO: Search voxelized? inside known spaces for other objects
-	// Capture their convex hulls?
-	// - Calculate obstructions in the world itself already that need to be accounted for.
-	// need to get bounds?
-	
+	// Gather simple-collision meshes from every primitive in the target world, restricted
+	// to actors whose bounds fall inside one of the input organs' volume bounds.
+	WorldCollisionMeshes.Reset();
+	WorldCollisionMeshTransforms.Reset();
+	FNRawMeshWorldUtils::GetWorldSimpleCollisionMeshes(World, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
 }
 
 void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)

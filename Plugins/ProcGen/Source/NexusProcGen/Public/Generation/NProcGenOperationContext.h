@@ -8,9 +8,9 @@
 #include "NProcGenOperationBoneContext.h"
 #include "NProcGenOperationOrganContext.h"
 #include "Organ/NBoneComponent.h"
+#include "Types/NRawMesh.h"
 
 class UNOrganComponent;
-
 
 /**
  * Game-thread context of an entire generation process.
@@ -40,6 +40,12 @@ public:
 	/** Organ components grouped into topologically-ordered batches that may run in parallel per step. */
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
 
+	/** Per-element simple-collision meshes gathered from the target world during preprocess, stored in element-local space. */
+	TArray<FNRawMesh> WorldCollisionMeshes;
+
+	/** World-space transforms corresponding 1:1 with WorldCollisionMeshes. */
+	TArray<FTransform> WorldCollisionMeshTransforms;
+	
 	/**
 	 * Register an organ component as a generation input.
 	 * @return true if the component was accepted; false if the context is already locked or the component was rejected.
@@ -52,7 +58,7 @@ public:
 	/** @return true once LockAndPreprocess has finished — no further mutation should occur. */
 	bool IsLocked() const { return bIsLocked; }
 
-	/** Finalize the context: compute per-organ/per-bone state, build the generation ordering, and mark locked. */
+	/** Finalize the context: compute per-organ/per-bone state, build the generation ordering, create world collision structure, and mark locked. */
 	void LockAndPreprocess(UWorld* World);
 
 	/**

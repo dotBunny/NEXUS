@@ -33,7 +33,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	int PassCount = 0;
 	FGraphEventRef LastPassTask = nullptr;
 	
-	// Itterate over the different bespoke passes that can occur and create dependency-chained tasks
+	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
 	for (auto Pass : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
@@ -83,7 +83,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	AllTasks.Add(SpawnCellProxiesTask);
 	
-	// Create our finalizer task on the main thread that will wait for all of the other finalizers to complete
+	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete
 	FinalizeTask = TGraphTask<FNProcGenFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr);
 	AllTasks.Add(FinalizeTask);
 }
