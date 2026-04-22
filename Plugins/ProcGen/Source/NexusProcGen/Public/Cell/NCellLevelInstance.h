@@ -24,10 +24,9 @@ class NEXUSPROCGEN_API ANCellLevelInstance final : public ALevelInstance
 
 	explicit ANCellLevelInstance();
 
-
 public:
-	/** Non-owning pointer to the junction detail map held by the owning cell proxy; nullptr until the proxy binds it. */
-	TMap<int32, FNCellJunctionDetails>* JunctionData;
+	/** Local copy of junction data from generation output, built from replicated JunctionDetails array. */
+	TMap<int32, FNCellJunctionDetails> JunctionData;
 
 	//~ALevelInstance
 	virtual void OnLevelInstanceLoaded() override;
@@ -43,6 +42,17 @@ protected:
 	/** The replicated identifier that created this ANCellLevelInstance on the server. */
 	UPROPERTY(Replicated)
 	uint32 OperationTicket = 0;
+	
+	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
+	TArray<FNCellJunctionDetails> JunctionDetails;
+	
+	UFUNCTION()
+	void OnRep_JunctionDetails();
+	
+	/** Take the flat JunctionDetails array and produce the JunctionData instance-keyed map. **/
+	void FillJunctionData();
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	
+	
 };

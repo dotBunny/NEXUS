@@ -57,7 +57,7 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 
 TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& SocketUnitSize) const
 {
-	
+
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
 		this->Details.SocketSize.X * SocketUnitSize.X,this->Details.SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
 
@@ -65,7 +65,7 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
-	
+
 	return RotatedCornerPoints;
 }
 
@@ -127,24 +127,18 @@ void UNCellJunctionComponent::OnRegister()
 	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance->IsA<ANCellLevelInstance>())
 	{
 		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
-		
-		// When this is replicated, we don't have junction data, so as a simple way (currently) it is something we might need to resolve,
-		// but for now instead of doing anything with this we just check if there's any junction data to find, and if not ignore updating.
-		if (CellLevelInstance->JunctionData != nullptr && 
-			CellLevelInstance->JunctionData->Num() == 0)
+		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
+		if (UpdatedDetails != nullptr)
 		{
-			const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData->Find(Details.InstanceIdentifier);
-			
-			if (UpdatedDetails == nullptr)
-			{
-				UE_LOG(LogNexusProcGen, Error, TEXT("No junction data was found for the provided instance identifier (%i)"), Details.InstanceIdentifier)
-				FNProcGenRegistry::RegisterCellJunctionComponent(this);
-				Super::OnRegister();
-				return;
-			}
-			
-			// Update local data (mainly for drawing really)
-			Details.WorldRotation = UpdatedDetails->WorldRotation;
+			// Copy details in-place
+			Details = *UpdatedDetails;
+
+			// Update the rotation so the thing draws nicely; this feels like a bug. The ALevelInstance is supposed
+			// to rotate the UWorlds content when it gets placed and loaded. The documentation around the methods seem to
+			// infer however that some of this might be editor time only. Not exactly sure what is happening here leading 
+			// to the world rotations needing to be updated manually to match the data-only version that we use during
+			// generating our NProcGenGraph.
+			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 	}
 	

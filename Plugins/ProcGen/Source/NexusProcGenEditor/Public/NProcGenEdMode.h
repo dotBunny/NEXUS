@@ -40,7 +40,6 @@ public:
 		Points = 2
 	};
 
-
 	/** @return Cached axis-aligned bounds for the focused cell. */
 	static FBox GetCachedBounds() { return CachedBounds; }
 
@@ -67,7 +66,6 @@ public:
 
 	/** Force the edit mode back to a safe state if the current one becomes invalid. */
 	static void ProtectCellEdMode();
-
 
 	/** @return The currently active voxel visualization style. */
 	static ENCellVoxelMode GetCellVoxelMode() { return CellVoxelMode; }

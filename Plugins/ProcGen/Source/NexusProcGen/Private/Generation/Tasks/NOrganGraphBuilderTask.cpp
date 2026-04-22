@@ -76,7 +76,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	Analytics.OutputToLog();
 	
 	// Clean up graph of pointers that can't be kept
-	ContextPtr->CellGraph->CleanupBuilderReferences();
+	if (ContextPtr->CellGraph != nullptr)
+	{
+		ContextPtr->CellGraph->CleanupBuilderReferences();
+	}
 	
 	// Only hand off graph if it's good
 	if (ContextPtr->IsSuccessful())

@@ -102,7 +102,11 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
+	
+	// Replicated settings
 	LevelInstance->OperationTicket = OperationTicket;
+	JunctionsData.GenerateValueArray(LevelInstance->JunctionDetails);
+	LevelInstance->FillJunctionData(); // this is really for the server
 	
 	// Apply relevancy flag to created actor
 	if (bAlwaysRelevant)
@@ -116,9 +120,6 @@ void ANCellProxy::CreateLevelInstance()
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif // WITH_EDITOR
 	LevelInstance->CookedWorldAsset = NCell->World;
-	// Add data for junction (not synced!!)
-
-	LevelInstance->JunctionData = &JunctionsData;
 	
 	// Finalize the spawn, BeginPlay can now be called
 	SpawnedLevelInstanceActor->FinishSpawning(this->GetActorTransform());

@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include "NArrayUtils.h"
-#include "NCellJunctionBlockerActor.h"
 #include "Types/NRotationConstraints.h"
 #include "NCellJunctionDetails.generated.h"
 
@@ -49,11 +47,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	/** Requirement satisfied during graph generation. */
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
-
-	// TODO: this is not prolly gonna get used
-	UPROPERTY(EditAnywhere, meta = (EditCondition="Requirements==ENCellJunctionRequirements::AllowBlocking", ToolTip = "The blocker(s) that can be used to fill this junction.", EditConditionHides))
-	TArray<TSubclassOf<ANCellJunctionBlockerActor>> Blockers;
-
+	
 	/** Size of the junction socket in grid units (width, height). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FIntVector2 SocketSize = FIntVector2(2, 4);
@@ -98,9 +92,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 			
 			&& WorldLocation == Other.WorldLocation
 			&& WorldRotation == Other.WorldRotation
-			&& RotationConstraints.IsEqual(Other.RotationConstraints)
-			
-			&& FNArrayUtils::IsSameOrderedValues(Blockers, Other.Blockers);
+			&& RotationConstraints.IsEqual(Other.RotationConstraints);
 	}
 };
 

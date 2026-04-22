@@ -80,9 +80,10 @@ private:
 	/** Dynamic material applied to the proxy mesh while it stands in for the level. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
-
-	// TODO: if we want to replicate we need to make a FastArraySerializer
-	/** Per-junction data mirrored from the cell; kept on the proxy for fast access before the level instance is available. */
+	
+	/** 
+	 * Per-junction data mirrored from the cell.
+	 * Kept on the proxy for fast access before the level instance is available, but gets copied over when made. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TMap<int32, FNCellJunctionDetails> JunctionsData;
 
