@@ -37,11 +37,11 @@ public:
 	static ANDebugActor* CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label,
 		const FVector& Scale = FVector::OneVector);
 
-protected:
-	/** Human-readable message displayed alongside the actor for quick identification. */
-	UPROPERTY(VisibleAnywhere)
+	/** Human-readable message stored with actor instance. */
+	UPROPERTY(EditAnywhere)
 	FString Message;
-
+	
+protected:
 	/** Sphere mesh component used as the visible marker in the viewport. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> SphereMesh;
