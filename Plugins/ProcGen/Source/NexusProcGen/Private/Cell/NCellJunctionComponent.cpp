@@ -128,12 +128,12 @@ void UNCellJunctionComponent::OnRegister()
 	{
 		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
 		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
-		// TODO: DONT UPDATE DETAILS WHILE WE DEBUG DRAW
-		// if (UpdatedDetails != nullptr)
-		// {
-		// 	// Copy details in-place
-		// 	Details = *UpdatedDetails;
-		// }
+		if (UpdatedDetails != nullptr)
+		{
+			// Copy details in-place
+			Details = *UpdatedDetails;
+			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
+		}
 	}
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);
