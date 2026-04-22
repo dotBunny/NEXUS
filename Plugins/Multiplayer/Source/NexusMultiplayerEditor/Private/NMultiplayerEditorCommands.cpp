@@ -10,6 +10,7 @@
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorSubsystem.h"
 #include "ShaderCompiler.h"
+#include "ToolMenu.h"
 
 bool FNMultiplayerEditorCommands::bIsTestRunning = false;
 FDelegateHandle FNMultiplayerEditorCommands::OnTestStartedHandle;
@@ -66,10 +67,14 @@ void FNMultiplayerEditorCommands::AddMultiplayerTestSection()
 
 void FNMultiplayerEditorCommands::RemoveMultiplayerTestSection()
 {
-	if (UToolMenu* Menu = UToolMenus::Get()->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
+	if (ToolMenus != nullptr)
 	{
-		Menu->RemoveSection(MultiplayerTestSectionName);
-		UToolMenus::Get()->RefreshMenuWidget(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
+		if (UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+		{
+			Menu->RemoveSection(MultiplayerTestSectionName);
+			ToolMenus->RefreshMenuWidget(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
+		}
 	}
 	
 	FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
@@ -87,7 +92,10 @@ void FNMultiplayerEditorCommands::RemoveMultiplayerTestSection()
 
 bool FNMultiplayerEditorCommands::HasMultiplayerTestSection()
 {
-	if (UToolMenu* Menu = UToolMenus::Get()->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	// Is shutting down?
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
+	if (ToolMenus == nullptr) return false;
+	if (UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
 	{
 		return Menu->FindSection(MultiplayerTestSectionName) != nullptr;
 	}

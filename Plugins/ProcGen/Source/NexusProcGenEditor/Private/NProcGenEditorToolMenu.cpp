@@ -289,7 +289,7 @@ void FNProcGenEditorToolMenu::RemoveMenuEntries()
 {
 	FNToolsMenu::RemoveMenuEntry(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 	
-	UToolMenus* Menu = UToolMenus::Get();
+	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NOrganExtensions_Button");

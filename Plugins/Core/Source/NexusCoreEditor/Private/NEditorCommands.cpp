@@ -128,7 +128,7 @@ void FNEditorCommands::AddMenuEntries()
 
 void FNEditorCommands::RemoveMenuEntries()
 {
-	UToolMenus* ToolMenus = UToolMenus::Get();
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus)
 	{
 		ToolMenus->RemoveEntry("LevelEditor.MainMenu.Help", "Reference", "NEXUS");

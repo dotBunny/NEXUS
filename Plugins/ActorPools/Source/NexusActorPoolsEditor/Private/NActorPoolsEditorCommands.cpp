@@ -50,7 +50,7 @@ void FNActorPoolsEditorCommands::AddMenuEntries()
 
 void FNActorPoolsEditorCommands::RemoveMenuEntries()
 {
-	UToolMenus* ToolMenus = UToolMenus::Get();
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus)
 	{
 		ToolMenus->RemoveEntry("AssetEditor.BlueprintEditor.MainMenu.Asset", "AssetEditorActions", "NEXUS_AddActorPoolMethods");

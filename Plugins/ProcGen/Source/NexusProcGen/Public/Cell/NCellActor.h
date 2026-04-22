@@ -101,9 +101,6 @@ public:
 	int32 GetCellJunctionNextIdentifier() { return CellJunctionNextIdentifier++; }
 	virtual void PostRegisterAllComponents() override;
 	bool HasDifferencesFromSidecar() const;
-	
-	
-	
 #endif // WITH_EDITOR
 
 	/** Recompute the cell's bounds from its level content and store the result on the root component. */

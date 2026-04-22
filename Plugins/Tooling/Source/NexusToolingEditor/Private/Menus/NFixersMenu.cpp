@@ -26,7 +26,7 @@ void FNFixersMenu::Register()
 
 void FNFixersMenu::Unregister()
 {
-	UToolMenus* ToolMenus = UToolMenus::Get();
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus != nullptr)
 	{
 		ToolMenus->RemoveEntry("ContentBrowser.FolderContextMenu", "PathContextBulkOperations", "NFixersBulkOperations");

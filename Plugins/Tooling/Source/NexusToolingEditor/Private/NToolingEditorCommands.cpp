@@ -221,7 +221,7 @@ bool FNToolingEditorCommands::NodeExternalDocumentation_CanExecute()
 
 void FNToolingEditorCommands::RemoveMenuEntries()
 {
-	UToolMenus* Menu = UToolMenus::Get();
+	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
 		// Remove Collision Visualizer

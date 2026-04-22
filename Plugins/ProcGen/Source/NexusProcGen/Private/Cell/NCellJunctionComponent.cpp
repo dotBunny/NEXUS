@@ -138,6 +138,10 @@ void UNCellJunctionComponent::OnRegister()
 			// infer however that some of this might be editor time only. Not exactly sure what is happening here leading 
 			// to the world rotations needing to be updated manually to match the data-only version that we use during
 			// generating our NProcGenGraph.
+			
+			// There is some explicit logic around WorldPartition moving everything to a flat-structure when you add ALevelInstances,
+			// this logic doesn't appear to be as exercised in the old-school non-world partition way of building levels.
+			// It might be related --- I don't know --- hopefully this information might be useful in the future.
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 	}
