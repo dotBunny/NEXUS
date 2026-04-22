@@ -133,8 +133,11 @@ void UNCellJunctionComponent::OnRegister()
 			// Copy details in-place
 			Details = *UpdatedDetails;
 
-			// Update the rotation so the thing draws nicely; feels wrong given that I would have thought
-			// the LevelInstance would have handled rotating this, but maybe theres some gotcha there.
+			// Update the rotation so the thing draws nicely; this feels like a bug. The ALevelInstance is supposed
+			// to rotate the UWorlds content when it gets placed and loaded. The documentation around the methods seem to
+			// infer however that some of this might be editor time only. Not exactly sure what is happening here leading 
+			// to the world rotations needing to be updated manually to match the data-only version that we use during
+			// generating our NProcGenGraph.
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 	}

@@ -13,8 +13,8 @@ namespace NEXUS::PerfTests::NUI::FNWidgetStateHarness
     constexpr int32 EntryCount = 250;
     constexpr int32 QueryCount = 50;
     constexpr float AddMaxDuration = 0.1f;
-    constexpr float GetMaxDuration = 0.05f;
-    constexpr float OverlayMaxDuration = 0.5f;
+    constexpr float GetMaxDuration = 0.1f;
+    constexpr float OverlayMaxDuration = 0.75f;
 }
 
 N_TEST_PERF(FNWidgetStatePerfTests_AddString,

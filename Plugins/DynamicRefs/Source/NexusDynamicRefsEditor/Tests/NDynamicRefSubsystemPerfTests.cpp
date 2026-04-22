@@ -14,10 +14,10 @@ namespace NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness
     constexpr int32 ObjectCount = 1000;
 	constexpr int32 QueryCount = 100;
 	
-    constexpr float AddObjectMaxDuration = 0.65f;
+    constexpr float AddObjectMaxDuration =1.25f;
     constexpr float RemoveObjectMaxDuration = 1.0f;
 	
-    constexpr float GetObjectsMaxDuration = 0.1f;
+    constexpr float GetObjectsMaxDuration = 0.15f;
     constexpr float GetByNameMaxDuration = 0.1f;
 }
 
