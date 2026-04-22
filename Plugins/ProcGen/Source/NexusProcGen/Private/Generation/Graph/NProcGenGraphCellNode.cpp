@@ -36,9 +36,9 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const
 	{
 		const int32 JunctionKey = FreeJunctionKeys[i];
 		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
-		
-		// Update position/rotation to reflect actual world placement
-		Details.WorldRotation += Rotation;
+
+		// Compose with quaternions - (was adding the Rotation previously, but this better?)
+		Details.WorldRotation = (Rotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
 		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
 	}
 	

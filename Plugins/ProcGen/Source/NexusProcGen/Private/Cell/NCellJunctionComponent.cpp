@@ -57,7 +57,7 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 
 TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& SocketUnitSize) const
 {
-	
+
 	const TArray<FVector> UnrotatedCornerPoints = FNProcGenUtils::GetCenteredWorldCornerPoints2D(
 		this->Details.SocketSize.X * SocketUnitSize.X,this->Details.SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
 
@@ -65,7 +65,7 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
 	const FRotator DisplayRotation = DisplayQuat.Rotator();
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
-	
+
 	return RotatedCornerPoints;
 }
 
@@ -128,13 +128,12 @@ void UNCellJunctionComponent::OnRegister()
 	{
 		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
 		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
-		if (UpdatedDetails != nullptr)
-		{
-			// Copy details in-place
-			Details = *UpdatedDetails;
-		}
-		
-		//Details.WorldRotation = GetComponentRotation();
+		// TODO: DONT UPDATE DETAILS WHILE WE DEBUG DRAW
+		// if (UpdatedDetails != nullptr)
+		// {
+		// 	// Copy details in-place
+		// 	Details = *UpdatedDetails;
+		// }
 	}
 	
 	FNProcGenRegistry::RegisterCellJunctionComponent(this);
