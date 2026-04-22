@@ -17,6 +17,13 @@ public:
 	/** Unregister entries previously installed by Register. */
 	static void Unregister();
 
+	/** Adds the MultiplayerTest section to the LevelEditorToolBar. */
+	static void AddMultiplayerTestSection();
+	/** Removes the MultiplayerTest section from the LevelEditorToolBar. */
+	static void RemoveMultiplayerTestSection();
+	/** @return true if the MultiplayerTest section is present on the LevelEditorToolBar. */
+	static bool HasMultiplayerTestSection();
+
 private:
 	/** @return true if the multiplayer test entry is currently enabled (e.g. not already running an incompatible mode). */
 	static bool MultiplayerTest_CanExecute();
@@ -39,4 +46,6 @@ private:
 	static FDelegateHandle OnTestStartedHandle;
 	/** Handle for the ended delegate binding, held so it can be removed on Unregister. */
 	static FDelegateHandle OnTestEndedHandle;
+	/** Named section used by the Multiplayer Test toggle button. */
+	static FName MultiplayerTestSectionName;
 };

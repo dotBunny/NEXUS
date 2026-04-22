@@ -4,6 +4,7 @@
 #include "NMultiplayerEditorSubsystem.h"
 
 #include "NMultiplayerEditorModule.h"
+#include "NMultiplayerEditorSettings.h"
 #include "NMultiplayerEditorUserSettings.h"
 
 void UNMultiplayerEditorSubsystem::Tick(float DeltaTime)
@@ -51,15 +52,16 @@ void UNMultiplayerEditorSubsystem::StartMultiplayerTest()
 	PlaySessionRequest.EditorPlaySettings = CastChecked<ULevelEditorPlaySettings>(StaticDuplicateObjectEx(DuplicationParams));
 
 #if WITH_EDITORONLY_DATA
-		
-	const UNMultiplayerEditorUserSettings* Settings = UNMultiplayerEditorUserSettings::Get();
+	const UNMultiplayerEditorSettings* Settings = UNMultiplayerEditorSettings::Get();	
+	const UNMultiplayerEditorUserSettings* UserSettings = UNMultiplayerEditorUserSettings::Get();
 	
-	if (Settings->bClearLogsFolder)
+	Settings->ApplySettings(PlaySessionRequest);
+	
+	if (UserSettings->bClearLogsFolder)
 	{
 		FNEditorUtils::CleanLogsFolder();
 	}
-	
-	Settings->ApplySettings(PlaySessionRequest);
+	UserSettings->ApplySettings(PlaySessionRequest);
 		
 #endif // WITH_EDITORONLY_DATA
 		

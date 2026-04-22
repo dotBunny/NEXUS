@@ -3,8 +3,10 @@
 
 #include "NMultiplayerEditorCommands.h"
 
+#include "NCoreEditorMinimal.h"
 #include "NEditorUtils.h"
 #include "NMultiplayerEditorModule.h"
+#include "NMultiplayerEditorSettings.h"
 #include "NMultiplayerEditorStyle.h"
 #include "NMultiplayerEditorSubsystem.h"
 #include "ShaderCompiler.h"
@@ -12,6 +14,7 @@
 bool FNMultiplayerEditorCommands::bIsTestRunning = false;
 FDelegateHandle FNMultiplayerEditorCommands::OnTestStartedHandle;
 FDelegateHandle FNMultiplayerEditorCommands::OnTestEndedHandle;
+FName FNMultiplayerEditorCommands::MultiplayerTestSectionName = FName("NEXUS_Multiplayer");
 
 bool FNMultiplayerEditorCommands::MultiplayerTest_CanExecute()
 {
@@ -20,11 +23,27 @@ bool FNMultiplayerEditorCommands::MultiplayerTest_CanExecute()
 
 void FNMultiplayerEditorCommands::Register()
 {
-	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.LevelEditorToolBar.User"))
+	const UNMultiplayerEditorSettings* Settings = UNMultiplayerEditorSettings::Get();
+	
+	if (!Settings->bMultiplayerTestEnabled) return;
+	AddMultiplayerTestSection();
+}
+
+void FNMultiplayerEditorCommands::Unregister()
+{
+	if (HasMultiplayerTestSection())
 	{
-		FToolMenuSection& NexusSection = Menu->FindOrAddSection("NEXUS_Multiplayer");
-		NexusSection.Alignment = EToolMenuSectionAlign::Last;
-		NexusSection.AddSeparator(NAME_None);
+		RemoveMultiplayerTestSection();
+	}
+}
+
+void FNMultiplayerEditorCommands::AddMultiplayerTestSection()
+{
+	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	{
+		FToolMenuSection& MultiplayerSection = Menu->FindOrAddSection(MultiplayerTestSectionName);
+		MultiplayerSection.Alignment = EToolMenuSectionAlign::Last;
+		MultiplayerSection.AddSeparator(NAME_None);
 		
 		FToolMenuEntry MultiplayerTest = FToolMenuEntry::InitToolBarButton(
 				"Toggle Multiplayer Test",
@@ -37,7 +56,7 @@ void FNMultiplayerEditorCommands::Register()
 					TAttribute<FText>::Create(TAttribute<FText>::FGetter::CreateStatic(&MultiplayerTest_GetTooltip)),
 					TAttribute<FSlateIcon>::Create(TAttribute<FSlateIcon>::FGetter::CreateStatic(&MultiplayerTest_GetIcon)));
 		
-		NexusSection.AddEntry(MultiplayerTest);
+		MultiplayerSection.AddEntry(MultiplayerTest);
 		
 		FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
 		OnTestStartedHandle = Module.OnMultiplayerTestStarted.AddStatic(OnMultiplayerTestStarted);
@@ -45,10 +64,16 @@ void FNMultiplayerEditorCommands::Register()
 	}
 }
 
-void FNMultiplayerEditorCommands::Unregister()
+void FNMultiplayerEditorCommands::RemoveMultiplayerTestSection()
 {
+	if (UToolMenu* Menu = UToolMenus::Get()->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	{
+		Menu->RemoveSection(MultiplayerTestSectionName);
+		UToolMenus::Get()->RefreshMenuWidget(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
+	}
+	
 	FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
-
+	
 	if (OnTestStartedHandle.IsValid())
 	{
 		Module.OnMultiplayerTestStarted.Remove(OnTestStartedHandle);
@@ -58,6 +83,15 @@ void FNMultiplayerEditorCommands::Unregister()
 	{
 		Module.OnMultiplayerTestEnded.Remove(OnTestEndedHandle);
 	}
+}
+
+bool FNMultiplayerEditorCommands::HasMultiplayerTestSection()
+{
+	if (UToolMenu* Menu = UToolMenus::Get()->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	{
+		return Menu->FindSection(MultiplayerTestSectionName) != nullptr;
+	}
+	return false;
 }
 
 FText FNMultiplayerEditorCommands::MultiplayerTest_GetTooltip()

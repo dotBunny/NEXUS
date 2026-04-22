@@ -37,9 +37,6 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	
-	UPROPERTY(EditAnywhere, config, Category = "Setup", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
-	bool bUseOnlineSubsystem = false;
-	
 	UPROPERTY(EditAnywhere, config, Category = "Setup", meta = (DisplayName = "Clear Logs Folder", Tooltip = "Clear the log files (not in use) prior to running a test?"))
 	bool bClearLogsFolder = false;
 	
@@ -156,8 +153,6 @@ private:
 public:
 	void ApplySettings(FRequestPlaySessionParams& Params) const
 	{
-		Params.bAllowOnlineSubsystem = bUseOnlineSubsystem;
-		
 		// Set window sized
 		Params.EditorPlaySettings->SetClientWindowSize(ClientWindowSize);
 		
