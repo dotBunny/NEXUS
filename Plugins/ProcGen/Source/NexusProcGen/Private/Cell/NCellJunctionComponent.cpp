@@ -132,6 +132,9 @@ void UNCellJunctionComponent::OnRegister()
 		{
 			// Copy details in-place
 			Details = *UpdatedDetails;
+
+			// Update the rotation so the thing draws nicely; feels wrong given that I would have thought
+			// the LevelInstance would have handled rotating this, but maybe theres some gotcha there.
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 	}
