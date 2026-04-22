@@ -172,3 +172,8 @@ bool FNRawMesh::CheckNonTris()
 	}
 	return false;
 }
+
+bool FNRawMesh::CheckBounds()
+{
+	return Bounds.IsValid();
+}

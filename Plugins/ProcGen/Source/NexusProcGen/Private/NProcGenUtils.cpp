@@ -6,7 +6,6 @@
 #include "NArrayUtils.h"
 #include "NLevelUtils.h"
 #include "NProcGenSettings.h"
-#include "Cell/NCellJunctionComponent.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
 #include "Organ/NOrganComponent.h"
@@ -96,11 +95,15 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	
 	Mesh.Vertices.Reserve(VerticesCount);
 	FVector CenterCalc;
+	FBox BoundingBox(ForceInit);
 	for (int i = 0; i < VerticesCount; i++)
 	{
 		BuildTask.EnterProgressFrame(1);
 		Mesh.Vertices.Add(FVector(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]));
-		CenterCalc += Mesh.Vertices.Last();
+		
+		FVector& CreatedPoint = Mesh.Vertices.Last();
+		CenterCalc += CreatedPoint;
+		BoundingBox += CreatedPoint;
 	}
 
 	// Build Loops
@@ -114,10 +117,12 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	}
 	
 	Mesh.Center = CenterCalc / VerticesCount;
+	Mesh.Bounds = BoundingBox;
 	
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
 	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
+	Mesh.bHasBounds = true;
 	Mesh.bHasNonTris = Mesh.CheckNonTris();
 	
 	return Mesh;

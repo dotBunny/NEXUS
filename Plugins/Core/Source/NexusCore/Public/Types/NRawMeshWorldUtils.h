@@ -13,7 +13,8 @@ class UStaticMesh;
 class UBodySetup;
 class UPrimitiveComponent;
 
-// TODO : Add landscape support
+// TODO: Add landscape support
+// TODO: Move all of the creation to constructors of FNRawMesh
 
 /**
  * Helpers for extracting the simple-collision geometry of every primitive in a UWorld

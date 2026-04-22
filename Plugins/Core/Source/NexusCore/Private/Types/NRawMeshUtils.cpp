@@ -10,6 +10,17 @@
 bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
                                    const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
 {
+	// Quick rotated AABB check to early out if possible
+	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
+	{
+		const FBox LeftWorldBounds = LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin));
+		const FBox RightWorldBounds = RightMesh.Bounds.TransformBy(FTransform(RightRotation, RightOrigin));
+		if (!LeftWorldBounds.Intersect(RightWorldBounds))
+		{
+			return false;
+		}
+	}
+
 	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."))
