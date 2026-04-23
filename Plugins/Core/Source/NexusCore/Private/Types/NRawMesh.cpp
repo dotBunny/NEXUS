@@ -173,7 +173,7 @@ bool FNRawMesh::CheckNonTris()
 	return false;
 }
 
-bool FNRawMesh::CheckBounds()
+bool FNRawMesh::CheckBounds() const
 {
-	return Bounds.IsValid();
+	return Bounds.IsValid != 0;
 }

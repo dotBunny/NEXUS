@@ -32,6 +32,7 @@ struct NEXUSCORE_API FNRawMesh
 	UPROPERTY(VisibleAnywhere)
 	FVector Center = FVector::ZeroVector;
 	
+	/** Relative AABB **/
 	UPROPERTY(VisibleAnywhere)
 	FBox Bounds;
 
@@ -106,7 +107,6 @@ struct NEXUSCORE_API FNRawMesh
 		FBox BoundingBox(ForceInit);
 		for (int i = 0; i < Vertices.Num(); i++)
 		{
-			
 			CenterCalc += Vertices[i];
 			BoundingBox += Vertices[i];
 		}
@@ -139,7 +139,7 @@ struct NEXUSCORE_API FNRawMesh
 private:
 	bool CheckConvex();
 	bool CheckNonTris();
-	bool CheckBounds();
+	bool CheckBounds() const;
 
 	/** Cached result of the most recent convexity check. */
 	UPROPERTY(VisibleAnywhere)

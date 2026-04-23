@@ -201,6 +201,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		const FVector PreviousPosition = RootComponent->Details.Hull.Vertices[VertexIndex];
 		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
 		RootComponent->Details.Hull.Validate();
+		RootComponent->Details.Hull.CalculateCenterAndBounds();
 		if (!RootComponent->Details.Hull.IsConvex())
 		{
 			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;

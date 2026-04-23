@@ -13,7 +13,7 @@
 #include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Types/NRawMeshWorldUtils.h"
+#include "Types/NRawMeshUtils.h"
 
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
@@ -241,7 +241,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// to actors whose bounds fall inside one of the input organs' volume bounds.
 	WorldCollisionMeshes.Reset();
 	WorldCollisionMeshTransforms.Reset();
-	FNRawMeshWorldUtils::GetWorldSimpleCollisionMeshes(World, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
+	FNRawMeshUtils::GetWorldSimpleCollisionMeshes(World, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
 }
 
 void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
