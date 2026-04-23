@@ -10,15 +10,23 @@
 #include "StaticMeshResources.h"
 #include "Cell/NTissue.h"
 #include "Components/StaticMeshComponent.h"
+#include "Developer/NDebugActor.h"
 #include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 #include "Types/NRawMeshUtils.h"
+#include "Organ/NOrganVolume.h"
 
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
+}
+
+bool FNProcGenOperationContext::IsWorldCollisionSource(const AActor* Actor)
+{
+	if (Actor->IsA<ANOrganVolume>()) return false;
+	return true;
 }
 
 void FNProcGenOperationContext::ResetContext()
@@ -201,6 +209,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	}
 	
 	// World Bounds Check
+	bool bHaveUnboundedBounds = false;
 	TArray<FBoxSphereBounds> Bounds;
 	
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
@@ -219,6 +228,13 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			}
 			
 			const AVolume* Volume = Component->GetVolume();
+			if (const ANOrganVolume* OrganVolume = Cast<ANOrganVolume>(Volume))
+			{
+				if (OrganVolume->GetOrganComponent()->bUnbounded)
+				{
+					bHaveUnboundedBounds = true;
+				}
+			}
 			Bounds.Add(Volume->GetBounds());
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
@@ -241,7 +257,28 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// to actors whose bounds fall inside one of the input organs' volume bounds.
 	WorldCollisionMeshes.Reset();
 	WorldCollisionMeshTransforms.Reset();
-	FNRawMeshUtils::GetWorldSimpleCollisionMeshes(World, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
+	if (bHaveUnboundedBounds)
+	{
+		Bounds.Empty();
+	}
+	
+	// TODO: Does it make sense maybe to filter actors at this point and cache actors in the world, so that when we build context later it then uses that map?
+	// need to refactor all the functions around this
+	
+	FNRawMeshUtils::GetWorldSimpleCollisionMeshes(World, Bounds,
+		&FNProcGenOperationContext::IsWorldCollisionSource,
+		WorldCollisionMeshes, WorldCollisionMeshTransforms);
+	
+	/** Create Representations of the assessed collisions	
+	for (int i = 0; i < WorldCollisionMeshTransforms.Num(); i++)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Name = MakeUniqueObjectName(nullptr, ANDebugActor::StaticClass(), FName("WorldCollisionTest"));
+		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), WorldCollisionMeshTransforms[i], SpawnParams);
+		
+		DebugActor->OverrideWithDynamicMesh(WorldCollisionMeshes[i].CreateDynamicMesh(true));
+	}
+	**/
 }
 
 void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)

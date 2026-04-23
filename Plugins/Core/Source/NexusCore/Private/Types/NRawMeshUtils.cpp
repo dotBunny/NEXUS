@@ -8,6 +8,7 @@
 #include "ParticleHelper.h"
 #include "StaticMeshCompiler.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Developer/NMethodScopeTimer.h"
 #include "Math/NBoundsUtils.h"
 #include "Math/NTriangleUtils.h"
 #include "Math/NVectorUtils.h"
@@ -42,11 +43,9 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
-void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TArray<FBoxSphereBounds>& ContainingBounds, 
+	TFunctionRef<bool(const AActor*)> ActorFilter, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
 {
-	// Strict semantics: no bounds => nothing can be "contained within at least one".
-	if (ContainingBounds.Num() == 0) return;
-
 #if WITH_EDITOR
 	// Static meshes compile async in editor; force any pending compiles to finish so every BodySetup is populated.
 	TArray<UStaticMesh*> Pending;
@@ -67,6 +66,7 @@ void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TA
 	{
 		AActor* Actor = *WorldActorIterator;
 		if (!Actor || Actor->IsEditorOnly()) continue;
+		if (!ActorFilter(Actor)) continue;
 
 		// Actor-bounds containment filter: include only when the actor's bounds fit inside at least one supplied bounds.
 		if (!ContainingBounds.IsEmpty())
@@ -100,18 +100,18 @@ void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TA
 			const bool bUseComplexAsSimple = (Trace == CTF_UseComplexAsSimple);
 
 			// Instanced variants share one BodySetup across N instances — emit per instance.
-			if (const UInstancedStaticMeshComponent* ISM = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
+			if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
 			{
-				const int32 InstanceCount = ISM->GetInstanceCount();
+				const int32 InstanceCount = InstanceStaticMesh->GetInstanceCount();
 				for (int32 i = 0; i < InstanceCount; ++i)
 				{
 					FTransform InstanceWorld;
-					ISM->GetInstanceTransform(i, InstanceWorld,true);
+					InstanceStaticMesh->GetInstanceTransform(i, InstanceWorld,true);
 
 					if (bUseComplexAsSimple)
 					{
 						FNRawMesh InstanceMesh;
-						if (FNRawMeshFactory::FromStaticMesh(ISM->GetStaticMesh(), InstanceMesh))
+						if (FNRawMeshFactory::FromStaticMesh(InstanceStaticMesh->GetStaticMesh(), InstanceMesh))
 						{
 							OutMeshes.Add(MoveTemp(InstanceMesh));
 							OutTransforms.Add(MoveTemp(InstanceWorld));
@@ -119,8 +119,7 @@ void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TA
 					}
 					else
 					{
-						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,
-							OutMeshes, OutTransforms);
+						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
 					}
 				}
 				continue;

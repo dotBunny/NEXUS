@@ -11,8 +11,11 @@ FNCollectPassTask::FNCollectPassTask(const TSharedPtr<FNCollectPassContext>& Pas
 void FNCollectPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	// TODO: Copy things from pass context to shared context
+	
 	for (TUniquePtr<FNProcGenGraph>& Graph : PassContextPtr->Graphs)
 	{
+		// TODO: is there any bads about using the shared ptr here .. other threads? locks?
+		
 		TaskGraphContextPtr->TakeGraph(MoveTemp(Graph));
 	}
 	PassContextPtr->Graphs.Reset();

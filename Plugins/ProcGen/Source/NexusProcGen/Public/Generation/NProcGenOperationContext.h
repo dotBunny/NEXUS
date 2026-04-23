@@ -83,6 +83,9 @@ public:
 	const FNProcGenOperationSettings& GetOperationSettings() { return OperationSettings; }
 
 private:
+	/** Actor filter for world-collision gathering. */
+	static bool IsWorldCollisionSource(const AActor* Actor);
+
 	/** The identifier of the UNProcGenOperation that owns this context. */
 	uint32 OperationTicket;
 

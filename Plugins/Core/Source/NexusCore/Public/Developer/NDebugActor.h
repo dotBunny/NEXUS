@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/DynamicMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "NDebugActor.generated.h"
 
@@ -41,8 +42,23 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString Message;
 	
+	TObjectPtr<UStaticMeshComponent> GetStaticMeshComponent() const { return SphereMesh; }
+	
+
+	
+	void OverrideWithDynamicMesh(FDynamicMesh3 NewMesh) const
+	{
+		SphereMesh->SetVisibility(false, false);
+		DynamicMesh->Modify();
+		DynamicMesh->SetMesh(MoveTemp(NewMesh));
+	}
+	TObjectPtr<UDynamicMeshComponent> GetDynamicMeshComponent() const { return DynamicMesh; }
+	
 protected:
 	/** Sphere mesh component used as the visible marker in the viewport. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> SphereMesh;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDynamicMeshComponent> DynamicMesh;
 };

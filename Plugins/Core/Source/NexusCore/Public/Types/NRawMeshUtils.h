@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NRawMesh.h"
+#include "Templates/Function.h"
 
 /**
  * Intersection and containment helpers for FNRawMesh geometry.
@@ -36,11 +37,13 @@ public:
 	 * - Landscape-based primitives are skipped.
 	 * @param World Source world to scan.
 	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds are contained within any one of these. Check is skipped if array is empty.
+	 * @param ActorFilter Predicate evaluated per actor after the null/editor-only checks and before bounds containment; return false to skip the actor.
 	 * @param OutMeshes Each mesh in element-local space, appended to the array.
 	 * @param OutTransforms Matching world-space transform per entry in OutMeshes.
 	 * @note In editor builds, force-flushes any async static-mesh compilation so every UBodySetup is populated before reading.
 	 */
-	static void GetWorldSimpleCollisionMeshes(const UWorld* World, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
+	static void GetWorldSimpleCollisionMeshes(const UWorld* World, const TArray<FBoxSphereBounds>& ContainingBounds, 
+		TFunctionRef<bool(const AActor*)> ActorFilter, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
 
 	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.

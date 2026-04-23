@@ -5,8 +5,11 @@
 
 ANDebugActor::ANDebugActor()
 {
-	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	SphereMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SphereMesh"));
 	RootComponent = SphereMesh;
+	
+	DynamicMesh = CreateDefaultSubobject<UDynamicMeshComponent>(TEXT("DynamicMesh"));
+	DynamicMesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	
 	// Load the engine's default sphere mesh
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMeshAsset(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
