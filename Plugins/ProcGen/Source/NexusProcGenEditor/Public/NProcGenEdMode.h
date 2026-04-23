@@ -6,6 +6,7 @@
 #include "EditorModeManager.h"
 #include "EdMode.h"
 #include "Cell/NCellActor.h"
+#include "Developer/NDebugActor.h"
 
 class FNProcGenOperationContext;
 class UNProcGenOperation;
@@ -88,6 +89,23 @@ public:
 	/** Set the active cell-edit sub-mode. */
 	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { CellEdMode = InCellEdMode; }
 
+	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
+	static bool HasCollisionVisualizer() { return CollisionVisualizer != nullptr; }
+
+	/**
+	 * Spawns the world-collision visualizer (a single merged ANDebugActor showing every world actor's simple-collision
+	 * geometry) and caches it on the mode. Any previously-spawned visualizer is destroyed first, so this doubles as a refresh.
+	 * The spawned actor is hidden from the World Outliner via ANDebugActor::HideInSceneOutliner.
+	 * @param World World to iterate for collision sources and to spawn the visualizer into. Must be valid.
+	 */
+	static void CreateCollisionVisualizer(UWorld* World);
+
+	/**
+	 * Destroys the cached world-collision visualizer actor if one exists. No-op when none is alive. Called automatically
+	 * from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer doesn't outlive the editor mode.
+	 */
+	static void DestroyCollisionVisualizer();
+	
 	/** Unique identifier registered with the editor-mode manager. */
 	const static FEditorModeID Identifier;
 
@@ -129,6 +147,7 @@ private:
 	static ANCellActor* CellActor;
 	static ENCellEdMode CellEdMode;
 	static ENCellVoxelMode CellVoxelMode;
+	static TObjectPtr<ANDebugActor> CollisionVisualizer;
 
 	/** Editor-side operation used to preview organ generation. */
 	TObjectPtr<UNProcGenOperation> OrganGenerator;

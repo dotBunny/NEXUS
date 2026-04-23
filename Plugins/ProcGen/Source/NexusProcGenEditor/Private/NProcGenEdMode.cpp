@@ -16,6 +16,7 @@
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
 #include "NProcGenOperation.h"
+#include "Developer/NMethodScopeTimer.h"
 
 void FNProcGenEdMode::ProtectCellEdMode()
 {
@@ -23,6 +24,22 @@ void FNProcGenEdMode::ProtectCellEdMode()
 		GetCellEdMode() == ENCellEdMode::Hull)
 	{
 		SetCellEdMode(ENCellEdMode::Bounds);
+	}
+}
+
+void FNProcGenEdMode::CreateCollisionVisualizer(UWorld* World)
+{
+	DestroyCollisionVisualizer();
+	FNMethodScopeTimer("World Collision Build Time");
+	CollisionVisualizer = FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(World, TArray<FBoxSphereBounds>());
+}
+
+void FNProcGenEdMode::DestroyCollisionVisualizer()
+{
+	if (CollisionVisualizer != nullptr)
+	{
+		CollisionVisualizer->GetWorld()->DestroyActor(CollisionVisualizer, false, false);
+		CollisionVisualizer = nullptr;
 	}
 }
 
@@ -42,6 +59,7 @@ FNCellVoxelData FNProcGenEdMode::CachedVoxelData;
 FLinearColor FNProcGenEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNProcGenEdMode::CachedBoundsVertices;
 FNProcGenEdMode::ENCellVoxelMode FNProcGenEdMode::CellVoxelMode = ENCellVoxelMode::None;
+TObjectPtr<ANDebugActor> FNProcGenEdMode::CollisionVisualizer = nullptr;
 
 FNProcGenEdMode::~FNProcGenEdMode()
 {
@@ -79,6 +97,9 @@ void FNProcGenEdMode::Exit()
 {
 	CellActor = nullptr;
 	bCanTick = false;
+	
+	// Destroy any visualizer kicking around
+	DestroyCollisionVisualizer();
 
 	// Remove our temp organ generator
 	if (OrganGenerator != nullptr)

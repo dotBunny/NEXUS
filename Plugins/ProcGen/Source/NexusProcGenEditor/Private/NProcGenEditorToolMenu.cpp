@@ -268,6 +268,21 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon)));
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
+		
+		// Collision Visualizer
+		FToolMenuEntry CollisionVisualizerEntry  = FToolMenuEntry::InitToolBarButton(
+			"NProcGen_ToggleCollisionVisualizer",
+			FUIAction(
+				FExecuteAction::CreateStatic(&CollisionVisualizerToggle),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&FNProcGenEdMode::IsActive)),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NProcGenEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
+				NSLOCTEXT("NexusProcGenEditor", "Command_NProcGenEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during generation."),
+				TAttribute<FSlateIcon>::Create(
+					TAttribute<FSlateIcon>::FGetter::CreateStatic(
+				&FNProcGenEditorStyle::CollisionVisualizerToggleIcon)));
+		NexusSection.AddEntry(CollisionVisualizerEntry);
 	}
 
 	// EUW Entry
@@ -339,6 +354,18 @@ bool FNProcGenEditorToolMenu::ShowCellJunctionDropdown()
 bool FNProcGenEditorToolMenu::ShowOrganDropdown()
 {
 	return FNProcGenEdMode::IsActive() && FNProcGenRegistry::HasOrganComponents();
+}
+
+void FNProcGenEditorToolMenu::CollisionVisualizerToggle()
+{
+	if (FNProcGenEdMode::HasCollisionVisualizer())
+	{
+		FNProcGenEdMode::DestroyCollisionVisualizer();
+	}
+	else
+	{
+		FNProcGenEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
+	}
 }
 
 void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()

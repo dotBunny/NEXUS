@@ -31,6 +31,11 @@ public:
 	/** @return true if the organ dropdown should be visible given the current context. */
 	static bool ShowOrganDropdown();
 
+	/**
+	 * Toggles the world-collision visualizer for the currently-edited world. Spawns a fresh visualizer via
+	 * FNProcGenEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
+	 */
+	static void CollisionVisualizerToggle();
 
 	/** Spawn or focus the EUW-based ProcGen tool window. */
 	static void CreateEditorUtilityWindow();

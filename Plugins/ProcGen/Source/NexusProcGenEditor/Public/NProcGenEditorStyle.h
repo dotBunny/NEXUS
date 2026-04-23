@@ -29,4 +29,7 @@ public:
 
 	/** @return Icon for the "toggle voxel-data overlay" action on the cell-actor toolbar. */
 	static FSlateIcon CellActorToggleDrawVoxelDataIcon();
+	
+	/** @return Icon for the "toggle world-collision visualizer" action on the ProcGen toolbar. */
+	static FSlateIcon CollisionVisualizerToggleIcon();
 };

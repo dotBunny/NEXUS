@@ -30,19 +30,20 @@ class NEXUSPROCGENEDITOR_API FNProcGenEditorUtils
 public:
 
 	/**
-	 * Spawns a single transient debug actor that visualizes the simple-collision geometry of every actor in the
-	 * currently-edited world whose bounds fall inside any of the supplied bounds.
+	 * Spawns a single transient debug actor into World that visualizes the simple-collision geometry of every actor
+	 * whose bounds fall inside any of the supplied containment volumes.
 	 *
 	 * Pulls the world-actor list via FNActorUtils::GetWorldActors using the ProcGen filter settings, extracts each
 	 * actor's simple-collision representation with FNRawMeshFactory::FromActorsInBounds, then merges every emitted
 	 * mesh into one ANDebugActor via FNRawMeshUtils::CreateRawMeshVisualizers (single-actor mode). The visualizer is
 	 * shaded with UNProcGenEditorSettings::CollisionVisualizerMaterial.
 	 *
+	 * @param World World to iterate for collision sources and to spawn the visualizer actor into. Must be valid.
 	 * @param Bounds Containment volumes; only actors whose bounds fit inside at least one are visualized.
 	 * @return The merged visualizer actor. Editor-only / diagnostic — do not use in shipping content.
 	 * @note Performs a synchronous load of the configured visualizer material.
 	 */
-	static ANDebugActor* CreateWorldCollisionVisualizerActor(const TArray<FBoxSphereBounds>& Bounds);
+	static ANDebugActor* CreateWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds);
 
 	/** @return true if the actor participates in generated cell data (has a cell-root or junction component). */
 	FORCEINLINE static bool EffectsGeneratedData(const AActor* ContextActor)

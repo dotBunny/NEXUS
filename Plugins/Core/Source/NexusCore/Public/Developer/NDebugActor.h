@@ -33,7 +33,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString Message;
 	
-	
 	/**
 	 * Spawns a debug actor in the supplied world at the given transform, labeled for quick identification.
 	 * @param World The world to spawn into.
@@ -52,6 +51,28 @@ public:
 	 */
 	TObjectPtr<UStaticMeshComponent> GetStaticMeshComponent() const { return SphereMesh; }
 
+	/**
+	 * Removes this actor from the editor's World Outliner / Scene Hierarchy panel without affecting viewport
+	 * visibility, selection, or any other behavior. Compiled out of non-editor builds.
+	 */
+	void HideInSceneOutliner()
+	{
+#if WITH_EDITORONLY_DATA
+		bListedInSceneOutliner = false;
+#endif // WITH_EDITORONLY_DATA
+	}
+
+	/**
+	 * Restores this actor's visibility in the editor's World Outliner / Scene Hierarchy panel after a prior
+	 * HideInSceneOutliner call. Compiled out of non-editor builds.
+	 */
+	void ShowInSceneOutliner()
+	{
+#if WITH_EDITORONLY_DATA
+		bListedInSceneOutliner = true;
+#endif // WITH_EDITORONLY_DATA
+	}
+	
 	/**
 	 * Replaces the sphere marker with arbitrary dynamic-mesh geometry, hiding the sphere in the process.
 	 * Calls Modify() on the dynamic-mesh component so the change is captured by the editor's transaction system.

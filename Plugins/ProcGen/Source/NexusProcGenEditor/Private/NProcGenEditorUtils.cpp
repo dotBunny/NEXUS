@@ -21,17 +21,21 @@
 #include "Types/NRawMeshFactory.h"
 #include "Types/NRawMeshUtils.h"
 
-ANDebugActor* FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(const TArray<FBoxSphereBounds>& Bounds)
+ANDebugActor* FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds)
 {
-	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
-	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(CurrentWorld, FNProcGenOperationContext::CreateWorldActorFilterSettings());
+	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World, FNProcGenOperationContext::CreateWorldActorFilterSettings());
 	
 	TArray<FNRawMesh> WorldCollisionMeshes;
 	TArray<FTransform> WorldCollisionMeshTransforms;
 	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
 	
 	UMaterialInterface* VisualizerMaterial = UNProcGenEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
-	return FNRawMeshUtils::CreateRawMeshVisualizers(CurrentWorld, WorldCollisionMeshes, WorldCollisionMeshTransforms, VisualizerMaterial, true, false)[0];
+	TArray<ANDebugActor*> Actors = FNRawMeshUtils::CreateRawMeshVisualizers(World, WorldCollisionMeshes, WorldCollisionMeshTransforms, 
+		VisualizerMaterial, true, false);
+	
+	if (Actors.Num() == 0) return nullptr;
+	
+	return Actors[0];
 }
 
 bool FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld()

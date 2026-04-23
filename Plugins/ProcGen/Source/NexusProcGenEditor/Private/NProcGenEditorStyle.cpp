@@ -49,6 +49,18 @@ FSlateIcon FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon()
 	}
 }
 
+FSlateIcon FNProcGenEditorStyle::CollisionVisualizerToggleIcon()
+{
+	if (FNProcGenEdMode::HasCollisionVisualizer())
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+	}
+	else
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
+	}
+}
+
 TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 {
 	N_IMPLEMENT_EDITOR_STYLE_CREATE
