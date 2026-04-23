@@ -27,11 +27,20 @@ void FNProcGenEdMode::ProtectCellEdMode()
 	}
 }
 
-void FNProcGenEdMode::CreateCollisionVisualizer(UWorld* World)
+void FNProcGenEdMode::OnActorDeleted(AActor* Actor)
+{
+	if (Actor == CollisionVisualizer)
+	{
+		CollisionVisualizer = nullptr;
+	}
+}
+
+TObjectPtr<ANDebugActor> FNProcGenEdMode::CreateCollisionVisualizer(UWorld* World)
 {
 	DestroyCollisionVisualizer();
 	FNMethodScopeTimer("World Collision Build Time");
 	CollisionVisualizer = FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(World, TArray<FBoxSphereBounds>());
+	return CollisionVisualizer;
 }
 
 void FNProcGenEdMode::DestroyCollisionVisualizer()
@@ -90,6 +99,8 @@ void FNProcGenEdMode::Enter()
 	OrganGenerator->DisplayName = FText::FromName(NEXUS::ProcGen::Operations::EditorMode);
 	OrganGenerator->AddToRoot();
 	
+	OnLevelActorDeletedHandle = GEngine->OnLevelActorDeleted().AddStatic(&FNProcGenEdMode::OnActorDeleted);
+	
 	FEdMode::Enter();
 }
 
@@ -97,6 +108,8 @@ void FNProcGenEdMode::Exit()
 {
 	CellActor = nullptr;
 	bCanTick = false;
+	
+	GEngine->OnLevelActorDeleted().Remove(OnLevelActorDeletedHandle);
 	
 	// Destroy any visualizer kicking around
 	DestroyCollisionVisualizer();

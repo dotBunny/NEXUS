@@ -19,6 +19,12 @@ ANDebugActor::ANDebugActor()
 	}
 }
 
+void ANDebugActor::BeginDestroy()
+{
+	OnDestroyed.ExecuteIfBound();
+	Super::BeginDestroy();
+}
+
 ANDebugActor* ANDebugActor::CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label, const FVector& Scale)
 {
 	FActorSpawnParameters SpawnInfo;

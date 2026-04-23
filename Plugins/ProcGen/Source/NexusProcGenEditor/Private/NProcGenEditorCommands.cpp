@@ -44,49 +44,49 @@ void FNProcGenEditorCommands::RegisterCommands()
 		"NProcGen.NCell.CalculateBounds",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateBounds", "Calculate Bounds"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateBounds_Tooltip", "Calculate bounds for the cell."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateBounds"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateBounds"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateHull,
 		"NProcGen.NCell.CalculateHull",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateHull", "Calculate Hull"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateHull_Tooltip", "Calculate convex hull for the cell."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateHull"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellCalculateVoxelData,
 		"NProcGen.NCell.CalculateVoxelData",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateVoxelData", "Calculate Voxel Data"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_CalculateVoxelData_Tooltip", "Calculate voxel data for the cell."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateVoxelData"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateVoxelData"),
 		EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleBoundsCalculateOnSave,
 		"NProcGen.NCell.ToggleBoundsCalculateOnSave",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleBoundsCalculateOnSave", "Calculate Bounds On Save"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleBoundsCalculateOnSave_Tooltip", "Calculates the bounds of the cell when the level is saved."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateBounds"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateBounds"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleHullCalculateOnSave,
 		"NProcGen.NCell.ToggleHullCalculateOnSave",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleHullCalculateOnSave", "Calculate Hull On Save"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleHullCalculateOnSave_Tooltip", "Calculates the hull of the cell when the level is saved."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateHull"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateHull"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleVoxelCalculateOnSave,
 		"NProcGen.NCell.ToggleVoxelCalculateOnSave",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelCalculateOnSave", "Calculate Voxel Data On Save"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelCalculateOnSave_Tooltip", "Calculates the voxel data of the cell when the level is saved."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.CalculateVoxelData"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.CalculateVoxelData"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleVoxelData,
 		"NProcGen.NCell.ToggleVoxelData",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelData", "Use Voxel Data w/ Cell"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_ToggleVoxelData_Tooltip", "Should voxel data be generated and associated to this cell?"),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.Voxel.Grid.Selected"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellResetCell,
@@ -100,7 +100,7 @@ void FNProcGenEditorCommands::RegisterCommands()
 		"NProcGen.NCell.RemoveActor",
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_RemoveActor", "Remove Actor"),
 		NSLOCTEXT("NexusProcGenEditor", "Command_NCell_RemoveActor_Tooltip", "Removes the cell actor, no longer making this a cell."),
-		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.RemoveNCellActor"),
+		FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.RemoveNCellActor"),
 		EUserInterfaceActionType::Button, FInputChord());
 
 	// Create NCell Command List
@@ -187,56 +187,56 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	"NProcGen.NOrganComponent.GenerateProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies", "Generate Proxies"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateProxies_Tooltip", "Dispatches an NProcGenOperation via the UNProcGenEditorSubsystem to generate the selected UNOrganComponents output NCellProxy actors."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellProxy"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganGenerateAllProxies,
 	"NProcGen.NOrganComponent.GenerateAllProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateAllProxies", "Generate All Proxies"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_GenerateAllProxies_Tooltip", "Dispatches an NProcGenOperation via the UNProcGenEditorSubsystem to generate all UNOrganComponents in the world outputing NCellProxy actors."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellProxy"),
 	EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::Home));
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateLevelInstances,
 	"NProcGen.NOrganComponent.LoadProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies", "Create Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadProxies_Tooltip", "Load the level instance from the selected proxies."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearProxies,
 	"NProcGen.NOrganComponent.ClearProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies", "Clear Proxies"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearProxies_Tooltip", "Remove generated NCellProxy actors from the world for the selected components operations."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellProxy"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganClearAllProxies,
 	"NProcGen.NOrganComponent.ClearAllProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearAllProxies", "Clear All Proxies"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_ClearAllProxies_Tooltip", "Remove all generated NCellProxy actors from the world."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellProxy"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellProxy"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganCreateAllLevelInstances,
 	"NProcGen.NOrganComponent.LoadAllProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies", "Create & Load All Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_LoadAllProxies_Tooltip", "Creates and then loads all level instances."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord(EModifierKey::Control | EModifierKey::Shift, EKeys::End));
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadLevelInstances,
 	"NProcGen.NOrganComponent.UnloadProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies", "Unload Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadProxies_Tooltip", "Unload the level instances from the selected proxies"),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_OrganUnloadAllLevelInstances,
 	"NProcGen.NOrganComponent.UnloadAllProxies",
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies", "Unload All Level Instances"),
 	NSLOCTEXT("NexusProcGenEditor", "Command_NOrganComponent_UnloadAllProxies_Tooltip", "Unload all level instances."),
-	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NCellLevelInstance"),
+	FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
 	CommandList_Organ = MakeShared<FUICommandList>();

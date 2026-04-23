@@ -13,27 +13,27 @@ FSlateIcon FNProcGenEditorStyle::CellActorEditHullModeIcon()
 {
 	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
 	{
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Hull.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Hull.Selected");
 	}
-	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Hull");
+	return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Hull");
 }
 
 FSlateIcon FNProcGenEditorStyle::CellActorEditBoundsModeIcon()
 {
 	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Bounds)
 	{
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Bounds.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Bounds.Selected");
 	}
-	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Bounds");
+	return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Bounds");
 }
 
 FSlateIcon FNProcGenEditorStyle::CellActorEditVoxelModeIcon()
 {
 	if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Voxel)
 	{
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Voxel.Points.Selected");
 	}
-	return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points");
+	return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Voxel.Points");
 }
 
 FSlateIcon FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon()
@@ -41,11 +41,11 @@ FSlateIcon FNProcGenEditorStyle::CellActorToggleDrawVoxelDataIcon()
 	switch (FNProcGenEdMode::GetCellVoxelMode())
 	{
 	case FNProcGenEdMode::ENCellVoxelMode::Grid:
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Voxel.Grid.Selected");
 	case FNProcGenEdMode::ENCellVoxelMode::Points:
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Voxel.Points.Selected");
 	default:
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.Voxel.Grid");
 	}
 }
 
@@ -53,12 +53,9 @@ FSlateIcon FNProcGenEditorStyle::CollisionVisualizerToggleIcon()
 {
 	if (FNProcGenEdMode::HasCollisionVisualizer())
 	{
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Points.Selected");
+		return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.HasCollisionVisualizer");
 	}
-	else
-	{
-		return FSlateIcon(GetStyleSetName(), "Command.ProGenEd.Voxel.Grid");
-	}
+	return FSlateIcon(GetStyleSetName(), "Command.ProcGenEd.CreateCollisionVisualizer");
 }
 
 TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
@@ -107,27 +104,31 @@ TSharedRef<FSlateStyleSet> FNProcGenEditorStyle::Create()
 	
 	Style.Set("Icon.ProcGen", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Icon_ProcGen"), Icon128x128));
 	
-	Style.Set("Command.ProGenEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
-	Style.Set("Command.ProGenEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
-	Style.Set("Command.ProGenEd.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NOrganComponent"), Icon16x16));
+	Style.Set("Command.ProcGenEd.NCellLevelInstance", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellLevelInstance"), Icon16x16));
+	Style.Set("Command.ProcGenEd.NCellProxy", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NCellProxy"), Icon16x16));
+	Style.Set("Command.ProcGenEd.NOrganComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_NOrganComponent"), Icon16x16));
 
-	Style.Set("Command.ProGenEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
-	Style.Set("Command.ProGenEd.AddNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_AddNCellActor"), Icon16x16));
-	Style.Set("Command.ProGenEd.SelectNCellActor.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellActor_Selected"), Icon16x16));
-	Style.Set("Command.ProGenEd.RemoveNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_RemoveNCellActor"), Icon16x16));
-	Style.Set("Command.ProGenEd.Bounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds"), Icon16x16));
-	Style.Set("Command.ProGenEd.Bounds.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds_Selected"), Icon16x16));
-	Style.Set("Command.ProGenEd.CalculateBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateBounds"), Icon16x16));
-	Style.Set("Command.ProGenEd.Hull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull"), Icon16x16));
-	Style.Set("Command.ProGenEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
-	Style.Set("Command.ProGenEd.CalculateHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateHull"), Icon16x16));
-	Style.Set("Command.ProGenEd.CalculateVoxelData", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateVoxelData"), Icon16x16));
-	Style.Set("Command.ProGenEd.Voxel.Grid", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid"), Icon16x16));
-	Style.Set("Command.ProGenEd.Voxel.Grid.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid_Selected"), Icon16x16));
-	Style.Set("Command.ProGenEd.Voxel.Points", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points"), Icon16x16));
-	Style.Set("Command.ProGenEd.Voxel.Points.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points_Selected"), Icon16x16));
+	Style.Set("Command.ProcGenEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
+	Style.Set("Command.ProcGenEd.AddNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_AddNCellActor"), Icon16x16));
+	Style.Set("Command.ProcGenEd.SelectNCellActor.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellActor_Selected"), Icon16x16));
+	Style.Set("Command.ProcGenEd.RemoveNCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_RemoveNCellActor"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Bounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Bounds.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds_Selected"), Icon16x16));
+	Style.Set("Command.ProcGenEd.CalculateBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateBounds"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Hull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
+	Style.Set("Command.ProcGenEd.CalculateHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateHull"), Icon16x16));
+	Style.Set("Command.ProcGenEd.CalculateVoxelData", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateVoxelData"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Voxel.Grid", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Voxel.Grid.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Grid_Selected"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Voxel.Points", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Voxel.Points.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Voxel_Points_Selected"), Icon16x16));
 	
-	Style.Set("Command.ProGenEd.Pin", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Pin"), Icon16x16));
+	Style.Set("Command.ProcGenEd.Pin", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Pin"), Icon16x16));
 
+	Style.Set("Command.ProcGenEd.HasCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_HasCollisionVisualizer"), Icon16x16));
+	Style.Set("Command.ProcGenEd.CreateCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CreateCollisionVisualizer"), Icon16x16));
+
+	
 	return StyleRef;
 }

@@ -46,7 +46,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 						MenuBuilder.AddMenuEntry(
 							OrganName,
 							FText::Format(NSLOCTEXT("NexusProcGenEditor", "NOrganExtensions_SelectNOrganComponent", "Select {0}"), OrganName),
-							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.NOrganComponent"),
+							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.NOrganComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::OrganSelectComponent, Organ),
 								FCanExecuteAction(),
 								FIsActionChecked()));
@@ -106,7 +106,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellAddActor_CanShow)),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_AddActor", "Add Actor"),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
-						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.AddNCellActor"));
+						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.AddNCellActor"));
 		NexusSection.AddEntry(NCellActor_AddButton);
 
 		// Create our option to select the NCellActor if we are in NProcGenEdMode and there is a NCellActor
@@ -119,7 +119,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 						FIsActionButtonVisible::CreateStatic(&FNProcGenEditorCommands::CellSelectActor_CanShow)),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_SelectActor", "Select Actor"),
 						NSLOCTEXT("NexusProcGenEditor", "Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
-						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellActor.Selected"));
+						FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.SelectNCellActor.Selected"));
 		NexusSection.AddEntry(NCellActor_SelectButton);
 		
 		// Display EditMode toggle buttons
@@ -237,7 +237,7 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 						MenuBuilder.AddMenuEntry(
 							JunctionName,
 							FText::Format(NSLOCTEXT("NexusProcGenEditor", "SelectNCellJunctionComponent", "Select {0}"), JunctionName),
-							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProGenEd.SelectNCellJunctionComponent"),
+							FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), "Command.ProcGenEd.SelectNCellJunctionComponent"),
 							FUIAction(FExecuteAction::CreateStatic(&FNProcGenEditorCommands::CellJunctionSelectComponent, Junction),
 								FCanExecuteAction(),
 								FIsActionChecked()));
@@ -364,7 +364,8 @@ void FNProcGenEditorToolMenu::CollisionVisualizerToggle()
 	}
 	else
 	{
-		FNProcGenEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
+		const TObjectPtr<ANDebugActor> NewVisualizer = FNProcGenEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
+		GEditor->SelectActor(NewVisualizer, true, false, false);
 	}
 }
 

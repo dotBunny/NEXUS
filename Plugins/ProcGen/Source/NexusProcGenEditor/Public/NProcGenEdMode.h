@@ -91,15 +91,20 @@ public:
 
 	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
 	static bool HasCollisionVisualizer() { return CollisionVisualizer != nullptr; }
-
+	
+	static void OnActorDeleted(AActor* Actor);
+	
 	/**
-	 * Spawns the world-collision visualizer (a single merged ANDebugActor showing every world actor's simple-collision
-	 * geometry) and caches it on the mode. Any previously-spawned visualizer is destroyed first, so this doubles as a refresh.
-	 * The spawned actor is hidden from the World Outliner via ANDebugActor::HideInSceneOutliner.
+	 * Spawns the world-collision visualizer — a single merged ANDebugActor whose mesh is the union of the
+	 * simple-collision geometry of every world actor that passes the ProcGen world-actor filter
+	 * (FNProcGenOperationContext::CreateWorldActorFilterSettings), shaded with
+	 * UNProcGenEditorSettings::CollisionVisualizerMaterial — and caches it on the mode. Any previously-spawned
+	 * visualizer is destroyed first, so this doubles as a refresh. Editor-only / diagnostic; the actor is
+	 * transient and will not be saved with the level.
 	 * @param World World to iterate for collision sources and to spawn the visualizer into. Must be valid.
+	 * @return The newly cached visualizer actor, or nullptr if no collision geometry was extracted.
 	 */
-	static void CreateCollisionVisualizer(UWorld* World);
-
+	static TObjectPtr<ANDebugActor> CreateCollisionVisualizer(UWorld* World);
 	/**
 	 * Destroys the cached world-collision visualizer actor if one exists. No-op when none is alive. Called automatically
 	 * from CreateCollisionVisualizer (refresh) and during Exit() so the visualizer doesn't outlive the editor mode.
@@ -169,4 +174,6 @@ private:
 
 	/** Hash of the previously-selected organ set, used to detect selection changes per tick. */
 	uint32 PreviousSelectedOrganHash = 0;
+	
+	FDelegateHandle OnLevelActorDeletedHandle;
 };

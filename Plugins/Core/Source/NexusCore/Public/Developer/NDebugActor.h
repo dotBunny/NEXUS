@@ -11,12 +11,8 @@
 /**
  * A disposable diagnostic actor used to visualize a world-space location or arbitrary geometry during development.
  *
- * ANDebugActor is intentionally hidden from the editor's Place Actors panel; it is spawned at runtime via
- * CreateInstance when a call site wants a tangible, clickable marker backed by a sphere mesh and a human-readable
- * label. It carries two visual components — a default sphere (SphereMesh) for point-style markers and a
- * UDynamicMeshComponent (DynamicMesh) for richer geometry overrides via OverrideWithDynamicMesh. It has no
- * gameplay behavior and should not be shipped in release content.
- * @remark Spawn via CreateInstance from debug/test code, not from gameplay logic.
+ * ANDebugActor is intentionally hidden from the editor's Place Actors panel; It has no gameplay behavior and should
+ * not be shipped in release content.
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Debug Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
@@ -32,6 +28,8 @@ public:
 	/** Human-readable message stored with actor instance. */
 	UPROPERTY(EditAnywhere)
 	FString Message;
+	
+	FSimpleDelegate OnDestroyed;
 	
 	/**
 	 * Spawns a debug actor in the supplied world at the given transform, labeled for quick identification.
@@ -92,6 +90,11 @@ public:
 	 * @return The dynamic-mesh component that holds any overridden geometry.
 	 */
 	TObjectPtr<UDynamicMeshComponent> GetDynamicMeshComponent() const { return DynamicMesh; }
+
+
+	//~AActor
+	virtual void BeginDestroy() override;
+	//End AActor
 
 protected:
 	/** Sphere mesh component used as the visible marker in the viewport. */

@@ -265,6 +265,8 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			}
 		}
 		
+		// TODO: Add world collision check
+		
 		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
 		for (int i = BoundsIntersectingNodes.Num() - 1; i >= 0; i--)
@@ -285,6 +287,10 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
 			Analytics.AddedCellNode();
 			NewNodes.Add(TargetCellNode);
+			
+			// TODO: Its at this point we could iterate through the graph and see if theres any open junctions near any of this 
+			// cell's open junctions and auto link them too. Maybe we do the same task at the end of the graph as well ? 
+			// Based on a settings for distance?
 		}
 		else
 		{
