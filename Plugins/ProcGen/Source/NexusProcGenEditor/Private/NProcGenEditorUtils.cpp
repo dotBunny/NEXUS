@@ -9,6 +9,7 @@
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
 #include "NProcGenEditorMinimal.h"
+#include "NProcGenEditorSettings.h"
 #include "NProcGenEditorSubsystem.h"
 #include "NProcGenEdMode.h"
 #include "NProcGenRegistry.h"
@@ -17,6 +18,21 @@
 #include "Engine/Level.h"
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganVolume.h"
+#include "Types/NRawMeshFactory.h"
+#include "Types/NRawMeshUtils.h"
+
+ANDebugActor* FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(const TArray<FBoxSphereBounds>& Bounds)
+{
+	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(CurrentWorld, FNProcGenOperationContext::CreateWorldActorFilterSettings());
+	
+	TArray<FNRawMesh> WorldCollisionMeshes;
+	TArray<FTransform> WorldCollisionMeshTransforms;
+	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
+	
+	UMaterialInterface* VisualizerMaterial = UNProcGenEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
+	return FNRawMeshUtils::CreateRawMeshVisualizers(CurrentWorld, WorldCollisionMeshes, WorldCollisionMeshTransforms, VisualizerMaterial, true, false)[0];
+}
 
 bool FNProcGenEditorUtils::IsCellActorPresentInCurrentWorld()
 {

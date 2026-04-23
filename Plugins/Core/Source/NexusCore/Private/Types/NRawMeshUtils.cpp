@@ -3,17 +3,48 @@
 
 #include "Types/NRawMeshUtils.h"
 
-#include "EngineUtils.h"
 #include "NCoreMinimal.h"
-#include "ParticleHelper.h"
-#include "StaticMeshCompiler.h"
-#include "Components/InstancedStaticMeshComponent.h"
-#include "Developer/NMethodScopeTimer.h"
-#include "Math/NBoundsUtils.h"
 #include "Math/NTriangleUtils.h"
 #include "Math/NVectorUtils.h"
-#include "PhysicsEngine/BodySetup.h"
 #include "Types/NRawMeshFactory.h"
+
+void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& BaseMesh,
+                                 const FTransform& OtherTransform, const FNRawMesh& OtherMesh)
+{
+	if (OtherMesh.Vertices.Num() == 0 || OtherMesh.Loops.Num() == 0)
+	{
+		return;
+	}
+
+	// Pre-compose Other-local → Base-local once so the per-vertex hot loop is a single TransformPosition call.
+	const FTransform OtherToBase = OtherTransform * BaseTransform.Inverse();
+
+	const int32 VertexOffset = BaseMesh.Vertices.Num();
+
+	BaseMesh.Vertices.Reserve(VertexOffset + OtherMesh.Vertices.Num());
+	for (const FVector& OtherVertex : OtherMesh.Vertices)
+	{
+		BaseMesh.Vertices.Add(OtherToBase.TransformPosition(OtherVertex));
+	}
+
+	BaseMesh.Loops.Reserve(BaseMesh.Loops.Num() + OtherMesh.Loops.Num());
+	for (const FNRawMeshLoop& OtherLoop : OtherMesh.Loops)
+	{
+		FNRawMeshLoop Shifted;
+		Shifted.Indices.Reserve(OtherLoop.Indices.Num());
+		for (const int32 Index : OtherLoop.Indices)
+		{
+			Shifted.Indices.Add(Index + VertexOffset);
+		}
+		BaseMesh.Loops.Add(MoveTemp(Shifted));
+	}
+
+	// A merged mesh is no longer a single Chaos-cooked body; force Validate() to re-evaluate convexity and tri-ness.
+	BaseMesh.bIsChaosGenerated = false;
+
+	BaseMesh.CalculateCenterAndBounds();
+	BaseMesh.Validate();
+}
 
 bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
                                    const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
@@ -43,118 +74,49 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
-void FNRawMeshUtils::GetWorldSimpleCollisionMeshes(const UWorld* World, const TArray<FBoxSphereBounds>& ContainingBounds, 
-	TFunctionRef<bool(const AActor*)> ActorFilter, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
 {
-#if WITH_EDITOR
-	// Static meshes compile async in editor; force any pending compiles to finish so every BodySetup is populated.
-	TArray<UStaticMesh*> Pending;
-	for (TObjectIterator<UStaticMesh> It; It; ++It)
+	TArray<ANDebugActor*> DebugActors;
+
+	if (bSingleActor)
 	{
-		if (It->IsCompiling())
+		FNRawMesh BaseMesh;
+		FTransform BaseTransform;
+		for (int i = 0; i < Transforms.Num(); i++)
 		{
-			Pending.Add(*It);
+			CombineMesh(BaseTransform, BaseMesh, Transforms[i], Meshes[i]);
 		}
-	}
-	if (Pending.Num() > 0)
-	{
-		FStaticMeshCompilingManager::Get().FinishCompilation(Pending);
-	}
+		
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));
+#if WITH_EDITOR	
+		const FString Label = SpawnParams.Name.ToString();
+		SpawnParams.InitialActorLabel = Label;
 #endif // WITH_EDITOR
-
-	for (TActorIterator<AActor> WorldActorIterator(World); WorldActorIterator; ++WorldActorIterator)
+		SpawnParams.ObjectFlags |= RF_Transient;
+		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), BaseTransform, SpawnParams);
+		DebugActor->OverrideWithDynamicMesh(BaseMesh.CreateDynamicMesh(bProcessMeshes), MaterialInterface);
+		DebugActors.Add(DebugActor);
+	}
+	else
 	{
-		AActor* Actor = *WorldActorIterator;
-		if (!Actor || Actor->IsEditorOnly()) continue;
-		if (!ActorFilter(Actor)) continue;
-
-		// Actor-bounds containment filter: include only when the actor's bounds fit inside at least one supplied bounds.
-		if (!ContainingBounds.IsEmpty())
+		for (int i = 0; i < Transforms.Num(); i++)
 		{
-			FVector ActorOrigin;
-			FVector ActorExtent;
-			Actor->GetActorBounds(true, ActorOrigin, ActorExtent, true);
-			const FBoxSphereBounds ActorBounds(ActorOrigin, ActorExtent, ActorExtent.Size());
-			bool bWithinAny = false;
-			for (const FBoxSphereBounds& Bounds : ContainingBounds)
-			{
-				if (FNBoundsUtils::IsBoundsContainedInBounds(ActorBounds, Bounds))
-				{
-					bWithinAny = true;
-					break;
-				}
-			}
-			if (!bWithinAny) continue;
-		}
-
-		TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);
-		for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
-		{
-			if (!ActorPrimitive || !ActorPrimitive->IsRegistered()) continue;
-			if (IsLandscapePrimitive(ActorPrimitive)) continue;
-
-			UBodySetup* Body = ActorPrimitive->GetBodySetup();
-			if (!Body) continue;
-
-			const ECollisionTraceFlag Trace = Body->GetCollisionTraceFlag();
-			const bool bUseComplexAsSimple = (Trace == CTF_UseComplexAsSimple);
-
-			// Instanced variants share one BodySetup across N instances — emit per instance.
-			if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
-			{
-				const int32 InstanceCount = InstanceStaticMesh->GetInstanceCount();
-				for (int32 i = 0; i < InstanceCount; ++i)
-				{
-					FTransform InstanceWorld;
-					InstanceStaticMesh->GetInstanceTransform(i, InstanceWorld,true);
-
-					if (bUseComplexAsSimple)
-					{
-						FNRawMesh InstanceMesh;
-						if (FNRawMeshFactory::FromStaticMesh(InstanceStaticMesh->GetStaticMesh(), InstanceMesh))
-						{
-							OutMeshes.Add(MoveTemp(InstanceMesh));
-							OutTransforms.Add(MoveTemp(InstanceWorld));
-						}
-					}
-					else
-					{
-						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
-					}
-				}
-				continue;
-			}
-
-			const FTransform CompToWorld = ActorPrimitive->GetComponentTransform();
-
-			if (bUseComplexAsSimple)
-			{
-				// Route 1 — StaticMeshComponent: read source triangles from render data.
-				if (const UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ActorPrimitive))
-				{
-					FNRawMesh InstanceMesh;
-					if (FNRawMeshFactory::FromStaticMesh(StaticMeshComponent->GetStaticMesh(), InstanceMesh))
-					{
-						OutMeshes.Add(MoveTemp(InstanceMesh));
-						OutTransforms.Add(CompToWorld);
-						continue;
-					}
-				}
-
-				// Route 2 — everything else (procedural meshes, destructibles, etc):
-				// ensure physics meshes are built and read the Chaos tri mesh directly.
-				if (!Body->bCreatedPhysicsMeshes)
-				{
-					Body->CreatePhysicsMeshes();
-				}
-				
-				FNRawMeshFactory::FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
-				continue;
-			}
-
-			AppendChaosAggregateGeometry(Body->AggGeom, CompToWorld,OutMeshes, OutTransforms);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));
+	#if WITH_EDITOR	
+			const FString Label = SpawnParams.Name.ToString();
+			SpawnParams.InitialActorLabel = Label;
+	#endif // WITH_EDITOR
+			SpawnParams.ObjectFlags |= RF_Transient;
+			
+			ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), Transforms[i], SpawnParams);
+			
+			DebugActor->OverrideWithDynamicMesh(Meshes[i].CreateDynamicMesh(bProcessMeshes), MaterialInterface);
+			DebugActors.Add(DebugActor);
 		}
 	}
+	return MoveTemp(DebugActors);
 }
 
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
@@ -200,55 +162,6 @@ bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray
 		}
 	}
 	return false;
-}
-
-void FNRawMeshUtils::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
-{
-	for (const FKConvexElem& ConvexHull : Agg.ConvexElems)
-	{
-		FNRawMesh WorkingMesh;
-		if (FNRawMeshFactory::FromChaosConvexHull(ConvexHull, WorkingMesh))
-		{
-			OutMeshes.Add(MoveTemp(WorkingMesh));
-			OutTransforms.Add(ConvexHull.GetTransform() * BaseToWorld);
-		}
-	}
-	for (const FKBoxElem& Box : Agg.BoxElems)
-	{
-		FNRawMesh WorkingMesh;
-		FTransform WorkingTransform;
-		if (FNRawMeshFactory::FromChaosBox(Box, BaseToWorld, WorkingMesh, WorkingTransform))
-		{
-			OutMeshes.Add(MoveTemp(WorkingMesh));
-			OutTransforms.Add(MoveTemp(WorkingTransform));
-		}
-	}
-	for (const FKSphereElem& Sphere : Agg.SphereElems)
-	{
-		FNRawMesh WorkingMesh;
-		FTransform WorkingTransform;
-		if (FNRawMeshFactory::FromChaosSphere(Sphere, BaseToWorld, WorkingMesh, WorkingTransform))
-		{
-			OutMeshes.Add(MoveTemp(WorkingMesh));
-			OutTransforms.Add(MoveTemp(WorkingTransform));
-		}
-	}
-	for (const FKSphylElem& Sphyl : Agg.SphylElems)
-	{
-		FNRawMesh WorkingMesh;
-		FTransform WorkingTransform;
-		if (FNRawMeshFactory::FromChaosSphyl(Sphyl, BaseToWorld, WorkingMesh, WorkingTransform))
-		{
-			OutMeshes.Add(MoveTemp(WorkingMesh));
-			OutTransforms.Add(MoveTemp(WorkingTransform));
-		}
-	}
-}
-
-bool FNRawMeshUtils::IsLandscapePrimitive(const UPrimitiveComponent* Prim)
-{
-	// Avoids taking a hard dependency on the Landscape module.
-	return Prim->GetClass()->GetName().StartsWith(TEXT("Landscape"));
 }
 
 bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,

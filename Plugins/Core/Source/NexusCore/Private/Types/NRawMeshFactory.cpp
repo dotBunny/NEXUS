@@ -4,13 +4,111 @@
 #include "Types/NRawMeshFactory.h"
 
 #include "Chaos/TriangleMeshImplicitObject.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "Developer/NDeveloperUtils.h"
+#include "Math/NBoundsUtils.h"
 #include "PhysicsEngine/BodySetup.h"
-
 
 namespace NEXUS::Core::RawMeshFactory
 {
 	constexpr int32 SphereSegments = 16;
 	constexpr int32 SphereRings = 8;
+}
+
+void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+{
+	// Static meshes compile async in editor; force any pending compiles to finish so every BodySetup is populated.
+	FNDeveloperUtils::WaitForStaticMeshCompilation();
+
+	for (AActor* Actor : Actors)
+	{
+		// Actor-bounds containment filter: include only when the actor's bounds fit inside at least one supplied bounds.
+		if (!ContainingBounds.IsEmpty())
+		{
+			FVector ActorOrigin;
+			FVector ActorExtent;
+			Actor->GetActorBounds(true, ActorOrigin, ActorExtent, true);
+			const FBoxSphereBounds ActorBounds(ActorOrigin, ActorExtent, ActorExtent.Size());
+			bool bWithinAny = false;
+			for (const FBoxSphereBounds& Bounds : ContainingBounds)
+			{
+				if (FNBoundsUtils::IsBoundsContainedInBounds(ActorBounds, Bounds))
+				{
+					bWithinAny = true;
+					break;
+				}
+			}
+			if (!bWithinAny) continue;
+		}
+
+		TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);
+		for (UPrimitiveComponent* ActorPrimitive : ActorPrimitives)
+		{
+			if (!ActorPrimitive || !ActorPrimitive->IsRegistered()) continue;
+			if (IsLandscapePrimitive(ActorPrimitive)) continue;
+
+			UBodySetup* Body = ActorPrimitive->GetBodySetup();
+			if (!Body) continue;
+
+			const ECollisionTraceFlag Trace = Body->GetCollisionTraceFlag();
+			const bool bUseComplexAsSimple = (Trace == CTF_UseComplexAsSimple);
+
+			// Instanced variants share one BodySetup across N instances — emit per instance.
+			if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
+			{
+				const int32 InstanceCount = InstanceStaticMesh->GetInstanceCount();
+				for (int32 i = 0; i < InstanceCount; ++i)
+				{
+					FTransform InstanceWorld;
+					InstanceStaticMesh->GetInstanceTransform(i, InstanceWorld,true);
+
+					if (bUseComplexAsSimple)
+					{
+						FNRawMesh InstanceMesh;
+						if (FromStaticMesh(InstanceStaticMesh->GetStaticMesh(), InstanceMesh))
+						{
+							OutMeshes.Add(MoveTemp(InstanceMesh));
+							OutTransforms.Add(MoveTemp(InstanceWorld));
+						}
+					}
+					else
+					{
+						AppendChaosAggregateGeometry(Body->AggGeom, InstanceWorld,OutMeshes, OutTransforms);
+					}
+				}
+				continue;
+			}
+
+			const FTransform CompToWorld = ActorPrimitive->GetComponentTransform();
+
+			if (bUseComplexAsSimple)
+			{
+				// Route 1 — StaticMeshComponent: read source triangles from render data.
+				if (const UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(ActorPrimitive))
+				{
+					FNRawMesh InstanceMesh;
+					if (FromStaticMesh(StaticMeshComponent->GetStaticMesh(), InstanceMesh))
+					{
+						OutMeshes.Add(MoveTemp(InstanceMesh));
+						OutTransforms.Add(CompToWorld);
+						continue;
+					}
+				}
+
+				// Route 2 — everything else (procedural meshes, destructibles, etc):
+				// ensure physics meshes are built and read the Chaos tri mesh directly.
+				if (!Body->bCreatedPhysicsMeshes)
+				{
+					Body->CreatePhysicsMeshes();
+				}
+				
+				FromChaosBodySetup(Body, CompToWorld, OutMeshes, OutTransforms);
+				continue;
+			}
+
+			AppendChaosAggregateGeometry(Body->AggGeom, CompToWorld,OutMeshes, OutTransforms);
+		}
+	}
 }
 
 bool FNRawMeshFactory::FromChaosBox(const FKBoxElem& Box, const FTransform& CompToWorld, FNRawMesh& OutMesh, FTransform& OutTransform)
@@ -302,4 +400,54 @@ bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& 
 	Mesh.CalculateCenterAndBounds();
 	OutMesh = MoveTemp(Mesh);
 	return true;
+}
+
+void FNRawMeshFactory::AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld, TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms)
+{
+	
+	for (const FKConvexElem& ConvexHull : Agg.ConvexElems)
+	{
+		FNRawMesh WorkingMesh;
+		if (FNRawMeshFactory::FromChaosConvexHull(ConvexHull, WorkingMesh))
+		{
+			OutMeshes.Add(MoveTemp(WorkingMesh));
+			OutTransforms.Add(ConvexHull.GetTransform() * BaseToWorld);
+		}
+	}
+	for (const FKBoxElem& Box : Agg.BoxElems)
+	{
+		FNRawMesh WorkingMesh;
+		FTransform WorkingTransform;
+		if (FNRawMeshFactory::FromChaosBox(Box, BaseToWorld, WorkingMesh, WorkingTransform))
+		{
+			OutMeshes.Add(MoveTemp(WorkingMesh));
+			OutTransforms.Add(MoveTemp(WorkingTransform));
+		}
+	}
+	for (const FKSphereElem& Sphere : Agg.SphereElems)
+	{
+		FNRawMesh WorkingMesh;
+		FTransform WorkingTransform;
+		if (FNRawMeshFactory::FromChaosSphere(Sphere, BaseToWorld, WorkingMesh, WorkingTransform))
+		{
+			OutMeshes.Add(MoveTemp(WorkingMesh));
+			OutTransforms.Add(MoveTemp(WorkingTransform));
+		}
+	}
+	for (const FKSphylElem& Sphyl : Agg.SphylElems)
+	{
+		FNRawMesh WorkingMesh;
+		FTransform WorkingTransform;
+		if (FNRawMeshFactory::FromChaosSphyl(Sphyl, BaseToWorld, WorkingMesh, WorkingTransform))
+		{
+			OutMeshes.Add(MoveTemp(WorkingMesh));
+			OutTransforms.Add(MoveTemp(WorkingTransform));
+		}
+	}
+}
+
+bool FNRawMeshFactory::IsLandscapePrimitive(const UPrimitiveComponent* Prim)
+{
+	// Avoids taking a hard dependency on the Landscape module.
+	return Prim->GetClass()->GetName().StartsWith(TEXT("Landscape"));
 }

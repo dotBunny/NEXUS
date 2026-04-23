@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NProcGenEditorStyle.h"
+#include "Developer/NDebugActor.h"
 
 class UNOrganComponent;
 class UNCellJunctionComponent;
@@ -130,6 +131,7 @@ public:
 
 	/** Capture the active viewport as a thumbnail image for the focused cell's side-car. */
 	static void CellCaptureThumbnail();
+
 	/** @return true if the active viewport is suitable for thumbnail capture. */
 	static bool CellCaptureThumbnail_CanExecute();
 

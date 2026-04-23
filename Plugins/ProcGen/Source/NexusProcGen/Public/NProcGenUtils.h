@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Cell/NCellActor.h"
+#include "Developer/NDebugActor.h"
 #include "Math/NVectorUtils.h"
 
 class UNOrganComponent;

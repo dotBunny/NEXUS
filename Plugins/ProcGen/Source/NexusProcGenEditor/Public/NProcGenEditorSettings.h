@@ -24,6 +24,14 @@ class UNProcGenEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
+	UNProcGenEditorSettings()
+	{
+		static ConstructorHelpers::FObjectFinder<UMaterialInterface> DefaultCollisionVisualizerAsset(TEXT("/NexusProcGen/M_NCellProxy.M_NCellProxy"));
+		if (DefaultCollisionVisualizerAsset.Succeeded())
+		{
+			CollisionVisualizerMaterial = DefaultCollisionVisualizerAsset.Object;
+		}
+	}
 	N_IMPLEMENT_EDITOR_SETTINGS(UNProcGenEditorSettings);
 
 	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
@@ -63,6 +71,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Proxy Color",
 		meta=(ToolTip=""))
 	FLinearColor CellProxyColor;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "World Context", DisplayName="Collision Visualizer Material")
+	TSoftObjectPtr<UMaterialInterface> CollisionVisualizerMaterial;
 
 	/** Copy every Cell default onto CellRoot's Details struct — called from the cell-actor factory. */
 	void ApplyDefaultSettings(UNCellRootComponent* CellRoot) const

@@ -9,11 +9,13 @@
 #include "NDebugActor.generated.h"
 
 /**
- * A disposable diagnostic actor used to visualize a world-space location during development.
+ * A disposable diagnostic actor used to visualize a world-space location or arbitrary geometry during development.
  *
- * ANDebugActor is intentionally hidden from the editor's Place Actors panel; it is spawned at runtime
- * via CreateInstance when a call site wants a tangible, clickable marker backed by a sphere mesh and a
- * human-readable label. It has no gameplay behavior and should not be shipped in release content.
+ * ANDebugActor is intentionally hidden from the editor's Place Actors panel; it is spawned at runtime via
+ * CreateInstance when a call site wants a tangible, clickable marker backed by a sphere mesh and a human-readable
+ * label. It carries two visual components — a default sphere (SphereMesh) for point-style markers and a
+ * UDynamicMeshComponent (DynamicMesh) for richer geometry overrides via OverrideWithDynamicMesh. It has no
+ * gameplay behavior and should not be shipped in release content.
  * @remark Spawn via CreateInstance from debug/test code, not from gameplay logic.
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Debug Actor", HideCategories=(Tags, Activation, Cooking,
@@ -24,8 +26,14 @@ class NEXUSCORE_API ANDebugActor : public AActor
 	GENERATED_BODY()
 
 public:
+	
 	ANDebugActor();
 
+	/** Human-readable message stored with actor instance. */
+	UPROPERTY(EditAnywhere)
+	FString Message;
+	
+	
 	/**
 	 * Spawns a debug actor in the supplied world at the given transform, labeled for quick identification.
 	 * @param World The world to spawn into.
@@ -38,27 +46,38 @@ public:
 	static ANDebugActor* CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label,
 		const FVector& Scale = FVector::OneVector);
 
-	/** Human-readable message stored with actor instance. */
-	UPROPERTY(EditAnywhere)
-	FString Message;
-	
+	/**
+	 * Accessor for the sphere marker component.
+	 * @return The static-mesh component used as the default point-style marker.
+	 */
 	TObjectPtr<UStaticMeshComponent> GetStaticMeshComponent() const { return SphereMesh; }
-	
 
-	
-	void OverrideWithDynamicMesh(FDynamicMesh3 NewMesh) const
+	/**
+	 * Replaces the sphere marker with arbitrary dynamic-mesh geometry, hiding the sphere in the process.
+	 * Calls Modify() on the dynamic-mesh component so the change is captured by the editor's transaction system.
+	 * @param NewMesh Mesh data to install. Moved into the component.
+	 * @param Material Material assigned to slot 0 of the dynamic mesh. May be null.
+	 */
+	void OverrideWithDynamicMesh(FDynamicMesh3 NewMesh, UMaterialInterface* Material) const
 	{
 		SphereMesh->SetVisibility(false, false);
 		DynamicMesh->Modify();
 		DynamicMesh->SetMesh(MoveTemp(NewMesh));
+		DynamicMesh->SetMaterial(0, Material);
 	}
+
+	/**
+	 * Accessor for the dynamic-mesh component used by OverrideWithDynamicMesh.
+	 * @return The dynamic-mesh component that holds any overridden geometry.
+	 */
 	TObjectPtr<UDynamicMeshComponent> GetDynamicMeshComponent() const { return DynamicMesh; }
-	
+
 protected:
 	/** Sphere mesh component used as the visible marker in the viewport. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UStaticMeshComponent> SphereMesh;
-	
+
+	/** Dynamic-mesh component used when OverrideWithDynamicMesh installs custom geometry in place of the sphere. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDynamicMeshComponent> DynamicMesh;
 };

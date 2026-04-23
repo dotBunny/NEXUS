@@ -21,6 +21,7 @@ struct NEXUSCORE_API FNRawMesh
 {
 	friend class FNProcGenUtils;
 	friend class FNCellRootComponentVisualizer;
+	friend class FNRawMeshUtils;
 
 	GENERATED_BODY()
 

@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+
 #include "NRawMesh.h"
 #include "PhysicsEngine/BoxElem.h"
 #include "PhysicsEngine/ConvexElem.h"
@@ -16,9 +17,29 @@
  * every method is static. Two distinct routes are exposed for complex-as-simple bodies — FromStaticMesh
  * (route 1, render-data) and FromChaosBodySetup (route 2, cooked Chaos tri meshes).
  */
-class FNRawMeshFactory
+class NEXUSCORE_API FNRawMeshFactory
 {
 public:
+	
+	/**
+	 * Walks each supplied actor's registered UPrimitiveComponents and extracts their simple-collision
+	 * representation as FNRawMesh entries, along with parallel world-space transforms.
+	 * - Only actors whose world-space bounds are fully contained within at least one of the
+	 *   supplied ContainingBounds are processed. Passing an empty array skips the containment test entirely.
+	 * - Aggregate-geometry path covers FKConvexElem, FKBoxElem, FKSphereElem and FKSphylElem (capsule).
+	 * - Complex-as-simple falls back to the source static-mesh render data (route 1) or Chaos TriMeshGeometries (route 2).
+	 * - UInstancedStaticMeshComponent emits one FNRawMesh entry per instance.
+	 * - Landscape-based primitives are skipped.
+	 * @param Actors Candidate actors to process. Pre-filter at the call site (e.g. via FNActorUtils::GetWorldActors).
+	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds are contained within any one of these. Skipped when empty.
+	 * @param OutMeshes Each mesh in element-local space, appended to the array.
+	 * @param OutTransforms Matching world-space transform per entry in OutMeshes.
+	 * @note In editor builds, force-flushes any pending async static-mesh compilation (via FNDeveloperUtils::WaitForStaticMeshCompilation)
+	 *       so actor bounds and BodySetups are fully populated before reading.
+	 */
+	static void FromActorsInBounds(const TArray<AActor*>& Actors, const TArray<FBoxSphereBounds>& ContainingBounds,
+		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
+	
 	/**
 	 * Emits an FKBoxElem as an 8-vertex / 12-triangle FNRawMesh. The element's Center and Rotation are
 	 * folded into the emitted transform; the mesh itself is box-half-extent-local.
@@ -32,7 +53,8 @@ public:
 
 	/**
 	 * Emits an FKConvexElem directly from its cooked VertexData / IndexData.
-	 * Vertices are stored in element-local space; the element's own transform is baked into ElemToWorld by the caller.
+	 * Vertices are stored in element-local space; unlike the box/sphere/sphyl emitters, this method does not output a transform —
+	 * the caller is responsible for combining FKConvexElem::GetTransform() with the owning component-to-world.
 	 * @param ConvexHull Convex element to emit.
 	 * @param OutMesh Destination for the new mesh.
 	 * @return true when the hull was written; false when the element has no cooked vertex or index data.
@@ -91,4 +113,22 @@ public:
 	 * @return true when a mesh was appended; false when StaticMesh has no usable render data.
 	 */
 	static bool FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& OutMesh);
+	
+private:
+	/**
+	 * Dispatches an FKAggregateGeom's convex/box/sphere/capsule elements through the per-element appenders.
+	 * @param Agg Aggregate geometry block (typically UBodySetup::AggGeom).
+	 * @param BaseToWorld Transform applied on top of each element's local transform before emitting.
+	 * @param OutMeshes Destination for appended meshes.
+	 * @param OutTransforms Destination for appended transforms, parallel to OutMeshes.
+	 */
+	static void AppendChaosAggregateGeometry(const FKAggregateGeom& Agg, const FTransform& BaseToWorld,
+		TArray<FNRawMesh>& OutMeshes, TArray<FTransform>& OutTransforms);
+	
+	/**
+	 * Class-name heuristic to skip landscape primitives without taking a hard Landscape-module dependency.
+	 * @param Prim Primitive component to inspect.
+	 * @return true when the component's class name begins with "Landscape".
+	 */
+	static bool IsLandscapePrimitive(const UPrimitiveComponent* Prim);
 };

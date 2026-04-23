@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NActorUtils.h"
 #include "NProcGenOperationSettings.h"
 #include "NProcGenOperationBoneContext.h"
 #include "NProcGenOperationOrganContext.h"
@@ -46,6 +47,7 @@ public:
 	/** World-space transforms corresponding 1:1 with WorldCollisionMeshes. */
 	TArray<FTransform> WorldCollisionMeshTransforms;
 	
+	static FNWorldActorFilterSettings CreateWorldActorFilterSettings();
 	/**
 	 * Register an organ component as a generation input.
 	 * @return true if the component was accepted; false if the context is already locked or the component was rejected.

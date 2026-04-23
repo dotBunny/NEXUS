@@ -3,6 +3,7 @@
 
 #include "Generation/NProcGenOperationContext.h"
 
+#include "NActorUtils.h"
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
@@ -10,13 +11,11 @@
 #include "StaticMeshResources.h"
 #include "Cell/NTissue.h"
 #include "Components/StaticMeshComponent.h"
-#include "Developer/NDebugActor.h"
 #include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Types/NRawMeshUtils.h"
 #include "Organ/NOrganVolume.h"
-
+#include "Types/NRawMeshFactory.h"
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
 {
@@ -55,6 +54,16 @@ void FNProcGenOperationContext::SetOperationSettings(const FNProcGenOperationSet
 	{
 		OperationSettings = InSettings; 
 	}
+}
+
+FNWorldActorFilterSettings FNProcGenOperationContext::CreateWorldActorFilterSettings()
+{
+	// Collect the world AActors that we need to care about
+	FNWorldActorFilterSettings ActorFilterSettings;
+	ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
+	ActorFilterSettings.bIncludePlayerStarts = true;
+	ActorFilterSettings.ExclusionFunction = &FNProcGenOperationContext::IsWorldCollisionSource;
+	return MoveTemp(ActorFilterSettings);
 }
 
 bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
@@ -252,33 +261,19 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			}
 		}
 	}
-
-	// Gather simple-collision meshes from every primitive in the target world, restricted
-	// to actors whose bounds fall inside one of the input organs' volume bounds.
-	WorldCollisionMeshes.Reset();
-	WorldCollisionMeshTransforms.Reset();
+	
+	// If we have an unbounded volume, we need the entire world, unfortunately.
 	if (bHaveUnboundedBounds)
 	{
 		Bounds.Empty();
 	}
 	
-	// TODO: Does it make sense maybe to filter actors at this point and cache actors in the world, so that when we build context later it then uses that map?
-	// need to refactor all the functions around this
+	// Collect the world AActors that we need to care about
+	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World, CreateWorldActorFilterSettings());
 	
-	FNRawMeshUtils::GetWorldSimpleCollisionMeshes(World, Bounds,
-		&FNProcGenOperationContext::IsWorldCollisionSource,
-		WorldCollisionMeshes, WorldCollisionMeshTransforms);
-	
-	/** Create Representations of the assessed collisions	
-	for (int i = 0; i < WorldCollisionMeshTransforms.Num(); i++)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Name = MakeUniqueObjectName(nullptr, ANDebugActor::StaticClass(), FName("WorldCollisionTest"));
-		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), WorldCollisionMeshTransforms[i], SpawnParams);
-		
-		DebugActor->OverrideWithDynamicMesh(WorldCollisionMeshes[i].CreateDynamicMesh(true));
-	}
-	**/
+	// Gather simple-collision meshes from every primitive in the target world, restricted
+	// to actors whose bounds fall inside one of the input organs' volume bounds.
+	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds,WorldCollisionMeshes, WorldCollisionMeshTransforms);
 }
 
 void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)

@@ -21,6 +21,7 @@
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "NProcGenOperation.h"
+#include "Types/NRawMeshFactory.h"
 
 void FNProcGenEditorCommands::RegisterCommands()
 {

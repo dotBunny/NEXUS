@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NCoreMinimal.h"
+#include "StaticMeshCompiler.h"
 #include "Misc/EngineVersionComparison.h"
 #include "UObject/Object.h"
 
@@ -102,5 +103,29 @@ public:
 	static bool HasBuildInfo()
 	{
 		return !FString(FApp::GetBuildVersion()).Equals(FString(TEXT("UE5-CL-0")));
+	}
+
+	/**
+	 * Blocks until every currently-compiling UStaticMesh has finished its async compile.
+	 * @note Editor-only; compiled out of non-editor builds. Iterates all loaded UStaticMesh objects, so cost scales with
+	 *       project size — call before operations that read mesh bounds, render data, or BodySetups (e.g. actor-bounds
+	 *       containment checks, collision-mesh extraction) where placeholder data would yield incorrect results.
+	 */
+	static void WaitForStaticMeshCompilation()
+	{
+#if WITH_EDITOR
+		TArray<UStaticMesh*> Pending;
+		for (TObjectIterator<UStaticMesh> It; It; ++It)
+		{
+			if (It->IsCompiling())
+			{
+				Pending.Add(*It);
+			}
+		}
+		if (Pending.Num() > 0)
+		{
+			FStaticMeshCompilingManager::Get().FinishCompilation(Pending);
+		}
+#endif // WITH_EDITOR
 	}
 };
