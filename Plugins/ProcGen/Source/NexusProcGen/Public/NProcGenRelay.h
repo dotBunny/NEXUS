@@ -27,9 +27,6 @@ public:
 	/** @return true once the relay has enough state to participate in cell-level-instance correlation. */
 	bool IsReady();
 
-	/** @return Identifier of the player this relay belongs to; -1 until cached. */
-	int32 GetPlayerIdentifier() const { return CachedPlayerIdentifier; }
-
 	/**
 	 * Refresh the cached nearby-cell list by re-asking the server.
 	 * @param bIsLevelLoaded Whether only loaded cell levels should be considered.
@@ -77,9 +74,6 @@ private:
 
 	/** Most recently received nearby-cell payload. */
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
-
-	/** Identifier of the player this relay belongs to, cached after first resolution. */
-	int32 CachedPlayerIdentifier = -1;
 
 	/** Operation tickets the client has been informed about. */
 	TArray<uint32> KnownOperations;

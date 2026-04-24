@@ -97,7 +97,13 @@ public:
 	 */
 	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
 	{
-		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();
+		APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
+		if (PlayerState== nullptr)
+		{
+			UE_LOG(LogNexusMultiplayer, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
+			return 0;
+		}
+		return PlayerState->GetPlayerId();
 	}
 
 	/**

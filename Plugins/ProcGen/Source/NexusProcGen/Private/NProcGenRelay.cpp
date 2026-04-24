@@ -42,12 +42,10 @@ void ANProcGenRelay::BeginPlay()
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
 	if (OwningPC != nullptr && OwningPC->IsLocalController())
 	{
-		CachedPlayerIdentifier = FNMultiplayerUtils::GetPlayerIdentifier(OwningPC);
 		if (UNProcGenSubsystem* Subsystem = UNProcGenSubsystem::Get(GetWorld()))
 		{
 			Subsystem->RegisterLocalRelay(this);
 		}
-		
 		// Initial check
 		UpdateNearbyCells();
 	}
@@ -132,6 +130,6 @@ void ANProcGenRelay::Server_RequestNearbyCells_Implementation(const FVector Loca
 
 void ANProcGenRelay::Client_ReceiveNearbyCells_Implementation(const TArray<FNCellLevelInstanceLocator>& Results)
 {
-	UE_LOG(LogNexusProcGen, Log, TEXT("Received nearby list(%i) of ANCellLevelInstances for player(%i)."), Results.Num(), CachedPlayerIdentifier);
+	UE_LOG(LogNexusProcGen, Log, TEXT("Received nearby list(%i) of ANCellLevelInstances for player."), Results.Num());
 	CachedNearbyCellLevelInstances = Results; // Copy
 }
