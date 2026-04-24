@@ -12,30 +12,73 @@
  * entry then becomes a uniform random index lookup while still honoring the relative weights.
  * This keeps selection fast at the cost of a larger memory footprint for heavily weighted entries.
  */
-struct NEXUSCORE_API FNWeightedIntegerArray
+struct FNWeightedIntegerArray
 {
 	/**
 	 * Add a value to the array, duplicated according to its weight.
 	 * @param Value The integer value to add.
 	 * @param Weight How many copies of Value to insert (the value's relative likelihood of selection).
 	 */
-	void Add(const int32 Value, const int32 Weight = 1);
+	void Add(const int32 Value, const int32 Weight = 1)
+	{
+		if (Weight == 0) return;
+		Values.AddUnique(Value);
+		Data.Reserve(Data.Num() + Weight);
+		for (int i = 0; i < Weight; i++)
+		{
+			Data.Add(Value);
+		}
+		CachedMaxIndex = Data.Num() - 1;
+	}
 
 	/** Clears all entries from the array. */
-	void Empty();
+	void Empty()
+	{
+		Values.Empty();
+		Data.Empty();
+		CachedMaxIndex = -1;
+	};
 
 	/**
 	 * Removes every copy of the supplied value from the array.
 	 * @param Value The value whose entries should all be removed.
 	 */
-	void Remove(const int32 Value);
+	void Remove(const int32 Value)
+	{
+		for (int i = CachedMaxIndex; i >= 0; i--)
+		{
+			if (Data[i] == Value)
+			{
+				Data.RemoveAtSwap(i, EAllowShrinking::No);
+			}
+		}
+		Values.RemoveSwap(Value);
+		CachedMaxIndex = Data.Num() - 1;
+	}
 
 	/**
 	 * Removes up to Limit copies of the supplied value from the array.
 	 * @param Value The value whose entries should be partially removed.
 	 * @param Limit The maximum number of copies to remove.
 	 */
-	void RemoveSome(const int32 Value, int32 Limit = 1);
+	void RemoveSome(const int32 Value, int32 Limit = 1)
+	{
+		for (int i = CachedMaxIndex; i >= 0; i--)
+		{
+			if (Data[i] == Value)
+			{
+				Data.RemoveAtSwap(i, EAllowShrinking::No);
+				Limit--;
+			}
+
+			if (Limit == 0) break;
+		}
+		if (!Data.Contains(Value))
+		{
+			Values.RemoveSwap(Value);
+		}
+		CachedMaxIndex = Data.Num() - 1;
+	}
 
 	/**
 	 * Get the next deterministic value from the array.
@@ -44,7 +87,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	int32 NextValue() const
 	{
 		return Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];
-	};
+	}
 	
 	/**
 	 * Get the next deterministic value from the array, then remove every copy of it.
@@ -82,7 +125,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	{
 		const FRandomStream RandomStream(Seed);
 		return Data[RandomStream.RandRange(0, CachedMaxIndex)];
-	};
+	}
 
 	/**
 	 * Get a random value from the array creating an instance FRandomStream from the Seed, then remove every copy of it.
@@ -152,7 +195,7 @@ struct NEXUSCORE_API FNWeightedIntegerArray
 	bool HasData() const
 	{
 		return Data.Num() > 0;
-	};
+	}
 	
 	/**
 	 * Does the array currently contain at least one copy of the supplied value?

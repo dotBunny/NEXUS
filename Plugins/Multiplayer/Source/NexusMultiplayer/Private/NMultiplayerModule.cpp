@@ -4,7 +4,7 @@
 #include "NMultiplayerModule.h"
 
 #include "NMultiplayerUtils.h"
-#include "GenericPlatform/GenericPlatformOutputDevices.h"
+#include "HAL/PlatformOutputDevices.h"
 #include "Interfaces/IPluginManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Modules/ModuleManager.h"
