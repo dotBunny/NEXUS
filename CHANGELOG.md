@@ -27,6 +27,7 @@
 - `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
 - Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.
 - Fixed `FNSpherePicker` scenarios where points could be ever-so-slightly out of the `MaximumRadius`.
+- `FNRawMesh::CreateDynamicMesh` no longer crashes on non-triangle based meshes, now returns default and errors.
 
 ### Removed
 
