@@ -203,7 +203,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	if (CheckNonTris())
 	{
 		UE_LOG(LogNexusCore, Error, TEXT("The FNRawMesh contains non-triangular geometry; a FDynamicMesh must be triangulated."));
-		return nullptr;
+		return FDynamicMesh3();
 	}
 
 	// Add all of our vertices and indices for the triangles.

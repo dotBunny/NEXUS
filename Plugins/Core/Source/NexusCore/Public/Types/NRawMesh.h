@@ -94,9 +94,9 @@ struct NEXUSCORE_API FNRawMesh
 		const int Count = Vertices.Num();
 		for (int i = 0; i < Count; i++)
 		{
-			Vertices[i] = FNVectorUtils::RotatedAroundPivot(Vertices[i] + WorldPoint, WorldPoint, Rotation);
+			Vertices[i] = FNVectorUtils::RotatedAroundPivot(Vertices[i], WorldPoint, Rotation);
 		}
-		Center = FNVectorUtils::RotatedAroundPivot(Center + WorldPoint, WorldPoint, Rotation);
+		Center = FNVectorUtils::RotatedAroundPivot(Center, WorldPoint, Rotation);
 	}
 
 	/**

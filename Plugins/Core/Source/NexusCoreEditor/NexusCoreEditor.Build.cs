@@ -29,6 +29,7 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"DeveloperSettings",
 					"Engine",
+					"GeometryCore",
 					"HTTP",
 					"Kismet",
 					"LevelEditor",
