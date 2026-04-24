@@ -63,6 +63,13 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	/** Allowed rotations for this junction when the owning cell is placed by the generator. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	FNRotationConstraints RotationConstraints;
+	
+	/** 
+	 * Relative weight for preferred selection.
+	 * @note Higher values increase the probability of this junction being filled.
+	 */
+	UPROPERTY(EditInstanceOnly)
+	int32 Weighting = 1;
 
 	/** Unique per-cell identifier; allocated by ANCellActor::GetCellJunctionNextIdentifier. */
 	UPROPERTY(VisibleAnywhere)
@@ -84,6 +91,7 @@ struct NEXUSPROCGEN_API FNCellJunctionDetails
 	{
 		return
 			InstanceIdentifier == Other.InstanceIdentifier
+			&& Weighting == Other.Weighting
 			&& bInsideHull == Other.bInsideHull
 			
 			&& Requirements == Other.Requirements

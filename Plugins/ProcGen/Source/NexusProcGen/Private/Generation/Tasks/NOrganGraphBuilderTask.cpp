@@ -202,6 +202,8 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 	FNWeightedIntegerArray CellInputWeightedIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
 	
+	// TODO: Implement junction weighting so that we dont loop through every? or the order is based on weight?
+	
 	for (const auto Junction : OpenJunctions)
 	{
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
