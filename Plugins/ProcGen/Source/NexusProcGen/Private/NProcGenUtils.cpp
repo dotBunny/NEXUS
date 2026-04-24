@@ -125,6 +125,12 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	Mesh.bHasBounds = true;
 	Mesh.bHasNonTris = Mesh.CheckNonTris();
 	
+	if (Mesh.bHasNonTris)
+	{
+		Mesh.ConvertToTriangles();
+	}
+	
+	
 	return Mesh;
 }
 
