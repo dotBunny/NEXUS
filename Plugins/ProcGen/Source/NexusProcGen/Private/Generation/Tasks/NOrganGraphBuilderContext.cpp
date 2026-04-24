@@ -138,7 +138,7 @@ FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNProcGenOperationO
 	
 	FilterCellInputData(PreFilter, PreIndices, ValidJunctions);
 
-	if (PreIndices.Count() == 0)
+	if (PreIndices.WeightedCount() == 0)
 	{
 		UE_LOG(LogNexusProcGen, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no starting junctions are sized to the provided UNBoneComponent."))
 		return;

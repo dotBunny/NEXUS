@@ -103,7 +103,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 	ContextPtr->FilterCellInputData(PreFilter, WeightedStartIndices, ValidJunctions);
 	
 	// Unable to generate
-	if (WeightedStartIndices.Count() == 0)
+	if (WeightedStartIndices.WeightedCount() == 0)
 	{
 		UE_LOG(LogNexusProcGen, Error, TEXT("Unable to place starting cell, due to no valid cells available."))
 		return;
@@ -197,22 +197,32 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwist
 TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNProcGenGraphCellNode* SourceCellNode) const
 {
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
+	FNWeightedIntegerArray WeightedOpenJunctionKeys;
+	for (const auto Junction : OpenJunctions)
+	{
+		WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting);
+	}
+	const int32 OpenJunctionCount = OpenJunctions.Num();
+	
 	TArray<FNProcGenGraphNode*> NewNodes;
 	
 	FNWeightedIntegerArray CellInputWeightedIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
 	
-	// TODO: Implement junction weighting so that we dont loop through every? or the order is based on weight?
 	
-	for (const auto Junction : OpenJunctions)
+	for (int i = 0; i < OpenJunctionCount; ++i)
 	{
+		// Select the next junction to fill, using weighted priority.
+		int SourceJunctionKey = WeightedOpenJunctionKeys.TwistedValueAndRemove(Random);
+		FNCellJunctionDetails* SourceJunctionValue = OpenJunctions[SourceJunctionKey];
+
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
-		FQuat SourceJunctionWorldQuat = Junction.Value->WorldRotation.Quaternion();
+		FQuat SourceJunctionWorldQuat = SourceJunctionValue->WorldRotation.Quaternion();
 		
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
 		
-		NodeFilter.SocketSize = Junction.Value->SocketSize;
+		NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
 		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr(); 
 		NodeFilter.SourceCellNode = SourceCellNode;
@@ -220,14 +230,14 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		ContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
 		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
-		if (CellInputWeightedIndices.Count() == 0)
+		if (CellInputWeightedIndices.WeightedCount() == 0)
 		{
 			// TODO: We will later go back and fill this with something.
-			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(Junction.Value->WorldLocation, Junction.Value->WorldRotation);
+			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
 			Analytics.AddedNullNode();
 			ContextPtr->CellGraph->RegisterNode(NullNode);
 			
-			SourceCellNode->Link(Junction.Key, NullNode);
+			SourceCellNode->Link(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
 			continue;
 		}
@@ -250,7 +260,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
 		
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
-		FVector TargetJunctionWorldPosition = Junction.Value->WorldLocation - TargetJunctionWorldOffset;
+		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
 	
 		FNProcGenGraphCellNode* TargetCellNode = FNProcGenGraphNodeFactory::CreateCellNode(CellInputData, TargetJunctionWorldPosition, RequiredRotation);
 		
@@ -285,7 +295,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		{
 			// We've passed validation, lets register it and move on
 			ContextPtr->CellGraph->RegisterNode(TargetCellNode);
-			SourceCellNode->Link(Junction.Key, TargetCellNode);
+			SourceCellNode->Link(SourceJunctionKey, TargetCellNode);
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
 			Analytics.AddedCellNode();
 			NewNodes.Add(TargetCellNode);
