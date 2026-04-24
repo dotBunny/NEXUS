@@ -6,7 +6,7 @@
 #include "NRandom.h"
 
 /**
- * An array of integers that are proportionally weighted via repeated entries.
+ * An inline array of integers that are proportionally weighted via repeated entries.
  *
  * Rather than storing explicit weight tables, each value is inserted Weight times. Picking an
  * entry then becomes a uniform random index lookup while still honoring the relative weights.
