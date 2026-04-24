@@ -281,12 +281,12 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
-		for (int i = BoundsIntersectingNodes.Num() - 1; i >= 0; i--)
+		for (int j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
 		{
 			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
-			if (!BoundsIntersectingNodes[i]->CheckHullIntersects(TargetCellNode))
+			if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
 			{
-				BoundsIntersectingNodes.RemoveAt(i);
+				BoundsIntersectingNodes.RemoveAt(j);
 			}
 		}
 		
