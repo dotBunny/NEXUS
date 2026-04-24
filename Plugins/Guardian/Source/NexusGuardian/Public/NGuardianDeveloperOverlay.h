@@ -19,12 +19,16 @@ class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()
 
+	//~UUserWidget
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	//End UUserWidget
 
+	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
 	void Bind(UWorld* World);
+	/** Drop the subscription to the Guardian subsystem hosted by World. */
 	void Unbind(const UWorld* World);
 
 protected:
@@ -46,14 +50,19 @@ protected:
 	TObjectPtr<UCommonNumericTextBlock> ObjectCountNextNumber;
 
 
+	/** Engine callback: Bind() the new world's Guardian subsystem once the world is fully initialized. */
 	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	/** Engine callback: Unbind() the departing world so we drop any cached subsystem handles. */
 	void OnWorldBeginTearDown(UWorld* World);
 
 
 private:
+	/** Refresh the overlay banner's color and message based on the current count vs. thresholds. */
 	void UpdateBanner() const;
 
+	/** Handle for the world-post-initialization delegate subscription. */
 	FDelegateHandle AddWorldDelegateHandle;
+	/** Handle for the world-begin-teardown delegate subscription. */
 	FDelegateHandle RemoveWorldDelegateHandle;
 
 	/** Placeholder text shown while no game world is active. */

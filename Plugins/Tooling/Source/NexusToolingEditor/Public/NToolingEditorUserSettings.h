@@ -10,7 +10,7 @@
 
 /**
  * Per-user editor preferences for NexusTooling. Stored in NexusUserSettings.ini so each developer
- * keeps their own values (frame-rate cap, visualization colours, graph navigation ergonomics).
+ * keeps their own values (frame-rate cap, visualization colors, graph navigation ergonomics).
  * Property edits re-apply immediately via PostEditChangeProperty.
  */
 UCLASS(config = NexusUserSettings, meta = (DisplayName = "Tooling (User)"))

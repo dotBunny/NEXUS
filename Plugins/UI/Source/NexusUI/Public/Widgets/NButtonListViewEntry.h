@@ -11,7 +11,7 @@
 #include "NButtonListViewEntry.generated.h"
 
 /**
- * Data model for a single row in a UNListView of buttons. Carries label text, per-state colour
+ * Data model for a single row in a UNListView of buttons. Carries label text, per-state color
  * slots (hover/pressed/unhovered) and a TargetObject passed back through OnPressedEvent so each
  * button can act on a specific domain object.
  */
@@ -23,28 +23,45 @@ class NEXUSUI_API UNButtonListViewEntryObject : public UObject
 	/** Button-press callback signature; receives the row's TargetObject. */
 	DECLARE_DELEGATE_OneParam( OnButtonPressedDelegate, UObject*);
 public:
-	
+
+	/** @return The label text the bound button should display. */
 	UFUNCTION(BlueprintCallable, Category = "Text")
 	FText GetText() const { return Text; }
-	
+
+	/**
+	 * Sets the label text displayed by any entry widget bound to this data object.
+	 * @param InText The text to display.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Text")
 	void SetText(const FText& InText) { Text = InText; }
 
+	/**
+	 * Internal click handler bound to the entry widget's button; forwards the activation to
+	 * OnPressedEvent so subscribers receive the row's TargetObject.
+	 */
 	UFUNCTION()
 	// ReSharper disable once CppMemberFunctionMayBeConst
 	void OnPressed() { OnPressedEvent.ExecuteIfBound(TargetObject); };
-	
+
+	/** Dispatched when the bound button is clicked. Subscribers receive TargetObject for context. */
 	OnButtonPressedDelegate OnPressedEvent;
-	
+
+	/** Text color applied to the button while the pointer is hovering over it. */
 	ENColor HoverStateForegroundColor = ENColor::NC_White;
+	/** Background color applied to the button while the pointer is hovering over it. */
 	ENColor HoverStateBackgroundColor = ENColor::NC_BlueLight;
-	
+
+	/** Text color applied while the button is actively being pressed. */
 	ENColor PressedStateForegroundColor = ENColor::NC_White;
+	/** Background color applied while the button is actively being pressed. */
 	ENColor PressedStateBackgroundColor = ENColor::NC_BlueDark;
-	
+
+	/** Text color applied to the idle (un-hovered) button state. */
 	ENColor UnhoveredStateForegroundColor = ENColor::NC_White;
+	/** Background color applied to the idle (un-hovered) button state. */
 	ENColor UnhoveredStateBackgroundColor = ENColor::NC_GreyDark;
-	
+
+	/** Arbitrary payload forwarded to OnPressedEvent subscribers when the button is clicked. */
 	UPROPERTY()
 	TObjectPtr<UObject> TargetObject;
 private:
@@ -54,7 +71,7 @@ private:
 
 /**
  * List-view entry widget that renders a UButton + UCommonTextBlock pair driven by a bound
- * UNButtonListViewEntryObject. Swaps background/foreground colours on hover/press/release
+ * UNButtonListViewEntryObject. Swaps background/foreground colors on hover/press/release
  * using the palette slots on the bound object.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
@@ -62,10 +79,11 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 {
 	GENERATED_BODY()
 
+	//~UUserWidget
 	virtual void NativeConstruct() override
 	{
 		Super::NativeConstruct();
-		
+
 		if (Button != nullptr)
 		{
 			Button->OnClicked.AddDynamic(this, &UNButtonListViewEntry::OnButtonPressed);
@@ -84,10 +102,12 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 			Button->OnUnhovered.RemoveAll(this);
 			Button->OnReleased.RemoveAll(this);
 		}
-		
+
 		Super::NativeDestruct();
 	}
-	
+	//End UUserWidget
+
+	//~INListViewEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{
 		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(ListItemObject);
@@ -116,15 +136,21 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-	
+	//End INListViewEntry
+
+	/**
+	 * Updates the label text displayed on the bound button's child text block.
+	 * @param NewText The text to display on the button.
+	 */
 	UFUNCTION(BlueprintCallable)
 	void SetText(const FText NewText) const
 	{
 		Text->SetText(NewText);
 	}
 
-protected:	
-	
+protected:
+
+	/** Applies the bound entry object's pressed-state colors to the button/text. */
 	UFUNCTION()
 	void OnButtonPressed()
 	{
@@ -138,6 +164,7 @@ protected:
 		}
 	}
 	
+	/** Applies the bound entry object's hover-state colors to the button/text. */
 	UFUNCTION()
 	void OnButtonHovered()
 	{
@@ -151,6 +178,7 @@ protected:
 		}
 	}
 	
+	/** Applies the bound entry object's hover-state colors on mouse release (pointer is still over the button). */
 	UFUNCTION()
 	void OnButtonReleased()
 	{
@@ -164,6 +192,7 @@ protected:
 		}
 	}
 	
+	/** Applies the bound entry object's idle-state colors when the pointer leaves the button. */
 	UFUNCTION()
 	void OnButtonUnhovered()
 	{
@@ -177,17 +206,21 @@ protected:
 		}
 	}
 	
+	/** Back-pointer to the list view that owns this entry; set by INListViewEntry::SetOwnerListView. */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
-	
+
+	/** Bound UButton in the entry widget tree that surfaces click/hover events. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UButton> Button;
-	
+
+	/** Bound UCommonTextBlock in the entry widget tree that renders the button's label. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> Text;
 
 private:
 
+	/** The currently bound UNButtonListViewEntryObject backing this row; nulled when the entry is released. */
 	UPROPERTY()
 	TObjectPtr<UObject> Object;
 };

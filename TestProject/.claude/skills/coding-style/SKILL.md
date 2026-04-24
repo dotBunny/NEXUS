@@ -166,6 +166,7 @@ Use Doxygen-style `/** */` for all public API. Standard tags:
 - `@remark` — "native code only", "manual add requires manual remove" style warnings
 - `@see` — links to the docs page for the type or method
 - Single-line doxygen comment blocks for methods and members should be the collapsed single-line format: /** comment */; where as top-level class/struct/enum,namespace docs should be the expanded three-line format.
+- Use American English spelling (color, behavior, etc.)
 
 ## Module Dependencies (.Build.cs)
 

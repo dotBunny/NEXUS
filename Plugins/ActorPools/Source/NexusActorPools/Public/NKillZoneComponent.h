@@ -22,8 +22,10 @@ class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
 public:
 	explicit UNKillZoneComponent(const FObjectInitializer& ObjectInitializer);
 
+	//~UActorComponent
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	//End UActorComponent
 
 	/**
 	 * Gets the internal counter tracking the number of AActors the component has killed.

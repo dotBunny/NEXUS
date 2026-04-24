@@ -66,9 +66,13 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
 	bool bMultiplayerTestUseOnlineSubsystem = false;
 	
+	/**
+	 * Forwards the project-level multiplayer-test toggles onto the supplied play-session request.
+	 * @param Params The play-session request whose Online Subsystem behaviour should be set.
+	 */
 	void ApplySettings(FRequestPlaySessionParams& Params) const
 	{
 		Params.bAllowOnlineSubsystem = bMultiplayerTestUseOnlineSubsystem;
 	}
-#endif // WITH_EDITORONLY_DATA	
+#endif // WITH_EDITORONLY_DATA
 };

@@ -263,22 +263,28 @@ struct FNWidgetState
 	}
 
 protected:
-	
+
+	/** Keys for boolean entries; BooleanKeys[i] maps to BooleanValues[i]. */
 	UPROPERTY()
 	TArray<FString> BooleanKeys;
-	
+
+	/** Values for boolean entries; index-aligned with BooleanKeys. */
 	UPROPERTY()
 	TArray<bool> BooleanValues;
-	
+
+	/** Keys for float entries; FloatKeys[i] maps to FloatValues[i]. */
 	UPROPERTY()
 	TArray<FString> FloatKeys;
-	
+
+	/** Values for float entries; index-aligned with FloatKeys. */
 	UPROPERTY()
 	TArray<float> FloatValues;
-	
+
+	/** Keys for string entries; StringKeys[i] maps to StringValues[i]. */
 	UPROPERTY()
 	TArray<FString> StringKeys;
-	
+
+	/** Values for string entries; index-aligned with StringKeys. */
 	UPROPERTY()
 	TArray<FString> StringValues;
 };

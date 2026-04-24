@@ -20,7 +20,9 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverl
 {
 	GENERATED_BODY()
 
+	/** Subscribe to the actor-pool subsystem hosted by World so its pool-added events drive this overlay. */
 	void Bind(UWorld* World);
+	/** Drop the subscription to the actor-pool subsystem hosted by World. */
 	void Unbind(const UWorld* World);
 
 public:
@@ -29,11 +31,15 @@ public:
 
 protected:
 
+	//~UUserWidget
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	//End UUserWidget
 
+	/** Engine callback: Bind() the new world's actor-pool subsystem once the world is fully initialized. */
 	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	/** Engine callback: Unbind() the departing world and release its cached delegate handles. */
 	void OnWorldBeginTearDown(UWorld* World);
 
 	/** The bound list view used to display pool rows. */
@@ -42,7 +48,9 @@ protected:
 
 private:
 
+	/** Add a row to ActorPoolList representing the supplied pool. */
 	void CreateListItem(FNActorPool* ActorPool);
+	/** Refresh the overlay banner's text based on whether any pools are currently live. */
 	void UpdateBanner() const;
 
 	/** Per-world delegate handles used to listen for new pools being added. */

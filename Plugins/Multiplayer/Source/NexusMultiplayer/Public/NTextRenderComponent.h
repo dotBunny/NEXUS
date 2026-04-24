@@ -15,19 +15,24 @@ UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Text Render", meta = (Blueprin
 class NEXUSMULTIPLAYER_API UNTextRenderComponent final : public UTextRenderComponent
 {
 	GENERATED_BODY()
-	
+
+	/** Broadcast signature for OnTextChanged; receives the new FString value. */
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnTextChanged, FString, NewText);
-	
+
 	explicit UNTextRenderComponent(const FObjectInitializer& Initializer);
 
 public:
 
+	//~UActorComponent
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void BeginPlay() override;
-	
+	//End UActorComponent
+
+	/** The currently-authoritative text value; replicated from the server to every client via OnRep_TextValue. */
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_TextValue)
 	FString CachedValue;
 
+	/** Replication callback — applies the replicated CachedValue to the render component and fires OnTextChanged. */
 	UFUNCTION()
 	void OnRep_TextValue();
 	/**

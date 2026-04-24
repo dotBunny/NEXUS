@@ -163,13 +163,18 @@ struct FNCollisionVisualizerQuery
 	meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Channel", EditConditionHides))
 	FCollisionResponseContainer CollisionResponses;
 	
+	/** @return An FCollisionResponseParams populated from CollisionResponses for use with channel-based queries. */
 	FCollisionResponseParams GetCollisionResponseParams() const
 	{
 		FCollisionResponseParams Parameters;
 		Parameters.CollisionResponse = CollisionResponses;
 		return MoveTemp(Parameters);
 	}
-	
+
+	/**
+	 * Builds the FCollisionShape implied by QueryShape plus its associated dimensions.
+	 * @return A Box/Capsule/Sphere FCollisionShape; default-constructed if QueryShape is unrecognised.
+	 */
 	FCollisionShape GetCollisionShape() const
 	{
 		switch (QueryShape)
@@ -184,7 +189,11 @@ struct FNCollisionVisualizerQuery
 		}
 		return FCollisionShape();
 	}
-	
+
+	/**
+	 * Supplies the options list for the CollisionProfileName picker metadata.
+	 * @return Names of every collision profile registered with UCollisionProfile.
+	 */
 	TArray<FName> GetCollisionProfileNames() const
 	{
 		TArray<FName> Names;
@@ -230,6 +239,7 @@ struct FNCollisionVisualizerOptions
 	
 	
 	
+	/** @return A FCollisionQueryParams populated from the boolean toggles on this struct (mobility is applied separately by the caller). */
 	FCollisionQueryParams GetCollisionQueryParams() const
 	{
 		FCollisionQueryParams Parameters;
@@ -243,7 +253,7 @@ struct FNCollisionVisualizerOptions
 };
 
 /**
- * Rendering controls for visualizer output — draw mode mask, thickness, colours, and cadence.
+ * Rendering controls for visualizer output — draw mode mask, thickness, colors, and cadence.
  */
 USTRUCT()
 struct FNCollisionVisualizerDrawing
@@ -281,16 +291,20 @@ USTRUCT()
 struct FNCollisionVisualizerSettings
 {
 	GENERATED_BODY()
-	
+
+	/** Start/end positions and orientation used to drive the visualizer query. */
 	UPROPERTY(EditAnywhere)
 	FNCollisionVisualizerPoints Points;
-	
+
+	/** Query configuration (method, channel/profile/type, shape dimensions). */
 	UPROPERTY(EditAnywhere)
 	FNCollisionVisualizerQuery Query;
-	
+
+	/** Secondary FCollisionQueryParams toggles applied alongside the main query. */
 	UPROPERTY(EditAnywhere)
 	FNCollisionVisualizerOptions Options;
-	
+
+	/** Rendering controls — draw mode mask, thickness, colors, and cadence. */
 	UPROPERTY(EditAnywhere)
 	FNCollisionVisualizerDrawing Drawing;
 };

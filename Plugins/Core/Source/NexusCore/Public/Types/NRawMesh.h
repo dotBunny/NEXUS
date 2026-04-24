@@ -138,8 +138,11 @@ struct NEXUSCORE_API FNRawMesh
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false);
 
 private:
+	/** @return true if Vertices form a convex hull; false otherwise. Recomputed by Validate. */
 	bool CheckConvex();
+	/** @return true if any loop in the mesh has more than three vertices. Recomputed by Validate. */
 	bool CheckNonTris();
+	/** @return true when Bounds has been populated (non-default FBox). Recomputed by Validate. */
 	bool CheckBounds() const;
 
 	/** Cached result of the most recent convexity check. */

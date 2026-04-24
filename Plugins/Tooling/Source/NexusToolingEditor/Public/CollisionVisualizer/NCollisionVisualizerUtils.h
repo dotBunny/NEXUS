@@ -10,7 +10,7 @@
 /**
  * Query dispatch and debug-draw helpers for the collision visualizer. Each Do* entry issues the
  * corresponding UE collision query against World using Settings and draws the result into the
- * viewport using the configured colours/thickness/lifetime.
+ * viewport using the configured colors/thickness/lifetime.
  */
 class FNCollisionVisualizerUtils
 {

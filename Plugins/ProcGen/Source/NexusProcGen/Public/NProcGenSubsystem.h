@@ -89,8 +89,12 @@ private:
 	/** Handle for the OnLogout game-mode delegate so it can be cleanly unbound. */
 	FDelegateHandle OnLogoutHandle;
 
+	/** GameMode::OnPostLogin handler — spawns the per-player relay for NewPlayer. */
 	void OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
+	/** GameMode::OnLogout handler — destroys the relay associated with Exiting, if any. */
 	void OnLogout(AGameModeBase* GameMode, AController* Exiting);
+	/** Spawn an ANProcGenRelay bound to PlayerController and store it in RelayMap. */
 	void SpawnRelay(APlayerController* PlayerController);
+	/** Destroy the relay previously spawned for PlayerController and remove it from RelayMap. */
 	void DestroyRelay(APlayerController* PlayerController);
 };

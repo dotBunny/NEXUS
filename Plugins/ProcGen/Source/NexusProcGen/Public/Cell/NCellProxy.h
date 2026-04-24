@@ -51,14 +51,20 @@ public:
 	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false);
 
 protected:
+	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */
 	void OnProxyMaterialLoaded();
+	/** Configure the proxy from a UNCell asset (mesh preview, junction details, etc.). */
 	void InitializeFromNCell(UNCell* InNCell);
+	/** Configure the proxy from a graph node describing the cell's transform and junction layout. */
 	void InitializeFromCellNode(const FNProcGenGraphCellNode* CellNode);
 
 private:
 
+	/** Reveal the proxy's preview mesh and enable its visualisation components. */
 	void Show() const;
+	/** Hide the proxy's preview mesh — used once the paired level instance is fully loaded. */
 	void Hide() const;
+	/** Build the proxy's dynamic collision mesh from the cell's bounds. */
 	void CreateCollisionMesh() const;
 
 	/** Dynamic mesh used as the visual preview while the underlying level instance streams in. */

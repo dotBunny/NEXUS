@@ -26,7 +26,7 @@ class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 	GENERATED_BODY()
 
 public:
-	/** Display the banner row with Text and the supplied foreground/background colour pair. */
+	/** Display the banner row with Text and the supplied foreground/background color pair. */
 	UFUNCTION(BlueprintCallable)
 	void ShowContainerBanner(const FText& Text = FText::GetEmpty(),
 		ENColor MessageColor = ENColor::NC_White, ENColor BannerColor = ENColor::NC_NexusDarkBlue) const;
@@ -40,12 +40,15 @@ public:
 	bool bIsEditorUtilityWidget;
 
 protected:
+	/** Bound UCommonBorder that provides the banner row's background brush. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonBorder> ContainerBanner;
 
+	/** Bound UCommonTextBlock that renders the banner row's message text. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ContainerBannerMessage;
 
+	/** Bound UVerticalBox where subclasses add diagnostic rows. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UVerticalBox> ContainerBox;
 };

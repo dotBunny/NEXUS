@@ -65,15 +65,19 @@ protected:
 	UFUNCTION()
 	void SelectEndPoint();
 
+	/** Bound button that triggers SelectStartPoint to focus the start-point scene component. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectStartButton;
 
+	/** Bound button that triggers SelectEndPoint to focus the end-point scene component. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UEditorUtilityButton> SelectEndButton;
 
+	/** Bound text block displaying the currently-bound visualizer actor's name. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ActorNameText;
 
+	/** Bound details view that surfaces the FNCollisionVisualizerSettings struct for editing. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNDetailsView> ObjectDetails;
 

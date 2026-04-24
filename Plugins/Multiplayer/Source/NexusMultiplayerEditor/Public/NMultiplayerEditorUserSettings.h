@@ -86,6 +86,11 @@ public:
 	FString ServerParameters = "";
 
 private:
+	/**
+	 * Builds the concatenated command-line arguments passed to each client launched by the
+	 * multiplayer test session, encoding the simulation toggles plus any user-supplied ClientParameters.
+	 * @return A single space-separated argument string prefixed with -NMultiplayerTest.
+	 */
 	FString GetClientArguments() const
 	{
 		FString ClientArguments = TEXT("-NMultiplayerTest");
@@ -135,6 +140,11 @@ private:
 		return MoveTemp(ClientArguments);
 	}
 	
+	/**
+	 * Builds the command-line arguments passed to the server (dedicated or listen) launched
+	 * alongside the test session's clients.
+	 * @return The concatenated server-side argument string.
+	 */
 	FString GetServerArguments() const
 	{
 		FString ServerAdditionalArguments = TEXT("");
@@ -151,6 +161,11 @@ private:
 	}
 	
 public:
+	/**
+	 * Copies the user-facing values from this settings object into the supplied FRequestPlaySessionParams
+	 * so the editor launches the test session with the configured client/server layout.
+	 * @param Params The play-session request to populate; Params.EditorPlaySettings must be valid.
+	 */
 	void ApplySettings(FRequestPlaySessionParams& Params) const
 	{
 		// Set window sized
