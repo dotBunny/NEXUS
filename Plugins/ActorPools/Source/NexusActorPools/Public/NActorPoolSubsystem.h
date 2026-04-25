@@ -60,7 +60,7 @@ public:
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
 	void SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
-
+	
 	/**
 	* Spawns an actor from a given pool, creating a pool as necessary.
 	* @param ActorClass The class of the actor which you would like to get from the actor pool.
