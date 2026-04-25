@@ -54,7 +54,9 @@ void UNProcGenEditorSubsystem::OnOperationFinished(UNProcGenOperation* Operation
 	{
 		KnownProxies.Add(Proxy);
 	}
-	ProxyMap.Add(Operation->GetTicket(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies)); // TODO : Check this copies?
+	
+	// Make our own map to the created proxies tied to the operation ticket
+	ProxyMap.Add(Operation->GetTicket(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
 }
 
