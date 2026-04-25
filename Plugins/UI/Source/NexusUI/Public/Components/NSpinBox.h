@@ -15,12 +15,13 @@ UCLASS(DisplayName = "NEXUS | SpinBox", ClassGroup = UI, meta = (Category = "NEX
 class NEXUSUI_API UNSpinBox : public USpinBox
 {
 	GENERATED_BODY()
+
+public:
 	
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
-#endif // WITH_EDITOR	
+#endif // WITH_EDITOR
 
-public:
 	/**
 	 * Set the value of the USpinBox without triggering exposed event bindings.
 	 * @param NewValue The new value.

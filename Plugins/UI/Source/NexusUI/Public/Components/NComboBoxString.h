@@ -16,11 +16,12 @@ class NEXUSUI_API UNComboBoxString : public UComboBoxString
 {
 	GENERATED_BODY()
 	
+public:
+	
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
-	
-public:
+
 	/**
 	 * Sets the selected option of the UComboBoxString without triggering exposed event bindings.
 	 * @param Option The new option's text.

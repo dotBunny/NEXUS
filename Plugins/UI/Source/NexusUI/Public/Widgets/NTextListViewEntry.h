@@ -97,6 +97,7 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 {
 	GENERATED_BODY()
 
+protected:
 	//~INListViewEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{
@@ -115,12 +116,15 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 			}
 		}
 	}
+
+public:	
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
 	//End INListViewEntry
+
 
 	/**
 	 * Updates the text displayed by the bound UCommonTextBlock.

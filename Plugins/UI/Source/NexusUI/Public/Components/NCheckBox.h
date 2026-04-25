@@ -16,11 +16,12 @@ class NEXUSUI_API UNCheckBox : public UCheckBox
 {
 	GENERATED_BODY()
 	
+public:
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
 	
-public:
 	/**
 	 * Sets if the UCheckBox is checked without triggering exposed event bindings.
 	 * @param bNewValue The new value.

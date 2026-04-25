@@ -15,12 +15,13 @@ UCLASS(DisplayName = "NEXUS | Slider", ClassGroup = UI, meta = (Category = "NEXU
 class NEXUSUI_API UNSlider : public USlider
 {
 	GENERATED_BODY()
-	
+
+public:
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
-#endif // WITH_EDITOR	
+#endif // WITH_EDITOR
 	
-public:
 	/**
 	 * Set the value of the USlider without triggering exposed event bindings.
 	 * @param NewValue The new value.

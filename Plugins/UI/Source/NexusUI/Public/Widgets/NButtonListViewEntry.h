@@ -79,6 +79,7 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 {
 	GENERATED_BODY()
 
+protected:
 	//~UUserWidget
 	virtual void NativeConstruct() override
 	{
@@ -130,7 +131,7 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 			Object = nullptr;
 		}
 	}
-
+public:
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
@@ -138,6 +139,7 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 	}
 	//End INListViewEntry
 
+public:
 	/**
 	 * Updates the label text displayed on the bound button's child text block.
 	 * @param NewText The text to display on the button.
