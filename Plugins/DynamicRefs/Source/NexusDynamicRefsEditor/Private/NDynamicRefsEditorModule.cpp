@@ -4,7 +4,6 @@
 #include "NDynamicRefsEditorModule.h"
 #include "NEditorUtils.h"
 #include "NDynamicRefsEditorStyle.h"
-#include "NDynamicRefsEditorToolMenu.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -15,7 +14,7 @@ void FNDynamicRefsEditorModule::StartupModule()
 
 void FNDynamicRefsEditorModule::ShutdownModule()
 {
-	FNDynamicRefsEditorToolMenu::Unregister();
+	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NDynamicRefs)();
 	FNDynamicRefsEditorStyle::Shutdown();
 }
 
@@ -30,7 +29,7 @@ void FNDynamicRefsEditorModule::OnPostEngineInit()
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNDynamicRefsEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NDynamicRefs)));
 	}
 }
 

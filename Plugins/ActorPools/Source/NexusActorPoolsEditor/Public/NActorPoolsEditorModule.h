@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include "NActorPoolsEditorStyle.h"
 #include "Macros/NModuleMacros.h"
+#include "Menus/NToolsMenuMacros.h"
 #include "Modules/ModuleInterface.h"
 
 class FPlacementModeID;
@@ -22,3 +24,10 @@ private:
 	TArray<TOptional<FPlacementModeID>> PlacementActors;
 	void OnPostEngineInit();
 };
+
+N_IMPLEMENT_TOOLS_MENU_EUW_ENTRY(
+	"Developer Overlay", EUW_NActorPools,
+	NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Actor Pools"), 
+	NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_Tooltip", "Opens the NActorPools Developer Overlay inside of an editor tab."),
+	FSlateIcon(FNActorPoolsEditorStyle::GetStyleSetName(), "ClassIcon.NActorPool"),
+	"/NexusActorPools/EditorResources/EUW_NActorPools.EUW_NActorPools")

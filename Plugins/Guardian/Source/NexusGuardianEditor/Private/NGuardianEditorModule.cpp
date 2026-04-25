@@ -4,7 +4,6 @@
 #include "NGuardianEditorModule.h"
 #include "NEditorUtils.h"
 #include "NGuardianEditorStyle.h"
-#include "NGuardianEditorToolMenu.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -15,7 +14,7 @@ void FNGuardianEditorModule::StartupModule()
 
 void FNGuardianEditorModule::ShutdownModule()
 {
-	FNGuardianEditorToolMenu::Unregister();
+	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NGuardian)();
 	FNGuardianEditorStyle::Shutdown();
 }
 
@@ -30,7 +29,7 @@ void FNGuardianEditorModule::OnPostEngineInit()
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNGuardianEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NGuardian)));
 	}
 }
 

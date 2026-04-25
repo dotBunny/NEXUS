@@ -284,26 +284,10 @@ void FNProcGenEditorToolMenu::AddMenuEntries()
 				&FNProcGenEditorStyle::CollisionVisualizerToggleIcon)));
 		NexusSection.AddEntry(CollisionVisualizerEntry);
 	}
-
-	// EUW Entry
-	auto EditorWindow = FNMenuEntry();
-	
-	EditorWindow.Section = TEXT("Developer Overlay");
-	EditorWindow.Identifier = NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier;
-	EditorWindow.DisplayName = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_DisplayName", "Procedural Generation");
-	EditorWindow.Tooltip = NSLOCTEXT("NexusProcGenEditor", "Create_EUW_Tooltip", "Opens the NProcGenSystem Developer Overlay inside of an editor tab.");
-	EditorWindow.Icon = FSlateIcon(FNProcGenEditorStyle::GetStyleSetName(), NEXUS::ProcGenEditor::EditorUtilityWidget::Icon);
-	
-	EditorWindow.Execute = FExecuteAction::CreateStatic(&FNProcGenEditorToolMenu::CreateEditorUtilityWindow);
-	EditorWindow.IsChecked = FIsActionChecked::CreateStatic(&FNProcGenEditorToolMenu::HasEditorUtilityWindow);
-	
-	FNToolsMenu::AddMenuEntry(EditorWindow);
 }
 
 void FNProcGenEditorToolMenu::RemoveMenuEntries()
 {
-	FNToolsMenu::RemoveMenuEntry(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
-	
 	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
@@ -367,18 +351,4 @@ void FNProcGenEditorToolMenu::CollisionVisualizerToggle()
 		const TObjectPtr<ANDebugActor> NewVisualizer = FNProcGenEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
 		GEditor->SelectActor(NewVisualizer, true, false, false);
 	}
-}
-
-void FNProcGenEditorToolMenu::CreateEditorUtilityWindow()
-{
-	UNEditorUtilityWidget::SpawnTab(
-		NEXUS::ProcGenEditor::EditorUtilityWidget::Path, 
-		NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
-}
-
-bool FNProcGenEditorToolMenu::HasEditorUtilityWindow()
-{
-	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
-	if (System == nullptr) return false;
-	return System->HasWidget(NEXUS::ProcGenEditor::EditorUtilityWidget::Identifier);
 }

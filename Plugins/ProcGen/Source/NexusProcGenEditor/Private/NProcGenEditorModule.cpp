@@ -67,6 +67,7 @@ void FNProcGenEditorModule::ShutdownModule()
 	}
 	
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
+	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NProcGenSystem)();
 	
 	FNProcGenEditorToolMenu::RemoveMenuEntries();
 	FNProcGenEditorStyle::Shutdown();
@@ -104,6 +105,7 @@ void FNProcGenEditorModule::OnPostEngineInit()
 	if (FSlateApplication::IsInitialized())
 	{
 		FNProcGenEditorCommands::Register();
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NProcGenSystem)));
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNProcGenEditorToolMenu::AddMenuEntries));
 	}
 

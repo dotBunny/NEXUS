@@ -4,8 +4,8 @@
 #include "NActorPoolsEditorModule.h"
 #include "ComponentVisualizer.h"
 #include "IPlacementModeModule.h"
+#include "NActorPoolsEditorCommands.h"
 #include "NActorPoolsEditorStyle.h"
-#include "NActorPoolsEditorToolMenu.h"
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
@@ -31,7 +31,8 @@ void FNActorPoolsEditorModule::ShutdownModule()
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
 	
-	FNActorPoolsEditorToolMenu::Unregister();
+	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
+	FNActorPoolsEditorCommands::RemoveMenuEntries();
 	
 	// Teardown Placement
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
@@ -45,12 +46,12 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
-	
-	
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNActorPoolsEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NActorPools)));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&FNActorPoolsEditorCommands::AddMenuEntries));
 	}
 	
 	if (GUnrealEd)

@@ -36,10 +36,4 @@ public:
 	 * FNProcGenEdMode::CreateCollisionVisualizer when none is alive, otherwise destroys the existing one.
 	 */
 	static void CollisionVisualizerToggle();
-
-	/** Spawn or focus the EUW-based ProcGen tool window. */
-	static void CreateEditorUtilityWindow();
-
-	/** @return true if the ProcGen tool window is currently open. */
-	static bool HasEditorUtilityWindow();
 };
