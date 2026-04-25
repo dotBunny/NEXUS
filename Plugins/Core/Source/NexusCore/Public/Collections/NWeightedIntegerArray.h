@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NRandom.h"
+#include "NWeightedIntegerArray.generated.h"
 
 /**
  * An inline array of integers that are proportionally weighted via repeated entries.
@@ -12,8 +13,11 @@
  * entry then becomes a uniform random index lookup while still honoring the relative weights.
  * This keeps selection fast at the cost of a larger memory footprint for heavily weighted entries.
  */
+USTRUCT(BlueprintType)
 struct FNWeightedIntegerArray
 {
+	GENERATED_BODY()
+	
 	/**
 	 * Add a value to the array, duplicated according to its weight.
 	 * @param Value The integer value to add.
@@ -22,7 +26,6 @@ struct FNWeightedIntegerArray
 	void Add(const int32 Value, const int32 Weight = 1)
 	{
 		if (Weight == 0) return;
-		Values.AddUnique(Value);
 		Data.Reserve(Data.Num() + Weight);
 		for (int i = 0; i < Weight; i++)
 		{
@@ -34,7 +37,6 @@ struct FNWeightedIntegerArray
 	/** Clears all entries from the array. */
 	void Empty()
 	{
-		Values.Empty();
 		Data.Empty();
 		CachedMaxIndex = -1;
 	};
@@ -52,7 +54,6 @@ struct FNWeightedIntegerArray
 				Data.RemoveAtSwap(i, EAllowShrinking::No);
 			}
 		}
-		Values.RemoveSwap(Value);
 		CachedMaxIndex = Data.Num() - 1;
 	}
 
@@ -72,10 +73,6 @@ struct FNWeightedIntegerArray
 			}
 
 			if (Limit == 0) break;
-		}
-		if (!Data.Contains(Value))
-		{
-			Values.RemoveSwap(Value);
 		}
 		CachedMaxIndex = Data.Num() - 1;
 	}
@@ -120,7 +117,10 @@ struct FNWeightedIntegerArray
 		return ReturnValue;
 	}
 
-	/** Get a random value from the array creating an instance FRandomStream from the Seed. */
+	/**
+	 * Get a random value from the array using a one-shot FRandomStream constructed from Seed.
+	 * @param Seed The seed used to construct the FRandomStream for this single pick. Calling again with the same Seed picks the same entry.
+	 */
 	int32 RandomOneShotValue(const int Seed) const
 	{
 		const FRandomStream RandomStream(Seed);
@@ -141,8 +141,12 @@ struct FNWeightedIntegerArray
 	}
 
 	/**
-	 * Get a random value from the array creating an instance FRandomStream from the Seed;
-	 * additionally settings the Seed with the mutated seed.	 
+	 * Get a random value from the array using an FRandomStream seeded from Seed, and write the stream's mutated seed back to Seed.
+	 *
+	 * Use this when chaining picks with a tracked seed so each call advances the stream deterministically.
+	 *
+	 * @param Seed The seed used to construct the FRandomStream; updated to the stream's post-pick seed on return.
+	 * @return The picked value.
 	 */
 	int32 RandomTrackedValue(int32& Seed) const
 	{
@@ -202,22 +206,35 @@ struct FNWeightedIntegerArray
 	 * @param Value The value to test for.
 	 * @return True if Value is present in the array, false otherwise.
 	 */
-	bool HasValue(const int32 Value) const { return Values.Contains(Value); }
+	bool HasValue(const int32 Value) const { return Data.Contains(Value); }
 
 	/**
-	 * How many entries remain in the weighted array?
-	 * @return The number of entries left?
+	 * Return the distinct set of values currently present in the array.
+	 *
+	 * Each value appears once in the result regardless of how many weighted copies it has in the
+	 * underlying storage. The returned array is built fresh on every call.
+	 *
+	 * @return A new array containing each unique value present in the weighted array.
+	 */
+	TArray<int32> GetUniqueValues()
+	{
+		TArray<int32> Values;
+		for (int i = 0; i < Data.Num(); i++)
+		{
+			Values.AddUnique(Data[i]);
+		}
+		return MoveTemp(Values);
+	}
+
+	/**
+	 * Total number of weighted entries currently in the array.
+	 * @return The size of the underlying storage — equal to the sum of every value's remaining weight.
 	 */
 	int32 WeightedCount() const { return Data.Num(); }
-	
-	/**
-	 * How many distinct values remain in the array, ignoring weighting?
-	 * @return The number of unique values currently present.
-	 */
-	int32 ValueCount() const { return Values.Num(); }
 
 private:
-	TArray<int32> Values;
+	UPROPERTY(VisibleAnywhere)
 	TArray<int32> Data;
+	UPROPERTY(VisibleAnywhere)
 	int32 CachedMaxIndex = 0;
 };
