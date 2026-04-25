@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NActorPool.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "Engine/StreamableManager.h"
 #include "NGetActorBlueprintAsyncAction.generated.h"
@@ -22,9 +23,8 @@ public:
 	/**
 	 * Gets an actor from a given pool asynchronously, creating a pool as necessary.
 	 * @note Primarily used to decouple hard references to Actors.
-	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param WorldContextObject Context used to resolve the Actor Pool subsystem.
-	 * @param ActorClass The soft class to load and then spawn from the pool.
+	 * @param ActorClass The soft class to load and then spawn from the pool.	
 	 * @return The async action instance that BP will attach its output pins to.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor Async", Category = "NEXUS|Actor Pools",
@@ -38,10 +38,11 @@ public:
 	virtual void Activate() override;
 
 private:
+	FDelegateHandle OnCreatedPoolHandle;
 	TWeakObjectPtr<UObject> WorldContext;
 	TSoftClassPtr<AActor> ActorClass;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
-
+	
 	void OnLoaded();
-	void OnHasPool();
+	void OnHasPool(FNActorPool* ActorPool);
 };

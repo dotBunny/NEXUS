@@ -13,7 +13,6 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSpawnActorAsyncOutputPin, AActor*, 
 
 /**
  * Async Blueprint action that soft-loads an AActor class and then spawns an instance of it from the Actor Pool subsystem.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/spawn-actor-blueprint-async-action/">UNSpawnActorBlueprintAsyncAction</a>
  */
 UCLASS()
 class NEXUSACTORPOOLS_API UNSpawnActorBlueprintAsyncAction : public UBlueprintAsyncActionBase
@@ -41,13 +40,13 @@ public:
 	virtual void Activate() override;
 
 private:
+	FDelegateHandle OnCreatedPoolHandle;
 	TWeakObjectPtr<UObject> WorldContext;
 	TSoftClassPtr<AActor> ActorClass;
 	FVector Position = FVector::ZeroVector;
 	FRotator Rotation = FRotator::ZeroRotator;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
-	FNActorPool* ActorPool;
 	
 	void OnLoaded();
-	void OnHasPool();
+	void OnHasPool(FNActorPool* ActorPool);
 };

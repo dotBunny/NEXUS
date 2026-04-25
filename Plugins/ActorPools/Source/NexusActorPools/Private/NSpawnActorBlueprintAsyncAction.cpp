@@ -36,26 +36,48 @@ void UNSpawnActorBlueprintAsyncAction::Activate()
 
 void UNSpawnActorBlueprintAsyncAction::OnLoaded()
 {
-	//const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-	//UClass* Actor = ActorClass.Get();
+	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
+	UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+	if (!ActorPoolSubsystem)
+	{
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to complete Spawn Actor Async as ActorPoolSubsystem is NULL"));
+		SetReadyToDestroy();
+		return;
+	}
 	
-	// ActorPoolSubsystem->CreateActorPool(Actor, ActorPoolSubsystem->GetDefaultSettings(Actor));
+	UClass* ActorLoaded = ActorClass.Get();
 	
-
-	OnHasPool();
+	// Already has pool created
+	if (ActorPoolSubsystem->HasActorPool(ActorLoaded))
+	{
+		OnHasPool(ActorPoolSubsystem->GetActorPool(ActorLoaded));
+		return;
+	}
+	
+	// Setup callback for when pool is added.
+	OnCreatedPoolHandle = ActorPoolSubsystem->OnActorPoolAdded.AddUObject(this, &UNSpawnActorBlueprintAsyncAction::OnHasPool);
+	ActorPoolSubsystem->CreateActorPool(ActorLoaded, ActorPoolSubsystem->GetDefaultSettings(ActorLoaded));
 }
 
-void UNSpawnActorBlueprintAsyncAction::OnHasPool()
+void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 {
-	AActor* SpawnedActor = nullptr;
-	if (const TSubclassOf<AActor> Class = ActorClass.Get(); Class && WorldContext.IsValid())
+	// Not for me!
+	if (ActorPool->GetTemplate() != ActorClass.Get()) return;
+	
+	// Unregister callback
+	if (OnCreatedPoolHandle.IsValid())
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-		if (UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World))
-		{
-			ActorPoolSubsystem->SpawnActor(Class, Position, Rotation, SpawnedActor);
-		}
+		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+		ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 	}
+	
+	AActor* SpawnedActor = nullptr;
+	if (const TSubclassOf<AActor> Class = ActorClass.Get(); Class && WorldContext.IsValid() && ActorPool != nullptr)
+	{
+		SpawnedActor = ActorPool->Spawn(Position, Rotation);
+	}
+
 	Completed.Broadcast(SpawnedActor);
 	SetReadyToDestroy();
 }
