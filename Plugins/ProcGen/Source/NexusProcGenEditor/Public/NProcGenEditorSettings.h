@@ -32,21 +32,8 @@ public:
 			CollisionVisualizerMaterial = DefaultCollisionVisualizerAsset.Object;
 		}
 	}
-	N_IMPLEMENT_EDITOR_SETTINGS(UNProcGenEditorSettings);
-
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Procedural Generation"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("Editor side settings used in NProcGen."));
-		return SectionDescription;
-	}
-
+	N_IMPLEMENT_EDITOR_SETTINGS(UNProcGenEditorSettings, "Procedural Generation", "Editor side settings used in NProcGen.");
+	
 	/** Default rotation constraints applied to newly-created cell roots. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Cell (Defaults)", DisplayName="Rotation Constraints",
 		meta=(ToolTip=""))

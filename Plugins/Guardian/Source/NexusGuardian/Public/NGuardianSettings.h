@@ -20,25 +20,9 @@ class UNGuardianSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	N_IMPLEMENT_SETTINGS(UNGuardianSettings);
+	N_IMPLEMENT_SETTINGS(UNGuardianSettings, "Guardian", "Settings related to the Guardian subsystem.")
 
 public:
-#if WITH_EDITOR	
-	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
-
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Guardian"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("Settings related to the Guardian subsystem."));
-		return SectionDescription;
-	}
-#endif // WITH_EDITOR	
-
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability"))
 	uint8 BuildAvailability = N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING;
 	

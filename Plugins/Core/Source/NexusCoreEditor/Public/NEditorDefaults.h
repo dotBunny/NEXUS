@@ -29,7 +29,6 @@ public:
 		return CategoryName;
 	}
 
-
 	/**
 	 * 
 	 * Gets the placement category for NEXUS related AActors.

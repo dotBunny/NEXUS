@@ -35,22 +35,7 @@ class UNToolingEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings);
-
-	//~UDeveloperSettings
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Tooling"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("A collection of tools for fixing content in the Unreal Editor."));
-		return SectionDescription;
-	}
-	//End UDeveloperSettings
+	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings, "Tooling", "A collection of tools for fixing content in the Unreal Editor.");
 
 #if WITH_EDITOR
 	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */

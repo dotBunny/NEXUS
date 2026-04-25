@@ -18,25 +18,10 @@ class NEXUSTOOLINGEDITOR_API UNToolingEditorUserSettings : public UDeveloperSett
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorUserSettings);
+	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorUserSettings, "Tooling (User)", "Specific settings for NEXUS: Tooling included with the framework.");
 
 	/** Post-engine-init hook that applies the persisted values to their respective editor systems. */
 	static void OnPostEngineInit();
-
-	//~UDeveloperSettings
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Tooling (User)"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("Specific settings for NEXUS: Tooling included with the framework."));
-		return SectionDescription;
-	}
-	//End UDeveloperSettings
 
 #if WITH_EDITOR
 	//~UObject

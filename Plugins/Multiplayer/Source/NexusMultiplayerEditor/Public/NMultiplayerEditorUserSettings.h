@@ -20,20 +20,7 @@ class UNMultiplayerEditorUserSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNMultiplayerEditorUserSettings);
-	
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override { return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Multiplayer (User)"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("Configuration for the multiplayer test system."));
-		return SectionDescription;
-	}
+	N_IMPLEMENT_EDITOR_SETTINGS(UNMultiplayerEditorUserSettings, "Multiplayer (User)", "Configuration for the multiplayer test system.");
 
 #if WITH_EDITORONLY_DATA
 	

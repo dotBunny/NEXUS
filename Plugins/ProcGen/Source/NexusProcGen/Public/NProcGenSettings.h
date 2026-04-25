@@ -36,25 +36,7 @@ class NEXUSPROCGEN_API UNProcGenSettings : public UDeveloperSettings
 		}
 	}
 
-	N_IMPLEMENT_SETTINGS(UNProcGenSettings);
-
-#if WITH_EDITOR
-
-	virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  }
-	
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Procedural Generation"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("Settings related to ProcGen."));
-		return SectionDescription;
-	}
-
-#endif // WITH_EDITOR
+	N_IMPLEMENT_SETTINGS(UNProcGenSettings, "Procedural Generation", "Settings related to ProcGen.");
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Voxel Size",
