@@ -23,7 +23,27 @@ class UNCollectionsLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
-
+	
+	/**
+	 * Replace the contents of WeightedIntegerArray with the (value, weight) pairs.
+	 *
+	 * The target array is emptied first, then each entry from Preset.Values is inserted with its
+	 * declared weight. Use this to populate a runtime weighted array from a UDataAsset / settings
+	 * field authored as a compact map rather than a fully-expanded weighted array.
+	 *
+	 * @param WeightedIntegerArray The target array, replaced in place.
+	 * @param PresetValues         Array of FInvVector2 representing Value(X) and Weight(Y).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Apply Preset")
+	static void WeightedIntegerArrayApplyPreset(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, TArray<FIntVector2> PresetValues)
+	{
+		WeightedIntegerArray.Empty();
+		for (const auto Pair : PresetValues)
+		{
+			WeightedIntegerArray.Add(Pair.X, Pair.Y);
+		}
+	}
+	
 	/**
 	 * Insert Weight copies of Value into the weighted array.
 	 * @param WeightedIntegerArray The target array, mutated in place.

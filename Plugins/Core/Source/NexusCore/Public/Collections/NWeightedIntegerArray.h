@@ -6,6 +6,24 @@
 #include "NRandom.h"
 #include "NWeightedIntegerArray.generated.h"
 
+// /**
+//  * Authoring-side description of an FNWeightedIntegerArray's contents.
+//  *
+//  * Stores the (Value, Weight) pairs as a TArray of FIntVector2. Use this as a Blueprint-friendly source 
+//  * for populating a runtime FNWeightedIntegerArray via UNCollectionsLibrary::WeightedIntegerArrayApplyPreset, 
+//  * or as a serialized field on UDataAssets and settings classes where storing the fully-expanded weighted array 
+//  * would be wasteful.
+//  */
+// USTRUCT(BlueprintType)
+// struct FNWeightedIntegerArrayPreset
+// {
+// 	GENERATED_BODY();
+//
+// 	/** Distinct values keyed to their weight (the number of copies inserted into the runtime array). */
+// 	UPROPERTY(BlueprintReadWrite)
+// 	TArray<FIntVector2> Values;
+// };
+
 /**
  * An inline array of integers that are proportionally weighted via repeated entries.
  *
