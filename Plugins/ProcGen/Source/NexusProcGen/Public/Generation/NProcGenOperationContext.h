@@ -40,14 +40,9 @@ public:
 
 	/** Organ components grouped into topologically-ordered batches that may run in parallel per step. */
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
-
-	/** Per-element simple-collision meshes gathered from the target world during preprocess, stored in element-local space. */
-	TArray<FNRawMesh> WorldCollisionMeshes;
-
-	/** World-space transforms corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FTransform> WorldCollisionMeshTransforms;
 	
-	static FNWorldActorFilterSettings CreateWorldActorFilterSettings();
+	TArray<FBoxSphereBounds> Bounds;
+	
 	/**
 	 * Register an organ component as a generation input.
 	 * @return true if the component was accepted; false if the context is already locked or the component was rejected.
@@ -85,8 +80,6 @@ public:
 	const FNProcGenOperationSettings& GetOperationSettings() { return OperationSettings; }
 
 private:
-	/** Actor filter for world-collision gathering. */
-	static bool IsWorldCollisionSource(const AActor* Actor);
 
 	/** The identifier of the UNProcGenOperation that owns this context. */
 	uint32 OperationTicket;

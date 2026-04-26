@@ -50,6 +50,8 @@ private:
 
 	/** Flat list of every task in the graph; used for status aggregation. */
 	FGraphEventArray AllTasks;
+	
+	FGraphEventArray PreTasks;
 
 	/** Graph-builder tasks grouped per generation-order batch. */
 	TArray<FGraphEventArray> GraphBuilderTasks;

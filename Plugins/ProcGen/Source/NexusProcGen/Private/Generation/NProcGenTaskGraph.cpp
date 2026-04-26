@@ -12,6 +12,8 @@
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/NProcGenTaskGraphContext.h"
 #include "Generation/Tasks/NCollectPassTask.h"
+#include "Generation/Tasks/NCreateWorldContext.h"
+#include "Generation/Tasks/NCreateWorldTask.h"
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
 #include "Math/NMersenneTwister.h"
@@ -29,10 +31,18 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
 	
+	// Create our world context holder
+	TSharedPtr<FNCreateWorldContext> CreateWorldContextPtr = MakeShared<FNCreateWorldContext, ESPMode::ThreadSafe>(
+		Context->GetTargetWorld(), Context->Bounds);
 	
-	// TODO: Create CopyWorldContext (ThreadSafe)
-	// TODO: Create CopyWorldTask
-	// TODO: Get all of the FNOrganGraphBuilderTask tasks to depend on its completion as well (as its MainThread)
+	// STEP 0 - CAPTURE WORLD
+	// Create our base world evaluation that builds out the collision-mesh for the world.
+	FGraphEventRef CreateWorldTask = TGraphTask<FNCreateWorldTask>::CreateTask(
+				nullptr, 
+				ENamedThreads::GameThread) // Doesn't need to run on game thread
+				.ConstructAndHold(CreateWorldContextPtr);
+	PreTasks.Add(CreateWorldTask);
+	AllTasks.Add(CreateWorldTask);
 	
 	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;
@@ -61,9 +71,9 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
-				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : nullptr,  // Ensures we are waiting for the last pass to complete
+				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &PreTasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(ContextPtr, PassContextPtr);
+				.ConstructAndHold(ContextPtr, PassContextPtr); // TODO: Add CreateWorldContext?
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 

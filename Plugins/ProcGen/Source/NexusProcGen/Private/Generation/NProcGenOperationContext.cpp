@@ -3,7 +3,6 @@
 
 #include "Generation/NProcGenOperationContext.h"
 
-#include "NActorUtils.h"
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
@@ -15,30 +14,20 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 #include "Organ/NOrganVolume.h"
-#include "Types/NRawMeshFactory.h"
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
 }
 
-bool FNProcGenOperationContext::IsWorldCollisionSource(const AActor* Actor)
-{
-	if (Actor->IsA<ANOrganVolume>()) return false;
-	return true;
-}
-
 void FNProcGenOperationContext::ResetContext()
 {
 	OrganContext.Empty();
 	BoneContext.Empty();
-
+	Bounds.Empty();
 	ComponentBoneMap.Empty();
 	GenerationOrder.Empty();
 	InputComponents.Empty();
-
-	WorldCollisionMeshes.Empty();
-	WorldCollisionMeshTransforms.Empty();
 
 	bIsLocked = false;
 }
@@ -54,16 +43,6 @@ void FNProcGenOperationContext::SetOperationSettings(const FNProcGenOperationSet
 	{
 		OperationSettings = InSettings; 
 	}
-}
-
-FNWorldActorFilterSettings FNProcGenOperationContext::CreateWorldActorFilterSettings()
-{
-	// Collect the world AActors that we need to care about
-	FNWorldActorFilterSettings ActorFilterSettings;
-	ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
-	ActorFilterSettings.bIncludePlayerStarts = true;
-	ActorFilterSettings.ExclusionFunction = &FNProcGenOperationContext::IsWorldCollisionSource;
-	return MoveTemp(ActorFilterSettings);
 }
 
 bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
@@ -216,12 +195,10 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			GenerationOrderIndex++;
 		}
 	}
-	
-	// ------------------ TODO: Think below here can be moved to collection task -----------------------------------------------------
-	
+
 	// World Bounds Check
 	bool bHaveUnboundedBounds = false;
-	TArray<FBoxSphereBounds> Bounds;
+	
 	
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
 	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
@@ -269,13 +246,6 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		Bounds.Empty();
 	}
-	
-	// Collect the world AActors that we need to care about
-	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World, CreateWorldActorFilterSettings());
-	
-	// Gather simple-collision meshes from every primitive in the target world, restricted
-	// to actors whose bounds fall inside one of the input organs' volume bounds.
-	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds,WorldCollisionMeshes, WorldCollisionMeshTransforms);
 }
 
 void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
