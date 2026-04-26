@@ -13,8 +13,6 @@
  * [HighPriority], [MediumPriority], [LowPriority]) plus one or more filter tags (Smoke, Stress,
  * Perf, Engine, Product, Negative). Context tags can be combined with the Flags argument at the
  * call site to further scope a test to a particular environment.
- *
- * @see https://nexus-framework.com/docs/plugins/core/testing/
  */
 
 /** Run-anywhere context; the test is valid in any environment. */

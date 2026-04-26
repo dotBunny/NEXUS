@@ -10,7 +10,7 @@
  * A wrapper around the UDetailsView class to expose the internal OnPropertyValueChanged delegate.
  * The delegate is protected on the base class so subclassing is the only way to surface it to
  * native callers that need to react to property edits in an embedded details panel.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/details-view/">UNDetailsView</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/editor-types/components/details-view/">UNDetailsView</a>
  */
 UCLASS()
 class NEXUSUIEDITOR_API UNDetailsView final : public UDetailsView

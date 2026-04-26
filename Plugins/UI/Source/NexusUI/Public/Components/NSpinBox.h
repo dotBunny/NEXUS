@@ -9,7 +9,7 @@
 
 /**
  * A wrapper around the USpinBox class to allow for setting the value without broadcasting events.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/spin-box/">UNSpinBox</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/spin-box/">UNSpinBox</a>
  */
 UCLASS(DisplayName = "NEXUS | SpinBox", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSpinBox : public USpinBox
@@ -27,7 +27,7 @@ public:
 	 * @param NewValue The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/spin-box/#set-value-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/spin-box/#set-value-no-broadcast"))
 	void SetValue_NoBroadcast(const float NewValue);
 	
 private:

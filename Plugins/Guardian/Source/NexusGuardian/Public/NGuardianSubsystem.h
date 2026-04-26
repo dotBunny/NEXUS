@@ -27,7 +27,7 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	 * @note Thresholds are relative to this baseline; thresholds are evaluated only after it is set.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/#setting-a-baseline"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/types/guardian-subsystem/#setting-a-baseline"))
 	void SetBaseline();
 
 	virtual void Tick(float DeltaTime) override;

@@ -9,7 +9,7 @@
 
 /**
  * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/check-box/">UNCheckBox</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/">UNCheckBox</a>
  */
 UCLASS(DisplayName = "NEXUS | CheckBox", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNCheckBox : public UCheckBox
@@ -27,7 +27,7 @@ public:
 	 * @param bNewValue The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set IsChecked (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/check-box/#set-ischecked-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/#set-ischecked-no-broadcast"))
 	void SetIsChecked_NoBroadcast(const bool bNewValue);
 
 	/**
@@ -35,7 +35,7 @@ public:
 	 * @param NewState The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Checked State (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/check-box/#set-checkedstate-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/#set-checkedstate-no-broadcast"))
 	void SetCheckedState_NoBroadcast(const ECheckBoxState NewState);
 	
 private:

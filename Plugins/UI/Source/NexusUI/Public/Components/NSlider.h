@@ -9,7 +9,7 @@
 
 /**
  * A wrapper around the USlider class to allow for setting the value without broadcasting events.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slider/">UNSlider</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/slider/">UNSlider</a>
  */
 UCLASS(DisplayName = "NEXUS | Slider", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSlider : public USlider
@@ -27,7 +27,7 @@ public:
 	 * @param NewValue The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/slider/#set-value-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/slider/#set-value-no-broadcast"))
 	void SetValue_NoBroadcast(const float NewValue);
 
 private:

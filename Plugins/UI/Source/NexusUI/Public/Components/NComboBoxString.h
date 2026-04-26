@@ -9,7 +9,7 @@
 
 /**
  * A wrapper around the UComboBoxString class to allow for setting the selected option without broadcasting events.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/">UNComboBoxString</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/combobox-string/">UNComboBoxString</a>
  */
 UCLASS(DisplayName = "NEXUS | ComboBox (String)", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNComboBoxString : public UComboBoxString
@@ -27,7 +27,7 @@ public:
 	 * @param Option The new option's text.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Selected Option (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/#set-selected-option-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/combobox-string/#set-selected-option-no-broadcast"))
 	void SetSelectedOption_NoBroadcast(FString Option);
 
 	/**
@@ -35,7 +35,7 @@ public:
 	 * @param Index The new option's index.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Selected Index (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/combobox-string/#set-selected-index-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/combobox-string/#set-selected-index-no-broadcast"))
 	void SetSelectedIndex_NoBroadcast(const int32 Index);
 
 private:
