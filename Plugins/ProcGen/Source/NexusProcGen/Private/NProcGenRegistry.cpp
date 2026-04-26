@@ -45,7 +45,7 @@ TArray<UNCellJunctionComponent*> FNProcGenRegistry::GetCellJunctionsComponentsFr
 	return MoveTemp(JunctionComponents);
 }
 
-TArray<UNOrganComponent*> FNProcGenRegistry::GetOrganComponentsFromLevel(const ULevel* Level)
+TArray<UNOrganComponent*> FNProcGenRegistry::GetOrganComponentsFromLevel(const ULevel* Level, const bool bSorted)
 {
 	TArray<UNOrganComponent*> OrganComponents;
 	if (Level == nullptr)
@@ -60,11 +60,19 @@ TArray<UNOrganComponent*> FNProcGenRegistry::GetOrganComponentsFromLevel(const U
 			OrganComponents.Add(Organ);
 		}
 	}
+	
+	if (bSorted)
+	{
+		OrganComponents.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
+			return A.Identifier < B.Identifier;
+		});
+	}
+	
 
 	return MoveTemp(OrganComponents);
 }
 
-TArray<UNBoneComponent*> FNProcGenRegistry::GetBoneComponentsFromLevel(const ULevel* Level)
+TArray<UNBoneComponent*> FNProcGenRegistry::GetBoneComponentsFromLevel(const ULevel* Level, const bool bSorted)
 {
 	TArray<UNBoneComponent*> BoneComponents;
 	if (Level == nullptr)
@@ -78,6 +86,13 @@ TArray<UNBoneComponent*> FNProcGenRegistry::GetBoneComponentsFromLevel(const ULe
 		{
 			BoneComponents.Add(Bone);
 		}
+	}
+	
+	if (bSorted)
+	{
+		BoneComponents.Sort([](const UNBoneComponent& A, const UNBoneComponent& B) {
+			return A.Identifier < B.Identifier;
+		});
 	}
 
 	return MoveTemp(BoneComponents);

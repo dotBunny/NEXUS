@@ -26,7 +26,6 @@ UNProcGenOperation::UNProcGenOperation(const FObjectInitializer& ObjectInitializ
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings)
 {
-	// TODO : Sort Components deterministically
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	Operation->NextTicket = UNProcGenOperation::NextTicket;
 	Operation->ApplySettings(OperationSettings);
@@ -41,7 +40,6 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 
 UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& OperationSettings)
 {
-	// TODO : Sort Objects deterministically
 	UNProcGenOperation* Operation = NewObject<UNProcGenOperation>();
 	Operation->ApplySettings(OperationSettings);
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Objects);

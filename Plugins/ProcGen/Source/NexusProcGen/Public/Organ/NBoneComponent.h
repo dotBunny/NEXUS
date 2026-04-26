@@ -59,6 +59,9 @@ public:
 	/** Organ component this bone contributes to; populated on registration. */
 	UPROPERTY()
 	TObjectPtr<UNOrganComponent> OrganComponent;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Bone Component")
+	FGuid Identifier = FGuid::NewGuid();
 
 	//~USceneComponent
 	virtual void OnRegister() override;

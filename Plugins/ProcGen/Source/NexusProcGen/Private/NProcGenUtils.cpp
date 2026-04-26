@@ -272,7 +272,7 @@ ANCellActor* FNProcGenUtils::GetCellActorFromWorld(const UWorld* World, const bo
 	return nullptr;
 }
 
-TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromLevel(const ULevel* InLevel)
+TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromLevel(const ULevel* InLevel, const bool bSorted)
 {
 	TArray<UNOrganComponent*> Result;
 	if (InLevel == nullptr) return Result;
@@ -286,8 +286,15 @@ TArray<UNOrganComponent*> FNProcGenUtils::GetOrganComponentsFromLevel(const ULev
 			Result.Append(Components);
 		}
 	}
+	
+	if (bSorted)
+	{
+		Result.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
+			return A.Identifier < B.Identifier;
+		});
+	}
     
-	return Result;
+	return MoveTemp(Result);
 
 }
 

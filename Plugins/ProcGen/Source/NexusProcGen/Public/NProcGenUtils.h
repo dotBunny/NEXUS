@@ -39,8 +39,12 @@ public:
 	/** @return First ANCellActor found in World, optionally ignoring level-instance children. */
 	static ANCellActor* GetCellActorFromWorld(const UWorld* World, bool bIgnoreInstancedLevels = true);
 
-	/** @return All UNOrganComponent instances attached to actors in Level. */
-	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* InLevel);
+	/**
+	 * @param InLevel Level to query.
+	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
+	 * @return All UNOrganComponent instances attached to actors in Level.
+	 */
+	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* InLevel, bool bSorted = true);
 
 	/** @return All ANOrganVolume actors in Level. */
 	static TArray<ANOrganVolume*> GetOrganVolumesFromLevel(const ULevel* InLevel);

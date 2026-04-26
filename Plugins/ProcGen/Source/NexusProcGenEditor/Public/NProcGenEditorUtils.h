@@ -67,11 +67,17 @@ public:
 	/** @return Every ANCellActor in the current editor selection. */
 	static TArray<ANCellActor*> GetSelectedCellActors();
 	
-	/** @return Every UNOrganComponent from the current editor selection (volumes and standalone components). */
-	static TArray<UNOrganComponent*> GetSelectedOrganComponents();
-	
-	/** @return Every ANOrganVolume in the current editor selection. */
-	static TArray<ANOrganVolume*> GetSelectedOrganVolumes();
+	/**
+	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
+	 * @return Every UNOrganComponent from the current editor selection (volumes and standalone components).
+	 */
+	static TArray<UNOrganComponent*> GetSelectedOrganComponents(bool bSorted = true);
+
+	/**
+	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
+	 * @return Every ANOrganVolume in the current editor selection.
+	 */
+	static TArray<ANOrganVolume*> GetSelectedOrganVolumes(bool bSorted = true);
 
 	/** @return Bitfield describing which ProcGen categories the current selection includes. */
 	static ENProcGenSelectionFlags GetSelectionFlags();

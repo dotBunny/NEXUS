@@ -95,17 +95,24 @@ bool FNProcGenEditorUtils::IsOrganComponentPresentInCurrentWorld()
 	return false;
 }
 
-TArray<ANOrganVolume*> FNProcGenEditorUtils::GetSelectedOrganVolumes()
+TArray<ANOrganVolume*> FNProcGenEditorUtils::GetSelectedOrganVolumes(const bool bSorted)
 {
 	TArray<ANOrganVolume*> Result;
 	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
 	{
 		if (ANOrganVolume* TestVolume = Cast<ANOrganVolume>( *SelectedActor )) Result.Add(TestVolume);
 	}
+	
+	if (bSorted)
+	{
+		Result.Sort([](const ANOrganVolume& A, const ANOrganVolume& B) {
+			return A.GetOrganComponent()->Identifier < B.GetOrganComponent()->Identifier;
+		});
+	}
 	return MoveTemp(Result);
 }
 
-TArray<UNOrganComponent*> FNProcGenEditorUtils::GetSelectedOrganComponents()
+TArray<UNOrganComponent*> FNProcGenEditorUtils::GetSelectedOrganComponents(const bool bSorted)
 {
 	TArray<UNOrganComponent*> Components;
 	for ( FSelectionIterator SelectedActor( GEditor->GetSelectedActorIterator() ) ; SelectedActor ; ++SelectedActor )
@@ -115,6 +122,14 @@ TArray<UNOrganComponent*> FNProcGenEditorUtils::GetSelectedOrganComponents()
 			Components.Add(Organ->GetOrganComponent());
 		}
 	}
+	
+	if (bSorted)
+	{
+		Components.Sort([](const UNOrganComponent& A, const UNOrganComponent& B) {
+			return A.Identifier < B.Identifier;
+		});
+	}
+	
 	return MoveTemp(Components);
 }
 

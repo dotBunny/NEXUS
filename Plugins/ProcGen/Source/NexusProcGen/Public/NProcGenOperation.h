@@ -83,15 +83,15 @@ public:
 	}
 	
 	/**
-	 * Build an operation from an explicit set of organ components.
-	 * @param Components Components participating in the generation context.
+	 * Build an operation from an explicit set of organ components.	 
+	 * @param Components Components participating in the generation context. It is important that these have been presorted by Identifier to ensure determinism.
 	 * @param OperationSettings Per-operation settings to apply (seed, level-instance behaviour).
 	 * @return The configured operation ready to be registered with a ProcGen subsystem.
 	 */
 	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings);
 	/**
 	 * Build an operation from a weak-pointer set of objects; unresolved or non-organ entries are skipped.
-	 * @param Objects Weak references to organs to pull into the context.
+	 * @param Objects Weak references to organs to pull into the context. It is important that these have been presorted by their components Identifier to ensure determinism.
 	 * @param OperationSettings Per-operation settings to apply.
 	 */
 	static UNProcGenOperation* CreateInstance(const TArray<TWeakObjectPtr<UObject>>& Objects, FNProcGenOperationSettings& OperationSettings);

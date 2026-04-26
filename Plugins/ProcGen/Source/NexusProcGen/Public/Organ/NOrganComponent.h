@@ -58,7 +58,7 @@ public:
 
 	/** Deterministic seed mixed into the organ's generation decisions. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
-	int Seed = 42;
+	int Seed = -1;
 
 	/** Controls when the organ is allowed to generate (load-time, on-demand, or runtime-scheduled). */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
@@ -118,7 +118,8 @@ public:
 		return ReturnTicket;
 	}
 
-
+	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
+	FGuid Identifier = FGuid::NewGuid();
 
 protected:
 

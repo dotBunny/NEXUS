@@ -43,10 +43,18 @@ public:
 	 * @return Cell junctions whose owning actor belongs to the supplied level.
 	 */
 	static TArray<UNCellJunctionComponent*> GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted = true);
-	/** @return Organ components whose owning actor belongs to the supplied level. */
-	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* Level);
-	/** @return Bone components whose owning actor belongs to the supplied level. */
-	static TArray<UNBoneComponent*> GetBoneComponentsFromLevel(const ULevel* Level);
+	/**
+	 * @param Level Level to query.
+	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
+	 * @return Organ components whose owning actor belongs to the supplied level.
+	 */
+	static TArray<UNOrganComponent*> GetOrganComponentsFromLevel(const ULevel* Level, bool bSorted = true);
+	/**
+	 * @param Level Level to query.
+	 * @param bSorted When true, results are returned in a stable sort order suitable for deterministic traversal.
+	 * @return Bone components whose owning actor belongs to the supplied level.
+	 */
+	static TArray<UNBoneComponent*> GetBoneComponentsFromLevel(const ULevel* Level, bool bSorted = true);
 	/** @return The single cell root component belonging to the supplied level, or nullptr if none is registered. */
 	static UNCellRootComponent* GetCellRootComponentFromLevel(const ULevel* Level);
 

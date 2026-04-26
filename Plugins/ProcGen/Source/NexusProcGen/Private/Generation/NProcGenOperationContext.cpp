@@ -3,7 +3,6 @@
 
 #include "Generation/NProcGenOperationContext.h"
 
-#include "LandscapeGizmoActiveActor.h"
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
@@ -14,7 +13,6 @@
 #include "Engine/StaticMesh.h"
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
-#include "Organ/NOrganVolume.h"
 
 FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTicket)
 {
