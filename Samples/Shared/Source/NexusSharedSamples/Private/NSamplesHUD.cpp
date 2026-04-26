@@ -72,7 +72,8 @@ void ANSamplesHUD::DrawMonoText(const FString& Text, const float TextScale, cons
 		MonospaceFont = GEngine->GetMonospaceFont();
 	}
 
-	float OutWidth, OutHeight;
+	float OutWidth;
+	float OutHeight;
 	GetTextSize(Text, OutWidth, OutHeight, MonospaceFont, TextScale);
 	DrawText(Text, Color, Indent, OutCursor.Y, MonospaceFont, TextScale);
 

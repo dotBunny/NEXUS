@@ -70,7 +70,8 @@ void FNMultiplayerEditorCommands::RemoveMultiplayerTestSection()
 	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus != nullptr)
 	{
-		if (UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+		UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
+		if (Menu != nullptr)
 		{
 			Menu->RemoveSection(MultiplayerTestSectionName);
 			ToolMenus->RefreshMenuWidget(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
@@ -95,7 +96,8 @@ bool FNMultiplayerEditorCommands::HasMultiplayerTestSection()
 	// Is shutting down?
 	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus == nullptr) return false;
-	if (UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
+	UToolMenu* Menu = ToolMenus->FindMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser);
+	if (Menu != nullptr)
 	{
 		return Menu->FindSection(MultiplayerTestSectionName) != nullptr;
 	}

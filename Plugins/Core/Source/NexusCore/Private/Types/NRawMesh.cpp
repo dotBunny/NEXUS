@@ -75,7 +75,8 @@ void FNRawMesh::ConvertToTriangles()
 			PolygonNormal = PolygonNormal.GetSafeNormal();
 
 			// Build a 2D basis on the polygon's plane and project the loop into it.
-			FVector Tangent, Bitangent;
+			FVector Tangent;
+			FVector Bitangent;
 			PolygonNormal.FindBestAxisVectors(Tangent, Bitangent);
 
 			TArray<FVector2D> Projected;
