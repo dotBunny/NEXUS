@@ -29,6 +29,11 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
 	
+	
+	// TODO: Create CopyWorldContext (ThreadSafe)
+	// TODO: Create CopyWorldTask
+	// TODO: Get all of the FNOrganGraphBuilderTask tasks to depend on its completion as well (as its MainThread)
+	
 	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;
 	FGraphEventRef LastPassTask = nullptr;

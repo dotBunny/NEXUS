@@ -217,6 +217,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 	
+	// ------------------ TODO: Think below here can be moved to collection task -----------------------------------------------------
+	
 	// World Bounds Check
 	bool bHaveUnboundedBounds = false;
 	TArray<FBoxSphereBounds> Bounds;
