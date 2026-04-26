@@ -47,10 +47,10 @@ public:
 	TArray<TSoftObjectPtr<UNActorPoolSet>> AlwaysCreateSets;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes", 
-		meta=(Tooltop="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
+		meta=(ToolTip="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
 	TArray<FString> IgnoreWorldPrefixes;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
-		meta=(Tooltop="What should be done with an AActor returned to APS that is not known to it."))
+		meta=(ToolTip="What should be done with an AActor returned to APS that is not known to it."))
 	ENActorPoolUnknownBehaviour UnknownBehaviour;
 };
