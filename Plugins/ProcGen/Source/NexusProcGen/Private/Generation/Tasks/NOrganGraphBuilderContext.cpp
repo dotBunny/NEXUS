@@ -21,23 +21,12 @@ FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNProcGenOperationO
 	MaximumCellCount = GeneratorContextMap->SourceComponent->MaximumCellCount;
 	MaximumRetryCount = GeneratorContextMap->MaximumRetryCount;
 	
+	// Keep a local copy of this here
 	bUnbounded = GeneratorContextMap->SourceComponent->bUnbounded;
 	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
-	if (!bUnbounded && GeneratorContextMap->SourceComponent->IsVolumeBased())
-	{
-		const AVolume* Volume = GeneratorContextMap->SourceComponent->GetVolume();
-		
-		Bounds = Volume->GetBounds();
-		Origin = Volume->GetActorLocation();
-	}
-	else
-	{
-		// Unbounded
-		Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
-		Origin = FVector::ZeroVector;
-	}
-
+	Bounds = GeneratorContextMap->Bounds;
+	Origin = GeneratorContextMap->Origin;
 	
 	// Build a safe reference to all the data so we can operate off-thread without issue
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = GeneratorContextMap->SourceComponent->GetTissueMap();

@@ -20,14 +20,20 @@ struct NEXUSPROCGEN_API FNProcGenOperationOrganContext
 	UNOrganComponent* SourceComponent;
 
 	/** Organs whose bounds intersect but are not fully contained by this one. */
-	TArray<UNOrganComponent*> IntersectComponents;
+	TArray<UNOrganComponent*> IntersectComponents = TArray<UNOrganComponent*>();
 
 	/** Organs whose bounds are entirely inside this one. */
-	TArray<UNOrganComponent*> ContainedComponents;
+	TArray<UNOrganComponent*> ContainedComponents = TArray<UNOrganComponent*>();
 
 	/** Bones whose transforms fall inside this organ's volume. */
-	TArray<FNProcGenOperationBoneContext*> ContainedBones;
+	TArray<FNProcGenOperationBoneContext*> ContainedBones = TArray<FNProcGenOperationBoneContext*>();
 
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;
+	
+	/** Spatial bounds of the SourceComponent unless bUnbounded. */
+	FBoxSphereBounds Bounds;
+	
+	/** World origin of the SourceComponent's actor. */
+	FVector Origin;
 };

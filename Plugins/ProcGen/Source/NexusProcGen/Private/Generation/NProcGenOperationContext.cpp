@@ -3,6 +3,7 @@
 
 #include "Generation/NProcGenOperationContext.h"
 
+#include "LandscapeGizmoActiveActor.h"
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
 #include "NProcGenSettings.h"
@@ -63,16 +64,18 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	OrganContext.Add(Component, FNProcGenOperationOrganContext());
 	FNProcGenOperationOrganContext* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;
+	WorkingContext->Origin = Component->GetOwner()->GetActorLocation();
 
 	// We're going to capture all the other components in the level
 	TArray<UNOrganComponent*> LevelComponents = FNProcGenUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
 
-	// We will handle ordering when we lock the context of the generation
-	if (Component->IsVolumeBased())
+	// We've got ourselves a volume and it has dimensions
+	if (Component->IsVolumeBased() && !Component->bUnbounded)
 	{
-		// Look at volume, search for sub volumes to add context too? order matters?
+		// Assign Bounds
 		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
-		const FBoxSphereBounds ComponentVolumeBounds = ComponentVolume->GetBounds();
+		WorkingContext->Bounds = ComponentVolume->GetBounds();
+		
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component)
@@ -84,21 +87,30 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
 			
 			// Check for intersection of any type
-			if (FBoxSphereBounds::BoxesIntersect(ComponentVolumeBounds, OtherVolumeBounds))
+			if (FBoxSphereBounds::BoxesIntersect(WorkingContext->Bounds, OtherVolumeBounds))
 			{
 				AddOrganComponent(OtherComponent);
 				WorkingContext->IntersectComponents.AddUnique(OtherComponent);
 			}
-			
+		
 			// Check for full containment
-			if (FNBoundsUtils::IsBoundsContainedInBounds(OtherVolumeBounds, ComponentVolumeBounds))
+			if (FNBoundsUtils::IsBoundsContainedInBounds(OtherVolumeBounds, WorkingContext->Bounds))
 			{
 				AddOrganComponent(OtherComponent);
 				WorkingContext->ContainedComponents.AddUnique(OtherComponent);
 			}
 		}
 	}
-	
+	else
+	{
+		// An unbounded component intersects with everything, no good way about this, they will generate first
+		WorkingContext->Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
+		for (UNOrganComponent* OtherComponent : LevelComponents)
+		{
+			if (OtherComponent == Component) continue;
+			WorkingContext->IntersectComponents.AddUnique(OtherComponent);
+		}
+	}
 	return true;
 }
 
@@ -126,6 +138,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	int GenerationOrderIndex = 0;
 	GenerationOrder.Empty();
 	GenerationOrder.Add(TArray<UNOrganComponent*>());
+	TArray<UNOrganComponent*> UnboundComponents;
 	TArray<UNOrganComponent*> PossibleComponents;
 	TArray<UNOrganComponent*> ProcessedComponents;
 	for (auto& Pair : OrganContext)
@@ -133,13 +146,23 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		// Assign values while we are iterating for defaults
 		Pair.Value.MaximumRetryCount = Settings->OrganGenerationRetryCount;
 		
-		// TODO: DO we want to check if the component is actually in the current level here?
-		PossibleComponents.AddUnique(Pair.Key);
+		if (Pair.Key->bUnbounded)
+		{
+			// These will get generated last
+			UnboundComponents.AddUnique(Pair.Key);
+		}
+		else
+		{
+			PossibleComponents.AddUnique(Pair.Key);	
+		}
 	}
 
 	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
 	for (auto& Pair : OrganContext)
 	{
+		// Again dont look at Unbounded here
+		if (Pair.Key->bUnbounded) continue;
+		
 		// Handle "easy" work parallelization classification
 		if (FNProcGenOperationOrganContext& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
@@ -196,9 +219,18 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 
-	// World Bounds Check
-	bool bHaveUnboundedBounds = false;
-	
+	// Handle the unbound organs last and make them each their own pass in order of the add
+	const bool bHaveUnboundedBounds = UnboundComponents.Num() > 0;
+	if (bHaveUnboundedBounds)
+	{
+		for (int i = 0; i < UnboundComponents.Num(); i++)
+		{
+			// Add to our generation order last the unbound	
+			GenerationOrder.Add(TArray<UNOrganComponent*>());
+			TArray<UNOrganComponent*>& NextPhase = GenerationOrder.Last();
+			NextPhase.Add(UnboundComponents[i]);
+		}
+	}
 	
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
 	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
@@ -216,13 +248,6 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			}
 			
 			const AVolume* Volume = Component->GetVolume();
-			if (const ANOrganVolume* OrganVolume = Cast<ANOrganVolume>(Volume))
-			{
-				if (OrganVolume->GetOrganComponent()->bUnbounded)
-				{
-					bHaveUnboundedBounds = true;
-				}
-			}
 			Bounds.Add(Volume->GetBounds());
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
@@ -241,7 +266,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		}
 	}
 	
-	// If we have an unbounded volume, we need the entire world, unfortunately.
+	// If we have an unbounded volume, we need touch the entire world, unfortunately.
 	if (bHaveUnboundedBounds)
 	{
 		Bounds.Empty();
