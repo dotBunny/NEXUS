@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
 	"Version": 12,
-	"VersionName": "0.2.7",
+	"VersionName": "0.3.0",
 	"FriendlyName": "NEXUS Samples: Dynamic References",
 	"Description": "Sample content for the NEXUS: Dynamic References plugin.",
 	"Category": "NEXUS Samples",

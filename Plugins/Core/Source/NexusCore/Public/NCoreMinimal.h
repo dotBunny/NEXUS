@@ -16,6 +16,6 @@ namespace NEXUS::Version
 {
 	constexpr int Number = 12;
 	constexpr int Major = 0;
-	constexpr int Minor = 2;
-	constexpr int Patch = 7;
+	constexpr int Minor = 3;
+	constexpr int Patch = 0;
 }
