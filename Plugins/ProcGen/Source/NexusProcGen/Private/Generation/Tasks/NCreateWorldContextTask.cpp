@@ -1,10 +1,10 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Tasks/NBuildWorldContextTask.h"
+#include "Generation/Tasks/NCreateWorldContextTask.h"
 #include "Types/NRawMeshFactory.h"
 
-void FNBuildWorldContextTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
+void FNCreateWorldContextTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	// Collect the world AActors that we need to care about
 	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(WorldContextPtr->InputWorld, CreateWorldActorFilterSettings());

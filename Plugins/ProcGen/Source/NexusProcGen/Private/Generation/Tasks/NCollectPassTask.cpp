@@ -3,7 +3,7 @@
 
 #include "Generation/Tasks/NCollectPassTask.h"
 
-FNCollectPassTask::FNCollectPassTask(const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr) 
+FNCollectPassTask::FNCollectPassTask(const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr) 
 : PassContextPtr(PassContextPtr.ToSharedRef()), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
 {
 }

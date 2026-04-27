@@ -44,7 +44,7 @@ struct FNCellInputDataFilter
  * retries: ResetForRetry drops the in-progress graph while preserving seed/name so analytics
  * remain aggregated.
  */
-class FNOrganGraphBuilderContext
+class FNOrganContext
 {
 	friend struct FNOrganGeneratorBuildGraphTask;
 
@@ -77,8 +77,8 @@ public:
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 
-	FNOrganGraphBuilderContext(const FNOrganLockedData* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
-	~FNOrganGraphBuilderContext();
+	FNOrganContext(const FNOrganLockedData* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
+	~FNOrganContext();
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };

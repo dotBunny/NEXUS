@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Contexts/NOrganGraphBuilderContext.h"
+#include "Generation/Contexts/NOrganContext.h"
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCell.h"
@@ -10,7 +10,7 @@
 #include "Generation/Contexts/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNOrganLockedData* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+FNOrganContext::FNOrganContext(const FNOrganLockedData* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
@@ -138,7 +138,7 @@ FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNOrganLockedData* 
 	bIsValid = true;
 }
 
-FNOrganGraphBuilderContext::~FNOrganGraphBuilderContext()
+FNOrganContext::~FNOrganContext()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
@@ -149,7 +149,7 @@ FNOrganGraphBuilderContext::~FNOrganGraphBuilderContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-bool FNOrganGraphBuilderContext::CheckGraph() const
+bool FNOrganContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
 	int CellNodeCount = 0;
@@ -176,13 +176,13 @@ bool FNOrganGraphBuilderContext::CheckGraph() const
 	return true;
 }
 
-bool FNOrganGraphBuilderContext::ValidateGraph()
+bool FNOrganContext::ValidateGraph()
 {
 	bSuccessful = CheckGraph();
 	return bSuccessful;
 }
 
-void FNOrganGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
+void FNOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
 	JunctionIndices.Empty();
@@ -251,7 +251,7 @@ void FNOrganGraphBuilderContext::FilterCellInputData(const FNCellInputDataFilter
 	}
 }
 
-bool FNOrganGraphBuilderContext::ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics)
+bool FNOrganContext::ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics)
 {
 	// Reset counters
 	for (int i = 0; i < CellInputData.Num(); i++)

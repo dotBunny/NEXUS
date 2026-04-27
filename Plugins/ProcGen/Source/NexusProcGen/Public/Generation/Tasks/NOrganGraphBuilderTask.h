@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Generation/Contexts/NCollectPassContext.h"
-#include "Generation/Contexts/NOrganGraphBuilderContext.h"
+#include "Generation/Contexts/NGraphCollectionContext.h"
+#include "Generation/Contexts/NOrganContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
 
@@ -18,8 +18,8 @@ class FNWorldContext;
  */
 struct FNOrganGraphBuilderTask
 {
-	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr,
-		const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr);
+	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
+		const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
 
@@ -36,10 +36,10 @@ private:
 	TArray<FRotator> WorldCollisionRotations;
 	
 	/** Per-organ input data and output graph reference. */
-	TSharedRef<FNOrganGraphBuilderContext> ContextPtr;
+	TSharedRef<FNOrganContext> ContextPtr;
 
 	/** Shared pass-level context — collects analytics/results across every organ in the step. */
-	TSharedRef<FNCollectPassContext> PassContextPtr;
+	TSharedRef<FNGraphCollectionContext> PassContextPtr;
 	
 	TSharedRef<FNWorldContext> WorldContextPtr;
 

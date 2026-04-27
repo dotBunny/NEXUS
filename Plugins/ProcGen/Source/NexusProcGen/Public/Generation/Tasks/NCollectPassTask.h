@@ -5,7 +5,7 @@
 
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
-#include "Generation/Contexts/NCollectPassContext.h"
+#include "Generation/Contexts/NGraphCollectionContext.h"
 
 class UNProcGenOperation;
 
@@ -14,7 +14,7 @@ class UNProcGenOperation;
  */
 struct FNCollectPassTask
 {
-	explicit FNCollectPassTask(const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
+	explicit FNCollectPassTask(const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCollectPassContextTask, STATGROUP_TaskGraphTasks); }
 
@@ -26,7 +26,7 @@ struct FNCollectPassTask
 
 private:
 	/** Pass-level collection being drained. */
-	TSharedRef<FNCollectPassContext> PassContextPtr;
+	TSharedRef<FNGraphCollectionContext> PassContextPtr;
 
 	/** Top-level task-graph context that receives the drained graphs. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;

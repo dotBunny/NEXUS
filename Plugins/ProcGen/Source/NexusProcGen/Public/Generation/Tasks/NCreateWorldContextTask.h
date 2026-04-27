@@ -6,10 +6,10 @@
 #include "Generation/Contexts/NWorldContext.h"
 #include "Organ/NOrganVolume.h"
 
-class FNBuildWorldContextTask
+class FNCreateWorldContextTask
 {
 public:
-	explicit FNBuildWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr) 
+	explicit FNCreateWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr) 
 	: WorldContextPtr(WorldContextPtr.ToSharedRef())
 	{
 		

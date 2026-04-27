@@ -10,8 +10,8 @@
 #include "Generation/Contexts/NWorldContext.h"
 #include "Math/NMersenneTwister.h"
 
-FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr,
-	const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr)
+FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
+	const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr)
 	: ContextPtr(ContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()), WorldContextPtr(WorldContextPtr.ToSharedRef())
 {
 }

@@ -7,13 +7,13 @@
 #include "NProcGenOperation.h"
 
 #include "Generation/Contexts/NProcGenOperationContext.h"
-#include "Generation/Contexts/NCollectPassContext.h"
+#include "Generation/Contexts/NGraphCollectionContext.h"
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Tasks/NCollectPassTask.h"
 #include "Generation/Contexts/NWorldContext.h"
-#include "Generation/Tasks/NBuildWorldContextTask.h"
+#include "Generation/Tasks/NCreateWorldContextTask.h"
 #include "Generation/Tasks/NProcessWorldContextTask.h"
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
@@ -38,21 +38,21 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	
 	// STEP 0 - CAPTURE WORLD (GAME THREAD)
 	// Create our base world evaluation that builds out the collision-mesh for the world.
-	FGraphEventRef CreateWorldTask = TGraphTask<FNBuildWorldContextTask>::CreateTask(
+	FGraphEventRef CreateWorldContextTask = TGraphTask<FNCreateWorldContextTask>::CreateTask(
 				nullptr, 
 				ENamedThreads::GameThread) // Doesn't need to run on game thread
 				.ConstructAndHold(WorldContextPtr);
-	Step0Tasks.Add(CreateWorldTask);
-	AllTasks.Add(CreateWorldTask);
+	Step0Tasks.Add(CreateWorldContextTask);
+	AllTasks.Add(CreateWorldContextTask);
 	
 	// STEP 1 - PROCESS WORLD CAPTURE
 	// Create associated data from our initial game-thread blocking task
-	FGraphEventRef ProcessWorldTask = TGraphTask<FNProcessWorldContextTask>::CreateTask(
+	FGraphEventRef ProcessWorldContextTask = TGraphTask<FNProcessWorldContextTask>::CreateTask(
 				&Step0Tasks, 
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
 				.ConstructAndHold(WorldContextPtr);
-	Step1Tasks.Add(ProcessWorldTask);
-	AllTasks.Add(ProcessWorldTask);
+	Step1Tasks.Add(ProcessWorldContextTask);
+	AllTasks.Add(ProcessWorldContextTask);
 	
 	// STEP 2 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;
@@ -62,7 +62,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	for (auto Pass : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
-		TSharedPtr<FNCollectPassContext> PassContextPtr = MakeShared<FNCollectPassContext, ESPMode::ThreadSafe>();
+		TSharedPtr<FNGraphCollectionContext> PassContextPtr = MakeShared<FNGraphCollectionContext, ESPMode::ThreadSafe>();
 		
 		int ComponentCount = 0;
 		FGraphEventArray PassTasks;
@@ -75,7 +75,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			if (!ContextMap->SourceComponent->bActivated) continue;
 			
 			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
-			TSharedPtr<FNOrganGraphBuilderContext> ContextPtr = MakeShared<FNOrganGraphBuilderContext>(
+			TSharedPtr<FNOrganContext> ContextPtr = MakeShared<FNOrganContext>(
 				ContextMap, BaseGenerator.UnsignedInteger64(), 
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 			
