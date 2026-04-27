@@ -4,7 +4,7 @@
 #include "NProcGenEditorSubsystem.h"
 
 #include "NProcGenOperation.h"
-#include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Organ/NOrganComponent.h"
 
 void UNProcGenEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)

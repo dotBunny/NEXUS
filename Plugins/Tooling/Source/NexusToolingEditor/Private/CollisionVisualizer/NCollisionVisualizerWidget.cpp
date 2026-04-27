@@ -61,10 +61,10 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 	UpdateSettings(Actor);
 	
 	// Draw Actor w/ Settings
-	using enum ECollisionVisualizerMethod;
+	using enum ENCollisionVisualizerMethod;
 	if (Settings.Query.QueryMethod == LineTrace)
 	{
-		using enum ECollisionVisualizerPrefix;
+		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
 			FNCollisionVisualizerUtils::DoLineTraceSingle(Settings, Actor->GetWorld(), 
@@ -83,7 +83,7 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 	}
 	else if (Settings.Query.QueryMethod == Sweep)
 	{
-		using enum ECollisionVisualizerPrefix;
+		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
 			FNCollisionVisualizerUtils::DoSweepSingle(Settings, Actor->GetWorld(), 
@@ -105,7 +105,7 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 	}
 	else if (Settings.Query.QueryMethod == Overlap)
 	{
-		using enum ECollisionVisualizerOverlapBlocking;
+		using enum ENCollisionVisualizerOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
 			FNCollisionVisualizerUtils::DoOverlapBlocking(Settings, Actor->GetWorld(), 
@@ -134,9 +134,9 @@ void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor
 		
 		Actor->SetActorTickInterval(Settings.Drawing.DrawTimer);
 		
-		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::EditorOnly));
-		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::PlayInEditor));
-		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::SimulateInEditor));
+		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::EditorOnly));
+		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::PlayInEditor));
+		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::SimulateInEditor));
 	}
 }
 

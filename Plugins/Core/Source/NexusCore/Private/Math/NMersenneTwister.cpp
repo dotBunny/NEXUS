@@ -108,7 +108,7 @@ float FNMersenneTwister::FloatRange(const float MinimumValue, const float Maximu
 	return PseudoRandomValue;
 }
 
-float FNMersenneTwister::DoubleRange(const double MinimumValue, const double MaximumValue)
+double FNMersenneTwister::DoubleRange(const double MinimumValue, const double MaximumValue)
 {
 	const double PseudoRandomValue = std::uniform_real_distribution<double>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;

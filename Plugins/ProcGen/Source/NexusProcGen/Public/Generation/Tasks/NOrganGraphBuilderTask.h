@@ -3,10 +3,12 @@
 
 #pragma once
 
-#include "NCollectPassContext.h"
-#include "Generation/Tasks/NOrganGraphBuilderContext.h"
+#include "Generation/Contexts/NCollectPassContext.h"
+#include "Generation/Contexts/NOrganGraphBuilderContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
+
+class FNWorldContext;
 
 /**
  * Task-graph job that builds the FNProcGenGraph for a single organ.
@@ -17,7 +19,7 @@
 struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr,
-		const TSharedPtr<FNCollectPassContext>& PassContextPtr);
+		const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
 
@@ -28,12 +30,18 @@ struct FNOrganGraphBuilderTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-
+	
+	TArray<FNRawMesh> WorldCollisionMeshes;
+	TArray<FVector> WorldCollisionLocations;
+	TArray<FRotator> WorldCollisionRotations;
+	
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNOrganGraphBuilderContext> ContextPtr;
 
 	/** Shared pass-level context — collects analytics/results across every organ in the step. */
 	TSharedRef<FNCollectPassContext> PassContextPtr;
+	
+	TSharedRef<FNWorldContext> WorldContextPtr;
 
 	/** Analytics recorded while this task runs; forwarded to the pass context on completion. */
 	mutable FNOrganGraphBuilderAnalytics Analytics;

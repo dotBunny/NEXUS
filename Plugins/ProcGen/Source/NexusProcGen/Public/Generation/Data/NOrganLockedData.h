@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NProcGenOperationBoneContext.h"
+#include "NBoneLockedData.h"
 
 class UNOrganComponent;
 
@@ -14,7 +14,7 @@ class UNOrganComponent;
  * Holds topological relationships (intersecting/contained organs), the bones that fall inside
  * this organ, and retry budget for the graph-builder stage.
  */
-struct NEXUSPROCGEN_API FNProcGenOperationOrganContext
+struct NEXUSPROCGEN_API FNOrganLockedData
 {
 	/** Organ component this context was computed from. */
 	UNOrganComponent* SourceComponent;
@@ -26,7 +26,7 @@ struct NEXUSPROCGEN_API FNProcGenOperationOrganContext
 	TArray<UNOrganComponent*> ContainedComponents = TArray<UNOrganComponent*>();
 
 	/** Bones whose transforms fall inside this organ's volume. */
-	TArray<FNProcGenOperationBoneContext*> ContainedBones = TArray<FNProcGenOperationBoneContext*>();
+	TArray<FNBoneLockedData*> ContainedBones = TArray<FNBoneLockedData*>();
 
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;

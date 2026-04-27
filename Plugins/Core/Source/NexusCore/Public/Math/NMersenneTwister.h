@@ -78,8 +78,8 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random double.
 	 */
-	float DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
-	FORCEINLINE float RandRange(const double MinimumValue = MIN_flt, const double MaximumValue = MAX_flt)
+	double DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
+	FORCEINLINE double RandRange(const double MinimumValue = MIN_flt, const double MaximumValue = MAX_flt)
 	{
 		return DoubleRange(MinimumValue, MaximumValue);
 	}

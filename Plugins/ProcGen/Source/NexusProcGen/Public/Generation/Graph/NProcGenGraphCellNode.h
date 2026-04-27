@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/NCellInputData.h"
+#include "Generation/Data/NCellInputData.h"
 #include "NProcGenGraphNode.h"
 #include "Cell/NCell.h"
 #include "Types/NRawMeshUtils.h"
@@ -50,6 +50,8 @@ public:
 	{
 		return WorldBounds.Intersect(Other->WorldBounds);
 	}
+	
+
 
 	/**
 	 * Walks linked neighbours up to MaxDepth looking for an existing node built from the same input data.
@@ -71,6 +73,12 @@ public:
 	{
 		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
 			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
+	}
+	
+	bool CheckHullIntersects(const FVector& OtherLocation, const FRotator& OtherRotation,  const FNRawMesh& OtherMesh) const
+	{
+		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
+			OtherMesh, OtherLocation, OtherRotation);
 	}
 
 	/**

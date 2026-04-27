@@ -3,7 +3,7 @@
 
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
-#include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Graph/NProcGenGraph.h"
 
 FNSpawnCellProxiesTask::FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)

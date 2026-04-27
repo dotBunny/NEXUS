@@ -54,11 +54,11 @@ public:
 
 private:
 	/** Map the visualizer's mobility enum onto the engine's EQueryMobilityType. */
-	static EQueryMobilityType ToQueryMobilityType(const ECollisionVisualizerMobility Mobility)
+	static EQueryMobilityType ToQueryMobilityType(const ENCollisionVisualizerMobility Mobility)
 	{
 		switch (Mobility)
 		{
-			using enum ECollisionVisualizerMobility;
+			using enum ENCollisionVisualizerMobility;
 		case Any: 
 			return EQueryMobilityType::Any;
 		case Static: 

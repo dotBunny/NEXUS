@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenOperationContext.h"
+#include "Generation/Contexts/NProcGenOperationContext.h"
 
 #include "NProcGenMinimal.h"
 #include "NProcGenRegistry.h"
@@ -59,8 +59,8 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	}
 	
 	InputComponents.Add(Component);
-	OrganContext.Add(Component, FNProcGenOperationOrganContext());
-	FNProcGenOperationOrganContext* WorkingContext = OrganContext.Find(Component);
+	OrganContext.Add(Component, FNOrganLockedData());
+	FNOrganLockedData* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;
 	WorkingContext->Origin = Component->GetOwner()->GetActorLocation();
 
@@ -126,8 +126,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	BoneContext.Reserve(BoneComponents.Num());
 	for (const auto& BoneComponent : BoneComponents)
 	{
-		BoneContext.Add(BoneComponent, FNProcGenOperationBoneContext());
-		FNProcGenOperationBoneContext* WorkingContext = BoneContext.Find(BoneComponent);
+		BoneContext.Add(BoneComponent, FNBoneLockedData());
+		FNBoneLockedData* WorkingContext = BoneContext.Find(BoneComponent);
 		WorkingContext->SourceComponent = BoneComponent;
 		WorkingContext->CornerPoints = BoneComponent->GetCornerPoints(Settings->SocketSize);
 	}
@@ -162,7 +162,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		if (Pair.Key->bUnbounded) continue;
 		
 		// Handle "easy" work parallelization classification
-		if (FNProcGenOperationOrganContext& ComponentContext = Pair.Value; 
+		if (FNOrganLockedData& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
 			PossibleComponents.Remove(Pair.Key);
@@ -187,7 +187,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNProcGenOperationOrganContext* ComponentContext = OrganContext.Find(Component);
+			FNOrganLockedData* ComponentContext = OrganContext.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
@@ -237,7 +237,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (auto& Component : Phase)
 		{
-			FNProcGenOperationOrganContext* OrganGenerationContext = OrganContext.Find(Component);
+			FNOrganLockedData* OrganGenerationContext = OrganContext.Find(Component);
 			
 			if (!Component->IsVolumeBased())
 			{
@@ -250,7 +250,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
-				 FNProcGenOperationBoneContext* Context = BoneContext.Find(BoneComponents[i]);
+				 FNBoneLockedData* Context = BoneContext.Find(BoneComponents[i]);
 				if (Volume->EncompassesPoint(Context->CornerPoints[0]) || 
 					Volume->EncompassesPoint(Context->CornerPoints[1]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[2]) ||

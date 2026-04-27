@@ -10,7 +10,7 @@
  * Which UWorld query flavour the collision visualizer should issue.
  */
 UENUM()
-enum class ECollisionVisualizerMethod : uint8
+enum class ENCollisionVisualizerMethod : uint8
 {
 	LineTrace,
 	Sweep,
@@ -21,7 +21,7 @@ enum class ECollisionVisualizerMethod : uint8
  * Trace/sweep result mode (single result, multi result, or boolean test).
  */
 UENUM()
-enum class ECollisionVisualizerPrefix : uint8
+enum class ENCollisionVisualizerPrefix : uint8
 {
 	Single,
 	Multi,
@@ -32,7 +32,7 @@ enum class ECollisionVisualizerPrefix : uint8
  * Overlap flavour — blocking-only, any-overlap, or multi-overlap.
  */
 UENUM()
-enum class ECollisionVisualizerOverlapBlocking : uint8
+enum class ENCollisionVisualizerOverlapBlocking : uint8
 {
 	Blocking,
 	Any,
@@ -43,7 +43,7 @@ enum class ECollisionVisualizerOverlapBlocking : uint8
  * Which UE collision query dispatch (channel / object type / named profile) to use.
  */
 UENUM()
-enum class ECollisionVisualizerBy : uint8
+enum class ENCollisionVisualizerBy : uint8
 {
 	Channel,
 	ObjectType,
@@ -54,7 +54,7 @@ enum class ECollisionVisualizerBy : uint8
  * Mobility filter applied to the query — maps onto EQueryMobilityType.
  */
 UENUM()
-enum class ECollisionVisualizerMobility : uint8
+enum class ENCollisionVisualizerMobility : uint8
 {
 	Any,
 	Static,
@@ -66,7 +66,7 @@ enum class ECollisionVisualizerMobility : uint8
  * Primitive shape used by sweep/overlap queries.
  */
 UENUM()
-enum class ECollisionVisualizerShape : uint8
+enum class ENCollisionVisualizerShape : uint8
 {
 	Box,
 	Capsule,
@@ -77,14 +77,14 @@ enum class ECollisionVisualizerShape : uint8
  * Bitflag mask selecting which editor contexts the visualizer should render into.
  */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
-enum class ECollisionVisualizerDrawMode : uint8
+enum class ENCollisionVisualizerDrawMode : uint8
 {
 	None = 0 UMETA(Hidden),
 	EditorOnly = 1 << 0 UMETA(DisplayName = "Editor"),
 	PlayInEditor =  1 << 1 UMETA(DisplayName = "PIE"),
 	SimulateInEditor =  1 << 2 UMETA(DisplayName = "SIE"),
 };
-ENUM_CLASS_FLAGS(ECollisionVisualizerDrawMode)
+ENUM_CLASS_FLAGS(ENCollisionVisualizerDrawMode)
 
 /**
  * Start/end positions and orientation used to drive a single collision-visualizer query.
@@ -113,54 +113,54 @@ struct FNCollisionVisualizerQuery
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, DisplayName="Method")
-	ECollisionVisualizerMethod QueryMethod = ECollisionVisualizerMethod::LineTrace;
+	ENCollisionVisualizerMethod QueryMethod = ENCollisionVisualizerMethod::LineTrace;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Type", 
-		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::Overlap", EditConditionHides))
-	ECollisionVisualizerPrefix QueryPrefix = ECollisionVisualizerPrefix::Single;
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::Overlap", EditConditionHides))
+	ENCollisionVisualizerPrefix QueryPrefix = ENCollisionVisualizerPrefix::Single;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Blocking", 
-		meta=(EditCondition="QueryMethod==ECollisionVisualizerMethod::Overlap", EditConditionHides))
-	ECollisionVisualizerOverlapBlocking QueryOverlapBlocking = ECollisionVisualizerOverlapBlocking::Any;
+		meta=(EditCondition="QueryMethod==ENCollisionVisualizerMethod::Overlap", EditConditionHides))
+	ENCollisionVisualizerOverlapBlocking QueryOverlapBlocking = ENCollisionVisualizerOverlapBlocking::Any;
 	
 	UPROPERTY(EditAnywhere, DisplayName="By")
-	ECollisionVisualizerBy QueryBy = ECollisionVisualizerBy::Channel;
+	ENCollisionVisualizerBy QueryBy = ENCollisionVisualizerBy::Channel;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Channel",
-		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Channel", EditConditionHides))
+		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides))
 	TEnumAsByte<ECollisionChannel> Channel = ECC_Pawn;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Object Type",
-		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::ObjectType", EditConditionHides))
+		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::ObjectType", EditConditionHides))
 	TEnumAsByte<EObjectTypeQuery> ObjectType = EObjectTypeQuery::ObjectTypeQuery1;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Collision Profile",
-		meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Profile", EditConditionHides, 
+		meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Profile", EditConditionHides, 
 			GetOptions="GetCollisionProfileNames"))
 	FName CollisionProfileName = TEXT("BlockAll");
 	
 	UPROPERTY(EditAnywhere, DisplayName="Shape",
-		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace", EditConditionHides))
-	ECollisionVisualizerShape QueryShape = ECollisionVisualizerShape::Capsule;
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace", EditConditionHides))
+	ENCollisionVisualizerShape QueryShape = ENCollisionVisualizerShape::Capsule;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Radius", 
-	meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Capsule", EditConditionHides))
+	meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleRadius = 40.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Half Height",
-		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Capsule", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Capsule", EditConditionHides))
 	float ShapeCapsuleHalfHeight = 80.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Half Extent", 
-		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Box", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Box", EditConditionHides))
 	FVector ShapeBoxHalfExtents = FVector(25,25,25);
 	
 	UPROPERTY(EditAnywhere, DisplayName="Radius", 
-		meta=(EditCondition="QueryMethod!=ECollisionVisualizerMethod::LineTrace&&QueryShape==ECollisionVisualizerShape::Sphere", EditConditionHides))
+		meta=(EditCondition="QueryMethod!=ENCollisionVisualizerMethod::LineTrace&&QueryShape==ENCollisionVisualizerShape::Sphere", EditConditionHides))
 	float SphereRadius = 42.f;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Collision Responses",
-	meta=(EditCondition="QueryBy==ECollisionVisualizerBy::Channel", EditConditionHides))
+	meta=(EditCondition="QueryBy==ENCollisionVisualizerBy::Channel", EditConditionHides))
 	FCollisionResponseContainer CollisionResponses;
 	
 	/** @return An FCollisionResponseParams populated from CollisionResponses for use with channel-based queries. */
@@ -179,7 +179,7 @@ struct FNCollisionVisualizerQuery
 	{
 		switch (QueryShape)
 		{
-			using enum ECollisionVisualizerShape;
+			using enum ENCollisionVisualizerShape;
 		case Box:
 			return FCollisionShape::MakeBox(ShapeBoxHalfExtents);
 		case Capsule:
@@ -235,7 +235,7 @@ struct FNCollisionVisualizerOptions
 	bool bSkipNarrowPhase = false;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Mobility Type")
-	ECollisionVisualizerMobility QueryMobility = ECollisionVisualizerMobility::Any;
+	ENCollisionVisualizerMobility QueryMobility = ENCollisionVisualizerMobility::Any;
 	
 	
 	
@@ -261,9 +261,9 @@ struct FNCollisionVisualizerDrawing
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusToolingEditor.ECollisionVisualizerDrawMode"))
-	uint8 DrawMode =	static_cast<uint8>(ECollisionVisualizerDrawMode::EditorOnly) | 
-						static_cast<uint8>(ECollisionVisualizerDrawMode::PlayInEditor) | 
-						static_cast<uint8>(ECollisionVisualizerDrawMode::SimulateInEditor);
+	uint8 DrawMode =	static_cast<uint8>(ENCollisionVisualizerDrawMode::EditorOnly) | 
+						static_cast<uint8>(ENCollisionVisualizerDrawMode::PlayInEditor) | 
+						static_cast<uint8>(ENCollisionVisualizerDrawMode::SimulateInEditor);
 	
 	UPROPERTY(EditAnywhere, DisplayName="Line Thickness")
 	float DrawLineThickness = 1.5f;

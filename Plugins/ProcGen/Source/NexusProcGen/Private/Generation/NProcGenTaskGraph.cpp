@@ -6,14 +6,15 @@
 #include "NProcGenMinimal.h"
 #include "NProcGenOperation.h"
 
-#include "Generation/NProcGenOperationContext.h"
-#include "Generation/Tasks/NCollectPassContext.h"
+#include "Generation/Contexts/NProcGenOperationContext.h"
+#include "Generation/Contexts/NCollectPassContext.h"
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
-#include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Tasks/NCollectPassTask.h"
-#include "Generation/Tasks/NCreateWorldContext.h"
-#include "Generation/Tasks/NCreateWorldTask.h"
+#include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Tasks/NBuildWorldContextTask.h"
+#include "Generation/Tasks/NProcessWorldContextTask.h"
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
 #include "Math/NMersenneTwister.h"
@@ -32,19 +33,28 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
 	
 	// Create our world context holder
-	TSharedPtr<FNCreateWorldContext> CreateWorldContextPtr = MakeShared<FNCreateWorldContext, ESPMode::ThreadSafe>(
+	TSharedPtr<FNWorldContext> WorldContextPtr = MakeShared<FNWorldContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->Bounds);
 	
-	// STEP 0 - CAPTURE WORLD
+	// STEP 0 - CAPTURE WORLD (GAME THREAD)
 	// Create our base world evaluation that builds out the collision-mesh for the world.
-	FGraphEventRef CreateWorldTask = TGraphTask<FNCreateWorldTask>::CreateTask(
+	FGraphEventRef CreateWorldTask = TGraphTask<FNBuildWorldContextTask>::CreateTask(
 				nullptr, 
 				ENamedThreads::GameThread) // Doesn't need to run on game thread
-				.ConstructAndHold(CreateWorldContextPtr);
-	PreTasks.Add(CreateWorldTask);
+				.ConstructAndHold(WorldContextPtr);
+	Step0Tasks.Add(CreateWorldTask);
 	AllTasks.Add(CreateWorldTask);
 	
-	// STEP 1 - BUILD CELL GRAPHS FOR ORGANS
+	// STEP 1 - PROCESS WORLD CAPTURE
+	// Create associated data from our initial game-thread blocking task
+	FGraphEventRef ProcessWorldTask = TGraphTask<FNProcessWorldContextTask>::CreateTask(
+				&Step0Tasks, 
+				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
+				.ConstructAndHold(WorldContextPtr);
+	Step1Tasks.Add(ProcessWorldTask);
+	AllTasks.Add(ProcessWorldTask);
+	
+	// STEP 2 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;
 	FGraphEventRef LastPassTask = nullptr;
 	
@@ -59,7 +69,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		for (const auto Component : Pass)
 		{
 			// Get the context generated during pre-generation process
-			FNProcGenOperationOrganContext* ContextMap = Context->OrganContext.Find(Component);
+			FNOrganLockedData* ContextMap = Context->OrganContext.Find(Component);
 			
 			// Do not generate a component if it is not activated, don't make the tasks
 			if (!ContextMap->SourceComponent->bActivated) continue;
@@ -71,9 +81,9 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
-				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &PreTasks,  // Ensures we are waiting for the last pass to complete
+				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(ContextPtr, PassContextPtr); // TODO: Add CreateWorldContext?
+				.ConstructAndHold(ContextPtr, PassContextPtr, WorldContextPtr);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 

@@ -6,8 +6,8 @@
 #include "CoreMinimal.h"
 #include "NActorUtils.h"
 #include "NProcGenOperationSettings.h"
-#include "NProcGenOperationBoneContext.h"
-#include "NProcGenOperationOrganContext.h"
+#include "Generation/Data/NBoneLockedData.h"
+#include "Generation/Data/NOrganLockedData.h"
 #include "Organ/NBoneComponent.h"
 #include "Types/NRawMesh.h"
 
@@ -30,10 +30,10 @@ public:
 	TArray<UNOrganComponent*> InputComponents;
 
 	/** Per-organ derived state (bounds, bone references, assigned tissues, etc.). */
-	TMap<UNOrganComponent*, FNProcGenOperationOrganContext> OrganContext;
+	TMap<UNOrganComponent*, FNOrganLockedData> OrganContext;
 
 	/** Per-bone derived state keyed by the bone component it was computed from. */
-	TMap<UNBoneComponent*, FNProcGenOperationBoneContext> BoneContext;
+	TMap<UNBoneComponent*, FNBoneLockedData> BoneContext;
 
 	/** Reverse index from organ to the bone components that belong to it. */
 	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;

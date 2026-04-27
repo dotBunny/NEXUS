@@ -5,23 +5,28 @@
 
 #include "Types/NRawMesh.h"
 
-class FNCreateWorldContext
+class FNWorldContext
 {
 public:
 	
-	UWorld* World;
+	UWorld* InputWorld;
+	TArray<FBoxSphereBounds> InputBounds;
 	
 	/** Per-element simple-collision meshes gathered from the target world during preprocess, stored in element-local space. */
 	TArray<FNRawMesh> CollisionMeshes;
-
+	
 	/** World-space transforms corresponding 1:1 with CollisionMeshes. */
 	TArray<FTransform> CollisionMeshTransforms;
 	
-	TArray<FBoxSphereBounds> Bounds;
+	/** World-space location corresponding 1:1 with CollisionMeshes. */
+	TArray<FVector> CollisionMeshLocations;
 	
-	explicit FNCreateWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
+	/** World-space rotation corresponding 1:1 with CollisionMeshes. */
+	TArray<FRotator> CollisionMeshRotations;
+	
+	explicit FNWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{
-		World = TargetWorld;
-		Bounds = TargetBounds;
+		InputWorld = TargetWorld;
+		InputBounds = TargetBounds;
 	}
 };

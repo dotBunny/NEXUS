@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 
 class UNProcGenOperation;

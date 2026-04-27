@@ -7,11 +7,12 @@
 #include "Generation/Graph/NProcGenGraphBoneNode.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Generation/Graph/NProcGenGraphNodeFactory.h"
+#include "Generation/Contexts/NWorldContext.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganGraphBuilderContext>& ContextPtr,
-	const TSharedPtr<FNCollectPassContext>& PassContextPtr)
-	: ContextPtr(ContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef())
+	const TSharedPtr<FNCollectPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr)
+	: ContextPtr(ContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()), WorldContextPtr(WorldContextPtr.ToSharedRef())
 {
 }
 
@@ -23,6 +24,12 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// Create our deterministic random for the task which will get passed byref to sub-methods
 	FNMersenneTwister Random(ContextPtr->GetSeed());
 	
+	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
+	WorldCollisionMeshes = WorldContextPtr->CollisionMeshes;
+	WorldCollisionLocations = WorldContextPtr->CollisionMeshLocations;
+	WorldCollisionRotations = WorldContextPtr->CollisionMeshRotations;
+	
+	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
 	
 	while (!ContextPtr->IsSuccessful())
 	{
@@ -278,6 +285,23 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		}
 		
 		// TODO: Add world collision check
+		bool bHasWorldCollision = false;
+		for (int j = 0; j < WorldCollisionMeshes.Num(); j++)
+		{
+			// TODO: World to hull?
+			if (TargetCellNode->CheckHullIntersects(WorldCollisionLocations[j], WorldCollisionRotations[j], WorldCollisionMeshes[j]))
+			{
+				bHasWorldCollision = true;
+				break;
+			}
+		}
+		if (bHasWorldCollision)
+		{
+			Analytics.DiscardWorldCollision();
+			delete TargetCellNode;
+			continue;
+		}
+		
 		
 		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);

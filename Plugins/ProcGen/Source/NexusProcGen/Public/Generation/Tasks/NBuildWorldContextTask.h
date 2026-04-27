@@ -3,19 +3,19 @@
 
 #pragma once
 #include "NActorUtils.h"
-#include "NCreateWorldContext.h"
+#include "Generation/Contexts/NWorldContext.h"
 #include "Organ/NOrganVolume.h"
 
-class FNCreateWorldTask
+class FNBuildWorldContextTask
 {
 public:
-	explicit FNCreateWorldTask(const TSharedPtr<FNCreateWorldContext>& CreateWorldContextPtr) 
-	: CreateWorldContextPtr(CreateWorldContextPtr.ToSharedRef())
+	explicit FNBuildWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr) 
+	: WorldContextPtr(WorldContextPtr.ToSharedRef())
 	{
 		
 	}
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateWorldTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNBuildWorldContextTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -38,6 +38,7 @@ public:
 		if (Actor->IsA<ANOrganVolume>()) return false;
 		return true;
 	}
+	
 private:
-	TSharedRef<FNCreateWorldContext> CreateWorldContextPtr;;
+	TSharedRef<FNWorldContext> WorldContextPtr;;
 };

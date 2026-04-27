@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NProcGenTaskGraphContext.h"
 
 FNProcGenTaskGraphContext::FNProcGenTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNProcGenOperationSettings& Settings)
 {

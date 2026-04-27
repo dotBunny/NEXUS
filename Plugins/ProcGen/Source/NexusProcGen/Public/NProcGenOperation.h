@@ -6,7 +6,7 @@
 #include "INProcGenOperationOwner.h"
 #include "NProcGenMinimal.h"
 #include "NProcGenOperationSettings.h"
-#include "Generation/NProcGenOperationContext.h"
+#include "Generation/Contexts/NProcGenOperationContext.h"
 #include "Generation/NProcGenTaskGraph.h"
 #include "NProcGenOperation.generated.h"
 

@@ -16,8 +16,8 @@
 #include "NProcGenUtils.h"
 #include "Selection.h"
 #include "Engine/Level.h"
-#include "Generation/Tasks/NCreateWorldContext.h"
-#include "Generation/Tasks/NCreateWorldTask.h"
+#include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Tasks/NBuildWorldContextTask.h"
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganVolume.h"
 #include "Types/NRawMeshFactory.h"
@@ -25,7 +25,7 @@
 
 ANDebugActor* FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds)
 {
-	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World, FNCreateWorldTask::CreateWorldActorFilterSettings());
+	const TArray<AActor*> WorldActors = FNActorUtils::GetWorldActors(World, FNBuildWorldContextTask::CreateWorldActorFilterSettings());
 	
 	TArray<FNRawMesh> WorldCollisionMeshes;
 	TArray<FTransform> WorldCollisionMeshTransforms;

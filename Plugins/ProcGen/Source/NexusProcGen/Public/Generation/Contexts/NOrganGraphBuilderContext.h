@@ -3,14 +3,14 @@
 
 #pragma once
 
-#include "Generation/NBoneInputData.h"
+#include "Generation/Data/NBoneInputData.h"
 #include "Generation/Graph/NProcGenGraph.h"
-#include "Generation/NCellInputData.h"
+#include "Generation/Data/NCellInputData.h"
 #include "Generation/Tasks/NOrganGraphBuilderAnalytics.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 
-struct FNProcGenOperationOrganContext;
+struct FNOrganLockedData;
 class UNOrganComponent;
 
 /**
@@ -77,7 +77,7 @@ public:
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 
-	FNOrganGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
+	FNOrganGraphBuilderContext(const FNOrganLockedData* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
 	~FNOrganGraphBuilderContext();
 
 	/** @return Deterministic seed used to drive this organ's random stream. */

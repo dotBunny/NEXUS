@@ -1,16 +1,16 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Tasks/NOrganGraphBuilderContext.h"
+#include "Generation/Contexts/NOrganGraphBuilderContext.h"
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
 #include "Collections/NWeightedIntegerArray.h"
-#include "Generation/NProcGenOperationContext.h"
+#include "Generation/Contexts/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNProcGenOperationOrganContext* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+FNOrganGraphBuilderContext::FNOrganGraphBuilderContext(const FNOrganLockedData* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread

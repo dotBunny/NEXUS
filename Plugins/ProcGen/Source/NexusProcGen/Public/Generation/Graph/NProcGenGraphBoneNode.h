@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/NBoneInputData.h"
+#include "Generation/Data/NBoneInputData.h"
 #include "NProcGenGraphNode.h"
 
 /**

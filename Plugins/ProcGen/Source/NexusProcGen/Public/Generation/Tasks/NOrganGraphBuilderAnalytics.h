@@ -31,12 +31,20 @@ struct FNOrganGraphBuilderAnalytics
 	void DiscardOutOfBounds()
 	{
 		DiscardedOutOfBoundsNodes++;
+		TotalDiscardedOutOfBoundsNodes++;
 	}
 
 	/** Record a candidate discarded because it intersected an existing node. */
 	void DiscardIntersecting()
 	{
 		DiscardedIntersectingNodes++;
+		TotalDiscardedIntersectingNodes++;
+	}
+	
+	void DiscardWorldCollision()
+	{
+		DiscardedWorldCollisionNodes++;
+		TotalDiscardedWorldCollisionNodes++;
 	}
 
 	/** Record a retry — bumps RetryCount and resets current-attempt counters. */
@@ -45,6 +53,9 @@ struct FNOrganGraphBuilderAnalytics
 		RetryCount++;
 		CellNodes = 0;
 		NullNodes = 0;
+		DiscardedIntersectingNodes = 0;
+		DiscardedOutOfBoundsNodes = 0;
+		DiscardedWorldCollisionNodes = 0;
 	}
 
 	/** Capture the organ's display name and input constraints for use in OutputToLog. */
@@ -70,6 +81,7 @@ struct FNOrganGraphBuilderAnalytics
 		Builder.Append(TEXT("\tDiscarded Nodes:\n"));
 		Builder.Appendf(TEXT("\t\tOut Of Bounds: %i (%i)\n"), DiscardedOutOfBoundsNodes, TotalDiscardedOutOfBoundsNodes);
 		Builder.Appendf(TEXT("\t\tIntersecting: %i (%i)\n"), DiscardedIntersectingNodes, TotalDiscardedIntersectingNodes);
+		Builder.Appendf(TEXT("\t\tWorld Collision: %i (%i)\n"), DiscardedWorldCollisionNodes, TotalDiscardedWorldCollisionNodes);
 
 		UE_LOG(LogNexusProcGen, Log, TEXT("%s"), Builder.ToString());
 	}
@@ -98,6 +110,8 @@ private:
 
 	/** Intersection-rejected discards on the current attempt. */
 	int DiscardedIntersectingNodes = 0;
+	
+	int DiscardedWorldCollisionNodes = 0;
 
 	/** Cells placed across every attempt. */
 	int TotalCellNodes = 0;
@@ -110,6 +124,8 @@ private:
 
 	/** Intersection-rejected discards across every attempt. */
 	int TotalDiscardedIntersectingNodes = 0;
+	
+	int TotalDiscardedWorldCollisionNodes = 0;
 
 	/** Organ display name used in log output. */
 	FString DisplayName;

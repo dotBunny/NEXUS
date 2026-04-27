@@ -62,6 +62,6 @@ protected:
 	//End UCommonListView
 
 	/** Weakly-held reference object surfaced via Get/SetReferenceObject for use by entry widgets. */
-	UPROPERTY(BlueprintreadOnly, Category = "NListView")
+	UPROPERTY(BlueprintReadOnly, Category = "NListView")
 	TWeakObjectPtr<UObject> ReferenceObject = nullptr;
 };
