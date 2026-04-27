@@ -159,7 +159,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 			delete StartNode; 
 			ContextPtr->CellGraph.Reset(); // Bone is already part of graph
 			ContextPtr->CellGraph = nullptr;
-			Analytics.DiscardStart();
+			Analytics.RetryStart();
 		}
 		else
 		{
@@ -170,7 +170,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 			StartNode->Link(TargetJunctionKey, BoneNode);
 		}
 		
-		if (Analytics.GetDiscardStart() > 100)
+		if (Analytics.GetBadStart() > 100)
 		{
 			break;
 		}

@@ -34,15 +34,15 @@ struct FNOrganGraphBuilderAnalytics
 		TotalDiscardedOutOfBoundsNodes++;
 	}
 	
-	void DiscardStart()
+	void RetryStart()
 	{
-		DiscardedStart++;
-		TotalDiscardedStart++;
+		BadStart++;
+		TotalBadStart++;
 	}
 	
-	int GetDiscardStart() const
+	int GetBadStart() const
 	{
-		return DiscardedStart;
+		return BadStart;
 	}
 
 	/** Record a candidate discarded because it intersected an existing node. */
@@ -67,7 +67,7 @@ struct FNOrganGraphBuilderAnalytics
 		DiscardedIntersectingNodes = 0;
 		DiscardedOutOfBoundsNodes = 0;
 		DiscardedWorldCollisionNodes = 0;
-		DiscardedStart = 0;
+		BadStart = 0;
 	}
 
 	/** Capture the organ's display name and input constraints for use in OutputToLog. */
@@ -87,7 +87,7 @@ struct FNOrganGraphBuilderAnalytics
 		Builder.Appendf(TEXT("\n[FNOrganGeneratorTaskAnalytics] %s\n"), *DisplayName);
 		Builder.Append(TEXT("\tResets:\n"));
 		Builder.Appendf(TEXT("\t\tRetry Count: %i/%i\n"), RetryCount, InputMaximumRetries);
-		Builder.Appendf(TEXT("\t\tDiscarded Start: %i/%i\n"), DiscardedStart, TotalDiscardedStart);
+		Builder.Appendf(TEXT("\t\tBad Start: %i/%i\n"), BadStart, TotalBadStart);
 		Builder.Append(TEXT("\tCreated Nodes:\n"));
 		Builder.Appendf(TEXT("\t\tCell: %i/%i (%i)\n"), CellNodes, InputMinimumCells, TotalCellNodes);
 		Builder.Appendf(TEXT("\t\tNull: %i (%i)\n"), NullNodes, TotalNullNodes);
@@ -121,7 +121,7 @@ private:
 	/** Out-of-bounds discards on the current attempt. */
 	int DiscardedOutOfBoundsNodes = 0;
 
-	int DiscardedStart = 0;
+	int BadStart = 0;
 	
 	/** Intersection-rejected discards on the current attempt. */
 	int DiscardedIntersectingNodes = 0;
@@ -134,7 +134,7 @@ private:
 	/** Null-terminators placed across every attempt. */
 	int TotalNullNodes = 0;
 	
-	int TotalDiscardedStart = 0;
+	int TotalBadStart = 0;
 
 	/** Out-of-bounds discards across every attempt. */
 	int TotalDiscardedOutOfBoundsNodes = 0;

@@ -150,6 +150,8 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext>
 	{
 		Component->SetLastOperationTicket(GetTicket());
 	}
+	const double DurationMs = (FPlatformTime::Seconds() - StartTime) * 1000.0;
+	UE_LOG(LogNexusProcGen, Log, TEXT("[%s] Finished in %f milliseconds."), *DisplayName.ToString(), DurationMs);
 	
 	// Were going to delete this object
 	ConditionalBeginDestroy();
@@ -159,6 +161,8 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 {
 	// Don't double run
 	if (bIsRunning) return;
+	
+	StartTime = FPlatformTime::Seconds();
 	
 	// Cache our caller
 	Owner = Caller;
