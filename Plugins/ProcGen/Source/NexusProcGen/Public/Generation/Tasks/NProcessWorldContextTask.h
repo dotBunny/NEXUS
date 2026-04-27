@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 
 class FNProcessWorldContextTask
 {
@@ -19,24 +20,10 @@ public:
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 	
-	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
-	{
-		int32 Count = WorldContextPtr->CollisionMeshTransforms.Num();
-		
-		WorldContextPtr->CollisionMeshLocations.Empty();
-		WorldContextPtr->CollisionMeshLocations.Reserve(Count);
-		
-		WorldContextPtr->CollisionMeshRotations.Empty();
-		WorldContextPtr->CollisionMeshRotations.Reserve(Count);
-		
-		// Cache our used data for later
-		for (FTransform Transform : WorldContextPtr->CollisionMeshTransforms)
-		{
-			WorldContextPtr->CollisionMeshLocations.Add(Transform.GetLocation());
-			WorldContextPtr->CollisionMeshRotations.Add(Transform.GetRotation().Rotator());
-		}
-	}
+	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
+	
 	
 private:
+	
 	TSharedRef<FNWorldContext> WorldContextPtr;;
 };

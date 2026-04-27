@@ -35,6 +35,7 @@ public:
 	 * Tests whether two raw meshes intersect when placed at the given origins and rotations.
 	 * Uses a transformed-AABB early-out, then a triangle-vs-triangle sweep, then a containment fallback so a
 	 * fully-enclosed convex mesh is still reported as intersecting.
+	 * @remark This assumes that the vertices in the FNRawMesh's are already in position and are not effected by a Transform's scale.
 	 * @param LeftMesh First mesh.
 	 * @param LeftOrigin World-space translation applied to LeftMesh.
 	 * @param LeftRotation World-space rotation applied to LeftMesh.
@@ -73,6 +74,17 @@ public:
 	 */
 	static TArray<ANDebugActor*> CreateRawMeshVisualizers(UWorld* World, TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,
 		UMaterialInterface* MaterialInterface, bool bSingleActor = false, bool bProcessMeshes = false);
+
+	/**
+	 * Builds a convex hull from the supplied mesh's vertex cloud using Chaos's hull builder.
+	 * The source mesh's loop topology is discarded; only its vertices contribute to the hull.
+	 * @param Mesh Source mesh whose vertices form the input point cloud.
+	 * @return A new convex-hull mesh in the source's local space, triangulated when the builder emits n-gon faces.
+	 *         When the source is already convex it is returned as-is (with a log warning) and no rebuild is performed.
+	 *         An empty mesh is returned (with a log warning) when the source has fewer than four vertices or the builder produces no geometry.
+	 * @note The result is flagged Chaos-generated and convex; bounds and center are computed directly from the hull output.
+	 */
+	static FNRawMesh ToConvexHull(const FNRawMesh& Mesh);
 	
 	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.

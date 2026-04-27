@@ -25,9 +25,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	FNMersenneTwister Random(ContextPtr->GetSeed());
 	
 	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
-	WorldCollisionMeshes = WorldContextPtr->CollisionMeshes;
-	WorldCollisionLocations = WorldContextPtr->CollisionMeshLocations;
-	WorldCollisionRotations = WorldContextPtr->CollisionMeshRotations;
+	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
+	WorldCollisionLocations = WorldContextPtr->WorldCollisionMeshLocations;
+	WorldCollisionRotations = WorldContextPtr->WorldCollisionMeshRotations;
 	
 	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
 	
@@ -36,13 +36,13 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// Find the bone and build our starting cell
 		StartGraph(Random);
 	
-		// Check for start placement
+		// Check for start placement and that it was a node too
+		if (ContextPtr->CellGraph == nullptr) return;
 		int NodeCount = ContextPtr->CellGraph->GetNodeCount();
 		if (NodeCount == 0) { return; }
 	
 		// Initialize Analytics
 		Analytics.Init(ContextPtr->GetName(), ContextPtr->MinimumCellCount, ContextPtr->MaximumCellCount, ContextPtr->MaximumRetryCount);
-		
 		
 		// TODO: Create better logic for placement / etc.
 		// #START Temp Generation -------------------------------------------------------------------------------------------------------------------
@@ -116,42 +116,78 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random) const
 		return;
 	}
 	
-	// Get a weighted array of indices representing possible starting cells, and reference the cell data
-	const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
-	FNCellInputData* StartCellInputData = &ContextPtr->CellInputData[StartCellIndex];
 	
-	// Decide which appropriately sized junction is going to be used
-	TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
-	const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-	const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-	
-	const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
-	
-	// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
-	// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
-	// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
-	const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
-	const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
-	
-	const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
-	const FRotator CellWorldRotation = CellWorldQuat.Rotator();
-	const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
-	const FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
-	
-	// Create our bone node and build a graph around it.
-	FNProcGenGraphBoneNode* BoneNode = FNProcGenGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
-	
-	// Create our graph
-	ContextPtr->CellGraph = MakeUnique<FNProcGenGraph>(
-		BoneNode, ContextPtr->Origin, ContextPtr->Bounds, ContextPtr->bUnbounded);
-	
-	// Create our first cell node, attaching it to the bone node
-	FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(StartCellInputData, CellWorldPosition, CellWorldRotation);
-	ContextPtr->CellGraph->RegisterNode(StartNode);
-	
-	// Link our nodes
-	BoneNode->Link(StartNode);
-	StartNode->Link(TargetJunctionKey, BoneNode);
+	// Our starting placement has to happen
+	do
+	{
+		// Get a weighted array of indices representing possible starting cells, and reference the cell data
+		const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
+		FNCellInputData* StartCellInputData = &ContextPtr->CellInputData[StartCellIndex];
+		
+		// Decide which appropriately sized junction is going to be used
+		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
+		const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+		const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+		
+		const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
+		
+		// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
+		// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
+		// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
+		const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
+		const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
+		
+		const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
+		const FRotator CellWorldRotation = CellWorldQuat.Rotator();
+		const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
+		const FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
+		
+		// Create our bone node and build a graph around it.
+		FNProcGenGraphBoneNode* BoneNode = FNProcGenGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
+		
+		// Create our graph
+		ContextPtr->CellGraph = MakeUnique<FNProcGenGraph>(
+			BoneNode, ContextPtr->Origin, ContextPtr->Bounds, ContextPtr->bUnbounded);
+		
+		
+		// Create our first cell node, attaching it to the bone node
+		FNProcGenGraphCellNode* StartNode = FNProcGenGraphNodeFactory::CreateCellNode(StartCellInputData, CellWorldPosition, CellWorldRotation);
+		
+		if (DoesWorldCollide(StartNode))
+		{
+			
+			delete StartNode; 
+			ContextPtr->CellGraph.Reset(); // Bone is already part of graph
+			ContextPtr->CellGraph = nullptr;
+			Analytics.DiscardStart();
+		}
+		else
+		{
+			ContextPtr->CellGraph->RegisterNode(StartNode);
+
+			// Link our nodes
+			BoneNode->Link(StartNode);
+			StartNode->Link(TargetJunctionKey, BoneNode);
+		}
+		
+		if (Analytics.GetDiscardStart() > 100)
+		{
+			break;
+		}
+	} 
+	while (ContextPtr->CellGraph == nullptr);
+}
+
+bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNProcGenGraphCellNode* CellNode) const
+{
+	for (int i = 0; i < WorldCollisionMeshes.Num(); i++)
+	{
+		if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 TArray<FNProcGenGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const
@@ -284,24 +320,13 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			}
 		}
 		
-		// TODO: Add world collision check
-		bool bHasWorldCollision = false;
-		for (int j = 0; j < WorldCollisionMeshes.Num(); j++)
-		{
-			// TODO: World to hull?
-			if (TargetCellNode->CheckHullIntersects(WorldCollisionLocations[j], WorldCollisionRotations[j], WorldCollisionMeshes[j]))
-			{
-				bHasWorldCollision = true;
-				break;
-			}
-		}
-		if (bHasWorldCollision)
+		// Check world collision
+		if (DoesWorldCollide(TargetCellNode))
 		{
 			Analytics.DiscardWorldCollision();
 			delete TargetCellNode;
 			continue;
 		}
-		
 		
 		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);

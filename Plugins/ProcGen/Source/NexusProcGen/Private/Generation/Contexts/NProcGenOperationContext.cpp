@@ -72,8 +72,14 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	{
 		// Assign Bounds
 		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
-		WorkingContext->Bounds = ComponentVolume->GetBounds();
-		
+		const FBoxSphereBounds ComponentBounds = ComponentVolume->GetBounds();
+		WorkingContext->Bounds = ComponentBounds;
+
+		// Stage relationships locally; the recursive AddOrganComponent calls below mutate
+		// OrganContext and can rehash its storage, which would dangle WorkingContext.
+		TArray<UNOrganComponent*> Intersects;
+		TArray<UNOrganComponent*> Contains;
+
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component)
@@ -83,21 +89,26 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 
 			const AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
 			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
-			
+
 			// Check for intersection of any type
-			if (FBoxSphereBounds::BoxesIntersect(WorkingContext->Bounds, OtherVolumeBounds))
+			if (FBoxSphereBounds::BoxesIntersect(ComponentBounds, OtherVolumeBounds))
 			{
 				AddOrganComponent(OtherComponent);
-				WorkingContext->IntersectComponents.AddUnique(OtherComponent);
+				Intersects.AddUnique(OtherComponent);
 			}
-		
+
 			// Check for full containment
-			if (FNBoundsUtils::IsBoundsContainedInBounds(OtherVolumeBounds, WorkingContext->Bounds))
+			if (FNBoundsUtils::IsBoundsContainedInBounds(OtherVolumeBounds, ComponentBounds))
 			{
 				AddOrganComponent(OtherComponent);
-				WorkingContext->ContainedComponents.AddUnique(OtherComponent);
+				Contains.AddUnique(OtherComponent);
 			}
 		}
+
+		// Re-pin after possible rehash and commit the staged relationships.
+		WorkingContext = OrganContext.Find(Component);
+		WorkingContext->IntersectComponents.Append(Intersects);
+		WorkingContext->ContainedComponents.Append(Contains);
 	}
 	else
 	{

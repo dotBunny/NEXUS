@@ -64,7 +64,7 @@ public:
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Generation Retry Count",
 	meta=(ToolTip="The maximum amount of full attempts at generating a space before it is considered a complete failure."))
-	int32 OrganGenerationRetryCount = 10;
+	int32 OrganGenerationRetryCount = 100;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
 	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))

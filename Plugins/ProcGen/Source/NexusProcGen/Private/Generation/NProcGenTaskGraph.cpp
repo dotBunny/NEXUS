@@ -39,46 +39,45 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	// STEP 0 - CAPTURE WORLD (GAME THREAD)
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateWorldContextTask = TGraphTask<FNCreateWorldContextTask>::CreateTask(
-				nullptr, 
-				ENamedThreads::GameThread) // Doesn't need to run on game thread
+				nullptr,
+				ENamedThreads::GameThread)
 				.ConstructAndHold(WorldContextPtr);
 	Step0Tasks.Add(CreateWorldContextTask);
 	AllTasks.Add(CreateWorldContextTask);
-	
+
 	// STEP 1 - PROCESS WORLD CAPTURE
 	// Create associated data from our initial game-thread blocking task
 	FGraphEventRef ProcessWorldContextTask = TGraphTask<FNProcessWorldContextTask>::CreateTask(
-				&Step0Tasks, 
+				&Step0Tasks,
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
 				.ConstructAndHold(WorldContextPtr);
 	Step1Tasks.Add(ProcessWorldContextTask);
 	AllTasks.Add(ProcessWorldContextTask);
-	
+
 	// STEP 2 - BUILD CELL GRAPHS FOR ORGANS
 	int PassCount = 0;
-	FGraphEventRef LastPassTask = nullptr;
-	
+
 	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
 	for (auto Pass : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
 		TSharedPtr<FNGraphCollectionContext> PassContextPtr = MakeShared<FNGraphCollectionContext, ESPMode::ThreadSafe>();
-		
+
 		int ComponentCount = 0;
 		FGraphEventArray PassTasks;
 		for (const auto Component : Pass)
 		{
 			// Get the context generated during pre-generation process
 			FNOrganLockedData* ContextMap = Context->OrganContext.Find(Component);
-			
+
 			// Do not generate a component if it is not activated, don't make the tasks
 			if (!ContextMap->SourceComponent->bActivated) continue;
-			
+
 			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
 			TSharedPtr<FNOrganContext> ContextPtr = MakeShared<FNOrganContext>(
-				ContextMap, BaseGenerator.UnsignedInteger64(), 
+				ContextMap, BaseGenerator.UnsignedInteger64(),
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
-			
+
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
@@ -89,15 +88,23 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 
 			ComponentCount++;
 		}
-		//  Record builder tasks to create dependency on previous phase
+
+		// We still will keep the pass count, just dont do anything else
+		if (PassTasks.Num() == 0)
+		{
+			PassCount++;
+			continue;
+		}
+
+		// Record builder tasks so the next pass can chain onto them.
 		GraphBuilderTasks.Add(PassTasks);
-		
+
 		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream.
 		FGraphEventRef CollectTask = TGraphTask<FNCollectPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
 			.ConstructAndHold(PassContextPtr, TaskGraphContextPtr);
 		CollectionTasks.Add(CollectTask);
 		AllTasks.Add(CollectTask);
-		
+
 		// Increment pass count for labeling
 		PassCount++;
 	};

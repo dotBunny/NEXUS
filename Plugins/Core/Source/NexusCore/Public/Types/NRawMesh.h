@@ -100,6 +100,23 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	/**
+	 * Bakes the scale component of Transform into every vertex, then refreshes Center and Bounds.
+	 * @param Transform Source transform; only its Scale3D is consumed — translation/rotation are ignored.
+	 */
+	void ApplyScale(const FTransform& Transform)
+	{
+		const FVector Scale = Transform.GetScale3D();
+		if (Scale.Equals(FVector::OneVector)) return;
+
+		const int Count = Vertices.Num();
+		for (int i = 0; i < Count; i++)
+		{
+			Vertices[i] *= Scale;
+		}
+		CalculateCenterAndBounds();
+	}
+
+	/**
 	 * Recomputes Center as the mean of Vertices and Bounds as the AABB enclosing them.
 	 */
 	void CalculateCenterAndBounds()

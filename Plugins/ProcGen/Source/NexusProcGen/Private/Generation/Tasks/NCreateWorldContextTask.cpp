@@ -12,5 +12,5 @@ void FNCreateWorldContextTask::DoTask(ENamedThreads::Type CurrentThread, const F
 	// Gather simple-collision meshes from every primitive in the target world, restricted
 	// to actors whose bounds fall inside one of the input organs' volume bounds.
 	FNRawMeshFactory::FromActorsInBounds(WorldActors, WorldContextPtr->InputBounds,
-		WorldContextPtr->CollisionMeshes, WorldContextPtr->CollisionMeshTransforms);
+		WorldContextPtr->WorldCollisionMeshes, WorldContextPtr->WorldCollisionMeshTransforms);
 }

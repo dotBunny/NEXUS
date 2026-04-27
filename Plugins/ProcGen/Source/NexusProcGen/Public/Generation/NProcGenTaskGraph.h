@@ -42,6 +42,7 @@ public:
 	void WaitForTasks();
 
 private:
+	
 	/** True once UnlockTasks has dispatched the graph for execution. */
 	bool bTasksUnlocked = false;
 

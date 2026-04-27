@@ -4,6 +4,7 @@
 #include "Types/NRawMeshUtils.h"
 
 #include "NCoreMinimal.h"
+#include "Chaos/Convex.h"
 #include "Math/NTriangleUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMeshFactory.h"
@@ -117,6 +118,77 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TA
 		}
 	}
 	return MoveTemp(DebugActors);
+}
+
+FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
+{
+	if (Mesh.IsConvex())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("Converting mesh to ConvexHull that is already a convex hull. This duplicates the mesh!!!"))
+		return Mesh;
+	}
+
+	FNRawMesh Result;
+	if (Mesh.Vertices.Num() < 4)
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("Cannot build a convex hull from fewer than 4 vertices; returning empty mesh."));
+		return MoveTemp(Result);
+	}
+
+	// Feed the source vertex cloud into Chaos's hull builder; the source loops are discarded.
+	TArray<Chaos::FConvex::FVec3Type> InputVertices;
+	InputVertices.Reserve(Mesh.Vertices.Num());
+	for (const FVector& Vertex : Mesh.Vertices)
+	{
+		InputVertices.Add(Chaos::FConvex::FVec3Type(Vertex));
+	}
+
+	TArray<Chaos::FConvex::FPlaneType> OutPlanes;
+	TArray<TArray<int32>> OutFaceIndices;
+	TArray<Chaos::FConvex::FVec3Type> OutVertices;
+	Chaos::FConvex::FAABB3Type OutLocalBounds;
+	Chaos::FConvexBuilder::Build(InputVertices, OutPlanes, OutFaceIndices, OutVertices, OutLocalBounds, 
+		Chaos::FConvexBuilder::EBuildMethod::Original); // Use the original
+	const int32 VerticesCount = OutVertices.Num();
+	const int32 LoopCount = OutFaceIndices.Num();
+	if (VerticesCount == 0 || LoopCount == 0)
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("Convex hull build returned no geometry; returning empty mesh."));
+		return MoveTemp(Result);
+	}
+
+	Result.Vertices.Reserve(VerticesCount);
+	FVector CenterCalc = FVector::ZeroVector;
+	FBox BoundingBox(ForceInit);
+	for (int32 i = 0; i < VerticesCount; i++)
+	{
+		const FVector Created(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]);
+		Result.Vertices.Add(Created);
+		CenterCalc += Created;
+		BoundingBox += Created;
+	}
+
+	Result.Loops.Reserve(LoopCount);
+	for (int32 i = 0; i < LoopCount; i++)
+	{
+		Result.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));
+	}
+
+	Result.Center = CenterCalc / VerticesCount;
+	Result.Bounds = BoundingBox;
+
+	// Trust the Chaos output: faces may be n-gons but are convex by construction.
+	Result.bIsChaosGenerated = true;
+	Result.bIsConvex = true;
+	Result.bHasBounds = true;
+	Result.bHasNonTris = Result.CheckNonTris();
+
+	if (Result.bHasNonTris)
+	{
+		Result.ConvertToTriangles();
+	}
+
+	return MoveTemp(Result);
 }
 
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)

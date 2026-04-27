@@ -49,6 +49,9 @@ private:
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random) const;
 
+	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays). */
+	bool DoesWorldCollide(const FNProcGenGraphCellNode* CellNode) const;
+
 	/** @return Every existing cell whose world bounds intersect NewNode's. */
 	TArray<FNProcGenGraphCellNode*> CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const;
 

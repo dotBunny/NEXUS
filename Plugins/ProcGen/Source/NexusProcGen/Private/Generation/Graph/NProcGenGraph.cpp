@@ -14,11 +14,14 @@ FNProcGenGraph::~FNProcGenGraph()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory
 	const int NodeCount = Nodes.Num();
-	for (int i = NodeCount - 1; i >= 0; i--)
+	if (NodeCount > 0)
 	{
-		delete Nodes[i];
+		for (int i = NodeCount - 1; i >= 0; i--)
+		{
+			delete Nodes[i];
+		}
+		Nodes.Empty();
 	}
-	Nodes.Empty();
 	RootNode = nullptr;
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
