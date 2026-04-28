@@ -7,6 +7,10 @@
 
 void FNProcessWorldContextTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->ProcessWorldContextStart();
+#endif // !UE_BUILD_SHIPPING
+	
 	const int32 MeshCount = WorldContextPtr->WorldCollisionMeshTransforms.Num();
 	
 	WorldContextPtr->WorldCollisionMeshLocations.Empty();
@@ -32,5 +36,9 @@ void FNProcessWorldContextTask::DoTask(ENamedThreads::Type CurrentThread, const 
 			WorldContextPtr->WorldCollisionMeshes[i] = FNRawMeshUtils::ToConvexHull(WorldContextPtr->WorldCollisionMeshes[i]);
 		}
 	}
+	
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->ProcessWorldContextFinish();
+#endif // !UE_BUILD_SHIPPING
 }
 

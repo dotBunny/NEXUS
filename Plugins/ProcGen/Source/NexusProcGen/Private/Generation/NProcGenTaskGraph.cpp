@@ -23,6 +23,12 @@
 
 FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
+	// Create our analytics object - we need to make it regardless of build configuration
+	Analytics = MakeShared<FNProcGenTaskAnalytics, ESPMode::ThreadSafe>();
+#if !UE_BUILD_SHIPPING	
+	Analytics->TaskGraphCreationStart();
+#endif // !UE_BUILD_SHIPPING
+	
 	// Convert our friendly seed to something more appropriate
 	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->GetOperationSettings().Seed);
 	UE_LOG(LogNexusProcGen, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->GetOperationSettings().Seed, BaseSeed);
@@ -32,29 +38,31 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNProcGenTaskGraphContext> TaskGraphContextPtr = MakeShared<FNProcGenTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
 	
-	// Create our world context holder
-	TSharedPtr<FNWorldContext> WorldContextPtr = MakeShared<FNWorldContext, ESPMode::ThreadSafe>(
-		Context->GetTargetWorld(), Context->Bounds);
+	// ----- STEP 0 - CAPTURE WORLD (GAME THREAD) ---------------------------------------------------------------------------------------------------
 	
-	// STEP 0 - CAPTURE WORLD (GAME THREAD)
+	// Create our world context holder
+	TSharedPtr<FNWorldContext> WorldContextPtr = MakeShared<FNWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
+
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateWorldContextTask = TGraphTask<FNCreateWorldContextTask>::CreateTask(
 				nullptr,
 				ENamedThreads::GameThread)
-				.ConstructAndHold(WorldContextPtr);
+				.ConstructAndHold(WorldContextPtr, Analytics);
 	Step0Tasks.Add(CreateWorldContextTask);
 	AllTasks.Add(CreateWorldContextTask);
 
-	// STEP 1 - PROCESS WORLD CAPTURE
+	// ----- STEP 1 - PROCESS WORLD CAPTURE ---------------------------------------------------------------------------------------------------------
+	
 	// Create associated data from our initial game-thread blocking task
 	FGraphEventRef ProcessWorldContextTask = TGraphTask<FNProcessWorldContextTask>::CreateTask(
 				&Step0Tasks,
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(WorldContextPtr);
+				.ConstructAndHold(WorldContextPtr, Analytics);
 	Step1Tasks.Add(ProcessWorldContextTask);
 	AllTasks.Add(ProcessWorldContextTask);
-
-	// STEP 2 - BUILD CELL GRAPHS FOR ORGANS
+	
+	// ----- STEP 2 - BUILD CELL GRAPHS FOR ORGANS --------------------------------------------------------------------------------------------------
+	
 	int PassCount = 0;
 
 	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
@@ -82,7 +90,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(ContextPtr, PassContextPtr, WorldContextPtr);
+				.ConstructAndHold(ContextPtr, PassContextPtr, WorldContextPtr, Analytics);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 
@@ -101,7 +109,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 
 		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream.
 		FGraphEventRef CollectTask = TGraphTask<FNCollectPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
-			.ConstructAndHold(PassContextPtr, TaskGraphContextPtr);
+			.ConstructAndHold(PassContextPtr, TaskGraphContextPtr, Analytics);
 		CollectionTasks.Add(CollectTask);
 		AllTasks.Add(CollectTask);
 
@@ -111,13 +119,18 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	
 	// TODO: Validate task to ensure generation is completable?
 	
-	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::GameThread).ConstructAndHold(TaskGraphContextPtr);
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::GameThread).ConstructAndHold(TaskGraphContextPtr, Analytics);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	AllTasks.Add(SpawnCellProxiesTask);
 	
 	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete
-	FinalizeTask = TGraphTask<FNProcGenFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr);
+	FinalizeTask = TGraphTask<FNProcGenFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr, Analytics);
 	AllTasks.Add(FinalizeTask);
+	
+	// Record end time
+#if !UE_BUILD_SHIPPING	
+	Analytics->TaskGraphCreationFinish();
+#endif // !UE_BUILD_SHIPPING
 }
 
 void FNProcGenTaskGraph::UnlockTasks()
@@ -141,7 +154,7 @@ void FNProcGenTaskGraph::WaitForTasks()
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 
-void FNProcGenTaskGraph::ResetGraph()
+void FNProcGenTaskGraph::TearDownGraph()
 {
 	// Remove all references
 	AllTasks.Empty();
@@ -149,6 +162,9 @@ void FNProcGenTaskGraph::ResetGraph()
 	FinalizerTasks.Empty();
 	GraphBuilderTasks.Empty();
 	FinalizeTask = nullptr;
+	
+	Analytics.Reset();
+	
 	
 	// Reset flag
 	bTasksUnlocked = false;

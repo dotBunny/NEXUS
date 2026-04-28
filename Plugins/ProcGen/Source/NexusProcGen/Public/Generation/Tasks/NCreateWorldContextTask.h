@@ -3,14 +3,15 @@
 
 #pragma once
 #include "NActorUtils.h"
+#include "Generation/NProcGenTaskAnalytics.h"
 #include "Generation/Contexts/NWorldContext.h"
 #include "Organ/NOrganVolume.h"
 
 class FNCreateWorldContextTask
 {
 public:
-	explicit FNCreateWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr) 
-	: WorldContextPtr(WorldContextPtr.ToSharedRef())
+	explicit FNCreateWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr) 
+	: WorldContextPtr(WorldContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
 	{
 		
 	}
@@ -40,5 +41,6 @@ public:
 	}
 	
 private:
-	TSharedRef<FNWorldContext> WorldContextPtr;;
+	TSharedRef<FNWorldContext> WorldContextPtr;
+	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
 };

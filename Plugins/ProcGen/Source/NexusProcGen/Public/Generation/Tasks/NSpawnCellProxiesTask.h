@@ -5,6 +5,7 @@
 
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
+#include "Generation/NProcGenTaskAnalytics.h"
 
 class UNProcGenOperation;
 
@@ -16,7 +17,8 @@ class UNProcGenOperation;
  */
 struct FNSpawnCellProxiesTask
 {
-	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr);
+	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
+		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenCreateProxiesTask, STATGROUP_TaskGraphTasks); }
 
@@ -29,4 +31,6 @@ struct FNSpawnCellProxiesTask
 private:
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
+	
+	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
 };

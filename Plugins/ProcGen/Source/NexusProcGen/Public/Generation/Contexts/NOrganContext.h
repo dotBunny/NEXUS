@@ -6,7 +6,7 @@
 #include "Generation/Data/NBoneInputData.h"
 #include "Generation/Graph/NProcGenGraph.h"
 #include "Generation/Data/NCellInputData.h"
-#include "Generation/Tasks/NOrganGraphBuilderAnalytics.h"
+#include "Generation/NProcGenTaskAnalytics.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 
@@ -104,11 +104,10 @@ public:
 	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
 	/**
-	 * Drop the current graph and bump the retry counter.
-	 * @param Analytics Accumulated analytics from the just-failed attempt; folded into the retry log.
+	 * Drop the current graph and bump the retry counter.	 
 	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
 	 */
-	bool ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics);
+	bool ResetForRetry();
 
 	/** Run the post-build invariant checks; flips bSuccessful on success. */
 	bool ValidateGraph();

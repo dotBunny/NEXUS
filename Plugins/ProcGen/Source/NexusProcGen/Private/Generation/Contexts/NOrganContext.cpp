@@ -14,7 +14,7 @@ FNOrganContext::FNOrganContext(const FNOrganLockedData* GeneratorContextMap, con
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
-	//TODO: There is a Seed on the component? What do we do here with it?
+	//TODO: There is a Seed on the component? What do we do here with it? 
 	
 	// Cache out some settings
 	MinimumCellCount = GeneratorContextMap->SourceComponent->MinimumCellCount;
@@ -251,16 +251,13 @@ void FNOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FN
 	}
 }
 
-bool FNOrganContext::ResetForRetry(FNOrganGraphBuilderAnalytics& Analytics)
+bool FNOrganContext::ResetForRetry()
 {
 	// Reset counters
 	for (int i = 0; i < CellInputData.Num(); i++)
 	{
 		CellInputData[i].UsedCount = 0;
 	}
-		
-	// Update analytics
-	Analytics.Retry();
 		
 	// Clear Graph
 	if (CellGraph != nullptr)

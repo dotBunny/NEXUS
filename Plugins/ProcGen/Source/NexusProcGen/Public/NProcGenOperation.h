@@ -192,6 +192,4 @@ private:
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	uint32 Ticket;
-	
-	double StartTime;
 };

@@ -6,8 +6,8 @@
 
 
 FNProcGenFinalizeTask::FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation, 
-	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
-	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr)
+	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
 {
 	
 }

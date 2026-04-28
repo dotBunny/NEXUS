@@ -3,14 +3,14 @@
 
 #pragma once
 
+#include "Generation/NProcGenTaskAnalytics.h"
 #include "Generation/Contexts/NWorldContext.h"
-#include "Generation/Graph/NProcGenGraphCellNode.h"
 
 class FNProcessWorldContextTask
 {
 public:
-	explicit FNProcessWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr) 
-	: WorldContextPtr(WorldContextPtr.ToSharedRef())
+	explicit FNProcessWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr) 
+	: WorldContextPtr(WorldContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
 	{
 		
 	}
@@ -21,9 +21,9 @@ public:
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 	
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
-	
-	
+
 private:
 	
-	TSharedRef<FNWorldContext> WorldContextPtr;;
+	TSharedRef<FNWorldContext> WorldContextPtr;
+	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
 };

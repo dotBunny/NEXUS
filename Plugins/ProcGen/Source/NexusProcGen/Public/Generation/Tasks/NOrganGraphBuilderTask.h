@@ -19,7 +19,8 @@ class FNWorldContext;
 struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
-		const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr);
+		const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr, 
+		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
 
@@ -34,6 +35,8 @@ private:
 	TArray<FNRawMesh> WorldCollisionMeshes;
 	TArray<FVector> WorldCollisionLocations;
 	TArray<FRotator> WorldCollisionRotations;
+	int32 BadStartCount = 0;
+	
 	
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNOrganContext> ContextPtr;
@@ -41,13 +44,15 @@ private:
 	/** Shared pass-level context — collects analytics/results across every organ in the step. */
 	TSharedRef<FNGraphCollectionContext> PassContextPtr;
 	
+	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
+	int32 AnalyticsIndex = -1;
+
 	TSharedRef<FNWorldContext> WorldContextPtr;
 
-	/** Analytics recorded while this task runs; forwarded to the pass context on completion. */
-	mutable FNOrganGraphBuilderAnalytics Analytics;
-
+	
+	
 	/** Seed the graph with the organ's bones and the root node. */
-	void StartGraph(FNMersenneTwister& Random) const;
+	void StartGraph(FNMersenneTwister& Random);
 
 	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays). */
 	bool DoesWorldCollide(const FNProcGenGraphCellNode* CellNode) const;

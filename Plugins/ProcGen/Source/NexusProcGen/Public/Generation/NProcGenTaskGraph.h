@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NProcGenTaskAnalytics.h"
 
 class UNProcGenOperation;
 class FNProcGenOperationContext;
@@ -32,15 +33,17 @@ public:
 	/** @return true once UnlockTasks has dispatched the graph. */
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
 
-	/** Abandon all queued work and return the graph to an unlocked/empty state. */
-	void ResetGraph();
+	/** Tear down the created objects in the graph in preparation for deletion. */
+	void TearDownGraph();
 
 	/** Dispatch all built tasks onto the task graph for execution. */
 	void UnlockTasks();
 
 	/** Block the calling thread until every stage finishes. */
 	void WaitForTasks();
-
+	
+	TSharedPtr<FNProcGenTaskAnalytics> Analytics;
+	
 private:
 	
 	/** True once UnlockTasks has dispatched the graph for execution. */

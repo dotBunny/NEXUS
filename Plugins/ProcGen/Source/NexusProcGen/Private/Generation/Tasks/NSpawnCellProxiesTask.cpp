@@ -6,8 +6,9 @@
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Graph/NProcGenGraph.h"
 
-FNSpawnCellProxiesTask::FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr)
-	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
+FNSpawnCellProxiesTask::FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
+	const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr)
+	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
 {
 }
 
