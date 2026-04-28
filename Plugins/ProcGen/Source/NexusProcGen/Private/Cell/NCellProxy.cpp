@@ -37,11 +37,6 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	Mesh->WireframeColor = FLinearColor::Gray;
 	Mesh->SetTangentsType(EDynamicMeshComponentTangentsMode::AutoCalculated);
 	
-	// Mesh Collisions
-	//Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//Mesh->SetCollisionObjectType(ECC_WorldStatic);
-	//Mesh->EnableComplexAsSimpleCollision();
-	
 #if WITH_EDITOR	
 	bCanPlayFromHere = 0;
 #endif // WITH_EDITOR
