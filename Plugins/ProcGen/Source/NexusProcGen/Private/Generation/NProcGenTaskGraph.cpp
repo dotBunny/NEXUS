@@ -119,7 +119,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	
 	// TODO: Validate task to ensure generation is completable?
 	
-	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::GameThread).ConstructAndHold(TaskGraphContextPtr, Analytics);
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask).ConstructAndHold(TaskGraphContextPtr, Analytics);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	AllTasks.Add(SpawnCellProxiesTask);
 	

@@ -141,20 +141,20 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	// Report Timespans
 	double DurationTotal = 0;
 	
-	Builder.Appendf(TEXT("\tTask Graph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tTask Graph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
 	DurationTotal += TaskGraphCreationTimer.Duration;
 	
-	Builder.Appendf(TEXT("\tCreate World Context: %f ms\n"), CreateWorldContextTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tCreate World Context: %f ms\n"), CreateWorldContextTimer.Duration);
 	DurationTotal += CreateWorldContextTimer.Duration;
 	
-	Builder.Appendf(TEXT("\tProcess World Context: %f ms\n"), ProcessWorldContextTimer.Duration);
+	Builder.Appendf(TEXT("[B]\tProcess World Context: %f ms\n"), ProcessWorldContextTimer.Duration);
 	DurationTotal += ProcessWorldContextTimer.Duration;
 	
 	double OrganGraphBuilderDurationTotal = 0;
 	Builder.Append(TEXT("\tOrgan Graph Builders:\n"));
 	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
 	{
-		Builder.Appendf(TEXT("\t\t%s (%i): %f ms\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations, OrganGraphBuilderAnalytic.Timer.Duration);
+		Builder.Appendf(TEXT("[B]\t\t%s (%i): %f ms\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations, OrganGraphBuilderAnalytic.Timer.Duration);
 		DurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
 		OrganGraphBuilderDurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
 	}
@@ -163,14 +163,14 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	Builder.Append(TEXT("\tCollect Generation Passes:\n"));
 	for (const auto CollectGenerationPassesAnalytic : CollectGenerationPassesAnalytics)
 	{
-		Builder.Appendf(TEXT("\t\tPhase %i: %f ms\n"), CollectGenerationPassesAnalytic.Phase, CollectGenerationPassesAnalytic.Timer.Duration);
+		Builder.Appendf(TEXT("[B]\t\tPhase %i: %f ms\n"), CollectGenerationPassesAnalytic.Phase, CollectGenerationPassesAnalytic.Timer.Duration);
 		DurationTotal += CollectGenerationPassesAnalytic.Timer.Duration;
 	}
 	
-	Builder.Appendf(TEXT("\tSpawn Cell Proxies: %f ms\n"), SpawnCellProxiesTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tSpawn Cell Proxies: %f ms / %i frames\n"), SpawnCellProxiesTimer.Duration, SpawnCellProxiesTimer.FrameCount);
 	DurationTotal += SpawnCellProxiesTimer.Duration;
 	
-	Builder.Appendf(TEXT("\tProc Gen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tProc Gen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
 	DurationTotal += ProcGenFinalizeTimer.Duration;
 	Builder.Appendf(TEXT("\tTotal=%f ms\n"), DurationTotal);
 	

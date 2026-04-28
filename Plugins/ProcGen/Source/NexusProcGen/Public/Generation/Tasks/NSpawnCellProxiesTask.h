@@ -9,12 +9,6 @@
 
 class UNProcGenOperation;
 
-/**
- * Game-thread task that walks the collected graphs and spawns the corresponding ANCellProxy actors.
- *
- * Runs on the game thread because actor spawning must — everything else in the task graph is
- * worker-thread-safe up until this point.
- */
 struct FNSpawnCellProxiesTask
 {
 	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
@@ -29,6 +23,8 @@ struct FNSpawnCellProxiesTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
+	
+	
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	

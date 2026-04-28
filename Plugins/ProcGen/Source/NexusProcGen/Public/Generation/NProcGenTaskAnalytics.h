@@ -10,14 +10,22 @@ struct FNProcGenTaskTimer
 	double EndTime;
 	double Duration;
 	
+	uint64 StartFrame;
+	uint64 EndFrame;
+	uint64 FrameCount;
+	
 	void Start()
 	{
 		StartTime = FPlatformTime::Seconds();
+		StartFrame = GFrameNumber;
 	}
 	void Stop()
 	{
 		EndTime = FPlatformTime::Seconds();
+		EndFrame = GFrameNumber;
+		
 		Duration = (EndTime -StartTime) * 1000.f;
+		FrameCount = EndFrame - StartFrame;
 	}
 };
 struct FNOrganGraphBuilderAnalytics
