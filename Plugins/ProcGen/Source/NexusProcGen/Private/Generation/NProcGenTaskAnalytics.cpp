@@ -112,14 +112,14 @@ void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index)
 	CollectionAnalytics.Timer.Stop();
 }
 
-void FNProcGenTaskAnalytics::SpawnCellProxiesStart()
+void FNProcGenTaskAnalytics::CreateSpawnCellsContextStart()
 {
-	SpawnCellProxiesTimer.Start();
+	CreateSpawnCellsContextTimer.Start();
 }
 
-void FNProcGenTaskAnalytics::SpawnCellProxiesFinish()
+void FNProcGenTaskAnalytics::CreateSpawnCellsContextFinish()
 {
-	SpawnCellProxiesTimer.Stop();
+	CreateSpawnCellsContextTimer.Stop();
 }
 
 void FNProcGenTaskAnalytics::ProcGenFinalizeStart()
@@ -141,17 +141,17 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	// Report Timespans
 	double DurationTotal = 0;
 	
-	Builder.Appendf(TEXT("[G]\tTask Graph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tTaskGraph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
 	DurationTotal += TaskGraphCreationTimer.Duration;
 	
-	Builder.Appendf(TEXT("[G]\tCreate World Context: %f ms\n"), CreateWorldContextTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tCreate WorldContext: %f ms\n"), CreateWorldContextTimer.Duration);
 	DurationTotal += CreateWorldContextTimer.Duration;
 	
-	Builder.Appendf(TEXT("[B]\tProcess World Context: %f ms\n"), ProcessWorldContextTimer.Duration);
+	Builder.Appendf(TEXT("[B]\tProcess WorldContext: %f ms\n"), ProcessWorldContextTimer.Duration);
 	DurationTotal += ProcessWorldContextTimer.Duration;
 	
 	double OrganGraphBuilderDurationTotal = 0;
-	Builder.Append(TEXT("\tOrgan Graph Builders:\n"));
+	Builder.Append(TEXT("\tOrganGraph Builders:\n"));
 	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
 	{
 		Builder.Appendf(TEXT("[B]\t\t%s (%i): %f ms\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations, OrganGraphBuilderAnalytic.Timer.Duration);
@@ -167,10 +167,10 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 		DurationTotal += CollectGenerationPassesAnalytic.Timer.Duration;
 	}
 	
-	Builder.Appendf(TEXT("[G]\tSpawn Cell Proxies: %f ms / %i frames\n"), SpawnCellProxiesTimer.Duration, SpawnCellProxiesTimer.FrameCount);
-	DurationTotal += SpawnCellProxiesTimer.Duration;
+	Builder.Appendf(TEXT("[B]\tCreate SpawnCellsContext: %f\n"), CreateSpawnCellsContextTimer.Duration);
+	DurationTotal += CreateSpawnCellsContextTimer.Duration;
 	
-	Builder.Appendf(TEXT("[G]\tProc Gen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
+	Builder.Appendf(TEXT("[G]\tProcGen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
 	DurationTotal += ProcGenFinalizeTimer.Duration;
 	Builder.Appendf(TEXT("\tTotal=%f ms\n"), DurationTotal);
 	
@@ -183,7 +183,7 @@ FString FNProcGenTaskAnalytics::GetCountersReport()
 	
 	Builder.Appendf(TEXT("[%s] Counters\n"), *DisplayName.ToString());
 	
-	Builder.Append(TEXT("\tOrgan Graph Builders:\n"));
+	Builder.Append(TEXT("\tOrganGraph Builders:\n"));
 	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
 	{
 		// Output data on each iteration

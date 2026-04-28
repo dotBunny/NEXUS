@@ -11,10 +11,12 @@
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
+#include "Generation/Contexts/NSpawnCellsContext.h"
 #include "Generation/Tasks/NCollectGenerationPassesTask.h"
 #include "Generation/Contexts/NWorldContext.h"
 #include "Generation/Tasks/NCreateWorldContextTask.h"
 #include "Generation/Tasks/NProcessWorldContextTask.h"
+#include "Generation/Tasks/NCreateSpawnCellsContextTask.h"
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
 #include "Math/NMersenneTwister.h"
@@ -117,9 +119,19 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		PassCount++;
 	};
 	
-	// TODO: Validate task to ensure generation is completable?
+	//explicit FNSpawnContext(UWorld* TargetWorld, const uint32 OperationTicket, const bool bPreloadLevel, const bool bSpawnLevelInstance)
 	
-	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask).ConstructAndHold(TaskGraphContextPtr, Analytics);
+	// TODO: Validate task to ensure generation is completable?
+	TSharedPtr<FNSpawnCellsContext> SpawnCellsContextPtr = MakeShared<FNSpawnCellsContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
+		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
+
+	FGraphEventRef CreateSpawnContextTask = TGraphTask<FNCreateSpawnCellsContextTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask).ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr, Analytics);
+	FinalizerTasks.Add(CreateSpawnContextTask);
+	SpawnContextTasks.Add(CreateSpawnContextTask);
+	AllTasks.Add(CreateSpawnContextTask);
+	
+	// Create our dispatcher task that will time-slice spawning
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, ENamedThreads::GameThread).ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	AllTasks.Add(SpawnCellProxiesTask);
 	

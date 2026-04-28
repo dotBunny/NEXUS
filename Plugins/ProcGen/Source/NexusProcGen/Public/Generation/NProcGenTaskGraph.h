@@ -63,6 +63,8 @@ private:
 
 	/** Collection/pass tasks that gather results after graph construction. */
 	FGraphEventArray CollectionTasks;
+	
+	FGraphEventArray SpawnContextTasks;
 
 	/** Finalizer tasks that run immediately before FinalizeTask. */
 	FGraphEventArray FinalizerTasks;

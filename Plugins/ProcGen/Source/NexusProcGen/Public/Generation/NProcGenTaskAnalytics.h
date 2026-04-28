@@ -102,8 +102,8 @@ public:
 	void CollectGenerationPassesStart(int32 Index);
 	void CollectGenerationPassesFinish(int32 Index);
 	
-	void SpawnCellProxiesStart();
-	void SpawnCellProxiesFinish();
+	void CreateSpawnCellsContextStart();
+	void CreateSpawnCellsContextFinish();
 	
 	void ProcGenFinalizeStart();
 	void ProcGenFinalizeFinish();
@@ -120,7 +120,7 @@ private:
 	FNProcGenTaskTimer CreateWorldContextTimer = FNProcGenTaskTimer();
 	FNProcGenTaskTimer ProcessWorldContextTimer = FNProcGenTaskTimer();
 	
-	FNProcGenTaskTimer SpawnCellProxiesTimer = FNProcGenTaskTimer();
+	FNProcGenTaskTimer CreateSpawnCellsContextTimer = FNProcGenTaskTimer();
 	FNProcGenTaskTimer ProcGenFinalizeTimer = FNProcGenTaskTimer();
 	
 	TArray<FNOrganGraphBuilderAnalytics> OrganGraphBuilderAnalytics;

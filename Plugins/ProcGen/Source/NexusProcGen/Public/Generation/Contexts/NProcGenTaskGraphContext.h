@@ -35,6 +35,7 @@ public:
 
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNProcGenGraph>> Graphs;
+	
 
 	explicit FNProcGenTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNProcGenOperationSettings& Settings);
 };
