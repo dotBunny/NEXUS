@@ -4,13 +4,27 @@
 #pragma once
 #include "Types/NIterationCounter.h"
 
-struct FNOrganGraphBuilderAnalytics
+struct FNProcGenTaskTimer
 {
-	FString Name;
-	
 	double StartTime;
 	double EndTime;
 	double Duration;
+	
+	void Start()
+	{
+		StartTime = FPlatformTime::Seconds();
+	}
+	void Stop()
+	{
+		EndTime = FPlatformTime::Seconds();
+		Duration = (EndTime -StartTime) * 1000.f;
+	}
+};
+struct FNOrganGraphBuilderAnalytics
+{
+	FString Name;
+	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
+
 	
 	int Iterations = 1;
 	
@@ -37,6 +51,11 @@ struct FNOrganGraphBuilderAnalytics
 		DiscardIntersectingCellNode.NextIteration();
 		DiscardWorldCollidingCellNode.NextIteration();
 	}
+};
+struct FNCollectGenerationPassesAnalytics
+{
+	int Pass = 0;
+	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
 };
 
 class FNProcGenTaskAnalytics
@@ -69,21 +88,28 @@ public:
 	
 	void OrganGraphBuilder_NextIteration(int32 Index);
 	
+	int CollectGenerationPassesCreate();
+	void CollectGenerationPassesStart(int32 Index);
+	void CollectGenerationPassesFinish(int32 Index);
+	
+	void SpawnCellProxiesStart();
+	void SpawnCellProxiesFinish();
+	
+	void ProcGenFinalizeStart();
+	void ProcGenFinalizeFinish();
+	
+	FString ToString();
+	
 private:
 
 #if !UE_BUILD_SHIPPING	
-	double TaskGraphCreationStartTime = 0;
-	double TaskGraphCreationEndTime = 0;
-	double TaskGraphCreationDuration = 0;
-	
-	double CreateWorldContextStartTime = 0;
-	double CreateWorldContextEndTime = 0;
-	double CreateWorldContextDuration = 0;
-	
-	double ProcessWorldContextStartTime = 0;
-	double ProcessWorldContextEndTime = 0;
-	double ProcessWorldContextDuration = 0;
+	FNProcGenTaskTimer TaskGraphCreationTimer = FNProcGenTaskTimer();
+	FNProcGenTaskTimer CreateWorldContextTimer = FNProcGenTaskTimer();
+	FNProcGenTaskTimer ProcessWorldContextTimer = FNProcGenTaskTimer();
+	FNProcGenTaskTimer SpawnCellProxiesTimer = FNProcGenTaskTimer();
+	FNProcGenTaskTimer ProcGenFinalizeTimer = FNProcGenTaskTimer();
 	
 	TArray<FNOrganGraphBuilderAnalytics> OrganGraphBuilderAnalytics;
+	TArray<FNCollectGenerationPassesAnalytics> CollectGenerationPassesAnalytics;
 #endif // !UE_BUILD_SHIPPING
 };

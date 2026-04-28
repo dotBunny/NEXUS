@@ -14,6 +14,10 @@ FNSpawnCellProxiesTask::FNSpawnCellProxiesTask(const TSharedPtr<FNProcGenTaskGra
 
 void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->SpawnCellProxiesStart();
+#endif // !UE_BUILD_SHIPPING	
+	
 	const FNProcGenOperationSettings& Settings = TaskGraphContextPtr->OperationSettings;
 	const bool bPreLoadLevelInstances = Settings.bPreLoadLevelInstances;
 	const bool bSpawnLevelInstances  = Settings.bCreateLevelInstances;
@@ -45,4 +49,8 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 			}
 		}
 	}
+
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->SpawnCellProxiesFinish();
+#endif // !UE_BUILD_SHIPPING	
 }

@@ -14,7 +14,17 @@ FNProcGenFinalizeTask::FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation
 
 void FNProcGenFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->ProcGenFinalizeStart();
+#endif // !UE_BUILD_SHIPPING		
 	// Send the finalized shared data back to the operation for doings
 	// This usually means recording the spawned things somewhere, but also could be useful for triggering events.
 	Operation->FinishBuild(TaskGraphContextPtr);
+
+#if !UE_BUILD_SHIPPING	
+	AnalyticsPtr->ProcGenFinalizeFinish();
+	
+	// Log our analytics at this point
+	UE_LOG(LogNexusProcGen, Log, TEXT("[FNProcGenTaskAnalytics]\n%s"), *AnalyticsPtr->ToString());
+#endif // !UE_BUILD_SHIPPING
 }

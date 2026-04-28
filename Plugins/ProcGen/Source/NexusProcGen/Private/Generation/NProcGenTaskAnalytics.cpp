@@ -11,31 +11,28 @@ namespace NEXUS::ProcGen::Analytics
 #if !UE_BUILD_SHIPPING	
 void FNProcGenTaskAnalytics::TaskGraphCreationStart()
 {
-	TaskGraphCreationStartTime = FPlatformTime::Seconds();
+	TaskGraphCreationTimer.Start();
 };
 void FNProcGenTaskAnalytics::TaskGraphCreationFinish()
 {
-	TaskGraphCreationEndTime = FPlatformTime::Seconds();
-	TaskGraphCreationDuration = (TaskGraphCreationEndTime - TaskGraphCreationStartTime) * NEXUS::ProcGen::Analytics::DurationMeasurement;
+	TaskGraphCreationTimer.Stop();
 }
 void FNProcGenTaskAnalytics::CreateWorldContextStart()
 {
-	CreateWorldContextStartTime = FPlatformTime::Seconds();
+	CreateWorldContextTimer.Start();
 }
 void FNProcGenTaskAnalytics::CreateWorldContextFinish()
 {
-	CreateWorldContextEndTime = FPlatformTime::Seconds();
-	CreateWorldContextDuration = (CreateWorldContextEndTime - CreateWorldContextStartTime) * NEXUS::ProcGen::Analytics::DurationMeasurement;
+	CreateWorldContextTimer.Stop();
 }
 void FNProcGenTaskAnalytics::ProcessWorldContextStart()
 {
-	ProcessWorldContextStartTime = FPlatformTime::Seconds();
+	ProcessWorldContextTimer.Start();
 }
 
 void FNProcGenTaskAnalytics::ProcessWorldContextFinish()
 {
-	ProcessWorldContextEndTime = FPlatformTime::Seconds();
-	ProcessWorldContextDuration = (ProcessWorldContextEndTime - ProcessWorldContextStartTime) * NEXUS::ProcGen::Analytics::DurationMeasurement;
+	ProcessWorldContextTimer.Stop();
 }
 
 int FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
@@ -46,7 +43,7 @@ int FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
 void FNProcGenTaskAnalytics::OrganGraphBuilderStart(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.StartTime = FPlatformTime::Seconds();
+	OrganAnalytics.Timer.Start();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_Init(int32 Index, const FString& Name, int32 MinimumCellCount, int32 MaximumCellCount, int32 MaximumRetryCount)
 {
@@ -95,11 +92,54 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 	OrganAnalytics.NextIteration();
 }
 
+int FNProcGenTaskAnalytics::CollectGenerationPassesCreate()
+{
+	CollectGenerationPassesAnalytics.Add(FNCollectGenerationPassesAnalytics());
+	return CollectGenerationPassesAnalytics.Num() - 1;
+}
+
+void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index)
+{
+	FNCollectGenerationPassesAnalytics& CollectionAnalytics = CollectGenerationPassesAnalytics[Index];
+	CollectionAnalytics.Timer.Start();
+}
+
+void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index)
+{
+	FNCollectGenerationPassesAnalytics& CollectionAnalytics = CollectGenerationPassesAnalytics[Index];
+	CollectionAnalytics.Timer.Stop();
+}
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesStart()
+{
+	SpawnCellProxiesTimer.Start();
+}
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesFinish()
+{
+	SpawnCellProxiesTimer.Stop();
+}
+
+void FNProcGenTaskAnalytics::ProcGenFinalizeStart()
+{
+	ProcGenFinalizeTimer.Start();
+}
+
+void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
+{
+	ProcGenFinalizeTimer.Stop();
+}
+
+FString FNProcGenTaskAnalytics::ToString()
+{
+	// TODO: IMPLEMENT
+	return TEXT("TO IMPLEMENT");
+}
+
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.EndTime = FPlatformTime::Seconds();
-	OrganAnalytics.Duration = (OrganAnalytics.EndTime - OrganAnalytics.StartTime) * NEXUS::ProcGen::Analytics::DurationMeasurement;
+	OrganAnalytics.Timer.Stop();
 }
 #else
 void FNProcGenTaskAnalytics::TaskGraphCreationStart() {}
@@ -124,4 +164,16 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index) {}
+FString FNProcGenTaskAnalytics::ToString() { return TEXT("NProcGenTaskAnalytics are not available in UE_BUILD_SHIPPING."); }
+
+int FNProcGenTaskAnalytics::CollectGenerationPassesCreate() { return -1; }
+void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index) {}
+void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index) {}
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesStart() {}
+void FNProcGenTaskAnalytics::SpawnCellProxiesFinish() {}
+
+void FNProcGenTaskAnalytics::ProcGenFinalizeStart() {}
+void FNProcGenTaskAnalytics::ProcGenFinalizeFinish() {}
+
 #endif // !UE_BUILD_SHIPPING	

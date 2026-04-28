@@ -7,11 +7,11 @@
 #include "NProcGenOperation.h"
 
 #include "Generation/Contexts/NProcGenOperationContext.h"
-#include "Generation/Contexts/NGraphCollectionContext.h"
+#include "Generation/Contexts/NGenerationPassContext.h"
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
-#include "Generation/Tasks/NCollectPassTask.h"
+#include "Generation/Tasks/NCollectGenerationPassesTask.h"
 #include "Generation/Contexts/NWorldContext.h"
 #include "Generation/Tasks/NCreateWorldContextTask.h"
 #include "Generation/Tasks/NProcessWorldContextTask.h"
@@ -69,7 +69,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	for (auto Pass : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
-		TSharedPtr<FNGraphCollectionContext> PassContextPtr = MakeShared<FNGraphCollectionContext, ESPMode::ThreadSafe>();
+		TSharedPtr<FNGenerationPassContext> GenerationPassContextPtr = MakeShared<FNGenerationPassContext, ESPMode::ThreadSafe>();
 
 		int ComponentCount = 0;
 		FGraphEventArray PassTasks;
@@ -82,7 +82,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			if (!ContextMap->SourceComponent->bActivated) continue;
 
 			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
-			TSharedPtr<FNOrganContext> ContextPtr = MakeShared<FNOrganContext>(
+			TSharedPtr<FNOrganContext> OrganContextPtr = MakeShared<FNOrganContext>(
 				ContextMap, BaseGenerator.UnsignedInteger64(),
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 
@@ -90,14 +90,14 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(ContextPtr, PassContextPtr, WorldContextPtr, Analytics);
+				.ConstructAndHold(OrganContextPtr, GenerationPassContextPtr, WorldContextPtr, Analytics);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 
 			ComponentCount++;
 		}
 
-		// We still will keep the pass count, just dont do anything else
+		// We still will keep the pass count, just don't do anything else
 		if (PassTasks.Num() == 0)
 		{
 			PassCount++;
@@ -108,8 +108,8 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		GraphBuilderTasks.Add(PassTasks);
 
 		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream.
-		FGraphEventRef CollectTask = TGraphTask<FNCollectPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
-			.ConstructAndHold(PassContextPtr, TaskGraphContextPtr, Analytics);
+		FGraphEventRef CollectTask = TGraphTask<FNCollectGenerationPassesTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
+			.ConstructAndHold(GenerationPassContextPtr, TaskGraphContextPtr, Analytics);
 		CollectionTasks.Add(CollectTask);
 		AllTasks.Add(CollectTask);
 

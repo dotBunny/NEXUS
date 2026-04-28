@@ -11,9 +11,9 @@
 #include "Math/NMersenneTwister.h"
 
 FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
-	const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr,
+	const TSharedPtr<FNGenerationPassContext>& GenerationPassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr,
 	const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr)
-	:	ContextPtr(ContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef()), 
+	:	ContextPtr(ContextPtr.ToSharedRef()), GenerationPassContextPtr(GenerationPassContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef()), 
 		WorldContextPtr(WorldContextPtr.ToSharedRef())
 {
 	// Stub our analytics around this
@@ -107,7 +107,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// Only hand off graph if it's good
 	if (ContextPtr->IsSuccessful())
 	{
-		PassContextPtr->TakeGraph(MoveTemp(ContextPtr->CellGraph));
+		GenerationPassContextPtr->TakeGraph(MoveTemp(ContextPtr->CellGraph));
 	}
 
 #if !UE_BUILD_SHIPPING		

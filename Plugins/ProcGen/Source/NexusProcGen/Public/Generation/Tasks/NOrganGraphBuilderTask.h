@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/Contexts/NGraphCollectionContext.h"
+#include "Generation/Contexts/NGenerationPassContext.h"
 #include "Generation/Contexts/NOrganContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -19,7 +19,7 @@ class FNWorldContext;
 struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
-		const TSharedPtr<FNGraphCollectionContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr, 
+		const TSharedPtr<FNGenerationPassContext>& GenerationPassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr, 
 		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
@@ -42,7 +42,7 @@ private:
 	TSharedRef<FNOrganContext> ContextPtr;
 
 	/** Shared pass-level context — collects analytics/results across every organ in the step. */
-	TSharedRef<FNGraphCollectionContext> PassContextPtr;
+	TSharedRef<FNGenerationPassContext> GenerationPassContextPtr;
 	
 	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
 	int32 AnalyticsIndex = -1;

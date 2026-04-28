@@ -9,7 +9,7 @@
  * Shared collect-pass context — fans-in completed organ graphs from every parallel builder task
  * so the subsequent collect/finalize stages have a single place to walk.
  */
-class FNGraphCollectionContext
+class FNGenerationPassContext
 {
 public:
 	/** Transfer ownership of a completed graph into this pass context. */

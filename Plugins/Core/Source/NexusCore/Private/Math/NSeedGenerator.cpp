@@ -177,7 +177,7 @@ uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 		Multiplier++;
 		Seed += (ParsedValue * FactorialMultiplier);
 	}
-	return MoveTemp(Seed);
+	return Seed;
 }
 
 uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
