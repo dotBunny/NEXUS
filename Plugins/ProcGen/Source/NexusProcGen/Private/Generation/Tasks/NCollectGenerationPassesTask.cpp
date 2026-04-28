@@ -9,14 +9,14 @@ FNCollectGenerationPassesTask::FNCollectGenerationPassesTask(const TSharedPtr<FN
 {
 	// Stub our analytics around this
 #if !UE_BUILD_SHIPPING	
-	AnalyticsIndex = AnalyticsPtr->OrganGraphBuilderCreate();
+	AnalyticsIndex = AnalyticsPtr->CollectGenerationPassesCreate();
 #endif // !UE_BUILD_SHIPPING
 }
 
 void FNCollectGenerationPassesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 #if !UE_BUILD_SHIPPING	
-	AnalyticsPtr->OrganGraphBuilderStart(AnalyticsIndex);
+	AnalyticsPtr->CollectGenerationPassesStart(AnalyticsIndex);
 #endif // !UE_BUILD_SHIPPING
 	
 	// TODO: Copy things from pass context to shared context
@@ -30,6 +30,6 @@ void FNCollectGenerationPassesTask::DoTask(ENamedThreads::Type CurrentThread, co
 	PassContextPtr->Graphs.Reset();
 	
 #if !UE_BUILD_SHIPPING	
-	AnalyticsPtr->OrganGraphBuilderFinish(AnalyticsIndex);
+	AnalyticsPtr->CollectGenerationPassesFinish(AnalyticsIndex);
 #endif // !UE_BUILD_SHIPPING	
 }

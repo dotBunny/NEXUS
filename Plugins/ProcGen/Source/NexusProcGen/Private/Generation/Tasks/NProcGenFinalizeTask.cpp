@@ -25,6 +25,6 @@ void FNProcGenFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGra
 	AnalyticsPtr->ProcGenFinalizeFinish();
 	
 	// Log our analytics at this point
-	UE_LOG(LogNexusProcGen, Log, TEXT("[FNProcGenTaskAnalytics]\n%s"), *AnalyticsPtr->ToString());
+	UE_LOG(LogNexusProcGen, Log, TEXT("%s"), *AnalyticsPtr->GetTimespanReport());
 #endif // !UE_BUILD_SHIPPING
 }

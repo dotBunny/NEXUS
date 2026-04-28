@@ -95,7 +95,9 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 int FNProcGenTaskAnalytics::CollectGenerationPassesCreate()
 {
 	CollectGenerationPassesAnalytics.Add(FNCollectGenerationPassesAnalytics());
-	return CollectGenerationPassesAnalytics.Num() - 1;
+	const int Phase = CollectGenerationPassesAnalytics.Num() - 1;
+	CollectGenerationPassesAnalytics.Last().Phase = Phase;
+	return Phase;
 }
 
 void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index)
@@ -130,10 +132,80 @@ void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
 	ProcGenFinalizeTimer.Stop();
 }
 
-FString FNProcGenTaskAnalytics::ToString()
+FString FNProcGenTaskAnalytics::GetTimespanReport()
 {
-	// TODO: IMPLEMENT
-	return TEXT("TO IMPLEMENT");
+	FStringBuilderBase Builder = FStringBuilderBase();
+	
+	Builder.Appendf(TEXT("[%s] Timespans\n"), *DisplayName.ToString());
+	
+	// Report Timespans
+	double DurationTotal = 0;
+	
+	Builder.Appendf(TEXT("\tTask Graph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
+	DurationTotal += TaskGraphCreationTimer.Duration;
+	
+	Builder.Appendf(TEXT("\tCreate World Context: %f ms\n"), CreateWorldContextTimer.Duration);
+	DurationTotal += CreateWorldContextTimer.Duration;
+	
+	Builder.Appendf(TEXT("\tProcess World Context: %f ms\n"), ProcessWorldContextTimer.Duration);
+	DurationTotal += ProcessWorldContextTimer.Duration;
+	
+	double OrganGraphBuilderDurationTotal = 0;
+	Builder.Append(TEXT("\tOrgan Graph Builders:\n"));
+	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
+	{
+		Builder.Appendf(TEXT("\t\t%s (%i): %f ms\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations, OrganGraphBuilderAnalytic.Timer.Duration);
+		DurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
+		OrganGraphBuilderDurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
+	}
+	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), OrganGraphBuilderDurationTotal);
+	
+	Builder.Append(TEXT("\tCollect Generation Passes:\n"));
+	for (const auto CollectGenerationPassesAnalytic : CollectGenerationPassesAnalytics)
+	{
+		Builder.Appendf(TEXT("\t\tPhase %i: %f ms\n"), CollectGenerationPassesAnalytic.Phase, CollectGenerationPassesAnalytic.Timer.Duration);
+		DurationTotal += CollectGenerationPassesAnalytic.Timer.Duration;
+	}
+	
+	Builder.Appendf(TEXT("\tSpawn Cell Proxies: %f ms\n"), SpawnCellProxiesTimer.Duration);
+	DurationTotal += SpawnCellProxiesTimer.Duration;
+	
+	Builder.Appendf(TEXT("\tProc Gen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
+	DurationTotal += ProcGenFinalizeTimer.Duration;
+	Builder.Appendf(TEXT("\tTotal=%f ms\n"), DurationTotal);
+	
+	return Builder.ToString();
+}
+
+FString FNProcGenTaskAnalytics::GetCountersReport()
+{
+	FStringBuilderBase Builder = FStringBuilderBase();
+	
+	Builder.Appendf(TEXT("[%s] Counters\n"), *DisplayName.ToString());
+	
+	Builder.Append(TEXT("\tOrgan Graph Builders:\n"));
+	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
+	{
+		// Output data on each iteration
+		for (int i = 0; i < OrganGraphBuilderAnalytic.Iterations; i++)
+		{
+			Builder.Appendf(TEXT("\t\t%s (%i)\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations);
+			Builder.Append(TEXT("\t\t\tFalse Starts:\n"));
+			Builder.Appendf(TEXT("\t\t\t\tOut Of Bounds: %i\n"), OrganGraphBuilderAnalytic.DiscardOutOfBoundsStart.Counter[i]);
+			Builder.Appendf(TEXT("\t\t\t\tWorld Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardWorldCollidingStart.Counter[i]);
+			
+			Builder.Append(TEXT("\t\t\tAdding Nodes:\n"));
+			Builder.Appendf(TEXT("\t\t\t\tNull: %i\n"), OrganGraphBuilderAnalytic.AddNullNodes.Counter[i]);
+			Builder.Appendf(TEXT("\t\t\t\tCell: %i\n"), OrganGraphBuilderAnalytic.AddCellNodes.Counter[i]);
+			
+			Builder.Append(TEXT("\t\t\tBad Placement (Cell):\n"));
+			Builder.Appendf(TEXT("\t\t\t\tIntersecting: %i\n"), OrganGraphBuilderAnalytic.DiscardIntersectingCellNode.Counter[i]);
+			Builder.Appendf(TEXT("\t\t\t\tWorld Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardWorldCollidingCellNode.Counter[i]);
+			Builder.Appendf(TEXT("\t\t\t\tOut Of Bounds: %i\n"), OrganGraphBuilderAnalytic.DiscardOutOfBoundsCellNode.Counter[i]);
+		}
+	}
+	
+	return Builder.ToString();
 }
 
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
@@ -164,7 +236,8 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index) {}
-FString FNProcGenTaskAnalytics::ToString() { return TEXT("NProcGenTaskAnalytics are not available in UE_BUILD_SHIPPING."); }
+FString FNProcGenTaskAnalytics::GetTimespanReport() { return TEXT("NProcGenTaskAnalytics::Timespans are not available in UE_BUILD_SHIPPING."); }
+FString FNProcGenTaskAnalytics::GetCountersReport() { return TEXT("NProcGenTaskAnalytics::Counters are not available in UE_BUILD_SHIPPING.");}
 
 int FNProcGenTaskAnalytics::CollectGenerationPassesCreate() { return -1; }
 void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index) {}

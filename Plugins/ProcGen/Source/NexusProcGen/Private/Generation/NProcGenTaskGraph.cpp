@@ -24,7 +24,7 @@
 FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenOperationContext* Context)
 {
 	// Create our analytics object - we need to make it regardless of build configuration
-	Analytics = MakeShared<FNProcGenTaskAnalytics, ESPMode::ThreadSafe>();
+	Analytics = MakeShared<FNProcGenTaskAnalytics, ESPMode::ThreadSafe>(Operation->GetDisplayName());
 #if !UE_BUILD_SHIPPING	
 	Analytics->TaskGraphCreationStart();
 #endif // !UE_BUILD_SHIPPING
@@ -123,7 +123,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	AllTasks.Add(SpawnCellProxiesTask);
 	
-	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete
+	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete and output analytics
 	FinalizeTask = TGraphTask<FNProcGenFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr, Analytics);
 	AllTasks.Add(FinalizeTask);
 	

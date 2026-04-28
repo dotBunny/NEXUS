@@ -54,13 +54,15 @@ struct FNOrganGraphBuilderAnalytics
 };
 struct FNCollectGenerationPassesAnalytics
 {
-	int Pass = 0;
+	int Phase = 0;
 	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
 };
 
 class FNProcGenTaskAnalytics
 {
 public:
+	explicit FNProcGenTaskAnalytics(const FText& DisplayName) : DisplayName(DisplayName) {};
+	
 	void TaskGraphCreationStart();
 	void TaskGraphCreationFinish();
 	
@@ -98,14 +100,18 @@ public:
 	void ProcGenFinalizeStart();
 	void ProcGenFinalizeFinish();
 	
-	FString ToString();
+	FString GetTimespanReport();
+	FString GetCountersReport();
+	
 	
 private:
+	FText DisplayName;
 
 #if !UE_BUILD_SHIPPING	
 	FNProcGenTaskTimer TaskGraphCreationTimer = FNProcGenTaskTimer();
 	FNProcGenTaskTimer CreateWorldContextTimer = FNProcGenTaskTimer();
 	FNProcGenTaskTimer ProcessWorldContextTimer = FNProcGenTaskTimer();
+	
 	FNProcGenTaskTimer SpawnCellProxiesTimer = FNProcGenTaskTimer();
 	FNProcGenTaskTimer ProcGenFinalizeTimer = FNProcGenTaskTimer();
 	
