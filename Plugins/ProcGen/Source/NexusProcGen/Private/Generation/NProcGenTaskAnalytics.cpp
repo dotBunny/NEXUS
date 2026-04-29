@@ -279,9 +279,6 @@ int FNProcGenTaskAnalytics::CollectGenerationPassesCreate() { return -1; }
 void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index) {}
 void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index) {}
 
-void FNProcGenTaskAnalytics::SpawnCellProxiesStart() {}
-void FNProcGenTaskAnalytics::SpawnCellProxiesFinish() {}
-
 int FNProcGenTaskAnalytics::SpawnCellProxiesCreate() { return -1; }
 void FNProcGenTaskAnalytics::SpawnCellProxiesStart(int32 Index) {}
 void FNProcGenTaskAnalytics::SpawnCellProxiesSpawned(int32 Index, FName Template) {}
