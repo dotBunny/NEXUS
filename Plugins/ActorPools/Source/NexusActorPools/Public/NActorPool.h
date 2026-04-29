@@ -82,7 +82,7 @@ public:
 	bool ImplementsPoolItemInterface() const { return bImplementsInterface; }
 
 	/** Will the ActorPool attempt to invoke UFUNCTIONs for events? */
-	bool HasInvokeUFunctionFlag() const { return Settings.HasFlag_InvokeUFunctions(); }
+	bool ShouldInvokeUFunctions() const { return Settings.HasFlag_InvokeUFunctions(); }
 
 	/** Get the number of AActors currently in the pool. */
 	int32 GetInCount() const { return InActors.Num(); };

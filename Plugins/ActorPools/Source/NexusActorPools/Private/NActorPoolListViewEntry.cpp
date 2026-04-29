@@ -25,7 +25,7 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 			TypeImage->SetBrushTintColor(FLinearColor::Green);
 			TypeImage->SetToolTipText(FText::FromString("INActorPoolItem"));
 		}
-		else if (Pool->HasInvokeUFunctionFlag())
+		else if (Pool->ShouldInvokeUFunctions())
 		{
 			TypeImage->SetBrushTintColor(FLinearColor::Yellow);
 			TypeImage->SetToolTipText(FText::FromString("Invoke UFUNCTION"));

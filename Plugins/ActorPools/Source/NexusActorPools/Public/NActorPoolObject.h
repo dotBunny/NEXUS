@@ -125,10 +125,10 @@ public:
 
 	/** @return true if the pool's flags include InvokeUFunctions. */
 	UFUNCTION(BlueprintCallable)
-	bool HasInvokeUFunctionFlag() const
+	bool ShouldInvokeUFunctions() const
 	{
 		if (Pool == nullptr) return false;
-		return Pool->HasInvokeUFunctionFlag();
+		return Pool->ShouldInvokeUFunctions();
 	}
 
 	/** @return A human-readable description of the pool's configuration. */
