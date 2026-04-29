@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Types/NRawMesh.h"
 
 class FNWorldContext
@@ -23,6 +24,12 @@ public:
 	
 	/** World-space rotation corresponding 1:1 with WorldCollisionMeshes. */
 	TArray<FRotator> WorldCollisionMeshRotations;
+	
+	
+	TArray<FNProcGenGraphCellNode*> NodeIndex;
+	TArray<FNRawMesh> NodeCollisionMeshes;
+	TArray<FVector> NodeCollisionMeshLocations;
+	TArray<FRotator> NodeCollisionMeshRotations;
 	
 	explicit FNWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{

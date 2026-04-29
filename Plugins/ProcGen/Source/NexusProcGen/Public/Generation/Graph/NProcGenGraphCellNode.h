@@ -92,9 +92,10 @@ public:
 	{
 		InputDataPtr = nullptr;
 	}
-protected:
+
 	/** @return Mutable access to the cell's world-space hull for intersection tests. */
 	FNRawMesh& GetHull() { return Hull; }
+	FNRawMesh GetHullCopy() { return Hull; }
 
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */

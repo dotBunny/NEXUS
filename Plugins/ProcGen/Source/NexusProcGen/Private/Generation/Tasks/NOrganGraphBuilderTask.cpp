@@ -40,6 +40,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
 	WorldCollisionLocations = WorldContextPtr->WorldCollisionMeshLocations;
 	WorldCollisionRotations = WorldContextPtr->WorldCollisionMeshRotations;
+	ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
+	ExistingNodeCollisionLocations = WorldContextPtr->NodeCollisionMeshLocations;
+	ExistingNodeCollisionRotations = WorldContextPtr->NodeCollisionMeshRotations;
 	
 	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
 	
@@ -175,12 +178,22 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		
 		// TODO: Intersecting or out of bounds start???
 		
+		
 		if (DoesWorldCollide(StartNode))
 		{
 			delete StartNode; 
 			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
 #if !UE_BUILD_SHIPPING		
 			AnalyticsPtr->OrganGraphBuilder_DiscardWorldCollidingStart(AnalyticsIndex);
+#endif // !UE_BUILD_SHIPPING			
+			BadStartCount++;
+		}
+		else if (DoesExistingNodeWorldCollide(StartNode))
+		{
+			delete StartNode; 
+			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
+#if !UE_BUILD_SHIPPING		
+			AnalyticsPtr->OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(AnalyticsIndex);
 #endif // !UE_BUILD_SHIPPING			
 			BadStartCount++;
 		}
@@ -192,6 +205,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			BoneNode->Link(StartNode);
 			StartNode->Link(TargetJunctionKey, BoneNode);
 		}
+		
+		
 		
 		// TODO: Add this as a global setting? Outside of RetryCount for graph, we should have some sort of number of bad starts before we ignore a graph?
 		if (BadStartCount > 100)
@@ -207,6 +222,18 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNProcGenGraphCellNode* Cel
 	for (int i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
 		if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNProcGenGraphCellNode* CellNode) const
+{
+	for (int i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
+	{
+		if (CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
 		{
 			return true;
 		}
@@ -355,6 +382,16 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		{
 #if !UE_BUILD_SHIPPING			
 			AnalyticsPtr->OrganGraphBuilder_DiscardWorldCollidingCellNode(AnalyticsIndex);
+#endif // !UE_BUILD_SHIPPING
+			delete TargetCellNode;
+			continue;
+		}
+		
+		// Check previous pass existing node world collision
+		if (DoesExistingNodeWorldCollide(TargetCellNode))
+		{
+#if !UE_BUILD_SHIPPING			
+			AnalyticsPtr->OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(AnalyticsIndex);
 #endif // !UE_BUILD_SHIPPING
 			delete TargetCellNode;
 			continue;

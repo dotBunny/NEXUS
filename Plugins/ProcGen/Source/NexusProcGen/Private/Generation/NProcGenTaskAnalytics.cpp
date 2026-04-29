@@ -86,6 +86,12 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int
 	OrganAnalytics.DiscardWorldCollidingCellNode.Increment();
 }
 
+void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index)
+{
+	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
+	OrganAnalytics.DiscardExistingNodeWorldCollidingCellNode.Increment();
+}
+
 void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
@@ -237,6 +243,7 @@ FString FNProcGenTaskAnalytics::GetCountersReport()
 			Builder.Append(TEXT("\t\t\tBad Placement (Cell):\n"));
 			Builder.Appendf(TEXT("\t\t\t\tIntersecting: %i\n"), OrganGraphBuilderAnalytic.DiscardIntersectingCellNode.Counter[i]);
 			Builder.Appendf(TEXT("\t\t\t\tWorld Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardWorldCollidingCellNode.Counter[i]);
+			Builder.Appendf(TEXT("\t\t\t\tExisting Node World Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]);
 			Builder.Appendf(TEXT("\t\t\t\tOut Of Bounds: %i\n"), OrganGraphBuilderAnalytic.DiscardOutOfBoundsCellNode.Counter[i]);
 		}
 	}
@@ -271,6 +278,7 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingStart(int32 
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index) {}
+void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index) {}
 void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index) {}
 FString FNProcGenTaskAnalytics::GetTimespanReport() { return TEXT("NProcGenTaskAnalytics::Timespans are not available in UE_BUILD_SHIPPING."); }
 FString FNProcGenTaskAnalytics::GetCountersReport() { return TEXT("NProcGenTaskAnalytics::Counters are not available in UE_BUILD_SHIPPING.");}

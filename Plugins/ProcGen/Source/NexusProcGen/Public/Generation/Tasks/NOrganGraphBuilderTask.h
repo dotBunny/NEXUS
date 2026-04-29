@@ -35,6 +35,11 @@ private:
 	TArray<FNRawMesh> WorldCollisionMeshes;
 	TArray<FVector> WorldCollisionLocations;
 	TArray<FRotator> WorldCollisionRotations;
+	
+	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
+	TArray<FVector> ExistingNodeCollisionLocations;
+	TArray<FRotator> ExistingNodeCollisionRotations;
+	
 	int32 BadStartCount = 0;
 	
 	
@@ -56,6 +61,7 @@ private:
 
 	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays). */
 	bool DoesWorldCollide(const FNProcGenGraphCellNode* CellNode) const;
+	bool DoesExistingNodeWorldCollide(const FNProcGenGraphCellNode* CellNode) const;
 
 	/** @return Every existing cell whose world bounds intersect NewNode's. */
 	TArray<FNProcGenGraphCellNode*> CheckNodeBounds(FNProcGenGraphCellNode* NewNode) const;

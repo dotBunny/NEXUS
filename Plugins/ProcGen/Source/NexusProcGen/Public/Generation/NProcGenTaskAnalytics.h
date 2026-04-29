@@ -36,6 +36,7 @@ struct FNOrganGraphBuilderAnalytics
 	FNIterationCounter DiscardOutOfBoundsCellNode;
 	FNIterationCounter DiscardIntersectingCellNode;
 	FNIterationCounter DiscardWorldCollidingCellNode;
+	FNIterationCounter DiscardExistingNodeWorldCollidingCellNode;
 	
 	void NextIteration()
 	{
@@ -49,6 +50,7 @@ struct FNOrganGraphBuilderAnalytics
 		DiscardOutOfBoundsCellNode.NextIteration();
 		DiscardIntersectingCellNode.NextIteration();
 		DiscardWorldCollidingCellNode.NextIteration();
+		DiscardExistingNodeWorldCollidingCellNode.NextIteration();
 	}
 };
 struct FNCollectGenerationPassesAnalytics
@@ -92,6 +94,7 @@ public:
 	void OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 Index);
 	void OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index);
 	void OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index);
+	void OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index);
 	
 	void OrganGraphBuilder_NextIteration(int32 Index);
 	

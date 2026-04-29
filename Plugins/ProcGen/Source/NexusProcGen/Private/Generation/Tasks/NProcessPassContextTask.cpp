@@ -22,13 +22,20 @@ void FNProcessPassContextTask::DoTask(ENamedThreads::Type CurrentThread, const F
 	AnalyticsPtr->CollectGenerationPassesStart(AnalyticsIndex);
 #endif // !UE_BUILD_SHIPPING
 	
-	// TODO: Copy things from pass context to shared context
-	
-	// TODO: Move collision meshes to world context
-	
 	for (TUniquePtr<FNProcGenGraph>& Graph : PassContextPtr->Graphs)
 	{
-		// TODO: is there any bads about using the shared ptr here .. other threads? locks?
+		// Copy our node collision data to the world
+		for (auto& Node : Graph->GetNodes())
+		{
+			if (Node->GetNodeType() == ENProcGenGraphNodeType::Cell)
+			{
+				FNProcGenGraphCellNode* CellNode = static_cast<FNProcGenGraphCellNode*>(Node);
+				WorldContextPtr->NodeIndex.Add(CellNode);
+				WorldContextPtr->NodeCollisionMeshes.Add(CellNode->GetHullCopy());
+				WorldContextPtr->NodeCollisionMeshLocations.Add(CellNode->GetWorldPosition());
+				WorldContextPtr->NodeCollisionMeshRotations.Add(CellNode->GetWorldRotation());
+			}
+		}
 		
 		TaskGraphContextPtr->TakeGraph(MoveTemp(Graph));
 	}
