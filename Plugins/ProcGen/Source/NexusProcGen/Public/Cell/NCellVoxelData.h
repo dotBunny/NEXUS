@@ -91,7 +91,7 @@ private:
 
 		return true;
 	}
-	/** @return true when every dimension is non-zero (i.e. the grid has been initialised). */
+	/** @return true when every dimension is non-zero (i.e. the grid has been initialized). */
 	bool IsValid() const
 	{
 		return Size.X > 0 && Size.Y > 0 && Size.Z > 0;

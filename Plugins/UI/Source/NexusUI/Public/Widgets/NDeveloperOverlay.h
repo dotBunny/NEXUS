@@ -18,7 +18,7 @@ class UButton;
 /**
  * Abstract base widget for NEXUS developer/diagnostic overlays. Supplies a banner row and a
  * ContainerBox slot for subclasses to populate; bIsEditorUtilityWidget toggles editor-only
- * behaviour when hosted inside an EUW.
+ * behavior when hosted inside an EUW.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Developer Overlay", Abstract, Blueprintable)
 class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget

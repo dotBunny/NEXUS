@@ -14,7 +14,7 @@
  * Policy applied when an Actor is returned to the Actor Pool Subsystem that is not known to any existing pool.
  */
 UENUM(BlueprintType)
-enum class ENActorPoolUnknownBehaviour : uint8
+enum class ENActorPoolUnknownBehavior : uint8
 {
 	/** Destroy the unknown Actor. */
 	Destroy = 0,
@@ -52,5 +52,5 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
 		meta=(ToolTip="What should be done with an AActor returned to APS that is not known to it."))
-	ENActorPoolUnknownBehaviour UnknownBehaviour;
+	ENActorPoolUnknownBehavior UnknownBehavior;
 };

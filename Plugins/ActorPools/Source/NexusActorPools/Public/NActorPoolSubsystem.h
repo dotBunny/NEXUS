@@ -73,7 +73,7 @@ public:
 
 	/**
 	 * Attempts to return an Actor to its owning pool.
-	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehaviour is applied.
+	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehavior is applied.
 	 * @param Actor The target actor to return to a pool.
 	 * @return true/false if the Actor was returned to a pool.
 	 */
@@ -217,7 +217,7 @@ private:
 	bool bHasTickableSpawners;
 
 	/** Policy used when ReturnActor is called with an Actor unknown to this subsystem. */
-	ENActorPoolUnknownBehaviour UnknownBehaviour = ENActorPoolUnknownBehaviour::Destroy;
+	ENActorPoolUnknownBehavior UnknownBehavior = ENActorPoolUnknownBehavior::Destroy;
 
 };
 

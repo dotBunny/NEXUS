@@ -20,6 +20,7 @@
 - Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
 - `NActorPool` tests now run in PIE worlds.
 - Forces `ANPooledActor` to be `abstract`.
+- Updated project-wide to enforcing `American English` for spelling.
 
 ### Fixed
 

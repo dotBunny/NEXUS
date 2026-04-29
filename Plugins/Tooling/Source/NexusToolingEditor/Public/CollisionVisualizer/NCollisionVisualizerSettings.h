@@ -7,7 +7,7 @@
 #include "NCollisionVisualizerSettings.generated.h"
 
 /**
- * Which UWorld query flavour the collision visualizer should issue.
+ * Which UWorld query flavor the collision visualizer should issue.
  */
 UENUM()
 enum class ENCollisionVisualizerMethod : uint8
@@ -29,7 +29,7 @@ enum class ENCollisionVisualizerPrefix : uint8
 };
 
 /**
- * Overlap flavour — blocking-only, any-overlap, or multi-overlap.
+ * Overlap flavor — blocking-only, any-overlap, or multi-overlap.
  */
 UENUM()
 enum class ENCollisionVisualizerOverlapBlocking : uint8
@@ -173,7 +173,7 @@ struct FNCollisionVisualizerQuery
 
 	/**
 	 * Builds the FCollisionShape implied by QueryShape plus its associated dimensions.
-	 * @return A Box/Capsule/Sphere FCollisionShape; default-constructed if QueryShape is unrecognised.
+	 * @return A Box/Capsule/Sphere FCollisionShape; default-constructed if QueryShape is unrecognized.
 	 */
 	FCollisionShape GetCollisionShape() const
 	{

@@ -282,7 +282,7 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnUnknownActor,
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Verifies that an actor with no pool and no INActorPoolItem interface is destroyed via
-	// the subsystem's default Destroy behaviour and the kill count is incremented.
+	// the subsystem's default Destroy behavior and the kill count is incremented.
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		// Need to spawn the zone away from origin so it doesnt trigger before actor settings are applied.
@@ -308,7 +308,7 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnUnknownActor,
 			return;
 		}
 
-		// The subsystem's default UnknownBehaviour is Destroy. ReturnActor calls Destroy()
+		// The subsystem's default UnknownBehavior is Destroy. ReturnActor calls Destroy()
 		// which returns true, so the kill count increments and the actor is destroyed.
 		KillZone->OnOverlapBegin(KillZone, UnknownActor, nullptr, 0, false, FHitResult());
 		CHECK_EQUALS("Kill count should be 1 after the unknown actor is destroyed.", KillZone->GetKillCount(), 1)

@@ -20,7 +20,7 @@ namespace NEXUS::ActorPools::ConsoleCommands
 void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
-	UnknownBehaviour = Settings->UnknownBehaviour;
+	UnknownBehavior = Settings->UnknownBehavior;
 	
 	// Check if we have anything to automatically load
 	if (Settings->AlwaysCreateSets.Num() == 0)
@@ -274,9 +274,9 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 		return (*ActorPools.Find(ActorClass))->Return(Actor);
 	}
 	
-	switch (UnknownBehaviour)
+	switch (UnknownBehavior)
 	{
-		using enum ENActorPoolUnknownBehaviour;
+		using enum ENActorPoolUnknownBehavior;
 		case CreateDefaultPool:
 		{
 			if (HasDefaultSettings(ActorClass))

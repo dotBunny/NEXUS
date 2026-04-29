@@ -31,7 +31,7 @@ private:
 	/** Module-owned input processor registered with FSlateApplication for the editor's lifetime. */
 	TSharedPtr<FNEditorInputProcessor> InputProcessor;
 
-	/** Handle for the tick delegate that re-applies the window icon after the editor initialises. */
+	/** Handle for the tick delegate that re-applies the window icon after the editor initializes. */
 	FDelegateHandle WindowIconDelegateHandle;
 
 	/** Replace the editor app icon with the resource at IconPath (SVG or raster). */

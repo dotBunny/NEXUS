@@ -18,7 +18,7 @@ class NEXUSCORE_API FNTestUtils
 public:
 	/**
 	 * Prepares global state so a performance test can produce comparable, low-noise measurements.
-	 * @note Initialises stack walking, forces a GC and flushes the log/visual-log streams.
+	 * @note Initializes stack walking, forces a GC and flushes the log/visual-log streams.
 	 */
 	FORCEINLINE static void PrePerformanceTest()
 	{

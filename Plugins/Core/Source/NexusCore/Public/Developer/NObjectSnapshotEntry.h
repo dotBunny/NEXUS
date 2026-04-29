@@ -7,9 +7,9 @@
 #include "NObjectSnapshotEntry.generated.h"
 
 /**
- * A single row within an FNObjectSnapshot, summarising one UObject at the moment of capture.
+ * A single row within an FNObjectSnapshot, summarizing one UObject at the moment of capture.
  *
- * Stores the minimum identifying information needed to recognise the same object in a later
+ * Stores the minimum identifying information needed to recognize the same object in a later
  * snapshot (pointer, serial number, names) alongside a few flags that are useful for leak
  * diagnosis (root-set membership, garbage flag, ref count). Diff logic (see FNObjectSnapshotUtils)
  * uses IsEqual() to decide whether two entries refer to the same object.
