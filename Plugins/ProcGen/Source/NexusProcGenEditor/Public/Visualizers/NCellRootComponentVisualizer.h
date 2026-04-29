@@ -18,7 +18,7 @@ class NEXUSPROCGENEDITOR_API FNCellRootComponentVisualizer final : public FCompo
 	/**
 	 * Which vertex/point type is currently being dragged, if any.
 	 */
-	enum class EEditMode
+	enum class ENEditMode
 	{
 		None = 0,
 		HullVertex = 1,
@@ -51,7 +51,7 @@ private:
 	static bool ToggleVoxelPoint(UNCellRootComponent* Component, int32 Index);
 
 	/** Active drag mode between a click and EndEditing. */
-	EEditMode CurrentEditMode = EEditMode::None;
+	ENEditMode CurrentEditMode = ENEditMode::None;
 
 	/** Index of the vertex or voxel currently being dragged (−1 when inactive). */
 	int32 VertexIndex = -1;
