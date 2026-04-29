@@ -59,8 +59,8 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	}
 	
 	InputComponents.Add(Component);
-	OrganContext.Add(Component, FNOrganLockedData());
-	FNOrganLockedData* WorkingContext = OrganContext.Find(Component);
+	OrganContext.Add(Component, FNWorldOrganContext());
+	FNWorldOrganContext* WorkingContext = OrganContext.Find(Component);
 	WorkingContext->SourceComponent = Component;
 	WorkingContext->Origin = Component->GetOwner()->GetActorLocation();
 
@@ -173,7 +173,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		if (Pair.Key->bUnbounded) continue;
 		
 		// Handle "easy" work parallelization classification
-		if (FNOrganLockedData& ComponentContext = Pair.Value; 
+		if (FNWorldOrganContext& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
 			PossibleComponents.Remove(Pair.Key);
@@ -198,7 +198,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNOrganLockedData* ComponentContext = OrganContext.Find(Component);
+			FNWorldOrganContext* ComponentContext = OrganContext.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
@@ -248,7 +248,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (auto& Component : Phase)
 		{
-			FNOrganLockedData* OrganGenerationContext = OrganContext.Find(Component);
+			FNWorldOrganContext* OrganGenerationContext = OrganContext.Find(Component);
 			
 			if (!Component->IsVolumeBased())
 			{

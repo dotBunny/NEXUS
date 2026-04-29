@@ -19,10 +19,10 @@ struct FNProcGenFinalizeTask
 {
 public:
 
-	explicit FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
-		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
+	explicit FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
+		N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenOperationFinalizeTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenFinalizeTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -37,5 +37,5 @@ private:
 	/** Top-level task-graph context containing the produced graphs and spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	
-	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
+	N_PROC_GEN_ANALYTICS_SHARED_REF
 };

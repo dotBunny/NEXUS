@@ -6,7 +6,7 @@
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Types/NRawMesh.h"
 
-class FNWorldContext
+class FNVirtualWorldContext
 {
 public:
 	
@@ -31,7 +31,7 @@ public:
 	TArray<FVector> NodeCollisionMeshLocations;
 	TArray<FRotator> NodeCollisionMeshRotations;
 	
-	explicit FNWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
+	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{
 		InputWorld = TargetWorld;
 		InputBounds = TargetBounds;

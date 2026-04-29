@@ -10,7 +10,7 @@
 #include "Collections/NWeightedIntegerArray.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 
-struct FNOrganLockedData;
+struct FNWorldOrganContext;
 class UNOrganComponent;
 
 /**
@@ -44,7 +44,7 @@ struct FNCellInputDataFilter
  * retries: ResetForRetry drops the in-progress graph while preserving seed/name so analytics
  * remain aggregated.
  */
-class FNOrganContext
+class FNVirtualOrganContext
 {
 	friend struct FNOrganGeneratorBuildGraphTask;
 
@@ -77,8 +77,8 @@ public:
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 
-	FNOrganContext(const FNOrganLockedData* GeneratorContextMap, uint64 TaskSeed, FString TaskName);
-	~FNOrganContext();
+	FNVirtualOrganContext(const FNWorldOrganContext* WorldOrganContext, uint64 TaskSeed, FString TaskName);
+	~FNVirtualOrganContext();
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };

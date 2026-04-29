@@ -4,19 +4,17 @@
 #pragma once
 #include "NActorUtils.h"
 #include "Generation/NProcGenTaskAnalytics.h"
-#include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Contexts/NVirtualWorldContext.h"
 #include "Organ/NOrganVolume.h"
 
-class FNCreateWorldContextTask
+class FNCreateVirtualWorldTask
 {
 public:
-	explicit FNCreateWorldContextTask(const TSharedPtr<FNWorldContext>& WorldContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr) 
-	: WorldContextPtr(WorldContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
-	{
-		
-	}
+	explicit FNCreateVirtualWorldTask(const TSharedPtr<FNVirtualWorldContext>& VirtualWorldContextPtr
+		N_PROC_GEN_ANALYTICS_CONSTRUCTOR)
+	: VirtualWorldContextPtr(VirtualWorldContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER { }
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNBuildWorldContextTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateVirtualWorldTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -41,6 +39,6 @@ public:
 	}
 	
 private:
-	TSharedRef<FNWorldContext> WorldContextPtr;
-	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
+	TSharedRef<FNVirtualWorldContext> VirtualWorldContextPtr;
+	N_PROC_GEN_ANALYTICS_SHARED_REF
 };

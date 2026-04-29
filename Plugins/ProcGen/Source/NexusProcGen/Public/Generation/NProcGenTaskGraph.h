@@ -42,7 +42,7 @@ public:
 	/** Block the calling thread until every stage finishes. */
 	void WaitForTasks();
 	
-	TSharedPtr<FNProcGenTaskAnalytics> Analytics;
+	N_PROC_GEN_ANALYTICS_SHARED_PTR
 	
 private:
 	

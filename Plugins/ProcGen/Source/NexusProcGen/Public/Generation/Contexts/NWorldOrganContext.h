@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NBoneLockedData.h"
+#include "Generation/Data/NBoneLockedData.h"
 
 class UNOrganComponent;
 
@@ -13,8 +13,10 @@ class UNOrganComponent;
  *
  * Holds topological relationships (intersecting/contained organs), the bones that fall inside
  * this organ, and retry budget for the graph-builder stage.
+ * 
+ * @remarks Unsafe to interact with off of the game-thread.
  */
-struct NEXUSPROCGEN_API FNOrganLockedData
+struct NEXUSPROCGEN_API FNWorldOrganContext
 {
 	/** Organ component this context was computed from. */
 	UNOrganComponent* SourceComponent;

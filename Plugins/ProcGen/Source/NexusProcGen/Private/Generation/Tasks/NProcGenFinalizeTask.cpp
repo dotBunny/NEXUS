@@ -6,24 +6,23 @@
 
 
 FNProcGenFinalizeTask::FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation, 
-	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr)
-	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef())
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR)
+	: Operation(TargetOperation), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER
 {
 	
 }
 
 void FNProcGenFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-#if !UE_BUILD_SHIPPING	
-	AnalyticsPtr->ProcGenFinalizeStart();
-#endif // !UE_BUILD_SHIPPING		
+	N_PROC_GEN_ANALYTICS(ProcGenFinalizeStart)
+
 	// Send the finalized shared data back to the operation for doings
 	// This usually means recording the spawned things somewhere, but also could be useful for triggering events.
 	Operation->FinishBuild(TaskGraphContextPtr);
 
+	N_PROC_GEN_ANALYTICS(ProcGenFinalizeFinish)
+
 #if !UE_BUILD_SHIPPING	
-	AnalyticsPtr->ProcGenFinalizeFinish();
-	
 	// Log our analytics at this point
 	UE_LOG(LogNexusProcGen, Log, TEXT("%s"), *AnalyticsPtr->GetTimespanReport());
 #endif // !UE_BUILD_SHIPPING

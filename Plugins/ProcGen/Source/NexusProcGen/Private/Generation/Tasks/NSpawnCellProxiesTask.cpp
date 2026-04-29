@@ -6,10 +6,9 @@
 
 void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-#if !UE_BUILD_SHIPPING	
-	const int AnalyticsIndex = AnalyticsPtr->SpawnCellProxiesCreate();
-	AnalyticsPtr->SpawnCellProxiesStart(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+	N_PROC_GEN_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
+	N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesStart)
+	
 	constexpr double MaxAllowableTime = 0.002; // 2ms budget
 	const double StartTime = FPlatformTime::Seconds();
 	const int NodeCount = SpawnCellsContextPtr->Nodes.Num();
@@ -33,15 +32,11 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		}
 		
 		SpawnCellsContextPtr->CurrentIndex++;
-#if !UE_BUILD_SHIPPING	
-		AnalyticsPtr->SpawnCellProxiesSpawned(AnalyticsIndex, SpawnCellsContextPtr->Nodes[i]->GetTemplate()->GetFName());
-#endif // !UE_BUILD_SHIPPING
+		N_PROC_GEN_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, AnalyticsIndex, SpawnCellsContextPtr->Nodes[i]->GetTemplate()->GetFName())
 		
 		if (SpawnCellsContextPtr->CurrentIndex == NodeCount)
 		{
-#if !UE_BUILD_SHIPPING	
-			AnalyticsPtr->SpawnCellProxiesFinish(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			CompletionEvent->Unlock(); // Triggers
 			return;
 		}
@@ -49,11 +44,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		// Outside of the required slicing, dispatch a new task that should move on to the next frame?
 		if (FPlatformTime::Seconds() - StartTime > MaxAllowableTime)
 		{
-#if !UE_BUILD_SHIPPING	
-			AnalyticsPtr->SpawnCellProxiesFinish(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			TGraphTask<FNSpawnCellProxiesTask>::CreateTask(nullptr,  ENamedThreads::GameThread)
-				.ConstructAndDispatchWhenReady(SpawnCellsContextPtr, TaskGraphContextPtr, CompletionEvent, AnalyticsPtr);
+				.ConstructAndDispatchWhenReady(SpawnCellsContextPtr, TaskGraphContextPtr, CompletionEvent N_PROC_GEN_ANALYTICS_CLASS_REF);
 			return;
 		}
 		

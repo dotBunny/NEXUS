@@ -7,7 +7,7 @@
 #include "Async/TaskGraphInterfaces.h"
 #include "Generation/NProcGenTaskAnalytics.h"
 #include "Generation/Contexts/NPassContext.h"
-#include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Contexts/NVirtualWorldContext.h"
 
 class UNProcGenOperation;
 
@@ -16,13 +16,13 @@ class UNProcGenOperation;
  * as well as adds the generated cell hulls to the world-context for future generation collision detection.
  * 
  */
-struct FNProcessPassContextTask
+struct FNProcessPassTask
 {
-	explicit FNProcessPassContextTask(const TSharedPtr<FNPassContext>& PassContextPtr, 
-		const TSharedPtr<FNWorldContext>& WorldContextPtr,
-		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr, const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
+	explicit FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContextPtr, 
+		const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCollectPassContextTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessPassTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -34,11 +34,11 @@ private:
 	/** Pass-level collection being drained. */
 	TSharedRef<FNPassContext> PassContextPtr;
 	
-	TSharedRef<FNWorldContext> WorldContextPtr;
+	TSharedRef<FNVirtualWorldContext> WorldContextPtr;
 
 	/** Top-level task-graph context that receives the drained graphs. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	
-	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
-	int32 AnalyticsIndex = -1;
+	N_PROC_GEN_ANALYTICS_SHARED_REF
+	N_PROC_GEN_ANALYTICS_INDEX_LOCAL
 };

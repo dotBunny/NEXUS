@@ -10,13 +10,13 @@
 
 class UNProcGenOperation;
 
-struct FNCreateSpawnCellsContextTask
+struct FNCreateSpawnCellsTask
 {
-	explicit FNCreateSpawnCellsContextTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
-		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
-		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
+	explicit FNCreateSpawnCellsTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
+		N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnContextTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnCellsTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
@@ -30,5 +30,5 @@ private:
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	TSharedRef<FNSpawnCellsContext> SpawnCellsContextPtr;
-	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
+	N_PROC_GEN_ANALYTICS_SHARED_REF
 };

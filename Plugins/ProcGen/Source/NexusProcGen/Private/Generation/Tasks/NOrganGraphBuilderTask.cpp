@@ -7,29 +7,23 @@
 #include "Generation/Graph/NProcGenGraphBoneNode.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Generation/Graph/NProcGenGraphNodeFactory.h"
-#include "Generation/Contexts/NWorldContext.h"
+#include "Generation/Contexts/NVirtualWorldContext.h"
 #include "Math/NMersenneTwister.h"
 
-FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& OrganContextPtr,
-	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr,
-	const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr)
-	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()), AnalyticsPtr(AnalyticsPtr.ToSharedRef()), 
+FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
+	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR)
+	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER, 
 		WorldContextPtr(WorldContextPtr.ToSharedRef())
 {
-	// Stub our analytics around this
-#if !UE_BUILD_SHIPPING	
-	AnalyticsIndex = AnalyticsPtr->OrganGraphBuilderCreate();
-#endif // !UE_BUILD_SHIPPING
+	N_PROC_GEN_ANALYTICS_INDEX_SET(OrganGraphBuilderCreate)
 }
 
 void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-#if !UE_BUILD_SHIPPING		
-	AnalyticsPtr->OrganGraphBuilderStart(AnalyticsIndex);
-	AnalyticsPtr->OrganGraphBuilder_Init(AnalyticsIndex, OrganContextPtr->GetName(), 
-		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount);
-#endif // !UE_BUILD_SHIPPING
-
+	N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilderStart)
+	N_PROC_GEN_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, AnalyticsIndex, OrganContextPtr->GetName(), 
+		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
+	
 	// The context was not validated during creation, so we cannot process it
 	if (!OrganContextPtr->IsValid()) return;
 	
@@ -95,9 +89,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			}
 			
 			// Prepare analytics for another pass
-#if !UE_BUILD_SHIPPING	
-			AnalyticsPtr->OrganGraphBuilder_NextIteration(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING			
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_NextIteration)
 		}
 	}
 	
@@ -113,9 +105,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		PassContextPtr->TakeGraph(MoveTemp(OrganContextPtr->CellGraph));
 	}
 
-#if !UE_BUILD_SHIPPING		
-	AnalyticsPtr->OrganGraphBuilderFinish(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING	
+	N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 }
 
 void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
@@ -183,18 +173,14 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		{
 			delete StartNode; 
 			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-#if !UE_BUILD_SHIPPING		
-			AnalyticsPtr->OrganGraphBuilder_DiscardWorldCollidingStart(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING			
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingStart)
 			BadStartCount++;
 		}
 		else if (DoesExistingNodeWorldCollide(StartNode))
 		{
 			delete StartNode; 
 			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-#if !UE_BUILD_SHIPPING		
-			AnalyticsPtr->OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING			
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
 			BadStartCount++;
 		}
 		else
@@ -329,9 +315,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			// TODO: We will later go back and fill this with something.
 			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
 			
-#if !UE_BUILD_SHIPPING			
-			AnalyticsPtr->OrganGraphBuilder_AddNullNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
 			
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			
@@ -369,9 +353,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
 			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 			{
-#if !UE_BUILD_SHIPPING			
-				AnalyticsPtr->OrganGraphBuilder_DiscardOutOfBoundsCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+				N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
 				delete TargetCellNode;
 				continue;
 			}
@@ -380,9 +362,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		// Check world collision
 		if (DoesWorldCollide(TargetCellNode))
 		{
-#if !UE_BUILD_SHIPPING			
-			AnalyticsPtr->OrganGraphBuilder_DiscardWorldCollidingCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
 			delete TargetCellNode;
 			continue;
 		}
@@ -390,9 +370,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		// Check previous pass existing node world collision
 		if (DoesExistingNodeWorldCollide(TargetCellNode))
 		{
-#if !UE_BUILD_SHIPPING			
-			AnalyticsPtr->OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
 			delete TargetCellNode;
 			continue;
 		}
@@ -415,9 +393,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
 			SourceCellNode->Link(SourceJunctionKey, TargetCellNode);
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
-#if !UE_BUILD_SHIPPING			
-			AnalyticsPtr->OrganGraphBuilder_AddCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
 			NewNodes.Add(TargetCellNode);
 			
 			// TODO: Its at this point we could iterate through the graph and see if theres any open junctions near any of this 
@@ -426,9 +402,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		}
 		else
 		{
-#if !UE_BUILD_SHIPPING			
-			AnalyticsPtr->OrganGraphBuilder_DiscardIntersectingCellNode(AnalyticsIndex);
-#endif // !UE_BUILD_SHIPPING			
+			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
 			delete TargetCellNode;
 		}
 	}

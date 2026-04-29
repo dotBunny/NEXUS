@@ -3,12 +3,6 @@
 
 #include "Generation/NProcGenTaskAnalytics.h"
 
-namespace NEXUS::ProcGen::Analytics
-{
-	inline float DurationMeasurement = 1000.f;
-}
-
-#if !UE_BUILD_SHIPPING	
 void FNProcGenTaskAnalytics::TaskGraphCreationStart()
 {
 	TaskGraphCreationTimer.Start();
@@ -17,22 +11,22 @@ void FNProcGenTaskAnalytics::TaskGraphCreationFinish()
 {
 	TaskGraphCreationTimer.Stop();
 }
-void FNProcGenTaskAnalytics::CreateWorldContextStart()
+void FNProcGenTaskAnalytics::CreateVirtualWorldContextStart()
 {
-	CreateWorldContextTimer.Start();
+	CreateVirtualWorldContextTimer.Start();
 }
-void FNProcGenTaskAnalytics::CreateWorldContextFinish()
+void FNProcGenTaskAnalytics::CreateVirtualWorldContextFinish()
 {
-	CreateWorldContextTimer.Stop();
+	CreateVirtualWorldContextTimer.Stop();
 }
-void FNProcGenTaskAnalytics::ProcessWorldContextStart()
+void FNProcGenTaskAnalytics::ProcessVirtualWorldContextStart()
 {
-	ProcessWorldContextTimer.Start();
+	ProcessVirtualWorldContextTimer.Start();
 }
 
-void FNProcGenTaskAnalytics::ProcessWorldContextFinish()
+void FNProcGenTaskAnalytics::ProcessVirtualWorldContextFinish()
 {
-	ProcessWorldContextTimer.Stop();
+	ProcessVirtualWorldContextTimer.Stop();
 }
 
 int FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
@@ -42,80 +36,80 @@ int FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilderStart(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.Timer.Start();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.Timer.Start();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_Init(int32 Index, const FString& Name, int32 MinimumCellCount, int32 MaximumCellCount, int32 MaximumRetryCount)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.Name = Name;
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.Name = Name;
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_AddNullNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.AddNullNodes.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.AddNullNodes.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_AddCellNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.AddCellNodes.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.AddCellNodes.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsStart(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardOutOfBoundsStart.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardOutOfBoundsStart.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingStart(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardWorldCollidingStart.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardWorldCollidingStart.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardOutOfBoundsCellNode.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardOutOfBoundsCellNode.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardIntersectingCellNode.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardIntersectingCellNode.Increment();
 }
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardWorldCollidingCellNode.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardWorldCollidingCellNode.Increment();
 }
 
 void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.DiscardExistingNodeWorldCollidingCellNode.Increment();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardExistingNodeWorldCollidingCellNode.Increment();
 }
 
 void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.NextIteration();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.NextIteration();
 }
 
 int FNProcGenTaskAnalytics::CollectGenerationPassesCreate()
 {
-	CollectGenerationPassesAnalytics.Add(FNCollectGenerationPassesAnalytics());
-	const int Phase = CollectGenerationPassesAnalytics.Num() - 1;
-	CollectGenerationPassesAnalytics.Last().Phase = Phase;
+	ProcessPassAnalytics.Add(FNProcessPassAnalytics());
+	const int Phase = ProcessPassAnalytics.Num() - 1;
+	ProcessPassAnalytics.Last().Phase = Phase;
 	return Phase;
 }
 
 void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index)
 {
-	FNCollectGenerationPassesAnalytics& CollectionAnalytics = CollectGenerationPassesAnalytics[Index];
-	CollectionAnalytics.Timer.Start();
+	FNProcessPassAnalytics& Analytic = ProcessPassAnalytics[Index];
+	Analytic.Timer.Start();
 }
 
 void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index)
 {
-	FNCollectGenerationPassesAnalytics& CollectionAnalytics = CollectGenerationPassesAnalytics[Index];
-	CollectionAnalytics.Timer.Stop();
+	FNProcessPassAnalytics& Analytic = ProcessPassAnalytics[Index];
+	Analytic.Timer.Stop();
 }
 
 void FNProcGenTaskAnalytics::CreateSpawnCellsContextStart()
@@ -136,21 +130,21 @@ int FNProcGenTaskAnalytics::SpawnCellProxiesCreate()
 
 void FNProcGenTaskAnalytics::SpawnCellProxiesStart(int32 Index)
 {
-	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
-	SpawnCellProxiesAnalytic.Timer.Start();
+	FNSpawnCellProxiesAnalytics& Analytic = SpawnCellProxiesAnalytics[Index];
+	Analytic.Timer.Start();
 }
 
 void FNProcGenTaskAnalytics::SpawnCellProxiesSpawned(int32 Index, FName Template)
 {
-	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
-	SpawnCellProxiesAnalytic.Spawned.Add(Template);
+	FNSpawnCellProxiesAnalytics& Analytic = SpawnCellProxiesAnalytics[Index];
+	Analytic.Spawned.Add(Template);
 }
 
 
 void FNProcGenTaskAnalytics::SpawnCellProxiesFinish(int32 Index)
 {
-	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
-	SpawnCellProxiesAnalytic.Timer.Stop();
+	FNSpawnCellProxiesAnalytics& Analytic = SpawnCellProxiesAnalytics[Index];
+	Analytic.Timer.Stop();
 }
 
 void FNProcGenTaskAnalytics::ProcGenFinalizeStart()
@@ -175,27 +169,27 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	Builder.Appendf(TEXT("[G]\tTaskGraph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
 	DurationTotal += TaskGraphCreationTimer.Duration;
 	
-	Builder.Appendf(TEXT("[G]\tCreate WorldContext: %f ms\n"), CreateWorldContextTimer.Duration);
-	DurationTotal += CreateWorldContextTimer.Duration;
+	Builder.Appendf(TEXT("[G]\tCreate VirtualWorldContext: %f ms\n"), CreateVirtualWorldContextTimer.Duration);
+	DurationTotal += CreateVirtualWorldContextTimer.Duration;
 	
-	Builder.Appendf(TEXT("[B]\tProcess WorldContext: %f ms\n"), ProcessWorldContextTimer.Duration);
-	DurationTotal += ProcessWorldContextTimer.Duration;
+	Builder.Appendf(TEXT("[B]\tProcess VirtualWorldContext: %f ms\n"), ProcessVirtualWorldContextTimer.Duration);
+	DurationTotal += ProcessVirtualWorldContextTimer.Duration;
 	
 	double OrganGraphBuilderDurationTotal = 0;
 	Builder.Append(TEXT("\tOrganGraph Builders:\n"));
-	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
+	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		Builder.Appendf(TEXT("[B]\t\t%s (%i): %f ms\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations, OrganGraphBuilderAnalytic.Timer.Duration);
-		DurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
-		OrganGraphBuilderDurationTotal += OrganGraphBuilderAnalytic.Timer.Duration;
+		Builder.Appendf(TEXT("[B]\t\t%s (%i): %f ms\n"), *Analytic.Name, Analytic.Iterations, Analytic.Timer.Duration);
+		DurationTotal += Analytic.Timer.Duration;
+		OrganGraphBuilderDurationTotal += Analytic.Timer.Duration;
 	}
 	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), OrganGraphBuilderDurationTotal);
 	
-	Builder.Append(TEXT("\tCollect Generation Passes:\n"));
-	for (const auto CollectGenerationPassesAnalytic : CollectGenerationPassesAnalytics)
+	Builder.Append(TEXT("\tProcess Passes:\n"));
+	for (const auto Analytic : ProcessPassAnalytics)
 	{
-		Builder.Appendf(TEXT("[B]\t\tPhase %i: %f ms\n"), CollectGenerationPassesAnalytic.Phase, CollectGenerationPassesAnalytic.Timer.Duration);
-		DurationTotal += CollectGenerationPassesAnalytic.Timer.Duration;
+		Builder.Appendf(TEXT("[B]\t\tPass %i: %f ms\n"), Analytic.Phase, Analytic.Timer.Duration);
+		DurationTotal += Analytic.Timer.Duration;
 	}
 	
 	Builder.Appendf(TEXT("[B]\tCreate SpawnCellsContext: %f\n"), CreateSpawnCellsContextTimer.Duration);
@@ -204,11 +198,11 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	
 	double SpawnCellProxiesDurationTotal = 0;
 	Builder.Append(TEXT("\tSpawn Cell Proxies (Sliced):\n"));
-	for (const auto SpawnCellProxiesAnalytic : SpawnCellProxiesAnalytics)
+	for (const auto Analytic : SpawnCellProxiesAnalytics)
 	{
-		Builder.Appendf(TEXT("[G]\t\t%i Spawns in %f ms\n"), SpawnCellProxiesAnalytic.Spawned.Num(), SpawnCellProxiesAnalytic.Timer.Duration);
-		DurationTotal +=  SpawnCellProxiesAnalytic.Timer.Duration;
-		SpawnCellProxiesDurationTotal +=  SpawnCellProxiesAnalytic.Timer.Duration;
+		Builder.Appendf(TEXT("[G]\t\t%i Spawns in %f ms\n"), Analytic.Spawned.Num(), Analytic.Timer.Duration);
+		DurationTotal +=  Analytic.Timer.Duration;
+		SpawnCellProxiesDurationTotal +=  Analytic.Timer.Duration;
 	}
 	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), SpawnCellProxiesDurationTotal);
 	
@@ -253,46 +247,6 @@ FString FNProcGenTaskAnalytics::GetCountersReport()
 
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
 {
-	FNOrganGraphBuilderAnalytics& OrganAnalytics = OrganGraphBuilderAnalytics[Index];
-	OrganAnalytics.Timer.Stop();
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.Timer.Stop();
 }
-#else
-void FNProcGenTaskAnalytics::TaskGraphCreationStart() {}
-void FNProcGenTaskAnalytics::TaskGraphCreationFinish() {}
-
-void FNProcGenTaskAnalytics::CreateWorldContextStart() {}
-void FNProcGenTaskAnalytics::CreateWorldContextFinish() {}
-
-void FNProcGenTaskAnalytics::ProcessWorldContextStart() {}
-void FNProcGenTaskAnalytics::ProcessWorldContextFinish() {}
-
-int FNProcGenTaskAnalytics::OrganGraphBuilderCreate() { return -1; }
-void FNProcGenTaskAnalytics::OrganGraphBuilderStart(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_Init(int32 Index, const FString& Name, 
-	int32 MinimumCellCount, int32 MaximumCellCount, int32 MaximumRetryCount) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_AddNullNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_AddCellNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsStart(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingStart(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardOutOfBoundsCellNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardIntersectingCellNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index) {}
-void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index) {}
-FString FNProcGenTaskAnalytics::GetTimespanReport() { return TEXT("NProcGenTaskAnalytics::Timespans are not available in UE_BUILD_SHIPPING."); }
-FString FNProcGenTaskAnalytics::GetCountersReport() { return TEXT("NProcGenTaskAnalytics::Counters are not available in UE_BUILD_SHIPPING.");}
-
-int FNProcGenTaskAnalytics::CollectGenerationPassesCreate() { return -1; }
-void FNProcGenTaskAnalytics::CollectGenerationPassesStart(int32 Index) {}
-void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index) {}
-
-int FNProcGenTaskAnalytics::SpawnCellProxiesCreate() { return -1; }
-void FNProcGenTaskAnalytics::SpawnCellProxiesStart(int32 Index) {}
-void FNProcGenTaskAnalytics::SpawnCellProxiesSpawned(int32 Index, FName Template) {}
-void FNProcGenTaskAnalytics::SpawnCellProxiesFinish(int32 Index) {}
-
-void FNProcGenTaskAnalytics::ProcGenFinalizeStart() {}
-void FNProcGenTaskAnalytics::ProcGenFinalizeFinish() {}
-
-#endif // !UE_BUILD_SHIPPING	

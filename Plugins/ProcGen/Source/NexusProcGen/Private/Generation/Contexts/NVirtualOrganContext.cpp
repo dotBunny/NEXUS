@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Contexts/NOrganContext.h"
+#include "Generation/Contexts/NVirtualOrganContext.h"
 
 #include "NProcGenMinimal.h"
 #include "Cell/NCell.h"
@@ -10,26 +10,26 @@
 #include "Generation/Contexts/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNOrganContext::FNOrganContext(const FNOrganLockedData* GeneratorContextMap, const uint64 TaskSeed, FString TaskName)
+FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganContext* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
 	//TODO: There is a Seed on the component? What do we do here with it? 
 	
 	// Cache out some settings
-	MinimumCellCount = GeneratorContextMap->SourceComponent->MinimumCellCount;
-	MaximumCellCount = GeneratorContextMap->SourceComponent->MaximumCellCount;
-	MaximumRetryCount = GeneratorContextMap->MaximumRetryCount;
+	MinimumCellCount = WorldOrganContext->SourceComponent->MinimumCellCount;
+	MaximumCellCount = WorldOrganContext->SourceComponent->MaximumCellCount;
+	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
 	
 	// Keep a local copy of this here
-	bUnbounded = GeneratorContextMap->SourceComponent->bUnbounded;
+	bUnbounded = WorldOrganContext->SourceComponent->bUnbounded;
 	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
-	Bounds = GeneratorContextMap->Bounds;
-	Origin = GeneratorContextMap->Origin;
+	Bounds = WorldOrganContext->Bounds;
+	Origin = WorldOrganContext->Origin;
 	
 	// Build a safe reference to all the data so we can operate off-thread without issue
-	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = GeneratorContextMap->SourceComponent->GetTissueMap();
+	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = WorldOrganContext->SourceComponent->GetTissueMap();
 	
 	// Validate the tissue map has a start
 	bool bFoundStartNode = false;
@@ -94,8 +94,8 @@ FNOrganContext::FNOrganContext(const FNOrganLockedData* GeneratorContextMap, con
 	}
 	
 	// Need to convert the bone data to something were going to use
-	BoneInputData.Reserve(GeneratorContextMap->ContainedBones.Num());
-	for (const auto& Bone : GeneratorContextMap->ContainedBones)
+	BoneInputData.Reserve(WorldOrganContext->ContainedBones.Num());
+	for (const auto& Bone : WorldOrganContext->ContainedBones)
 	{
 		FNBoneInputData BoneDetails;
 		
@@ -138,7 +138,7 @@ FNOrganContext::FNOrganContext(const FNOrganLockedData* GeneratorContextMap, con
 	bIsValid = true;
 }
 
-FNOrganContext::~FNOrganContext()
+FNVirtualOrganContext::~FNVirtualOrganContext()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
@@ -149,7 +149,7 @@ FNOrganContext::~FNOrganContext()
 // #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
-bool FNOrganContext::CheckGraph() const
+bool FNVirtualOrganContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
 	int CellNodeCount = 0;
@@ -176,13 +176,13 @@ bool FNOrganContext::CheckGraph() const
 	return true;
 }
 
-bool FNOrganContext::ValidateGraph()
+bool FNVirtualOrganContext::ValidateGraph()
 {
 	bSuccessful = CheckGraph();
 	return bSuccessful;
 }
 
-void FNOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
+void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
 	JunctionIndices.Empty();
@@ -251,7 +251,7 @@ void FNOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FN
 	}
 }
 
-bool FNOrganContext::ResetForRetry()
+bool FNVirtualOrganContext::ResetForRetry()
 {
 	// Reset counters
 	for (int i = 0; i < CellInputData.Num(); i++)
