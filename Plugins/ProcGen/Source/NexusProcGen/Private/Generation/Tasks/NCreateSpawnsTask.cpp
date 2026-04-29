@@ -1,19 +1,19 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Generation/Tasks/NCreateSpawnCellsTask.h"
+#include "Generation/Tasks/NCreateSpawnsTask.h"
 
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Graph/NProcGenGraph.h"
 
-FNCreateSpawnCellsTask::FNCreateSpawnCellsTask(
+FNCreateSpawnsTask::FNCreateSpawnsTask(
 	const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
 	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR)
 	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()) N_PROCEDURAL_GENERATION_ANALYTICS_INITIALIZER
 {
 }
 
-void FNCreateSpawnCellsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
+void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	N_PROCEDURAL_GENERATION_ANALYTICS(CreateSpawnCellsContextStart)
 	

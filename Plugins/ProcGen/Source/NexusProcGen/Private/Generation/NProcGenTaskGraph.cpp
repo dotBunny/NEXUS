@@ -16,7 +16,7 @@
 #include "Generation/Contexts/NVirtualWorldContext.h"
 #include "Generation/Tasks/NCreateVirtualWorldTask.h"
 #include "Generation/Tasks/NProcessVirtualWorldTask.h"
-#include "Generation/Tasks/NCreateSpawnCellsTask.h"
+#include "Generation/Tasks/NCreateSpawnsTask.h"
 #include "Generation/Tasks/NSpawnCellProxiesTask.h"
 
 #include "Math/NMersenneTwister.h"
@@ -126,11 +126,11 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNSpawnContext> SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
 		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
 
-	FGraphEventRef CreateSpawnContextTask = TGraphTask<FNCreateSpawnCellsTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
+	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-	FinalizerTasks.Add(CreateSpawnContextTask);
-	SpawnContextTasks.Add(CreateSpawnContextTask);
-	AllTasks.Add(CreateSpawnContextTask);
+	FinalizerTasks.Add(CreateSpawnsTask);
+	SpawnContextTasks.Add(CreateSpawnsTask);
+	AllTasks.Add(CreateSpawnsTask);
 	
 	// Create our dispatcher task that will time-slice spawning
 	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();

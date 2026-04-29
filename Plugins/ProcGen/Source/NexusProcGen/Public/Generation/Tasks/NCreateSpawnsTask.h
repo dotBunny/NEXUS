@@ -10,13 +10,13 @@
 
 class UNProcGenOperation;
 
-struct FNCreateSpawnCellsTask
+struct FNCreateSpawnsTask
 {
-	explicit FNCreateSpawnCellsTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
+	explicit FNCreateSpawnsTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
 		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
 		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
-	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnCellsTask, STATGROUP_TaskGraphTasks); }
+	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnsTask, STATGROUP_TaskGraphTasks); }
 
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
