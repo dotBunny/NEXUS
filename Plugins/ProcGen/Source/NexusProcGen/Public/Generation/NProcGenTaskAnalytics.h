@@ -107,13 +107,11 @@ public:
 	void SpawnCellProxiesSpawned(int32 Index, FName Template);
 	void SpawnCellProxiesFinish(int32 Index);
 	
-	
 	void ProcGenFinalizeStart();
 	void ProcGenFinalizeFinish();
 	
 	FString GetTimespanReport();
 	FString GetCountersReport();
-	
 	
 private:
 	FText DisplayName;

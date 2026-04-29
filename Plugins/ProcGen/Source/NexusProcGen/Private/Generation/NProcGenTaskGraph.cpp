@@ -7,12 +7,12 @@
 #include "NProcGenOperation.h"
 
 #include "Generation/Contexts/NProcGenOperationContext.h"
-#include "Generation/Contexts/NGenerationPassContext.h"
+#include "Generation/Contexts/NPassContext.h"
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Generation/Contexts/NSpawnCellsContext.h"
-#include "Generation/Tasks/NCollectGenerationPassesTask.h"
+#include "Generation/Tasks/NProcessPassContextTask.h"
 #include "Generation/Contexts/NWorldContext.h"
 #include "Generation/Tasks/NCreateWorldContextTask.h"
 #include "Generation/Tasks/NProcessWorldContextTask.h"
@@ -68,14 +68,14 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	int PassCount = 0;
 
 	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
-	for (auto Pass : Context->GenerationOrder)
+	for (auto PassComponents : Context->GenerationOrder)
 	{
 		// Create context for the pass itself that organ builders will hand off their generated graph too
-		TSharedPtr<FNGenerationPassContext> GenerationPassContextPtr = MakeShared<FNGenerationPassContext, ESPMode::ThreadSafe>();
+		TSharedPtr<FNPassContext> PassContextPtr = MakeShared<FNPassContext, ESPMode::ThreadSafe>();
 
 		int ComponentCount = 0;
 		FGraphEventArray PassTasks;
-		for (const auto Component : Pass)
+		for (const auto Component : PassComponents)
 		{
 			// Get the context generated during pre-generation process
 			FNOrganLockedData* ContextMap = Context->OrganContext.Find(Component);
@@ -92,7 +92,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(OrganContextPtr, GenerationPassContextPtr, WorldContextPtr, Analytics);
+				.ConstructAndHold(OrganContextPtr, PassContextPtr, WorldContextPtr, Analytics);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 
@@ -109,11 +109,12 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		// Record builder tasks so the next pass can chain onto them.
 		GraphBuilderTasks.Add(PassTasks);
 
-		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream.
-		FGraphEventRef CollectTask = TGraphTask<FNCollectGenerationPassesTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
-			.ConstructAndHold(GenerationPassContextPtr, TaskGraphContextPtr, Analytics);
-		CollectionTasks.Add(CollectTask);
-		AllTasks.Add(CollectTask);
+		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream as well as 
+		// any additional data like collisions, etc.
+		FGraphEventRef ProcessPassContextTask = TGraphTask<FNProcessPassContextTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
+			.ConstructAndHold(PassContextPtr, WorldContextPtr, TaskGraphContextPtr, Analytics);
+		CollectionTasks.Add(ProcessPassContextTask);
+		AllTasks.Add(ProcessPassContextTask);
 
 		// Increment pass count for labeling
 		PassCount++;

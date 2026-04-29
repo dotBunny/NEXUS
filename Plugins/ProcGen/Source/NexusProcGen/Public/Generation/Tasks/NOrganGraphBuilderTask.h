@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/Contexts/NGenerationPassContext.h"
+#include "Generation/Contexts/NPassContext.h"
 #include "Generation/Contexts/NOrganContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
@@ -18,8 +18,8 @@ class FNWorldContext;
  */
 struct FNOrganGraphBuilderTask
 {
-	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& ContextPtr,
-		const TSharedPtr<FNGenerationPassContext>& GenerationPassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr, 
+	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNOrganContext>& OrganContextPtr,
+		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNWorldContext>& WorldContextPtr, 
 		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
@@ -39,10 +39,10 @@ private:
 	
 	
 	/** Per-organ input data and output graph reference. */
-	TSharedRef<FNOrganContext> ContextPtr;
+	TSharedRef<FNOrganContext> OrganContextPtr;
 
-	/** Shared pass-level context — collects analytics/results across every organ in the step. */
-	TSharedRef<FNGenerationPassContext> GenerationPassContextPtr;
+	/** Shared pass-level context. */
+	TSharedRef<FNPassContext> PassContextPtr;
 	
 	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
 	int32 AnalyticsIndex = -1;
