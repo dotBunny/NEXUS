@@ -16,10 +16,10 @@ class FNProcGenTaskGraphContext
 {
 public:
 	/** The UWorld to target when creating or querying from the NProcGenTaskGraph. */
-	UWorld* TargetWorld;
+	TObjectPtr<UWorld> TargetWorld;
 
 	/** The proxies that were created from the evaluated task graph. */
-	TArray<ANCellProxy*> CreatedProxies;
+	TArray<TObjectPtr<ANCellProxy>> CreatedProxies;
 
 	/** The operation identifier for this graph. */
 	uint32 OperationTicket;

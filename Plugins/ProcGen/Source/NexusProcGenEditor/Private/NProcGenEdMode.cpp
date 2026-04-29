@@ -219,7 +219,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		
 		if (OrganGenerator->IsLocked())
 		{
-			TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
+			TArray<TArray<TObjectPtr<UNOrganComponent>>>& Order = OrganGenerator->GetGenerationOrder();
 			// #SONARQUBE-DISABLE-CPP_S134 Need the extra depth to iterate
 			for (int32 i = 0; i < Order.Num(); i++)
 			{

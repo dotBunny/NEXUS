@@ -19,13 +19,13 @@ class UNOrganComponent;
 struct NEXUSPROCGEN_API FNWorldOrganData
 {
 	/** Organ component this context was computed from. */
-	UNOrganComponent* SourceComponent;
+	TObjectPtr<UNOrganComponent> SourceComponent;
 
 	/** Organs whose bounds intersect but are not fully contained by this one. */
-	TArray<UNOrganComponent*> IntersectComponents = TArray<UNOrganComponent*>();
+	TArray<TObjectPtr<UNOrganComponent>> IntersectComponents = TArray<TObjectPtr<UNOrganComponent>>();
 
 	/** Organs whose bounds are entirely inside this one. */
-	TArray<UNOrganComponent*> ContainedComponents = TArray<UNOrganComponent*>();
+	TArray<TObjectPtr<UNOrganComponent>> ContainedComponents = TArray<TObjectPtr<UNOrganComponent>>();
 
 	/** Bones whose transforms fall inside this organ's volume. */
 	TArray<FNWorldBoneData*> ContainedBones = TArray<FNWorldBoneData*>();

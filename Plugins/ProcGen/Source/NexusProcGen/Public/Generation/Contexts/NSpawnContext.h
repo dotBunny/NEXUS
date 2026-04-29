@@ -16,7 +16,7 @@ class FNSpawnContext
 {
 public:
 	/** World the proxies will be spawned into. */
-	UWorld* World;
+	TObjectPtr<UWorld> World;
 
 	/** Operation identifier propagated into spawned proxies for traceability. */
 	uint32 OperationTicket;

@@ -15,7 +15,7 @@
 struct NEXUSPROCGEN_API FNWorldBoneData
 {
 	/** Bone component this context was computed from. */
-	UNBoneComponent* SourceComponent;
+	TObjectPtr<UNBoneComponent> SourceComponent;
 
 	/** Cached world-space corners of the bone's junction socket. */
 	TArray<FVector> CornerPoints;

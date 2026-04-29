@@ -146,7 +146,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// Create a separate list of components that we will operate on and clear out.
 	int32 GenerationOrderIndex = 0;
 	GenerationOrder.Empty();
-	GenerationOrder.Add(TArray<UNOrganComponent*>());
+	GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 	TArray<UNOrganComponent*> UnboundComponents;
 	TArray<UNOrganComponent*> PossibleComponents;
 	TArray<UNOrganComponent*> ProcessedComponents;
@@ -185,7 +185,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	// Evaluate if we should bump the generation order
 	if (GenerationOrder[0].Num() > 0 && PossibleComponents.Num() > 0)
 	{
-		GenerationOrder.Add(TArray<UNOrganComponent*>());
+		GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 		GenerationOrderIndex = 1;
 	}
 	
@@ -193,7 +193,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		// We need to track the processed components per generation iteration, so if we process this loop, it needs
 		// to ensure that anything that required it bumps to the next iteration.
-		TArray<UNOrganComponent*> PhaseProcessed;
+		TArray<TObjectPtr<UNOrganComponent>> PhaseProcessed;
 		
 		for (int32 i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
@@ -223,7 +223,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		// Evaluate if we should bump the generation order
 		if (GenerationOrder[GenerationOrderIndex].Num() > 0 && PossibleComponents.Num() > 0)
 		{
-			GenerationOrder.Add(TArray<UNOrganComponent*>());
+			GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 			GenerationOrderIndex++;
 		}
 	}
@@ -235,8 +235,8 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int32 i = 0; i < UnboundComponents.Num(); i++)
 		{
 			// Add to our generation order last the unbound	
-			GenerationOrder.Add(TArray<UNOrganComponent*>());
-			TArray<UNOrganComponent*>& NextPhase = GenerationOrder.Last();
+			GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
+			TArray<TObjectPtr<UNOrganComponent>>& NextPhase = GenerationOrder.Last();
 			NextPhase.Add(UnboundComponents[i]);
 		}
 	}

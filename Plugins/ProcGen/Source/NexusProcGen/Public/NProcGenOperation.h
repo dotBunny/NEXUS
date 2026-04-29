@@ -135,7 +135,7 @@ public:
 	void LockContext(UWorld* World);
 
 	/** @return The topologically ordered batches of organs determined during LockContext. */
-	TArray<TArray<UNOrganComponent*>>& GetGenerationOrder() const
+	TArray<TArray<TObjectPtr<UNOrganComponent>>>& GetGenerationOrder() const
 	{
 		return Context->GenerationOrder;
 	}

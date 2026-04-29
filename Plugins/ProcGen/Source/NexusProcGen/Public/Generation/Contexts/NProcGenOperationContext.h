@@ -25,19 +25,19 @@ public:
 	explicit FNProcGenOperationContext(uint32 NewOperationTicket);
 
 	/** Organ components fed into the operation prior to LockAndPreprocess. */
-	TArray<UNOrganComponent*> InputComponents;
+	TArray<TObjectPtr<UNOrganComponent>> InputComponents;
 
 	/** Per-organ derived state (bounds, bone references, assigned tissues, etc.). */
-	TMap<UNOrganComponent*, FNWorldOrganData> OrganData;
+	TMap<TObjectPtr<UNOrganComponent>, FNWorldOrganData> OrganData;
 
 	/** Per-bone derived state keyed by the bone component it was computed from. */
-	TMap<UNBoneComponent*, FNWorldBoneData> BoneData;
+	TMap<TObjectPtr<UNBoneComponent>, FNWorldBoneData> BoneData;
 
 	/** Reverse index from organ to the bone components that belong to it. */
-	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;
+	TMap<TObjectPtr<UNOrganComponent>, TArray<TObjectPtr<UNBoneComponent>>> ComponentBoneMap;
 
 	/** Organ components grouped into topologically-ordered batches that may run in parallel per step. */
-	TArray<TArray<UNOrganComponent*>> GenerationOrder;
+	TArray<TArray<TObjectPtr<UNOrganComponent>>> GenerationOrder;
 
 	/** Spatial bounds of every input organ; forwarded to FNVirtualWorldContext to scope collision gathering. */
 	TArray<FBoxSphereBounds> Bounds;
@@ -90,5 +90,5 @@ private:
 	bool bIsLocked = false;
 
 	/** World that will host the generated content. */
-	UWorld* TargetWorld = nullptr;
+	TObjectPtr<UWorld> TargetWorld = nullptr;
 };

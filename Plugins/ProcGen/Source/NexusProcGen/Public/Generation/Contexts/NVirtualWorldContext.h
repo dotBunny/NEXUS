@@ -17,7 +17,7 @@ class FNVirtualWorldContext
 {
 public:
 	/** Target world the snapshot was taken from. */
-	UWorld* InputWorld;
+	TObjectPtr<UWorld> InputWorld;
 
 	/** Spatial bounds of every organ participating in the operation, used to scope collision gathering. */
 	TArray<FBoxSphereBounds> InputBounds;
