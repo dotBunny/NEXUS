@@ -32,7 +32,7 @@ public:
 
 private:
 	/** Operation whose completion this task signals. */
-	UNProcGenOperation* Operation;
+	TObjectPtr<UNProcGenOperation> Operation;
 
 	/** Top-level task-graph context containing the produced graphs and spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;

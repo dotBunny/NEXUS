@@ -57,5 +57,5 @@ private:
 	int32 VertexIndex = -1;
 
 	/** Component currently targeted by the drag; cleared by EndEditing. */
-	UNCellRootComponent* RootComponent = nullptr;
+	TObjectPtr<UNCellRootComponent> RootComponent = nullptr;
 };
