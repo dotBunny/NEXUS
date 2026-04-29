@@ -48,17 +48,17 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 				nullptr,
 				ENamedThreads::GameThread)
 				.ConstructAndHold(VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-	Step0Tasks.Add(CreateVirtualWorldTask);
+	PreGameThreadTasks.Add(CreateVirtualWorldTask);
 	AllTasks.Add(CreateVirtualWorldTask);
 
 	// ----- STEP 1 - PROCESS WORLD CAPTURE ---------------------------------------------------------------------------------------------------------
 	
 	// Create associated data from our initial game-thread blocking task
 	FGraphEventRef ProcessVirtualWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
-				&Step0Tasks,
+				&PreGameThreadTasks,
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
 				.ConstructAndHold(VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-	Step1Tasks.Add(ProcessVirtualWorldContextTask);
+	ProcessInitialGameThreadTasks.Add(ProcessVirtualWorldContextTask);
 	AllTasks.Add(ProcessVirtualWorldContextTask);
 	
 	// ----- STEP 2 - BUILD CELL GRAPHS FOR ORGANS --------------------------------------------------------------------------------------------------
@@ -88,7 +88,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
-				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
+				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &ProcessInitialGameThreadTasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
 				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 			PassTasks.Add(OrganGraphBuilderTask);

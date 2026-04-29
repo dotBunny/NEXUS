@@ -38,7 +38,8 @@ public:
 
 	/** Organ components grouped into topologically-ordered batches that may run in parallel per step. */
 	TArray<TArray<UNOrganComponent*>> GenerationOrder;
-	
+
+	/** Spatial bounds of every input organ; forwarded to FNVirtualWorldContext to scope collision gathering. */
 	TArray<FBoxSphereBounds> Bounds;
 	
 	/**

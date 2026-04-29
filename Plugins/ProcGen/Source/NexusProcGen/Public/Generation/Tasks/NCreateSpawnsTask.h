@@ -10,9 +10,16 @@
 
 class UNProcGenOperation;
 
+/**
+ * Task-graph job that flattens every collected per-organ graph into the spawn context's cell-node
+ * list, ready for FNSpawnCellProxiesTask to consume.
+ *
+ * Runs on the game thread so the spawn context can be safely re-built ahead of the spawn passes.
+ * Acts as the bridge between the world/pass collection stages and the actual proxy-spawning stage.
+ */
 struct FNCreateSpawnsTask
 {
-	explicit FNCreateSpawnsTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
+	explicit FNCreateSpawnsTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr,
 		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
 		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
@@ -21,14 +28,15 @@ struct FNCreateSpawnsTask
 	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
-	/** Executed by the task graph: spawns proxies on the game thread from the collected graphs. */
+	/** Executed by the task graph: flattens the collected graphs into the spawn context. */
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	
-	
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
+
+	/** Spawn context that receives the flattened cell-node list. */
 	TSharedRef<FNSpawnContext> SpawnCellsContextPtr;
+
 	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 };

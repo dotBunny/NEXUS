@@ -54,16 +54,20 @@ private:
 
 	/** Flat list of every task in the graph; used for status aggregation. */
 	FGraphEventArray AllTasks;
+
+	/** Pre-work on game thread tasks; kicks off before any per-organ work. */
+	FGraphEventArray PreGameThreadTasks;
 	
-	FGraphEventArray Step0Tasks;
-	FGraphEventArray Step1Tasks;
+	/** Post pre-work game-thread tasks; gates the graph-builder batches. */
+	FGraphEventArray ProcessInitialGameThreadTasks;
 
 	/** Graph-builder tasks grouped per generation-order batch. */
 	TArray<FGraphEventArray> GraphBuilderTasks;
 
 	/** Collection/pass tasks that gather results after graph construction. */
 	FGraphEventArray CollectionTasks;
-	
+
+	/** Spawn-context preparation tasks that flatten collected graphs ready for proxy spawning. */
 	FGraphEventArray SpawnContextTasks;
 
 	/** Finalizer tasks that run immediately before FinalizeTask. */

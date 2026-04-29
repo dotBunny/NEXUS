@@ -75,6 +75,7 @@ public:
 			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
 	}
 	
+	/** @return true if this cell's hull intersects the supplied externally-transformed mesh. */
 	bool CheckHullIntersects(const FVector& OtherLocation, const FRotator& OtherRotation,  const FNRawMesh& OtherMesh) const
 	{
 		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
@@ -95,6 +96,7 @@ public:
 
 	/** @return Mutable access to the cell's world-space hull for intersection tests. */
 	FNRawMesh& GetHull() { return Hull; }
+	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
 
 private:

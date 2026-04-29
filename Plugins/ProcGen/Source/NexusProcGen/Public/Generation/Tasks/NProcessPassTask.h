@@ -33,12 +33,13 @@ struct FNProcessPassTask
 private:
 	/** Pass-level collection being drained. */
 	TSharedRef<FNPassContext> PassContextPtr;
-	
+
+	/** Virtual-world context that receives the new node hulls for downstream collision tests. */
 	TSharedRef<FNVirtualWorldContext> WorldContextPtr;
 
 	/** Top-level task-graph context that receives the drained graphs. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
-	
+
 	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_LOCAL
 };

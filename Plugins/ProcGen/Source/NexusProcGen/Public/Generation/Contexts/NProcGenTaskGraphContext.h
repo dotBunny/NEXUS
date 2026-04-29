@@ -35,7 +35,11 @@ public:
 
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNProcGenGraph>> Graphs;
-	
 
+	/**
+	 * @param OutputWorld World to target when spawning proxies.
+	 * @param OperationTicket Identifier of the operation that owns this context.
+	 * @param Settings Operation-wide settings forwarded to dependent tasks.
+	 */
 	explicit FNProcGenTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNProcGenOperationSettings& Settings);
 };
