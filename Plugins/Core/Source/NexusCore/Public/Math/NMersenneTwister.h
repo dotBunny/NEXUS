@@ -136,8 +136,8 @@ public:
 	* @param MaximumValue The highest possible value.
 	* @return a pseudo random integer.
 	*/
-	int IntegerRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32);
-	FORCEINLINE float RandRange(const int MinimumValue = MIN_int32, const int MaximumValue = MAX_int32)
+	int32 IntegerRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32);
+	FORCEINLINE int32 RandRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32)
 	{
 		return IntegerRange(MinimumValue, MaximumValue);
 	}

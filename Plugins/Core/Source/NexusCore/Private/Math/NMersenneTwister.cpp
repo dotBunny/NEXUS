@@ -22,9 +22,9 @@ bool FNMersenneTwister::Bias(const float Chance)
 
 void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
+	const int32 ActualCount = StartIndex + Count;
 	auto Distribution = std::uniform_real_distribution<float>(0.0, 1.0);
-	for (int i = StartIndex; i < ActualCount; i++)
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		if (Distribution(this->Engine) <= Chance)
 		{
@@ -47,8 +47,8 @@ bool FNMersenneTwister::Bool()
 
 void FNMersenneTwister::Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
-	for (int i = StartIndex; i < ActualCount; i++)
+	const int32 ActualCount = StartIndex + Count;
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = this->BooleanDistribution(this->Engine);
 	}
@@ -64,8 +64,8 @@ double FNMersenneTwister::Double()
 
 void FNMersenneTwister::Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
-	for (int i = StartIndex; i < ActualCount; i++)
+	const int32 ActualCount = StartIndex + Count;
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = this->PersistentDoubleRangeDistribution(this->Engine);
 	}
@@ -75,9 +75,9 @@ void FNMersenneTwister::Double(TArray<double>& OutArray, const int32 Count, cons
 void FNMersenneTwister::DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue,
 	const double MaximumValue, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
+	const int32 ActualCount = StartIndex + Count;
 	auto Distribution = std::uniform_real_distribution<double>(MinimumValue, MaximumValue);
-	for (int i = StartIndex; i < ActualCount; i++)
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
 	}
@@ -93,8 +93,8 @@ float FNMersenneTwister::Float()
 
 void FNMersenneTwister::Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
-	for (int i = StartIndex; i < ActualCount; i++)
+	const int32 ActualCount = StartIndex + Count;
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = this->PersistentFloatRangeDistribution(this->Engine);
 	}
@@ -118,18 +118,18 @@ double FNMersenneTwister::DoubleRange(const double MinimumValue, const double Ma
 void FNMersenneTwister::FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue,
 	const float MaximumValue, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
+	const int32 ActualCount = StartIndex + Count;
 	auto Distribution = std::uniform_real_distribution<float>(MinimumValue, MaximumValue);
-	for (int i = StartIndex; i < ActualCount; i++)
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
 	}
 	this->CallCounter += Count;
 }
 
-int FNMersenneTwister::IntegerRange(const int MinimumValue, const int MaximumValue)
+int32 FNMersenneTwister::IntegerRange(const int32 MinimumValue, const int32 MaximumValue)
 {
-	const int PseudoRandomValue = std::uniform_int_distribution<int>(MinimumValue, MaximumValue)(this->Engine);
+	const int32 PseudoRandomValue = std::uniform_int_distribution<int32>(MinimumValue, MaximumValue)(this->Engine);
 	this->CallCounter++;
 	return PseudoRandomValue;
 }
@@ -137,9 +137,9 @@ int FNMersenneTwister::IntegerRange(const int MinimumValue, const int MaximumVal
 void FNMersenneTwister::IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue,
 	const int32 MaximumValue, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
+	const int32 ActualCount = StartIndex + Count;
 	auto Distribution = std::uniform_int_distribution<int32>(MinimumValue, MaximumValue);
-	for (int i = StartIndex; i < ActualCount; i++)
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
 	}
@@ -156,9 +156,9 @@ uint32 FNMersenneTwister::UnsignedIntegerRange(const uint32 MinimumValue, const 
 void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count, const uint32 MinimumValue,
 	const uint32 MaximumValue, const int32 StartIndex)
 {
-	const int ActualCount = StartIndex + Count;
+	const int32 ActualCount = StartIndex + Count;
 	auto Distribution = std::uniform_int_distribution<uint32>(MinimumValue, MaximumValue);
-	for (int i = StartIndex; i < ActualCount; i++)
+	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = Distribution(this->Engine);
 	}
