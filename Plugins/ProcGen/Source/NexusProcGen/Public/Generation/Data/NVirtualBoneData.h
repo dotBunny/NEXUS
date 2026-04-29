@@ -7,7 +7,7 @@
  * Snapshot of a bone's spatial data, copied onto a task so it can be consumed off the game thread
  * without touching the live UNBoneComponent.
  */
-struct NEXUSPROCGEN_API FNBoneInputData
+struct NEXUSPROCGEN_API FNVirtualBoneData
 {
 	/** World-space location of the bone at the time of snapshot. */
 	FVector WorldPosition;

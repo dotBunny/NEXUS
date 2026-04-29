@@ -3,10 +3,12 @@
 
 #pragma once
 
+#include "Generation/NProcGenTaskAnalytics.h"
 #include "Generation/Contexts/NPassContext.h"
 #include "Generation/Contexts/NVirtualOrganContext.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
+
 
 class FNVirtualWorldContext;
 

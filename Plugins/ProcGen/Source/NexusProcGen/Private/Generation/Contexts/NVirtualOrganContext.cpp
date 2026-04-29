@@ -10,7 +10,7 @@
 #include "Generation/Contexts/NProcGenOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
-FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganContext* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
+FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
 	// This is our last chance to read anything off the main-thread
@@ -70,7 +70,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganContext* WorldOrg
 	CellInputData.Reserve(TissueMap.Num());
 	for (const auto& Cell : TissueMap)
 	{
-		FNCellInputData CellDetails;
+		FNVirtualCellData CellDetails;
 		
 		// TODO: We could implement some checks on the UNCell about cross referencing and what happens?
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
@@ -97,7 +97,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganContext* WorldOrg
 	BoneInputData.Reserve(WorldOrganContext->ContainedBones.Num());
 	for (const auto& Bone : WorldOrganContext->ContainedBones)
 	{
-		FNBoneInputData BoneDetails;
+		FNVirtualBoneData BoneDetails;
 		
 		BoneDetails.WorldPosition = Bone->SourceComponent->GetComponentLocation();
 		BoneDetails.WorldRotation = Bone->SourceComponent->GetComponentRotation();
@@ -189,7 +189,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	
 	for (int i = 0; i < CellInputData.Num(); i++)
 	{
-		const FNCellInputData* CellData = &CellInputData[i];
+		const FNVirtualCellData* CellData = &CellInputData[i];
 		
 		// Early out on some simple filters
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;

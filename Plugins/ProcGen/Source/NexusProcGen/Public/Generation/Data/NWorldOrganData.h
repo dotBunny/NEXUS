@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Generation/Data/NBoneLockedData.h"
+#include "Generation/Data/NWorldBoneData.h"
 
 class UNOrganComponent;
 
@@ -16,7 +16,7 @@ class UNOrganComponent;
  * 
  * @remarks Unsafe to interact with off of the game-thread.
  */
-struct NEXUSPROCGEN_API FNWorldOrganContext
+struct NEXUSPROCGEN_API FNWorldOrganData
 {
 	/** Organ component this context was computed from. */
 	UNOrganComponent* SourceComponent;
@@ -28,7 +28,7 @@ struct NEXUSPROCGEN_API FNWorldOrganContext
 	TArray<UNOrganComponent*> ContainedComponents = TArray<UNOrganComponent*>();
 
 	/** Bones whose transforms fall inside this organ's volume. */
-	TArray<FNBoneLockedData*> ContainedBones = TArray<FNBoneLockedData*>();
+	TArray<FNWorldBoneData*> ContainedBones = TArray<FNWorldBoneData*>();
 
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;

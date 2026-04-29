@@ -6,7 +6,7 @@
 #include "NProcGenMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
+FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation) : FNProcGenGraphNode(Position, Rotation)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
@@ -86,7 +86,7 @@ FNProcGenGraphNode* FNProcGenGraphCellNode::GetLinkedNode(const int32 JunctionKe
 	return Links[JunctionKey];
 }
 
-bool FNProcGenGraphCellNode::SearchForMatchingCellInputData(const FNCellInputData* InputData, const int32 MaxDepth) const
+bool FNProcGenGraphCellNode::SearchForMatchingCellInputData(const FNVirtualCellData* InputData, const int32 MaxDepth) const
 {
 	if (InputData == nullptr) return false;
 	if (InputDataPtr == InputData) return true;

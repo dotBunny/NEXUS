@@ -4,12 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NActorUtils.h"
 #include "NProcGenOperationSettings.h"
-#include "Generation/Data/NBoneLockedData.h"
-#include "Generation/Contexts/NWorldOrganContext.h"
+#include "Generation/Data/NWorldBoneData.h"
+#include "Generation/Data/NWorldOrganData.h"
 #include "Organ/NBoneComponent.h"
-#include "Types/NRawMesh.h"
 
 class UNOrganComponent;
 
@@ -30,10 +28,10 @@ public:
 	TArray<UNOrganComponent*> InputComponents;
 
 	/** Per-organ derived state (bounds, bone references, assigned tissues, etc.). */
-	TMap<UNOrganComponent*, FNWorldOrganContext> OrganContext;
+	TMap<UNOrganComponent*, FNWorldOrganData> OrganData;
 
 	/** Per-bone derived state keyed by the bone component it was computed from. */
-	TMap<UNBoneComponent*, FNBoneLockedData> BoneContext;
+	TMap<UNBoneComponent*, FNWorldBoneData> BoneData;
 
 	/** Reverse index from organ to the bone components that belong to it. */
 	TMap<UNOrganComponent*, TArray<UNBoneComponent*>> ComponentBoneMap;

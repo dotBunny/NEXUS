@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/Data/NCellInputData.h"
+#include "Generation/Data/NVirtualCellData.h"
 #include "NProcGenGraphBoneNode.h"
 #include "NProcGenGraphCellNode.h"
 #include "NProcGenGraphNullNode.h"
@@ -20,7 +20,7 @@ class FNProcGenGraphNodeFactory
 public:
 
 	/** Allocate a new bone node at the given transform, copying its socket size from Bone. */
-	FORCEINLINE static FNProcGenGraphBoneNode* CreateBoneNode(const FNBoneInputData* Bone, const FVector& Position, const FRotator& Rotation)
+	FORCEINLINE static FNProcGenGraphBoneNode* CreateBoneNode(const FNVirtualBoneData* Bone, const FVector& Position, const FRotator& Rotation)
 	{
 		FNProcGenGraphBoneNode* BoneNode = new FNProcGenGraphBoneNode(Bone, Position, Rotation);
 		return BoneNode;
@@ -28,7 +28,7 @@ public:
 	}
 
 	/** Allocate a new cell node at the given transform, bound to the provided input data. */
-	FORCEINLINE static FNProcGenGraphCellNode* CreateCellNode(FNCellInputData* Cell, const FVector& Position, const FRotator& Rotation)
+	FORCEINLINE static FNProcGenGraphCellNode* CreateCellNode(FNVirtualCellData* Cell, const FVector& Position, const FRotator& Rotation)
 	{
 		FNProcGenGraphCellNode* CellNode = new FNProcGenGraphCellNode(Cell, Position, Rotation);
 		return CellNode;

@@ -111,7 +111,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 {
 	// TODO: We haven't resolved yet how we might join multiple generation points yet so we are just going to use the first bone.
-	FNBoneInputData& BoneData = OrganContextPtr->BoneInputData[0];
+	FNVirtualBoneData& BoneData = OrganContextPtr->BoneInputData[0];
 	
 	FNCellInputDataFilter PreFilter;
 	PreFilter.SocketSize = BoneData.SocketSize;
@@ -135,7 +135,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	{
 		// Get a weighted array of indices representing possible starting cells, and reference the cell data
 		const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
-		FNCellInputData* StartCellInputData = &OrganContextPtr->CellInputData[StartCellIndex];
+		FNVirtualCellData* StartCellInputData = &OrganContextPtr->CellInputData[StartCellIndex];
 		
 		// Decide which appropriately sized junction is going to be used
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
@@ -326,7 +326,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Pick our cell to use to spawn
 		const int32 CellInputIndex = CellInputWeightedIndices.TwistedValue(Random);
-		FNCellInputData* CellInputData = &OrganContextPtr->CellInputData[CellInputIndex];
+		FNVirtualCellData* CellInputData = &OrganContextPtr->CellInputData[CellInputIndex];
 		
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];

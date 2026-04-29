@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/Data/NCellInputData.h"
+#include "Generation/Data/NVirtualCellData.h"
 #include "NProcGenGraphNode.h"
 #include "Cell/NCell.h"
 #include "Types/NRawMeshUtils.h"
@@ -19,7 +19,7 @@ class NEXUSPROCGEN_API FNProcGenGraphCellNode : public FNProcGenGraphNode
 public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Cell; }
 
-	FNProcGenGraphCellNode(FNCellInputData* InputData, const FVector& Position, const FRotator& Rotation);
+	FNProcGenGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation);
 
 	/** @return true if at least one junction on this cell is still unlinked. */
 	bool HasOpenJunctions() const;
@@ -57,7 +57,7 @@ public:
 	 * Walks linked neighbours up to MaxDepth looking for an existing node built from the same input data.
 	 * Used to enforce MinimumNodeDistance constraints.
 	 */
-	bool SearchForMatchingCellInputData(const FNCellInputData* InputData, int32 MaxDepth) const;
+	bool SearchForMatchingCellInputData(const FNVirtualCellData* InputData, int32 MaxDepth) const;
 
 	/** @return true if the node's world bounds are fully contained within Bounds. */
 	bool IsBoundsInside(const FBox& Bounds) const
@@ -85,7 +85,7 @@ public:
 	 * @return The raw input-data pointer used by the builder.
 	 * @warning Only valid during graph construction; nulled by CleanupBuilderReferences afterwards.
 	 */
-	FNCellInputData* GetInputDataPtr() const { return InputDataPtr; }
+	FNVirtualCellData* GetInputDataPtr() const { return InputDataPtr; }
 
 	/** Drop the builder-only input-data pointer once the graph is handed to the next stage. */
 	void CleanupBuilderReferences()
@@ -99,7 +99,7 @@ public:
 
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
-	FNCellInputData* InputDataPtr;
+	FNVirtualCellData* InputDataPtr;
 
 	/** Whether the spawned level instance should be always-relevant for networking. */
 	bool bAlwaysRelevant;

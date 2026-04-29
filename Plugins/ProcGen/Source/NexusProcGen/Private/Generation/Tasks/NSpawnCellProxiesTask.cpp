@@ -11,30 +11,30 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 	constexpr double MaxAllowableTime = 0.002; // 2ms budget
 	const double StartTime = FPlatformTime::Seconds();
-	const int NodeCount = SpawnCellsContextPtr->Nodes.Num();
+	const int NodeCount = SpawnCellsContextPtr->CellNodes.Num();
 	
-	for (int i = SpawnCellsContextPtr->CurrentIndex; i < NodeCount; i++)
+	for (int i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 
 		SpawnCellsContextPtr->OperationTicket, 
-		SpawnCellsContextPtr->Nodes[i], 
-		SpawnCellsContextPtr->bPreloadLevel);
+		SpawnCellsContextPtr->CellNodes[i], 
+		SpawnCellsContextPtr->bPreloadLevels);
 		
 		// Registered with global?
 		TaskGraphContextPtr->CreatedProxies.Add(Proxy);
 			
 		// What about creating the instance?
-		if (SpawnCellsContextPtr->bSpawnLevelInstance)
+		if (SpawnCellsContextPtr->bSpawnLevelInstances)
 		{
 			Proxy->CreateLevelInstance();
 			Proxy->LoadLevelInstance();
 		}
 		
-		SpawnCellsContextPtr->CurrentIndex++;
-		N_PROCEDURAL_GENERATION_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX, SpawnCellsContextPtr->Nodes[i]->GetTemplate()->GetFName())
+		SpawnCellsContextPtr->CellNodesCurrentIndex++;
+		N_PROCEDURAL_GENERATION_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX, SpawnCellsContextPtr->CellNodes[i]->GetTemplate()->GetFName())
 		
-		if (SpawnCellsContextPtr->CurrentIndex == NodeCount)
+		if (SpawnCellsContextPtr->CellNodesCurrentIndex == NodeCount)
 		{
 			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			CompletionEvent->Unlock(); // Triggers

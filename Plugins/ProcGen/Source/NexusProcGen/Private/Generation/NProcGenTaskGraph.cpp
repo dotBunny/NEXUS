@@ -11,7 +11,7 @@
 #include "Generation/Tasks/NOrganGraphBuilderTask.h"
 #include "Generation/Tasks/NProcGenFinalizeTask.h"
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
-#include "Generation/Contexts/NSpawnCellsContext.h"
+#include "Generation/Contexts/NSpawnContext.h"
 #include "Generation/Tasks/NProcessPassTask.h"
 #include "Generation/Contexts/NVirtualWorldContext.h"
 #include "Generation/Tasks/NCreateVirtualWorldTask.h"
@@ -41,25 +41,25 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	// ----- STEP 0 - CAPTURE WORLD (GAME THREAD) ---------------------------------------------------------------------------------------------------
 	
 	// Create our world context holder
-	TSharedPtr<FNVirtualWorldContext> WorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
+	TSharedPtr<FNVirtualWorldContext> VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
 
 	// Create our base world evaluation that builds out the collision-mesh for the world.
-	FGraphEventRef CreateWorldContextTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(
+	FGraphEventRef CreateVirtualWorldTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(
 				nullptr,
 				ENamedThreads::GameThread)
-				.ConstructAndHold(WorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-	Step0Tasks.Add(CreateWorldContextTask);
-	AllTasks.Add(CreateWorldContextTask);
+				.ConstructAndHold(VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+	Step0Tasks.Add(CreateVirtualWorldTask);
+	AllTasks.Add(CreateVirtualWorldTask);
 
 	// ----- STEP 1 - PROCESS WORLD CAPTURE ---------------------------------------------------------------------------------------------------------
 	
 	// Create associated data from our initial game-thread blocking task
-	FGraphEventRef ProcessWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
+	FGraphEventRef ProcessVirtualWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
 				&Step0Tasks,
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(WorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-	Step1Tasks.Add(ProcessWorldContextTask);
-	AllTasks.Add(ProcessWorldContextTask);
+				.ConstructAndHold(VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+	Step1Tasks.Add(ProcessVirtualWorldContextTask);
+	AllTasks.Add(ProcessVirtualWorldContextTask);
 	
 	// ----- STEP 2 - BUILD CELL GRAPHS FOR ORGANS --------------------------------------------------------------------------------------------------
 	
@@ -75,22 +75,22 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		FGraphEventArray PassTasks;
 		for (const auto Component : PassComponents)
 		{
-			// Get the context generated during pre-generation process
-			FNWorldOrganContext* ContextMap = Context->OrganContext.Find(Component);
+			// Get the data generated during pre-generation process
+			FNWorldOrganData* WorldOrganData = Context->OrganData.Find(Component);
 
 			// Do not generate a component if it is not activated, don't make the tasks
-			if (!ContextMap->SourceComponent->bActivated) continue;
+			if (!WorldOrganData->SourceComponent->bActivated) continue;
 
 			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
-			TSharedPtr<FNVirtualOrganContext> OrganContextPtr = MakeShared<FNVirtualOrganContext>(
-				ContextMap, BaseGenerator.UnsignedInteger64(),
+			TSharedPtr<FNVirtualOrganContext> VirtualOrganContextPtr = MakeShared<FNVirtualOrganContext>(
+				WorldOrganData, BaseGenerator.UnsignedInteger64(),
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 
 			// Create a task and pass the context to the constructor, as well as the previous event array if there
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &Step1Tasks,  // Ensures we are waiting for the last pass to complete
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
-				.ConstructAndHold(OrganContextPtr, PassContextPtr, WorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 
@@ -109,23 +109,25 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 
 		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream as well as 
 		// any additional data like collisions, etc.
-		FGraphEventRef ProcessPassContextTask = TGraphTask<FNProcessPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
-			.ConstructAndHold(PassContextPtr, WorldContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
-		CollectionTasks.Add(ProcessPassContextTask);
-		AllTasks.Add(ProcessPassContextTask);
+		FGraphEventRef ProcessPassTask = TGraphTask<FNProcessPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
+			.ConstructAndHold(PassContextPtr, VirtualWorldContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+		CollectionTasks.Add(ProcessPassTask);
+		AllTasks.Add(ProcessPassTask);
 
 		// Increment pass count for labeling
 		PassCount++;
 	};
 	
-	//explicit FNSpawnContext(UWorld* TargetWorld, const uint32 OperationTicket, const bool bPreloadLevel, const bool bSpawnLevelInstance)
-	
 	// TODO: Validate task to ensure generation is completable?
-	TSharedPtr<FNSpawnCellsContext> SpawnCellsContextPtr = MakeShared<FNSpawnCellsContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
+	
+
+	
+	// Create our context of what we are going to need to spawn back on the game-thread
+	TSharedPtr<FNSpawnContext> SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
 		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
 
 	FGraphEventRef CreateSpawnContextTask = TGraphTask<FNCreateSpawnCellsTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
-		.ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(CreateSpawnContextTask);
 	SpawnContextTasks.Add(CreateSpawnContextTask);
 	AllTasks.Add(CreateSpawnContextTask);
@@ -133,7 +135,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	// Create our dispatcher task that will time-slice spawning
 	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();
 	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, ENamedThreads::GameThread)
-		.ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr, SpawnCellProxiesTaskCompleted N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
+		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr, SpawnCellProxiesTaskCompleted N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	FinalizerTasks.Add(SpawnCellProxiesTaskCompleted); // This is what will actually trigger moving on post spawning
 	AllTasks.Add(SpawnCellProxiesTask);
@@ -163,7 +165,6 @@ void FNProcGenTaskGraph::WaitForTasks()
 	{
 		UnlockTasks();
 	}
-
 	FTaskGraphInterface::Get().WaitUntilTaskCompletes(FinalizeTask);
 }
 

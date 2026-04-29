@@ -6,13 +6,13 @@
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Generation/NProcGenTaskAnalytics.h"
-#include "Generation/Contexts/NSpawnCellsContext.h"
+#include "Generation/Contexts/NSpawnContext.h"
 
 class UNProcGenOperation;
 
 struct FNCreateSpawnCellsTask
 {
-	explicit FNCreateSpawnCellsTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
+	explicit FNCreateSpawnCellsTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
 		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
 		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
@@ -29,6 +29,6 @@ private:
 	
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
-	TSharedRef<FNSpawnCellsContext> SpawnCellsContextPtr;
+	TSharedRef<FNSpawnContext> SpawnCellsContextPtr;
 	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 };

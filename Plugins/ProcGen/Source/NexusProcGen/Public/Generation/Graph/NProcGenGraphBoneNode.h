@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Generation/Data/NBoneInputData.h"
+#include "Generation/Data/NVirtualBoneData.h"
 #include "NProcGenGraphNode.h"
 
 /**
@@ -16,7 +16,7 @@ class NEXUSPROCGEN_API FNProcGenGraphBoneNode  : public FNProcGenGraphNode
 {
 public:
 	virtual ENProcGenGraphNodeType GetNodeType() const override {  return ENProcGenGraphNodeType::Bone; }
-	FNProcGenGraphBoneNode(const FNBoneInputData* InputData, const FVector& Position, const FRotator& Rotation)
+	FNProcGenGraphBoneNode(const FNVirtualBoneData* InputData, const FVector& Position, const FRotator& Rotation)
 	: FNProcGenGraphNode(Position, Rotation)
 	{
 		SocketSize = InputData->SocketSize;

@@ -12,7 +12,7 @@
  * Stores the bone component and its computed world-space corner points so downstream
  * stages don't recompute them per access.
  */
-struct NEXUSPROCGEN_API FNBoneLockedData
+struct NEXUSPROCGEN_API FNWorldBoneData
 {
 	/** Bone component this context was computed from. */
 	UNBoneComponent* SourceComponent;

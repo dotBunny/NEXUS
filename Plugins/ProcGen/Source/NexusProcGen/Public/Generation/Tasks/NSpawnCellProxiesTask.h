@@ -6,13 +6,13 @@
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
 #include "Generation/NProcGenTaskAnalytics.h"
-#include "Generation/Contexts/NSpawnCellsContext.h"
+#include "Generation/Contexts/NSpawnContext.h"
 
 class UNProcGenOperation;
 
 struct FNSpawnCellProxiesTask
 {
-	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
+	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNSpawnContext>& SpawnCellsContextPtr, 
 		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
 		const FGraphEventRef& CompletionEvent N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR) 
 		: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()) 
@@ -30,7 +30,7 @@ struct FNSpawnCellProxiesTask
 
 private:
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
-	TSharedRef<FNSpawnCellsContext> SpawnCellsContextPtr;
+	TSharedRef<FNSpawnContext> SpawnCellsContextPtr;
 	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 	FGraphEventRef CompletionEvent;
 

@@ -21,8 +21,8 @@ FNProcGenOperationContext::FNProcGenOperationContext(const uint32 NewOperationTi
 
 void FNProcGenOperationContext::ResetContext()
 {
-	OrganContext.Empty();
-	BoneContext.Empty();
+	OrganData.Empty();
+	BoneData.Empty();
 	Bounds.Empty();
 	ComponentBoneMap.Empty();
 	GenerationOrder.Empty();
@@ -53,16 +53,16 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	}
 	
 	// We've already added this component
-	if (OrganContext.Contains(Component))
+	if (OrganData.Contains(Component))
 	{
 		return true;
 	}
 	
 	InputComponents.Add(Component);
-	OrganContext.Add(Component, FNWorldOrganContext());
-	FNWorldOrganContext* WorkingContext = OrganContext.Find(Component);
-	WorkingContext->SourceComponent = Component;
-	WorkingContext->Origin = Component->GetOwner()->GetActorLocation();
+	OrganData.Add(Component, FNWorldOrganData());
+	FNWorldOrganData* WorkingOrganData = OrganData.Find(Component);
+	WorkingOrganData->SourceComponent = Component;
+	WorkingOrganData->Origin = Component->GetOwner()->GetActorLocation();
 
 	// We're going to capture all the other components in the level
 	TArray<UNOrganComponent*> LevelComponents = FNProcGenUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
@@ -73,7 +73,7 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 		// Assign Bounds
 		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
 		const FBoxSphereBounds ComponentBounds = ComponentVolume->GetBounds();
-		WorkingContext->Bounds = ComponentBounds;
+		WorkingOrganData->Bounds = ComponentBounds;
 
 		// Stage relationships locally; the recursive AddOrganComponent calls below mutate
 		// OrganContext and can rehash its storage, which would dangle WorkingContext.
@@ -106,18 +106,18 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 		}
 
 		// Re-pin after possible rehash and commit the staged relationships.
-		WorkingContext = OrganContext.Find(Component);
-		WorkingContext->IntersectComponents.Append(Intersects);
-		WorkingContext->ContainedComponents.Append(Contains);
+		WorkingOrganData = OrganData.Find(Component);
+		WorkingOrganData->IntersectComponents.Append(Intersects);
+		WorkingOrganData->ContainedComponents.Append(Contains);
 	}
 	else
 	{
 		// An unbounded component intersects with everything, no good way about this, they will generate first
-		WorkingContext->Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
+		WorkingOrganData->Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component) continue;
-			WorkingContext->IntersectComponents.AddUnique(OtherComponent);
+			WorkingOrganData->IntersectComponents.AddUnique(OtherComponent);
 		}
 	}
 	return true;
@@ -133,12 +133,12 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	
 	// Gather our bone components so we can add them to a specific organs context later
 	TArray<UNBoneComponent*> BoneComponents = FNProcGenRegistry::GetBoneComponentsFromLevel(TargetWorld->GetCurrentLevel());
-	BoneContext.Empty();
-	BoneContext.Reserve(BoneComponents.Num());
+	BoneData.Empty();
+	BoneData.Reserve(BoneComponents.Num());
 	for (const auto& BoneComponent : BoneComponents)
 	{
-		BoneContext.Add(BoneComponent, FNBoneLockedData());
-		FNBoneLockedData* WorkingContext = BoneContext.Find(BoneComponent);
+		BoneData.Add(BoneComponent, FNWorldBoneData());
+		FNWorldBoneData* WorkingContext = BoneData.Find(BoneComponent);
 		WorkingContext->SourceComponent = BoneComponent;
 		WorkingContext->CornerPoints = BoneComponent->GetCornerPoints(Settings->SocketSize);
 	}
@@ -150,7 +150,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	TArray<UNOrganComponent*> UnboundComponents;
 	TArray<UNOrganComponent*> PossibleComponents;
 	TArray<UNOrganComponent*> ProcessedComponents;
-	for (auto& Pair : OrganContext)
+	for (auto& Pair : OrganData)
 	{
 		// Assign values while we are iterating for defaults
 		Pair.Value.MaximumRetryCount = Settings->OrganGenerationRetryCount;
@@ -167,13 +167,13 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	}
 
 	// Step 1 - Find components who have no contained "sub" organs, as they are defined and parallelizable work
-	for (auto& Pair : OrganContext)
+	for (auto& Pair : OrganData)
 	{
 		// Again dont look at Unbounded here
 		if (Pair.Key->bUnbounded) continue;
 		
 		// Handle "easy" work parallelization classification
-		if (FNWorldOrganContext& ComponentContext = Pair.Value; 
+		if (FNWorldOrganData& ComponentContext = Pair.Value; 
 			ComponentContext.ContainedComponents.Num() == 0)
 		{
 			PossibleComponents.Remove(Pair.Key);
@@ -198,11 +198,11 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
-			FNWorldOrganContext* ComponentContext = OrganContext.Find(Component);
+			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
 			
 			// Ensure all contained organs are processed / not this iteration
 			bool bAllContainsProcessed = true;
-			for (auto ContainedComponent : ComponentContext->ContainedComponents)
+			for (auto ContainedComponent : TargetOrganData->ContainedComponents)
 			{
 				if (!ProcessedComponents.Contains(ContainedComponent) || 
 					PhaseProcessed.Contains(ContainedComponent))
@@ -248,7 +248,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		for (auto& Component : Phase)
 		{
-			FNWorldOrganContext* OrganGenerationContext = OrganContext.Find(Component);
+			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
 			
 			if (!Component->IsVolumeBased())
 			{
@@ -261,13 +261,13 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			
 			for (int i = BoneCount - 1; i >= 0; i--)
 			{
-				 FNBoneLockedData* Context = BoneContext.Find(BoneComponents[i]);
+				 FNWorldBoneData* Context = BoneData.Find(BoneComponents[i]);
 				if (Volume->EncompassesPoint(Context->CornerPoints[0]) || 
 					Volume->EncompassesPoint(Context->CornerPoints[1]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[2]) ||
 					Volume->EncompassesPoint(Context->CornerPoints[3]))
 				{
-					OrganGenerationContext->ContainedBones.Add(Context);
+					TargetOrganData->ContainedBones.Add(Context);
 					BoneComponents.RemoveAt(i);
 					BoneCount--;
 				}
@@ -304,19 +304,19 @@ void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 		Builder.Append("\n");
 	}
 	
-	Builder.Appendf(TEXT("\tComponents (%i)\n"), OrganContext.Num());
-	for (auto Component : OrganContext)
+	Builder.Appendf(TEXT("\tComponents (%i)\n"), OrganData.Num());
+	for (auto Data : OrganData)
 	{
-		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Component.Value.SourceComponent->GetDebugLabel());
-		for (const auto IntersectComponent : Component.Value.IntersectComponents)
+		Builder.Appendf(TEXT("\t\tSource: %s\n"), *Data.Value.SourceComponent->GetDebugLabel());
+		for (const auto IntersectComponent : Data.Value.IntersectComponents)
 		{
 			Builder.Appendf(TEXT("\t\t\tIntersects: %s\n"), *IntersectComponent->GetDebugLabel());
 		}
-		for (const auto ContainedComponent : Component.Value.ContainedComponents)
+		for (const auto ContainedComponent : Data.Value.ContainedComponents)
 		{
 			Builder.Appendf(TEXT("\t\t\tContains: %s\n"), *ContainedComponent->GetDebugLabel());
 		}
-		for (const auto ContainedBone : Component.Value.ContainedBones)
+		for (const auto ContainedBone : Data.Value.ContainedBones)
 		{
 			Builder.Appendf(TEXT("\t\t\tBone: %s\n"), *ContainedBone->SourceComponent->GetDebugLabel());
 		}
@@ -325,7 +325,7 @@ void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 		if (bBuildTissues)
 		{
 			Builder.Append(TEXT("\t\t\tTissues:\n"));
-			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue = Component.Value.SourceComponent->GetTissueMap();
+			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue = Data.Value.SourceComponent->GetTissueMap();
 		
 			for (const auto& TissuePair : BuildTissue)
 			{

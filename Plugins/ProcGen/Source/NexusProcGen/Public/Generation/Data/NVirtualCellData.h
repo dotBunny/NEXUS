@@ -14,7 +14,7 @@
  * can be used during procedural generation, including placement rules, usage limits,
  * and junction connection points.
  */
-struct NEXUSPROCGEN_API FNCellInputData
+struct NEXUSPROCGEN_API FNVirtualCellData
 {
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	bool bAlwaysRelevant = false;

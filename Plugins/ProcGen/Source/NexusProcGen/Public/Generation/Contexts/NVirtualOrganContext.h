@@ -3,14 +3,13 @@
 
 #pragma once
 
-#include "Generation/Data/NBoneInputData.h"
+#include "Generation/Data/NVirtualBoneData.h"
 #include "Generation/Graph/NProcGenGraph.h"
-#include "Generation/Data/NCellInputData.h"
-#include "Generation/NProcGenTaskAnalytics.h"
+#include "Generation/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Generation/Graph/NProcGenGraphCellNode.h"
 
-struct FNWorldOrganContext;
+struct FNWorldOrganData;
 class UNOrganComponent;
 
 /**
@@ -25,7 +24,7 @@ struct FNCellInputDataFilter
 	bool bRequireEnd = false;
 
 	/** Cell the filter is stepping away from; used for distance/uniqueness checks. */
-	FNCellInputData* SourceCellInputData = nullptr;
+	FNVirtualCellData* SourceCellInputData = nullptr;
 
 	/** Graph node the filter is stepping away from; used for spatial checks. */
 	FNProcGenGraphCellNode* SourceCellNode = nullptr;
@@ -69,15 +68,15 @@ public:
 	FVector Origin;
 
 	/** Bones the builder will anchor the graph on. */
-	TArray<FNBoneInputData> BoneInputData;
+	TArray<FNVirtualBoneData> BoneInputData;
 
 	/** Candidate cells the builder may pull from. */
-	TArray<FNCellInputData> CellInputData;
+	TArray<FNVirtualCellData> CellInputData;
 
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNProcGenGraph> CellGraph = nullptr;
 
-	FNVirtualOrganContext(const FNWorldOrganContext* WorldOrganContext, uint64 TaskSeed, FString TaskName);
+	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
 	~FNVirtualOrganContext();
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
