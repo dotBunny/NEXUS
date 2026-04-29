@@ -20,7 +20,7 @@ struct FNProcessPassTask
 {
 	explicit FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContextPtr, 
 		const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
-		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessPassTask, STATGROUP_TaskGraphTasks); }
 
@@ -39,6 +39,6 @@ private:
 	/** Top-level task-graph context that receives the drained graphs. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	
-	N_PROC_GEN_ANALYTICS_SHARED_REF
-	N_PROC_GEN_ANALYTICS_INDEX_LOCAL
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_LOCAL
 };

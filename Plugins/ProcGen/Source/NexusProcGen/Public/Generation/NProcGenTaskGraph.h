@@ -42,7 +42,7 @@ public:
 	/** Block the calling thread until every stage finishes. */
 	void WaitForTasks();
 	
-	N_PROC_GEN_ANALYTICS_SHARED_PTR
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_PTR
 	
 private:
 	

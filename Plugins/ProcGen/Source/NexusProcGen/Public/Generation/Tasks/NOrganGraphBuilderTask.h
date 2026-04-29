@@ -20,7 +20,7 @@ struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
 		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr 
-		N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
+		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenGraphBuilderTask, STATGROUP_TaskGraphTasks); }
 
@@ -49,8 +49,8 @@ private:
 	/** Shared pass-level context. */
 	TSharedRef<FNPassContext> PassContextPtr;
 	
-	N_PROC_GEN_ANALYTICS_SHARED_REF
-	N_PROC_GEN_ANALYTICS_INDEX_LOCAL
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_LOCAL
 
 	TSharedRef<FNVirtualWorldContext> WorldContextPtr;
 	

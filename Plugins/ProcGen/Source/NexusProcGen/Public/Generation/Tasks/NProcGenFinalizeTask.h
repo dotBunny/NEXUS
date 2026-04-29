@@ -20,7 +20,7 @@ struct FNProcGenFinalizeTask
 public:
 
 	explicit FNProcGenFinalizeTask(UNProcGenOperation* TargetOperation, const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
-		N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
+		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcGenFinalizeTask, STATGROUP_TaskGraphTasks); }
 
@@ -37,5 +37,5 @@ private:
 	/** Top-level task-graph context containing the produced graphs and spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	
-	N_PROC_GEN_ANALYTICS_SHARED_REF
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 };

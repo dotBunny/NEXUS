@@ -7,7 +7,7 @@
 
 void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	N_PROC_GEN_ANALYTICS(ProcessVirtualWorldContextStart)
+	N_PROCEDURAL_GENERATION_ANALYTICS(ProcessVirtualWorldContextStart)
 	
 	const int32 MeshCount = VirtualWorldContextPtr->WorldCollisionMeshTransforms.Num();
 	
@@ -34,6 +34,6 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 		}
 	}
 	
-	N_PROC_GEN_ANALYTICS(ProcessVirtualWorldContextFinish)
+	N_PROCEDURAL_GENERATION_ANALYTICS(ProcessVirtualWorldContextFinish)
 }
 

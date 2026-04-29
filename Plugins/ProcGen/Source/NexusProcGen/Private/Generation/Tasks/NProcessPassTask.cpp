@@ -6,16 +6,16 @@
 FNProcessPassTask::FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContextPtr, 
                                      const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr, 
                                      const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr 
-                                     N_PROC_GEN_ANALYTICS_CONSTRUCTOR) 
+                                     N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR) 
 :	PassContextPtr(PassContextPtr.ToSharedRef()), WorldContextPtr(WorldContextPtr.ToSharedRef()), 
-	TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER
+	TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_PROCEDURAL_GENERATION_ANALYTICS_INITIALIZER
 {
-	N_PROC_GEN_ANALYTICS_INDEX_SET(CollectGenerationPassesCreate)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_SET(CollectGenerationPassesCreate)
 }
 
 void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	N_PROC_GEN_ANALYTICS_INDEX(CollectGenerationPassesStart)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(CollectGenerationPassesStart)
 	
 	for (TUniquePtr<FNProcGenGraph>& Graph : PassContextPtr->Graphs)
 	{
@@ -36,5 +36,5 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 	}
 	PassContextPtr->Graphs.Reset();
 	
-	N_PROC_GEN_ANALYTICS_INDEX(CollectGenerationPassesFinish)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(CollectGenerationPassesFinish)
 }

@@ -10,8 +10,8 @@ class FNProcessVirtualWorldTask
 {
 public:
 	explicit FNProcessVirtualWorldTask(const TSharedPtr<FNVirtualWorldContext>& VirtualWorldContextPtr 
-		N_PROC_GEN_ANALYTICS_CONSTRUCTOR) 
-	: VirtualWorldContextPtr(VirtualWorldContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER { }
+		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR) 
+	: VirtualWorldContextPtr(VirtualWorldContextPtr.ToSharedRef()) N_PROCEDURAL_GENERATION_ANALYTICS_INITIALIZER { }
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessVirtualWorldTask, STATGROUP_TaskGraphTasks); }
 
@@ -23,5 +23,5 @@ public:
 private:
 	
 	TSharedRef<FNVirtualWorldContext> VirtualWorldContextPtr;
-	N_PROC_GEN_ANALYTICS_SHARED_REF
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 };

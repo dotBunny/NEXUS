@@ -14,7 +14,7 @@ struct FNCreateSpawnCellsTask
 {
 	explicit FNCreateSpawnCellsTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
 		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr
-		N_PROC_GEN_ANALYTICS_CONSTRUCTOR);
+		N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnCellsTask, STATGROUP_TaskGraphTasks); }
 
@@ -30,5 +30,5 @@ private:
 	/** Top-level task-graph context supplying the graphs and receiving the spawned proxies. */
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	TSharedRef<FNSpawnCellsContext> SpawnCellsContextPtr;
-	N_PROC_GEN_ANALYTICS_SHARED_REF
+	N_PROCEDURAL_GENERATION_ANALYTICS_SHARED_REF
 };

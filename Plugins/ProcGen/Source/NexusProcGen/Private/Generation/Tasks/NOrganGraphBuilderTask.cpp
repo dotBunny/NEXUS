@@ -11,17 +11,17 @@
 #include "Math/NMersenneTwister.h"
 
 FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
-	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR)
-	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER, 
+	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR)
+	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()) N_PROCEDURAL_GENERATION_ANALYTICS_INITIALIZER, 
 		WorldContextPtr(WorldContextPtr.ToSharedRef())
 {
-	N_PROC_GEN_ANALYTICS_INDEX_SET(OrganGraphBuilderCreate)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_SET(OrganGraphBuilderCreate)
 }
 
 void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilderStart)
-	N_PROC_GEN_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, AnalyticsIndex, OrganContextPtr->GetName(), 
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilderStart)
+	N_PROCEDURAL_GENERATION_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(), 
 		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
 	
 	// The context was not validated during creation, so we cannot process it
@@ -89,7 +89,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			}
 			
 			// Prepare analytics for another pass
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_NextIteration)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_NextIteration)
 		}
 	}
 	
@@ -105,7 +105,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		PassContextPtr->TakeGraph(MoveTemp(OrganContextPtr->CellGraph));
 	}
 
-	N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 }
 
 void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
@@ -173,14 +173,14 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		{
 			delete StartNode; 
 			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingStart)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingStart)
 			BadStartCount++;
 		}
 		else if (DoesExistingNodeWorldCollide(StartNode))
 		{
 			delete StartNode; 
 			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
 			BadStartCount++;
 		}
 		else
@@ -315,7 +315,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			// TODO: We will later go back and fill this with something.
 			FNProcGenGraphNullNode* NullNode = FNProcGenGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
 			
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
 			
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			
@@ -353,7 +353,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
 			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 			{
-				N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
+				N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
 				delete TargetCellNode;
 				continue;
 			}
@@ -362,7 +362,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		// Check world collision
 		if (DoesWorldCollide(TargetCellNode))
 		{
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
 			delete TargetCellNode;
 			continue;
 		}
@@ -370,7 +370,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		// Check previous pass existing node world collision
 		if (DoesExistingNodeWorldCollide(TargetCellNode))
 		{
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
 			delete TargetCellNode;
 			continue;
 		}
@@ -393,7 +393,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
 			SourceCellNode->Link(SourceJunctionKey, TargetCellNode);
 			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
 			NewNodes.Add(TargetCellNode);
 			
 			// TODO: Its at this point we could iterate through the graph and see if theres any open junctions near any of this 
@@ -402,7 +402,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		}
 		else
 		{
-			N_PROC_GEN_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
 			delete TargetCellNode;
 		}
 	}

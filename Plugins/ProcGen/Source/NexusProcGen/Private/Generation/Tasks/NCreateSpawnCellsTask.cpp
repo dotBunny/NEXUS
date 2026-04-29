@@ -8,14 +8,14 @@
 
 FNCreateSpawnCellsTask::FNCreateSpawnCellsTask(
 	const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
-	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROC_GEN_ANALYTICS_CONSTRUCTOR)
-	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()) N_PROC_GEN_ANALYTICS_INITIALIZER
+	const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR)
+	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()) N_PROCEDURAL_GENERATION_ANALYTICS_INITIALIZER
 {
 }
 
 void FNCreateSpawnCellsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	N_PROC_GEN_ANALYTICS(CreateSpawnCellsContextStart)
+	N_PROCEDURAL_GENERATION_ANALYTICS(CreateSpawnCellsContextStart)
 	
 	// Iterate over all graphs that we have had generate
 	for (const TUniquePtr<FNProcGenGraph>& Graph : TaskGraphContextPtr->Graphs)
@@ -32,5 +32,5 @@ void FNCreateSpawnCellsTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		}
 	}
 
-	N_PROC_GEN_ANALYTICS(CreateSpawnCellsContextFinish)
+	N_PROCEDURAL_GENERATION_ANALYTICS(CreateSpawnCellsContextFinish)
 }

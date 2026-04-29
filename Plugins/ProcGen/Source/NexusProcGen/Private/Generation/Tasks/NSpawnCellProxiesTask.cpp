@@ -6,8 +6,8 @@
 
 void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	N_PROC_GEN_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
-	N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesStart)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
+	N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(SpawnCellProxiesStart)
 	
 	constexpr double MaxAllowableTime = 0.002; // 2ms budget
 	const double StartTime = FPlatformTime::Seconds();
@@ -32,11 +32,11 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		}
 		
 		SpawnCellsContextPtr->CurrentIndex++;
-		N_PROC_GEN_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, AnalyticsIndex, SpawnCellsContextPtr->Nodes[i]->GetTemplate()->GetFName())
+		N_PROCEDURAL_GENERATION_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX, SpawnCellsContextPtr->Nodes[i]->GetTemplate()->GetFName())
 		
 		if (SpawnCellsContextPtr->CurrentIndex == NodeCount)
 		{
-			N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesFinish)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			CompletionEvent->Unlock(); // Triggers
 			return;
 		}
@@ -44,9 +44,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		// Outside of the required slicing, dispatch a new task that should move on to the next frame?
 		if (FPlatformTime::Seconds() - StartTime > MaxAllowableTime)
 		{
-			N_PROC_GEN_ANALYTICS_INDEX(SpawnCellProxiesFinish)
+			N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			TGraphTask<FNSpawnCellProxiesTask>::CreateTask(nullptr,  ENamedThreads::GameThread)
-				.ConstructAndDispatchWhenReady(SpawnCellsContextPtr, TaskGraphContextPtr, CompletionEvent N_PROC_GEN_ANALYTICS_CLASS_REF);
+				.ConstructAndDispatchWhenReady(SpawnCellsContextPtr, TaskGraphContextPtr, CompletionEvent N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 			return;
 		}
 		
