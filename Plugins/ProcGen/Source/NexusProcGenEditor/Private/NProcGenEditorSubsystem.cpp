@@ -67,7 +67,7 @@ void UNProcGenEditorSubsystem::OnOperationDestroyed(UNProcGenOperation* Operatio
 
 void UNProcGenEditorSubsystem::ClearAllProxies()
 {
-	for (int i = 0; i < KnownProxies.Num(); i++)
+	for (int32 i = 0; i < KnownProxies.Num(); i++)
 	{
 		if (IsValid(KnownProxies[i]))
 		{
@@ -89,8 +89,8 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const uint32& OperationTick
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
 		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
-		const int FoundCount = ProxiesArray.Num();
-		for (int i = 0; i < FoundCount; i++)
+		const int32 FoundCount = ProxiesArray.Num();
+		for (int32 i = 0; i < FoundCount; i++)
 		{
 			KnownProxies.Remove(ProxiesArray[i]);
 			if (IsValid(ProxiesArray[i]))
@@ -105,7 +105,7 @@ void UNProcGenEditorSubsystem::ClearGeneratedProxies(const uint32& OperationTick
 
 void UNProcGenEditorSubsystem::LoadAllGeneratedProxies()
 {
-	for (int i = 0; i < KnownProxies.Num(); i++)
+	for (int32 i = 0; i < KnownProxies.Num(); i++)
 	{
 		KnownProxies[i]->LoadLevelInstance();
 	}
@@ -116,8 +116,8 @@ void UNProcGenEditorSubsystem::LoadGeneratedProxies(const uint32& OperationTicke
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
 		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
-		const int FoundCount = ProxiesArray.Num();
-		for (int i = 0; i < FoundCount; i++)
+		const int32 FoundCount = ProxiesArray.Num();
+		for (int32 i = 0; i < FoundCount; i++)
 		{
 			ProxiesArray[i]->LoadLevelInstance();
 		}
@@ -142,8 +142,8 @@ void UNProcGenEditorSubsystem::UnloadGeneratedProxies(const uint32& OperationTic
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
 		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
-		const int FoundCount = ProxiesArray.Num();
-		for (int i = 0; i < FoundCount; i++)
+		const int32 FoundCount = ProxiesArray.Num();
+		for (int32 i = 0; i < FoundCount; i++)
 		{
 			ProxiesArray[i]->UnloadLevelInstance();
 		}

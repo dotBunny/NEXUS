@@ -45,18 +45,18 @@ void UNDynamicRefComponent::UninitializeComponent()
 
 void UNDynamicRefComponent::Register()
 {
-	const int FastReferenceCount = FastReferences.Num();
-	const int NamedReferenceCount = NamedReferences.Num();
+	const int32 FastReferenceCount = FastReferences.Num();
+	const int32 NamedReferenceCount = NamedReferences.Num();
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
-		for (int i = 0; i < FastReferenceCount; i++)
+		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
 			Subsystem->AddObject(FastReferences[i], Owner);
 		}
-		for (int i = 0; i < NamedReferenceCount; i++)
+		for (int32 i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->AddObjectByName(NamedReferences[i], Owner);
@@ -66,18 +66,18 @@ void UNDynamicRefComponent::Register()
 
 void UNDynamicRefComponent::Unregister()
 {	
-	const int FastReferenceCount = FastReferences.Num();
-	const int NamedReferenceCount = NamedReferences.Num();
+	const int32 FastReferenceCount = FastReferences.Num();
+	const int32 NamedReferenceCount = NamedReferences.Num();
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
-		for (int i = 0; i < FastReferenceCount; i++)
+		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
 			Subsystem->RemoveObject(FastReferences[i], Owner);
 		}
-		for (int i = 0; i < NamedReferenceCount; i++)
+		for (int32 i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->RemoveObjectByName(NamedReferences[i], Owner);

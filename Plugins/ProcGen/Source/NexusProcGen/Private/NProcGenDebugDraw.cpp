@@ -35,7 +35,7 @@ void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector&
 	const FVector DirectionBottomPoint = DirectionBottom + (FacingRotation * 35.f);
 	
 	// Estimate of lines: Rectangle(4) + Corner Lines(4) + Direction Arrow(3)
-	const int ReserveLineCount = 11 + (SocketPointsCount*32);
+	const int32 ReserveLineCount = 11 + (SocketPointsCount*32);
 	PDI->AddReserveLines(SDPG_Foreground, ReserveLineCount, false, false);
 	
 	// Draw Rectangle
@@ -45,7 +45,7 @@ void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector&
 	PDI->DrawLine(RotatedCornerPoints[0], RotatedCornerPoints[1], Color, SDPG_Foreground, NEXUS::ProcGen::Debug::LineThickness);
 	
 	// Draw Socket Points
-	for (int i = 0; i < SocketPointsCount; i++)
+	for (int32 i = 0; i < SocketPointsCount; i++)
 	{
 		FVector RotatedNubPoint = FNVectorUtils::RotatedAroundPivot(Location + 
 			FVector(UnrotatedSocketPoints[i].X, 0.0f, UnrotatedSocketPoints[i].Y), Location, DisplayRotation);
@@ -56,7 +56,7 @@ void FNProcGenDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FVector&
 	}
 	
 	// Draw Corner Lines
-	for (int i = 0; i < 4; i++)
+	for (int32 i = 0; i < 4; i++)
 	{
 		switch (SocketType)
 		{
@@ -99,13 +99,13 @@ void FNProcGenDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const F
 	const TArray<FNRawMeshLoop>& Loops = Mesh.Loops;
 	const int LoopCount = Loops.Num();
 
-	for (int i = 0; i < LoopCount; i++)
+	for (int32 i = 0; i < LoopCount; i++)
 	{
 		const FNRawMeshLoop& Loop = Loops[i];
-		const int Stride = Loop.Indices.Num();
-		const int StrideShort = Stride - 1;
+		const int32 Stride = Loop.Indices.Num();
+		const int32 StrideShort = Stride - 1;
 		
-		for (int j = 0; j < StrideShort; j++)
+		for (int32 j = 0; j < StrideShort; j++)
 		{
 			DrawDashedLine(PDI, WorldVertices[Loop.Indices[j]] ,WorldVertices[Loop.Indices[j+1]], Color, DashSize, Priority);
 		}
@@ -123,7 +123,7 @@ void FNProcGenDebugDraw::DrawVoxelDataGrid(FPrimitiveDrawInterface* PDI, const F
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
 		
-	for (int i = 0; i < PointCount; i++)
+	for (int32 i = 0; i < PointCount; i++)
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		const FVector VoxelCenter = BaseOffset + ((FVector(x, y, z) * UnitSize) + HalfUnitSize);
@@ -152,7 +152,7 @@ void FNProcGenDebugDraw::DrawVoxelDataPoints(FPrimitiveDrawInterface* PDI, const
 	const FVector HalfUnitSize = UnitSize * 0.5f;
 	const FVector BaseOffset = VoxelData.Origin + Offset;
 	
-	for (int i = 0; i < PointCount; i++)
+	for (int32 i = 0; i < PointCount; i++)
 	{
 		auto [x,y,z] = VoxelData.GetInverseIndex(i);
 		

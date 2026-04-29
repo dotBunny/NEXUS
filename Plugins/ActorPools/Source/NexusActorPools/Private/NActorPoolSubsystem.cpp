@@ -287,7 +287,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 				
 				const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
 				OnActorPoolAdded.Broadcast(NewPool.Get());
-				if (NewPool->DoesSupportInterface())
+				if (NewPool->ImplementsPoolItemInterface())
 				{
 					INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 					ActorItem->InitializeActorPoolItem(NewPool.Get());		
@@ -299,7 +299,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 				ActorClass, *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
 			OnActorPoolAdded.Broadcast(NewPool.Get());
-			if (NewPool->DoesSupportInterface())
+			if (NewPool->ImplementsPoolItemInterface())
 			{
 				INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 				ActorItem->InitializeActorPoolItem(NewPool.Get());		

@@ -17,7 +17,7 @@ class UNTestUObject : public UObject
 	GENERATED_BODY()
 
 public:
-	int Counter;
+	int32 Counter;
 	FString Message;
 	uint8 State;
 };

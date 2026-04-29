@@ -118,8 +118,8 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
 	{
 		TArray<UObject*> Items = ActorPoolList->GetListItems();
-		const int ItemCount = Items.Num();
-		for (int i = ItemCount - 1; i >= 0; i--)
+		const int32 ItemCount = Items.Num();
+		for (int32 i = ItemCount - 1; i >= 0; i--)
 		{
 			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
 			

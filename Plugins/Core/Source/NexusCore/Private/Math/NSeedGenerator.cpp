@@ -8,7 +8,7 @@
 #include "Math/BigInt.h"
 #include "Math/NHashUtils.h"
 
-int FNSeedGenerator::HexToInteger(const TCHAR Char)
+int32 FNSeedGenerator::HexToInteger(const TCHAR Char)
 {
 	switch (Char)
 	{
@@ -65,7 +65,7 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 {
 	// Sanitize
 	const FString ParsedSeed = SanitizeHexSeed(InHexSeed);
-	const int SeedLength = ParsedSeed.Len();
+	const int32 SeedLength = ParsedSeed.Len();
 	
 	if (SeedLength == 0)
 	{
@@ -121,7 +121,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 {
 	FString Builder;
 	Builder.Reserve(16);
-	for (int i = 0; i < InHexSeed.Len(); i++)
+	for (int32 i = 0; i < InHexSeed.Len(); i++)
 	{
 		if (TChar<TCHAR>::IsHexDigit(InHexSeed[i]))
 		{
@@ -170,7 +170,7 @@ uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 		const uint8 ParsedValue = static_cast<uint8>(CharacterValue - 97);
 		
 		uint64 FactorialMultiplier = 1;
-		for (int f = 0; f < Multiplier; f++)
+		for (int32 f = 0; f < Multiplier; f++)
 		{
 			FactorialMultiplier *= 10;
 		}
@@ -184,7 +184,7 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 {
 	// Sanitize the string
 	FString ParsedSeed = SanitizeHexSeed(InHexSeed);
-	const int SeedLength = ParsedSeed.Len();
+	const int32 SeedLength = ParsedSeed.Len();
 
 	if (SeedLength == 0 || SeedLength == 1)
 	{
@@ -200,7 +200,7 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 
 	// Generate our actual unit value, with shifting
 	uint64 NewSeed = 0;
-	for (int i = 0; i < ParsedSeed.Len(); i += 2)
+	for (int32 i = 0; i < ParsedSeed.Len(); i += 2)
 	{
 		// Get our two hexadecimal characters in the series
 		const TCHAR CachedLeftCharacter = ParsedSeed[i];
@@ -238,7 +238,7 @@ FString FNSeedGenerator::HexFromSeed(const uint64 Seed)
 
 	// Loop and add markers (:)
 	FString FancySeed = TEXT("");
-	for (int i = 0; i < NewSeed.Len(); i += 2)
+	for (int32 i = 0; i < NewSeed.Len(); i += 2)
 	{
 		FancySeed.AppendChar(NewSeed[i]);
 		FancySeed.AppendChar(NewSeed[i + 1]);

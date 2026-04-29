@@ -47,20 +47,20 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	
 		// Check for start placement and that it was a node too
 		if (OrganContextPtr->CellGraph == nullptr) return;
-		int NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
+		int32 NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
 		if (NodeCount == 0) { return; }
 		
 		// TODO: Create better logic for placement / etc.
 		// #START Temp Generation -------------------------------------------------------------------------------------------------------------------
 		TArray<FNProcGenGraphNode*> NewNodes = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
-		for (int i = 0; i < 5; i++)
+		for (int32 i = 0; i < 5; i++)
 		{
 			TArray<FNProcGenGraphNode*> NextBatch = NewNodes;
 			NewNodes.Empty();
-			for (int j = 0; j < NextBatch.Num(); j++)
+			for (int32 j = 0; j < NextBatch.Num(); j++)
 			{
 				TArray<FNProcGenGraphNode*> BatchNodes = ProcessNode(Random, NextBatch[j]);
-				for (int k = 0; k < BatchNodes.Num(); k++)
+				for (int32 k = 0; k < BatchNodes.Num(); k++)
 				{
 					NewNodes.Add(BatchNodes[k]);
 				}
@@ -70,7 +70,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		if (OrganContextPtr->CellGraph->GetNodeCount() < 10)
 		{
 			TArray<FNProcGenGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
-			for (int j = 0; j < OpenNodes.Num(); j++)
+			for (int32 j = 0; j < OpenNodes.Num(); j++)
 			{
 				ProcessNode(Random, OpenNodes[j]);
 			}
@@ -139,8 +139,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		
 		// Decide which appropriately sized junction is going to be used
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
-		const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-		const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 		
 		const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
 		
@@ -205,7 +205,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNProcGenGraphCellNode* CellNode) const
 {
-	for (int i = 0; i < WorldCollisionMeshes.Num(); i++)
+	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
 		if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
 		{
@@ -217,7 +217,7 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNProcGenGraphCellNode* Cel
 
 bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNProcGenGraphCellNode* CellNode) const
 {
-	for (int i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
+	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
 	{
 		if (CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
 		{
@@ -290,10 +290,10 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 	TMap<int32, TArray<int32>> ValidJunctions;
 	
 	
-	for (int i = 0; i < OpenJunctionCount; ++i)
+	for (int32 i = 0; i < OpenJunctionCount; ++i)
 	{
 		// Select the next junction to fill, using weighted priority.
-		int SourceJunctionKey = WeightedOpenJunctionKeys.TwistedValueAndRemove(Random);
+		int32 SourceJunctionKey = WeightedOpenJunctionKeys.TwistedValueAndRemove(Random);
 		FNCellJunctionDetails* SourceJunctionValue = OpenJunctions[SourceJunctionKey];
 
 		// We're going to need the desired target rotation so that when we generate our possible list we account for the rotational allowance
@@ -330,8 +330,8 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
-		const int TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-		const int TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
 		
 		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
@@ -377,7 +377,7 @@ TArray<FNProcGenGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneT
 		
 		// Now check the bounds of other existing nodes
 		TArray<FNProcGenGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
-		for (int j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
+		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
 		{
 			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
 			if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))

@@ -26,7 +26,7 @@ struct FNWidgetStateSnapshot
 	TArray<FNWidgetState> WidgetStates;
 
 	/** @return The number of widgets tracked in this snapshot. */
-	int GetCount() const
+	int32 GetCount() const
 	{
 		return Identifiers.Num();
 	}

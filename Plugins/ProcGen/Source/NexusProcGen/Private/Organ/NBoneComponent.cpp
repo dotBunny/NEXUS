@@ -167,7 +167,7 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 	while (IterationCount > 0 && bDidAdjust)
 	{
 		bDidAdjust = false;
-		for (int i = 0; i < 4; i++)
+		for (int32 i = 0; i < 4; i++)
 		{
 			const float Distance = BrushComponent->GetClosestPointOnCollision(
 				CornerPoints[i], ClosestLocation, NAME_None);

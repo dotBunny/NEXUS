@@ -79,7 +79,7 @@ bool UNEditorUtilityWidgetSubsystem::HasWidget(const FName& Identifier)
 
 FName UNEditorUtilityWidgetSubsystem::GetTabIdentifier(const FName WidgetIdentifier)
 {
-	for (int i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
+	for (int32 i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
 	{
 		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
 		{
@@ -91,7 +91,7 @@ FName UNEditorUtilityWidgetSubsystem::GetTabIdentifier(const FName WidgetIdentif
 
 void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifier, const FName TabIdentifier)
 {
-	for (int i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
+	for (int32 i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
 	{
 		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
 		{
@@ -108,7 +108,7 @@ void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifi
 
 void UNEditorUtilityWidgetSubsystem::RemoveTabIdentifier(const FName WidgetIdentifier)
 {
-	for (int i = WidgetTabIdentifiers.WidgetIdentifiers.Num() - 1; i >= 0; i--)
+	for (int32 i = WidgetTabIdentifiers.WidgetIdentifiers.Num() - 1; i >= 0; i--)
 	{
 		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
 		{

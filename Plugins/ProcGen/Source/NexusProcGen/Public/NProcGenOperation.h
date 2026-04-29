@@ -186,9 +186,9 @@ private:
 	FString DisplayMessage;
 
 	/** Most recent total-task count broadcast to OnTasksChanged. */
-	int CachedTotalTasks = 0;
+	int32 CachedTotalTasks = 0;
 	/** Most recent completed-task count broadcast to OnTasksChanged. */
-	int CachedCompletedTasks = 0;
+	int32 CachedCompletedTasks = 0;
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	uint32 Ticket;

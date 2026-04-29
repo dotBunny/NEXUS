@@ -13,10 +13,10 @@ FNProcGenGraph::FNProcGenGraph(FNProcGenGraphNode* RootNodePtr, const FVector& O
 FNProcGenGraph::~FNProcGenGraph()
 {
 // #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory
-	const int NodeCount = Nodes.Num();
+	const int32 NodeCount = Nodes.Num();
 	if (NodeCount > 0)
 	{
-		for (int i = NodeCount - 1; i >= 0; i--)
+		for (int32 i = NodeCount - 1; i >= 0; i--)
 		{
 			delete Nodes[i];
 		}

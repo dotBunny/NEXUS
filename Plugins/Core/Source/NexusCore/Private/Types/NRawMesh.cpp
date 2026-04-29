@@ -13,7 +13,7 @@ TArray<int32> FNRawMesh::GetFlatIndices()
 	ReturnData.Reserve(LoopCount*3);
 	for (int32 i = 0; i < LoopCount; i++)
 	{
-		for (int j = 0; j < Loops[i].Indices.Num(); j++)
+		for (int32 j = 0; j < Loops[i].Indices.Num(); j++)
 		{
 			ReturnData.Add(Loops[i].Indices[j]);
 		}
@@ -32,7 +32,7 @@ void FNRawMesh::ConvertToTriangles()
 	if (bIsConvex)
 	{
 		// Fan triangulation from vertex 0 — valid for convex loops only.
-		for (int i = Loops.Num() - 1; i >= 0;  i--)
+		for (int32 i = Loops.Num() - 1; i >= 0;  i--)
 		{
 			if (Loops[i].IsTriangle())
 			{
@@ -52,7 +52,7 @@ void FNRawMesh::ConvertToTriangles()
 		// Ear-clipping triangulation — handles concave loops by projecting each loop onto its
 		// best-fit plane, then repeatedly clipping convex "ear" triangles that contain no other
 		// loop vertices.
-		for (int i = Loops.Num() - 1; i >= 0; i--)
+		for (int32 i = Loops.Num() - 1; i >= 0; i--)
 		{
 			if (Loops[i].IsTriangle())
 			{
@@ -212,8 +212,8 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	FDynamicMesh3 DynamicMesh;
 	DynamicMesh.BeginUnsafeVerticesInsert();
 	{
-		const int VertexCount = Vertices.Num();
-		for (int i = 0; i < VertexCount; i++)
+		const int32 VertexCount = Vertices.Num();
+		for (int32 i = 0; i < VertexCount; i++)
 		{
 			DynamicMesh.InsertVertex(i, Vertices[i], true);
 		}
@@ -222,8 +222,8 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	
 	DynamicMesh.BeginUnsafeTrianglesInsert();
 	{
-		const int LoopCount = Loops.Num();
-		for (int i = 0; i < LoopCount; i++)
+		const int32 LoopCount = Loops.Num();
+		for (int32 i = 0; i < LoopCount; i++)
 		{
 			DynamicMesh.InsertTriangle(i,
 				UE::Geometry::FIndex3i(
@@ -335,8 +335,8 @@ bool FNRawMesh::CheckConvex()
 
 bool FNRawMesh::CheckNonTris()
 {
-	const int LoopCount = Loops.Num();
-	for (int i = 0; i < LoopCount; i++)
+	const int32 LoopCount = Loops.Num();
+	for (int32 i = 0; i < LoopCount; i++)
 	{
 		if (Loops[i].Indices.Num() != 3)
 		{

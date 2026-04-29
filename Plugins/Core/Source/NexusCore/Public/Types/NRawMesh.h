@@ -91,8 +91,8 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	void RotatedAroundPivot(const FVector& WorldPoint, const FRotator& Rotation)
 	{
-		const int Count = Vertices.Num();
-		for (int i = 0; i < Count; i++)
+		const int32 Count = Vertices.Num();
+		for (int32 i = 0; i < Count; i++)
 		{
 			Vertices[i] = FNVectorUtils::RotatedAroundPivot(Vertices[i], WorldPoint, Rotation);
 		}
@@ -108,8 +108,8 @@ struct NEXUSCORE_API FNRawMesh
 		const FVector Scale = Transform.GetScale3D();
 		if (Scale.Equals(FVector::OneVector)) return;
 
-		const int Count = Vertices.Num();
-		for (int i = 0; i < Count; i++)
+		const int32 Count = Vertices.Num();
+		for (int32 i = 0; i < Count; i++)
 		{
 			Vertices[i] *= Scale;
 		}
@@ -123,7 +123,7 @@ struct NEXUSCORE_API FNRawMesh
 	{
 		FVector CenterCalc;
 		FBox BoundingBox(ForceInit);
-		for (int i = 0; i < Vertices.Num(); i++)
+		for (int32 i = 0; i < Vertices.Num(); i++)
 		{
 			CenterCalc += Vertices[i];
 			BoundingBox += Vertices[i];

@@ -231,31 +231,31 @@ struct FNWidgetState
 	{
 		UE_LOG(LogNexusUI, Log, TEXT("[FNWidgetState]"));
 		
-		const int BooleanCount = BooleanKeys.Num();
+		const int32 BooleanCount = BooleanKeys.Num();
 		if (BooleanCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Booleans(%i)"), BooleanCount);
-			for (int i = 0; i < BooleanCount; ++i)
+			for (int32 i = 0; i < BooleanCount; ++i)
 			{
 				UE_LOG(LogNexusUI, Display, TEXT("  %s : %i"), *BooleanKeys[i], BooleanValues[i]);
 			}
 		}
 		
-		const int FloatCount = FloatKeys.Num();
+		const int32 FloatCount = FloatKeys.Num();
 		if (FloatCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Floats(%i)"), FloatCount);
-			for (int i = 0; i < FloatCount; ++i)
+			for (int32 i = 0; i < FloatCount; ++i)
 			{
 				UE_LOG(LogNexusUI, Log, TEXT("  %s : %f"), *FloatKeys[i], FloatValues[i]);
 			}
 		}
 		
-		const int StringCount = StringKeys.Num();
+		const int32 StringCount = StringKeys.Num();
 		if (StringCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Strings(%i)"), StringCount);
-			for (int i = 0; i < StringCount; ++i)
+			for (int32 i = 0; i < StringCount; ++i)
 			{
 				UE_LOG(LogNexusUI, Log, TEXT("  %s : %s"), *StringKeys[i], *StringValues[i]);
 			}

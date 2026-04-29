@@ -144,7 +144,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	}
 	
 	// Create a separate list of components that we will operate on and clear out.
-	int GenerationOrderIndex = 0;
+	int32 GenerationOrderIndex = 0;
 	GenerationOrder.Empty();
 	GenerationOrder.Add(TArray<UNOrganComponent*>());
 	TArray<UNOrganComponent*> UnboundComponents;
@@ -195,7 +195,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 		// to ensure that anything that required it bumps to the next iteration.
 		TArray<UNOrganComponent*> PhaseProcessed;
 		
-		for (int i = PossibleComponents.Num() - 1; i >= 0; i--)
+		for (int32 i = PossibleComponents.Num() - 1; i >= 0; i--)
 		{
 			UNOrganComponent* Component = PossibleComponents[i];
 			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
@@ -232,7 +232,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	const bool bHaveUnboundedBounds = UnboundComponents.Num() > 0;
 	if (bHaveUnboundedBounds)
 	{
-		for (int i = 0; i < UnboundComponents.Num(); i++)
+		for (int32 i = 0; i < UnboundComponents.Num(); i++)
 		{
 			// Add to our generation order last the unbound	
 			GenerationOrder.Add(TArray<UNOrganComponent*>());
@@ -243,7 +243,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	
 	// Now that we have the generation order, we now are going to assign bones to the 'first' impacted organ.
 	// This step is going to remove things from BoneComponents as they are used so DO NOT use it after this point.
-	int BoneCount = BoneComponents.Num();
+	int32 BoneCount = BoneComponents.Num();
 	for (const auto& Phase : GenerationOrder)
 	{
 		for (auto& Component : Phase)
@@ -259,7 +259,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			const AVolume* Volume = Component->GetVolume();
 			Bounds.Add(Volume->GetBounds());
 			
-			for (int i = BoneCount - 1; i >= 0; i--)
+			for (int32 i = BoneCount - 1; i >= 0; i--)
 			{
 				 FNWorldBoneData* Context = BoneData.Find(BoneComponents[i]);
 				if (Volume->EncompassesPoint(Context->CornerPoints[0]) || 
@@ -335,7 +335,7 @@ void FNProcGenOperationContext::OutputToLog(const bool bBuildTissues)
 	}
 	
 	Builder.Appendf(TEXT("\tGeneration Order (%i)\n"), GenerationOrder.Num());
-	for (int i = 0; i < GenerationOrder.Num(); i++)
+	for (int32 i = 0; i < GenerationOrder.Num(); i++)
 	{
 		Builder.Appendf(TEXT("\t\tPhase (%i)\n"), i);
 		for (const auto Component : GenerationOrder[i])

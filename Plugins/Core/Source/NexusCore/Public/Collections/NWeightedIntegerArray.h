@@ -27,7 +27,7 @@ struct FNWeightedIntegerArray
 	{
 		if (Weight == 0) return;
 		Data.Reserve(Data.Num() + Weight);
-		for (int i = 0; i < Weight; i++)
+		for (int32 i = 0; i < Weight; i++)
 		{
 			Data.Add(Value);
 		}
@@ -47,7 +47,7 @@ struct FNWeightedIntegerArray
 	 */
 	void Remove(const int32 Value)
 	{
-		for (int i = CachedMaxIndex; i >= 0; i--)
+		for (int32 i = CachedMaxIndex; i >= 0; i--)
 		{
 			if (Data[i] == Value)
 			{
@@ -64,7 +64,7 @@ struct FNWeightedIntegerArray
 	 */
 	void RemoveSome(const int32 Value, int32 Limit = 1)
 	{
-		for (int i = CachedMaxIndex; i >= 0; i--)
+		for (int32 i = CachedMaxIndex; i >= 0; i--)
 		{
 			if (Data[i] == Value)
 			{
@@ -121,7 +121,7 @@ struct FNWeightedIntegerArray
 	 * Get a random value from the array using a one-shot FRandomStream constructed from Seed.
 	 * @param Seed The seed used to construct the FRandomStream for this single pick. Calling again with the same Seed picks the same entry.
 	 */
-	int32 RandomOneShotValue(const int Seed) const
+	int32 RandomOneShotValue(const int32 Seed) const
 	{
 		const FRandomStream RandomStream(Seed);
 		return Data[RandomStream.RandRange(0, CachedMaxIndex)];
@@ -132,7 +132,7 @@ struct FNWeightedIntegerArray
 	 * @param Seed The seed used to construct the FRandomStream for this one-shot pick.
 	 * @return The picked value, which will no longer appear in the array on subsequent calls.
 	 */
-	int32 RandomOneShotValueAndRemove(const int Seed)
+	int32 RandomOneShotValueAndRemove(const int32 Seed)
 	{
 		const FRandomStream RandomStream(Seed);
 		const int32 ReturnValue = Data[RandomStream.RandRange(0, CachedMaxIndex)];
@@ -151,7 +151,7 @@ struct FNWeightedIntegerArray
 	int32 RandomTrackedValue(int32& Seed) const
 	{
 		const FRandomStream Random(Seed);
-		const int RandomIndex = Random.RandRange(0, CachedMaxIndex);
+		const int32 RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
 		return Data[RandomIndex];
 	};
@@ -165,7 +165,7 @@ struct FNWeightedIntegerArray
 	int32 RandomTrackedValueAndRemove(int32& Seed)
 	{
 		const FRandomStream Random(Seed);
-		const int RandomIndex = Random.RandRange(0, CachedMaxIndex);
+		const int32 RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
 		const int32 ReturnValue = Data[RandomIndex];
 		Remove(ReturnValue);
@@ -178,7 +178,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 TwistedValue(FNMersenneTwister& Twister) const
 	{
-		const int RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
+		const int32 RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
 		return Data[RandomIndex];
 	}
 	
@@ -189,7 +189,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 TwistedValueAndRemove(FNMersenneTwister& Twister)
 	{
-		const int RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
+		const int32 RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
 		const int32 ReturnValue = Data[RandomIndex];
 		Remove(ReturnValue);
 		return ReturnValue;
@@ -219,7 +219,7 @@ struct FNWeightedIntegerArray
 	TArray<int32> GetUniqueValues()
 	{
 		TArray<int32> Values;
-		for (int i = 0; i < Data.Num(); i++)
+		for (int32 i = 0; i < Data.Num(); i++)
 		{
 			Values.AddUnique(Data[i]);
 		}

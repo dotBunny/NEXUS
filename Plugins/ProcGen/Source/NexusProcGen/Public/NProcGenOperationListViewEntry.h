@@ -67,7 +67,7 @@ protected:
 
 	/** Delegate callback: the operation's task counts changed. */
 	UFUNCTION()
-	void OnOperationTasksChanged(const int CompletedTasks, const int TotalTasks);
+	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
 
 
 private:

@@ -34,5 +34,5 @@ public:
 private:
 	/** Schema version stored alongside the asset so older data can be upgraded after reloads. */
 	UPROPERTY(VisibleAnywhere)
-	int Version = 0;
+	int32 Version = 0;
 };

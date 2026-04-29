@@ -91,8 +91,8 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         TArray<FPCGPoint>& OutPoints = OutputData->GetMutablePoints();
         OutPoints = SortedPoints;
         
-        const int NumPoints = OutPoints.Num();
-        const int NumPointsMinusOne = NumPoints - 1;
+        const int32 NumPoints = OutPoints.Num();
+        const int32 NumPointsMinusOne = NumPoints - 1;
       
     	
         // Should we figure out the next direction?

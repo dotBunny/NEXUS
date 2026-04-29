@@ -19,7 +19,7 @@ TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(TSharedPtr<SWidget> Pare
 	}
 	
 	FChildren* Children = ParentWidget->GetChildren();
-	for (int i = 0; i < Children->Num(); ++i)
+	for (int32 i = 0; i < Children->Num(); ++i)
 	{
 		TSharedPtr<SWidget> Found = FindFirstWidgetByType(Children->GetChildAt(i), WidgetType);
 		if (Found.IsValid())
@@ -46,7 +46,7 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TS
 	}
 	
 	FChildren* Children = ParentWidget->GetChildren();
-	for (int i = 0; i < Children->Num(); ++i)
+	for (int32 i = 0; i < Children->Num(); ++i)
 	{
 		FindWidgetsByType(OutWidgets, Children->GetChildAt(i), WidgetType, WidgetTypeStop);
 	}
@@ -62,14 +62,14 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 		if (Widget->GetType() == SDockingTabStackName)
 		{
 			FChildren* Children = Widget->GetChildren();
-			int ChildrenCount = Children->Num();
+			int32 ChildrenCount = Children->Num();
 			
-			for (int i = 0; i < ChildrenCount; ++i)
+			for (int32 i = 0; i < ChildrenCount; ++i)
 			{
 				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
 				TArray<TSharedPtr<SWidget>> FoundWidgets;
 				FindWidgetsByType(FoundWidgets, ChildWidget, SDockTabName, SDockingTabStackName);
-				for (int j = 0; j < FoundWidgets.Num(); j++)
+				for (int32 j = 0; j < FoundWidgets.Num(); j++)
 				{
 					if (FoundWidgets[j].IsValid())
 					{

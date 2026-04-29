@@ -21,6 +21,9 @@
 - `NActorPool` tests now run in PIE worlds.
 - Forces `ANPooledActor` to be `abstract`.
 - Updated project-wide to enforcing `American English` for spelling.
+- `FNActorPool::DoesSupportInterface` renamed to `FNActorPool::ImplementsPoolItemInterface
+- `UNActorPoolObject::DoesSupportInterface` renamed to `UNActorPoolObject::ImplementsPoolItemInterface`
+- All `int` now replaced with `int32` to be explicit.
 
 ### Fixed
 

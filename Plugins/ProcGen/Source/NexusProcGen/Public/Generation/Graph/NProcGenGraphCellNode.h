@@ -84,7 +84,7 @@ public:
 
 	/**
 	 * @return The raw input-data pointer used by the builder.
-	 * @warning Only valid during graph construction; nulled by CleanupBuilderReferences afterwards.
+	 * @warning Only valid during graph construction; nulled by CleanupBuilderReferences afterward.
 	 */
 	FNVirtualCellData* GetInputDataPtr() const { return InputDataPtr; }
 

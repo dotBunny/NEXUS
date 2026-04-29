@@ -56,7 +56,7 @@ public:
 	float VisualizationLineThickness = 1.5f;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers: Distribution", DisplayName = "Circle Sides",  meta = (Tooltip = "The number of lines used to draw a debug circle."))
-	int VisualizationCircleSides = 64;
+	int32 VisualizationCircleSides = 64;
 	
 #endif // WITH_EDITORONLY_DATA
 

@@ -61,7 +61,7 @@ void UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged(const FSt
 	CenterText->SetText(FText::FromString(NewDisplayMessage));
 }
 
-void UNProcGenOperationListViewEntry::OnOperationTasksChanged(const int CompletedTasks, const int TotalTasks)
+void UNProcGenOperationListViewEntry::OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks)
 {
 	if (TotalTasks != 0)
 	{

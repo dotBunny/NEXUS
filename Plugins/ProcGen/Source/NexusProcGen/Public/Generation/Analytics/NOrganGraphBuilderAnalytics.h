@@ -22,7 +22,7 @@ struct FNOrganGraphBuilderAnalytics
 	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
 
 	/** Total number of build iterations consumed (1 + retries). */
-	int Iterations = 1;
+	int32 Iterations = 1;
 
 	/** Count of null-terminator nodes added per iteration. */
 	FNIterationCounter AddNullNodes;

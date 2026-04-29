@@ -26,7 +26,7 @@ void FNCellProxyCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuil
 	DetailBuilder.GetObjectsBeingCustomized(Objects);
 
 	TArray<TWeakObjectPtr<ANCellProxy>> Proxies;
-	for (int i = 0; i < Objects.Num(); i++)
+	for (int32 i = 0; i < Objects.Num(); i++)
 	{
 		if (Objects[i].IsValid())
 		{

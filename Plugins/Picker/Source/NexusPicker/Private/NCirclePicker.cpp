@@ -8,7 +8,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_CIRCLE_PREFIX \
-	const int OutLocationsStartIndex = OutLocations.Num(); \
+	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.Rotation.IsZero(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_CIRCLE_THETA(FloatSingle) \
@@ -29,7 +29,7 @@
 			UE_VLOG_WIRECIRCLE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
 		UE_VLOG_WIRECIRCLE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		for (int i = 0; i < Params.Count; i++) \
+		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
@@ -51,7 +51,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -63,7 +63,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -74,7 +74,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -87,7 +87,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -99,7 +99,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -110,7 +110,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -134,7 +134,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -146,7 +146,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -157,7 +157,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -170,7 +170,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -182,7 +182,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -193,7 +193,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -218,7 +218,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -230,7 +230,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -241,7 +241,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -254,7 +254,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -266,7 +266,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -277,7 +277,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -302,7 +302,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -314,7 +314,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -325,7 +325,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -338,7 +338,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -350,7 +350,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)
@@ -361,7 +361,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 		}
 		else
 		{
-			for (int i = 0; i < Params.Count; i++)
+			for (int32 i = 0; i < Params.Count; i++)
 			{
 				N_PICKER_CIRCLE_THETA(RANDOM_FLOAT)
 				N_PICKER_CIRCLE_RADIUS(RANDOM_FLOAT_RANGE)

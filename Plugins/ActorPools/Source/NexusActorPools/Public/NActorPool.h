@@ -79,7 +79,7 @@ public:
 	void UpdateSettings(const FNActorPoolSettings& InNewSettings);
 
 	/** Does the ActorPool's Template implement the IActorPoolItem interface? */
-	bool DoesSupportInterface() const { return bImplementsInterface; }
+	bool ImplementsPoolItemInterface() const { return bImplementsInterface; }
 
 	/** Will the ActorPool attempt to invoke UFUNCTIONs for events? */
 	bool HasInvokeUFunctionFlag() const { return Settings.HasFlag_InvokeUFunctions(); }

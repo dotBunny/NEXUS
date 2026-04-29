@@ -16,7 +16,7 @@
 struct FNIterationCounter
 {
 	/** Index of the current bucket; always equals Counter.Num() - 1. */
-	int Iteration = 0;
+	int32 Iteration = 0;
 
 	/** Per-iteration tallies; index 0 is the first iteration, the last entry is the current bucket. */
 	TArray<int32> Counter = TArray({0});
@@ -43,8 +43,8 @@ struct FNIterationCounter
 	/** Sum every iteration's tally and return the cumulative total across all buckets. */
 	int32 GetTotal()
 	{
-		int Total = 0;
-		for (int i = 0; i < Counter.Num(); i++)
+		int32 Total = 0;
+		for (int32 i = 0; i < Counter.Num(); i++)
 		{
 			Total += Counter[i];
 		}

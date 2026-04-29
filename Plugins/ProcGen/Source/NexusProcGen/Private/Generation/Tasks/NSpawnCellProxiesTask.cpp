@@ -11,9 +11,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 	constexpr double MaxAllowableTime = 0.002; // 2ms budget
 	const double StartTime = FPlatformTime::Seconds();
-	const int NodeCount = SpawnCellsContextPtr->CellNodes.Num();
+	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
 	
-	for (int i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
+	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 

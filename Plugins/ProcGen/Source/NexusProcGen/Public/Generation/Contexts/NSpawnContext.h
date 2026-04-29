@@ -28,7 +28,7 @@ public:
 	bool bSpawnLevelInstances;
 
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
-	int CellNodesCurrentIndex = 0;
+	int32 CellNodesCurrentIndex = 0;
 
 	/** Flattened list of cell nodes awaiting proxy spawn, populated by FNCreateSpawnsTask. */
 	TArray<FNProcGenGraphCellNode*> CellNodes;

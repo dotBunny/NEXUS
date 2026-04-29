@@ -152,7 +152,7 @@ FNVirtualOrganContext::~FNVirtualOrganContext()
 bool FNVirtualOrganContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
-	int CellNodeCount = 0;
+	int32 CellNodeCount = 0;
 	for (const auto Pair : CellGraph->GetNodes())
 	{
 		if (Pair->GetNodeType() == ENProcGenGraphNodeType::Cell)
@@ -187,7 +187,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	CellIndices.Empty();
 	JunctionIndices.Empty();
 	
-	for (int i = 0; i < CellInputData.Num(); i++)
+	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
 		
@@ -254,7 +254,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 bool FNVirtualOrganContext::ResetForRetry()
 {
 	// Reset counters
-	for (int i = 0; i < CellInputData.Num(); i++)
+	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
 		CellInputData[i].UsedCount = 0;
 	}

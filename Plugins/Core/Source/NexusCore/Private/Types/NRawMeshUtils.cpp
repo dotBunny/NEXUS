@@ -83,7 +83,7 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TA
 	{
 		FNRawMesh BaseMesh;
 		FTransform BaseTransform;
-		for (int i = 0; i < Transforms.Num(); i++)
+		for (int32 i = 0; i < Transforms.Num(); i++)
 		{
 			CombineMesh(BaseTransform, BaseMesh, Transforms[i], Meshes[i]);
 		}
@@ -101,7 +101,7 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TA
 	}
 	else
 	{
-		for (int i = 0; i < Transforms.Num(); i++)
+		for (int32 i = 0; i < Transforms.Num(); i++)
 		{
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));

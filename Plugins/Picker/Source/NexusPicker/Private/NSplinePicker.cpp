@@ -8,7 +8,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_SPLINE_PREFIX \
-	const int OutLocationsStartIndex = OutLocations.Num(); \
+	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_SPLINE_LOCATION(FloatRange) \
 	Params.SplineComponent->GetWorldLocationAtTime(FloatRange(0, Params.SplineComponent->Duration))
@@ -34,7 +34,7 @@
 		{ \
 			UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
-		for (int i = 0; i < Params.Count; i++) \
+		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
@@ -53,7 +53,7 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerPar
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -63,7 +63,7 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerPar
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -72,7 +72,7 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerPar
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
 		}
@@ -88,7 +88,7 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -98,7 +98,7 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -107,7 +107,7 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
 		}
@@ -124,7 +124,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -134,7 +134,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -143,7 +143,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
 		}
@@ -160,7 +160,7 @@ void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -170,7 +170,7 @@ void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -179,7 +179,7 @@ void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& T
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
 		}

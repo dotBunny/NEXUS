@@ -56,7 +56,7 @@
 	N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX = N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->Method();
 /** Define a new const local index initialized from an analytics call that returns a record index. */
 #define N_PROCEDURAL_GENERATION_ANALYTICS_INDEX_DEFINE(Method) \
-	const int N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX = N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->Method();
+	const int32 N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_INDEX = N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->Method();
 #else
 #define N_PROCEDURAL_GENERATION_ANALYTICS_CREATE
 #define N_PROCEDURAL_GENERATION_ANALYTICS_CONSTRUCTOR
@@ -110,7 +110,7 @@ public:
 	void ProcessVirtualWorldContextFinish();
 
 	/** Allocate a new organ-graph-builder analytics record and return its index. */
-	int OrganGraphBuilderCreate();
+	int32 OrganGraphBuilderCreate();
 	/** Mark the start time of the organ-graph-builder record at Index. */
 	void OrganGraphBuilderStart(int32 Index);
 	/** Mark the finish time of the organ-graph-builder record at Index. */
@@ -149,7 +149,7 @@ public:
 	void OrganGraphBuilder_NextIteration(int32 Index);
 
 	/** Allocate a new collect-generation-passes analytics record and return its index. */
-	int CollectGenerationPassesCreate();
+	int32 CollectGenerationPassesCreate();
 	/** Mark the start time of the collect-generation-passes record at Index. */
 	void CollectGenerationPassesStart(int32 Index);
 	/** Mark the finish time of the collect-generation-passes record at Index. */
@@ -161,7 +161,7 @@ public:
 	void CreateSpawnCellsContextFinish();
 
 	/** Allocate a new spawn-cell-proxies analytics record and return its index. */
-	int SpawnCellProxiesCreate();
+	int32 SpawnCellProxiesCreate();
 	/** Mark the start time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesStart(int32 Index);
 	/** Append Template to the list of cells spawned during the record at Index. */

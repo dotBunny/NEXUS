@@ -360,7 +360,7 @@ void FNActorPool::CreateActors(const int32 Count)
 	// Reserve space for the new actors
 	if (Count > 1)
 	{
-		const int BufferCount = Count * 2;
+		const int32 BufferCount = Count * 2;
 		InActors.Reserve(InActors.Num() + BufferCount);
 		OutActors.Reserve(OutActors.Num() + BufferCount);
 	}
@@ -370,7 +370,7 @@ void FNActorPool::CreateActors(const int32 Count)
 #endif // WITH_EDITOR
 
 	// Create actual actors
-	for (int i = 0; i < Count; i++)
+	for (int32 i = 0; i < Count; i++)
 	{
 #if WITH_EDITOR
 		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);

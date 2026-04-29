@@ -34,7 +34,7 @@ EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementat
 		if (Level == nullptr) continue;
 		if (Level->LevelScriptBlueprint != nullptr && Level->LevelScriptBlueprint->UbergraphPages.Num() != 0)
 		{
-			int NodeCount = 0;
+			int32 NodeCount = 0;
 			TArray<TObjectPtr<UEdGraph>> Graphs = Level->LevelScriptBlueprint->UbergraphPages;
 			for (const UEdGraph* Graph : Graphs)
 			{

@@ -45,7 +45,7 @@ public:
 
 	/** @return The number of Actors currently in the pool (available to spawn), or -1 if unlinked. */
 	UFUNCTION(BlueprintCallable)
-	int GetInCount() const
+	int32 GetInCount() const
 	{
 		if (Pool == nullptr) return -1;
 		return Pool->GetInCount();
@@ -53,7 +53,7 @@ public:
 
 	/** @return The number of Actors currently out of the pool (spawned in the world), or -1 if unlinked. */
 	UFUNCTION(BlueprintCallable)
-	int GetOutCount() const
+	int32 GetOutCount() const
 	{
 		if (Pool == nullptr) return -1;
 		return Pool->GetOutCount();
@@ -117,10 +117,10 @@ public:
 
 	/** @return true if the pool's Actor class implements INActorPoolItem. */
 	UFUNCTION(BlueprintCallable)
-	bool DoesSupportInterface() const
+	bool ImplementsPoolItemInterface() const
 	{
 		if (Pool == nullptr) return false;
-		return Pool->DoesSupportInterface();
+		return Pool->ImplementsPoolItemInterface();
 	}
 
 	/** @return true if the pool's flags include InvokeUFunctions. */

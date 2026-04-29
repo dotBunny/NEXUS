@@ -35,7 +35,7 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 		BasePosition += FVector(0.f, 0.f, WorkingLineHeight);
 	}
 	FVector CurrentPosition = BasePosition;
-	int LineIndex = 0;
+	int32 LineIndex = 0;
 	
 	// Make it stack up if inverted
 	if (bInvertLineFeed)
@@ -49,7 +49,7 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 	
 	for (const auto Character : Characters)
 	{
-		switch (const int GlyphIndex = Character)
+		switch (const int32 GlyphIndex = Character)
 		{
 		case 0: // String terminator, stop now
 			return;
@@ -70,7 +70,7 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 			TArray<FNPrimitiveFontPoint>& Points = GetGlyph(GlyphIndex);
 			
 			// Check our point count, if we don't have any at this point, it is considered a bad character
-			int PointCount = Points.Num();
+			int32 PointCount = Points.Num();
 			if (PointCount  == 0)
 			{
 				Points = GetGlyph(0);
@@ -78,7 +78,7 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 			}
 
 			// Draw our glyph
-			for (int i = 0; i < PointCount; i += 2)
+			for (int32 i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
 				FVector StartPoint = CurrentPosition + FVector(0.f, Points[i].X * WorkingScale, Points[i].Y * WorkingScale);
@@ -124,7 +124,7 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 		BasePosition += FVector(0.f, 0.f, WorkingLineHeight);
 	}
 	FVector CurrentPosition = BasePosition;
-	int LineIndex = 0;
+	int32 LineIndex = 0;
 	
 	// Make it stack up if inverted
 	if (bInvertLineFeed)
@@ -138,7 +138,7 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 	
 	for (const auto Character : Characters)
 	{
-		switch (const int GlyphIndex = Character)
+		switch (const int32 GlyphIndex = Character)
 		{
 		case 0: // String terminator, stop now
 			return;
@@ -159,7 +159,7 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 			TArray<FNPrimitiveFontPoint>& Points = GetGlyph(GlyphIndex);
 			
 			// Check our point count, if we don't have any at this point, it is considered a bad character
-			int PointCount = Points.Num();
+			int32 PointCount = Points.Num();
 			if (PointCount  == 0)
 			{
 				Points = GetGlyph(0);
@@ -167,7 +167,7 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 			}
 
 			// Draw our glyph
-			for (int i = 0; i < PointCount; i += 2)
+			for (int32 i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
 				FVector StartPoint = CurrentPosition + FVector(0.f, Points[i].X * WorkingScale, Points[i].Y * WorkingScale);

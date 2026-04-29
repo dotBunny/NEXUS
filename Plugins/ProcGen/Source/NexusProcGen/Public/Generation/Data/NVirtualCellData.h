@@ -29,28 +29,28 @@ struct NEXUSPROCGEN_API FNVirtualCellData
 	 * A minimum number of times this cell must be used in the generated FNProcGenGraph.
 	 * @note A value of -1 indicates no minimum constraint.
 	 */
-	int MinimumCount = -1;
+	int32 MinimumCount = -1;
 
 	/** 
 	 * The maximum number of times this cell can be used in the generated FNProcGenGraph.
 	 * @note A value of -1 indicates no maximum constraint.
 	 */
-	int MaximumCount = -1;
+	int32 MaximumCount = -1;
 
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
 	 * @note A value of 0 indicates no constraint.
 	 */
-	int MinimumNodeDistance = 1;
+	int32 MinimumNodeDistance = 1;
 
 	/** 
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
 	 */
-	int Weighting = 1;
+	int32 Weighting = 1;
 
 	/** Tracks how many times this cell has been used during the current generation pass. */
-	int UsedCount = 0;
+	int32 UsedCount = 0;
 
 	/** Root-level details and properties of this cell. */
 	FNCellRootDetails CellDetails;

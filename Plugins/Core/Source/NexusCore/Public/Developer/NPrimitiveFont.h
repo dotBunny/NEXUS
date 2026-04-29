@@ -33,7 +33,7 @@ class NEXUSCORE_API FNPrimitiveFont
 
 public:
 	/** Number of line-segment points used to draw an "undefined" fallback glyph. */
-	constexpr static int UndefinedPointCount = 12;
+	constexpr static int32 UndefinedPointCount = 12;
 
 	/**
 	 * Indicates whether the glyph table has been populated and the font is safe to use.

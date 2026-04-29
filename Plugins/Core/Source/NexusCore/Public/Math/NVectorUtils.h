@@ -117,14 +117,14 @@ public:
 	 * @param Size The grid spacing.
 	 * @return The integer grid index corresponding to Value.
 	 */
-	FORCEINLINE static int GetCrunchedGridUnit(const double& Value, const double& Size)
+	FORCEINLINE static int32 GetCrunchedGridUnit(const double& Value, const double& Size)
 	{
 		if (FMath::IsNearlyZero(Value)) return 0;
 
 		if (const double RawValue = Value / Size;
 			!FMath::IsNearlyZero(RawValue))
 		{
-			if (const int CrunchedValue = RawValue;
+			if (const int32 CrunchedValue = RawValue;
 				FMath::IsNearlyEqual(RawValue, CrunchedValue))
 			{
 				return CrunchedValue;

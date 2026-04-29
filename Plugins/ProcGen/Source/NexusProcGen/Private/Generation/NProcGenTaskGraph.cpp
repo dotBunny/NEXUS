@@ -63,7 +63,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	
 	// ----- STEP 2 - BUILD CELL GRAPHS FOR ORGANS --------------------------------------------------------------------------------------------------
 	
-	int PassCount = 0;
+	int32 PassCount = 0;
 
 	// Iterate over the different bespoke passes that can occur and create dependency-chained tasks
 	for (auto PassComponents : Context->GenerationOrder)
@@ -71,7 +71,7 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 		// Create context for the pass itself that organ builders will hand off their generated graph too
 		TSharedPtr<FNPassContext> PassContextPtr = MakeShared<FNPassContext, ESPMode::ThreadSafe>();
 
-		int ComponentCount = 0;
+		int32 ComponentCount = 0;
 		FGraphEventArray PassTasks;
 		for (const auto Component : PassComponents)
 		{
@@ -185,8 +185,8 @@ void FNProcGenTaskGraph::TearDownGraph()
 
 FIntVector2 FNProcGenTaskGraph::GetTaskStatus() const
 {
-	int TotalTasks = 0;
-	int CompletedTasks = 0;
+	int32 TotalTasks = 0;
+	int32 CompletedTasks = 0;
 	for (const FGraphEventRef& Task  : AllTasks)
 	{
 		if (Task->IsComplete())

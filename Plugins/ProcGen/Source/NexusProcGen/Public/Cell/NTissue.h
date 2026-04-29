@@ -35,28 +35,28 @@ struct NEXUSPROCGEN_API FNTissueEntry
 	 * @note A value of -1 indicates no minimum constraint.
 	 */	
 	UPROPERTY(EditAnywhere)
-	int MinimumCount = -1;
+	int32 MinimumCount = -1;
 	
 	/** 
 	 * The maximum number of times this cell can be used in the generated FNProcGenGraph.
 	 * @note A value of -1 indicates no maximum constraint.
 	 */	
 	UPROPERTY(EditAnywhere)
-	int MaximumCount = -1;
+	int32 MaximumCount = -1;
 	
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
 	 * @note A value of 0 indicates no constraint.
 	 */
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
-	int MinimumNodeDistance = 1;
+	int32 MinimumNodeDistance = 1;
 	
 	/** 
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
 	 */
 	UPROPERTY(EditAnywhere)
-	int Weighting = 1;
+	int32 Weighting = 1;
 	
 	/** The cell asset this entry refers to. */
 	UPROPERTY(EditAnywhere)

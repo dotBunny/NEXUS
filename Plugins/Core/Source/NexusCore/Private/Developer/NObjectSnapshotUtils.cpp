@@ -17,7 +17,7 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	Snapshot.Ticket = TakeTicket();
 	
 	FChunkedFixedUObjectArray& Objects = GUObjectArray.GetObjectItemArrayUnsafe();
-	for (int i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
+	for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 	{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		if (Objects[i].Object)
@@ -56,13 +56,13 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
 	
 	// If we check what has been maintained or removed, that leaves what's left in the array as having been added.
-	for (int OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
+	for (int32 OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
 	{
 		FNObjectSnapshotEntry& EntryA = OldSnapshot.CapturedObjects[OldIndex];
 		bool bFoundEntry = false;
 
 		// Find things we have
-		for (int NewIndex = NewSnapshot.CapturedObjectCount - 1; NewIndex >= 0 ; NewIndex--)
+		for (int32 NewIndex = NewSnapshot.CapturedObjectCount - 1; NewIndex >= 0 ; NewIndex--)
 		{
 			if (FNObjectSnapshotEntry& EntryB = NewSnapshot.CapturedObjects[NewIndex];
 				EntryA.IsEqual(EntryB))
@@ -85,7 +85,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 	}
 
 	// What's left is added
-	for (int i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
+	for (int32 i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
 	{
 		Diff.Added.Add(NewSnapshot.CapturedObjects[i]);
 	}
@@ -110,7 +110,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 
 void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 {
-	for (int i = Diff.AddedCount - 1; i >= 0; i--)
+	for (int32 i = Diff.AddedCount - 1; i >= 0; i--)
 	{
 		FNObjectSnapshotEntry& Entry = Diff.Added[i];
 

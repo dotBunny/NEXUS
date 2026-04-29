@@ -49,8 +49,8 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	else if (FNProcGenEdMode::GetCellEdMode() == FNProcGenEdMode::ENCellEdMode::Hull)
 	{
 		const TArray<FVector> WorldVertices = FNProcGenEdMode::GetCachedHullVertices();
-		const int VertCount = WorldVertices.Num();
-		for (int i = 0; i < VertCount; i++)
+		const int32 VertCount = WorldVertices.Num();
+		for (int32 i = 0; i < VertCount; i++)
 		{
 			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
 			PDI->DrawPoint(WorldVertices[i], FNProcGenEdMode::GetCachedHullColor(), PointSize, SDPG_Foreground);
@@ -76,7 +76,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		const FVector UnitSize = Settings->VoxelSize;
 		const FVector HalfUnitSize = UnitSize * 0.5f;
 		const FVector BaseOffset = CachedData.Origin;
-		for (int i = 0; i < PointCount; i++)
+		for (int32 i = 0; i < PointCount; i++)
 		{
 			auto [x,y,z] = CachedData.GetInverseIndex(i);
 	

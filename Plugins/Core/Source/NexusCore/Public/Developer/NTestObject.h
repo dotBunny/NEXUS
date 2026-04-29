@@ -11,7 +11,7 @@
 class FNTestObject
 {
 public:
-	int Counter;
+	int32 Counter;
 	FString Message;
 	uint8 State;
 };

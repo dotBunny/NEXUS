@@ -87,8 +87,8 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	ChaosTask.EnterProgressFrame(1);
 	
 	// Construct FVector Vertices
-	const int VerticesCount = OutVertices.Num();
-	const int IndicesCount = OutFaceIndices.Num();
+	const int32 VerticesCount = OutVertices.Num();
+	const int32 IndicesCount = OutFaceIndices.Num();
 	
 	FScopedSlowTask BuildTask = FScopedSlowTask(VerticesCount + IndicesCount, NSLOCTEXT("NexusProcGen", "Task_CalculateConvexHull_Build", "Calculate Convex Hull - Build Mesh"));
 	BuildTask.MakeDialog(false);
@@ -96,7 +96,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 	Mesh.Vertices.Reserve(VerticesCount);
 	FVector CenterCalc;
 	FBox BoundingBox(ForceInit);
-	for (int i = 0; i < VerticesCount; i++)
+	for (int32 i = 0; i < VerticesCount; i++)
 	{
 		BuildTask.EnterProgressFrame(1);
 		Mesh.Vertices.Add(FVector(OutVertices[i][0], OutVertices[i][1], OutVertices[i][2]));
@@ -108,7 +108,7 @@ FNRawMesh FNProcGenUtils::CalculateConvexHull(ULevel* InLevel, const FNCellHullG
 
 	// Build Loops
 	Mesh.Loops.Reserve(IndicesCount);
-	for (int i = 0; i < IndicesCount; i++)
+	for (int32 i = 0; i < IndicesCount; i++)
 	{
 		BuildTask.EnterProgressFrame(1);
 		
@@ -188,11 +188,11 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	TArray<uint32> SurroundingIndices;
 	
 	// #SONARQUBE-DISABLE Need to loop depth to handle dimensions
-	for (int x = 0; x < SizeX; x++)
+	for (int32 x = 0; x < SizeX; x++)
 	{
-		for (int y = 0; y < SizeY; y++)
+		for (int32 y = 0; y < SizeY; y++)
 		{
-			for (int z = 0; z < SizeZ; z++)
+			for (int32 z = 0; z < SizeZ; z++)
 			{
 				const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
 				BroadTraceTask.EnterProgressFrame(1);
@@ -212,9 +212,9 @@ FNCellVoxelData FNProcGenUtils::CalculateVoxelData(ULevel* InLevel, const FNCell
 	return MoveTemp(ReturnData);
 }
 
-int FNProcGenUtils::GetCellActorCountFromLevel(const ULevel* Level)
+int32 FNProcGenUtils::GetCellActorCountFromLevel(const ULevel* Level)
 {
-	int Count = 0;
+	int32 Count = 0;
 	for (auto ActorIt = Level->Actors.CreateConstIterator(); ActorIt; ++ActorIt )
 	{
 		if (ActorIt->IsA<ANCellActor>())
@@ -225,9 +225,9 @@ int FNProcGenUtils::GetCellActorCountFromLevel(const ULevel* Level)
 	return Count;
 }
 
-int FNProcGenUtils::GetCellActorCountFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
+int32 FNProcGenUtils::GetCellActorCountFromWorld(const UWorld* World, const bool bIgnoreInstancedLevels)
 {
-	int Count = 0;
+	int32 Count = 0;
 	for (const ULevel* Level : World->GetLevels())
 	{
 		if (bIgnoreInstancedLevels && Level->IsInstancedLevel()) continue;
@@ -340,9 +340,9 @@ TArray<FVector2D> FNProcGenUtils::GetSocketPoints2D(const FIntVector2& Units, co
 	const double WidthStart = -(UsableWidth * 0.5f);
 	const double HeightStart = -(UsableHeight * 0.5f);
 
-	for (int i = 0; i < Units.X; i++)
+	for (int32 i = 0; i < Units.X; i++)
 	{
-		for ( int y = 0; y < Units.Y; y++)
+		for ( int32 y = 0; y < Units.Y; y++)
 		{
 			Points.Add(FVector2D(WidthStart + (i * UnitSize.X), HeightStart + (y * UnitSize.Y)));
 		}
@@ -429,8 +429,8 @@ void FNProcGenUtils::GetVoxelQueryLevelBoundsEndPoints(const FVector& WorldCente
 	FVector IntersectionPoint;
 	const FBox ExpendedBounds = LevelBounds.ExpandBy(10.f);
 	GetVoxelQueryPoints(WorldCenter,FVector::OneVector, OutPositions); // We do not care about the size for this
-	const int Count = OutPositions.Num();
-	for (int i = 0; i < Count; i++)
+	const int32 Count = OutPositions.Num();
+	for (int32 i = 0; i < Count; i++)
 	{
 		FVector Direction = OutPositions[i] - WorldCenter;
 		Direction.Normalize();

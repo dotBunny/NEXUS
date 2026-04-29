@@ -83,8 +83,8 @@ private:
 	{
 		if (Size.X != Other.Size.X || Size.Y != Other.Size.Y || Size.Z != Other.Size.Z) return false;
 
-		const int Count = Size.X * Size.Y * Size.Z;
-		for (int i = 0; i < Count; i++)
+		const int32 Count = Size.X * Size.Y * Size.Z;
+		for (int32 i = 0; i < Count; i++)
 		{
 			if (Data[i] != Other.Data[i]) return false;
 		}

@@ -14,7 +14,7 @@
 struct FNProcessPassAnalytics
 {
 	/** Index of the generation pass this record corresponds to. */
-	int Phase = 0;
+	int32 Phase = 0;
 
 	/** Wall-clock duration of the pass-collection step. */
 	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();

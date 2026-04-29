@@ -49,7 +49,7 @@ public:
 	 */
 	bool TryGetUniqueSets(TArray<UNActorPoolSet*>& OutActorPoolSets)
 	{
-		const int AdditionalCount = NestedSets.Num();
+		const int32 AdditionalCount = NestedSets.Num();
 		OutActorPoolSets.Reserve(OutActorPoolSets.Num() + AdditionalCount + 1);
 
 		// Add current
@@ -59,7 +59,7 @@ public:
 		}
 
 		// Add children/s
-		for (int i = 0; i < AdditionalCount; i++)
+		for (int32 i = 0; i < AdditionalCount; i++)
 		{
 			UNActorPoolSet* NestedSetPtr = NestedSets[i].LoadSynchronous();
 			if (!OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop

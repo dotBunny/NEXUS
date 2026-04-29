@@ -41,7 +41,7 @@ public:
 	}
 
 	/**
-	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterwards.
+	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterward.
 	 *
 	 * The world is fully booted through InitializeActorsForPlay/BeginPlay so it can host actor
 	 * behavior, and is destroyed (along with its temporary UGameInstance) when the test body

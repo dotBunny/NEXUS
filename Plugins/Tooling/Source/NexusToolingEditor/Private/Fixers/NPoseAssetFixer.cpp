@@ -40,13 +40,13 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting Everything ..."));
 		SelectedPaths = { TEXT("/Game") };
 	}
-	const int PathCount = SelectedPaths.Num();
+	const int32 PathCount = SelectedPaths.Num();
 
 	// STEP 2 - Look for PoseAssets
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2", "Scanning ..."));
 	FScopedSlowTask ScanTask = FScopedSlowTask(PathCount, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Scan", "Scanning For Pose Assets"));
 	ScanTask.MakeDialog(false);
-	for (int i = 0; i < PathCount; i++)
+	for (int32 i = 0; i < PathCount; i++)
 	{
 		if (SelectedPaths[i] == "/All")
 		{
@@ -82,8 +82,8 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step3", "Processing ..."));
 	FScopedSlowTask FixTask = FScopedSlowTask(PoseAssets.Num(), NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix", "Processing Pose Assets"));
 	FixTask.MakeDialog(true);
-	int ProblemsFixed = 0;
-	for (int i = 0; i < PoseAssets.Num(); i++)
+	int32 ProblemsFixed = 0;
+	for (int32 i = 0; i < PoseAssets.Num(); i++)
 	{
 		UPoseAsset* PoseAsset = Cast<UPoseAsset>(PoseAssets[i]);
 		

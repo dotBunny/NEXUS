@@ -196,8 +196,8 @@ UObject* UNDynamicRefSubsystem::GetFirstObjectByNameUnsafe(const FName Name)
 AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 {
 	TArray<UObject*> Objects = GetObjects(DynamicRef);
-	const int ObjectsCount = Objects.Num();
-	for (int i = ObjectsCount - 1; i >= 0; i--)
+	const int32 ObjectsCount = Objects.Num();
+	for (int32 i = ObjectsCount - 1; i >= 0; i--)
 	{
 		AActor* Actor = Cast<AActor>(Objects[i]);
 		if (Actor) return Actor;
@@ -208,8 +208,8 @@ AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 AActor* UNDynamicRefSubsystem::GetLastActorByName(const FName Name)
 {
 	TArray<UObject*> Objects = GetObjectsByName(Name);
-	const int ObjectsCount = Objects.Num();
-	for (int i = ObjectsCount - 1; i >= 0; i--)
+	const int32 ObjectsCount = Objects.Num();
+	for (int32 i = ObjectsCount - 1; i >= 0; i--)
 	{
 		AActor* Actor = Cast<AActor>(Objects[i]);
 		if (Actor) return Actor;
@@ -241,7 +241,7 @@ TArray<FName> UNDynamicRefSubsystem::GetNames() const
 TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
 {
 	TArray<ENDynamicRef> Result;
-	for (int i = 0; i < NDR_Max; i++)
+	for (int32 i = 0; i < NDR_Max; i++)
 	{
 		if (FastCollection[i].HasObjects())
 		{

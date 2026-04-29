@@ -141,7 +141,7 @@ public:
 
 private:
 	/** Pixel spacing between stacked HUD messages. */
-	const int MessageSpacing = 20;
+	const int32 MessageSpacing = 20;
 
 	static TArray<FVector> CachedHullVertices;
 	static FLinearColor CachedHullColor;

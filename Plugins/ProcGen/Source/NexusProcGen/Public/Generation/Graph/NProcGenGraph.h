@@ -34,7 +34,7 @@ public:
 	TArray<FNProcGenGraphNode*> GetNodesWithOpenJunctions();
 
 	/** @return Total node count. */
-	int GetNodeCount() const
+	int32 GetNodeCount() const
 	{
 		return Nodes.Num();
 	}

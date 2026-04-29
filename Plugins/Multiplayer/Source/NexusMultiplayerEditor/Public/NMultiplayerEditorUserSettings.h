@@ -28,7 +28,7 @@ public:
 	bool bClearLogsFolder = false;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Count", Tooltip = "The number of clients to spawn."))
-	int ClientCount = 2;
+	int32 ClientCount = 2;
 
 	UPROPERTY(EditAnywhere, config, Category = "Clients", meta = (DisplayName = "Window Size", Tooltip = "The size of the created clients windows."))
 	FIntPoint ClientWindowSize = FIntPoint(800, 600);
@@ -43,19 +43,19 @@ public:
 	FString ClientParameters = "";
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Lag (Minimum)", Tooltip = "The minimum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
-	int ClientSimulateLagMinimum = 20;
+	int32 ClientSimulateLagMinimum = 20;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Lag (Maximum)", Tooltip = "The maximum amount of network lag (ms) be simulated ontop of the existing round trip time.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1))
-	int ClientSimulateLagMaximum = 60;
+	int32 ClientSimulateLagMaximum = 60;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Loss", Tooltip = "An amount of packet loss (%) to be simulated.", ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", SliderExponent = 1)) 
-	int ClientSimulatePacketLoss = 0;
+	int32 ClientSimulatePacketLoss = 0;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Jitter", Tooltip = "An amount of packet jitter (ms) to be simulated.", ClampMin="0", ClampMax="1000", UIMin="0", UIMax="1000", SliderExponent = 1)) 
-	int ClientSimulatePacketJitter = 0;
+	int32 ClientSimulatePacketJitter = 0;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Packet Duplication", Tooltip = "An amount of packet duplication (%) to be simulated.", ClampMin="0", ClampMax="100", UIMin="0", UIMax="100", SliderExponent = 1)) 
-	int ClientSimulatePacketDuplication = 0;
+	int32 ClientSimulatePacketDuplication = 0;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Clients: Network Simulation", meta = (DisplayName = "Receive Out Of Order", Tooltip = "Forces network packets to be recieved out of order.")) 
 	bool bClientSimulateReceiveOutOfOrderPackets = false;

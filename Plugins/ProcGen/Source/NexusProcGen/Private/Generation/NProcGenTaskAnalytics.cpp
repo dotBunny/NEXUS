@@ -29,7 +29,7 @@ void FNProcGenTaskAnalytics::ProcessVirtualWorldContextFinish()
 	ProcessVirtualWorldContextTimer.Stop();
 }
 
-int FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
+int32 FNProcGenTaskAnalytics::OrganGraphBuilderCreate()
 {
 	OrganGraphBuilderAnalytics.Add(FNOrganGraphBuilderAnalytics());
 	return OrganGraphBuilderAnalytics.Num() - 1;
@@ -92,10 +92,10 @@ void FNProcGenTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 	Analytic.NextIteration();
 }
 
-int FNProcGenTaskAnalytics::CollectGenerationPassesCreate()
+int32 FNProcGenTaskAnalytics::CollectGenerationPassesCreate()
 {
 	ProcessPassAnalytics.Add(FNProcessPassAnalytics());
-	const int Phase = ProcessPassAnalytics.Num() - 1;
+	const int32 Phase = ProcessPassAnalytics.Num() - 1;
 	ProcessPassAnalytics.Last().Phase = Phase;
 	return Phase;
 }
@@ -122,7 +122,7 @@ void FNProcGenTaskAnalytics::CreateSpawnCellsContextFinish()
 	CreateSpawnCellsContextTimer.Stop();
 }
 
-int FNProcGenTaskAnalytics::SpawnCellProxiesCreate()
+int32 FNProcGenTaskAnalytics::SpawnCellProxiesCreate()
 {
 	SpawnCellProxiesAnalytics.Add(FNSpawnCellProxiesAnalytics());
 	return SpawnCellProxiesAnalytics.Num() - 1;
@@ -223,7 +223,7 @@ FString FNProcGenTaskAnalytics::GetCountersReport()
 	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
 	{
 		// Output data on each iteration
-		for (int i = 0; i < OrganGraphBuilderAnalytic.Iterations; i++)
+		for (int32 i = 0; i < OrganGraphBuilderAnalytic.Iterations; i++)
 		{
 			Builder.Appendf(TEXT("\t\t%s (%i)\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations);
 			Builder.Append(TEXT("\t\t\tFalse Starts:\n"));

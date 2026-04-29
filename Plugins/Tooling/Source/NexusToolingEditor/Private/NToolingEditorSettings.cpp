@@ -10,7 +10,7 @@ bool UNToolingEditorSettings::IsAssetIgnored(const FSoftObjectPath& AssetPath) c
 	if (ValidatorIgnoredAssets.Contains(AssetPath)) return true;
 
 	const FString Path = AssetPath.GetAssetPathString();
-	for (int i = 0; i < ValidatorIgnoredPrefixes.Num(); i++)
+	for (int32 i = 0; i < ValidatorIgnoredPrefixes.Num(); i++)
 	{
 		if (Path.StartsWith(ValidatorIgnoredPrefixes[i])) return true;
 	}

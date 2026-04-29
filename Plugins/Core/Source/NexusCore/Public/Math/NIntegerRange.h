@@ -26,5 +26,5 @@ struct NEXUSCORE_API FNIntegerRange
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Maximum = MAX_int32;
 
-	N_IMPLEMENT_RANGE(int)
+	N_IMPLEMENT_RANGE(int32)
 };

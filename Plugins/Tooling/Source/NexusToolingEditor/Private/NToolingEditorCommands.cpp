@@ -198,7 +198,7 @@ void FNToolingEditorCommands::OnNodeExternalDocumentation()
 	// Split the data so you can have multiple URIs in the data
 	TArray<FString> OutURIs;
 	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
-	for (int i = 0; i < OutURIs.Num(); i++)
+	for (int32 i = 0; i < OutURIs.Num(); i++)
 	{
 		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
 	}

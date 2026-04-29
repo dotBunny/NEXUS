@@ -221,9 +221,9 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 		{
 			TArray<TArray<UNOrganComponent*>>& Order = OrganGenerator->GetGenerationOrder();
 			// #SONARQUBE-DISABLE-CPP_S134 Need the extra depth to iterate
-			for (int i = 0; i < Order.Num(); i++)
+			for (int32 i = 0; i < Order.Num(); i++)
 			{
-				for (int p = 0; p < Order[i].Num(); p++)
+				for (int32 p = 0; p < Order[i].Num(); p++)
 				{
 					Order[i][p]->DrawDebugPDI(PDI);
 					
@@ -248,7 +248,7 @@ void FNProcGenEdMode::Render(const FSceneView* View, FViewport* Viewport, FPrimi
 
 void FNProcGenEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
-	int MessageOffset = 35;
+	int32 MessageOffset = 35;
 	
 	if (bHasDirtyActors)
 	{

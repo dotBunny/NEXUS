@@ -74,7 +74,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	
 	for (int32 i = Lines.Num() - 1; i >= 0; i--)
 	{
-		if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int Number")))
+		if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int32 Number")))
 		{
 			TargetVersion = Lines[i];
 			break;

@@ -222,7 +222,7 @@ void FNEditorUtils::CleanLogsFolder()
 	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
 
 	const FString ProjectLogDir = FPaths::ProjectLogDir();
-	int DeleteCount = 0;
+	int32 DeleteCount = 0;
 
 	for (const FString& Search : Searches)
 	{

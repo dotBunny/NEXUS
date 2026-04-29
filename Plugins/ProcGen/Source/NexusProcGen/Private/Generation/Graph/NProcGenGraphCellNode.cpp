@@ -32,7 +32,7 @@ FNProcGenGraphCellNode::FNProcGenGraphCellNode(FNVirtualCellData* InputData, con
 	WorldVoxel.RotatedAroundPivot(Position, Rotation); // TODO: Implement
 	
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
-	for (int i = 0; i < FreeJunctionKeys.Num(); i++)
+	for (int32 i = 0; i < FreeJunctionKeys.Num(); i++)
 	{
 		const int32 JunctionKey = FreeJunctionKeys[i];
 		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
@@ -54,8 +54,8 @@ bool FNProcGenGraphCellNode::HasOpenJunctions() const
 TMap<int32, FNCellJunctionDetails*> FNProcGenGraphCellNode::GetOpenJunctions()
 {
 	TMap<int32, FNCellJunctionDetails*> Junctions;
-	const int FreeCount = FreeJunctionKeys.Num();
-	for (int i = 0; i < FreeCount; i++)
+	const int32 FreeCount = FreeJunctionKeys.Num();
+	for (int32 i = 0; i < FreeCount; i++)
 	{
 		uint32 Key = FreeJunctionKeys[i];
 		Junctions.Add(Key, &WorldJunctions[Key]);
