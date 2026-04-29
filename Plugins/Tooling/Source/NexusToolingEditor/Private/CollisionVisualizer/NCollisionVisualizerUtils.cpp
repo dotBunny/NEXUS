@@ -13,7 +13,7 @@
 #define N_COLLISION_VISUALIZER_MID_COLOR Settings.Drawing.DrawMidColor
 #define N_COLLISION_VISUALIZER_MISS_COLOR Settings.Drawing.DrawMissColor
 
-void FNCollisionVisualizerUtils::DoLineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -51,7 +51,7 @@ void FNCollisionVisualizerUtils::DoLineTraceSingle(const FNCollisionVisualizerSe
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -100,7 +100,7 @@ void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSet
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceTest(const FNCollisionVisualizerSettings& Settings, 
                                                 const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -129,7 +129,7 @@ void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSett
 
 
 
-void FNCollisionVisualizerUtils::DoSweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -170,7 +170,7 @@ void FNCollisionVisualizerUtils::DoSweepSingle(const FNCollisionVisualizerSettin
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -226,7 +226,7 @@ void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSetting
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings& Settings, const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
+void FNCollisionVisualizerUtils::SweepTest(const FNCollisionVisualizerSettings& Settings, const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
@@ -254,7 +254,7 @@ void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
+void FNCollisionVisualizerUtils::OverlapBlocking(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
 	const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -283,7 +283,7 @@ void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSe
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapAny(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
@@ -312,7 +312,7 @@ void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSetting
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapMulti(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON

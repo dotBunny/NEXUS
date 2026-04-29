@@ -67,17 +67,17 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 	}
@@ -86,19 +86,19 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::DoSweepSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::DoSweepMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::DoSweepTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
@@ -108,17 +108,17 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		using enum ENCollisionVisualizerOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
-			FNCollisionVisualizerUtils::DoOverlapBlocking(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapBlocking(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
-			FNCollisionVisualizerUtils::DoOverlapAny(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapAny(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionVisualizerUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapMulti(Settings, QueryActor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 	}

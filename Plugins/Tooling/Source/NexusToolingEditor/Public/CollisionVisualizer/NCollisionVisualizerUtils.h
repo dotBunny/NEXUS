@@ -17,39 +17,39 @@ class FNCollisionVisualizerUtils
 public:
 
 	/** Issue a single-result line trace and draw the outcome. */
-	static void DoLineTraceSingle(const FNCollisionVisualizerSettings& Settings,
+	static void LineTraceSingle(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 
 	/** Issue a multi-result line trace and draw each hit. */
-	static void DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings,
+	static void LineTraceMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 
 	/** Issue a boolean line-trace test and draw a hit/miss segment. */
-	static void DoLineTraceTest(const FNCollisionVisualizerSettings& Settings,
+	static void LineTraceTest(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
 
 	/** Issue a single-result shape sweep and draw the outcome. */
-	static void DoSweepSingle(const FNCollisionVisualizerSettings& Settings,
+	static void SweepSingle(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 
 	/** Issue a multi-result shape sweep and draw each hit. */
-	static void DoSweepMulti(const FNCollisionVisualizerSettings& Settings,
+	static void SweepMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 
 	/** Issue a boolean shape-sweep test and draw a hit/miss result. */
-	static void DoSweepTest(const FNCollisionVisualizerSettings& Settings,
+	static void SweepTest(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
 
 	/** Issue a blocking-only overlap query at Position/Rotation and draw the outcome. */
-	static void DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings,
+	static void OverlapBlocking(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 
 	/** Issue an any-overlap query at Position/Rotation and draw the outcome. */
-	static void DoOverlapAny(const FNCollisionVisualizerSettings& Settings,
+	static void OverlapAny(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 
 	/** Issue a multi-overlap query at Position/Rotation and draw each overlapping primitive. */
-	static void DoOverlapMulti(const FNCollisionVisualizerSettings& Settings,
+	static void OverlapMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
 
 private:
