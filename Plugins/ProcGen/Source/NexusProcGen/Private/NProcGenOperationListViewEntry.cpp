@@ -31,7 +31,7 @@ void UNProcGenOperationListViewEntry::Reset() const
 	if (Operation != nullptr)
 	{
 		LeftText->SetText(Operation->GetDisplayName());
-		const FIntVector2 Tasks = Operation->GetCachedTasksStatus();
+		const FIntVector2 Tasks = Operation->GetCachedTaskStatusCounts();
 		CenterText->SetText(FText::FromString(Operation->GetDisplayMessage()));
 
 		if (Tasks.Y != 0)

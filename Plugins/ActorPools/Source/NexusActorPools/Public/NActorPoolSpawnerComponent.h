@@ -164,12 +164,12 @@ private:
 
 	/** Cached reference to the owning world's Actor Pool subsystem. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	UNActorPoolSubsystem* Manager = nullptr;
+	TObjectPtr<UNActorPoolSubsystem> Manager = nullptr;
 
 	/** Cached count of Templates for tight loops. */
 	int32 TemplateCount = 0;
 
 	/** Cached spline component used when Distribution == Spline. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	USplineComponent* CachedSplineComponent = nullptr;
+	TObjectPtr<USplineComponent> CachedSplineComponent = nullptr;
 };

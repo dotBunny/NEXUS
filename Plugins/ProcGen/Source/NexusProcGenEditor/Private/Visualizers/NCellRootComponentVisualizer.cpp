@@ -130,7 +130,7 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 
 bool FNCellRootComponentVisualizer::EditHullVertex(UNCellRootComponent* Component, int32 Index)
 {
-	CurrentEditMode = ENEditMode::HullVertex;
+	CurrentEditMode = ENCellEditMode::HullVertex;
 	RootComponent = Component;
 	VertexIndex = Index;
 	return true;
@@ -138,7 +138,7 @@ bool FNCellRootComponentVisualizer::EditHullVertex(UNCellRootComponent* Componen
 
 bool FNCellRootComponentVisualizer::EditBoundsVertex(UNCellRootComponent* Component, int32 Index)
 {
-	CurrentEditMode = ENEditMode::BoundsVertex;
+	CurrentEditMode = ENCellEditMode::BoundsVertex;
 	RootComponent = Component;
 	VertexIndex = Index;
 	return true;
@@ -180,7 +180,7 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 void FNCellRootComponentVisualizer::EndEditing()
 {
 	// Should validate that the new positions are convex if hull?
-	CurrentEditMode = ENEditMode::None;
+	CurrentEditMode = ENCellEditMode::None;
 	RootComponent = nullptr;
 	VertexIndex = -1;
 	FComponentVisualizer::EndEditing();
@@ -190,7 +190,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 {
 	if (RootComponent == nullptr) return false;
 	
-	if (CurrentEditMode == ENEditMode::HullVertex)
+	if (CurrentEditMode == ENCellEditMode::HullVertex)
 	{
 		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
 	
@@ -210,7 +210,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		return true;
 	}
 	
-	if (CurrentEditMode == ENEditMode::BoundsVertex)
+	if (CurrentEditMode == ENCellEditMode::BoundsVertex)
 	{
 		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusProcGenEditor", "FNCellRootComponentVisualizer_AdjustBoundsVertex", "Adjust Bounds Vertex"));
 	
@@ -233,7 +233,7 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 
 bool FNCellRootComponentVisualizer::HandleInputKey(FEditorViewportClient* ViewportClient, FViewport* Viewport, FKey Key, EInputEvent Event)
 {
-	if (CurrentEditMode == ENEditMode::None) return false;
+	if (CurrentEditMode == ENCellEditMode::None) return false;
 
 	if (Key == EKeys::Escape && Event == EInputEvent::IE_Pressed)
 	{
@@ -248,12 +248,12 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 {
 	switch (CurrentEditMode)
 	{
-	case ENEditMode::None:
+	case ENCellEditMode::None:
 		return false;
-	case ENEditMode::HullVertex:
+	case ENCellEditMode::HullVertex:
 		OutLocation = FNProcGenEdMode::GetCachedHullVertices()[VertexIndex];
 		return true;
-	case ENEditMode::BoundsVertex:
+	case ENCellEditMode::BoundsVertex:
 		if (VertexIndex == 0)
 		{
 			OutLocation = FNProcGenEdMode::GetCachedBounds().Min;

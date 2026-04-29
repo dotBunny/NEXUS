@@ -143,7 +143,7 @@ private:
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;
 
-	UWorld* World;
+	TObjectPtr<UWorld> World;
 	FNActorPoolSettings Settings;
 
 #if WITH_EDITOR

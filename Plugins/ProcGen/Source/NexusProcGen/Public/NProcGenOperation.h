@@ -156,7 +156,7 @@ public:
 	FOnNProcGenOperationTasksChanged OnTasksChanged;
 
 	/** @return Cached (completed, total) task counts captured since the last OnTasksChanged broadcast. */
-	FIntVector2 GetCachedTasksStatus() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
+	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	uint32 GetTicket() const { return Ticket; }
 protected:

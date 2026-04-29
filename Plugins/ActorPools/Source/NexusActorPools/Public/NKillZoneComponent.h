@@ -77,5 +77,5 @@ private:
 
 	/** Cached reference to the ActorPool subsystem used to route returns. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	UNActorPoolSubsystem* ActorPoolSubsystem;
+	TObjectPtr<UNActorPoolSubsystem> ActorPoolSubsystem;
 };
