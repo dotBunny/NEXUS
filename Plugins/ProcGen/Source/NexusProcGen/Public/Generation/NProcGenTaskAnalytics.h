@@ -7,35 +7,37 @@
 #include "Analytics/NProcGenTaskTimer.h"
 #include "Analytics/NSpawnCellProxiesAnalytics.h"
 
-#if !UE_BUILD_SHIPPING	
+#define N_PROC_GEN_ANALYTICS_MEMBER_PTR AnalyticsPtr
+#define N_PROC_GEN_ANALYTICS_MEMBER_INDEX AnalyticsIndex
 
-#define N_PROC_GEN_ANALYTICS_CREATE AnalyticsPtr = MakeShared<FNProcGenTaskAnalytics, ESPMode::ThreadSafe>(Operation->GetDisplayName());
-#define N_PROC_GEN_ANALYTICS_CONSTRUCTOR , const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr
-#define N_PROC_GEN_ANALYTICS_INITIALIZER , AnalyticsPtr(AnalyticsPtr.ToSharedRef())
-#define N_PROC_GEN_ANALYTICS_CLASS_REF , AnalyticsPtr
-#define N_PROC_GEN_ANALYTICS_SHARED_PTR	TSharedPtr<FNProcGenTaskAnalytics> AnalyticsPtr;
-#define N_PROC_GEN_ANALYTICS_SHARED_REF TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
-#define N_PROC_GEN_ANALYTICS_DELETE AnalyticsPtr.Reset();
-#define N_PROC_GEN_ANALYTICS_INDEX_LOCAL int32 AnalyticsIndex = -1;
+#if !UE_BUILD_SHIPPING	
+#define N_PROC_GEN_ANALYTICS_CREATE N_PROC_GEN_ANALYTICS_MEMBER_PTR = MakeShared<FNProcGenTaskAnalytics, ESPMode::ThreadSafe>(Operation->GetDisplayName());
+#define N_PROC_GEN_ANALYTICS_CONSTRUCTOR , const TSharedPtr<FNProcGenTaskAnalytics>& N_PROC_GEN_ANALYTICS_MEMBER_PTR
+#define N_PROC_GEN_ANALYTICS_INITIALIZER , N_PROC_GEN_ANALYTICS_MEMBER_PTR(N_PROC_GEN_ANALYTICS_MEMBER_PTR.ToSharedRef())
+#define N_PROC_GEN_ANALYTICS_CLASS_REF , N_PROC_GEN_ANALYTICS_MEMBER_PTR
+#define N_PROC_GEN_ANALYTICS_SHARED_PTR	TSharedPtr<FNProcGenTaskAnalytics> N_PROC_GEN_ANALYTICS_MEMBER_PTR;
+#define N_PROC_GEN_ANALYTICS_SHARED_REF TSharedRef<FNProcGenTaskAnalytics> N_PROC_GEN_ANALYTICS_MEMBER_PTR;
+#define N_PROC_GEN_ANALYTICS_DELETE N_PROC_GEN_ANALYTICS_MEMBER_PTR.Reset();
+#define N_PROC_GEN_ANALYTICS_INDEX_LOCAL int32 N_PROC_GEN_ANALYTICS_MEMBER_INDEX = -1;
 
 #define N_PROC_GEN_ANALYTICS(Method) \
-	AnalyticsPtr->Method();
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method();
 #define N_PROC_GEN_ANALYTICS_ONE_PARAM(Method, Parameter) \
-	AnalyticsPtr->Method(Parameter);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(Parameter);
 #define N_PROC_GEN_ANALYTICS_TWO_PARAM(Method, Parameter1, Parameter2) \
-	AnalyticsPtr->Method(Parameter1, Parameter2);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(Parameter1, Parameter2);
 #define N_PROC_GEN_ANALYTICS_THREE_PARAM(Method, Parameter1, Parameter2, Parameter3) \
-	AnalyticsPtr->Method(Parameter1, Parameter2, Parameter3);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(Parameter1, Parameter2, Parameter3);
 #define N_PROC_GEN_ANALYTICS_FOUR_PARAM(Method, Parameter1, Parameter2, Parameter3, Parameter4) \
-	AnalyticsPtr->Method(Parameter1, Parameter2, Parameter3, Parameter4);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(Parameter1, Parameter2, Parameter3, Parameter4);
 #define N_PROC_GEN_ANALYTICS_FIVE_PARAM(Method, Parameter1, Parameter2, Parameter3, Parameter4, Parameter5) \
-	AnalyticsPtr->Method(Parameter1, Parameter2, Parameter3, Parameter4, Parameter5);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(Parameter1, Parameter2, Parameter3, Parameter4, Parameter5);
 #define N_PROC_GEN_ANALYTICS_INDEX(Method) \
-	AnalyticsPtr->Method(AnalyticsIndex);
+	N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method(N_PROC_GEN_ANALYTICS_MEMBER_INDEX);
 #define N_PROC_GEN_ANALYTICS_INDEX_SET(Method) \
-	AnalyticsIndex = AnalyticsPtr->Method();
+	N_PROC_GEN_ANALYTICS_MEMBER_INDEX = N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method();
 #define N_PROC_GEN_ANALYTICS_INDEX_DEFINE(Method) \
-	const int AnalyticsIndex = AnalyticsPtr->Method();
+	const int N_PROC_GEN_ANALYTICS_MEMBER_INDEX = N_PROC_GEN_ANALYTICS_MEMBER_PTR->Method();
 #else
 #define N_PROC_GEN_ANALYTICS_CREATE
 #define N_PROC_GEN_ANALYTICS_CONSTRUCTOR
@@ -45,6 +47,7 @@
 #define N_PROC_GEN_ANALYTICS_SHARED_REF
 #define N_PROC_GEN_ANALYTICS_DELETE
 #define N_PROC_GEN_ANALYTICS_INDEX_LOCAL
+
 #define N_PROC_GEN_ANALYTICS(Method)
 #define N_PROC_GEN_ANALYTICS_ONE_PARAM(Method, Parameter)
 #define N_PROC_GEN_ANALYTICS_TWO_PARAM(Method, Parameter1, Parameter2)
