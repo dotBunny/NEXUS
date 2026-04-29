@@ -125,14 +125,18 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 	TSharedPtr<FNSpawnCellsContext> SpawnCellsContextPtr = MakeShared<FNSpawnCellsContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
 		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
 
-	FGraphEventRef CreateSpawnContextTask = TGraphTask<FNCreateSpawnCellsContextTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask).ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr, Analytics);
+	FGraphEventRef CreateSpawnContextTask = TGraphTask<FNCreateSpawnCellsContextTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
+		.ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr, Analytics);
 	FinalizerTasks.Add(CreateSpawnContextTask);
 	SpawnContextTasks.Add(CreateSpawnContextTask);
 	AllTasks.Add(CreateSpawnContextTask);
 	
 	// Create our dispatcher task that will time-slice spawning
-	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, ENamedThreads::GameThread).ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr);
+	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, ENamedThreads::GameThread)
+		.ConstructAndHold(SpawnCellsContextPtr, TaskGraphContextPtr, SpawnCellProxiesTaskCompleted, Analytics);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
+	FinalizerTasks.Add(SpawnCellProxiesTaskCompleted); // This is what will actually trigger moving on post spawning
 	AllTasks.Add(SpawnCellProxiesTask);
 	
 	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete and output analytics

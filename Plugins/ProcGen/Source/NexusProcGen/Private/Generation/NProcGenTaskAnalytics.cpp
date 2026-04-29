@@ -122,6 +122,31 @@ void FNProcGenTaskAnalytics::CreateSpawnCellsContextFinish()
 	CreateSpawnCellsContextTimer.Stop();
 }
 
+int FNProcGenTaskAnalytics::SpawnCellProxiesCreate()
+{
+	SpawnCellProxiesAnalytics.Add(FNSpawnCellProxiesAnalytics());
+	return SpawnCellProxiesAnalytics.Num() - 1;
+}
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesStart(int32 Index)
+{
+	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
+	SpawnCellProxiesAnalytic.Timer.Start();
+}
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesSpawned(int32 Index, FName Template)
+{
+	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
+	SpawnCellProxiesAnalytic.Spawned.Add(Template);
+}
+
+
+void FNProcGenTaskAnalytics::SpawnCellProxiesFinish(int32 Index)
+{
+	FNSpawnCellProxiesAnalytics& SpawnCellProxiesAnalytic = SpawnCellProxiesAnalytics[Index];
+	SpawnCellProxiesAnalytic.Timer.Stop();
+}
+
 void FNProcGenTaskAnalytics::ProcGenFinalizeStart()
 {
 	ProcGenFinalizeTimer.Start();
@@ -168,7 +193,18 @@ FString FNProcGenTaskAnalytics::GetTimespanReport()
 	}
 	
 	Builder.Appendf(TEXT("[B]\tCreate SpawnCellsContext: %f\n"), CreateSpawnCellsContextTimer.Duration);
+	
 	DurationTotal += CreateSpawnCellsContextTimer.Duration;
+	
+	double SpawnCellProxiesDurationTotal = 0;
+	Builder.Append(TEXT("\tSpawn Cell Proxies (Sliced):\n"));
+	for (const auto SpawnCellProxiesAnalytic : SpawnCellProxiesAnalytics)
+	{
+		Builder.Appendf(TEXT("[G]\t\t%i Spawns in %f ms\n"), SpawnCellProxiesAnalytic.Spawned.Num(), SpawnCellProxiesAnalytic.Timer.Duration);
+		DurationTotal +=  SpawnCellProxiesAnalytic.Timer.Duration;
+		SpawnCellProxiesDurationTotal +=  SpawnCellProxiesAnalytic.Timer.Duration;
+	}
+	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), SpawnCellProxiesDurationTotal);
 	
 	Builder.Appendf(TEXT("[G]\tProcGen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
 	DurationTotal += ProcGenFinalizeTimer.Duration;
@@ -245,6 +281,11 @@ void FNProcGenTaskAnalytics::CollectGenerationPassesFinish(int32 Index) {}
 
 void FNProcGenTaskAnalytics::SpawnCellProxiesStart() {}
 void FNProcGenTaskAnalytics::SpawnCellProxiesFinish() {}
+
+int FNProcGenTaskAnalytics::SpawnCellProxiesCreate() { return -1; }
+void FNProcGenTaskAnalytics::SpawnCellProxiesStart(int32 Index) {}
+void FNProcGenTaskAnalytics::SpawnCellProxiesSpawned(int32 Index, FName Template) {}
+void FNProcGenTaskAnalytics::SpawnCellProxiesFinish(int32 Index) {}
 
 void FNProcGenTaskAnalytics::ProcGenFinalizeStart() {}
 void FNProcGenTaskAnalytics::ProcGenFinalizeFinish() {}

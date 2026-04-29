@@ -10,29 +10,20 @@ struct FNProcGenTaskTimer
 	double EndTime;
 	double Duration;
 	
-	uint64 StartFrame;
-	uint64 EndFrame;
-	uint64 FrameCount;
-	
 	void Start()
 	{
 		StartTime = FPlatformTime::Seconds();
-		StartFrame = GFrameNumber;
 	}
 	void Stop()
 	{
 		EndTime = FPlatformTime::Seconds();
-		EndFrame = GFrameNumber;
-		
 		Duration = (EndTime -StartTime) * 1000.f;
-		FrameCount = EndFrame - StartFrame;
 	}
 };
 struct FNOrganGraphBuilderAnalytics
 {
 	FString Name;
 	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
-
 	
 	int Iterations = 1;
 	
@@ -63,6 +54,12 @@ struct FNOrganGraphBuilderAnalytics
 struct FNCollectGenerationPassesAnalytics
 {
 	int Phase = 0;
+	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
+};
+
+struct FNSpawnCellProxiesAnalytics
+{
+	TArray<FName> Spawned;
 	FNProcGenTaskTimer Timer = FNProcGenTaskTimer();
 };
 
@@ -105,6 +102,12 @@ public:
 	void CreateSpawnCellsContextStart();
 	void CreateSpawnCellsContextFinish();
 	
+	int SpawnCellProxiesCreate();
+	void SpawnCellProxiesStart(int32 Index);
+	void SpawnCellProxiesSpawned(int32 Index, FName Template);
+	void SpawnCellProxiesFinish(int32 Index);
+	
+	
 	void ProcGenFinalizeStart();
 	void ProcGenFinalizeFinish();
 	
@@ -125,5 +128,6 @@ private:
 	
 	TArray<FNOrganGraphBuilderAnalytics> OrganGraphBuilderAnalytics;
 	TArray<FNCollectGenerationPassesAnalytics> CollectGenerationPassesAnalytics;
+	TArray<FNSpawnCellProxiesAnalytics> SpawnCellProxiesAnalytics;
 #endif // !UE_BUILD_SHIPPING
 };

@@ -31,7 +31,6 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	Mesh->Mobility = EComponentMobility::Movable;
 	
 	// Mesh Visible-stuff
-	Mesh->SetEnableRaytracing(false);
 	Mesh->SetVisibleInRayTracing(false);
 	Mesh->bExplicitShowWireframe = true;
 	Mesh->WireframeColor = FLinearColor::Gray;

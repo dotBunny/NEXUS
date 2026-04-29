@@ -5,6 +5,7 @@
 
 #include "Generation/Contexts/NProcGenTaskGraphContext.h"
 #include "Async/TaskGraphInterfaces.h"
+#include "Generation/NProcGenTaskAnalytics.h"
 #include "Generation/Contexts/NSpawnCellsContext.h"
 
 class UNProcGenOperation;
@@ -12,8 +13,21 @@ class UNProcGenOperation;
 struct FNSpawnCellProxiesTask
 {
 	explicit FNSpawnCellProxiesTask(const TSharedPtr<FNSpawnCellsContext>& SpawnCellsContextPtr, 
-		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr) 
-	: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef())
+		const TSharedPtr<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
+		const FGraphEventRef& CompletionEvent,
+		const TSharedPtr<FNProcGenTaskAnalytics>& AnalyticsPtr) 
+		: TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()), SpawnCellsContextPtr(SpawnCellsContextPtr.ToSharedRef()), 
+		AnalyticsPtr(AnalyticsPtr.ToSharedRef()), CompletionEvent(CompletionEvent)
+	{
+		
+	}
+	
+	explicit FNSpawnCellProxiesTask(const TSharedRef<FNSpawnCellsContext>& SpawnCellsContextPtr, 
+		const TSharedRef<FNProcGenTaskGraphContext>& TaskGraphContextPtr,
+		const FGraphEventRef& CompletionEvent,
+		const TSharedRef<FNProcGenTaskAnalytics>& AnalyticsPtr) 
+		: TaskGraphContextPtr(TaskGraphContextPtr), SpawnCellsContextPtr(SpawnCellsContextPtr), 
+		AnalyticsPtr(AnalyticsPtr), CompletionEvent(CompletionEvent)
 	{
 		
 	}
@@ -28,5 +42,7 @@ struct FNSpawnCellProxiesTask
 private:
 	TSharedRef<FNProcGenTaskGraphContext> TaskGraphContextPtr;
 	TSharedRef<FNSpawnCellsContext> SpawnCellsContextPtr;
+	TSharedRef<FNProcGenTaskAnalytics> AnalyticsPtr;
+	FGraphEventRef CompletionEvent;
 
 };
