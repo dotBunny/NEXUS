@@ -1,6 +1,6 @@
 ﻿#include "Components/NComboBoxString.h"
 
-UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptySelectionChanged;
+UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptyChangedEvent;
 
 void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 {
@@ -8,12 +8,12 @@ void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnSelectionChanged = OnSelectionChanged;
-		OnSelectionChanged = EmptySelectionChanged;
+		CachedChangedEvent = OnSelectionChanged;
+		OnSelectionChanged = EmptyChangedEvent;
 
 		SetSelectedOption(Option);
 		
-		OnSelectionChanged = CachedOnSelectionChanged;
+		OnSelectionChanged = CachedChangedEvent;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
@@ -24,12 +24,12 @@ void UNComboBoxString::SetSelectedIndex_NoBroadcast(const int32 Index)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnSelectionChanged = OnSelectionChanged;
-		OnSelectionChanged = EmptySelectionChanged;
+		CachedChangedEvent = OnSelectionChanged;
+		OnSelectionChanged = EmptyChangedEvent;
 		
 		SetSelectedIndex(Index);
 
-		OnSelectionChanged = CachedOnSelectionChanged;
+		OnSelectionChanged = CachedChangedEvent;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

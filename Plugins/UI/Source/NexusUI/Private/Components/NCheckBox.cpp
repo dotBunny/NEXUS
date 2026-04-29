@@ -3,7 +3,7 @@
 
 #include "Components/NCheckBox.h"
 
-FOnCheckBoxComponentStateChanged UNCheckBox::EmptyStateChanged;
+FOnCheckBoxComponentStateChanged UNCheckBox::EmptyChangedDelegate;
 
 void UNCheckBox::SetIsChecked_NoBroadcast(const bool bNewValue)
 {
@@ -12,12 +12,12 @@ void UNCheckBox::SetIsChecked_NoBroadcast(const bool bNewValue)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnStateChanged = OnCheckStateChanged;
-		OnCheckStateChanged = EmptyStateChanged;
+		CachedChangedDelegate = OnCheckStateChanged;
+		OnCheckStateChanged = EmptyChangedDelegate;
 
 		SetIsChecked(bNewValue);
 
-		OnCheckStateChanged = CachedOnStateChanged;
+		OnCheckStateChanged = CachedChangedDelegate;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
@@ -28,12 +28,12 @@ void UNCheckBox::SetCheckedState_NoBroadcast(const ECheckBoxState NewState)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnStateChanged = OnCheckStateChanged;
-		OnCheckStateChanged = EmptyStateChanged;
+		CachedChangedDelegate = OnCheckStateChanged;
+		OnCheckStateChanged = EmptyChangedDelegate;
 
 		SetCheckedState(NewState);
 
-		OnCheckStateChanged = CachedOnStateChanged;
+		OnCheckStateChanged = CachedChangedDelegate;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

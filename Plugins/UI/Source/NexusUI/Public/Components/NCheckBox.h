@@ -39,9 +39,9 @@ public:
 	void SetCheckedState_NoBroadcast(const ECheckBoxState NewState);
 	
 private:
-	/** Cached value of the OnStateChanged used to prevent it from being called when setting the value. */
-	FOnCheckBoxComponentStateChanged CachedOnStateChanged;
+	/** Previous value of the OnStateChanged used to prevent it from being called when setting the value. */
+	FOnCheckBoxComponentStateChanged CachedChangedDelegate;
 
 	/** Empty OnStateChanged event used to swap in for the CachedOnStateChanged to prevent it from being called. */
-	static FOnCheckBoxComponentStateChanged EmptyStateChanged;
+	static FOnCheckBoxComponentStateChanged EmptyChangedDelegate;
 };

@@ -40,8 +40,8 @@ public:
 
 private:
 	/** Cached value of the OnSelectionChanged used to prevent it from being called when setting the value. */
-	FOnSelectionChangedEvent CachedOnSelectionChanged;
+	FOnSelectionChangedEvent CachedChangedEvent;
 
 	/** Empty OnSelectionChanged event used to swap in for the CachedOnSelectionChanged to prevent it from being called. */
-	static FOnSelectionChangedEvent EmptySelectionChanged;
+	static FOnSelectionChangedEvent EmptyChangedEvent;
 };
