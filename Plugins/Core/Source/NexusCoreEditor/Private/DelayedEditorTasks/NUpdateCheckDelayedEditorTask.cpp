@@ -100,7 +100,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	}
 	
 	// We need to clean up the line and look just for the number
-	TargetVersion = TargetVersion.Replace(TEXT("constexpr int Number ="), TEXT(""));
+	TargetVersion = TargetVersion.Replace(TEXT("constexpr int32 Number ="), TEXT(""));
 	TargetVersion = TargetVersion.Replace(TEXT(";"), TEXT(""));
 	TargetVersion = TargetVersion.TrimStartAndEnd();
 	UE_LOG(LogNexusCoreEditor, Log, TEXT("Found remote plugin version(%s)."), *TargetVersion);
