@@ -59,7 +59,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 		UniqueIdentifier = FName(GetFName());
 	}
 	
-	// Bind our default behaviour
+	// Bind our default behavior
 	if (OnTabClosedCallback.IsBound())
 	{
 		OnTabClosedCallback.Unbind();
@@ -93,7 +93,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
-	// Remove the delayed task to prevent dangling behaviour.
+	// Remove the delayed task to prevent dangling behavior.
 	if (DelayedTask)
 	{
 		DelayedTask->Complete.RemoveAll(this);

@@ -39,7 +39,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnNProcGenOperationPercentageChange
  * A single procedural-generation operation: the unit of work scheduled on the ProcGen subsystem.
  *
  * Owns the generation context (participating organs, cells, tissue), the task graph that actually
- * executes the pass, and the per-operation settings (seed, level-instance behaviour). Clients register
+ * executes the pass, and the per-operation settings (seed, level-instance behavior). Clients register
  * as the operation's owner via INProcGenOperationOwner to receive lifecycle callbacks.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | ProcGen Operation")
@@ -85,7 +85,7 @@ public:
 	/**
 	 * Build an operation from an explicit set of organ components.	 
 	 * @param Components Components participating in the generation context. It is important that these have been presorted by Identifier to ensure determinism.
-	 * @param OperationSettings Per-operation settings to apply (seed, level-instance behaviour).
+	 * @param OperationSettings Per-operation settings to apply (seed, level-instance behavior).
 	 * @return The configured operation ready to be registered with a ProcGen subsystem.
 	 */
 	static UNProcGenOperation* CreateInstance(const TArray<UNOrganComponent*>& Components, FNProcGenOperationSettings& OperationSettings);
@@ -106,7 +106,7 @@ public:
 	virtual void BeginDestroy() override;
 
 	/**
-	 * Merge the supplied settings into the operation, updating seed/display-name/level-instance behaviour.
+	 * Merge the supplied settings into the operation, updating seed/display-name/level-instance behavior.
 	 * @param Settings Settings to copy in.
 	 */
 	void ApplySettings(FNProcGenOperationSettings& Settings);

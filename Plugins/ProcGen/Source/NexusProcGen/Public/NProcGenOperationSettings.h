@@ -9,7 +9,7 @@
 /**
  * Per-operation settings applied to a single ProcGen generation pass.
  *
- * Lives on the operation itself so each pass can have its own seed and level-instance behaviour
+ * Lives on the operation itself so each pass can have its own seed and level-instance behavior
  * independent of the project-wide UNProcGenSettings.
  */
 USTRUCT(BlueprintType)

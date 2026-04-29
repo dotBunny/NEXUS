@@ -92,7 +92,7 @@
  *
  * Injects Get accessors, a tick stat id, and a ShouldCreateSubsystem implementation that limits
  * creation to Game/PIE worlds. Pair with N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE to
- * finish wiring the subsystem's tick behaviour.
+ * finish wiring the subsystem's tick behavior.
  *
  * @param Type The concrete tickable subsystem class.
  * @param ShouldCreate Boolean expression that gates subsystem creation.

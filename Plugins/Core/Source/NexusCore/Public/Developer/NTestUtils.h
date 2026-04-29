@@ -44,7 +44,7 @@ public:
 	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterwards.
 	 *
 	 * The world is fully booted through InitializeActorsForPlay/BeginPlay so it can host actor
-	 * behaviour, and is destroyed (along with its temporary UGameInstance) when the test body
+	 * behavior, and is destroyed (along with its temporary UGameInstance) when the test body
 	 * returns. Every test that needs a world should go through this helper rather than rolling
 	 * its own world lifecycle.
 	 *

@@ -50,7 +50,7 @@ public:
 		meta=(ToolTip="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
 	TArray<FString> IgnoreWorldPrefixes;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behaviour", DisplayName = "Returned Unknown Actor", 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behavior", DisplayName = "Returned Unknown Actor", 
 		meta=(ToolTip="What should be done with an AActor returned to APS that is not known to it."))
 	ENActorPoolUnknownBehavior UnknownBehavior;
 };

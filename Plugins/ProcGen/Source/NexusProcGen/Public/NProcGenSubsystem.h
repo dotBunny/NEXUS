@@ -35,7 +35,7 @@ class NEXUSPROCGEN_API UNProcGenSubsystem : public UTickableWorldSubsystem, publ
 public:
 	/**
 	 * Kick off a new generation pass with the supplied per-operation settings.
-	 * @param Settings Operation-level settings (seed, level-instance behaviour); taken by reference so the caller can reuse the struct.
+	 * @param Settings Operation-level settings (seed, level-instance behavior); taken by reference so the caller can reuse the struct.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|ProcGen")
 	void Generate(UPARAM(ref) FNProcGenOperationSettings& Settings);

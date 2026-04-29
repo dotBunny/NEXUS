@@ -4,7 +4,7 @@
 #pragma once
 
 /**
- * Resolves the UWorld a WorldContextObject belongs to with build-config appropriate behaviour.
+ * Resolves the UWorld a WorldContextObject belongs to with build-config appropriate behavior.
  *
  * In shipping builds this is the raw WorldContextObject->GetWorld() call, which is faster but
  * assumes the context is valid. Non-shipping builds use GEngine->GetWorldFromContextObject with

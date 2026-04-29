@@ -9,7 +9,6 @@
 #include "Collections/NWeightedIntegerArray.h"
 #include "NActorPoolSpawnerComponent.generated.h"
 
-class UActorPoolSubsystem;
 class USplineComponent;
 
 /**

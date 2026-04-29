@@ -11,7 +11,7 @@ class UNProcGenOperation;
 /**
  * Interface implemented by anything that owns a UNProcGenOperation (runtime subsystem, editor subsystem,
  * editor mode). The operation routes its lifecycle callbacks back to the owner so runtime vs editor
- * driven flows can specialize their behaviour.
+ * driven flows can specialize their behavior.
  * @remark Native-only interface; not exposed to Blueprints.
  */
 class INProcGenOperationOwner
