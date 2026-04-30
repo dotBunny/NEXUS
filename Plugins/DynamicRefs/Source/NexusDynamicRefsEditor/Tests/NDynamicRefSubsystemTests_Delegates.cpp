@@ -157,9 +157,8 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemoved_DoesNotFireForMissing
         AActor* Actor = World->SpawnActor<AActor>();
         // Intentionally skip AddObject to test remove-without-add.
         Subsystem->RemoveObject(NDR_NonPlayableCharacter, Actor);
-
-        // The current implementation always broadcasts on RemoveObject.
-        CHECK_EQUALS("OnRemoved fires once even for an object that was never added.", Tracker->Counter, 1)
+    	
+        CHECK_EQUALS("OnRemoved fired even for an object that was never added.", Tracker->Counter, 0)
     });
 }
 

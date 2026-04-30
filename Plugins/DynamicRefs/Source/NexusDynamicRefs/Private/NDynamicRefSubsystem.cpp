@@ -57,8 +57,12 @@ void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> 
 
 void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
-	FastCollection[DynamicRef].Remove(InObject);
-	OnRemoved.Broadcast(DynamicRef, InObject);
+	// Only remove and callback if we have the actual objects
+	if (FastCollection[DynamicRef].Objects.Contains(InObject))
+	{
+		FastCollection[DynamicRef].Remove(InObject);
+		OnRemoved.Broadcast(DynamicRef, InObject);
+	}
 }
 
 void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)

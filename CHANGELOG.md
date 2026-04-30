@@ -38,6 +38,7 @@
 - Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.
 - Fixed `FNSpherePicker` scenarios where points could be ever-so-slightly out of the `MaximumRadius`.
 - `FNRawMesh::CreateDynamicMesh` no longer crashes on non-triangle based meshes, now returns default and errors.
+- NDynamicRefs events fired when removing object from the fast-path when it was not actually previously added.
 
 ### Removed
 
