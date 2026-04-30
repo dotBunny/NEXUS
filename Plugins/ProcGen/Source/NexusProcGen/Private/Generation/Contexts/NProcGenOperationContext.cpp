@@ -227,6 +227,12 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 			GenerationOrderIndex++;
 		}
 	}
+	
+	// Handle specific-case where your generating just an unbounded organ, it will just remove the empty pass to save us later.
+	if (GenerationOrder[0].Num() == 0)
+	{
+		GenerationOrder.RemoveAt(0);
+	}
 
 	// Handle the unbound organs last and make them each their own pass in order of the add
 	const bool bHaveUnboundedBounds = UnboundComponents.Num() > 0;
