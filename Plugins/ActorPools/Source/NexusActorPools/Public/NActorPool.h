@@ -9,10 +9,10 @@
 namespace NEXUS::ActorPools::InvokeMethods
 {
 	inline FText Category = FText::FromString("NActor Pool");
-	inline FName OnCreated = TEXT("OnCreatedByActorPool");
-	inline FName OnDestroyed = TEXT("OnDestroyedByActorPool");
-	inline FName OnReturn = TEXT("OnReturnToActorPool");
-	inline FName OnSpawned = TEXT("OnSpawnedFromActorPool");
+	inline FName OnCreatedByActorPool = TEXT("OnCreatedByActorPool");
+	inline FName OnDestroyedByActorPool = TEXT("OnDestroyedByActorPool");
+	inline FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
+	inline FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
 	
 }
 
@@ -85,10 +85,10 @@ public:
 	bool ShouldInvokeUFunctions() const { return Settings.HasFlag_InvokeUFunctions(); }
 
 	/** Get the number of AActors currently in the pool. */
-	int32 GetInCount() const { return InActors.Num(); };
+	int32 GetAvailableCount() const { return InActors.Num(); };
 
 	/** Get the number of AActors currently out of the pool. */
-	int32 GetOutCount() const { return OutActors.Num(); };
+	int32 GetSpawnedCount() const { return OutActors.Num(); };
 
 	/** Get the settings currently applied to the ActorPool. */
 	const FNActorPoolSettings& GetSettings() const { return Settings; };

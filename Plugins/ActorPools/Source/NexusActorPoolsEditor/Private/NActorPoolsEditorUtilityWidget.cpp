@@ -62,7 +62,7 @@ void UNActorPoolsEditorUtilityWidget::OnCreateActorPoolSet()
 			FNActorPoolDefinition NewDefinition;
 			NewDefinition.Settings = DefaultSettings->DefaultSettings;
 			
-			NewDefinition.Settings.MinimumActorCount = FMath::CeilToInt((PoolObject->GetOutCount() + PoolObject->GetInCount()) / NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple) * NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple;
+			NewDefinition.Settings.MinimumActorCount = FMath::CeilToInt((PoolObject->GetSpawnedCount() + PoolObject->GetOutCount()) / NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple) * NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple;
 			NewDefinition.Settings.MaximumActorCount = NewDefinition.Settings.MinimumActorCount * 2;
 			
 			NewDefinition.ActorClass = PoolObject->GetTemplate();

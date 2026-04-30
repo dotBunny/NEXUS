@@ -28,7 +28,7 @@ N_TEST(FNActorPoolTests_LeakCheck_DontForceDestroy,
 		const int32 PostPoolObjects = FNDeveloperUtils::GetCurrentObjectCount();
 		CHECK_EQUALS("Check that no additional objects were created when filling the pool.", PostPoolObjects, PrePoolObjects+Pool.GetSettings().MinimumActorCount);
 
-		const int32 PooledActorCount = Pool.GetInCount();
+		const int32 PooledActorCount = Pool.GetAvailableCount();
 		CHECK_EQUALS("Check that the expected number of Actors were made.", PooledActorCount, Pool.GetSettings().MinimumActorCount);
 
 		Pool.Clear(false);
@@ -73,8 +73,8 @@ N_TEST(FNActorPoolTests_Get_BasicRetrieval,
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		CHECK_EQUALS("Pool should have 3 actors in before Get().", Pool.GetInCount(), 3)
-		CHECK_EQUALS("Pool should have 0 actors out before Get().", Pool.GetOutCount(), 0)
+		CHECK_EQUALS("Pool should have 3 actors in before Get().", Pool.GetAvailableCount(), 3)
+		CHECK_EQUALS("Pool should have 0 actors out before Get().", Pool.GetSpawnedCount(), 0)
 
 		AActor* Actor = Pool.Get();
 		if (Actor == nullptr)
@@ -84,8 +84,8 @@ N_TEST(FNActorPoolTests_Get_BasicRetrieval,
 			return;
 		}
 
-		CHECK_EQUALS("Pool should have 2 actors in after Get().", Pool.GetInCount(), 2)
-		CHECK_EQUALS("Pool should have 1 actor out after Get().", Pool.GetOutCount(), 1)
+		CHECK_EQUALS("Pool should have 2 actors in after Get().", Pool.GetAvailableCount(), 2)
+		CHECK_EQUALS("Pool should have 1 actor out after Get().", Pool.GetSpawnedCount(), 1)
 
 		Pool.Clear();
 	});
@@ -150,13 +150,13 @@ N_TEST(FNActorPoolTests_Return_MovesActorBackToIn,
 			return;
 		}
 
-		CHECK_EQUALS("Pool should have 2 in after Spawn().", Pool.GetInCount(), 2)
-		CHECK_EQUALS("Pool should have 1 out after Spawn().", Pool.GetOutCount(), 1)
+		CHECK_EQUALS("Pool should have 2 in after Spawn().", Pool.GetAvailableCount(), 2)
+		CHECK_EQUALS("Pool should have 1 out after Spawn().", Pool.GetSpawnedCount(), 1)
 
 		const bool bResult = Pool.Return(Actor);
 		CHECK_EQUALS("Return() should return true.", bResult, true)
-		CHECK_EQUALS("Pool should have 3 in after Return().", Pool.GetInCount(), 3)
-		CHECK_EQUALS("Pool should have 0 out after Return().", Pool.GetOutCount(), 0)
+		CHECK_EQUALS("Pool should have 3 in after Return().", Pool.GetAvailableCount(), 3)
+		CHECK_EQUALS("Pool should have 0 out after Return().", Pool.GetSpawnedCount(), 0)
 
 		Pool.Clear();
 	});
@@ -370,13 +370,13 @@ N_TEST(FNActorPoolTests_Clear_WithOutActors,
 		Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator);
 		Pool.Spawn(FVector(100.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
 
-		CHECK_EQUALS("Pool should have 2 actors in.", Pool.GetInCount(), 2)
-		CHECK_EQUALS("Pool should have 2 actors out.", Pool.GetOutCount(), 2)
+		CHECK_EQUALS("Pool should have 2 actors in.", Pool.GetAvailableCount(), 2)
+		CHECK_EQUALS("Pool should have 2 actors out.", Pool.GetSpawnedCount(), 2)
 
 		Pool.Clear(true);
 
-		CHECK_EQUALS("Pool should have 0 in after Clear().", Pool.GetInCount(), 0)
-		CHECK_EQUALS("Pool should have 0 out after Clear().", Pool.GetOutCount(), 0)
+		CHECK_EQUALS("Pool should have 0 in after Clear().", Pool.GetAvailableCount(), 0)
+		CHECK_EQUALS("Pool should have 0 out after Clear().", Pool.GetSpawnedCount(), 0)
 	});
 }
 
@@ -396,11 +396,11 @@ N_TEST(FNActorPoolTests_Fill_RespectsMinimum,
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		CHECK_EQUALS("Fill() should create MinimumActorCount actors.", Pool.GetInCount(), 3)
+		CHECK_EQUALS("Fill() should create MinimumActorCount actors.", Pool.GetAvailableCount(), 3)
 
 		Pool.Fill();
 
-		CHECK_EQUALS("A second Fill() should not add actors when the minimum is already met.", Pool.GetInCount(), 3)
+		CHECK_EQUALS("A second Fill() should not add actors when the minimum is already met.", Pool.GetAvailableCount(), 3)
 
 		Pool.Clear();
 	});
@@ -422,11 +422,11 @@ N_TEST(FNActorPoolTests_Prewarm_AddsAboveMinimum,
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		CHECK_EQUALS("Fill() should create MinimumActorCount actors.", Pool.GetInCount(), 3)
+		CHECK_EQUALS("Fill() should create MinimumActorCount actors.", Pool.GetAvailableCount(), 3)
 
 		Pool.Prewarm(5);
 
-		CHECK_EQUALS("Prewarm() should add on top of the existing pool count.", Pool.GetInCount(), 8)
+		CHECK_EQUALS("Prewarm() should add on top of the existing pool count.", Pool.GetAvailableCount(), 8)
 
 		Pool.Clear();
 	});
@@ -448,7 +448,7 @@ N_TEST(FNActorPoolTests_UpdateSettings_ChangesMinimum,
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
 
-		CHECK_EQUALS("Initial fill should create MinimumActorCount actors.", Pool.GetInCount(), 2)
+		CHECK_EQUALS("Initial fill should create MinimumActorCount actors.", Pool.GetAvailableCount(), 2)
 
 		FNActorPoolSettings NewSettings = ActorPoolSettings;
 		NewSettings.MinimumActorCount = 5;
@@ -458,7 +458,7 @@ N_TEST(FNActorPoolTests_UpdateSettings_ChangesMinimum,
 
 		Pool.Fill();
 
-		CHECK_EQUALS("Fill() after UpdateSettings() should bring the pool up to the new minimum.", Pool.GetInCount(), 5)
+		CHECK_EQUALS("Fill() after UpdateSettings() should bring the pool up to the new minimum.", Pool.GetAvailableCount(), 5)
 
 		Pool.Clear();
 	});
@@ -488,8 +488,8 @@ N_TEST(FNActorPoolTests_Strategy_Create,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 10)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 10)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		// Check the created actors for unique pointers
 		for (int32 i = 0; i < 10; i++)
@@ -532,8 +532,8 @@ N_TEST(FNActorPoolTests_Strategy_CreateLimited,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 2)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 2)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		// Check the created actors for unique pointers
 		for (int32 i = 0; i < 2; i++)
@@ -579,8 +579,8 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 5)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 5)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		// Check that we recycle the first spawned actor
 		AActor* FirstActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
@@ -623,8 +623,8 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleFirst_RecyclesWhenAtMax,
 			Actors.Add(Pool.Spawn(FVector(100.0f * i, 0.0f, 0.0f), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Pool should have 3 out after reaching max.", Pool.GetOutCount(), 3)
-		CHECK_EQUALS("Pool should have 0 in when at max.", Pool.GetInCount(), 0)
+		CHECK_EQUALS("Pool should have 3 out after reaching max.", Pool.GetSpawnedCount(), 3)
+		CHECK_EQUALS("Pool should have 0 in when at max.", Pool.GetAvailableCount(), 0)
 
 		// 4th spawn should recycle the first out actor
 		AActor* Recycled = Pool.Spawn(FVector(300.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
@@ -661,8 +661,8 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 5)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 5)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		// Test that it recycles the last actor
 		AActor* FirstLastActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
@@ -709,8 +709,8 @@ N_TEST(FNActorPoolTests_Strategy_CreateRecycleLast_RecyclesWhenAtMax,
 			Actors.Add(Pool.Spawn(FVector(100.0f * i, 0.0f, 0.0f), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Pool should have 3 out after reaching max.", Pool.GetOutCount(), 3)
-		CHECK_EQUALS("Pool should have 0 in when at max.", Pool.GetInCount(), 0)
+		CHECK_EQUALS("Pool should have 3 out after reaching max.", Pool.GetSpawnedCount(), 3)
+		CHECK_EQUALS("Pool should have 0 in when at max.", Pool.GetAvailableCount(), 0)
 
 		// 4th spawn should recycle the last out actor
 		AActor* Recycled = Pool.Spawn(FVector(300.0f, 0.0f, 0.0f), FRotator::ZeroRotator);
@@ -747,8 +747,8 @@ N_TEST(FNActorPoolTests_Strategy_Fixed,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 3)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 3)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		AActor* BlockedActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
 		if (BlockedActor != nullptr)
@@ -784,8 +784,8 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleFirst,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 2)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 2)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 		// Check that we recycle the first spawned actor
 		AActor* FirstActor = Pool.Spawn(FVector::Zero() + FVector(100*10, 0,0), FRotator::ZeroRotator);
@@ -829,8 +829,8 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast,
 			Actors.Add(Pool.Spawn(FVector::Zero() + FVector(100*i, 0,0), FRotator::ZeroRotator));
 		}
 
-		CHECK_EQUALS("Check the pools OutActors.", Pool.GetOutCount(), 3)
-		CHECK_EQUALS("Check the pools InActors.",Pool.GetInCount(), 0)
+		CHECK_EQUALS("Check the pools OutActors.", Pool.GetSpawnedCount(), 3)
+		CHECK_EQUALS("Check the pools InActors.",Pool.GetAvailableCount(), 0)
 
 
 		// Test that it recycles the last actor

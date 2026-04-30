@@ -109,8 +109,8 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 	{
 		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
 		{
-			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetInCount())
-			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetOutCount())
+			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetAvailableCount())
+			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetSpawnedCount())
 		}
 	};
 }

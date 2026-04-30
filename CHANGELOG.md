@@ -23,8 +23,12 @@
 - Updated project-wide to enforcing `American English` for spelling.
 - `FNActorPool::DoesSupportInterface` renamed to `FNActorPool::ImplementsPoolItemInterface`
 - `FNActorPool::HasInvokeUFunctionFlag` renamed to `FNActorPool::ShouldInvokeUFunctions`
+- `FNActorPool::GetInCount` renamed to `FNActorPool::GetAvailableCount`
+- `FNActorPool::GetOutCount` renamed to `FNActorPool::GetSpawnedCount`
 - `UNActorPoolObject::DoesSupportInterface` renamed to `UNActorPoolObject::ImplementsPoolItemInterface`
 - `UNActorPoolObject::HasInvokeUFunctionFlag` renamed to `UNActorPoolObject::ShouldInvokeUFunctions`
+- `UNActorPoolObject::GetInCount` renamed to `UNActorPoolObject::GetAvailableCount`
+- `UNActorPoolObject::GetOutCount` renamed to `UNActorPoolObject::GetSpawnedCount`
 - All `int` now replaced with `int32` to be explicit.
 
 ### Fixed

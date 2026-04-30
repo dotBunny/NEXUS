@@ -45,18 +45,18 @@ public:
 
 	/** @return The number of Actors currently in the pool (available to spawn), or -1 if unlinked. */
 	UFUNCTION(BlueprintCallable)
-	int32 GetInCount() const
+	int32 GetOutCount() const
 	{
 		if (Pool == nullptr) return -1;
-		return Pool->GetInCount();
+		return Pool->GetAvailableCount();
 	}
 
 	/** @return The number of Actors currently out of the pool (spawned in the world), or -1 if unlinked. */
 	UFUNCTION(BlueprintCallable)
-	int32 GetOutCount() const
+	int32 GetSpawnedCount() const
 	{
 		if (Pool == nullptr) return -1;
-		return Pool->GetOutCount();
+		return Pool->GetSpawnedCount();
 	}
 
 	/** @return An Actor from the pool without spawning it into the world, or nullptr if none available. */
