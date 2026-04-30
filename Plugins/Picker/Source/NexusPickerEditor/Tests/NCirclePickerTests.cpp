@@ -92,4 +92,23 @@ N_TEST_HIGH(FNCirclePickerTests_Random_PointsInsideAnnulus, "NEXUS::UnitTests::N
 	}
 }
 
+N_TEST_HIGH(FNCirclePickerTests_Next_PointsInsideAnnulusInnerRadius, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_PointsInsideAnnulusInnerRadius", N_TEST_CONTEXT_ANYWHERE)
+{
+	// The default Next_PointsInsideAnnulus test uses MinimumRadius = 0 so it cannot detect a
+	// regression that ignores the inner radius. This case asserts that no Next point falls in the hole.
+	FNCirclePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 200;
+	Params.MinimumRadius = 8.f;
+	Params.MaximumRadius = 25.f;
+	Params.Rotation = FRotator::ZeroRotator;
+	TArray<FVector> Points;
+	FNCirclePicker::Next(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Next annulus point[%d] should respect the non-zero inner radius"), i),
+			FNCirclePicker::IsPointInsideOrOn(Params.Origin, Params.MinimumRadius, Params.MaximumRadius, Params.Rotation, Points[i]));
+	}
+}
+
 #endif //WITH_TESTS

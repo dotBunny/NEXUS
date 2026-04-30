@@ -102,6 +102,7 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_GetActorPool,
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Measures the cost of QueryCount TMap lookups via GetActorPool on an existing pool.
+	// The result is consumed inside the loop and verified after to keep the calls observable.
 	FNTestUtils::PrePerformanceTest();
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
@@ -111,16 +112,25 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_GetActorPool,
 		FNActorPoolSettings Settings;
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 
+		FNActorPool* LastPool = nullptr;
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(UNActorPoolSubsystemPerfTests_GetActorPool,
 				NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness::GetActorPoolMaxDuration)
 			for (int32 i = 0; i < NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness::QueryCount; ++i)
 			{
-				Subsystem->GetActorPool(AActor::StaticClass());
+				LastPool = Subsystem->GetActorPool(AActor::StaticClass());
 			}
 			NTestTimer.ManualStop();
 		}
+
+		if (LastPool == nullptr)
+		{
+			ADD_ERROR("GetActorPool returned nullptr for a pool that was just created.");
+			return;
+		}
+		CHECK_MESSAGE(TEXT("GetActorPool should return the AActor-templated pool."),
+			LastPool->GetTemplate() == AActor::StaticClass())
 	}, true);
 	FNTestUtils::PostPerformanceTest();
 }

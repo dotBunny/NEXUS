@@ -6,51 +6,53 @@
 #include "Math/NVectorUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_NoRotation, "NEXUS::UnitTests::NCore::FNVectorUtils::TransformPoint_NoRotation", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_Yaw90WithOrigin, "NEXUS::UnitTests::NCore::FNVectorUtils::TransformPoint_Yaw90WithOrigin", N_TEST_CONTEXT_ANYWHERE)
 {
-	// With zero rotation the result should be Origin + Point
-	const FVector Result = FNVectorUtils::TransformPoint(FVector(10.f, 0.f, 0.f), FVector(5.f, 5.f, 5.f), FRotator::ZeroRotator);
-	CHECK_MESSAGE(TEXT("TransformPoint with no rotation should be Origin + Point"), Result.Equals(FVector(15.f, 5.f, 5.f)));
+	// Yaw90 rotates (10,0,0) -> (0,10,0); Origin (5,5,5) shifts the result to (5,15,5).
+	const FVector Result = FNVectorUtils::TransformPoint(FVector(10.f, 0.f, 0.f), FVector(5.f, 5.f, 5.f), FRotator(0.f, 90.f, 0.f));
+	CHECK_MESSAGE(TEXT("TransformPoint should rotate the point first, then translate by Origin"), Result.Equals(FVector(5.f, 15.f, 5.f), 0.01f));
 }
 
-N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_ZeroOrigin, "NEXUS::UnitTests::NCore::FNVectorUtils::TransformPoint_ZeroOrigin", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_Yaw180WithOrigin, "NEXUS::UnitTests::NCore::FNVectorUtils::TransformPoint_Yaw180WithOrigin", N_TEST_CONTEXT_ANYWHERE)
 {
-	// Zero origin and no rotation: result should be Point unchanged
-	const FVector Result = FNVectorUtils::TransformPoint(FVector(7.f, 3.f, 2.f), FVector::ZeroVector, FRotator::ZeroRotator);
-	CHECK_MESSAGE(TEXT("TransformPoint with zero origin and no rotation should equal Point"), Result.Equals(FVector(7.f, 3.f, 2.f)));
+	// Yaw180 negates X; the non-zero Origin then moves the point so each axis can be checked independently.
+	const FVector Result = FNVectorUtils::TransformPoint(FVector(3.f, 4.f, 0.f), FVector(10.f, 0.f, 2.f), FRotator(0.f, 180.f, 0.f));
+	CHECK_MESSAGE(TEXT("TransformPoint Yaw180 should negate X and Y of Point before adding Origin"), Result.Equals(FVector(7.f, -4.f, 2.f), 0.01f));
 }
 
-N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoint_NoRotation, "NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoint_NoRotation", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoint_Yaw90WithOffset, "NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoint_Yaw90WithOffset", N_TEST_CONTEXT_ANYWHERE)
 {
-	// Zero rotation: Rotation.RotateVector(Point) == Point, so result should be Point + Offset
-	const FVector Result = FNVectorUtils::RotateAndOffsetPoint(FVector(10.f, 0.f, 0.f), FRotator::ZeroRotator, FVector(5.f, 5.f, 5.f));
-	CHECK_MESSAGE(TEXT("RotateAndOffsetPoint with no rotation should be Point + Offset"), Result.Equals(FVector(15.f, 5.f, 5.f)));
+	// Yaw90 rotates (10,0,0) -> (0,10,0); Offset (5,5,5) shifts to (5,15,5).
+	const FVector Result = FNVectorUtils::RotateAndOffsetPoint(FVector(10.f, 0.f, 0.f), FRotator(0.f, 90.f, 0.f), FVector(5.f, 5.f, 5.f));
+	CHECK_MESSAGE(TEXT("RotateAndOffsetPoint should rotate Point then add Offset"), Result.Equals(FVector(5.f, 15.f, 5.f), 0.01f));
 }
 
-N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoint_ZeroOffset, "NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoint_ZeroOffset", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoint_Yaw180WithOffset, "NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoint_Yaw180WithOffset", N_TEST_CONTEXT_ANYWHERE)
 {
-	// Zero offset and no rotation: result should be Point unchanged
-	const FVector Result = FNVectorUtils::RotateAndOffsetPoint(FVector(4.f, 5.f, 6.f), FRotator::ZeroRotator, FVector::ZeroVector);
-	CHECK_MESSAGE(TEXT("RotateAndOffsetPoint with no rotation and zero offset should equal Point"), Result.Equals(FVector(4.f, 5.f, 6.f)));
+	// Yaw180 negates X and Y of Point (5,5,0) -> (-5,-5,0); Offset (10,0,0) shifts to (5,-5,0).
+	const FVector Result = FNVectorUtils::RotateAndOffsetPoint(FVector(5.f, 5.f, 0.f), FRotator(0.f, 180.f, 0.f), FVector(10.f, 0.f, 0.f));
+	CHECK_MESSAGE(TEXT("RotateAndOffsetPoint Yaw180 should negate Point's X and Y before adding Offset"), Result.Equals(FVector(5.f, -5.f, 0.f), 0.01f));
 }
 
-N_TEST_HIGH(FNVectorUtilsTests_RotatedAroundPivot_ZeroRotation, "NEXUS::UnitTests::NCore::FNVectorUtils::RotatedAroundPivot_ZeroRotation", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_RotatedAroundPivot_Yaw90AtNonOriginPivot, "NEXUS::UnitTests::NCore::FNVectorUtils::RotatedAroundPivot_Yaw90AtNonOriginPivot", N_TEST_CONTEXT_ANYWHERE)
 {
-	// No rotation: vector should be unchanged regardless of pivot
-	const FVector Pivot = FVector(5.f, 0.f, 0.f);
-	const FVector Point = FVector(10.f, 0.f, 0.f);
-	const FVector Result = FNVectorUtils::RotatedAroundPivot(Point, Pivot, FRotator::ZeroRotator);
-	CHECK_MESSAGE(TEXT("RotatedAroundPivot with zero rotation should return the original vector"), Result.Equals(Point));
+	// World point (10,0,0) relative to pivot (5,5,0) is (5,-5,0); Yaw90 maps that to (5,5,0); pivot adds back to (10,10,0).
+	const FVector Result = FNVectorUtils::RotatedAroundPivot(FVector(10.f, 0.f, 0.f), FVector(5.f, 5.f, 0.f), FRotator(0.f, 90.f, 0.f));
+	CHECK_MESSAGE(TEXT("RotatedAroundPivot Yaw90 about (5,5,0) should map (10,0,0) to (10,10,0)"), Result.Equals(FVector(10.f, 10.f, 0.f), 0.01f));
 }
 
-N_TEST_HIGH(FNVectorUtilsTests_RotatedAroundPivot_Yaw180, "NEXUS::UnitTests::NCore::FNVectorUtils::RotatedAroundPivot_Yaw180", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNVectorUtilsTests_RotatedAroundPivot_Yaw180AtNonOriginPivot, "NEXUS::UnitTests::NCore::FNVectorUtils::RotatedAroundPivot_Yaw180AtNonOriginPivot", N_TEST_CONTEXT_ANYWHERE)
 {
-	// 180-degree yaw rotation around origin: (10,0,0) → (-10,0,0)
-	const FVector Pivot = FVector::ZeroVector;
-	const FVector Point = FVector(10.f, 0.f, 0.f);
-	const FRotator Rot180 = FRotator(0.f, 180.f, 0.f);
-	const FVector Result = FNVectorUtils::RotatedAroundPivot(Point, Pivot, Rot180);
-	CHECK_MESSAGE(TEXT("RotatedAroundPivot 180-degree yaw should negate X"), Result.Equals(FVector(-10.f, 0.f, 0.f), 0.01f));
+	// World point (10,0,0) about pivot (5,0,0): offset (5,0,0); Yaw180 -> (-5,0,0); + pivot = (0,0,0).
+	const FVector Result = FNVectorUtils::RotatedAroundPivot(FVector(10.f, 0.f, 0.f), FVector(5.f, 0.f, 0.f), FRotator(0.f, 180.f, 0.f));
+	CHECK_MESSAGE(TEXT("RotatedAroundPivot Yaw180 about (5,0,0) should reflect (10,0,0) to (0,0,0)"), Result.Equals(FVector::ZeroVector, 0.01f));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_RotatedAroundPivot_Yaw180AtOrigin, "NEXUS::UnitTests::NCore::FNVectorUtils::RotatedAroundPivot_Yaw180AtOrigin", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Sanity: Yaw180 at the origin should still negate X.
+	const FVector Result = FNVectorUtils::RotatedAroundPivot(FVector(10.f, 0.f, 0.f), FVector::ZeroVector, FRotator(0.f, 180.f, 0.f));
+	CHECK_MESSAGE(TEXT("RotatedAroundPivot Yaw180 at origin should negate X"), Result.Equals(FVector(-10.f, 0.f, 0.f), 0.01f));
 }
 
 N_TEST_HIGH(FNVectorUtilsTests_GetClosestGridIntersection_OnGrid, "NEXUS::UnitTests::NCore::FNVectorUtils::GetClosestGridIntersection_OnGrid", N_TEST_CONTEXT_ANYWHERE)

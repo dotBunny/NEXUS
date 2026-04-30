@@ -102,7 +102,8 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_GetActor_ReturnsValidActor,
 	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::GetActor::ReturnsValidActor",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that GetActor returns a non-null actor pointer.
+	// Verifies that GetActor returns a live, in-world actor of the requested class and that the
+	// pool's spawned-count reflects that the actor was sourced from the pool.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
@@ -112,11 +113,34 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_GetActor_ReturnsValidActor,
 			return;
 		}
 
-		AActor* Actor = Subsystem->GetActor<AActor>(AActor::StaticClass());
+		AActor* Actor = Subsystem->GetActor<AActor>(ANDebugActor::StaticClass());
 		if (Actor == nullptr)
 		{
 			ADD_ERROR("GetActor returned nullptr unexpectedly.");
+			return;
 		}
+
+		if (!Actor->IsA(ANDebugActor::StaticClass()))
+		{
+			ADD_ERROR(FString::Printf(TEXT("GetActor returned an actor of class %s, expected ANDebugActor."),
+				*Actor->GetClass()->GetName()));
+			return;
+		}
+
+		if (Actor->GetWorld() != World)
+		{
+			ADD_ERROR("GetActor returned an actor that is not in the test world.");
+			return;
+		}
+
+		FNActorPool* Pool = Subsystem->GetActorPool(ANDebugActor::StaticClass());
+		if (Pool == nullptr)
+		{
+			ADD_ERROR("Pool for ANDebugActor was not created by GetActor.");
+			return;
+		}
+
+		CHECK_EQUALS("Pool should record the GetActor result as a spawned actor.", Pool->GetSpawnedCount(), 1)
 	});
 }
 
@@ -179,7 +203,8 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::ReturnActor::ReturnsTrueForKnownPool",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that ReturnActor returns true when the actor belongs to a registered pool.
+	// Verifies that ReturnActor returns true AND the pool's available/spawned counts reflect the
+	// return. A bool-only assertion would pass even if the implementation lied about success.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
@@ -196,6 +221,13 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 
+		FNActorPool* Pool = Subsystem->GetActorPool(AActor::StaticClass());
+		if (Pool == nullptr)
+		{
+			ADD_ERROR("Pool was not created.");
+			return;
+		}
+
 		AActor* Actor = Subsystem->SpawnActor<AActor>(AActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
 		if (Actor == nullptr)
 		{
@@ -203,8 +235,14 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 			return;
 		}
 
+		const int32 SpawnedBefore = Pool->GetSpawnedCount();
+		const int32 AvailableBefore = Pool->GetAvailableCount();
+		CHECK_EQUALS("Pool should report exactly 1 spawned actor before return.", SpawnedBefore, 1)
+
 		const bool bReturned = Subsystem->ReturnActor(Actor);
 		CHECK_MESSAGE(TEXT("ReturnActor should return true for an actor from a known pool."), bReturned)
+		CHECK_EQUALS("Pool's spawned count should drop by 1 after return.", Pool->GetSpawnedCount(), SpawnedBefore - 1)
+		CHECK_EQUALS("Pool's available count should rise by 1 after return.", Pool->GetAvailableCount(), AvailableBefore + 1)
 	});
 }
 
@@ -243,7 +281,8 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_GetAllPools_CountMatchesCreated,
 	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::GetAllPools::CountMatchesCreated",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that GetAllPools returns an array whose count matches the number of pools created.
+	// Verifies that GetAllPools returns the exact pool set we created - both count AND identity by
+	// template class. A count-only assertion would pass even if the wrong pools were returned.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
@@ -259,8 +298,19 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_GetAllPools_CountMatchesCreated,
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 		Subsystem->CreateActorPool(ANDebugActor::StaticClass(), Settings);
 
-		CHECK_EQUALS("GetAllPools should contain exactly two newly created pools.",
-			Subsystem->GetAllPools().Num(), CountBefore + 2)
+		const TArray<FNActorPool*> AllPools = Subsystem->GetAllPools();
+		CHECK_EQUALS("GetAllPools should contain exactly two newly created pools.", AllPools.Num(), CountBefore + 2)
+
+		bool bFoundActor = false;
+		bool bFoundDebugActor = false;
+		for (FNActorPool* Pool : AllPools)
+		{
+			if (Pool == nullptr) continue;
+			if (Pool->GetTemplate() == AActor::StaticClass()) bFoundActor = true;
+			if (Pool->GetTemplate() == ANDebugActor::StaticClass()) bFoundDebugActor = true;
+		}
+		CHECK_MESSAGE(TEXT("GetAllPools should contain a pool templated on AActor."), bFoundActor)
+		CHECK_MESSAGE(TEXT("GetAllPools should contain a pool templated on ANDebugActor."), bFoundDebugActor)
 	});
 }
 

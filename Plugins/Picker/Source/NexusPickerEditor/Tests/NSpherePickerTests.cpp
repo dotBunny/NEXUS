@@ -103,4 +103,43 @@ N_TEST_HIGH(FNSpherePickerTests_IsPointsInsideOrOn_Shell, "NEXUS::UnitTests::NPi
 	CHECK_FALSE_MESSAGE(TEXT("Point beyond outer radius should be outside"), Results[2]);
 }
 
+N_TEST_HIGH(FNSpherePickerTests_Random_PointsInsideShell, "NEXUS::UnitTests::NPicker::FNSpherePicker::Random_PointsInsideShell", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that Random respects MinimumRadius. Without this case, a regression where Random
+	// ignored the inner radius would slip through Random_PointsInsideSphere (which uses Min=0).
+	FNSpherePickerParams Params;
+	Params.Origin = FVector(2.f, -4.f, 1.f);
+	Params.Count = 200;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 25.f;
+
+	TArray<FVector> Points;
+	FNSpherePicker::Random(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		const float Distance = static_cast<float>(FVector::Dist(Points[i], Params.Origin));
+		CHECK_MESSAGE(FString::Printf(TEXT("Random shell point[%d] (%.2f) should sit inside [%.2f, %.2f]"), i, Distance, Params.MinimumRadius, Params.MaximumRadius),
+			Distance >= Params.MinimumRadius - 0.001f && Distance <= Params.MaximumRadius + 0.001f);
+	}
+}
+
+N_TEST_HIGH(FNSpherePickerTests_Next_PointsInsideShell, "NEXUS::UnitTests::NPicker::FNSpherePicker::Next_PointsInsideShell", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirror Random coverage on the deterministic Next path with a non-zero MinimumRadius.
+	FNSpherePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 200;
+	Params.MinimumRadius = 8.f;
+	Params.MaximumRadius = 20.f;
+
+	TArray<FVector> Points;
+	FNSpherePicker::Next(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		const float Distance = static_cast<float>(FVector::Dist(Points[i], Params.Origin));
+		CHECK_MESSAGE(FString::Printf(TEXT("Next shell point[%d] (%.2f) should sit inside [%.2f, %.2f]"), i, Distance, Params.MinimumRadius, Params.MaximumRadius),
+			Distance >= Params.MinimumRadius - 0.001f && Distance <= Params.MaximumRadius + 0.001f);
+	}
+}
+
 #endif //WITH_TESTS

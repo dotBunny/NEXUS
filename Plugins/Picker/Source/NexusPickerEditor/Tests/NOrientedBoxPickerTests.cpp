@@ -108,4 +108,40 @@ N_TEST_HIGH(FNOrientedBoxPickerTests_Tracked_SeedMutates, "NEXUS::UnitTests::NPi
 	CHECK_MESSAGE(TEXT("Tracked should mutate the seed"), Seed != OriginalSeed);
 }
 
+N_TEST_HIGH(FNOrientedBoxPickerTests_Random_PointsInsideRotatedBox, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::Random_PointsInsideRotatedBox", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies Random respects rotation. The companion Random_PointsInsideBox uses zero rotation
+	// and would not catch a bug where the implementation dropped the Rotation parameter on the
+	// random path.
+	FNOrientedBoxPickerParams Params;
+	Params.Origin = FVector(5.f, 10.f, -2.f);
+	Params.Count = 200;
+	Params.MaximumDimensions = FVector(40.f, 8.f, 8.f);
+	Params.Rotation = FRotator(15.f, 50.f, 25.f);
+	TArray<FVector> Points;
+	FNOrientedBoxPicker::Random(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Random rotated oriented box point[%d] should be inside"), i),
+			FNOrientedBoxPicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerTests_Next_PointsInsideRotatedBox, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::Next_PointsInsideRotatedBox", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirror Random coverage on the deterministic Next path.
+	FNOrientedBoxPickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 200;
+	Params.MaximumDimensions = FVector(50.f, 10.f, 5.f);
+	Params.Rotation = FRotator(0.f, 45.f, 30.f);
+	TArray<FVector> Points;
+	FNOrientedBoxPicker::Next(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Next rotated oriented box point[%d] should be inside"), i),
+			FNOrientedBoxPicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
 #endif //WITH_TESTS

@@ -23,11 +23,27 @@ N_TEST_HIGH(FNSeedGeneratorTests_IsValidHexSeed_InvalidSeeds, "NEXUS::UnitTests:
 
 N_TEST_HIGH(FNSeedGeneratorTests_HexFromSeed_KnownValues, "NEXUS::UnitTests::NCore::FNSeedGenerator::HexFromSeed_KnownValues", N_TEST_CONTEXT_ANYWHERE)
 {
+	// Seed 0 takes the explicit empty-result branch and must return the literal "0".
 	const FString HexZero = FNSeedGenerator::HexFromSeed(0);
-	CHECK_MESSAGE(TEXT("Seed 0 should produce a valid hex string"), FNSeedGenerator::IsValidHexSeed(HexZero));
+	CHECK_EQUALS("HexFromSeed(0) should return the literal string \"0\".", HexZero, FString(TEXT("0")));
 
-	const FString Hex255 = FNSeedGenerator::HexFromSeed(255);
-	CHECK_MESSAGE(TEXT("Seed 255 should produce a valid hex string"), FNSeedGenerator::IsValidHexSeed(Hex255));
+	// Multi-byte values are formatted as upper-case byte pairs separated by ':'. SeedFromHex
+	// must invert HexFromSeed losslessly for these values, so cross-check both directions.
+	const uint64 Seeds[] = { 255ull, 256ull, 0xDEADBEEFull, 0xCAFEBABEull };
+	for (const uint64 Seed : Seeds)
+	{
+		const FString Hex = FNSeedGenerator::HexFromSeed(Seed);
+		CHECK_MESSAGE(FString::Printf(TEXT("HexFromSeed(%llu) should produce a valid hex string."), Seed),
+			FNSeedGenerator::IsValidHexSeed(Hex));
+		CHECK_MESSAGE(FString::Printf(TEXT("HexFromSeed(%llu) should be upper-case (no lowercase digits)."), Seed),
+			Hex == Hex.ToUpper());
+		const uint64 Recovered = FNSeedGenerator::SeedFromHex(Hex);
+		if (Recovered != Seed)
+		{
+			ADD_ERROR(FString::Printf(TEXT("HexFromSeed(%llu) -> SeedFromHex(\"%s\") returned %llu; round-trip must recover the original seed."),
+				Seed, *Hex, Recovered));
+		}
+	}
 }
 
 N_TEST_HIGH(FNSeedGeneratorTests_SeedFromHex_RoundTrip, "NEXUS::UnitTests::NCore::FNSeedGenerator::SeedFromHex_RoundTrip", N_TEST_CONTEXT_ANYWHERE)

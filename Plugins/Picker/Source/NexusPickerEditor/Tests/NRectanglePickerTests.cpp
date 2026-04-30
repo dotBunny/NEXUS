@@ -95,4 +95,39 @@ N_TEST_HIGH(FNRectanglePickerTests_Random_PointsInsideRectangle, "NEXUS::UnitTes
 	}
 }
 
+N_TEST_HIGH(FNRectanglePickerTests_Random_PointsInsideRotatedRectangle, "NEXUS::UnitTests::NPicker::FNRectanglePicker::Random_PointsInsideRotatedRectangle", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies Random respects non-axis-aligned rotation. Without a rotated case, a regression
+	// where the implementation ignored Rotation in the random path would slip through.
+	FNRectanglePickerParams Params;
+	Params.Origin = FVector(5.f, -3.f, 0.f);
+	Params.Count = 200;
+	Params.MaximumDimensions = FVector2D(30.f, 10.f);
+	Params.Rotation = FRotator(0.f, 35.f, 0.f);
+	TArray<FVector> Points;
+	FNRectanglePicker::Random(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Random rotated rectangle point[%d] should be inside"), i),
+			FNRectanglePicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_Next_PointsInsideRotatedRectangle, "NEXUS::UnitTests::NPicker::FNRectanglePicker::Next_PointsInsideRotatedRectangle", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirror coverage of Next under non-trivial rotation.
+	FNRectanglePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 200;
+	Params.MaximumDimensions = FVector2D(30.f, 10.f);
+	Params.Rotation = FRotator(0.f, 60.f, 0.f);
+	TArray<FVector> Points;
+	FNRectanglePicker::Next(Points, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Next rotated rectangle point[%d] should be inside"), i),
+			FNRectanglePicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
 #endif //WITH_TESTS
