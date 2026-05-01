@@ -4,6 +4,7 @@
 #pragma once
 
 struct FNReport;
+
 /**
  * Output format selector used by FNReport's emit methods to choose between human-readable
  * plain text and Markdown.
@@ -19,22 +20,39 @@ enum class ENTextOutputFormat : uint8
 struct NEXUSCORE_API FNReportContentBlock
 {
 	FString Heading;
-	FString Content;
 	
-	void AddContentBlock(const FNReportContentBlock& ChildContentBlock);
-	void RemoveContentBlock(const FNReportContentBlock& ChildContentBlock);
+	void AddLine(const FString& Line)
+	{
+		Content.Add(Line);
+	}
+	void AddLine(const FString& Format, const FStringFormatOrderedArguments& Arguments)
+	{
+		Content.Add(FString::Format(*Format, Arguments));
+	}
+	void AddLine(const FString& Format, const FStringFormatNamedArguments& NamedArguments)
+	{
+		Content.Add(FString::Format(*Format, NamedArguments));
+	}
+	
+	TArray<FString>& GetContent() { return Content; }
+	
 	FNReportContentBlock& CreateContentBlock();
 	FNReportContentBlock& CreateContentBlock(const FString& ContentHeading, int OrderPriority = 0);
-
+	void RemoveContentBlock(const FNReportContentBlock& ChildContentBlock);
+	
 	bool operator==(const FNReportContentBlock& Other) const
 	{
-		// TODO: Actual ID?
-		return Heading == Other.Heading && Content == Other.Content && Priority == Other.Priority;
+		return Other.Ticket == Ticket && Other.Level == Level;
 	}
+	
 
 private:
-	int Priority = 0;
+	int32 Level = 0;
+	uint64 Ticket = ContentBlockTickets++;
+	int32 Priority = 0;
 	TArray<FNReportContentBlock> Children;
+	TArray<FString> Content;
+	static uint64 ContentBlockTickets;
 };
 
 struct NEXUSCORE_API FNReport

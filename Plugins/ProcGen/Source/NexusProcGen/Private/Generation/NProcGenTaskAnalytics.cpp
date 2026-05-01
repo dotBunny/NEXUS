@@ -157,6 +157,22 @@ void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
 	ProcGenFinalizeTimer.Stop();
 }
 
+
+FNReport FNProcGenTaskAnalytics::GetReport()
+{
+	FNReport Report;
+	
+	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + ProcessVirtualWorldContextTimer.Duration;
+	
+	FNReportContentBlock& TimespansBlock = Report.ContentRoot.CreateContentBlock("Timespans");
+	
+	TimespansBlock.AddLine(TEXT("[G]\tTaskGraph Creation: %f ms"), {TaskGraphCreationTimer.Duration});
+	TimespansBlock.AddLine(TEXT("[G]\tCreate VirtualWorldContext: %f ms"), {CreateVirtualWorldContextTimer.Duration});
+	TimespansBlock.AddLine(TEXT("[G]\tProcess VirtualWorldContext: %f ms"), {ProcessVirtualWorldContextTimer.Duration});
+	
+	return MoveTemp(Report);
+}
+
 FString FNProcGenTaskAnalytics::GetTimespanReport()
 {
 	FStringBuilderBase Builder = FStringBuilderBase();
@@ -244,6 +260,7 @@ FString FNProcGenTaskAnalytics::GetCountersReport()
 	
 	return Builder.ToString();
 }
+
 
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
 {

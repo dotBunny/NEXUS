@@ -6,6 +6,7 @@
 #include "Analytics/NProcessPassAnalytics.h"
 #include "Analytics/NProcGenTaskTimer.h"
 #include "Analytics/NSpawnCellProxiesAnalytics.h"
+#include "Developer/NReport.h"
 
 /** Member name used by every N_PROCEDURAL_GENERATION_ANALYTICS_* macro for the analytics shared pointer. */
 #define N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR AnalyticsPtr
@@ -179,6 +180,8 @@ public:
 	/** @return Multi-line text report listing per-iteration counter values for each tracked stage. */
 	FString GetCountersReport();
 
+	FNReport GetReport();	
+	
 private:
 	/** Operation display name used as the heading in generated reports. */
 	FText DisplayName;
