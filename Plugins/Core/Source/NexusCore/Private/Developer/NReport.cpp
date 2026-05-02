@@ -2,44 +2,39 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Developer/NReport.h"
-uint64 FNReportContentBlock::ContentBlockTickets = 0;
 
-void FNReportContentBlock::RemoveContentBlock(const FNReportContentBlock& ChildContentBlock)
+#define N_REPORT_CREATE_BLOCK(BlockType) \
+	int32 InsertIndex = Children.Num(); \
+	for (int32 i = 0; i < Children.Num(); i++) \
+	{ \
+		if (Children[i].Priority > OrderPriority) \
+		{ \
+			InsertIndex = i; \
+			break; \
+		} \
+	} \
+	Children.Insert(BlockType(), InsertIndex); \
+	BlockType& Block = static_cast<BlockType&>(Children[InsertIndex]); \
+	Block.Priority = OrderPriority; \
+	Block.Level = Level + 1;
+
+FNReportHeadingBlock& FNReportBlock::CreateHeadingBlock(const FString& Text, const int OrderPriority)
 {
-	if (Children.Contains(ChildContentBlock))
-	{
-		Children.Remove(ChildContentBlock);
-	}
+	N_REPORT_CREATE_BLOCK(FNReportHeadingBlock)
+	Block.SetText(Text);
+	return Block;
 }
 
-FNReportContentBlock& FNReportContentBlock::CreateContentBlock()
+FNReportContentBlock& FNReportBlock::CreateContentBlock(const int OrderPriority)
 {
-	Children.Add(FNReportContentBlock());
-	
-	FNReportContentBlock& ContentBlock = Children.Last();
-	ContentBlock.Level = Level + 1;
-	return Children.Last();
+	N_REPORT_CREATE_BLOCK(FNReportContentBlock)
+	return Block;
 }
 
-FNReportContentBlock& FNReportContentBlock::CreateContentBlock(const FString& ContentHeading, const int OrderPriority)
+FNReportTableBlock& FNReportBlock::CreateTableBlock(const int OrderPriority)
 {
-	int32 InsertIndex = Children.Num();
-	for (int32 i = 0; i < Children.Num(); i++)
-	{
-		if (Children[i].Priority > OrderPriority)
-		{
-			InsertIndex = i;
-			break;
-		}
-	}
-	
-	Children.Insert(FNReportContentBlock(), InsertIndex);
-	
-	FNReportContentBlock& ContentBlock = Children[InsertIndex];
-	
-	ContentBlock.Priority = OrderPriority;
-	ContentBlock.Heading = ContentHeading;
-	ContentBlock.Level = Level + 1;
-	
-	return ContentBlock;
+	N_REPORT_CREATE_BLOCK(FNReportTableBlock)
+	return Block;
 }
+
+uint64 FNReportBlock::BlockTickets = 0;

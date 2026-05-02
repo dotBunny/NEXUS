@@ -3,7 +3,11 @@
 
 #pragma once
 
+
 struct FNReport;
+struct FNReportHeadingBlock;
+struct FNReportContentBlock;
+struct FNReportTableBlock;
 
 /**
  * Output format selector used by FNReport's emit methods to choose between human-readable
@@ -17,10 +21,36 @@ enum class ENTextOutputFormat : uint8
 	Markdown
 };
 
-struct NEXUSCORE_API FNReportContentBlock
+struct NEXUSCORE_API FNReportBlock
 {
+	FNReportHeadingBlock& CreateHeadingBlock(const FString& Text, int OrderPriority = 0);
+	FNReportContentBlock& CreateContentBlock(int OrderPriority = 0);
+	FNReportTableBlock& CreateTableBlock(int OrderPriority = 0);
+	bool operator==(const FNReportBlock& Other) const
+	{
+		return Other.Ticket == Ticket && Other.Level == Level;
+	}
+
+protected:
+	int32 Level = 0;
+	int32 Priority = 0;
+	TArray<FNReportBlock> Children;
+
+private:
+	uint64 Ticket = BlockTickets++;
+	static uint64 BlockTickets;
+};
+struct NEXUSCORE_API FNReportHeadingBlock : FNReportBlock
+{
+	void SetText(const FString& Text)
+	{
+		Heading = Text;
+	}
+private:
 	FString Heading;
-	
+};
+struct NEXUSCORE_API FNReportContentBlock : FNReportBlock
+{
 	void AddLine(const FString& Line)
 	{
 		Content.Add(Line);
@@ -33,29 +63,35 @@ struct NEXUSCORE_API FNReportContentBlock
 	{
 		Content.Add(FString::Format(*Format, NamedArguments));
 	}
-	
 	TArray<FString>& GetContent() { return Content; }
-	
-	FNReportContentBlock& CreateContentBlock();
-	FNReportContentBlock& CreateContentBlock(const FString& ContentHeading, int OrderPriority = 0);
-	void RemoveContentBlock(const FNReportContentBlock& ChildContentBlock);
-	
-	bool operator==(const FNReportContentBlock& Other) const
-	{
-		return Other.Ticket == Ticket && Other.Level == Level;
-	}
-	
-
 private:
-	int32 Level = 0;
-	uint64 Ticket = ContentBlockTickets++;
-	int32 Priority = 0;
-	TArray<FNReportContentBlock> Children;
 	TArray<FString> Content;
-	static uint64 ContentBlockTickets;
+};
+struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
+{
+	void Initialize(const int32 Columns)
+	{
+		ColumnCount = Columns;
+		
+		Header.Empty();
+		Header.Reserve(Columns);
+		Table.Empty();
+	}
+	void AddRow(const TArray<FString>& Row)
+	{
+		Table.Add(Row);
+	}
+	void SetHeader(const TArray<FString>& HeaderRow)
+	{
+		Header = HeaderRow;
+	}
+private:
+	TArray<FString> Header;
+	TArray<TArray<FString>> Table;
+	int32 ColumnCount = 0;
 };
 
 struct NEXUSCORE_API FNReport
 {
-	FNReportContentBlock ContentRoot;
+	FNReportBlock ContentRoot;
 };

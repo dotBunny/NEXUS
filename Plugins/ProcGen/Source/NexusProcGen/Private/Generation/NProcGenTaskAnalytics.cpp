@@ -162,13 +162,20 @@ FNReport FNProcGenTaskAnalytics::GetReport()
 {
 	FNReport Report;
 	
-	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + ProcessVirtualWorldContextTimer.Duration;
+	double DurationTotal = 
+		TaskGraphCreationTimer.Duration + 
+		CreateVirtualWorldContextTimer.Duration + 
+		ProcessVirtualWorldContextTimer.Duration;
 	
-	FNReportContentBlock& TimespansBlock = Report.ContentRoot.CreateContentBlock("Timespans");
+	FNReportHeadingBlock& Timespans = Report.ContentRoot.CreateHeadingBlock("Timespans");
+	FNReportTableBlock& TimespansTable = Timespans.CreateTableBlock();
 	
-	TimespansBlock.AddLine(TEXT("[G]\tTaskGraph Creation: %f ms"), {TaskGraphCreationTimer.Duration});
-	TimespansBlock.AddLine(TEXT("[G]\tCreate VirtualWorldContext: %f ms"), {CreateVirtualWorldContextTimer.Duration});
-	TimespansBlock.AddLine(TEXT("[G]\tProcess VirtualWorldContext: %f ms"), {ProcessVirtualWorldContextTimer.Duration});
+	TimespansTable.Initialize(3);
+	TimespansTable.SetHeader({ "Thread", "Task", "ms" });
+	
+	TimespansTable.AddRow({"Game", "TaskGraph Creation", FString::FromInt(TaskGraphCreationTimer.Duration)});
+	TimespansTable.AddRow({"Game", "Create VirtualWorldContext", FString::FromInt(CreateVirtualWorldContextTimer.Duration)});
+	TimespansTable.AddRow({"Off", "Process VirtualWorldContext", FString::FromInt(ProcessVirtualWorldContextTimer.Duration)});
 	
 	return MoveTemp(Report);
 }
