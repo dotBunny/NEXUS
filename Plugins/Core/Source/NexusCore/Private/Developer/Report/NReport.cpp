@@ -96,9 +96,9 @@ int32 FNReport::GetLevel(const int32 Ticket)
 	return 0;
 }
 
-void FNReport::GetOrderedBlocks(const int32 ParentTicket, TArray<int32>& Output, const bool bIncludeChildren)
+void FNReport::GetOrderedBlocks(const int32 TargetTicket, TArray<int32>& Output, const bool bIncludeChildren)
 {
-	const TArray<int32>* Children = ChildrenMap.Find(ParentTicket);
+	const TArray<int32>* Children = ChildrenMap.Find(TargetTicket);
 	if (Children == nullptr)
 	{
 		return;

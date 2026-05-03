@@ -48,7 +48,7 @@ protected:
 	
 	int32 GetLevel(const int32 Ticket);
 	
-	void GetOrderedBlocks(int32 ParentTicket, TArray<int32>& Output,  bool bIncludeChildren = true);
+	void GetOrderedBlocks(int32 TargetTicket, TArray<int32>& Output,  bool bIncludeChildren = true);
 	
 	/** Render the block identified by Ticket into Output, dispatching to the correct concrete type. */
 	void RenderBlock(const int32 Ticket, TArray<FString>& Output, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
