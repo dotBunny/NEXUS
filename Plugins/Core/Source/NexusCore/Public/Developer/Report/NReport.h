@@ -10,7 +10,7 @@
 /**
  * Composable, hierarchical report structure that can be emitted as plain text or Markdown.
  * Reports own their child blocks (content and table) by value, keyed by an integer ticket
- * issued from a process-wide counter, and a root block establishes the top-level ordering.
+ * issued from a per-report counter; top-level blocks are parented to the implicit root ticket 0.
  */
 struct NEXUSCORE_API FNReport
 {
@@ -76,7 +76,6 @@ protected:
 	void RenderBlock(const int32 Ticket, TArray<FString>& Output, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
 private:
-
 	/** Storage for every content block in the report, keyed by block ticket. */
 	TMap<int32, FNReportContentBlock> ContentBlocks;
 
