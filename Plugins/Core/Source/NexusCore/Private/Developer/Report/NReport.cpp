@@ -3,6 +3,11 @@
 
 #include "Developer/Report/NReport.h"
 
+#include "NCoreMinimal.h"
+#include "HAL/PlatformFileManager.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
+
 #define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage) \
 	const int32 BlockTicket = ++BlockTickets; \
 	BlockStorage.Add(BlockTicket, BlockType(BlockTicket)); \
@@ -59,6 +64,29 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 	}
 	
 	return MoveTemp(Output);
+}
+
+void FNReport::OutputToFile(const FString& FilePath, const ENReportOutputFormat OutputFormat)
+{
+	const FString Directory = FPaths::GetPath(FilePath);
+	if (!Directory.IsEmpty())
+	{
+		IPlatformFile& PlatformFile = FPlatformFileManager::Get().GetPlatformFile();
+		if (!PlatformFile.DirectoryExists(*Directory) && !PlatformFile.CreateDirectoryTree(*Directory))
+		{
+			UE_LOG(LogNexusCore, Error, TEXT("Unable to create directory '%s' for report output."), *Directory);
+			return;
+		}
+	}
+
+	const TArray<FString> Lines = GetReportLines(OutputFormat);
+	if (!FFileHelper::SaveStringArrayToFile(Lines, *FilePath, FFileHelper::EEncodingOptions::ForceUTF8))
+	{
+		UE_LOG(LogNexusCore, Error, TEXT("Failed to write report to '%s'."), *FilePath);
+		return;
+	}
+
+	UE_LOG(LogNexusCore, Log, TEXT("Report written to %s."), *FilePath);
 }
 
 int32 FNReport::GetPriority(const int32 Ticket)

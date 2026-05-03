@@ -57,6 +57,14 @@ struct NEXUSCORE_API FNReport
 	 */
 	TArray<FString> GetReportLines(ENReportOutputFormat OutputFormat);
 
+	/**
+	 * Render the report and write it to disk, creating any missing intermediate directories.
+	 * @param FilePath Destination file path; the parent directory tree is created if it does not exist.
+	 * @param OutputFormat Whether to emit plain text or Markdown.
+	 * @note Logs an error via LogNexusCore on directory creation or file write failure.
+	 */
+	void OutputToFile(const FString& FilePath, ENReportOutputFormat OutputFormat = ENReportOutputFormat::Markdown);
+
 protected:
 	/** Look up the priority of a block by its ticket; returns 0 when the ticket is unknown. */
 	int32 GetPriority(const int32 Ticket);
