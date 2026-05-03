@@ -174,9 +174,7 @@ public:
 	void ProcGenFinalizeStart();
 	/** Stop the timer for the procgen-finalize stage. */
 	void ProcGenFinalizeFinish();
-
-	/** @return Multi-line text report listing the duration of each tracked stage. */
-	FString GetTimespanReport();
+	
 	/** @return Multi-line text report listing per-iteration counter values for each tracked stage. */
 	FString GetCountersReport();
 

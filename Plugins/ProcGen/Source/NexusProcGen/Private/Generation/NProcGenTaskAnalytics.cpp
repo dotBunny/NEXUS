@@ -160,83 +160,79 @@ void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
 
 FNReport FNProcGenTaskAnalytics::GetReport()
 {
-	FNReport Report = FNReport("FNProcGenTaskAnalytics");
-	
-	double DurationTotal = 
-		TaskGraphCreationTimer.Duration + 
-		CreateVirtualWorldContextTimer.Duration + 
-		ProcessVirtualWorldContextTimer.Duration;
+	FNReport Report;
+	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
+		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration + ProcGenFinalizeTimer.Duration;
+	double LoopTotal = 0;
 
 	const int32 TimespanContentTicket = Report.CreateContentBlock();
 	FNReportContentBlock* TimespanContentBlock = Report.GetContentBlock(TimespanContentTicket);
 	TimespanContentBlock->SetHeading("Timespans");
 
+	// Start Creating Overview
 	const int32 OverviewTableTicket = Report.CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OverviewTable = Report.GetTableBlock(OverviewTableTicket);
 	OverviewTable->SetHeading("Overview");
 	OverviewTable->Initialize({ "Thread", "Task", "ms" });
 	OverviewTable->AddRow({"Game", "TaskGraph Creation", FString::SanitizeFloat(TaskGraphCreationTimer.Duration)});
 	OverviewTable->AddRow({"Game", "Create VirtualWorldContext", FString::SanitizeFloat(CreateVirtualWorldContextTimer.Duration)});
-	OverviewTable->AddRow({"Off", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
+	OverviewTable->AddRow({"Task", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
+	
+	// Organ Builders Individual Times
+	LoopTotal = 0;
+	const int32 OrganBuilderTableTicket = Report.CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* OrganBuilderTable = Report.GetTableBlock(OrganBuilderTableTicket);
+	OrganBuilderTable->SetHeading("Organs");
+	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "ms" });
+	for (const auto Analytic : OrganGraphBuilderAnalytics)
+	{
+		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		DurationTotal += Analytic.Timer.Duration;
+		LoopTotal += Analytic.Timer.Duration;
+	}
+	
+	// Need to re-get as it may have moved
+	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable->AddRow({"Task", "OrganGraph Builders", FString::SanitizeFloat(LoopTotal)});
+	
+	// Collection timings
+	LoopTotal = 0;
+	const int32 ProcessPassTableTicket = Report.CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* ProcessPassTable = Report.GetTableBlock(ProcessPassTableTicket);
+	ProcessPassTable->SetHeading("Collection Passes");
+	ProcessPassTable->Initialize({ "Thread", "Phase", "ms" });
+	for (const auto Analytic : ProcessPassAnalytics)
+	{
+		ProcessPassTable->AddRow({"Task", FString::FromInt(Analytic.Phase), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		DurationTotal += Analytic.Timer.Duration;
+		LoopTotal += Analytic.Timer.Duration;
+	}
+	
+	// Need to re-get as it may have moved
+	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable->AddRow({"Task", "Process Pass", FString::SanitizeFloat(LoopTotal)});
+	OverviewTable->AddRow({"Task", "Create SpawnCellsContext", FString::SanitizeFloat(CreateSpawnCellsContextTimer.Duration)});
+
+	LoopTotal = 0;
+	const int32 SpawnCellProxiesTableTicket = Report.CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* SpawnCellProxiesTable = Report.GetTableBlock(SpawnCellProxiesTableTicket);
+	SpawnCellProxiesTable->SetHeading("Spawn Cells (Sliced)");
+	SpawnCellProxiesTable->Initialize({ "Thread", "Spawns", "ms" });
+	for (const auto Analytic : SpawnCellProxiesAnalytics)
+	{
+		SpawnCellProxiesTable->AddRow({ "Game", FString::FromInt(Analytic.Spawned.Num()), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		DurationTotal += Analytic.Timer.Duration;
+		LoopTotal += Analytic.Timer.Duration;
+	}
+	
+	// Need to re-get as it may have moved
+	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
+	OverviewTable->AddRow({"Game", "ProcGen Finalize", FString::SanitizeFloat(ProcGenFinalizeTimer.Duration)});
 	
 	return MoveTemp(Report);
 }
 
-FString FNProcGenTaskAnalytics::GetTimespanReport()
-{
-	FStringBuilderBase Builder = FStringBuilderBase();
-	
-	Builder.Appendf(TEXT("[%s] Timespans\n"), *DisplayName.ToString());
-	
-	// Report Timespans
-	double DurationTotal = 0;
-	
-	Builder.Appendf(TEXT("[G]\tTaskGraph Creation: %f ms\n"), TaskGraphCreationTimer.Duration);
-	DurationTotal += TaskGraphCreationTimer.Duration;
-	
-	Builder.Appendf(TEXT("[G]\tCreate VirtualWorldContext: %f ms\n"), CreateVirtualWorldContextTimer.Duration);
-	DurationTotal += CreateVirtualWorldContextTimer.Duration;
-	
-	Builder.Appendf(TEXT("[B]\tProcess VirtualWorldContext: %f ms\n"), ProcessVirtualWorldContextTimer.Duration);
-	DurationTotal += ProcessVirtualWorldContextTimer.Duration;
-	
-	double OrganGraphBuilderDurationTotal = 0;
-	Builder.Append(TEXT("\tOrganGraph Builders:\n"));
-	for (const auto Analytic : OrganGraphBuilderAnalytics)
-	{
-		Builder.Appendf(TEXT("[B]\t\t%s (%i): %f ms\n"), *Analytic.Name, Analytic.Iterations, Analytic.Timer.Duration);
-		DurationTotal += Analytic.Timer.Duration;
-		OrganGraphBuilderDurationTotal += Analytic.Timer.Duration;
-	}
-	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), OrganGraphBuilderDurationTotal);
-	
-	Builder.Append(TEXT("\tProcess Passes:\n"));
-	for (const auto Analytic : ProcessPassAnalytics)
-	{
-		Builder.Appendf(TEXT("[B]\t\tPass %i: %f ms\n"), Analytic.Phase, Analytic.Timer.Duration);
-		DurationTotal += Analytic.Timer.Duration;
-	}
-	
-	Builder.Appendf(TEXT("[B]\tCreate SpawnCellsContext: %f\n"), CreateSpawnCellsContextTimer.Duration);
-	
-	DurationTotal += CreateSpawnCellsContextTimer.Duration;
-	
-	double SpawnCellProxiesDurationTotal = 0;
-	Builder.Append(TEXT("\tSpawn Cell Proxies (Sliced):\n"));
-	for (const auto Analytic : SpawnCellProxiesAnalytics)
-	{
-		Builder.Appendf(TEXT("[G]\t\t%i Spawns in %f ms\n"), Analytic.Spawned.Num(), Analytic.Timer.Duration);
-		DurationTotal +=  Analytic.Timer.Duration;
-		SpawnCellProxiesDurationTotal +=  Analytic.Timer.Duration;
-	}
-	Builder.Appendf(TEXT("\t\tTotal=%f ms:\n"), SpawnCellProxiesDurationTotal);
-	
-	Builder.Appendf(TEXT("[G]\tProcGen Finalize: %f ms\n"), ProcGenFinalizeTimer.Duration);
-	DurationTotal += ProcGenFinalizeTimer.Duration;
-	Builder.Appendf(TEXT("\tTotal=%f ms\n"), DurationTotal);
-	
-	return Builder.ToString();
-}
 
 FString FNProcGenTaskAnalytics::GetCountersReport()
 {

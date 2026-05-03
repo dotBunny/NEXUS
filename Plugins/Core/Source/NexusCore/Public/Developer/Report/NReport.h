@@ -19,15 +19,6 @@ struct NEXUSCORE_API FNReport
 	friend struct FNReportContentBlock;
 
 	/**
-	 * Construct a report with a display title.
-	 * @param ReportTitle Title used as the report's identifying header.
-	 */
-	explicit FNReport(FString ReportTitle)
-	{
-		Title = ReportTitle;
-	}
-
-	/**
 	 * Allocate a new content block, attach it to a parent, and issue its ticket.
 	 * @param ParentTicket Ticket of the block this one is nested under; 0 attaches to the report root.
 	 * @param OrderPriority Sort priority among siblings; lower values render first.
@@ -85,8 +76,6 @@ protected:
 	void RenderBlock(const int32 Ticket, TArray<FString>& Output, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
 private:
-	/** Title used as the top-level header for the report. */
-	FString Title;
 
 	/** Storage for every content block in the report, keyed by block ticket. */
 	TMap<int32, FNReportContentBlock> ContentBlocks;
