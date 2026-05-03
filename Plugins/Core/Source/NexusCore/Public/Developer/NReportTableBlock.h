@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Developer/Report/NReportBlock.h"
+#include "Developer/NReportBlock.h"
 
 /**
  * Report block that holds tabular data. Must be initialized with either a fixed column count

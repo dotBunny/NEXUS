@@ -3,7 +3,7 @@
 
 #if WITH_TESTS
 
-#include "Developer/Report/NReport.h"
+#include "Developer/NReport.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 

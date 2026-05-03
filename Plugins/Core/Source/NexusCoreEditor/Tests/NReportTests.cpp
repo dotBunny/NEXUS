@@ -3,7 +3,7 @@
 
 #if WITH_TESTS
 
-#include "Developer/Report/NReport.h"
+#include "Developer/NReport.h"
 #include "HAL/PlatformFileManager.h"
 #include "Macros/NTestMacros.h"
 #include "Misc/FileHelper.h"

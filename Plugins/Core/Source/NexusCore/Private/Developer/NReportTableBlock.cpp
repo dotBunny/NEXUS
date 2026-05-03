@@ -1,10 +1,9 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Developer/Report/NReportTableBlock.h"
-
+#include "Developer/NReportTableBlock.h"
 #include "NCoreMinimal.h"
-#include "Developer/Report/NReport.h"
+#include "Developer/NReport.h"
 
 void FNReportTableBlock::Initialize(const int32 Columns)
 {

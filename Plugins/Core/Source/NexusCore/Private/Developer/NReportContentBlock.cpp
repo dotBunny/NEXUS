@@ -1,9 +1,8 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "Developer/Report/NReportContentBlock.h"
-
-#include "Developer/Report/NReport.h"
+#include "Developer/NReportContentBlock.h"
+#include "Developer/NReport.h"
 
 void FNReportContentBlock::Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat)
 {

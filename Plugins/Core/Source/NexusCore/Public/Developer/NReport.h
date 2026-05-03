@@ -3,9 +3,9 @@
 
 #pragma once
 
-#include "Developer/Report/NReportBlock.h"
-#include "Developer/Report/NReportContentBlock.h"
-#include "Developer/Report/NReportTableBlock.h"
+#include "Developer/NReportBlock.h"
+#include "Developer/NReportContentBlock.h"
+#include "Developer/NReportTableBlock.h"
 
 /**
  * Composable, hierarchical report structure that can be emitted as plain text or Markdown.

@@ -6,7 +6,7 @@
 #include "Analytics/NProcessPassAnalytics.h"
 #include "Analytics/NProcGenTaskTimer.h"
 #include "Analytics/NSpawnCellProxiesAnalytics.h"
-#include "Developer/Report/NReport.h"
+#include "Developer/NReport.h"
 
 /** Member name used by every N_PROCEDURAL_GENERATION_ANALYTICS_* macro for the analytics shared pointer. */
 #define N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR AnalyticsPtr

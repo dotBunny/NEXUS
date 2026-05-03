@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Developer/Report/NReportBlock.h"
+#include "Developer/NReportBlock.h"
 
 /**
  * Report block that holds a sequence of free-form text lines. Lines are emitted verbatim
