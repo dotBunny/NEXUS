@@ -160,22 +160,24 @@ void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
 
 FNReport FNProcGenTaskAnalytics::GetReport()
 {
-	FNReport Report;
+	FNReport Report = FNReport("FNProcGenTaskAnalytics");
 	
 	double DurationTotal = 
 		TaskGraphCreationTimer.Duration + 
 		CreateVirtualWorldContextTimer.Duration + 
 		ProcessVirtualWorldContextTimer.Duration;
-	
-	FNReportHeadingBlock& Timespans = Report.ContentRoot.CreateHeadingBlock("Timespans");
-	FNReportTableBlock& TimespansTable = Timespans.CreateTableBlock();
-	
-	TimespansTable.Initialize(3);
-	TimespansTable.SetHeader({ "Thread", "Task", "ms" });
-	
-	TimespansTable.AddRow({"Game", "TaskGraph Creation", FString::FromInt(TaskGraphCreationTimer.Duration)});
-	TimespansTable.AddRow({"Game", "Create VirtualWorldContext", FString::FromInt(CreateVirtualWorldContextTimer.Duration)});
-	TimespansTable.AddRow({"Off", "Process VirtualWorldContext", FString::FromInt(ProcessVirtualWorldContextTimer.Duration)});
+
+	const int32 TimespanContentTicket = Report.CreateContentBlock();
+	FNReportContentBlock* TimespanContentBlock = Report.GetContentBlock(TimespanContentTicket);
+	TimespanContentBlock->SetHeading("Timespans");
+
+	const int32 OverviewTableTicket = Report.CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable->SetHeading("Overview");
+	OverviewTable->Initialize({ "Thread", "Task", "ms" });
+	OverviewTable->AddRow({"Game", "TaskGraph Creation", FString::SanitizeFloat(TaskGraphCreationTimer.Duration)});
+	OverviewTable->AddRow({"Game", "Create VirtualWorldContext", FString::SanitizeFloat(CreateVirtualWorldContextTimer.Duration)});
+	OverviewTable->AddRow({"Off", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
 	
 	return MoveTemp(Report);
 }
