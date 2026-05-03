@@ -15,13 +15,13 @@ struct FNReportTableBlock;
 struct NEXUSCORE_API FNReportBlock
 {
 	friend struct FNReport;
+
+	/** Construct a block with the ticket issued by the owning FNReport; not intended for direct use. */
 	explicit FNReportBlock(const int32 Ticket) : BlockTicket(Ticket) {}
-	
-	
+
 	virtual ~FNReportBlock() = default;
 
-	
-	
+	/** Equality is identity-based: two blocks are equal iff they share the same ticket. */
 	bool operator==(const FNReportBlock& Other) const
 	{
 		return Other.BlockTicket == BlockTicket;
@@ -29,13 +29,14 @@ struct NEXUSCORE_API FNReportBlock
 
 	/** Order priority used by the parent to sort siblings; lower values render first. */
 	int32 GetPriority() const { return Priority; }
+
+	/** Nesting depth assigned when this block was created (0 = root, 1 = top-level block, etc.). */
 	int32 GetLevel() const { return Level; }
-	
-	
-	void SetTicket(const int32 Ticket) { BlockTicket = Ticket; }
+
+	/** Ticket that uniquely identifies this block within its owning FNReport. */
 	int32 GetTicket() const { return BlockTicket; }
-	
-	
+
+
 	/** Set the heading line rendered above this block (decorated by level when emitted as plain text or Markdown). */
 	void SetHeading(const FString& BlockHeading)
 	{
@@ -47,13 +48,10 @@ struct NEXUSCORE_API FNReportBlock
 	/** Set the footer line emitted after the block body and any child blocks. */
 	void SetFooter(const FString& BlockFooter) { Footer = BlockFooter; }
 
-	
-	int32 CreateChildContentBlock(int32 OrderPriority = 0);
-
-	int32 CreateChildTableBlock(int32 OrderPriority = 0);
 
 	/**
 	 * Render this block (heading, header, children, footer) into Output.
+	 * @param Report The owning report, used to resolve and render this block's children.
 	 * @param Output Line buffer that this block appends to.
 	 * @param OutputFormat Whether to emit plain text or Markdown.
 	 */
@@ -74,10 +72,15 @@ protected:
 	void RenderFooter(TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) const;
 
 private:
+	/** Heading text rendered above the block; empty disables heading output. */
 	FString Heading;
+	/** Cached length of Heading, used to size the underline decoration in plain-text output. */
 	int32 HeadingLength = 0;
+	/** Optional header line emitted between the heading and the block body. */
 	FString Header;
+	/** Optional footer line emitted after the block body and any children. */
 	FString Footer;
 
+	/** Ticket issued by the owning FNReport; -1 indicates an unparented sentinel. */
 	int32 BlockTicket = -1;
 };

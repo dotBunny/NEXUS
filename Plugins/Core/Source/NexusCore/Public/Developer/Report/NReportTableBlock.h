@@ -12,11 +12,12 @@
  */
 struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 {
+	/** Construct a table block with the ticket issued by the owning FNReport; not intended for direct use. */
 	explicit FNReportTableBlock(const int32 Ticket)
 	: FNReportBlock(Ticket)
 	{
 	}
-	
+
 	/**
 	 * Initialize the table with a fixed number of columns and no header row.
 	 * @param Columns Number of columns the table will have; rows exceeding this are truncated.
@@ -37,17 +38,20 @@ struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 
 	/**
 	 * Render this table (heading, header, table body, child blocks, footer) into Output.
+	 * @param Report The owning report, used to resolve and render this block's children.
 	 * @param Output Line buffer that this block appends to.
 	 * @param OutputFormat Whether to emit plain text (column-aligned) or Markdown (pipe-separated).
 	 */
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
 
 private:
-
-
+	/** Header row cells; empty when the table was initialized with a column count rather than a header row. */
 	TArray<FString> HeaderCells;
+	/** Body rows, each storing one cell value per column. */
 	TArray<TArray<FString>> Cells;
+	/** Widest cell length seen per column, used to drive plain-text padding. */
 	TArray<int32> MaximumCellLengths;
 
+	/** Number of columns the table was initialized with; -1 indicates the table has not been initialized yet. */
 	int32 ColumnCount = -1;
 };

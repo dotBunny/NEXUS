@@ -4,7 +4,7 @@
 #include "Developer/Report/NReport.h"
 
 #define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage) \
-	const int32 BlockTicket = BlockTickets++; \
+	const int32 BlockTicket = ++BlockTickets; \
 	BlockStorage.Add(BlockTicket, BlockType(BlockTicket)); \
 	BlockType* Block = BlockStorage.Find(BlockTicket); \
 	const int ParentLevel = GetLevel(ParentTicket); \
@@ -58,7 +58,6 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 		RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
 	
-	//Root.Render(Output, OutputFormat);
 	return MoveTemp(Output);
 }
 

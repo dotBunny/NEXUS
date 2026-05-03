@@ -11,6 +11,7 @@
  */
 struct NEXUSCORE_API FNReportContentBlock : FNReportBlock
 {
+	/** Construct a content block with the ticket issued by the owning FNReport; not intended for direct use. */
 	explicit FNReportContentBlock(const int32 Ticket)
 		: FNReportBlock(Ticket)
 	{
@@ -37,12 +38,15 @@ struct NEXUSCORE_API FNReportContentBlock : FNReportBlock
 
 	/**
 	 * Render this content block (heading, header, lines, child blocks, footer) into Output.
+	 * @param Report The owning report, used to resolve and render this block's children.
 	 * @param Output Line buffer that this block appends to.
 	 * @param OutputFormat Whether to emit plain text or Markdown.
 	 */
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
 
 private:
+	/** Body lines, emitted in insertion order with a blank line between entries. */
 	TArray<FString> Content;
+	/** Per-line character counts captured at insertion time for downstream sizing. */
 	TArray<int32> Lengths;
 };
