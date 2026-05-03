@@ -30,27 +30,30 @@ void FNReportBlock::RenderHeading(TArray<FString>& Output, const ENReportOutputF
 	
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
+		Output.Add(TEXT(""));
 		switch (Level)
 		{
 			case 1:
 				Output.Add(TEXT("# ") + Heading);
-				return;
+				break;;
 			case 2:
 				Output.Add(TEXT("## ") + Heading);
-				return;
+				break;;
 			case 3:
 				Output.Add(TEXT("### ") + Heading);
-				return;
+				break;;
 			case 4:
 				Output.Add(TEXT("#### ") + Heading);
-				return;
+				break;;
 			case 5:
 				Output.Add(TEXT("##### ") + Heading);
-				return;			
+				break;;			
 			default:
 				Output.Add(Heading);
-				return;
+				break;
 		}
+		Output.Add(TEXT(""));
+		return;
 	}
 	
 	FStringBuilderBase Builder;
@@ -98,7 +101,9 @@ void FNReportBlock::RenderHeader(TArray<FString>& Output, const ENReportOutputFo
 	
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
+		Output.Add(TEXT(""));
 		Output.Add("> " + Header);
+		Output.Add(TEXT(""));
 		return;
 	}
 	Output.Add(Header);
@@ -110,7 +115,9 @@ void FNReportBlock::RenderFooter(TArray<FString>& Output, const ENReportOutputFo
 	
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
+		Output.Add(TEXT(""));
 		Output.Add("> " + Footer);
+		Output.Add(TEXT(""));
 		return;
 	}
 	Output.Add(Footer);
