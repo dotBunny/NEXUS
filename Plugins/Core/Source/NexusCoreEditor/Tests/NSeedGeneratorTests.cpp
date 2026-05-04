@@ -18,6 +18,11 @@ N_TEST_HIGH(FNSeedGeneratorTests_IsValidHexSeed_InvalidSeeds, "NEXUS::UnitTests:
 {
 	CHECK_FALSE_MESSAGE(TEXT("Empty string should be invalid"), FNSeedGenerator::IsValidHexSeed(TEXT("")));
 	CHECK_FALSE_MESSAGE(TEXT("Non-hex characters should be invalid"), FNSeedGenerator::IsValidHexSeed(TEXT("GHIJK")));
+}
+
+N_TEST_HIGH(FNSeedGeneratorTests_IsValidHexSeed_SanitizesSpaces, "NEXUS::UnitTests::NCore::FNSeedGenerator::IsValidHexSeed_SanitizesSpaces", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that spaces are stripped before validation, so embedded whitespace does not invalidate an otherwise valid seed.
 	CHECK_MESSAGE(TEXT("Spaces should be removed, and thus valid"), FNSeedGenerator::IsValidHexSeed(TEXT("AB CD")));
 }
 

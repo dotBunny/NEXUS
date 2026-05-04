@@ -20,14 +20,14 @@ namespace NEXUS::UnitTests::NCore::NArrayMacrosHarness
 }
 
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Reset_SetsCorrectCount, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Reset_SetsCorrectCount", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_Reset_SetsCorrectCount, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Reset_SetsCorrectCount", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(2, 3, 4);
 	CHECK_MESSAGE(TEXT("Reset(2,3,4) should produce 24 elements"), Grid.GetCount() == 24);
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetIndex_LinearMapping, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetIndex_LinearMapping", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_GetIndex_LinearMapping, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetIndex_LinearMapping", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
@@ -40,7 +40,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetIndex_LinearMapping, "NEXUS::UnitT
 	CHECK_MESSAGE(TEXT("(3,2,1) should map to last index 23"), Grid.GetIndex(3, 2, 1) == 23);
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetInverseIndex_RoundTrip, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetInverseIndex_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_GetInverseIndex_RoundTrip, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetInverseIndex_RoundTrip", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
@@ -61,7 +61,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetInverseIndex_RoundTrip, "NEXUS::Un
 	}
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_SetGetData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::SetGetData", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_SetGetData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::SetGetData", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(4, 3, 2);
@@ -73,7 +73,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_SetGetData, "NEXUS::UnitTests::NCore:
 	CHECK_MESSAGE(TEXT("GetData by linear index should return the stored value"), Grid.GetData(LinearIndex) == 42);
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_GrowPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_GrowPreservesData", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_Resize_GrowPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_GrowPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(2, 2, 2);
@@ -106,7 +106,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_GrowPreservesData, "NEXUS::Uni
 	}
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_ShrinkPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_ShrinkPreservesData", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_Resize_ShrinkPreservesData, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::Resize_ShrinkPreservesData", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);
@@ -138,7 +138,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_Resize_ShrinkPreservesData, "NEXUS::U
 	}
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Center, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Center", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Center, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Center", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);
@@ -149,7 +149,7 @@ N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Center, "NEXUS:
 	CHECK_MESSAGE(TEXT("Center cell in 3x3x3 grid should have 26 neighbors"), Neighbors.Num() == 26);
 }
 
-N_TEST_HIGH(FNArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Corner, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Corner", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(NArrayMacrosTests_FlatArray3D_GetSurroundingIndices_Corner, "NEXUS::UnitTests::NCore::NArrayMacros::FlatArray3D::GetSurroundingIndices_Corner", N_TEST_CONTEXT_ANYWHERE)
 {
 	NEXUS::UnitTests::NCore::NArrayMacrosHarness::FTestFlat3DArray Grid;
 	Grid.Reset(3, 3, 3);

@@ -37,7 +37,7 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 	}
 
 	// Flag object to be destroyed
-	ObjectLibrary->ConditionalBeginDestroy();
+	ObjectLibrary->MarkAsGarbage();
 
 	return MoveTemp(ReturnArray);
 }

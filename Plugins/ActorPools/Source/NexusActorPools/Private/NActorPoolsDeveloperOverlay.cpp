@@ -128,7 +128,7 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 				ActorPoolList->RemoveItem(Object);
 				
 				// Remove our created object
-				Object->ConditionalBeginDestroy();
+				Object->MarkAsGarbage();
 			}
 		}
 		UpdateBanner();

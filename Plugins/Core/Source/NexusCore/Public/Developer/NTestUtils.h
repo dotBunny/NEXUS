@@ -91,7 +91,7 @@ public:
 		World->EndPlay(EEndPlayReason::Quit);
 		GEngine->DestroyWorldContext(World);
 		World->DestroyWorld(bInformEngineOfWorld);
-		TestGameInstance->ConditionalBeginDestroy();
+		TestGameInstance->MarkAsGarbage();
 	}
 	
 	/**

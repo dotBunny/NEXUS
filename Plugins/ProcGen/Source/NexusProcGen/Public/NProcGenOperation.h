@@ -102,8 +102,7 @@ public:
 	 */
 	static UNProcGenOperation* CreateInstance(UNOrganComponent* BaseComponent, FNProcGenOperationSettings& OperationSettings);
 
-
-	virtual void BeginDestroy() override;
+	void TearDownOperation();
 
 	/**
 	 * Merge the supplied settings into the operation, updating seed/display-name/level-instance behavior.

@@ -74,9 +74,7 @@ FNProcGenEdMode::~FNProcGenEdMode()
 {
 	if (OrganGenerator != nullptr)
 	{
-		OrganGenerator->Reset();
-		OrganGenerator->RemoveFromRoot();
-		OrganGenerator->ConditionalBeginDestroy();
+		OrganGenerator->TearDownOperation();
 		OrganGenerator = nullptr;
 	}
 }
@@ -117,9 +115,7 @@ void FNProcGenEdMode::Exit()
 	// Remove our temp organ generator
 	if (OrganGenerator != nullptr)
 	{
-		OrganGenerator->Reset();
-		OrganGenerator->RemoveFromRoot();
-		OrganGenerator->ConditionalBeginDestroy();
+		OrganGenerator->TearDownOperation();
 		OrganGenerator = nullptr;
 	}
 	

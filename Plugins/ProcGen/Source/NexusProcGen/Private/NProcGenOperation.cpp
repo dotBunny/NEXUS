@@ -63,6 +63,36 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	return Operation;
 }
 
+void UNProcGenOperation::TearDownOperation()
+{
+	if (Owner != nullptr)
+	{
+		Owner->OnOperationDestroyed(this);
+		Owner = nullptr;
+	}
+	
+	if (Context.IsValid())
+	{
+		Context->ResetContext();
+		Context.Reset();
+	}
+	
+	if (TaskGraph.IsValid())
+	{
+		TaskGraph->TearDownGraph();
+		TaskGraph.Reset();
+	}
+	
+	if (!this->IsTemplate())
+	{
+		FNProcGenRegistry::UnregisterOperation(this);
+	}
+	
+	RemoveFromRoot();
+	
+	MarkAsGarbage();
+}
+
 void UNProcGenOperation::ApplySettings(FNProcGenOperationSettings& Settings)
 {
 	// Validate the Display Name, otherwise assign the operation name to it.
@@ -91,36 +121,6 @@ void UNProcGenOperation::SetDisplayMessage(FString NewDisplayMessage)
 		DisplayMessage = NewDisplayMessage;
 		OnDisplayMessageChanged.Broadcast(DisplayMessage);
 	}
-}
-
-void UNProcGenOperation::BeginDestroy()
-{
-	if (Owner != nullptr)
-	{
-		Owner->OnOperationDestroyed(this);
-		Owner = nullptr;
-	}
-	
-	if (Context.IsValid())
-	{
-		Context->ResetContext();
-		Context.Reset();
-	}
-	
-	if (TaskGraph.IsValid())
-	{
-		TaskGraph->TearDownGraph();
-		TaskGraph.Reset();
-	}
-	
-	if (!this->IsTemplate())
-	{
-		FNProcGenRegistry::UnregisterOperation(this);
-	}
-	
-	this->RemoveFromRoot();
-	
-	Super::BeginDestroy();
 }
 
 void UNProcGenOperation::Tick()
@@ -152,7 +152,7 @@ void UNProcGenOperation::FinishBuild(const TSharedRef<FNProcGenTaskGraphContext>
 	}
 	
 	// Were going to delete this object
-	ConditionalBeginDestroy();
+	TearDownOperation();
 }
 
 void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)

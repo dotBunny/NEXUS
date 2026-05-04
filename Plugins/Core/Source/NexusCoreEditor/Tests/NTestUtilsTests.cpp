@@ -7,7 +7,9 @@
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_CRITICAL(FNTestUtilsTests, "NEXUS::UnitTests::NCore::FNTestUtils::EditorWorldLeak", N_TEST_CONTEXT_EDITOR)
+N_TEST_CRITICAL(FNTestUtilsTests_WorldTestChecked_EmptyBody_NoLeak,
+	"NEXUS::UnitTests::NCore::FNTestUtils::WorldTestChecked::EmptyBody_NoLeak",
+	N_TEST_CONTEXT_EDITOR)
 {
 	// The empty lambda is intentional: WorldTestChecked snapshots UObject counts before and after,
 	// so this test verifies that PIE world create/teardown alone does not leak any UObjects.
