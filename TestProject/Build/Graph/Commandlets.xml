@@ -1,0 +1,27 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+	
+    <!-- Include Standard Stuffs -->
+    <Include Script="Includes/Environment.xml" />	
+	<Include Script="Includes/SharedProperties.xml" />	
+
+    <!-- We need a project file -->
+    <Include Script="Includes/ProjectDetails.xml" />
+    
+    <!-- Check if locally the UnrealEditor-CMD.exe exists / if not we need to build -->
+
+    <!-- Customize Editor Build (Win64 Only) -->   
+    <Property Name="HostAgentType" Value="Win64" />
+    <Property Name="UProjectPath" Value="$(ProjectFile)" />
+    <Property Name="EditorTarget" Value="$(ProjectName)Editor" />
+
+    <!-- Check if locally the UnrealEditor-CMD.exe exists / if not we need to build -->    
+    <Include Script="BuildEditorAndTools.xml" />
+
+    <Agent Name="Commandlets" Type="$(HostAgentType)">
+        <Node Name="DataValidation" Requires="#EditorBinaries"> 
+            <Commandlet Name="DataValidation" Project="$(RootDir)/$(ProjectFile)" Arguments="" />
+        </Node>
+    </Agent>    
+    <Label Category="Commandlet" Name="DataValidation" Requires="DataValidation" UgsBadge="DataValidation" />
+</BuildGraph>

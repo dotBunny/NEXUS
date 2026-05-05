@@ -1,0 +1,18 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+	<EnvVar Name="UE_HORDE_JOBID"/>
+	<EnvVar Name="UE_HORDE_STEPID"/>
+	<EnvVar Name="UE_HORDE_TEMPLATEID"/>
+	<EnvVar Name="UE_HORDE_LAST_WARNING_CL"/>
+
+	<EnvVar Name="UE-CloudPublishHost"/>
+	<EnvVar Name="UE-CloudPublishHttpVersion"/>
+	<EnvVar Name="UE-CloudPublishDescriptorHost"/>
+	<EnvVar Name="UE-CloudPublishDescriptorHttpVersion"/>
+	<EnvVar Name="UE-CloudPublishNamespace"/>
+	<EnvVar Name="UE-ZenPublishHost"/>
+
+	<Property Name="IsHordeEnv" Value="false"/>
+	<Property Name="IsHordeEnv" Value="true" If="'$(UE_HORDE_JOBID)' != ''"/>
+	<Option Name="Horde" DefaultValue="$(IsBuildMachine) And $(IsHordeEnv)" Description="Whether the build is running under Horde"/>
+</BuildGraph>

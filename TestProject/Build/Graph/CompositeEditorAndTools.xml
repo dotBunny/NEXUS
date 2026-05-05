@@ -1,0 +1,10 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+	
+    <!-- INCLUDE EPICS EDITOR AND TOOLS TASK -->
+    <Include Script="../../../../Engine/Build/Graph/Examples/BuildEditorAndTools.xml" />
+
+	<!-- INCLUDE GLOBALS  -->
+    <Include Script="Includes/CompositeGlobals.xml" />    
+
+</BuildGraph>

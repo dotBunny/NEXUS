@@ -1,0 +1,14 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+
+    <!-- HANDLE NETWORK SHARE STUFF -->
+    <Option Name="IsInternalBuildMachine" DefaultValue="false" Description="Should we assume certain network setup?"/>
+
+    <!-- INCLUDE EPICS BUILD TASK -->
+    <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+
+    <!-- INCLUDE GLOBALS  -->
+    <Include Script="Includes/CompositeGlobals.xml" />
+    <Include Script="Includes/K9Properties.xml" />
+
+</BuildGraph>
