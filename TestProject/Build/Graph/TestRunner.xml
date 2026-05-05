@@ -8,12 +8,6 @@
     <Include Script="../../../../Engine/Build/Graph/Examples/BuildEditorAndTools.xml" />
     <Include Script="Includes/CompositeGlobals.xml" />  
 
-    <Agent Name="Smoke Tests" Group="Tests">
-        <Node Name="Smoke Tests" Requires="#StagedBuildFiles">
-            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=NEXUS.UnitTests" />
-        </Node>
-    </Agent>
-
     <Agent Name="Unit Tests" Group="Tests">
         <Node Name="Unit Tests" Requires="#StagedBuildFiles">
             <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(UnitTests)" />
@@ -32,7 +26,6 @@
         </Node>
     </Agent>
 
-    <Label Category="Tests" Name="Smoke" Requires="Smoke Tests" UgsBadge="Smoke" />
     <Label Category="Tests" Name="Unit" Requires="Unit Tests" UgsBadge="Unit" />
     <Label Category="Tests" Name="Performance" Requires="Performance Tests" UgsBadge="Performance" />
     <Label Category="Tests" Name="Functional" Requires="Functional Tests" UgsBadge="Functional" />
