@@ -1,6 +1,7 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
 
+    <!--
     <Option Name="WithUnitTests" DefaultValue="true" Restrict="true|false" Description="Should we be running Unit Tests?"/>
     <Option Name="WithPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests?"/>
     <Option Name="WithFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests?"/>
@@ -10,10 +11,10 @@
     <Option Name="FunctionalTests" DefaultValue="Tests.Nexus" Description="What functional tests should be ran?"/>
 
     <Property Name="TestPackageAggregate" Value="" />
-
-    <Include Script="../../../../Engine/Build/Graph/Examples/BuildEditorAndTools.xml" />
-    <Include Script="Includes/CompositeGlobals.xml" />  
-    <Include Script="Includes/ProjectDetails.xml" />  
+    -->
+    <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+ 
+  <!--
 
     <Agent Name="Unit Tests" Type="IncrementalWin64;CompileWin64;Win64">
         <Node Name="Unit Tests" Requires="#OutputFiles">
@@ -49,5 +50,5 @@
     <Label Category="Tests" Name="Unit" Requires="Unit Tests" UgsBadge="Unit" />
     <Label Category="Tests" Name="Performance" Requires="Performance Tests" UgsBadge="Performance" />
     <Label Category="Tests" Name="Functional" Requires="Functional Tests" UgsBadge="Functional" />
-
+-->
 </BuildGraph>
