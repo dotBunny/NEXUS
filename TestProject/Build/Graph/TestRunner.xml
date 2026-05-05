@@ -14,19 +14,19 @@
     <Include Script="../../../../Engine/Build/Graph/Examples/BuildEditorAndTools.xml" />
     <Include Script="Includes/CompositeGlobals.xml" />  
 
-    <Agent Name="Unit Tests" Group="Tests">
+    <Agent Name="Unit Tests">
         <Node Name="Unit Tests" Requires="#StagedBuildFiles">
             <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(UnitTests)" />
         </Node>
     </Agent>
 
-    <Agent Name="Performance Tests" Group="Tests">
+    <Agent Name="Performance Tests">
         <Node Name="Performance Tests" Requires="#StagedBuildFiles">
             <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(PerformanceTests)" />
         </Node>
     </Agent>
 
-    <Agent Name="Functional Tests" Group="Tests">
+    <Agent Name="Functional Tests">
         <Node Name="Functional Tests" Requires="#StagedBuildFiles">
             <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(FunctionalTests)" />
         </Node>
