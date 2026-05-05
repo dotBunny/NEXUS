@@ -37,7 +37,7 @@
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Unit Test" />
     </Do>
     <Do If="'$(WithPerformanceTests)'">
-        <Property Name="CompositeTestPackageAggregateAggregate" Value="$(TestPackageAggregate);Performance Tests" />
+        <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Performance Tests" />
     </Do>
     <Do If="'$(WithFunctionalTests)'">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Functional Tests" />
