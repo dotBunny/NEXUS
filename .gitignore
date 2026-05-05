@@ -101,3 +101,4 @@ LastCoverageResults.log
 
 # Horde Build Graph
 !/TestProject/Build/Graph
+GIT_COMMIT_SHA
