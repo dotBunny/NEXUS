@@ -1,0 +1,40 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+
+    <Option Name="UnitTests" DefaultValue="NEXUS.UnitTests" Description="What unit tests should be ran?"/>
+    <Option Name="PerformanceTests" DefaultValue="NEXUS.PerfTests" Description="What performance tests should be ran?"/>
+    <Option Name="FunctionalTests" DefaultValue="Tests.Nexus" Description="What functional tests should be ran?"/>
+
+    <Include Script="../../../../Engine/Build/Graph/Examples/BuildEditorAndTools.xml" />
+    <Include Script="Includes/CompositeGlobals.xml" />  
+
+    <Agent Name="Smoke Tests" Group="Tests">
+        <Node Name="Smoke Tests" Requires="#StagedBuildFiles">
+            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=NEXUS.UnitTests" />
+        </Node>
+    </Agent>
+
+    <Agent Name="Unit Tests" Group="Tests">
+        <Node Name="Unit Tests" Requires="#StagedBuildFiles">
+            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(UnitTests)" />
+        </Node>
+    </Agent>
+
+    <Agent Name="Performance Tests" Group="Tests">
+        <Node Name="Performance Tests" Requires="#StagedBuildFiles">
+            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(PerformanceTests)" />
+        </Node>
+    </Agent>
+
+    <Agent Name="Functional Tests" Group="Tests">
+        <Node Name="Functional Tests" Requires="#StagedBuildFiles">
+            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(FunctionalTests)" />
+        </Node>
+    </Agent>
+
+    <Label Category="Tests" Name="Smoke" Requires="Smoke Tests" UgsBadge="Smoke" />
+    <Label Category="Tests" Name="Unit" Requires="Unit Tests" UgsBadge="Unit" />
+    <Label Category="Tests" Name="Performance" Requires="Performance Tests" UgsBadge="Performance" />
+    <Label Category="Tests" Name="Functional" Requires="Functional Tests" UgsBadge="Functional" />
+
+</BuildGraph>
