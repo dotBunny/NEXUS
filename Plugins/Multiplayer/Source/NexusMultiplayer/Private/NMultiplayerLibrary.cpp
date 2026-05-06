@@ -19,7 +19,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 {
 	if (PlayerState != nullptr && PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
-		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."))
+		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."));
 		return false;
 	}
 	

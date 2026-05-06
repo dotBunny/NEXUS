@@ -54,7 +54,7 @@ void UNSamplesUserWidget::NativeConstruct()
 	}
 	else
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("Unable to bind to unsupported widget type(%s) to UNSamplesUserWidget; clearing reference to avoid further messages."), *MonitoredWidget->GetName())
+		UE_LOG(LogNexusCore, Warning, TEXT("Unable to bind to unsupported widget type(%s) to UNSamplesUserWidget; clearing reference to avoid further messages."), *MonitoredWidget->GetName());
 		MonitoredWidget = nullptr;
 	}
 }
@@ -87,7 +87,7 @@ void UNSamplesUserWidget::UpdateCurrentValue()
 	}
 	else
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("Unable to monitor widget via UNSamplesUserWidget due to an unsupported type(%s); clearing reference to avoid further messages."), *MonitoredWidget->GetName())
+		UE_LOG(LogNexusCore, Warning, TEXT("Unable to monitor widget via UNSamplesUserWidget due to an unsupported type(%s); clearing reference to avoid further messages."), *MonitoredWidget->GetName());
 		MonitoredWidget = nullptr;
 	}
 }

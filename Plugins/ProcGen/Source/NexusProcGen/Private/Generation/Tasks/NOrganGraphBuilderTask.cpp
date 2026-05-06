@@ -125,7 +125,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	// Unable to generate
 	if (WeightedStartIndices.WeightedCount() == 0)
 	{
-		UE_LOG(LogNexusProcGen, Error, TEXT("Unable to place starting cell, due to no valid cells available."))
+		UE_LOG(LogNexusProcGen, Error, TEXT("Unable to place starting cell, due to no valid cells available."));
 		return;
 	}
 	

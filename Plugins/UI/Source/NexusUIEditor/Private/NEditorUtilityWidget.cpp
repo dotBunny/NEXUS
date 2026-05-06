@@ -143,7 +143,7 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	}
 	else
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."))
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."));
 	}
 	
 	// We need a render to happen so this can be updated

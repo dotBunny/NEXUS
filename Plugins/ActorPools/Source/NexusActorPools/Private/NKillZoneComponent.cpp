@@ -80,10 +80,10 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	
 	if (OtherActor->IsRooted())
 	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behavior has been ignored."), *OtherActor->GetName())
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behavior has been ignored."), *OtherActor->GetName());
 	}
 	else
 	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to properly dispose of AActor(%s) via the UNKillZoneComponent."), *OtherActor->GetName())
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to properly dispose of AActor(%s) via the UNKillZoneComponent."), *OtherActor->GetName());
 	}
 }

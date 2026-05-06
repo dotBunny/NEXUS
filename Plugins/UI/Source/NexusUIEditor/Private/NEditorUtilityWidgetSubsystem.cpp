@@ -62,7 +62,7 @@ void UNEditorUtilityWidgetSubsystem::UnregisterWidget(const UNEditorUtilityWidge
 		}
 		else
 		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Widget(%s) is not the registered reference for the identifier. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString())
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Widget(%s) is not the registered reference for the identifier. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString());
 		}
 	}
 }
