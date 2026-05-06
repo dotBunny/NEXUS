@@ -205,9 +205,20 @@ void ANCellProxy::InitializeFromCellNode(const FNProcGenGraphCellNode* CellNode)
 
 void ANCellProxy::OnProxyMaterialLoaded()
 {
-	DynamicMaterial = UMaterialInstanceDynamic::Create(UNProcGenSettings::Get()->ProxyMaterial.Get(), this);
+	if (!IsValid(NCell) || !IsValid(Mesh))
+	{
+		return;
+	}
+
+	UMaterialInterface* ProxyMaterial = UNProcGenSettings::Get()->ProxyMaterial.Get();
+	if (ProxyMaterial == nullptr)
+	{
+		return;
+	}
+
+	DynamicMaterial = UMaterialInstanceDynamic::Create(ProxyMaterial, this);
 	Mesh->SetMaterial(0, DynamicMaterial);
-	
+
 	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
 	Mesh->MarkRenderStateDirty();
 }
