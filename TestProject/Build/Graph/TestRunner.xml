@@ -12,6 +12,8 @@
     
     <Property Name="PublishAgentType" Value="Win64" />
 	<Property Name="PublishAgentType" Value="Incremental$(PublishAgentType)" If="$(UseIncrementalAgents)" />
+    
+    <Property Name="GraphPrefix" Value="OnlyTest" />
 
     <!-- EDITOR BOOT TEST -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >        
@@ -82,6 +84,7 @@
         <Property Name="EditorBootTest" Value="false" />
         <Property Name="TargetBootTest" Value="true" />
         <Property Name="CookedEditorBootTest" Value="false" />
+        <Property Name="GraphPrefix" Value="BuildAndTest" />
 
         <Property Name="WithWin64" Value="true" />
         <Property Name="WithWin64Editor" Value="true" />
@@ -124,7 +127,7 @@
         </Do>        
     </Agent>
 
-    <Aggregate Name="TestPackage" Requires="BuildAndTest $(ProjectName);$(TestPackageAggregate)"/>
+    <Aggregate Name="TestPackage" Requires="$(GraphPrefix) $(ProjectName);$(TestPackageAggregate)"/>
      
      <Do If="'$(TestPackageLabel)' != ''" >
         <Label Category="Tests" Name="$(TestPackageLabel)" Requires="BuildAndTest $(ProjectName)" UgsBadge="$(TestPackageLabel)" />
