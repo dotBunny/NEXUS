@@ -2,42 +2,55 @@
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
     
     <Include Script="Includes/CompositeGlobals.xml" />
-    <Include Script="Includes/K9Properties.xml" />    
-    <Option Name="TestPackageLabel" DefaultValue="" Description="Label that should be used or updated in Horde/GitHub"/>
+    <Include Script="Includes/K9Properties.xml" />
 
-    <!-- Should we run an editor boot test? -->    
-    <Option Name="WithEditorBootTest" DefaultValue="true" Restrict="true|false" Description="Should we be check that the Editor boots?"/>
-    <Do If="'$(WithEditorBootTest)' != 'false'" >
+    <Property Name="TestPackageLabel" DefaultValue="" Description="Label that should be used or updated in Horde/GitHub"/>
+    <Option Name="WithTestConfiguration" DefaultValue="EditorSmoke" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?"/>
+    
+    <!-- EDITOR BOOT TEST -->    
+    <Do If="'$(WithTestConfiguration)' != 'EditorBootTest'" >
+        <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
-        <Property Name="EditorBootTest" Value="true" />              
+        <Property Name="EditorBootTest" Value="true" />
+        <Property Name="TestPackageLabel" Value="BootTest Editor Win64" />      
+    </Do>
+
+    <!-- EDITOR UNIT TESTS -->    
+    <Do If="'$(WithTestConfiguration)' != 'EditorUnitTests'" >
+        <Property Name="WithWin64" Value="false" />
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorBootTest" Value="false" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
+        <Property Name="TestPackageLabel" Value="UnitTests Editor Win64" />
     </Do>
     
-    <!-- Should we run unit tests in the editor? -->
-    <Option Name="WithEditorUnitTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Unit Tests in the Editor?"/>
-    <Do If="'$(WithEditorUnitTests)' != 'false'" >
+    <!-- EDITOR PERFORMANCE TESTS -->    
+    <Do If="'$(WithTestConfiguration)' != 'EditorPerformanceTests'" >
+        <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
-        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />        
+        <Property Name="EditorBootTest" Value="false" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
+        <Property Name="TestPackageLabel" Value="PerfTests Editor Win64" />
+    </Do>
+    
+    <!-- EDITOR FUNCTIONAL TESTS -->
+    <Do If="'$(WithTestConfiguration)' != 'EditorFunctionalTests'" >
+        <Property Name="WithWin64" Value="false" />
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorBootTest" Value="false" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />
+        <Property Name="TestPackageLabel" Value="FuncTests Editor Win64" />        
     </Do>
 
-    <!-- Should we run performance tests in the editor? -->
-    <Option Name="WithEditorPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests in the Editor?"/>
-    <Do If="'$(WithEditorPerformanceTests)' != 'false'" >
-        <Property Name="WithWin64Editor" Value="true" />
-        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />        
-    </Do>
-
-    <!-- Should we run functional tests in the editor? -->
-    <Option Name="WithEditorFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests in the Editor?"/>
-    <Do If="'$(WithEditorFunctionalTests)' != 'false'" >
-        <Property Name="WithWin64Editor" Value="true" />
-        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />        
-    </Do>
-
-    <Option Name="WithGameBootTest" DefaultValue="false" Restrict="true|false" Description="Should we be check the game boots?"/>
-    <Do If="'$(WithGameBootTest)' != 'false'" >
+    <!-- GAME BOOT TEST -->    
+    <Do If="'$(WithTestConfiguration)' != 'GameBootTest'" >
         <Property Name="WithWin64" Value="true" />
-        <Property Name="TargetBootTest" Value="true" />        
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorBootTest" Value="false" />
+        <Property Name="TargetBootTest" Value="true" />
+        <Property Name="TestPackageLabel" Value="BootTest Game Win64" />      
     </Do>
+
 
     <!-- INCLUDE EPICS MAIN TASK -->
     <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
