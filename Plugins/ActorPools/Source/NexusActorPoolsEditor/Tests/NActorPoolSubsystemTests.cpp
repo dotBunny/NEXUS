@@ -246,6 +246,71 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 	});
 }
 
+N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_DestroyModeReturnsFalse,
+	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::ReturnActor::DestroyModeReturnsFalse",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that ReturnActor reports false for an actor with no registered pool when the
+	// subsystem's UnknownBehavior is Destroy. The actor is disposed of internally but the call
+	// returns false so callers can distinguish "pooled" from "consumed by fallback".
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Destroy);
+
+		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
+		if (Actor == nullptr)
+		{
+			ADD_ERROR("Could not spawn unknown test actor.");
+			return;
+		}
+
+		const bool bReturned = Subsystem->ReturnActor(Actor);
+		CHECK_FALSE_MESSAGE(TEXT("ReturnActor must return false in Destroy mode when no pool exists."), bReturned)
+		CHECK_FALSE_MESSAGE(TEXT("HasActorPool must remain false; Destroy mode does not create a pool."),
+			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
+	});
+}
+
+N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_IgnoreModeReturnsFalse,
+	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::ReturnActor::IgnoreModeReturnsFalse",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that ReturnActor reports false and does not touch the actor when UnknownBehavior is
+	// Ignore and no pool exists for the actor's class.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Ignore);
+
+		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
+		if (Actor == nullptr)
+		{
+			ADD_ERROR("Could not spawn unknown test actor.");
+			return;
+		}
+
+		const bool bReturned = Subsystem->ReturnActor(Actor);
+		CHECK_FALSE_MESSAGE(TEXT("ReturnActor must return false in Ignore mode when no pool exists."), bReturned)
+		CHECK_FALSE_MESSAGE(TEXT("HasActorPool must remain false; Ignore mode does not create a pool."),
+			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
+		if (!IsValid(Actor))
+		{
+			ADD_ERROR("Actor must remain valid in Ignore mode; ReturnActor must not destroy it.");
+		}
+	});
+}
+
 N_TEST_HIGH(UNActorPoolSubsystemTests_GetActorPool_ReturnsCreatedPool,
 	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::GetActorPool::ReturnsCreatedPool",
 	N_TEST_CONTEXT_EDITOR)

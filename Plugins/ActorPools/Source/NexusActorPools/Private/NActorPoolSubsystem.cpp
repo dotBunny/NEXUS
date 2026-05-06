@@ -269,6 +269,9 @@ void UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Po
 
 bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 {
+	// You cant return nothing
+	if (!IsValid(Actor)) return false;
+	
 	UClass* ActorClass = Actor->GetClass();
 	if (ActorPools.Contains(ActorClass))
 	{
@@ -315,7 +318,8 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 			{
 				return false;
 			}
-			return Actor->Destroy();
+			Actor->Destroy();
+			return false;
 	}
 }
 

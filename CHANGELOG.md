@@ -41,6 +41,7 @@
 - NDynamicRefs events fired when removing object from the fast-path when it was not actually previously added.
 - `FNEditorUtils::DisallowConfigFileFromStaging` and `FNEditorUtils::AllowConfigFileForStaging` now properly use the project name.
 - `FNActorPool` now properly marks created `AActor` as root-object.
+- `UNActorPoolSubsystem` will no longer crash returning null actors, and returns false when the actor is destroyed, as it doesnt get returned to the pool.
 
 ### Removed
 

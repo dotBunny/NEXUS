@@ -21,7 +21,7 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 {
 	friend class FNActorPool;
-	
+
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNActorPoolSubsystem, true)
 
@@ -190,7 +190,14 @@ public:
 	 * @return The default settings for the specified AActor class, or the global defaults if none are registered.
 	 */
 	FNActorPoolSettings GetDefaultSettings(TSubclassOf<AActor> ActorClass) const;
-	
+
+	/**
+	 * Override the policy applied when ReturnActor is called with an Actor unknown to this subsystem.
+	 * @note Initialized from UNActorPoolsSettings::UnknownBehavior on world begin play; use this to override at runtime.
+	 * @param Behavior The new unknown-actor policy to apply.
+	 */
+	void SetUnknownBehavior(const ENActorPoolUnknownBehavior Behavior) { UnknownBehavior = Behavior; }
+
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
