@@ -8,59 +8,77 @@
     
     <!-- EDITOR BOOT TEST -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >        
+        <Property Name="WithWin64Editor" Value="true" />
+
         <Property Name="SkipCook" Value="true" />
         <Property Name="SkipPackage" Value="true" />
         <Property Name="SkipPublish" Value="true" />
 
-        <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="true" />
+        <Property Name="TargetBootTest" Value="false" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+                
         <Property Name="TestPackageLabel" Value="BootTest Editor Win64" />      
     </Do>
 
 
     <!-- EDITOR UNIT TESTS -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorUnitTests'" >
+        <Property Name="WithWin64Editor" Value="true" />
+
         <Property Name="SkipCook" Value="true" />
         <Property Name="SkipPackage" Value="true" />
         <Property Name="SkipPublish" Value="true" />
 
-
-        <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
+        <Property Name="TargetBootTest" Value="false" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+          
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
         <Property Name="TestPackageLabel" Value="UnitTests Editor Win64" />
     </Do>
     
     <!-- EDITOR PERFORMANCE TESTS -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorPerformanceTests'" >
+        <Property Name="WithWin64Editor" Value="true" />
+
         <Property Name="SkipCook" Value="true" />
         <Property Name="SkipPackage" Value="true" />
         <Property Name="SkipPublish" Value="true" />
 
-        <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
+        <Property Name="TargetBootTest" Value="false" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+        
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
         <Property Name="TestPackageLabel" Value="PerfTests Editor Win64" />
     </Do>
     
     <!-- EDITOR FUNCTIONAL TESTS -->
     <Do If="'$(WithTestConfiguration)' == 'EditorFunctionalTests'" >
+        <Property Name="WithWin64Editor" Value="true" />  
+        
         <Property Name="SkipCook" Value="true" />
         <Property Name="SkipPackage" Value="true" />
-        <Property Name="SkipPublish" Value="true" />    
+        <Property Name="SkipPublish" Value="true" />
 
-        <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
+        <Property Name="TargetBootTest" Value="false" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />
         <Property Name="TestPackageLabel" Value="FuncTests Editor Win64" />        
     </Do>
 
     <!-- GAME BOOT TEST -->    
     <Do If="'$(WithTestConfiguration)' == 'GameBootTest'" >
-        <Property Name="WithWin64" Value="true" />
-        <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
         <Property Name="TargetBootTest" Value="true" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+
+        <Property Name="WithWin64" Value="true" />
+        <Property Name="WithWin64Editor" Value="true" />
+
         <Property Name="TestPackageLabel" Value="BootTest Game Win64" />      
     </Do>
 
