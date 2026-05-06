@@ -3,9 +3,8 @@
     
     <Include Script="Includes/CompositeGlobals.xml" />
     <Include Script="Includes/K9Properties.xml" />
-
-    <Property Name="TestPackageLabel" Description="Label that should be used or updated in Horde/GitHub" />
-    <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?"/>
+    <Property Name="TestPackageLabel" Value="" />
+    <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?" />
     
     <!-- EDITOR BOOT TEST -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >
