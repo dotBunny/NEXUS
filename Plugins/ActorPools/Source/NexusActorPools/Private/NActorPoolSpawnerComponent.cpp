@@ -200,6 +200,7 @@ void UNActorPoolSpawnerComponent::CacheSplineComponent()
 			if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
 			{
 				CachedSplineComponent = FoundSplineComponents[i];
+				break;
 			}
 		}
 	}
