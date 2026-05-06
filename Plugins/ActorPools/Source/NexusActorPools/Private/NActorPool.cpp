@@ -3,6 +3,7 @@
 
 #include "NActorPool.h"
 #include "INActorPoolItem.h"
+#include "NActorPoolObject.h"
 #include "NActorPoolsSettings.h"
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
@@ -32,6 +33,14 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	PreInitialize(TargetWorld, ActorClass);
 	UpdateSettings(InActorPoolSetting);
 	PostInitialize();
+}
+
+FNActorPool::~FNActorPool()
+{
+	if (IsValid(LinkedActorPoolObject))
+	{
+		LinkedActorPoolObject->Pool = nullptr;
+	}
 }
 
 FText FNActorPool::GetDescription() const

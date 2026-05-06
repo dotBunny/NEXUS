@@ -51,7 +51,7 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 
 void UNActorPoolListViewEntry::Refresh() const
 {
-	if (Pool == nullptr)
+	if (Pool == nullptr || !Pool->IsValid())
 	{
 		return;
 	}

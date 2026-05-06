@@ -22,7 +22,7 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 	GENERATED_BODY()
 
 public:
-
+	
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;

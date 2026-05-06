@@ -6,6 +6,8 @@
 #include "NActorPoolSettings.h"
 #include "Types/NToggle.h"
 
+class UNActorPoolObject;
+
 namespace NEXUS::ActorPools::InvokeMethods
 {
 	inline FText Category = FText::FromString("NActor Pool");
@@ -23,6 +25,7 @@ namespace NEXUS::ActorPools::InvokeMethods
 class NEXUSACTORPOOLS_API FNActorPool
 {
 	// Allow to test w/ deep access
+	friend class UNActorPoolObject;
 	friend class FNActorPoolTests_Return_StorageLocation;
 	
 public:
@@ -39,6 +42,12 @@ public:
 	 * @param InActorPoolSetting Settings to apply to the ActorPool, overriding the ActorPoolItem definition, and defaults.
 	 */
 	FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass, const FNActorPoolSettings& InActorPoolSetting);
+
+	/**
+	 * Destroy the ActorPool and notify any linked UNActorPoolObject so it can null its back-pointer.
+	 * @note Required because UNActorPoolObject holds a raw FNActorPool* that would otherwise dangle when the owning subsystem releases this pool (e.g. on world teardown).
+	 */
+	~FNActorPool();
 
 	/**
 	 * Clear and destroy the contents of the ActorPool, both actors in and out of the pool.
@@ -144,6 +153,10 @@ private:
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;
 
 	TObjectPtr<UWorld> World;
+
+	/** The UObject wrapper currently reflecting this pool, if any; cleared in the destructor so the wrapper can detect that the native pool is gone. */
+	TObjectPtr<UNActorPoolObject> LinkedActorPoolObject;
+
 	FNActorPoolSettings Settings;
 
 #if WITH_EDITOR

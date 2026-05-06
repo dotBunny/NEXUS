@@ -12,18 +12,26 @@
 UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Object")
 class NEXUSACTORPOOLS_API UNActorPoolObject : public UObject
 {
+	friend class FNActorPool;
+	
 	GENERATED_BODY()
 
 public:
 
 	/**
-	 * Factory method that creates a new UNActorPoolObject and links it to the provided native pool.
-	 * @param Outer The UObject owner of the new wrapper.
+	 * Factory method that returns the wrapper reflecting the supplied native pool, creating one if it does not already exist.
+	 * @param Outer The UObject owner used when a new wrapper is allocated.
 	 * @param ActorPool The native pool this wrapper should reflect.
-	 * @return A newly allocated, linked UNActorPoolObject.
+	 * @return The pool's existing wrapper if one is already linked, otherwise a newly allocated, linked UNActorPoolObject.
+	 * @note Each FNActorPool may only have a single UNActorPoolObject linked at a time so the pool's destructor has a deterministic back-pointer to clear.
 	 */
 	static UNActorPoolObject* Create(UObject* Outer, FNActorPool* ActorPool)
 	{
+		if (ActorPool->LinkedActorPoolObject != nullptr)
+		{
+			return ActorPool->LinkedActorPoolObject;
+		}
+
 		UNActorPoolObject* Object = NewObject<UNActorPoolObject>(Outer, StaticClass(), NAME_None, RF_Transient);
 		Object->Link(ActorPool);
 		return Object;
@@ -32,9 +40,11 @@ public:
 	/**
 	 * Bind this wrapper to a native FNActorPool and cache display metadata from it.
 	 * @param NewPool The pool to link.
+	 * @note Also stores a back-pointer on the pool so its destructor can null Pool here, preventing dangling reads after the pool is destroyed.
 	 */
 	void Link(FNActorPool* NewPool)
 	{
+		NewPool->LinkedActorPoolObject = this;
 		this->Pool = NewPool;
 
 		FString ClassNameOriginal = NewPool->GetTemplate()->GetFName().ToString();
@@ -137,6 +147,15 @@ public:
 	{
 		if (Pool == nullptr) return FText::FromString("Pool == nullptr");
 		return Pool->GetDescription();
+	}
+	
+	/**
+	 * @return true if this wrapper is still linked to a live native FNActorPool.
+	 * @note Returns false once the pool's destructor has cleared the back-pointer (e.g. after world teardown), so callers can safely skip work that would otherwise dereference a destroyed pool.
+	 */
+	bool IsValid() const
+	{
+		return Pool != nullptr;
 	}
 
 private:
