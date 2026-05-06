@@ -60,8 +60,10 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 	// Only remove and callback if we have the actual objects
 	if (FastCollection[DynamicRef].Objects.Contains(InObject))
 	{
-		FastCollection[DynamicRef].Remove(InObject);
-		OnRemoved.Broadcast(DynamicRef, InObject);
+		if (FastCollection[DynamicRef].Remove(InObject))
+		{
+			OnRemoved.Broadcast(DynamicRef, InObject);
+		}
 	}
 }
 
@@ -77,8 +79,10 @@ void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObje
 {
 	if (NamedCollection.Contains(Name))
 	{
-		NamedCollection[Name].Remove(InObject);
-		OnRemovedByName.Broadcast(Name, InObject);
+		if (NamedCollection[Name].Remove(InObject))
+		{
+			OnRemovedByName.Broadcast(Name, InObject);	
+		}
 	}
 }
 

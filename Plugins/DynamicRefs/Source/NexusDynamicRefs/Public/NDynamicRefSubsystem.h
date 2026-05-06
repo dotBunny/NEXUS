@@ -26,7 +26,7 @@ struct FNDynamicRefCollection
 	/** Add an object to the collection; duplicates are ignored. */
 	void Add(UObject* Object) { Objects.AddUnique(Object); }
 	/** Remove an object from the collection if present. */
-	void Remove(UObject* Object) { Objects.Remove(Object); }
+	bool Remove(UObject* Object) { return Objects.Remove(Object) > 0; }
 	
 };
 
