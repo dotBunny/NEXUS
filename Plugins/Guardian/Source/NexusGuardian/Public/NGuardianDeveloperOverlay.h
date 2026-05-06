@@ -27,9 +27,9 @@ class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 	//End UUserWidget
 
 	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
-	void Bind(UWorld* World);
+	virtual void Bind(UWorld* World) override;
 	/** Drop the subscription to the Guardian subsystem hosted by World. */
-	void Unbind(const UWorld* World);
+	virtual void Unbind(const UWorld* World) override;
 
 protected:
 
