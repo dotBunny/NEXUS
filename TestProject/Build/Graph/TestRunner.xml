@@ -1,7 +1,6 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
-    
-    <Include Script="Includes/Environment.xml" />
+        
     <Include Script="Includes/CompositeGlobals.xml" />
     <Include Script="Includes/K9Properties.xml" />
 
@@ -106,9 +105,9 @@
             </Do>
             <Log Message="Compiling Used K9 Tools ..." />					
             <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
-            
+                        	
             <!-- UPDATE STATUS -->        
-            <Do If="'$(IsHordeEnv)' == 'true' && '$(GitHubToken)' != ''" />
+            <Do If="'$(UE_HORDE_JOBID)' != '' and '$(GitHubToken)' != ''" />
                 <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---AUTH-TOKEN=$(GitHubToken) ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---DESCRIPTION=$(TestPackageLabel) ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	
             </Do>
         </Node>
