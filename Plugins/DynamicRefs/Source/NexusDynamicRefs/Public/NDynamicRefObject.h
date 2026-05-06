@@ -47,14 +47,14 @@ public:
 
 
 	/** @return The ENDynamicRef slot this wrapper targets (meaningful only when TargetName is None). */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	ENDynamicRef GetDynamicRef() const
 	{
 		return TargetDynamicRef;
 	}
 
 	/** @return The FName bucket this wrapper targets (NAME_None when targeting an ENDynamicRef slot). */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	FName GetTargetName() const
 	{
 		return TargetName;
@@ -64,7 +64,7 @@ public:
 	 * Append an object to this wrapper's cached list and broadcast Changed.
 	 * @param Object The object to add.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void AddObject(UObject* Object)
 	{
 		TargetObjects.Add(Object);
@@ -75,7 +75,7 @@ public:
 	 * Remove an object from this wrapper's cached list and broadcast Changed.
 	 * @param Object The object to remove.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void RemoveObject(UObject* Object)
 	{
 		TargetObjects.Remove(Object);
@@ -83,7 +83,7 @@ public:
 	}
 
 	/** @return The number of objects currently tracked by this wrapper. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	int32 GetCount()
 	{
 		return TargetObjects.Num();

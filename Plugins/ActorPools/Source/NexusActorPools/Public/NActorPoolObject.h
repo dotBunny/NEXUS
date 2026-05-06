@@ -44,7 +44,7 @@ public:
 	}
 
 	/** @return The number of Actors currently in the pool (available to spawn), or -1 if unlinked. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	int32 GetOutCount() const
 	{
 		if (Pool == nullptr) return -1;
@@ -52,7 +52,7 @@ public:
 	}
 
 	/** @return The number of Actors currently out of the pool (spawned in the world), or -1 if unlinked. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	int32 GetSpawnedCount() const
 	{
 		if (Pool == nullptr) return -1;
@@ -60,7 +60,7 @@ public:
 	}
 
 	/** @return An Actor from the pool without spawning it into the world, or nullptr if none available. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	AActor* GetActor() const
 	{
 		if (Pool == nullptr) return nullptr;
@@ -73,7 +73,7 @@ public:
 	 * @param Rotation World rotation to spawn with.
 	 * @return The spawned Actor, or nullptr if the pool is exhausted.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	AActor* Spawn(const FVector& Position, const FRotator& Rotation) const
 	{
 		if (Pool == nullptr) return nullptr;
@@ -85,7 +85,7 @@ public:
 	 * @param Actor The Actor to return.
 	 * @return true if the Actor was successfully returned.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	bool Return(AActor* Actor) const
 	{
 		if (Pool == nullptr) return false;
@@ -93,7 +93,7 @@ public:
 	}
 
 	/** @return The Actor class template this pool produces. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	TSubclassOf<AActor> GetTemplate()
 	{
 		if (Pool == nullptr) return nullptr;
@@ -101,14 +101,14 @@ public:
 	};
 
 	/** @return The display name of the Actor class this pool produces (with any trailing "_C" stripped). */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	FText GetClassName() const
 	{
 		return ClassName;
 	}
 
 	/** @return The UWorld the underlying pool is bound to, or nullptr if unlinked. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	UWorld* GetPoolWorld() const
 	{
 		if (Pool == nullptr) return nullptr;
@@ -116,7 +116,7 @@ public:
 	}
 
 	/** @return true if the pool's Actor class implements INActorPoolItem. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	bool ImplementsPoolItemInterface() const
 	{
 		if (Pool == nullptr) return false;
@@ -124,7 +124,7 @@ public:
 	}
 
 	/** @return true if the pool's flags include InvokeUFunctions. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	bool ShouldInvokeUFunctions() const
 	{
 		if (Pool == nullptr) return false;
@@ -132,7 +132,7 @@ public:
 	}
 
 	/** @return A human-readable description of the pool's configuration. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	FText GetDescription() const
 	{
 		if (Pool == nullptr) return FText::FromString("Pool == nullptr");

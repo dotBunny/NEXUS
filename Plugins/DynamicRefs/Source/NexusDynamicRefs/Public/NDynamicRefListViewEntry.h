@@ -38,7 +38,7 @@ public:
 	void OnButtonPressed(UObject* TargetObject) const;
 
 	/** Refresh the widget's displayed values from the bound UNDynamicRefObject. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void Refresh() const;
 
 protected:
