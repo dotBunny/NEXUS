@@ -21,3 +21,21 @@ void UNDeveloperOverlay::HideContainerBanner() const
 {
 	ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
 }
+
+void UNDeveloperOverlay::BindAllCurrentWorlds()
+{
+	if (GEngine == nullptr) return;
+	for (const FWorldContext& Context : GEngine->GetWorldContexts())
+	{
+		Bind(Context.World());
+	}
+}
+
+void UNDeveloperOverlay::UnbindAllCurrentWorlds()
+{
+	if (GEngine == nullptr) return;
+	for (const FWorldContext& Context : GEngine->GetWorldContexts())
+	{
+		Unbind(Context.World());
+	}
+}

@@ -12,12 +12,7 @@ void UNGuardianDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldBeginTearDown);
 	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
+	BindAllCurrentWorlds();
 
 	Super::NativeConstruct();
 }
@@ -27,12 +22,8 @@ void UNGuardianDeveloperOverlay::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
-	
+	UnbindAllCurrentWorlds();
+
 	Super::NativeDestruct();
 }
 
