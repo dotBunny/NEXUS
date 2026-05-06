@@ -1,6 +1,8 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
     
+    <Include Script="Includes/CompositeGlobals.xml" />
+    <Include Script="Includes/K9Properties.xml" />
     <Property Name="TestPackageList" Value="" />
 
     <!-- Should we run an editor boot test? -->    
