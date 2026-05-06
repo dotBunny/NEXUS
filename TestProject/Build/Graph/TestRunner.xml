@@ -7,16 +7,24 @@
     <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?" />
     
     <!-- EDITOR BOOT TEST -->    
-    <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >
-        <Property Name="WithWin64" Value="false" />
+    <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >        
+        <Property Name="SkipCook" Value="true" />
+        <Property Name="SkipPackage" Value="true" />
+        <Property Name="SkipPublish" Value="true" />
+
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="true" />
         <Property Name="TestPackageLabel" Value="BootTest Editor Win64" />      
     </Do>
 
+
     <!-- EDITOR UNIT TESTS -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorUnitTests'" >
-        <Property Name="WithWin64" Value="false" />
+        <Property Name="SkipCook" Value="true" />
+        <Property Name="SkipPackage" Value="true" />
+        <Property Name="SkipPublish" Value="true" />
+
+
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
@@ -25,7 +33,10 @@
     
     <!-- EDITOR PERFORMANCE TESTS -->    
     <Do If="'$(WithTestConfiguration)' == 'EditorPerformanceTests'" >
-        <Property Name="WithWin64" Value="false" />
+        <Property Name="SkipCook" Value="true" />
+        <Property Name="SkipPackage" Value="true" />
+        <Property Name="SkipPublish" Value="true" />
+
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
@@ -34,7 +45,10 @@
     
     <!-- EDITOR FUNCTIONAL TESTS -->
     <Do If="'$(WithTestConfiguration)' == 'EditorFunctionalTests'" >
-        <Property Name="WithWin64" Value="false" />
+        <Property Name="SkipCook" Value="true" />
+        <Property Name="SkipPackage" Value="true" />
+        <Property Name="SkipPublish" Value="true" />    
+
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />
