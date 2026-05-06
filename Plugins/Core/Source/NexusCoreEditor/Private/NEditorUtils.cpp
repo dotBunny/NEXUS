@@ -101,7 +101,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	const TCHAR* StagingSectionKey = TEXT("Staging");
 	const TCHAR* DisallowedConfigFilesKey = TEXT("+DisallowedConfigFiles");
 	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
 	
 	if (!GConfig->IsReadyForUse())
 	{
@@ -144,7 +144,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	const TCHAR* StagingSectionKey = TEXT("Staging");
 	const TCHAR* AllowedConfigFilesKey = TEXT("+AllowedConfigFiles");
 	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
 	
 	if (!GConfig->IsReadyForUse())
 	{
