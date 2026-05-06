@@ -6,7 +6,7 @@
 
 void UNProcGenOperationListViewEntry::NativeDestruct()
 {
-	if (Operation != nullptr && Operation->IsValidLowLevel())
+	if (IsValid(Operation))
 	{
 		Operation->OnDisplayMessageChanged.RemoveDynamic(this, &UNProcGenOperationListViewEntry::OnOperationDisplayMessageChanged);\
 		Operation->OnTasksChanged.RemoveDynamic(this, &UNProcGenOperationListViewEntry::OnOperationTasksChanged);

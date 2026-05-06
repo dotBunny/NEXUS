@@ -5,7 +5,7 @@
 
 void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
 {
-	if (ContainerBanner != nullptr && ContainerBanner->IsValidLowLevel())
+	if (IsValid(ContainerBanner))
 	{
 		ContainerBanner->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		ContainerBanner->SetBrushColor(FNColor::GetLinearColor(BannerColor));

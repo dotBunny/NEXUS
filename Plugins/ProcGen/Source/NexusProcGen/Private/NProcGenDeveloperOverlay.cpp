@@ -28,7 +28,7 @@ void UNProcGenDeveloperOverlay::NativeConstruct()
 
 void UNProcGenDeveloperOverlay::NativeDestruct()
 {
-	if (OperationsList != nullptr && OperationsList->IsValidLowLevel())
+	if (IsValid(OperationsList))
 	{
 		OperationsList->ClearListItems();
 	}
@@ -68,7 +68,7 @@ void UNProcGenDeveloperOverlay::OnOperationStatusChanged(UNProcGenOperation* Ope
 
 void UNProcGenDeveloperOverlay::UpdateBanner() const
 {
-	if (OperationsList != nullptr && OperationsList->IsValidLowLevel() && OperationsList->GetNumItems() > 0)
+	if (IsValid(OperationsList) && OperationsList->GetNumItems() > 0)
 	{
 		HideContainerBanner();
 	}
