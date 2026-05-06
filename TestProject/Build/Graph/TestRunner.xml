@@ -1,52 +1,53 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
+    
+    <Property Name="TestPackageList" Value="" />
 
-    <!--
-    <Option Name="WithUnitTests" DefaultValue="true" Restrict="true|false" Description="Should we be running Unit Tests?"/>
-    <Option Name="WithPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests?"/>
-    <Option Name="WithFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests?"/>
+    <!-- Should we run an editor boot test? -->    
+    <Option Name="WithEditorBootTest" DefaultValue="true" Restrict="true|false" Description="Should we be check that the Editor boots?"/>    
+    <Do If="'$(WithEditorBootTest)' != 'false'" >
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorBootTest" Value="true" />
+        <Property Name="TestPackageList" Value="$(TestPackageList), EditorBootTest" />        
+    </Do>
+    
+    <!-- Should we run unit tests in the editor? -->
+    <Option Name="WithUnitTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Unit Tests in the Editor?"/>
+    <Do If="'$(WithUnitTests)' != 'false'" >
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
+        <Property Name="TestPackageList" Value="$(TestPackageList), EditorUnitTests" />
+    </Do>
 
-    <Option Name="UnitTests" DefaultValue="NEXUS.UnitTests" Description="What unit tests should be ran?"/>
-    <Option Name="PerformanceTests" DefaultValue="NEXUS.PerfTests" Description="What performance tests should be ran?"/>
-    <Option Name="FunctionalTests" DefaultValue="Tests.Nexus" Description="What functional tests should be ran?"/>
+    <!-- Should we run performance tests in the editor? -->
+    <Option Name="WithPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests in the Editor?"/>
+    <Do If="'$(WithPerformanceTests)' != 'false'" >
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
+        <Property Name="TestPackageList" Value="$(TestPackageList), EditorPerfTests" />
+    </Do>
 
-    <Property Name="TestPackageAggregate" Value="" />
-    -->
+    <!-- Should we run functional tests in the editor? -->
+    <Option Name="WithFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests in the Editor?"/>
+    <Do If="'$(WithFunctionalTests)' != 'false'" >
+        <Property Name="WithWin64Editor" Value="true" />
+        <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />
+        <Property Name="TestPackageList" Value="$(TestPackageList), EditorFunctionalTests" />
+    </Do>
+
+    <Option Name="WithGameBootTest" DefaultValue="false" Restrict="true|false" Description="Should we be check the game boots?"/>
+    <Do If="'$(WithGameBootTest)' != 'false'" >
+        <Property Name="WithWin64" Value="true" />
+        <Property Name="TargetBootTest" Value="true" />
+        <Property Name="TestPackageList" Value="$(TestPackageList), GameBootTest" />     
+    </Do>
+
+    <!-- INCLUDE EPICS MAIN TASK -->
     <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
+
+    <Aggregate Name="TestPackage" Requires="BuildAndTest $(ProjectName)"/>
  
-  <!--
-
-    <Agent Name="Unit Tests" Type="IncrementalWin64;CompileWin64;Win64">
-        <Node Name="Unit Tests" Requires="#OutputFiles">
-            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(UnitTests)" />
-        </Node>
-    </Agent>
-
-    <Agent Name="Performance Tests" Type="IncrementalWin64;CompileWin64;Win64">
-        <Node Name="Performance Tests" Requires="#OutputFiles">
-            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(PerformanceTests)" />
-        </Node>
-    </Agent>
-
-    <Agent Name="Functional Tests" Type="IncrementalWin64;CompileWin64;Win64">
-        <Node Name="Functional Tests" Requires="#OutputFiles">
-            <Command Name="RunUnreal" Arguments="-project=$(ProjectPath) -test=$(FunctionalTests)" />
-        </Node>
-    </Agent>
-
-
-    <Do If="'$(WithUnitTests)'">
-        <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Unit Test" />
-    </Do>
-    <Do If="'$(WithPerformanceTests)'">
-        <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Performance Tests" />
-    </Do>
-    <Do If="'$(WithFunctionalTests)'">
-        <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);Functional Tests" />
-    </Do>
-
-    <Aggregate Name="TestPackage" Requires="BuildAndTest $(ProjectName);$(TestPackageAggregate)"/>
-
+ <!--
     <Label Category="Tests" Name="Unit" Requires="Unit Tests" UgsBadge="Unit" />
     <Label Category="Tests" Name="Performance" Requires="Performance Tests" UgsBadge="Performance" />
     <Label Category="Tests" Name="Functional" Requires="Functional Tests" UgsBadge="Functional" />
