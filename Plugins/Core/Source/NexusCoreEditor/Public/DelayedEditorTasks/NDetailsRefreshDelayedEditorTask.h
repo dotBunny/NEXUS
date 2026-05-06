@@ -20,7 +20,7 @@ class NEXUSCOREEDITOR_API UNDetailsRefreshDelayedEditorTask : public UNDelayedEd
 
 public:
 	/** Schedules the refresh to run after a short delay (0.5s, 5 ticks). */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Core")
 	static void Create()
 	{
 		UAsyncEditorDelay* DelayedMechanism = CreateDelayMechanism();

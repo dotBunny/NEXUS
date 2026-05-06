@@ -130,7 +130,7 @@ public:
 	 * Updates the text displayed by the bound UCommonTextBlock.
 	 * @param NewText The text to display in the row.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void SetText(const FText NewText) const
 	{
 		Text->SetText(NewText);
@@ -140,7 +140,7 @@ public:
 	 * Applies a palette color to the text block's color-and-opacity.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the text.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void SetTextColor(ENColor NewColor) const
 	{
 		Text->SetColorAndOpacity(FNColor::GetLinearColor(NewColor));
@@ -150,7 +150,7 @@ public:
 	 * Applies a palette color to the container border's brush.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the border.
 	 */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void SetBackgroundColor(ENColor NewColor) const
 	{
 		Container->SetBrushColor(FNColor::GetLinearColor(NewColor));

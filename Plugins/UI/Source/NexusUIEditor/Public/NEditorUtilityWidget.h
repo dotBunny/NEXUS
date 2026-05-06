@@ -30,21 +30,21 @@ public:
 	static UEditorUtilityWidget* SpawnTab(const FString& ObjectPath, FName Identifier = NAME_None);
 
 	/** @return True when the widget opts in to cross-session state persistence via the widget subsystem. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	bool IsPersistent() const
 	{
 		return bIsPersistent;
 	};
 
 	/** @return The widget's stable identifier used as the key when storing/restoring persistent state. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	FName GetUniqueIdentifier() const
 	{
 		return UniqueIdentifier;
 	};
 
 	/** @return The tab identifier the widget was most recently hosted under, or NAME_None if not tabbed. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	FName GetTabIdentifier() const
 	{
 		return CachedTabIdentifier;

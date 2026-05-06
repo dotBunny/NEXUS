@@ -27,12 +27,12 @@ class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 
 public:
 	/** Display the banner row with Text and the supplied foreground/background color pair. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void ShowContainerBanner(const FText& Text = FText::GetEmpty(),
 		ENColor MessageColor = ENColor::NC_White, ENColor BannerColor = ENColor::NC_NexusDarkBlue) const;
 
 	/** Collapse the banner row. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void HideContainerBanner() const;
 
 	/** When true the overlay is hosted inside an EUW and should avoid runtime-only assumptions. */

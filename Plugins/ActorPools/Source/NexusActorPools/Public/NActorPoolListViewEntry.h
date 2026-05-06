@@ -33,7 +33,7 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 public:
 
 	/** Refresh the widget's displayed fields from the current pool state. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	void Refresh() const;
 
 protected:

@@ -44,7 +44,7 @@ public:
 	static TArray<ANSamplesDisplayActor*> KnownDisplays;
 	static void SortKnownDisplays();
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	void Rebuild();
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Prepare Test"))

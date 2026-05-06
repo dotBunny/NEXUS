@@ -69,11 +69,11 @@ public:
 	TArray<TSoftObjectPtr<UNTissue>> Tissues;
 
 	/** @return true if the owning actor is a volume-derived actor. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ProcGen")
 	bool IsVolumeBased() const { return GetOwner()->IsA<AVolume>(); }
 
 	/** @return The owning actor cast to AVolume, or nullptr if the owner isn't a volume. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|ProcGen")
 	AVolume* GetVolume() const { return Cast<AVolume>(GetOwner()); }
 
 	/** @return Human-readable debug label drawn in the viewport overlay. */

@@ -25,11 +25,11 @@ public:
 #endif // WITH_EDITOR
 
 	/** Stash an arbitrary outer reference on the list so entries can retrieve it during construction. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void SetReferenceObject(UObject* Object) { ReferenceObject = Object; }
 
 	/** @return the previously-stashed reference object, or nullptr if it has been GC'd. */
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	UObject* GetReferenceObject() const
 	{
 		if (ReferenceObject.IsValid())
