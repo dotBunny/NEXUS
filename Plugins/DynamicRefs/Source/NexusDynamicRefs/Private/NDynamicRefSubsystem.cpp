@@ -35,36 +35,29 @@ void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UOb
 
 void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 {
-	if (NamedCollection.Contains(Name))
-	{
-		NamedCollection[Name].Add(InObject);
-	}
-	else
-	{
-		NamedCollection.Add(Name, FNDynamicRefCollection());
-		NamedCollection[Name].Add(InObject);
-	}
+	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
+	Collection.Add(InObject);
 	OnAddedByName.Broadcast(Name, InObject);
 }
 
 void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> InObjects)
 {
+	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	for (UObject* Object : InObjects)
 	{
-		AddObjectByName(Name, Object);
+		Collection.Add(Object);
+		OnAddedByName.Broadcast(Name, Object);
 	}
 }
 
 void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
 	// Only remove and callback if we have the actual objects
-	if (FastCollection[DynamicRef].Objects.Contains(InObject))
+	if (FastCollection[DynamicRef].Remove(InObject))
 	{
-		if (FastCollection[DynamicRef].Remove(InObject))
-		{
-			OnRemoved.Broadcast(DynamicRef, InObject);
-		}
+		OnRemoved.Broadcast(DynamicRef, InObject);
 	}
+	
 }
 
 void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
@@ -77,20 +70,26 @@ void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<
 
 void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObject)
 {
-	if (NamedCollection.Contains(Name))
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr && Collection->Remove(InObject))
 	{
-		if (NamedCollection[Name].Remove(InObject))
-		{
-			OnRemovedByName.Broadcast(Name, InObject);	
-		}
+		OnRemovedByName.Broadcast(Name, InObject);	
 	}
+	
 }
 
 void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject*> InObjects)
 {
-	for (UObject* Object : InObjects)
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr)
 	{
-		RemoveObjectByName(Name, Object);
+		for (UObject* Object : InObjects)
+		{
+			if (Collection->Remove(Object))
+			{
+				OnRemovedByName.Broadcast(Name, Object);	
+			}
+		}
 	}
 }
 
@@ -101,9 +100,10 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 {
-	if (NamedCollection.Contains(Name))
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr)
 	{
-		return NamedCollection[Name].GetObjects();
+		return Collection->GetObjects();
 	}
 	return TArray<UObject*>();
 }
@@ -127,7 +127,6 @@ AActor* UNDynamicRefSubsystem::GetFirstActorByName(const FName Name)
 	}
 	return nullptr;
 }
-
 
 UObject* UNDynamicRefSubsystem::GetFirstObject(const ENDynamicRef DynamicRef)
 {
@@ -180,18 +179,22 @@ int32 UNDynamicRefSubsystem::GetCount(const ENDynamicRef DynamicRef)
 	return FastCollection[DynamicRef].Objects.Num();
 }
 
-int32 UNDynamicRefSubsystem::GetCountByName(FName Name)
+int32 UNDynamicRefSubsystem::GetCountByName(const FName Name)
 {
-	if (!NamedCollection.Contains(Name)) return 0;
-	return NamedCollection[Name].Objects.Num();
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr)
+	{
+		return Collection->Objects.Num();
+	}
+	return 0;
 }
-
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectByName(const FName Name)
 {
-	if (NamedCollection.Contains(Name))
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr)
 	{
-		return NamedCollection[Name].Objects[0];
+		return Collection->Objects[0];
 	}
 	return nullptr;
 }
@@ -227,9 +230,10 @@ AActor* UNDynamicRefSubsystem::GetLastActorByName(const FName Name)
 
 UObject* UNDynamicRefSubsystem::GetLastObjectByName(const FName Name)
 {
-	if (NamedCollection.Contains(Name))
+	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	if (Collection != nullptr)
 	{
-		return NamedCollection[Name].Objects.Last();
+		return Collection->Objects.Last().Get();
 	}
 	return nullptr;
 }
