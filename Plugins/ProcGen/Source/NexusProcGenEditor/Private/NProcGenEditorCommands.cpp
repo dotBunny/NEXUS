@@ -341,17 +341,17 @@ void FNProcGenEditorCommands::CellAddActor()
 		switch (Choice)
 		{
 		case EAppReturnType::No:
-			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."));
 			return;
 		case EAppReturnType::Yes:
 			if (!FEditorFileUtils::SaveLevel(CurrentWorld->GetCurrentLevel()))
 			{
-				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+				UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."));
 				return;
 			}
 			break;
 		default:
-			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."))
+			UE_LOG(LogNexusProcGenEditor, Error, TEXT("Unable to add UNCellActor to an unsaved world."));
 			return;
 		}
 	}

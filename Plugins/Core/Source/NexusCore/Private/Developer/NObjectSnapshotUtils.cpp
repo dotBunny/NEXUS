@@ -48,7 +48,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, F
 		const FNObjectSnapshot TempSnapshot = OldSnapshot;
 		OldSnapshot = NewSnapshot;
 		NewSnapshot = TempSnapshot;
-		UE_LOG(LogNexusCore, VeryVerbose, TEXT("The provided FNObjectSnapshot(OldSnapshot) was actually newer then the comparator FNObjectSnapshot(NewSnapshot); swapping for comparison purposes."))
+		UE_LOG(LogNexusCore, VeryVerbose, TEXT("The provided FNObjectSnapshot(OldSnapshot) was actually newer then the comparator FNObjectSnapshot(NewSnapshot); swapping for comparison purposes."));
 	}
 
 	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;

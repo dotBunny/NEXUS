@@ -48,7 +48,7 @@ bool FNProcGenOperationContext::AddOrganComponent(UNOrganComponent* Component)
 {
 	if (IsLocked())
 	{
-		UE_LOG(LogNexusProcGen, Warning, TEXT("Attempted to add additional context from a UNOrganComponent when the FNOrganGenerationContext has already been locked."))
+		UE_LOG(LogNexusProcGen, Warning, TEXT("Attempted to add additional context from a UNOrganComponent when the FNOrganGenerationContext has already been locked."));
 		return false;
 	}
 	

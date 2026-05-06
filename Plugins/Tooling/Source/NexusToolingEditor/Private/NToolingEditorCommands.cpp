@@ -140,7 +140,7 @@ void FNToolingEditorCommands::OpenNetworkProfiler()
 		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
 	if (!ProcHandle.IsValid())
 	{
-		UE_LOG(LogNexusToolingEditor, Error, TEXT("Unable to launch NetworkProfiler."))
+		UE_LOG(LogNexusToolingEditor, Error, TEXT("Unable to launch NetworkProfiler."));
 	}
 }
 

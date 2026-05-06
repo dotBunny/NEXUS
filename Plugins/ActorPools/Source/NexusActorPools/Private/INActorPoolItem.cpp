@@ -27,7 +27,7 @@ bool INActorPoolItem::ReturnToActorPool()
 		}
 		return Actor->GetWorld()->GetSubsystem<UNActorPoolSubsystem>()->ReturnActor(Actor);
 	}
-	UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL or non-AActor to an FNActorPool."))
+	UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL or non-AActor to an FNActorPool."));
 	return false;
 }
 

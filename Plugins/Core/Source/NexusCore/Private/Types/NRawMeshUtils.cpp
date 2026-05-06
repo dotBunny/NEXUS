@@ -63,7 +63,7 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 
 	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."))
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."));
 		return false;
 	}
 	if (LeftMesh.HasNonTris() || RightMesh.HasNonTris())
@@ -124,7 +124,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 {
 	if (Mesh.IsConvex())
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("Converting mesh to ConvexHull that is already a convex hull. This duplicates the mesh!!!"))
+		UE_LOG(LogNexusCore, Warning, TEXT("Converting mesh to ConvexHull that is already a convex hull. This duplicates the mesh!!!"));
 		return Mesh;
 	}
 

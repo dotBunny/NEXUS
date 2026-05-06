@@ -9,7 +9,7 @@ void FNProcGenGraphNullNode::Link(FNProcGenGraphNode* Node)
 {
 	if (Linked != nullptr)
 	{
-		UE_LOG(LogNexusProcGen, Error, TEXT("FNProcGenGraphNullNode already linked."))
+		UE_LOG(LogNexusProcGen, Error, TEXT("FNProcGenGraphNullNode already linked."));
 		return;
 	}
 	Linked = Node;
@@ -19,7 +19,7 @@ void FNProcGenGraphNullNode::Unlink()
 {
 	if (Linked == nullptr)
 	{
-		UE_LOG(LogNexusProcGen, Error, TEXT("FNProcGenGraphNullNode not linked."))
+		UE_LOG(LogNexusProcGen, Error, TEXT("FNProcGenGraphNullNode not linked."));
 		return;
 	}
 	Linked = nullptr;

@@ -59,12 +59,12 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 {
 	if (!bProcessedSuccessfull)
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."));
 		return;
 	}
 	if (!Response.IsValid())
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request response was invalid."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request response was invalid."));
 		return;
 	}
 	
@@ -84,7 +84,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	// We didn't find anything, bail
 	if (TargetVersion.IsEmpty())
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to find remote plugin version for update."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to find remote plugin version for update."));
 		return;
 	}
 	

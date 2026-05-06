@@ -541,7 +541,7 @@ void FNActorPool::Fill()
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items."), *Template->GetName(), Settings.MinimumActorCount)
+	UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items."), *Template->GetName(), Settings.MinimumActorCount);
 	CreateActors(Settings.MinimumActorCount - InActors.Num());
 }
 
@@ -550,7 +550,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count)
+	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count);
 	CreateActors(Count);
 }
 

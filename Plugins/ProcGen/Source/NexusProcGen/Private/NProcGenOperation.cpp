@@ -33,8 +33,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<UNOrganCompo
 	{
 		Operation->AddToContext(Component);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"),
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }
 
@@ -47,8 +47,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(const TArray<TWeakObjectP
 	{
 		Operation->AddToContext(Organ);
 	}
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%i) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with GUID(%i) and Seed(%s)"),
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }
 
@@ -58,8 +58,8 @@ UNProcGenOperation* UNProcGenOperation::CreateInstance(UNOrganComponent* BaseCom
 	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
 	
-	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"), 
-		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed)
+	UE_LOG(LogNexusProcGen, Log, TEXT("Created new UNProcGenOperation(%s) with Ticket(%i) and Seed(%s)"),
+		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }
 
