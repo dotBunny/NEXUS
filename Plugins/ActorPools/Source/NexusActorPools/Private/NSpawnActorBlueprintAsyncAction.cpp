@@ -62,7 +62,7 @@ void UNSpawnActorBlueprintAsyncAction::OnLoaded()
 void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 {
 	// Not for me!
-	if (ActorPool->GetTemplate() != ActorClass.Get()) return;
+	if (ActorPool == nullptr || ActorPool->GetTemplate() != ActorClass.Get()) return;
 	
 	// Unregister callback
 	if (OnCreatedPoolHandle.IsValid())

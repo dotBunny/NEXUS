@@ -40,6 +40,7 @@
 - `FNRawMesh::CreateDynamicMesh` no longer crashes on non-triangle based meshes, now returns default and errors.
 - NDynamicRefs events fired when removing object from the fast-path when it was not actually previously added.
 - `FNEditorUtils::DisallowConfigFileFromStaging` and `FNEditorUtils::AllowConfigFileForStaging` now properly use the project name.
+- `FNActorPool` now properly marks created `AActor` as root-object.
 
 ### Removed
 

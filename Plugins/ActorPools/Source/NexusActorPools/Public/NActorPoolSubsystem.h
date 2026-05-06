@@ -137,7 +137,8 @@ public:
 	 */
 	FNActorPool* GetActorPool(const TSubclassOf<AActor> ActorClass) const
 	{
-		return ActorPools.Find(ActorClass)->Get();
+		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);
+		return Found ? Found->Get() : nullptr;
 	}
 
 	/**
