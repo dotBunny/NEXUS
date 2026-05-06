@@ -13,6 +13,14 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	const double StartTime = FPlatformTime::Seconds();
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
 	
+	// Early out when we do not have any nodes to spawn
+	if (NodeCount == 0)
+	{
+		N_PROCEDURAL_GENERATION_ANALYTICS_INDEX(SpawnCellProxiesFinish)
+		CompletionEvent->Unlock();
+		return;
+	}
+	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
