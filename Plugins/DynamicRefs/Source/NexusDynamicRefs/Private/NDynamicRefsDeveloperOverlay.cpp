@@ -13,12 +13,7 @@ void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown);
 	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
+	BindAllCurrentWorlds();
 
 	Super::NativeConstruct();
 }
@@ -28,12 +23,8 @@ void UNDynamicRefsDeveloperOverlay::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
-	
+	UnbindAllCurrentWorlds();
+
 	Super::NativeDestruct();
 }
 

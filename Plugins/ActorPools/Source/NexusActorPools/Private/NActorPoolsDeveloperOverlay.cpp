@@ -24,13 +24,8 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
 	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
-	
+	BindAllCurrentWorlds();
+
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 
 	UpdateBanner();
@@ -43,11 +38,7 @@ void UNActorPoolsDeveloperOverlay::NativeDestruct()
 	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
 	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
 	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
+	UnbindAllCurrentWorlds();
 
 	ActorPoolList->ClearListItems();
 	Super::NativeDestruct();

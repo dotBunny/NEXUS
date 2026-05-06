@@ -39,7 +39,16 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsEditorUtilityWidget;
 
-protected:
+	/** Iterates all current GEngine world contexts and calls Bind() on each. Safe to call when GEngine is null. */
+	void BindAllCurrentWorlds();
+	/** Iterates all current GEngine world contexts and calls Unbind() on each. Safe to call when GEngine is null. */
+	void UnbindAllCurrentWorlds();
+
+	/** Override to subscribe to a specific world's subsystems when the overlay is constructed or a world is added. */
+	virtual void Bind(UWorld* World) {}
+	/** Override to unsubscribe from a specific world's subsystems when the overlay is destroyed or a world is removed. */
+	virtual void Unbind(const UWorld* World) {}
+
 	/** Bound UCommonBorder that provides the banner row's background brush. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonBorder> ContainerBanner;
