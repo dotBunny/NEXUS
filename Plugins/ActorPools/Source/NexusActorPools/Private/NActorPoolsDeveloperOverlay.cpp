@@ -115,7 +115,7 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 	}
 	
 	
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
+	if (IsValid(ActorPoolList))
 	{
 		TArray<UObject*> Items = ActorPoolList->GetListItems();
 		const int32 ItemCount = Items.Num();
@@ -150,7 +150,7 @@ void UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 
 void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 {
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel() && ActorPoolList->GetNumItems() > 0)
+	if (IsValid(ActorPoolList) && ActorPoolList->GetNumItems() > 0)
 	{
 		HideContainerBanner();
 	}

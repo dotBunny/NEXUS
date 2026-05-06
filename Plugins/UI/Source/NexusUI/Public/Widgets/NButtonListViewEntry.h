@@ -96,7 +96,7 @@ protected:
 
 	virtual void NativeDestruct() override
 	{
-		if (Button != nullptr && Button->IsValidLowLevel())
+		if (IsValid(Button))
 		{
 			Button->OnClicked.RemoveAll(this);
 			Button->OnHovered.RemoveAll(this);

@@ -164,11 +164,9 @@ void UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 
 void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 {
-	const bool bNamedReferences = (NamedReferences != nullptr && 
-		NamedReferences->IsValidLowLevel() && 
+	const bool bNamedReferences = (IsValid(NamedReferences) &&
 		NamedReferences->GetNumItems() > 0);
-	const bool bDynamicReferences = (DynamicReferences != nullptr && 
-		DynamicReferences->IsValidLowLevel() && 
+	const bool bDynamicReferences = (IsValid(DynamicReferences) &&
 		DynamicReferences->GetNumItems() > 0);
 		
 	if (bNamedReferences || bDynamicReferences)
