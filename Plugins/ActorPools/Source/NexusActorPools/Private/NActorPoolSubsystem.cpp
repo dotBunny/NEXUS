@@ -53,6 +53,7 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	{
 		// Ensure the set has been loaded
 		UNActorPoolSet* LoadedSet = Set.LoadSynchronous();
+		if (LoadedSet == nullptr) continue;
 		ApplyActorPoolSet(LoadedSet);
 	}
 	

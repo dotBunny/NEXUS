@@ -349,6 +349,9 @@ void FNProcGenEditorToolMenu::CollisionVisualizerToggle()
 	else
 	{
 		const TObjectPtr<ANDebugActor> NewVisualizer = FNProcGenEdMode::CreateCollisionVisualizer(FNEditorUtils::GetCurrentWorld());
-		GEditor->SelectActor(NewVisualizer, true, false, false);
+		if (NewVisualizer != nullptr)
+		{
+			GEditor->SelectActor(NewVisualizer, true, false, false);
+		}
 	}
 }

@@ -32,6 +32,8 @@ ANDebugActor* FNProcGenEditorUtils::CreateWorldCollisionVisualizerActor(UWorld* 
 	FNRawMeshFactory::FromActorsInBounds(WorldActors, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
 	
 	UMaterialInterface* VisualizerMaterial = UNProcGenEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
+	if (VisualizerMaterial == nullptr) return nullptr;
+	
 	TArray<ANDebugActor*> Actors = FNRawMeshUtils::CreateRawMeshVisualizers(World, WorldCollisionMeshes, WorldCollisionMeshTransforms, 
 		VisualizerMaterial, true, false);
 	

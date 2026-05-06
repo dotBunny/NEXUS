@@ -11,6 +11,7 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 	for (FNTissueEntry Entry : Tissue->Cells)
 	{
 		TObjectPtr<UNCell> Cell = Entry.Cell.LoadSynchronous();
+		if (Cell == nullptr) continue;
 		if (!OutCellMap.Find(Cell))
 		{
 			OutCellMap.Add(Cell, Entry);
@@ -25,7 +26,7 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 	for (auto Additional : Tissue->AdditionalTissue)
 	{
 		TObjectPtr<UNTissue> AdditionalTissue = Additional.LoadSynchronous();
-		if (OutProcessedSets.Contains(AdditionalTissue)) continue;
+		if (AdditionalTissue == nullptr || OutProcessedSets.Contains(AdditionalTissue)) continue;
 
 		// Add before recursion to stop double
 		OutProcessedSets.Add(AdditionalTissue);

@@ -93,6 +93,7 @@ TMap<TObjectPtr<UNCell>, FNTissueEntry> UNOrganComponent::GetTissueMap() const
 	for (auto Tissue : Tissues)
 	{
 		TObjectPtr<UNTissue> LoadedTissue = Tissue.LoadSynchronous();
+		if (LoadedTissue == nullptr) continue;
 		UNTissue::BuildTissueMap(LoadedTissue, TissueMap, ReferencedTissues);
 	}
 	return MoveTemp(TissueMap);

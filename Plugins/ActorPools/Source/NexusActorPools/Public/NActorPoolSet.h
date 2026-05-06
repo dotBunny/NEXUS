@@ -62,7 +62,7 @@ public:
 		for (int32 i = 0; i < AdditionalCount; i++)
 		{
 			UNActorPoolSet* NestedSetPtr = NestedSets[i].LoadSynchronous();
-			if (!OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
+			if (NestedSetPtr != nullptr && !OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
 			{
 				NestedSetPtr->TryGetUniqueSets(OutActorPoolSets);
 			}
