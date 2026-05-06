@@ -21,12 +21,13 @@ class NEXUSDYNAMICREFS_API UNDynamicRefsDeveloperOverlay : public UNDeveloperOve
 
 	GENERATED_BODY()
 
+public:
+	
 	/** Subscribe to the dynamic-ref subsystem hosted by World so its add/remove events drive this overlay. */
 	virtual void BindWorld(UWorld* World) override;
 	/** Drop the subscription to the dynamic-ref subsystem hosted by World. */
 	virtual void UnbindWorld(const UWorld* World) override;
 
-public:
 	/** Fired when a row's button is clicked; typically used to focus/select the target object in the editor. */
 	UPROPERTY(BlueprintAssignable)
 	FOnDynamicRefButtonDelegate OnButtonClicked;

@@ -21,22 +21,22 @@ class NEXUSACTORPOOLS_API UNActorPoolListViewEntry : public UUserWidget, public 
 {
 	GENERATED_BODY()
 
+public:
+
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-
-	virtual void NativeDestruct() override;
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-
-public:
-
+	
 	/** Refresh the widget's displayed fields from the current pool state. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	void Refresh() const;
 
 protected:
+	
+	virtual void NativeDestruct() override;
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
 	/** The list view that owns this entry. */
 	UPROPERTY(BlueprintReadOnly)
