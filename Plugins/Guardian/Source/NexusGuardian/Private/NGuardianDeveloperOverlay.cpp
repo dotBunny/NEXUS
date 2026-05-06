@@ -27,7 +27,7 @@ void UNGuardianDeveloperOverlay::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNGuardianDeveloperOverlay::Bind(UWorld* World)
+void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
@@ -40,7 +40,7 @@ void UNGuardianDeveloperOverlay::Bind(UWorld* World)
 	UpdateBanner();
 }
 
-void UNGuardianDeveloperOverlay::Unbind(const UWorld* World)
+void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
@@ -58,7 +58,7 @@ void UNGuardianDeveloperOverlay::OnWorldPostInitialization(UWorld* World,
 {
 	if (World != nullptr)
 	{
-		Bind(World);
+		BindWorld(World);
 	}
 }
 
@@ -66,7 +66,7 @@ void UNGuardianDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 {
 	if (World != nullptr)
 	{
-		Unbind(World);
+		UnbindWorld(World);
 	}
 }
 

@@ -28,7 +28,7 @@ void UNDynamicRefsDeveloperOverlay::NativeDestruct()
 	Super::NativeDestruct();
 }
 
-void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
+void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (System == nullptr)
@@ -93,7 +93,7 @@ void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
 
 
 
-void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World)
+void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
 	
@@ -142,14 +142,14 @@ void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World)
 void UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization(UWorld* World,
 	FWorldInitializationValues WorldInitializationValues)
 {
-	Bind(World);
+	BindWorld(World);
 }
 
 void UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 {
 	if (World != nullptr)
 	{
-		Unbind(World);
+		UnbindWorld(World);
 	}
 }
 
