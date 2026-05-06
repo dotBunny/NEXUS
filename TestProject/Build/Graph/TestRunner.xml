@@ -92,6 +92,8 @@
         <Property Name="TestPackageLabel" Value="BootTest Game Win64" />      
     </Do>
 
+    <!-- INCLUDE EPICS MAIN TASK -->
+    <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
     <!-- SETUP OUR PUBLISHING OF STATUS -->
     <Property Name="UpdateGitHubStatus" Value="false" />
@@ -99,9 +101,6 @@
     <Do If="$(UpdateGitHubStatus)">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);GitHub Commit Status"/>
     </Do>
-
-    <!-- INCLUDE EPICS MAIN TASK -->
-    <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
     <Agent Name="Publish Updates" Type="$(PublishAgentType)">        
         <Do If="$(UpdateGitHubStatus)">
