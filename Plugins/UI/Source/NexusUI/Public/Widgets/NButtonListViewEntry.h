@@ -144,7 +144,7 @@ public:
 	 * Updates the label text displayed on the bound button's child text block.
 	 * @param NewText The text to display on the button.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface")
 	void SetText(const FText NewText) const
 	{
 		Text->SetText(NewText);

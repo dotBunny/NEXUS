@@ -26,6 +26,6 @@ public:
 	 * @param Visibility The visibility you want to set the layer to.
 	 * @return True if the layer was successfully set, false otherwise.
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI|Game Layer", DisplayName = "Set Layer Visibility")
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface", DisplayName = "Set Layer Visibility")
 	static bool SetLayerVisibility(UPARAM(ref) ULocalPlayer* LocalPlayer, const FName Name, ESlateVisibility Visibility);
 };
