@@ -8,7 +8,7 @@
     <Option Name="WithTestConfiguration" DefaultValue="EditorSmoke" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?"/>
     
     <!-- EDITOR BOOT TEST -->    
-    <Do If="'$(WithTestConfiguration)' != 'EditorBootTest'" >
+    <Do If="'$(WithTestConfiguration)' == 'EditorBootTest'" >
         <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="true" />
@@ -16,7 +16,7 @@
     </Do>
 
     <!-- EDITOR UNIT TESTS -->    
-    <Do If="'$(WithTestConfiguration)' != 'EditorUnitTests'" >
+    <Do If="'$(WithTestConfiguration)' == 'EditorUnitTests'" >
         <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
@@ -25,7 +25,7 @@
     </Do>
     
     <!-- EDITOR PERFORMANCE TESTS -->    
-    <Do If="'$(WithTestConfiguration)' != 'EditorPerformanceTests'" >
+    <Do If="'$(WithTestConfiguration)' == 'EditorPerformanceTests'" >
         <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
@@ -34,7 +34,7 @@
     </Do>
     
     <!-- EDITOR FUNCTIONAL TESTS -->
-    <Do If="'$(WithTestConfiguration)' != 'EditorFunctionalTests'" >
+    <Do If="'$(WithTestConfiguration)' == 'EditorFunctionalTests'" >
         <Property Name="WithWin64" Value="false" />
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
@@ -43,7 +43,7 @@
     </Do>
 
     <!-- GAME BOOT TEST -->    
-    <Do If="'$(WithTestConfiguration)' != 'GameBootTest'" >
+    <Do If="'$(WithTestConfiguration)' == 'GameBootTest'" >
         <Property Name="WithWin64" Value="true" />
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorBootTest" Value="false" />
