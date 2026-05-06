@@ -66,7 +66,7 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 	Super::NativeTick(MyGeometry, InDeltaTime);
 }
 
-void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
+void UNActorPoolsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World == nullptr) return;
 	
@@ -94,7 +94,7 @@ void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 	}));
 }
 
-void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
+void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
 	
@@ -128,14 +128,14 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 
 void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues)
 {
-	Bind(World);
+	BindWorld(World);
 }
 
 void UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 {
 	if (World != nullptr)
 	{
-		Unbind(World);
+		UnbindWorld(World);
 	}
 }
 
