@@ -104,7 +104,7 @@
 
     <Agent Name="Publish Updates" Type="$(PublishAgentType)">        
         <Do If="$(UpdateGitHubStatus)">
-            <Node Name="GitHub Commit Status" Requires="BuildAndTest $(ProjectName);">
+            <Node Name="GitHub Commit Status" Requires="$(GraphPrefix) $(ProjectName);">
                 
                 <!-- START: Get & Compile K9 Tooling -->			
                 <!-- If we dont have the source, get it, if we do update it. -->
