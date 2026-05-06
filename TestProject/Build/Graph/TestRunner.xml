@@ -14,24 +14,24 @@
     </Do>
     
     <!-- Should we run unit tests in the editor? -->
-    <Option Name="WithUnitTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Unit Tests in the Editor?"/>
-    <Do If="'$(WithUnitTests)' != 'false'" >
+    <Option Name="WithEditorUnitTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Unit Tests in the Editor?"/>
+    <Do If="'$(WithEditorUnitTests)' != 'false'" >
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
         <Property Name="TestPackageList" Value="$(TestPackageList), EditorUnitTests" />
     </Do>
 
     <!-- Should we run performance tests in the editor? -->
-    <Option Name="WithPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests in the Editor?"/>
-    <Do If="'$(WithPerformanceTests)' != 'false'" >
+    <Option Name="WithEditorPerformanceTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Performance Tests in the Editor?"/>
+    <Do If="'$(WithEditorPerformanceTests)' != 'false'" >
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
         <Property Name="TestPackageList" Value="$(TestPackageList), EditorPerfTests" />
     </Do>
 
     <!-- Should we run functional tests in the editor? -->
-    <Option Name="WithFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests in the Editor?"/>
-    <Do If="'$(WithFunctionalTests)' != 'false'" >
+    <Option Name="WithEditorFunctionalTests" DefaultValue="false" Restrict="true|false" Description="Should we be running Functional Tests in the Editor?"/>
+    <Do If="'$(WithEditorFunctionalTests)' != 'false'" >
         <Property Name="WithWin64Editor" Value="true" />
         <Property Name="EditorTestList" Value="$(EditorTestList)+UE.EditorAutomation(RunTest=Project.)" />
         <Property Name="TestPackageList" Value="$(TestPackageList), EditorFunctionalTests" />
