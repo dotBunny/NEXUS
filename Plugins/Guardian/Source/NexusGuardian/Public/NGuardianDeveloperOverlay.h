@@ -19,19 +19,20 @@ class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()
 
+public:
+	
+	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
+	virtual void Bind(UWorld* World) override;
+	/** Drop the subscription to the Guardian subsystem hosted by World. */
+	virtual void Unbind(const UWorld* World) override;
+	
+protected:
 	//~UUserWidget
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	//End UUserWidget
-
-	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
-	virtual void Bind(UWorld* World) override;
-	/** Drop the subscription to the Guardian subsystem hosted by World. */
-	virtual void Unbind(const UWorld* World) override;
-
-protected:
 
 	/** Container showing the object count trio (current / base / next threshold). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))

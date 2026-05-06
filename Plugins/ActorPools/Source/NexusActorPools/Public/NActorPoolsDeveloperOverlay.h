@@ -20,12 +20,13 @@ class NEXUSACTORPOOLS_API UNActorPoolsDeveloperOverlay : public UNDeveloperOverl
 {
 	GENERATED_BODY()
 
+public:
+	
 	/** Subscribe to the actor-pool subsystem hosted by World so its pool-added events drive this overlay. */
 	virtual void Bind(UWorld* World) override;
 	/** Drop the subscription to the actor-pool subsystem hosted by World. */
 	virtual void Unbind(const UWorld* World) override;
 
-public:
 	/** @return The list view widget displaying the pools. */
 	TObjectPtr<UNListView> GetActorPoolList() const { return ActorPoolList; }
 
