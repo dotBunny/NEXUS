@@ -27,7 +27,7 @@
         <Property Name="TargetBootTest" Value="false" />
         <Property Name="CookedEditorBootTest" Value="false" />
                 
-        <Property Name="TestPackageLabel" Value="BootTest Editor Win64" />      
+        <Property Name="TestPackageLabel" Value="BootTestEditor" />      
     </Do>
 
 
@@ -44,7 +44,7 @@
         <Property Name="CookedEditorBootTest" Value="false" />
           
         <Property Name="DefaultEditorTestList" Value="UE.EditorAutomation(RunTest=NEXUS.UnitTests)" />
-        <Property Name="TestPackageLabel" Value="UnitTests Editor Win64" />
+        <Property Name="TestPackageLabel" Value="UnitTestsEditor" />
     </Do>
     
     <!-- EDITOR PERFORMANCE TESTS -->    
@@ -60,7 +60,7 @@
         <Property Name="CookedEditorBootTest" Value="false" />
         
         <Property Name="DefaultEditorTestList" Value="UE.EditorAutomation(RunTest=NEXUS.PerfTests)" />
-        <Property Name="TestPackageLabel" Value="PerfTests Editor Win64" />
+        <Property Name="TestPackageLabel" Value="PerfTestsEditor" />
     </Do>
     
     <!-- EDITOR FUNCTIONAL TESTS -->
@@ -76,7 +76,7 @@
         <Property Name="CookedEditorBootTest" Value="false" />
 
         <Property Name="DefaultEditorTestList" Value="UE.EditorAutomation(RunTest=Project.)" />
-        <Property Name="TestPackageLabel" Value="FuncTests Editor Win64" />        
+        <Property Name="TestPackageLabel" Value="FuncTestsEditor" />        
     </Do>
 
     <!-- GAME BOOT TEST -->    
@@ -89,7 +89,7 @@
         <Property Name="WithWin64" Value="true" />
         <Property Name="WithWin64Editor" Value="true" />
 
-        <Property Name="TestPackageLabel" Value="BootTest Game Win64" />      
+        <Property Name="TestPackageLabel" Value="BootTestGame" />      
     </Do>
 
     <!-- INCLUDE EPICS MAIN TASK -->
@@ -134,7 +134,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=\"$(TestPackageLabel)\" ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=Horde/NEXUS/$(TestPackageLabel) ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
