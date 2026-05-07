@@ -100,7 +100,7 @@ void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifi
 			return;
 		}
 	}
-	
+
 	WidgetTabIdentifiers.WidgetIdentifiers.Add(WidgetIdentifier);
 	WidgetTabIdentifiers.TabIdentifier.Add(TabIdentifier);
 	SaveConfig();
@@ -108,13 +108,19 @@ void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifi
 
 void UNEditorUtilityWidgetSubsystem::RemoveTabIdentifier(const FName WidgetIdentifier)
 {
+	bool bDirty = false;
 	for (int32 i = WidgetTabIdentifiers.WidgetIdentifiers.Num() - 1; i >= 0; i--)
 	{
 		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
 		{
 			WidgetTabIdentifiers.WidgetIdentifiers.RemoveAt(i);
 			WidgetTabIdentifiers.TabIdentifier.RemoveAt(i);
-			SaveConfig();
+			bDirty = true;
 		}
+	}
+
+	if (bDirty)
+	{
+		SaveConfig();
 	}
 }
