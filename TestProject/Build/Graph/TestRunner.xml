@@ -111,7 +111,9 @@
         <!-- GITHUB COMMIT STATUS -->
         <Do If="$(UpdateGitHubStatus)">
             <Property Name="GitHubTestState" Value="failure" />
+            <Log Message="Updating GitHub Commit State ..." />                
             <Node Name="GitHub Determine Status" Requires="TestPackageWait">
+                <Log Message="Tests were successful, setting success state." />
                 <Property Name="GitHubTestState" Value="success" />
             </Node>
             <Node Name="GitHub Commit Status" After="GitHub Determine Status">
@@ -132,7 +134,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=$(TestPackageLabel) ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=\"$(TestPackageLabel)\" ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
