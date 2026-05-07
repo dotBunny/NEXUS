@@ -106,7 +106,7 @@
         
         <Do If="$(UpdateGitHubStatus)">
             <Node Name="GitHub Commit Status" After="$(GraphPrefix) $(ProjectName);">
-                <Horde-SetSecretEnvVar Name="NEXUS_SECRETS_GITHUB_TOKEN" Secret="nexus-secrets.github-token" />
+                <Horde-SetSecretEnvVar Name="NEXUS_SECRETS_GITHUB_TOKEN" Secret="nexus.github-token" />
 
                 <!-- START: Get & Compile K9 Tooling -->			
                 <!-- If we dont have the source, get it, if we do update it. -->
