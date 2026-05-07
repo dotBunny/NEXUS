@@ -1,6 +1,7 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
-        
+      
+    <Horde-SetSecretEnvVar Name="SECRET_GITHUB_TOKEN" Secret="horde-secrets.nexus-github-token"/>
     <Include Script="Includes/CompositeGlobals.xml" />
     <Include Script="Includes/K9Properties.xml" />
 
@@ -8,7 +9,6 @@
     <Property Name="TestPackageAggregate" Value="" />
     
     <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?" />
-    <Option Name="GitHubToken" DefaultValue="" Description="Token used when communicating with GitHub" />
     
     <Property Name="PublishAgentType" Value="Win64" />
 	<Property Name="PublishAgentType" Value="Incremental$(PublishAgentType)" If="$(UseIncrementalAgents)" />
@@ -97,7 +97,7 @@
 
     <!-- SETUP OUR PUBLISHING OF STATUS -->
     <Property Name="UpdateGitHubStatus" Value="false" />
-	<Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != '' and '$(GitHubToken)' != ''" />
+	<Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != '' and '$(SECRET_GITHUB_TOKEN)' != ''" />
     <Do If="$(UpdateGitHubStatus)">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);GitHub Commit Status"/>
     </Do>
@@ -121,7 +121,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---AUTH-TOKEN=$(GitHubToken) ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---DESCRIPTION=$(TestPackageLabel) ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---AUTH-TOKEN=$(SECRET_GITHUB_TOKEN) ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---DESCRIPTION=$(TestPackageLabel) ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
