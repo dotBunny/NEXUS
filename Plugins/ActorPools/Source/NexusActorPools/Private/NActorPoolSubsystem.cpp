@@ -62,15 +62,17 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 void UNActorPoolSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
+	TickableActorPools.Empty();
+	TickableSpawners.Empty();
+
 	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
 		Pool.Value->Clear();
 		Pool.Value.Reset();
 	}
-	
+
 	ActorPools.Empty();
-	TickableActorPools.Empty();
-	
+
 	Super::OnWorldEndPlay(InWorld);
 }
 
