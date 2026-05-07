@@ -33,14 +33,15 @@ void UNMultiplayerEditorSubsystem::Tick(float DeltaTime)
 
 void UNMultiplayerEditorSubsystem::StartMultiplayerTest()
 {
-	ProcessHandles.Empty();
-	LocalProcessDelegateHandle = FEditorDelegates::BeginStandaloneLocalPlay.AddUObject(this, &UNMultiplayerEditorSubsystem::AddLocalProcess);
-	
+	// Stop first so any prior delegate binding is removed and prior process handles are closed before we
+	// overwrite LocalProcessDelegateHandle with the new binding below.
 	if (bIsMultiplayerTestRunning)
 	{
 		StopMultiplayerTest();
 	}
-	
+
+	LocalProcessDelegateHandle = FEditorDelegates::BeginStandaloneLocalPlay.AddUObject(this, &UNMultiplayerEditorSubsystem::AddLocalProcess);
+
 	const FNMultiplayerEditorModule& Module = FNMultiplayerEditorModule::Get();
 	
 	FRequestPlaySessionParams PlaySessionRequest;
@@ -98,9 +99,29 @@ void UNMultiplayerEditorSubsystem::StopMultiplayerTest()
 	Module.OnMultiplayerTestEnded.Broadcast();
 	
 	FEditorDelegates::BeginStandaloneLocalPlay.Remove(LocalProcessDelegateHandle);
+	LocalProcessDelegateHandle.Reset();
+
+	// FProcHandle's destructor does not release the underlying OS handle; CloseProcess is required to avoid leaking
+	// a kernel handle per spawned PIE process every Start/Stop cycle.
+	for (FProcHandle& Handle : ProcessHandles)
+	{
+		if (Handle.IsValid())
+		{
+			FPlatformProcess::CloseProc(Handle);
+		}
+	}
 	ProcessHandles.Empty();
-	
+
 	bIsMultiplayerTestRunning = false;
+}
+
+void UNMultiplayerEditorSubsystem::Deinitialize()
+{
+	if (bIsMultiplayerTestRunning)
+	{
+		StopMultiplayerTest();
+	}
+	Super::Deinitialize();
 }
 
 void UNMultiplayerEditorSubsystem::ToggleMultiplayerTest()

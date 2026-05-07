@@ -42,6 +42,7 @@
 - `FNEditorUtils::DisallowConfigFileFromStaging` and `FNEditorUtils::AllowConfigFileForStaging` now properly use the project name.
 - `FNActorPool` now properly marks created `AActor` as root-object.
 - `UNActorPoolSubsystem` will no longer crash returning null actors, and returns false when the actor is destroyed, as it doesnt get returned to the pool.
+- `UNMultiplayerEditorSubsystem` now concretely shutdown process handles, not relying on natural causes.
 
 ### Removed
 

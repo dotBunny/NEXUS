@@ -40,6 +40,8 @@ class NEXUSMULTIPLAYEREDITOR_API UNMultiplayerEditorSubsystem : public UEditorSu
 	virtual bool IsTickableInEditor() const override { return true; }
 	//End FTickableGameObject
 
+	virtual void Deinitialize() override;
+
 	/** Start the multiplayer test, spawning client/server processes according to the user settings. */
 	void StartMultiplayerTest();
 	/** Stop the multiplayer test and terminate any tracked processes. */
