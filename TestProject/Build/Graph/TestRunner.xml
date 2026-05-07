@@ -124,7 +124,7 @@
                 <!-- If we dont have the source, get it, if we do update it. -->
                 <Do If="Exists('$(K9Checkout)/')">
                     <Log Message="Updating K9 ..." />
-                    <Git-Clone Dir="$(K9Checkout)" Branch="origin/main"/>		
+                    <Git-Clone Dir="$(K9Checkout)" Branch="origin/main"/>
                 </Do>			
                 <Do If="!Exists('$(K9Checkout)/')">
                     <Log Message="Cloning K9 ..." />
