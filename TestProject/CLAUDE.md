@@ -20,7 +20,7 @@ NEXUS/
 
 - The `TestProject` is a thin host project.
 - Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer. Before using any command that contains `___UEROOT___`, check for a locally saved path in `./claude/ue5.path`, if it is not present, check each candidate path in order to find the first one on disk, save it to `./claude/ue5.path`, and then use it.
+- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer. Before using any command that contains `___UEROOT___`, check the `settings.local.json` and look for `replace["___UEROOT___"]` to see if we have the path saved. If not, check each candidate path in order to find the first one on disk, save it to `settings.local.json`'s `replace["___UEROOT___"]`, and then use it.
 - `___PROJECTROOT___` is the absolute path to the `TestProject/` directory — the current working directory. Resolve it from the working directory rather than hardcoding a path.
 
 ## Plugin Architecture

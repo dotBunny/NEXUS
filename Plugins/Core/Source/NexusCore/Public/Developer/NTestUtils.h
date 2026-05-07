@@ -13,7 +13,7 @@
  * its macros (REQUIRE_MESSAGE, ADD_ERROR). All methods are designed to be safely re-entrant — every
  * world is disposed before the call returns.
  */
-class NEXUSCORE_API FNTestUtils
+class FNTestUtils
 {
 public:
 	/**
@@ -167,42 +167,65 @@ public:
 	}
 
 	/**
-	 * Polls ProjectLogDir until a file matching the wildcard appears that is not in PreExisting.
+	 * Polls ProjectLogDir until a file matching the wildcard appears that is not in PreExisting,
+	 * then waits for the writer to finish before returning the path.
 	 *
 	 * Provides a deterministic synchronisation point for tests whose subject-under-test writes
 	 * files asynchronously (Async() tasks, background thread pool, etc.). The poll loop runs at
-	 * roughly 25 ms granularity until either a new match is found or the timeout elapses, so the
-	 * caller does not need access to the producer's task handles or futures.
+	 * roughly 25 ms granularity until either a stable file is observed or the timeout elapses, so
+	 * the caller does not need access to the producer's task handles or futures.
+	 *
+	 * The function returns only once the new file is non-empty AND its size has held steady across
+	 * one poll interval. The size-stability gate avoids a race where IFileManager::FindFiles() sees
+	 * the file the moment the writer creates it (0 bytes, handle still open) — returning that path
+	 * would let the caller observe FileSize() == 0 and trip a sharing violation when it tried to
+	 * delete the file. By the time the size has stopped changing the writer has serialised the
+	 * payload and closed its handle, so the path is safe to read or delete.
 	 *
 	 * The first new filename encountered is returned as an absolute path (ProjectLogDir joined
-	 * with the filename) so the caller can immediately stat, read, or delete it. If multiple new
-	 * files exist on a given poll iteration the order is whatever IFileManager::FindFiles()
-	 * yields — tests that need to disambiguate should narrow the wildcard.
+	 * with the filename). If multiple new files exist on a given poll iteration the order is
+	 * whatever IFileManager::FindFiles() yields — tests that need to disambiguate should narrow
+	 * the wildcard.
 	 *
 	 * @param Wildcard       Filename glob applied inside ProjectLogDir. Must match the wildcard
 	 *                       passed to the corresponding SnapshotLogFiles() call.
 	 * @param PreExisting    Baseline set returned by SnapshotLogFiles() before the test body ran.
 	 * @param TimeoutSeconds Maximum wall-clock time to poll. Default 5s — long enough for typical
 	 *                       async file IO under contention without stalling the test suite.
-	 * @return Absolute path of the first new matching file, or an empty string on timeout.
+	 * @return Absolute path of the new matching file once its size has stabilised, or an empty
+	 *         string on timeout.
 	 */
 	FORCEINLINE static FString WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds = 5.0)
 	{
 		const double Deadline = FPlatformTime::Seconds() + TimeoutSeconds;
-		do
+		FString FoundPath;
+		int64 LastSize = -1;
+		while (FPlatformTime::Seconds() < Deadline)
 		{
-			TArray<FString> Found;
-			IFileManager::Get().FindFiles(Found, *(FPaths::ProjectLogDir() / Wildcard), true, false);
-			for (const FString& Name : Found)
+			if (FoundPath.IsEmpty())
 			{
-				if (!PreExisting.Contains(Name))
+				TArray<FString> Found;
+				IFileManager::Get().FindFiles(Found, *(FPaths::ProjectLogDir() / Wildcard), true, false);
+				for (const FString& Name : Found)
 				{
-					return FPaths::ProjectLogDir() / Name;
+					if (!PreExisting.Contains(Name))
+					{
+						FoundPath = FPaths::ProjectLogDir() / Name;
+						break;
+					}
 				}
+			}
+			else
+			{
+				const int64 CurrentSize = IFileManager::Get().FileSize(*FoundPath);
+				if (CurrentSize > 0 && CurrentSize == LastSize)
+				{
+					return FoundPath;
+				}
+				LastSize = CurrentSize;
 			}
 			FPlatformProcess::Sleep(0.025f);
 		}
-		while (FPlatformTime::Seconds() < Deadline);
 		return FString();
 	}
 };

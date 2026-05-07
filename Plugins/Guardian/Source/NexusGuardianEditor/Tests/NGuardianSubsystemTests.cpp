@@ -3,6 +3,9 @@
 
 #if WITH_TESTS
 
+#include "HAL/FileManager.h"
+#include "HAL/PlatformProcess.h"
+#include "Misc/Paths.h"
 #include "NGuardianSettings.h"
 #include "NGuardianSubsystem.h"
 #include "Developer/NTestUtils.h"
@@ -17,13 +20,15 @@ namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
         int32 OriginalWarning;
         int32 OriginalSnapshot;
         int32 OriginalCompare;
+        bool  OriginalCaptureOutput;
 
         FSettingsGuard()
         {
             const UNGuardianSettings* S = UNGuardianSettings::Get();
-            OriginalWarning  = S->ObjectCountWarningThreshold;
-            OriginalSnapshot = S->ObjectCountSnapshotThreshold;
-            OriginalCompare  = S->ObjectCountCompareThreshold;
+            OriginalWarning       = S->ObjectCountWarningThreshold;
+            OriginalSnapshot      = S->ObjectCountSnapshotThreshold;
+            OriginalCompare       = S->ObjectCountCompareThreshold;
+            OriginalCaptureOutput = S->bObjectCountCaptureOutput;
         }
 
         ~FSettingsGuard()
@@ -32,6 +37,7 @@ namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
             S->ObjectCountWarningThreshold  = OriginalWarning;
             S->ObjectCountSnapshotThreshold = OriginalSnapshot;
             S->ObjectCountCompareThreshold  = OriginalCompare;
+            S->bObjectCountCaptureOutput    = OriginalCaptureOutput;
         }
     };
 }
@@ -217,6 +223,8 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
     // The compare flag must remain false.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
+        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
         {
@@ -227,13 +235,17 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 		AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
-    	
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+		AddExpectedMessage(TEXT("A UObject snapshot has been written to"), ELogVerbosity::Error);
+
+        FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
         Settings->ObjectCountCompareThreshold  = 99999999;
+        Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
+
+        const TSet<FString> PreSnapshotFiles = FNTestUtils::SnapshotLogFiles(TEXT("NEXUS_Snapshot_*.txt"));
 
         Subsystem->Tick(0.f); // triggers warning, returns early
         Subsystem->Tick(0.f); // triggers snapshot, returns early
@@ -241,6 +253,20 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
         CHECK_MESSAGE("Warning flag must be true after two Ticks.", Subsystem->HasPassedWarningThreshold())
         CHECK_MESSAGE("Snapshot flag must be true after two Ticks at zero-offset thresholds.", Subsystem->HasPassedSnapshotThreshold())
         CHECK_FALSE_MESSAGE("Compare flag must remain false — needs a third Tick.", Subsystem->HasPassedCompareThreshold())
+
+        const FString SnapshotPath = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Snapshot_*.txt"), PreSnapshotFiles);
+        if (SnapshotPath.IsEmpty())
+        {
+            ADD_ERROR("Snapshot file was not written to ProjectLogDir within the timeout.");
+        }
+        else
+        {
+            if (IFileManager::Get().FileSize(*SnapshotPath) <= 0)
+            {
+                ADD_ERROR(FString::Printf(TEXT("Snapshot file %s is empty."), *SnapshotPath));
+            }
+            IFileManager::Get().Delete(*SnapshotPath);
+        }
     }, true);
 }
 
@@ -249,9 +275,12 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
     N_TEST_CONTEXT_EDITOR)
 {
     // With all three offsets at zero, three Ticks must set all three flags.
-    // Note: crossing the compare threshold always writes a diff file to ProjectLogDir.
+    // Crossing the snapshot and compare thresholds asynchronously writes files to ProjectLogDir;
+    // the test polls for both files to verify the writes actually completed.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
+        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
         {
@@ -259,19 +288,24 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
             return;
         }
 
-		NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
         Settings->ObjectCountCompareThreshold  = 0;
+        Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
+
+        const TSet<FString> PreSnapshotFiles = FNTestUtils::SnapshotLogFiles(TEXT("NEXUS_Snapshot_*.txt"));
+        const TSet<FString> PreCompareFiles  = FNTestUtils::SnapshotLogFiles(TEXT("NEXUS_Compare_*.txt"));
 
     	AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
         Subsystem->Tick(0.f); // warning
-        
+
     	AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
+    	AddExpectedMessage(TEXT("A UObject snapshot has been written to"), ELogVerbosity::Error);
     	Subsystem->Tick(0.f); // snapshot
-    	
+
     	AddExpectedMessage(TEXT("The UObject count compare threshold met"), ELogVerbosity::Error);
     	AddExpectedMessage(TEXT("A UObject comparison written to"), ELogVerbosity::Error);
     	Subsystem->Tick(0.f); // compare
@@ -279,6 +313,35 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
         CHECK_MESSAGE("Warning flag must be true after three Ticks.", Subsystem->HasPassedWarningThreshold())
         CHECK_MESSAGE("Snapshot flag must be true after three Ticks.", Subsystem->HasPassedSnapshotThreshold())
         CHECK_MESSAGE("Compare flag must be true after three Ticks at zero-offset thresholds.", Subsystem->HasPassedCompareThreshold())
+
+        const FString SnapshotPath = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Snapshot_*.txt"), PreSnapshotFiles);
+        const FString ComparePath  = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Compare_*.txt"),  PreCompareFiles);
+
+        if (SnapshotPath.IsEmpty())
+        {
+            ADD_ERROR("Snapshot file was not written to ProjectLogDir within the timeout.");
+        }
+        else
+        {
+            if (IFileManager::Get().FileSize(*SnapshotPath) <= 0)
+            {
+                ADD_ERROR(FString::Printf(TEXT("Snapshot file %s is empty."), *SnapshotPath));
+            }
+            IFileManager::Get().Delete(*SnapshotPath);
+        }
+
+        if (ComparePath.IsEmpty())
+        {
+            ADD_ERROR("Compare file was not written to ProjectLogDir within the timeout.");
+        }
+        else
+        {
+            if (IFileManager::Get().FileSize(*ComparePath) <= 0)
+            {
+                ADD_ERROR(FString::Printf(TEXT("Compare file %s is empty."), *ComparePath));
+            }
+            IFileManager::Get().Delete(*ComparePath);
+        }
     }, true);
 }
 
@@ -290,6 +353,8 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
     // as the object count stays at or above the warning threshold).
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
+        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
         {
@@ -297,19 +362,24 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
             return;
         }
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 0;
         Settings->ObjectCountSnapshotThreshold = 0;
         Settings->ObjectCountCompareThreshold  = 0;
+        Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
+
+        const TSet<FString> PreSnapshotFiles = FNTestUtils::SnapshotLogFiles(TEXT("NEXUS_Snapshot_*.txt"));
+        const TSet<FString> PreCompareFiles  = FNTestUtils::SnapshotLogFiles(TEXT("NEXUS_Compare_*.txt"));
 
     	// We expect some messages
     	AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 		AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
+		AddExpectedMessage(TEXT("A UObject snapshot has been written to"), ELogVerbosity::Error);
     	AddExpectedMessage(TEXT("The UObject count compare threshold met"), ELogVerbosity::Error);
 		AddExpectedMessage(TEXT("A UObject comparison written to"), ELogVerbosity::Error);
-    	
+
         // Advance through all three thresholds.
         Subsystem->Tick(0.f);
         Subsystem->Tick(0.f);
@@ -322,6 +392,35 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
         CHECK_MESSAGE("Warning flag must remain true after extra Ticks.", Subsystem->HasPassedWarningThreshold())
         CHECK_MESSAGE("Snapshot flag must remain true after extra Ticks.", Subsystem->HasPassedSnapshotThreshold())
         CHECK_MESSAGE("Compare flag must remain true after extra Ticks.", Subsystem->HasPassedCompareThreshold())
+
+        const FString SnapshotPath = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Snapshot_*.txt"), PreSnapshotFiles);
+        const FString ComparePath  = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Compare_*.txt"),  PreCompareFiles);
+
+        if (SnapshotPath.IsEmpty())
+        {
+            ADD_ERROR("Snapshot file was not written to ProjectLogDir within the timeout.");
+        }
+        else
+        {
+            if (IFileManager::Get().FileSize(*SnapshotPath) <= 0)
+            {
+                ADD_ERROR(FString::Printf(TEXT("Snapshot file %s is empty."), *SnapshotPath));
+            }
+            IFileManager::Get().Delete(*SnapshotPath);
+        }
+
+        if (ComparePath.IsEmpty())
+        {
+            ADD_ERROR("Compare file was not written to ProjectLogDir within the timeout.");
+        }
+        else
+        {
+            if (IFileManager::Get().FileSize(*ComparePath) <= 0)
+            {
+                ADD_ERROR(FString::Printf(TEXT("Compare file %s is empty."), *ComparePath));
+            }
+            IFileManager::Get().Delete(*ComparePath);
+        }
     }, true);
 }
 
