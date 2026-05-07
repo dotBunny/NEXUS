@@ -30,6 +30,7 @@
 - `UNActorPoolObject::GetInCount` renamed to `UNActorPoolObject::GetAvailableCount`
 - `UNActorPoolObject::GetOutCount` renamed to `UNActorPoolObject::GetSpawnedCount`
 - All `int` now replaced with `int32` to be explicit.
+- `NGuardianSubsystem` now does writing of reports using async tasks.
 
 ### Fixed
 
