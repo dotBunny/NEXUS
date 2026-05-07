@@ -1,7 +1,6 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
       
-    <Horde-SetSecretEnvVar Name="NEXUS_SECRETS_GITHUB_TOKEN" Secret="nexus-secrets.github-token"/>
     
     <Include Script="Includes/CompositeGlobals.xml" />
     <Include Script="Includes/K9Properties.xml" />
@@ -96,17 +95,19 @@
     <!-- INCLUDE EPICS MAIN TASK -->
     <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
-    <!-- SETUP OUR PUBLISHING OF STATUS -->
+    <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
     <Property Name="UpdateGitHubStatus" Value="false" />
-	<Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != '' and '$(NEXUS_SECRETS_GITHUB_TOKEN)' != ''" />
+    <Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != ''" />
     <Do If="$(UpdateGitHubStatus)">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);GitHub Commit Status"/>
     </Do>
 
-    <Agent Name="Publish Updates" Type="$(PublishAgentType)">        
+    <Agent Name="Publish Updates" Type="$(PublishAgentType)">  
+        
         <Do If="$(UpdateGitHubStatus)">
             <Node Name="GitHub Commit Status" After="$(GraphPrefix) $(ProjectName);">
-                
+                <Horde-SetSecretEnvVar Name="NEXUS_SECRETS_GITHUB_TOKEN" Secret="nexus-secrets.github-token" />
+
                 <!-- START: Get & Compile K9 Tooling -->			
                 <!-- If we dont have the source, get it, if we do update it. -->
                 <Do If="Exists('$(K9Checkout)/')">
