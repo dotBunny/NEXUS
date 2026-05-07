@@ -36,6 +36,13 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 
 	// Register with the management system so it will handle ticking the component
 	Manager = UNActorPoolSubsystem::Get(GetWorld());
+	if (Manager == nullptr)
+	{
+		// No subsystem on this world (e.g. preview/thumbnail/inactive worlds); skip registration.
+		UE_LOG(LogNexusActorPools, Verbose, TEXT("UNActorPoolSpawnerComponent on AActor(%s) could not resolve UNActorPoolSubsystem for UWorld(%s); skipping registration."),
+			*GetNameSafe(GetOwner()), *GetNameSafe(GetWorld()));
+		return;
+	}
 	Manager->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
 
@@ -162,7 +169,8 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	}
 	
 	const FRotator SpawnRotator = this->GetComponentRotation();
-	for (int32 i = 0; i < Count; i++)
+	const int32 OutCount = OutLocations.Num();
+	for (int32 i = 0; i < OutCount; i++)
 	{
 		int32 RandomIndex = 0;
 		if (TemplateCount > 1)
