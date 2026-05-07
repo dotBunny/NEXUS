@@ -20,9 +20,9 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 	FNPositionRotation PositionRotation;
 	const AActor* Owner = GetOwner();
 	
-	if (IsVolumeBased())
+	const AVolume* Volume = IsVolumeBased() ? Cast<AVolume>(Owner) : nullptr;
+	if (Volume != nullptr)
 	{
-		const AVolume* Volume = Cast<AVolume>(Owner);
 		const FBox VolumeBox = Volume->GetBounds().GetBox();
 		PositionRotation.Position = FVector(VolumeBox.Min.X, VolumeBox.Min.Y, VolumeBox.Max.Z);
 	}
@@ -40,8 +40,10 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 	if (IsVolumeBased())
 	{
 		const AActor* Owner = GetOwner();
-		FTransform BoxTransform = Owner->GetLevelTransform();
 		const AVolume* Volume = Cast<AVolume>(Owner);
+		if (Volume == nullptr) return;
+
+		FTransform BoxTransform = Owner->GetLevelTransform();
 		const auto Box =  Volume->GetBounds().GetBox();
 		BoxTransform.SetLocation( Owner->GetActorLocation() );
 		
