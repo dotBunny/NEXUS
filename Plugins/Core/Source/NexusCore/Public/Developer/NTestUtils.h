@@ -143,4 +143,66 @@ public:
 			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
 		}
 	}
+	
+	/**
+	 * Captures the current set of filenames in ProjectLogDir matching a wildcard pattern.
+	 *
+	 * Intended as a "before" baseline for tests that exercise code paths which write files into
+	 * the project log directory (snapshot dumps, comparison reports, etc.). Pair with
+	 * WaitForNewLogFile() to detect files produced by the test body — the diff between the
+	 * baseline and the post-test directory listing identifies the new file unambiguously, even
+	 * when prior runs or other tests have left files behind.
+	 *
+	 * Returned entries are bare filenames (no directory component), matching the format
+	 * IFileManager::FindFiles() yields and the format WaitForNewLogFile() expects.
+	 *
+	 * @param Wildcard Filename glob applied inside ProjectLogDir (e.g. TEXT("NEXUS_Compare_*.txt")).
+	 * @return Set of filenames already present in ProjectLogDir that match the wildcard.
+	 */
+	FORCEINLINE static TSet<FString> SnapshotLogFiles(const TCHAR* Wildcard)
+	{
+		TArray<FString> Existing;
+		IFileManager::Get().FindFiles(Existing, *(FPaths::ProjectLogDir() / Wildcard), true, false);
+		return TSet<FString>(Existing);
+	}
+
+	/**
+	 * Polls ProjectLogDir until a file matching the wildcard appears that is not in PreExisting.
+	 *
+	 * Provides a deterministic synchronisation point for tests whose subject-under-test writes
+	 * files asynchronously (Async() tasks, background thread pool, etc.). The poll loop runs at
+	 * roughly 25 ms granularity until either a new match is found or the timeout elapses, so the
+	 * caller does not need access to the producer's task handles or futures.
+	 *
+	 * The first new filename encountered is returned as an absolute path (ProjectLogDir joined
+	 * with the filename) so the caller can immediately stat, read, or delete it. If multiple new
+	 * files exist on a given poll iteration the order is whatever IFileManager::FindFiles()
+	 * yields — tests that need to disambiguate should narrow the wildcard.
+	 *
+	 * @param Wildcard       Filename glob applied inside ProjectLogDir. Must match the wildcard
+	 *                       passed to the corresponding SnapshotLogFiles() call.
+	 * @param PreExisting    Baseline set returned by SnapshotLogFiles() before the test body ran.
+	 * @param TimeoutSeconds Maximum wall-clock time to poll. Default 5s — long enough for typical
+	 *                       async file IO under contention without stalling the test suite.
+	 * @return Absolute path of the first new matching file, or an empty string on timeout.
+	 */
+	FORCEINLINE static FString WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds = 5.0)
+	{
+		const double Deadline = FPlatformTime::Seconds() + TimeoutSeconds;
+		do
+		{
+			TArray<FString> Found;
+			IFileManager::Get().FindFiles(Found, *(FPaths::ProjectLogDir() / Wildcard), true, false);
+			for (const FString& Name : Found)
+			{
+				if (!PreExisting.Contains(Name))
+				{
+					return FPaths::ProjectLogDir() / Name;
+				}
+			}
+			FPlatformProcess::Sleep(0.025f);
+		}
+		while (FPlatformTime::Seconds() < Deadline);
+		return FString();
+	}
 };
