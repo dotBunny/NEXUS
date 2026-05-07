@@ -95,19 +95,22 @@
     <!-- INCLUDE EPICS MAIN TASK -->
     <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
+
+    <Aggregate Name="TestPackageWait" Requires="$(GraphPrefix) $(ProjectName)"/>
+
+
     <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
     <Property Name="UpdateGitHubStatus" Value="false" />
     <Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != ''" />
     <Do If="$(UpdateGitHubStatus)">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);GitHub Commit Status"/>
     </Do>
-    <Aggregate Name="TestPackageWait" Requires="$(GraphPrefix) $(ProjectName)"/>
-
+    
     <Agent Name="Publish Updates" Type="$(PublishAgentType)">  
         
         <!-- GITHUB COMMIT STATUS -->
         <Do If="$(UpdateGitHubStatus)">
-            <Property name="GitHubTestState" value="failure" />
+            <Property Name="GitHubTestState" Value="failure" />
             <Node Name="GitHub Determine Status" Requires="TestPackageWait">
                 <Property Name="GitHubTestState" Value="success" />
             </Node>
