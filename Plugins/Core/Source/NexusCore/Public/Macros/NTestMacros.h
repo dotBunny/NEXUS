@@ -113,6 +113,21 @@
 #define N_TEST_FAILURE_LOW(ClassName, PrettyName, Flags)\
 	N_TEST_LOW(ClassName, PrettyName, [NegativeFilter]Flags))
 
-#define N_TEST_TIMER_SCOPE(Name, MaxDuration)\
+#define N_TEST_TIMER_SCOPE_2(Name, MaxDuration)\
 	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\
-	FNTestScopeTimer NTestTimer(TEXT(#Name),MaxDuration);
+	FNTestScopeTimer NTestTimer(TEXT(#Name), MaxDuration);
+
+#define N_TEST_TIMER_SCOPE_3(Name, MaxDuration, Context)\
+	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\
+	FNTestScopeTimer NTestTimer(TEXT(#Name), MaxDuration, true, Context);
+
+/** Internal selector that dispatches N_TEST_TIMER_SCOPE to the 2- or 3-arg variant based on argument count. */
+#define N_TEST_TIMER_SCOPE_SELECT(_1, _2, _3, NAME, ...) NAME
+/**
+ * Opens a timed, test-aware scope.
+ * @param Name Identifier stringified into the scope label and the telemetry data point name.
+ * @param MaxDuration Fail threshold in milliseconds; the test errors if the scope exceeds this.
+ * @param Context (optional) Telemetry grouping label forwarded to AddTelemetryData for Gauntlet.
+ */
+#define N_TEST_TIMER_SCOPE(...)\
+	N_TEST_TIMER_SCOPE_SELECT(__VA_ARGS__, N_TEST_TIMER_SCOPE_3, N_TEST_TIMER_SCOPE_2, _UNUSED)(__VA_ARGS__)
