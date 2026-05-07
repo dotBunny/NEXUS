@@ -95,6 +95,7 @@ TestProject/NEXUS.unrealvs
 # Claude
 TestProject/.claude/tmp
 TestProject/.claude/settings.local.json
+TestProject/.claude/ue5.path
 
 # Coverage
 LastCoverageResults.log
