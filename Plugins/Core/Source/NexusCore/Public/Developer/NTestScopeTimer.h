@@ -6,6 +6,10 @@
 #include "NCoreMinimal.h"
 #include "Misc/LowLevelTestAdapter.h"
 
+#if !WITH_LOW_LEVEL_TESTS
+#include "Misc/AutomationTest.h"
+#endif
+
 /**
  * A scoped test-aware timer that integrates with the Low-Level Test framework.
  *
@@ -22,9 +26,10 @@ public:
 	 * @param InName Human-readable label included in logs, the INFO line and the failure message.
 	 * @param MaxDurationMs Fail threshold in milliseconds. The test errors if the scope exceeds this.
 	 * @param bUseNamedEvent When true, wraps the scope in a FPlatformMisc named event for profilers.
+	 * @param InContext Optional grouping label forwarded to AddTelemetryData so Gauntlet can bucket results.
 	 */
-	explicit FNTestScopeTimer(const FString& InName, const float MaxDurationMs = MAX_FLT, const bool bUseNamedEvent = true)
-		: bNamedEvent(bUseNamedEvent), Name(InName), MaxDuration(MaxDurationMs)
+	explicit FNTestScopeTimer(const FString& InName, const float MaxDurationMs = MAX_FLT, const bool bUseNamedEvent = true, const FString& InContext = TEXT("NEXUS"))
+		: bNamedEvent(bUseNamedEvent), Name(InName), Context(InContext), MaxDuration(MaxDurationMs)
 	{
 		if (bUseNamedEvent)
 		{
@@ -62,6 +67,16 @@ public:
 		const double DurationMs = (EndTime - StartTime) * 1000.0;
 		INFO(FString::Printf(TEXT("[%s] %f ms"), *Name, DurationMs));
 
+#if !WITH_LOW_LEVEL_TESTS
+		if (GIsAutomationTesting)
+		{
+			if (FAutomationTestBase* CurrentTest = FAutomationTestFramework::Get().GetCurrentTest())
+			{
+				CurrentTest->AddTelemetryData(Name, DurationMs, Context);
+			}
+		}
+#endif
+
 		if (DurationMs >= MaxDuration)
 		{
 			ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
@@ -72,6 +87,7 @@ private:
 	bool bNamedEvent = true;
 	bool bStopped = false;
 	FString Name;
+	FString Context;
 	double MaxDuration;
 	double StartTime;
 	double EndTime = 0;
