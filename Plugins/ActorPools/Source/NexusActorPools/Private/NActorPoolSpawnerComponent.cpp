@@ -35,15 +35,16 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	}
 
 	// Register with the management system so it will handle ticking the component
-	Manager = UNActorPoolSubsystem::Get(GetWorld());
-	if (Manager == nullptr)
+	UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(GetWorld());
+	if (Subsystem == nullptr)
 	{
 		// No subsystem on this world (e.g. preview/thumbnail/inactive worlds); skip registration.
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("UNActorPoolSpawnerComponent on AActor(%s) could not resolve UNActorPoolSubsystem for UWorld(%s); skipping registration."),
 			*GetNameSafe(GetOwner()), *GetNameSafe(GetWorld()));
 		return;
 	}
-	Manager->RegisterTickableSpawner(this);
+	Manager = Subsystem;
+	Subsystem->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
 
 	// Create / validate pools
@@ -57,11 +58,11 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		}
 
 		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
-		if (!Manager->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
+		if (!Subsystem->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
 			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());
 		}
-		
+
 		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
@@ -82,9 +83,9 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 void UNActorPoolSpawnerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (Manager != nullptr) // !Client
+	if (UNActorPoolSubsystem* Subsystem = Manager.Get())
 	{
-		Manager->UnregisterTickableSpawner(this);
+		Subsystem->UnregisterTickableSpawner(this);
 	}
 }
 
@@ -98,7 +99,10 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
 	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
-	
+
+	UNActorPoolSubsystem* Subsystem = Manager.Get();
+	if (Subsystem == nullptr) return;
+
 	TArray<FVector> OutLocations;
 	switch (Distribution)
 	{
@@ -177,7 +181,7 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);
 		}
-		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
+		Subsystem->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
 	}
 	TimeSinceSpawned = 0;
 }

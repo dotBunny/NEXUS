@@ -162,9 +162,8 @@ private:
 	/** Accumulated time since the last spawn event, used against SpawnRate. */
 	float TimeSinceSpawned = 0.f;
 
-	/** Cached reference to the owning world's UNActorPoolSubsystem. */
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
-	TObjectPtr<UNActorPoolSubsystem> Manager = nullptr;
+	/** Weak reference to the owning world's UNActorPoolSubsystem; may go stale if the subsystem deinitializes before this component's EndPlay. */
+	TWeakObjectPtr<UNActorPoolSubsystem> Manager;
 
 	/** Cached count of Templates for tight loops. */
 	int32 TemplateCount = 0;
