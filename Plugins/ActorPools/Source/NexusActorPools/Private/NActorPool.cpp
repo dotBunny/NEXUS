@@ -267,7 +267,8 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
 	// Ingest flags - and update cached flags
 	Settings.Flags = InNewSettings.Flags;
-	bStubMode = Settings.HasFlag_ServerOnly() && !World->GetAuthGameMode();
+	// World may have been torn down out from under a long-lived external pool reference; treat that as non-authoritative.
+	bStubMode = Settings.HasFlag_ServerOnly() && (!IsValid(World) || !World->GetAuthGameMode());
 	
 	// Handle change of actor pooling counts
 	Settings.MinimumActorCount = InNewSettings.MinimumActorCount;
@@ -284,7 +285,7 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	Settings.SpawnedTransform = InNewSettings.SpawnedTransform;
 	
 	// Update based on if we should tick - test usually don't have access to the system to time-slice
-	UNActorPoolSubsystem* System  = UNActorPoolSubsystem::Get(World);
+	UNActorPoolSubsystem* System = IsValid(World) ? UNActorPoolSubsystem::Get(World) : nullptr;
 	if (System != nullptr)
 	{
 		if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
