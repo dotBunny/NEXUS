@@ -61,8 +61,8 @@ private:
 	/** Post pre-work game-thread tasks; gates the graph-builder batches. */
 	FGraphEventArray ProcessInitialGameThreadTasks;
 
-	/** Graph-builder tasks grouped per generation-order batch. */
-	TArray<FGraphEventArray> GraphBuilderTasks;
+	/** Per-pass FNProcessPassTask wrappers; each entry holds a single event so the next pass can chain on it. */
+	TArray<FGraphEventArray> ProcessPassTasks;
 
 	/** Collection/pass tasks that gather results after graph construction. */
 	FGraphEventArray CollectionTasks;

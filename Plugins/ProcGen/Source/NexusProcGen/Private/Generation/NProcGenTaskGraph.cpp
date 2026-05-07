@@ -86,9 +86,11 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 				WorldOrganData, BaseGenerator.UnsignedInteger64(),
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 
-			// Create a task and pass the context to the constructor, as well as the previous event array if there
+			// Create a task and pass the context to the constructor. Chain onto the previous pass's FNProcessPassTask
+			// (not its organ-builders) so this pass sees the previous pass's collision data fully propagated into
+			// the world context before any organ-builder reads NodeCollisionMeshes.
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
-				(GraphBuilderTasks.Num() > 0) ? &GraphBuilderTasks.Last() : &ProcessInitialGameThreadTasks,  // Ensures we are waiting for the last pass to complete
+				(ProcessPassTasks.Num() > 0) ? &ProcessPassTasks.Last() : &ProcessInitialGameThreadTasks,
 				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
 				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 			PassTasks.Add(OrganGraphBuilderTask);
@@ -104,15 +106,17 @@ FNProcGenTaskGraph::FNProcGenTaskGraph(UNProcGenOperation* Operation, FNProcGenO
 			continue;
 		}
 
-		// Record builder tasks so the next pass can chain onto them.
-		GraphBuilderTasks.Add(PassTasks);
-
-		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream as well as 
+		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream as well as
 		// any additional data like collisions, etc.
 		FGraphEventRef ProcessPassTask = TGraphTask<FNProcessPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
 			.ConstructAndHold(PassContextPtr, VirtualWorldContextPtr, TaskGraphContextPtr N_PROCEDURAL_GENERATION_ANALYTICS_CLASS_REF);
 		CollectionTasks.Add(ProcessPassTask);
 		AllTasks.Add(ProcessPassTask);
+
+		// Record this pass's process task so the next pass can chain onto it (it's the task that propagates collision
+		// meshes/locations into the shared world context).
+		FGraphEventArray& PassProcessGate = ProcessPassTasks.AddDefaulted_GetRef();
+		PassProcessGate.Add(ProcessPassTask);
 
 		// Increment pass count for labeling
 		PassCount++;
@@ -174,7 +178,7 @@ void FNProcGenTaskGraph::TearDownGraph()
 	AllTasks.Empty();
 	CollectionTasks.Empty();
 	FinalizerTasks.Empty();
-	GraphBuilderTasks.Empty();
+	ProcessPassTasks.Empty();
 	FinalizeTask = nullptr;
 	
 	N_PROCEDURAL_GENERATION_ANALYTICS_DELETE
