@@ -101,11 +101,17 @@
     <Do If="$(UpdateGitHubStatus)">
         <Property Name="TestPackageAggregate" Value="$(TestPackageAggregate);GitHub Commit Status"/>
     </Do>
+    <Aggregate Name="TestPackageWait" Requires="$(GraphPrefix) $(ProjectName)"/>
 
     <Agent Name="Publish Updates" Type="$(PublishAgentType)">  
         
+        <!-- GITHUB COMMIT STATUS -->
         <Do If="$(UpdateGitHubStatus)">
-            <Node Name="GitHub Commit Status" After="$(GraphPrefix) $(ProjectName);">
+            <Property name="GitHubTestState" value="failure" />
+            <Node Name="GitHub Determine Status" Requires="TestPackageWait">
+                <Property Name="GitHubTestState" Value="success" />
+            </Node>
+            <Node Name="GitHub Commit Status" After="GitHub Determine Status">
                 <Horde-GetSecrets File="$(RootDir)\Staging\github.k9.tmp" Text="{{nexus.github-token}}"/>
                 
                 <!-- START: Get & Compile K9 Tooling -->			
@@ -123,7 +129,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---CONTEXT=$(TestPackageLabel) ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=$(TestPackageLabel) ---DESCRIPTION=Successful ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
