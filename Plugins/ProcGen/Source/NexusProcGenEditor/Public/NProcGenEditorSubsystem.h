@@ -35,11 +35,10 @@ class NEXUSPROCGENEDITOR_API UNProcGenEditorSubsystem : public UEditorSubsystem,
 	//~FTickableGameObject
 	virtual void Tick(float DeltaTime) override
 	{
-		for (const auto Operation : KnownOperations)
+		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 		{
-			Operation->Tick();
+			KnownOperations[i]->Tick();
 		}
-
 		LastFrameNumberWeTicked = GFrameCounter;
 	}
 

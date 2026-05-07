@@ -37,9 +37,9 @@ bool UNProcGenSubsystem::IsReady()
 
 void UNProcGenSubsystem::Tick(float DeltaTime)
 {
-	for (const auto Operation : KnownOperations)
+	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
-		Operation->Tick();
+		KnownOperations[i]->Tick();
 	}
 }
 
@@ -54,10 +54,15 @@ void UNProcGenSubsystem::StartOperation(UNProcGenOperation* Operation)
 	KnownOperations.AddUnique(Operation);
 	Operation->StartBuild(this);
 
-	// Notify Relays
-	for (const auto Pair : RelayMap)
+	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
+	TArray<TObjectPtr<ANProcGenRelay>> Relays;
+	RelayMap.GenerateValueArray(Relays);
+	for (ANProcGenRelay* Relay : Relays)
 	{
-		Pair.Value->Client_OperationStarted(Operation->GetTicket());
+		if (IsValid(Relay))
+		{
+			Relay->Client_OperationStarted(Operation->GetTicket());
+		}
 	}
 }
 
@@ -65,22 +70,32 @@ void UNProcGenSubsystem::OnOperationFinished(UNProcGenOperation* Operation, TSha
 {
 	KnownOperations.Remove(Operation);
 
-	// Notify Relays
-	for (const auto Pair : RelayMap)
+	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
+	TArray<TObjectPtr<ANProcGenRelay>> Relays;
+	RelayMap.GenerateValueArray(Relays);
+	for (ANProcGenRelay* Relay : Relays)
 	{
-		Pair.Value->Client_OperationFinished(Operation->GetTicket());
+		if (IsValid(Relay))
+		{
+			Relay->Client_OperationFinished(Operation->GetTicket());
+		}
 	}
 }
 
 void UNProcGenSubsystem::OnOperationDestroyed(UNProcGenOperation* Operation)
 {
 	KnownOperations.Remove(Operation);
-	
-	// Notify Relays
-	for (const auto Pair : RelayMap)
+
+	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
+	TArray<TObjectPtr<ANProcGenRelay>> Relays;
+	RelayMap.GenerateValueArray(Relays);
+	for (ANProcGenRelay* Relay : Relays)
 	{
-		Pair.Value->Client_OperationDestroyed(Operation->GetTicket());
-	}	
+		if (IsValid(Relay))
+		{
+			Relay->Client_OperationDestroyed(Operation->GetTicket());
+		}
+	}
 }
 
 void UNProcGenSubsystem::RegisterLocalRelay(ANProcGenRelay* InRelay)
