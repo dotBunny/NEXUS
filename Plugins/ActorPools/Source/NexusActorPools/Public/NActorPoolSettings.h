@@ -49,13 +49,13 @@ enum class ENActorPoolFlags : uint8
 	ShouldFinishSpawning = 1 << 3,
 	/** Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked. */
 	ServerOnly = 1 << 4,
-	/** Broadcast destroy event on the Actor through the operational change state delegate. */
-	BroadcastDestroy = 1 << 5,
+	/** Broadcast the released-from-pool event on the Actor through the operational change state delegate. */
+	BroadcastRelease = 1 << 5,
 	/** Should an Actor's network dormancy be updated based on state? */
 	SetNetDormancy = 1 << 6,
 
 	/**
-	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnDestroyedByActorPool be invoked to simulate an interface callback to AActor-based blueprints? 
+	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnReleasedFromActorPool be invoked to simulate an interface callback to AActor-based blueprints?
 	 * @note This is only applicable to non-interfaced AActors, as interfaced Actors have their own interface callback mechanism.
 	 */
 	InvokeUFunctions = 1 << 7 UMETA(DisplayName = "Invoke UFunctions"),
@@ -100,10 +100,10 @@ public:
 	{
 		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ServerOnly);
 	}
-	/** @return true if the BroadcastDestroy flag is set. */
-	FORCEINLINE bool HasFlag_BroadcastDestroy() const
+	/** @return true if the BroadcastRelease flag is set. */
+	FORCEINLINE bool HasFlag_BroadcastRelease() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::BroadcastDestroy);
+		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::BroadcastRelease);
 	}
 	/** @return true if the SetNetDormancy flag is set. */
 	FORCEINLINE bool HasFlag_SetNetDormancy() const

@@ -29,10 +29,10 @@ class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 		OnCreatedByActorPoolEvent.Broadcast();
 	};
 
-	virtual void OnDestroyedByActorPool() override
+	virtual void OnReleasedFromActorPool() override
 	{
-		INActorPoolItem::OnDestroyedByActorPool();
-		OnDestroyedByActorPoolEvent.Broadcast();
+		INActorPoolItem::OnReleasedFromActorPool();
+		OnReleasedFromActorPoolEvent.Broadcast();
 	};
 
 	virtual void OnReturnToActorPool() override
@@ -60,7 +60,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnReturnToActorPoolEvent;
 
-	/** Event broadcast when the Actor has been destroyed by its Actor Pool. */
+	/** Event broadcast when the Actor has been released from its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
-	FOnActorPoolDelegate OnDestroyedByActorPoolEvent;
+	FOnActorPoolDelegate OnReleasedFromActorPoolEvent;
 };

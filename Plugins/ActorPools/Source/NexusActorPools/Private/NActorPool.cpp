@@ -93,9 +93,9 @@ FText FNActorPool::GetDescription() const
 	
 	// Flags
 	FString FlagDetails = TEXT("FLAGS:\n");
-	if (Settings.HasFlag_BroadcastDestroy())
+	if (Settings.HasFlag_BroadcastRelease())
 	{
-		FlagDetails += TEXT("\tBroadcast Destroy\n");
+		FlagDetails += TEXT("\tBroadcast Release\n");
 	}
 	if (Settings.HasFlag_DeferConstruction())
 	{
@@ -504,18 +504,18 @@ void FNActorPool::Clear(const bool bForceDestroy)
 {
 	for (int32 i = InActors.Num() - 1; i >= 0; i--)
 	{
-		DestroyActor(InActors[i], bForceDestroy);
+		ReleaseActor(InActors[i], bForceDestroy);
 	}
 	for (int32 i = OutActors.Num() - 1; i >= 0; i--)
 	{
-		DestroyActor(OutActors[i], bForceDestroy);
+		ReleaseActor(OutActors[i], bForceDestroy);
 	}
 	
 	InActors.Reset();
 	OutActors.Reset();
 }
 
-void FNActorPool::DestroyActor(const TObjectPtr<AActor> Actor, bool bForceDestroy) const
+void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, bool bForceDestroy) const
 {
 	check(Actor != nullptr);
 
@@ -523,17 +523,20 @@ void FNActorPool::DestroyActor(const TObjectPtr<AActor> Actor, bool bForceDestro
 	{
 		return;
 	}
-	Actor->RemoveFromRoot();
+	if (Actor->IsRooted())
+	{
+		Actor->RemoveFromRoot();
+	}
 
-	const bool bBroadcastDestroy = Settings.HasFlag_BroadcastDestroy();
-	if (bImplementsInterface && bBroadcastDestroy)
+	const bool bBroadcastRelease = Settings.HasFlag_BroadcastRelease();
+	if (bImplementsInterface && bBroadcastRelease)
 	{
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
-		ActorItem->OnDestroyedByActorPool();
+		ActorItem->OnReleasedFromActorPool();
 	}
-	else if (bBroadcastDestroy && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+	else if (bBroadcastRelease && Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
 	{
-		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDestroyedByActorPool);
+		UFunction* Function = Actor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnReleasedFromActorPool);
 		if (Function)
 		{
 			Actor->ProcessEvent(Function, nullptr);

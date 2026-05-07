@@ -73,7 +73,7 @@ void FNActorPoolsEditorCommands::AddActorPoolMethods(const UObject* EditedObject
 		N_ACTOR_POOL_INVOKE_METHODS(OnCreated, NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		N_ACTOR_POOL_INVOKE_METHODS(OnSpawned, NEXUS::ActorPools::InvokeMethods::OnSpawnedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		N_ACTOR_POOL_INVOKE_METHODS(OnReturn, NEXUS::ActorPools::InvokeMethods::OnReturnToActorPool, NEXUS::ActorPools::InvokeMethods::Category)
-		N_ACTOR_POOL_INVOKE_METHODS(OnDestroyed, NEXUS::ActorPools::InvokeMethods::OnDestroyedByActorPool, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnReleased, NEXUS::ActorPools::InvokeMethods::OnReleasedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 	}

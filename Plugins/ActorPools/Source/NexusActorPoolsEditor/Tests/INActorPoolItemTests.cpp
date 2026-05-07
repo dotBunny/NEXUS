@@ -20,7 +20,7 @@ N_TEST(INActorPoolItemTests_Events,
 		ActorPoolSettings.MinimumActorCount = 1;
 		ActorPoolSettings.MaximumActorCount = 1;
 		ActorPoolSettings.Strategy = ENActorPoolStrategy::Create;
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::BroadcastDestroy);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::BroadcastRelease);
 
 		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
 		Pool.Fill();
@@ -51,7 +51,7 @@ N_TEST(INActorPoolItemTests_Events,
 
 		Pool.Clear();
 
-		CHECK_EQUALS("Check destroyed state event occurred.", TestObject->State, static_cast<uint8>(ENActorOperationalState::Destroyed))
+		CHECK_EQUALS("Check released state event occurred.", TestObject->State, static_cast<uint8>(ENActorOperationalState::Released))
 		CHECK_EQUALS("Delegate should have fired exactly three times after clear.", TestObject->Counter, 3)
 	});
 }

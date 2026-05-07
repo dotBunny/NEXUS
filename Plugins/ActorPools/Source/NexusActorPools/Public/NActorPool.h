@@ -12,7 +12,7 @@ namespace NEXUS::ActorPools::InvokeMethods
 {
 	inline FText Category = FText::FromString("NActor Pool");
 	inline FName OnCreatedByActorPool = TEXT("OnCreatedByActorPool");
-	inline FName OnDestroyedByActorPool = TEXT("OnDestroyedByActorPool");
+	inline FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
 	inline FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
 	inline FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
 	
@@ -147,7 +147,7 @@ private:
 	
 	FORCEINLINE void CreateActor(const FActorSpawnParameters& SpawnInfo);
 	
-	void DestroyActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
+	void ReleaseActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 
 	FORCEINLINE void ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const;
 	FORCEINLINE void ApplyReturnState(AActor* Actor) const;

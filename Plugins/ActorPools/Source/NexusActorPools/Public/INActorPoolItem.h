@@ -25,8 +25,8 @@ enum class ENActorOperationalState : uint8
 	Enabled	= 2,
 	/** The actor has been returned to the pool and is inactive. */
 	Disabled = 3,
-	/** The actor has been destroyed by the pool. */
-	Destroyed = 4,
+	/** The actor has been released from the pool (and may have been destroyed if the pool was cleared with bForceDestroy=true). */
+	Released = 4,
 };
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, const ENActorOperationalState OldState, const ENActorOperationalState NewState);
@@ -82,8 +82,8 @@ public:
 	/** Called on the Actor when it has been created by an Actor Pool. */
 	virtual void OnCreatedByActorPool() { SetActorOperationalState(ENActorOperationalState::Created); };
 
-	/** Called on the Actor when it has been destroyed by an Actor Pool. */
-	virtual void OnDestroyedByActorPool() { SetActorOperationalState(ENActorOperationalState::Destroyed); };
+	/** Called on the Actor when it has been released from an Actor Pool (the pool stops tracking it; the Actor may also be destroyed if Clear was invoked with bForceDestroy=true). */
+	virtual void OnReleasedFromActorPool() { SetActorOperationalState(ENActorOperationalState::Released); };
 
 	/** Called after the Actor has been placed back in the Actor Pool, and its settings have been applied. */
 	virtual void OnReturnToActorPool() { SetActorOperationalState(ENActorOperationalState::Disabled); };

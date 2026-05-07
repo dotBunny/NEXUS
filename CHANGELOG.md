@@ -31,6 +31,7 @@
 - `UNActorPoolObject::GetOutCount` renamed to `UNActorPoolObject::GetSpawnedCount`
 - All `int` now replaced with `int32` to be explicit.
 - `NGuardianSubsystem` now does writing of reports using async tasks.
+- `FNActorPool::OnDestroyedByActorPool` to `FNActorPool::OnReleasedFromActorPool` to better reflect actual doing
 
 ### Fixed
 
@@ -50,6 +51,14 @@
 ### Removed
 
 - `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
+
+### Core Redirects
+
+```ini
+[CoreRedirects]                                                  
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("Destroyed","Released")))                                                                              
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("BroadcastDestroy","BroadcastRelease")))
+```
 
 ## [0.2.7] - 2026-02-22
 
