@@ -1,7 +1,7 @@
 <?xml version='1.0' ?>
 <BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
       
-    <Horde-SetSecretEnvVar Name="SECRET_GITHUB_TOKEN" Secret="horde-secrets.nexus-github-token"/>
+    <Horde-SetSecretEnvVar Name="SECRET_GITHUB_TOKEN" Secret="dotbunny-secrets.nexus-github-token"/>
     <Include Script="Includes/CompositeGlobals.xml" />
     <Include Script="Includes/K9Properties.xml" />
 
