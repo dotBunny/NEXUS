@@ -36,6 +36,9 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 
+	const FString ComparePrefix = TEXT("NEXUS_Compare");
+	const FString SnapshotPrefix = TEXT("NEXUS_Snapshot");
+	
 	/** @return The last sampled total UObject count. */
 	int32 GetLastObjectCount() const { return LastObjectCount; }
 	/** @return The baseline UObject count set by SetBaseline. */
@@ -54,7 +57,7 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	bool HasPassedSnapshotThreshold() const { return bPassedObjectCountSnapshotThreshold; }
 	/** @return true if the compare threshold has been crossed since the baseline was set. */
 	bool HasPassedCompareThreshold() const { return bPassedObjectCountCompareThreshold; }
-
+	
 private:
 	/** Latched true once the warning threshold has been crossed. */
 	bool bPassedObjectCountWarningThreshold = false;

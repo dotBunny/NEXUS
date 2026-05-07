@@ -63,12 +63,12 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		if (bShouldOutputSnapshot)
 		{
 			FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-				FString::Printf(TEXT("NEXUS_Snapshot_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-			UE_LOG(LogNexusCore, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
-			Async(EAsyncExecution::ThreadPool,
+				FString::Printf(TEXT("%s_%s.txt"), *SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			Async(EAsyncExecution::TaskGraph,
 				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
 				{
 					FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+					UE_LOG(LogNexusCore, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
 				});
 		}
 		bPassedObjectCountSnapshotThreshold = true;
@@ -84,12 +84,12 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
 
 		FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-		FString::Printf(TEXT("NEXUS_Compare_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-		UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
-		Async(EAsyncExecution::ThreadPool,
+		FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+		Async(EAsyncExecution::TaskGraph,
 			[Diff = MoveTemp(Diff), DumpFilePath = MoveTemp(DumpFilePath)]()
 			{
 				FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+				UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
 			});
 		bPassedObjectCountCompareThreshold = true;
 	}
