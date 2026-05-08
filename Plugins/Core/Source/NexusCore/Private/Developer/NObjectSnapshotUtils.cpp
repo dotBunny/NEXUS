@@ -7,11 +7,13 @@
 #include "Developer/NDeveloperUtils.h"
 #include "Runtime/Launch/Resources/Version.h"
 
-int32 FNObjectSnapshotUtils::SnapshotTicket = 0;
+TAtomic<int32> FNObjectSnapshotUtils::SnapshotTicket(0);
 FNObjectSnapshot FNObjectSnapshotUtils::CachedSnapshot;
 
 FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
+	check(IsInGameThread());
+
 	// Create our Snapshot struct
 	FNObjectSnapshot Snapshot(FNDeveloperUtils::GetCurrentObjectCount());
 	Snapshot.Ticket = TakeTicket();
@@ -134,6 +136,8 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 
 void FNObjectSnapshotUtils::SnapshotToDisk()
 {
+	check(IsInGameThread());
+
 	const FNObjectSnapshot Snapshot = FNObjectSnapshotUtils::Snapshot();
 
 	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
@@ -146,19 +150,25 @@ void FNObjectSnapshotUtils::SnapshotToDisk()
 
 void FNObjectSnapshotUtils::ClearCachedSnapshot()
 {
+	check(IsInGameThread());
+
 	CachedSnapshot.Reset();
 	UE_LOG(LogNexusCore, Verbose, TEXT("Cached UObject snapshot cleared."));
-	
+
 }
 
 void FNObjectSnapshotUtils::CacheSnapshot()
 {
+	check(IsInGameThread());
+
 	CachedSnapshot = Snapshot();
 	UE_LOG(LogNexusCore, Verbose, TEXT("UObject snapshot cached for future compare."));
 }
 
 void FNObjectSnapshotUtils::CompareSnapshotToDisk()
 {
+	check(IsInGameThread());
+
 	if (CachedSnapshot.Ticket == -1)
 	{
 		return;

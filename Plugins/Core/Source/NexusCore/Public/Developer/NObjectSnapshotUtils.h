@@ -6,6 +6,7 @@
 #include "NObjectSnapshotUtils.h"
 #include "NObjectSnapshot.h"
 #include "NObjectSnapshotDiff.h"
+#include "Templates/Atomic.h"
 
 /**
  * Entry points for capturing and comparing UObject snapshots.
@@ -21,6 +22,7 @@ public:
 	/**
 	 * Produces the next monotonic ticket number used to tag new snapshots.
 	 * @return A new ticket value guaranteed to be strictly greater than any previously issued.
+	 * @note Thread-safe; safe to call from any thread.
 	 */
 	static int32 TakeTicket() { return ++SnapshotTicket; }
 
@@ -59,6 +61,6 @@ public:
 	static void CompareSnapshotToDisk();
 
 private:
-	static int32 SnapshotTicket;
+	static TAtomic<int32> SnapshotTicket;
 	static FNObjectSnapshot CachedSnapshot;
 };
