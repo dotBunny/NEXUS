@@ -122,7 +122,7 @@ public:
 	int32 MinimumActorCount = 10;
 
 	/** The number of pooled Actors that a pool can use/have. This is tied more to the Strategy being used for what happens when the pool has to create new Actors. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="0", UIMin="0", SliderExponent = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta = (ClampMin="1", UIMin="1", SliderExponent = 1))
 	int32 MaximumActorCount = 100;
 
 	/** Throttles the number of Actors that can be created per tick. This can be useful to spread the cost of warming a pool up across multiple frames (-1 for unlimited). */

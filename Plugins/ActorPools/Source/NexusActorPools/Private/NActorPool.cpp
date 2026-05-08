@@ -270,14 +270,15 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	// World may have been torn down out from under a long-lived external pool reference; treat that as non-authoritative.
 	bStubMode = Settings.HasFlag_ServerOnly() && (!IsValid(World) || !World->GetAuthGameMode());
 	
-	// Handle change of actor pooling counts
+	// Handle change of actor pooling counts. Clamp Maximum to at least 1 — recycle strategies index OutActors[0] / OutActors.Last() and would crash on an empty array if 0 were allowed through.
 	Settings.MinimumActorCount = InNewSettings.MinimumActorCount;
-	if (InNewSettings.MaximumActorCount > Settings.MaximumActorCount)
+	const int32 ClampedMaximumActorCount = FMath::Max(1, InNewSettings.MaximumActorCount);
+	if (ClampedMaximumActorCount > Settings.MaximumActorCount)
 	{
-		InActors.Reserve(InNewSettings.MaximumActorCount);
-		OutActors.Reserve(InNewSettings.MaximumActorCount);
+		InActors.Reserve(ClampedMaximumActorCount);
+		OutActors.Reserve(ClampedMaximumActorCount);
 	}
-	Settings.MaximumActorCount = InNewSettings.MaximumActorCount;
+	Settings.MaximumActorCount = ClampedMaximumActorCount;
 
 	// Update strategy
 	Settings.Strategy = InNewSettings.Strategy;
