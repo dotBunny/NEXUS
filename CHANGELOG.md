@@ -47,6 +47,7 @@
 - `UNMultiplayerEditorSubsystem` now concretely shutdown process handles, not relying on natural causes.
 - `UNActorPoolSubsystem` crash where a tickable `FNActorPool` gets invoked during world teardown.
 - `FNActorPool` crash when applying settings where `UWorld` does not exist.
+- `FNActorPool` crash when dealing with MaximumActorCount=0, now minimum of 1.
 
 ### Removed
 
