@@ -11,7 +11,7 @@ void FNEditorCommands::RegisterCommands()
 	// ReSharper disable StringLiteralTypo
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Overwatch,"NCore.Help.OpenOverwatch",
 	NSLOCTEXT("NexusCoreEditor", "Command_Help_OpenOverwatch", "Overwatch"),
-	NSLOCTEXT("NexusCoreEditor","Command_Help_Overwatch_Desc", "Opens the GitHub project's development board in your browser."),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenOverwatch_Desc", "Opens the GitHub project's development board in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitCommunityHome"),
 	EUserInterfaceActionType::Button, FInputChord());
 	// ReSharper restore StringLiteralTypo
@@ -39,10 +39,10 @@ void FNEditorCommands::RegisterCommands()
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Roadmap,
 		"NCore.Help.OpenRoadmap",
-		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Roadmap"),
-		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport_Desc", "Opens the GitHub project's Roadmap in your browser."),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenRoadmap", "Roadmap"),
+		NSLOCTEXT("NexusCoreEditor","Command_Help_OpenRoadmap_Desc", "Opens the GitHub project's Roadmap in your browser."),
 		FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.VisitOnlineLearning"),
-		EUserInterfaceActionType::Button, FInputChord());	
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Documentation,
 		"NCore.Help.OpenDocumentation",

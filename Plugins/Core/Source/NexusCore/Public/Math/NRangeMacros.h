@@ -53,7 +53,7 @@
 	} \
 	inline Type RandomTrackedValue(int& Seed) const \
 	{ \
-		const FRandomStream RandomStream(Seed); \
+		FRandomStream RandomStream(Seed); \
 		const Type ReturnValue = RandomStream.RandRange(Minimum, Maximum); \
 		Seed = RandomStream.GetCurrentSeed(); \
 		return ReturnValue; \
@@ -81,7 +81,7 @@
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
-		const FRandomStream RandomStream(Seed); \
+		FRandomStream RandomStream(Seed); \
 		const Type ReturnValue = RandomStream.RandRange(MinimumValue, MaximumValue); \
 		Seed = RandomStream.GetCurrentSeed(); \
 		return ReturnValue; \

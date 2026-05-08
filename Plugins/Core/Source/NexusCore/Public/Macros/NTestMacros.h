@@ -111,7 +111,7 @@
 #define N_TEST_FAILURE_MEDIUM(ClassName, PrettyName, Flags)\
 	N_TEST_MEDIUM(ClassName, PrettyName, [NegativeFilter]Flags)
 #define N_TEST_FAILURE_LOW(ClassName, PrettyName, Flags)\
-	N_TEST_LOW(ClassName, PrettyName, [NegativeFilter]Flags))
+	N_TEST_LOW(ClassName, PrettyName, [NegativeFilter]Flags)
 
 #define N_TEST_TIMER_SCOPE_2(Name, MaxDuration)\
 	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\

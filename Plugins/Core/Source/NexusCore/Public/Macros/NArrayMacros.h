@@ -110,27 +110,25 @@ public: \
 	void GetSurroundingIndices(const IndexType X, const IndexType Y, TArray<IndexType>& OutIndices) const \
 	{ \
 		const bool bCanXSubtract = X > 0; \
-		const uint32 XMinus = (X - 1); \
 		const bool bCanXAdd = X < (SizeX - 1); \
-		const uint32 XAdd = X + 1; \
 		const bool bCanYSubtract = Y > 0; \
-		const uint32 YMinus = (Y - 1); \
 		const bool bCanYAdd = Y < (SizeY - 1); \
-		const uint32 YAdd = (Y + 1); \
 		if (bCanXSubtract) \
 		{ \
+			const IndexType XMinus = X - 1; \
 			OutIndices.Add(GetIndex(XMinus, Y)); \
-			if (bCanYAdd) OutIndices.Add(GetIndex(XMinus, YAdd)); \
-			if (bCanYSubtract) OutIndices.Add(GetIndex(XMinus, YMinus)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XMinus, Y + 1)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XMinus, Y - 1)); \
 		} \
 		if (bCanXAdd) \
 		{ \
+			const IndexType XAdd = X + 1; \
 			OutIndices.Add(GetIndex(XAdd, Y)); \
-			if (bCanYAdd) OutIndices.Add(GetIndex(XAdd, YAdd)); \
-			if (bCanYSubtract) OutIndices.Add(GetIndex(XAdd, YMinus)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XAdd, Y + 1)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XAdd, Y - 1)); \
 		} \
-		if (bCanYSubtract) OutIndices.Add(GetIndex(X, YMinus)); \
-		if (bCanYAdd) OutIndices.Add(GetIndex(X, YAdd)); \
+		if (bCanYSubtract) OutIndices.Add(GetIndex(X, Y - 1)); \
+		if (bCanYAdd) OutIndices.Add(GetIndex(X, Y + 1)); \
 	}
 
 /**
@@ -249,71 +247,71 @@ public: \
 	void GetSurroundingIndices(const IndexType X, const IndexType Y, const IndexType Z, TArray<IndexType>& OutIndices) const \
 	{ \
 		const bool bCanXSubtract = X > 0; \
-		const uint32 XMinus = (X - 1); \
 		const bool bCanXAdd = X < (SizeX - 1); \
-		const uint32 XAdd = X + 1; \
 		const bool bCanYSubtract = Y > 0; \
-		const uint32 YMinus = (Y - 1); \
 		const bool bCanYAdd = Y < (SizeY - 1); \
-		const uint32 YAdd = (Y + 1); \
 		const bool bCanZSubtract = Z > 0; \
-		const uint32 ZMinus = (Z - 1); \
 		const bool bCanZAdd = Z < (SizeZ - 1); \
-		const uint32 ZAdd = (Z + 1); \
 		if (bCanXSubtract) \
 		{ \
+			const IndexType XMinus = X - 1; \
 			OutIndices.Add(GetIndex(XMinus, Y, Z)); \
 			if (bCanYAdd) \
 			{ \
-				OutIndices.Add(GetIndex(XMinus, YAdd, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YAdd, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YAdd, ZMinus)); \
+				OutIndices.Add(GetIndex(XMinus, Y + 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, Y + 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, Y + 1, Z - 1)); \
 			} \
 			if (bCanYSubtract) \
 			{ \
-				OutIndices.Add(GetIndex(XMinus, YMinus, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YMinus, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YMinus, ZMinus)); \
+				OutIndices.Add(GetIndex(XMinus, Y - 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, Y - 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, Y - 1, Z - 1)); \
 			} \
 		} \
 		if (bCanXAdd) \
 		{ \
+			const IndexType XAdd = X + 1; \
 			OutIndices.Add(GetIndex(XAdd, Y, Z)); \
 			if (bCanYAdd) \
 			{ \
-				OutIndices.Add(GetIndex(XAdd, YAdd, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YAdd, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YAdd, ZMinus)); \
+				OutIndices.Add(GetIndex(XAdd, Y + 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, Y + 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, Y + 1, Z - 1)); \
 			} \
 			if (bCanYSubtract) \
 			{ \
-				OutIndices.Add(GetIndex(XAdd, YMinus, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YMinus, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YMinus, ZMinus)); \
+				OutIndices.Add(GetIndex(XAdd, Y - 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, Y - 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, Y - 1, Z - 1)); \
 			} \
 		} \
 		if (bCanYSubtract) \
 		{ \
+			const IndexType YMinus = Y - 1; \
 			OutIndices.Add(GetIndex(X, YMinus, Z)); \
-			if (bCanZAdd) OutIndices.Add(GetIndex(X, YMinus, ZAdd)); \
-			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YMinus, ZMinus)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YMinus, Z + 1)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YMinus, Z - 1)); \
 		} \
 		if (bCanYAdd) \
 		{ \
+			const IndexType YAdd = Y + 1; \
 			OutIndices.Add(GetIndex(X, YAdd, Z)); \
-			if (bCanZAdd) OutIndices.Add(GetIndex(X, YAdd, ZAdd)); \
-			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YAdd, ZMinus)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YAdd, Z + 1)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YAdd, Z - 1)); \
 		} \
 		if (bCanZSubtract) \
 		{ \
+			const IndexType ZMinus = Z - 1; \
 			OutIndices.Add(GetIndex(X, Y, ZMinus)); \
-			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZMinus)); \
-			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZMinus)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(X + 1, Y, ZMinus)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(X - 1, Y, ZMinus)); \
 		} \
 		if (bCanZAdd) \
 		{ \
+			const IndexType ZAdd = Z + 1; \
 			OutIndices.Add(GetIndex(X, Y, ZAdd)); \
-			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZAdd)); \
-			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZAdd)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(X + 1, Y, ZAdd)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(X - 1, Y, ZAdd)); \
 		} \
 	}

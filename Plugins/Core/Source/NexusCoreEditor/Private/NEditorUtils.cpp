@@ -226,6 +226,7 @@ void FNEditorUtils::CleanLogsFolder()
 
 	for (const FString& Search : Searches)
 	{
+		FilePaths.Reset();
 		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
 		for (const FString& File : FilePaths)
 		{
