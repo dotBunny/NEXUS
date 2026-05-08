@@ -3,6 +3,9 @@
 
 #include "NDynamicRefSubsystem.h"
 
+#include "NDynamicRefsMinimal.h"
+#include "Macros/NValidationMacros.h"
+
 void UNDynamicRefSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	// Pre-allocate space for enum based collection
@@ -21,6 +24,7 @@ void UNDynamicRefSubsystem::Deinitialize()
 
 void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
 	FastCollection[DynamicRef].Add(InObject);
 	OnAdded.Broadcast(DynamicRef, InObject);
 }
@@ -29,12 +33,14 @@ void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UOb
 {
 	for (UObject* Object : InObjects)
 	{
+		N_VALIDATE_CONTINUE(LogNexusDynamicRefs, Object)
 		AddObject(DynamicRef, Object);
 	}
 }
 
 void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	Collection.Add(InObject);
 	OnAddedByName.Broadcast(Name, InObject);
@@ -45,6 +51,7 @@ void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> 
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	for (UObject* Object : InObjects)
 	{
+		N_VALIDATE_CONTINUE(LogNexusDynamicRefs, Object)
 		Collection.Add(Object);
 		OnAddedByName.Broadcast(Name, Object);
 	}

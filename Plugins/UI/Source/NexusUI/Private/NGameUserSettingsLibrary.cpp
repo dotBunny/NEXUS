@@ -3,9 +3,11 @@
 
 #include "NGameUserSettingsLibrary.h"
 
+#include "NUIMinimal.h"
 #include "Components/NComboBoxString.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Macros/NValidationMacros.h"
 
 TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 	NSLOCTEXT("NexusUI", "FullscreenDisplayModeLabel", "Fullscreen"),
@@ -135,6 +137,7 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 
 void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
 	ComboBox->ClearOptions();
 	for (auto& Label : DisplayModeLabels)
 	{
@@ -148,6 +151,7 @@ void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxStr
 
 void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
 	ComboBox->ClearOptions();
 	for (auto& Resolution : GetSupportedDisplayResolutions())
 	{

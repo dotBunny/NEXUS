@@ -6,6 +6,7 @@
 #include "NActorPool.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
+#include "Macros/NValidationMacros.h"
 
 namespace NEXUS::ActorPools::ConsoleCommands
 {
@@ -180,8 +181,8 @@ FNActorPoolSettings UNActorPoolSubsystem::GetDefaultSettings(const TSubclassOf<A
 
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
-	if (ActorPoolSet == nullptr) return;
-	
+	N_VALIDATE_RETURN_VOID(LogNexusActorPools, ActorPoolSet)
+
 	if (ActorPoolSet->NestedSets.Num() == 0)
 	{
 		// Optimized fast-path for if the APS is not using nested sets.
@@ -259,20 +260,25 @@ bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
 	return TickableActorPools.Contains(ActorPool);
 }
 
-void UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
+bool UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
 {
+	ReturnedActor = nullptr;
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
 	ReturnedActor = GetActor<AActor>(ActorClass);
+	return ReturnedActor != nullptr;
 }
 
-void UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor)
+bool UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor)
 {
+	SpawnedActor = nullptr;
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
 	SpawnedActor = SpawnActor<AActor>(ActorClass, Position, Rotation);
+	return SpawnedActor != nullptr;
 }
 
 bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 {
-	// You cant return nothing
-	if (!IsValid(Actor)) return false;
+	N_VALIDATE_RETURN(LogNexusActorPools, Actor, false)
 	
 	UClass* ActorClass = Actor->GetClass();
 	if (ActorPools.Contains(ActorClass))

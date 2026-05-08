@@ -11,6 +11,7 @@
 - Pickers all now have a `Twisted` method to support passing a `FNMersenneTwister`.
 - `ANDebugPointActor` for quick point debugging.
 - `NexusCore`, `NDynamicRefs`, `NGuardian`, `NUI` all have Unit and Performance-based testing.
+- `NValidationMacros` to support providing easy to use validation for Blueprint-facing methods.
 
 ### Changed
 

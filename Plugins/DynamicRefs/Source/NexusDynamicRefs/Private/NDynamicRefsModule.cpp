@@ -2,8 +2,11 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NDynamicRefsModule.h"
+#include "NDynamicRefsMinimal.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
+
+DEFINE_LOG_CATEGORY(LogNexusDynamicRefs);
 
 void FNDynamicRefsModule::StartupModule()
 {

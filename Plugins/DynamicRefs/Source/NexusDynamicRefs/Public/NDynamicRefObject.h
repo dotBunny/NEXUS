@@ -5,6 +5,8 @@
 #include "NDynamicRef.h"
 #include "NDynamicRefComponent.h"
 #include "NDynamicRefsDeveloperOverlay.h"
+#include "NDynamicRefsMinimal.h"
+#include "Macros/NValidationMacros.h"
 #include "NDynamicRefObject.generated.h"
 
 /**
@@ -67,6 +69,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void AddObject(UObject* Object)
 	{
+		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object)
 		TargetObjects.Add(Object);
 		Changed.ExecuteIfBound();
 	}

@@ -4,8 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NCoreEditorMinimal.h"
 #include "NEditorUtils.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NValidationMacros.h"
 #include "NEditorLibrary.generated.h"
 
 /**
@@ -26,6 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Select Actor", Category = "NEXUS|Editor")
 	static void SelectActor(AActor* Actor)
 	{
+		N_VALIDATE_RETURN_VOID(LogNexusCoreEditor, Actor)
 		FNEditorUtils::SelectActor(Actor);
 	}
 };

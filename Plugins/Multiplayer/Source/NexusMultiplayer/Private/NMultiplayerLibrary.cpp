@@ -8,6 +8,7 @@
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Macros/NValidationMacros.h"
 #include "Macros/NWorldMacros.h"
 
 float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
@@ -17,7 +18,9 @@ float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)
 {
-	if (PlayerState != nullptr && PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
+	N_VALIDATE_RETURN(LogNexusMultiplayer, PlayerState, false)
+
+	if (PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
 		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."));
 		return false;

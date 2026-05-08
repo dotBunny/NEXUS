@@ -33,12 +33,13 @@ public:
 	 * Gets an actor from a given pool, creating a pool as necessary.
 	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
-	 * @param ReturnedActor The returned actor.
+	 * @param ReturnedActor The returned actor, or nullptr if the pool could not provide one.
+	 * @return true if an actor was successfully retrieved, false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actor"))
-	void GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
+	bool GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
 
 	/**
 	 * Gets an actor from a given pool, creating a pool as necessary.
@@ -50,24 +51,27 @@ public:
 	T* GetActor(TSubclassOf<AActor> ActorClass);
 
 	/**
-	* Spawns an actor from a given pool, creating a pool as necessary.
-	* @param ActorClass The class of the actor which you would like to get from the actor pool.
-	* @param Position The world position to spawn the actor at.
-	* @param Rotation The world rotation to apply to the spawned actor.
-	* @param SpawnedActor The returned actor.
-	*/
+	 * Spawns an actor from a given pool, creating a pool as necessary, positioning it in the world and activating it.
+	 * @note Unlike GetActor, this places the actor at the supplied transform and triggers OnSpawnedFromActorPool on the returned actor.
+	 * @param ActorClass The class of the actor which you would like to spawn from the actor pool.
+	 * @param Position The world position to spawn the actor at.
+	 * @param Rotation The world rotation to apply to the spawned actor.
+	 * @param SpawnedActor The spawned actor, or nullptr if the pool could not provide one.
+	 * @return true if an actor was successfully spawned, false otherwise.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
-	void SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
+	bool SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
 	
 	/**
-	* Spawns an actor from a given pool, creating a pool as necessary.
-	* @param ActorClass The class of the actor which you would like to get from the actor pool.
-	* @param Position The world position to spawn the actor at.
-	* @param Rotation The world rotation to apply to the spawned actor.
-	* @return SpawnedActor The spawned actor.
-	*/
+	 * Spawns an actor from a given pool, creating a pool as necessary, positioning it in the world and activating it.
+	 * @note Unlike GetActor, this places the actor at the supplied transform and triggers OnSpawnedFromActorPool on the returned actor.
+	 * @param ActorClass The class of the actor which you would like to spawn from the actor pool.
+	 * @param Position The world position to spawn the actor at.
+	 * @param Rotation The world rotation to apply to the spawned actor.
+	 * @return The spawned actor cast to T, or nullptr if the pool could not provide one.
+	 */
 	template<typename T>
 	T* SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation);
 

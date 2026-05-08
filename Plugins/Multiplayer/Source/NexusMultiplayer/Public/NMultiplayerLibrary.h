@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NMultiplayerMinimal.h"
 #include "NMultiplayerUtils.h"
 #include "UObject/ObjectMacros.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NValidationMacros.h"
 #include "NMultiplayerLibrary.generated.h"
 
 class APlayerState;
@@ -159,7 +161,10 @@ public:
 			meta = (DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#get-playeridentifier"))
 	static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
 	{
-		return PlayerController->GetPlayerState<APlayerState>()->GetPlayerId();
+		N_VALIDATE_RETURN(LogNexusMultiplayer, PlayerController, 0)
+		const APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
+		N_VALIDATE_RETURN(LogNexusMultiplayer, PlayerState, 0)
+		return PlayerState->GetPlayerId();
 	}
 
 	/**

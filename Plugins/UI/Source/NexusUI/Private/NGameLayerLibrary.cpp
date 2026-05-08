@@ -1,13 +1,15 @@
 ﻿#include "NGameLayerLibrary.h"
 
+#include "NUIMinimal.h"
 #include "NWidgetUtils.h"
 #include "Components/Widget.h"
+#include "Macros/NValidationMacros.h"
 #include "Slate/SGameLayerManager.h"
 
 bool UNGameLayerLibrary::SetLayerVisibility(ULocalPlayer* LocalPlayer, const FName Name, const ESlateVisibility Visibility)
 {
-	if (LocalPlayer == nullptr) return false;
-	
+	N_VALIDATE_RETURN(LogNexusUI, LocalPlayer, false)
+
 	const UWorld* World = LocalPlayer->GetWorld();
 	if (World == nullptr || !World->IsGameWorld()) return false;
 	

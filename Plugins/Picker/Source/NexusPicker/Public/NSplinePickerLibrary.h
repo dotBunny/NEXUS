@@ -5,7 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "NSplinePicker.h"
+#include "NPickerMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NValidationMacros.h"
 #include "Macros/NWorldMacros.h"
 #include "NSplinePickerLibrary.generated.h"
 
@@ -111,6 +113,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Point On?", Category = "NEXUS|Picker|Spline")
 	static bool IsPointOn(const USplineComponent* SplineComponent, const FVector& Point)
 	{
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, false)
 		return FNSplinePicker::IsPointOn(SplineComponent, Point);
 	}
 	
@@ -123,6 +126,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Points On?", Category = "NEXUS|Picker|Spline")
 	static TArray<bool> IsPointsOn(const TArray<FVector>& Points, const USplineComponent* SplineComponent)
 	{
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, TArray<bool>())
 		return FNSplinePicker::IsPointsOn(Points, SplineComponent);
 	}
 };
