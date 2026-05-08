@@ -30,16 +30,25 @@
 	public: \
 		static const Type* Get() \
 		{ \
-			static const Type* CachedSettings = GetDefault<Type>(); \
-			return CachedSettings; \
-		} \
-		static Type* GetMutable() { \
-			static Type* MutableInstance; \
-			if (MutableInstance == nullptr) \
+			static TWeakObjectPtr<const Type> CachedSettings; \
+			const Type* Resolved = CachedSettings.Get(); \
+			if (Resolved == nullptr) \
 			{ \
-				MutableInstance = GetMutableDefault<Type>(); \
+				Resolved = GetDefault<Type>(); \
+				CachedSettings = Resolved; \
 			} \
-			return MutableInstance; \
+			return Resolved; \
+		} \
+		static Type* GetMutable() \
+		{ \
+			static TWeakObjectPtr<Type> CachedMutableSettings; \
+			Type* Resolved = CachedMutableSettings.Get(); \
+			if (Resolved == nullptr) \
+			{ \
+				Resolved = GetMutableDefault<Type>(); \
+				CachedMutableSettings = Resolved; \
+			} \
+			return Resolved; \
 		} \
 		virtual FName GetContainerName() const override { return FNSettingsUtils::GetContainerName(); } \
 		virtual FName GetCategoryName() const override {  return FNSettingsUtils::GetCategoryName();  } \
@@ -101,16 +110,25 @@
 	public: \
 		static const Type* Get() \
 		{ \
-			static const Type* CachedSettings = GetDefault<Type>(); \
-			return CachedSettings; \
-		} \
-		static Type* GetMutable() { \
-			static Type* MutableInstance; \
-			if (MutableInstance == nullptr) \
+			static TWeakObjectPtr<const Type> CachedSettings; \
+			const Type* Resolved = CachedSettings.Get(); \
+			if (Resolved == nullptr) \
 			{ \
-				MutableInstance = GetMutableDefault<Type>(); \
+				Resolved = GetDefault<Type>(); \
+				CachedSettings = Resolved; \
 			} \
-			return MutableInstance; \
+			return Resolved; \
+		} \
+		static Type* GetMutable() \
+		{ \
+			static TWeakObjectPtr<Type> CachedMutableSettings; \
+			Type* Resolved = CachedMutableSettings.Get(); \
+			if (Resolved == nullptr) \
+			{ \
+				Resolved = GetMutableDefault<Type>(); \
+				CachedMutableSettings = Resolved; \
+			} \
+			return Resolved; \
 		} \
 		virtual FName GetContainerName() const override { return Container; } \
 		virtual FName GetCategoryName() const override {  return Category;  } \

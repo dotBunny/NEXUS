@@ -33,13 +33,16 @@
 		{ \
 			return GetDefault<Type>(); \
 		} \
-		static Type* GetMutable() { \
-			static Type* MutableInstance; \
-			if (MutableInstance == nullptr) \
+		static Type* GetMutable() \
+		{ \
+			static TWeakObjectPtr<Type> CachedMutableSettings; \
+			Type* Resolved = CachedMutableSettings.Get(); \
+			if (Resolved == nullptr) \
 			{ \
-				MutableInstance = GetMutableDefault<Type>(); \
+				Resolved = GetMutableDefault<Type>(); \
+				CachedMutableSettings = Resolved; \
 			} \
-			return MutableInstance; \
+			return Resolved; \
 		} \
 		virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); } \
 		virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  } \
@@ -93,13 +96,16 @@
 		{ \
 			return GetDefault<Type>(); \
 		} \
-		static Type* GetMutable() { \
-			static Type* MutableInstance; \
-			if (MutableInstance == nullptr) \
+		static Type* GetMutable() \
+		{ \
+			static TWeakObjectPtr<Type> CachedMutableSettings; \
+			Type* Resolved = CachedMutableSettings.Get(); \
+			if (Resolved == nullptr) \
 			{ \
-				MutableInstance = GetMutableDefault<Type>(); \
+				Resolved = GetMutableDefault<Type>(); \
+				CachedMutableSettings = Resolved; \
 			} \
-			return MutableInstance; \
+			return Resolved; \
 		} \
 		virtual FName GetContainerName() const override { return NAME_None; } \
 		virtual FName GetCategoryName() const override {  return NAME_None;  }
