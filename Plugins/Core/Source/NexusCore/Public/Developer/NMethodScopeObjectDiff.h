@@ -31,7 +31,7 @@ public:
 		const FNObjectSnapshot EndSnapshot = FNObjectSnapshotUtils::Snapshot();
 		const FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(StartSnapshot, EndSnapshot, false);
 
-		UE_LOG(LogNexusCore, Log, TEXT("FNMethodScopeObjectDiff(%s) %s", *Name, *Diff.ToString());
+		UE_LOG(LogNexusCore, Log, TEXT("FNMethodScopeObjectDiff(%s) %s"), *Name, *Diff.ToString());
 	}
 private:
 	FString Name;
