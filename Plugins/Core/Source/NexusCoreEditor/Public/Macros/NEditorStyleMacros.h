@@ -59,9 +59,9 @@
 #define N_IMPLEMENT_EDITOR_STYLE_CREATE \
 	TSharedRef<FSlateStyleSet> StyleRef = MakeShareable(new FSlateStyleSet(GetStyleSetName())); \
 	FSlateStyleSet& Style = StyleRef.Get(); \
-	const FVector2D Icon128x128(128.0f, 128.0f);
-	const FVector2D Icon64x64(64.0f, 64.0f);
-	const FVector2D Icon32x32(32.0f, 32.0f);
+	const FVector2D Icon128x128(128.0f, 128.0f); \
+	const FVector2D Icon64x64(64.0f, 64.0f); \
+	const FVector2D Icon32x32(32.0f, 32.0f); \
 	const FVector2D Icon16x16(16.0f, 16.0f);
 
 /**

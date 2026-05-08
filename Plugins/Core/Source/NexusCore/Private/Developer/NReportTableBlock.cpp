@@ -36,6 +36,7 @@ void FNReportTableBlock::AddRow(const TArray<FString>& Row)
 	if (ColumnCount == -1)
 	{
 		UE_LOG(LogNexusCore, Error, TEXT("Unable to add data row as the FNReportTableBlock has not been initialized yet."));
+		return;
 	}
 	
 	int Columns = Row.Num();

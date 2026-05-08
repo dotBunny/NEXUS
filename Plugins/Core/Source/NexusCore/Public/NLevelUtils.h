@@ -32,7 +32,9 @@ public:
 	 */
 	FORCEINLINE static ILevelInstanceInterface* GetActorComponentLevelInstance(const UActorComponent* ActorComponent)
 	{
-		return GetActorLevelInstance(ActorComponent->GetOwner());
+		const AActor* Owner = ActorComponent->GetOwner();
+		if (!Owner) return nullptr;
+		return GetActorLevelInstance(Owner);
 	};
 
 	/**

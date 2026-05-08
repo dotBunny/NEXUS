@@ -95,7 +95,10 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TA
 		SpawnParams.InitialActorLabel = Label;
 #endif // WITH_EDITOR
 		SpawnParams.ObjectFlags |= RF_Transient;
+		
 		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), BaseTransform, SpawnParams);
+		if (DebugActor == nullptr) return MoveTemp(DebugActors);
+		
 		DebugActor->OverrideWithDynamicMesh(BaseMesh.CreateDynamicMesh(bProcessMeshes), MaterialInterface);
 		DebugActors.Add(DebugActor);
 	}
@@ -105,14 +108,15 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, TA
 		{
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("RawMeshVisualizer"));
-	#if WITH_EDITOR	
+	#if WITH_EDITOR
 			const FString Label = SpawnParams.Name.ToString();
 			SpawnParams.InitialActorLabel = Label;
 	#endif // WITH_EDITOR
 			SpawnParams.ObjectFlags |= RF_Transient;
-			
+
 			ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), Transforms[i], SpawnParams);
-			
+			if (DebugActor == nullptr) continue;
+
 			DebugActor->OverrideWithDynamicMesh(Meshes[i].CreateDynamicMesh(bProcessMeshes), MaterialInterface);
 			DebugActors.Add(DebugActor);
 		}
@@ -260,12 +264,16 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 
 	for (int32 i = 0; i < LeftLoopCount; ++i)
 	{
+		if (!LeftMesh.Loops[i].IsTriangle()) continue;
+		
 		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
 		const FVector& V1 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[1]];
 		const FVector& V2 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[2]];
 
 		for (int32 j = 0; j < RightLoopCount; ++j)
 		{
+			if (!RightMesh.Loops[j].IsTriangle()) continue;
+
 			const FVector& U0 = RightVerticesWorld[RightMesh.Loops[j].Indices[0]];
 			const FVector& U1 = RightVerticesWorld[RightMesh.Loops[j].Indices[1]];
 			const FVector& U2 = RightVerticesWorld[RightMesh.Loops[j].Indices[2]];

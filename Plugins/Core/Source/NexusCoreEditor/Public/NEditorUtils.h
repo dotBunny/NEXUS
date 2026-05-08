@@ -41,13 +41,15 @@ public:
 	/** Get the current editor map name. */
 	FORCEINLINE static FString GetCurrentMapName()
 	{
-		return GEditor->GetEditorWorldContext().World()->GetMapName();
+		const UWorld* World = GEditor->GetEditorWorldContext().World();
+		return World != nullptr ? World->GetMapName() : TEXT("");
 	}
 
 	/** Get the current editor map full path. */
 	FORCEINLINE static FString GetCurrentMapFullPath()
 	{
-		return GEditor->GetEditorWorldContext().World()->GetName();
+		const UWorld* World = GEditor->GetEditorWorldContext().World();
+		return World != nullptr ? World->GetName() : TEXT("");
 	}
 
 	/** Is in PIE mode. */
@@ -106,11 +108,16 @@ public:
 	
 	/**
 	 * Returns the active editor viewport's client.
-	 * @return The viewport client cast to FEditorViewportClient; does not check for null.
+	 * @return The viewport client cast to FEditorViewportClient.
 	 */
 	FORCEINLINE static FEditorViewportClient* GetActiveViewportClient()
 	{
-		return static_cast<FEditorViewportClient*>(GEditor->GetActiveViewport()->GetClient());
+		const FViewport* Viewport = GEditor->GetActiveViewport();
+		if (Viewport != nullptr)
+		{
+			return static_cast<FEditorViewportClient*>(Viewport->GetClient());
+		}
+		return nullptr;
 	}
 
 	/**

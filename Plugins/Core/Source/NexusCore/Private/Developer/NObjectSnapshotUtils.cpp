@@ -112,39 +112,19 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 {
 	for (int32 i = Diff.AddedCount - 1; i >= 0; i--)
 	{
-		FNObjectSnapshotEntry& Entry = Diff.Added[i];
+		const FNObjectSnapshotEntry& Entry = Diff.Added[i];
 
-		// Remove Engine Entry
-		if (Entry.Name.Equals(TEXT("/Script/Engine")) && Entry.SerialNumber == 0)
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
+		// These are what we are labeling as "known leaks"
+		const bool bRemove =
+			(Entry.Name.Equals(TEXT("/Script/Engine")) && Entry.SerialNumber == 0) ||
+			Entry.Name.Equals(TEXT("/Script/InputCore")) ||
+			Entry.Name.StartsWith(TEXT("ChaosEventRelay")) ||
+			Entry.Name.StartsWith(TEXT("NiagaraComponentPool")) ||
+			// UBoxComponent lazily creates a UBodySetup the first time an instance is registered with the physics system.
+			// That body setup lives in the transient package — not the world — so it survives the world teardown and shows up as a "leak".
+			(Entry.Name.StartsWith(TEXT("BodySetup")) && Entry.Name.EndsWith(TEXT("BodySetup_0")));
 
-		// Remove InputCore
-		if (Entry.Name.Equals(TEXT("/Script/InputCore")))
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
-
-		// Remove ChaosEventRelay (physics world) entry (will have a _# in its name)
-		if (Entry.Name.StartsWith(TEXT("ChaosEventRelay")))
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
-		
-		// Remove Niagara Component Pool entry (will have a _# in its name)
-		if (Entry.Name.StartsWith(TEXT("NiagaraComponentPool")))
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
-		
-		// UBoxComponent lazily creates a UBodySetup the first time an instance is registered with the physics system. 
-		// That body setup lives in the transient package — not the world — so it survives the world teardown and shows up as a "leak".
-		if (Entry.Name.StartsWith(TEXT("BodySetup")) && Entry.Name.EndsWith(TEXT("BodySetup_0")))
+		if (bRemove)
 		{
 			Diff.Added.RemoveAt(i, EAllowShrinking::No);
 			Diff.AddedCount--;

@@ -13,24 +13,26 @@ void FNDrawDebugHelpers::DrawString(const UWorld* InWorld, FString& String, cons
 	const float Scale, const float LineHeight, const float Thickness, const bool bInvertLineFeed, const bool bDrawBelowPosition)
 {
 #if ENABLE_DRAW_DEBUG
+	if (InWorld == nullptr)
+	{
+		return;
+	}
+
 	// Ensure we are not a dedicated server who doesn't have a visual side
 	if (GEngine->GetNetMode(InWorld) == NM_DedicatedServer)
 	{
 		return;
 	}
-	
+
 	// Find the appropriate batching component
-	ULineBatchComponent* LineBatcher = nullptr;
-	if (InWorld)
+	ULineBatchComponent* LineBatcher;
+	if (bPersistentLines || LifeTime > 0.f)
 	{
-		if (bPersistentLines || LifeTime > 0.f)
-		{
-			LineBatcher = DepthPriority ? InWorld->GetLineBatcher(UWorld::ELineBatcherType::ForegroundPersistent) : InWorld->GetLineBatcher(UWorld::ELineBatcherType::WorldPersistent);
-		}
-		else
-		{
-			LineBatcher =  DepthPriority ? InWorld->GetLineBatcher(UWorld::ELineBatcherType::Foreground) : InWorld->GetLineBatcher(UWorld::ELineBatcherType::World);
-		}
+		LineBatcher = DepthPriority ? InWorld->GetLineBatcher(UWorld::ELineBatcherType::ForegroundPersistent) : InWorld->GetLineBatcher(UWorld::ELineBatcherType::WorldPersistent);
+	}
+	else
+	{
+		LineBatcher = DepthPriority ? InWorld->GetLineBatcher(UWorld::ELineBatcherType::Foreground) : InWorld->GetLineBatcher(UWorld::ELineBatcherType::World);
 	}
 	
 	// If we can't find one, we shouldn't be trying to draw anything

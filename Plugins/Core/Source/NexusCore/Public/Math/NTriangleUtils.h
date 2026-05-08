@@ -31,7 +31,10 @@ public:
 		const float dot11 = FVector::DotProduct(v1, v1);
 		const float dot12 = FVector::DotProduct(v1, v2);
 
-		const float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+		const float denom = dot00 * dot11 - dot01 * dot01;
+		if (FMath::Abs(denom) < SMALL_NUMBER) return false;
+		const float invDenom = 1.0f / denom;
+		
 		const float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
 		const float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 

@@ -9,7 +9,10 @@
 
 ILevelInstanceInterface* FNLevelUtils::GetActorLevelInstance(const AActor* Actor)
 {
-	if (const ULevelInstanceSubsystem* LevelInstanceSubsystem = Actor->GetWorld()->GetSubsystem<ULevelInstanceSubsystem>())
+	const UWorld* World = Actor->GetWorld();
+	if (!World) return nullptr;
+
+	if (const ULevelInstanceSubsystem* LevelInstanceSubsystem = World->GetSubsystem<ULevelInstanceSubsystem>())
 	{
 		return LevelInstanceSubsystem->GetOwningLevelInstance(Actor->GetLevel());
 	}

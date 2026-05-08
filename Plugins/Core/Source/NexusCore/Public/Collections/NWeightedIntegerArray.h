@@ -35,7 +35,7 @@ struct FNWeightedIntegerArray
 	}
 
 	/** Clears all entries from the array. */
-	void Empty()
+	void Empty()	
 	{
 		Data.Empty();
 		CachedMaxIndex = -1;
@@ -64,6 +64,7 @@ struct FNWeightedIntegerArray
 	 */
 	void RemoveSome(const int32 Value, int32 Limit = 1)
 	{
+		if (Limit <= 0) return;
 		for (int32 i = CachedMaxIndex; i >= 0; i--)
 		{
 			if (Data[i] == Value)
@@ -83,15 +84,17 @@ struct FNWeightedIntegerArray
 	 */
 	int32 NextValue() const
 	{
+		if (!HasData()) return INDEX_NONE;
 		return Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];
 	}
-	
+
 	/**
 	 * Get the next deterministic value from the array, then remove every copy of it.
 	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::Deterministic.
 	 */
 	int32 NextValueAndRemove()
 	{
+		if (!HasData()) return INDEX_NONE;
 		const int32 ReturnValue = Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];;
 		Remove(ReturnValue);
 		return ReturnValue;
@@ -103,6 +106,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomValue() const
 	{
+		if (!HasData()) return INDEX_NONE;
 		return Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
 	}
 
@@ -112,6 +116,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomValueAndRemove()
 	{
+		if (!HasData()) return INDEX_NONE;
 		const int32 ReturnValue = Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
 		Remove(ReturnValue);
 		return ReturnValue;
@@ -123,6 +128,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomOneShotValue(const int32 Seed) const
 	{
+		if (!HasData()) return INDEX_NONE;
 		const FRandomStream RandomStream(Seed);
 		return Data[RandomStream.RandRange(0, CachedMaxIndex)];
 	}
@@ -134,6 +140,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomOneShotValueAndRemove(const int32 Seed)
 	{
+		if (!HasData()) return INDEX_NONE;
 		const FRandomStream RandomStream(Seed);
 		const int32 ReturnValue = Data[RandomStream.RandRange(0, CachedMaxIndex)];
 		Remove(ReturnValue);
@@ -150,6 +157,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomTrackedValue(int32& Seed) const
 	{
+		if (!HasData()) return INDEX_NONE;
 		const FRandomStream Random(Seed);
 		const int32 RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
@@ -164,6 +172,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 RandomTrackedValueAndRemove(int32& Seed)
 	{
+		if (!HasData()) return INDEX_NONE;
 		const FRandomStream Random(Seed);
 		const int32 RandomIndex = Random.RandRange(0, CachedMaxIndex);
 		Seed = Random.GetCurrentSeed();
@@ -178,10 +187,11 @@ struct FNWeightedIntegerArray
 	 */
 	int32 TwistedValue(FNMersenneTwister& Twister) const
 	{
+		if (!HasData()) return INDEX_NONE;
 		const int32 RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
 		return Data[RandomIndex];
 	}
-	
+
 	/**
 	 * Get a random value from the array from a deterministic input, then remove every copy of it.
 	 * @param Twister The Mersenne Twister to query for random.
@@ -189,6 +199,7 @@ struct FNWeightedIntegerArray
 	 */
 	int32 TwistedValueAndRemove(FNMersenneTwister& Twister)
 	{
+		if (!HasData()) return INDEX_NONE;
 		const int32 RandomIndex = Twister.IntegerRange(0, CachedMaxIndex);
 		const int32 ReturnValue = Data[RandomIndex];
 		Remove(ReturnValue);
@@ -196,9 +207,9 @@ struct FNWeightedIntegerArray
 	}
 
 	/** Is there any data in the array? */
-	bool HasData() const
+	FORCEINLINE bool HasData() const
 	{
-		return Data.Num() > 0;
+		return CachedMaxIndex >= 0;
 	}
 	
 	/**
@@ -236,5 +247,5 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<int32> Data;
 	UPROPERTY(VisibleAnywhere)
-	int32 CachedMaxIndex = 0;
+	int32 CachedMaxIndex = -1;
 };

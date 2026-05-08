@@ -247,7 +247,12 @@ void FNEditorUtils::CleanLogsFolder()
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-	
+	if (BlutilityModule == nullptr)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Attempting to access the Blutility Module prior to it being loaded."));
+		return;
+	}
+
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
@@ -266,6 +271,12 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 void FNEditorUtils::RemoveWorkspaceItem(const FName& WidgetIdentifier)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	if (BlutilityModule == nullptr)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Attempting to access the Blutility Module prior to it being loaded."));
+		return;
+	}
+
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
 	TSharedPtr<FWorkspaceItem> Found;
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
