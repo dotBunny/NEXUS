@@ -121,14 +121,24 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	void CalculateCenterAndBounds()
 	{
-		FVector CenterCalc;
+		FVector CenterCalc = FVector::ZeroVector;
 		FBox BoundingBox(ForceInit);
 		for (int32 i = 0; i < Vertices.Num(); i++)
 		{
 			CenterCalc += Vertices[i];
 			BoundingBox += Vertices[i];
 		}
-		Center = CenterCalc / Vertices.Num();
+		
+		// Ensure that we never divide by zero
+		if (Vertices.Num() > 0)
+		{
+			Center = CenterCalc / Vertices.Num();
+		}
+		else
+		{
+			Center = FVector::ZeroVector;
+		}
+
 		Bounds = BoundingBox;
 		bHasBounds = true;
 	}

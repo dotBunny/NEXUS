@@ -50,6 +50,7 @@
 - `FNActorPool` crash when applying settings where `UWorld` does not exist.
 - `FNActorPool` crash when dealing with MaximumActorCount=0, now minimum of 1.
 - `FNActorPool::Return` now rejects actors whose class does not match the pool's `Template`, and rejects actors already present in the pool (non-Shipping builds only) — previously these would silently pollute `InActors` or be handed back twice from subsequent `Get()`/`Spawn()` calls.
+- `FNRawMesh` crash when calculating center with no verticies.
 
 ### Removed
 
