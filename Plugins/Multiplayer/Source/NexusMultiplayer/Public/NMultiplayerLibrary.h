@@ -258,26 +258,4 @@ public:
 	{
 		return IsServer(WorldContextObject);
 	};
-
-	/**
-	 * Is the current session created from the MultiplayerTest editor command?
-	 * @return true/false if it is.
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Is Multiplayer Test", Category = "NEXUS|Multiplayer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-multiplayer-test"))
-	static bool IsMultiplayerTest()
-	{
-		return FNMultiplayerUtils::IsMultiplayerTest();
-	};
-
-	/**
-	* Is the current session created from the MultiplayerTest editor command?
-	* @return true/false if it is.
-	*/
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Is Multiplayer Test ?", Category = "NEXUS|Multiplayer",
-		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/multiplayer-library/#is-multiplayer-test"))
-	static bool IsMultiplayerTestExec()
-	{
-		return FNMultiplayerUtils::IsMultiplayerTest();
-	}
 };

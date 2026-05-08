@@ -19,16 +19,6 @@
 			"Name": "NexusMultiplayer",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "NexusMultiplayerEditor",
-			"Type": "Editor",
-			"LoadingPhase": "Default",
-			"PlatformAllowList": [
-				"Mac",
-				"Linux",
-				"Win64"
-			]
 		}
 	],
 	"Plugins": [

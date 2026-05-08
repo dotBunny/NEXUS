@@ -25,7 +25,7 @@ public:
 	 * @param bAbsolute true for an absolute travel; false for a relative travel.
 	 * @param bShouldSkipGameNotify true to skip notifying the current game mode.
 	 */
-	FORCEINLINE static void ServerTravel(const UObject *WorldContextObject, const FString& InURL, const bool bAbsolute = true, const bool bShouldSkipGameNotify = false)
+	FORCEINLINE static void ServerTravel(const UObject* WorldContextObject, const FString& InURL, const bool bAbsolute = true, const bool bShouldSkipGameNotify = false)
 	{
 		if (UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject); IsValid(World))
 		{
@@ -34,20 +34,11 @@ public:
 	}
 
 	/**
-	 * Is the current session created from the MultiplayerTest editor command?
-	 * @return true/false if it is.
-	 */	
-	FORCEINLINE static bool IsMultiplayerTest()
-	{
-		return FParse::Param(FCommandLine::Get(), TEXT("NMultiplayerTest"));
-	}
-
-	/**
 	 * Does the current callstack have World authority?
 	 * @remark Developer preference, use this to determine if logic is operating on the host.
 	 * @param World The world to check.
 	 * @return true/false if authority is found.
-	 */		
+	 */
 	FORCEINLINE static bool HasWorldAuthority(const UWorld* World)
 	{
 		return World->GetAuthGameMode() != nullptr;
@@ -58,7 +49,7 @@ public:
 	 * @remark Developer preference, use this to determine if logic is operating on the host.
 	 * @param World The world to check.
 	 * @return true/false if authority is found.
-	 */		
+	 */
 	FORCEINLINE static bool HasWorldAuthority(const UWorld& World)
 	{
 		return World.GetAuthGameMode() != nullptr;
@@ -98,7 +89,7 @@ public:
 	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
 	{
 		APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
-		if (PlayerState== nullptr)
+		if (PlayerState == nullptr)
 		{
 			UE_LOG(LogNexusMultiplayer, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
 			return 0;
@@ -120,7 +111,7 @@ public:
 		}
 		return 0;
 	}
-	
+
 	/**
 	 * Get the APawn for the given player's unique identifier.
 	 * @param World The world to check.
@@ -188,24 +179,24 @@ public:
 		{
 			return NEXUS::Multiplayer::InvalidPing;
 		}
-	
+
 		const ULocalPlayer* LocalPlayer = World->GetFirstLocalPlayerFromController();
 		if (LocalPlayer == nullptr)
 		{
 			return NEXUS::Multiplayer::InvalidPing;
 		}
-	
+
 		const APlayerController* PlayerController = LocalPlayer->GetPlayerController(World);
 		if (PlayerController == nullptr)
 		{
 			return NEXUS::Multiplayer::InvalidPing;
 		}
-	
+
 		if (PlayerController->PlayerState == nullptr)
 		{
 			return NEXUS::Multiplayer::InvalidPing;
 		}
-	
+
 		// All conditions checked should have a real ping to provide.
 		return PlayerController->PlayerState->ExactPing;
 	}

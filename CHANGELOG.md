@@ -4,9 +4,6 @@
 
 ### Added
 
-- Additional settings to the `MultiplayerTest` to simulate different network conditions.
-- `FNMultiplayerEditorModule` now has `OnMultiplayerTestStart` and `OnMultiplayerTestEnd` delegates, the first also allows for additional arguments to be passed in to the launch of the client(s)/server.
-- Preference to clean logs folder prior to launching `MultiplayerTest`.
 - `FNDeveloperUtils` and `UNDeveloperLibrary` now have `IsBuildDemo()` methods to support `IS_BUILD_DEMO` definitions from build targets.
 - Pickers all now have a `Twisted` method to support passing a `FNMersenneTwister`.
 - `ANDebugPointActor` for quick point debugging.
@@ -16,7 +13,6 @@
 ### Changed
 
 - Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
-- `MultiplayerTest` now monitors the status of the spawned processes and updates state accordingly.
 - `ANSamplesPawn` now replicates movement.
 - Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
 - `NActorPool` tests now run in PIE worlds.
@@ -55,6 +51,7 @@
 ### Removed
 
 - `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
+- With recent changes to UE 5.4+ the need for a dedicated multiplayer test framework was deemed not necessary, the `Multiplayer Test` has been removed from `NexusMultiplayer`.
 
 ### Core Redirects
 

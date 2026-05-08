@@ -15,9 +15,4 @@ class FNMultiplayerModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	N_IMPLEMENT_MODULE(FNMultiplayerModule, "NexusMultiplayer")
-
-private:
-	/** Cached localized title used by the multiplayer test window. */
-	FText MultiplayerTestWindowTitle;
-	void OnPostEngineInit();
 };
