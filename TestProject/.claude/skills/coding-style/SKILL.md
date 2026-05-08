@@ -7,19 +7,13 @@ description: Describes coding style and naming conventions. Invoke this skill wh
 
 ## File Structure
 
-Every `.cpp` and `.h` must start with:
+Every file starts with:
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 ```
 
-Every `.h` must follow the copyright with `#pragma once`:
-```cpp
-// Copyright dotBunny Inc. All Rights Reserved.
-// See the LICENSE file at the repository root for more information.
-
-#pragma once
-```
+Every `.h` also adds `#pragma once` immediately after the copyright.
 
 ## Formatting
 
@@ -30,28 +24,18 @@ Style is enforced via `.editorconfig`. Key rules:
 
 ## Naming Conventions
 
-Standard UE prefixes apply:
+Standard UE prefixes apply, with NEXUS adding `N` after the type prefix:
 
-| Prefix | Type |
-|---|---|
-| `A` | AActor subclass |
-| `U` | UObject subclass |
-| `F` | Struct |
-| `E` | Enum |
-| `T` | Template |
-| `S` | SWidget |
-| `I` | Interface |
-| `b` | bool field |
-
-NEXUS adds `N` after the type prefix:
-
-| Example | Meaning |
-|---|---|
-| `ANDebugActor` | AActor subclass |
-| `UNDynamicRef` | UObject subclass |
-| `FNActorPool` | Struct |
-| `ENActorComponentLifecycleEnd` | Enum |
-| `INActorPoolItem` | Interface (`I` + `N`) |
+| Prefix | Type | NEXUS example |
+|---|---|---|
+| `A` | AActor subclass | `ANDebugActor` |
+| `U` | UObject subclass | `UNDynamicRef` |
+| `F` | Struct | `FNActorPool` |
+| `E` | Enum | `ENActorComponentLifecycleEnd` |
+| `T` | Template | |
+| `S` | SWidget | |
+| `I` | Interface | `INActorPoolItem` |
+| `b` | bool field | |
 
 ## Module API Macro
 
@@ -59,7 +43,6 @@ Every exported class and free function must be tagged with its module's API macr
 
 ```cpp
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem { ... };
-class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem { ... };
 ```
 
 The macro is `NEXUS<UPPERCASEPLUGINNAME>_API`.
@@ -84,11 +67,6 @@ namespace NEXUS::ActorPools::InvokeMethods
 {
     inline FName OnSpawned = TEXT("OnSpawnedFromActorPool");
 }
-
-namespace NEXUS::ActorPools::VLog
-{
-    constexpr float PointSize = 2.f;
-}
 ```
 
 Do not put types or function definitions in these namespaces — they are for constants and inline data only.
@@ -105,11 +83,8 @@ TObjectPtr<UNActorPoolObject> PoolObject;
 ## UCLASS / USTRUCT Specifiers
 
 ```cpp
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
+UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
-
-UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef Subsystem")
-class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 ```
 
 - `ClassGroup` is always `"NEXUS"`
@@ -149,7 +124,7 @@ virtual void Tick(float DeltaTime) final override;
 
 ## Doc Comments
 
-Use Doxygen-style `/** */` for all public API. Standard tags:
+Use Doxygen-style `/** */` for all public API:
 
 ```cpp
 /**
@@ -157,7 +132,7 @@ Use Doxygen-style `/** */` for all public API. Standard tags:
  * @param ParamName Description of the parameter.
  * @return Description of the return value.
  * @note Thread-safety, usage constraints, or behavioural caveats.
- * @remark Intended audience (e.g. "native code only") or manual-use warnings.
+ * @remark Intended audience or manual-use warnings.
  * @see <a href="https://nexus-framework.com/docs/...">TypeName</a>
  */
 ```
@@ -165,19 +140,19 @@ Use Doxygen-style `/** */` for all public API. Standard tags:
 - `@note` — thread safety, must-be-on-game-thread, does-not-check-bounds caveats
 - `@remark` — "native code only", "manual add requires manual remove" style warnings
 - `@see` — links to the docs page for the type or method
-- Single-line doxygen comment blocks for methods and members should be the collapsed single-line format: /** comment */; where as top-level class/struct/enum,namespace docs should be the expanded three-line format.
+- Top-level class/struct/enum/namespace docs use the expanded three-line `/** */` format; methods and members use the collapsed single-line `/** comment */` format.
 - Use American English spelling (color, behavior, etc.)
 
 ## Module Dependencies (.Build.cs)
 
-When adding an include from a module that isn't already a dependency, you must declare it in the plugin's `.Build.cs` file or the project will fail to build.
+When adding an include from a module that isn't already a dependency, declare it in the plugin's `.Build.cs`:
 
-- Use `PublicDependencyModuleNames` for headers included in `.h` files (exposed to dependents)
-- Use `PrivateDependencyModuleNames` for headers included only in `.cpp` files
+- `PublicDependencyModuleNames` for headers included in `.h` files
+- `PrivateDependencyModuleNames` for headers included only in `.cpp` files
 
 ```csharp
 PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "NexusCore" });
 PrivateDependencyModuleNames.AddRange(new string[] { "NexusActorPools" });
 ```
 
-The `.Build.cs` file lives at `Plugins/<Name>/Source/Nexus<Name>/Nexus<Name>.Build.cs` (runtime module) or `Plugins/<Name>/Source/Nexus<Name>Editor/Nexus<Name>Editor.Build.cs` (editor module).
+The `.Build.cs` file lives at `Plugins/<Name>/Source/Nexus<Name>/Nexus<Name>.Build.cs` (runtime) or `Plugins/<Name>/Source/Nexus<Name>Editor/Nexus<Name>Editor.Build.cs` (editor).

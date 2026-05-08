@@ -7,23 +7,15 @@ description: Creating new unit tests, test cases, or performance tests. Invoke t
 
 Follow the `coding-style` skill for all formatting, naming, and doc comment conventions — test files are subject to the same rules as production code.
 
-When writing tests, follow these guidelines exactly.
-
 ## File Placement & Naming
 
 - Tests belong in the `Editor` module under a `Tests/` subdirectory:
   `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`
-- File naming is based on the **class being tested**, not the plugin short name:
-  - `<ClassName>Tests.cpp` — all tests for one class in one file
-  - `<ClassName>Tests_<Feature>.cpp` — tests for a specific feature area of a class
-  - `<ClassName>PerfTests.cpp` — performance tests for a class
-  - `<ClassName>PerfTests_<Feature>.cpp` — perf tests for a specific feature area
-- `<ClassName>` carries the same UE type prefix as the tested subject:
-  - `FNActorPool` → `NActorPoolTests.cpp`, `NActorPoolPerfTests.cpp`
-  - `UNDynamicRefSubsystem` → `NDynamicRefSubsystemTests.cpp`, `NDynamicRefSubsystemTests_Delegates.cpp`
-  - `FNMersenneTwister` → `NMersenneTwisterTests.cpp`, `NMersenneTwisterPerfTests.cpp`
-  - `INActorPoolItem` → `INActorPoolItemTests.cpp`
-  - `NFlagsMacros` (macro group, no prefix) → `NFlagsMacrosTests.cpp`
+- File naming is based on the **class being tested**:
+  - `<ClassName>Tests.cpp` — all tests for one class
+  - `<ClassName>Tests_<Feature>.cpp` — tests for a specific feature area
+  - `<ClassName>PerfTests.cpp` / `<ClassName>PerfTests_<Feature>.cpp` — performance tests
+- Examples: `FNActorPool` → `NActorPoolTests.cpp`; `UNDynamicRefSubsystem` → `NDynamicRefSubsystemTests_Delegates.cpp`; `INActorPoolItem` → `INActorPoolItemTests.cpp`
 
 ## Every File Must Start With
 
@@ -42,8 +34,6 @@ And end with:
 
 ## Required Includes
 
-Include only what is needed:
-
 ```cpp
 // Always needed
 #include "Macros/NTestMacros.h"
@@ -52,24 +42,19 @@ Include only what is needed:
 #include "Developer/NTestUtils.h"
 
 // Needed for CHECK_EQUALS only when NTestUtils.h is NOT included
-// (NTestUtils.h pulls it in transitively, so skip this when already including NTestUtils.h)
+// (NTestUtils.h pulls it in transitively)
 #include "Tests/TestHarnessAdapter.h"
 ```
 
-Include plugin-specific headers as needed (e.g. `"NActorPool.h"`, `"NDynamicRefSubsystem.h"`).
-
-Include the module's `Nexus<Name>Minimal.h` rather than the full module header.
+Include plugin-specific headers and the module's `Nexus<Name>Minimal.h` as needed.
 
 ## Test Name Hierarchy
-
-Test struct names and string names mirror the class under test:
 
 | Subject | Struct name | String name |
 |---|---|---|
 | `FNActorPool` – leak check, force destroy | `FNActorPoolTests_LeakCheck_ForceDestroy` | `"NEXUS::UnitTests::NActorPools::FNActorPool::LeakCheck::ForceDestroy"` |
 | `UNDynamicRefSubsystem` – fast collection, add | `UNDynamicRefSubsystemTests_FastCollection_AddObject` | `"NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::AddObject"` |
 | `FNMersenneTwister` – float range | `FNMersenneTwisterTests_Float_Range` | `"NEXUS::UnitTests::NCore::FNMersenneTwister::Float_Range"` |
-| `NFlagsMacros` – has bits set | `NFlagsMacrosTests_Has_BitsSet` | `"NEXUS::UnitTests::NCore::NFlagsMacros::Has_BitsSet"` |
 
 Rules:
 - **Unit tests**: `"NEXUS::UnitTests::<ShortPlugin>::<ClassName>::<Category>::<Case>"`
@@ -138,8 +123,6 @@ if (SomePtr == nullptr)
 
 ## Unit Test Format — Pure Logic (`N_TEST_CONTEXT_ANYWHERE`)
 
-For tests that need no world. Only `NTestMacros.h` is required. Use `CHECK_EQUALS` only if you also include `TestHarnessAdapter.h`.
-
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
@@ -174,7 +157,7 @@ namespace NEXUS::UnitTests::NMyPlugin::FNMyClassHarness
 
 ## Unit Test Format — World-Based (`N_TEST_CONTEXT_EDITOR`)
 
-Use `WorldTestChecked` when correctness of the world state matters (validates pre/post conditions). `NTestUtils.h` is required.
+Use `WorldTestChecked` for unit tests (validates pre/post world state conditions). Use `WorldTest` when explicit GC control is needed; pass `true` as the final argument to disable GC during the test.
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -215,11 +198,7 @@ N_TEST_CRITICAL(UNMySubsystemTests_Category_Case,
 #endif //WITH_TESTS
 ```
 
-Use `WorldTest` (without "Checked") when you need explicit GC control or accept less strict world validation. Pass `true` as the final argument to disable garbage collection during the test.
-
 ## Performance Test Format — Pure Logic (`N_TEST_CONTEXT_ANYWHERE`)
-
-For perf tests with no world dependency. Place setup and the timed scope directly in the test body.
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -254,7 +233,7 @@ N_TEST_PERF_HIGH(FNMyClassPerfTests_OperationName,
 
 ## Performance Test Format — World-Based (`N_TEST_CONTEXT_EDITOR`)
 
-Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` block above the tests. Use `WorldTest(..., true)` (the `true` disables garbage collection while the test is running). Mark the timed region with a `// TEST` comment. Call `NTestTimer.ManualStop()` inside the timer scope when cleanup follows inside the same scope; omit it when the scope naturally ends after the measured work.
+Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` block above the tests. Use `WorldTest(..., true)` to disable GC. Call `NTestTimer.ManualStop()` inside the timer scope when cleanup follows in the same scope; omit it when the timed work ends right before the closing brace.
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -312,20 +291,8 @@ N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
 
 ## Common Patterns
 
-**Debug Actor**: Use `ANDebugActor` instead of `AActor`.
-
-**Multiple tests in one file**: Group related tests in a single file. Each test still gets its own `N_TEST_*` block.
-
-**Subsystem null guard in unit tests**: Always check the subsystem pointer immediately inside the lambda and `ADD_ERROR` + `return` if null.
-
-**Subsystem null guard in perf tests**: Use a bare early-out — `if (!Subsystem) return;` — without `ADD_ERROR`. Perf tests don't need to record a failure message for this case.
-
-**`WorldTestChecked` vs `WorldTest`**: Use `WorldTestChecked` for unit tests (validates world state pre/post). Use `WorldTest(..., true)` for perf tests and for unit tests that need explicit GC control.
-
-**`ManualStop()`**: Call `NTestTimer.ManualStop()` inside the timer scope when there is cleanup code (e.g., `Pool.Clear()`) that should not be included in the timing. Omit it when the measured work ends right before the closing brace of the scope.
-
-**Brief intent comment**: Start the test body (or lambda body for world tests) with a `// Verifies that …` comment when the test name alone doesn't make the intent obvious. Especially valuable for edge-case and delegate tests.
-
-**Feature divider comments**: Do not add section divider commments like: `// ----- Feature ----------------------------`.
-
-**Reading existing tests before writing**: Always read the existing `Tests/` files for the target plugin before writing new ones to match established patterns and avoid conflicting enum/name values used as test fixtures.
+- **Debug Actor**: Use `ANDebugActor` instead of `AActor`.
+- **Subsystem null guard in unit tests**: `ADD_ERROR` + `return` inside the lambda.
+- **Subsystem null guard in perf tests**: bare `if (!Subsystem) return;` — no `ADD_ERROR` needed.
+- **Brief intent comment**: Start the test/lambda body with `// Verifies that …` when the test name alone doesn't make the intent obvious.
+- **Reading existing tests before writing**: Always read the existing `Tests/` files for the target plugin first to match established patterns and avoid conflicting fixture values.
