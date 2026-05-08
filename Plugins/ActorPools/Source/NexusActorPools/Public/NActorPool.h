@@ -66,7 +66,7 @@ public:
 
 	/**
 	 * Return the given actor to the pool.
-	 * @note This will add any actor provided to the pool, regardless if it came from the pool originally.
+	 * @note Accepts any actor whose class matches the pool's Template, regardless of whether the actor was originally created by this pool. Null pointers are always rejected; mismatched-class actors and actors already in the pool are rejected and logged in non-Shipping builds (the checks are stripped in Shipping for hot-path cost — callers must honour the same contract there).
 	 * @param Actor The target actor to be returned.
 	 */
 	bool Return(AActor* Actor);

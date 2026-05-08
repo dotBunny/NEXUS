@@ -221,12 +221,33 @@ bool FNActorPool::Return(AActor* Actor)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return true;
-	
+
 	if (Actor == nullptr)
 	{
 		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to return a NULL reference to a FNActorPool."));
 		return false;
 	}
+#if !UE_BUILD_SHIPPING
+	// Development-only contract checks — stripped in Shipping for hot-path cost; callers in Shipping are expected to honour these invariants.
+
+	// Mismatched-class actors would pollute InActors; a future Get() would Cast<T> them to the wrong type.
+	if (Actor->GetClass() != Template)
+	{
+		UE_LOG(LogNexusActorPools, Warning,
+			TEXT("Attempted to return an actor of class %s to a FNActorPool templated on %s; rejecting."),
+			*Actor->GetClass()->GetName(), *Template->GetName());
+		return false;
+	}
+
+	// Re-adding an actor already in the pool would hand the same pointer back to multiple callers from subsequent Get()/Spawn() calls.
+	if (InActors.Contains(Actor))
+	{
+		UE_LOG(LogNexusActorPools, Warning,
+			TEXT("Attempted to return an actor (%s) that is already pooled in a FNActorPool; rejecting double-add."),
+			*Actor->GetName());
+		return false;
+	}
+#endif // !UE_BUILD_SHIPPING
 	
 	ApplyReturnState(Actor);
 

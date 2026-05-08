@@ -183,6 +183,77 @@ N_TEST(FNActorPoolTests_Return_NullArgument,
 	});
 }
 
+N_TEST(FNActorPoolTests_Return_RejectsMismatchedClass,
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Return::RejectsMismatchedClass",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that returning an actor of a different class than the pool's Template is rejected and does not pollute the pool.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.MinimumActorCount = 1;
+		ActorPoolSettings.MaximumActorCount = 1;
+		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+
+		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), ActorPoolSettings);
+		Pool.Fill();
+
+		AActor* WrongClassActor = World->SpawnActor<ANDebugActor>();
+		if (WrongClassActor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn ANDebugActor for the mismatched-class test.");
+			Pool.Clear();
+			return;
+		}
+
+		AddExpectedMessage(TEXT("Attempted to return an actor of class"), ELogVerbosity::Type::Warning);
+		const bool bResult = Pool.Return(WrongClassActor);
+		CHECK_EQUALS("Return() with mismatched class should return false.", bResult, false)
+		CHECK_EQUALS("Pool's available count should be unchanged after a rejected mismatched-class Return().", Pool.GetAvailableCount(), 1)
+
+		WrongClassActor->Destroy();
+		Pool.Clear();
+	});
+}
+
+N_TEST(FNActorPoolTests_Return_RejectsDoubleAdd,
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Return::RejectsDoubleAdd",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that returning an actor that is already in the pool is rejected, preventing the same pointer from being handed out twice by subsequent Get()/Spawn() calls.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.MinimumActorCount = 2;
+		ActorPoolSettings.MaximumActorCount = 2;
+		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
+		Pool.Fill();
+
+		AActor* Actor = Pool.Spawn(FVector::Zero(), FRotator::ZeroRotator);
+		if (Actor == nullptr)
+		{
+			ADD_ERROR("Spawn() returned nullptr unexpectedly.");
+			Pool.Clear();
+			return;
+		}
+
+		const bool bFirstReturn = Pool.Return(Actor);
+		CHECK_EQUALS("First Return() should succeed.", bFirstReturn, true)
+		CHECK_EQUALS("Pool should have 2 available after the first Return().", Pool.GetAvailableCount(), 2)
+
+		AddExpectedMessage(TEXT("already pooled in a FNActorPool"), ELogVerbosity::Type::Warning);
+		const bool bSecondReturn = Pool.Return(Actor);
+		CHECK_EQUALS("Second Return() of the same actor should return false.", bSecondReturn, false)
+		CHECK_EQUALS("Available count should be unchanged after a rejected double-add.", Pool.GetAvailableCount(), 2)
+
+		Pool.Clear();
+	});
+}
+
 N_TEST(FNActorPoolTests_Return_StorageLocation,
 	"NEXUS::UnitTests::NActorPools::FNActorPool::Return::StorageLocation",
 	N_TEST_CONTEXT_EDITOR)
