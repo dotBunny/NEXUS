@@ -20,7 +20,7 @@ NEXUS/
 
 - The `TestProject` is a thin host project.
 - Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-- The Unreal Engine source may be found in `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, or `D:\EGS\UE_5.7` depending on the computer. Before using any command that contains `___UEROOT___`, check the `settings.local.json` and look for `replace["___UEROOT___"]` to see if we have the path saved. If not, check each candidate path in order to find the first one on disk, save it to `settings.local.json`'s `replace["___UEROOT___"]`, and then use it.
+- Resolve `___UEROOT___` from `settings.local.json` `replace["___UEROOT___"]`; if absent, probe `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, `D:\EGS\UE_5.7` in order, then save the found path there.
 - `___PROJECTROOT___` is the absolute path to the `TestProject/` directory — the current working directory. Resolve it from the working directory rather than hardcoding a path.
 
 ## Plugin Architecture
@@ -51,8 +51,6 @@ Active plugins loaded by the `TestProject`:
 | **NexusTooling** | Editor tools and fixers |
 | **NexusUI** | UMG/Slate UI components (depends on CommonUI) |
 
-`NexusCore` is a dependency of all other plugins and provides shared utilities: math helpers, collections, debug draw, actor/level libraries, and the developer-only headers in `Public/Developer/` (test utilities, object snapshots, scope timers, `NDebugActor`).
-
-`NexusCore/Public/Macros/` contains framework-wide macros used across all plugins.
+`NexusCore` provides developer-only headers in `Public/Developer/` (test utilities, object snapshots, scope timers, `NDebugActor`) and framework-wide macros in `Public/Macros/` used across all plugins.
 
 **Samples vs Tests**: Functional test content lives in `Samples/<Name>/Content/` as separate plugins (`NexusXxxSamples`). Unit tests live in `Plugins/<Name>/Source/Nexus<Name>Editor/Tests/`. The two test categories use different exec commands (`Tests.Nexus` vs `NEXUS.UnitTests`).

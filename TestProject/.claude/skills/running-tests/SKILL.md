@@ -5,11 +5,9 @@ description: Describes how to run unit tests, test cases, or performance tests. 
 
 # Running Tests
 
-When running tests, follow these guidelines exactly.
-
 ## Prerequisites
 
-The project must be built before running tests. Use the `build` skill to compile `NEXUSEditor` if any source files have changed since the last build.
+Build the project first. Use the `build` skill to compile `NEXUSEditor` if any source files changed.
 
 ```powershell
 # Unit tests
@@ -49,8 +47,4 @@ The test name is the string passed as the second argument to the `N_TEST_*` macr
 
 ## Debugging Failures
 
-If a run crashes or tests produce unexpected results, check the editor log:
-
-`TestProject/Saved/Logs/NEXUS.log`
-
-Look for lines containing `Error:` or `Warning:` to identify the root cause.
+If a run crashes or tests produce unexpected results, check `TestProject/Saved/Logs/NEXUS.log` for `Error:` or `Warning:` lines.
