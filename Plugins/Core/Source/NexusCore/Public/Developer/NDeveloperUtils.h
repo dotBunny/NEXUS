@@ -52,7 +52,10 @@ public:
 		for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); ++i)
 		{
 			FUObjectItem* ObjectItem = GUObjectArray.IndexToObject(i);
-			if (ObjectItem->IsRootSet())
+			// We're going to protect against the possibility that the IndexToObject comes back nullptr
+			// It really never should, because our GetObjectArrayNum() should ensure the count never exceeds the bounds,
+			// but, for the sake of sanity, and this not being in the hot path, we will just be absolutely sure.
+			if (ObjectItem != nullptr && ObjectItem->IsRootSet())
 			{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 				UObject* Object = static_cast<UObject*>(ObjectItem.Object);
