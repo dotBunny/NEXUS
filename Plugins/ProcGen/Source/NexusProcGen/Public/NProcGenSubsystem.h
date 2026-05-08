@@ -44,7 +44,11 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Get Local Relay", Category = "NEXUS|ProcGen")
 	ANProcGenRelay* GetLocalRelay() const { return LocalRelay; }
 
-	/** @return true once the subsystem has finished world-begin-play setup and can accept Generate calls. */
+	/**
+	 * @return true when the local procgen view is settled relative to the server.
+	 * @remark Server path: no operations are currently in flight. Client path: LocalRelay has replicated, the nearby-cell payload has been received, and no operations the client has been notified of are pending.
+	 * @note Does not gate Generate() — that can be called at any time regardless of this value.
+	 */
 	UFUNCTION(blueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|ProcGen")
 	bool IsReady();
 

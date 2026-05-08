@@ -24,7 +24,7 @@ class NEXUSPROCGEN_API ANProcGenRelay : public AActor
 
 public:
 
-	/** @return true once the relay has enough state to participate in cell-level-instance correlation. */
+	/** @return true when the server has answered the nearby-cells RPC at least once and no operations the client has been notified about are pending. */
 	bool IsReady();
 
 	/**
