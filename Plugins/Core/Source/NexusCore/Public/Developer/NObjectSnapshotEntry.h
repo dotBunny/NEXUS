@@ -46,8 +46,8 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 		}
 		else
 		{
-			Name = Item.GetObject()->GetFName().ToString();
-			FullName = Name;
+			Name = TEXT("NULL");
+			FullName = FString::Printf(TEXT("NULL [%i:%i]"), Item.GetClusterIndex(), Item.GetSerialNumber());;
 			ObjectPtr = nullptr;
 		}
 	}
