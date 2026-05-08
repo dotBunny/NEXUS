@@ -19,3 +19,8 @@ namespace NEXUS::Version
 	constexpr int32 Minor = 3;
 	constexpr int32 Patch = 0;
 }
+
+namespace NEXUS::Multiplayer
+{
+	constexpr float InvalidPing = 1.f;
+}

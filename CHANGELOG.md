@@ -51,7 +51,7 @@
 ### Removed
 
 - `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
-- With recent changes to UE 5.4+ the need for a dedicated multiplayer test framework was deemed not necessary, the `Multiplayer Test` has been removed from `NexusMultiplayer`.
+- With recent changes to UE 5.4+ the need for a dedicated multiplayer test framework was deemed not necessary, collapsed logic back to core, removed test.
 
 ### Core Redirects
 
@@ -59,6 +59,8 @@
 [CoreRedirects]                                                  
 +EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("Destroyed","Released")))                                                                              
 +EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("BroadcastDestroy","BroadcastRelease")))
++ClassRedirects=(OldName="/Script/NexusMultiplayer.UNMultiplayerLibrary",NewName="/Script/NexusCore.UNMultiplayerLibrary")
++ClassRedirects=(OldName="/Script/NexusMultiplayer.UNTextRenderComponent",NewName="/Script/NexusUI.UNTextRenderComponent")
 ```
 
 ## [0.2.7] - 2026-02-22

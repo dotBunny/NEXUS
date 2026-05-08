@@ -3,7 +3,7 @@
 
 #include "NMultiplayerLibrary.h"
 
-#include "NMultiplayerMinimal.h"
+#include "NCoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/GameSession.h"
 #include "GameFramework/GameStateBase.h"
@@ -18,11 +18,11 @@ float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)
 {
-	N_VALIDATE_RETURN(LogNexusMultiplayer, PlayerState, false)
+	N_VALIDATE_RETURN(LogNexusCore, PlayerState, false)
 
 	if (PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{
-		UE_LOG(LogNexusMultiplayer, Error, TEXT("You are unable to kick the host."));
+		UE_LOG(LogNexusCore, Error, TEXT("You are unable to kick the host."));
 		return false;
 	}
 	
@@ -34,7 +34,7 @@ bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState*
 		{
 			return false;
 		}
-		const FText KickReason = NSLOCTEXT("NexusMultiplayer", "HostKicked", "You were kicked.");
+		const FText KickReason = NSLOCTEXT("NexusCore", "HostKicked", "You were kicked.");
 		return GameMode->GameSession->KickPlayer(PlayerState->GetPlayerController(), KickReason);
 	}
 	return false;

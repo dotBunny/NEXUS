@@ -59,7 +59,6 @@ private:
 		"/NexusActorPoolsSamples/",
 		"/NexusBlockoutSamples/",
 		"/NexusDynamicRefsSamples/"
-		"/NexusMultiplayerSamples/",
 		"/NexusPickerSamples/",
 		"/NexusProcGenSamples/",
 		"/NexusUISamples/",

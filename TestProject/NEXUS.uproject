@@ -35,10 +35,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusMultiplayer",
-			"Enabled": true
-		},
-		{
 			"Name": "NexusPicker",
 			"Enabled": true
 		},
@@ -72,10 +68,6 @@
 		},
 		{
 			"Name": "NexusUISamples",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusMultiplayerSamples",
 			"Enabled": true
 		},
 		{

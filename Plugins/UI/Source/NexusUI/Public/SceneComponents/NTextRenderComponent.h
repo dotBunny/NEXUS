@@ -9,10 +9,10 @@
 
 /**
  * A component that builds a network-synchronized UTextRenderComponent between clients.
- * @see <a href="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/">UNTextRenderComponent</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/">UNTextRenderComponent</a>
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Text Render", meta = (BlueprintSpawnableComponent))
-class NEXUSMULTIPLAYER_API UNTextRenderComponent final : public UTextRenderComponent
+class NEXUSUI_API UNTextRenderComponent final : public UTextRenderComponent
 {
 	GENERATED_BODY()
 
@@ -39,24 +39,24 @@ public:
 	 * Set the value of the text component from an FName.
 	 * @param NewValue The desired text value.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName="Set From Name", Category = "NEXUS|Multiplayer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/#set-from-name"))
+	UFUNCTION(BlueprintCallable, DisplayName="Set From Name", Category = "NEXUS|User Interface",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-name"))
 	void SetFromName(const FName& NewValue);
 
 	/**
 	 * Set the value of the text component from an FString.
 	 * @param NewValue The desired text value.
 	 */		
-	UFUNCTION(BlueprintCallable, DisplayName="Set From String", Category = "NEXUS|Multiplayer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/#set-from-string"))
+	UFUNCTION(BlueprintCallable, DisplayName="Set From String", Category = "NEXUS|User Interface",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-string"))
 	void SetFromString(const FString& NewValue);
 
 	/**
 	 * Set the value of the text component from an FText.
 	 * @param NewValue The desired text value.
 	 */	
-	UFUNCTION(BlueprintCallable, DisplayName="Set From Text",  Category = "NEXUS|Multiplayer",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/multiplayer/types/text-render-component/#set-from-text"))
+	UFUNCTION(BlueprintCallable, DisplayName="Set From Text",  Category = "NEXUS|User Interface",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/text-render-component/#set-from-text"))
 	void SetFromText(const FText& NewValue);
 
 	/** Delegate fired when the text is changed via any of the provided methods. */

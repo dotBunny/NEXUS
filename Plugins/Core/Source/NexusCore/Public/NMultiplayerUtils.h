@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NMultiplayerMinimal.h"
+#include "NCoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Macros/NWorldMacros.h"
@@ -91,7 +91,7 @@ public:
 		APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
 		if (PlayerState == nullptr)
 		{
-			UE_LOG(LogNexusMultiplayer, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
+			UE_LOG(LogNexusCore, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
 			return 0;
 		}
 		return PlayerState->GetPlayerId();

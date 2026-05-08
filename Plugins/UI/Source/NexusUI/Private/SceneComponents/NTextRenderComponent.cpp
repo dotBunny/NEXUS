@@ -1,7 +1,7 @@
 ﻿// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
-#include "NTextRenderComponent.h"
+#include "SceneComponents/NTextRenderComponent.h"
 
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
