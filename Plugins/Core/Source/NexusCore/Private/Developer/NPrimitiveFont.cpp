@@ -67,13 +67,13 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 		default:
 
 			// Get reference to glyph data
-			TArray<FNPrimitiveFontPoint>& Points = GetGlyph(GlyphIndex);
-			
+			const TArray<FNPrimitiveFontPoint>* Points = &GetGlyph(GlyphIndex);
+
 			// Check our point count, if we don't have any at this point, it is considered a bad character
-			int32 PointCount = Points.Num();
+			int32 PointCount = Points->Num();
 			if (PointCount  == 0)
 			{
-				Points = GetGlyph(0);
+				Points = &GetGlyph(0);
 				PointCount = UndefinedPointCount;
 			}
 
@@ -81,16 +81,16 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 			for (int32 i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
-				FVector StartPoint = CurrentPosition + FVector(0.f, Points[i].X * WorkingScale, Points[i].Y * WorkingScale);
-				FVector EndPoint = CurrentPosition + FVector(0.f, Points[i + 1].X * WorkingScale, Points[i + 1].Y * WorkingScale);
-				
+				FVector StartPoint = CurrentPosition + FVector(0.f, (*Points)[i].X * WorkingScale, (*Points)[i].Y * WorkingScale);
+				FVector EndPoint = CurrentPosition + FVector(0.f, (*Points)[i + 1].X * WorkingScale, (*Points)[i + 1].Y * WorkingScale);
+
 				// Rotate points around base origin w/ rotation
 				if (bNeedsRotation)
 				{
 					StartPoint = BasePosition + RotationMatrix.TransformVector(StartPoint - BasePosition);
 					EndPoint = BasePosition + RotationMatrix.TransformVector(EndPoint - BasePosition);
 				}
-				
+
 				PDI->DrawLine(StartPoint, EndPoint, ForegroundColor, DepthPriorityGroup, Thickness);
 			}
 
@@ -156,13 +156,13 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 		default:
 
 			// Get reference to glyph data
-			TArray<FNPrimitiveFontPoint>& Points = GetGlyph(GlyphIndex);
-			
+			const TArray<FNPrimitiveFontPoint>* Points = &GetGlyph(GlyphIndex);
+
 			// Check our point count, if we don't have any at this point, it is considered a bad character
-			int32 PointCount = Points.Num();
+			int32 PointCount = Points->Num();
 			if (PointCount  == 0)
 			{
-				Points = GetGlyph(0);
+				Points = &GetGlyph(0);
 				PointCount = UndefinedPointCount;
 			}
 
@@ -170,16 +170,16 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 			for (int32 i = 0; i < PointCount; i += 2)
 			{
 				// Scale our points and bring them into 3D
-				FVector StartPoint = CurrentPosition + FVector(0.f, Points[i].X * WorkingScale, Points[i].Y * WorkingScale);
-				FVector EndPoint = CurrentPosition + FVector(0.f, Points[i + 1].X * WorkingScale, Points[i + 1].Y * WorkingScale);
-				
+				FVector StartPoint = CurrentPosition + FVector(0.f, (*Points)[i].X * WorkingScale, (*Points)[i].Y * WorkingScale);
+				FVector EndPoint = CurrentPosition + FVector(0.f, (*Points)[i + 1].X * WorkingScale, (*Points)[i + 1].Y * WorkingScale);
+
 				// Rotate points around base origin w/ rotation
 				if (bNeedsRotation)
 				{
 					StartPoint = BasePosition + RotationMatrix.TransformVector(StartPoint - BasePosition);
 					EndPoint = BasePosition + RotationMatrix.TransformVector(EndPoint - BasePosition);
 				}
-				
+
 				LineBatch->DrawLine(StartPoint, EndPoint, ForegroundColor, DepthPriorityGroup, Thickness);
 			}
 

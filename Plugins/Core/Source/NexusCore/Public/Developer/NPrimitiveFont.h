@@ -49,7 +49,7 @@ public:
 	 * @param InChar The character to look up.
 	 * @return The array of glyph points; an "undefined" glyph is returned for non-printable input.
 	 */
-	FORCEINLINE static TArray<FNPrimitiveFontPoint>& GetGlyph(const char InChar)
+	FORCEINLINE static const TArray<FNPrimitiveFontPoint>& GetGlyph(const char InChar)
 	{
 		if (InChar < 32 || InChar > 126) return Glyphs[0];
 		return Glyphs[InChar];
