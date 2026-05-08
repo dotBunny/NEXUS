@@ -97,6 +97,7 @@ TestProject/NEXUS.unrealvs
 
 TestProject/.claude/tmp
 TestProject/.claude/settings.local.json
+TestProject/.claude/local-memory
 
 # Coverage
 LastCoverageResults.log
