@@ -90,5 +90,6 @@
 	{ \
 		if (Value < Minimum) { return 0.f; } \
 		if (Value > Maximum) { return 1.f; } \
+		if (Maximum == Minimum) { return 0.f; } \
 		return static_cast<float>(Value - Minimum) / static_cast<float>(Maximum - Minimum); \
 	}
