@@ -37,7 +37,7 @@
 		SpriteComponent = nullptr; \
 	}
 #else // !WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_CLEANUP()
+#define N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
 #endif // WITH_EDITORONLY_DATA
 
 /**
