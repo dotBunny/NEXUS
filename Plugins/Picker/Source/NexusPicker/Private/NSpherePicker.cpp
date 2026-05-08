@@ -31,8 +31,8 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_VECTOR FNRandom::Deterministic.VRand
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
+#define RANDOM_VECTOR FNRandom::GetDeterministic().VRand
+#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
 void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
 	N_PICKER_SPHERE_PREFIX
@@ -68,8 +68,8 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 #undef RANDOM_VECTOR
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_VECTOR FNRandom::NonDeterministic.VRand
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_VECTOR FNRandom::GetNonDeterministic().VRand
+#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
 void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
 	N_PICKER_SPHERE_PREFIX

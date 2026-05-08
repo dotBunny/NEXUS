@@ -82,9 +82,9 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_INDEX FNRandom::Deterministic.IntegerRange
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
-#define RANDOM_BOOL FNRandom::Deterministic.Bool()
+#define RANDOM_INDEX FNRandom::GetDeterministic().IntegerRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_BOOL FNRandom::GetDeterministic().Bool()
 void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX
@@ -231,8 +231,8 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
-#define RANDOM_INDEX FNRandom::NonDeterministic.RandRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
+#define RANDOM_INDEX FNRandom::GetNonDeterministic().RandRange
 void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX

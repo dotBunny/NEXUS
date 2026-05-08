@@ -42,7 +42,7 @@
 #endif // ENABLE_VISUAL_LOG
 
 
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
 void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
 	N_PICKER_ARC_PREFIX
@@ -78,7 +78,7 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& P
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
 void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
 	N_PICKER_ARC_PREFIX

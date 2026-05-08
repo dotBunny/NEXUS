@@ -41,8 +41,8 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
-#define RANDOM_FLOAT FNRandom::Deterministic.Float
+#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_FLOAT FNRandom::GetDeterministic().Float
 void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
 	N_PICKER_CIRCLE_PREFIX
@@ -124,8 +124,8 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_FLOAT
 
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
-#define RANDOM_FLOAT FNRandom::NonDeterministic.FRand
+#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
+#define RANDOM_FLOAT FNRandom::GetNonDeterministic().FRand
 void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
 	N_PICKER_CIRCLE_PREFIX

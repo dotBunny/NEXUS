@@ -80,44 +80,44 @@ struct FNWeightedIntegerArray
 
 	/**
 	 * Get the next deterministic value from the array.
-	 * @return Uses FNRandom::Deterministic
+	 * @return Uses FNRandom::GetDeterministic()
 	 */
 	int32 NextValue() const
 	{
 		if (!HasData()) return INDEX_NONE;
-		return Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];
+		return Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];
 	}
 
 	/**
 	 * Get the next deterministic value from the array, then remove every copy of it.
-	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::Deterministic.
+	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::GetDeterministic().
 	 */
 	int32 NextValueAndRemove()
 	{
 		if (!HasData()) return INDEX_NONE;
-		const int32 ReturnValue = Data[FNRandom::Deterministic.IntegerRange(0, CachedMaxIndex)];;
+		const int32 ReturnValue = Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];;
 		Remove(ReturnValue);
 		return ReturnValue;
 	}
 
 	/**
 	 * Get a random value from the array.
-	 * @return Uses FNRandom::NonDeterministic
+	 * @return Uses FNRandom::GetNonDeterministic()
 	 */
 	int32 RandomValue() const
 	{
 		if (!HasData()) return INDEX_NONE;
-		return Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
+		return Data[FNRandom::GetNonDeterministic().RandRange(0, CachedMaxIndex)];
 	}
 
 	/**
 	 * Get a random value from the array, then remove every copy of it.
-	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::NonDeterministic.
+	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::GetNonDeterministic().
 	 */
 	int32 RandomValueAndRemove()
 	{
 		if (!HasData()) return INDEX_NONE;
-		const int32 ReturnValue = Data[FNRandom::NonDeterministic.RandRange(0, CachedMaxIndex)];
+		const int32 ReturnValue = Data[FNRandom::GetNonDeterministic().RandRange(0, CachedMaxIndex)];
 		Remove(ReturnValue);
 		return ReturnValue;
 	}

@@ -26,13 +26,13 @@
 #define N_IMPLEMENT_RANGE(Type) \
 	inline Type NextValue() const \
 	{ \
-		return FNRandom::Deterministic.RandRange(Minimum, Maximum); \
+		return FNRandom::GetDeterministic().RandRange(Minimum, Maximum); \
 	} \
 	inline Type NextValueInSubRange(Type MinimumValue, Type MaximumValue) const \
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
-		return FNRandom::Deterministic.RandRange(MinimumValue, MaximumValue); \
+		return FNRandom::GetDeterministic().RandRange(MinimumValue, MaximumValue); \
 	} \
 	inline Type PercentageValue(const float Percentage) const \
 	{ \
@@ -40,7 +40,7 @@
 	} \
 	inline Type RandomValue() const \
 	{ \
-		return FNRandom::NonDeterministic.RandRange(Minimum, Maximum); \
+		return FNRandom::GetNonDeterministic().RandRange(Minimum, Maximum); \
 	} \
 	inline Type RandomOneShotValue(FRandomStream& RandomStream) const \
 	{ \
@@ -62,7 +62,7 @@
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
-		return FNRandom::NonDeterministic.RandRange(MinimumValue, MaximumValue); \
+		return FNRandom::GetNonDeterministic().RandRange(MinimumValue, MaximumValue); \
 	} \
 	inline Type RandonTrackedValueInSubRange(FRandomStream& RandomStream, Type MinimumValue, Type MaximumValue) const \
 	{ \

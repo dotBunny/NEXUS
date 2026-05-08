@@ -46,7 +46,7 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
 void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX
@@ -81,7 +81,7 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerPar
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
 void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX

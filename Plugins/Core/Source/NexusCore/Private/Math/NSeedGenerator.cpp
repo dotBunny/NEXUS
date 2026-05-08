@@ -84,7 +84,7 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 
 uint64 FNSeedGenerator::RandomSeed()
 {
-	return static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt()) << 32 | static_cast<uint64>(FNRandom::NonDeterministic.GetUnsignedInt());
+	return static_cast<uint64>(FNRandom::GetNonDeterministic().GetUnsignedInt()) << 32 | static_cast<uint64>(FNRandom::GetNonDeterministic().GetUnsignedInt());
 }
 
 FString FNSeedGenerator::RandomFriendlySeed()
