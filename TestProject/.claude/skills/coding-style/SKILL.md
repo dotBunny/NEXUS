@@ -156,3 +156,10 @@ PrivateDependencyModuleNames.AddRange(new string[] { "NexusActorPools" });
 ```
 
 The `.Build.cs` file lives at `Plugins/<Name>/Source/Nexus<Name>/Nexus<Name>.Build.cs` (runtime) or `Plugins/<Name>/Source/Nexus<Name>Editor/Nexus<Name>Editor.Build.cs` (editor).
+
+## Assumptions
+
+Treat the following as non-null — do not add null checks or early-out guards:
+
+- `GEditor` and `GEngine`.
+- Pointer parameters tagged `meta=(WorldContext=...)`, and Reference parameters (`Foo&`, `const Foo&`, `const TArray<Foo>&`, `UPARAM(ref)`) on `BlueprintCallable` functions.
