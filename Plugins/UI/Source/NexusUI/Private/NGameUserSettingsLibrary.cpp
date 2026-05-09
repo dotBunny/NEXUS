@@ -99,7 +99,7 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 		return DisplayModeTexts[0];
 	}
 #else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
-	return DisplayModeLabels[0];
+	return DisplayModeTexts[0];
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
@@ -116,7 +116,11 @@ FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntP
 FIntPoint UNGameUserSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
 {
 	TArray<FString> Resolution;
-	Selection.ParseIntoArray(Resolution, TEXT("x"), true);
+	const int32 ElementCount = Selection.ParseIntoArray(Resolution, TEXT("x"), true);
+	if (ElementCount != 2)
+	{
+		return FIntPoint(-1,-1);
+	}
 	return FIntPoint(
 		FCString::Atoi(*Resolution[0].TrimStartAndEnd()),
 		FCString::Atoi(*Resolution[1].TrimStartAndEnd())
