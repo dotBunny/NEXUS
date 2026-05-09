@@ -22,5 +22,5 @@ namespace NEXUS::Version
 
 namespace NEXUS::Multiplayer
 {
-	constexpr float InvalidPing = 1.f;
+	constexpr float InvalidPing = -1.f;
 }

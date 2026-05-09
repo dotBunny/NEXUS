@@ -23,11 +23,11 @@ namespace NEXUS::ProcGen
 	namespace DisplayMessages
 	{
 		/** Emitted while the generation context is frozen and being queued up. */
-		const FString ContextLocked = TEXT("Context Locked");
+		inline const FString ContextLocked = TEXT("Context Locked");
 		/** Emitted while the task graph for the current pass is being assembled. */
-		const FString BuildingTaskGraph = TEXT("Building Task Graph");
+		inline const FString BuildingTaskGraph = TEXT("Building Task Graph");
 		/** Emitted immediately before scheduled tasks begin executing. */
-		const FString StartingTasks = TEXT("Starting Tasks");
+		inline const FString StartingTasks = TEXT("Starting Tasks");
 	}
 
 	/**
@@ -35,12 +35,12 @@ namespace NEXUS::ProcGen
 	 */
 	namespace States
 	{
-		const FString None = TEXT("None");
-		const FString Registered = TEXT("Registered");
-		const FString Started = TEXT("Started");
-		const FString Updated = TEXT("Updated");
-		const FString Finished = TEXT("Finished");
-		const FString Unregistered = TEXT("Unregistered");
+		inline const FString None = TEXT("None");
+		inline const FString Registered = TEXT("Registered");
+		inline const FString Started = TEXT("Started");
+		inline const FString Updated = TEXT("Updated");
+		inline const FString Finished = TEXT("Finished");
+		inline const FString Unregistered = TEXT("Unregistered");
 	}
 
 	/**
@@ -49,9 +49,9 @@ namespace NEXUS::ProcGen
 	namespace Operations
 	{
 		/** The main runtime generation operation. */
-		const FName Main = FName("NProcGenMainOperation");
+		inline const FName Main = FName("NProcGenMainOperation");
 		/** The editor-mode preview generation operation. */
-		const FName EditorMode = FName("NProcGenEditorModeOperation");
+		inline const FName EditorMode = FName("NProcGenEditorModeOperation");
 	}
 }
 

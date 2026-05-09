@@ -21,9 +21,9 @@ namespace NEXUS::ActorPools
 	namespace VLog
 	{
 		/** Color used to draw the originally requested spawn point. */
-		const FColor RequestedPointColor = FColor::Green;
+		inline const FColor RequestedPointColor = FColor::Green;
 		/** Color used to draw the actual spawn point after any adjustments. */
-		const FColor ActualPointColor = FColor::Blue;
+		inline const FColor ActualPointColor = FColor::Blue;
 		/** Size of the marker drawn at each logged point. */
 		constexpr float PointSize = 2.f;
 	}

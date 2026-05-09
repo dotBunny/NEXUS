@@ -9,7 +9,7 @@
 namespace NEXUS::UIEditor
 {
 	/** Palette category used by every NexusUI widget to group them together in the designer. */
-	const FText PaletteCategory = NSLOCTEXT("NexusUIEditor", "WidgetPaletteCategory", "NEXUS UI");
+	inline const FText PaletteCategory = NSLOCTEXT("NexusUIEditor", "WidgetPaletteCategory", "NEXUS UI");
 }
 
 /** Log category for the NexusUI runtime logging. */

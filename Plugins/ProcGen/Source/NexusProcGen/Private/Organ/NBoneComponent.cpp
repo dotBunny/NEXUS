@@ -17,7 +17,7 @@
 
 namespace NEXUS::ProcGen::Bone
 {
-	const FName Mode = FName("Mode");
+	inline const FName Mode = FName("Mode");
 }
 
 UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)

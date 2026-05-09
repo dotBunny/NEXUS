@@ -7,11 +7,11 @@
 #include "INActorPoolItem.h"
 #include "NActorPoolSubsystem.h"
 
-namespace NEXUS::ActorPools::Killzone
+namespace NEXUS::ActorPools::KillZone
 {
-	const FVector DefaultRelativeLocation = FVector(254, 0, 17);
-	const FVector DefaultRelativeScale = FVector(2.25f, 2.75f, 2.f);
-	const FVector DefaultBoxExtents = FVector(100,100,5);
+	inline const FVector DefaultRelativeLocation = FVector(254, 0, 17);
+	inline const FVector DefaultRelativeScale = FVector(2.25f, 2.75f, 2.f);
+	inline const FVector DefaultBoxExtents = FVector(100,100,5);
 }
 
 UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -21,9 +21,9 @@ UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitial
 
 	SetIsReplicatedByDefault(false);
 	
-	SetRelativeLocation(NEXUS::ActorPools::Killzone::DefaultRelativeLocation, false);
-	SetRelativeScale3D(NEXUS::ActorPools::Killzone::DefaultRelativeScale);
-	InitBoxExtent(NEXUS::ActorPools::Killzone::DefaultBoxExtents);
+	SetRelativeLocation(NEXUS::ActorPools::KillZone::DefaultRelativeLocation, false);
+	SetRelativeScale3D(NEXUS::ActorPools::KillZone::DefaultRelativeScale);
+	InitBoxExtent(NEXUS::ActorPools::KillZone::DefaultBoxExtents);
 	UPrimitiveComponent::SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 }
 
