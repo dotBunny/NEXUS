@@ -143,9 +143,9 @@ private:
 
 	bool ApplyStrategy();
 
-	void CreateActors(const int32 Count = 1);
+	bool CreateActors(const int32 Count = 1);
 	
-	FORCEINLINE void CreateActor(const FActorSpawnParameters& SpawnInfo);
+	FORCEINLINE bool CreateActor(const FActorSpawnParameters& SpawnInfo);
 	
 	void ReleaseActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;
 

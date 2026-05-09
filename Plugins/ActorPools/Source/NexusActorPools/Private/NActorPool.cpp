@@ -337,13 +337,11 @@ bool FNActorPool::ApplyStrategy()
 	{
 		using enum ENActorPoolStrategy;
 	case Create:
-		CreateActors();
-		return true;
+		return CreateActors();
 	case CreateLimited:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 			return false;
-		CreateActors();
-		return true;
+		return CreateActors();
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
 		{
@@ -351,7 +349,7 @@ bool FNActorPool::ApplyStrategy()
 		}
 		else
 		{
-			CreateActors();
+			return CreateActors();
 		}
 		return true;
 	case CreateRecycleLast:
@@ -361,7 +359,7 @@ bool FNActorPool::ApplyStrategy()
 		}
 		else
 		{
-			CreateActors();
+			return CreateActors();
 		}
 		return true;
 	case Fixed:
@@ -377,10 +375,10 @@ bool FNActorPool::ApplyStrategy()
 	}
 }
 
-void FNActorPool::CreateActors(const int32 Count)
+bool FNActorPool::CreateActors(const int32 Count)
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
-	if (bStubMode) return;
+	if (bStubMode) return true;
 	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
@@ -402,19 +400,29 @@ void FNActorPool::CreateActors(const int32 Count)
 #endif // WITH_EDITOR
 
 	// Create actual actors
+	bool bCreatedActors = true;
 	for (int32 i = 0; i < Count; i++)
 	{
 #if WITH_EDITOR
 		const FString Label = FString::Printf(TEXT("%s__%i"), *this->Name, LabelNumber++);
 		SpawnInfo.InitialActorLabel = Label;
 #endif // WITH_EDITOR
-		CreateActor(SpawnInfo);
+		if (!CreateActor(SpawnInfo))
+		{
+			bCreatedActors = false;
+		}
 	}
+	return bCreatedActors;
 }
 
-void FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
+bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 {
 	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.StorageTransform, SpawnInfo);
+	if (CreatedActor == nullptr)
+	{
+		UE_LOG(LogNexusActorPools, Error, TEXT("FNActorPool failed to spawn actor of class %s when requested/needed."), *Template->GetName())
+		return false;
+	}
 
 	if (bImplementsInterface)
 	{
@@ -451,6 +459,7 @@ void FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 	}
 
 	InActors.Add(CreatedActor);
+	return true;
 }
 
 void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, const FRotator& InRotation) const
