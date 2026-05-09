@@ -20,6 +20,8 @@ class NEXUSUI_API UNGameViewportClient : public UCommonGameViewportClient
 {
 	GENERATED_BODY()
 	
+public:
+
 	/**
 	 * Toggles if the world should render.
 	 * @remark This can be useful when you pause a game and want to show a fullscreen UI.

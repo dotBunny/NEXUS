@@ -8,6 +8,8 @@
 #include "NColor.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Border.h"
+#include "NUIMinimal.h"
+#include "Macros/NValidationMacros.h"
 #include "NTextListViewEntry.generated.h"
 
 
@@ -98,6 +100,15 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 	GENERATED_BODY()
 
 protected:
+	
+	virtual void NativeConstruct() override
+	{
+		Super::NativeConstruct();
+		
+		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
+		N_VALIDATE(LogNexusUI, Text)
+		N_VALIDATE(LogNexusUI, Container)
+	}
 	//~INListViewEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{

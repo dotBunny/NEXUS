@@ -61,11 +61,13 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 
 FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
 {
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
 FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 {
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
@@ -105,6 +107,7 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
 {
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionFromDisplayResolution(GEngine->GetGameUserSettings()->GetScreenResolution());
 }
 
@@ -116,11 +119,17 @@ FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntP
 FIntPoint UNGameUserSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
 {
 	TArray<FString> Resolution;
+	
+	// Parse
 	const int32 ElementCount = Selection.ParseIntoArray(Resolution, TEXT("x"), true);
-	if (ElementCount != 2)
+	
+	// Ensure we can convert to a FIntPoint (in-case the provided string isn't one we made)
+	if (ElementCount < 2)
 	{
 		return FIntPoint(-1,-1);
 	}
+	
+	// Return our value
 	return FIntPoint(
 		FCString::Atoi(*Resolution[0].TrimStartAndEnd()),
 		FCString::Atoi(*Resolution[1].TrimStartAndEnd())

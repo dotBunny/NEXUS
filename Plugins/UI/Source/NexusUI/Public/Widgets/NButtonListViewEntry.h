@@ -8,6 +8,8 @@
 #include "NColor.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "NUIMinimal.h"
+#include "Macros/NValidationMacros.h"
 #include "NButtonListViewEntry.generated.h"
 
 /**
@@ -85,13 +87,15 @@ protected:
 	{
 		Super::NativeConstruct();
 
-		if (Button != nullptr)
-		{
-			Button->OnClicked.AddDynamic(this, &UNButtonListViewEntry::OnButtonPressed);
-			Button->OnHovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonHovered);
-			Button->OnUnhovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonUnhovered);
-			Button->OnReleased.AddDynamic(this, &UNButtonListViewEntry::OnButtonReleased);
-		}
+		// Will validate it here only to throw a message in log for someone to realize they havent hooked up the widget correctly.
+		N_VALIDATE(LogNexusUI, Text)
+		N_VALIDATE_RETURN_VOID(LogNexusUI, Button)
+		
+		
+		Button->OnClicked.AddDynamic(this, &UNButtonListViewEntry::OnButtonPressed);
+		Button->OnHovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonHovered);
+		Button->OnUnhovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonUnhovered);
+		Button->OnReleased.AddDynamic(this, &UNButtonListViewEntry::OnButtonReleased);
 	}
 
 	virtual void NativeDestruct() override
@@ -112,13 +116,12 @@ protected:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{
 		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(ListItemObject);
-		if (ButtonObject != nullptr)
+		if (IsValid(ButtonObject))
 		{
 			SetText(ButtonObject->GetText());
+			Button->OnClicked.AddDynamic(ButtonObject, &UNButtonListViewEntryObject::OnPressed);
+			Object = ListItemObject;
 		}
-		Button->OnClicked.AddDynamic(ButtonObject, &UNButtonListViewEntryObject::OnPressed);
-		Object = ListItemObject;
-		
 		OnButtonUnhovered();
 	}
 	
@@ -184,7 +187,7 @@ protected:
 	UFUNCTION()
 	void OnButtonReleased()
 	{
-		if (Object == nullptr) return;
+		N_VALIDATE_RETURN_VOID(LogNexusUI, Object);
 		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
 
 		if (ButtonObject != nullptr)
@@ -198,6 +201,7 @@ protected:
 	UFUNCTION()
 	void OnButtonUnhovered()
 	{
+		
 		if (Object == nullptr) return;
 		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
 

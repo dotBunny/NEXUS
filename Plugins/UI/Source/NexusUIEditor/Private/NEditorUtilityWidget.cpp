@@ -160,7 +160,7 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const
 			System->RemoveTabIdentifier(GetUniqueIdentifier());
 			if (!bHasPermanentState)
 			{
-				GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetUniqueIdentifier());
+				System->RemoveWidgetState(GetUniqueIdentifier());
 			}	
 		}
 		

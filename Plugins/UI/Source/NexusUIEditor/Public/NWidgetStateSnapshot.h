@@ -151,7 +151,15 @@ struct FNWidgetStateSnapshot
 	 */
 	FNWidgetState& GetWidgetState(const FName& Identifier)
 	{
-		return WidgetStates[GetIdentifierIndex(Identifier)];
+		const int32 WorkingIndex = GetIdentifierIndex(Identifier);
+		
+		// Handle bad index / state / runtime
+		if (WorkingIndex == INDEX_NONE)
+		{
+			static FNWidgetState EmptyState;
+			return EmptyState;
+		}
+		return WidgetStates[WorkingIndex];
 	}
 
 	/** Dump the entire snapshot to LogNexusUIEditor for diagnostics. */

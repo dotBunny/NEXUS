@@ -5,6 +5,13 @@
 
 #include "Logging/LogMacros.h"
 
+
+#define N_VALIDATE(LogCategory, Expr) \
+	if (!IsValid(Expr)) \
+	{ \
+		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), __FUNCTION__, #Expr); \
+	}
+
 /**
  * Guard a Blueprint-callable entry point against a null pointer/class input. If Expr fails IsValid,
  * a warning is logged via LogCategory and the function returns ReturnValue.

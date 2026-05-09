@@ -28,5 +28,3 @@ void FNUIEditorModule::OnPostEngineInit()
 }
 
 IMPLEMENT_MODULE(FNUIEditorModule, NexusUIEditor)
-
-

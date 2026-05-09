@@ -42,7 +42,6 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TS
 	{
 		OutWidgets.Add(ParentWidget);
 		return;
-
 	}
 	
 	FChildren* Children = ParentWidget->GetChildren();

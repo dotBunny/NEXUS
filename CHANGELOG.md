@@ -31,6 +31,7 @@
 - `FNActorPool::OnDestroyedByActorPool` to `FNActorPool::OnReleasedFromActorPool` to better reflect actual doing
 - `UNKillZoneComponent::UnknownBehaviour` to define behavior when an AActor is not known or able to be processed.
 - `FNActorPool` preallocates more appropriately for its In/Out arrays.
+- Started using pattern in Widgets where `BindWidget` members are validated in `NativeConstructor` only.
 
 ### Fixed
 
