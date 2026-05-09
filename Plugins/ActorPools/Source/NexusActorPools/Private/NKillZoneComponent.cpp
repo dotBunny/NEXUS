@@ -7,6 +7,13 @@
 #include "INActorPoolItem.h"
 #include "NActorPoolSubsystem.h"
 
+namespace NEXUS::ActorPools::Killzone
+{
+	const FVector DefaultRelativeLocation = FVector(254, 0, 17);
+	const FVector DefaultRelativeScale = FVector(2.25f, 2.75f, 2.f);
+	const FVector DefaultBoxExtents = FVector(100,100,5);
+}
+
 UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -14,9 +21,9 @@ UNKillZoneComponent::UNKillZoneComponent(const FObjectInitializer& ObjectInitial
 
 	SetIsReplicatedByDefault(false);
 	
-	SetRelativeLocation(FVector(254, 0, 17), false);
-	SetRelativeScale3D(FVector(2.25f, 2.75f, 2.f));
-	InitBoxExtent(FVector(100, 100, 5));
+	SetRelativeLocation(NEXUS::ActorPools::Killzone::DefaultRelativeLocation, false);
+	SetRelativeScale3D(NEXUS::ActorPools::Killzone::DefaultRelativeScale);
+	InitBoxExtent(NEXUS::ActorPools::Killzone::DefaultBoxExtents);
 	UPrimitiveComponent::SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 }
 
@@ -24,7 +31,16 @@ void UNKillZoneComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ActorPoolSubsystem = UNActorPoolSubsystem::Get(GetWorld());
+	const UWorld* World = GetWorld();
+	ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+
+	WorldFallDamageType = GetDefault<UDamageType>();
+	AWorldSettings* WorldSettings = World->GetWorldSettings( true );
+	if ( WorldSettings && WorldSettings->KillZDamageType )
+	{
+		WorldFallDamageType = WorldSettings->KillZDamageType->GetDefaultObject<UDamageType>();
+	}
+
 	OnComponentBeginOverlap.AddDynamic(this, &UNKillZoneComponent::OnOverlapBegin);
 }
 
@@ -36,7 +52,7 @@ void UNKillZoneComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult)
 {
-	// If theres no root object its not moving so were considering it static
+	// If there's no root object it's not moving so were considering it static
 	if (bIgnoreStaticActors && (!OtherActor->IsRootComponentMovable() || OtherActor->GetRootComponent() == nullptr)) return;
 
 	// Check if in an actor pool, return to the pool
@@ -60,30 +76,40 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 	}
 
 	// Check if we have a pool for this Actor, but it just doesn't implement the interface
-	if (ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
+	if (ActorPoolSubsystem != nullptr && 
+		ActorPoolSubsystem->HasActorPool(OtherActor->GetClass()))
 	{
 		ActorPoolSubsystem->ReturnActor(OtherActor);
 		KillCount++;
 		return; 
 	}
 
-	if (bIgnoreNonInterfacedActors)
-	{
-		return;
-	}
 	
-	if (ActorPoolSubsystem->ReturnActor(OtherActor))
+	switch (UnknownBehaviour)
 	{
-		KillCount++;
-		return; 
-	}
-	
-	if (OtherActor->IsRooted())
-	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to destroy a rooted AActor(%s) via the UNKillZoneComponent, this behavior has been ignored."), *OtherActor->GetName());
-	}
-	else
-	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to properly dispose of AActor(%s) via the UNKillZoneComponent."), *OtherActor->GetName());
+	case ENKillZoneBehavior::Ignore:
+		break;
+	case ENKillZoneBehavior::ApplyFellOutOfWorld:
+		if (!OtherActor->IsRooted())
+		{
+			OtherActor->FellOutOfWorld(*WorldFallDamageType);
+			KillCount++;
+		}
+		else
+		{
+			UE_LOG(LogNexusActorPools, Warning, TEXT("UNKillZoneComponent unable to apply FellOutOfWorld to rooted unknown AActor(%s)."), *OtherActor->GetName());
+		}
+		break;
+	case ENKillZoneBehavior::ReturnToActorPool:
+		if (ActorPoolSubsystem != nullptr &&
+		ActorPoolSubsystem->ReturnActor(OtherActor))
+		{
+			KillCount++;
+		}
+		else
+		{
+			UE_LOG(LogNexusActorPools, Warning, TEXT("Unable to return the unknown AActor(%s) to an Actor Pool."), *OtherActor->GetName());
+		}
+		break;
 	}
 }

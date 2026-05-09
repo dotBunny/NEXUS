@@ -232,12 +232,12 @@ N_TEST_CRITICAL(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnActorWithKnow
 	});
 }
 
-N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IgnoresNonInterfacedActorWhenFlagSet,
-	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::IgnoresNonInterfacedActorWhenFlagSet",
+N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorIgnore,
+	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::UnknownBehaviorIgnore",
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Verifies that an actor with no pool and no INActorPoolItem interface is silently ignored
-	// when bIgnoreNonInterfacedActors is true, leaving the kill count unchanged.
+	// when UnknownBehaviour is set to ENKillZoneBehavior::Ignore, leaving the kill count unchanged.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		// Need to spawn the zone away from origin so it doesnt trigger before actor settings are applied.
@@ -256,14 +256,7 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IgnoresNonInterfacedActorWhe
 			return;
 		}
 
-		// bIgnoreNonInterfacedActors is protected — set it via UE property reflection.
-		FBoolProperty* IgnoreProp = FindFProperty<FBoolProperty>(UNKillZoneComponent::StaticClass(), TEXT("bIgnoreNonInterfacedActors"));
-		if (!IgnoreProp)
-		{
-			ADD_ERROR("Could not find bIgnoreNonInterfacedActors property — check the UPROPERTY name.");
-			return;
-		}
-		IgnoreProp->SetPropertyValue_InContainer(KillZone, true);
+		KillZone->UnknownBehaviour = ENKillZoneBehavior::Ignore;
 
 		ANDebugActor* UnknownActor = World->SpawnActor<ANDebugActor>();
 		if (!UnknownActor)
@@ -273,16 +266,16 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IgnoresNonInterfacedActorWhe
 		}
 
 		KillZone->OnOverlapBegin(KillZone, UnknownActor, nullptr, 0, false, FHitResult());
-		CHECK_EQUALS("Kill count must remain 0 when ignoring non-interfaced actors.", KillZone->GetKillCount(), 0)
+		CHECK_EQUALS("Kill count must remain 0 when UnknownBehaviour is Ignore.", KillZone->GetKillCount(), 0)
 	});
 }
 
-N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnUnknownActor,
-	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::IncrementOnUnknownActor",
+N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorApplyFellOutOfWorld,
+	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::UnknownBehaviorApplyFellOutOfWorld",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that an actor with no pool and no INActorPoolItem interface is destroyed via
-	// the subsystem's default Destroy behavior and the kill count is incremented.
+	// Verifies that an actor with no pool and no INActorPoolItem interface has FellOutOfWorld
+	// applied (the default UnknownBehaviour) and the kill count is incremented.
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		// Need to spawn the zone away from origin so it doesnt trigger before actor settings are applied.
@@ -301,6 +294,9 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnUnknownActor,
 			return;
 		}
 
+		CHECK_EQUALS("Default UnknownBehaviour should be ApplyFellOutOfWorld.",
+			static_cast<uint8>(KillZone->UnknownBehaviour), static_cast<uint8>(ENKillZoneBehavior::ApplyFellOutOfWorld))
+
 		ANDebugActor* UnknownActor = World->SpawnActor<ANDebugActor>();
 		if (!UnknownActor)
 		{
@@ -308,19 +304,18 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnUnknownActor,
 			return;
 		}
 
-		// The subsystem's default UnknownBehavior is Destroy. ReturnActor calls Destroy()
-		// which returns true, so the kill count increments and the actor is destroyed.
 		KillZone->OnOverlapBegin(KillZone, UnknownActor, nullptr, 0, false, FHitResult());
-		CHECK_EQUALS("Kill count should be 1 after the unknown actor is destroyed.", KillZone->GetKillCount(), 1)
+		CHECK_EQUALS("Kill count should be 1 after FellOutOfWorld is applied to the unknown actor.", KillZone->GetKillCount(), 1)
 	}, true);
 }
 
-N_TEST_MEDIUM(UNKillZoneComponentTests_OnOverlapBegin_IncrementForRootedActor,
-	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::IncrementForRootedActor",
+N_TEST_MEDIUM(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorApplyFellOutOfWorld_RootedActor,
+	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::UnknownBehaviorApplyFellOutOfWorld_RootedActor",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that a rooted actor cannot be destroyed, the kill count is not incremented,
-	// and a warning is logged.
+	// Verifies that a rooted actor with the default ApplyFellOutOfWorld behaviour still
+	// increments the kill count (FellOutOfWorld is invoked unconditionally) and that no
+	// pool is implicitly created for the unknown actor.
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
 	{
 		// Need to spawn the zone away from origin so it doesnt trigger before actor settings are applied.
@@ -348,12 +343,64 @@ N_TEST_MEDIUM(UNKillZoneComponentTests_OnOverlapBegin_IncrementForRootedActor,
 
 		RootedActor->AddToRoot();
 		UNActorPoolSubsystem* System = UNActorPoolSubsystem::Get(World);
-
-		KillZone->OnOverlapBegin(KillZone, RootedActor, nullptr, 0, false, FHitResult());
-		CHECK_EQUALS("A pool should have been made for the rooted actor.", System->GetAllPools().Num(), 1)
-		CHECK_EQUALS("Kill count must be 1 when a rooted actor when a pool is created.", KillZone->GetKillCount(), 1)
 		
+		AddExpectedMessage(TEXT("UNKillZoneComponent unable to apply FellOutOfWorld to rooted unknown AActor"), ELogVerbosity::Warning);
+		KillZone->OnOverlapBegin(KillZone, RootedActor, nullptr, 0, false, FHitResult());
+		CHECK_EQUALS("A pool should not be made for the unknown rooted actor.", System->GetAllPools().Num(), 0)
+		CHECK_EQUALS("Kill count must be 0 after ApplyFellOutOfWorld runs on the rooted actor.", KillZone->GetKillCount(), 0)
+
 		RootedActor->RemoveFromRoot();
+	}, true);
+}
+
+N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorReturnToActorPool_NoPool,
+	"NEXUS::UnitTests::NActorPools::UNKillZoneComponent::OnOverlapBegin::UnknownBehaviorReturnToActorPool_NoPool",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that when UnknownBehaviour is ReturnToActorPool and the subsystem cannot route
+	// the unknown actor (its UnknownBehavior is forced to Destroy so ReturnActor returns false),
+	// the kill zone logs a warning and does not increment its kill count.
+	AddExpectedMessage(TEXT("Unable to return the unknown"), ELogVerbosity::Type::Warning);
+
+	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	{
+		// Need to spawn the zone away from origin so it doesn't trigger before actor settings are applied.
+		const FVector RemoteLocation = FVector(200.f,200.f,200.f);
+		ANKillZoneActor* KillZoneActor = World->SpawnActor<ANKillZoneActor>(RemoteLocation, FRotator::ZeroRotator);
+		if (!KillZoneActor)
+		{
+			ADD_ERROR("Could not spawn ANKillZoneActor.");
+			return;
+		}
+
+		UNKillZoneComponent* KillZone = Cast<UNKillZoneComponent>(KillZoneActor->GetRootComponent());
+		if (!KillZone)
+		{
+			ADD_ERROR("Root component is not a UNKillZoneComponent.");
+			return;
+		}
+
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		// Project default is CreateDefaultPool, which would auto-pool and return true; force
+		// Destroy so ReturnActor returns false and the kill zone takes the warning path.
+		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Destroy);
+		KillZone->UnknownBehaviour = ENKillZoneBehavior::ReturnToActorPool;
+
+		ANDebugActor* UnknownActor = World->SpawnActor<ANDebugActor>();
+		if (!UnknownActor)
+		{
+			ADD_ERROR("Could not spawn unknown test actor.");
+			return;
+		}
+
+		KillZone->OnOverlapBegin(KillZone, UnknownActor, nullptr, 0, false, FHitResult());
+		CHECK_EQUALS("Kill count must remain 0 when ReturnToActorPool fails for an unknown class.", KillZone->GetKillCount(), 0)
 	}, true);
 }
 

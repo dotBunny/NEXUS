@@ -36,6 +36,7 @@ public:
 	FGetActorAsyncOutputPin Completed;
 
 	virtual void Activate() override;
+	virtual void BeginDestroy() override;
 
 private:
 	FDelegateHandle OnCreatedPoolHandle;

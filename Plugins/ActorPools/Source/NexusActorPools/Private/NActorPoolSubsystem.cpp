@@ -68,8 +68,8 @@ void UNActorPoolSubsystem::OnWorldEndPlay(UWorld& InWorld)
 
 	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
-		Pool.Value->Clear();
-		Pool.Value.Reset();
+		Pool.Value->Clear(); // Releases all actors from pool (not forcibly destroying cause of world teardown)
+		Pool.Value.Reset(); // Releases back-pointer to UObject through destructor
 	}
 
 	ActorPools.Empty();

@@ -17,8 +17,8 @@ UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENProcGenSelectionFlags : uint8
 {
 	None = 0,
-	CellActor = 1 << 0,
-	OrganVolume = 1 << 1
+	CellActor = 1,
+	OrganVolume = 2
 };
 ENUM_CLASS_FLAGS(ENProcGenSelectionFlags)
 

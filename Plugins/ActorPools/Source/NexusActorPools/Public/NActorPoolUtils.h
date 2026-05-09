@@ -20,16 +20,17 @@ public:
 	{
 		switch (State)
 		{
-		case AOS_Undefined:
+			using enum ENActorOperationalState;
+		case Undefined:
 			return FString("Undefined");
-		case AOS_Created:
+		case Created:
 			return FString("Created");
-		case AOS_Enabled:
+		case Enabled:
 			return FString("Enabled");
-		case AOS_Disabled:
+		case Disabled:
 			return FString("Disabled");
-		case AOS_Destroyed:
-			return FString("Destroyed");
+		case Released:
+			return FString("Released");
 		}
 		return FString("Undefined");
 	}

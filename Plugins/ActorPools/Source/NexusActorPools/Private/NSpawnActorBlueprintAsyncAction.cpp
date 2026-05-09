@@ -34,6 +34,20 @@ void UNSpawnActorBlueprintAsyncAction::Activate()
 	);
 }
 
+void UNSpawnActorBlueprintAsyncAction::BeginDestroy()
+{
+	if (OnCreatedPoolHandle.IsValid())
+	{
+		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
+		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+		if (ActorPoolSubsystem)
+		{
+			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		}
+	}
+	Super::BeginDestroy();
+}
+
 void UNSpawnActorBlueprintAsyncAction::OnLoaded()
 {
 	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
@@ -70,6 +84,7 @@ void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
 		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
 		ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		OnCreatedPoolHandle.Reset();
 	}
 	
 	AActor* SpawnedActor = nullptr;

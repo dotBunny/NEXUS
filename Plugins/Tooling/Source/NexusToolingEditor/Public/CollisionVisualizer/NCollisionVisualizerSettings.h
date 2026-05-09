@@ -80,9 +80,9 @@ UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENCollisionVisualizerDrawMode : uint8
 {
 	None = 0 UMETA(Hidden),
-	EditorOnly = 1 << 0 UMETA(DisplayName = "Editor"),
-	PlayInEditor =  1 << 1 UMETA(DisplayName = "PIE"),
-	SimulateInEditor =  1 << 2 UMETA(DisplayName = "SIE"),
+	EditorOnly = 1  UMETA(DisplayName = "Editor"),
+	PlayInEditor =  2 UMETA(DisplayName = "PIE"),
+	SimulateInEditor =  4 UMETA(DisplayName = "SIE"),
 };
 ENUM_CLASS_FLAGS(ENCollisionVisualizerDrawMode)
 

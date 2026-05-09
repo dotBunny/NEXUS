@@ -10,6 +10,14 @@
 
 class UNActorPoolSubsystem;
 
+UENUM(BlueprintType)
+enum class ENKillZoneBehavior : uint8
+{
+	Ignore,
+	ReturnToActorPool,
+	ApplyFellOutOfWorld
+};
+
 /**
  * A kill plane implementation built to automatically pool properly configured AActor upon overlap.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-component/">UNKillZoneComponent</a>
@@ -61,15 +69,13 @@ public:
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepHitResult);
 
-protected:
-
 	/** When true, Actors with a Static mobility root component are ignored by the kill zone. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, DisplayName="Ignore Static Actors", Category="Kill Zone")
 	bool bIgnoreStaticActors = true;
 
-	/** When true, Actors that do not implement INActorPoolItem are ignored by the kill zone. */
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, DisplayName="Ignore Non-INActorPoolItem Actors", Category="Kill Zone")
-	bool bIgnoreNonInterfacedActors = false;
+	/** What should occur for an AActor that doesn't implement the INActorPoolItem interface. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, DisplayName="Non-INActorPoolItem Behavior", Category="Kill Zone")
+	ENKillZoneBehavior UnknownBehaviour = ENKillZoneBehavior::ApplyFellOutOfWorld;
 
 private:
 	/** Running count of Actors killed by this zone since spawn (or the last reset). */
@@ -78,4 +84,9 @@ private:
 	/** Cached reference to the ActorPool subsystem used to route returns. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UNActorPoolSubsystem> ActorPoolSubsystem;
+
+
+	const UDamageType* WorldFallDamageType;
+		
+	
 };

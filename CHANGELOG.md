@@ -29,6 +29,8 @@
 - All `int` now replaced with `int32` to be explicit.
 - `NGuardianSubsystem` now does writing of reports using async tasks.
 - `FNActorPool::OnDestroyedByActorPool` to `FNActorPool::OnReleasedFromActorPool` to better reflect actual doing
+- `UNKillZoneComponent::UnknownBehaviour` to define behavior when an AActor is not known or able to be processed.
+- `FNActorPool` preallocates more appropriately for its In/Out arrays.
 
 ### Fixed
 
@@ -48,6 +50,8 @@
 - `FNActorPool::Return` now rejects actors whose class does not match the pool's `Template`, and rejects actors already present in the pool (non-Shipping builds only) — previously these would silently pollute `InActors` or be handed back twice from subsequent `Get()`/`Spawn()` calls.
 - `FNRawMesh` crash when calculating center with no verticies.
 - `FNActorPool` protect against the odd change that an actor is requsted and needs to be created when the pools world is being torn down.
+- `FNActorPool` spawning with designated rotation now properly applies.
+- `INActorPoolItem` now handles invocation during teardown gracefully.
 
 ### Removed
 

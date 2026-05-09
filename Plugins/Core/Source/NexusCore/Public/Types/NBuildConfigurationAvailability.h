@@ -14,11 +14,11 @@ UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENBuildConfigurationAvailability : uint8
 {
 	None = 0 UMETA(Hidden),
-	Debug =  1 << 0,
-	Development = 1 << 1,
-	Shipping = 1 << 2,
-	Test = 1 << 3,
-	Editor = 1 << 4
+	Debug =  1,
+	Development = 2,
+	Shipping = 4,
+	Test = 8,
+	Editor = 16
 };
 ENUM_CLASS_FLAGS(ENBuildConfigurationAvailability)
 

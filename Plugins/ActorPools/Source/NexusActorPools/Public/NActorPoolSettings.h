@@ -37,32 +37,38 @@ enum class ENActorPoolFlags : uint8
 {
 	None = 0 UMETA(Hidden),
 	/** Should a sweep be done when setting the location of an Actor being spawned? */
-	SweepBeforeSettingLocation = 1 << 0,
+	SweepBeforeSettingLocation = 1,
 	/** Should the Actor being returned to the pool be moved to a storage transform? */
-	ReturnToStorage = 1 << 1,
+	ReturnToStorage = 2,
 	/** Controls whether Actor construction is deferred when creating new Actors. */
-	DeferConstruction = 1 << 2,
+	DeferConstruction = 4,
 	/**
 	 * Should FinishSpawning be called on the Actor when it does not implement INActorPoolItem?
 	 * @note This is not used by INActorPoolItems, they have a method which is called for logic to be applied before FinishSpawning is called.
 	 */
-	ShouldFinishSpawning = 1 << 3,
+	ShouldFinishSpawning = 8,
 	/** Safely ensure all actions only actually occur on world authority (server), transparently making the pool networked. */
-	ServerOnly = 1 << 4,
+	ServerOnly = 16,
 	/** Broadcast the released-from-pool event on the Actor through the operational change state delegate. */
-	BroadcastRelease = 1 << 5,
+	BroadcastRelease = 32,
 	/** Should an Actor's network dormancy be updated based on state? */
-	SetNetDormancy = 1 << 6,
-
+	SetNetDormancy = 64,
 	/**
 	 * Should the UFunctions (void)OnCreatedByActorPool, (void)OnSpawnedFromActorPool, (void)OnReturnToActorPool, and (void)OnReleasedFromActorPool be invoked to simulate an interface callback to AActor-based blueprints?
 	 * @note This is only applicable to non-interfaced AActors, as interfaced Actors have their own interface callback mechanism.
 	 */
-	InvokeUFunctions = 1 << 7 UMETA(DisplayName = "Invoke UFunctions"),
-	
-	DefaultSettings = ReturnToStorage | DeferConstruction | ShouldFinishSpawning | ServerOnly | SetNetDormancy
+	InvokeUFunctions = 128 UMETA(DisplayName = "Invoke UFunctions"),
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
+
+namespace NEXUS::ActorPools
+{
+	constexpr uint8 DefaultFlags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage) | 
+								  static_cast<uint8>(ENActorPoolFlags::DeferConstruction) | 
+								  static_cast<uint8>(ENActorPoolFlags::ShouldFinishSpawning) | 
+								  static_cast<uint8>(ENActorPoolFlags::ServerOnly) | 
+								  static_cast<uint8>(ENActorPoolFlags::SetNetDormancy);
+}
 
 /**
  * A Blueprint-compatible struct that defines configuration parameters for managing object pooling inside a FNActorPool.
@@ -135,7 +141,7 @@ public:
 	
 	/** The behavioral flags to evaluate when doing operations with this pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
-	uint8 Flags = static_cast<uint8>(ENActorPoolFlags::DefaultSettings);
+	uint8 Flags = NEXUS::ActorPools::DefaultFlags;
 	
 	/** The default applied transform when creating an actor, as well as where and how an actor is stored. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")

@@ -8,6 +8,7 @@
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NActorPoolsMinimal.h"
+#include "DSP/FloatArrayMath.h"
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
@@ -97,9 +98,9 @@ FText FNActorPool::GetDescription() const
 	{
 		FlagDetails += TEXT("\tBroadcast Release\n");
 	}
-	if (Settings.HasFlag_DeferConstruction())
+	if (Settings.HasFlag_SetNetDormancy())
 	{
-		FlagDetails += TEXT("\tDefer Construction\n");
+		FlagDetails += TEXT("\tSet Net Dormancy\n");
 	}
 	if (Settings.HasFlag_InvokeUFunctions())
 	{
@@ -158,6 +159,8 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	}
 
 #if WITH_EDITOR
+	// Increments only on the game thread, no real issue with roll over. 
+	// If you have that many pools you might have a different problems to answer.
 	ActorPoolTicket++;
 
 	// Generate the name for the actor pool
@@ -312,11 +315,11 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 	{
 		if (InNewSettings.CreateObjectsPerTick <= 0 && System->HasTickableActorPool(this))
 		{
-			UNActorPoolSubsystem::Get(World)->RemoveTickableActorPool(this);
+			System->RemoveTickableActorPool(this);
 		}
 		else if(InNewSettings.CreateObjectsPerTick > 0 && !System->HasTickableActorPool(this))
 		{
-			UNActorPoolSubsystem::Get(World)->AddTickableActorPool(this);
+			System->AddTickableActorPool(this);
 		}
 		
 		Settings.CreateObjectsPerTick = InNewSettings.CreateObjectsPerTick;
@@ -365,9 +368,11 @@ bool FNActorPool::ApplyStrategy()
 	case Fixed:
 		return false;
 	case FixedRecycleFirst:
+		if (OutActors.IsEmpty()) return false;
 		Return(OutActors[0]);
 		return true;
 	case FixedRecycleLast:
+		if (OutActors.IsEmpty()) return false;
 		Return(OutActors[OutActors.Num() - 1]);
 		return true;
 	default:
@@ -380,6 +385,9 @@ bool FNActorPool::CreateActors(const int32 Count)
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return true;
 	
+	// We didnt make anything
+	if (Count == 0) return false;
+	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
 	SpawnInfo.ObjectFlags |= RF_Transient | RF_MarkAsRootSet; // AddToRoot - Pool will manage lifecycle
@@ -390,9 +398,34 @@ bool FNActorPool::CreateActors(const int32 Count)
 	// Reserve space for the new actors
 	if (Count > 1)
 	{
-		const int32 BufferCount = Count * 2;
-		InActors.Reserve(InActors.Num() + BufferCount);
-		OutActors.Reserve(OutActors.Num() + BufferCount);
+		const int32 InActorsMax = InActors.Max();
+		const int32 OutActorsMax = OutActors.Max();
+		
+		if (InActorsMax == 0 || OutActorsMax == 0)
+		{
+			// Initial allocation we really don't know what it's going to look like and given they're pointers,
+			// we will just use a double allocation strategy.
+			InActors.Reserve(Count * 2);
+			OutActors.Reserve(Count * 2);
+			
+		}
+		else
+		{
+			// Since we actually have existing actors, we can look at the usage and try to think of a good way to reasonably grow the array
+			// if it's actually needed.
+			const float InArrayUsage = InActors.Num() / InActorsMax;
+			const float OutArrayUsage = OutActors.Num() / OutActorsMax;
+			
+			if (OutArrayUsage > 0.75f)
+			{
+				OutActors.Reserve(OutActorsMax + (OutActorsMax * 0.5f));
+			}
+			
+			if (InArrayUsage > 0.85f)
+			{
+				InActors.Reserve(InActorsMax + (InActorsMax * 0.75f));
+			}
+		}
 	}
 	
 #if WITH_EDITOR
@@ -472,7 +505,7 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 
 	// Set Actor Location And Rotation
 	const FTransform SpawnTransform(
-		InRotation.Quaternion() + Settings.SpawnedTransform.GetRotation(), 
+		InRotation.Quaternion() * Settings.SpawnedTransform.GetRotation(), 
 		InPosition + Settings.SpawnedTransform.GetLocation(),
 		Settings.SpawnedTransform.GetScale3D());
 
@@ -546,14 +579,13 @@ void FNActorPool::Clear(const bool bForceDestroy)
 	OutActors.Reset();
 }
 
-void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, bool bForceDestroy) const
+void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForceDestroy) const
 {
-	check(Actor != nullptr);
-
-	if (Actor->IsPendingKillPending())
+	if (!IsValid(Actor) || Actor->IsPendingKillPending())
 	{
 		return;
 	}
+
 	if (Actor->IsRooted())
 	{
 		Actor->RemoveFromRoot();
@@ -585,8 +617,12 @@ void FNActorPool::Fill()
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
-	UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items."), *Template->GetName(), Settings.MinimumActorCount);
-	CreateActors(Settings.MinimumActorCount - InActors.Num());
+	const int32 Deficit = Settings.MinimumActorCount - InActors.Num();
+	if (Deficit > 0)
+	{
+		UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items (+%i)"), *Template->GetName(), Settings.MinimumActorCount, Deficit);
+		CreateActors(Deficit);
+	}
 }
 
 void FNActorPool::Prewarm(const int32 Count)

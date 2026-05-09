@@ -35,15 +35,14 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	}
 
 	// Register with the management system so it will handle ticking the component
-	UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(GetWorld());
-	if (Subsystem == nullptr)
+	Subsystem = UNActorPoolSubsystem::Get(GetWorld());
+	if (!Subsystem.IsValid())
 	{
 		// No subsystem on this world (e.g. preview/thumbnail/inactive worlds); skip registration.
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("UNActorPoolSpawnerComponent on AActor(%s) could not resolve UNActorPoolSubsystem for UWorld(%s); skipping registration."),
 			*GetNameSafe(GetOwner()), *GetNameSafe(GetWorld()));
 		return;
 	}
-	Manager = Subsystem;
 	Subsystem->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
 
@@ -83,7 +82,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 void UNActorPoolSpawnerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (UNActorPoolSubsystem* Subsystem = Manager.Get())
+	if (Subsystem.IsValid())
 	{
 		Subsystem->UnregisterTickableSpawner(this);
 	}
@@ -98,10 +97,10 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 
 void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
-	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
+	if ((!bSpawningEnabled && !bIgnoreSpawningFlag) || !WeightedIndices.HasData()) return;
 
-	UNActorPoolSubsystem* Subsystem = Manager.Get();
-	if (Subsystem == nullptr) return;
+	if (!Subsystem.IsValid()) { return; }
+	
 
 	TArray<FVector> OutLocations;
 	switch (Distribution)

@@ -10,11 +10,11 @@ class UNActorPoolObject;
 
 namespace NEXUS::ActorPools::InvokeMethods
 {
-	inline FText Category = FText::FromString("NActor Pool");
-	inline FName OnCreatedByActorPool = TEXT("OnCreatedByActorPool");
-	inline FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
-	inline FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
-	inline FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
+	inline const FText Category = FText::FromString("NActor Pool");
+	inline const FName OnCreatedByActorPool = TEXT("OnCreatedByActorPool");
+	inline const FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
+	inline const FName OnReturnToActorPool = TEXT("OnReturnToActorPool");
+	inline const FName OnSpawnedFromActorPool = TEXT("OnSpawnedFromActorPool");
 	
 }
 

@@ -156,14 +156,11 @@ private:
 	/** Precomputed weighted index sampler built from Templates. */
 	FNWeightedIntegerArray WeightedIndices;
 
-	/** Whether this component is running on the network authority (for bServerAuthoritative). */
-	bool bIsNetAuthority = false;
-
 	/** Accumulated time since the last spawn event, used against SpawnRate. */
 	float TimeSinceSpawned = 0.f;
 
 	/** Weak reference to the owning world's UNActorPoolSubsystem; may go stale if the subsystem deinitializes before this component's EndPlay. */
-	TWeakObjectPtr<UNActorPoolSubsystem> Manager;
+	TWeakObjectPtr<UNActorPoolSubsystem> Subsystem;
 
 	/** Cached count of Templates for tight loops. */
 	int32 TemplateCount = 0;

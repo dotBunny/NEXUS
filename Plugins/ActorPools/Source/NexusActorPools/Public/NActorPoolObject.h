@@ -160,7 +160,7 @@ public:
 
 private:
 	/** The native Actor Pool this wrapper reflects. */
-	FNActorPool* Pool;
+	FNActorPool* Pool = nullptr;
 
 	/** Cached display name of the pool's Actor template. */
 	FText ClassName;

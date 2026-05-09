@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NActorPoolSettings.h"
+#include "NActorPoolsMinimal.h"
 #include "Engine/DataAsset.h"
 #include "NActorPoolSet.generated.h"
 
@@ -62,7 +63,12 @@ public:
 		for (int32 i = 0; i < AdditionalCount; i++)
 		{
 			UNActorPoolSet* NestedSetPtr = NestedSets[i].LoadSynchronous();
-			if (NestedSetPtr != nullptr && !OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
+			if (NestedSetPtr == nullptr)
+			{
+				UE_LOG(LogNexusActorPools, Warning, TEXT("Was not able to load nested UNActorPoolSet at index(%i)."), i);
+				continue;
+			}
+			if (!OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
 			{
 				NestedSetPtr->TryGetUniqueSets(OutActorPoolSets);
 			}
