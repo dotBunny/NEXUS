@@ -31,7 +31,7 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-viewport-client/#toggle-world-rendering"))
 	void ToggleWorldRendering(const bool bNewValue)
 	{
-		OnDisableWorldRendering.Broadcast(bNewValue);
+		OnToggleWorldRendering.Broadcast(bNewValue);
 		bDisableWorldRendering = bNewValue;
 	};
 
@@ -39,5 +39,5 @@ protected:
 
 	/** Fires when ToggleWorldRendering is called, before bDisableWorldRendering is updated. */
 	UPROPERTY(BlueprintAssignable, Category = "NEXUS|User Interface")
-	FOnToggleWorldRenderingDelegate OnDisableWorldRendering;
+	FOnToggleWorldRenderingDelegate OnToggleWorldRendering;
 };

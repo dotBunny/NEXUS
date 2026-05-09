@@ -1,4 +1,7 @@
-﻿#include "Components/NComboBoxString.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "Components/NComboBoxString.h"
 
 UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptyChangedEvent;
 

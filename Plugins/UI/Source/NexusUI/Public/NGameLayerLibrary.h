@@ -11,7 +11,7 @@
 
 /**
  * A collection of functionality used to interact with a games' IGameLayerManager.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/">UNGameUserSettingsLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-layer-library/">UNGameLayerLibrary</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game Layer Library")
 class UNGameLayerLibrary : public UBlueprintFunctionLibrary

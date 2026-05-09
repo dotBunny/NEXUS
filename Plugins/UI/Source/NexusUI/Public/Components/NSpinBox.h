@@ -34,8 +34,7 @@ private:
 	/** Cached value of the OnValueChanged used to prevent it from being called when setting the value. */
 	FOnSpinBoxValueChangedEvent CachedChangedEvent;
 	FOnSpinBoxValueCommittedEvent CachedCommittedEvent;
-
-
+	
 	/** Empty OnValueChanged event used to swap in for the CachedOnValueChanged to prevent it from being called. */
 	static FOnSpinBoxValueChangedEvent EmptyChangedEvent;
 	static FOnSpinBoxValueCommittedEvent EmptyCommittedEvent;

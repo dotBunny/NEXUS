@@ -143,7 +143,7 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 	UKismetSystemLibrary::GetSupportedFullscreenResolutions(AllResolutions);
 	for (const FIntPoint& Resolution : AllResolutions)
 	{
-		SupportedResolutions.Add(FString::Printf(TEXT("%dx%d"), Resolution.X, Resolution.Y));
+		SupportedResolutions.Add(FString::Printf(TEXT("%ix%i"), Resolution.X, Resolution.Y));
 	}
 	return MoveTemp(SupportedResolutions);
 }

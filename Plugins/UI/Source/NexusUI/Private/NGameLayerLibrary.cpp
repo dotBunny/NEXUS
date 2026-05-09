@@ -1,4 +1,7 @@
-﻿#include "NGameLayerLibrary.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NGameLayerLibrary.h"
 
 #include "NUIMinimal.h"
 #include "NWidgetUtils.h"
