@@ -183,7 +183,7 @@ struct FNWidgetState
 	 * @param bShouldReplaceKeys When true, values from Other overwrite matching keys; otherwise
 	 *        existing keys are preserved and only missing keys are copied across.
 	 */
-	void OverlayState(FNWidgetState& Other, const bool bShouldReplaceKeys = false)
+	void OverlayState(const FNWidgetState& Other, const bool bShouldReplaceKeys = false)
 	{
 		for (const FString& Key : Other.BooleanKeys)
 		{
