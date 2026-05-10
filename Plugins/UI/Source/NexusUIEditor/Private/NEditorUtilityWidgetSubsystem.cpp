@@ -108,19 +108,14 @@ void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifi
 
 void UNEditorUtilityWidgetSubsystem::RemoveTabIdentifier(const FName WidgetIdentifier)
 {
-	bool bDirty = false;
 	for (int32 i = WidgetIdentifiers.Num() - 1; i >= 0; i--)
 	{
 		if (WidgetIdentifiers[i] == WidgetIdentifier)
 		{
 			WidgetIdentifiers.RemoveAt(i);
 			TabIdentifiers.RemoveAt(i);
-			bDirty = true;
+			SaveConfig();
+			break;
 		}
-	}
-
-	if (bDirty)
-	{
-		SaveConfig();
 	}
 }
