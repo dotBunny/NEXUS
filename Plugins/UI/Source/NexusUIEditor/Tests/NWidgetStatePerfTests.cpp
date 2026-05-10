@@ -24,11 +24,11 @@ N_TEST_PERF(FNWidgetStatePerfTests_AddString,
     FNTestUtils::PrePerformanceTest();
 
     // Build keys outside the timed region.
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        Keys.Add(FString::Printf(TEXT("Key_%d"), i));
+        Keys.Add(FName(*FString::Printf(TEXT("Key_%d"), i)));
     }
 
     // ReSharper disable once CppTooWideScope
@@ -53,11 +53,11 @@ N_TEST_PERF(FNWidgetStatePerfTests_AddBoolean,
 {
     FNTestUtils::PrePerformanceTest();
 
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        Keys.Add(FString::Printf(TEXT("bKey_%d"), i));
+        Keys.Add(FName(*FString::Printf(TEXT("bKey_%d"), i)));
     }
 
     // ReSharper disable once CppTooWideScope
@@ -82,11 +82,11 @@ N_TEST_PERF(FNWidgetStatePerfTests_AddFloat,
 {
     FNTestUtils::PrePerformanceTest();
 
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        Keys.Add(FString::Printf(TEXT("fKey_%d"), i));
+        Keys.Add(FName(*FString::Printf(TEXT("fKey_%d"), i)));
     }
 
     // ReSharper disable once CppTooWideScope
@@ -112,18 +112,18 @@ N_TEST_PERF(FNWidgetStatePerfTests_GetString,
     // Measures lookup cost on a fully populated state (worst-case linear scan).
     FNTestUtils::PrePerformanceTest();
 
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     FNWidgetState State;
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        const FString Key = FString::Printf(TEXT("Key_%d"), i);
+        const FName Key = FName(*FString::Printf(TEXT("Key_%d"), i));
         Keys.Add(Key);
         State.AddString(Key, TEXT("Value"));
     }
 
     // TEST — always look up the last key (worst-case scan position).
-    const FString& LastKey = Keys.Last();
+    const FName& LastKey = Keys.Last();
     {
         N_TEST_TIMER_SCOPE(FNWidgetStatePerfTests_GetString, NEXUS::PerfTests::NUI::FNWidgetStateHarness::GetMaxDuration)
         for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::QueryCount; ++i)
@@ -143,17 +143,17 @@ N_TEST_PERF(FNWidgetStatePerfTests_GetBoolean,
 {
     FNTestUtils::PrePerformanceTest();
 
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     FNWidgetState State;
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        const FString Key = FString::Printf(TEXT("bKey_%d"), i);
+        const FName Key = FName(*FString::Printf(TEXT("bKey_%d"), i));
         Keys.Add(Key);
         State.AddBoolean(Key, true);
     }
 
-    const FString& LastKey = Keys.Last();
+    const FName& LastKey = Keys.Last();
     {
         N_TEST_TIMER_SCOPE(FNWidgetStatePerfTests_GetBoolean, NEXUS::PerfTests::NUI::FNWidgetStateHarness::GetMaxDuration)
         for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::QueryCount; ++i)
@@ -173,17 +173,17 @@ N_TEST_PERF(FNWidgetStatePerfTests_GetFloat,
 {
     FNTestUtils::PrePerformanceTest();
 
-    TArray<FString> Keys;
+    TArray<FName> Keys;
     Keys.Reserve(NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount);
     FNWidgetState State;
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        const FString Key = FString::Printf(TEXT("fKey_%d"), i);
+        const FName Key = FName(*FString::Printf(TEXT("fKey_%d"), i));
         Keys.Add(Key);
         State.AddFloat(Key, static_cast<float>(i));
     }
 
-    const FString& LastKey = Keys.Last();
+    const FName& LastKey = Keys.Last();
     {
         N_TEST_TIMER_SCOPE(FNWidgetStatePerfTests_GetFloat, NEXUS::PerfTests::NUI::FNWidgetStateHarness::GetMaxDuration)
         for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::QueryCount; ++i)
@@ -208,8 +208,8 @@ N_TEST_PERF(FNWidgetStatePerfTests_OverlayState_Merge,
     FNWidgetState Overlay;
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        Base.AddString(FString::Printf(TEXT("Base_%d"), i), TEXT("B"));
-        Overlay.AddString(FString::Printf(TEXT("Overlay_%d"), i), TEXT("O"));
+        Base.AddString(FName(*FString::Printf(TEXT("Base_%d"), i)), TEXT("B"));
+        Overlay.AddString(FName(*FString::Printf(TEXT("Overlay_%d"), i)), TEXT("O"));
     }
 
     // TEST
@@ -233,7 +233,7 @@ N_TEST_PERF(FNWidgetStatePerfTests_OverlayState_Replace,
     FNWidgetState Overlay;
     for (int32 i = 0; i < NEXUS::PerfTests::NUI::FNWidgetStateHarness::EntryCount; ++i)
     {
-        const FString Key = FString::Printf(TEXT("Key_%d"), i);
+        const FName Key = FName(*FString::Printf(TEXT("Key_%d"), i));
         Base.AddString(Key, TEXT("Original"));
         Overlay.AddString(Key, TEXT("Replacement"));
     }

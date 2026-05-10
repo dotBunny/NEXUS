@@ -1,4 +1,4 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
@@ -8,7 +8,7 @@
 #include "NWidgetState.generated.h"
 
 /**
- * Lightweight string/bool/float key-value bag used to snapshot and restore UMG widget state
+ * Lightweight name/bool/float key-value bag used to snapshot and restore UMG widget state
  * across navigation, layer changes, or save/load. Keys are stored in parallel arrays per type
  * so the struct stays USTRUCT-friendly without requiring a container-of-variants.
  */
@@ -18,29 +18,29 @@ struct FNWidgetState
 	GENERATED_BODY()
 
 	/** @return true if a string value is stored for Key. */
-	bool HasString(const FString& Key) const
+	bool HasString(const FName& Key) const
 	{
 		return StringKeys.Contains(Key);
 	}
 	/** @return true if a boolean value is stored for Key. */
-	bool HasBoolean(const FString& Key) const
+	bool HasBoolean(const FName& Key) const
 	{
 		return BooleanKeys.Contains(Key);
 	}
 	/** @return true if a float value is stored for Key. */
-	bool HasFloat(const FString& Key) const
+	bool HasFloat(const FName& Key) const
 	{
 		return FloatKeys.Contains(Key);
 	}
 
 	/** @return the stored string for Key, or an empty string if Key is missing. */
-	FString GetString(const FString& Key) const
+	FString GetString(const FName& Key) const
 	{
 		const int32 Index = StringKeys.IndexOfByKey(Key);
 		return Index != INDEX_NONE ? StringValues[Index] : FString();
 	}
 	/** Append a new string entry without checking for an existing one; overwrites if already exists. */
-	int32 AddString(const FString& Key, const FString& Value)
+	int32 AddString(const FName& Key, const FString& Value)
 	{
 		const int32 ExistingIndex = StringKeys.Find(Key);
 		if (ExistingIndex != INDEX_NONE)
@@ -54,9 +54,9 @@ struct FNWidgetState
 		return StringValues.Num() - 1;
 	}
 	/** Update or insert the string entry for Key. */
-	void SetString(const FString& Key, const FString& Value)
+	void SetString(const FName& Key, const FString& Value)
 	{
-		if (const int32 Index = StringKeys.IndexOfByKey(Key); 
+		if (const int32 Index = StringKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
 		{
 			StringValues[Index] = Value;
@@ -67,7 +67,7 @@ struct FNWidgetState
 		}
 	}
 	/** Remove the string entry for Key if present. */
-	void RemoveString(const FString& Key)
+	void RemoveString(const FName& Key)
 	{
 		if (const int32 Index = StringKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
@@ -84,22 +84,22 @@ struct FNWidgetState
 	}
 
 	/** @return the stored boolean for Key, or bDefaultValue if Key is missing. */
-	bool GetBoolean(const FString& Key, const bool bDefaultValue = false) const
+	bool GetBoolean(const FName& Key, const bool bDefaultValue = false) const
 	{
 		const int32 Index = BooleanKeys.IndexOfByKey(Key);
 		return Index != INDEX_NONE ? BooleanValues[Index] : bDefaultValue;
 	}
 	/** Append a new boolean entry without checking for an existing one; returns the new index. */
-	int32 AddBoolean(const FString& Key, const bool bValue)
+	int32 AddBoolean(const FName& Key, const bool bValue)
 	{
 		BooleanKeys.Add(Key);
 		BooleanValues.Add(bValue);
 		return BooleanValues.Num() - 1;
 	}
 	/** Update or insert the boolean entry for Key. */
-	void SetBoolean(const FString& Key, const bool bValue)
+	void SetBoolean(const FName& Key, const bool bValue)
 	{
-		if (const int32 Index = BooleanKeys.IndexOfByKey(Key); 
+		if (const int32 Index = BooleanKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
 		{
 			BooleanValues[Index] = bValue;
@@ -110,7 +110,7 @@ struct FNWidgetState
 		}
 	}
 	/** Remove the boolean entry for Key if present. */
-	void RemoveBoolean(const FString& Key)
+	void RemoveBoolean(const FName& Key)
 	{
 		if (const int32 Index = BooleanKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
@@ -127,22 +127,22 @@ struct FNWidgetState
 	}
 
 	/** @return the stored float for Key, or DefaultValue if Key is missing. */
-	float GetFloat(const FString& Key, const float DefaultValue = 0.f) const
+	float GetFloat(const FName& Key, const float DefaultValue = 0.f) const
 	{
 		const int32 Index = FloatKeys.IndexOfByKey(Key);
 		return Index != INDEX_NONE ? FloatValues[Index] : DefaultValue;
 	}
 	/** Append a new float entry without checking for an existing one; returns the new index. */
-	int32 AddFloat(const FString& Key, const float Value)
+	int32 AddFloat(const FName& Key, const float Value)
 	{
 		FloatKeys.Add(Key);
 		FloatValues.Add(Value);
 		return FloatValues.Num() - 1;
 	}
 	/** Update or insert the float entry for Key. */
-	void SetFloat(const FString& Key, const float Value)
+	void SetFloat(const FName& Key, const float Value)
 	{
-		if (const int32 Index = FloatKeys.IndexOfByKey(Key); 
+		if (const int32 Index = FloatKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
 		{
 			FloatValues[Index] = Value;
@@ -153,7 +153,7 @@ struct FNWidgetState
 		}
 	}
 	/** Remove the float entry for Key if present. */
-	void RemoveFloat(const FString& Key)
+	void RemoveFloat(const FName& Key)
 	{
 		if (const int32 Index = FloatKeys.IndexOfByKey(Key);
 			Index != INDEX_NONE)
@@ -185,7 +185,7 @@ struct FNWidgetState
 	 */
 	void OverlayState(const FNWidgetState& Other, const bool bShouldReplaceKeys = false)
 	{
-		for (const FString& Key : Other.BooleanKeys)
+		for (const FName& Key : Other.BooleanKeys)
 		{
 			if (bShouldReplaceKeys)
 			{
@@ -199,9 +199,9 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		
-		for (const FString& Key : Other.FloatKeys)
+
+
+		for (const FName& Key : Other.FloatKeys)
 		{
 			if (bShouldReplaceKeys)
 			{
@@ -215,8 +215,8 @@ struct FNWidgetState
 				}
 			}
 		}
-		
-		for (const FString& Key : Other.StringKeys)
+
+		for (const FName& Key : Other.StringKeys)
 		{
 			if (bShouldReplaceKeys)
 			{
@@ -230,41 +230,41 @@ struct FNWidgetState
 				}
 			}
 		}
-		
+
 	}
 
 	/** Log every stored key/value pair to LogNexusUI for inspection. */
 	void DumpToLog() const
 	{
 		UE_LOG(LogNexusUI, Log, TEXT("[FNWidgetState]"));
-		
+
 		const int32 BooleanCount = BooleanKeys.Num();
 		if (BooleanCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Booleans(%i)"), BooleanCount);
 			for (int32 i = 0; i < BooleanCount; ++i)
 			{
-				UE_LOG(LogNexusUI, Display, TEXT("  %s : %i"), *BooleanKeys[i], BooleanValues[i]);
+				UE_LOG(LogNexusUI, Display, TEXT("  %s : %i"), *BooleanKeys[i].ToString(), BooleanValues[i]);
 			}
 		}
-		
+
 		const int32 FloatCount = FloatKeys.Num();
 		if (FloatCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Floats(%i)"), FloatCount);
 			for (int32 i = 0; i < FloatCount; ++i)
 			{
-				UE_LOG(LogNexusUI, Log, TEXT("  %s : %f"), *FloatKeys[i], FloatValues[i]);
+				UE_LOG(LogNexusUI, Log, TEXT("  %s : %f"), *FloatKeys[i].ToString(), FloatValues[i]);
 			}
 		}
-		
+
 		const int32 StringCount = StringKeys.Num();
 		if (StringCount > 0)
 		{
 			UE_LOG(LogNexusUI, Log, TEXT("Strings(%i)"), StringCount);
 			for (int32 i = 0; i < StringCount; ++i)
 			{
-				UE_LOG(LogNexusUI, Log, TEXT("  %s : %s"), *StringKeys[i], *StringValues[i]);
+				UE_LOG(LogNexusUI, Log, TEXT("  %s : %s"), *StringKeys[i].ToString(), *StringValues[i]);
 			}
 		}
 	}
@@ -273,7 +273,7 @@ protected:
 
 	/** Keys for boolean entries; BooleanKeys[i] maps to BooleanValues[i]. */
 	UPROPERTY()
-	TArray<FString> BooleanKeys;
+	TArray<FName> BooleanKeys;
 
 	/** Values for boolean entries; index-aligned with BooleanKeys. */
 	UPROPERTY()
@@ -281,7 +281,7 @@ protected:
 
 	/** Keys for float entries; FloatKeys[i] maps to FloatValues[i]. */
 	UPROPERTY()
-	TArray<FString> FloatKeys;
+	TArray<FName> FloatKeys;
 
 	/** Values for float entries; index-aligned with FloatKeys. */
 	UPROPERTY()
@@ -289,7 +289,7 @@ protected:
 
 	/** Keys for string entries; StringKeys[i] maps to StringValues[i]. */
 	UPROPERTY()
-	TArray<FString> StringKeys;
+	TArray<FName> StringKeys;
 
 	/** Values for string entries; index-aligned with StringKeys. */
 	UPROPERTY()

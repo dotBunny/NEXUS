@@ -10,7 +10,7 @@
 
 namespace NEXUS::UnitTests::NUI::FNWidgetStateSnapshotHarness
 {
-    static FNWidgetState MakeState(const FString& Key, const FString& Value)
+    static FNWidgetState MakeState(const FName& Key, const FString& Value)
     {
         FNWidgetState S;
         S.AddString(Key, Value);
