@@ -17,6 +17,9 @@
  * INFO() and, if MaxDurationMs is exceeded, the enclosing test is failed with ADD_ERROR(). When
  * enabled, a FPlatformMisc named event is emitted so the region is visible in profilers such as
  * Unreal Insights.
+ * 
+ * @note When ran on a build machine a warning is NOT thrown, instead we print an INFO statement.
+ *		 Telemetry will capture the time and bubble it up.
  */
 class FNTestScopeTimer
 {
@@ -76,10 +79,17 @@ public:
 			}
 		}
 #endif
-
+		
 		if (DurationMs > MaxDuration)
 		{
-			ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
+			if(FPlatformMisc::GetEnvironmentVariable(TEXT("IsBuildMachine")) != TEXT("1"))
+			{
+				ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
+			}
+			else
+			{
+				INFO(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
+			}
 		}
 	}
 
