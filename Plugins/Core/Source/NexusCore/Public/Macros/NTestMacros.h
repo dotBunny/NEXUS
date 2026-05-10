@@ -125,6 +125,12 @@
 #define N_TEST_FAILURE_LOW(ClassName, PrettyName, Flags)\
 	N_TEST_LOW(ClassName, PrettyName, [NegativeFilter]Flags)
 
+
+#define N_TEST_TIMER_SCOPE_1(Name)\
+	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\
+	FNTestScopeTimer NTestTimer(TEXT(#Name), 0);
+
+
 #define N_TEST_TIMER_SCOPE_2(Name, MaxDuration)\
 	TRACE_CPUPROFILER_EVENT_SCOPE(Name)\
 	FNTestScopeTimer NTestTimer(TEXT(#Name), MaxDuration);
@@ -142,7 +148,7 @@
  * @param Context (optional) Telemetry grouping label forwarded to AddTelemetryData for Gauntlet.
  */
 #define N_TEST_TIMER_SCOPE(...)\
-	N_TEST_TIMER_SCOPE_SELECT(__VA_ARGS__, N_TEST_TIMER_SCOPE_3, N_TEST_TIMER_SCOPE_2, _UNUSED)(__VA_ARGS__)
+	N_TEST_TIMER_SCOPE_SELECT(__VA_ARGS__, N_TEST_TIMER_SCOPE_3, N_TEST_TIMER_SCOPE_2, N_TEST_TIMER_SCOPE_1)(__VA_ARGS__)
 
 #define N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT 45
 #define N_TESTS_LATENT_COMMANDS_CREATE_WORLD_WAIT 10
