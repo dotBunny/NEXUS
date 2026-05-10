@@ -200,6 +200,8 @@ N_TEST_CRITICAL(UNMySubsystemTests_Category_Case,
 
 ## Performance Test Format — Pure Logic (`N_TEST_CONTEXT_ANYWHERE`)
 
+Performance tests run through the latent-automation framework so the engine can stabilize before timing starts. Wrap the timed work in a static method on a `class FN<ClassName>PerfTests` and dispatch from each `N_TEST_PERF` body via `FNTestLatentCommand`. Constants live in a `NEXUS::PerfTests::<ShortPlugin>::<ClassName>Harness` namespace above the class. Always end the timed region with `NTestTimer.ManualStop()` inside the `N_TEST_TIMER_SCOPE` block.
+
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
@@ -207,25 +209,42 @@ N_TEST_CRITICAL(UNMySubsystemTests_Category_Case,
 #if WITH_TESTS
 
 #include "MyPluginHeader.h"
+#include "Developer/NTestLatentCommands.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
-N_TEST_PERF_HIGH(FNMyClassPerfTests_OperationName,
+namespace NEXUS::PerfTests::NMyPlugin::FNMyClassHarness
+{
+    constexpr float MaxDuration = 0.2f;
+}
+
+class FNMyClassPerfTests
+{
+public:
+    static void OperationName()
+    {
+        FNMyClass Subject(SomeSetupArg);
+
+        // TEST
+        {
+            N_TEST_TIMER_SCOPE(FNMyClassPerfTests_OperationName,
+                NEXUS::PerfTests::NMyPlugin::FNMyClassHarness::MaxDuration)
+            for (int32 i = 0; i < 10000; ++i)
+            {
+                Subject.DoWork();
+            }
+            NTestTimer.ManualStop();
+        }
+    }
+};
+
+N_TEST_PERF(FNMyClassPerfTests_OperationName,
     "NEXUS::PerfTests::NMyPlugin::FNMyClass::OperationName",
     N_TEST_CONTEXT_ANYWHERE)
 {
-    FNTestUtils::PrePerformanceTest();
-
-    FNMyClass Subject(SomeSetupArg);
-    {
-        N_TEST_TIMER_SCOPE(FNMyClassPerfTests_OperationName, 10.f)
-        for (int32 i = 0; i < 10000; ++i)
-        {
-            Subject.DoWork();
-        }
-    }
-
-    FNTestUtils::PostPerformanceTest();
+    N_TESTS_PERF_START_LATENT_TEST
+    ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNMyClassPerfTests::OperationName));
+    N_TESTS_PERF_FINISH_LATENT_TEST
 }
 
 #endif //WITH_TESTS
@@ -233,7 +252,7 @@ N_TEST_PERF_HIGH(FNMyClassPerfTests_OperationName,
 
 ## Performance Test Format — World-Based (`N_TEST_CONTEXT_EDITOR`)
 
-Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` block above the tests. Use `WorldTest(..., true)` to disable GC. Call `NTestTimer.ManualStop()` inside the timer scope when cleanup follows in the same scope; omit it when the timed work ends right before the closing brace.
+Same shape as the pure-logic variant, but each static method takes a `UWorld*` and the test body uses the `_WORLD` macro pair plus `FNTestLatentCommand_WorldTest`. The macros handle world creation, GC suppression, and cleanup — never call `FNTestUtils::WorldTest` or `Pre/PostPerformanceTest` from inside the test body. Pass `true` as the second arg to `FNTestLatentCommand_WorldTest` to disable GC during the test (the standard choice for perf tests).
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -243,6 +262,7 @@ Declare constants in a `namespace NEXUS::PerfTests::<ShortPlugin>::<ClassName>` 
 
 #include "Misc/Timespan.h"
 #include "MyPluginHeader.h"
+#include "Developer/NTestLatentCommands.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
@@ -253,21 +273,19 @@ namespace NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness
     constexpr float RemoveMaxDuration = 1.0f;
 }
 
-N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
-    "NEXUS::PerfTests::NMyPlugin::UNMySubsystem::AddObject",
-    N_TEST_CONTEXT_EDITOR)
+class FNMySubsystemPerfTests
 {
+public:
     // Measures the cost of adding ObjectCount unique actors to a single bucket.
-    FNTestUtils::PrePerformanceTest();
-    FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+    static void AddObject(UWorld* World)
     {
         UNMySubsystem* Subsystem = UNMySubsystem::Get(World);
         if (!Subsystem) return;
 
         // Pre-spawn outside the timed region.
         TArray<AActor*> Actors;
-        Actors.Reserve(NEXUS::PerfTests::NMyPlugin::UNMySubsystem::ObjectCount);
-        for (int32 i = 0; i < NEXUS::PerfTests::NMyPlugin::UNMySubsystem::ObjectCount; ++i)
+        Actors.Reserve(NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::ObjectCount);
+        for (int32 i = 0; i < NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::ObjectCount; ++i)
         {
             Actors.Add(World->SpawnActor<AActor>());
         }
@@ -275,15 +293,23 @@ N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
         // TEST
         {
             N_TEST_TIMER_SCOPE(UNMySubsystemPerfTests_AddObject,
-                NEXUS::PerfTests::NMyPlugin::UNMySubsystem::AddMaxDuration)
-            for (int32 i = 0; i < NEXUS::PerfTests::NMyPlugin::UNMySubsystem::ObjectCount; ++i)
+                NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::AddMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::ObjectCount; ++i)
             {
                 Subsystem->AddObject(Actors[i]);
             }
             NTestTimer.ManualStop();
         }
-    }, true);
-    FNTestUtils::PostPerformanceTest();
+    }
+};
+
+N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
+    "NEXUS::PerfTests::NMyPlugin::UNMySubsystem::AddObject",
+    N_TEST_CONTEXT_EDITOR)
+{
+    N_TESTS_PERF_START_LATENT_TEST_WORLD
+    ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNMySubsystemPerfTests::AddObject, true));
+    N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
 }
 
 #endif //WITH_TESTS

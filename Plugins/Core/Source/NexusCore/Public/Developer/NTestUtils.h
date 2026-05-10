@@ -13,33 +13,9 @@
  * its macros (REQUIRE_MESSAGE, ADD_ERROR). All methods are designed to be safely re-entrant — every
  * world is disposed before the call returns.
  */
-class FNTestUtils
+class NEXUSCORE_API FNTestUtils
 {
 public:
-	/**
-	 * Prepares global state so a performance test can produce comparable, low-noise measurements.
-	 * @note Initializes stack walking, forces a GC and flushes the log/visual-log streams.
-	 */
-	FORCEINLINE static void PrePerformanceTest()
-	{
-		// Ensure that stack walking is initialized prior to performance testing to avoid library loading
-		FPlatformStackWalk::InitStackWalking();
-
-		// Force garbage collection to ensure a clean slate for performance testing
-		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-
-		// Force the logs to be written to disk prior to the operation
-		GLog->Flush();
-		FVisualLogger::Get().Flush();
-	}
-
-	/** Matching teardown to PrePerformanceTest(); forces a GC so the next test starts clean. */
-	FORCEINLINE static void PostPerformanceTest()
-	{
-		// Force garbage collection to ensure the next test is already prepared / faster
-		CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
-	}
-
 	/**
 	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterward.
 	 *
@@ -51,6 +27,7 @@ public:
 	 * @param WorldType The EWorldType to create (typically Game or PIE).
 	 * @param TestFunctionality Callable that receives the created world and performs the test.
 	 * @param bDisableGarbageCollection Suppress GC for the duration of the test body when true.
+	 * @remark Useful for straight runs where no ticking is required, but you want a world.
 	 */
 	FORCEINLINE static void WorldTest(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bDisableGarbageCollection = false)
 	{
@@ -105,6 +82,7 @@ public:
 	 * @param WorldType The EWorldType to create for the world fixture.
 	 * @param TestFunctionality Callable that receives the created world and performs the test.
 	 * @param bShouldGarbageCollect Run GC between the test body and the leak check when true.
+	 * @remark Useful for straight runs where no ticking is required, but you want a world.
 	 */
 	FORCEINLINE static void WorldTestChecked(const EWorldType::Type WorldType, const TFunctionRef<void(UWorld* World)>& TestFunctionality, const bool bShouldGarbageCollect = true)
 	{
@@ -195,37 +173,5 @@ public:
 	 * @return Absolute path of the new matching file once its size has stabilised, or an empty
 	 *         string on timeout.
 	 */
-	FORCEINLINE static FString WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds = 5.0)
-	{
-		const double Deadline = FPlatformTime::Seconds() + TimeoutSeconds;
-		FString FoundPath;
-		int64 LastSize = -1;
-		while (FPlatformTime::Seconds() < Deadline)
-		{
-			if (FoundPath.IsEmpty())
-			{
-				TArray<FString> Found;
-				IFileManager::Get().FindFiles(Found, *(FPaths::ProjectLogDir() / Wildcard), true, false);
-				for (const FString& Name : Found)
-				{
-					if (!PreExisting.Contains(Name))
-					{
-						FoundPath = FPaths::ProjectLogDir() / Name;
-						break;
-					}
-				}
-			}
-			else
-			{
-				const int64 CurrentSize = IFileManager::Get().FileSize(*FoundPath);
-				if (CurrentSize > 0 && CurrentSize == LastSize)
-				{
-					return FoundPath;
-				}
-				LastSize = CurrentSize;
-			}
-			FPlatformProcess::Sleep(0.025f);
-		}
-		return FString();
-	}
+	static FString WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds = 5.0);
 };
