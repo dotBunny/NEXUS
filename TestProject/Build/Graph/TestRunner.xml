@@ -117,7 +117,7 @@
                 <Property Name="GitHubTestState" Value="success" />
                 <Property Name="GitHubTestMessage" Value="Successful" />
             </Node>
-            <Node Name="GitHub Commit Status" After="GitHub Determine Status">
+            <Node Name="GitHub Commit Status" After="GitHub Determine Status" Finally="true">
                 <Horde-GetSecrets File="$(RootDir)\Staging\github.k9.tmp" Text="{{nexus.github-token}}"/>
                 
                 <!-- START: Get & Compile K9 Tooling -->			
