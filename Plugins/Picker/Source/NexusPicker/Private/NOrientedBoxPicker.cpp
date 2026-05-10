@@ -16,26 +16,26 @@
 	const FVector MaximumExtent = 0.5f * Params.MaximumDimensions;
 #define N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(-MaximumExtent.X, MaximumExtent.X), \
-		FloatValue(-MaximumExtent.Y, MaximumExtent.Y), \
-		FloatValue(-MaximumExtent.Z, MaximumExtent.Z))
+		Random.FloatValue(-MaximumExtent.X, MaximumExtent.X), \
+		Random.FloatValue(-MaximumExtent.Y, MaximumExtent.Y), \
+		Random.FloatValue(-MaximumExtent.Z, MaximumExtent.Z))
 #define N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RandomIndex) \
-	FBox ChosenBox = ValidBoxes[RandomIndex(0,ValidBoxes.Num()-1)];
+	FBox ChosenBox = ValidBoxes[Random.RandomIndex(0,ValidBoxes.Num()-1)];
 #define N_PICKER_ORIENTED_BOX_LOCATION(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
-		FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
-		FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z))
+		Random.FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
+		Random.FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
+		Random.FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z))
 #define N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(FloatValue) \
 	Params.Origin + Params.Rotation.RotateVector(FVector( \
-		FloatValue(-MaximumExtent.X, MaximumExtent.X), \
-		FloatValue(-MaximumExtent.Y, MaximumExtent.Y), \
-		FloatValue(-MaximumExtent.Z, MaximumExtent.Z)))
+		Random.FloatValue(-MaximumExtent.X, MaximumExtent.X), \
+		Random.FloatValue(-MaximumExtent.Y, MaximumExtent.Y), \
+		Random.FloatValue(-MaximumExtent.Z, MaximumExtent.Z)))
 #define N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(FloatValue) \
 	Params.Origin + Params.Rotation.RotateVector(FVector( \
-		FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
-		FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
-		FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z)))
+		Random.FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
+		Random.FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
+		Random.FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z)))
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_ORIENTED_BOX_VALID_BOXES \
@@ -73,10 +73,11 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
-#define RANDOM_INDEX FNRandom::GetDeterministic().IntegerRange
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_INDEX IntegerRange
 void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)
 	{
@@ -219,10 +220,11 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
-#define RANDOM_INDEX FNRandom::GetNonDeterministic().RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)
 	{
@@ -365,11 +367,11 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
-#define RANDOM_INDEX RandomStream.RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNOrientedBoxPickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)
 	{
@@ -508,15 +510,15 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 		}
 	}
 	N_PICKER_ORIENTED_BOX_VLOG(!bSimpleMode)
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-#define RANDOM_INDEX Twister.IntegerRange
-void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNOrientedBoxPickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_INDEX IntegerRange
+void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params)
 {
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)

@@ -8,7 +8,6 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
-
 #define N_PICKER_ARC_PREFIX \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
@@ -16,8 +15,8 @@
 	const float MinDegrees = -MaxDegrees;
 
 #define N_PICKER_RADIAL_LOCATION(FloatRange) \
-	const float RandomAngle = FMath::DegreesToRadians(FloatRange(MinDegrees, MaxDegrees)); \
-	const float RandomDistance = FloatRange(Params.MinimumDistance, Params.MaximumDistance); \
+	const float RandomAngle = FMath::DegreesToRadians(Random.FloatRange(MinDegrees, MaxDegrees)); \
+	const float RandomDistance = Random.FloatRange(Params.MinimumDistance, Params.MaximumDistance); \
 	FVector Location = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(RandomAngle), FMath::Sin(RandomAngle), 0) * RandomDistance);
 
 #if ENABLE_VISUAL_LOG
@@ -41,10 +40,10 @@
 #define N_PICKER_RADIAL_VLOG
 #endif // ENABLE_VISUAL_LOG
 
-
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_FLOAT_RANGE  FloatRange
 void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -78,9 +77,10 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& P
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -114,10 +114,10 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNArcPickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -148,13 +148,13 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 		}
 	}
 	N_PICKER_RADIAL_VLOG
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-void FNArcPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNArcPickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+void FNArcPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params)
 {
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)

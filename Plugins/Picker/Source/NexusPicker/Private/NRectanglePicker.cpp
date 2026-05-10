@@ -13,18 +13,18 @@
 	const bool bHasRotation = !Params.Rotation.IsZero(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RandomIndex) \
-	FVector4 ChosenRange = ValidRanges[RandomIndex(0,ValidRanges.Num()-1)];
+	FVector4 ChosenRange = ValidRanges[Random.RandomIndex(0,ValidRanges.Num()-1)];
 #define N_PICKER_RECTANGLE_EXTENTS_SIMPLE \
 	const float ExtentX = Params.MaximumDimensions.X * 0.5f; \
 	const float ExtentY = Params.MaximumDimensions.Y * 0.5f;
 #define N_PICKER_RECTANGLE_LOCATION(FloatValue) \
-	Params.Origin + FVector(FloatValue(ChosenRange.X, ChosenRange.Z), FloatValue(ChosenRange.Y, ChosenRange.W), 0.f)
+	Params.Origin + FVector(Random.FloatValue(ChosenRange.X, ChosenRange.Z), Random.FloatValue(ChosenRange.Y, ChosenRange.W), 0.f)
 #define N_PICKER_RECTANGLE_LOCATION_ROTATION(FloatValue) \
-	Params.Origin + Params.Rotation.RotateVector(FVector(FloatValue(ChosenRange.X, ChosenRange.Z), FloatValue(ChosenRange.Y, ChosenRange.W), 0.f))
+	Params.Origin + Params.Rotation.RotateVector(FVector(Random.FloatValue(ChosenRange.X, ChosenRange.Z), Random.FloatValue(ChosenRange.Y, ChosenRange.W), 0.f))
 #define N_PICKER_RECTANGLE_LOCATION_SIMPLE(FloatValue) \
-	Params.Origin + FVector ( FloatValue(-ExtentX, ExtentX), FloatValue(-ExtentY, ExtentY), 0.f)
+	Params.Origin + FVector (Random.FloatValue(-ExtentX, ExtentX), Random.FloatValue(-ExtentY, ExtentY), 0.f)
 #define N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(FloatValue) \
-	Params.Origin + Params.Rotation.RotateVector(FVector(FloatValue(-ExtentX, ExtentX), FloatValue(-ExtentY, ExtentY), 0.f))
+	Params.Origin + Params.Rotation.RotateVector(FVector(Random.FloatValue(-ExtentX, ExtentX), Random.FloatValue(-ExtentY, ExtentY), 0.f))
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_RECTANGLE_VALID_RANGES \
@@ -82,11 +82,12 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_INDEX FNRandom::GetDeterministic().IntegerRange
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
-#define RANDOM_BOOL FNRandom::GetDeterministic().Bool()
+#define RANDOM_INDEX IntegerRange
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_BOOL Bool()
 void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -231,10 +232,11 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
-#define RANDOM_INDEX FNRandom::GetNonDeterministic().RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -378,11 +380,11 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
-#define RANDOM_INDEX RandomStream.RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -522,15 +524,15 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 		}
 	}
 	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-#define RANDOM_INDEX Twister.IntegerRange
-void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNRectanglePickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_INDEX IntegerRange
+void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)

@@ -12,9 +12,9 @@
 	const bool bSimpleMode = Params.Rotation.IsZero(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_CIRCLE_THETA(FloatSingle) \
-	const float PointTheta = FloatSingle() * 2.0f * PI;
+	const float PointTheta = Random.FloatSingle() * 2.0f * PI;
 #define N_PICKER_CIRCLE_RADIUS(FloatValue) \
-	const float PointRadius = FloatValue(Params.MinimumRadius, Params.MaximumRadius);
+	const float PointRadius = Random.FloatValue(Params.MinimumRadius, Params.MaximumRadius);
 #define N_PICKER_CIRCLE_LOCATION_SIMPLE \
 	Params.Origin + FVector((PointRadius * FMath::Cos(PointTheta)),(PointRadius * FMath::Sin(PointTheta)), 0.f)
 #define N_PICKER_CIRCLE_LOCATION \
@@ -41,10 +41,11 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
-#define RANDOM_FLOAT FNRandom::GetDeterministic().Float
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_FLOAT Float
 void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -124,10 +125,11 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_FLOAT
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
-#define RANDOM_FLOAT FNRandom::GetNonDeterministic().FRand
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_FLOAT FRand
 void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -207,11 +209,11 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_FLOAT
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
-#define RANDOM_FLOAT RandomStream.FRand
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_FLOAT FRand
 void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNCirclePickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
@@ -287,14 +289,14 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	}
 	
 	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_FLOAT
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-#define RANDOM_FLOAT Twister.Float
-void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNCirclePickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_FLOAT Float
+void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNCirclePickerParams& Params)
 {
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)

@@ -11,7 +11,7 @@
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_SPHERE_LOCATION(VectorValue, FloatRange) \
-	Params.Origin + (VectorValue() * FloatRange(Params.MinimumRadius, Params.MaximumRadius))
+	Params.Origin + (Random.VectorValue() * Random.FloatRange(Params.MinimumRadius, Params.MaximumRadius))
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_SPHERE_VLOG \
@@ -31,10 +31,11 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_VECTOR FNRandom::GetDeterministic().VRand
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_VECTOR VRand
+#define RANDOM_FLOAT_RANGE FloatRange
 void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -68,10 +69,11 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 #undef RANDOM_VECTOR
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_VECTOR FNRandom::GetNonDeterministic().VRand
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
+#define RANDOM_VECTOR VRand
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -105,11 +107,11 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 #undef RANDOM_VECTOR
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_VECTOR RandomStream.VRand
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_VECTOR VRand
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -140,14 +142,14 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	}
 	
 	N_PICKER_SPHERE_VLOG
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_VECTOR
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_VECTOR Twister.VectorNormalized
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNSpherePickerParams& Params)
+#define RANDOM_VECTOR VectorNormalized
+#define RANDOM_FLOAT_RANGE FloatRange
+void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params)
 {
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)

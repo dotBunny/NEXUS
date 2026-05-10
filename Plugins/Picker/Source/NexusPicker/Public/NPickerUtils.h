@@ -8,6 +8,10 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
+#define N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC FNMersenneTwister& Random = FNRandom::GetDeterministic();
+
+#define N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC FRandomStream& Random = FNRandom::GetNonDeterministic();
+
 #define N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX \
 	FHitResult HitResult(ForceInit);
 #define N_IMPLEMENT_PICKER_PROJECTION_TRACE \

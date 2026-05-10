@@ -11,7 +11,7 @@
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_SPLINE_LOCATION(FloatRange) \
-	Params.SplineComponent->GetWorldLocationAtTime(FloatRange(0, Params.SplineComponent->Duration))
+	Params.SplineComponent->GetWorldLocationAtTime(Random.FloatRange(0, Params.SplineComponent->Duration))
 #if ENABLE_VISUAL_LOG
 #define N_IMPLEMENT_VLOG_SPLINE \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) { \
@@ -46,9 +46,10 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_FLOAT_RANGE FloatRange
 void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_SPLINE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -81,9 +82,10 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerPar
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPLINE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -116,10 +118,10 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_SPLINE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
@@ -149,12 +151,12 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		}
 	}
 	N_IMPLEMENT_VLOG_SPLINE
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNSplinePickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)

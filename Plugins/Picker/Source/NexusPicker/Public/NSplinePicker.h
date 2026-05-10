@@ -59,10 +59,10 @@ public:
 	/**
 	 * Generates random points on a spline using a provided Mersenne Twister.	 
 	 * @param OutLocations An array to store the generated points.
-	 * @param Twister The Mersenne Twister to query for random.
+	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNSplinePickerParams& Params);
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
 	
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.

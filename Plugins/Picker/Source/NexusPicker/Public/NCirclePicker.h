@@ -58,10 +58,10 @@ public:
 	/**
 	 * Generate random points inside or on the perimeter of a circle using a provided Mersenne Twister.	 
 	 * @param OutLocations An array to store the generated points.
-	 * @param Twister The Mersenne Twister to query for random.
+	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNCirclePickerParams& Params);
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNCirclePickerParams& Params);
 	
 	/**
 	 * Checks if a point is inside or on the perimeter of a circle.	 

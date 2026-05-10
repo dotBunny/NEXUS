@@ -13,17 +13,17 @@
 	const bool bSimpleMode = Params.MinimumBox.IsValid == 0; \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
 #define N_PICKER_BOX_VALID_BOXES_CHOICE(RandomIndex) \
-	FBox ChosenBox = ValidBoxes[RandomIndex(0,ValidBoxes.Num()-1)];
+	FBox ChosenBox = ValidBoxes[Random.RandomIndex(0,ValidBoxes.Num()-1)];
 #define N_PICKER_BOX_LOCATION_SIMPLE(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X), \
-		FloatValue(Params.MaximumBox.Min.Y, Params.MaximumBox.Max.Y), \
-		FloatValue(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z))
+		Random.FloatValue(Params.MaximumBox.Min.X, Params.MaximumBox.Max.X), \
+		Random.FloatValue(Params.MaximumBox.Min.Y, Params.MaximumBox.Max.Y), \
+		Random.FloatValue(Params.MaximumBox.Min.Z, Params.MaximumBox.Max.Z))
 #define N_PICKER_BOX_LOCATION(FloatValue) \
 	Params.Origin + FVector( \
-		FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
-		FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
-		FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z))
+		Random.FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
+		Random.FloatValue(ChosenBox.Min.Y, ChosenBox.Max.Y), \
+		Random.FloatValue(ChosenBox.Min.Z, ChosenBox.Max.Z))
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_BOX_VALID_BOXES \
@@ -61,10 +61,11 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_INDEX FNRandom::GetDeterministic().IntegerRange
-#define RANDOM_FLOAT_RANGE FNRandom::GetDeterministic().FloatRange
+#define RANDOM_INDEX IntegerRange
+#define RANDOM_FLOAT_RANGE FloatRange
 void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_BOX_PREFIX
 	
 	if (bSimpleMode)
@@ -138,10 +139,11 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& P
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE FNRandom::GetNonDeterministic().FRandRange
-#define RANDOM_INDEX FNRandom::GetNonDeterministic().RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_BOX_PREFIX
 	
 	if (bSimpleMode)
@@ -215,11 +217,11 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
-#define RANDOM_INDEX RandomStream.RandRange
+#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_INDEX RandRange
 void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_BOX_PREFIX
 	
 	if (bSimpleMode)
@@ -289,14 +291,14 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	}
 	
 	N_PICKER_BOX_VLOG(!bSimpleMode)
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
 #undef RANDOM_INDEX
 
-#define RANDOM_FLOAT_RANGE Twister.FloatRange
-#define RANDOM_INDEX Twister.IntegerRange
-void FNBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Twister, const FNBoxPickerParams& Params)
+#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_INDEX IntegerRange
+void FNBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params)
 {
 	N_PICKER_BOX_PREFIX
 	
