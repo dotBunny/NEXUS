@@ -64,7 +64,7 @@ struct FNWidgetStateSnapshot
 	 * @param WidgetState State bag to store.
 	 * @return True on success; mirrors AddWidgetState.
 	 */
-	bool DuplicateWidgetState(const FName Identifier, const FNWidgetState WidgetState)
+	bool DuplicateWidgetState(const FName Identifier, const FNWidgetState& WidgetState)
 	{
 		return AddWidgetState(Identifier, WidgetState);
 	}
@@ -85,7 +85,7 @@ struct FNWidgetStateSnapshot
 		{
 			// Add our items
 			WorkingIndex = Identifiers.Add(Identifier);
-			const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState);
+			const int32 PayloadIndexCheck = WidgetStates.Add(WidgetState); // copy
 
 			// Sanity check
 			if (WorkingIndex != PayloadIndexCheck)
