@@ -39,9 +39,16 @@ struct FNWidgetState
 		const int32 Index = StringKeys.IndexOfByKey(Key);
 		return Index != INDEX_NONE ? StringValues[Index] : FString();
 	}
-	/** Append a new string entry without checking for an existing one; returns the new index. */
+	/** Append a new string entry without checking for an existing one; overwrites if already exists. */
 	int32 AddString(const FString& Key, const FString& Value)
 	{
+		const int32 ExistingIndex = StringKeys.Find(Key);
+		if (ExistingIndex != INDEX_NONE)
+		{
+			StringValues[ExistingIndex] = Value;
+			return ExistingIndex;
+		}
+
 		StringKeys.Add(Key);
 		StringValues.Add(Value);
 		return StringValues.Num() - 1;

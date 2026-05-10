@@ -41,6 +41,7 @@ void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UOb
 void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 {
 	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
+	
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	Collection.Add(InObject);
 	OnAddedByName.Broadcast(Name, InObject);
