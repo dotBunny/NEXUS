@@ -19,14 +19,12 @@ namespace NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness
 	constexpr float GetActorPoolMaxDuration = 0.5f;
 }
 
-N_TEST_PERF(UNActorPoolSubsystemPerfTests_SpawnActor,
-	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::SpawnActor",
-	N_TEST_CONTEXT_EDITOR)
+class FNActorPoolSubsystemPerfTests
 {
+public:
 	// Measures the cost of routing ObjectCount Spawn calls through the subsystem.
 	// The pool is pre-warmed outside the timed region to isolate routing overhead from actor creation.
-	FNTestUtils::PrePerformanceTest();
-	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	static void SpawnActor(UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
 		if (!Subsystem) return;
@@ -51,17 +49,10 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_SpawnActor,
 			}
 			NTestTimer.ManualStop();
 		}
-	}, true);
-	FNTestUtils::PostPerformanceTest();
-}
+	}
 
-N_TEST_PERF(UNActorPoolSubsystemPerfTests_ReturnActor,
-	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::ReturnActor",
-	N_TEST_CONTEXT_EDITOR)
-{
 	// Measures the cost of routing ObjectCount Return calls through the subsystem.
-	FNTestUtils::PrePerformanceTest();
-	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	static void ReturnActor(UWorld* World, FAutomationTestBase* Test)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
 		if (!Subsystem) return;
@@ -81,7 +72,7 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_ReturnActor,
 		{
 			Actors.Add(Subsystem->SpawnActor<AActor>(AActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator));
 		}
-		
+
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(UNActorPoolSubsystemPerfTests_ReturnActor,
@@ -93,18 +84,11 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_ReturnActor,
 			NTestTimer.ManualStop();
 		}
 		CHECK_MESSAGE(TEXT("Only 1 pool was made"), Subsystem->GetAllPools().Num() == 1)
-	}, true);
-	FNTestUtils::PostPerformanceTest();
-}
+	}
 
-N_TEST_PERF(UNActorPoolSubsystemPerfTests_GetActorPool,
-	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::GetActorPool",
-	N_TEST_CONTEXT_EDITOR)
-{
 	// Measures the cost of QueryCount TMap lookups via GetActorPool on an existing pool.
 	// The result is consumed inside the loop and verified after to keep the calls observable.
-	FNTestUtils::PrePerformanceTest();
-	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
+	static void GetActorPool(UWorld* World, FAutomationTestBase* Test)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
 		if (!Subsystem) return;
@@ -131,8 +115,36 @@ N_TEST_PERF(UNActorPoolSubsystemPerfTests_GetActorPool,
 		}
 		CHECK_MESSAGE(TEXT("GetActorPool should return the AActor-templated pool."),
 			LastPool->GetTemplate() == AActor::StaticClass())
-	}, true);
-	FNTestUtils::PostPerformanceTest();
+	}
+};
+
+N_TEST_PERF(UNActorPoolSubsystemPerfTests_SpawnActor,
+	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::SpawnActor",
+	N_TEST_CONTEXT_EDITOR)
+{
+	N_TESTS_PERF_START_LATENT_TEST_WORLD
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNActorPoolSubsystemPerfTests::SpawnActor, true));
+	N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
+}
+
+N_TEST_PERF(UNActorPoolSubsystemPerfTests_ReturnActor,
+	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::ReturnActor",
+	N_TEST_CONTEXT_EDITOR)
+{
+	N_TESTS_PERF_START_LATENT_TEST_WORLD
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTestWithBase(
+		&FNActorPoolSubsystemPerfTests::ReturnActor, true, this));
+	N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
+}
+
+N_TEST_PERF(UNActorPoolSubsystemPerfTests_GetActorPool,
+	"NEXUS::PerfTests::NActorPools::UNActorPoolSubsystem::GetActorPool",
+	N_TEST_CONTEXT_EDITOR)
+{
+	N_TESTS_PERF_START_LATENT_TEST_WORLD
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTestWithBase(
+		&FNActorPoolSubsystemPerfTests::GetActorPool, true, this));
+	N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
 }
 
 #endif //WITH_TESTS

@@ -4,7 +4,19 @@
 #pragma once
 
 #include "NGeneralMacros.h"
+
 #include "Developer/NTestScopeTimer.h"
+
+// We're going to include our 
+#include "Developer/TestLatentCommands/NTestLatentCommand.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_CleanupWorld.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_CreateWorld.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_FrameWait.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_PostPerformanceTest.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_PrePerformanceTest.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_WithBase.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_WorldTest.h"
+#include "Developer/TestLatentCommands/NTestLatentCommand_WorldTestWithBase.h"
 
 /**
  * Macros that wrap Unreal's TEST_CASE_NAMED macro to declare NEXUS test cases.
@@ -131,5 +143,25 @@
  */
 #define N_TEST_TIMER_SCOPE(...)\
 	N_TEST_TIMER_SCOPE_SELECT(__VA_ARGS__, N_TEST_TIMER_SCOPE_3, N_TEST_TIMER_SCOPE_2, _UNUSED)(__VA_ARGS__)
+
+#define N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT 45
+#define N_TESTS_LATENT_COMMANDS_CREATE_WORLD_WAIT 10
+
+#define N_TESTS_PERF_START_LATENT_TEST \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PrePerformanceTest) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT))
+
+#define N_TESTS_PERF_START_LATENT_TEST_WORLD \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PrePerformanceTest) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT)) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_CreateWorld(this)) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_CREATE_WORLD_WAIT))
+
+#define N_TESTS_PERF_FINISH_LATENT_TEST \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest)
+
+#define N_TESTS_PERF_FINISH_LATENT_TEST_WORLD \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_CleanupWorld) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest) 
 
 

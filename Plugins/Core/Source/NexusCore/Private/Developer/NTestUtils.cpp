@@ -3,6 +3,8 @@
 
 #include "Developer/NTestUtils.h"
 
+FNTestEnvironment FNTestUtils::Environment;
+
 FString FNTestUtils::WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds)
 {
 	const double Deadline = FPlatformTime::Seconds() + TimeoutSeconds;

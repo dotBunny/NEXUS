@@ -1,0 +1,30 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+#include "Misc/AutomationTest.h"
+
+class FNTestLatentCommand_WithBase : public IAutomationLatentCommand
+{
+public:
+	FNTestLatentCommand_WithBase(TFunction<void(FAutomationTestBase*)> StaticMethod, FAutomationTestBase* TestPtr)
+		: TestFunctionality(StaticMethod)
+		, Test(TestPtr)
+	{
+	}
+
+	virtual ~FNTestLatentCommand_WithBase() override
+	{
+	}
+
+	virtual bool Update() override
+	{
+		TestFunctionality(Test);
+		return true;
+	}
+
+private:
+	TFunction<void(FAutomationTestBase*)> TestFunctionality;
+	FAutomationTestBase* Test;
+};

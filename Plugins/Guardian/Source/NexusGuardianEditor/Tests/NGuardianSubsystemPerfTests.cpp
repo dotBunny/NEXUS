@@ -16,15 +16,13 @@ namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness
     constexpr float TickBelowMaxDuration   = 0.1f;   // Tick with no thresholds crossed is a cheap read
 }
 
-N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
-    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::SetBaseline",
-    N_TEST_CONTEXT_EDITOR)
+class FNGuardianSubsystemPerfTests
 {
+public:
     // Measures the cost of calling SetBaseline() IterationCount times.
     // SetBaseline reads GUObjectArray once and performs simple arithmetic —
     // this test establishes a baseline budget for monitoring overhead.
-    FNTestUtils::PrePerformanceTest();
-    FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
+    static void SetBaseline(UWorld* World)
     {
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
@@ -54,18 +52,11 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
         Settings->ObjectCountSnapshotThreshold = OriginalSnapshot;
         Settings->ObjectCountCompareThreshold  = OriginalCompare;
         Subsystem->SetBaseline();
-    }, true);
-    FNTestUtils::PostPerformanceTest();
-}
+    }
 
-N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
-    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::Tick::BelowThresholds",
-    N_TEST_CONTEXT_EDITOR)
-{
     // Measures the per-frame monitoring cost when the object count is well below
     // all thresholds — the common-case path executed every game frame.
-    FNTestUtils::PrePerformanceTest();
-    FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
+    static void Tick_BelowThresholds(UWorld* World)
     {
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
@@ -94,8 +85,25 @@ N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
         Settings->ObjectCountSnapshotThreshold = OriginalSnapshot;
         Settings->ObjectCountCompareThreshold  = OriginalCompare;
         Subsystem->SetBaseline();
-    }, true);
-    FNTestUtils::PostPerformanceTest();
+    }
+};
+
+N_TEST_PERF(FNGuardianPerfTests_Subsystem_SetBaseline,
+    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::SetBaseline",
+    N_TEST_CONTEXT_EDITOR)
+{
+    N_TESTS_PERF_START_LATENT_TEST_WORLD
+    ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNGuardianSubsystemPerfTests::SetBaseline, true));
+    N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
+}
+
+N_TEST_PERF(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
+    "NEXUS::PerfTests::NGuardian::UNGuardianSubsystem::Tick::BelowThresholds",
+    N_TEST_CONTEXT_EDITOR)
+{
+    N_TESTS_PERF_START_LATENT_TEST_WORLD
+    ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNGuardianSubsystemPerfTests::Tick_BelowThresholds, true));
+    N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
 }
 
 #endif //WITH_TESTS

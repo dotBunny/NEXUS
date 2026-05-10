@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NObjectSnapshotUtils.h"
+#include "NTestEnvironment.h"
 #include "Misc/LowLevelTestAdapter.h"
 
 /**
@@ -16,6 +17,8 @@
 class NEXUSCORE_API FNTestUtils
 {
 public:
+	static FNTestEnvironment Environment;
+	
 	/**
 	 * Creates a throwaway UWorld, runs a test body against it, and tears everything down afterward.
 	 *

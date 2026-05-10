@@ -35,10 +35,12 @@ And end with:
 ## Required Includes
 
 ```cpp
-// Always needed
+// Always needed — also transitively pulls in every FNTestLatentCommand_* class
+// and the N_TESTS_PERF_START_LATENT_TEST* / _FINISH_LATENT_TEST* macros, so
+// perf tests do NOT need a separate latent-commands include.
 #include "Macros/NTestMacros.h"
 
-// Needed for WorldTest / WorldTestChecked / PrePerformanceTest / PostPerformanceTest
+// Needed for WorldTest / WorldTestChecked (unit tests)
 #include "Developer/NTestUtils.h"
 
 // Needed for CHECK_EQUALS only when NTestUtils.h is NOT included
@@ -202,6 +204,8 @@ N_TEST_CRITICAL(UNMySubsystemTests_Category_Case,
 
 Performance tests run through the latent-automation framework so the engine can stabilize before timing starts. Wrap the timed work in a static method on a `class FN<ClassName>PerfTests` and dispatch from each `N_TEST_PERF` body via `FNTestLatentCommand`. Constants live in a `NEXUS::PerfTests::<ShortPlugin>::<ClassName>Harness` namespace above the class. Always end the timed region with `NTestTimer.ManualStop()` inside the `N_TEST_TIMER_SCOPE` block.
 
+> **Wrapper class name**: always `FN<ClassName>PerfTests`, even when the subject is `U`-prefixed (e.g. `UNDynamicRefSubsystem` → `class FNDynamicRefSubsystemPerfTests`). The wrapper is a plain C++ class, never a `UCLASS`.
+
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
@@ -209,8 +213,6 @@ Performance tests run through the latent-automation framework so the engine can 
 #if WITH_TESTS
 
 #include "MyPluginHeader.h"
-#include "Developer/NTestLatentCommands.h"
-#include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
 namespace NEXUS::PerfTests::NMyPlugin::FNMyClassHarness
@@ -252,7 +254,7 @@ N_TEST_PERF(FNMyClassPerfTests_OperationName,
 
 ## Performance Test Format — World-Based (`N_TEST_CONTEXT_EDITOR`)
 
-Same shape as the pure-logic variant, but each static method takes a `UWorld*` and the test body uses the `_WORLD` macro pair plus `FNTestLatentCommand_WorldTest`. The macros handle world creation, GC suppression, and cleanup — never call `FNTestUtils::WorldTest` or `Pre/PostPerformanceTest` from inside the test body. Pass `true` as the second arg to `FNTestLatentCommand_WorldTest` to disable GC during the test (the standard choice for perf tests).
+Same shape as the pure-logic variant, but each static method takes a `UWorld*` and the test body uses the `_WORLD` macro pair plus `FNTestLatentCommand_WorldTest`. The macros handle world creation, GC suppression, and cleanup — never call `FNTestUtils::WorldTest` or `Pre/PostPerformanceTest` from inside the test body. Pass `true` as the second arg to `FNTestLatentCommand_WorldTest` to disable GC during the test (the standard choice for perf tests). The `UWorld*` parameter must be non-`const` to match the latent-command signature.
 
 ```cpp
 // Copyright dotBunny Inc. All Rights Reserved.
@@ -262,8 +264,6 @@ Same shape as the pure-logic variant, but each static method takes a `UWorld*` a
 
 #include "Misc/Timespan.h"
 #include "MyPluginHeader.h"
-#include "Developer/NTestLatentCommands.h"
-#include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
 namespace NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness
@@ -313,6 +313,61 @@ N_TEST_PERF(UNMySubsystemPerfTests_AddObject,
 }
 
 #endif //WITH_TESTS
+```
+
+## Performance Test Format — Asserting Inside the Timed Body
+
+`ADD_ERROR`, `CHECK_MESSAGE`, and `CHECK_EQUALS` need a `Test` symbol in scope. The plain `FNTestLatentCommand` / `FNTestLatentCommand_WorldTest` static methods don't have one, so use the `_WithBase` variants when an assertion has to live inside the static method:
+
+| Need | Latent command | Static method signature |
+|---|---|---|
+| Pure logic, no assertions | `FNTestLatentCommand` | `static void M()` |
+| Pure logic, with assertions | `FNTestLatentCommand_WithBase` | `static void M(FAutomationTestBase* Test)` |
+| World-based, no assertions | `FNTestLatentCommand_WorldTest` | `static void M(UWorld* World)` |
+| World-based, with assertions | `FNTestLatentCommand_WorldTestWithBase` | `static void M(UWorld* World, FAutomationTestBase* Test)` |
+
+The parameter **must be named `Test`** — the assertion macros expand to expressions referencing that exact name. Default to the non-`_WithBase` variants and only switch when an assertion is actually required; keep correctness checks in unit tests where possible.
+
+```cpp
+class FNMySubsystemPerfTests
+{
+public:
+    static void GetActorPool(UWorld* World, FAutomationTestBase* Test)
+    {
+        UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+        if (!Subsystem) return;
+
+        FNActorPool* LastPool = nullptr;
+        // TEST
+        {
+            N_TEST_TIMER_SCOPE(UNMySubsystemPerfTests_GetActorPool,
+                NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::GetMaxDuration)
+            for (int32 i = 0; i < NEXUS::PerfTests::NMyPlugin::UNMySubsystemHarness::QueryCount; ++i)
+            {
+                LastPool = Subsystem->GetActorPool(AActor::StaticClass());
+            }
+            NTestTimer.ManualStop();
+        }
+
+        if (LastPool == nullptr)
+        {
+            ADD_ERROR("GetActorPool returned nullptr for a pool that was just created.");
+            return;
+        }
+        CHECK_MESSAGE(TEXT("GetActorPool should return the templated pool."),
+            LastPool->GetTemplate() == AActor::StaticClass())
+    }
+};
+
+N_TEST_PERF(UNMySubsystemPerfTests_GetActorPool,
+    "NEXUS::PerfTests::NMyPlugin::UNMySubsystem::GetActorPool",
+    N_TEST_CONTEXT_EDITOR)
+{
+    N_TESTS_PERF_START_LATENT_TEST_WORLD
+    ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTestWithBase(
+        &FNMySubsystemPerfTests::GetActorPool, true, this));
+    N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
+}
 ```
 
 ## Common Patterns

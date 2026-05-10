@@ -12,6 +12,7 @@
 
 ### Changed
 
+- Performance tests now use automation latent commands to attempt to stabalize the world prior to running tests.
 - Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
 - `ANSamplesPawn` now replicates movement.
 - Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
