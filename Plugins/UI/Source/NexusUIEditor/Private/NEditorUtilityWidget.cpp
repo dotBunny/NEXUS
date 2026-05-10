@@ -94,7 +94,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 	DelayedTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
 	DelayedTask->RegisterWithGameInstance(this);
 	DelayedTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
-	DelayedTask->Start(0.01f, 1);
+	DelayedTask->Start(0, 1); // No time, we're just waiting for 1 frame
 }
 
 void UNEditorUtilityWidget::NativeDestruct()
