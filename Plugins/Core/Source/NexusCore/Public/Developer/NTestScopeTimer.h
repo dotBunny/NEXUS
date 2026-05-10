@@ -14,9 +14,9 @@
  * A scoped test-aware timer that integrates with the Low-Level Test framework.
  *
  * Like FNMethodScopeTimer but with extra test-harness hooks: the measured duration is reported via
- * INFO() and, if MaxDurationMs is exceeded, ADD_WARNING(). This behavior pivots when ran via 
- * Commandlet to only using INFO() in both cases. When enabled, a FPlatformMisc named event is emitted 
- * so the region is visible in profilers such as Unreal Insights.
+ * INFO() and, if MaxDurationMs is exceeded, the enclosing test is failed with ADD_ERROR(). When
+ * enabled, a FPlatformMisc named event is emitted so the region is visible in profilers such as
+ * Unreal Insights.
  */
 class FNTestScopeTimer
 {
@@ -24,7 +24,7 @@ public:
 	/**
 	 * Starts the timer, optionally emitting a named-event marker.
 	 * @param InName Human-readable label included in logs, the INFO line and the failure message.
-	 * @param MaxDurationMs Warning threshold in milliseconds. The test throws a warning if the scope exceeds this.
+	 * @param MaxDurationMs Fail threshold in milliseconds. The test errors if the scope exceeds this.
 	 * @param bUseNamedEvent When true, wraps the scope in a FPlatformMisc named event for profilers.
 	 * @param InContext Optional grouping label forwarded to AddTelemetryData so Gauntlet can bucket results.
 	 */
@@ -77,18 +77,9 @@ public:
 		}
 #endif
 
-		
 		if (DurationMs > MaxDuration)
 		{
-			// There's a wide variety of things that run in automation, its
-			if (IsRunningCommandlet())
-			{
-				INFO(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
-			}
-			else
-			{
-				ADD_WARNING(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
-			}
+			ADD_ERROR(FString::Printf(TEXT("[%s] %f ms EXCEEDS %f defined MaxDuration."), *Name, DurationMs, MaxDuration));
 		}
 	}
 
