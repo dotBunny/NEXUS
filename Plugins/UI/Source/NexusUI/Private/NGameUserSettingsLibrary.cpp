@@ -17,22 +17,14 @@ TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 };
 
-TArray<FString> UNGameUserSettingsLibrary::DisplayModeLabels = {
-	DisplayModeTexts[0].ToString(),
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
-	DisplayModeTexts[1].ToString(),
-	DisplayModeTexts[2].ToString()
-#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
-};
-
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FString& Selection)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
-	if (DisplayModeLabels[2].Compare(Selection) == 0)
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+	if (DisplayModeTexts[2].ToString().Compare(Selection) == 0)
 	{
 		return EWindowMode::Type::Windowed;
 	}
-	if (DisplayModeLabels[1].Compare(Selection) == 0)
+	if (DisplayModeTexts[1].ToString().Compare(Selection) == 0)
 	{
 		return EWindowMode::Type::WindowedFullscreen;
 	}
@@ -59,7 +51,18 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
-FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
+TArray<FString> UNGameUserSettingsLibrary::GetWindowModeStringSelections()
+{
+	TArray<FString> Selections;
+	Selections.Reserve(DisplayModeTexts.Num());
+	for (const FText& Text : DisplayModeTexts)
+	{
+		Selections.Add(Text.ToString());
+	}
+	return MoveTemp(Selections);
+}
+
+FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
 {
 	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
@@ -71,20 +74,20 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
-FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
+FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
 {
 #if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
-		return DisplayModeLabels[1];
+		return DisplayModeTexts[1].ToString();
 	case EWindowMode::Windowed:
-		return DisplayModeLabels[2];
+		return DisplayModeTexts[2].ToString();
 	default:
-		return DisplayModeLabels[0];
+		return DisplayModeTexts[0].ToString();
 	}
 #else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
-	return DisplayModeLabels[0];
+	return DisplayModeTexts[0].ToString();
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
@@ -152,9 +155,9 @@ void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxStr
 {
 	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
 	ComboBox->ClearOptions();
-	for (auto& Label : DisplayModeLabels)
+	for (const FText& Text : DisplayModeTexts)
 	{
-		ComboBox->AddOption(Label);
+		ComboBox->AddOption(Text.ToString());
 	}
 	if (bSelectCurrent)
 	{
