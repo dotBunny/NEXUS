@@ -66,7 +66,6 @@ struct FNWidgetStateSnapshot
 	 */
 	bool DuplicateWidgetState(const FName Identifier, const FNWidgetState WidgetState)
 	{
-
 		return AddWidgetState(Identifier, WidgetState);
 	}
 

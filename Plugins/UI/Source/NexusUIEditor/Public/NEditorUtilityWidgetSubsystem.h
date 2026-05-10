@@ -5,7 +5,6 @@
 
 #include "NWidgetState.h"
 #include "NWidgetStateSnapshot.h"
-#include "NWidgetTabIdentifiers.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSubsystemMacros.h"
 #include "NEditorUtilityWidgetSubsystem.generated.h"
@@ -107,9 +106,13 @@ protected:
 	UPROPERTY(config)
 	FNWidgetStateSnapshot WidgetStates;
 
-	/** Persisted widget-to-tab identifier mapping; used to restore tab placement. */
+	/** Widget identifiers (UNEditorUtilityWidget::UniqueIdentifier); parallel to TabIdentifier. */
 	UPROPERTY(config)
-	FNWidgetTabIdentifiers WidgetTabIdentifiers;
+	TArray<FName> WidgetIdentifiers;
+
+	/** Tab identifiers last used to host each widget; parallel to WidgetIdentifiers. */
+	UPROPERTY(config)
+	TArray<FName> TabIdentifiers;
 private:
 	/** Transient map of currently-alive widget instances keyed by identifier. */
 	TMap<FName, TObjectPtr<UNEditorUtilityWidget>> KnownWidgets;
