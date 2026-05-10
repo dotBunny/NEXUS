@@ -96,9 +96,6 @@
     <Include Script="../../../../Engine/Build/Graph/Tasks/BuildAndTestProject.xml" />
 
 
-    <Aggregate Name="TestPackageWait" Requires="$(GraphPrefix) $(ProjectName)"/>
-
-
     <!-- SETUP OUR PUBLISHING OF GIT COMMIT STATUS -->
     <Property Name="UpdateGitHubStatus" Value="false" />
     <Property Name="UpdateGitHubStatus" Value="true" If="'$(UE_HORDE_JOBID)' != ''" />
@@ -110,16 +107,8 @@
         
         <!-- GITHUB COMMIT STATUS -->
         <Do If="$(UpdateGitHubStatus)">
-            <Property Name="GitHubTestState" Value="failure" />
-            <Property Name="GitHubTestMessage" Value="Failure" />
 
-            <Node Name="GitHub Determine Status" Requires="TestPackageWait">
-                <Log Message="Tests were successful, setting success state." />
-                <Property Name="GitHubTestState" Value="success" />
-                <Property Name="GitHubTestMessage" Value="Successful" />
-            </Node>
-
-            <Node Name="GitHub Commit Status" After="GitHub Determine Status">
+            <Node Name="GitHub Commit Status" After="$(GraphPrefix) $(ProjectName)">
                 <Horde-GetSecrets File="$(RootDir)\Staging\github.k9.tmp" Text="{{nexus.github-token}}"/>
                 
                 <!-- START: Get & Compile K9 Tooling -->			
@@ -137,7 +126,7 @@
                 <CsCompile Project="$(K9GitHubCommitStatusProject)" Configuration="$(K9Configuration)" />
                                 
                 <!-- UPDATE STATUS -->        
-                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=$(GitHubTestState) ---CONTEXT=&quot;Horde / NEXUS / $(TestPackageLabel)&quot; ---DESCRIPTION=&quot;$(GitHubTestMessage)&quot; ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
+                <Spawn Exe="$(K9GitHubCommitStatusExecutable)" Arguments="---CREDENTIALS=$(RootDir)\Staging\github.k9.tmp ---REPO-OWNER=dotBunny ---REPO-NAME=NEXUS ---SHA-FILE=$(RootDir)/NEXUS/GIT_COMMIT_SHA ---STATE=success ---CONTEXT=&quot;Horde / NEXUS / $(TestPackageLabel)&quot; ---DESCRIPTION=&quot;Successful.&quot; ---URL=https://horde.dotbunny.com:5001/job/$(UE_HORDE_JOBID)" />	                            
             </Node>
         </Do>        
     </Agent>
