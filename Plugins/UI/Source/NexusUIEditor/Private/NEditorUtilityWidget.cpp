@@ -33,6 +33,12 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 		const TObjectPtr<UEditorUtilityWidgetBlueprint> LoadedWidgetBlueprint = 
 			LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
 		
+		if (!IsValid(LoadedWidgetBlueprint))
+		{
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to load(%s) when trying to SpawnTab from UNEditorUtilityWidget."), *ObjectPath)
+			return nullptr;
+		}
+		
 		// Use an internal system to spawn and register the widget
 		FName TabIdentifier;
 		UEditorUtilityWidget* SpawnedWidget = EditorUtilitySubsystem->SpawnAndRegisterTabAndGetID(LoadedWidgetBlueprint, TabIdentifier);
