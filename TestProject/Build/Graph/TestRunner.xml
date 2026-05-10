@@ -112,12 +112,14 @@
         <Do If="$(UpdateGitHubStatus)">
             <Property Name="GitHubTestState" Value="failure" />
             <Property Name="GitHubTestMessage" Value="Failure" />
+
             <Node Name="GitHub Determine Status" Requires="TestPackageWait">
                 <Log Message="Tests were successful, setting success state." />
                 <Property Name="GitHubTestState" Value="success" />
                 <Property Name="GitHubTestMessage" Value="Successful" />
             </Node>
-            <Node Name="GitHub Commit Status" After="GitHub Determine Status" Finally="true">
+
+            <Node Name="GitHub Commit Status" After="GitHub Determine Status">
                 <Horde-GetSecrets File="$(RootDir)\Staging\github.k9.tmp" Text="{{nexus.github-token}}"/>
                 
                 <!-- START: Get & Compile K9 Tooling -->			
