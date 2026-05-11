@@ -1,9 +1,0 @@
-<?xml version='1.0' ?>
-<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >
-	<Option Name="ProjectFile" DefaultValue="" Restrict=".*" Description="Path to the project file. Can be used instead of specifying ProjectName and ProjectPath separately."/>
-	<Property Name="DefaultProjectName" Value="None"/>
-	<Property Name="DefaultProjectPath" Value="None"/>
-	<Regex Input="$(ProjectFile)" Pattern="(.*)[/\\]([^/\\]+)\.uproject" Capture="DefaultProjectPath;DefaultProjectName" If="'$(ProjectFile)' != ''"/>
-	<Option Name="ProjectName" DefaultValue="$(DefaultProjectName)" Restrict=".+" Description="Name of Project"/>
-	<Option Name="ProjectPath" DefaultValue="$(DefaultProjectPath)" Restrict=".+" Description="Path to the folder that contains your project"/>
-</BuildGraph>
