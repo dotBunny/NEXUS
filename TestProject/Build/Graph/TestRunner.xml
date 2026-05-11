@@ -8,7 +8,7 @@
     <Property Name="TestPackageLabel" Value="" />
     <Property Name="TestPackageAggregate" Value="" />
     
-    <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest)?" />
+    <Option Name="WithTestConfiguration" DefaultValue="EditorBootTest" Description="What known configuration should we use (EditorBootTest, EditorUnitTests, EditorPerformanceTests, EditorFunctionalTests, GameBootTest, GamePackageTest)?" />
     
     <Property Name="PublishAgentType" Value="Win64" />
 	<Property Name="PublishAgentType" Value="Incremental$(PublishAgentType)" If="$(UseIncrementalAgents)" />
@@ -90,6 +90,33 @@
         <Property Name="WithWin64Editor" Value="true" />
 
         <Property Name="TestPackageLabel" Value="BootTest Game Win64" />      
+    </Do>
+
+    <!-- PACKAGE TEST -->
+    <Do If="'$(WithTestConfiguration)' == 'GamePackageTest'" >
+        <Property Name="EditorBootTest" Value="false" />
+        <Property Name="TargetBootTest" Value="false" />
+        <Property Name="CookedEditorBootTest" Value="false" />
+        <Property Name="GraphPrefix" Value="BuildAndTest" />
+
+        <Property Name="WithWin64" Value="true" />
+        <Property Name="WithWin64Editor" Value="true" />
+
+        <Property Name="WithDeviceReservation" Value="false" />
+        <Property Name="PublishBuilds" Value="false" />
+        <Property Name="PublishHordeArtifacts" Value="false" />
+
+        <Property Name="WithDebugTargets" Value="true" />
+        <Property Name="WithDevelopmentTargets" Value="true" />
+        <Property Name="WithTestTargets" Value="true" />
+        <Property Name="WithShippingTargets" Value="true" />
+
+        <Property Name="WithDebugPackages" Value="true" />
+        <Property Name="WithDevelopmentPackages" Value="true" />
+        <Property Name="WithTestPackages" Value="true" />
+        <Property Name="WithShippingPackages" Value="true" />
+
+        <Property Name="TestPackageLabel" Value="PackageTest Game Win64" />      
     </Do>
 
     <!-- INCLUDE EPICS MAIN TASK -->
