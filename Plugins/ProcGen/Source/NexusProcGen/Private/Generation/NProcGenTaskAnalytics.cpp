@@ -267,6 +267,8 @@ void FNProcGenTaskAnalytics::AddToReport(FNReport* Report)
 		
 		}
 	}
+	
+	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
 }
 
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)

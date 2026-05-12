@@ -65,6 +65,16 @@ struct NEXUSCORE_API FNReport
 	 */
 	void OutputToFile(const FString& FilePath, ENReportOutputFormat OutputFormat = ENReportOutputFormat::Markdown);
 
+	void AddReplaceToken(const FString& Token, const FString& Value)
+	{
+		if (ReplaceTokens.Contains(Token))
+		{
+			ReplaceTokens[Token] = Value;
+			return;
+		}
+		ReplaceTokens.Add(Token, Value);
+	}
+	
 protected:
 	/** Look up the priority of a block by its ticket; returns 0 when the ticket is unknown. */
 	int32 GetPriority(const int32 Ticket);
@@ -83,6 +93,7 @@ protected:
 	/** Render the block identified by Ticket into Output, dispatching to the correct concrete type. */
 	void RenderBlock(const int32 Ticket, TArray<FString>& Output, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
+
 private:
 	/** Storage for every content block in the report, keyed by block ticket. */
 	TMap<int32, FNReportContentBlock> ContentBlocks;
@@ -92,6 +103,8 @@ private:
 
 	/** Parent ticket -> ordered child tickets; the root's children live under key 0. */
 	TMap<int32, TArray<int32>> ChildrenMap;
+	
+	TMap<FString, FString> ReplaceTokens;
 
 	/** Monotonically increasing counter used to issue unique tickets to newly created blocks. */
 	int32 BlockTickets = 0;

@@ -175,11 +175,10 @@ void UNProcGenOperation::StartBuild(INProcGenOperationOwner* Caller)
 		TaskGraph->TearDownGraph();
 		TaskGraph.Reset();
 	}
-	
-	// Output debug in our editor only
-#if WITH_EDITOR	
-	Context->OutputToLog(true);
-#endif // WITH_EDITOR	
+
+#if !UE_BUILD_SHIPPING
+	Context->AddToReport(GetReport(), true);
+#endif // !UE_BUILD_SHIPPING	
 	
 	// Build out our new graph
 	SetDisplayMessage(NEXUS::ProcGen::DisplayMessages::BuildingTaskGraph);

@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NProcGenOperationSettings.h"
+#include "Developer/NReport.h"
 #include "Generation/Data/NWorldBoneData.h"
 #include "Generation/Data/NWorldOrganData.h"
 #include "Organ/NBoneComponent.h"
@@ -56,12 +57,10 @@ public:
 
 	/** Finalize the context: compute per-organ/per-bone state, build the generation ordering, create world collision structure, and mark locked. */
 	void LockAndPreprocess(UWorld* World);
-
-	/**
-	 * Dump a human-readable summary of the context to the log.
-	 * @param bBuildTissues When true, additionally walks and prints the flattened tissue/cell maps.
-	 */
-	void OutputToLog(bool bBuildTissues = false);
+	
+#if !UE_BUILD_SHIPPING
+	void AddToReport(FNReport* Report, bool bBuildTissues = false);
+#endif // !UE_BUILD_SHIPPING	
 
 	/** Clear all derived state and return the context to an unlocked, empty state. */
 	void ResetContext();

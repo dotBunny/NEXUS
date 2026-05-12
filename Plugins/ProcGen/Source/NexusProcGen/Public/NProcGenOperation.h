@@ -57,6 +57,18 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	explicit UNProcGenOperation(const FObjectInitializer& ObjectInitializer);
 public:
 #if !UE_BUILD_SHIPPING
+	void OutputReportToFile()
+	{
+		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
+		Async(EAsyncExecution::TaskGraph,
+			[Output = MoveTemp(Output)]()
+			{
+				FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
+					FString::Printf(TEXT("NEXUS_ProcGen_%s.md"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+				FFileHelper::SaveStringArrayToFile(Output, *OutputFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+				UE_LOG(LogNexusProcGen, Log, TEXT("ProcGen Report written to %s."), *OutputFile);
+			});
+	}
 	void OutputReportToLog()
 	{
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);

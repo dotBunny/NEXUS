@@ -218,6 +218,7 @@ void FNEditorUtils::CleanLogsFolder()
 	Searches.Add(TEXT("*-backup-*")); // Backups
 	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
 	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
+	Searches.Add(TEXT("NEXUS_ProcGen*")); // NEXUS Snapshots
 	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
 	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
 

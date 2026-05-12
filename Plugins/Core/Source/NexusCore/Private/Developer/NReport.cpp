@@ -63,6 +63,27 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 		RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
 	
+	TArray<FString> Tokens;
+	ReplaceTokens.GetKeys(Tokens);
+	
+	// Early out since we dont have any tokens
+	if (Tokens.Num() == 0)
+	{
+		return MoveTemp(Output);
+	}
+
+	for (int i = 0; i < Output.Num(); i++)
+	{
+		if (Output[i].Len() < 4) continue;
+		for (int j = 0; j < Tokens.Num(); j++)
+		{
+			if (Output[i].Contains(Tokens[j]))
+			{
+				Output[i] = Output[i].Replace(*Tokens[j],*ReplaceTokens[Tokens[j]]);
+			}
+		}
+	}
+	
 	return MoveTemp(Output);
 }
 

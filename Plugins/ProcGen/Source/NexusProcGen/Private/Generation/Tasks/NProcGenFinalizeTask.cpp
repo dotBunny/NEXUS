@@ -24,8 +24,7 @@ void FNProcGenFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGra
 
 #if !UE_BUILD_SHIPPING	
 	N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
-	
-	// Output to log for now
-	Operation->OutputReportToLog();
+
+	Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 }
