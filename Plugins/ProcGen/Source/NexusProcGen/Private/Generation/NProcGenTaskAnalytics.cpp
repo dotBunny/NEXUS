@@ -158,20 +158,23 @@ void FNProcGenTaskAnalytics::ProcGenFinalizeFinish()
 }
 
 
-FNReport FNProcGenTaskAnalytics::GetReport()
+void FNProcGenTaskAnalytics::AddToReport(FNReport* Report)
 {
-	FNReport Report;
+	const int32 AnalyticsContentTicket = Report->CreateContentBlock();
+	FNReportContentBlock* AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
+	AnalyticsContentBlock->SetHeading("Analytics");
+	
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration + ProcGenFinalizeTimer.Duration;
 	double LoopTotal = 0;
 
-	const int32 TimespanContentTicket = Report.CreateContentBlock();
-	FNReportContentBlock* TimespanContentBlock = Report.GetContentBlock(TimespanContentTicket);
+	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
+	FNReportContentBlock* TimespanContentBlock = Report->GetContentBlock(TimespanContentTicket);
 	TimespanContentBlock->SetHeading("Timespans");
 
 	// Start Creating Overview
-	const int32 OverviewTableTicket = Report.CreateTableBlock(TimespanContentTicket);
-	FNReportTableBlock* OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	const int32 OverviewTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->SetHeading("Overview");
 	OverviewTable->Initialize({ "Thread", "Task", "ms" });
 	OverviewTable->AddRow({"Game", "TaskGraph Creation", FString::SanitizeFloat(TaskGraphCreationTimer.Duration)});
@@ -180,8 +183,8 @@ FNReport FNProcGenTaskAnalytics::GetReport()
 	
 	// Organ Builders Individual Times
 	LoopTotal = 0;
-	const int32 OrganBuilderTableTicket = Report.CreateTableBlock(TimespanContentTicket);
-	FNReportTableBlock* OrganBuilderTable = Report.GetTableBlock(OrganBuilderTableTicket);
+	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
 	OrganBuilderTable->SetHeading("Organs");
 	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "ms" });
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
@@ -192,13 +195,13 @@ FNReport FNProcGenTaskAnalytics::GetReport()
 	}
 	
 	// Need to re-get as it may have moved
-	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "OrganGraph Builders", FString::SanitizeFloat(LoopTotal)});
 	
 	// Collection timings
 	LoopTotal = 0;
-	const int32 ProcessPassTableTicket = Report.CreateTableBlock(TimespanContentTicket);
-	FNReportTableBlock* ProcessPassTable = Report.GetTableBlock(ProcessPassTableTicket);
+	const int32 ProcessPassTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* ProcessPassTable = Report->GetTableBlock(ProcessPassTableTicket);
 	ProcessPassTable->SetHeading("Collection Passes");
 	ProcessPassTable->Initialize({ "Thread", "Phase", "ms" });
 	for (const auto Analytic : ProcessPassAnalytics)
@@ -209,13 +212,13 @@ FNReport FNProcGenTaskAnalytics::GetReport()
 	}
 	
 	// Need to re-get as it may have moved
-	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Task", "Process Pass", FString::SanitizeFloat(LoopTotal)});
 	OverviewTable->AddRow({"Task", "Create SpawnCellsContext", FString::SanitizeFloat(CreateSpawnCellsContextTimer.Duration)});
 
 	LoopTotal = 0;
-	const int32 SpawnCellProxiesTableTicket = Report.CreateTableBlock(TimespanContentTicket);
-	FNReportTableBlock* SpawnCellProxiesTable = Report.GetTableBlock(SpawnCellProxiesTableTicket);
+	const int32 SpawnCellProxiesTableTicket = Report->CreateTableBlock(TimespanContentTicket);
+	FNReportTableBlock* SpawnCellProxiesTable = Report->GetTableBlock(SpawnCellProxiesTableTicket);
 	SpawnCellProxiesTable->SetHeading("Spawn Cells (Sliced)");
 	SpawnCellProxiesTable->Initialize({ "Thread", "Spawns", "ms" });
 	for (const auto Analytic : SpawnCellProxiesAnalytics)
@@ -226,46 +229,45 @@ FNReport FNProcGenTaskAnalytics::GetReport()
 	}
 	
 	// Need to re-get as it may have moved
-	OverviewTable = Report.GetTableBlock(OverviewTableTicket);
+	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
 	OverviewTable->AddRow({"Game", "ProcGen Finalize", FString::SanitizeFloat(ProcGenFinalizeTimer.Duration)});
 	
-	return MoveTemp(Report);
-}
-
-
-FString FNProcGenTaskAnalytics::GetCountersReport()
-{
-	FStringBuilderBase Builder = FStringBuilderBase();
 	
-	Builder.Appendf(TEXT("[%s] Counters\n"), *DisplayName.ToString());
+	const int32 CountersContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
+	FNReportContentBlock* CountersContentBlock = Report->GetContentBlock(CountersContentTicket);
+	CountersContentBlock->SetHeading("Counters");
 	
-	Builder.Append(TEXT("\tOrganGraph Builders:\n"));
-	for (const auto OrganGraphBuilderAnalytic : OrganGraphBuilderAnalytics)
+	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		// Output data on each iteration
-		for (int32 i = 0; i < OrganGraphBuilderAnalytic.Iterations; i++)
+		const int32 OrganContentTicket = Report->CreateContentBlock(CountersContentTicket);
+		FNReportContentBlock* OrganContentBlock = Report->GetContentBlock(OrganContentTicket);
+		OrganContentBlock->SetHeading(Analytic.Name);
+		
+		for (int32 i = 0; i < Analytic.Iterations; i++)
 		{
-			Builder.Appendf(TEXT("\t\t%s (%i)\n"), *OrganGraphBuilderAnalytic.Name, OrganGraphBuilderAnalytic.Iterations);
-			Builder.Append(TEXT("\t\t\tFalse Starts:\n"));
-			Builder.Appendf(TEXT("\t\t\t\tOut Of Bounds: %i\n"), OrganGraphBuilderAnalytic.DiscardOutOfBoundsStart.Counter[i]);
-			Builder.Appendf(TEXT("\t\t\t\tWorld Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardWorldCollidingStart.Counter[i]);
-			
-			Builder.Append(TEXT("\t\t\tAdding Nodes:\n"));
-			Builder.Appendf(TEXT("\t\t\t\tNull: %i\n"), OrganGraphBuilderAnalytic.AddNullNodes.Counter[i]);
-			Builder.Appendf(TEXT("\t\t\t\tCell: %i\n"), OrganGraphBuilderAnalytic.AddCellNodes.Counter[i]);
-			
-			Builder.Append(TEXT("\t\t\tBad Placement (Cell):\n"));
-			Builder.Appendf(TEXT("\t\t\t\tIntersecting: %i\n"), OrganGraphBuilderAnalytic.DiscardIntersectingCellNode.Counter[i]);
-			Builder.Appendf(TEXT("\t\t\t\tWorld Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardWorldCollidingCellNode.Counter[i]);
-			Builder.Appendf(TEXT("\t\t\t\tExisting Node World Colliding: %i\n"), OrganGraphBuilderAnalytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]);
-			Builder.Appendf(TEXT("\t\t\t\tOut Of Bounds: %i\n"), OrganGraphBuilderAnalytic.DiscardOutOfBoundsCellNode.Counter[i]);
+			const int32 FalseStartTicket = Report->CreateTableBlock(OrganContentTicket);
+			FNReportTableBlock* FalseStartTable = Report->GetTableBlock(FalseStartTicket);
+			FalseStartTable->SetHeading("False Starts");
+			FalseStartTable->Initialize({ "Out Of Bounds", "World Colliding" });
+			FalseStartTable->AddRow({ FString::FromInt(Analytic.DiscardOutOfBoundsStart.Counter[i]), FString::FromInt(Analytic.DiscardWorldCollidingStart.Counter[i]) });
+		
+			const int32 AddingNodesTicket = Report->CreateTableBlock(OrganContentTicket);
+			FNReportTableBlock* AddingNodesTable = Report->GetTableBlock(AddingNodesTicket);
+			AddingNodesTable->SetHeading("Adding Nodes");
+			AddingNodesTable->Initialize({ "Null", "Cell" });
+			AddingNodesTable->AddRow({ FString::FromInt(Analytic.AddNullNodes.Counter[i]), FString::FromInt(Analytic.AddCellNodes.Counter[i]) });
+		
+			const int32 BadPlacementCellTicket = Report->CreateTableBlock(OrganContentTicket);
+			FNReportTableBlock* BadPlacementCellTable = Report->GetTableBlock(BadPlacementCellTicket);
+			BadPlacementCellTable->SetHeading("Bad Placement (Cell)");
+			BadPlacementCellTable->Initialize({ "Intersecting", "World Colliding", "Existing Node World Colliding", "Out Of Bounds" });
+			BadPlacementCellTable->AddRow({ FString::FromInt(Analytic.DiscardIntersectingCellNode.Counter[i]), FString::FromInt(Analytic.DiscardWorldCollidingCellNode.Counter[i]),
+			FString::FromInt(Analytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]), FString::FromInt(Analytic.DiscardOutOfBoundsCellNode.Counter[i])});
+		
 		}
 	}
-	
-	return Builder.ToString();
 }
-
 
 void FNProcGenTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
 {

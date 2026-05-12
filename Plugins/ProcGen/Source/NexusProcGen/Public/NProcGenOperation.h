@@ -55,8 +55,19 @@ class NEXUSPROCGEN_API UNProcGenOperation : public UObject
 	GENERATED_BODY()
 
 	explicit UNProcGenOperation(const FObjectInitializer& ObjectInitializer);
-
 public:
+#if !UE_BUILD_SHIPPING
+	void OutputReportToLog()
+	{
+		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
+		for (int i = 0; i < Output.Num(); i++)
+		{
+			UE_LOG(LogNexusProcGen, Log, TEXT("%s"), *Output[i]);
+		}
+	}
+	FNReport* GetReport() { return &Report; }
+#endif // !UE_BUILD_SHIPPING
+	
 	/**
 	 * Convert an operation state enum into the stable string used by logs and the developer overlay.
 	 * @param State The state to convert.
@@ -191,4 +202,7 @@ private:
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	uint32 Ticket;
+#if !UE_BUILD_SHIPPING
+	FNReport Report;
+#endif // !UE_BUILD_SHIPPING
 };

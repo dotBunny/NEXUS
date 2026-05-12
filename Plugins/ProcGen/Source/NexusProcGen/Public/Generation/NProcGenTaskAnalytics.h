@@ -175,10 +175,7 @@ public:
 	/** Stop the timer for the procgen-finalize stage. */
 	void ProcGenFinalizeFinish();
 	
-	/** @return Multi-line text report listing per-iteration counter values for each tracked stage. */
-	FString GetCountersReport();
-
-	FNReport GetReport();	
+	void AddToReport(FNReport* Report);	
 	
 private:
 	/** Operation display name used as the heading in generated reports. */

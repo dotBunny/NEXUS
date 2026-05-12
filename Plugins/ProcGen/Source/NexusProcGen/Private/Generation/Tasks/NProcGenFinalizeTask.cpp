@@ -23,11 +23,9 @@ void FNProcGenFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGra
 	N_PROCEDURAL_GENERATION_ANALYTICS(ProcGenFinalizeFinish)
 
 #if !UE_BUILD_SHIPPING	
-	FNReport Report = N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->GetReport();
-	TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
-	for (int i = 0; i < Output.Num(); i++)
-	{
-		UE_LOG(LogNexusProcGen, Log, TEXT("%s"), *Output[i]);
-	}
+	N_PROCEDURAL_GENERATION_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
+	
+	// Output to log for now
+	Operation->OutputReportToLog();
 #endif // !UE_BUILD_SHIPPING
 }
