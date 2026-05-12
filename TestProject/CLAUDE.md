@@ -45,7 +45,6 @@ Active plugins loaded by the `TestProject`:
 | **NexusBlockout** | Level blockout tools |
 | **NexusDynamicRefs** | Dynamic asset reference system |
 | **NexusGuardian** | Monitors UObject counts against a baseline; fires warnings/snapshots when configurable thresholds are crossed |
-| **NexusMultiplayer** | Networking / multiplayer support |
 | **NexusPicker** | Point distribution and picking utilities |
 | **NexusProcGen** | Procedural generation (depends on UE's PCG plugin) |
 | **NexusTooling** | Editor tools and fixers |
