@@ -215,6 +215,7 @@ void FNEditorUtils::CleanLogsFolder()
 	IFileManager& FileManager = IFileManager::Get();
 	
 	TArray<FString> Searches;
+	Searches.Add(TEXT("*BuildOut*"));
 	Searches.Add(TEXT("*-backup-*")); // Backups
 	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
 	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
