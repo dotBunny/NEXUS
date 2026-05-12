@@ -354,7 +354,7 @@ void FNProcGenOperationContext::AddToReport(FNReport* Report, const bool bBuildT
 			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue = Data.Value.SourceComponent->GetTissueMap();
 			for (const auto& TissuePair : BuildTissue)
 			{
-				TissuesContentBlock->AddLine(FString::Printf(TEXT("- %s (%i)\n"), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting));
+				TissuesContentBlock->AddLine(FString::Printf(TEXT("- %s (%i)"), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting));
 			}
 		}
 	}

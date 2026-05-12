@@ -14,7 +14,6 @@ void FNReportContentBlock::Render(FNReport& Report, TArray<FString>& Output, con
 		for (int32 i = 0; i < Content.Num(); i++)
 		{
 			Output.Add(Content[i]);
-			Output.Add(TEXT(""));
 		}
 	}
 	else
@@ -22,7 +21,6 @@ void FNReportContentBlock::Render(FNReport& Report, TArray<FString>& Output, con
 		for (int32 i = 0; i < Content.Num(); i++)
 		{
 			Output.Add(Content[i]);
-			Output.Add(TEXT(""));
 		}
 	}
 	
