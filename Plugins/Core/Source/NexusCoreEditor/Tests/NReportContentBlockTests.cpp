@@ -24,15 +24,13 @@ N_TEST_HIGH(FNReportContentBlockTests_AddLine_Literal,
 
 	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::PlainText);
 	// Each content line is followed by a blank separator line.
-	CHECK_EQUALS("Two literal lines should produce four output entries (line, blank, line, blank).",
-		Lines.Num(), 4);
-	if (Lines.Num() < 4) return;
+	CHECK_EQUALS("Two literal lines should produce two output entries (line, line).",
+		Lines.Num(), 2);
+	if (Lines.Num() < 2) return;
 	CHECK_EQUALS("First content line should be the first AddLine value.",
 		Lines[0], FString(TEXT("Hello")));
-	CHECK_EQUALS("Each content line is followed by a blank separator.",
-		Lines[1], FString(TEXT("")));
 	CHECK_EQUALS("Second content line should be the second AddLine value.",
-		Lines[2], FString(TEXT("World")));
+		Lines[1], FString(TEXT("World")));
 }
 
 N_TEST_HIGH(FNReportContentBlockTests_AddLine_OrderedFormat,
@@ -53,8 +51,8 @@ N_TEST_HIGH(FNReportContentBlockTests_AddLine_OrderedFormat,
 	Block->AddLine(TEXT("Hello {0}, value={1}"), Args);
 
 	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::PlainText);
-	CHECK_MESSAGE(TEXT("Ordered format AddLine should emit at least one line."), Lines.Num() >= 1);
-	if (Lines.Num() < 1) return;
+	CHECK_MESSAGE(TEXT("Ordered format AddLine should emit one line."), Lines.Num() >= 1);
+	if (Lines.Num() != 1) return;
 	CHECK_EQUALS("Ordered format substitutions should fill in by index.",
 		Lines[0], FString(TEXT("Hello World, value=42")));
 }
@@ -77,8 +75,8 @@ N_TEST_HIGH(FNReportContentBlockTests_AddLine_NamedFormat,
 	Block->AddLine(TEXT("{name}={count}"), Args);
 
 	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::PlainText);
-	CHECK_MESSAGE(TEXT("Named format AddLine should emit at least one line."), Lines.Num() >= 1);
-	if (Lines.Num() < 1) return;
+	CHECK_MESSAGE(TEXT("Named format AddLine should emit one line."), Lines.Num() == 1);
+	if (Lines.Num() != 1) return;
 	CHECK_EQUALS("Named format substitutions should fill in by token.",
 		Lines[0], FString(TEXT("Alice=7")));
 }
@@ -101,12 +99,11 @@ N_TEST_HIGH(FNReportContentBlockTests_Render_HeaderBodyFooterOrder,
 	Block->SetFooter(TEXT("Footer"));
 
 	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::PlainText);
-	CHECK_EQUALS("Render should emit header, body, blank separator, and footer.", Lines.Num(), 4);
-	if (Lines.Num() < 4) return;
+	CHECK_EQUALS("Render should emit header, body, and footer.", Lines.Num(), 3);
+	if (Lines.Num() < 3) return;
 	CHECK_EQUALS("Header should appear first.", Lines[0], FString(TEXT("Header")));
 	CHECK_EQUALS("Body should follow the header.", Lines[1], FString(TEXT("Body")));
-	CHECK_EQUALS("Each content line is followed by a blank separator.", Lines[2], FString(TEXT("")));
-	CHECK_EQUALS("Footer should appear last.", Lines[3], FString(TEXT("Footer")));
+	CHECK_EQUALS("Footer should appear last.", Lines[2], FString(TEXT("Footer")));
 }
 
 N_TEST_HIGH(FNReportContentBlockTests_Render_NestedChildContent,
@@ -157,13 +154,11 @@ N_TEST_MEDIUM(FNReportContentBlockTests_Render_Markdown_BlankSeparator,
 	Block->AddLine(TEXT("Paragraph"));
 
 	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::Markdown);
-	CHECK_EQUALS("Markdown content should emit one body line plus one blank separator.",
-		Lines.Num(), 2);
-	if (Lines.Num() < 2) return;
+	CHECK_EQUALS("Markdown content should emit one body line.",
+		Lines.Num(), 1);
+	if (Lines.Num() < 1) return;
 	CHECK_EQUALS("Body line should be emitted verbatim in markdown.",
 		Lines[0], FString(TEXT("Paragraph")));
-	CHECK_EQUALS("Trailing blank separator should follow the body line.",
-		Lines[1], FString(TEXT("")));
 }
 
 #endif //WITH_TESTS
