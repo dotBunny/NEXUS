@@ -4,6 +4,7 @@
 #include "NToolingEditorModule.h"
 
 #include "NEditorUtils.h"
+#include "MultiplayerTest/NMultiplayerTestToolbarSection.h"
 #include "NToolingEditorCommands.h"
 #include "NToolingEditorMinimal.h"
 #include "NToolingEditorSettings.h"
@@ -29,6 +30,7 @@ void FNToolingEditorModule::StartupModule()
 void FNToolingEditorModule::ShutdownModule()
 {
 	FNToolingEditorCommands::RemoveMenuEntries();
+	FNMultiplayerTestToolbarSection::RemoveSection();
 	
 	if (InputProcessor.IsValid())
 	{
@@ -53,6 +55,7 @@ void FNToolingEditorModule::OnPostEngineInit()
 	if (FSlateApplication::IsInitialized())
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNToolingEditorCommands::AddMenuEntries));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNMultiplayerTestToolbarSection::AddSection));
 		
 		const UNToolingEditorSettings* Settings = UNToolingEditorSettings::Get();
 	

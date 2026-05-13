@@ -7,6 +7,7 @@
 #include "NEditorStyle.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
+#include "NEditorUtils.h"
 #include "NMetaUtils.h"
 #include "Menus/NFixersMenu.h"
 #include "Menus/NToolsMenu.h"
@@ -99,6 +100,8 @@ void FNToolingEditorCommands::AddMenuEntries()
 			FExecuteAction::CreateStatic(&FNToolingEditorCommands::OpenNetworkProfiler));
 		}
 	}
+	
+	// Add Multiplayer Test Bits
 	
 	// Support for DocsURL addition to nodes
 	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
