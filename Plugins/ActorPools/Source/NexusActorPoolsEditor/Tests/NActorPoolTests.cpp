@@ -926,4 +926,70 @@ N_TEST(FNActorPoolTests_Strategy_FixedRecycleLast,
 	});
 }
 
+N_TEST(FNActorPoolTests_Create_ActorsAreNotRooted,
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Create::ActorsAreNotRooted",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that actors created by the pool are not added to the root set, neither at Fill() time nor when handed out via Spawn().
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.MinimumActorCount = 3;
+		ActorPoolSettings.MaximumActorCount = 3;
+		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
+		Pool.Fill();
+
+		for (int32 i = 0; i < Pool.InActors.Num(); i++)
+		{
+			CHECK_FALSE_MESSAGE(TEXT("Pool-created Actor must not be in the root set."), Pool.InActors[i]->IsRooted())
+		}
+
+		AActor* Spawned = Pool.Spawn(FVector::ZeroVector, FRotator::ZeroRotator);
+		if (Spawned == nullptr)
+		{
+			ADD_ERROR("Spawn() returned nullptr unexpectedly.");
+			Pool.Clear();
+			return;
+		}
+		CHECK_FALSE_MESSAGE(TEXT("Spawned pool Actor must not be in the root set."), Spawned->IsRooted())
+
+		Pool.Clear();
+	});
+}
+
+N_TEST(FNActorPoolTests_Clear_ForceDestroyOnRootedActor_WarnsAndSkips,
+	"NEXUS::UnitTests::NActorPools::FNActorPool::Clear::ForceDestroyOnRootedActor::WarnsAndSkips",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that Clear(true) emits a warning and skips destruction when a pool actor has been externally added to the root set.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
+		ActorPoolSettings.MinimumActorCount = 2;
+		ActorPoolSettings.MaximumActorCount = 2;
+		ActorPoolSettings.Strategy = ENActorPoolStrategy::Fixed;
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+
+		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
+		Pool.Fill();
+
+		// Keep our own reference; Clear() will Reset() the pool's InActors.
+		AActor* RootedActor = Pool.InActors[0];
+		RootedActor->AddToRoot();
+
+		AddExpectedMessage(TEXT("was told to release AND destroy an Actor"), ELogVerbosity::Type::Warning);
+		Pool.Clear(true);
+
+		CHECK_MESSAGE(TEXT("Rooted Actor must remain valid after a force-destroy Clear()."), IsValid(RootedActor))
+		CHECK_MESSAGE(TEXT("Rooted Actor must remain rooted after a force-destroy Clear()."), RootedActor->IsRooted())
+
+		// Cleanup so the rooted actor does not survive the test world.
+		RootedActor->RemoveFromRoot();
+		RootedActor->Destroy();
+	});
+}
+
 #endif //WITH_TESTS
