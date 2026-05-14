@@ -390,7 +390,7 @@ bool FNActorPool::CreateActors(const int32 Count)
 	
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Instigator = nullptr;
-	SpawnInfo.ObjectFlags |= RF_Transient | RF_MarkAsRootSet; // AddToRoot - Pool will manage lifecycle
+	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.bDeferConstruction = Settings.HasFlag_DeferConstruction();
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
