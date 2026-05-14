@@ -581,14 +581,10 @@ void FNActorPool::Clear(const bool bForceDestroy)
 
 void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForceDestroy) const
 {
+	// Always remove if it is rooted
 	if (!IsValid(Actor) || Actor->IsPendingKillPending())
 	{
 		return;
-	}
-
-	if (Actor->IsRooted())
-	{
-		Actor->RemoveFromRoot();
 	}
 
 	const bool bBroadcastRelease = Settings.HasFlag_BroadcastRelease();
@@ -608,6 +604,12 @@ void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForce
 	
 	if (bForceDestroy)
 	{
+		if (Actor->IsRooted())
+		{
+			UE_LOG(LogNexusActorPools, Warning, TEXT("An FNActorPool was told to release AND destroy an Actor(%s) which was rooted. Skipping the destroy, this is probably a mistake."), *Actor->GetName());
+			return;
+		}
+		
 		Actor->Destroy();
 	}
 }

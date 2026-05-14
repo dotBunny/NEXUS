@@ -1,0 +1,276 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "Assembly/Contexts/NVirtualOrganContext.h"
+
+#include "NWorldAssemblyMinimal.h"
+#include "Cell/NCell.h"
+#include "Cell/NTissue.h"
+#include "Collections/NWeightedIntegerArray.h"
+#include "Assembly/Contexts/NAssemblyOperationContext.h"
+#include "Organ/NOrganComponent.h"
+
+FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
+	: Seed(TaskSeed), Name(TaskName)
+{
+	// This is our last chance to read anything off the main-thread
+	//TODO: There is a Seed on the component? What do we do here with it? 
+	
+	// Cache out some settings
+	MinimumCellCount = WorldOrganContext->SourceComponent->MinimumCellCount;
+	MaximumCellCount = WorldOrganContext->SourceComponent->MaximumCellCount;
+	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
+	
+	// Keep a local copy of this here
+	bUnbounded = WorldOrganContext->SourceComponent->bUnbounded;
+	
+	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
+	Bounds = WorldOrganContext->Bounds;
+	Origin = WorldOrganContext->Origin;
+	
+	// Build a safe reference to all the data so we can operate off-thread without issue
+	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = WorldOrganContext->SourceComponent->GetTissueMap();
+	
+	// Validate the tissue map has a start
+	bool bFoundStartNode = false;
+	bool bFoundSomeCells = false;
+	
+	for (auto Pair : TissueMap)
+	{
+		if (Pair.Value.MaximumCount > 0 || Pair.Value.MaximumCount == -1)
+		{
+			bFoundSomeCells = true;
+		}
+		
+		if (Pair.Value.bCanBeStartNode)
+		{
+			bFoundStartNode = true;
+		}
+		
+		// We've hit our marks, early out.
+		if (bFoundSomeCells && bFoundStartNode)
+		{
+			break;
+		}
+	}
+	
+	if (!bFoundStartNode)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as the provided UNTissues do not contain a UNCell flagged capable of being the Start Node. Skipping."));
+		return;
+	}
+
+	if (!bFoundSomeCells)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as the it appears that no UNCells would be generated from the provided UNTissues (check MaximumCount). Skipping."));
+		return;
+	}
+	
+	// Build CellInputData
+	CellInputData.Reserve(TissueMap.Num());
+	for (const auto& Cell : TissueMap)
+	{
+		FNVirtualCellData CellDetails;
+		
+		// TODO: We could implement some checks on the UNCell about cross referencing and what happens?
+		CellDetails.MinimumCount = Cell.Value.MinimumCount;
+		CellDetails.MaximumCount = Cell.Value.MaximumCount;
+		CellDetails.bCanBeStartNode = Cell.Value.bCanBeStartNode;
+		CellDetails.bCanBeEndNode = Cell.Value.bCanBeEndNode;
+		CellDetails.Weighting = Cell.Value.Weighting;
+		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
+		CellDetails.bAlwaysRelevant = Cell.Value.bAlwaysRelevant;
+		
+		// We won't touch this till later
+		CellDetails.Template = Cell.Key;
+		
+		Cell.Key->Root.CopyTo(CellDetails.CellDetails);
+		for (const TPair<int32, FNCellJunctionDetails>& Junction :  Cell.Key->Junctions)
+		{
+			CellDetails.Junctions.Add(Junction.Key, Junction.Value);
+		}
+		
+		CellInputData.Add(CellDetails); // TODO: Check this is a Move
+	}
+	
+	// Need to convert the bone data to something were going to use
+	BoneInputData.Reserve(WorldOrganContext->ContainedBones.Num());
+	for (const auto& Bone : WorldOrganContext->ContainedBones)
+	{
+		FNVirtualBoneData BoneDetails;
+		
+		BoneDetails.WorldPosition = Bone->SourceComponent->GetComponentLocation();
+		BoneDetails.WorldRotation = Bone->SourceComponent->GetComponentRotation();
+		
+		BoneDetails.CornerPoints = Bone->CornerPoints;		
+		
+		BoneDetails.SocketSize = Bone->SourceComponent->SocketSize;
+		
+		BoneInputData.Add(BoneDetails);
+	}
+	
+	// Validate that we do have bones
+	if (BoneInputData.Num() == 0)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no UNBoneComponents were provided or found. Skipping."));
+		return;
+	}
+	
+	// TODO: handle more then 1 bone
+	FNCellInputDataFilter PreFilter;
+	PreFilter.SocketSize = BoneInputData[0].SocketSize;
+	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
+	PreFilter.bRequireStart = true;
+	
+	FNWeightedIntegerArray PreIndices;
+	TMap<int32, TArray<int32>> ValidJunctions;
+	
+	FilterCellInputData(PreFilter, PreIndices, ValidJunctions);
+
+	if (PreIndices.WeightedCount() == 0)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no starting junctions are sized to the provided UNBoneComponent."));
+		return;
+	}
+	
+	
+	// We got to the end so we have validated things so far at this point.
+	bIsValid = true;
+}
+
+FNVirtualOrganContext::~FNVirtualOrganContext()
+{
+// #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
+	if (CellGraph != nullptr)
+	{
+		delete CellGraph.Release();
+		CellGraph = nullptr;
+	}
+// #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
+}
+
+bool FNVirtualOrganContext::CheckGraph() const
+{
+	// We're going to look over all the nodes
+	int32 CellNodeCount = 0;
+	for (const auto Pair : CellGraph->GetNodes())
+	{
+		if (Pair->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			CellNodeCount++;
+		}
+	}
+	
+	// Enforce check for the minimum amount of cells wanted
+	if (MinimumCellCount > 0 && CellNodeCount < MinimumCellCount)
+	{
+		return false;
+	}
+	
+	// Enforce check for maximum amount of cells wanted
+	if (MaximumCellCount > 0 && CellNodeCount > MaximumCellCount)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool FNVirtualOrganContext::ValidateGraph()
+{
+	bSuccessful = CheckGraph();
+	return bSuccessful;
+}
+
+void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
+{
+	CellIndices.Empty();
+	JunctionIndices.Empty();
+	
+	for (int32 i = 0; i < CellInputData.Num(); i++)
+	{
+		const FNVirtualCellData* CellData = &CellInputData[i];
+		
+		// Early out on some simple filters
+		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
+		if (Filter.bRequireStart && !CellData->bCanBeStartNode) continue;
+		if (Filter.bRequireEnd && !CellData->bCanBeEndNode) continue;
+		
+		// Check minimum distance in current graph for reusing the cell piece
+		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&
+			Filter.SourceCellInputData->MinimumNodeDistance >= 1 &&
+			Filter.SourceCellNode->SearchForMatchingCellInputData(CellData, Filter.SourceCellInputData->MinimumNodeDistance - 1))
+		{
+			continue;
+		}
+		
+		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
+		
+		// Parse Junctions
+		TArray<int32> GoodJunctions;
+		for (auto Pair : CellData->Junctions)
+		{
+			if (Pair.Value.SocketSize == Filter.SocketSize)
+			{
+				// Determine the rotation this junction would have to take on to match Filter.SourceQuat. Same math used in
+				// ProcessCellNode when actually placing the cell: flip 180 around Up to oppose the source's facing direction,
+				// then undo the junction's local rotation so only the delta we need to apply to the cell remains.
+				const FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
+				const FQuat RequiredRotationQuat = Filter.SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
+				
+				const float RequiredRoll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
+				const float RequiredPitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
+				const float RequiredYaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
+
+				// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
+				// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
+				if (!CellRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw) ||
+					!JunctionRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw))
+				{
+					continue;
+				}
+
+				GoodJunctions.Add(Pair.Key);
+			}
+		}
+		
+		if (GoodJunctions.Num() > 0)
+		{
+			// Add weighting
+			CellIndices.Add(i, CellData->Weighting);
+			
+			// Fill out selectable junctions
+			TArray<int32>& Junctions = JunctionIndices.Add(i, TArray<int32>());
+			for (auto Index : GoodJunctions)
+			{
+				Junctions.Add(Index);
+			}
+		}
+	}
+}
+
+bool FNVirtualOrganContext::ResetForRetry()
+{
+	// Reset counters
+	for (int32 i = 0; i < CellInputData.Num(); i++)
+	{
+		CellInputData[i].UsedCount = 0;
+	}
+		
+	// Clear Graph
+	if (CellGraph != nullptr)
+	{
+		delete CellGraph.Release();
+		CellGraph = nullptr;
+	}
+	
+	RetryCount++;
+	
+	if (RetryCount > MaximumRetryCount)
+	{
+		return false;
+	}
+	return true;
+}

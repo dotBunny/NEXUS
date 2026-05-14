@@ -8,7 +8,7 @@
 
 
 /**
- * Dual-interval rotation constraints used by ProcGen matching rules.
+ * Dual-interval rotation constraints used by World Assembly matching rules.
  *
  * The "matching" interval constrains a candidate rotation's own pose, while the "difference"
  * interval constrains the delta between two rotations. Either interval can be enabled independently.

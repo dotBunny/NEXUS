@@ -1,0 +1,67 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "Assembly/Graph/NAssemblyGraph.h"
+#include "Assembly/Graph/NAssemblyGraphCellNode.h"
+
+FNAssemblyGraph::FNAssemblyGraph(FNAssemblyGraphNode* RootNodePtr, const FVector& Origin, const FBoxSphereBounds& Bounds, const bool bUnbounded)
+: bUnbounded(bUnbounded), Bounds(Bounds), Origin(Origin), RootNode(RootNodePtr)
+{
+	Nodes.Add(RootNodePtr);
+}
+
+FNAssemblyGraph::~FNAssemblyGraph()
+{
+// #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory
+	const int32 NodeCount = Nodes.Num();
+	if (NodeCount > 0)
+	{
+		for (int32 i = NodeCount - 1; i >= 0; i--)
+		{
+			delete Nodes[i];
+		}
+		Nodes.Empty();
+	}
+	RootNode = nullptr;
+// #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
+}
+
+void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
+{
+	
+	Nodes.Add(Node);
+	Node->NodeID = Ticket++;
+}
+
+TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()
+{
+	TArray<FNAssemblyGraphNode*> ReturnNodes;
+	for (FNAssemblyGraphNode* Node : Nodes)
+	{
+		if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
+			if (CellNode->HasOpenJunctions())
+			{
+				ReturnNodes.Add(CellNode);
+			}
+		}
+	}
+	return MoveTemp(ReturnNodes);
+}
+
+void FNAssemblyGraph::CleanupBuilderReferences()
+{
+	if (Nodes.Num() == 0) return;
+	
+	for (FNAssemblyGraphNode* Node : Nodes)
+	{
+		if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
+			CellNode->CleanupBuilderReferences();
+		}
+	}
+}
+
+

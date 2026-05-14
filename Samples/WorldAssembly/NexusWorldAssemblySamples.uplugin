@@ -1,0 +1,32 @@
+{
+	"FileVersion": 3,
+	"Version": 12,
+	"VersionName": "0.3.0",
+	"FriendlyName": "NEXUS Samples: World Assembly",
+	"Description": "Sample content for the NEXUS: World Assembly plugin.",
+	"Category": "NEXUS Samples",
+	"CreatedBy": "dotBunny Inc.",
+	"CreatedByURL": "https://dotbunny.com",
+	"DocsURL": "https://nexus-framework.com/docs/plugins/world-assembly/#samples",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"EnabledByDefault": false,
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "NexusSharedSamples",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusWorldAssembly",
+			"Enabled": true
+		},
+		{
+			"Name": "NexusBlockout",
+			"Enabled": true
+		}
+	],
+	"IsExperimentalVersion": true
+}

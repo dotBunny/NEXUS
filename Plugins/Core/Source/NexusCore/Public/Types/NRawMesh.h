@@ -10,7 +10,7 @@
 
 
 /**
- * Lightweight CPU-side mesh representation used by ProcGen and blockout tools.
+ * Lightweight CPU-side mesh representation used by World Assembly and blockout tools.
  *
  * Stores a shared vertex buffer plus one or more ordered loops that reference into it. Supports
  * convexity / non-tri validation, rigid-body rotation around a pivot, and conversion into
@@ -19,7 +19,7 @@
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNRawMesh
 {
-	friend class FNProcGenUtils;
+	friend class FNWorldAssemblyUtils;
 	friend class FNCellRootComponentVisualizer;
 	friend class FNRawMeshUtils;
 

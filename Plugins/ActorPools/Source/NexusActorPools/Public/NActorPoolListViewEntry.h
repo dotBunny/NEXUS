@@ -9,7 +9,6 @@
 #include "Components/Image.h"
 #include "NActorPoolListViewEntry.generated.h"
 
-class UNProcGenOperation;
 class UProgressBar;
 class UCommonTextBlock;
 
@@ -68,5 +67,6 @@ private:
 
 	/** The pool this entry is bound to. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	UPROPERTY()
 	TObjectPtr<UNActorPoolObject> Pool;
 };

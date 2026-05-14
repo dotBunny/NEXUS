@@ -46,7 +46,7 @@ Active plugins loaded by the `TestProject`:
 | **NexusDynamicRefs** | Dynamic asset reference system |
 | **NexusGuardian** | Monitors UObject counts against a baseline; fires warnings/snapshots when configurable thresholds are crossed |
 | **NexusPicker** | Point distribution and picking utilities |
-| **NexusProcGen** | Procedural generation (depends on UE's PCG plugin) |
+| **NexusWorldAssembly** | Procedural generation (depends on UE's PCG plugin) |
 | **NexusTooling** | Editor tools and fixers |
 | **NexusUI** | UMG/Slate UI components (depends on CommonUI) |
 

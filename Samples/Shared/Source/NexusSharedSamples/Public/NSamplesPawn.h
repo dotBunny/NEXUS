@@ -60,7 +60,7 @@ private:
 		"/NexusBlockoutSamples/",
 		"/NexusDynamicRefsSamples/"
 		"/NexusPickerSamples/",
-		"/NexusProcGenSamples/",
+		"/NexusWorldAssemblySamples/",
 		"/NexusUISamples/",
 		"/Game/Maps/"
 	};

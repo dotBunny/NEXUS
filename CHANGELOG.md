@@ -33,6 +33,8 @@
 - `UNKillZoneComponent::UnknownBehaviour` to define behavior when an AActor is not known or able to be processed.
 - `FNActorPool` preallocates more appropriately for its In/Out arrays.
 - Started using pattern in Widgets where `BindWidget` members are validated in `NativeConstructor` only.
+- Moved `Multiplayer Test` into `NexusTooling`.
+- Renamed `NEXUS: ProcGen` plugin to `NEXUS: World Assembly` (`NexusProcGen` → `NexusWorldAssembly`, `NexusProcGenSamples` → `NexusWorldAssemblySamples`, `NProcGen*` class prefix → `NWorldAssembly*`). `CoreRedirects` in `DefaultEngine.ini` handle package + class renames so existing assets continue to load.
 
 ### Fixed
 
@@ -45,7 +47,7 @@
 - `FNEditorUtils::DisallowConfigFileFromStaging` and `FNEditorUtils::AllowConfigFileForStaging` now properly use the project name.
 - `FNActorPool` now properly marks created `AActor` as root-object.
 - `UNActorPoolSubsystem` will no longer crash returning null actors, and returns false when the actor is destroyed, as it doesnt get returned to the pool.
-- `UNMultiplayerEditorSubsystem` now concretely shutdown process handles, not relying on natural causes.
+- `UNMultiplayerTestSubsystem` now concretely shutdown process handles, not relying on natural causes.
 - `UNActorPoolSubsystem` crash where a tickable `FNActorPool` gets invoked during world teardown.
 - `FNActorPool` crash when applying settings where `UWorld` does not exist.
 - `FNActorPool` crash when dealing with MaximumActorCount=0, now minimum of 1.
@@ -58,7 +60,6 @@
 ### Removed
 
 - `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
-- With recent changes to UE 5.4+ the need for a dedicated multiplayer test framework was deemed not necessary, collapsed logic back to core, removed test.
 
 ### Core Redirects
 

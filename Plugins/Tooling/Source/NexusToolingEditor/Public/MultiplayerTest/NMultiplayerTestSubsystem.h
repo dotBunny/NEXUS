@@ -34,7 +34,7 @@ class NEXUSTOOLINGEDITOR_API UNMultiplayerTestSubsystem : public UEditorSubsyste
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	virtual TStatId GetStatId() const override
 	{
-		RETURN_QUICK_DECLARE_CYCLE_STAT(UNProcGenEditorSubsystem, STATGROUP_Tickables);
+		RETURN_QUICK_DECLARE_CYCLE_STAT(UNMultiplayerTestSubsystem, STATGROUP_Tickables);
 	}
 	virtual bool IsTickableWhenPaused() const override{ return true; }
 	virtual bool IsTickableInEditor() const override { return true; }

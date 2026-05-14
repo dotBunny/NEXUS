@@ -155,5 +155,9 @@ void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 
 void UNActorPoolsDeveloperOverlay::CreateListItem(FNActorPool* ActorPool)
 {
-	ActorPoolList->AddItem(UNActorPoolObject::Create(this, ActorPool));
+	UNActorPoolObject* Object = UNActorPoolObject::Create(this, ActorPool);
+	if (!ActorPoolList->GetListItems().Contains(Object))
+	{
+		ActorPoolList->AddItem(Object);
+	}
 }

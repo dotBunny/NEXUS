@@ -71,11 +71,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusProcGen",
+			"Name": "NexusWorldAssembly",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusProcGenSamples",
+			"Name": "NexusWorldAssemblySamples",
 			"Enabled": true
 		},
 		{
