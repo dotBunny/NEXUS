@@ -4,6 +4,7 @@
 #pragma once
 
 #include "EditorUtilityLibrary.h"
+#include "EditorUtilitySubsystem.h"
 #include "NDelayedEditorTask.generated.h"
 
 /**
@@ -29,18 +30,18 @@ protected:
 	void Lock(UAsyncEditorDelay* DelayMechanism)
 	{
 		Parent = DelayMechanism;
-		Parent->AddToRoot();
-
-		AddToRoot();
+		
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		EditorUtilitySubsystem->RegisterReferencedObject(this);
 	}
 
 	/** Unbinds the task from its delay mechanism and removes both from the root set; safe to call from the completion callback. */
 	void Release()
 	{
 		Parent->Complete.RemoveAll(this);
-		Parent->RemoveFromRoot();
-
-		RemoveFromRoot();
+		
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		EditorUtilitySubsystem->UnregisterReferencedObject(this);
 	}
 
 private:
