@@ -6,7 +6,7 @@
 #include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Assembly/Contexts/NPassContext.h"
 #include "Assembly/Contexts/NVirtualOrganContext.h"
-#include "Assembly/Graph//NAssemblyGraphCellNode.h"
+#include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Async/TaskGraphInterfaces.h"
 
 

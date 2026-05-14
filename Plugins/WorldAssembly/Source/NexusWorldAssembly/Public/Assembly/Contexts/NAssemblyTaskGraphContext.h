@@ -2,9 +2,10 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "Cell/NCellProxy.h"
-#include "Assembly/Graph//NAssemblyGraph.h"
+#include "Assembly/Graph/NAssemblyGraph.h"
 
 /**
  * Execution-time context shared across all tasks in a single FNAssemblyTaskGraph run.
