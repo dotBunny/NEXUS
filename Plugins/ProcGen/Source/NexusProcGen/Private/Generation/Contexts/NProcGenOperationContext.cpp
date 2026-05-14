@@ -288,6 +288,7 @@ void FNProcGenOperationContext::LockAndPreprocess(UWorld* World)
 	}
 }
 
+#if !UE_BUILD_SHIPPING
 void FNProcGenOperationContext::AddToReport(FNReport* Report, const bool bBuildTissues)
 {
 	const int32 OperationContextContentTicket = Report->CreateContentBlock();
@@ -374,4 +375,5 @@ void FNProcGenOperationContext::AddToReport(FNReport* Report, const bool bBuildT
 		}
 	}
 }
+#endif // !UE_BUILD_SHIPPING
 
