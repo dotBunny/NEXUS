@@ -15,6 +15,7 @@ UCLASS(Abstract)
 class NEXUSCOREEDITOR_API UNDelayedEditorTask : public UObject
 {
 	GENERATED_BODY()
+
 public:
 	/**
 	 * Factory for the UAsyncEditorDelay that drives the delay timer.
