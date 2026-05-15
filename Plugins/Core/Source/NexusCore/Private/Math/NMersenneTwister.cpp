@@ -167,13 +167,7 @@ void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int
 
 FVector FNMersenneTwister::VectorNormalized()
 {
-	const FVector PseudoRandomValue = FVector(
-		this->PersistentFloatRangeDistribution(this->Engine),
-		this->PersistentFloatRangeDistribution(this->Engine),
-		this->PersistentFloatRangeDistribution(this->Engine)
-	);
-	this->CallCounter += 3;
-	return PseudoRandomValue;
+	return Vector(-1.f, 1.f);
 }
 
 FVector FNMersenneTwister::Vector(const float MinimumRange, const float MaximumRange)

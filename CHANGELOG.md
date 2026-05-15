@@ -56,6 +56,7 @@
 - `FNActorPool` protect against the odd change that an actor is requsted and needs to be created when the pools world is being torn down.
 - `FNActorPool` spawning with designated rotation now properly applies.
 - `INActorPoolItem` now handles invocation during teardown gracefully.
+- `FNMersenneTwister::VectorNormalized` now provides `-1` to `1` component values.
 
 ### Removed
 

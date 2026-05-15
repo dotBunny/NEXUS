@@ -45,7 +45,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		
 		// We need to figure out the final corners
 		TArray<FVector> Vertices;
-		Vertices.Reserve(8);
+		Vertices.SetNum(8);
 		OrientedBox.CalcVertices(Vertices.GetData());
 		FVector MinPoint = Vertices[0];
 		FVector MaxPoint = Vertices[0];
