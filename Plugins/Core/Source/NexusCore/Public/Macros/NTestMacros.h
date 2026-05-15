@@ -150,18 +150,21 @@
 #define N_TEST_TIMER_SCOPE(...)\
 	N_TEST_TIMER_SCOPE_SELECT(__VA_ARGS__, N_TEST_TIMER_SCOPE_3, N_TEST_TIMER_SCOPE_2, N_TEST_TIMER_SCOPE_1)(__VA_ARGS__)
 
-#define N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT 45
-#define N_TESTS_LATENT_COMMANDS_CREATE_WORLD_WAIT 10
+namespace NEXUS::Testing::LatentCommands
+{
+	constexpr int32 PrePerformanceFrameWait = 45;
+	constexpr int32 CreateWorldFrameWait = 10;
+}
 
 #define N_TESTS_PERF_START_LATENT_TEST \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PrePerformanceTest) \
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT))
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(NEXUS::Testing::LatentCommands::PrePerformanceFrameWait)) \
 
 #define N_TESTS_PERF_START_LATENT_TEST_WORLD \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PrePerformanceTest) \
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_PRE_PERFORMANCE_WAIT)) \
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(NEXUS::Testing::LatentCommands::PrePerformanceFrameWait)) \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_CreateWorld(this)) \
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(N_TESTS_LATENT_COMMANDS_CREATE_WORLD_WAIT))
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_FrameWait(NEXUS::Testing::LatentCommands::CreateWorldFrameWait))
 
 #define N_TESTS_PERF_FINISH_LATENT_TEST \
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_PostPerformanceTest)
