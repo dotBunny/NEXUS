@@ -67,7 +67,8 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 			Async(EAsyncExecution::TaskGraph,
 				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
 				{
-					FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+					const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
+					FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 					UE_LOG(LogNexusCore, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
 				});
 		}
@@ -88,7 +89,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		Async(EAsyncExecution::TaskGraph,
 			[Diff = MoveTemp(Diff), DumpFilePath = MoveTemp(DumpFilePath)]()
 			{
-				FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+				FFileHelper::SaveStringArrayToFile(Diff.ToReport().GetReportLines(ENReportOutputFormat::PlainText), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 				UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
 			});
 		bPassedObjectCountCompareThreshold = true;

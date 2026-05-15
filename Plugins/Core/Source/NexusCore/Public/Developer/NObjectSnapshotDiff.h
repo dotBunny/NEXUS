@@ -102,6 +102,64 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 
 		return StringBuilder.ToString();
 	}
+	
+	FNReport ToReport() const
+	{
+		FNReport Report;
+		
+		const int32 CapturedObjectsTicket = Report.CreateContentBlock();
+		FNReportContentBlock* CapturedObjectBlock = Report.GetContentBlock(CapturedObjectsTicket);
+		CapturedObjectBlock->SetHeading("FNObjectSnapshotDiff");
+		
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Captured %i Objects"), ObjectCount));
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("%i Changes"), ChangeCount));
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Previously %i Untracked Objects"), UntrackedObjectCountA));
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Currently %i Untracked Objects"), UntrackedObjectCountB));
+		
+		// ADDED
+		const int32 AddedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
+		FNReportTableBlock* AddObjectsTableBlock = Report.GetTableBlock(AddedObjectsTableTicket);
+		AddObjectsTableBlock->Initialize({"Full Name", "References", "Root Set", "Marked Garbage" });
+		for (const FNObjectSnapshotEntry& Entry : Added)
+		{
+			AddObjectsTableBlock->AddRow({
+				Entry.FullName,
+				FString::FromInt(Entry.RefCount), 
+				Entry.bIsRoot ? TEXT("R") : TEXT(""),
+				Entry.bIsGarbage ? TEXT("G") : TEXT("")
+			});
+		}
+		
+		// MAINTAINED
+		const int32 MaintainedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
+		FNReportTableBlock* MaintainedObjectsTableBlock = Report.GetTableBlock(MaintainedObjectsTableTicket);
+		MaintainedObjectsTableBlock->Initialize({"Full Name", "References", "Root Set", "Marked Garbage" });
+		for (const FNObjectSnapshotEntry& Entry : Maintained)
+		{
+			MaintainedObjectsTableBlock->AddRow({
+				Entry.FullName,
+				FString::FromInt(Entry.RefCount), 
+				Entry.bIsRoot ? TEXT("R") : TEXT(""),
+				Entry.bIsGarbage ? TEXT("G") : TEXT(""),
+			});
+		}
+		
+		// REMOVED
+		const int32 RemovedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
+		FNReportTableBlock* RemovedObjectsTableBlock = Report.GetTableBlock(RemovedObjectsTableTicket);
+		RemovedObjectsTableBlock->Initialize({"Full Name", "References", "Root Set", "Marked Garbage" });
+		for (const FNObjectSnapshotEntry& Entry : Removed)
+		{
+			RemovedObjectsTableBlock->AddRow({
+				Entry.FullName,
+				FString::FromInt(Entry.RefCount), 
+				Entry.bIsRoot ? TEXT("R") : TEXT(""),
+				Entry.bIsGarbage ? TEXT("M") : TEXT("")
+			});
+		}
+		
+		return MoveTemp(Report);
+	}
 
 	/** Writes a detailed summary of the diff to LogNexusCore, one category and one entry per line. */
 	void DumpToLog() const

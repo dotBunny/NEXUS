@@ -5,6 +5,7 @@
 
 #include "NCoreMinimal.h"
 #include "NObjectSnapshotEntry.h"
+#include "NReport.h"
 #include "NObjectSnapshot.generated.h"
 
 /**
@@ -78,6 +79,37 @@ struct NEXUSCORE_API FNObjectSnapshot
 			StringBuilder.Appendf(TEXT("  %s\n"), *Entry.ToString());
 		}
 		return StringBuilder.ToString();
+	}
+
+	/**
+	 * Builds a structured FNReport describing the snapshot's contents.
+	 * @return A report containing a header block with the capture/untracked counts and a table block listing each captured entry's reference count, root-set state, garbage-marked state, and full name.
+	 */
+	FNReport ToReport() const
+	{
+		FNReport Report;
+		
+		const int32 CapturedObjectsTicket = Report.CreateContentBlock();
+		FNReportContentBlock* CapturedObjectBlock = Report.GetContentBlock(CapturedObjectsTicket);
+		CapturedObjectBlock->SetHeading("FNObjectSnapshot");
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("Captured %i Objects"), CapturedObjectCount));
+		CapturedObjectBlock->AddLine(FString::Printf(TEXT("%i Untracked"), UntrackedObjectCount));
+		
+		const int32 CapturedObjectsTableTicket = Report.CreateTableBlock(CapturedObjectsTicket);
+		FNReportTableBlock* CapturedObjectsTableBlock = Report.GetTableBlock(CapturedObjectsTableTicket);
+		
+		CapturedObjectsTableBlock->Initialize({ "Full Name", "References", "Root Set", "Marked Garbage",});
+		for (const FNObjectSnapshotEntry& Entry : CapturedObjects)
+		{
+			CapturedObjectsTableBlock->AddRow({
+				Entry.FullName,
+				FString::FromInt(Entry.RefCount), 
+				Entry.bIsRoot ? TEXT("R") : TEXT(""),
+				Entry.bIsGarbage ? TEXT("M") : TEXT("")
+			});
+		}
+		
+		return MoveTemp(Report);
 	}
 
 	/** Writes a detailed summary of the snapshot to LogNexusCore, one entry per line. */

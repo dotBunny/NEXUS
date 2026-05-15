@@ -55,7 +55,7 @@ struct NEXUSCORE_API FNReport
 	 * @param OutputFormat Whether to emit plain text or Markdown.
 	 * @return The rendered report, one entry per line.
 	 */
-	TArray<FString> GetReportLines(ENReportOutputFormat OutputFormat);
+	TArray<FString> GetReportLines(ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
 	/**
 	 * Render the report and write it to disk, creating any missing intermediate directories.
@@ -63,7 +63,7 @@ struct NEXUSCORE_API FNReport
 	 * @param OutputFormat Whether to emit plain text or Markdown.
 	 * @note Logs an error via LogNexusCore on directory creation or file write failure.
 	 */
-	void OutputToFile(const FString& FilePath, ENReportOutputFormat OutputFormat = ENReportOutputFormat::Markdown);
+	void OutputToFile(const FString& FilePath, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
 	void AddReplaceToken(const FString& Token, const FString& Value)
 	{

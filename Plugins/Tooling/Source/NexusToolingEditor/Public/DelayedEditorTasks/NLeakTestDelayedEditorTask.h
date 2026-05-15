@@ -50,7 +50,7 @@ private:
 		{
 			const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 			FString::Printf(TEXT("NEXUS_LeakCheck_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-			FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+			FFileHelper::SaveStringArrayToFile(Diff.ToReport().GetReportLines(ENReportOutputFormat::PlainText), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 			UE_LOG(LogNexusToolingEditor, Warning, TEXT("UObject leak detected; comparison written to %s."), *DumpFilePath);
 		}
 		else

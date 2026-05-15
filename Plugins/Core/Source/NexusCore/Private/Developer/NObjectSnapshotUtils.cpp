@@ -143,7 +143,8 @@ void FNObjectSnapshotUtils::SnapshotToDisk()
 	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 		FString::Printf(TEXT("NEXUS_SnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 
-	FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+	const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
+	FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
 	UE_LOG(LogNexusCore, Log, TEXT("UObject snapshot written to %s."), *DumpFilePath);
 }
@@ -177,8 +178,9 @@ void FNObjectSnapshotUtils::CompareSnapshotToDisk()
 	FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CachedSnapshot, CompareSnapshot, false);
 
 	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-	FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-	FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+		FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+	const TArray<FString> Output = Diff.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
+	FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
 	UE_LOG(LogNexusCore, Log, TEXT("UObject comparison written to %s."), *DumpFilePath);
 }
