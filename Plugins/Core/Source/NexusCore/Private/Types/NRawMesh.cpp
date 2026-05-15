@@ -240,19 +240,18 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	// So we need to process it
 	if (bProcessMesh)
 	{
-		// Check and flip triangles if needed
+		// Reorient any triangle whose normal faces inward (toward Center) so all faces face outward.
 		for (const int32 TriangleID : DynamicMesh.TriangleIndicesItr())
 		{
-			UE::Geometry::FIndex3i Triangle = DynamicMesh.GetTriangle(TriangleID);
-			FVector V1 = DynamicMesh.GetVertex(Triangle.A);
-			FVector V2 = DynamicMesh.GetVertex(Triangle.B);
-			FVector V3 = DynamicMesh.GetVertex(Triangle.C);
+			const UE::Geometry::FIndex3i Triangle = DynamicMesh.GetTriangle(TriangleID);
+			const FVector V1 = DynamicMesh.GetVertex(Triangle.A);
+			const FVector V2 = DynamicMesh.GetVertex(Triangle.B);
+			const FVector V3 = DynamicMesh.GetVertex(Triangle.C);
 
-			FVector Normal = FVector::CrossProduct(V2 - V1, V3 - V1).GetSafeNormal();
-			FVector CenterToVertex = (V1 - Center).GetSafeNormal();
+			const FVector Normal = FVector::CrossProduct(V2 - V1, V3 - V1).GetSafeNormal();
+			const FVector Outward = (V1 - Center).GetSafeNormal();
 
-			// This should have been the other way?
-			if (FVector::DotProduct(Normal, CenterToVertex) > 0)
+			if (FVector::DotProduct(Normal, Outward) < 0.0)
 			{
 				DynamicMesh.ReverseTriOrientation(TriangleID);
 			}
