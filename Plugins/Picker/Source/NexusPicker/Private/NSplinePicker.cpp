@@ -9,7 +9,16 @@
 
 #define N_PICKER_SPLINE_PREFIX \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
+	if (!IsValid(Params.SplineComponent)) \
+	{ \
+		for (int32 i = 0; i < Params.Count; i++) \
+		{ \
+			OutLocations.Add(FVector::ZeroVector); \
+		} \
+		UE_LOG(LogNexusPicker, Error, TEXT("Unable to pick points on spline as either no spline component was provided, or it was invalid. Defaulting to origin points.")) \
+		return; \
+	}
 #define N_PICKER_SPLINE_LOCATION(FloatRange) \
 	Params.SplineComponent->GetWorldLocationAtTime(Random.FloatRange(0, Params.SplineComponent->Duration))
 #if ENABLE_VISUAL_LOG

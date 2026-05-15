@@ -24,22 +24,29 @@
 	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Params.CachedWorld); \
 	FNavLocation NavLocation;
 #define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1 \
-	if (!NavigationSystem->IsInitialized()) \
+	if (NavigationSystem != nullptr) \
 	{ \
-		UE_LOG(LogNexusPicker, Error, TEXT("Attempted to project a generated location(%s) onto a NavMesh prior to the Navigation system having been initialized. Falling back to using the initial location point."), *Location.ToCompactString()) \
-		OutLocations.Add(Location); \
-		continue; \
-	} \
-	if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::NavQueryExtent, &FNPickerUtils::NavAgentProperties )) \
-	{ \
-		if (Location != NavLocation.Location) \
+		if (!NavigationSystem->IsInitialized()) \
 		{ \
-			Location = NavLocation.Location; \
+			UE_LOG(LogNexusPicker, Error, TEXT("Attempted to project a generated location(%s) onto a NavMesh prior to the Navigation system having been initialized. Falling back to using the initial location point."), *Location.ToCompactString()) \
+			OutLocations.Add(Location); \
+			continue; \
+		} \
+		if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::NavQueryExtent, &FNPickerUtils::NavAgentProperties )) \
+		{ \
+			if (Location != NavLocation.Location) \
+			{ \
+				Location = NavLocation.Location; \
+			} \
+		} \
+		else \
+		{ \
+			UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh! Was the location(%s) outside of the NavMesh volume, or inside of a NavModifier. Adjust your NavQueryExtent to account for this increased distance, or ensure your dimensions are within the NavMesh volume."), *Location.ToCompactString()); \
 		} \
 	} \
 	else \
 	{ \
-		UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh! Was the location(%s) outside of the NavMesh volume, or inside of a NavModifier. Adjust your NavQueryExtent to account for this increased distance, or ensure your dimensions are within the NavMesh volume."), *Location.ToCompactString()); \
+		UE_LOG(LogNexusPicker, Error, TEXT("Unable to project a location to the NavMesh as NavigationSystemV1 was null.")); \
 	}
 
 /**
