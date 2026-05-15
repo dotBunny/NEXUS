@@ -26,9 +26,11 @@ class NEXUSACTORPOOLS_API FNActorPool
 {
 	// Allow to test w/ deep access
 	friend class UNActorPoolObject;
+#if WITH_TESTS	
 	friend class FNActorPoolTests_Return_StorageLocation;
 	friend class FNActorPoolTests_Create_ActorsAreNotRooted;
 	friend class FNActorPoolTests_Clear_ForceDestroyOnRootedActor_WarnsAndSkips;
+#endif // WITH_TESTS	
 	
 public:
 	/**

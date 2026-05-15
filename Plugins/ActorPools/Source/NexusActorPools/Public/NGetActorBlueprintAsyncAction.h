@@ -19,6 +19,12 @@ class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyn
 {
 	GENERATED_BODY()
 
+#if WITH_TESTS
+	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_NullPool;
+	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate;
+	friend class UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy;
+#endif // WITH_TESTS
+
 public:
 	/**
 	 * Gets an actor from a given pool asynchronously, creating a pool as necessary.

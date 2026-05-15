@@ -27,6 +27,12 @@ class NEXUSACTORPOOLS_API UNKillZoneComponent : public UBoxComponent
 {
 	GENERATED_BODY()
 
+#if WITH_TESTS
+	friend class UNKillZoneComponentTests_OnOverlapBegin_NullSubsystem_ReturnToActorPoolBehavior;
+	friend class UNKillZoneComponentTests_OnOverlapBegin_NullSubsystem_KnownPoolPathSkipped;
+	friend class UNKillZoneComponentTests_OnOverlapBegin_NullSubsystem_FellOutOfWorldStillWorks;
+#endif // WITH_TESTS
+
 public:
 	explicit UNKillZoneComponent(const FObjectInitializer& ObjectInitializer);
 

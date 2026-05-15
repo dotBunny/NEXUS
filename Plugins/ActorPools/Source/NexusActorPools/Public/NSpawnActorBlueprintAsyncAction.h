@@ -19,6 +19,12 @@ class NEXUSACTORPOOLS_API UNSpawnActorBlueprintAsyncAction : public UBlueprintAs
 {
 	GENERATED_BODY()
 
+#if WITH_TESTS
+	friend class UNSpawnActorBlueprintAsyncActionTests_OnHasPool_NullPool;
+	friend class UNSpawnActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate;
+	friend class UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy;
+#endif // WITH_TESTS
+
 public:
 	/**
 	 * Spawns an actor from a given pool asynchronously, creating a pool as necessary.
