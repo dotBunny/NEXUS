@@ -140,7 +140,7 @@ void FNRawMesh::ConvertToTriangles()
 
 			// Guard against pathological polygons causing an infinite loop.
 			int32 Guard = SrcCount * SrcCount;
-			while (Ring.Num() > 3 && Guard-- > 0)
+			while (Ring.Num() > 3 && Guard > 0)
 			{
 				bool bEarFound = false;
 				const int32 RingCount = Ring.Num();
@@ -177,6 +177,9 @@ void FNRawMesh::ConvertToTriangles()
 					break;
 				}
 
+				// Safety countdown
+				Guard--;
+				
 				if (!bEarFound)
 				{
 					UE_LOG(LogNexusCore, Warning, TEXT("Ear-clipping failed on loop %d; falling back to fan of the remainder."), i);
