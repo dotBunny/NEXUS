@@ -51,6 +51,13 @@ void UNDynamicRefComponent::Register()
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
+		
+		if (Subsystem == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			return;
+		}
+		
 		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
@@ -72,6 +79,13 @@ void UNDynamicRefComponent::Unregister()
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
+		
+		if (Subsystem == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			return;
+		}
+		
 		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
