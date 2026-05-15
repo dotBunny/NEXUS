@@ -103,7 +103,7 @@ public:
 	}
 
 	/** @return A mutable view of the tracked objects. */
-	TArray<TObjectPtr<UObject>>& GetObjects()
+	TArray<TSoftObjectPtr<UObject>>& GetObjects()
 	{
 		return TargetObjects;
 	}
@@ -120,7 +120,8 @@ private:
 	TObjectPtr<UNDynamicRefsDeveloperOverlay> Overlay;
 
 	/** The objects registered for this slot/bucket, mirrored into this wrapper for UI binding. */
-	TArray<TObjectPtr<UObject>> TargetObjects;
+	UPROPERTY()
+	TArray<TSoftObjectPtr<UObject>> TargetObjects;
 
 	/** The FName bucket this wrapper targets (NAME_None when targeting an ENDynamicRef slot). */
 	FName TargetName;

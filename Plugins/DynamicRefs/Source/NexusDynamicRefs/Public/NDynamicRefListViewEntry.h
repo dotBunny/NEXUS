@@ -19,17 +19,15 @@ class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, publi
 {
 	GENERATED_BODY()
 
+
+public:
+	
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
 		Execute_OnSetOwnerListView(Widget, Owner);
 	}
-
-	virtual void NativeDestruct() override;
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
-	virtual void NativeOnEntryReleased() override;
-
-public:
+	
 	/**
 	 * Button handler used by nested list rows to focus/select the referenced object.
 	 * @param TargetObject The object clicked.
@@ -54,6 +52,10 @@ protected:
 	/** Nested list view of objects currently claiming the reference. */
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UNListView> References;
+	
+	virtual void NativeDestruct() override;
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+	virtual void NativeOnEntryReleased() override;
 
 private:
 	/** The reference wrapper currently bound to this entry. */

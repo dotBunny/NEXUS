@@ -20,9 +20,10 @@ void UNDynamicRefListViewEntry::NativeDestruct()
 void UNDynamicRefListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	Object = Cast<UNDynamicRefObject>(ListItemObject);
-	Object->Changed.BindUObject(this, &UNDynamicRefListViewEntry::Refresh);
-	
-	
+	if (Object != nullptr)
+	{
+		Object->Changed.BindUObject(this, &UNDynamicRefListViewEntry::Refresh);
+	}
 	Refresh();
 }
 
@@ -39,27 +40,35 @@ void UNDynamicRefListViewEntry::NativeOnEntryReleased()
 
 void UNDynamicRefListViewEntry::OnButtonPressed(UObject* TargetObject) const
 {
-	Object->GetOverlay()->OnButtonClicked.Broadcast(TargetObject);
+	if (!IsValid(Object)) return;
+	const UNDynamicRefsDeveloperOverlay* Overlay = Object->GetOverlay();
+	if (!IsValid(Overlay)) return;
+	Overlay->OnButtonClicked.Broadcast(TargetObject);
 }
 
 void UNDynamicRefListViewEntry::Refresh() const
 {
-	Reference->SetText(Object->GetReferenceText());
-	if (Object != nullptr)
+	if (IsValid(Object))
 	{
+		Reference->SetText(Object->GetReferenceText());
+		
 		// Remake buttons for referenced objects
 		References->ClearListItems();
 		
-		for (UObject* ReferenceObject : Object->GetObjects())
+		for (TSoftObjectPtr ReferenceObject : Object->GetObjects())
 		{
-			UNButtonListViewEntryObject* ButtonObject = NewObject<UNButtonListViewEntryObject>(
-				Object, UNButtonListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
+			UObject* Reference = ReferenceObject.Get();
+			if (IsValid(Reference))
+			{
+				UNButtonListViewEntryObject* ButtonObject = NewObject<UNButtonListViewEntryObject>(
+					Object, UNButtonListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
 			
-			ButtonObject->SetText(FText::FromString(FString::Printf(TEXT("%s"), *ReferenceObject->GetFName().ToString())));
-			ButtonObject->TargetObject = ReferenceObject;
-			ButtonObject->OnPressedEvent.BindUObject(this, &UNDynamicRefListViewEntry::OnButtonPressed);
+				ButtonObject->SetText(FText::FromString(FString::Printf(TEXT("%s"), *Reference->GetFName().ToString())));
+				ButtonObject->TargetObject = Reference;
+				ButtonObject->OnPressedEvent.BindUObject(this, &UNDynamicRefListViewEntry::OnButtonPressed);
 
-			References->AddItem(ButtonObject);
+				References->AddItem(ButtonObject);
+			}
 		}
 	}
 }
