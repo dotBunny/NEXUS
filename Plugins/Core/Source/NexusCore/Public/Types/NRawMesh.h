@@ -176,7 +176,28 @@ private:
 	/** @return true if any loop in the mesh has more than three vertices. Recomputed by Validate. */
 	bool CheckNonTris();
 	/** @return true when Bounds has been populated (non-default FBox). Recomputed by Validate. */
-	bool CheckBounds() const;
+	FORCEINLINE bool CheckBounds() const { return Bounds.IsValid != 0; };
+
+	/**
+	 * Newell's-method face normal for an arbitrary (possibly slightly non-planar) polygon loop.
+	 * @param Indices Loop indices into VertexBuffer, in winding order.
+	 * @param VertexBuffer Vertex pool the indices reference.
+	 * @return Unit-length face normal, or zero for degenerate / collinear loops.
+	 */
+	FORCEINLINE static FVector ComputeLoopNormal(const TArray<int32>& Indices, const TArray<FVector>& VertexBuffer)
+	{
+		const int32 Count = Indices.Num();
+		FVector Normal = FVector::ZeroVector;
+		for (int32 k = 0; k < Count; k++)
+		{
+			const FVector& A = VertexBuffer[Indices[k]];
+			const FVector& B = VertexBuffer[Indices[(k + 1) % Count]];
+			Normal.X += (A.Y - B.Y) * (A.Z + B.Z);
+			Normal.Y += (A.Z - B.Z) * (A.X + B.X);
+			Normal.Z += (A.X - B.X) * (A.Y + B.Y);
+		}
+		return Normal.GetSafeNormal();
+	}
 
 	/** Cached result of the most recent convexity check. */
 	UPROPERTY(VisibleAnywhere)

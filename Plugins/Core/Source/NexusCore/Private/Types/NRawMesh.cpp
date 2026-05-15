@@ -62,17 +62,7 @@ void FNRawMesh::ConvertToTriangles()
 			const TArray<int32> Src = Loops[i].Indices;
 			const int32 SrcCount = Src.Num();
 
-			// Polygon normal via Newell's method — robust for slightly non-planar loops.
-			FVector PolygonNormal = FVector::ZeroVector;
-			for (int32 k = 0; k < SrcCount; k++)
-			{
-				const FVector& A = Vertices[Src[k]];
-				const FVector& B = Vertices[Src[(k + 1) % SrcCount]];
-				PolygonNormal.X += (A.Y - B.Y) * (A.Z + B.Z);
-				PolygonNormal.Y += (A.Z - B.Z) * (A.X + B.X);
-				PolygonNormal.Z += (A.X - B.X) * (A.Y + B.Y);
-			}
-			PolygonNormal = PolygonNormal.GetSafeNormal();
+			const FVector PolygonNormal = ComputeLoopNormal(Src, Vertices);
 
 			// Build a 2D basis on the polygon's plane and project the loop into it.
 			FVector Tangent;
@@ -285,17 +275,7 @@ bool FNRawMesh::CheckConvex()
 			continue;
 		}
 
-		// Face normal via Newell's method — works for triangles, quads, and n-gons (including slightly non-planar ones).
-		FVector FaceNormal = FVector::ZeroVector;
-		for (int32 k = 0; k < LoopCount; k++)
-		{
-			const FVector& A = Vertices[Loop.Indices[k]];
-			const FVector& B = Vertices[Loop.Indices[(k + 1) % LoopCount]];
-			FaceNormal.X += (A.Y - B.Y) * (A.Z + B.Z);
-			FaceNormal.Y += (A.Z - B.Z) * (A.X + B.X);
-			FaceNormal.Z += (A.X - B.X) * (A.Y + B.Y);
-		}
-		FaceNormal = FaceNormal.GetSafeNormal();
+		const FVector FaceNormal = ComputeLoopNormal(Loop.Indices, Vertices);
 		if (FaceNormal.IsNearlyZero())
 		{
 			// Degenerate face — can't reason about its supporting plane.
@@ -346,9 +326,4 @@ bool FNRawMesh::CheckNonTris()
 		}
 	}
 	return false;
-}
-
-bool FNRawMesh::CheckBounds() const
-{
-	return Bounds.IsValid != 0;
 }
