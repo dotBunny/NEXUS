@@ -85,18 +85,24 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	/**
-	 * Rotates every vertex and the center around a world-space pivot.
+	 * Rotates every vertex and the center around a world-space pivot, and refreshes Bounds from the
+	 * rotated vertices.
 	 * @param WorldPoint Pivot around which the rotation occurs.
 	 * @param Rotation Rotation to apply.
 	 */
 	void RotatedAroundPivot(const FVector& WorldPoint, const FRotator& Rotation)
 	{
+		const FQuat Quat = Rotation.Quaternion();
+		FBox NewBounds(ForceInit);
 		const int32 Count = Vertices.Num();
 		for (int32 i = 0; i < Count; i++)
 		{
-			Vertices[i] = FNVectorUtils::RotatedAroundPivot(Vertices[i], WorldPoint, Rotation);
+			Vertices[i] = Quat.RotateVector(Vertices[i] - WorldPoint) + WorldPoint;
+			NewBounds += Vertices[i];
 		}
-		Center = FNVectorUtils::RotatedAroundPivot(Center, WorldPoint, Rotation);
+		Center = Quat.RotateVector(Center - WorldPoint) + WorldPoint;
+		Bounds = NewBounds;
+		bHasBounds = (Count > 0);
 	}
 
 	/**
