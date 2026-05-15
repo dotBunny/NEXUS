@@ -81,6 +81,12 @@ void UNDynamicRefSubsystem::RemoveObjectByName(const FName Name, UObject* InObje
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
 	if (Collection != nullptr && Collection->Remove(InObject))
 	{
+		// Remove empty collection
+		if (!Collection->HasObjects())
+		{
+			NamedCollection.Remove(Name);
+		}
+		
 		OnRemovedByName.Broadcast(Name, InObject);	
 	}
 	
@@ -200,7 +206,7 @@ int32 UNDynamicRefSubsystem::GetCountByName(const FName Name)
 UObject* UNDynamicRefSubsystem::GetFirstObjectByName(const FName Name)
 {
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
-	if (Collection != nullptr)
+	if (Collection != nullptr && Collection->HasObjects())
 	{
 		return Collection->Objects[0];
 	}
