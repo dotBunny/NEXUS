@@ -52,7 +52,7 @@ void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TS
 }
 
 // #SONARQUBE-DISABLE-CPP_S134
-TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel)
+TSharedPtr<SDockTab> FNSlateUtils::FindDockTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel)
 {
 	TSharedPtr<SWidget> Widget = BaseWidget;
 	while (Widget.IsValid())
@@ -61,8 +61,8 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 		if (Widget->GetType() == SDockingTabStackName)
 		{
 			FChildren* Children = Widget->GetChildren();
-			int32 ChildrenCount = Children->Num();
-			
+			const int32 ChildrenCount = Children->Num();
+
 			for (int32 i = 0; i < ChildrenCount; ++i)
 			{
 				const TSharedPtr<SWidget> ChildWidget = Children->GetChildAt(i);
@@ -70,13 +70,10 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 				FindWidgetsByType(FoundWidgets, ChildWidget, SDockTabName, SDockingTabStackName);
 				for (int32 j = 0; j < FoundWidgets.Num(); j++)
 				{
-					if (FoundWidgets[j].IsValid())
+					TSharedPtr<SDockTab> Tab = StaticCastSharedPtr<SDockTab>(FoundWidgets[j]);
+					if (Tab->GetTabLabel().EqualTo(TargetLabel))
 					{
-						TSharedPtr<SDockTab> Tab = StaticCastSharedPtr<SDockTab>(FoundWidgets[j]);
-						if (Tab->GetTabLabel().EqualTo(TargetLabel))
-						{
-							return StaticCastSharedPtr<SDockTab>(FoundWidgets[j]);
-						}
+						return Tab;
 					}
 				}
 			}
@@ -85,10 +82,16 @@ TSharedPtr<SDockTab> FNSlateUtils::FindDocTabWithLabel(const TSharedPtr<SWidget>
 			return nullptr;
 		}
 		
-		// Floating Tab  ?
+		// Floating Tab
 		if (Widget->GetType() == SDockTabName)
 		{
-			return StaticCastSharedPtr<SDockTab>(Widget);
+			TSharedPtr<SDockTab> Tab = StaticCastSharedPtr<SDockTab>(Widget);
+			if (Tab->GetTabLabel().EqualTo(TargetLabel))
+			{
+				return Tab;
+			}
+			// Reached our containing tab and it isn't the target; let the caller fall back to identifier lookup.
+			return nullptr;
 		}
 		
 		// Goes up

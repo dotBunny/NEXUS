@@ -5,18 +5,18 @@
 #include "LevelEditor.h"
 #include "NSlateUtils.h"
 
-TSharedPtr<SDockTab> FNEditorSlateUtils::FindDocTab(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel,
+TSharedPtr<SDockTab> FNEditorSlateUtils::FindDockTab(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel,
                                                     const FName TabIdentifier)
 {
-	TSharedPtr<SDockTab> RuntimeTab = FNSlateUtils::FindDocTabWithLabel(BaseWidget, TargetLabel);
+	TSharedPtr<SDockTab> RuntimeTab = FNSlateUtils::FindDockTabWithLabel(BaseWidget, TargetLabel);
 	if (RuntimeTab.IsValid())
 	{
 		return RuntimeTab;
 	}
-	return FindDocTabByIdentifier(TabIdentifier);
+	return FindDockTabByIdentifier(TabIdentifier);
 }
 
-TSharedPtr<SDockTab> FNEditorSlateUtils::FindDocTabByIdentifier(const FName TabIdentifier)
+TSharedPtr<SDockTab> FNEditorSlateUtils::FindDockTabByIdentifier(const FName TabIdentifier)
 {
 	const FName ActiveTabIdentifier = FName(FString::Printf(TEXT("%s_ActiveTab"), *TabIdentifier.ToString()));
 	

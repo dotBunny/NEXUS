@@ -21,13 +21,13 @@ public:
 	 * @param TabIdentifier Tab manager identifier to match; preferred over label when unique.
 	 * @return The matching SDockTab, or an invalid shared pointer if nothing was found.
 	 */
-	static TSharedPtr<SDockTab> FindDocTab(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel, const FName TabIdentifier);
+	static TSharedPtr<SDockTab> FindDockTab(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel, const FName TabIdentifier);
 
 	/**
 	 * Find an SDockTab anywhere in the global FGlobalTabmanager by identifier.
 	 * @param TabIdentifier Tab manager identifier registered when the tab was spawned.
 	 * @return The matching SDockTab, or an invalid shared pointer if no such tab is live.
 	 */
-	static TSharedPtr<SDockTab> FindDocTabByIdentifier(const FName TabIdentifier);
+	static TSharedPtr<SDockTab> FindDockTabByIdentifier(const FName TabIdentifier);
 };
 
