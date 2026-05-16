@@ -40,11 +40,33 @@ void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& Bas
 		BaseMesh.Loops.Add(MoveTemp(Shifted));
 	}
 
+	// FaceLoops carries the polygonal pre-triangulation description used by CheckConvex. Preserve it only
+	// when BOTH sides describe themselves polygonally; otherwise clear, because partial coverage would let
+	// CheckConvex skip the undocumented faces and falsely accept non-convex merges. When both sides have
+	// it, the combined description is still geometrically meaningful — for genuinely convex merges (two
+	// hulls along a shared face) CheckConvex correctly accepts, and for unrelated stitches it correctly
+	// rejects because each side's vertices land on the wrong side of the other side's face planes.
+	if (BaseMesh.FaceLoops.Num() > 0 && OtherMesh.FaceLoops.Num() > 0)
+	{
+		BaseMesh.FaceLoops.Reserve(BaseMesh.FaceLoops.Num() + OtherMesh.FaceLoops.Num());
+		for (const FNRawMeshLoop& OtherFace : OtherMesh.FaceLoops)
+		{
+			FNRawMeshLoop Shifted;
+			Shifted.Indices.Reserve(OtherFace.Indices.Num());
+			for (const int32 Index : OtherFace.Indices)
+			{
+				Shifted.Indices.Add(Index + VertexOffset);
+			}
+			BaseMesh.FaceLoops.Add(MoveTemp(Shifted));
+		}
+	}
+	else
+	{
+		BaseMesh.FaceLoops.Reset();
+	}
+
 	// A merged mesh is no longer a single Chaos-cooked body; force Validate() to re-evaluate convexity and tri-ness.
-	// Drop FaceLoops too — the polygonal-face description belonged to a single hull and stitching loops from
-	// two meshes together produces a mix that no longer represents one mesh's pre-triangulation faces.
 	BaseMesh.bIsChaosGenerated = false;
-	BaseMesh.FaceLoops.Reset();
 
 	BaseMesh.CalculateCenterAndBounds();
 	BaseMesh.Validate();

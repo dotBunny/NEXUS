@@ -76,6 +76,81 @@ N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_Identity_AppendsAndShiftsIndices
 	CHECK_EQUALS("Appended loop's third index should be shifted past Base's existing vertices", AppendedLoop.Indices[2], BaseVertexCount + 2);
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_FaceLoops_BothSidesHaveThem_AppendedWithShift,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::FaceLoops_BothSidesHaveThem_AppendedWithShift",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// When both inputs carry a polygonal FaceLoops description, the merged mesh should keep both — with
+	// Other's indices shifted past Base's vertex count, exactly the way Loops are shifted. Without this,
+	// CheckConvex on the merged mesh falls back to walking the fan-triangulated Loops and re-introduces
+	// the per-triangle coplanar drift the FaceLoops path was added to avoid.
+	FNRawMesh Base;
+	Base.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(10, 10, 0), FVector(0, 10, 0) };
+	Base.FaceLoops.Add(FNRawMeshLoop(0, 1, 2, 3));
+	Base.Loops = Base.FaceLoops;
+
+	FNRawMesh Other;
+	Other.Vertices = { FVector(100, 0, 0), FVector(110, 0, 0), FVector(110, 10, 0), FVector(100, 10, 0) };
+	Other.FaceLoops.Add(FNRawMeshLoop(0, 1, 2, 3));
+	Other.Loops = Other.FaceLoops;
+
+	const int32 BaseVertexCount = Base.Vertices.Num();
+	const int32 BaseFaceLoopCount = Base.FaceLoops.Num();
+
+	FNRawMeshUtils::CombineMesh(FTransform::Identity, Base, FTransform::Identity, Other);
+
+	CHECK_EQUALS("Combined FaceLoops count should be Base + Other", Base.FaceLoops.Num(), BaseFaceLoopCount + 1);
+
+	const FNRawMeshLoop& AppendedFace = Base.FaceLoops.Last();
+	CHECK_EQUALS("Appended FaceLoop should preserve the 4-vertex polygon", AppendedFace.Indices.Num(), 4);
+	CHECK_EQUALS("Appended FaceLoop index 0 should be shifted by VertexOffset", AppendedFace.Indices[0], BaseVertexCount + 0);
+	CHECK_EQUALS("Appended FaceLoop index 1 should be shifted by VertexOffset", AppendedFace.Indices[1], BaseVertexCount + 1);
+	CHECK_EQUALS("Appended FaceLoop index 2 should be shifted by VertexOffset", AppendedFace.Indices[2], BaseVertexCount + 2);
+	CHECK_EQUALS("Appended FaceLoop index 3 should be shifted by VertexOffset", AppendedFace.Indices[3], BaseVertexCount + 3);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_FaceLoops_OnlyBaseHasThem_Cleared,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::FaceLoops_OnlyBaseHasThem_Cleared",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Partial FaceLoops coverage would let CheckConvex skip the undocumented side's face planes and falsely
+	// accept non-convex merges. The combined mesh must drop FaceLoops entirely when either side lacks it.
+	FNRawMesh Base;
+	Base.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(10, 10, 0), FVector(0, 10, 0) };
+	Base.FaceLoops.Add(FNRawMeshLoop(0, 1, 2, 3));
+	Base.Loops = Base.FaceLoops;
+
+	FNRawMesh Other;
+	Other.Vertices = { FVector(100, 0, 0), FVector(110, 0, 0), FVector(105, 10, 0) };
+	Other.Loops.Add(FNRawMeshLoop(0, 1, 2));
+	// Deliberately leave Other.FaceLoops empty.
+
+	FNRawMeshUtils::CombineMesh(FTransform::Identity, Base, FTransform::Identity, Other);
+
+	CHECK_EQUALS("Partial-coverage merge must clear FaceLoops rather than leave a half-described mesh", Base.FaceLoops.Num(), 0);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_FaceLoops_OnlyOtherHasThem_Cleared,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::FaceLoops_OnlyOtherHasThem_Cleared",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirror of the previous test: Base lacks FaceLoops, Other has it. Still a partial-coverage case
+	// and the combined mesh must clear FaceLoops.
+	FNRawMesh Base;
+	Base.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(5, 10, 0) };
+	Base.Loops.Add(FNRawMeshLoop(0, 1, 2));
+	// Deliberately leave Base.FaceLoops empty.
+
+	FNRawMesh Other;
+	Other.Vertices = { FVector(100, 0, 0), FVector(110, 0, 0), FVector(110, 10, 0), FVector(100, 10, 0) };
+	Other.FaceLoops.Add(FNRawMeshLoop(0, 1, 2, 3));
+	Other.Loops = Other.FaceLoops;
+
+	FNRawMeshUtils::CombineMesh(FTransform::Identity, Base, FTransform::Identity, Other);
+
+	CHECK_EQUALS("Partial-coverage merge must clear FaceLoops regardless of which side carried the description", Base.FaceLoops.Num(), 0);
+}
+
 N_TEST_CRITICAL(FNRawMeshUtilsTests_CombineMesh_TransformsCompose,
 	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::TransformsCompose",
 	N_TEST_CONTEXT_ANYWHERE)
