@@ -6,19 +6,21 @@
 #include "BaseTools/BaseMeshProcessingTool.h"
 #include "DynamicMesh/MeshNormals.h"
 
-TArray<int32> FNRawMesh::GetFlatIndices()
+TArray<int32> FNRawMesh::GetFlatIndices() const
 {
-	TArray<int32> ReturnData;
-	const int32 LoopCount = Loops.Num();
-	ReturnData.Reserve(LoopCount*3);
-	for (int32 i = 0; i < LoopCount; i++)
+	int32 Total = 0;
+	for (const FNRawMeshLoop& Loop : Loops)
 	{
-		for (int32 j = 0; j < Loops[i].Indices.Num(); j++)
-		{
-			ReturnData.Add(Loops[i].Indices[j]);
-		}
+		Total += Loop.Indices.Num();
 	}
-	return MoveTemp(ReturnData);
+
+	TArray<int32> ReturnData;
+	ReturnData.Reserve(Total);
+	for (const FNRawMeshLoop& Loop : Loops)
+	{
+		ReturnData.Append(Loop.Indices);
+	}
+	return ReturnData;
 }
 
 void FNRawMesh::ConvertToTriangles()
@@ -192,7 +194,7 @@ void FNRawMesh::ConvertToTriangles()
 	}
 }
 
-FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
+FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 {
 	if (CheckNonTris())
 	{
@@ -255,7 +257,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh)
 	return MoveTemp(DynamicMesh);
 }
 
-bool FNRawMesh::CheckConvex()
+bool FNRawMesh::CheckConvex() const
 {
 	if (Vertices.Num() == 0 || Loops.Num() == 0)
 	{
@@ -315,7 +317,7 @@ bool FNRawMesh::CheckConvex()
 	return true;
 }
 
-bool FNRawMesh::CheckNonTris()
+bool FNRawMesh::CheckNonTris() const
 {
 	const int32 LoopCount = Loops.Num();
 	for (int32 i = 0; i < LoopCount; i++)

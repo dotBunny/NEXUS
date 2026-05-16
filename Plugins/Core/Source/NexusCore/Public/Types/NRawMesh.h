@@ -48,7 +48,7 @@ struct NEXUSCORE_API FNRawMesh
 	 * Flattens Loops into a single contiguous index buffer.
 	 * @return A concatenation of every loop's indices.
 	 */
-	TArray<int32> GetFlatIndices();
+	TArray<int32> GetFlatIndices() const;
 
 	/** Re-triangulates non-triangular loops in place so every loop is a 3-vertex triangle. */
 	void ConvertToTriangles();
@@ -178,13 +178,13 @@ struct NEXUSCORE_API FNRawMesh
 	 * Creates an FDynamicMesh3 copy suitable for use with UE's dynamic mesh processing APIs.
 	 * @param bProcessMesh When true, runs additional cleanup on the resulting dynamic mesh.
 	 */
-	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false);
+	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false) const;
 
 private:
 	/** @return true if Vertices form a convex hull; false otherwise. Recomputed by Validate. */
-	bool CheckConvex();
+	bool CheckConvex() const;
 	/** @return true if any loop in the mesh has more than three vertices. Recomputed by Validate. */
-	bool CheckNonTris();
+	bool CheckNonTris() const;
 	/** @return true when Bounds has been populated (non-default FBox). Recomputed by Validate. */
 	FORCEINLINE bool CheckBounds() const { return Bounds.IsValid != 0; };
 
