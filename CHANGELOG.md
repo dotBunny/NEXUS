@@ -35,6 +35,7 @@
 - Started using pattern in Widgets where `BindWidget` members are validated in `NativeConstructor` only.
 - Moved `Multiplayer Test` into `NexusTooling`.
 - Renamed `NEXUS: ProcGen` plugin to `NEXUS: World Assembly` (`NexusProcGen` → `NexusWorldAssembly`, `NexusProcGenSamples` → `NexusWorldAssemblySamples`, `NProcGen*` class prefix → `NWorldAssembly*`). `CoreRedirects` in `DefaultEngine.ini` handle package + class renames so existing assets continue to load.
+- `FNLevelUtils::DetermineLevelBounds` now by default ignores transient actors, but has an option to include them.
 
 ### Fixed
 

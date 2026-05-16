@@ -278,7 +278,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::IsActive)),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
-				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during generation."),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon)));

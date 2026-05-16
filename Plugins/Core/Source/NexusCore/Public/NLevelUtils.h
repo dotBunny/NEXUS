@@ -52,7 +52,8 @@ public:
 	 * @param ActorIgnoreTags Any actor carrying one of these tags is ignored.
 	 * @param bIncludeEditorOnly If true, editor-only actors contribute to the bounds.
 	 * @param bIncludeNonColliding If true, non-colliding actors also contribute to the bounds.
+	 * @param bIncludeTransientActors If true, transient actors also contribute to the bounds.
 	 */
 	static void DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
-		const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly = false, bool bIncludeNonColliding = false);
+		const TArray<FName>& ActorIgnoreTags, bool bIncludeEditorOnly = false, bool bIncludeNonColliding = false, bool bIncludeTransientActors = false);
 };

@@ -46,7 +46,7 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 }
 
 void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
-	const TArray<FName>& ActorIgnoreTags, const bool bIncludeEditorOnly, const bool bIncludeNonColliding)
+	const TArray<FName>& ActorIgnoreTags, const bool bIncludeEditorOnly, const bool bIncludeNonColliding, const bool bIncludeTransientActors)
 {
 	const int32 NumActors = InLevel->Actors.Num();
 	
@@ -66,6 +66,13 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 		{
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, ActorIgnoreTags))
+			{
+				OutIgnoredActors.Add(Actor);
+				continue;
+			}
+			
+			// Don't include transient actors
+			if (!bIncludeTransientActors && Actor->HasAnyFlags(RF_Transient))
 			{
 				OutIgnoredActors.Add(Actor);
 				continue;

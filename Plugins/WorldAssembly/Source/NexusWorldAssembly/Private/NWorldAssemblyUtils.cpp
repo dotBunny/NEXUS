@@ -54,6 +54,9 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 			// Check Editor Only
 			if (Actor->IsEditorOnly() && !Settings.bIncludeEditorOnly) continue;
 			
+			// Don't bother with transient actors
+			if (Actor->HasAnyFlags(RF_Transient)) continue;
+			
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
 			
