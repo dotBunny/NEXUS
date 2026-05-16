@@ -82,6 +82,26 @@ public:
 			OtherMesh, OtherLocation, OtherRotation);
 	}
 
+	/** @return true if this cell's hull intersects Other's hull, oriented by each cell's world transform. */
+	float GetHullIntersectDepth(FNAssemblyGraphCellNode* Other) const
+	{
+		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
+			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
+	}
+	
+	/**
+	 * @return The deepest penetration distance between this cell's hull and the supplied externally-transformed mesh,
+	 *         or -1.0 when their AABBs do not overlap or the meshes are otherwise unmeasurable (see
+	 *         FNRawMeshUtils::GetIntersectDepth for the full set of sentinel cases).
+	 * @note Intended for "max-allowed-penetration" threshold checks during graph expansion; use CheckHullIntersects
+	 *       for an exact boolean overlap test.
+	 */
+	float GetHullIntersectDepth(const FVector& OtherLocation, const FRotator& OtherRotation,  const FNRawMesh& OtherMesh) const
+	{
+		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
+			OtherMesh, OtherLocation, OtherRotation);
+	}
+
 	/**
 	 * @return The raw input-data pointer used by the builder.
 	 * @warning Only valid during graph construction; nulled by CleanupBuilderReferences afterward.

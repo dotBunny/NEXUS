@@ -207,7 +207,8 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 {
 	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
-		if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]);
+		if (PenetrationDepth >= OrganContextPtr->WorldHullPenetration)
 		{
 			return true;
 		}
@@ -219,7 +220,8 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 {
 	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
 	{
-		if (CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]);
+		if (PenetrationDepth >= OrganContextPtr->CellHullPenetration)
 		{
 			return true;
 		}
@@ -380,7 +382,8 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
 		{
 			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
-			if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+			const float PenetrationDepth = BoundsIntersectingNodes[j]->GetHullIntersectDepth(TargetCellNode);
+			if (PenetrationDepth < OrganContextPtr->CellHullPenetration)
 			{
 				BoundsIntersectingNodes.RemoveAt(j);
 			}

@@ -62,10 +62,6 @@ public:
 	meta=(ToolTip="The range to query for nearby ANCellLevelInstances by ANWorldAssemblyRelay, used to determine if the client is considered loaded."))
 	float NetworkNearbyRange = 20000.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Generation Retry Count",
-	meta=(ToolTip="The maximum amount of full attempts at generating a space before it is considered a complete failure."))
-	int32 OrganGenerationRetryCount = 100;
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
 	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))
 	ENDirection OrganAutomaticBoneDirection = ENDirection::Backward;
@@ -73,6 +69,18 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction (Offset)",
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Assembly Retry Count",
+		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
+	int32 AssemblyGenerationRetryCount = 100;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum Cell Hull Penetration",
+		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	float AssemblyJunctionMatchingCellHullPenetration = 10.f;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration",
+		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	float AssemblyJunctionMatchingWorldPenetration = 1.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;

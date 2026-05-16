@@ -50,7 +50,6 @@ private:
 	/** Number of consecutive failed start-node attempts; used to break out of unwinnable retries. */
 	int32 BadStartCount = 0;
 
-
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
 
@@ -66,8 +65,10 @@ private:
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
 
-	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays). */
+	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
 	bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
+	
+	/** @return true when CellNode's hull intersects any of the cached node-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
 	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
 
 	/** @return Every existing cell whose world bounds intersect NewNode's. */

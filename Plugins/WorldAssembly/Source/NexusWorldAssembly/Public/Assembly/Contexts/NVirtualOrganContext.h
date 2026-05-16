@@ -48,6 +48,10 @@ class FNVirtualOrganContext
 	friend struct FNOrganGeneratorBuildGraphTask;
 
 public:
+	
+	float CellHullPenetration = 10.f;
+	
+	float WorldHullPenetration = 1.f;
 
 	/** Lower bound on cell count; -1 disables the check. */
 	int32 MinimumCellCount = -1;

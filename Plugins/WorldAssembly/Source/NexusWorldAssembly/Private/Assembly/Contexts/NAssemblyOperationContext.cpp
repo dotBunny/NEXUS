@@ -153,7 +153,9 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	for (auto& Pair : OrganData)
 	{
 		// Assign values while we are iterating for defaults
-		Pair.Value.MaximumRetryCount = Settings->OrganGenerationRetryCount;
+		Pair.Value.MaximumRetryCount = Settings->AssemblyGenerationRetryCount;
+		Pair.Value.CellHullPenetration = Settings->AssemblyJunctionMatchingCellHullPenetration;
+		Pair.Value.WorldHullPenetration = Settings->AssemblyJunctionMatchingWorldPenetration;
 		
 		if (Pair.Key->bUnbounded)
 		{

@@ -33,6 +33,10 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;
 	
+	float CellHullPenetration = 10.f;
+	
+	float WorldHullPenetration = 1.f;
+	
 	/** Spatial bounds of the SourceComponent unless bUnbounded. */
 	FBoxSphereBounds Bounds;
 	
