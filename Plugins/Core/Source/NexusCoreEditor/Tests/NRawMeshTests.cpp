@@ -343,8 +343,8 @@ N_TEST_CRITICAL(FNRawMeshTests_ConvertToTriangles_ConcaveQuad_EarClipping, "NEXU
 N_TEST_HIGH(FNRawMeshTests_ConvertToTriangles_Collinear_FallbackWarning, "NEXUS::UnitTests::NCore::FNRawMesh::ConvertToTriangles::Collinear_FallbackWarning", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Four collinear vertices form a degenerate loop — ear-clipping can never find a convex ear, so the code must
-	// emit a "falling back to fan" warning and still reduce the loop to n-2 triangle entries.
-	AddExpectedMessage(TEXT("Ear-clipping failed on loop"), ELogVerbosity::Warning);
+	// warn and drop the unresolved remainder rather than fanning it into self-intersecting / zero-area triangles.
+	AddExpectedMessage(TEXT("Ear-clipping could not fully triangulate loop"), ELogVerbosity::Warning);
 
 	FNRawMesh Mesh;
 	Mesh.Vertices = { FVector(0, 0, 0), FVector(1, 0, 0), FVector(2, 0, 0), FVector(3, 0, 0) };
@@ -353,7 +353,7 @@ N_TEST_HIGH(FNRawMeshTests_ConvertToTriangles_Collinear_FallbackWarning, "NEXUS:
 
 	Mesh.ConvertToTriangles();
 
-	CHECK_EQUALS("Degenerate collinear quad should still yield n-2 = 2 triangle entries via the fan fallback", Mesh.Loops.Num(), 2);
+	CHECK_EQUALS("Degenerate collinear quad must drop the unresolved remainder rather than emitting bad triangles", Mesh.Loops.Num(), 0);
 }
 
 N_TEST_HIGH(FNRawMeshTests_CheckConvex_Cube_True, "NEXUS::UnitTests::NCore::FNRawMesh::CheckConvex::Cube_True", N_TEST_CONTEXT_ANYWHERE)
