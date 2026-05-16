@@ -22,7 +22,7 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 	// - Cache the location and the rotation
 	for (int32 i = 0; i < MeshCount; i++)
 	{
-		VirtualWorldContextPtr->WorldCollisionMeshes[i].ApplyScale(VirtualWorldContextPtr->WorldCollisionMeshTransforms[i]);
+		VirtualWorldContextPtr->WorldCollisionMeshes[i].ApplyScale(VirtualWorldContextPtr->WorldCollisionMeshTransforms[i].GetScale3D());
 		VirtualWorldContextPtr->WorldCollisionMeshTransforms[i].SetScale3D(FVector::OneVector); // Clear Scale
 		VirtualWorldContextPtr->WorldCollisionMeshLocations.Add(VirtualWorldContextPtr->WorldCollisionMeshTransforms[i].GetLocation());
 		VirtualWorldContextPtr->WorldCollisionMeshRotations.Add(VirtualWorldContextPtr->WorldCollisionMeshTransforms[i].GetRotation().Rotator());

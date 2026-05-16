@@ -116,12 +116,11 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	/**
-	 * Bakes the scale component of Transform into every vertex, then refreshes Center and Bounds.
-	 * @param Transform Source transform; only its Scale3D is consumed — translation/rotation are ignored.
+	 * Bakes Scale into every vertex, then refreshes Center and Bounds. No-op when Scale is the identity.
+	 * @param Scale Per-axis scale factors. Callers with an FTransform should pass Transform.GetScale3D().
 	 */
-	void ApplyScale(const FTransform& Transform)
+	void ApplyScale(const FVector& Scale)
 	{
-		const FVector Scale = Transform.GetScale3D();
 		if (Scale.Equals(FVector::OneVector)) return;
 
 		const int32 Count = Vertices.Num();
