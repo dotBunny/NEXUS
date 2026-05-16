@@ -73,25 +73,25 @@ struct NEXUSCORE_API FNRawMesh
 	bool HasNonTris() const { return bHasNonTris; }
 
 	/**
-	 * Deep equality comparison (vertices, loops, validation flags and center).
-	 * @param Other Right-hand side of the comparison.
+	 * Deep equality comparison: vertices, loops, center, bounds, and the cached validation flags
+	 * (bIsConvex, bHasNonTris, bHasBounds, bIsChaosGenerated). Two meshes with identical geometry
+	 * but different cached flags will compare not-equal — call Validate() first if that matters.
 	 */
-	bool IsEqual(const FNRawMesh& Other) const
+	bool operator==(const FNRawMesh& Other) const
 	{
-		if (bIsConvex != Other.bIsConvex || bHasNonTris != Other.bHasNonTris || 
-			bHasBounds != Other.bHasBounds || bIsChaosGenerated != Other.bIsChaosGenerated)
-		{
-			return false;
-		}
-		if (Center != Other.Center) return false;
-		if (Bounds != Other.Bounds) return false;
-		if (Loops.Num() != Other.Loops.Num()) return false;
-		if (Vertices != Other.Vertices) return false;
-		for (int32 i = 0; i < Loops.Num(); i++)
-		{
-			if (!Loops[i].IsEqual(Other.Loops[i])) return false;
-		}
-		return true;
+		return bIsConvex == Other.bIsConvex
+			&& bHasNonTris == Other.bHasNonTris
+			&& bHasBounds == Other.bHasBounds
+			&& bIsChaosGenerated == Other.bIsChaosGenerated
+			&& Center == Other.Center
+			&& Bounds == Other.Bounds
+			&& Vertices == Other.Vertices
+			&& Loops == Other.Loops;
+	}
+
+	bool operator!=(const FNRawMesh& Other) const
+	{
+		return !(*this == Other);
 	}
 
 	/**

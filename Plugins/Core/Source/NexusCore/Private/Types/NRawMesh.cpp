@@ -307,7 +307,7 @@ bool FNRawMesh::CheckConvex() const
 				continue;
 			}
 			const double Signed = FVector::DotProduct(FaceNormal, Vertices[v]) - PlaneD;
-			if (Signed > DBL_EPSILON)
+			if (Signed > UE_DOUBLE_KINDA_SMALL_NUMBER)
 			{
 				return false;
 			}

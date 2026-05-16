@@ -44,10 +44,15 @@ struct NEXUSCORE_API FNRawMeshLoop
 	UPROPERTY(VisibleAnywhere)
 	TArray<int> Indices;
 
-	/** Exact order-sensitive equality with Other. */
-	bool IsEqual(const FNRawMeshLoop& Other) const
+	/** Exact order-sensitive equality. */
+	bool operator==(const FNRawMeshLoop& Other) const
 	{
 		return Indices == Other.Indices;
+	}
+
+	bool operator!=(const FNRawMeshLoop& Other) const
+	{
+		return !(*this == Other);
 	}
 
 	/** Returns true when the loop has exactly four vertices. */

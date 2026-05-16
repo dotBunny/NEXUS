@@ -80,7 +80,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellRootDetails
 				UnitBounds == Other.UnitBounds &&
 				UnitSize == Other.UnitSize &&
 				HullSettings.Equals(Other.HullSettings) &&
-				Hull.IsEqual(Other.Hull) &&
+				Hull == Other.Hull &&
 				VoxelSettings.Equals(Other.VoxelSettings) &&
 				VoxelData.IsEqual(Other.VoxelData) &&
 				RotationConstraints.IsEqual(Other.RotationConstraints);

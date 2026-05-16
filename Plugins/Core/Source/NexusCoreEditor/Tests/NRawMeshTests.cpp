@@ -162,7 +162,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_Identical, "NEXUS::UnitTests::NCore::FNRawMes
 	A.Validate();
 
 	FNRawMesh B = A;
-	CHECK_MESSAGE(TEXT("Identical meshes should compare equal"), A.IsEqual(B));
+	CHECK_MESSAGE(TEXT("Identical meshes should compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentVertices, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::DifferentVertices", N_TEST_CONTEXT_ANYWHERE)
@@ -175,7 +175,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentVertices, "NEXUS::UnitTests::NCore::
 
 	FNRawMesh B = A;
 	B.Vertices[1] = FVector(2, 0, 0);
-	CHECK_FALSE_MESSAGE(TEXT("Meshes with different vertex positions should not compare equal"), A.IsEqual(B));
+	CHECK_FALSE_MESSAGE(TEXT("Meshes with different vertex positions should not compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentLoopCount, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::DifferentLoopCount", N_TEST_CONTEXT_ANYWHERE)
@@ -186,7 +186,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentLoopCount, "NEXUS::UnitTests::NCore:
 
 	FNRawMesh B = A;
 	B.Loops.Add(FNRawMeshLoop(1, 3, 2));
-	CHECK_FALSE_MESSAGE(TEXT("Meshes with differing loop counts should not compare equal"), A.IsEqual(B));
+	CHECK_FALSE_MESSAGE(TEXT("Meshes with differing loop counts should not compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_CalculateCenterAndBounds_SymmetricCube, "NEXUS::UnitTests::NCore::FNRawMesh::CalculateCenterAndBounds::SymmetricCube", N_TEST_CONTEXT_ANYWHERE)
@@ -431,7 +431,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentCenter, "NEXUS::UnitTests::NCore::FN
 
 	FNRawMesh B = A;
 	B.Center += FVector(1, 0, 0);
-	CHECK_FALSE_MESSAGE(TEXT("Meshes with different Center should not compare equal"), A.IsEqual(B));
+	CHECK_FALSE_MESSAGE(TEXT("Meshes with different Center should not compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentBounds, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::DifferentBounds", N_TEST_CONTEXT_ANYWHERE)
@@ -444,7 +444,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentBounds, "NEXUS::UnitTests::NCore::FN
 
 	FNRawMesh B = A;
 	B.Bounds = FBox(FVector(-100, -100, -100), FVector(100, 100, 100));
-	CHECK_FALSE_MESSAGE(TEXT("Meshes with different Bounds should not compare equal"), A.IsEqual(B));
+	CHECK_FALSE_MESSAGE(TEXT("Meshes with different Bounds should not compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_IsEqual_SameLoopCount_DifferentIndices, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::SameLoopCount_DifferentIndices", N_TEST_CONTEXT_ANYWHERE)
@@ -455,7 +455,7 @@ N_TEST_HIGH(FNRawMeshTests_IsEqual_SameLoopCount_DifferentIndices, "NEXUS::UnitT
 
 	FNRawMesh B = A;
 	B.Loops[0] = FNRawMeshLoop(0, 1, 3);
-	CHECK_FALSE_MESSAGE(TEXT("Same loop count but different loop indices should not compare equal"), A.IsEqual(B));
+	CHECK_FALSE_MESSAGE(TEXT("Same loop count but different loop indices should not compare equal"), A == B);
 }
 
 N_TEST_HIGH(FNRawMeshTests_CalculateCenterAndBounds_AsymmetricMesh, "NEXUS::UnitTests::NCore::FNRawMesh::CalculateCenterAndBounds::AsymmetricMesh", N_TEST_CONTEXT_ANYWHERE)
