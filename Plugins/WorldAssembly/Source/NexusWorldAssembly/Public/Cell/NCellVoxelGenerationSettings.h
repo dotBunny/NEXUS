@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NArrayUtils.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NCellVoxelGenerationSettings.generated.h"
 
 /**
@@ -32,7 +33,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { "NCELL_VoxelIgnore" };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnoreActorTag, "NCell_VoxelIgnore" };
 
 	/** Collision channel used when tracing against the cell to determine occupancy. */
 	UPROPERTY(EditAnywhere)

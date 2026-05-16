@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NArrayUtils.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NCellBoundsGenerationSettings.generated.h"
 
 /**
@@ -28,7 +29,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the bounds calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { "NCELL_BoundsIgnore" };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnoreActorTag, "NCell_BoundsIgnore" };
 
 	// TODO: Padding to surfaces ? character height
 	/** @return true if all fields match structurally; used when diffing live vs. side-car cell data. */

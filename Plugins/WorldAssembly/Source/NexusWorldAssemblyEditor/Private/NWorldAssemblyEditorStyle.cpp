@@ -3,6 +3,8 @@
 
 #include "NWorldAssemblyEditorStyle.h"
 
+#include "NEditorUtils.h"
+#include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEdMode.h"
 #include "Brushes/SlateImageBrush.h"
 #include "Styling/SlateStyle.h"
@@ -56,6 +58,21 @@ FSlateIcon FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon()
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.HasCollisionVisualizer");
 	}
 	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer");
+}
+
+FSlateIcon FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon()
+{
+	const int32 Mode = FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode();
+	switch (Mode)
+	{
+	case 0:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_NotIgnored");
+	case 1:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_Ignored");
+	default:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_Unknown");
+	}
+	
 }
 
 TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
@@ -128,7 +145,10 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 
 	Style.Set("Command.WorldAssemblyEd.HasCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_HasCollisionVisualizer"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CreateCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CreateCollisionVisualizer"), Icon16x16));
-
+	
+	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_Unknown"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_NotIgnored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_Ignored"), Icon16x16));
 	
 	return StyleRef;
 }

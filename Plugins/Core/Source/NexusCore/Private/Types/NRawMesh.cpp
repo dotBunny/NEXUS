@@ -142,11 +142,11 @@ void FNRawMesh::ConvertToTriangles()
 				const int32 RingCount = Ring.Num();
 				for (int32 k = 0; k < RingCount; k++)
 				{
-					const int32 Prev = Ring[(k + RingCount - 1) % RingCount];
-					const int32 Curr = Ring[k];
+					const int32 Previous = Ring[(k + RingCount - 1) % RingCount];
+					const int32 Current = Ring[k];
 					const int32 Next = Ring[(k + 1) % RingCount];
 
-					if (!IsConvex(Prev, Curr, Next))
+					if (!IsConvex(Previous, Current, Next))
 					{
 						continue;
 					}
@@ -155,8 +155,8 @@ void FNRawMesh::ConvertToTriangles()
 					for (int32 m = 0; m < RingCount; m++)
 					{
 						const int32 Idx = Ring[m];
-						if (Idx != Prev && Idx != Curr && Idx != Next &&
-							PointInTri(Idx, Prev, Curr, Next))
+						if (Idx != Previous && Idx != Current && Idx != Next &&
+							PointInTri(Idx, Previous, Current, Next))
 						{
 							bContainsOther = true;
 							break;
@@ -167,7 +167,7 @@ void FNRawMesh::ConvertToTriangles()
 						continue;
 					}
 
-					NewLoops.Emplace(Src[Prev], Src[Curr], Src[Next]);
+					NewLoops.Emplace(Src[Previous], Src[Current], Src[Next]);
 					Ring.RemoveAt(k);
 					bEarFound = true;
 					break;
@@ -379,18 +379,18 @@ void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double 
 		{
 			const int32 StartV = NextVert.CreateConstIterator().Key();
 			LoopIndices.Reserve(NextVert.Num());
-			int32 Curr = StartV;
+			int32 Current = StartV;
 			int32 Guard = NextVert.Num() + 1;
 			while (Guard > 0)
 			{
-				LoopIndices.Add(Curr);
-				const int32* Next = NextVert.Find(Curr);
+				LoopIndices.Add(Current);
+				const int32* Next = NextVert.Find(Current);
 				if (!Next)
 				{
 					break;
 				}
-				Curr = *Next;
-				if (Curr == StartV)
+				Current = *Next;
+				if (Current == StartV)
 				{
 					bClosedLoop = (LoopIndices.Num() == NextVert.Num());
 					break;
@@ -511,10 +511,10 @@ bool FNRawMesh::CheckConvex() const
 		// In-plane convexity: every consecutive turn must keep the same sign relative to the face normal.
 		for (int32 k = 0; k < LoopCount; k++)
 		{
-			const FVector& Prev = Vertices[Loop.Indices[(k + LoopCount - 1) % LoopCount]];
-			const FVector& Curr = Vertices[Loop.Indices[k]];
+			const FVector& Previous = Vertices[Loop.Indices[(k + LoopCount - 1) % LoopCount]];
+			const FVector& Current = Vertices[Loop.Indices[k]];
 			const FVector& Next = Vertices[Loop.Indices[(k + 1) % LoopCount]];
-			const FVector Cross = FVector::CrossProduct(Curr - Prev, Next - Curr);
+			const FVector Cross = FVector::CrossProduct(Current - Previous, Next - Current);
 			if (FVector::DotProduct(Cross, FaceNormal) < -UE_DOUBLE_KINDA_SMALL_NUMBER)
 			{
 				return false;

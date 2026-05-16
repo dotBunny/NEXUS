@@ -5,24 +5,22 @@
 
 #include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
-#include "NEditorUtilityWidget.h"
-#include "NEditorUtilityWidgetSubsystem.h"
+
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorCommands.h"
-#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
-#include "Menus/NMenuEntry.h"
-#include "Menus/NToolsMenu.h"
+
+const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
 
 void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 {
 	// Level Tools
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
 	{
-		FToolMenuSection& NexusSection = Menu->FindOrAddSection("NEXUS");
+		FToolMenuSection& NexusSection = Menu->FindOrAddSection(MenuSection);
 		
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -269,6 +267,24 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				&FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon)));
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 		
+		// Actions
+		NexusSection.AddSeparator(NAME_None);
+		
+		// Ignore Actor Toggle
+		FToolMenuEntry IgnoreActorToggle  = FToolMenuEntry::InitToolBarButton(
+			"NWorldAssembly_IgnoreActorToggle",
+			FUIAction(
+				FExecuteAction::CreateStatic(&IgnoreSelectedActorsToggle),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::HasCellActor)),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle", "Ignore Actor Toggle"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a NCell."),
+				TAttribute<FSlateIcon>::Create(
+					TAttribute<FSlateIcon>::FGetter::CreateStatic(
+				&FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon)));
+		NexusSection.AddEntry(IgnoreActorToggle);
+		
 		// Collision Visualizer
 		FToolMenuEntry CollisionVisualizerEntry  = FToolMenuEntry::InitToolBarButton(
 			"NWorldAssembly_ToggleCollisionVisualizer",
@@ -291,16 +307,19 @@ void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NOrganExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NWorldAssemblyEdMode_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_AddButton");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_SelectButton");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_EditBoundsMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_EditHullMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_EditVoxelMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellJunctionExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, "NEXUS", "NCellActor_DrawVoxelData");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NOrganExtensions_Button");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssemblyEdMode_Button");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_AddButton");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_SelectButton");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditBoundsMode");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditHullMode");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditVoxelMode");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellExtensions_Button");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellJunctionExtensions_Button");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_DrawVoxelData");
+		
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_ToggleCollisionVisualizer");
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_IgnoreSelectedActorsToggle");
 	}
 }
 
@@ -354,4 +373,61 @@ void FNWorldAssemblyEditorToolMenu::CollisionVisualizerToggle()
 			GEditor->SelectActor(NewVisualizer, true, false, false);
 		}
 	}
+}
+
+void FNWorldAssemblyEditorToolMenu::IgnoreSelectedActorsToggle()
+{
+	if (GetIgnoreSelectedActorsToggleMode() == 0)
+	{
+		// ADD
+		USelection* AddSelection = GEditor->GetSelectedActors();
+		for (FSelectionIterator It(*AddSelection); It; ++It)
+		{
+			AActor* Actor = Cast<AActor>(*It);
+			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag);
+		}
+	}
+	else
+	{
+		// REMOVE
+		USelection* RemoveSelection = GEditor->GetSelectedActors();
+		for (FSelectionIterator It(*RemoveSelection); It; ++It)
+		{
+			AActor* Actor = Cast<AActor>(*It);
+			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag);
+		}
+	}
+}
+
+int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
+{
+	USelection* Selection = GEditor->GetSelectedActors();
+	if (Selection == nullptr || Selection->Num() == 0)
+	{
+		return -1; // Disabled
+	}
+	
+	int32 ActorCount = 0;
+	int32 TaggedActorCount = 0;
+	
+	for (FSelectionIterator It(*Selection); It; ++It)
+	{
+		const AActor* Actor = Cast<AActor>(*It);
+		ActorCount++;
+		
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag))
+		{
+			TaggedActorCount++;
+		}
+	}
+	
+	if (TaggedActorCount > 0)
+	{
+		if (ActorCount == TaggedActorCount)
+		{
+			return 1; // Remove
+		}
+		return -1; // Unknown
+	}
+	return 0; // Add
 }

@@ -32,4 +32,6 @@ public:
 	
 	/** @return Icon for the "toggle world-collision visualizer" action on the World Assembly toolbar. */
 	static FSlateIcon CollisionVisualizerToggleIcon();
+	
+	static FSlateIcon IgnoreActorToggleIcon();
 };

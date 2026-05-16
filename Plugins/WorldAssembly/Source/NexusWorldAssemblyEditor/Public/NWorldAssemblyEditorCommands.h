@@ -4,7 +4,6 @@
 #pragma once
 
 #include "NWorldAssemblyEditorStyle.h"
-#include "Developer/NDebugActor.h"
 
 class UNOrganComponent;
 class UNCellJunctionComponent;

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Chaos/Convex.h"
+#include "NWorldAssemblyMinimal.h"
 #include "NCellHullGenerationSettings.generated.h"
 
 /**
@@ -44,7 +45,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the hull calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { "NCELL_HullIgnore" };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnoreActorTag, "NCell_HullIgnore" };
 
 	/** @return The Chaos enum matching BuildMethod. */
 	Chaos::FConvexBuilder::EBuildMethod GetChaosBuildMethod() const

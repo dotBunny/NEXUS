@@ -9,7 +9,7 @@
  */
 class FNWorldAssemblyEditorUndo : public FSelfRegisteringEditorUndoClient
 {
-protected:
+public:
 	virtual bool MatchesContext( const FTransactionContext& InContext, const TArray<TPair<UObject*, FTransactionObjectEvent>>& TransactionObjectContexts ) const override;
 	virtual void PostUndo(bool bSuccess) override;
 	virtual void PostRedo(bool bSuccess) override;

@@ -8,6 +8,10 @@
  */
 namespace NEXUS::WorldAssembly
 {
+	namespace Tags
+	{
+		inline const FName CellIgnoreActorTag = FName("NCell_Ignore");
+	}
 	/**
 	 * Debug-draw tuning.
 	 */
