@@ -53,13 +53,23 @@ struct NEXUSCORE_API FNRawMesh
 	/** Re-triangulates non-triangular loops in place so every loop is a 3-vertex triangle. */
 	void ConvertToTriangles();
 
-	/** Whether the mesh has been validated as convex. */
+	/**
+	 * Cached convexity result from the most recent Validate(). Defaults to false; returns false until
+	 * Validate() (or an external setter via a friend) has populated it. Not live — mutating Vertices
+	 * or Loops can leave this stale.
+	 */
 	bool IsConvex() const { return bIsConvex; }
 
-	/** Whether the mesh has an AABB set. */
+	/**
+	 * Cached AABB-set flag from the most recent Validate(). Defaults to false; CalculateCenterAndBounds()
+	 * and RotatedAroundPivot() also keep it in sync. Not live — direct vertex mutation can leave this stale.
+	 */
 	bool HasBounds() const { return bHasBounds; }
-	
-	/** Whether any loop in the mesh has more than three vertices. */
+
+	/**
+	 * Cached non-triangle-loop flag from the most recent Validate(). Defaults to false; returns false until
+	 * Validate() has populated it. Not live — mutating Loops can leave this stale.
+	 */
 	bool HasNonTris() const { return bHasNonTris; }
 
 	/**
