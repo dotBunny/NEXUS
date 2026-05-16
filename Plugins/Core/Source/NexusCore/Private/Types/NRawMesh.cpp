@@ -30,22 +30,27 @@ void FNRawMesh::ConvertToTriangles()
 	{
 		return;
 	}
-	
+
+	// Build a fresh loop list and swap it in at the end — avoids O(K*N) shifting from RemoveAt/Insert
+	// on the existing Loops array while we triangulate.
+	TArray<FNRawMeshLoop> NewLoops;
+	NewLoops.Reserve(Loops.Num());
+
 	if (bIsConvex)
 	{
 		// Fan triangulation from vertex 0 — valid for convex loops only.
-		for (int32 i = Loops.Num() - 1; i >= 0;  i--)
+		for (const FNRawMeshLoop& Loop : Loops)
 		{
-			if (Loops[i].IsTriangle())
+			if (Loop.IsTriangle())
 			{
+				NewLoops.Add(Loop);
 				continue;
 			}
 
-			const TArray<int32> Src = Loops[i].Indices;
-			Loops.RemoveAt(i);
-			for (int32 j = Src.Num() - 2; j >= 1; j--)
+			const TArray<int32>& Src = Loop.Indices;
+			for (int32 j = 1; j <= Src.Num() - 2; j++)
 			{
-				Loops.Insert(FNRawMeshLoop(Src[0], Src[j], Src[j + 1]), i);
+				NewLoops.Emplace(Src[0], Src[j], Src[j + 1]);
 			}
 		}
 	}
@@ -54,14 +59,16 @@ void FNRawMesh::ConvertToTriangles()
 		// Ear-clipping triangulation — handles concave loops by projecting each loop onto its
 		// best-fit plane, then repeatedly clipping convex "ear" triangles that contain no other
 		// loop vertices.
-		for (int32 i = Loops.Num() - 1; i >= 0; i--)
+		for (int32 LoopIdx = 0; LoopIdx < Loops.Num(); LoopIdx++)
 		{
-			if (Loops[i].IsTriangle())
+			const FNRawMeshLoop& Loop = Loops[LoopIdx];
+			if (Loop.IsTriangle())
 			{
+				NewLoops.Add(Loop);
 				continue;
 			}
 
-			const TArray<int32> Src = Loops[i].Indices;
+			const TArray<int32>& Src = Loop.Indices;
 			const int32 SrcCount = Src.Num();
 
 			const FVector PolygonNormal = ComputeLoopNormal(Src, Vertices);
@@ -127,9 +134,6 @@ void FNRawMesh::ConvertToTriangles()
 				return !(bHasNeg && bHasPos);
 			};
 
-			TArray<FNRawMeshLoop> NewTris;
-			NewTris.Reserve(SrcCount - 2);
-
 			// Guard against pathological polygons causing an infinite loop.
 			int32 Guard = SrcCount * SrcCount;
 			while (Ring.Num() > 3 && Guard > 0)
@@ -163,7 +167,7 @@ void FNRawMesh::ConvertToTriangles()
 						continue;
 					}
 
-					NewTris.Emplace(Src[Prev], Src[Curr], Src[Next]);
+					NewLoops.Emplace(Src[Prev], Src[Curr], Src[Next]);
 					Ring.RemoveAt(k);
 					bEarFound = true;
 					break;
@@ -171,10 +175,10 @@ void FNRawMesh::ConvertToTriangles()
 
 				// Safety countdown
 				Guard--;
-				
+
 				if (!bEarFound)
 				{
-					UE_LOG(LogNexusCore, Warning, TEXT("Ear-clipping failed on loop %d; falling back to fan of the remainder."), i);
+					UE_LOG(LogNexusCore, Warning, TEXT("Ear-clipping failed on loop %d; falling back to fan of the remainder."), LoopIdx);
 					break;
 				}
 			}
@@ -182,16 +186,12 @@ void FNRawMesh::ConvertToTriangles()
 			// Emit whatever remains (either the final triangle, or the untriangulated remainder as a fan).
 			for (int32 k = 1; k < Ring.Num() - 1; k++)
 			{
-				NewTris.Emplace(Src[Ring[0]], Src[Ring[k]], Src[Ring[k + 1]]);
-			}
-
-			Loops.RemoveAt(i);
-			for (int32 k = NewTris.Num() - 1; k >= 0; k--)
-			{
-				Loops.Insert(MoveTemp(NewTris[k]), i);
+				NewLoops.Emplace(Src[Ring[0]], Src[Ring[k]], Src[Ring[k + 1]]);
 			}
 		}
 	}
+
+	Loops = MoveTemp(NewLoops);
 }
 
 FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
