@@ -22,6 +22,7 @@ struct NEXUSCORE_API FNRawMesh
 	friend class FNWorldAssemblyUtils;
 	friend class FNCellRootComponentVisualizer;
 	friend class FNRawMeshUtils;
+	friend class FNRawMeshFactory;
 
 	GENERATED_BODY()
 
@@ -62,6 +63,25 @@ struct NEXUSCORE_API FNRawMesh
 
 	/** Re-triangulates non-triangular loops in place so every loop is a 3-vertex triangle. */
 	void ConvertToTriangles();
+
+	/**
+	 * Rebuilds FaceLoops from a triangulated Loops by grouping coplanar-adjacent triangles back into n-gonal faces.
+	 * The inverse of ConvertToTriangles for known-polygonal sources, and the only way to get a polygonal face
+	 * description for triangle-only inputs (static-mesh imports, physics tri meshes).
+	 *
+	 * Algorithm: per-triangle Newell normals, edge → triangle adjacency, union-find merging triangles that share
+	 * an edge AND have near-parallel normals AND are mutually coplanar within tolerance, then a boundary-edge walk
+	 * to recover each group's polygon in winding order. Singleton groups remain as triangles.
+	 *
+	 * @param AngleToleranceDeg Maximum normal-angle difference for triangles to be considered the same face. Default
+	 *        1 degree picks up tessellated planar faces without merging shallow dihedrals.
+	 * @param RelativeDistanceTolerance Coplanarity threshold expressed as a fraction of mesh extent. Default 1e-4
+	 *        absorbs FP drift on coordinates at ~1000-unit scale (~0.1-unit absolute tolerance).
+	 * @note No-op when Loops is empty or contains any non-triangle. Existing FaceLoops content is discarded.
+	 *       Faces with internal holes are emitted as their outer boundary only (acceptable for convexity testing —
+	 *       convex hull faces don't have holes anyway).
+	 */
+	void CalculateFaceLoops(double AngleToleranceDeg = 1.0, double RelativeDistanceTolerance = 1e-4);
 
 	/**
 	 * Cached convexity result from the most recent Validate(). Defaults to false; returns false until

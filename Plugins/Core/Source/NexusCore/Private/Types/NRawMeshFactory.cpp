@@ -3,6 +3,7 @@
 
 #include "Types/NRawMeshFactory.h"
 
+#include "Chaos/Convex.h"
 #include "Chaos/TriangleMeshImplicitObject.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Developer/NDeveloperUtils.h"
@@ -56,6 +57,14 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 			// Instanced variants share one BodySetup across N instances — emit per instance.
 			if (const UInstancedStaticMeshComponent* InstanceStaticMesh = Cast<UInstancedStaticMeshComponent>(ActorPrimitive))
 			{
+				// Ensure ConvexElems on the body have their Chaos::FConvex populated before
+				// AppendChaosAggregateGeometry reads them, otherwise FromChaosConvexHull falls back to the
+				// triangulated IndexData path and CheckConvex loses the polygonal face description.
+				if (!bUseComplexAsSimple && !Body->bCreatedPhysicsMeshes)
+				{
+					Body->CreatePhysicsMeshes();
+				}
+
 				const int32 InstanceCount = InstanceStaticMesh->GetInstanceCount();
 				for (int32 i = 0; i < InstanceCount; ++i)
 				{
@@ -106,6 +115,13 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 				continue;
 			}
 
+			// Same reason as the instanced path above — populate ConvexElem.ChaosConvex so
+			// FromChaosConvexHull can pull polygonal face data instead of falling back to triangles.
+			if (!Body->bCreatedPhysicsMeshes)
+			{
+				Body->CreatePhysicsMeshes();
+			}
+
 			AppendChaosAggregateGeometry(Body->AggGeom, CompToWorld,OutMeshes, OutTransforms);
 		}
 	}
@@ -136,7 +152,16 @@ bool FNRawMeshFactory::FromChaosBox(const FKBoxElem& Box, const FTransform& Comp
 	{
 		Mesh.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
 	}
-	
+
+	// Polygonal face description for CheckConvex — six outward-wound quads matching the fan splits above.
+	Mesh.FaceLoops.Reserve(6);
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1)); // -Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6, 7)); // +Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4)); // -Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5)); // +X
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6)); // +Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7)); // -X
+
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
 	
@@ -175,6 +200,8 @@ bool FNRawMeshFactory::FromChaosSphere(const FKSphereElem& Sphere, const FTransf
 		const int32 B = 1 + (s + 1) % NEXUS::Core::RawMeshFactory::SphereSegments;
 		Mesh.Loops.Add(FNRawMeshLoop(0, A, B));
 	}
+	// Band quads wind outward as (A, D, C, B) when viewed from outside the sphere — A/B on the upper ring,
+	// C/D on the lower ring. Fan-from-A emits the two outward-CCW triangles below.
 	for (int32 r = 0; r < NEXUS::Core::RawMeshFactory::SphereRings - 2; ++r)
 	{
 		const int32 RowStart = 1 + r * NEXUS::Core::RawMeshFactory::SphereSegments;
@@ -185,8 +212,8 @@ bool FNRawMeshFactory::FromChaosSphere(const FKSphereElem& Sphere, const FTransf
 			const int32 B = RowStart + (s + 1) % NEXUS::Core::RawMeshFactory::SphereSegments;
 			const int32 C = NextRowStart + (s + 1) % NEXUS::Core::RawMeshFactory::SphereSegments;
 			const int32 D = NextRowStart + s;
-			Mesh.Loops.Add(FNRawMeshLoop(A, B, C));
-			Mesh.Loops.Add(FNRawMeshLoop(A, C, D));
+			Mesh.Loops.Add(FNRawMeshLoop(A, D, C));
+			Mesh.Loops.Add(FNRawMeshLoop(A, C, B));
 		}
 	}
 	constexpr int32 LastRowStart = 1 + (NEXUS::Core::RawMeshFactory::SphereRings - 2) * NEXUS::Core::RawMeshFactory::SphereSegments;
@@ -251,37 +278,55 @@ bool FNRawMeshFactory::FromChaosSphyl(const FKSphylElem& Sphyl, const FTransform
 	constexpr int32 TotalRings = 2 * HemiRings;
 	constexpr int32 BottomPole = 1 + TotalRings * Segments;
 
-	// Top cap fan.
+	// Top cap fan — pole tris are intrinsically triangular, so FaceLoops mirrors Loops here.
 	for (int32 s = 0; s < Segments; ++s)
 	{
 		const int32 A = 1 + s;
 		const int32 B = 1 + (s + 1) % Segments;
 		Mesh.Loops.Add(FNRawMeshLoop(0, A, B));
+		Mesh.FaceLoops.Add(FNRawMeshLoop(0, A, B));
 	}
-	// Quad band between every adjacent ring (includes the cylindrical band).
+	// Quad band between every adjacent ring (includes the cylindrical band). A/B on the upper ring, C/D on the lower
+	// ring; the outward-CCW winding viewed from outside the sphyl is (A, D, C, B), so each quad fans into the two
+	// triangles below. Hemisphere-band quads are saddle-shaped on the sphere surface and don't form a planar polygon,
+	// so FaceLoops keeps them as the same two triangles as Loops. The cylindrical band (between the top equator and
+	// the cylinder bottom ring) IS planar — its four vertices form a vertical rectangle — so FaceLoops emits it as a
+	// single quad and CheckConvex tests one supporting plane per band segment instead of two (which would otherwise
+	// drift apart after a vertex edit).
 	for (int32 r = 0; r < TotalRings - 1; ++r)
 	{
 		const int32 RowStart = 1 + r * Segments;
 		const int32 NextRowStart = RowStart + Segments;
+		const bool bIsCylinderBand = (r == HemiRings - 1);
 		for (int32 s = 0; s < Segments; ++s)
 		{
 			const int32 A = RowStart + s;
 			const int32 B = RowStart + (s + 1) % Segments;
 			const int32 C = NextRowStart + (s + 1) % Segments;
 			const int32 D = NextRowStart + s;
-			Mesh.Loops.Add(FNRawMeshLoop(A, B, C));
-			Mesh.Loops.Add(FNRawMeshLoop(A, C, D));
+			Mesh.Loops.Add(FNRawMeshLoop(A, D, C));
+			Mesh.Loops.Add(FNRawMeshLoop(A, C, B));
+			if (bIsCylinderBand)
+			{
+				Mesh.FaceLoops.Add(FNRawMeshLoop(A, D, C, B));
+			}
+			else
+			{
+				Mesh.FaceLoops.Add(FNRawMeshLoop(A, D, C));
+				Mesh.FaceLoops.Add(FNRawMeshLoop(A, C, B));
+			}
 		}
 	}
-	// Bottom cap fan.
+	// Bottom cap fan — pole tris, FaceLoops mirrors Loops.
 	constexpr int32 LastRowStart = 1 + (TotalRings - 1) * Segments;
 	for (int32 s = 0; s < Segments; ++s)
 	{
 		const int32 A = LastRowStart + s;
 		const int32 B = LastRowStart + (s + 1) % Segments;
 		Mesh.Loops.Add(FNRawMeshLoop(A, BottomPole, B));
+		Mesh.FaceLoops.Add(FNRawMeshLoop(A, BottomPole, B));
 	}
-	
+
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
 	
@@ -325,10 +370,13 @@ bool FNRawMeshFactory::FromChaosTriMeshes(const Chaos::FTriangleMeshImplicitObje
 			Mesh.Loops.Add(FNRawMeshLoop(Tri[0], Tri[1],Tri[2]));
 		}
 	}
-	Mesh.Validate();
+	// Recover polygonal faces from the triangle list so CheckConvex sees merged n-gons rather than fan-triangulated
+	// coplanar groups. For sculpted / organic source meshes this is a no-op; for CSG-style box aggregates it recovers quads.
 	Mesh.CalculateCenterAndBounds();
+	Mesh.CalculateFaceLoops();
+	Mesh.Validate();
 	OutMesh = MoveTemp(Mesh);
-	
+
 	return true;
 }
 
@@ -351,16 +399,63 @@ bool FNRawMeshFactory::FromChaosConvexHull(const FKConvexElem& ConvexHull, FNRaw
 	if (ConvexHull.VertexData.Num() == 0 || ConvexHull.IndexData.Num() < 3) return false;
 
 	FNRawMesh Mesh;
-	Mesh.Vertices = ConvexHull.VertexData;
-	const int32 TriCount = ConvexHull.IndexData.Num() / 3;
-	Mesh.Loops.Reserve(TriCount);
-	for (int32 i = 0; i < TriCount; ++i)
+
+	// When the FKConvexElem carries a live Chaos::FConvex (the common case for cooked physics bodies), prefer its
+	// polygonal face data over the triangulated IndexData — that's the same n-gon description Chaos used to build the
+	// hull, with no coplanar-merge work needed on our side. The Chaos convex has its own filtered vertex array (a
+	// deduplicated subset of FKConvexElem.VertexData), so we take vertices from there too to keep face indices valid.
+	// Fall back to the IndexData triangulation when no Chaos convex is attached (e.g. hand-built test inputs).
+	const Chaos::FConvexPtr& ChaosConvex = ConvexHull.GetChaosConvexMesh();
+	const bool bHasChaosFaceData = ChaosConvex.IsValid()
+		&& ChaosConvex->NumPlanes() > 0
+		&& ChaosConvex->NumPlaneVertices(0) >= 3;
+
+	if (bHasChaosFaceData)
 	{
-		Mesh.Loops.Add(FNRawMeshLoop(
-			ConvexHull.IndexData[i * 3 + 0],
-			ConvexHull.IndexData[i * 3 + 1],
-			ConvexHull.IndexData[i * 3 + 2]));
+		const int32 NumVerts = ChaosConvex->NumVertices();
+		Mesh.Vertices.Reserve(NumVerts);
+		for (int32 i = 0; i < NumVerts; ++i)
+		{
+			const Chaos::FConvex::FVec3Type& V = ChaosConvex->GetVertex(i);
+			Mesh.Vertices.Add(FVector(V[0], V[1], V[2]));
+		}
+
+		const int32 NumPlanes = ChaosConvex->NumPlanes();
+		Mesh.FaceLoops.Reserve(NumPlanes);
+		for (int32 p = 0; p < NumPlanes; ++p)
+		{
+			const int32 NumPlaneVerts = ChaosConvex->NumPlaneVertices(p);
+			TArray<int32> Indices;
+			Indices.Reserve(NumPlaneVerts);
+			for (int32 v = 0; v < NumPlaneVerts; ++v)
+			{
+				Indices.Add(ChaosConvex->GetPlaneVertex(p, v));
+			}
+			Mesh.FaceLoops.Add(FNRawMeshLoop(MoveTemp(Indices)));
+		}
+		Mesh.Loops = Mesh.FaceLoops;
+
+		// Chaos hulls are convex by construction; flag both so ConvertToTriangles takes the cheap fan path and Validate
+		// short-circuits on bIsChaosGenerated.
+		Mesh.bIsChaosGenerated = true;
+		Mesh.bIsConvex = true;
+		Mesh.ConvertToTriangles();
+		Mesh.bHasNonTris = false;
 	}
+	else
+	{
+		Mesh.Vertices = ConvexHull.VertexData;
+		const int32 TriCount = ConvexHull.IndexData.Num() / 3;
+		Mesh.Loops.Reserve(TriCount);
+		for (int32 i = 0; i < TriCount; ++i)
+		{
+			Mesh.Loops.Add(FNRawMeshLoop(
+				ConvexHull.IndexData[i * 3 + 0],
+				ConvexHull.IndexData[i * 3 + 1],
+				ConvexHull.IndexData[i * 3 + 2]));
+		}
+	}
+
 	Mesh.Validate();
 	Mesh.CalculateCenterAndBounds();
 	OutMesh = MoveTemp(Mesh);
@@ -396,8 +491,11 @@ bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& 
 			static_cast<int32>(Indices[i * 3 + 1]),
 			static_cast<int32>(Indices[i * 3 + 2])));
 	}
-	Mesh.Validate();
+	// Recover polygonal faces from the static mesh's triangle list. Boxy / modular assets recover quads here, which
+	// gives CheckConvex an accurate polygonal description; sculpted meshes return all triangles and the call is a no-op.
 	Mesh.CalculateCenterAndBounds();
+	Mesh.CalculateFaceLoops();
+	Mesh.Validate();
 	OutMesh = MoveTemp(Mesh);
 	return true;
 }

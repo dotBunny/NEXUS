@@ -388,4 +388,112 @@ N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_NonTriMesh_FalseWithError,
 	CHECK_FALSE_MESSAGE(TEXT("Quad-based input must be rejected with an error"), bResult);
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_SeparatedAABBs_NegativeOne,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::SeparatedAABBs_NegativeOne",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Cube, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Cube, FVector(1000, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Far-apart AABBs must return the -1 'no overlap' sentinel"),
+		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_PartialOverlap_NearestFaceDistance,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::PartialOverlap_NearestFaceDistance",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Small Right cube (HalfExtent 5) shifted along +X into a Large Left cube (HalfExtent 10).
+	// Right's -X face vertices land at world x=7 (inside Left, which spans -10..+10). The deepest
+	// face-plane distance from those vertices is to Left's +X face at x=+10 → depth = 3.
+	const FNRawMesh Left = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0,  0, 0), FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Partial overlap depth should match the closest-face perpendicular distance (3.0)"),
+		FMath::IsNearlyEqual(Depth, 3.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_FullyContained_VertexInsetDistance,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FullyContained_VertexInsetDistance",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Tiny Right cube (HalfExtent 1) fully inside Large Left cube (HalfExtent 10). Each Right vertex
+	// sits 9 units away from Left's nearest face → depth = 9.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(1.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator::ZeroRotator,
+		Right, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Fully-contained Right should report Right-vertex-to-Left-face distance (9.0)"),
+		FMath::IsNearlyEqual(Depth, 9.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_SymmetricSwap_SameResult,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::SymmetricSwap_SameResult",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Swapping Left and Right must yield the same depth — the metric is symmetric by construction
+	// (it picks the larger of the two vertex-in-other measurements).
+	const FNRawMesh Big   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(1.0);
+
+	const float DepthA = FNRawMeshUtils::GetIntersectDepth(
+		Big,   FVector(0, 0, 0), FRotator::ZeroRotator,
+		Small, FVector(0, 0, 0), FRotator::ZeroRotator);
+	const float DepthB = FNRawMeshUtils::GetIntersectDepth(
+		Small, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Big,   FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Depth result must not depend on which mesh is passed as Left vs Right"),
+		FMath::IsNearlyEqual(DepthA, DepthB, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_EmptyLoops_NegativeOneWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::EmptyLoops_NegativeOneWithWarning",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	AddExpectedMessage(TEXT("No loops were found"), ELogVerbosity::Warning);
+
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	FNRawMesh Empty;
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Cube,  FVector(0, 0, 0), FRotator::ZeroRotator,
+		Empty, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Loop-less mesh must yield the -1 sentinel with a warning"),
+		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonTriMesh_NegativeOneWithError,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonTriMesh_NegativeOneWithError",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	AddExpectedMessage(TEXT("non-triangle based geometry"), ELogVerbosity::Error);
+
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	FNRawMesh Quad;
+	Quad.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(10, 10, 0), FVector(0, 10, 0) };
+	Quad.Loops.Add(FNRawMeshLoop(0, 1, 2, 3));
+	Quad.CalculateCenterAndBounds();
+	Quad.Validate();
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Cube, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Quad, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Quad-based input must yield the -1 sentinel with an error"),
+		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
 #endif //WITH_TESTS

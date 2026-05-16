@@ -203,6 +203,215 @@ void FNRawMesh::ConvertToTriangles()
 	Loops = MoveTemp(NewLoops);
 }
 
+void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double RelativeDistanceTolerance)
+{
+	FaceLoops.Reset();
+	if (Loops.Num() == 0 || Vertices.Num() == 0)
+	{
+		return;
+	}
+
+	// Only operate on fully-triangulated input — anything else suggests FaceLoops already exists or the mesh isn't
+	// in the shape this recovery algorithm understands.
+	for (const FNRawMeshLoop& Loop : Loops)
+	{
+		if (Loop.Indices.Num() != 3)
+		{
+			return;
+		}
+	}
+
+	const int32 NumTris = Loops.Num();
+
+	// 1. Per-triangle Newell normals.
+	TArray<FVector> Normals;
+	Normals.SetNumUninitialized(NumTris);
+	for (int32 i = 0; i < NumTris; i++)
+	{
+		const FVector& A = Vertices[Loops[i].Indices[0]];
+		const FVector& B = Vertices[Loops[i].Indices[1]];
+		const FVector& C = Vertices[Loops[i].Indices[2]];
+		Normals[i] = FVector::CrossProduct(B - A, C - A).GetSafeNormal();
+	}
+
+	// 2. Edge → triangle map, keyed by sorted vertex pair so reverse-wound shared edges hash together.
+	TMap<TPair<int32, int32>, TArray<int32, TInlineAllocator<2>>> EdgeToTris;
+	EdgeToTris.Reserve(NumTris * 2);
+	for (int32 TriIdx = 0; TriIdx < NumTris; TriIdx++)
+	{
+		const TArray<int32>& Idx = Loops[TriIdx].Indices;
+		for (int32 k = 0; k < 3; k++)
+		{
+			const int32 V0 = Idx[k];
+			const int32 V1 = Idx[(k + 1) % 3];
+			const TPair<int32, int32> Key(FMath::Min(V0, V1), FMath::Max(V0, V1));
+			EdgeToTris.FindOrAdd(Key).Add(TriIdx);
+		}
+	}
+
+	// 3. Compute absolute coplanarity threshold from mesh extent so the tolerance scales with coordinate magnitude.
+	FBox VertexBounds(ForceInit);
+	for (const FVector& V : Vertices)
+	{
+		VertexBounds += V;
+	}
+	const double Extent = VertexBounds.IsValid != 0 ? VertexBounds.GetExtent().GetMax() * 2.0 : 1.0;
+	const double DistThreshold = RelativeDistanceTolerance * Extent;
+	const double CosThreshold = FMath::Cos(FMath::DegreesToRadians(AngleToleranceDeg));
+
+	// 4. Union-find: merge triangles sharing an edge AND a plane (normal and offset within tolerance).
+	TArray<int32> Parent;
+	Parent.SetNumUninitialized(NumTris);
+	for (int32 i = 0; i < NumTris; i++)
+	{
+		Parent[i] = i;
+	}
+	auto Find = [&Parent](int32 X) -> int32
+	{
+		while (Parent[X] != X)
+		{
+			Parent[X] = Parent[Parent[X]];
+			X = Parent[X];
+		}
+		return X;
+	};
+
+	for (const auto& EdgeEntry : EdgeToTris)
+	{
+		const auto& Tris = EdgeEntry.Value;
+		if (Tris.Num() != 2)
+		{
+			continue;
+		}
+		const int32 T0 = Tris[0];
+		const int32 T1 = Tris[1];
+		if (Normals[T0].IsNearlyZero() || Normals[T1].IsNearlyZero())
+		{
+			continue;
+		}
+		if (FVector::DotProduct(Normals[T0], Normals[T1]) < CosThreshold)
+		{
+			continue;
+		}
+
+		// Each T1 vertex must lie on T0's supporting plane within DistThreshold.
+		const FVector& Origin0 = Vertices[Loops[T0].Indices[0]];
+		const double Plane0D = FVector::DotProduct(Normals[T0], Origin0);
+		bool bCoplanar = true;
+		for (const int32 V : Loops[T1].Indices)
+		{
+			const double Signed = FVector::DotProduct(Normals[T0], Vertices[V]) - Plane0D;
+			if (FMath::Abs(Signed) > DistThreshold)
+			{
+				bCoplanar = false;
+				break;
+			}
+		}
+		if (!bCoplanar)
+		{
+			continue;
+		}
+
+		const int32 R0 = Find(T0);
+		const int32 R1 = Find(T1);
+		if (R0 != R1)
+		{
+			Parent[R0] = R1;
+		}
+	}
+
+	// 5. Bucket triangles by union-find root.
+	TMap<int32, TArray<int32>> Groups;
+	for (int32 i = 0; i < NumTris; i++)
+	{
+		Groups.FindOrAdd(Find(i)).Add(i);
+	}
+
+	// 6. For each group, walk the boundary directed edges to recover the polygon's winding.
+	FaceLoops.Reserve(Groups.Num());
+	for (auto& GroupEntry : Groups)
+	{
+		const TArray<int32>& GroupTris = GroupEntry.Value;
+		if (GroupTris.Num() == 1)
+		{
+			FaceLoops.Add(Loops[GroupTris[0]]);
+			continue;
+		}
+
+		TSet<int32> GroupSet;
+		GroupSet.Reserve(GroupTris.Num());
+		for (const int32 T : GroupTris)
+		{
+			GroupSet.Add(T);
+		}
+
+		// Boundary directed edges: a (V0, V1) edge in any group triangle is boundary iff no OTHER group triangle
+		// contains the reverse edge (V1, V0). Internal edges between two coplanar siblings cancel out.
+		TMap<int32, int32> NextVert;
+		NextVert.Reserve(GroupTris.Num() * 3);
+		for (const int32 T : GroupTris)
+		{
+			const TArray<int32>& Idx = Loops[T].Indices;
+			for (int32 k = 0; k < 3; k++)
+			{
+				const int32 V0 = Idx[k];
+				const int32 V1 = Idx[(k + 1) % 3];
+				const TPair<int32, int32> Key(FMath::Min(V0, V1), FMath::Max(V0, V1));
+				const auto* SharingTris = EdgeToTris.Find(Key);
+				bool bInternal = false;
+				if (SharingTris && SharingTris->Num() == 2)
+				{
+					const int32 Other = (*SharingTris)[0] == T ? (*SharingTris)[1] : (*SharingTris)[0];
+					bInternal = GroupSet.Contains(Other);
+				}
+				if (!bInternal)
+				{
+					NextVert.Add(V0, V1);
+				}
+			}
+		}
+
+		// Walk a single closed boundary loop. Multi-loop groups (faces with holes) can't be represented as one
+		// FNRawMeshLoop, so fall back to emitting the group's source triangles individually.
+		bool bClosedLoop = false;
+		TArray<int32> LoopIndices;
+		if (NextVert.Num() > 0)
+		{
+			const int32 StartV = NextVert.CreateConstIterator().Key();
+			LoopIndices.Reserve(NextVert.Num());
+			int32 Curr = StartV;
+			int32 Guard = NextVert.Num() + 1;
+			while (Guard-- > 0)
+			{
+				LoopIndices.Add(Curr);
+				const int32* Next = NextVert.Find(Curr);
+				if (!Next)
+				{
+					break;
+				}
+				Curr = *Next;
+				if (Curr == StartV)
+				{
+					bClosedLoop = (LoopIndices.Num() == NextVert.Num());
+					break;
+				}
+			}
+		}
+
+		if (bClosedLoop && LoopIndices.Num() >= 3)
+		{
+			FaceLoops.Add(FNRawMeshLoop(MoveTemp(LoopIndices)));
+		}
+		else
+		{
+			for (const int32 T : GroupTris)
+			{
+				FaceLoops.Add(Loops[T]);
+			}
+		}
+	}
+}
+
 FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 {
 	if (CheckNonTris())

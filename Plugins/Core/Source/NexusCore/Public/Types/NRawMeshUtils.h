@@ -50,6 +50,35 @@ public:
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
 	/**
+	 * Measures the maximum penetration depth between two convex meshes placed at the given origins and rotations.
+	 *
+	 * Symmetric vertex-sampling metric: returns the largest of
+	 * - max distance from any RightMesh vertex (inside LeftMesh) to LeftMesh's nearest face plane, and
+	 * - max distance from any LeftMesh vertex (inside RightMesh) to RightMesh's nearest face plane.
+	 *
+	 * Captures both "right poked into left" and "right engulfed a corner of left" with a single value.
+	 *
+	 * @param LeftMesh First mesh. Must be convex and triangle-based.
+	 * @param LeftOrigin World-space translation applied to LeftMesh.
+	 * @param LeftRotation World-space rotation applied to LeftMesh.
+	 * @param RightMesh Second mesh. Must be convex and triangle-based.
+	 * @param RightOrigin World-space translation applied to RightMesh.
+	 * @param RightRotation World-space rotation applied to RightMesh.
+	 * @return The deepest measured penetration distance in mesh units, or -1.0 when the transformed AABBs do not
+	 *         overlap, when either mesh has zero loops (logs a warning), when either mesh contains non-triangle
+	 *         loops (logs an error), or when either mesh is not convex (logs a warning). Returns 0.0 when the
+	 *         AABBs overlap but no vertex of either mesh lies inside the other (surface-only crossings are not
+	 *         measured by this metric).
+	 * @remark This assumes that the vertices in the FNRawMesh's are already in position and are not effected by a Transform's scale.
+	 * @note Intended for "max-allowed-penetration" threshold checks while iterating many meshes. For exact
+	 *       boolean overlap including surface-only crossings without vertex containment, use DoesIntersect.
+	 */
+	static float GetIntersectDepth(
+		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+
+
+	/**
 	 * Spawns transient ANDebugActor instances that render the supplied FNRawMesh entries in-world for visual diagnostics.
 	 *
 	 * Two output modes are supported:
@@ -105,7 +134,7 @@ public:
 	static bool AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray<FVector>& RelativePoints);
 
 private:
-	
+	static float ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint);
 	static bool DoesIntersectTriangles(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);

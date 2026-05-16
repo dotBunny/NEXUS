@@ -100,6 +100,71 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
+float FNRawMeshUtils::GetIntersectDepth(
+	const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+	const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+{
+	// Rotated AABB early-out, mirroring DoesIntersect.
+	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
+	{
+		const FBox LeftWorldBounds = LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin));
+		const FBox RightWorldBounds = RightMesh.Bounds.TransformBy(FTransform(RightRotation, RightOrigin));
+		if (!LeftWorldBounds.Intersect(RightWorldBounds))
+		{
+			return -1.0f;
+		}
+	}
+
+	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine intersection depth."));
+		return -1.0f;
+	}
+	if (LeftMesh.HasNonTris() || RightMesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection depth checks."));
+		return -1.0f;
+	}
+	if (!LeftMesh.IsConvex() || !RightMesh.IsConvex())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("One or both of the provided FNRawMeshes is not convex, unable to determine intersection depth."));
+		return -1.0f;
+	}
+
+	const FQuat LeftQuat = LeftRotation.Quaternion();
+	const FQuat RightQuat = RightRotation.Quaternion();
+	const FQuat LeftInvQuat = LeftQuat.Inverse();
+	const FQuat RightInvQuat = RightQuat.Inverse();
+
+	float MaxDepth = 0.0f;
+
+	// Right vertices, expressed in Left's local space, tested against Left's hull.
+	for (const FVector& V : RightMesh.Vertices)
+	{
+		const FVector WorldPos = RightQuat.RotateVector(V) + RightOrigin;
+		const FVector LeftLocal = LeftInvQuat.RotateVector(WorldPos - LeftOrigin);
+		const float Depth = ComputePointDepthInsideConvex(LeftMesh, LeftLocal);
+		if (Depth > MaxDepth)
+		{
+			MaxDepth = Depth;
+		}
+	}
+
+	// Left vertices, expressed in Right's local space, tested against Right's hull.
+	for (const FVector& V : LeftMesh.Vertices)
+	{
+		const FVector WorldPos = LeftQuat.RotateVector(V) + LeftOrigin;
+		const FVector RightLocal = RightInvQuat.RotateVector(WorldPos - RightOrigin);
+		const float Depth = ComputePointDepthInsideConvex(RightMesh, RightLocal);
+		if (Depth > MaxDepth)
+		{
+			MaxDepth = Depth;
+		}
+	}
+
+	return MaxDepth;
+}
+
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
 {
 	TArray<ANDebugActor*> DebugActors;
@@ -266,6 +331,40 @@ bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray
 		}
 	}
 	return false;
+}
+
+float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint)
+{
+	float MinFaceDist = TNumericLimits<float>::Max();
+	for (const FNRawMeshLoop& Loop : Mesh.Loops)
+	{
+		const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
+		const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
+		const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
+
+		const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
+		const double NormalLenSq = Normal.SizeSquared();
+		if (NormalLenSq <= UE_KINDA_SMALL_NUMBER)
+		{
+			// Degenerate triangle: contributes no half-space constraint to the hull.
+			continue;
+		}
+
+		const double CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
+		const double PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
+
+		if (CenterSide * PointSide < 0.0)
+		{
+			return -1.0f;
+		}
+
+		const double PerpDist = FMath::Abs(PointSide) / FMath::Sqrt(NormalLenSq);
+		if (PerpDist < MinFaceDist)
+		{
+			MinFaceDist = static_cast<float>(PerpDist);
+		}
+	}
+	return (MinFaceDist == TNumericLimits<float>::Max()) ? 0.0f : MinFaceDist;
 }
 
 bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,

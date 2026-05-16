@@ -482,6 +482,124 @@ N_TEST_HIGH(FNRawMeshTests_CheckConvex_FaceLoops_DetectsConcavity,
 	CHECK_FALSE_MESSAGE(TEXT("Spike vertex outside the +Z face plane must trip the plane-side test on the FaceLoops path"), Mesh.IsConvex());
 }
 
+N_TEST_CRITICAL(FNRawMeshTests_CalculateFaceLoops_TriangulatedCube_SixQuads,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CalculateFaceLoops::TriangulatedCube_SixQuads",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Fan-triangulated cube — recovery should merge each pair of coplanar triangles back into a quad and produce
+	// exactly 6 faces. Vertex windings were chosen to match FromChaosBox so the resulting normals point outward.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+	static const int32 Tris[12][3] = {
+		{ 0, 3, 2 }, { 0, 2, 1 },  // -Z (quad 0,3,2,1)
+		{ 4, 5, 6 }, { 4, 6, 7 },  // +Z (quad 4,5,6,7)
+		{ 0, 1, 5 }, { 0, 5, 4 },  // -Y (quad 0,1,5,4)
+		{ 1, 2, 6 }, { 1, 6, 5 },  // +X (quad 1,2,6,5)
+		{ 2, 3, 7 }, { 2, 7, 6 },  // +Y (quad 2,3,7,6)
+		{ 3, 0, 4 }, { 3, 4, 7 },  // -X (quad 3,0,4,7)
+	};
+	for (int32 i = 0; i < 12; ++i)
+	{
+		Mesh.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
+	}
+	Mesh.CalculateCenterAndBounds();
+
+	Mesh.CalculateFaceLoops();
+
+	CHECK_EQUALS("Coplanar-merge should collapse 12 triangles into 6 quad faces", Mesh.FaceLoops.Num(), 6);
+	for (int32 i = 0; i < Mesh.FaceLoops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Every recovered face should be a quad"), Mesh.FaceLoops[i].IsQuad());
+	}
+
+	Mesh.Validate();
+	CHECK_MESSAGE(TEXT("Recovered FaceLoops should let CheckConvex accept the cube"), Mesh.IsConvex());
+}
+
+N_TEST_HIGH(FNRawMeshTests_CalculateFaceLoops_NoCoplanarGroups_KeepsTriangles,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CalculateFaceLoops::NoCoplanarGroups_KeepsTriangles",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A regular tetrahedron — no two faces share a plane, so recovery should keep every triangle as its own face.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{  10,  10,  10 },
+		{  10, -10, -10 },
+		{ -10,  10, -10 },
+		{ -10, -10,  10 },
+	};
+	Mesh.Loops.Add(FNRawMeshLoop(0, 1, 2));
+	Mesh.Loops.Add(FNRawMeshLoop(0, 3, 1));
+	Mesh.Loops.Add(FNRawMeshLoop(0, 2, 3));
+	Mesh.Loops.Add(FNRawMeshLoop(1, 3, 2));
+	Mesh.CalculateCenterAndBounds();
+
+	Mesh.CalculateFaceLoops();
+
+	CHECK_EQUALS("Tetrahedron has 4 non-coplanar faces — recovery should emit 4 triangle FaceLoops", Mesh.FaceLoops.Num(), 4);
+	for (int32 i = 0; i < Mesh.FaceLoops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Each tetrahedron FaceLoop should remain a triangle"), Mesh.FaceLoops[i].IsTriangle());
+	}
+}
+
+N_TEST_HIGH(FNRawMeshTests_CalculateFaceLoops_MixedMesh_RecoversWhereCoplanar,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CalculateFaceLoops::MixedMesh_RecoversWhereCoplanar",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cube (6 quads → 12 tris) plus one isolated, non-coplanar triangle. Recovery should collapse the cube into
+	// 6 quads while leaving the lone triangle as its own face — verifying that disconnected components don't accidentally
+	// merge with anything they share no edge with.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+		{ 100, 0, 0 }, { 110, 0, 0 }, { 100, 10, 0 },
+	};
+	static const int32 CubeTris[12][3] = {
+		{ 0, 3, 2 }, { 0, 2, 1 }, { 4, 5, 6 }, { 4, 6, 7 },
+		{ 0, 1, 5 }, { 0, 5, 4 }, { 1, 2, 6 }, { 1, 6, 5 },
+		{ 2, 3, 7 }, { 2, 7, 6 }, { 3, 0, 4 }, { 3, 4, 7 },
+	};
+	for (int32 i = 0; i < 12; ++i)
+	{
+		Mesh.Loops.Add(FNRawMeshLoop(CubeTris[i][0], CubeTris[i][1], CubeTris[i][2]));
+	}
+	Mesh.Loops.Add(FNRawMeshLoop(8, 9, 10));
+	Mesh.CalculateCenterAndBounds();
+
+	Mesh.CalculateFaceLoops();
+
+	CHECK_EQUALS("Cube collapses to 6 quads + 1 stray triangle = 7 faces total", Mesh.FaceLoops.Num(), 7);
+	int32 QuadCount = 0;
+	int32 TriCount = 0;
+	for (const FNRawMeshLoop& Face : Mesh.FaceLoops)
+	{
+		if (Face.IsQuad()) QuadCount++;
+		else if (Face.IsTriangle()) TriCount++;
+	}
+	CHECK_EQUALS("Recovered cube faces should be 6 quads", QuadCount, 6);
+	CHECK_EQUALS("Stray non-coplanar triangle should remain a triangle", TriCount, 1);
+}
+
+N_TEST_HIGH(FNRawMeshTests_CalculateFaceLoops_NonTriangulatedInput_NoOp,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CalculateFaceLoops::NonTriangulatedInput_NoOp",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Recovery only understands all-triangle input; a mesh that already has n-gons should be left alone so callers
+	// that ran CalculateFaceLoops by mistake on a polygonal mesh don't corrupt their FaceLoops.
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(10, 10, 0), FVector(0, 10, 0) };
+	Mesh.Loops.Add(FNRawMeshLoop(0, 1, 2, 3));
+
+	Mesh.CalculateFaceLoops();
+
+	CHECK_EQUALS("FaceLoops should stay empty when input contains a non-triangle loop", Mesh.FaceLoops.Num(), 0);
+}
+
 N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentCenter, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::DifferentCenter", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNRawMesh A;

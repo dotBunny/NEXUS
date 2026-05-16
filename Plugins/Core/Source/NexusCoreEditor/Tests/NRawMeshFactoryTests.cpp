@@ -4,6 +4,7 @@
 #if WITH_TESTS
 
 #include "Types/NRawMeshFactory.h"
+#include "Chaos/Convex.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -35,6 +36,29 @@ N_TEST_CRITICAL(FNRawMeshFactoryTests_FromChaosBox_VertexAndLoopCounts,
 	{
 		CHECK_MESSAGE(TEXT("Every emitted loop should be a triangle"), OutMesh.Loops[i].IsTriangle());
 	}
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosBox_FaceLoops_SixOutwardQuads,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosBox::FaceLoops_SixOutwardQuads",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// FaceLoops should describe the box as six quads — that's what CheckConvex walks, and it's what protects against the
+	// per-triangle coplanar-drift false-negative if a downstream tool ever edits a box's vertices.
+	FKBoxElem Box;
+	Box.X = 2.0;
+	Box.Y = 4.0;
+	Box.Z = 6.0;
+
+	FNRawMesh OutMesh;
+	FTransform OutTransform;
+	FNRawMeshFactory::FromChaosBox(Box, FTransform::Identity, OutMesh, OutTransform);
+
+	CHECK_EQUALS("Box should produce 6 polygonal faces", OutMesh.FaceLoops.Num(), 6);
+	for (int32 i = 0; i < OutMesh.FaceLoops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Every box FaceLoop should be a quad"), OutMesh.FaceLoops[i].IsQuad());
+	}
+	CHECK_MESSAGE(TEXT("Box with FaceLoops should report convex via the polygonal CheckConvex path"), OutMesh.IsConvex());
 }
 
 N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosBox_BoundsMatchHalfExtents,
@@ -99,6 +123,55 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosConvexHull_TooFewIndices_False,
 	const bool bResult = FNRawMeshFactory::FromChaosConvexHull(ConvexHull, OutMesh);
 
 	CHECK_FALSE_MESSAGE(TEXT("Convex hull with fewer than 3 indices must produce false"), bResult);
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosConvexHull_ChaosConvex_PolygonalFaceLoops,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosConvexHull::ChaosConvex_PolygonalFaceLoops",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// When the FKConvexElem carries a live Chaos::FConvex, FromChaosConvexHull should pull the polygonal face
+	// description directly (no coplanar-triangle recovery needed). For a cube vertex cloud the builder emits 6
+	// quad faces, and CheckConvex should accept the result via the FaceLoops path.
+	TArray<Chaos::FConvex::FVec3Type> InputVerts;
+	InputVerts.Reserve(8);
+	const double H = 5.0;
+	InputVerts.Add(Chaos::FConvex::FVec3Type(-H, -H, -H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(+H, -H, -H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(+H, +H, -H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(-H, +H, -H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(-H, -H, +H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(+H, -H, +H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(+H, +H, +H));
+	InputVerts.Add(Chaos::FConvex::FVec3Type(-H, +H, +H));
+
+	TArray<Chaos::FConvex::FPlaneType> Planes;
+	TArray<TArray<int32>> FaceIndices;
+	TArray<Chaos::FConvex::FVec3Type> HullVerts;
+	Chaos::FConvex::FAABB3Type LocalBounds;
+	Chaos::FConvexBuilder::Build(InputVerts, Planes, FaceIndices, HullVerts, LocalBounds);
+
+	Chaos::FConvexPtr ChaosPtr(new Chaos::FConvex(MoveTemp(Planes), MoveTemp(FaceIndices), MoveTemp(HullVerts)));
+
+	// Pre-populate VertexData and IndexData so SetConvexMeshObject with UpdateConvexDataOnlyIfMissing leaves them alone —
+	// the IndexData path isn't what we're testing here, we just need to satisfy FromChaosConvexHull's entry guard.
+	FKConvexElem ConvexHull;
+	for (const Chaos::FConvex::FVec3Type& V : InputVerts)
+	{
+		ConvexHull.VertexData.Add(FVector(V[0], V[1], V[2]));
+	}
+	ConvexHull.IndexData = { 0, 1, 2 };
+	ConvexHull.SetConvexMeshObject(MoveTemp(ChaosPtr), FKConvexElem::EConvexDataUpdateMethod::UpdateConvexDataOnlyIfMissing);
+
+	FNRawMesh OutMesh;
+	const bool bResult = FNRawMeshFactory::FromChaosConvexHull(ConvexHull, OutMesh);
+
+	CHECK_MESSAGE(TEXT("FromChaosConvexHull should succeed with a live Chaos convex attached"), bResult);
+	CHECK_EQUALS("Cube hull should yield 6 polygonal FaceLoops", OutMesh.FaceLoops.Num(), 6);
+	for (int32 i = 0; i < OutMesh.FaceLoops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Each face from a cube hull should be a quad"), OutMesh.FaceLoops[i].IsQuad());
+	}
+	CHECK_MESSAGE(TEXT("Mesh built via Chaos face data should report convex"), OutMesh.IsConvex());
 }
 
 N_TEST_CRITICAL(FNRawMeshFactoryTests_FromChaosConvexHull_ValidData_PopulatesMesh,
@@ -171,6 +244,23 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphere_VerticesAtRadius,
 	CHECK_MESSAGE(TEXT("Every emitted vertex should sit at the sphere's radius from the origin"), bAllOnSurface);
 }
 
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphere_OutwardWindingReportsConvex,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosSphere::OutwardWindingReportsConvex",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A tessellated sphere is convex by construction. With outward-wound triangles every face plane has all other
+	// vertices on the centroid side, so CheckConvex must report convex. Pre-fix the bands were wound inward and
+	// this assertion would have failed regardless of FaceLoops.
+	FKSphereElem Sphere;
+	Sphere.Radius = 25.0;
+
+	FNRawMesh OutMesh;
+	FTransform OutTransform;
+	FNRawMeshFactory::FromChaosSphere(Sphere, FTransform::Identity, OutMesh, OutTransform);
+
+	CHECK_MESSAGE(TEXT("Sphere with outward-wound bands should report convex via CheckConvex"), OutMesh.IsConvex());
+}
+
 N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphere_TransformCarriesCenter,
 	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosSphere::TransformCarriesCenter",
 	N_TEST_CONTEXT_ANYWHERE)
@@ -211,6 +301,40 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphyl_VertexAndLoopCounts,
 	{
 		CHECK_MESSAGE(TEXT("Every emitted loop should be a triangle"), OutMesh.Loops[i].IsTriangle());
 	}
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphyl_FaceLoops_CylinderBandIsQuads,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosSphyl::FaceLoops_CylinderBandIsQuads",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The cylinder middle band is the only genuinely-planar-quad section of a sphyl (top/bottom edges are parallel chords
+	// at fixed Z). FaceLoops should emit those as quads while keeping the saddle-shaped hemisphere bands and the pole fans
+	// as triangles.
+	FKSphylElem Sphyl;
+	Sphyl.Radius = 5.0;
+	Sphyl.Length = 10.0;
+
+	FNRawMesh OutMesh;
+	FTransform OutTransform;
+	FNRawMeshFactory::FromChaosSphyl(Sphyl, FTransform::Identity, OutMesh, OutTransform);
+
+	using namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness;
+	constexpr int32 TotalRings = 2 * SphylHemiRings;
+	// Triangles: 2 cap fans (Segments each) + 2 hemisphere band groups, each (HemiRings - 1) bands of 2*Segments tris.
+	constexpr int32 ExpectedTriFaces = SphereSegments * 2 + (TotalRings - 2) * SphereSegments * 2;
+	constexpr int32 ExpectedQuadFaces = SphereSegments;
+
+	int32 QuadCount = 0;
+	int32 TriCount = 0;
+	for (const FNRawMeshLoop& Face : OutMesh.FaceLoops)
+	{
+		if (Face.IsQuad()) QuadCount++;
+		else if (Face.IsTriangle()) TriCount++;
+	}
+
+	CHECK_EQUALS("Sphyl FaceLoops should contain Segments quads for the cylinder middle band", QuadCount, ExpectedQuadFaces);
+	CHECK_EQUALS("Sphyl FaceLoops should contain triangles for the pole fans and hemisphere bands", TriCount, ExpectedTriFaces);
+	CHECK_MESSAGE(TEXT("Sphyl with outward-wound bands and FaceLoops should report convex"), OutMesh.IsConvex());
 }
 
 N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosSphyl_BoundsExtent,

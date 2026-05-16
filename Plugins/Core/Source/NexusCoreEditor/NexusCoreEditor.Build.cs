@@ -25,6 +25,8 @@ namespace UnrealBuildTool.Rules
 					"AssetDefinition",
 					"BlueprintGraph",
 					"Blutility",
+					"Chaos",
+					"ChaosCore",
 					"ContentBrowser",
 					"CoreUObject",
 					"DeveloperSettings",
