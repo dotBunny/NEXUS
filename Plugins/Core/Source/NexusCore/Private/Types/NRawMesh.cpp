@@ -291,7 +291,7 @@ bool FNRawMesh::CheckConvex() const
 			const FVector& Curr = Vertices[Loop.Indices[k]];
 			const FVector& Next = Vertices[Loop.Indices[(k + 1) % LoopCount]];
 			const FVector Cross = FVector::CrossProduct(Curr - Prev, Next - Curr);
-			if (FVector::DotProduct(Cross, FaceNormal) < -DBL_EPSILON)
+			if (FVector::DotProduct(Cross, FaceNormal) < -UE_DOUBLE_KINDA_SMALL_NUMBER)
 			{
 				return false;
 			}
