@@ -178,15 +178,24 @@ void FNRawMesh::ConvertToTriangles()
 
 				if (!bEarFound)
 				{
-					UE_LOG(LogNexusCore, Warning, TEXT("Ear-clipping failed on loop %d; falling back to fan of the remainder."), LoopIdx);
 					break;
 				}
 			}
 
-			// Emit whatever remains (either the final triangle, or the untriangulated remainder as a fan).
-			for (int32 k = 1; k < Ring.Num() - 1; k++)
+			if (Ring.Num() == 3)
 			{
-				NewLoops.Emplace(Src[Ring[0]], Src[Ring[k]], Src[Ring[k + 1]]);
+				// Natural termination — the ring converged to a single triangle.
+				NewLoops.Emplace(Src[Ring[0]], Src[Ring[1]], Src[Ring[2]]);
+			}
+			else
+			{
+				// Ear-clipping bailed with a concave remainder (or the guard expired). Fanning the
+				// remainder would emit self-intersecting / zero-area triangles, so drop it instead —
+				// missing geometry is recoverable; corrupt geometry silently breaks downstream physics
+				// and rendering.
+				UE_LOG(LogNexusCore, Warning,
+					TEXT("Ear-clipping could not fully triangulate loop %d (%d unresolved vertices); dropping the remainder."),
+					LoopIdx, Ring.Num());
 			}
 		}
 	}
