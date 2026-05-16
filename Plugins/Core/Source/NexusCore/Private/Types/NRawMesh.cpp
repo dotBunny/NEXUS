@@ -268,7 +268,12 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 
 bool FNRawMesh::CheckConvex() const
 {
-	if (Vertices.Num() == 0 || Loops.Num() == 0)
+	// Prefer the polygonal face description when present — fan-triangulated coplanar faces will fail
+	// the per-triangle plane-side test after any vertex perturbation, since each triangle's Newell
+	// normal drifts independently and neighbor-triangle vertices end up infinitesimally off plane.
+	const TArray<FNRawMeshLoop>& FacesToCheck = FaceLoops.Num() > 0 ? FaceLoops : Loops;
+
+	if (Vertices.Num() == 0 || FacesToCheck.Num() == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("No vertices or loops were found in the FNRawMesh when checking if it was convex."));
 		return false;
@@ -277,9 +282,9 @@ bool FNRawMesh::CheckConvex() const
 	// A mesh is convex if every loop is convex in its own plane AND every vertex of the mesh lies
 	// on or behind every face's supporting plane. The first test catches flat concave n-gons; the
 	// second catches concave polyhedra (e.g. a star).
-	for (int32 LoopIdx = 0; LoopIdx < Loops.Num(); LoopIdx++)
+	for (int32 LoopIdx = 0; LoopIdx < FacesToCheck.Num(); LoopIdx++)
 	{
-		const FNRawMeshLoop& Loop = Loops[LoopIdx];
+		const FNRawMeshLoop& Loop = FacesToCheck[LoopIdx];
 		const int32 LoopCount = Loop.Indices.Num();
 		if (LoopCount < 3)
 		{

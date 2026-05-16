@@ -106,31 +106,30 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 		BoundingBox += CreatedPoint;
 	}
 
-	// Build Loops
-	Mesh.Loops.Reserve(IndicesCount);
+	// Capture the polygonal faces straight from Chaos as the canonical face description, then start Loops
+	// as a copy so triangulation below has something to work on. FaceLoops remains polygonal and is what
+	// CheckConvex consults — that avoids the per-triangle coplanar-drift false-negative after a vertex edit.
+	Mesh.FaceLoops.Reserve(IndicesCount);
 	for (int32 i = 0; i < IndicesCount; i++)
 	{
 		BuildTask.EnterProgressFrame(1);
-		
-		// Right now we are 
-		Mesh.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));	
+		Mesh.FaceLoops.Add(FNRawMeshLoop(OutFaceIndices[i]));
 	}
-	
+	Mesh.Loops = Mesh.FaceLoops;
+
 	Mesh.Center = CenterCalc / VerticesCount;
 	Mesh.Bounds = BoundingBox;
-	
+
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull
 	Mesh.bIsChaosGenerated = true;
 	Mesh.bIsConvex = true;
 	Mesh.bHasBounds = true;
-	Mesh.bHasNonTris = Mesh.CheckNonTris();
-	
-	if (Mesh.bHasNonTris)
-	{
-		Mesh.ConvertToTriangles();
-	}
-	
-	
+
+	// ConvertToTriangles self-early-outs when Loops is already all-tris, so call it unconditionally and
+	// skip the extra CheckNonTris pass that used to gate it.
+	Mesh.ConvertToTriangles();
+	Mesh.bHasNonTris = false;
+
 	return Mesh;
 }
 

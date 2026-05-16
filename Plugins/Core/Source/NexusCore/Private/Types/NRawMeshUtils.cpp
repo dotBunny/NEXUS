@@ -41,7 +41,10 @@ void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& Bas
 	}
 
 	// A merged mesh is no longer a single Chaos-cooked body; force Validate() to re-evaluate convexity and tri-ness.
+	// Drop FaceLoops too — the polygonal-face description belonged to a single hull and stitching loops from
+	// two meshes together produces a mix that no longer represents one mesh's pre-triangulation faces.
 	BaseMesh.bIsChaosGenerated = false;
+	BaseMesh.FaceLoops.Reset();
 
 	BaseMesh.CalculateCenterAndBounds();
 	BaseMesh.Validate();
@@ -172,11 +175,15 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 		BoundingBox += Created;
 	}
 
-	Result.Loops.Reserve(LoopCount);
+	// Capture the polygonal faces straight from Chaos as the canonical face description, then start Loops
+	// as a copy so triangulation has something to work on. FaceLoops remains polygonal and is what
+	// CheckConvex consults — that avoids the per-triangle coplanar-drift false-negative after a vertex edit.
+	Result.FaceLoops.Reserve(LoopCount);
 	for (int32 i = 0; i < LoopCount; i++)
 	{
-		Result.Loops.Add(FNRawMeshLoop(OutFaceIndices[i]));
+		Result.FaceLoops.Add(FNRawMeshLoop(OutFaceIndices[i]));
 	}
+	Result.Loops = Result.FaceLoops;
 
 	Result.Center = CenterCalc / VerticesCount;
 	Result.Bounds = BoundingBox;
@@ -185,12 +192,11 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	Result.bIsChaosGenerated = true;
 	Result.bIsConvex = true;
 	Result.bHasBounds = true;
-	Result.bHasNonTris = Result.CheckNonTris();
 
-	if (Result.bHasNonTris)
-	{
-		Result.ConvertToTriangles();
-	}
+	// ConvertToTriangles self-early-outs when Loops is already all-tris, so call it unconditionally and
+	// skip the extra CheckNonTris pass that used to gate it.
+	Result.ConvertToTriangles();
+	Result.bHasNonTris = false;
 
 	return MoveTemp(Result);
 }

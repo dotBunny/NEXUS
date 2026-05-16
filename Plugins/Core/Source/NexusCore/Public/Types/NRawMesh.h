@@ -45,6 +45,16 @@ struct NEXUSCORE_API FNRawMesh
 	TArray<FNRawMeshLoop> Loops;
 
 	/**
+	 * Pre-triangulation n-gonal face definition, in winding order. Optional — when populated, CheckConvex
+	 * walks these polygonal faces instead of Loops, which avoids false-negative convexity rejections caused
+	 * by the per-triangle plane test on fan-triangulated coplanar faces.
+	 * @note Indices reference the same Vertices buffer as Loops. Index-stable vertex mutations (move/scale)
+	 * preserve FaceLoops; topology changes (add/remove vertex, re-triangulate from scratch) do not.
+	 */
+	UPROPERTY(VisibleAnywhere)
+	TArray<FNRawMeshLoop> FaceLoops;
+
+	/**
 	 * Flattens Loops into a single contiguous index buffer.
 	 * @return A concatenation of every loop's indices.
 	 */
@@ -86,7 +96,8 @@ struct NEXUSCORE_API FNRawMesh
 			&& Center == Other.Center
 			&& Bounds == Other.Bounds
 			&& Vertices == Other.Vertices
-			&& Loops == Other.Loops;
+			&& Loops == Other.Loops
+			&& FaceLoops == Other.FaceLoops;
 	}
 
 	bool operator!=(const FNRawMesh& Other) const
@@ -180,7 +191,12 @@ struct NEXUSCORE_API FNRawMesh
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false) const;
 
 private:
-	/** @return true if Vertices form a convex hull; false otherwise. Recomputed by Validate. */
+	/**
+	 * @return true if Vertices form a convex hull; false otherwise. Recomputed by Validate.
+	 * @note Walks FaceLoops when non-empty (the polygonal face description); falls back to Loops otherwise.
+	 * Using FaceLoops avoids false negatives on fan-triangulated meshes where coplanar neighbor triangles
+	 * drift slightly off each other's plane after any vertex edit.
+	 */
 	bool CheckConvex() const;
 	/** @return true if any loop in the mesh has more than three vertices. Recomputed by Validate. */
 	bool CheckNonTris() const;

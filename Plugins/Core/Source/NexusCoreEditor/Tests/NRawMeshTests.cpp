@@ -421,6 +421,67 @@ N_TEST_HIGH(FNRawMeshTests_CheckConvex_Empty_FalseWithWarning, "NEXUS::UnitTests
 	CHECK_FALSE_MESSAGE(TEXT("Empty mesh must report IsConvex==false and log a warning"), Mesh.IsConvex());
 }
 
+N_TEST_CRITICAL(FNRawMeshTests_CheckConvex_FaceLoops_FanTriangulatedCubeAfterVertexNudge,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CheckConvex::FaceLoops_FanTriangulatedCubeAfterVertexNudge",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Repro for the visualizer regression: a hull built by Chaos arrives as ngonal faces, gets fan-triangulated,
+	// and the per-triangle plane test then rejects any subsequent vertex edit because coplanar neighbor triangles
+	// drift slightly off each other's plane. With FaceLoops carrying the polygonal source, CheckConvex must walk
+	// the n-gons and accept the edit. Coordinates are at editor-realistic scale to make floating-point drift
+	// large enough to break the per-triangle path.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -500, -500, -500 }, { +500, -500, -500 }, { +500, +500, -500 }, { -500, +500, -500 },
+		{ -500, -500, +500 }, { +500, -500, +500 }, { +500, +500, +500 }, { -500, +500, +500 },
+	};
+	// Six quad faces wound outward.
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1)); // -Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6, 7)); // +Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4)); // -Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5)); // +X
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6)); // +Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7)); // -X
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.ConvertToTriangles();
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+
+	CHECK_MESSAGE(TEXT("Fan-triangulated cube described via FaceLoops should pass CheckConvex out of the gate"), Mesh.IsConvex());
+
+	// Pull one vertex inward by 1 unit — the cube is still convex, but the per-triangle plane test on Loops would reject this.
+	Mesh.Vertices[1] = FVector(+499, -499, -500);
+	Mesh.Validate();
+
+	CHECK_MESSAGE(TEXT("Nudging a corner inward must still report convex when CheckConvex walks FaceLoops"), Mesh.IsConvex());
+}
+
+N_TEST_HIGH(FNRawMeshTests_CheckConvex_FaceLoops_DetectsConcavity,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CheckConvex::FaceLoops_DetectsConcavity",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// FaceLoops must not silently pass concave geometry. A spike vertex outside the cube's top face plane should
+	// be detected by the plane-side test when walking the polygonal faces, exactly like it is on the triangle path.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -500, -500, -500 }, { +500, -500, -500 }, { +500, +500, -500 }, { -500, +500, -500 },
+		{ -500, -500, +500 }, { +500, -500, +500 }, { +500, +500, +500 }, { -500, +500, +500 },
+		{    0,    0, 5000 }, // spike well above the +Z face
+	};
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1));
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6, 7));
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4));
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5));
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6));
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7));
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.ConvertToTriangles();
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+
+	CHECK_FALSE_MESSAGE(TEXT("Spike vertex outside the +Z face plane must trip the plane-side test on the FaceLoops path"), Mesh.IsConvex());
+}
+
 N_TEST_HIGH(FNRawMeshTests_IsEqual_DifferentCenter, "NEXUS::UnitTests::NCore::FNRawMesh::IsEqual::DifferentCenter", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNRawMesh A;
