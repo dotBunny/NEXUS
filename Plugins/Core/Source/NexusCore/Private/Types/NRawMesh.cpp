@@ -381,7 +381,7 @@ void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double 
 			LoopIndices.Reserve(NextVert.Num());
 			int32 Curr = StartV;
 			int32 Guard = NextVert.Num() + 1;
-			while (Guard-- > 0)
+			while (Guard > 0)
 			{
 				LoopIndices.Add(Curr);
 				const int32* Next = NextVert.Find(Curr);
@@ -395,6 +395,7 @@ void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double 
 					bClosedLoop = (LoopIndices.Num() == NextVert.Num());
 					break;
 				}
+				Guard--;
 			}
 		}
 
