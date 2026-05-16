@@ -72,7 +72,7 @@ public:
 	 * @return The spawned debug actors, in spawn order. Length is Transforms.Num() in per-mesh mode, or 1 in single-actor mode.
 	 * @note Intended for editor / developer diagnostics only. The actors are transient and will not be saved with the level.
 	 */
-	static TArray<ANDebugActor*> CreateRawMeshVisualizers(UWorld* World, TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,
+	static TArray<ANDebugActor*> CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,
 		UMaterialInterface* MaterialInterface, bool bSingleActor = false, bool bProcessMeshes = false);
 
 	/**
