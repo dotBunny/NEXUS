@@ -47,6 +47,10 @@ void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 {
 	if (CollisionVisualizer != nullptr)
 	{
+		if (CollisionVisualizer->IsSelected())
+		{
+			GEditor->SelectActor(CollisionVisualizer, false, false);
+		}
 		CollisionVisualizer->GetWorld()->DestroyActor(CollisionVisualizer, false, false);
 		CollisionVisualizer = nullptr;
 	}
