@@ -8,6 +8,7 @@
 #include "NActorPoolSubsystem.h"
 #include "NStyleLibrary.h"
 #include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 
 namespace NEXUS::ActorPools::ConsoleCommands
 {
@@ -21,6 +22,8 @@ namespace NEXUS::ActorPools::ConsoleCommands
 
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
+	N_VALIDATE(LogNexusActorPools, ActorPoolList)
+	
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
 	

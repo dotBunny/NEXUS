@@ -9,6 +9,7 @@
 - `ANDebugPointActor` for quick point debugging.
 - `NexusCore`, `NDynamicRefs`, `NGuardian`, `NUI` all have Unit and Performance-based testing.
 - `NValidationMacros` to support providing easy to use validation for Blueprint-facing methods.
+- `NGuardian` now supports automatically setting its baseline after a defined period (default 15 seconds).
 
 ### Changed
 

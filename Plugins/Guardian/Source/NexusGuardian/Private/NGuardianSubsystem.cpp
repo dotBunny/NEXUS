@@ -14,7 +14,20 @@
 void UNGuardianSubsystem::SetBaseline()
 {
 	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
-
+	if (Settings == nullptr)
+	{
+		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings was null; unable to set baseline."));
+		return;
+	}
+	
+	if (Settings->ObjectCountWarningThreshold >= Settings->ObjectCountSnapshotThreshold || 
+		Settings->ObjectCountSnapshotThreshold >= Settings->ObjectCountCompareThreshold)
+	{
+		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings values must increase between thresholds (warning < snapshot < compare); unable to set baseline."));
+		return;
+	}
+	
+	
 	bPassedObjectCountWarningThreshold = false;
 	bPassedObjectCountSnapshotThreshold = false;
 	bPassedObjectCountCompareThreshold = false;
@@ -27,7 +40,7 @@ void UNGuardianSubsystem::SetBaseline()
 	ObjectCountCompareThreshold =  FMath::Clamp(BaseObjectCount + Settings->ObjectCountCompareThreshold, 3, MAX_int32-2);
 	
 	bShouldOutputSnapshot = Settings->bObjectCountCaptureOutput;
-	
+
 	UE_LOG(LogNexusGuardian, Log, TEXT("Watching UObjects(%i). Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)."),
 		BaseObjectCount,
 		ObjectCountWarningThreshold, Settings->ObjectCountWarningThreshold,
@@ -80,13 +93,13 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	if (LastObjectCount >= ObjectCountCompareThreshold && !bPassedObjectCountCompareThreshold)
 	{
 		// Notice ahead of the actual capture to give user feedback
-		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count compare threshold met with %d objects."), LastObjectCount);
+		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count compare threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountCompareThreshold);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
 
 		FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-		FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		Async(EAsyncExecution::TaskGraph,
 			[Diff = MoveTemp(Diff), DumpFilePath = MoveTemp(DumpFilePath)]()
 			{
@@ -100,6 +113,21 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 void UNGuardianSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
-
-	SetBaseline();
+	
+	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
+	if (Settings == nullptr)
+	{
+		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings was null; unable to auto baseline."));
+		return;
+	}
+	
+	// Spin up doing a baseline after the delay
+	if (Settings->bAutoBaseline)
+	{
+		FTimerHandle TimerHandle;
+		InWorld.GetTimerManager().SetTimer(TimerHandle,                                                                                                          
+			FTimerDelegate::CreateUObject(this, &UNGuardianSubsystem::SetBaseline),
+			Settings->AutoBaselineDelay,
+			false);
+	}
 }

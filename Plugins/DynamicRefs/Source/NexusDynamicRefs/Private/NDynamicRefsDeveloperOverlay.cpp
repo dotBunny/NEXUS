@@ -10,6 +10,11 @@
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader)
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences)
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader)
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
+	
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown);
 	

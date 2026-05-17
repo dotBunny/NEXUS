@@ -6,9 +6,12 @@
 #include "NWorldAssemblyRegistry.h"
 #include "NStyleLibrary.h"
 #include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 
 void UNWorldAssemblyDeveloperOverlay::NativeConstruct()
 {
+	N_VALIDATE(LogNexusWorldAssembly, OperationsList)
+	
 	Super::NativeConstruct();
 	
 	// Bind to Registry

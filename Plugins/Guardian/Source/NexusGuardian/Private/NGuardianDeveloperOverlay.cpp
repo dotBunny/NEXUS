@@ -3,12 +3,19 @@
 
 #include "NGuardianDeveloperOverlay.h"
 
+#include "NGuardianMinimal.h"
 #include "NGuardianSubsystem.h"
 #include "NStyleLibrary.h"
 #include "Components/HorizontalBox.h"
+#include "Macros/NValidationMacros.h"
 
 void UNGuardianDeveloperOverlay::NativeConstruct()
 {
+	N_VALIDATE(LogNexusGuardian, ObjectCountBox)
+	N_VALIDATE(LogNexusGuardian, ObjectCountNumber)
+	N_VALIDATE(LogNexusGuardian, BaseCountNumber)
+	N_VALIDATE(LogNexusGuardian, ObjectCountNextNumber)
+	
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldPostInitialization);
 	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldBeginTearDown);
 	
@@ -103,6 +110,8 @@ void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float I
 {
 	if (Subsystems.Num() <= 0) return;
 
+	// TODO: This forces us to only show the active game world or PIE, despite the possibility there is more
+	// We should make this a list entry like the others to support multiple worlds
 	UNGuardianSubsystem* System = Subsystems[0];
 	
 	ObjectCountNumber->SetCurrentValue(System->GetLastObjectCount());

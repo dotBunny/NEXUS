@@ -31,6 +31,16 @@ public:
 			EditCondition="BuildAvailability!=0"))
 	bool bObjectCountCaptureOutput = false;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Baseline", DisplayName ="Auto Baseline",
+		meta=(ToolTip="Automatically establish the UObject count baseline when a world begins play. Disable if you want to call SetBaseline() manually at a more representative point in your game's lifecycle.",
+			EditCondition="BuildAvailability!=0"))
+	bool bAutoBaseline = true;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Baseline", DisplayName ="Auto Baseline Delay",
+		meta=(ToolTip="Seconds to wait after world begin play before capturing the auto baseline. A short delay lets transient startup objects settle so the baseline reflects steady-state object counts.",
+			EditCondition="BuildAvailability!=0 && bAutoBaseline", ClampMin="0.0", UIMin="0.0", Units="s"))
+	float AutoBaselineDelay = 15.f;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Warning Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown.", EditCondition="BuildAvailability!=0"))
 	int32 ObjectCountWarningThreshold = 25000;

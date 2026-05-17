@@ -17,6 +17,7 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 	
+public:	
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(
 		UNGuardianSubsystem, 
 		FNBuildConfigurationAvailability::IsAvailableInBuild(
@@ -32,12 +33,9 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); };
+	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); }
 
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
-
-	const FString ComparePrefix = TEXT("NEXUS_Compare");
-	const FString SnapshotPrefix = TEXT("NEXUS_Snapshot");
 	
 	/** @return The last sampled total UObject count. */
 	int32 GetLastObjectCount() const { return LastObjectCount; }
@@ -59,6 +57,9 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	bool HasPassedCompareThreshold() const { return bPassedObjectCountCompareThreshold; }
 	
 private:
+	const FString ComparePrefix = TEXT("NEXUS_Compare");
+	const FString SnapshotPrefix = TEXT("NEXUS_Snapshot");
+	
 	/** Latched true once the warning threshold has been crossed. */
 	bool bPassedObjectCountWarningThreshold = false;
 	/** Latched true once the snapshot threshold has been crossed. */
@@ -78,7 +79,8 @@ private:
 	int32 ObjectCountSnapshotThreshold = 0;
 	/** Resolved compare threshold (baseline + UNGuardianSettings::ObjectCountCompareThreshold). */
 	int32 ObjectCountCompareThreshold = 0;
-	/** Mirrors UNGuardianSettings::bObjectCountCaptureOutput; when true, snapshots are written to disk. */
+	/** Mirrors UNGuardianSettings::bObjectCountCaptureOutput; when true, snapshots are written to disk. 
+	 * @note Cached when the baseline is set, to avoid polling during Tick. */
 	bool bShouldOutputSnapshot = false;
 
 	/** In-memory snapshot captured at the snapshot threshold and compared at the compare threshold. */
