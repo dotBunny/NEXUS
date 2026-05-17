@@ -33,7 +33,7 @@ public:
 
 	static void IntegerRangeGeneration()
 	{
-		FNMersenneTwister Twister(67890ull);
+		FNMersenneTwister Twister(67890ULL);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNMersenneTwisterPerfTests_IntegerRangeGeneration,
