@@ -69,7 +69,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 				{
 					const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
 					FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
-					UE_LOG(LogNexusCore, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
+					UE_LOG(LogNexusGuardian, Error, TEXT("A UObject snapshot has been written to %s."), *DumpFilePath);
 				});
 		}
 		bPassedObjectCountSnapshotThreshold = true;

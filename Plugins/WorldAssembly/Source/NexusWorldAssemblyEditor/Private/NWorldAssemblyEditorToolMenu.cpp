@@ -5,6 +5,8 @@
 
 #include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/Layout/SSeparator.h"
 
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyRegistry.h"
@@ -12,6 +14,7 @@
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
+#include "Macros/NEditorToolsMacros.h"
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
@@ -53,7 +56,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			{
 				return EVisibility::Visible;
 			}
-			return EVisibility::Hidden;
+			return EVisibility::Collapsed;
 		});
 		
 		// NOrgan Dropdown
@@ -270,7 +273,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(NCellJunctionDropdownMenu);
 		
 		// Visualizers Section
-		NexusSection.AddSeparator(NAME_None);
+		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Toggle Drawing Voxel Data
 		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
@@ -303,7 +306,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(CollisionVisualizerEntry);
 		
 		// Actions Section
-		NexusSection.AddSeparator(NAME_None);
+		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Ignore Actor Toggle
 		FToolMenuEntry IgnoreActorToggle  = FToolMenuEntry::InitToolBarButton(
