@@ -3,32 +3,38 @@
 
 #if WITH_TESTS
 
+#include "Engine/World.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/Paths.h"
 #include "NGuardianSettings.h"
 #include "NGuardianSubsystem.h"
+#include "TimerManager.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
 namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
 {
-    // RAII guard that saves and restores UNGuardianSettings threshold offsets so
-    // individual tests can modify them without polluting subsequent tests.
+    // RAII guard that saves and restores UNGuardianSettings fields so individual
+    // tests can modify them without polluting subsequent tests.
     struct FSettingsGuard
     {
         int32 OriginalWarning;
         int32 OriginalSnapshot;
         int32 OriginalCompare;
         bool  OriginalCaptureOutput;
+        bool  OriginalAutoBaseline;
+        float OriginalAutoBaselineDelay;
 
         FSettingsGuard()
         {
             const UNGuardianSettings* S = UNGuardianSettings::Get();
-            OriginalWarning       = S->ObjectCountWarningThreshold;
-            OriginalSnapshot      = S->ObjectCountSnapshotThreshold;
-            OriginalCompare       = S->ObjectCountCompareThreshold;
-            OriginalCaptureOutput = S->bObjectCountCaptureOutput;
+            OriginalWarning           = S->ObjectCountWarningThreshold;
+            OriginalSnapshot          = S->ObjectCountSnapshotThreshold;
+            OriginalCompare           = S->ObjectCountCompareThreshold;
+            OriginalCaptureOutput     = S->bObjectCountCaptureOutput;
+            OriginalAutoBaseline      = S->bAutoBaseline;
+            OriginalAutoBaselineDelay = S->AutoBaselineDelay;
         }
 
         ~FSettingsGuard()
@@ -38,6 +44,8 @@ namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
             S->ObjectCountSnapshotThreshold = OriginalSnapshot;
             S->ObjectCountCompareThreshold  = OriginalCompare;
             S->bObjectCountCaptureOutput    = OriginalCaptureOutput;
+            S->bAutoBaseline                = OriginalAutoBaseline;
+            S->AutoBaselineDelay            = OriginalAutoBaselineDelay;
         }
     };
 }
@@ -46,8 +54,9 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::InitialState",
     N_TEST_CONTEXT_EDITOR)
 {
-    // OnWorldBeginPlay calls SetBaseline() automatically. Verify the post-conditions:
-    // all threshold flags false, a positive base count, and IsTickable() true.
+    // OnWorldBeginPlay schedules SetBaseline() on a timer (UNGuardianSettings::AutoBaselineDelay),
+    // so this test calls SetBaseline() explicitly to verify its post-conditions: all threshold
+    // flags false, a positive base count, and IsTickable() true.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
@@ -56,6 +65,8 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+
+        Subsystem->SetBaseline();
 
         CHECK_FALSE_MESSAGE("Warning threshold flag should be false after SetBaseline.", Subsystem->HasPassedWarningThreshold())
         CHECK_FALSE_MESSAGE("Snapshot threshold flag should be false after SetBaseline.", Subsystem->HasPassedSnapshotThreshold())
@@ -69,6 +80,83 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
         if (!Subsystem->IsTickable())
         {
             ADD_ERROR("IsTickable should return true once a baseline has been set.");
+        }
+    });
+}
+
+N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_Disabled,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::AutoBaseline::Disabled",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // With bAutoBaseline=false, OnWorldBeginPlay must skip scheduling the timer, so the
+    // subsystem stays non-tickable until something calls SetBaseline() manually.
+    using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+
+    FSettingsGuard Guard;
+    UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
+    Settings->bAutoBaseline = false;
+
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
+    {
+        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
+            return;
+        }
+
+        World->GetTimerManager().Tick(1.0f);
+
+        if (Subsystem->IsTickable())
+        {
+            ADD_ERROR("IsTickable should be false when bAutoBaseline=false and SetBaseline has not been called.");
+        }
+        CHECK_EQUALS("BaseObjectCount should remain zero when auto-baseline is disabled.",
+            Subsystem->GetBaseObjectCount(), 0)
+    });
+}
+
+N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::AutoBaseline::FiresAfterDelay",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // With bAutoBaseline=true and a tiny AutoBaselineDelay, OnWorldBeginPlay schedules a
+    // timer that fires on the next timer-manager tick — the subsystem must become tickable
+    // with a positive base count once the timer has run.
+    using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+
+    FSettingsGuard Guard;
+    UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
+    Settings->bAutoBaseline = true;
+    // FTimerManager silently discards SetTimer with Rate==0, so use a tiny positive delay
+    // and tick the manager past it to fire the timer.
+    Settings->AutoBaselineDelay = 0.001f;
+
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
+    {
+        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
+            return;
+        }
+
+        // When SetTimer runs before the manager has been ticked this frame, the new timer
+        // is queued in PendingTimerSet — it doesn't reach ActiveTimerHeap until the END of
+        // the next Tick(). So the first tick promotes it; only the second tick fires it.
+        // Bump GFrameCounter between ticks so HasBeenTickedThisFrame() lets each one run.
+        ++GFrameCounter;
+        World->GetTimerManager().Tick(0.1f);
+        ++GFrameCounter;
+        World->GetTimerManager().Tick(0.1f);
+
+        if (!Subsystem->IsTickable())
+        {
+            ADD_ERROR("IsTickable should be true after the auto-baseline timer fires.");
+        }
+        if (Subsystem->GetBaseObjectCount() <= 0)
+        {
+            ADD_ERROR("BaseObjectCount should be positive after the auto-baseline timer fires.");
         }
     });
 }
@@ -155,10 +243,11 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
 
-        // Set a zero offset so the current object count already meets the threshold.
-        Settings->ObjectCountWarningThreshold  = 0;
-        Settings->ObjectCountSnapshotThreshold = 0;
-        Settings->ObjectCountCompareThreshold  = 0;
+        // Negative offsets so the current object count already meets the warning threshold;
+        // SetBaseline enforces strict Warning < Snapshot < Compare ordering.
+        Settings->ObjectCountWarningThreshold  = -3;
+        Settings->ObjectCountSnapshotThreshold = -2;
+        Settings->ObjectCountCompareThreshold  = -1;
         Subsystem->SetBaseline();
 
         // Tick once to set the warning flag (returns early after setting it).
@@ -166,13 +255,13 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
         Subsystem->Tick(0.f);
         if (!Subsystem->HasPassedWarningThreshold())
         {
-            ADD_ERROR("Warning flag should be set after first Tick with a zero-offset threshold.");
+            ADD_ERROR("Warning flag should be set after first Tick with a negative-offset threshold.");
             return;
         }
 
-        // Now restore large thresholds and re-baseline. All flags must be reset.
-        Settings->ObjectCountWarningThreshold  = 99999999;
-        Settings->ObjectCountSnapshotThreshold = 99999999;
+        // Now switch to thresholds well above the current count and re-baseline. All flags must be reset.
+        Settings->ObjectCountWarningThreshold  = 99999997;
+        Settings->ObjectCountSnapshotThreshold = 99999998;
         Settings->ObjectCountCompareThreshold  = 99999999;
         Subsystem->SetBaseline();
 
@@ -186,7 +275,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::WarningThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
-    // With a zero warning offset, the first Tick() must set the warning flag.
+    // With a negative warning offset, the first Tick() must set the warning flag.
     // The snapshot and compare flags must remain false (each needs a separate Tick).
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
@@ -196,20 +285,22 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
-    	
+
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        Settings->ObjectCountWarningThreshold  = 0;
-        Settings->ObjectCountSnapshotThreshold = 99999999;
+        // SetBaseline enforces strict Warning < Snapshot < Compare ordering, so the two
+        // un-triggered thresholds must still be strictly larger than warning.
+        Settings->ObjectCountWarningThreshold  = -1;
+        Settings->ObjectCountSnapshotThreshold = 99999998;
         Settings->ObjectCountCompareThreshold  = 99999999;
         Subsystem->SetBaseline();
 
         Subsystem->Tick(0.f);
 
-        CHECK_MESSAGE("Warning flag must be true after one Tick at a zero-offset threshold.", Subsystem->HasPassedWarningThreshold())
+        CHECK_MESSAGE("Warning flag must be true after one Tick at a negative-offset threshold.", Subsystem->HasPassedWarningThreshold())
         CHECK_FALSE_MESSAGE("Snapshot flag must remain false — each threshold needs its own Tick.", Subsystem->HasPassedSnapshotThreshold())
         CHECK_FALSE_MESSAGE("Compare flag must remain false — each threshold needs its own Tick.", Subsystem->HasPassedCompareThreshold())
     }, true);
@@ -219,8 +310,8 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::SnapshotThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
-    // With zero offsets for warning and snapshot, two Ticks must set both flags.
-    // The compare flag must remain false.
+    // With warning and snapshot offsets below the current count, two Ticks must set both
+    // flags. The compare flag must remain false.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
         using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
@@ -239,8 +330,10 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        Settings->ObjectCountWarningThreshold  = 0;
-        Settings->ObjectCountSnapshotThreshold = 0;
+        // Strict Warning < Snapshot < Compare required by SetBaseline; negative offsets keep
+        // both triggerable thresholds below the live UObject count.
+        Settings->ObjectCountWarningThreshold  = -2;
+        Settings->ObjectCountSnapshotThreshold = -1;
         Settings->ObjectCountCompareThreshold  = 99999999;
         Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
@@ -274,9 +367,10 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::Tick::CompareThreshold",
     N_TEST_CONTEXT_EDITOR)
 {
-    // With all three offsets at zero, three Ticks must set all three flags.
-    // Crossing the snapshot and compare thresholds asynchronously writes files to ProjectLogDir;
-    // the test polls for both files to verify the writes actually completed.
+    // With all three offsets below the current count and strictly increasing, three Ticks
+    // must set all three flags. Crossing the snapshot and compare thresholds asynchronously
+    // writes files to ProjectLogDir; the test polls for both files to verify the writes
+    // actually completed.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
         using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
@@ -290,9 +384,9 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        Settings->ObjectCountWarningThreshold  = 0;
-        Settings->ObjectCountSnapshotThreshold = 0;
-        Settings->ObjectCountCompareThreshold  = 0;
+        Settings->ObjectCountWarningThreshold  = -3;
+        Settings->ObjectCountSnapshotThreshold = -2;
+        Settings->ObjectCountCompareThreshold  = -1;
         Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
 
@@ -306,13 +400,13 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
     	AddExpectedMessage(TEXT("A UObject snapshot has been written to"), ELogVerbosity::Error);
     	Subsystem->Tick(0.f); // snapshot
 
-    	AddExpectedMessage(TEXT("The UObject count compare threshold met"), ELogVerbosity::Error);
+    	AddExpectedMessage(TEXT("The UObject count compare threshold has been met"), ELogVerbosity::Error);
     	AddExpectedMessage(TEXT("A UObject comparison written to"), ELogVerbosity::Error);
     	Subsystem->Tick(0.f); // compare
 
         CHECK_MESSAGE("Warning flag must be true after three Ticks.", Subsystem->HasPassedWarningThreshold())
         CHECK_MESSAGE("Snapshot flag must be true after three Ticks.", Subsystem->HasPassedSnapshotThreshold())
-        CHECK_MESSAGE("Compare flag must be true after three Ticks at zero-offset thresholds.", Subsystem->HasPassedCompareThreshold())
+        CHECK_MESSAGE("Compare flag must be true after three Ticks at below-count thresholds.", Subsystem->HasPassedCompareThreshold())
 
         const FString SnapshotPath = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Snapshot_*.txt"), PreSnapshotFiles);
         const FString ComparePath  = FNTestUtils::WaitForNewLogFile(TEXT("NEXUS_Compare_*.txt"),  PreCompareFiles);
@@ -364,9 +458,9 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        Settings->ObjectCountWarningThreshold  = 0;
-        Settings->ObjectCountSnapshotThreshold = 0;
-        Settings->ObjectCountCompareThreshold  = 0;
+        Settings->ObjectCountWarningThreshold  = -3;
+        Settings->ObjectCountSnapshotThreshold = -2;
+        Settings->ObjectCountCompareThreshold  = -1;
         Settings->bObjectCountCaptureOutput    = true;
         Subsystem->SetBaseline();
 
@@ -377,7 +471,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
     	AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 		AddExpectedMessage(TEXT("The UObject count snapshot threshold has been met"), ELogVerbosity::Error);
 		AddExpectedMessage(TEXT("A UObject snapshot has been written to"), ELogVerbosity::Error);
-    	AddExpectedMessage(TEXT("The UObject count compare threshold met"), ELogVerbosity::Error);
+    	AddExpectedMessage(TEXT("The UObject count compare threshold has been met"), ELogVerbosity::Error);
 		AddExpectedMessage(TEXT("A UObject comparison written to"), ELogVerbosity::Error);
 
         // Advance through all three thresholds.
@@ -438,11 +532,11 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
             return;
         }
 
-        // Use a large threshold so no flags are triggered.
+        // Use large, strictly-increasing thresholds so no flags are triggered.
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        Settings->ObjectCountWarningThreshold  = 99999999;
-        Settings->ObjectCountSnapshotThreshold = 99999999;
+        Settings->ObjectCountWarningThreshold  = 99999997;
+        Settings->ObjectCountSnapshotThreshold = 99999998;
         Settings->ObjectCountCompareThreshold  = 99999999;
         Subsystem->SetBaseline();
 
