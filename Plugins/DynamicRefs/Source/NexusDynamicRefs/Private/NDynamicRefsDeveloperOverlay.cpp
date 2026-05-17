@@ -43,7 +43,7 @@ void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 	{
 		if (!DynamicRefObjects.Contains(DynamicRef))
 		{
-			NamedReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
+			DynamicReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
 		}
 		for (UObject* Object : System->GetObjects(DynamicRef))
 		{
@@ -98,21 +98,45 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 	if (World == nullptr) return;
 	
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
-	if (OnAddedDelegates.Contains(World) && System != nullptr)
+	
+	// OnAddedDelegates
+	if (OnAddedDelegates.Contains(World))
 	{
-		System->OnAdded.Remove(OnAddedDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnAdded.Remove(OnAddedDelegates[World]);
+		}
+		OnAddedDelegates.Remove(World);
 	}
-	if (OnAddedByNameDelegates.Contains(World) && System != nullptr)
+	
+	// OnAddedByNameDelegates
+	if (OnAddedByNameDelegates.Contains(World))
 	{
-		System->OnAddedByName.Remove(OnAddedByNameDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnAddedByName.Remove(OnAddedByNameDelegates[World]);
+		}
+		OnAddedByNameDelegates.Remove(World);
 	}
-	if (OnRemovedDelegates.Contains(World) && System != nullptr)
+	
+	// OnRemovedDelegates
+	if (OnRemovedDelegates.Contains(World))
 	{
-		System->OnRemoved.Remove(OnRemovedDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnRemoved.Remove(OnRemovedDelegates[World]);
+		}
+		OnRemovedDelegates.Remove(World);
 	}
-	if (OnRemovedByNameDelegates.Contains(World) && System != nullptr)
+	
+	// OnRemovedByNameDelegates
+	if (OnRemovedByNameDelegates.Contains(World))
 	{
-		System->OnRemovedByName.Remove(OnRemovedByNameDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnRemovedByName.Remove(OnRemovedByNameDelegates[World]);
+		}
+		OnRemovedByNameDelegates.Remove(World);
 	}
 	
 	if (System != nullptr)

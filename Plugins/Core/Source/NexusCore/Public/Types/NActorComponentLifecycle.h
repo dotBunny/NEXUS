@@ -3,6 +3,21 @@
 
 #pragma once
 
+
+
+/**
+ * Identifies a paired UActorComponent lifecycle hook (start and matching end) on which a feature should run.
+ * Each value implies both the beginning and the corresponding tear-down callback.
+ */
+UENUM(BlueprintType)
+enum class ENActorComponentLifecycle : uint8
+{
+	/** Run on BeginPlay and tear down on EndPlay; safe for most gameplay-side setup. */
+	BeginPlay = 0,
+	/** Run on InitializeComponent and tear down on UninitializeComponent; required when setup must be in place before other components' BeginPlay runs. */
+	InitializeComponent = 1,
+};
+
 /**
  * Identifies which UActorComponent lifecycle hook a feature should initialize on.
  */

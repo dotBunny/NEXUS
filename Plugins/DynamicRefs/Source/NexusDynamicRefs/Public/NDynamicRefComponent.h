@@ -12,13 +12,14 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-component/">UNDynamicRefComponent</a>
  */
 UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName = "NEXUS | DynamicRef",
-	meta = (BlueprintSpawnableComponent, Tooltop="Reference an Actor without knowing it."),
+	meta = (BlueprintSpawnableComponent, Tooltip="Reference an Actor without knowing it."),
 	HideCategories=(Tags, Activation, Cooking, AssetUserData, Navigation))
 class NEXUSDYNAMICREFS_API UNDynamicRefComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
+	UNDynamicRefComponent();
 
 	/**
 	 * Resolve an ENDynamicRef value to its human-readable display name via UE reflection.
@@ -38,14 +39,10 @@ public:
 	virtual void UninitializeComponent() override;
 
 protected:
-	/** What phase of the component's lifecycle should the references be linked? */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
-	ENActorComponentLifecycleStart LinkPhase = ENActorComponentLifecycleStart::BeginPlay;
-
-	/** What phase of the component's lifecycle should the references be broken? */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
-	ENActorComponentLifecycleEnd BreakPhase = ENActorComponentLifecycleEnd::EndPlay;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
+	ENActorComponentLifecycle Lifecycle = ENActorComponentLifecycle::BeginPlay;
+
 	/** The set of ENDynamicRef slot identifiers this Actor will claim (fast array-backed lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<TEnumAsByte<ENDynamicRef>> FastReferences;

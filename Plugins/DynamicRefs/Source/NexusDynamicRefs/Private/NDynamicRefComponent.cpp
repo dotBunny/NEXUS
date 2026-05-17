@@ -4,11 +4,15 @@
 #include "NDynamicRefComponent.h"
 #include "NDynamicRefSubsystem.h"
 
+UNDynamicRefComponent::UNDynamicRefComponent()
+{
+	bWantsInitializeComponent = true;
+}
+
 void UNDynamicRefComponent::BeginPlay()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::BeginPlay)
+	if (Lifecycle == ENActorComponentLifecycle::BeginPlay)
 	{
-		// Register the references with the subsystem
 		Register();
 	}
 	Super::BeginPlay();
@@ -17,7 +21,7 @@ void UNDynamicRefComponent::BeginPlay()
 
 void UNDynamicRefComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::EndPlay)
+	if (Lifecycle == ENActorComponentLifecycle::BeginPlay)
 	{
 		Unregister();
 	}
@@ -26,7 +30,7 @@ void UNDynamicRefComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNDynamicRefComponent::InitializeComponent()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::InitializeComponent)
+	if (Lifecycle == ENActorComponentLifecycle::InitializeComponent)
 	{
 		Register();
 	}
@@ -35,9 +39,8 @@ void UNDynamicRefComponent::InitializeComponent()
 
 void UNDynamicRefComponent::UninitializeComponent()
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::UninitializeComponent)
+	if (Lifecycle == ENActorComponentLifecycle::InitializeComponent)
 	{
-		// Unregister the references with the subsystem
 		Unregister();
 	}
 	Super::UninitializeComponent();

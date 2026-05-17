@@ -31,6 +31,7 @@ public:
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
 		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetName = Name;
+		Object->TargetDynamicRef = NDR_None;
 		return Object;
 	};
 
@@ -44,6 +45,7 @@ public:
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
 		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetDynamicRef = DynamicRef;
+		Object->TargetName = NAME_None;
 		return Object;
 	};
 

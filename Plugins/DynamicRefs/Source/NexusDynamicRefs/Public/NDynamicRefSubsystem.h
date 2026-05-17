@@ -23,6 +23,8 @@ struct FNDynamicRefCollection
 	bool HasObjects() const { return Objects.Num() > 0; }
 	/** @return A copy of the currently registered objects. */
 	TArray<UObject*> GetObjects() { return Objects; }
+	/** @return A const reference to the registered objects; avoids the copy GetObjects() makes. */
+	const TArray<TObjectPtr<UObject>>& GetObjectsRef() const { return Objects; }
 	/** Add an object to the collection; duplicates are ignored. */
 	void Add(UObject* Object) { Objects.AddUnique(Object); }
 	/** Remove an object from the collection if present. */
@@ -170,13 +172,13 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UFUNCTION(BlueprintCallable, DisplayName="Get Objects", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects"))
 	TArray<UObject*> GetObjects(const ENDynamicRef DynamicRef);
-
+	
 	/**
 	 * Gets an array of UObject dynamically associated with the provided FName.
 	 * @param Name The desired FName to access.
 	 * @return An array of UObject. 
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Objects", Category = "NEXUS|DynamicRefs",
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects-by-name"))
 	TArray<UObject*> GetObjectsByName(FName Name);
 
@@ -285,6 +287,23 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	TArray<FName> GetNames() const;
 	/** @return All ENDynamicRef slots that currently have at least one registered object. */
 	TArray<ENDynamicRef> GetDynamicRefs() const;
+	
+
+	/**
+	 * Gets a const reference to the underlying collection for the provided ENDynamicRef slot.
+	 * @remark Native code only; prefer this over GetObjects() when you only need to read the registered objects, as it avoids copying the array.
+	 * @param DynamicRef The desired ENDynamicRef slot to access.
+	 * @return A const reference to the FNDynamicRefCollection for the slot.
+	 */
+	const FNDynamicRefCollection& GetObjectCollectionRef(const ENDynamicRef DynamicRef);
+
+	/**
+	 * Gets a const reference to the underlying collection for the provided FName bucket.
+	 * @remark Native code only; prefer this over GetObjectsByName() when you only need to read the registered objects, as it avoids copying the array.
+	 * @param Name The desired FName bucket to access.
+	 * @return A const reference to the FNDynamicRefCollection for the bucket.
+	 */
+	const FNDynamicRefCollection& GetObjectCollectionByNameRef(const FName Name);
 
 	/** Fired when an object is added under an ENDynamicRef slot. */
 	OnDynamicRefChangeDelegate OnAdded;

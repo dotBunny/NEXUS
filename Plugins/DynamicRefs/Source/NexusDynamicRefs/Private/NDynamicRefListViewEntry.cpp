@@ -63,7 +63,7 @@ void UNDynamicRefListViewEntry::Refresh() const
 				UNButtonListViewEntryObject* ButtonObject = NewObject<UNButtonListViewEntryObject>(
 					Object, UNButtonListViewEntryObject::StaticClass(), NAME_None, RF_Transient);
 			
-				ButtonObject->SetText(FText::FromString(FString::Printf(TEXT("%s"), *ReferencePtr->GetFName().ToString())));
+				ButtonObject->SetText(FText::FromName(ReferenceObject->GetFName()));
 				ButtonObject->TargetObject = ReferencePtr;
 				ButtonObject->OnPressedEvent.BindUObject(this, &UNDynamicRefListViewEntry::OnButtonPressed);
 
