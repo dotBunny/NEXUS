@@ -150,7 +150,7 @@ void UNWorldAssemblyEditorSubsystem::UnloadGeneratedProxies(const uint32& Operat
 	}
 }
 
-void UNWorldAssemblyEditorSubsystem::OnPreBeginPIE(bool bArg)
+void UNWorldAssemblyEditorSubsystem::OnPreBeginPIE([[maybe_unused]] bool bArg)
 {
 	ClearAllProxies();
 }
