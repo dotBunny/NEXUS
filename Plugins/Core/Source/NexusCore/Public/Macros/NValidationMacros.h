@@ -16,7 +16,7 @@
 #define N_VALIDATE(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 	}
 
 /**
@@ -30,7 +30,7 @@
 #define N_VALIDATE_RETURN(LogCategory, Expr, ReturnValue) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 		return ReturnValue; \
 	}
 
@@ -43,7 +43,7 @@
 #define N_VALIDATE_RETURN_VOID(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 		return; \
 	}
 
@@ -59,6 +59,6 @@
 #define N_VALIDATE_CONTINUE(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' contained a null entry; skipping."), UE_SOURCE_LOCATION, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' contained a null entry; skipping."), UE_SOURCE_LOCATION, #Expr); \
 		continue; \
 	}
