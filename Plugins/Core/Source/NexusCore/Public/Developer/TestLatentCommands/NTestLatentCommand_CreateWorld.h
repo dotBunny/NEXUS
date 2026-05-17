@@ -9,7 +9,7 @@
 class FNTestLatentCommand_CreateWorld : public IAutomationLatentCommand
 {
 public:
-	FNTestLatentCommand_CreateWorld(FAutomationTestBase* TestPtr)
+	explicit FNTestLatentCommand_CreateWorld(FAutomationTestBase* TestPtr)
 		: Test(TestPtr)
 	{
 	}
