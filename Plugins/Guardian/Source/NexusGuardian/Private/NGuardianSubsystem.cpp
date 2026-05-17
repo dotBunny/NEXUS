@@ -22,9 +22,10 @@ void UNGuardianSubsystem::SetBaseline()
 	
 	BaseObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 
-	ObjectCountWarningThreshold = BaseObjectCount + Settings->ObjectCountWarningThreshold;
-	ObjectCountSnapshotThreshold = BaseObjectCount + Settings->ObjectCountSnapshotThreshold;
-	ObjectCountCompareThreshold = BaseObjectCount + Settings->ObjectCountCompareThreshold;
+	ObjectCountWarningThreshold = FMath::Clamp(BaseObjectCount + Settings->ObjectCountWarningThreshold, 1, MAX_int32);
+	ObjectCountSnapshotThreshold =  FMath::Clamp(BaseObjectCount + Settings->ObjectCountSnapshotThreshold, 2, MAX_int32-1);
+	ObjectCountCompareThreshold =  FMath::Clamp(BaseObjectCount + Settings->ObjectCountCompareThreshold, 3, MAX_int32-2);
+	
 	bShouldOutputSnapshot = Settings->bObjectCountCaptureOutput;
 	
 	UE_LOG(LogNexusGuardian, Log, TEXT("Watching UObjects(%i). Warning @ %i (+%i) / Capture @ %i (+%i) / Compare @ %i (+%i)."),

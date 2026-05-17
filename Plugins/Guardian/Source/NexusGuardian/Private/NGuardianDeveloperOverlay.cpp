@@ -29,6 +29,8 @@ void UNGuardianDeveloperOverlay::NativeDestruct()
 
 void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
@@ -42,6 +44,8 @@ void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 
 void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
