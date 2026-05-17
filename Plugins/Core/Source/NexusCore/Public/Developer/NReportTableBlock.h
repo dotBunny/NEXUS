@@ -54,4 +54,17 @@ private:
 
 	/** Number of columns the table was initialized with; -1 indicates the table has not been initialized yet. */
 	int32 ColumnCount = -1;
+	
+	/**
+	 * Render the header row, separator row, and body cells as a pipe-separated Markdown table.
+	 * @param Report The owning report (unused for content emission, retained for signature parity with the plain-text variant).
+	 * @param Output Line buffer that this block appends to.
+	 */
+	void RenderContentAsMarkdown(FNReport& Report, TArray<FString>& Output);
+	/**
+	 * Render the header row (when present), an ASCII underline, and body cells with each column padded to its widest entry.
+	 * @param Report The owning report (unused for content emission, retained for signature parity with the Markdown variant).
+	 * @param Output Line buffer that this block appends to.
+	 */
+	void RenderContentAsPlainText(FNReport& Report, TArray<FString>& Output);
 };

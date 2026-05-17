@@ -66,93 +66,13 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 	
 
 	// Build Table
-	FStringBuilderBase Builder;
 	if (OutputFormat == ENReportOutputFormat::Markdown)
 	{
-		Builder.Append(TEXT("|"));
-		for (int32 i = 0; i < ColumnCount; i++)
-		{
-			Builder.Append(TEXT(" "));
-			Builder.Append(HeaderCells.IsValidIndex(i) ? HeaderCells[i] : FString());
-			Builder.Append(TEXT(" |"));
-		}
-		Output.Add(Builder.ToString());
-
-		Builder.Reset();
-		Builder.Append(TEXT("|"));
-		for (int32 i = 0; i < ColumnCount; i++)
-		{
-			Builder.Append(TEXT(" --- |"));
-		}
-		Output.Add(Builder.ToString());
-
-		for (int32 r = 0; r < Cells.Num(); r++)
-		{
-			Builder.Reset();
-			Builder.Append(TEXT("|"));
-			const TArray<FString>& Row = Cells[r];
-			for (int32 c = 0; c < ColumnCount; c++)
-			{
-				Builder.Append(TEXT(" "));
-				Builder.Append(Row.IsValidIndex(c) ? Row[c] : FString());
-				Builder.Append(TEXT(" |"));
-			}
-			Output.Add(Builder.ToString());
-		}
+		RenderContentAsMarkdown(Report, Output);
 	}
 	else
 	{
-		if (HeaderCells.Num() > 0)
-		{
-			for (int32 i = 0; i < ColumnCount; i++)
-			{
-				if (i > 0)
-				{
-					Builder.Append(TEXT("  "));
-				}
-				const FString& Cell = HeaderCells[i];
-				Builder.Append(Cell);
-				for (int32 p = Cell.Len(); p < MaximumCellLengths[i]; p++)
-				{
-					Builder.Append(TEXT(" "));
-				}
-			}
-			Output.Add(Builder.ToString());
-
-			Builder.Reset();
-			for (int32 i = 0; i < ColumnCount; i++)
-			{
-				if (i > 0)
-				{
-					Builder.Append(TEXT("  "));
-				}
-				for (int32 p = 0; p < MaximumCellLengths[i]; p++)
-				{
-					Builder.Append(TEXT("-"));
-				}
-			}
-			Output.Add(Builder.ToString());
-		}
-
-		for (int32 r = 0; r < Cells.Num(); r++)
-		{
-			Builder.Reset();
-			const TArray<FString>& Row = Cells[r];
-			for (int32 c = 0; c < ColumnCount; c++)
-			{
-				if (c > 0)
-				{
-					Builder.Append(TEXT("  "));
-				}
-				const FString Cell = Row.IsValidIndex(c) ? Row[c] : FString();
-				Builder.Append(Cell);
-				for (int32 p = Cell.Len(); p < MaximumCellLengths[c]; p++)
-				{
-					Builder.Append(TEXT(" "));
-				}
-			}
-			Output.Add(Builder.ToString());
-		}
+		RenderContentAsPlainText(Report, Output);
 	}
 	
 	// Children
@@ -166,4 +86,95 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 	}
 	
 	RenderFooter(Output, OutputFormat);
+}
+
+void FNReportTableBlock::RenderContentAsMarkdown(FNReport& Report, TArray<FString>& Output)
+{
+	FStringBuilderBase Builder;
+	Builder.Append(TEXT("|"));
+	for (int32 i = 0; i < ColumnCount; i++)
+	{
+		Builder.Append(TEXT(" "));
+		Builder.Append(HeaderCells.IsValidIndex(i) ? HeaderCells[i] : FString());
+		Builder.Append(TEXT(" |"));
+	}
+	Output.Add(Builder.ToString());
+
+	Builder.Reset();
+	Builder.Append(TEXT("|"));
+	for (int32 i = 0; i < ColumnCount; i++)
+	{
+		Builder.Append(TEXT(" --- |"));
+	}
+	Output.Add(Builder.ToString());
+
+	for (int32 r = 0; r < Cells.Num(); r++)
+	{
+		Builder.Reset();
+		Builder.Append(TEXT("|"));
+		const TArray<FString>& Row = Cells[r];
+		for (int32 c = 0; c < ColumnCount; c++)
+		{
+			Builder.Append(TEXT(" "));
+			Builder.Append(Row.IsValidIndex(c) ? Row[c] : FString());
+			Builder.Append(TEXT(" |"));
+		}
+		Output.Add(Builder.ToString());
+	}
+}
+
+void FNReportTableBlock::RenderContentAsPlainText(FNReport& Report, TArray<FString>& Output)
+{
+	FStringBuilderBase Builder;
+	if (HeaderCells.Num() > 0)
+	{
+		for (int32 i = 0; i < ColumnCount; i++)
+		{
+			if (i > 0)
+			{
+				Builder.Append(TEXT("  "));
+			}
+			const FString& Cell = HeaderCells[i];
+			Builder.Append(Cell);
+			for (int32 p = Cell.Len(); p < MaximumCellLengths[i]; p++)
+			{
+				Builder.Append(TEXT(" "));
+			}
+		}
+		Output.Add(Builder.ToString());
+
+		Builder.Reset();
+		for (int32 i = 0; i < ColumnCount; i++)
+		{
+			if (i > 0)
+			{
+				Builder.Append(TEXT("  "));
+			}
+			for (int32 p = 0; p < MaximumCellLengths[i]; p++)
+			{
+				Builder.Append(TEXT("-"));
+			}
+		}
+		Output.Add(Builder.ToString());
+	}
+
+	for (int32 r = 0; r < Cells.Num(); r++)
+	{
+		Builder.Reset();
+		const TArray<FString>& Row = Cells[r];
+		for (int32 c = 0; c < ColumnCount; c++)
+		{
+			if (c > 0)
+			{
+				Builder.Append(TEXT("  "));
+			}
+			const FString Cell = Row.IsValidIndex(c) ? Row[c] : FString();
+			Builder.Append(Cell);
+			for (int32 p = Cell.Len(); p < MaximumCellLengths[c]; p++)
+			{
+				Builder.Append(TEXT(" "));
+			}
+		}
+		Output.Add(Builder.ToString());
+	}
 }

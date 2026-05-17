@@ -6,6 +6,8 @@
 #include "BaseTools/BaseMeshProcessingTool.h"
 #include "DynamicMesh/MeshNormals.h"
 
+// #SONARQUBE-DISABLE-CPP_S3776 It just is what it is to handle edge cases
+
 TArray<int32> FNRawMesh::GetFlatIndices() const
 {
 	int32 Total = 0;
@@ -553,3 +555,5 @@ bool FNRawMesh::CheckNonTris() const
 	}
 	return false;
 }
+
+// #SONARQUBE-DISABLE-CPP_S3776 It just is what it is to handle edge cases
