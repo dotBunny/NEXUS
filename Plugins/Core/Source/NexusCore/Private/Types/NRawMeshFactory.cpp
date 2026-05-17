@@ -138,19 +138,19 @@ bool FNRawMeshFactory::FromChaosBox(const FKBoxElem& Box, const FTransform& Comp
 					{ -HX, -HY, -HZ }, { +HX, -HY, -HZ }, { +HX, +HY, -HZ }, { -HX, +HY, -HZ },
 					{ -HX, -HY, +HZ }, { +HX, -HY, +HZ }, { +HX, +HY, +HZ }, { -HX, +HY, +HZ },
 				};
-	static const int32 Tris[12][3] = {
-		{ 0, 2, 1 }, { 0, 3, 2 },
-		{ 4, 5, 6 }, { 4, 6, 7 },
-		{ 0, 1, 5 }, { 0, 5, 4 },
-		{ 1, 2, 6 }, { 1, 6, 5 },
-		{ 2, 3, 7 }, { 2, 7, 6 },
-		{ 3, 0, 4 }, { 3, 4, 7 },
+	static const TStaticArray<FIntVector, 12> Tris{
+		FIntVector{ 0, 2, 1 }, FIntVector{ 0, 3, 2 },
+		FIntVector{ 4, 5, 6 }, FIntVector{ 4, 6, 7 },
+		FIntVector{ 0, 1, 5 }, FIntVector{ 0, 5, 4 },
+		FIntVector{ 1, 2, 6 }, FIntVector{ 1, 6, 5 },
+		FIntVector{ 2, 3, 7 }, FIntVector{ 2, 7, 6 },
+		FIntVector{ 3, 0, 4 }, FIntVector{ 3, 4, 7 },
 	};
 
 	Mesh.Loops.Reserve(12);
-	for (int32 i = 0; i < 12; ++i)
+	for (const FIntVector& Tri : Tris)
 	{
-		Mesh.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
+		Mesh.Loops.Add(FNRawMeshLoop(Tri.X, Tri.Y, Tri.Z));
 	}
 
 	// Polygonal face description for CheckConvex — six outward-wound quads matching the fan splits above.
