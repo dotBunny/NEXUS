@@ -16,8 +16,8 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
 	// but will follow the defined bounds previously defined at author-time, but rotated.
-	FVector Corners[8];
-	InputData->CellDetails.Bounds.GetVertices(Corners);
+	TStaticArray<FVector, 8> Corners;
+	InputData->CellDetails.Bounds.GetVertices(Corners.Elements);
 	WorldBounds = FBox(ForceInit);
 	for (const FVector& Corner : Corners)
 	{
