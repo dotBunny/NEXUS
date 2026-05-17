@@ -296,6 +296,7 @@ bool FNWorldAssemblyEditorCommands::CellActorEditHullMode_CanExecute()
 	if (Level == nullptr) return false;
 
 	const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
+	if (RootComponent == nullptr) return false;
 	return !RootComponent->Details.Hull.HasNonTris();
 }
 

@@ -11,6 +11,7 @@ class FNWorldAssemblyEditorToolMenu
 {
 public:
 	
+	static const FName MenuSectionGlobal;
 	static const FName MenuSection;
 	
 	/** Register all World Assembly entries with the global tool-menu system. */

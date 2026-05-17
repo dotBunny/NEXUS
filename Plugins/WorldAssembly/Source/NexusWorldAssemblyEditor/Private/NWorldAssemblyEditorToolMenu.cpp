@@ -14,13 +14,47 @@
 #include "NWorldAssemblyEdMode.h"
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
+const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
 
 void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 {
 	// Level Tools
 	if (UToolMenu* Menu = UToolMenus::Get()->ExtendMenu(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser))
 	{
-		FToolMenuSection& NexusSection = Menu->FindOrAddSection(MenuSection);
+		// Safety that it is already added for some reason
+		const FToolMenuSection* ExistingSection = Menu->FindSection(MenuSection);
+		if (ExistingSection != nullptr) return;
+		
+		// Register command lists with the level editor so input chords work globally
+		FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
+		LevelEditorModule.GetGlobalLevelEditorActions()->Append(FNWorldAssemblyEditorCommands::Get().CommandList_Organ.ToSharedRef());
+		
+		// Always there buttons
+		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal);
+		
+		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
+		const FToolMenuEntry NWorldAssemblyEdMode_Button = FToolMenuEntry::InitToolBarButton(
+					"NWorldAssemblyEdMode_Button",
+					FUIAction(
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode),
+						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEdMode::IsNotActive),
+						FIsActionChecked(),
+						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow)),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To NWorldAssembly Editor Mode"),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch the current editor mode to the NWorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
+						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
+		NexusGlobalSection.AddEntry(NWorldAssemblyEdMode_Button);
+		
+		// Editor Mode Dependent
+		FToolMenuSection& NexusSection = Menu->AddSection(MenuSection);
+		NexusSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
+		{
+			if (FNWorldAssemblyEdMode::IsActive())
+			{
+				return EVisibility::Visible;
+			}
+			return EVisibility::Hidden;
+		});
 		
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -76,23 +110,6 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		);
 		NOrganDropdownMenu.StyleNameOverride = "CalloutToolbar";
 		NexusSection.AddEntry(NOrganDropdownMenu);
-		
-		// Register command lists with the level editor so input chords work globally
-		FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-		LevelEditorModule.GetGlobalLevelEditorActions()->Append(FNWorldAssemblyEditorCommands::Get().CommandList_Organ.ToSharedRef());
-		
-		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
-		const FToolMenuEntry NWorldAssemblyEdMode_Button = FToolMenuEntry::InitToolBarButton(
-					"NWorldAssemblyEdMode_Button",
-					FUIAction(
-						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode),
-						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEdMode::IsNotActive),
-						FIsActionChecked(),
-						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow)),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To NWorldAssembly Editor Mode"),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch the current editor mode to the NWorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
-						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
-		NexusSection.AddEntry(NWorldAssemblyEdMode_Button);
 		
 		// Create our option Add NCellActor button that only shows in NWorldAssemblyEdMode + no present NCellActor
 		const FToolMenuEntry NCellActor_AddButton = FToolMenuEntry::InitToolBarButton(
@@ -252,6 +269,9 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NCellJunctionDropdownMenu.StyleNameOverride = "CalloutToolbar";
 		NexusSection.AddEntry(NCellJunctionDropdownMenu);
 		
+		// Visualizers Section
+		NexusSection.AddSeparator(NAME_None);
+		
 		// Toggle Drawing Voxel Data
 		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
 			"NCellActor_DrawVoxelData",
@@ -267,7 +287,22 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				&FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon)));
 		NexusSection.AddEntry(NCellActor_DrawVoxelData);
 		
-		// Actions
+		// Collision Visualizer
+		FToolMenuEntry CollisionVisualizerEntry  = FToolMenuEntry::InitToolBarButton(
+			"NWorldAssembly_ToggleCollisionVisualizer",
+			FUIAction(
+				FExecuteAction::CreateStatic(&CollisionVisualizerToggle),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::IsActive)),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
+				TAttribute<FSlateIcon>::Create(
+					TAttribute<FSlateIcon>::FGetter::CreateStatic(
+				&FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon)));
+		NexusSection.AddEntry(CollisionVisualizerEntry);
+		
+		// Actions Section
 		NexusSection.AddSeparator(NAME_None);
 		
 		// Ignore Actor Toggle
@@ -284,21 +319,6 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon)));
 		NexusSection.AddEntry(IgnoreActorToggle);
-		
-		// Collision Visualizer
-		FToolMenuEntry CollisionVisualizerEntry  = FToolMenuEntry::InitToolBarButton(
-			"NWorldAssembly_ToggleCollisionVisualizer",
-			FUIAction(
-				FExecuteAction::CreateStatic(&CollisionVisualizerToggle),
-				FCanExecuteAction(),
-				FIsActionChecked(),
-				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::IsActive)),
-				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
-				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer_Tooltip", "Creates and destroys a temporary/transient visualizer of the worlds collision geometry used during assembly."),
-				TAttribute<FSlateIcon>::Create(
-					TAttribute<FSlateIcon>::FGetter::CreateStatic(
-				&FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon)));
-		NexusSection.AddEntry(CollisionVisualizerEntry);
 	}
 }
 
@@ -307,8 +327,10 @@ void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
+		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSectionGlobal, "NWorldAssemblyEdMode_Button");
+		
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NOrganExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssemblyEdMode_Button");
+
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_AddButton");
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_SelectButton");
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditBoundsMode");
@@ -351,12 +373,12 @@ bool FNWorldAssemblyEditorToolMenu::ShowCellJunctionDropdown()
 {
 	if (FNEditorUtils::IsPlayInEditor()) return false;
 
-	return FNWorldAssemblyEdMode::IsActive() && FNWorldAssemblyEdMode::HasCellActor();
+	return FNWorldAssemblyEdMode::HasCellActor();
 }
 
 bool FNWorldAssemblyEditorToolMenu::ShowOrganDropdown()
 {
-	return FNWorldAssemblyEdMode::IsActive() && FNWorldAssemblyRegistry::HasOrganComponents();
+	return FNWorldAssemblyRegistry::HasOrganComponents();
 }
 
 void FNWorldAssemblyEditorToolMenu::CollisionVisualizerToggle()
