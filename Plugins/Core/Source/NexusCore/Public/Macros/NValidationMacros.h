@@ -5,11 +5,18 @@
 
 #include "Logging/LogMacros.h"
 
-
+/**
+ * Log a warning via LogCategory when Expr fails IsValid, then continue execution. Use when an
+ * invalid input should be reported but the function can still proceed (e.g. optional dependencies
+ * or non-fatal checks). For early-out behavior, prefer N_VALIDATE_RETURN / N_VALIDATE_RETURN_VOID.
+ *
+ * @param LogCategory The log category to emit the warning on (e.g. LogNexusCore).
+ * @param Expr        The pointer/class/TSubclassOf to validate.
+ */
 #define N_VALIDATE(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), __FUNCTION__, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 	}
 
 /**
@@ -23,7 +30,7 @@
 #define N_VALIDATE_RETURN(LogCategory, Expr, ReturnValue) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), __FUNCTION__, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 		return ReturnValue; \
 	}
 
@@ -36,7 +43,7 @@
 #define N_VALIDATE_RETURN_VOID(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), __FUNCTION__, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
 		return; \
 	}
 
@@ -52,6 +59,6 @@
 #define N_VALIDATE_CONTINUE(LogCategory, Expr) \
 	if (!IsValid(Expr)) \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' contained a null entry; skipping."), __FUNCTION__, #Expr); \
+		UE_LOG(LogCategory, Warning, TEXT("%hs: '%hs' contained a null entry; skipping."), UE_SOURCE_LOCATION, #Expr); \
 		continue; \
 	}
