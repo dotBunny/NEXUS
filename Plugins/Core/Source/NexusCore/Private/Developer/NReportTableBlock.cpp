@@ -88,6 +88,8 @@ void FNReportTableBlock::Render(FNReport& Report, TArray<FString>& Output, const
 	RenderFooter(Output, OutputFormat);
 }
 
+// #SONARQUBE-DISABLE-CPP_S3776 It just is what it is to handle edge cases
+
 void FNReportTableBlock::RenderContentAsMarkdown(FNReport& Report, TArray<FString>& Output)
 {
 	FStringBuilderBase Builder;
@@ -178,3 +180,5 @@ void FNReportTableBlock::RenderContentAsPlainText(FNReport& Report, TArray<FStri
 		Output.Add(Builder.ToString());
 	}
 }
+
+// #SONARQUBE-ENABLE-CPP_S3776 It just is what it is to handle edge cases

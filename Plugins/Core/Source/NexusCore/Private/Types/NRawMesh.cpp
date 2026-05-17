@@ -556,4 +556,4 @@ bool FNRawMesh::CheckNonTris() const
 	return false;
 }
 
-// #SONARQUBE-DISABLE-CPP_S3776 It just is what it is to handle edge cases
+// #SONARQUBE-ENABLE-CPP_S3776 It just is what it is to handle edge cases
