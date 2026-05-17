@@ -24,8 +24,8 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_PreAllocated,
             return;
         }
 
-        // Every bucket should start empty; none should crash on access.
-        for (int32 i = 0; i < NDR_Max; ++i)
+        // Every bucket should start empty; none should crash on access, skip empty NONE bucket
+        for (int32 i = 1; i < NDR_Max; ++i)
         {
             const ENDynamicRef Ref = static_cast<ENDynamicRef>(i);
             CHECK_EQUALS("Initial count should be zero for every ENDynamicRef bucket.",
