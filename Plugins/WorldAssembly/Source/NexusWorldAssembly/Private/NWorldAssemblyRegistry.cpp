@@ -182,9 +182,10 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 	if (OperationTicket != 0)
 	{
 		// Specific-only
-		if (const TArray<ANCellLevelInstance*>* Ptr = CellLevelInstances.Find(OperationTicket))
+		const TArray<ANCellLevelInstance*>* LevelInstancePtr = CellLevelInstances.Find(OperationTicket);
+		if (LevelInstancePtr != nullptr)
 		{
-			AppendInRange(*Ptr);
+			AppendInRange(*LevelInstancePtr);
 		}
 	}
 	else
@@ -201,7 +202,8 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstance(const uint32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
 {
-	if (TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
+	TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
+	if (LevelInstances != nullptr && LevelInstances->Num() > 0)
 	{
 		for (ANCellLevelInstance* LevelInstance : *LevelInstances)
 		{
@@ -292,7 +294,8 @@ bool FNWorldAssemblyRegistry::RegisterOperation(UNAssemblyOperation* Operation)
 bool FNWorldAssemblyRegistry::RegisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
 	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
-	if (const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
+	const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
+	if (LevelInstances != nullptr)
 	{
 		if (LevelInstances->Contains(CellLevelInstance))
 		{
@@ -372,7 +375,8 @@ bool FNWorldAssemblyRegistry::UnregisterOperation(UNAssemblyOperation* Operation
 bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
 	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
-	if (TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket))
+	TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
+	if (LevelInstances != nullptr)
 	{
 		if (LevelInstances->Contains(CellLevelInstance))
 		{
