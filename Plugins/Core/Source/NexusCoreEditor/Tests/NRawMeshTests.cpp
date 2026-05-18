@@ -4,6 +4,7 @@
 #if WITH_TESTS
 
 #include "Types/NRawMesh.h"
+#include "Types/NRawMeshUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -708,6 +709,111 @@ N_TEST_HIGH(FNRawMeshTests_CreateDynamicMesh_ProcessMesh_EnablesVertexNormals, "
 
 	CHECK_MESSAGE(TEXT("bProcessMesh=true should enable vertex normals on the dynamic mesh"), Dyn.HasVertexNormals());
 	CHECK_EQUALS("Processed dynamic mesh should still contain the source triangle", Dyn.TriangleCount(), 1);
+}
+
+N_TEST_HIGH(FNRawMeshTests_ApplyScale_Identity_NoOp, "NEXUS::UnitTests::NCore::FNRawMesh::ApplyScale::Identity_NoOp", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Identity scale hits the OneVector early-out — vertices, Center, and Bounds must all survive untouched
+	// (a buggy implementation that always re-multiplied could introduce FP drift here).
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(1, 2, 3), FVector(4, 5, 6) };
+	Mesh.CalculateCenterAndBounds();
+	const FVector OriginalCenter = Mesh.Center;
+	const FBox OriginalBounds = Mesh.Bounds;
+
+	Mesh.ApplyScale(FVector::OneVector);
+
+	CHECK_MESSAGE(TEXT("Identity scale must leave vertex 0 unchanged"), Mesh.Vertices[0].Equals(FVector(1, 2, 3)));
+	CHECK_MESSAGE(TEXT("Identity scale must leave vertex 1 unchanged"), Mesh.Vertices[1].Equals(FVector(4, 5, 6)));
+	CHECK_MESSAGE(TEXT("Identity scale must leave Center unchanged"), Mesh.Center.Equals(OriginalCenter));
+	CHECK_MESSAGE(TEXT("Identity scale must leave Bounds unchanged"),
+		Mesh.Bounds.Min.Equals(OriginalBounds.Min) && Mesh.Bounds.Max.Equals(OriginalBounds.Max));
+}
+
+N_TEST_HIGH(FNRawMeshTests_ApplyScale_Uniform_ScalesAllAxes, "NEXUS::UnitTests::NCore::FNRawMesh::ApplyScale::Uniform_ScalesAllAxes", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Uniform 2x scale — every vertex doubles and the recompute path updates Center + Bounds.
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(1, 2, 3), FVector(4, 5, 6) };
+
+	Mesh.ApplyScale(FVector(2.0, 2.0, 2.0));
+
+	CHECK_MESSAGE(TEXT("Uniform 2x scale must double vertex 0"), Mesh.Vertices[0].Equals(FVector(2, 4, 6)));
+	CHECK_MESSAGE(TEXT("Uniform 2x scale must double vertex 1"), Mesh.Vertices[1].Equals(FVector(8, 10, 12)));
+	CHECK_MESSAGE(TEXT("Center must be recomputed from the scaled vertices"), Mesh.Center.Equals(FVector(5, 7, 9)));
+	CHECK_MESSAGE(TEXT("Bounds.Min must reflect the scaled minimum"), Mesh.Bounds.Min.Equals(FVector(2, 4, 6)));
+	CHECK_MESSAGE(TEXT("Bounds.Max must reflect the scaled maximum"), Mesh.Bounds.Max.Equals(FVector(8, 10, 12)));
+	CHECK_MESSAGE(TEXT("HasBounds() must be true after the recompute"), Mesh.HasBounds());
+}
+
+N_TEST_HIGH(FNRawMeshTests_ApplyScale_NonUniform_PerAxisIndependent, "NEXUS::UnitTests::NCore::FNRawMesh::ApplyScale::NonUniform_PerAxisIndependent", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Non-uniform scale (0.5, 2, 1) — proves per-axis independence; a regression that collapsed to a uniform
+	// shortcut would visibly mangle this vertex.
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(2, 4, 8) };
+
+	Mesh.ApplyScale(FVector(0.5, 2.0, 1.0));
+
+	CHECK_MESSAGE(TEXT("Non-uniform scale must apply independently per axis (0.5*2, 2*4, 1*8) = (1, 8, 8)"),
+		Mesh.Vertices[0].Equals(FVector(1, 8, 8)));
+}
+
+N_TEST_HIGH(FNRawMeshTests_ApplyScale_Negative_MirrorsAndRecomputesBounds, "NEXUS::UnitTests::NCore::FNRawMesh::ApplyScale::Negative_MirrorsAndRecomputesBounds", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Negative X scale mirrors the mesh across the YZ plane. The post-scale CalculateCenterAndBounds must
+	// pick min/max from the mirrored positions — a naive "Bounds *= Scale" would leave Min > Max and break
+	// downstream AABB tests.
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(1, 0, 0), FVector(3, 0, 0) };
+
+	Mesh.ApplyScale(FVector(-1.0, 1.0, 1.0));
+
+	CHECK_MESSAGE(TEXT("Negative X scale must mirror vertex 0 to x=-1"), Mesh.Vertices[0].Equals(FVector(-1, 0, 0)));
+	CHECK_MESSAGE(TEXT("Negative X scale must mirror vertex 1 to x=-3"), Mesh.Vertices[1].Equals(FVector(-3, 0, 0)));
+	CHECK_MESSAGE(TEXT("Bounds.Min.X must be the post-mirror minimum (-3)"), FMath::IsNearlyEqual(Mesh.Bounds.Min.X, -3.0, 0.001));
+	CHECK_MESSAGE(TEXT("Bounds.Max.X must be the post-mirror maximum (-1)"), FMath::IsNearlyEqual(Mesh.Bounds.Max.X, -1.0, 0.001));
+}
+
+N_TEST_HIGH(FNRawMeshTests_CalculateCenterAndBounds_Empty_HasBoundsFalse,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CalculateCenterAndBounds::Empty_HasBoundsFalse",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// CalculateCenterAndBounds must mirror Validate's CheckBounds contract: HasBounds() reports true only
+	// when the underlying FBox is actually valid. Without this, callers that read HasBounds() to decide
+	// whether to use the AABB get a false positive on empty meshes (e.g. DoesIntersect's bounds early-out
+	// would treat the empty mesh's invalid FBox as a real AABB and produce surprising results).
+	FNRawMesh Mesh;
+	Mesh.CalculateCenterAndBounds();
+
+	CHECK_MESSAGE(TEXT("Center must collapse to zero when no vertices were supplied"), Mesh.Center.IsZero());
+	CHECK_FALSE_MESSAGE(TEXT("HasBounds() must report false when no vertices contributed an AABB"), Mesh.HasBounds());
+	CHECK_FALSE_MESSAGE(TEXT("Underlying FBox must remain invalid"), Mesh.Bounds.IsValid != 0);
+}
+
+N_TEST_HIGH(FNRawMeshTests_Validate_SkippedWhenChaosGenerated,
+	"NEXUS::UnitTests::NCore::FNRawMesh::Validate::SkippedWhenChaosGenerated",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Validate's early-out at bIsChaosGenerated==true: subsequent calls must leave cached flags alone.
+	// Build a Chaos-generated hull via ToConvexHull, then deliberately break convexity at the vertex level.
+	// A correct Validate must SKIP the recompute and IsConvex() must still report true.
+	FNRawMesh Cloud;
+	Cloud.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+	// Deliberately skip Validate on Cloud so bIsConvex stays false and ToConvexHull doesn't early-return.
+
+	FNRawMesh Hull = FNRawMeshUtils::ToConvexHull(Cloud);
+	CHECK_MESSAGE(TEXT("Hull of a cube cloud must initially report convex"), Hull.IsConvex());
+
+	// Yank a single hull vertex far outside — geometrically non-convex now.
+	Hull.Vertices[0] = FVector(0, 0, 10000);
+	Hull.Validate();
+
+	CHECK_MESSAGE(TEXT("Validate must skip when bIsChaosGenerated==true, so IsConvex remains true despite the broken vertex"),
+		Hull.IsConvex());
 }
 
 #endif //WITH_TESTS

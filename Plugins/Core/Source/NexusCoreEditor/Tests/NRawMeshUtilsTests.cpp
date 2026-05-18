@@ -4,6 +4,8 @@
 #if WITH_TESTS
 
 #include "Types/NRawMeshUtils.h"
+#include "Types/NRawMeshFactory.h"
+#include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -33,6 +35,67 @@ namespace NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness
 		Mesh.CalculateCenterAndBounds();
 		Mesh.Validate();
 		return Mesh;
+	}
+
+	/** Builds an axis-aligned box with arbitrary half-extents using the same hand-rolled topology as MakeCube. */
+	static FNRawMesh MakeBox(const double Hx, const double Hy, const double Hz)
+	{
+		FNRawMesh Mesh;
+		Mesh.Vertices = {
+			{ -Hx, -Hy, -Hz }, { +Hx, -Hy, -Hz }, { +Hx, +Hy, -Hz }, { -Hx, +Hy, -Hz },
+			{ -Hx, -Hy, +Hz }, { +Hx, -Hy, +Hz }, { +Hx, +Hy, +Hz }, { -Hx, +Hy, +Hz },
+		};
+		static const int32 Tris[12][3] = {
+			{ 0, 2, 1 }, { 0, 3, 2 },
+			{ 4, 5, 6 }, { 4, 6, 7 },
+			{ 0, 1, 5 }, { 0, 5, 4 },
+			{ 1, 2, 6 }, { 1, 6, 5 },
+			{ 2, 3, 7 }, { 2, 7, 6 },
+			{ 3, 0, 4 }, { 3, 4, 7 },
+		};
+		for (int32 i = 0; i < 12; ++i)
+		{
+			Mesh.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
+		}
+		Mesh.CalculateCenterAndBounds();
+		Mesh.Validate();
+		return Mesh;
+	}
+
+	/** Emits a box via FromChaosBox so depth tests exercise the factory production path (FaceLoops populated, bIsChaosGenerated=true). */
+	static FNRawMesh MakeChaosBox(const double FullX, const double FullY, const double FullZ)
+	{
+		FKBoxElem Box;
+		Box.X = FullX;
+		Box.Y = FullY;
+		Box.Z = FullZ;
+		FNRawMesh OutMesh;
+		FTransform OutTransform;
+		FNRawMeshFactory::FromChaosBox(Box, FTransform::Identity, OutMesh, OutTransform);
+		return OutMesh;
+	}
+
+	/** Emits a UV-tessellated sphere via FromChaosSphere. */
+	static FNRawMesh MakeChaosSphere(const double Radius)
+	{
+		FKSphereElem Sphere;
+		Sphere.Radius = Radius;
+		FNRawMesh OutMesh;
+		FTransform OutTransform;
+		FNRawMeshFactory::FromChaosSphere(Sphere, FTransform::Identity, OutMesh, OutTransform);
+		return OutMesh;
+	}
+
+	/** Emits a tessellated capsule (cylinder band + hemispherical caps) via FromChaosSphyl. */
+	static FNRawMesh MakeChaosSphyl(const double Radius, const double Length)
+	{
+		FKSphylElem Sphyl;
+		Sphyl.Radius = Radius;
+		Sphyl.Length = Length;
+		FNRawMesh OutMesh;
+		FTransform OutTransform;
+		FNRawMeshFactory::FromChaosSphyl(Sphyl, FTransform::Identity, OutMesh, OutTransform);
+		return OutMesh;
 	}
 }
 
@@ -494,6 +557,364 @@ N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonTriMesh_NegativeOneWithErro
 
 	CHECK_MESSAGE(TEXT("Quad-based input must yield the -1 sentinel with an error"),
 		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_FromChaosBoxParity_MatchesMakeCube,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FromChaosBoxParity_MatchesMakeCube",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirrors PartialOverlap_NearestFaceDistance but uses factory-built boxes — proves the FromChaosBox emission
+	// path (which populates FaceLoops and flags bIsChaosGenerated) flows through GetIntersectDepth identically to
+	// the hand-built MakeCube path. Half-extents 10 and 5 with a +12 X offset → analytic depth = 3.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(20.0, 20.0, 20.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(10.0, 10.0, 10.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0,  0, 0), FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Factory-built boxes must produce the same nearest-face depth (3.0) as the MakeCube case"),
+		FMath::IsNearlyEqual(Depth, 3.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_FromChaosSphere_Concentric_PositiveBounded,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FromChaosSphere_Concentric_PositiveBounded",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Small sphere (R=2) concentric inside a large sphere (R=10). The cube tests can't exercise non-axis-aligned
+	// face normals; this case forces ComputePointDepthInsideConvex to walk hundreds of differently-oriented
+	// tessellation planes. For an inner vertex at radius 2 the closest outer triangle plane sits at perp distance
+	// R_big * cos(half-segment-angle) - 2, so the max-over-vertices depth ≈ 9.808 (cylinder-band-style faces win).
+	const FNRawMesh Big   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphere(10.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphere(2.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Big,   FVector(0, 0, 0), FRotator::ZeroRotator,
+		Small, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Concentric inner sphere must report a positive depth in the tessellation-bounded range"),
+		Depth > 7.0f && Depth < 10.0f);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_FromChaosSphyl_Contained_PositiveBounded,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FromChaosSphyl_Contained_PositiveBounded",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Small sphyl (R=2, L=4) co-axial inside a large sphyl (R=10, L=20). Exercises the heterogeneous-face-normal
+	// path (pole fans + hemisphere bands + cylinder quads-as-triangles), which the cube tests don't reach. Worst-
+	// case depth is bounded by the radial gap minus the small sphyl's outer extent on the cylinder band.
+	const FNRawMesh Big   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphyl(10.0, 20.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphyl(2.0, 4.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Big,   FVector(0, 0, 0), FRotator::ZeroRotator,
+		Small, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Contained sphyl must report a positive depth bounded by the large sphyl's tessellated radial gap"),
+		Depth > 7.0f && Depth < 10.0f);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_FromChaosSphyl_VsBox_SymmetricSwap,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FromChaosSphyl_VsBox_SymmetricSwap",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Asymmetric-shape symmetry: SymmetricSwap_SameResult only covers identical-shape pairs. A sphyl + box pair
+	// has very different face-normal distributions in each direction, so swap-invariance here is a stronger check
+	// that the "max of two directional measurements" metric doesn't accidentally short-circuit on the first pass.
+	const FNRawMesh Sphyl = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphyl(5.0, 10.0);
+	const FNRawMesh Box   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(20.0, 20.0, 20.0);
+
+	const float DepthA = FNRawMeshUtils::GetIntersectDepth(
+		Sphyl, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Box,   FVector(0, 0, 0), FRotator::ZeroRotator);
+	const float DepthB = FNRawMeshUtils::GetIntersectDepth(
+		Box,   FVector(0, 0, 0), FRotator::ZeroRotator,
+		Sphyl, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Sphyl-vs-Box depth must be identical when the arguments are swapped"),
+		FMath::IsNearlyEqual(DepthA, DepthB, 0.001f));
+	CHECK_MESSAGE(TEXT("Sphyl co-located with a larger box must report a positive depth"), DepthA > 0.0f);
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_FromChaosSphyl_RotatedVsBox_TipPenetration,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::FromChaosSphyl_RotatedVsBox_TipPenetration",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Sphyl (R=2, L=10) rotated 90° about Y so its long axis lies along world -X, then placed at world X=16. Its
+	// top pole at local (0,0,7) maps to world (-7,0,0) → translated (9,0,0), which sits 1 unit inside the box's
+	// +X face. Verifies that GetIntersectDepth's per-vertex rotation step (LeftQuat / RightQuat in the
+	// vertex-sampling loops) is wired correctly — a regression that drops the rotation would either misplace the
+	// sphyl entirely (Depth ≈ -1 from AABB miss, or +7 from the tip flush against the box face) or measure depth
+	// against the wrong face.
+	const FNRawMesh Sphyl = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosSphyl(2.0, 10.0);
+	const FNRawMesh Box   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(20.0, 20.0, 20.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Box,   FVector(0,  0, 0), FRotator::ZeroRotator,
+		Sphyl, FVector(16, 0, 0), FRotator(90.f, 0.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Rotated sphyl tip 1 unit inside the box's +X face must report depth ≈ 1"),
+		Depth > 0.5f && Depth < 1.5f);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_SurfaceOnlyCrossing_ReturnsZero,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::SurfaceOnlyCrossing_ReturnsZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Two perpendicular thin rods crossing at the origin: their bodies overlap in the middle but every vertex of
+	// each rod sits well outside the other's cross-section (|x|=100 vs cross-section |x|≤1, and vice-versa).
+	// Locks the documented contract "Returns 0.0 when the AABBs overlap but no vertex of either mesh lies inside
+	// the other" — a bug that double-counted boundary-touching vertices or accidentally returned -1 here would
+	// silently corrupt threshold checks built on this API.
+	const FNRawMesh RodX = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeBox(100.0, 1.0, 1.0);
+	const FNRawMesh RodY = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeBox(1.0, 100.0, 1.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		RodX, FVector(0, 0, 0), FRotator::ZeroRotator,
+		RodY, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Surface-only crossing without vertex containment must return exactly 0, not -1 and not positive"),
+		FMath::IsNearlyEqual(Depth, 0.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_NegativeOneWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_NegativeOneWithWarning",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	AddExpectedMessage(TEXT("not convex"), ELogVerbosity::Warning);
+
+	// Triangle-only mesh that fails IsConvex (spike vertex outside the +Z face plane — same shape as
+	// CheckConvex_ConcavePolyhedron_False). Mirrors the rejection path that real FromStaticMesh /
+	// FromChaosBodySetup output (typically arbitrary concave geometry) would hit at the GetIntersectDepth
+	// entry — currently only the EmptyLoops and NonTriMesh rejection paths are covered at this entry point.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	FNRawMesh Concave;
+	Concave.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+		{  0,  0, 100 },
+	};
+	static const int32 Tris[12][3] = {
+		{ 0, 2, 1 }, { 0, 3, 2 },
+		{ 4, 5, 6 }, { 4, 6, 7 },
+		{ 0, 1, 5 }, { 0, 5, 4 },
+		{ 1, 2, 6 }, { 1, 6, 5 },
+		{ 2, 3, 7 }, { 2, 7, 6 },
+		{ 3, 0, 4 }, { 3, 4, 7 },
+	};
+	for (int32 i = 0; i < 12; ++i)
+	{
+		Concave.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
+	}
+	Concave.CalculateCenterAndBounds();
+	Concave.Validate();
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Cube,    FVector(0, 0, 0), FRotator::ZeroRotator,
+		Concave, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Non-convex input must yield the -1 sentinel with a warning"),
+		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_SurfaceOnlyCrossing_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::SurfaceOnlyCrossing_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Paired with GetIntersectDepth::SurfaceOnlyCrossing_ReturnsZero — same geometry, but DoesIntersect must
+	// return true (the rods do geometrically overlap via triangle-vs-triangle) while the depth metric
+	// returns 0 (no vertex of either lies inside the other). Locks in the contract that the two APIs
+	// measure different things and can legitimately disagree on the same input.
+	const FNRawMesh RodX = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeBox(100.0, 1.0, 1.0);
+	const FNRawMesh RodY = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeBox(1.0, 100.0, 1.0);
+
+	const bool bResult = FNRawMeshUtils::DoesIntersect(
+		RodX, FVector(0, 0, 0), FRotator::ZeroRotator,
+		RodY, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Perpendicular rods pass through each other geometrically — DoesIntersect must return true"), bResult);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_ToConvexHull_AlreadyConvex_ReturnsCopyWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::ToConvexHull::AlreadyConvex_ReturnsCopyWithWarning",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	AddExpectedMessage(TEXT("already a convex hull"), ELogVerbosity::Warning);
+
+	// Validated convex cube must early-return as a duplicate rather than being re-built — the warning is the
+	// audible cue to the caller that they have a redundant call site.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	CHECK_MESSAGE(TEXT("Input cube must report convex going in"), Cube.IsConvex());
+
+	const FNRawMesh Hull = FNRawMeshUtils::ToConvexHull(Cube);
+
+	CHECK_MESSAGE(TEXT("Already-convex input must be returned as an equal copy"), Hull == Cube);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_ToConvexHull_TooFewVertices_ReturnsEmptyWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::ToConvexHull::TooFewVertices_ReturnsEmptyWithWarning",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	AddExpectedMessage(TEXT("fewer than 4 vertices"), ELogVerbosity::Warning);
+
+	// A single triangle cannot form a 3D hull. Chaos's builder needs >=4 points; the guard short-circuits
+	// before reaching it and returns an empty mesh so the caller's downstream pipeline can detect the failure.
+	FNRawMesh Input;
+	Input.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(0, 10, 0) };
+
+	const FNRawMesh Hull = FNRawMeshUtils::ToConvexHull(Input);
+
+	CHECK_EQUALS("Too-few-vertices input must yield an empty hull (no vertices)", Hull.Vertices.Num(), 0);
+	CHECK_EQUALS("Too-few-vertices input must yield zero loops", Hull.Loops.Num(), 0);
+	CHECK_EQUALS("Too-few-vertices input must yield zero FaceLoops", Hull.FaceLoops.Num(), 0);
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_ToConvexHull_CubeCloud_BuildsChaosHullWithTriangulatedFaces,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::ToConvexHull::CubeCloud_BuildsChaosHullWithTriangulatedFaces",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Feeding 8 cube vertices (no triangles, no Validate so bIsConvex stays false and the early-out doesn't
+	// fire) drives the actual Chaos hull builder. ToConvexHull hard-codes EBuildMethod::Original
+	// (NRawMeshUtils.cpp:245), which emits already-triangulated face indices — so for a cube the result is
+	// 12 triangle FaceLoops, not 6 quads (contrast FromChaosConvexHull, which uses the default builder and
+	// preserves quads). The "polygonal pre-triangulation" intent of FaceLoops is effectively a no-op on this
+	// path; this test documents that contract.
+	FNRawMesh Cloud;
+	Cloud.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+
+	const FNRawMesh Hull = FNRawMeshUtils::ToConvexHull(Cloud);
+
+	CHECK_EQUALS("Cube cloud should produce 8 hull vertices", Hull.Vertices.Num(), 8);
+	CHECK_EQUALS("EBuildMethod::Original pre-triangulates each cube face → 12 triangle FaceLoops", Hull.FaceLoops.Num(), 12);
+	for (int32 i = 0; i < Hull.FaceLoops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Each cube-hull FaceLoop should be a triangle on the Original-builder path"), Hull.FaceLoops[i].IsTriangle());
+	}
+	CHECK_MESSAGE(TEXT("Hull should report convex via the cached flag"), Hull.IsConvex());
+	CHECK_MESSAGE(TEXT("Hull should have populated bounds"), Hull.HasBounds());
+	CHECK_FALSE_MESSAGE(TEXT("Loops should be all-triangles after the builder + ConvertToTriangles pass"), Hull.HasNonTris());
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_ToConvexHull_SpikeCubeCloud_IncludesSpikeAsHullVertex,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::ToConvexHull::SpikeCubeCloud_IncludesSpikeAsHullVertex",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// 8 cube corners + 1 spike well above the cube. The spike is an extreme point in +Z and every cube
+	// corner remains extreme in its own ±X/±Y direction, so the hull must contain all 9 input points.
+	FNRawMesh Cloud;
+	Cloud.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+		{  0,  0, 100 },
+	};
+
+	const FNRawMesh Hull = FNRawMeshUtils::ToConvexHull(Cloud);
+
+	CHECK_EQUALS("Spike-cube cloud should produce a 9-vertex hull (all inputs are extreme points)", Hull.Vertices.Num(), 9);
+	CHECK_MESSAGE(TEXT("Spike-cube hull must report convex by construction"), Hull.IsConvex());
+	CHECK_MESSAGE(TEXT("Spike-cube hull Z extent should reach the spike at z=100"),
+		FMath::IsNearlyEqual(Hull.Bounds.Max.Z, 100.0, 0.001));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_ClearsChaosGeneratedFlag,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CombineMesh::ClearsChaosGeneratedFlag",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Header @note on CombineMesh: "BaseMesh's bIsChaosGenerated flag is cleared since the merged result is
+	// no longer a single cooked Chaos body." Observable side effect: after the merge, the internal Validate
+	// must re-evaluate convexity rather than skip. Test by combining two convex hulls 100 units apart — if
+	// the flag weren't cleared, Validate would skip and IsConvex would inherit Base's incoming true; with the
+	// flag cleared, Validate correctly detects the disjoint-cube merge as non-convex.
+	FNRawMesh CloudA;
+	CloudA.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+	FNRawMesh HullA = FNRawMeshUtils::ToConvexHull(CloudA);
+	CHECK_MESSAGE(TEXT("HullA must be Chaos-flagged and convex before the merge"), HullA.IsConvex());
+
+	FNRawMesh CloudB;
+	CloudB.Vertices = {
+		{ +95, -5, -5 }, { +105, -5, -5 }, { +105, +5, -5 }, { +95, +5, -5 },
+		{ +95, -5, +5 }, { +105, -5, +5 }, { +105, +5, +5 }, { +95, +5, +5 },
+	};
+	const FNRawMesh HullB = FNRawMeshUtils::ToConvexHull(CloudB);
+	CHECK_MESSAGE(TEXT("HullB must also be Chaos-flagged and convex before the merge"), HullB.IsConvex());
+
+	FNRawMeshUtils::CombineMesh(FTransform::Identity, HullA, FTransform::Identity, HullB);
+
+	CHECK_FALSE_MESSAGE(TEXT("Two convex hulls 100 units apart must merge to a non-convex result — proves CombineMesh cleared bIsChaosGenerated so the internal Validate ran"),
+		HullA.IsConvex());
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CreateRawMeshVisualizers_PerMesh_SpawnsOnePerEntry,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CreateRawMeshVisualizers::PerMesh_SpawnsOnePerEntry",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Per-mesh mode: one ANDebugActor per (Mesh, Transform) pair, each spawned at its matching transform
+	// and marked transient so the actors don't leak into the saved level.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+		const TArray<FNRawMesh> Meshes = { Cube, Cube, Cube };
+		const TArray<FTransform> Transforms = {
+			FTransform(FVector(0,   0, 0)),
+			FTransform(FVector(50,  0, 0)),
+			FTransform(FVector(100, 0, 0)),
+		};
+
+		const TArray<ANDebugActor*> Actors = FNRawMeshUtils::CreateRawMeshVisualizers(
+			World, Meshes, Transforms, nullptr, /*bSingleActor*/ false, /*bProcessMeshes*/ false);
+
+		CHECK_EQUALS("Per-mesh mode must spawn one actor per Meshes/Transforms entry", Actors.Num(), 3);
+		for (int32 i = 0; i < Actors.Num(); i++)
+		{
+			if (Actors[i] == nullptr)
+			{
+				ADD_ERROR("Spawned visualizer actor was unexpectedly null");
+				continue;
+			}
+			CHECK_MESSAGE(TEXT("Each visualizer must be an ANDebugActor"), Actors[i]->IsA<ANDebugActor>());
+			CHECK_MESSAGE(TEXT("Each visualizer must be RF_Transient so it does not persist with the level"),
+				Actors[i]->HasAnyFlags(RF_Transient));
+			CHECK_MESSAGE(TEXT("Each visualizer must land at its source transform"),
+				Actors[i]->GetActorLocation().Equals(Transforms[i].GetLocation(), 0.001));
+		}
+	});
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_CreateRawMeshVisualizers_SingleActor_SpawnsOneAtIdentity,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::CreateRawMeshVisualizers::SingleActor_SpawnsOneAtIdentity",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Single-actor mode: all entries are merged via CombineMesh into one ANDebugActor anchored at identity.
+	// The per-entry transforms are used to align the meshes during the merge, not to position the actor.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+		const TArray<FNRawMesh> Meshes = { Cube, Cube };
+		const TArray<FTransform> Transforms = {
+			FTransform(FVector(0,  0, 0)),
+			FTransform(FVector(50, 0, 0)),
+		};
+
+		const TArray<ANDebugActor*> Actors = FNRawMeshUtils::CreateRawMeshVisualizers(
+			World, Meshes, Transforms, nullptr, /*bSingleActor*/ true, /*bProcessMeshes*/ false);
+
+		CHECK_EQUALS("Single-actor mode must spawn exactly one actor regardless of input count", Actors.Num(), 1);
+		if (Actors.Num() != 1 || Actors[0] == nullptr)
+		{
+			ADD_ERROR("Single-actor spawn produced no usable actor to assert on");
+			return;
+		}
+		CHECK_MESSAGE(TEXT("Single-actor visualizer must be an ANDebugActor"), Actors[0]->IsA<ANDebugActor>());
+		CHECK_MESSAGE(TEXT("Single-actor visualizer must spawn at the merged-mesh base transform (identity)"),
+			Actors[0]->GetActorLocation().Equals(FVector::ZeroVector, 0.001));
+	});
 }
 
 #endif //WITH_TESTS

@@ -174,7 +174,7 @@ struct NEXUSCORE_API FNRawMesh
 			CenterCalc += Vertices[i];
 			BoundingBox += Vertices[i];
 		}
-		
+
 		// Ensure that we never divide by zero
 		if (Vertices.Num() > 0)
 		{
@@ -186,7 +186,7 @@ struct NEXUSCORE_API FNRawMesh
 		}
 
 		Bounds = BoundingBox;
-		bHasBounds = true;
+		bHasBounds = Bounds.IsValid != 0;
 	}
 
 	/**
