@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "NWorldAssemblyGameplayTags.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
 
@@ -19,13 +20,8 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, meta = (Categories="NEXUS.WorldAssembly"))
-	FGameplayTagContainer PlacementTags;
-	
-	UPROPERTY(EditAnywhere, meta = (Categories="NEXUS.WorldAssembly"))
-	FGameplayTagContainer UniqueGroupTags;
-	
-	
+	UPROPERTY(EditAnywhere, DisplayName="Tags", meta = (Categories="NEXUS.WorldAssembly"))
+	FGameplayTagContainer Tags;
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	UPROPERTY(EditAnywhere)
@@ -60,6 +56,13 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDistance = 1;
 	
+	/**
+	* The minimum number of cell links away this cell must be from the start to be used.
+	* @note A value of 0 indicates no constraint.
+	*/
+	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
+	int32 MinimumNodeDistanceFromStart = 0;
+	
 	/** 
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
@@ -89,7 +92,10 @@ public:
 	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
 	 */
 	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets);
-
+	
+	UPROPERTY(EditAnywhere, DisplayName="Unique Groups", meta = (Categories="NEXUS.WorldAssembly"))
+	FGameplayTagContainer UniqueGroupTags = FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique);
+	
 	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{Cell}"))
 	TArray<FNTissueEntry> Cells;

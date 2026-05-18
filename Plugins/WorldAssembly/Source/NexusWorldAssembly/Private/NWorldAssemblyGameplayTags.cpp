@@ -1,6 +1,16 @@
 ﻿#include "NWorldAssemblyGameplayTags.h"
 
-UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Placement_Start, "NEXUS.WorldAssembly.Placement.Start", 
-	"Indicate tagged item can be used at the start of an assembly. If no items are tagged, any can be used, but by having any item tagged Start tagged items will be drawn from.");
-UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Placement_End, "NEXUS.WorldAssembly.Placement.End", 
-	"Indicate tagged item can be used at the end of an assembly. If no items are tagged, any can be used, but by having any item tagged End tagged items will be drawn from.");
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_Starter, "NEXUS.WorldAssembly.BuiltIn.Starter", 
+	"Tagged items can be used at the start of an Organ Assembly as the first placed node in the AssemblyGraph, attached to the Bone. If no Tissue entries are tagged with this (or StarterOnly), any can be used instead in their place.");
+
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_StarterOnly, "NEXUS.WorldAssembly.BuiltIn.StarterOnly", 
+	"Tagged items can ONLY be used at the start of an Organ Assembly as the first placed node in the AssemblyGraph, attached to the Bone. If no Tissue entries are tagged with this (or Starter), any can be used instead in their place.");
+
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_Finisher, "NEXUS.WorldAssembly.BuiltIn.Finisher", 
+	"Tagged items can be used at the end of an Organ Assembly node branch. If no Tissue entries are tagged with this (or FinisherOnly), any can be used instead in their place.");
+
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_FinisherOnly, "NEXUS.WorldAssembly.BuiltIn.FinisherOnly", 
+	"Tagged items can ONLY be used at the end of an Organ Assembly node branch. If no Tissue entries are tagged with this (or Finisher), any can be used instead in their place.");
+
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_Unique, "NEXUS.WorldAssembly.BuiltIn.Unique", 
+	"Only one of tagged items could be placed in an Organ Assembly. This is just a built-in default unique group, you can make your own to create discrete groups.");

@@ -5,5 +5,10 @@
 
 #include "NativeGameplayTags.h"
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Placement_Start);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Placement_End);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Starter);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_StarterOnly);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Finisher);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_FinisherOnly);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Unique);
