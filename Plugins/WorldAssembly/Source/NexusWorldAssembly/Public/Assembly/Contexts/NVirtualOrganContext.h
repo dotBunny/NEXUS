@@ -17,6 +17,8 @@ class UNOrganComponent;
  */
 struct FNCellInputDataFilter
 {
+	int32 NodeDistanceFromStart = 0;
+	
 	/** When true, only cells flagged bCanBeStartNode are eligible. */
 	bool bIsStartNode = false;
 

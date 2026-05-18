@@ -148,6 +148,8 @@ void FNAssemblyGraphCellNode::Link(const int32 JunctionKey, FNAssemblyGraphNode*
 	}
 	FreeJunctionKeys.Remove(JunctionKey);
 	Links.Add(JunctionKey, Node);
+	
+	NodeCountFromStart = Node->GetNodeCountFromStart() + 1;
 }
 
 void FNAssemblyGraphCellNode::Unlink(const int32 JunctionKey)

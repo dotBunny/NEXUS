@@ -114,9 +114,9 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	FNVirtualBoneData& BoneData = OrganContextPtr->BoneInputData[0];
 	
 	FNCellInputDataFilter PreFilter;
+	PreFilter.NodeDistanceFromStart = 0;
 	PreFilter.SocketSize = BoneData.SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
-	
 	PreFilter.bIsStartNode = true;
 
 	FNWeightedIntegerArray WeightedStartIndices;
@@ -304,7 +304,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
-		
+		NodeFilter.NodeDistanceFromStart = SourceCellNode->GetNodesFromStart();
 		NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
 		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr(); 

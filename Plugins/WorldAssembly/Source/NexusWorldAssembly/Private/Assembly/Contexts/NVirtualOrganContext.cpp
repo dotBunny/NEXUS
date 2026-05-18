@@ -139,6 +139,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	
 	// TODO: handle more then 1 bone
 	FNCellInputDataFilter PreFilter;
+	PreFilter.NodeDistanceFromStart = 0;
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
 	PreFilter.bIsStartNode = true;
@@ -262,6 +263,13 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			continue;
 		}
+		
+		// Check Minimum Node Count
+		if (CellData->MinimumNodeDistanceFromStart != 0 && CellData->MinimumNodeDistanceFromStart >= Filter.NodeDistanceFromStart)
+		{
+			continue;
+		}
+		
 		
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 		

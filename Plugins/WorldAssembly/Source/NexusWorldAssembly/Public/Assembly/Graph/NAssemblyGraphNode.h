@@ -38,6 +38,8 @@ public:
 
 	/** @return The node's stable identifier within its owning graph. */
 	uint32 GetNodeID() const { return NodeID; }
+	
+	int32 GetNodeCountFromStart() const { return NodeCountFromStart; }
 
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */
@@ -48,6 +50,8 @@ protected:
 
 	/** Stable identifier assigned when the node is registered with the graph. */
 	uint32 NodeID = 0;
+	
+	int32 NodeCountFromStart = 0;
 private:
 
 	/** World-space position. */

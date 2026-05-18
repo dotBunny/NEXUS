@@ -118,11 +118,13 @@ public:
 	FNRawMesh& GetHull() { return Hull; }
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
+	
+	int32 GetNodesFromStart() { return NodeCountFromStart; }
 
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
 	FNVirtualCellData* InputDataPtr;
-
+	
 	/** Whether the spawned level instance should be always-relevant for networking. */
 	bool bAlwaysRelevant;
 
