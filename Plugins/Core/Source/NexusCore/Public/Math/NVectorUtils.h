@@ -98,10 +98,17 @@ public:
 	}
 
 	/**
-	 * Returns the furthest (ceiling-rounded) grid intersection for each axis.
-	 * @param Location The point to snap.
+	 * Crunches Location into per-axis integer grid-unit indices via GetCrunchedGridUnit.
+	 *
+	 * Despite the historical name, this does NOT return a world-space coordinate — the returned FVector
+	 * carries the per-axis unit *index* (Location.* / GridSize.*, rounded outward away from zero), not a
+	 * snapped position. Multiply each axis by the matching GridSize component if a coordinate is needed.
+	 *
+	 * @param Location The point to crunch.
 	 * @param GridSize Per-axis grid spacing.
-	 * @return The grid intersection reached by rounding each axis away from zero toward the outside of its current cell.
+	 * @return Per-axis integer unit index packed into an FVector (e.g. (74, 74, 74) on a 50-grid → (2, 2, 2)).
+	 *         On-grid values pass through GetCrunchedGridUnit's IsNearlyEqual branch and return the exact unit.
+	 * @see GetCrunchedGridUnit, GetClosestGridIntersection (which DOES return a coordinate).
 	 */
 	FORCEINLINE static FVector GetFurthestGridIntersection(const FVector& Location, const FVector& GridSize)
 	{

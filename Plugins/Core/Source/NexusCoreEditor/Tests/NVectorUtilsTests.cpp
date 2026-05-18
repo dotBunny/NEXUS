@@ -5,6 +5,7 @@
 
 #include "Math/NVectorUtils.h"
 #include "Macros/NTestMacros.h"
+#include "Tests/TestHarnessAdapter.h"
 
 N_TEST_HIGH(FNVectorUtilsTests_TransformPoint_Yaw90WithOrigin, "NEXUS::UnitTests::NCore::FNVectorUtils::TransformPoint_Yaw90WithOrigin", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -101,6 +102,120 @@ N_TEST_HIGH(FNVectorUtilsTests_GetCrunchedGridUnit_OffGrid, "NEXUS::UnitTests::N
 N_TEST_HIGH(FNVectorUtilsTests_GetCrunchedGridUnit_Zero, "NEXUS::UnitTests::NCore::FNVectorUtils::GetCrunchedGridUnit_Zero", N_TEST_CONTEXT_ANYWHERE)
 {
 	CHECK_MESSAGE(TEXT("Zero value should return zero grid unit"), FNVectorUtils::GetCrunchedGridUnit(0.0, 50.0) == 0);
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoints_Yaw90WithOffset,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoints::Yaw90WithOffset",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Batch variant of RotateAndOffsetPoint — every input must come back rotated-then-offset, in order.
+	const TArray<FVector> Inputs = { FVector(10, 0, 0), FVector(0, 10, 0), FVector(5, 5, 0) };
+	const TArray<FVector> Result = FNVectorUtils::RotateAndOffsetPoints(Inputs, FRotator(0.f, 90.f, 0.f), FVector(1, 1, 1));
+
+	CHECK_EQUALS("Output array length must match the input length", Result.Num(), 3);
+	CHECK_MESSAGE(TEXT("Index 0: yaw90 maps (10,0,0)→(0,10,0); +offset → (1,11,1)"), Result[0].Equals(FVector(1, 11, 1), 0.01));
+	CHECK_MESSAGE(TEXT("Index 1: yaw90 maps (0,10,0)→(-10,0,0); +offset → (-9,1,1)"), Result[1].Equals(FVector(-9, 1, 1), 0.01));
+	CHECK_MESSAGE(TEXT("Index 2: yaw90 maps (5,5,0)→(-5,5,0); +offset → (-4,6,1)"), Result[2].Equals(FVector(-4, 6, 1), 0.01));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_RotateAndOffsetPoints_Empty_ReturnsEmpty,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::RotateAndOffsetPoints::Empty_ReturnsEmpty",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const TArray<FVector> Empty;
+	const TArray<FVector> Result = FNVectorUtils::RotateAndOffsetPoints(Empty, FRotator(0.f, 90.f, 0.f), FVector(1, 1, 1));
+	CHECK_EQUALS("Empty input must yield an empty output without crashing", Result.Num(), 0);
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_RotatePoints_Yaw180,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::RotatePoints::Yaw180",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Yaw180 negates X and Y component-wise; Z is untouched. Batch variant must preserve order.
+	const TArray<FVector> Inputs = { FVector(3, 4, 5), FVector(-1, 2, 0) };
+	const TArray<FVector> Result = FNVectorUtils::RotatePoints(Inputs, FRotator(0.f, 180.f, 0.f));
+
+	CHECK_EQUALS("Output length must match input length", Result.Num(), 2);
+	CHECK_MESSAGE(TEXT("Yaw180 must negate X and Y of vertex 0 while leaving Z intact"), Result[0].Equals(FVector(-3, -4, 5), 0.01));
+	CHECK_MESSAGE(TEXT("Yaw180 must negate X and Y of vertex 1 while leaving Z intact"), Result[1].Equals(FVector(1, -2, 0), 0.01));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_OffsetPoints_AppliesPerVector,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::OffsetPoints::AppliesPerVector",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Pure translation — the offset must apply to every entry independently with no implicit rotation.
+	const TArray<FVector> Inputs = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(0, 10, 0) };
+	const TArray<FVector> Result = FNVectorUtils::OffsetPoints(Inputs, FVector(5, -5, 1));
+
+	CHECK_EQUALS("Output length must match input length", Result.Num(), 3);
+	CHECK_MESSAGE(TEXT("Vertex 0 must equal Offset"), Result[0].Equals(FVector(5, -5, 1)));
+	CHECK_MESSAGE(TEXT("Vertex 1 must equal Inputs[1] + Offset"), Result[1].Equals(FVector(15, -5, 1)));
+	CHECK_MESSAGE(TEXT("Vertex 2 must equal Inputs[2] + Offset"), Result[2].Equals(FVector(5, 5, 1)));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_OffsetPoints_ZeroOffset_NoOp,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::OffsetPoints::ZeroOffset_NoOp",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const TArray<FVector> Inputs = { FVector(1, 2, 3), FVector(4, 5, 6) };
+	const TArray<FVector> Result = FNVectorUtils::OffsetPoints(Inputs, FVector::ZeroVector);
+
+	CHECK_MESSAGE(TEXT("Zero offset must leave vertex 0 unchanged"), Result[0].Equals(Inputs[0]));
+	CHECK_MESSAGE(TEXT("Zero offset must leave vertex 1 unchanged"), Result[1].Equals(Inputs[1]));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_GetFurthestGridIntersection_OffGrid_ReturnsCeiledUnitIndices,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GetFurthestGridIntersection::OffGrid_ReturnsCeiledUnitIndices",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// IMPORTANT: despite the docstring saying "grid intersection", this returns the per-axis unit INDEX
+	// (the GetCrunchedGridUnit result), not a world-space coordinate. WorldAssembly's UnitBounds
+	// construction (NWorldAssemblyUtils.cpp:165, NCellActor.cpp:102) depends on this index behaviour.
+	// For (74,74,74) on a 50-unit grid: 74/50 = 1.48 → ceil → 2 per axis.
+	const FVector GridSize(50.f, 50.f, 50.f);
+	const FVector Result = FNVectorUtils::GetFurthestGridIntersection(FVector(74, 74, 74), GridSize);
+	CHECK_MESSAGE(TEXT("(74,74,74) on a 50-grid must crunch to unit indices (2,2,2)"), Result.Equals(FVector(2, 2, 2), 0.001));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_GetFurthestGridIntersection_OnGrid_ReturnsExactUnitIndices,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GetFurthestGridIntersection::OnGrid_ReturnsExactUnitIndices",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Exactly-on-grid input hits GetCrunchedGridUnit's IsNearlyEqual branch and returns the exact unit
+	// index (no ceil). For (100,150,200) on a 50-grid: (2,3,4).
+	const FVector GridSize(50.f, 50.f, 50.f);
+	const FVector Result = FNVectorUtils::GetFurthestGridIntersection(FVector(100, 150, 200), GridSize);
+	CHECK_MESSAGE(TEXT("On-grid input must return exact unit indices (2,3,4) — IsNearlyEqual branch"),
+		Result.Equals(FVector(2, 3, 4), 0.001));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_GetFurthestGridIntersection_Zero_ReturnsZero,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GetFurthestGridIntersection::Zero_ReturnsZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FVector GridSize(50.f, 50.f, 50.f);
+	const FVector Result = FNVectorUtils::GetFurthestGridIntersection(FVector::ZeroVector, GridSize);
+	CHECK_MESSAGE(TEXT("Zero input must return zero unit indices (the IsNearlyZero short-circuit)"),
+		Result.Equals(FVector::ZeroVector, 0.001));
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_GetCrunchedGridUnit_Negative_CeilsTowardZero,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GetCrunchedGridUnit::Negative_CeilsTowardZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// CeilToInt(-1.5) = -1 (rounds toward zero for negatives) — locks that the "crunch" direction for
+	// negative values is toward zero, not away from it. A caller using this to walk grid cells in -X needs
+	// this contract to be stable.
+	CHECK_EQUALS("CeilToInt of -1.5 should round toward zero (-1)", FNVectorUtils::GetCrunchedGridUnit(-75.0, 50.0), -1);
+}
+
+N_TEST_HIGH(FNVectorUtilsTests_GetCrunchedGridUnit_NegativeOnGrid_ReturnsExactUnit,
+	"NEXUS::UnitTests::NCore::FNVectorUtils::GetCrunchedGridUnit::NegativeOnGrid_ReturnsExactUnit",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// -100 / 50 = -2 exactly — IsNearlyEqual branch must return the exact value, not ceil.
+	CHECK_EQUALS("Negative on-grid value should return its exact grid unit", FNVectorUtils::GetCrunchedGridUnit(-100.0, 50.0), -2);
 }
 
 #endif //WITH_TESTS

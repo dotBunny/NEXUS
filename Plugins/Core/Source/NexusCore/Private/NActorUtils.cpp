@@ -35,6 +35,8 @@ USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclass
 TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldActorFilterSettings& Settings)
 {
 	TArray<AActor*> ReturnActors;
+	if (World == nullptr) return MoveTemp(ReturnActors);
+
 	const bool bHasExclusionFunctionRef = Settings.ExclusionFunction.IsSet();
 	for (TActorIterator<AActor> WorldActorIterator(World); WorldActorIterator; ++WorldActorIterator)
 	{

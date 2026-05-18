@@ -5,7 +5,13 @@
 
 #include "Types/NRawMeshFactory.h"
 #include "Chaos/Convex.h"
+#include "Chaos/TriangleMeshImplicitObject.h"
+#include "Components/StaticMeshComponent.h"
+#include "Developer/NTestUtils.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/StaticMeshActor.h"
 #include "Macros/NTestMacros.h"
+#include "PhysicsEngine/BodySetup.h"
 #include "Tests/TestHarnessAdapter.h"
 
 namespace NEXUS::UnitTests::NCore::FNRawMeshFactoryHarness
@@ -388,6 +394,122 @@ N_TEST_HIGH(FNRawMeshFactoryTests_FromStaticMesh_Null_False,
 
 	CHECK_FALSE_MESSAGE(TEXT("Null UStaticMesh should produce false"), bResult);
 	CHECK_EQUALS("Null UStaticMesh should leave OutMesh untouched", OutMesh.Vertices.Num(), 0);
+}
+
+N_TEST_CRITICAL(FNRawMeshFactoryTests_FromStaticMesh_EngineCube_ProducesGeometry,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromStaticMesh::EngineCube_ProducesGeometry",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// /Engine/BasicShapes/Cube is a built-in 8-vertex / 12-triangle static mesh — the render-data path
+	// (route 1) should extract its LOD 0 positions and indices into a populated FNRawMesh. This is the
+	// first end-to-end coverage of FromStaticMesh against a real UStaticMesh (the existing test only
+	// covered the null-input guard).
+	UStaticMesh* Cube = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cube"));
+	if (Cube == nullptr)
+	{
+		ADD_ERROR("Failed to load /Engine/BasicShapes/Cube");
+		return;
+	}
+
+	FNRawMesh OutMesh;
+	const bool bResult = FNRawMeshFactory::FromStaticMesh(Cube, OutMesh);
+
+	CHECK_MESSAGE(TEXT("FromStaticMesh on a valid engine cube must report success"), bResult);
+	CHECK_MESSAGE(TEXT("Engine cube must produce at least 8 vertices (one per corner; tessellation may add more)"),
+		OutMesh.Vertices.Num() >= 8);
+	CHECK_MESSAGE(TEXT("Engine cube must produce at least 12 triangle loops"), OutMesh.Loops.Num() >= 12);
+	for (int32 i = 0; i < OutMesh.Loops.Num(); i++)
+	{
+		CHECK_MESSAGE(TEXT("Every emitted loop must be a triangle (Loops is post-CalculateFaceLoops triangulation)"),
+			OutMesh.Loops[i].IsTriangle());
+	}
+	CHECK_MESSAGE(TEXT("Bounds must be populated after extraction"), OutMesh.HasBounds());
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosTriMeshes_NullPtr_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosTriMeshes::NullPtr_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Default-constructed Chaos::FTriangleMeshImplicitObjectPtr is null — the IsValid() guard at
+	// NRawMeshFactory.cpp:341 must short-circuit and return false without touching OutMesh.
+	const Chaos::FTriangleMeshImplicitObjectPtr NullPtr;
+	FNRawMesh OutMesh;
+	const bool bResult = FNRawMeshFactory::FromChaosTriMeshes(NullPtr, OutMesh);
+
+	CHECK_FALSE_MESSAGE(TEXT("Null Chaos TriMesh ptr must produce false"), bResult);
+	CHECK_EQUALS("Null Chaos TriMesh ptr must leave OutMesh untouched", OutMesh.Vertices.Num(), 0);
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromChaosBodySetup_EmptyTriMeshes_NoOutputAppended,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromChaosBodySetup::EmptyTriMeshes_NoOutputAppended",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// A freshly constructed UBodySetup has an empty TriMeshGeometries array — the loop iterates zero
+	// times and nothing is appended. Covers the "no cooked tri meshes" path without requiring a real
+	// physics-built body.
+	UBodySetup* Body = NewObject<UBodySetup>();
+	if (Body == nullptr)
+	{
+		ADD_ERROR("Failed to construct UBodySetup via NewObject");
+		return;
+	}
+
+	TArray<FNRawMesh> OutMeshes;
+	TArray<FTransform> OutTransforms;
+	const bool bResult = FNRawMeshFactory::FromChaosBodySetup(Body, FTransform::Identity, OutMeshes, OutTransforms);
+
+	CHECK_MESSAGE(TEXT("Empty TriMeshGeometries body should still return true (function returns true unconditionally after loop)"), bResult);
+	CHECK_EQUALS("No meshes should be appended", OutMeshes.Num(), 0);
+	CHECK_EQUALS("No transforms should be appended", OutTransforms.Num(), 0);
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_EmptyActors_NoOutput,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::EmptyActors_NoOutput",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Empty actor list — function should run the WaitForStaticMeshCompilation pre-step and then the
+	// outer loop iterates zero times, leaving the output arrays untouched.
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		const TArray<AActor*> EmptyActors;
+		const TArray<FBoxSphereBounds> EmptyBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(EmptyActors, EmptyBounds, OutMeshes, OutTransforms);
+
+		CHECK_EQUALS("Empty actor list must produce no meshes", OutMeshes.Num(), 0);
+		CHECK_EQUALS("Empty actor list must produce no transforms", OutTransforms.Num(), 0);
+	});
+}
+
+N_TEST_HIGH(FNRawMeshFactoryTests_FromActorsInBounds_BareActor_SkippedGracefully,
+	"NEXUS::UnitTests::NCore::FNRawMeshFactory::FromActorsInBounds::BareActor_SkippedGracefully",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// A bare AActor (no primitive components → no UBoxComponent / UStaticMeshComponent) must be walked
+	// without emitting any meshes and without crashing. Locks the inner TInlineComponentArray loop's
+	// "no primitives" early-skip path. (A richer end-to-end test that emits meshes from a static-mesh
+	// actor would need a deterministic UStaticMesh fixture with a known AggGeom — out of scope here.)
+	FNTestUtils::WorldTestChecked(EWorldType::Editor, [this](UWorld* World)
+	{
+		AActor* Actor = World->SpawnActor<AActor>();
+		if (Actor == nullptr)
+		{
+			ADD_ERROR("Failed to spawn AActor");
+			return;
+		}
+
+		const TArray<AActor*> Actors = { Actor };
+		const TArray<FBoxSphereBounds> NoBounds;
+		TArray<FNRawMesh> OutMeshes;
+		TArray<FTransform> OutTransforms;
+
+		FNRawMeshFactory::FromActorsInBounds(Actors, NoBounds, OutMeshes, OutTransforms);
+
+		CHECK_EQUALS("A bare AActor must emit no meshes", OutMeshes.Num(), 0);
+		CHECK_EQUALS("A bare AActor must emit no transforms", OutTransforms.Num(), 0);
+	});
 }
 
 #endif //WITH_TESTS
