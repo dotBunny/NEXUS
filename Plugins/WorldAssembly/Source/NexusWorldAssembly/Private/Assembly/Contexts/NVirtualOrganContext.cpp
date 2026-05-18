@@ -34,10 +34,13 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	// Build a safe reference to all the data so we can operate off-thread without issue
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = WorldOrganContext->SourceComponent->GetTissueMap();
 	
+	
+	// We're going to process the input cells to see what behavior we are going to be exercising down the road.
+	
 	// Validate the tissue map has a start
-	bool bFoundStartNode = false;
 	bool bFoundSomeCells = false;
 	
+	CellInputDataSummary = FNVirtualCellDataSummary();
 	for (auto Pair : TissueMap)
 	{
 		if (Pair.Value.MaximumCount > 0 || Pair.Value.MaximumCount == -1)
@@ -45,22 +48,39 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 			bFoundSomeCells = true;
 		}
 		
-		if (Pair.Value.bCanBeStartNode)
+		// bFoundStarterTagged
+		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_Starter))
 		{
-			bFoundStartNode = true;
+			CellInputDataSummary.bFoundStarterTagged = true;
 		}
 		
-		// We've hit our marks, early out.
-		if (bFoundSomeCells && bFoundStartNode)
+		// bFoundStarterOnlyTagged
+		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		{
+			CellInputDataSummary.bFoundStarterOnlyTagged = true;
+		}
+		
+		// bFoundFinisherTagged
+		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_Finisher))
+		{
+			CellInputDataSummary.bFoundFinisherTagged = true;
+		}
+		
+		// bFoundFinisherOnlyTagged
+		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		{
+			CellInputDataSummary.bFoundFinisherOnlyTagged = true;
+		}
+		
+		// Early out as there is nothing else we really are looking for
+		if (bFoundSomeCells && 
+			CellInputDataSummary.bFoundStarterTagged && 
+			CellInputDataSummary.bFoundStarterOnlyTagged && 
+			CellInputDataSummary.bFoundFinisherTagged && 
+			CellInputDataSummary.bFoundFinisherOnlyTagged)
 		{
 			break;
 		}
-	}
-	
-	if (!bFoundStartNode)
-	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as the provided UNTissues do not contain a UNCell flagged capable of being the Start Node. Skipping."));
-		return;
 	}
 
 	if (!bFoundSomeCells)
@@ -74,14 +94,12 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	for (const auto& Cell : TissueMap)
 	{
 		FNVirtualCellData CellDetails;
-		
-		// TODO: We could implement some checks on the UNCell about cross referencing and what happens?
+		CellDetails.Tags = Cell.Value.Tags;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
-		CellDetails.bCanBeStartNode = Cell.Value.bCanBeStartNode;
-		CellDetails.bCanBeEndNode = Cell.Value.bCanBeEndNode;
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
+		CellDetails.MinimumNodeDistanceFromStart = Cell.Value.MinimumNodeDistanceFromStart;
 		CellDetails.bAlwaysRelevant = Cell.Value.bAlwaysRelevant;
 		
 		// We won't touch this till later
@@ -123,7 +141,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	FNCellInputDataFilter PreFilter;
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
-	PreFilter.bRequireStart = true;
+	PreFilter.bIsStartNode = true;
 	
 	FNWeightedIntegerArray PreIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
@@ -196,8 +214,46 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		
 		// Early out on some simple filters
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
-		if (Filter.bRequireStart && !CellData->bCanBeStartNode) continue;
-		if (Filter.bRequireEnd && !CellData->bCanBeEndNode) continue;
+		
+		
+		// STARTER TAGS
+		
+		// Handle Starter Nodes
+		if (Filter.bIsStartNode && (CellInputDataSummary.bFoundStarterTagged || CellInputDataSummary.bFoundStarterOnlyTagged))
+		{
+			// We had some tagged content specific to starting off
+			if (!CellData->Tags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CellData->Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+			{
+				// Didn't have what we were looking for
+				continue;
+			}
+		}
+		
+		// Bail out from list if it is StarterOnly.
+		if (!Filter.bIsStartNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		{
+			continue;
+		}
+		
+		// FINISHER TAGS
+		
+		// Handle Starter Nodes
+		if (Filter.bIsEndNode && (CellInputDataSummary.bFoundFinisherTagged || CellInputDataSummary.bFoundFinisherOnlyTagged))
+		{
+			// We had some tagged content specific to ending off
+			if (!CellData->Tags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CellData->Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+			{
+				// Didn't have what we were looking for
+				continue;
+			}
+		}
+		
+		// Bail out from list if it is FinisherOnly.
+		if (!Filter.bIsEndNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		{
+			continue;
+		}
+		
 		
 		// Check minimum distance in current graph for reusing the cell piece
 		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&

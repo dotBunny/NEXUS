@@ -3,9 +3,21 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellRootDetails.h"
+
+struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
+{
+	bool bFoundStarterTagged = false;
+	
+	bool bFoundStarterOnlyTagged = false;
+	
+	bool bFoundFinisherTagged = false;
+	
+	bool bFoundFinisherOnlyTagged = false;
+};
 
 /**
  * Represents input configuration data for a procedural generation cell.
@@ -16,14 +28,11 @@
  */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
+	
+	FGameplayTagContainer Tags;
+	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	bool bAlwaysRelevant = false;
-	
-	/** Whether this cell can be used as a starting node in the generated FNAssemblyGraph. */
-	bool bCanBeStartNode = true;
-
-	/** Whether this cell can be used as an ending/terminal node in the generated FNAssemblyGraph. */
-	bool bCanBeEndNode = true;
 
 	/** 
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
@@ -42,6 +51,12 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 * @note A value of 0 indicates no constraint.
 	 */
 	int32 MinimumNodeDistance = 1;
+	
+	/**
+	* The minimum number of cell links away this cell must be from the start to be used.
+	* @note A value of 0 indicates no constraint.
+	*/
+	int32 MinimumNodeDistanceFromStart = 0;
 
 	/** 
 	 * Relative weight for random selection during generation.

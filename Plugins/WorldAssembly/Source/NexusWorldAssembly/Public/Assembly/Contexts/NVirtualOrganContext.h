@@ -18,10 +18,10 @@ class UNOrganComponent;
 struct FNCellInputDataFilter
 {
 	/** When true, only cells flagged bCanBeStartNode are eligible. */
-	bool bRequireStart = false;
+	bool bIsStartNode = false;
 
 	/** When true, only cells flagged bCanBeEndNode are eligible. */
-	bool bRequireEnd = false;
+	bool bIsEndNode = false;
 
 	/** Cell the filter is stepping away from; used for distance/uniqueness checks. */
 	FNVirtualCellData* SourceCellInputData = nullptr;
@@ -76,6 +76,8 @@ public:
 
 	/** Candidate cells the builder may pull from. */
 	TArray<FNVirtualCellData> CellInputData;
+	
+	FNVirtualCellDataSummary CellInputDataSummary;
 
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;

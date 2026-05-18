@@ -27,14 +27,6 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere)
 	bool bAlwaysRelevant = false;
 	
-	/** Whether this cell can be used as a starting node in the generated FNAssemblyGraph. */
-	UPROPERTY(EditAnywhere)
-	bool bCanBeStartNode = true;
-	
-	/** Whether this cell can be used as an ending/terminal node in the generated FNAssemblyGraph. */
-	UPROPERTY(EditAnywhere)
-	bool bCanBeEndNode = true;
-	
 	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
 	 * @note A value of -1 indicates no minimum constraint.

@@ -116,7 +116,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	FNCellInputDataFilter PreFilter;
 	PreFilter.SocketSize = BoneData.SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
-	PreFilter.bRequireStart = true;
+	
+	PreFilter.bIsStartNode = true;
 
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
