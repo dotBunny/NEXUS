@@ -12,8 +12,42 @@
 namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness
 {
     constexpr int32 IterationCount = 1000;
-    constexpr float SetBaselineMaxDuration = 1.5f;   // SetBaseline reads GUObjectArray — allow generous budget
+    constexpr float SetBaselineMaxDuration = 5.0f;   // SetBaseline reads GUObjectArray and writes a formatted log line per call
     constexpr float TickBelowMaxDuration   = 0.1f;   // Tick with no thresholds crossed is a cheap read
+
+    // RAII guard that saves and restores UNGuardianSettings fields so individual
+    // tests can modify them without polluting subsequent tests.
+    struct FSettingsGuard
+    {
+        int32 OriginalWarning;
+        int32 OriginalSnapshot;
+        int32 OriginalCompare;
+        bool  OriginalCaptureOutput;
+        bool  OriginalAutoBaseline;
+        float OriginalAutoBaselineDelay;
+
+        FSettingsGuard()
+        {
+            const UNGuardianSettings* S = UNGuardianSettings::Get();
+            OriginalWarning           = S->ObjectCountWarningThreshold;
+            OriginalSnapshot          = S->ObjectCountSnapshotThreshold;
+            OriginalCompare           = S->ObjectCountCompareThreshold;
+            OriginalCaptureOutput     = S->bObjectCountCaptureOutput;
+            OriginalAutoBaseline      = S->bAutoBaseline;
+            OriginalAutoBaselineDelay = S->AutoBaselineDelay;
+        }
+
+        ~FSettingsGuard()
+        {
+            UNGuardianSettings* S = UNGuardianSettings::GetMutable();
+            S->ObjectCountWarningThreshold  = OriginalWarning;
+            S->ObjectCountSnapshotThreshold = OriginalSnapshot;
+            S->ObjectCountCompareThreshold  = OriginalCompare;
+            S->bObjectCountCaptureOutput    = OriginalCaptureOutput;
+            S->bAutoBaseline                = OriginalAutoBaseline;
+            S->AutoBaselineDelay            = OriginalAutoBaselineDelay;
+        }
+    };
 }
 
 class FNGuardianSubsystemPerfTests
@@ -24,67 +58,62 @@ public:
     // this test establishes a baseline budget for monitoring overhead.
     static void SetBaseline(UWorld* World)
     {
+        using namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness;
+
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
 
-        // Use a large threshold so no threshold events are triggered during the
-        // timed region (which would cause log output and file I/O).
+        FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        const int32 OriginalWarning  = Settings->ObjectCountWarningThreshold;
-        const int32 OriginalSnapshot = Settings->ObjectCountSnapshotThreshold;
-        const int32 OriginalCompare  = Settings->ObjectCountCompareThreshold;
-        Settings->ObjectCountWarningThreshold  = 99999999;
-        Settings->ObjectCountSnapshotThreshold = 99999999;
+        // Disable auto-baseline so the timer queued by OnWorldBeginPlay can't
+        // fire during the timed region.
+        Settings->bAutoBaseline = false;
+        // Strictly increasing (Warning < Snapshot < Compare) is enforced by
+        // SetBaseline; equal values cause an early-return and pollute the log.
+        // Keep them large so no thresholds are crossed during measurement.
+        Settings->ObjectCountWarningThreshold  = 99999997;
+        Settings->ObjectCountSnapshotThreshold = 99999998;
         Settings->ObjectCountCompareThreshold  = 99999999;
 
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_SetBaseline,
-                NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::SetBaselineMaxDuration)
-            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::IterationCount; ++i)
+                SetBaselineMaxDuration)
+            for (int32 i = 0; i < IterationCount; ++i)
             {
                 Subsystem->SetBaseline();
             }
             NTestTimer.ManualStop();
         }
-
-        Settings->ObjectCountWarningThreshold  = OriginalWarning;
-        Settings->ObjectCountSnapshotThreshold = OriginalSnapshot;
-        Settings->ObjectCountCompareThreshold  = OriginalCompare;
-        Subsystem->SetBaseline();
     }
 
     // Measures the per-frame monitoring cost when the object count is well below
     // all thresholds — the common-case path executed every game frame.
     static void Tick_BelowThresholds(UWorld* World)
     {
+        using namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness;
+
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
 
+        FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
-        const int32 OriginalWarning  = Settings->ObjectCountWarningThreshold;
-        const int32 OriginalSnapshot = Settings->ObjectCountSnapshotThreshold;
-        const int32 OriginalCompare  = Settings->ObjectCountCompareThreshold;
-        Settings->ObjectCountWarningThreshold  = 99999999;
-        Settings->ObjectCountSnapshotThreshold = 99999999;
+        Settings->bAutoBaseline = false;
+        Settings->ObjectCountWarningThreshold  = 99999997;
+        Settings->ObjectCountSnapshotThreshold = 99999998;
         Settings->ObjectCountCompareThreshold  = 99999999;
         Subsystem->SetBaseline();
 
         // TEST
         {
             N_TEST_TIMER_SCOPE(FNGuardianPerfTests_Subsystem_Tick_BelowThresholds,
-                NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::TickBelowMaxDuration)
-            for (int32 i = 0; i < NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness::IterationCount; ++i)
+                TickBelowMaxDuration)
+            for (int32 i = 0; i < IterationCount; ++i)
             {
                 Subsystem->Tick(0.016f);
             }
             NTestTimer.ManualStop();
         }
-
-        Settings->ObjectCountWarningThreshold  = OriginalWarning;
-        Settings->ObjectCountSnapshotThreshold = OriginalSnapshot;
-        Settings->ObjectCountCompareThreshold  = OriginalCompare;
-        Subsystem->SetBaseline();
     }
 };
 

@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
 
@@ -17,6 +18,14 @@ USTRUCT()
 struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, meta = (Categories="NEXUS.WorldAssembly"))
+	FGameplayTagContainer PlacementTags;
+	
+	UPROPERTY(EditAnywhere, meta = (Categories="NEXUS.WorldAssembly"))
+	FGameplayTagContainer UniqueGroupTags;
+	
+	
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	UPROPERTY(EditAnywhere)
