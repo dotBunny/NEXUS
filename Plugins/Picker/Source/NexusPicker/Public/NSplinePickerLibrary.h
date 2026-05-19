@@ -42,7 +42,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param Params The parameters for the point generation. 
 	 * @param WorldContextObject Object that provides access to the world.
@@ -62,7 +62,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Updates the seed value to enable sequential random point generation.	 
 	 * @param Params The parameters for the point generation.
 	 * @param Seed The random seed to start with, and update.	  
@@ -83,7 +83,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Useful for one-time random point generation with reproducible results. 
 	 * @param Params The parameters for the point generation.
 	 * @param Seed The random seed to start with, and update.	  
