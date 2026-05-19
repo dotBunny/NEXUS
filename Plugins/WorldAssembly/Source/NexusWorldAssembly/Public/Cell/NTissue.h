@@ -49,11 +49,11 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	* The minimum number of cell links away this cell must be from the start to be used.
+	* The minimum number of nodes away from the start when this can be used.
 	* @note A value of 0 indicates no constraint.
 	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
-	int32 MinimumNodeDistanceFromStart = 0;
+	int32 MinimumNodeDepth = 0;
 	
 	/** 
 	 * Relative weight for random selection during generation.

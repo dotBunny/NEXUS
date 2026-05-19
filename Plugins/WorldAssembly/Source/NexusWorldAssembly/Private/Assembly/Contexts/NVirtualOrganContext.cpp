@@ -99,7 +99,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
-		CellDetails.MinimumNodeDistanceFromStart = Cell.Value.MinimumNodeDistanceFromStart;
+		CellDetails.MinimumNodeDepth = Cell.Value.MinimumNodeDepth;
 		CellDetails.bAlwaysRelevant = Cell.Value.bAlwaysRelevant;
 		
 		// We won't touch this till later
@@ -139,7 +139,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	
 	// TODO: handle more then 1 bone
 	FNCellInputDataFilter PreFilter;
-	PreFilter.NodeDistanceFromStart = 0;
+	PreFilter.NodeDepth = 0;
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
 	PreFilter.bIsStartNode = true;
@@ -265,7 +265,8 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// Check Minimum Node Count
-		if (CellData->MinimumNodeDistanceFromStart != 0 && CellData->MinimumNodeDistanceFromStart >= Filter.NodeDistanceFromStart)
+		if (CellData->MinimumNodeDepth > 0 && 
+			CellData->MinimumNodeDepth > Filter.NodeDepth)
 		{
 			continue;
 		}

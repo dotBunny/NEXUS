@@ -114,7 +114,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	FNVirtualBoneData& BoneData = OrganContextPtr->BoneInputData[0];
 	
 	FNCellInputDataFilter PreFilter;
-	PreFilter.NodeDistanceFromStart = 0;
+	PreFilter.NodeDepth = 0;
 	PreFilter.SocketSize = BoneData.SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
 	PreFilter.bIsStartNode = true;
@@ -187,10 +187,13 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		else
 		{
 			OrganContextPtr->CellGraph->RegisterNode(StartNode);
-
+			
 			// Link our nodes
 			BoneNode->Link(StartNode);
-			StartNode->Link(TargetJunctionKey, BoneNode);
+			StartNode->LinkJunction(TargetJunctionKey, BoneNode);
+			
+			// Base node connection
+			BoneNode->Connect(StartNode);
 		}
 		
 		
@@ -304,7 +307,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		// Build our possible list of cells (and cache out the valid junctions)
 		FNCellInputDataFilter NodeFilter;
-		NodeFilter.NodeDistanceFromStart = SourceCellNode->GetNodesFromStart();
+		NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
 		NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
 		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr(); 
@@ -322,8 +325,10 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
 			
-			SourceCellNode->Link(SourceJunctionKey, NullNode);
+			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
+			
+			SourceCellNode->Connect(NullNode);
 			continue;
 		}
 		
@@ -395,8 +400,12 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		{
 			// We've passed validation, lets register it and move on
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
-			SourceCellNode->Link(SourceJunctionKey, TargetCellNode);
-			TargetCellNode->Link(TargetJunctionKey, SourceCellNode);
+			
+			SourceCellNode->LinkJunction(SourceJunctionKey, TargetCellNode);
+			TargetCellNode->LinkJunction(TargetJunctionKey, SourceCellNode);
+			
+			SourceCellNode->Connect(TargetCellNode);
+			
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
 			NewNodes.Add(TargetCellNode);
 			

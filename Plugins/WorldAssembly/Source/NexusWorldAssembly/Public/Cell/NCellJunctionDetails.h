@@ -46,7 +46,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 
 	/** Requirement satisfied during graph generation. */
 	UPROPERTY(EditInstanceOnly)
-	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
+	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::AllowBlocking;
 	
 	/** Size of the junction socket in grid units (width, height). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)

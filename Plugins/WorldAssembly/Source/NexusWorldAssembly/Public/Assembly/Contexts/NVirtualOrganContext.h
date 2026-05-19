@@ -17,8 +17,13 @@ class UNOrganComponent;
  */
 struct FNCellInputDataFilter
 {
-	int32 NodeDistanceFromStart = 0;
-	
+	/**
+	 * Hop-count from the start node of the cell the filter is stepping away from.
+	 * Compared against each candidate's MinimumNodeDepth to gate cells that are only allowed
+	 * to appear at or beyond a certain distance from the bone. 0 means "at the start".
+	 */
+	int32 NodeDepth = 0;
+
 	/** When true, only cells flagged bCanBeStartNode are eligible. */
 	bool bIsStartNode = false;
 

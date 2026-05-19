@@ -20,6 +20,7 @@ public:
 	: FNAssemblyGraphNode(Position, Rotation)
 	{
 		SocketSize = InputData->SocketSize;
+		NodeDepth = 0;
 	}
 
 	/** Link the bone's socket to Node. */

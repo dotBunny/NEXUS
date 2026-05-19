@@ -134,7 +134,7 @@ bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 	return WorldVertices.Num() > 0;
 }
 
-void FNAssemblyGraphCellNode::Link(const int32 JunctionKey, FNAssemblyGraphNode* Node)
+void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)
 {
 	if (!FreeJunctionKeys.Contains(JunctionKey))
 	{
@@ -148,11 +148,9 @@ void FNAssemblyGraphCellNode::Link(const int32 JunctionKey, FNAssemblyGraphNode*
 	}
 	FreeJunctionKeys.Remove(JunctionKey);
 	Links.Add(JunctionKey, Node);
-	
-	NodeCountFromStart = Node->GetNodeCountFromStart() + 1;
 }
 
-void FNAssemblyGraphCellNode::Unlink(const int32 JunctionKey)
+void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 {
 	if (!Links.Contains(JunctionKey))
 	{

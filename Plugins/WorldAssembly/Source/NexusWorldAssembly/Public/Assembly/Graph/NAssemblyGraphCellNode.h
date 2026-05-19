@@ -40,10 +40,10 @@ public:
 	TObjectPtr<UNCell> GetTemplate() const { return TemplatePtr; }
 
 	/** Link the junction with the given key to Node — used by the builder when expanding connections. */
-	void Link(int32 JunctionKey, FNAssemblyGraphNode* Node);
+	void LinkJunction(int32 JunctionKey, FNAssemblyGraphNode* Node);
 
 	/** Drop the link on the given junction, returning it to the free pool. */
-	void Unlink(int32 JunctionKey);
+	void UnlinkJunction(int32 JunctionKey);
 
 	/** @return true if this cell's world bounds intersect Other's world bounds. */
 	bool CheckBoundsIntersects(const FNAssemblyGraphCellNode* Other) const
@@ -118,8 +118,6 @@ public:
 	FNRawMesh& GetHull() { return Hull; }
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
-	
-	int32 GetNodesFromStart() { return NodeCountFromStart; }
 
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
