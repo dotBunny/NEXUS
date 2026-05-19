@@ -1,8 +1,5 @@
 ﻿#include "NEditorInputProcessor.h"
-
-#include "BlueprintEditor.h"
 #include "NEditorUtils.h"
-#include "NToolingEditorUtils.h"
 
 
 bool FNEditorInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)

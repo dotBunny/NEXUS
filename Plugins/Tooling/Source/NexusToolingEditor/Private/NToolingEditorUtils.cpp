@@ -1,6 +1,7 @@
 ﻿#include "NToolingEditorUtils.h"
 
 #include "BlueprintEditor.h"
+#include "NEditorUtils.h"
 #include "NToolingEditorMinimal.h"
 #include "Engine/LevelScriptBlueprint.h"
 
@@ -9,8 +10,12 @@
 #include "Windows/WindowsHWrapper.h"
 #ifdef UNICODE
 #define SEND_MESSAGE  SendMessageW
+#define LOAD_IMAGE LoadImageW
+#define LOAD_IMAGE_PATH 
 #else // !UNICODE
 #define SEND_MESSAGE  SendMessageA
+#define LOAD_IMAGE LoadImageA
+#define LOAD_IMAGE_PATH TCHAR_TO_ANSI
 #endif // UNICODE
 #endif // PLATFORM_WINDOWS
 
@@ -24,7 +29,6 @@ bool FNToolingEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPa
 	if (IsBlueprintEditorAssetType(ForegroundAssetEditor->GetEditingAssetTypeName()))
 	{
 		const FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(ForegroundAssetEditor);
-		if (BlueprintEditor == nullptr) return false;
 		OutSelection = BlueprintEditor->GetSelectedNodes();
 		return true;
 	}
@@ -72,7 +76,7 @@ bool FNToolingEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 	if (FPaths::FileExists(FinalPath))
 	{
 		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
-		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
+		Windows::HICON hIcon = (Windows::HICON)LOAD_IMAGE(NULL, LOAD_IMAGE_PATH(*FinalPath),IMAGE_ICON,
 		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
 		
 		if (hIcon)

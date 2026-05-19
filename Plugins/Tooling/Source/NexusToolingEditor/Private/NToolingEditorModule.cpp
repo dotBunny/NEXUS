@@ -29,11 +29,20 @@ void FNToolingEditorModule::StartupModule()
 
 void FNToolingEditorModule::ShutdownModule()
 {
+	if (WindowIconDelegateHandle.IsValid() && GEngine != nullptr)
+	{
+		GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
+	}
+	
 	FNToolingEditorCommands::RemoveMenuEntries();
 	FNMultiplayerTestToolbarSection::RemoveSection();
 	
 	if (InputProcessor.IsValid())
 	{
+		if (FSlateApplication::IsInitialized()) // Still around
+		{
+			FSlateApplication::Get().UnregisterInputPreProcessor(InputProcessor);
+		}
 		InputProcessor.Reset();
 	}
 	
@@ -109,16 +118,17 @@ void FNToolingEditorModule::ApplyWindowIcon(const FString& IconPath)
 	if (FNToolingEditorUtils::ReplaceWindowIcon(BasePath))
 	{
 		// Register the window delegate to make sure our windows get changed, this will change the loading window as well as an indicator of success.
-
 		WindowIconDelegateHandle = GEngine->OnPostEditorTick().AddRaw(this, &FNToolingEditorModule::ApplyWindowIconPostEditorTick);
 	}
 }
 
-void FNToolingEditorModule::ApplyWindowIconPostEditorTick(float Time) const
+void FNToolingEditorModule::ApplyWindowIconPostEditorTick(float Time)
 {
+	GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
+	WindowIconDelegateHandle.Reset();
+	
 	const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *UNToolingEditorSettings::Get()->ProjectWindowIconPath);
 	FNToolingEditorUtils::ReplaceWindowIcon(BasePath);
-	GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
 }
 
 IMPLEMENT_MODULE(FNToolingEditorModule, NexusToolingEditor)

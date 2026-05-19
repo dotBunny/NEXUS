@@ -42,7 +42,10 @@ void UNToolingEditorUserSettings::ApplyEditorFrameRateLimit() const
 		UE_LOG(LogNexusToolingEditor, Log, TEXT("Apply framerate limit(%f)."), EditorFrameRateLimit);
 
 		GEngine->SetMaxFPS(EditorFrameRateLimit);
-		GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
+		if (IsValid(GEngine->GameUserSettings))
+		{
+			GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
+		}
 	}
 }
 
@@ -130,7 +133,7 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
 		ServerAdditionalArguments.Append(" networkprofiler=true");
 	}
 		
-	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerAdditionalArguments.TrimStartAndEnd()));
+	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerParameters.TrimStartAndEnd()));
 		
 	return MoveTemp(ServerAdditionalArguments);
 }

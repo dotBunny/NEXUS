@@ -97,10 +97,10 @@ public:
 	bool IsAnyMouseButtonDown() const;
 
 	/** Cached UNToolingEditorUserSettings::bGraphNavigationSpaceToPan, pushed here on settings change. */
-	bool bCachedGraphNavigationSpaceToPan;
+	bool bCachedGraphNavigationSpaceToPan = false;
 
 	/** Cached UNToolingEditorUserSettings::GraphNavigationPanSpeedMultiplier. */
-	float CachedGraphNavigationPanSpeedMultiplier;
+	float CachedGraphNavigationPanSpeedMultiplier = 1.f;
 
 private:
 

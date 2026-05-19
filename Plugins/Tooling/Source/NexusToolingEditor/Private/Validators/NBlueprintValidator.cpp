@@ -26,6 +26,8 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)
 	{
+		if (Graph == nullptr) continue;
+		
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
 			// Check for Empty Ticks

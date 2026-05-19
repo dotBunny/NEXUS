@@ -105,7 +105,7 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Dedicated Server", Tooltip = "Spawn a dedicated server for use by the clients."))
 	bool bUseDedicatedServer = true;
 
-	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Spawn Seperate Server", Tooltip = "This is a rarely used option that will launch a separate server (possibly hidden in-process depending on RunUnderOneProcess) even if the net mode does not require a server (such as Standalone). If the net mode requires a server (such as Client) a server will be launched for you (regardless of this setting)."))
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Spawn Separate Server", Tooltip = "This is a rarely used option that will launch a separate server (possibly hidden in-process depending on RunUnderOneProcess) even if the net mode does not require a server (such as Standalone). If the net mode requires a server (such as Client) a server will be launched for you (regardless of this setting)."))
 	bool bSpawnSeparateServer = false;
 
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test|Server", meta = (DisplayName = "Parameters", Tooltip = "Additional parameters to pass to the server being launched, on top of client parameters."))

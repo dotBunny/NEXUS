@@ -53,7 +53,7 @@ private:
 	void ApplyWindowIcon(const FString& IconPath);
 
 	/** Tick callback that applies the window icon after the main frame exists. */
-	void ApplyWindowIconPostEditorTick(float Time) const;
+	void ApplyWindowIconPostEditorTick(float Time);
 
 	/** Post-engine-init hook that performs the icon replacements and other one-time setup. */
 	void OnPostEngineInit();

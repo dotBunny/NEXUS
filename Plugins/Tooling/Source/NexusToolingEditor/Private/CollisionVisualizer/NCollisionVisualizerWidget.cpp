@@ -9,11 +9,17 @@
 #include "CollisionVisualizer/NCollisionVisualizerUtils.h"
 #include "Selection.h"
 #include "Macros/NFlagsMacros.h"
+#include "Macros/NValidationMacros.h"
 
 void UNCollisionVisualizerWidget::NativeConstruct()
 {
 	UniqueIdentifier = NEXUS::ToolingEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
+	
+	N_VALIDATE(LogNexusToolingEditor, SelectStartButton)
+	N_VALIDATE(LogNexusToolingEditor, SelectEndButton)
+	N_VALIDATE(LogNexusToolingEditor, ActorNameText)
+	N_VALIDATE(LogNexusToolingEditor, ObjectDetails)
 	
 	Super::NativeConstruct();
 	
@@ -118,7 +124,7 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionVisualizerUtils::OverlapMulti(Settings, QueryActor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 	}
@@ -269,6 +275,9 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		
 		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
+		
+		if (QueryActor == nullptr) return;
+		
 		QueryActor->SetFlags(RF_Transient);
 		
 		PushSettings(QueryActor);

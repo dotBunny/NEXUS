@@ -72,8 +72,11 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			if (AssetData.IsValid() && AssetData.AssetClassPath == UPoseAsset::StaticClass()->GetClassPathName())
 			{
 				UObject* LoadedAsset = EditorAssetSubsystem->LoadAsset(AssetPath);
-				PoseAssets.AddUnique(LoadedAsset);
-				CleanupPackages.AddUnique(LoadedAsset->GetOutermost());
+				if (IsValid(LoadedAsset))
+				{
+					PoseAssets.AddUnique(LoadedAsset);
+					CleanupPackages.AddUnique(LoadedAsset->GetOutermost());
+				}
 			}
 		}
 	}
@@ -86,6 +89,13 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	for (int32 i = 0; i < PoseAssets.Num(); i++)
 	{
 		UPoseAsset* PoseAsset = Cast<UPoseAsset>(PoseAssets[i]);
+		if (!IsValid(PoseAsset))
+		{
+			FixTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item_Bad", "Skipping Bad Asset ..."));
+			
+			// Bad asset check
+			continue;
+		}
 		
 		FixTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item", "Processing {0}"), FText::FromString(PoseAssets[i]->GetName())));
 

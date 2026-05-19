@@ -65,9 +65,9 @@ private:
 	/** Handles for all child processes spawned as part of the current test session. */
 	TArray<FProcHandle> ProcessHandles;
 	/** true while a multiplayer test is active. */
-	bool bIsMultiplayerTestRunning;
+	bool bIsMultiplayerTestRunning = false;
 
 	/** Accumulated delta time used to throttle process-state polling inside Tick. */
-	float DeltaAccumulator;
+	float DeltaAccumulator = 0.f;
 
 };

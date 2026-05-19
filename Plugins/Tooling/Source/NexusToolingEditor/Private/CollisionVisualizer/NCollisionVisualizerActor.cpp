@@ -52,6 +52,8 @@ void ANCollisionVisualizerActor::Tick(float DeltaTime)
 		{
 			return;
 		}
+		
+		// #MAYBE This could be a bug, but we could add !World->HasBegunPlay()
 		if (World->WorldType == EWorldType::Editor && !bTickInEditor)
 		{
 			return;
