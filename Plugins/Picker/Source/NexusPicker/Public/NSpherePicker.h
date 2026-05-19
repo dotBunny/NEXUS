@@ -86,6 +86,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			if (IsPointInsideOrOn(Origin, MinimumRadius, Point) || !IsPointInsideOrOn(Origin, MaximumRadius, Point))

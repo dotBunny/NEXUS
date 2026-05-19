@@ -94,6 +94,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point));

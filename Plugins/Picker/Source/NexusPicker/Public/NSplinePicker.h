@@ -92,6 +92,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsOn(const TArray<FVector>& Points, const USplineComponent* SplineComponent)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointOn(SplineComponent, Point));
