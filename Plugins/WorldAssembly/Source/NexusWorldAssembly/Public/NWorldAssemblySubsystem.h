@@ -29,6 +29,9 @@ class AGameModeBase;
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly Subsystem")
 class NEXUSWORLDASSEMBLY_API UNWorldAssemblySubsystem : public UTickableWorldSubsystem, public INAssemblyOperationOwner
 {
+	/** Broadcast signature for operation lifecycle events; Operation is the one whose state just changed. */
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOperationChangedDelegate, UNAssemblyOperation*, Operation);
+	
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNWorldAssemblySubsystem, true)
 
@@ -73,6 +76,16 @@ public:
 	void RegisterLocalRelay(ANWorldAssemblyRelay* InRelay);
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
+	
+	/** Fired after StartOperation has successfully kicked off Operation's build and it is running. */
+	UPROPERTY(BlueprintAssignable)
+	FOnOperationChangedDelegate OnOperationStartedDelegate;
+	/** Fired when Operation has completed its task graph and has been removed from the tracked set. */
+	UPROPERTY(BlueprintAssignable)
+	FOnOperationChangedDelegate OnOperationFinishedDelegate;
+	/** Fired when Operation is torn down before completion (e.g. canceled or world teardown) and has been removed from the tracked set. */
+	UPROPERTY(BlueprintAssignable)
+	FOnOperationChangedDelegate OnOperationDestroyedDelegate;
 
 private:
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */

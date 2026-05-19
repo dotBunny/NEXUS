@@ -51,7 +51,12 @@ bool UNWorldAssemblySubsystem::IsTickable() const
 void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 {
 	KnownOperations.AddUnique(Operation);
+	
 	Operation->StartBuild(this);
+	if (Operation->IsRunning())
+	{
+		OnOperationStartedDelegate.Broadcast(Operation);
+	}
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
 	TArray<TObjectPtr<ANWorldAssemblyRelay>> Relays;
@@ -68,6 +73,7 @@ void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
 	KnownOperations.Remove(Operation);
+	OnOperationFinishedDelegate.Broadcast(Operation);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
 	TArray<TObjectPtr<ANWorldAssemblyRelay>> Relays;
@@ -84,6 +90,7 @@ void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operatio
 void UNWorldAssemblySubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)
 {
 	KnownOperations.Remove(Operation);
+	OnOperationDestroyedDelegate.Broadcast(Operation);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
 	TArray<TObjectPtr<ANWorldAssemblyRelay>> Relays;
