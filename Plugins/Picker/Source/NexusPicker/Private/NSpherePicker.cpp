@@ -9,9 +9,14 @@
 
 #define N_PICKER_SPHERE_PREFIX \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
+	const float MinRadiusCubed = Params.MinimumRadius * Params.MinimumRadius * Params.MinimumRadius; \
+	const float MaxRadiusCubed = Params.MaximumRadius * Params.MaximumRadius * Params.MaximumRadius; \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
-#define N_PICKER_SPHERE_LOCATION(VectorValue, FloatRange) \
-	Params.Origin + (Random.VectorValue() * Random.FloatRange(Params.MinimumRadius, Params.MaximumRadius))
+// Inverse-CDF transform: uniform u in [0,1] maps to volume-weighted radius across the shell.
+#define N_PICKER_SPHERE_RADIUS(FloatSingle) \
+	const float PointRadius = FMath::Pow(Random.FloatSingle() * (MaxRadiusCubed - MinRadiusCubed) + MinRadiusCubed, 1.0f / 3.0f);
+#define N_PICKER_SPHERE_LOCATION(VectorValue) \
+	Params.Origin + (Random.VectorValue() * PointRadius)
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_SPHERE_VLOG \
@@ -32,7 +37,7 @@
 // Excluded from code duplication
 
 #define RANDOM_VECTOR VRand
-#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_FLOAT Float
 void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
 	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
@@ -42,7 +47,8 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
@@ -52,7 +58,8 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
@@ -61,16 +68,17 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 	{
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE));
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR));
 		}
 	}
 	N_PICKER_SPHERE_VLOG
 }
 #undef RANDOM_VECTOR
-#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
 #define RANDOM_VECTOR VRand
-#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_FLOAT FRand
 void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
 	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
@@ -80,7 +88,8 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
@@ -90,7 +99,8 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
@@ -99,16 +109,17 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 	{
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE));
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR));
 		}
 	}
-	N_PICKER_SPHERE_VLOG	
+	N_PICKER_SPHERE_VLOG
 }
 #undef RANDOM_VECTOR
-#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
 #define RANDOM_VECTOR VRand
-#define RANDOM_FLOAT_RANGE FRandRange
+#define RANDOM_FLOAT FRand
 void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params)
 {
 	const FRandomStream Random(Seed);
@@ -118,7 +129,8 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
@@ -128,7 +140,8 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
@@ -137,18 +150,19 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	{
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE));
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR));
 		}
 	}
-	
+
 	N_PICKER_SPHERE_VLOG
 	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_VECTOR
-#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
-#define RANDOM_VECTOR VectorNormalized
-#define RANDOM_FLOAT_RANGE FloatRange
+#define RANDOM_VECTOR VRand
+#define RANDOM_FLOAT Float
 void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params)
 {
 	N_PICKER_SPHERE_PREFIX
@@ -157,7 +171,8 @@ void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& R
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
@@ -167,7 +182,8 @@ void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& R
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE);
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
@@ -176,12 +192,13 @@ void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& R
 	{
 		for (int32 i = 0; i < Params.Count; i++)
 		{
-			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR, RANDOM_FLOAT_RANGE));
+			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
+			OutLocations.Add(N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR));
 		}
 	}
 	N_PICKER_SPHERE_VLOG
 }
 #undef RANDOM_VECTOR
-#undef RANDOM_FLOAT_RANGE
+#undef RANDOM_FLOAT
 
 // #SONARQUBE-ENABLE

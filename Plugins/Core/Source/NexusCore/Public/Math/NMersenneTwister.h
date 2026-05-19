@@ -175,12 +175,6 @@ public:
 	void UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count,const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32, const int32 StartIndex = 0);
 
 	/**
-	 * Generate a pseudo random normalized FVector (-1 to 1).
-	 * @return A normalized random FVector.
-	 */
-	FVector VectorNormalized();
-
-	/**
 	 * Generates a pseudo random FVector using the provided ranges.
 	 * @param MinimumRange The minimum X, Y, Z range.
 	 * @param MaximumRange  The maximum X, Y, Z range.

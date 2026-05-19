@@ -51,9 +51,9 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
 				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
 		}
-		else if (MinimumDimensions.X > MaximumDimensions.X && MinimumDimensions.Y > MaximumDimensions.Y)
+		else if (MinimumDimensions.X > MaximumDimensions.X || MinimumDimensions.Y > MaximumDimensions.Y)
 		{
-			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions completely encompasses the MaximumDimensions, using MaximumDimensions instead."));
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions exceeds the MaximumDimensions on at least one axis, using MaximumDimensions instead."));
 			ValidRanges.Add( FVector4(
 				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
 				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
@@ -61,64 +61,52 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 		else
 		{
 			const FVector2D HalfMinDimensions = MinimumDimensions * 0.5f;
-			
+
+			// Inner-hole extents clamped to the outer rectangle. Ranges below are packed as
+			// (min_x, min_y, max_x, max_y) so consumers can call FloatValue(min, max) without
+			// risking inverted args (std::uniform_real_distribution requires a <= b).
+			const float HoleMinX = FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X);
+			const float HoleMaxX = FMath::Min(HalfMinDimensions.X, HalfMaxDimensions.X);
+			const float HoleMinY = FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y);
+			const float HoleMaxY = FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y);
+
 			// Reserve the number of possible sides just because
 			ValidRanges.Reserve(8);
-			
+
 			// We can do some really simple checks for the absolute vertical spots
 			if (HalfMinDimensions.Y < HalfMaxDimensions.Y)
 			{
-				// North | bottom (density)
-				ValidRanges.Add( FVector4(
-					FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
-					HalfMaxDimensions.Y, 
-				FMath::Min(HalfMinDimensions.X, HalfMaxDimensions.X) , 
-				FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y)));
-				
-				// South | top (density)
-				ValidRanges.Add( FVector4(
-					FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
-					FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y), 
-				FMath::Min(HalfMinDimensions.X,HalfMaxDimensions.X), 
-				-HalfMaxDimensions.Y));
+				// North | top strip
+				ValidRanges.Add(FVector4(HoleMinX, HoleMaxY, HoleMaxX, HalfMaxDimensions.Y));
+
+				// South | bottom strip
+				ValidRanges.Add(FVector4(HoleMinX, -HalfMaxDimensions.Y, HoleMaxX, HoleMinY));
 			}
-			
+
 			// We can do some really simple checks for the absolute horizontal spots
 			if (HalfMinDimensions.X < HalfMaxDimensions.X)
 			{
-				// East | right (density)
-				ValidRanges.Add( FVector4(
-					FMath::Min(HalfMinDimensions.X, HalfMaxDimensions.X), 
-					FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y),
-				HalfMaxDimensions.X, 
-				FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y)));
-				
-				// West | left (density)
-				ValidRanges.Add( FVector4(
-					-HalfMaxDimensions.X,
-					FMath::Min(HalfMinDimensions.Y, HalfMaxDimensions.Y),
-				FMath::Max(-HalfMinDimensions.X, -HalfMaxDimensions.X), 
-				FMath::Max(-HalfMinDimensions.Y, -HalfMaxDimensions.Y)));
+				// East | right strip
+				ValidRanges.Add(FVector4(HoleMaxX, HoleMinY, HalfMaxDimensions.X, HoleMaxY));
+
+				// West | left strip
+				ValidRanges.Add(FVector4(-HalfMaxDimensions.X, HoleMinY, HoleMinX, HoleMaxY));
 			}
-			
+
 			// If we're inside and do not overlap we can make our corners
 			if (HalfMinDimensions.Y < HalfMaxDimensions.Y && HalfMinDimensions.X < HalfMaxDimensions.X)
 			{
-				// North East | bottom right (density)
-				ValidRanges.Add( FVector4(HalfMinDimensions.X,HalfMaxDimensions.Y, 
-				HalfMaxDimensions.X, HalfMinDimensions.Y));
-				
-				// South East | top right (density)
-				ValidRanges.Add( FVector4(HalfMinDimensions.X,-HalfMinDimensions.Y, 
-				HalfMaxDimensions.X, -HalfMaxDimensions.Y));
-				
-				// South West | top left (density)
-				ValidRanges.Add( FVector4(-HalfMaxDimensions.X,-HalfMinDimensions.Y, 
-				-HalfMinDimensions.X, -HalfMaxDimensions.Y));
-				
-				// North West | bottom left (density)
-				ValidRanges.Add( FVector4(-HalfMaxDimensions.X,HalfMinDimensions.Y, 
-				-HalfMinDimensions.X, HalfMaxDimensions.Y));
+				// North East | top right corner
+				ValidRanges.Add(FVector4(HoleMaxX, HoleMaxY, HalfMaxDimensions.X, HalfMaxDimensions.Y));
+
+				// South East | bottom right corner
+				ValidRanges.Add(FVector4(HoleMaxX, -HalfMaxDimensions.Y, HalfMaxDimensions.X, HoleMinY));
+
+				// South West | bottom left corner
+				ValidRanges.Add(FVector4(-HalfMaxDimensions.X, -HalfMaxDimensions.Y, HoleMinX, HoleMinY));
+
+				// North West | top left corner
+				ValidRanges.Add(FVector4(-HalfMaxDimensions.X, HoleMaxY, HoleMinX, HalfMaxDimensions.Y));
 			}
 		}
 		return MoveTemp(ValidRanges);

@@ -95,9 +95,9 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		{
 			Boxes.Add(MaximumBox);
 		}
-		else if (MinimumDimensions.X > MaximumDimensions.X && MinimumDimensions.Y > MaximumDimensions.Y && MinimumDimensions.Z > MaximumDimensions.Z)
+		else if (MinimumDimensions.X > MaximumDimensions.X || MinimumDimensions.Y > MaximumDimensions.Y || MinimumDimensions.Z > MaximumDimensions.Z)
 		{
-			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions completely encompasses the MaximumDimensions, using MaximumDimensions instead."));
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions exceeds the MaximumDimensions on at least one axis, using MaximumDimensions instead."));
 			Boxes.Add(MaximumBox);
 		}
 		else

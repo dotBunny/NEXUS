@@ -165,11 +165,6 @@ void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int
 	this->CallCounter += Count;
 }
 
-FVector FNMersenneTwister::VectorNormalized()
-{
-	return Vector(-1.f, 1.f);
-}
-
 FVector FNMersenneTwister::Vector(const float MinimumRange, const float MaximumRange)
 {
 	auto Distribution = std::uniform_real_distribution<float>(MinimumRange, MaximumRange);
