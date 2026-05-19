@@ -7,6 +7,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NActorLibrary.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNSimpleDynamicMulticastDelegate);
+
 /**
  * A utility class providing core functions and operations for Actors.
  *
