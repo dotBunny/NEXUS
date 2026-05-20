@@ -27,7 +27,15 @@ public:
 	 */
 	explicit FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssemblyOperationContext* Context);
 
-	/** @return (Completed, Total) task counts across all stages, for progress display. */
+	/**
+	 * @return (Completed, Total) task counts across all stages, for progress display.
+	 * @remark Thread-safe to call from any thread once UnlockTasks() has dispatched the graph and before TearDownGraph()
+	 *         runs: the AllTasks array is built during construction and never mutated thereafter, and FGraphEvent::IsComplete()
+	 *         reads its completion state atomically. Calling this before UnlockTasks() (while the graph is still being
+	 *         assembled) or concurrently with TearDownGraph() is unsafe — the array can be in flux. The returned snapshot
+	 *         may already be stale by the time the caller inspects it, since tasks can complete between iteration steps;
+	 *         use it for progress reporting, not for correctness decisions.
+	 */
 	FIntVector2 GetTaskStatus() const;
 
 	/** @return true once UnlockTasks has dispatched the graph. */
