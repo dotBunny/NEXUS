@@ -27,7 +27,6 @@ UNAssemblyOperation::UNAssemblyOperation(const FObjectInitializer& ObjectInitial
 UNAssemblyOperation* UNAssemblyOperation::CreateInstance(const TArray<UNOrganComponent*>& Components, FNAssemblyOperationSettings& OperationSettings)
 {
 	UNAssemblyOperation* Operation = NewObject<UNAssemblyOperation>();
-	Operation->NextTicket = UNAssemblyOperation::NextTicket;
 	Operation->ApplySettings(OperationSettings);
 	for (const auto Component : Components)
 	{
