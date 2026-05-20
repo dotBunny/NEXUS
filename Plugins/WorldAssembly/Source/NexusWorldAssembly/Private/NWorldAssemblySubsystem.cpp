@@ -24,7 +24,7 @@ bool UNWorldAssemblySubsystem::IsReady()
 	// Server always has stuff replicated
 	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
-		return KnownOperations.Num() == 0;
+		return KnownOperations.IsEmpty();
 	}
 	
 	// Client hasn't spawned the goodness yet
@@ -68,7 +68,7 @@ void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
 	const int RemoveCount = KnownOperations.Remove(Operation);
-	if (RemoveCount > 0 && KnownOperations.Num() == 0)
+	if (RemoveCount > 0 && KnownOperations.IsEmpty())
 	{
 		OnOperationsCompleted.Broadcast();
 	}
@@ -88,7 +88,7 @@ void UNWorldAssemblySubsystem::OnOperationFinished(UNAssemblyOperation* Operatio
 void UNWorldAssemblySubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)
 {
 	const int RemoveCount = KnownOperations.Remove(Operation);
-	if (RemoveCount > 0 && KnownOperations.Num() == 0)
+	if (RemoveCount > 0 && KnownOperations.IsEmpty())
 	{
 		OnOperationsCompleted.Broadcast();
 	}

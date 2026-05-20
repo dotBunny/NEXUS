@@ -124,7 +124,7 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_BoundsSizeZero", "Cell {0} has no bounds."), FText::FromString(Cell->GetName())));
 	}
 
-	if (Cell->Root.Hull.Vertices.Num() == 0)
+	if (Cell->Root.Hull.Vertices.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
@@ -136,7 +136,7 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex."), FText::FromString(Cell->GetName())));
 	}
 
-	if (Cell->Junctions.Num() == 0)
+	if (Cell->Junctions.IsEmpty())
 	{
 		Result = EDataValidationResult::Invalid;
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_NoJunctions", "Cell {0} has no junctions."), FText::FromString(Cell->GetName())));

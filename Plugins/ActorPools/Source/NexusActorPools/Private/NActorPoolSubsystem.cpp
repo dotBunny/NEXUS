@@ -24,14 +24,14 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	UnknownBehavior = Settings->UnknownBehavior;
 	
 	// Check if we have anything to automatically load
-	if (Settings->AlwaysCreateSets.Num() == 0)
+	if (Settings->AlwaysCreateSets.IsEmpty())
 	{
 		Super::OnWorldBeginPlay(InWorld);
 		return;
 	}
 	
 	// Check if we have any prefixes to ignore
-	if (Settings->IgnoreWorldPrefixes.Num() > 0)
+	if (!Settings->IgnoreWorldPrefixes.IsEmpty())
 	{
 		bool bShouldIgnoreLevel = false;
 		const FString WorldName = InWorld.GetName();
@@ -183,7 +183,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
 	N_VALIDATE_RETURN_VOID(LogNexusActorPools, ActorPoolSet)
 
-	if (ActorPoolSet->NestedSets.Num() == 0)
+	if (ActorPoolSet->NestedSets.IsEmpty())
 	{
 		// Optimized fast-path for if the APS is not using nested sets.
 		for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)

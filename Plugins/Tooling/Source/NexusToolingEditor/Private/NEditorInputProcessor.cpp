@@ -1,6 +1,8 @@
-﻿#include "NEditorInputProcessor.h"
-#include "NEditorUtils.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
 
+#include "NEditorInputProcessor.h"
+#include "NEditorUtils.h"
 
 bool FNEditorInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
 {

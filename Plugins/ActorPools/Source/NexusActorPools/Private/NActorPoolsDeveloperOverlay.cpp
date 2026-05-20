@@ -116,6 +116,7 @@ void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		for (int32 i = ItemCount - 1; i >= 0; i--)
 		{
 			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
+			if (!IsValid(Object)) continue;
 			
 			if (Object->GetPoolWorld() == World)
 			{

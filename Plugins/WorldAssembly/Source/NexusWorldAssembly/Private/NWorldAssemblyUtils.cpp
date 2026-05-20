@@ -120,7 +120,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	}
 	Mesh.Loops = Mesh.FaceLoops;
 
-	Mesh.Center = CenterCalc / VerticesCount;
+	Mesh.Center = (VerticesCount > 0) ? (CenterCalc / VerticesCount) : FVector::ZeroVector;
 	Mesh.Bounds = BoundingBox;
 
 	// Because the generator will have processed the mesh and even though it could have ngons it is still a convex hull

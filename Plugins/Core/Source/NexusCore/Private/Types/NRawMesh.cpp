@@ -208,7 +208,7 @@ void FNRawMesh::ConvertToTriangles()
 void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double RelativeDistanceTolerance)
 {
 	FaceLoops.Reset();
-	if (Loops.Num() == 0 || Vertices.Num() == 0)
+	if (Loops.IsEmpty() || Vertices.IsEmpty())
 	{
 		return;
 	}
@@ -599,7 +599,7 @@ bool FNRawMesh::CheckConvex() const
 	// normal drifts independently and neighbor-triangle vertices end up infinitesimally off plane.
 	const TArray<FNRawMeshLoop>& FacesToCheck = FaceLoops.Num() > 0 ? FaceLoops : Loops;
 
-	if (Vertices.Num() == 0 || FacesToCheck.Num() == 0)
+	if (Vertices.IsEmpty() || FacesToCheck.IsEmpty())
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("No vertices or loops were found in the FNRawMesh when checking if it was convex."));
 		return false;

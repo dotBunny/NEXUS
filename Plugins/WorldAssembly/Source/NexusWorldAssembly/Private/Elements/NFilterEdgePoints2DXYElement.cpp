@@ -35,7 +35,7 @@ bool FNFilterEdgePoints2DXYElement::ExecuteInternal(FPCGContext* Context) const
     for (const FPCGTaggedData& Input : Inputs)
     {
         const UPCGPointData* OriginalData = Cast<UPCGPointData>(Input.Data);
-        if (!OriginalData || OriginalData->GetPoints().Num() == 0) continue;
+        if (!OriginalData || OriginalData->GetPoints().IsEmpty()) continue;
 
         const TArray<FPCGPoint>& Points = OriginalData->GetPoints();
         const int32 PointCount = Points.Num();

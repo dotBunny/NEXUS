@@ -396,7 +396,7 @@ bool FNRawMeshFactory::FromChaosBodySetup(const UBodySetup* Body, const FTransfo
 
 bool FNRawMeshFactory::FromChaosConvexHull(const FKConvexElem& ConvexHull, FNRawMesh& OutMesh)
 {
-	if (ConvexHull.VertexData.Num() == 0 || ConvexHull.IndexData.Num() < 3) return false;
+	if (ConvexHull.VertexData.IsEmpty() || ConvexHull.IndexData.Num() < 3) return false;
 
 	FNRawMesh Mesh;
 
@@ -464,7 +464,7 @@ bool FNRawMeshFactory::FromChaosConvexHull(const FKConvexElem& ConvexHull, FNRaw
 
 bool FNRawMeshFactory::FromStaticMesh(const UStaticMesh* StaticMesh, FNRawMesh& OutMesh)
 {
-	if (!StaticMesh || !StaticMesh->GetRenderData() || StaticMesh->GetRenderData()->LODResources.Num() == 0)
+	if (!StaticMesh || !StaticMesh->GetRenderData() || StaticMesh->GetRenderData()->LODResources.IsEmpty())
 	{
 		return false;
 	}

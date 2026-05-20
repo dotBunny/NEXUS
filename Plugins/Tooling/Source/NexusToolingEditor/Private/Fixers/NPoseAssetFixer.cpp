@@ -128,7 +128,7 @@ bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
 	}
 	
 	// Nothing selected, don't allow execution.
-	if (SelectedPaths.Num() == 0)
+	if (SelectedPaths.IsEmpty())
 	{
 		return false;
 	}

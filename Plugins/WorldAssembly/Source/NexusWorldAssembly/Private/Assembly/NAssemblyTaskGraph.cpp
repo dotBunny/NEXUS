@@ -100,7 +100,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 		}
 
 		// We still will keep the pass count, just don't do anything else
-		if (PassTasks.Num() == 0)
+		if (PassTasks.IsEmpty())
 		{
 			PassCount++;
 			continue;

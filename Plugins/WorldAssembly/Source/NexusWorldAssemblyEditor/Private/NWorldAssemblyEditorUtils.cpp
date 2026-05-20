@@ -37,7 +37,7 @@ ANDebugActor* FNWorldAssemblyEditorUtils::CreateWorldCollisionVisualizerActor(UW
 	TArray<ANDebugActor*> Actors = FNRawMeshUtils::CreateRawMeshVisualizers(World, WorldCollisionMeshes, WorldCollisionMeshTransforms, 
 		VisualizerMaterial, true, false);
 	
-	if (Actors.Num() == 0) return nullptr;
+	if (Actors.IsEmpty()) return nullptr;
 	
 	return Actors[0];
 }

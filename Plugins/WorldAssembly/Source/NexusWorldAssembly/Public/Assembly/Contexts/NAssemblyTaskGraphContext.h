@@ -31,6 +31,7 @@ public:
 	/** Transfer ownership of a built organ-graph into this context. */
 	void TakeGraph(TUniquePtr<FNAssemblyGraph> Graph)
 	{
+		FScopeLock Lock(&GraphsMutex);
 		Graphs.Add(MoveTemp(Graph));
 	}
 
@@ -43,4 +44,7 @@ public:
 	 * @param Settings Operation-wide settings forwarded to dependent tasks.
 	 */
 	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNAssemblyOperationSettings& Settings);
+
+private:
+	FCriticalSection GraphsMutex;
 };

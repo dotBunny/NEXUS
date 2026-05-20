@@ -15,9 +15,13 @@ public:
 	/** Transfer ownership of a completed graph into this pass context. */
 	void TakeGraph(TUniquePtr<FNAssemblyGraph> Graph)
 	{
+		FScopeLock Lock(&GraphsMutex);
 		Graphs.Add(MoveTemp(Graph));
 	}
 
 	/** Graphs accumulated from this collect pass. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
+
+private:
+	FCriticalSection GraphsMutex;
 };

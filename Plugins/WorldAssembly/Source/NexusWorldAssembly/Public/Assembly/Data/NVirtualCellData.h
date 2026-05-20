@@ -108,7 +108,7 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 */
 	bool IsValidSelection() const
 	{
-		if (Junctions.Num() == 0 || MaximumCount == 0) return false;
+		if (Junctions.IsEmpty() || MaximumCount == 0) return false;
 		if (HasMaximumCount() && UsedCount == MaximumCount) return false;
 		if (IsUnique() && UsedCount > 0) return false;
 

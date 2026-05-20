@@ -192,13 +192,13 @@ void ANSamplesPawn::OnResolutionDecrease()
 
 void ANSamplesPawn::OnAutoScreenshot()
 {
-	if (ANSamplesDisplayActor::KnownDisplays.Num() == 0) return;
+	if (ANSamplesDisplayActor::KnownDisplays.IsEmpty()) return;
 	ScreenshotState = ENSamplesScreenshotState::Prepare;
 }
 
 void ANSamplesPawn::OnPreviousMap()
 {
-	if (MapList.Num() == 0) return;
+	if (MapList.IsEmpty()) return;
 	UWorld* World = GetWorld();
 	if (World->GetAuthGameMode() == nullptr)
 	{
@@ -217,7 +217,7 @@ void ANSamplesPawn::OnPreviousMap()
 
 void ANSamplesPawn::OnNextMap()
 {
-	if (MapList.Num() == 0) return;
+	if (MapList.IsEmpty()) return;
 	UWorld* World = GetWorld();
 	if (World->GetAuthGameMode() == nullptr)
 	{

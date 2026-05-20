@@ -22,8 +22,8 @@ public: \
 	{ \
 		SizeX = InSizeX; \
 		SizeY = InSizeY; \
-		Data.Empty(); \
-		Data.SetNum(SizeX * SizeY); \
+		DataArray.Empty(); \
+		DataArray.SetNum(SizeX * SizeY); \
 	} \
 	void Resize(const IndexType NewSizeX, const IndexType NewSizeY) \
 	{ \
@@ -153,8 +153,8 @@ public: \
 		SizeX = InSizeX; \
 		SizeY = InSizeY; \
 		SizeZ = InSizeZ; \
-		Data.Empty(); \
-		Data.SetNum(SizeX * SizeY * SizeZ); \
+		DataArray.Empty(); \
+		DataArray.SetNum(SizeX * SizeY * SizeZ); \
 	} \
 	void Resize(const IndexType NewSizeX, const IndexType NewSizeY, const IndexType NewSizeZ) \
 	{ \

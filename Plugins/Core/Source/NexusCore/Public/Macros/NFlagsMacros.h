@@ -9,6 +9,9 @@
  */
 
 /** Evaluates to true when every bit in Mask is also set in Flags. */
+
+#pragma once
+
 #define N_FLAGS_HAS(Flags, Mask) \
 ((Flags & Mask) == Mask)
 

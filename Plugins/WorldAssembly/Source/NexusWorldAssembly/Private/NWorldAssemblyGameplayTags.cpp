@@ -1,4 +1,7 @@
-﻿#include "NWorldAssemblyGameplayTags.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NWorldAssemblyGameplayTags.h"
 
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_Starter, "NEXUS.WorldAssembly.BuiltIn.Starter", 
 	"Tagged items can be used at the start of an Organ Assembly as the first placed node in the AssemblyGraph, attached to the Bone. If no Tissue entries are tagged with this (or StarterOnly), any can be used instead in their place.");

@@ -131,7 +131,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	}
 	
 	// Validate that we do have bones
-	if (BoneInputData.Num() == 0)
+	if (BoneInputData.IsEmpty())
 	{
 		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no UNBoneComponents were provided or found. Skipping."));
 		return;

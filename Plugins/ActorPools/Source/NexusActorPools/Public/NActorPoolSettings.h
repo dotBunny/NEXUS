@@ -84,37 +84,37 @@ public:
 	/** @return true if the DeferConstruction flag is set. */
 	FORCEINLINE bool HasFlag_DeferConstruction() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::DeferConstruction);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::DeferConstruction);
 	}
 	/** @return true if the ShouldFinishSpawning flag is set. */
 	FORCEINLINE bool HasFlag_ShouldFinishSpawning() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ShouldFinishSpawning);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::ShouldFinishSpawning);
 	}
 	/** @return true if the ReturnToStorage flag is set. */
 	FORCEINLINE bool HasFlag_ReturnToStorage() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ReturnToStorage);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::ReturnToStorage);
 	}
 	/** @return true if the SweepBeforeSettingLocation flag is set. */
 	FORCEINLINE bool HasFlag_SweepBeforeSettingLocation() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SweepBeforeSettingLocation);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::SweepBeforeSettingLocation);
 	}
 	/** @return true if the ServerOnly flag is set. */
 	FORCEINLINE bool HasFlag_ServerOnly() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::ServerOnly);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::ServerOnly);
 	}
 	/** @return true if the BroadcastRelease flag is set. */
 	FORCEINLINE bool HasFlag_BroadcastRelease() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::BroadcastRelease);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::BroadcastRelease);
 	}
 	/** @return true if the SetNetDormancy flag is set. */
 	FORCEINLINE bool HasFlag_SetNetDormancy() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::SetNetDormancy);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::SetNetDormancy);
 	}
 
 	/** @return true if the InvokeUFunctions flag is set. */

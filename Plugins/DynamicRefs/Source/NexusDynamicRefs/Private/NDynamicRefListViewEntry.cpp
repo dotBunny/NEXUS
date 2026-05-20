@@ -1,11 +1,12 @@
-﻿#include "NDynamicRefListViewEntry.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NDynamicRefListViewEntry.h"
 
 #include "CommonTextBlock.h"
 #include "NDynamicRefObject.h"
 #include "Components/NListView.h"
 #include "Widgets/NButtonListViewEntry.h"
-#include "Widgets/NTextListViewEntry.h"
-
 
 void UNDynamicRefListViewEntry::NativeDestruct()
 {

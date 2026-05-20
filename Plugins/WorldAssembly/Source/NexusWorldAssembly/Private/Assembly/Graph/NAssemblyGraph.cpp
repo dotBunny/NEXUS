@@ -52,7 +52,7 @@ TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()
 
 void FNAssemblyGraph::CleanupBuilderReferences()
 {
-	if (Nodes.Num() == 0) return;
+	if (Nodes.IsEmpty()) return;
 	
 	for (FNAssemblyGraphNode* Node : Nodes)
 	{

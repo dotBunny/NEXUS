@@ -104,7 +104,7 @@ public:
 	 * Set the ActorOperationalState of the INActorPoolItem (Actor) calling the change delegate as needed.
 	 * @note There are very few use cases for invoking this method, think twice before using it.
 	 * @note Will ignore if NewState is the same as ActorOperationalState.
-	 * @param NewState The state to change too.
+	 * @param NewState The state to change to.
 	 * @return Was a change made?
 	 */
 	bool SetActorOperationalState(ENActorOperationalState NewState);

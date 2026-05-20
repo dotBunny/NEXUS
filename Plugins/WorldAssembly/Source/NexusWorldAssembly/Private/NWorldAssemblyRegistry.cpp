@@ -148,12 +148,12 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const uint32 OperationTicket
 {
 	if (OperationTicket == 0)
 	{
-		return CellLevelInstances.Num() > 0;
+		return !CellLevelInstances.IsEmpty();
 	}
 	
 	if (CellLevelInstances.Contains(OperationTicket))
 	{
-		return CellLevelInstances[OperationTicket].Num() > 0;
+		return !CellLevelInstances[OperationTicket].IsEmpty();
 	}
 	return false;
 }
@@ -161,7 +161,7 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const uint32 OperationTicket
 TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const uint32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
-	if (CellLevelInstances.Num() == 0) return MoveTemp(Results);
+	if (CellLevelInstances.IsEmpty()) return MoveTemp(Results);
 	
 	const double RangeSquared = Range * Range;
 
@@ -381,7 +381,7 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 		if (LevelInstances->Contains(CellLevelInstance))
 		{
 			LevelInstances->RemoveSwap(CellLevelInstance);
-			if (LevelInstances->Num() == 0)
+			if (LevelInstances->IsEmpty())
 			{
 				CellLevelInstances.Remove(OperationTicket);
 			}

@@ -20,7 +20,7 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 	if (bImplementsInterface)
 	{
 		AActor* DefaultActor = ActorClass->GetDefaultObject<AActor>();
-		UpdateSettings((Cast<INActorPoolItem>(DefaultActor))->GetActorPoolSettings());
+		UpdateSettings(Cast<INActorPoolItem>(DefaultActor)->GetActorPoolSettings());
 	}
 	else
 	{
@@ -97,10 +97,6 @@ FText FNActorPool::GetDescription() const
 	if (Settings.HasFlag_BroadcastRelease())
 	{
 		FlagDetails += TEXT("\tBroadcast Release\n");
-	}
-	if (Settings.HasFlag_SetNetDormancy())
-	{
-		FlagDetails += TEXT("\tSet Net Dormancy\n");
 	}
 	if (Settings.HasFlag_InvokeUFunctions())
 	{
@@ -183,7 +179,7 @@ void FNActorPool::PostInitialize()
 
 AActor* FNActorPool::Get()
 {
-	if (InActors.Num() == 0 && !ApplyStrategy())
+	if (InActors.IsEmpty() && !ApplyStrategy())
 	{
 		return nullptr;
 	}
@@ -195,7 +191,7 @@ AActor* FNActorPool::Get()
 
 AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 {
-	if (InActors.Num() == 0 && !ApplyStrategy())
+	if (InActors.IsEmpty() && !ApplyStrategy())
 	{
 		return nullptr;
 	}
@@ -413,14 +409,12 @@ bool FNActorPool::CreateActors(const int32 Count)
 		{
 			// Since we actually have existing actors, we can look at the usage and try to think of a good way to reasonably grow the array
 			// if it's actually needed.
-			const float InArrayUsage = InActors.Num() / InActorsMax;
-			const float OutArrayUsage = OutActors.Num() / OutActorsMax;
-			
+			const float OutArrayUsage = static_cast<float>(OutActors.Num()) / static_cast<float>(OutActorsMax);
 			if (OutArrayUsage > 0.75f)
 			{
 				OutActors.Reserve(OutActorsMax + (OutActorsMax * 0.5f));
 			}
-			
+			const float InArrayUsage = static_cast<float>(InActors.Num()) / static_cast<float>(InActorsMax);
 			if (InArrayUsage > 0.85f)
 			{
 				InActors.Reserve(InActorsMax + (InActorsMax * 0.75f));

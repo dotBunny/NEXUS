@@ -17,7 +17,7 @@ USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclass
 	}
 	
 	const TArray<USCS_Node*>& RootNodes =  BlueprintGeneratedClass->SimpleConstructionScript->GetRootNodes();
-	if (RootNodes.Num() == 0 || RootNodes[0] == nullptr)
+	if (RootNodes.IsEmpty() || RootNodes[0] == nullptr)
 	{
 		return ActorClass->GetDefaultObject<AActor>()->GetRootComponent();
 	}

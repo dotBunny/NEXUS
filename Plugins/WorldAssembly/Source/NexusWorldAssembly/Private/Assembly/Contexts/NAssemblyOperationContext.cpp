@@ -176,7 +176,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		
 		// Handle "easy" work parallelization classification
 		if (FNWorldOrganData& ComponentContext = Pair.Value; 
-			ComponentContext.ContainedComponents.Num() == 0)
+			ComponentContext.ContainedComponents.IsEmpty())
 		{
 			PossibleComponents.Remove(Pair.Key);
 			ProcessedComponents.Add(Pair.Key);
@@ -231,7 +231,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	}
 	
 	// Handle specific-case where your generating just an unbounded organ, it will just remove the empty pass to save us later.
-	if (GenerationOrder[0].Num() == 0)
+	if (GenerationOrder[0].IsEmpty())
 	{
 		GenerationOrder.RemoveAt(0);
 	}

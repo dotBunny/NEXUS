@@ -396,7 +396,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		}
 		
 		// Only build when we are not colliding with anything
-		if (BoundsIntersectingNodes.Num() == 0)
+		if (BoundsIntersectingNodes.IsEmpty())
 		{
 			// We've passed validation, lets register it and move on
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);

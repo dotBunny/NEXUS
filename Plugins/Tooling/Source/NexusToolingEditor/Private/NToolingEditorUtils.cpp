@@ -1,10 +1,12 @@
-﻿#include "NToolingEditorUtils.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NToolingEditorUtils.h"
 
 #include "BlueprintEditor.h"
 #include "NEditorUtils.h"
 #include "NToolingEditorMinimal.h"
 #include "Engine/LevelScriptBlueprint.h"
-
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
@@ -44,6 +46,7 @@ void FNToolingEditorUtils::SetBlueprintEditorAssetTypes()
 
 void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 {
+	// This is dangerous, but necessary to be able to change UE internals.
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
@@ -57,6 +60,7 @@ void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 
 void FNToolingEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 {
+	// This is dangerous, but necessary to be able to change UE internals.
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{

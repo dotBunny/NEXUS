@@ -64,10 +64,11 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 	}
 	
 	TArray<FString> Tokens;
+	Tokens.Reserve(ReplaceTokens.Num());
 	ReplaceTokens.GetKeys(Tokens);
 	
-	// Early out since we dont have any tokens
-	if (Tokens.Num() == 0)
+	// Early out since we don't have any tokens
+	if (Tokens.IsEmpty())
 	{
 		return MoveTemp(Output);
 	}

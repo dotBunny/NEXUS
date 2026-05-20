@@ -84,7 +84,7 @@ void UNGuardianDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
 
 void UNGuardianDeveloperOverlay::UpdateBanner() const
 {
-	if (Subsystems.Num() <= 0)
+	if (Subsystems.IsEmpty())
 	{
 		ShowContainerBanner(RuntimeOnlyText,
 				UNStyleLibrary::GetInfoForegroundColor(), 
@@ -108,7 +108,7 @@ void UNGuardianDeveloperOverlay::UpdateBanner() const
 
 void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	if (Subsystems.Num() <= 0) return;
+	if (Subsystems.IsEmpty()) return;
 
 	// TODO: This forces us to only show the active game world or PIE, despite the possibility there is more
 	// We should make this a list entry like the others to support multiple worlds

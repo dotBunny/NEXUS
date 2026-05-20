@@ -12,7 +12,7 @@
 void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& BaseMesh,
                                  const FTransform& OtherTransform, const FNRawMesh& OtherMesh)
 {
-	if (OtherMesh.Vertices.Num() == 0 || OtherMesh.Loops.Num() == 0)
+	if (OtherMesh.Vertices.IsEmpty() || OtherMesh.Loops.IsEmpty())
 	{
 		return;
 	}
@@ -86,7 +86,7 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 		}
 	}
 
-	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
+	if (LeftMesh.Loops.IsEmpty() || RightMesh.Loops.IsEmpty())
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."));
 		return false;
@@ -115,7 +115,7 @@ float FNRawMeshUtils::GetIntersectDepth(
 		}
 	}
 
-	if (LeftMesh.Loops.Num() == 0 || RightMesh.Loops.Num() == 0)
+	if (LeftMesh.Loops.IsEmpty() || RightMesh.Loops.IsEmpty())
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine intersection depth."));
 		return -1.0f;

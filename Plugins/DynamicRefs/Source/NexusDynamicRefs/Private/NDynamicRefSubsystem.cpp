@@ -24,6 +24,12 @@ void UNDynamicRefSubsystem::Deinitialize()
 
 void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
+	if (InObject == nullptr)
+	{
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add a null UObject, skipping."));
+		return;
+	}
+	
 	if (DynamicRef == NDR_None)
 	{
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None, skipping."), *InObject->GetName());
@@ -72,6 +78,12 @@ void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> 
 
 void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject* InObject)
 {
+	if (InObject == nullptr)
+	{
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove a null UObject, skipping."));
+		return;
+	}
+	
 	if (DynamicRef == NDR_None)
 	{
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None, skipping."), *InObject->GetName());
@@ -142,7 +154,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef
 		return TArray<UObject*>();;
 	}
 	
-	return FastCollection[DynamicRef].GetObjects();
+	return FastCollection[DynamicRef].GetObjectsCopy();
 }
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
@@ -150,7 +162,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
 	if (Collection != nullptr)
 	{
-		return Collection->GetObjects();
+		return Collection->GetObjectsCopy();
 	}
 	return TArray<UObject*>();
 }
@@ -231,7 +243,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 	}
 	
 	TArray<AActor*> Result;
-	for (UObject* Object : FastCollection[DynamicRef].GetObjects())
+	for (UObject* Object : FastCollection[DynamicRef].GetObjectsCopy())
 	{
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor) Result.Add(Actor);
@@ -350,12 +362,12 @@ TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
 	return MoveTemp(Result);
 }
 
-const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionRef(const ENDynamicRef DynamicRef)
+const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionRefUnsafe(const ENDynamicRef DynamicRef)
 {
 	return FastCollection[DynamicRef];
 }
 
-const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionByNameRef(const FName Name)
+const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionByNameRefUnsafe(const FName Name)
 {
 	return NamedCollection.FindChecked(Name);
 }

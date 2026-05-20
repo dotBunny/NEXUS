@@ -21,14 +21,14 @@ ANWorldAssemblyRelay::ANWorldAssemblyRelay()
 
 bool ANWorldAssemblyRelay::IsReady()
 {
-	return KnownOperations.Num() == 0 && HasNearbyCellLevelInstances();
+	return KnownOperations.IsEmpty() && HasNearbyCellLevelInstances();
 }
 
 bool ANWorldAssemblyRelay::HasNearbyCellLevelInstances()
 {
 	// Early out the best we can
 	if (bHasNearbyCellLevelInstances) return true;
-	if (CachedNearbyCellLevelInstances.Num() == 0)  return false;
+	if (CachedNearbyCellLevelInstances.IsEmpty())  return false;
 	
 	// If we haven't got them lets reupdate and respond accordingly
 	bHasNearbyCellLevelInstances = FNWorldAssemblyRegistry::HasCellLevelInstances(CachedNearbyCellLevelInstances);

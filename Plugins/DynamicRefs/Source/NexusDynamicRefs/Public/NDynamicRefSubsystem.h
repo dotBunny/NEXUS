@@ -22,7 +22,7 @@ struct FNDynamicRefCollection
 	/** @return true if the collection has at least one registered object. */
 	bool HasObjects() const { return Objects.Num() > 0; }
 	/** @return A copy of the currently registered objects. */
-	TArray<UObject*> GetObjects() { return Objects; }
+	TArray<UObject*> GetObjectsCopy() { return Objects; }
 	/** @return A const reference to the registered objects; avoids the copy GetObjects() makes. */
 	const TArray<TObjectPtr<UObject>>& GetObjectsRef() const { return Objects; }
 	/** Add an object to the collection; duplicates are ignored. */
@@ -51,7 +51,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Add a reference by ENDynamicRef to a specified UObject.
 	 * @remark Be careful with the manual add method. If you add it, you must remove it!
-	 * @param DynamicRef The desired ENDynamicRef to add too.
+	 * @param DynamicRef The desired ENDynamicRef to add to.
 	 * @param InObject The UObject to be referenced by the provided ENDynamicRef.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Object", Category = "NEXUS|DynamicRefs",
@@ -61,7 +61,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Add a reference by ENDynamicRef to a TArray of UObjects.
 	 * @remark Be careful with the manual add method. If you add it, you must remove it!
-	 * @param DynamicRef The desired ENDynamicRef to add too.
+	 * @param DynamicRef The desired ENDynamicRef to add to.
 	 * @param InObjects The TArray of UObjects to be referenced by the provided ENDynamicRef.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Objects", Category = "NEXUS|DynamicRefs",
@@ -71,7 +71,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Add a reference by FName to a specified UObject.
 	 * @remark Be careful with the manual add method. If you add it, you must remove it!
-	 * @param Name The desired FName to add too.
+	 * @param Name The desired FName to add to.
 	 * @param InObject The UObject to be referenced by the FName.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Object (By Name)", Category = "NEXUS|DynamicRefs",
@@ -81,7 +81,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Add a reference by FName to a TArray of UObjects.
 	 * @remark Be careful with the manual add method. If you add it, you must remove it!
-	 * @param Name The desired FName to add too.
+	 * @param Name The desired FName to add to.
 	 * @param InObjects The TArray of UObjects to be referenced by the FName.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Objects (By Name)", Category = "NEXUS|DynamicRefs",
@@ -292,18 +292,26 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Gets a const reference to the underlying collection for the provided ENDynamicRef slot.
 	 * @remark Native code only; prefer this over GetObjects() when you only need to read the registered objects, as it avoids copying the array.
+	 * @warning Unsafe: performs no bounds checking on DynamicRef and will assert/crash if the value is outside [0, NDR_Max).
+	 *          The returned reference is only valid until the next mutation of this slot (Add/Remove); any such call may
+	 *          reallocate the backing TArray and invalidate this reference. Do not cache the reference across frames or
+	 *          across calls that can modify the subsystem, and do not use it from multiple threads.
 	 * @param DynamicRef The desired ENDynamicRef slot to access.
 	 * @return A const reference to the FNDynamicRefCollection for the slot.
 	 */
-	const FNDynamicRefCollection& GetObjectCollectionRef(const ENDynamicRef DynamicRef);
+	const FNDynamicRefCollection& GetObjectCollectionRefUnsafe(const ENDynamicRef DynamicRef);
 
 	/**
 	 * Gets a const reference to the underlying collection for the provided FName bucket.
 	 * @remark Native code only; prefer this over GetObjectsByName() when you only need to read the registered objects, as it avoids copying the array.
+	 * @warning Unsafe: performs no key existence check and will assert/crash (FindChecked) if Name has no registered bucket.
+	 *          The returned reference is only valid until the next mutation of the named map (Add/Remove of any bucket);
+	 *          a rehash or bucket removal will invalidate this reference. Do not cache the reference across frames or
+	 *          across calls that can modify the subsystem, and do not use it from multiple threads.
 	 * @param Name The desired FName bucket to access.
 	 * @return A const reference to the FNDynamicRefCollection for the bucket.
 	 */
-	const FNDynamicRefCollection& GetObjectCollectionByNameRef(const FName Name);
+	const FNDynamicRefCollection& GetObjectCollectionByNameRefUnsafe(const FName Name);
 
 	/** Fired when an object is added under an ENDynamicRef slot. */
 	OnDynamicRefChangeDelegate OnAdded;

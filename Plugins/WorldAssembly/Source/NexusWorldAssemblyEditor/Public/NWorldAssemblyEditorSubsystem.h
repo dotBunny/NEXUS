@@ -19,8 +19,6 @@ class UNAssemblyOperation;
  * them up at PIE/map-load boundaries since the proxies are transient. Acts as the operation
  * owner for editor-initiated generation flows.
  */
-// TODO: Is there a way to save the keys and pass them through to playmode based on the last generation? so
-// a user could generate and then visually see in game what they were hammering to
 UCLASS()
 class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEditorSubsystem, public FTickableGameObject, public INAssemblyOperationOwner
 {
