@@ -210,6 +210,31 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	FDynamicMesh3 CreateDynamicMesh(bool bProcessMesh = false) const;
 
+	/**
+	 * Inserts a new vertex at the midpoint of the edge between VertexAIndex and VertexBIndex and
+	 * splices it into every Loop and FaceLoop that owns that edge, so the affected face(s) become
+	 * (..., A, M, B, ...). Both sides of a shared edge are updated together, which is what keeps
+	 * the result T-junction free on a closed mesh.
+	 *
+	 * Loops: a triangle that owned the edge becomes a quad after the insert and is immediately
+	 * fan-triangulated from M — producing the natural geometric split — so Loops stays
+	 * triangulated. Non-triangulated loops are spliced but not re-triangulated; call
+	 * ConvertToTriangles() if the caller relies on that invariant.
+	 *
+	 * FaceLoops: M is spliced into any face that owned the edge; no re-triangulation needed.
+	 *
+	 * Bookkeeping: clears bIsChaosGenerated (the chaos provenance no longer applies after a
+	 * topology change), then runs CalculateCenterAndBounds() and Validate() so the cached
+	 * convexity / bounds / non-triangle flags reflect the new state.
+	 *
+	 * @param VertexAIndex First endpoint of the edge to split.
+	 * @param VertexBIndex Second endpoint of the edge to split.
+	 * @return Index of the newly inserted midpoint vertex, or INDEX_NONE when an endpoint index
+	 *         is invalid, the two indices are equal, or no loop/face references the edge.
+	 * @note Edge direction is order-agnostic — A→B and B→A both match.
+	 */
+	int32 SplitEdge(int32 VertexAIndex, int32 VertexBIndex);
+
 private:
 	/**
 	 * @return true if Vertices form a convex hull; false otherwise. Recomputed by Validate.

@@ -305,7 +305,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				&FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon)));
 		NexusSection.AddEntry(CollisionVisualizerEntry);
 		
-		// Actions Section
+		// Actions Section - based on selection
 		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Ignore Actor Toggle
@@ -315,13 +315,25 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FExecuteAction::CreateStatic(&IgnoreSelectedActorsToggle),
 				FCanExecuteAction(),
 				FIsActionChecked(),
-				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::HasCellActor)),
+				FIsActionButtonVisible::CreateStatic(&IgnoreSelectedActorsToggle_CanShow)),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle", "Ignore Actor Toggle"),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a NCell."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon)));
 		NexusSection.AddEntry(IgnoreActorToggle);
+		
+		FToolMenuEntry HullSplitEdgeEntry  = FToolMenuEntry::InitToolBarButton(
+			"NWorldAssembly_Hull_SplitEdge",
+			FUIAction(
+				FExecuteAction::CreateStatic(&Hull_SplitEdge),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&Hull_SplitEdge_CanShow)),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Hull_SplitEdge", "Split Hull Edge"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Hull_SplitEdge_Tooltip", "Splits the hull edge and retriangulates the Hull."),
+				FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.SplitEdge"));
+		NexusSection.AddEntry(HullSplitEdgeEntry);
 	}
 }
 
@@ -424,6 +436,13 @@ void FNWorldAssemblyEditorToolMenu::IgnoreSelectedActorsToggle()
 	}
 }
 
+bool FNWorldAssemblyEditorToolMenu::IgnoreSelectedActorsToggle_CanShow()
+{
+	return FNWorldAssemblyEdMode::HasCellActor() 
+		&& FNEditorUtils::HasActorsSelected() 
+		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
+}
+
 int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
 {
 	USelection* Selection = GEditor->GetSelectedActors();
@@ -455,4 +474,15 @@ int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
 		return -1; // Unknown
 	}
 	return 0; // Add
+}
+
+void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
+{
+}
+
+bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
+{
+	
+	return true;
+
 }

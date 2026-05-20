@@ -478,6 +478,120 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 	return MoveTemp(DynamicMesh);
 }
 
+int32 FNRawMesh::SplitEdge(const int32 VertexAIndex, const int32 VertexBIndex)
+{
+	if (!Vertices.IsValidIndex(VertexAIndex) || !Vertices.IsValidIndex(VertexBIndex) || VertexAIndex == VertexBIndex)
+	{
+		return INDEX_NONE;
+	}
+
+	// Locate the edge inside a loop as a consecutive (wrap-aware) index pair. Direction-agnostic
+	// because the same undirected edge appears as A→B in one adjacent face and B→A in the other.
+	auto FindEdgeStart = [VertexAIndex, VertexBIndex](const FNRawMeshLoop& Loop) -> int32
+	{
+		const int32 Count = Loop.Indices.Num();
+		for (int32 i = 0; i < Count; i++)
+		{
+			const int32 Current = Loop.Indices[i];
+			const int32 Next = Loop.Indices[(i + 1) % Count];
+			if ((Current == VertexAIndex && Next == VertexBIndex) ||
+				(Current == VertexBIndex && Next == VertexAIndex))
+			{
+				return i;
+			}
+		}
+		return INDEX_NONE;
+	};
+
+	// Bail before we append a vertex that nothing references — orphan vertices would skew
+	// CalculateCenterAndBounds and confuse downstream geometry consumers.
+	bool bEdgeFound = false;
+	for (const FNRawMeshLoop& Loop : Loops)
+	{
+		if (FindEdgeStart(Loop) != INDEX_NONE)
+		{
+			bEdgeFound = true;
+			break;
+		}
+	}
+	if (!bEdgeFound)
+	{
+		for (const FNRawMeshLoop& Face : FaceLoops)
+		{
+			if (FindEdgeStart(Face) != INDEX_NONE)
+			{
+				bEdgeFound = true;
+				break;
+			}
+		}
+	}
+	if (!bEdgeFound)
+	{
+		return INDEX_NONE;
+	}
+
+	const FVector Midpoint = (Vertices[VertexAIndex] + Vertices[VertexBIndex]) * 0.5;
+	const int32 MidpointIndex = Vertices.Add(Midpoint);
+
+	// Rebuild Loops: any triangle that owned the edge becomes a quad after the insert and is
+	// fan-triangulated from M to keep Loops triangulated — the invariant CreateDynamicMesh,
+	// CalculateFaceLoops, and the convexity check (when FaceLoops is empty) all rely on.
+	TArray<FNRawMeshLoop> NewLoops;
+	NewLoops.Reserve(Loops.Num() + 2);
+	for (FNRawMeshLoop& Loop : Loops)
+	{
+		const int32 EdgeStart = FindEdgeStart(Loop);
+		if (EdgeStart == INDEX_NONE)
+		{
+			NewLoops.Add(MoveTemp(Loop));
+			continue;
+		}
+
+		const bool bWasTriangle = Loop.IsTriangle();
+		Loop.Indices.Insert(MidpointIndex, EdgeStart + 1);
+
+		if (!bWasTriangle)
+		{
+			// Defensive: Loops is expected to be triangulated, but if a caller fed an n-gon
+			// through we splice it and leave the re-triangulation to ConvertToTriangles, which
+			// has the projection / ear-clipping machinery needed for arbitrary polygons.
+			NewLoops.Add(MoveTemp(Loop));
+			continue;
+		}
+
+		// Quad (A, M, B, C in some rotation). Fanning from M produces (M, B, C) and (M, C, A) —
+		// the natural geometric split of the original triangle bisected by line M↔C, with both
+		// output triangles non-degenerate and inheriting the source winding.
+		const int32 LoopCount = Loop.Indices.Num();
+		const int32 MPos = EdgeStart + 1;
+		for (int32 k = 1; k <= LoopCount - 2; k++)
+		{
+			NewLoops.Emplace(
+				Loop.Indices[MPos],
+				Loop.Indices[(MPos + k) % LoopCount],
+				Loop.Indices[(MPos + k + 1) % LoopCount]);
+		}
+	}
+	Loops = MoveTemp(NewLoops);
+
+	// FaceLoops are polygonal by design — splicing M between A and B keeps the face description
+	// authoritative and lets CheckConvex continue to use it instead of the per-triangle fallback.
+	for (FNRawMeshLoop& Face : FaceLoops)
+	{
+		const int32 EdgeStart = FindEdgeStart(Face);
+		if (EdgeStart != INDEX_NONE)
+		{
+			Face.Indices.Insert(MidpointIndex, EdgeStart + 1);
+		}
+	}
+
+	bIsChaosGenerated = false;
+	CalculateCenterAndBounds();
+	Validate();
+
+	return MidpointIndex;
+}
+
 bool FNRawMesh::CheckConvex() const
 {
 	// Prefer the polygonal face description when present — fan-triangulated coplanar faces will fail

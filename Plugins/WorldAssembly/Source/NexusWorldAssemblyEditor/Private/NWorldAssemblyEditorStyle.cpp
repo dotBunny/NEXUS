@@ -133,6 +133,8 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Command.WorldAssemblyEd.Bounds.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Bounds_Selected"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CalculateBounds", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateBounds"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.Hull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.Hull.SplitEdge", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_SplitEdge"), Icon16x16));
+	
 	Style.Set("Command.WorldAssemblyEd.Hull.Selected", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_Hull_Selected"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CalculateHull", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateHull"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CalculateVoxelData", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CalculateVoxelData"), Icon16x16));

@@ -47,10 +47,15 @@ public:
 	 * otherwise the tag is removed from all.
 	 */
 	static void IgnoreSelectedActorsToggle();
+	
+	static bool IgnoreSelectedActorsToggle_CanShow();
 
 	/**
 	 * @return Toggle state for the ignore-selected-actors action: 0 to add the tag, 1 to remove it, or -1
 	 * when the action should be disabled (empty selection or a mixed-tag selection where the intent is ambiguous).
 	 */
 	static int32 GetIgnoreSelectedActorsToggleMode();
+	
+	static void Hull_SplitEdge();
+	static bool Hull_SplitEdge_CanShow();
 };
