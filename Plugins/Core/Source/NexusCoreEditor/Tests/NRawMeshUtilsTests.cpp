@@ -97,6 +97,55 @@ namespace NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness
 		FNRawMeshFactory::FromChaosSphyl(Sphyl, FTransform::Identity, OutMesh, OutTransform);
 		return OutMesh;
 	}
+
+	/**
+	 * Triangulated non-convex closed manifold: a "notched-square" pentagon (the unit square with a
+	 * triangular bite taken out of the top edge) extruded along +Z. Used to exercise the non-convex
+	 * fallback in IsRelativePointInside / DoesIntersect.
+	 *
+	 * Footprint (z=0 and z=5):
+	 *   (0,10) ----------- (10,10)
+	 *      \              /
+	 *       \   notch    /
+	 *        \          /
+	 *         \ (5,5)  /
+	 *         /        \             ← interior continues here
+	 *        /          \
+	 *   (0,0) ---------- (10,0)
+	 *
+	 * Walking the bottom polygon CCW from +Z: 0,1,2,3,4 where 3=(5,5) is the concave (inner) vertex.
+	 * The polygon area is 75 (10×10 square minus the 25-unit notch triangle); points like (3,3) are
+	 * inside the body, points like (5,8) sit in the cut-out and are outside.
+	 */
+	static FNRawMesh MakeNonConvexPrism()
+	{
+		FNRawMesh Mesh;
+		Mesh.Vertices = {
+			{ 0,  0, 0 }, { 10,  0, 0 }, { 10, 10, 0 }, { 5,  5, 0 }, { 0, 10, 0 },
+			{ 0,  0, 5 }, { 10,  0, 5 }, { 10, 10, 5 }, { 5,  5, 5 }, { 0, 10, 5 },
+		};
+
+		// Bottom (outward -Z, CW from +Z view). Fan from the notch vertex 3.
+		Mesh.Loops.Add(FNRawMeshLoop(3, 2, 1));
+		Mesh.Loops.Add(FNRawMeshLoop(3, 1, 0));
+		Mesh.Loops.Add(FNRawMeshLoop(3, 0, 4));
+
+		// Top (outward +Z, CCW from +Z view). Fan from the notch vertex 8.
+		Mesh.Loops.Add(FNRawMeshLoop(8, 9, 5));
+		Mesh.Loops.Add(FNRawMeshLoop(8, 5, 6));
+		Mesh.Loops.Add(FNRawMeshLoop(8, 6, 7));
+
+		// Five rectangular sides, each two triangles, wound (A, B, B', A') for outward winding.
+		Mesh.Loops.Add(FNRawMeshLoop(0, 1, 6)); Mesh.Loops.Add(FNRawMeshLoop(0, 6, 5)); // edge 0→1, outward -Y
+		Mesh.Loops.Add(FNRawMeshLoop(1, 2, 7)); Mesh.Loops.Add(FNRawMeshLoop(1, 7, 6)); // edge 1→2, outward +X
+		Mesh.Loops.Add(FNRawMeshLoop(2, 3, 8)); Mesh.Loops.Add(FNRawMeshLoop(2, 8, 7)); // edge 2→3, notch wall
+		Mesh.Loops.Add(FNRawMeshLoop(3, 4, 9)); Mesh.Loops.Add(FNRawMeshLoop(3, 9, 8)); // edge 3→4, notch wall
+		Mesh.Loops.Add(FNRawMeshLoop(4, 0, 5)); Mesh.Loops.Add(FNRawMeshLoop(4, 5, 9)); // edge 4→0, outward -X
+
+		Mesh.CalculateCenterAndBounds();
+		Mesh.Validate();
+		return Mesh;
+	}
 }
 
 N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_EmptyOther_NoOp,
@@ -264,13 +313,15 @@ N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_OnFace_True,
 		FNRawMeshUtils::IsRelativePointInside(Cube, FVector(5, 0, 0)));
 }
 
-N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonConvex_FalseWithWarning,
-	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonConvex_FalseWithWarning",
+N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonTriPentagon_FalseWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonTriPentagon_FalseWithWarning",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	AddExpectedMessage(TEXT("not convex or has non-triangles"), ELogVerbosity::Warning);
+	AddExpectedMessage(TEXT("has non-triangle loops"), ELogVerbosity::Warning);
 
-	// Concave pentagon — IsConvex() returns false so the guard rejects the input.
+	// A 5-vertex single-loop pentagon: rejected by the HasNonTris() guard. (Non-convex meshes
+	// themselves are no longer rejected — they fall through to the parity ray-cast path — but a
+	// non-triangle loop still is, because both code paths assume triangle topology.)
 	FNRawMesh Mesh;
 	Mesh.Vertices = {
 		FVector(0,  0,  0),
@@ -283,7 +334,7 @@ N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonConvex_FalseWithWarning
 	Mesh.CalculateCenterAndBounds();
 	Mesh.Validate();
 
-	CHECK_FALSE_MESSAGE(TEXT("Non-convex mesh must be rejected by IsRelativePointInside"),
+	CHECK_FALSE_MESSAGE(TEXT("Pentagon loop is non-triangle and must be rejected by IsRelativePointInside"),
 		FNRawMeshUtils::IsRelativePointInside(Mesh, FVector(1, 1, 0)));
 }
 
@@ -291,9 +342,9 @@ N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonTri_FalseWithWarning,
 	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonTri_FalseWithWarning",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	AddExpectedMessage(TEXT("not convex or has non-triangles"), ELogVerbosity::Warning);
+	AddExpectedMessage(TEXT("has non-triangle loops"), ELogVerbosity::Warning);
 
-	// Convex but quad-based — guard must still reject for HasNonTris().
+	// Convex quad-based mesh — the only remaining rejection condition is HasNonTris().
 	FNRawMesh Mesh;
 	Mesh.Vertices = { FVector(0, 0, 0), FVector(10, 0, 0), FVector(10, 10, 0), FVector(0, 10, 0) };
 	Mesh.Loops.Add(FNRawMeshLoop(0, 1, 2, 3));
@@ -335,12 +386,14 @@ N_TEST_HIGH(FNRawMeshUtilsTests_AnyRelativePointsInside_EmptyArray_False,
 		FNRawMeshUtils::AnyRelativePointsInside(Cube, Empty));
 }
 
-N_TEST_HIGH(FNRawMeshUtilsTests_AnyRelativePointsInside_NonConvex_FalseWithWarning,
-	"NEXUS::UnitTests::NCore::FNRawMeshUtils::AnyRelativePointsInside::NonConvex_FalseWithWarning",
+N_TEST_HIGH(FNRawMeshUtilsTests_AnyRelativePointsInside_NonTriPentagon_FalseWithWarning,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::AnyRelativePointsInside::NonTriPentagon_FalseWithWarning",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	AddExpectedMessage(TEXT("not convex or has non-triangles"), ELogVerbosity::Warning);
+	AddExpectedMessage(TEXT("has non-triangle loops"), ELogVerbosity::Warning);
 
+	// Mirrors IsRelativePointInside::NonTriPentagon — AnyRelativePointsInside delegates and must
+	// surface the same HasNonTris() rejection.
 	FNRawMesh Mesh;
 	Mesh.Vertices = {
 		FVector(0,  0,  0),
@@ -354,8 +407,99 @@ N_TEST_HIGH(FNRawMeshUtilsTests_AnyRelativePointsInside_NonConvex_FalseWithWarni
 	Mesh.Validate();
 
 	const TArray<FVector> Points = { FVector(1, 1, 0) };
-	CHECK_FALSE_MESSAGE(TEXT("Non-convex mesh must be rejected by AnyRelativePointsInside"),
+	CHECK_FALSE_MESSAGE(TEXT("Pentagon loop is non-triangle and must be rejected by AnyRelativePointsInside"),
 		FNRawMeshUtils::AnyRelativePointsInside(Mesh, Points));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonConvex_BodyPoint_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonConvex_BodyPoint_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Notched-square prism is a triangulated, closed, non-convex manifold; IsRelativePointInside
+	// drops into the parity-raycast fallback. Point (3, 3, 2.5) is inside the body of the L —
+	// the +X probe ray crosses exactly one wall (the +X side of the square), giving odd parity.
+	const FNRawMesh Mesh = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+
+	CHECK_FALSE_MESSAGE(TEXT("Sanity: the notched prism must report IsConvex==false so the ray-cast fallback path runs"),
+		Mesh.IsConvex());
+	CHECK_MESSAGE(TEXT("Point inside the prism's solid body should ray-cast to odd parity (inside)"),
+		FNRawMeshUtils::IsRelativePointInside(Mesh, FVector(3, 3, 2.5)));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonConvex_NotchPoint_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonConvex_NotchPoint_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Point (5, 8, 2.5) sits inside the prism's AABB but in the cut-out region of the footprint —
+	// the +X probe ray crosses two walls (the +X edge of the square, plus the notch-2→3 wall),
+	// giving even parity. This is the case that motivates the non-convex fallback: a convex
+	// half-space test would falsely call it "inside" because the AABB hides the indent.
+	const FNRawMesh Mesh = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+
+	CHECK_FALSE_MESSAGE(TEXT("Point in the cut-out region of the notched prism must report outside"),
+		FNRawMeshUtils::IsRelativePointInside(Mesh, FVector(5, 8, 2.5)));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_IsRelativePointInside_NonConvex_FarOutside_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::IsRelativePointInside::NonConvex_FarOutside_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Point well clear of the prism's AABB — ray cast must produce zero crossings.
+	const FNRawMesh Mesh = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+
+	CHECK_FALSE_MESSAGE(TEXT("Point far from the prism must report outside"),
+		FNRawMeshUtils::IsRelativePointInside(Mesh, FVector(100, 100, 100)));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_AnyRelativePointsInside_NonConvex_BodyAndNotch_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::AnyRelativePointsInside::NonConvex_BodyAndNotch_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mixed input: a notch point (outside) followed by a body point (inside). Verifies that the
+	// short-circuit doesn't stop at the first false answer and that AnyRelativePointsInside
+	// reaches the parity-raycast path for the non-convex input.
+	const FNRawMesh Mesh = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const TArray<FVector> Points = { FVector(5, 8, 2.5), FVector(3, 3, 2.5) };
+
+	CHECK_MESSAGE(TEXT("AnyRelativePointsInside must return true once a body point is found, even on a non-convex mesh"),
+		FNRawMeshUtils::AnyRelativePointsInside(Mesh, Points));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_NonConvex_BoxContainedInBody_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::NonConvex_BoxContainedInBody_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The bug DoesIntersect's non-convex fallback fixes: a small cube fully contained inside the
+	// non-convex prism's body. No triangle pair crosses, AABBs overlap, and the containment probe
+	// must call into the parity ray cast (because the outer mesh is non-convex) to find that the
+	// sample vertex is enclosed. Pre-fix this returned false silently with a "not convex" warning.
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.5);
+
+	const bool bResult = FNRawMeshUtils::DoesIntersect(
+		Prism,     FVector::ZeroVector,        FRotator::ZeroRotator,
+		SmallCube, FVector(3, 3, 2.5),         FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Small cube fully inside the non-convex prism's body must be reported as intersecting"), bResult);
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_NonConvex_BoxContainedInNotch_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::NonConvex_BoxContainedInNotch_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Same prism, but the small cube sits inside the AABB's notched-out region — geometrically
+	// outside the prism. AABBs still overlap so the early-out doesn't fire; the triangle pairs
+	// don't cross either (the cube is small enough to stay clear of the notch walls); and the
+	// non-convex containment probe must correctly report "outside" via even-parity ray cast.
+	// This is the dual of the body-contained test — same code path, different parity.
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.25);
+
+	const bool bResult = FNRawMeshUtils::DoesIntersect(
+		Prism,     FVector::ZeroVector,        FRotator::ZeroRotator,
+		SmallCube, FVector(5, 8, 2.5),         FRotator::ZeroRotator);
+
+	CHECK_FALSE_MESSAGE(TEXT("Small cube parked in the prism's notch must be reported as non-intersecting"), bResult);
 }
 
 N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_SeparatedAABBs_False,
@@ -677,45 +821,93 @@ N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_SurfaceOnlyCrossing_ReturnsZer
 		FMath::IsNearlyEqual(Depth, 0.0f, 0.001f));
 }
 
-N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_NegativeOneWithWarning,
-	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_NegativeOneWithWarning",
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_VertexInBody_ReturnsPositiveDepth,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_VertexInBody_ReturnsPositiveDepth",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	AddExpectedMessage(TEXT("not convex"), ELogVerbosity::Warning);
-
-	// Triangle-only mesh that fails IsConvex (spike vertex outside the +Z face plane — same shape as
-	// CheckConvex_ConcavePolyhedron_False). Mirrors the rejection path that real FromStaticMesh /
-	// FromChaosBodySetup output (typically arbitrary concave geometry) would hit at the GetIntersectDepth
-	// entry — currently only the EmptyLoops and NonTriMesh rejection paths are covered at this entry point.
-	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
-
-	FNRawMesh Concave;
-	Concave.Vertices = {
-		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
-		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
-		{  0,  0, 100 },
-	};
-	static const int32 Tris[12][3] = {
-		{ 0, 2, 1 }, { 0, 3, 2 },
-		{ 4, 5, 6 }, { 4, 6, 7 },
-		{ 0, 1, 5 }, { 0, 5, 4 },
-		{ 1, 2, 6 }, { 1, 6, 5 },
-		{ 2, 3, 7 }, { 2, 7, 6 },
-		{ 3, 0, 4 }, { 3, 4, 7 },
-	};
-	for (int32 i = 0; i < 12; ++i)
-	{
-		Concave.Loops.Add(FNRawMeshLoop(Tris[i][0], Tris[i][1], Tris[i][2]));
-	}
-	Concave.CalculateCenterAndBounds();
-	Concave.Validate();
+	// Small unit cube parked inside the body of the non-convex prism at (3, 3, 2.5). All 8 cube
+	// vertices clear the prism's footprint (the L-body covers (3, 3)) and sit at z ∈ [2.0, 3.0],
+	// equidistant from the z=0 and z=5 caps — nearest surface is one of the top/bottom faces at
+	// distance 2.0. This exercises the full non-convex path: IsRelativePointInside parity probe
+	// per vertex + point-to-triangle distance.
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.5);
 
 	const float Depth = FNRawMeshUtils::GetIntersectDepth(
-		Cube,    FVector(0, 0, 0), FRotator::ZeroRotator,
-		Concave, FVector(0, 0, 0), FRotator::ZeroRotator);
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator,
+		SmallCube, FVector(3, 3, 2.5),     FRotator::ZeroRotator);
 
-	CHECK_MESSAGE(TEXT("Non-convex input must yield the -1 sentinel with a warning"),
-		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+	CHECK_MESSAGE(TEXT("Cube fully inside the non-convex prism's body must report a positive depth"),
+		Depth > 0.0f);
+	CHECK_MESSAGE(TEXT("Depth should be ~2.0 — distance from each cube vertex (z ∈ [2.0, 3.0]) to the prism's nearest cap"),
+		FMath::IsNearlyEqual(Depth, 2.0f, 0.05f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_VertexInNotch_ReturnsZero,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_VertexInNotch_ReturnsZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Small cube parked inside the prism's AABB but in the cut-out notch — no cube vertex is
+	// inside the prism's body, and no prism vertex is inside the cube. Result must be exactly 0,
+	// matching the existing "AABBs overlap, no vertex containment" semantic for surface-only
+	// crossings on convex meshes.
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.25);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator,
+		SmallCube, FVector(5, 8, 2.5),     FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Cube parked in the prism's notch (no vertex inside the body) must return exactly 0"),
+		FMath::IsNearlyEqual(Depth, 0.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_DeeperPenetration_HigherDepth,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_DeeperPenetration_HigherDepth",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Sanity check on the monotonicity of the metric: a cube nudged close to the top cap (z=4.5)
+	// must report a smaller depth than the same cube parked at the prism's centre. Catches "we
+	// measured to the wrong wall" bugs that the convex algorithm's plane test would mask, since
+	// for a non-convex mesh the right answer is distance-to-nearest-surface, not the cube's own
+	// offset from any single face plane.
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.25);
+
+	const float ShallowDepth = FNRawMeshUtils::GetIntersectDepth(
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator,
+		SmallCube, FVector(3, 3, 4.5),     FRotator::ZeroRotator);
+
+	const float CentredDepth = FNRawMeshUtils::GetIntersectDepth(
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator,
+		SmallCube, FVector(3, 3, 2.5),     FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Cube parked near the top of the prism must report a smaller depth than one in the centre"),
+		ShallowDepth < CentredDepth);
+	CHECK_MESSAGE(TEXT("Shallow penetration should still be positive — every cube vertex is inside the body"),
+		ShallowDepth > 0.0f);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_NonConvex_SymmetricSwap_SameResult,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::NonConvex_SymmetricSwap_SameResult",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The metric is symmetric by construction — swapping (Left, Right) must yield bitwise the same
+	// result. Verifies the new dispatch behaves the same regardless of which mesh is the convex one
+	// and which is non-convex (each calls ComputePointDepthInside on the opposite mesh).
+	const FNRawMesh Prism = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeNonConvexPrism();
+	const FNRawMesh SmallCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(0.5);
+
+	const float DepthLeft = FNRawMeshUtils::GetIntersectDepth(
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator,
+		SmallCube, FVector(3, 3, 2.5),     FRotator::ZeroRotator);
+
+	const float DepthRight = FNRawMeshUtils::GetIntersectDepth(
+		SmallCube, FVector(3, 3, 2.5),     FRotator::ZeroRotator,
+		Prism,     FVector::ZeroVector,    FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("GetIntersectDepth must be argument-symmetric for non-convex inputs too"),
+		FMath::IsNearlyEqual(DepthLeft, DepthRight, 0.001f));
 }
 
 N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_SurfaceOnlyCrossing_True,

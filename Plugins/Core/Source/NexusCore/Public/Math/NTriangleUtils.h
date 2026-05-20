@@ -55,6 +55,135 @@ public:
 	 */
 	static bool TrianglesIntersect(const FVector& V0, const FVector& V1, const FVector& V2, const FVector& U0, const FVector& U1, const FVector& U2);
 
+	/**
+	 * Distance from a point to the surface of a triangle.
+	 *
+	 * Finds the closest point on triangle (A, B, C) to P using a barycentric-region clamp
+	 * (Ericson, Real-Time Collision Detection §5.1.5), then returns ||P - Closest||. Handles every
+	 * Voronoi region of the triangle:
+	 *   - perpendicular distance when P projects inside the face,
+	 *   - edge-clamped distance when P projects past exactly one edge,
+	 *   - vertex distance when P projects past two edges (a corner region).
+	 *
+	 * @param P The query point.
+	 * @param A First triangle vertex.
+	 * @param B Second triangle vertex.
+	 * @param C Third triangle vertex.
+	 * @return The minimum Euclidean distance from P to any point on the triangle's surface.
+	 */
+	UE_FORCEINLINE_HINT static double DistanceFromPointToTriangle(const FVector& P,
+		const FVector& A, const FVector& B, const FVector& C)
+	{
+		const FVector AB = B - A;
+		const FVector AC = C - A;
+		const FVector AP = P - A;
+
+		const double D1 = FVector::DotProduct(AB, AP);
+		const double D2 = FVector::DotProduct(AC, AP);
+		if (D1 <= 0.0 && D2 <= 0.0)
+		{
+			return FVector::Distance(P, A);
+		}
+
+		const FVector BP = P - B;
+		const double D3 = FVector::DotProduct(AB, BP);
+		const double D4 = FVector::DotProduct(AC, BP);
+		if (D3 >= 0.0 && D4 <= D3)
+		{
+			return FVector::Distance(P, B);
+		}
+
+		const double VC = D1 * D4 - D3 * D2;
+		if (VC <= 0.0 && D1 >= 0.0 && D3 <= 0.0)
+		{
+			const double V = D1 / (D1 - D3);
+			return FVector::Distance(P, A + AB * V);
+		}
+
+		const FVector CP = P - C;
+		const double D5 = FVector::DotProduct(AB, CP);
+		const double D6 = FVector::DotProduct(AC, CP);
+		if (D6 >= 0.0 && D5 <= D6)
+		{
+			return FVector::Distance(P, C);
+		}
+
+		const double VB = D5 * D2 - D1 * D6;
+		if (VB <= 0.0 && D2 >= 0.0 && D6 <= 0.0)
+		{
+			const double W = D2 / (D2 - D6);
+			return FVector::Distance(P, A + AC * W);
+		}
+
+		const double VA = D3 * D6 - D5 * D4;
+		if (VA <= 0.0 && (D4 - D3) >= 0.0 && (D5 - D6) >= 0.0)
+		{
+			const double W = (D4 - D3) / ((D4 - D3) + (D5 - D6));
+			return FVector::Distance(P, B + (C - B) * W);
+		}
+
+		// P projects inside the triangle — distance is the perpendicular to the plane.
+		const double Denom = 1.0 / (VA + VB + VC);
+		const double V = VB * Denom;
+		const double W = VC * Denom;
+		return FVector::Distance(P, A + AB * V + AC * W);
+	}
+
+	/**
+	 * Möller-Trumbore ray-triangle intersection test.
+	 *
+	 * Returns true when the ray starting at Origin and travelling along Direction (does not need to be
+	 * unit-length) pierces the interior of triangle (A, B, C) at strictly positive distance. The
+	 * barycentric inequalities are strict (u > 0, v > 0, u + v < 1) so a ray that grazes an edge or
+	 * vertex of the triangle is counted as a miss — combined with a non-axis-aligned Direction this
+	 * keeps parity counts stable across an adjacent triangle pair (the shared edge is missed by both
+	 * triangles, not double-counted on each).
+	 *
+	 * @param Origin Ray start position.
+	 * @param Direction Ray direction (does not need to be normalised; only the sign of t is meaningful).
+	 * @param A First triangle vertex.
+	 * @param B Second triangle vertex.
+	 * @param C Third triangle vertex.
+	 * @param OutT Optional output for the ray parameter at the hit point (Origin + Direction * OutT).
+	 * @return true when the ray crosses the triangle's interior at t > 0.
+	 */
+	UE_FORCEINLINE_HINT static bool RayIntersectsTriangle(const FVector& Origin, const FVector& Direction,
+		const FVector& A, const FVector& B, const FVector& C, double* OutT = nullptr)
+	{
+		const FVector E1 = B - A;
+		const FVector E2 = C - A;
+		const FVector H = FVector::CrossProduct(Direction, E2);
+		const double Det = FVector::DotProduct(E1, H);
+		if (FMath::Abs(Det) < SMALL_NUMBER)
+		{
+			// Ray parallel to triangle plane (or triangle is degenerate).
+			return false;
+		}
+		const double InvDet = 1.0 / Det;
+		const FVector S = Origin - A;
+		const double U = InvDet * FVector::DotProduct(S, H);
+		if (U <= 0.0 || U >= 1.0)
+		{
+			return false;
+		}
+		const FVector Q = FVector::CrossProduct(S, E1);
+		const double V = InvDet * FVector::DotProduct(Direction, Q);
+		if (V <= 0.0 || U + V >= 1.0)
+		{
+			return false;
+		}
+		const double T = InvDet * FVector::DotProduct(E2, Q);
+		if (T <= 0.0)
+		{
+			return false;
+		}
+		if (OutT != nullptr)
+		{
+			*OutT = T;
+		}
+		return true;
+	}
+
 private:
 
 // #SONARQUBE-DISABLE-CPP_S107 Method required complexity

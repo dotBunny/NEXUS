@@ -34,8 +34,11 @@ public:
 	/**
 	 * Tests whether two raw meshes intersect when placed at the given origins and rotations.
 	 * Uses a transformed-AABB early-out, then a triangle-vs-triangle sweep, then a containment fallback so a
-	 * fully-enclosed convex mesh is still reported as intersecting.
+	 * fully-enclosed mesh is still reported as intersecting. Convex inputs use a face-plane containment test;
+	 * non-convex inputs fall back to an odd-parity ray cast (see IsRelativePointInside).
 	 * @remark This assumes that the vertices in the FNRawMesh's are already in position and are not effected by a Transform's scale.
+	 * @remark Containment fallback assumes each mesh is a closed manifold (no open boundaries). Open / shell meshes
+	 *         will give undefined containment results — surface-crossing detection still works.
 	 * @param LeftMesh First mesh.
 	 * @param LeftOrigin World-space translation applied to LeftMesh.
 	 * @param LeftRotation World-space rotation applied to LeftMesh.
@@ -50,28 +53,34 @@ public:
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
 	/**
-	 * Measures the maximum penetration depth between two convex meshes placed at the given origins and rotations.
+	 * Measures the maximum penetration depth between two meshes placed at the given origins and rotations.
 	 *
 	 * Symmetric vertex-sampling metric: returns the largest of
-	 * - max distance from any RightMesh vertex (inside LeftMesh) to LeftMesh's nearest face plane, and
-	 * - max distance from any LeftMesh vertex (inside RightMesh) to RightMesh's nearest face plane.
+	 * - max distance from any RightMesh vertex (inside LeftMesh) to LeftMesh's nearest surface, and
+	 * - max distance from any LeftMesh vertex (inside RightMesh) to RightMesh's nearest surface.
 	 *
 	 * Captures both "right poked into left" and "right engulfed a corner of left" with a single value.
 	 *
-	 * @param LeftMesh First mesh. Must be convex and triangle-based.
+	 * Convex inputs use a fast face-plane distance metric (O(faces) per query). Non-convex inputs fall back to
+	 * a parity ray-cast containment probe plus point-to-triangle surface distance — ~2× the work per vertex.
+	 *
+	 * @param LeftMesh First mesh. Must be triangle-based; for non-convex inputs, must also be a closed manifold.
 	 * @param LeftOrigin World-space translation applied to LeftMesh.
 	 * @param LeftRotation World-space rotation applied to LeftMesh.
-	 * @param RightMesh Second mesh. Must be convex and triangle-based.
+	 * @param RightMesh Second mesh. Same triangle / closed-manifold requirement as LeftMesh.
 	 * @param RightOrigin World-space translation applied to RightMesh.
 	 * @param RightRotation World-space rotation applied to RightMesh.
 	 * @return The deepest measured penetration distance in mesh units, or -1.0 when the transformed AABBs do not
-	 *         overlap, when either mesh has zero loops (logs a warning), when either mesh contains non-triangle
-	 *         loops (logs an error), or when either mesh is not convex (logs a warning). Returns 0.0 when the
-	 *         AABBs overlap but no vertex of either mesh lies inside the other (surface-only crossings are not
-	 *         measured by this metric).
+	 *         overlap, when either mesh has zero loops (logs a warning), or when either mesh contains non-triangle
+	 *         loops (logs an error). Returns 0.0 when the AABBs overlap but no vertex of either mesh lies inside
+	 *         the other (surface-only crossings are not measured by this metric).
 	 * @remark This assumes that the vertices in the FNRawMesh's are already in position and are not effected by a Transform's scale.
 	 * @note Intended for "max-allowed-penetration" threshold checks while iterating many meshes. For exact
 	 *       boolean overlap including surface-only crossings without vertex containment, use DoesIntersect.
+	 * @note On non-convex meshes "depth" is distance to the nearest triangle surface, not to the AABB. A vertex
+	 *       deep inside a thin "arm" of the body reports a small depth because a nearby wall is close, even though
+	 *       the AABB extends well past it — this is the correct geometric answer but can surprise callers who
+	 *       expect AABB-relative numbers.
 	 */
 	static float GetIntersectDepth(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
@@ -117,24 +126,41 @@ public:
 	
 	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.
-	 * Implemented as a half-space test against every triangle plane — the point must lie on the same side
-	 * of each plane as the mesh's pre-computed Center.
-	 * @param Mesh The mesh to test against. Must be convex and triangle-based.
+	 *
+	 * For convex meshes (Mesh.IsConvex() == true), implemented as a half-space test against every triangle
+	 * plane — the point must lie on the same side of each plane as the mesh's pre-computed Center. Exact
+	 * and O(faces) per query.
+	 *
+	 * For non-convex meshes, falls back to a Möller-Trumbore odd-parity ray cast. A probe ray is cast in
+	 * a deliberately non-axis-aligned direction; the point is inside iff the ray crosses an odd number of
+	 * triangle interiors. The mesh must be a closed manifold for the parity to be meaningful — open / shell
+	 * meshes give undefined results.
+	 *
+	 * @param Mesh The mesh to test against. Must be triangle-based (n-gon FaceLoops are not supported).
 	 * @param RelativePoint Point expressed in Mesh's local space.
-	 * @return true when RelativePoint is inside the mesh volume; false when the mesh is not convex, contains non-triangle loops, or the point is outside.
+	 * @return true when RelativePoint is inside the mesh volume; false when the mesh contains non-triangle
+	 *         loops (logs a warning) or the point is outside.
 	 */
 	static bool IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint);
 
 	/**
 	 * Tests whether any of RelativePoints are inside Mesh. Short-circuits on the first hit.
-	 * @param Mesh The mesh to test against. Must be convex and triangle-based.
+	 * @param Mesh The mesh to test against. Must be triangle-based. Convex and non-convex meshes are
+	 *             both supported — see IsRelativePointInside for the per-point algorithm and the
+	 *             closed-manifold requirement on non-convex inputs.
 	 * @param RelativePoints Points expressed in Mesh's local space.
-	 * @return true when at least one point lies inside the mesh; false when the mesh is not convex, contains non-triangle loops, or no point is inside.
+	 * @return true when at least one point lies inside the mesh; false when the mesh contains non-triangle
+	 *         loops or no point is inside.
 	 */
 	static bool AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray<FVector>& RelativePoints);
 
 private:
+	/** Dispatch wrapper: picks the convex fast path or the non-convex containment + surface-distance path. */
+	static float ComputePointDepthInside(const FNRawMesh& Mesh, const FVector& RelativePoint);
+	/** Convex fast path: max perpendicular distance to any face plane. Returns -1 when outside, depth when inside. */
 	static float ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint);
+	/** Non-convex distance-to-surface: caller has already verified the point is inside; returns min Euclidean distance to any triangle. */
+	static float ComputePointDepthInsideNonConvex(const FNRawMesh& Mesh, const FVector& RelativePoint);
 	static bool DoesIntersectTriangles(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);

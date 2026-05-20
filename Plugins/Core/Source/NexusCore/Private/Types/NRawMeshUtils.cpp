@@ -125,11 +125,9 @@ float FNRawMeshUtils::GetIntersectDepth(
 		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection depth checks."));
 		return -1.0f;
 	}
-	if (!LeftMesh.IsConvex() || !RightMesh.IsConvex())
-	{
-		UE_LOG(LogNexusCore, Warning, TEXT("One or both of the provided FNRawMeshes is not convex, unable to determine intersection depth."));
-		return -1.0f;
-	}
+	// Convex requirement dropped — the non-convex path (parity-raycast containment + point-to-triangle
+	// surface distance) is plumbed through ComputePointDepthInside. Convex inputs still take the existing
+	// face-plane fast path inside that dispatch.
 
 	const FQuat LeftQuat = LeftRotation.Quaternion();
 	const FQuat RightQuat = RightRotation.Quaternion();
@@ -143,7 +141,7 @@ float FNRawMeshUtils::GetIntersectDepth(
 	{
 		const FVector WorldPos = RightQuat.RotateVector(V) + RightOrigin;
 		const FVector LeftLocal = LeftInvQuat.RotateVector(WorldPos - LeftOrigin);
-		const float Depth = ComputePointDepthInsideConvex(LeftMesh, LeftLocal);
+		const float Depth = ComputePointDepthInside(LeftMesh, LeftLocal);
 		if (Depth > MaxDepth)
 		{
 			MaxDepth = Depth;
@@ -155,7 +153,7 @@ float FNRawMeshUtils::GetIntersectDepth(
 	{
 		const FVector WorldPos = LeftQuat.RotateVector(V) + LeftOrigin;
 		const FVector RightLocal = RightInvQuat.RotateVector(WorldPos - RightOrigin);
-		const float Depth = ComputePointDepthInsideConvex(RightMesh, RightLocal);
+		const float Depth = ComputePointDepthInside(RightMesh, RightLocal);
 		if (Depth > MaxDepth)
 		{
 			MaxDepth = Depth;
@@ -290,36 +288,66 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
 {
-	if (!Mesh.IsConvex() || Mesh.HasNonTris())
+	if (Mesh.HasNonTris())
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine IsRelativePointInside; returning false."));
+		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh has non-triangle loops; unable to determine IsRelativePointInside; returning false."));
 		return false;
 	}
-	
+
+	if (Mesh.IsConvex())
+	{
+		// Convex fast path: for every face plane, the test point must lie on the same side as
+		// the mesh centroid. Exact and branch-free for closed convex hulls.
+		for (const FNRawMeshLoop& Loop : Mesh.Loops)
+		{
+			const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
+			const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
+			const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
+
+			const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
+			const float CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
+			const float PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
+
+			if (CenterSide * PointSide < 0.0f)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	// Non-convex fallback: odd-parity ray cast. Cast a ray in a non-axis-aligned direction so it
+	// doesn't graze the axis-aligned edges typical of editor hulls, count strict-interior triangle
+	// crossings, and an odd total means the point is enclosed by the closed surface. Assumes the
+	// mesh is a closed manifold — which a SplitEdge-edited hull remains, since SplitEdge only
+	// subdivides existing edges and never opens the surface.
+	//
+	// Direction picked to be clearly irrational and non-symmetric so it doesn't align with any
+	// hull edge or face normal that the user might construct (axis planes, 45° diagonals, etc.).
+	// Magnitude is irrelevant; only the sign of t and the barycentric inequalities matter.
+	static const FVector ProbeDirection(0.832050, 0.416025, 0.366092);
+
+	int32 HitCount = 0;
 	for (const FNRawMeshLoop& Loop : Mesh.Loops)
 	{
-		const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
-		const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
-		const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
-		
-		const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
-		const float CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
-		const float PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
-		
-		if (CenterSide * PointSide < 0.0f)
+		const FVector& A = Mesh.Vertices[Loop.Indices[0]];
+		const FVector& B = Mesh.Vertices[Loop.Indices[1]];
+		const FVector& C = Mesh.Vertices[Loop.Indices[2]];
+		if (FNTriangleUtils::RayIntersectsTriangle(RelativePoint, ProbeDirection, A, B, C))
 		{
-			return false;
+			++HitCount;
 		}
 	}
 
-	return true;
+	return (HitCount & 1) == 1;
 }
 
 bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray<FVector>& RelativePoints)
 {
-	if (!Mesh.IsConvex() || Mesh.HasNonTris())
+	if (Mesh.HasNonTris())
 	{
-		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh is either not convex or has non-triangles; unable to determine AnyRelativePointsInside; returning false."));
+		UE_LOG(LogNexusCore, Warning, TEXT("The FNRawMesh has non-triangle loops; unable to determine AnyRelativePointsInside; returning false."));
 		return false;
 	}
 
@@ -331,6 +359,45 @@ bool FNRawMeshUtils::AnyRelativePointsInside(const FNRawMesh& Mesh, const TArray
 		}
 	}
 	return false;
+}
+
+float FNRawMeshUtils::ComputePointDepthInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
+{
+	if (Mesh.IsConvex())
+	{
+		// Convex hull: face planes bound the body, so max plane-distance gives the depth in one pass
+		// and naturally returns -1 when the point lies outside any half-space.
+		return ComputePointDepthInsideConvex(Mesh, RelativePoint);
+	}
+
+	// Non-convex: containment isn't decidable from face planes alone (a face's infinite plane may have
+	// body on both sides of it). Run the parity-raycast containment probe first, then measure distance
+	// to the actual triangle surface — point-to-plane would over-estimate by ignoring the triangle's
+	// finite extent.
+	if (!IsRelativePointInside(Mesh, RelativePoint))
+	{
+		return -1.0f;
+	}
+	return ComputePointDepthInsideNonConvex(Mesh, RelativePoint);
+}
+
+float FNRawMeshUtils::ComputePointDepthInsideNonConvex(const FNRawMesh& Mesh, const FVector& RelativePoint)
+{
+	// Minimum distance from RelativePoint to any triangle's surface. Assumes the caller has already
+	// verified the point is inside the closed manifold; this function just measures distance-to-surface.
+	double MinDist = TNumericLimits<double>::Max();
+	for (const FNRawMeshLoop& Loop : Mesh.Loops)
+	{
+		const FVector& A = Mesh.Vertices[Loop.Indices[0]];
+		const FVector& B = Mesh.Vertices[Loop.Indices[1]];
+		const FVector& C = Mesh.Vertices[Loop.Indices[2]];
+		const double D = FNTriangleUtils::DistanceFromPointToTriangle(RelativePoint, A, B, C);
+		if (D < MinDist)
+		{
+			MinDist = D;
+		}
+	}
+	return (MinDist == TNumericLimits<double>::Max()) ? 0.0f : static_cast<float>(MinDist);
 }
 
 float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint)
@@ -412,9 +479,11 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 		}
 	}
 
-	// Triangle-triangle tests only catch surface crossings. If one convex mesh is entirely
-	// contained within the other, no triangles will intersect but the meshes still overlap.
-	// Check containment by testing one vertex from each mesh against the other mesh.
+	// Triangle-triangle tests only catch surface crossings. If one mesh is entirely contained
+	// within the other, no triangles will intersect but the meshes still overlap. Check
+	// containment by testing one vertex from each mesh against the other mesh; for a closed
+	// manifold (convex or not), a single sample is enough — either every vertex is enclosed or
+	// none is, because any surface intersection would have been caught above.
 	const FQuat LeftInvQuat = LeftRotation.Quaternion().Inverse();
 	const FQuat RightInvQuat = RightRotation.Quaternion().Inverse();
 
