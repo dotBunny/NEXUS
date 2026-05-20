@@ -162,19 +162,20 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 
 FNVirtualOrganContext::~FNVirtualOrganContext()
 {
-// #SONARQUBE-DISABLE-CPP_S5025 Wanting to own and control memory	
 	if (CellGraph != nullptr)
 	{
-		delete CellGraph.Release();
-		CellGraph = nullptr;
+		CellGraph.Reset();
 	}
-// #SONARQUBE-ENABLE-CPP_S5025 Wanting to own and control memory
 }
 
 bool FNVirtualOrganContext::CheckGraph() const
 {
 	// We're going to look over all the nodes
 	int32 CellNodeCount = 0;
+	
+	// If we don't have a graph it's a fail
+	if (!CellGraph) return false;
+	
 	for (const auto Pair : CellGraph->GetNodes())
 	{
 		if (Pair->GetNodeType() == ENAssemblyGraphNodeType::Cell)
@@ -330,8 +331,7 @@ bool FNVirtualOrganContext::ResetForRetry()
 	// Clear Graph
 	if (CellGraph != nullptr)
 	{
-		delete CellGraph.Release();
-		CellGraph = nullptr;
+		CellGraph.Reset();
 	}
 	
 	RetryCount++;
