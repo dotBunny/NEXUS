@@ -190,8 +190,6 @@ private:
 
 	/** Timer for the create-spawn-cells-context stage. */
 	FNWorldAssemblyTaskTimer CreateSpawnCellsContextTimer = FNWorldAssemblyTaskTimer();
-	/** Timer for the procgen-finalize stage. */
-	FNWorldAssemblyTaskTimer ProcGenFinalizeTimer = FNWorldAssemblyTaskTimer();
 
 	/** Per-organ-builder records allocated by OrganGraphBuilderCreate. */
 	TArray<FNOrganGraphBuilderAnalytics> OrganGraphBuilderAnalytics;

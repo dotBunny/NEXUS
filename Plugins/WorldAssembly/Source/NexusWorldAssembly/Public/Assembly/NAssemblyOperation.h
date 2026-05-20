@@ -66,7 +66,7 @@ public:
 				FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
 					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 				FFileHelper::SaveStringArrayToFile(Output, *OutputFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
-				UE_LOG(LogNexusWorldAssembly, Log, TEXT("World Assembly Report written to %s."), *OutputFile);
+				UE_LOG(LogNexusWorldAssembly, Log, TEXT("Report written to %s."), *OutputFile);
 			});
 	}
 	void OutputReportToLog()

@@ -147,16 +147,6 @@ void FNAssemblyTaskAnalytics::SpawnCellProxiesFinish(int32 Index)
 	Analytic.Timer.Stop();
 }
 
-void FNAssemblyTaskAnalytics::ProcGenFinalizeStart()
-{
-	ProcGenFinalizeTimer.Start();
-}
-
-void FNAssemblyTaskAnalytics::ProcGenFinalizeFinish()
-{
-	ProcGenFinalizeTimer.Stop();
-}
-
 
 void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 {
@@ -165,7 +155,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	AnalyticsContentBlock->SetHeading("Analytics");
 	
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
-		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration + ProcGenFinalizeTimer.Duration;
+		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
 	double LoopTotal = 0;
 
 	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
@@ -231,8 +221,6 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	// Need to re-get as it may have moved
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
-	OverviewTable->AddRow({"Game", "ProcGen Finalize", FString::SanitizeFloat(ProcGenFinalizeTimer.Duration)});
-	
 	
 	const int32 CountersContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
 	FNReportContentBlock* CountersContentBlock = Report->GetContentBlock(CountersContentTicket);
