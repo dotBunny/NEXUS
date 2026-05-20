@@ -359,6 +359,132 @@ N_TEST_HIGH(FNRawMeshTests_SplitEdge_ChaosGeneratedCleared,
 		Hull.IsConvex());
 }
 
+N_TEST_HIGH(FNRawMeshTests_SplitEdge_MidpointOffPlane_ReportsNonConvex,
+	"NEXUS::UnitTests::NCore::FNRawMesh::SplitEdge::MidpointOffPlane_ReportsNonConvex",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The visualizer lets the user grab the freshly-inserted midpoint and drag it; if they push it
+	// off the face plane the mesh is no longer a valid convex polyhedron and CheckConvex must say so.
+	//
+	// Edge 4↔5 is chosen deliberately. It's the top-front edge of the cube, shared by +Z (becomes a
+	// pentagon after the splice) and -Y (the side face, which is in the y=-5 plane — z-axis motion
+	// is *in-plane* there, so M sliding along ±Z stays inside that face's plane and the side's
+	// in-plane convex-turn test reads it as a convex bump that extends the polygon). The +Z pentagon's
+	// Newell normal averages over the bumped midpoint and tilts just enough to keep the in-plane
+	// turn at M passing the sign test too. Every other cube face skips M (loop membership) or sees
+	// M as still on the inside half-space (because the displacement is purely along the top face's
+	// outward normal, which lies in the side face's plane). Without a per-face planarity gate,
+	// CheckConvex would have nothing left to reject on, so the drag-revert guard in
+	// FNCellRootComponentVisualizer::HandleInputDelta would silently let concave geometry through.
+	//
+	// Both directions must flip IsConvex to false: outward (M pokes above the original top plane)
+	// and inward (M dips below it into the cube interior).
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1)); // -Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6, 7)); // +Z (becomes a pentagon after the split)
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4)); // -Y (shares edge 4↔5 with +Z; z lies in plane)
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5)); // +X
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6)); // +Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7)); // -X
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.ConvertToTriangles();
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+	CHECK_MESSAGE(TEXT("Cube must report convex before any edits"), Mesh.IsConvex());
+
+	const int32 MidIndex = Mesh.SplitEdge(4, 5);
+	CHECK_MESSAGE(TEXT("Edge split must succeed"), MidIndex != INDEX_NONE);
+	CHECK_MESSAGE(TEXT("Cube must remain convex immediately after a split (midpoint sits on both adjacent face planes)"),
+		Mesh.IsConvex());
+
+	// Outward perpendicular drag — M pokes above the original z=+5 plane. The pentagon's Newell
+	// normal tilts to absorb the bump and the in-plane convex-turn test at M passes; only the
+	// planarity check sees that M is no longer on the +Z face's plane.
+	const FVector OriginalMid = Mesh.Vertices[MidIndex];
+	Mesh.Vertices[MidIndex] = OriginalMid + FVector(0, 0, 0.5);
+	Mesh.Validate();
+	CHECK_FALSE_MESSAGE(TEXT("Midpoint dragged outward (perpendicular to the +Z face) must flip IsConvex to false"),
+		Mesh.IsConvex());
+
+	// Inward perpendicular drag — M dips into the cube interior. Every other face's plane-side
+	// test still passes (M is inside their half-spaces), so planarity on +Z is again the only
+	// catcher.
+	Mesh.Vertices[MidIndex] = OriginalMid + FVector(0, 0, -0.5);
+	Mesh.Validate();
+	CHECK_FALSE_MESSAGE(TEXT("Midpoint dragged inward (perpendicular toward the cube interior) must flip IsConvex to false"),
+		Mesh.IsConvex());
+
+	// Restoring the midpoint to its on-edge position must restore convexity — the planarity check
+	// must not latch a sticky failure from the cached prior state.
+	Mesh.Vertices[MidIndex] = OriginalMid;
+	Mesh.Validate();
+	CHECK_MESSAGE(TEXT("Restoring the midpoint to its split position must restore convexity"),
+		Mesh.IsConvex());
+}
+
+N_TEST_HIGH(FNRawMeshTests_SplitEdge_MidpointOnEndpoint_ReportsNonConvex,
+	"NEXUS::UnitTests::NCore::FNRawMesh::SplitEdge::MidpointOnEndpoint_ReportsNonConvex",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Lateral drag along the split edge — M slid along AB until it lands on top of A (or B). The
+	// face polygon now has a zero-length edge: (A, M=A, B, ...). The Newell normal still gets a
+	// usable contribution from the rest of the polygon, every in-plane turn at A and M produces a
+	// zero cross (which the convex-turn test must keep allowing, since a redundant on-edge vertex
+	// is the immediately-post-SplitEdge state), and every other face's plane-side test still
+	// passes. Only an explicit coincident-vertex check can reject this — without it the drag-revert
+	// guard in FNCellRootComponentVisualizer::HandleInputDelta keeps the collapsed face.
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -5, -5, -5 }, { +5, -5, -5 }, { +5, +5, -5 }, { -5, +5, -5 },
+		{ -5, -5, +5 }, { +5, -5, +5 }, { +5, +5, +5 }, { -5, +5, +5 },
+	};
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1)); // -Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6, 7)); // +Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4)); // -Y (shares edge 4↔5 with +Z)
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5)); // +X
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6)); // +Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7)); // -X
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.ConvertToTriangles();
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+
+	const int32 MidIndex = Mesh.SplitEdge(4, 5);
+	CHECK_MESSAGE(TEXT("Edge split must succeed"), MidIndex != INDEX_NONE);
+	CHECK_MESSAGE(TEXT("Cube must remain convex with M at its on-edge midpoint position"), Mesh.IsConvex());
+
+	// Slide M along the edge until it lands exactly on V4 — a zero-length edge in both adjacent
+	// faces' polygons. The face is structurally degenerate (duplicate vertex) even though it still
+	// has a non-zero Newell normal from the remaining four vertices.
+	Mesh.Vertices[MidIndex] = Mesh.Vertices[4];
+	Mesh.Validate();
+	CHECK_FALSE_MESSAGE(TEXT("Midpoint coincident with edge endpoint must flip IsConvex to false"),
+		Mesh.IsConvex());
+}
+
+N_TEST_HIGH(FNRawMeshTests_SplitEdge_FaceCollapsedToLine_ReportsNonConvex,
+	"NEXUS::UnitTests::NCore::FNRawMesh::SplitEdge::FaceCollapsedToLine_ReportsNonConvex",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// All-collinear face — Newell's normal collapses to zero. Constructed directly rather than via
+	// drag because reaching this state through the visualizer requires moving multiple vertices;
+	// the goal here is to verify CheckConvex's NIL-normal branch returns false instead of silently
+	// skipping the face (the previous behaviour, which let a fully collapsed polygon slip past).
+	FNRawMesh Mesh;
+	Mesh.Vertices = { FVector(0, 0, 0), FVector(5, 0, 0), FVector(10, 0, 0) };
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 2));
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+
+	CHECK_FALSE_MESSAGE(TEXT("Triangle with all three vertices collinear must report IsConvex==false"),
+		Mesh.IsConvex());
+}
+
 N_TEST_HIGH(FNRawMeshTests_SplitEdge_HasNonTrisFlagRefreshed,
 	"NEXUS::UnitTests::NCore::FNRawMesh::SplitEdge::HasNonTrisFlagRefreshed",
 	N_TEST_CONTEXT_ANYWHERE)

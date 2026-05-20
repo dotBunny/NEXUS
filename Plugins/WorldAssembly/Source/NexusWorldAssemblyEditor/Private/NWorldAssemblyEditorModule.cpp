@@ -47,6 +47,7 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 
 	if (GUnrealEd)
 	{
+		RootComponentVisualizer.Reset();
 		GUnrealEd->UnregisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName());
 		GUnrealEd->UnregisterComponentVisualizer(UNCellJunctionComponent::StaticClass()->GetFName());
 		GUnrealEd->UnregisterComponentVisualizer(UNBoneComponent::StaticClass()->GetFName());
@@ -117,7 +118,7 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	// Visualizers
 	if (GUnrealEd != nullptr)
 	{
-		const TSharedPtr<FComponentVisualizer> RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
+		RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();
 	

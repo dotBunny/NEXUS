@@ -61,6 +61,14 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	TArray<int32> GetFlatIndices() const;
 
+	/**
+	 * Extracts every unique undirected edge across all Loops as a (min, max) vertex-index pair. Loops
+	 * are treated as closed polygons (last vertex wraps back to first), and shared edges between adjacent
+	 * faces collapse to a single entry.
+	 * @return Deduplicated list of edges as vertex-index pairs into Vertices.
+	 */
+	TArray<FIntVector2> GetEdgeIndices() const;
+
 	/** Re-triangulates non-triangular loops in place so every loop is a 3-vertex triangle. */
 	void ConvertToTriangles();
 

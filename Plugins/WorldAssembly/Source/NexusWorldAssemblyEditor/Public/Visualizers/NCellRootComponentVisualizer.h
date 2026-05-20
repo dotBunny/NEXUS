@@ -15,6 +15,7 @@ class UNCellRootComponent;
  */
 class NEXUSWORLDASSEMBLYEDITOR_API FNCellRootComponentVisualizer final : public FComponentVisualizer
 {
+public:
 	/**
 	 * Which vertex/point type is currently being dragged, if any.
 	 */
@@ -22,10 +23,10 @@ class NEXUSWORLDASSEMBLYEDITOR_API FNCellRootComponentVisualizer final : public 
 	{
 		None = 0,
 		HullVertex = 1,
-		BoundsVertex = 2
+		BoundsVertex = 2,
+		HullEdge = 3,
 	};
-
-public:
+	
 	//~FComponentVisualizer
 	virtual void DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI) override;
 	virtual void EndEditing() override;
@@ -36,11 +37,22 @@ public:
 
 	virtual bool VisProxyHandleClick(FEditorViewportClient* InViewportClient, HComponentVisProxy* VisProxy, const FViewportClick& Click) override;
 	//End FComponentVisualizer
-
+	
+	ENCellEditMode GetMode() const { return CurrentEditMode; }
+	bool HasEdgeSelected() const { return EdgeStartIndex != -1 && EdgeEndIndex != -1; }
+	FIntVector2 GetEdgeSelection() const { return FIntVector2(EdgeStartIndex, EdgeEndIndex); }
+	void ClearSelection()
+	{
+		VertexIndex = -1;
+		EdgeStartIndex = -1;
+		EdgeEndIndex = -1;
+	}
 private:
 	/** Pixel size used when rendering selectable vertex points. */
 	const float PointSize = 12.0f;
 
+	bool EditHullEdge(UNCellRootComponent* Component, int32 IndexA, int32 IndexB);
+	
 	/** Apply a drag delta to the hull vertex at Index; returns true if the component was mutated. */
 	bool EditHullVertex(UNCellRootComponent* Component, int32 Index);
 
@@ -55,6 +67,8 @@ private:
 
 	/** Index of the vertex or voxel currently being dragged (−1 when inactive). */
 	int32 VertexIndex = -1;
+	int32 EdgeStartIndex = -1;
+	int32 EdgeEndIndex = -1;
 
 	/** Component currently targeted by the drag; cleared by EndEditing. */
 	TObjectPtr<UNCellRootComponent> RootComponent = nullptr;

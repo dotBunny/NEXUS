@@ -66,6 +66,7 @@ const FText FNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("NCell V
 ANCellActor* FNWorldAssemblyEdMode::CellActor = nullptr;
 FNWorldAssemblyEdMode::ENCellEdMode FNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
 TArray<FVector> FNWorldAssemblyEdMode::CachedHullVertices;
+TArray<FIntVector2> FNWorldAssemblyEdMode::CachedHullEdges;
 FLinearColor FNWorldAssemblyEdMode::CachedHullColor = FColor::Blue;
 FBox FNWorldAssemblyEdMode::CachedBounds;
 FNCellVoxelData FNWorldAssemblyEdMode::CachedVoxelData;
@@ -88,6 +89,7 @@ void FNWorldAssemblyEdMode::Enter()
 	// Initialize cached values
 	CellActor = nullptr;
 	CachedHullVertices.Empty();
+	CachedHullEdges.Empty();
 	CachedHullColor = FColor::Blue;
 	CachedBounds = FBox(ForceInit);
 	CachedVoxelData = FNCellVoxelData();
@@ -144,6 +146,7 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 
 			// We only update them during tick
 			CachedHullVertices = FNVectorUtils::RotateAndOffsetPoints(RootComponent->Details.Hull.Vertices, Rotation, Offset);
+			CachedHullEdges = RootComponent->Details.Hull.GetEdgeIndices();
 			CachedBounds = FNWorldAssemblyUtils::CreateRotatedBox(RootComponent->Details.Bounds, Rotation, Offset);
 			CachedBoundsVertices = FNBoxUtils::GetVertices(CachedBounds);
 			CachedVoxelData = RootComponent->Details.VoxelData;

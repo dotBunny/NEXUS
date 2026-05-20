@@ -3,11 +3,13 @@
 
 #pragma once
 
+#include "ComponentVisualizer.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "Macros/NModuleMacros.h"
 #include "Menus/NToolsMenuMacros.h"
 #include "Modules/ModuleInterface.h"
 
+class FNCellRootComponentVisualizer;
 class FPlacementModeID;
 class FNWorldAssemblyEditorUndo;
 
@@ -21,6 +23,8 @@ public:
 	virtual void ShutdownModule() override;
 	N_IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, "NexusWorldAssemblyEditor")
 
+	TSharedPtr<FNCellRootComponentVisualizer> RootComponentVisualizer;
+	
 private:
 	/** Custom undo handler that intercepts World Assembly-related transactions. */
 	TSharedPtr<FNWorldAssemblyEditorUndo> UndoHandler;

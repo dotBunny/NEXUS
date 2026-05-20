@@ -5,8 +5,10 @@
 
 #include "EditorModeManager.h"
 #include "EdMode.h"
+#include "NWorldAssemblyEditorModule.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
+#include "Visualizers/NCellRootComponentVisualizer.h"
 
 class FNAssemblyOperationContext;
 class UNAssemblyOperation;
@@ -58,6 +60,9 @@ public:
 
 	/** @return Cached hull overlay vertex positions. */
 	static const TArray<FVector>& GetCachedHullVertices() { return CachedHullVertices; }
+	
+	/** @return Cached hull overlay vertex positions. */
+	static const TArray<FIntVector2>& GetCachedHullEdges() { return CachedHullEdges; }
 
 	/** @return The cell actor this mode is currently focused on. */
 	static ANCellActor* GetCellActor() { return CellActor; }
@@ -87,7 +92,15 @@ public:
 	static bool IsNotActive() { return !GLevelEditorModeTools().IsModeActive(Identifier); }
 
 	/** Set the active cell-edit sub-mode. */
-	static void SetCellEdMode(const ENCellEdMode InCellEdMode) { CellEdMode = InCellEdMode; }
+	static void SetCellEdMode(const ENCellEdMode InCellEdMode)
+	{
+		if (CellEdMode == InCellEdMode) return;
+		
+		FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
+		Module.RootComponentVisualizer->ClearSelection();
+		
+		CellEdMode = InCellEdMode;
+	}
 
 	/** @return true when a world-collision visualizer actor is currently alive for the focused world. */
 	static bool HasCollisionVisualizer() { return CollisionVisualizer != nullptr; }
@@ -144,6 +157,7 @@ private:
 	const int32 MessageSpacing = 20;
 
 	static TArray<FVector> CachedHullVertices;
+	static TArray<FIntVector2> CachedHullEdges;
 	static FLinearColor CachedHullColor;
 	static FBox CachedBounds;
 	static FNCellVoxelData CachedVoxelData;

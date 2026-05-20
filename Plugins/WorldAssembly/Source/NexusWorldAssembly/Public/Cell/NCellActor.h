@@ -105,6 +105,8 @@ public:
 
 	/** Recompute the cell's bounds from its level content and store the result on the root component. */
 	void CalculateBounds();
+	
+	void SplitHullEdge(int32 IndexA, int32 IndexB, bool bUpdateDerivedData = true );
 	/**
 	 * Recompute the cell's convex hull from its level content.
 	 * @param bUpdateDerivedData When true, dependent derived data (voxels) is also refreshed.

@@ -12,9 +12,11 @@
 #include "NWorldAssemblyRegistry.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorCommands.h"
+#include "NWorldAssemblyEditorModule.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "Macros/NEditorToolsMacros.h"
+#include "Visualizers/NCellRootComponentVisualizer.h"
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
@@ -478,11 +480,27 @@ int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
 
 void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
 {
+	FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
+	FIntVector2 Selection = Module.RootComponentVisualizer->GetEdgeSelection();
+	
+	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	CellActor->SplitHullEdge(Selection.X, Selection.Y);
+	Module.RootComponentVisualizer->ClearSelection();
 }
 
 bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 {
+	if (FNWorldAssemblyEdMode::GetCellEdMode() != FNWorldAssemblyEdMode::ENCellEdMode::Hull)
+	{
+		return false;
+	}
 	
-	// TODO: and selected edge?
-	return FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Hull;
+	FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
+	if (Module.RootComponentVisualizer->GetMode() == FNCellRootComponentVisualizer::ENCellEditMode::HullEdge &&
+		Module.RootComponentVisualizer->HasEdgeSelected())
+	{
+		return true;
+	}
+	
+	return false;
 }

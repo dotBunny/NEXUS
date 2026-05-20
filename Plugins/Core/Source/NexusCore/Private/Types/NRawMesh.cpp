@@ -25,6 +25,42 @@ TArray<int32> FNRawMesh::GetFlatIndices() const
 	return ReturnData;
 }
 
+TArray<FIntVector2> FNRawMesh::GetEdgeIndices() const
+{
+	int32 EdgeBudget = 0;
+	for (const FNRawMeshLoop& Loop : Loops)
+	{
+		EdgeBudget += Loop.Indices.Num();
+	}
+
+	// Dedup via undirected (min,max) key so a shared edge between two faces — appearing as A→B in one
+	// loop and B→A in the other — collapses to a single entry.
+	TSet<FIntVector2> Seen;
+	Seen.Reserve(EdgeBudget);
+
+	TArray<FIntVector2> EdgeIndices;
+	EdgeIndices.Reserve(EdgeBudget);
+
+	for (const FNRawMeshLoop& Loop : Loops)
+	{
+		const int32 Count = Loop.Indices.Num();
+		for (int32 i = 0; i < Count; i++)
+		{
+			const int32 V0 = Loop.Indices[i];
+			const int32 V1 = Loop.Indices[(i + 1) % Count];
+			const FIntVector2 Key(FMath::Min(V0, V1), FMath::Max(V0, V1));
+			bool bAlready = false;
+			Seen.Add(Key, &bAlready);
+			if (!bAlready)
+			{
+				EdgeIndices.Add(Key);
+			}
+		}
+	}
+
+	return EdgeIndices;
+}
+
 void FNRawMesh::ConvertToTriangles()
 {
 	// Early out
@@ -605,9 +641,36 @@ bool FNRawMesh::CheckConvex() const
 		return false;
 	}
 
-	// A mesh is convex if every loop is convex in its own plane AND every vertex of the mesh lies
-	// on or behind every face's supporting plane. The first test catches flat concave n-gons; the
-	// second catches concave polyhedra (e.g. a star).
+	// Mesh-extent-scaled tolerances. A fixed KINDA_SMALL_NUMBER is too strict on large cells and
+	// too loose on tiny ones; relative-to-extent matches the convention CalculateFaceLoops uses.
+	// Planarity is the looser of the two — Newell fits a best plane through the loop, so a small
+	// vertex nudge (FP drift or a sub-pixel editor edit) typically yields |Signed| ≈ nudge/2 on
+	// the bumped vertex, and rejecting at 1e-3 keeps small edits accepted while still catching
+	// real off-plane drags (5%+ of extent). Coincidence is tighter — two vertices a full per-mille
+	// of extent apart aren't "the same point", they're just close.
+	FBox VertexBounds(ForceInit);
+	for (const FVector& V : Vertices)
+	{
+		VertexBounds += V;
+	}
+	const double Extent = VertexBounds.IsValid != 0 ? VertexBounds.GetExtent().GetMax() * 2.0 : 1.0;
+	const double ScaledExtent = FMath::Max(Extent, 1.0);
+	const double PlanarityTolerance = 1e-3 * ScaledExtent;
+	const double CoincidenceTolerance = 1e-5 * ScaledExtent;
+	const double CoincidenceToleranceSq = CoincidenceTolerance * CoincidenceTolerance;
+
+	// A mesh is convex if every face is a non-degenerate planar polygon with distinct vertices,
+	// every loop is convex in its own plane, AND every vertex of the mesh lies on or behind every
+	// face's supporting plane. Two structural preconditions (no coincident consecutive vertices,
+	// face has a usable normal) are checked first because they let lateral drags collapse a face
+	// without ever reaching the geometric tests below — e.g. dragging a SplitEdge midpoint along
+	// the shared edge until it lands on A or B yields a zero-length edge that the convex-turn and
+	// plane-side checks both treat as "no opinion" rather than "invalid".
+	//
+	// Note: the convex-turn check below intentionally permits a zero cross (collinear consecutive
+	// vertices). A redundant on-edge vertex — exactly what SplitEdge produces before any drag —
+	// is not degenerate, just collinear, and IsConvex is read by ConvertToTriangles, the asset
+	// validator, and the merge / boolean ops, all of which need to keep accepting that state.
 	for (int32 LoopIdx = 0; LoopIdx < FacesToCheck.Num(); LoopIdx++)
 	{
 		const FNRawMeshLoop& Loop = FacesToCheck[LoopIdx];
@@ -617,11 +680,45 @@ bool FNRawMesh::CheckConvex() const
 			continue;
 		}
 
+		// Coincident-vertex check: any two consecutive (wrap-aware) loop vertices closer than
+		// tolerance form a zero-length edge. The polygon may still look planar and locally convex
+		// to the tests below, but it is geometrically degenerate and downstream consumers
+		// (triangulation, dynamic mesh build, collision) will misbehave.
+		for (int32 k = 0; k < LoopCount; k++)
+		{
+			const FVector& Current = Vertices[Loop.Indices[k]];
+			const FVector& Next = Vertices[Loop.Indices[(k + 1) % LoopCount]];
+			if (FVector::DistSquared(Current, Next) < CoincidenceToleranceSq)
+			{
+				return false;
+			}
+		}
+
 		const FVector FaceNormal = ComputeLoopNormal(Loop.Indices, Vertices);
 		if (FaceNormal.IsNearlyZero())
 		{
-			// Degenerate face — can't reason about its supporting plane.
-			continue;
+			// Newell returned zero — every vertex of this face is collinear (or worse). A face
+			// without a supporting plane is not a valid component of a convex polyhedron, and
+			// silently skipping it (the previous behaviour) lets lateral drags fully collapse a
+			// face without IsConvex ever flipping.
+			return false;
+		}
+
+		const FVector& FaceOrigin = Vertices[Loop.Indices[0]];
+		const double PlaneD = FVector::DotProduct(FaceNormal, FaceOrigin);
+
+		// Planarity: every loop vertex must lie on the face's supporting plane within tolerance.
+		// Triangles are planar by construction, so this only does real work on n-gonal FaceLoops.
+		if (LoopCount > 3)
+		{
+			for (const int32 LoopVert : Loop.Indices)
+			{
+				const double Signed = FVector::DotProduct(FaceNormal, Vertices[LoopVert]) - PlaneD;
+				if (FMath::Abs(Signed) > PlanarityTolerance)
+				{
+					return false;
+				}
+			}
 		}
 
 		// In-plane convexity: every consecutive turn must keep the same sign relative to the face normal.
@@ -638,8 +735,6 @@ bool FNRawMesh::CheckConvex() const
 		}
 
 		// Plane-side test: every vertex not on this face must lie on or behind its supporting plane.
-		const FVector& FaceOrigin = Vertices[Loop.Indices[0]];
-		const double PlaneD = FVector::DotProduct(FaceNormal, FaceOrigin);
 		for (int32 v = 0; v < Vertices.Num(); v++)
 		{
 			if (Loop.Indices.Contains(v))

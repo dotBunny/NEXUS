@@ -110,6 +110,22 @@ void ANCellActor::CalculateBounds()
 	SetActorDirty();
 }
 
+void ANCellActor::SplitHullEdge(int32 IndexA, int32 IndexB, const bool bUpdateDerivedData)
+{
+	CellRoot->Modify();
+	CellRoot->Details.Hull.SplitEdge(IndexA, IndexB);
+	
+	if (bUpdateDerivedData)
+	{
+		for (const auto Pair : CellJunctions)
+		{
+			Pair.Value->UpdateHullDerivedData(CellRoot);
+		}
+	}
+	
+	SetActorDirty();
+}
+
 void ANCellActor::CalculateHull(const bool bUpdateDerivedData)
 {
 	CellRoot->Modify();
