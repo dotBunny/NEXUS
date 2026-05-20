@@ -30,6 +30,9 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	/** When true, the hull is recomputed automatically whenever the cell is saved. */
 	UPROPERTY(EditAnywhere)
 	bool bCalculateOnSave = true;
+	
+	UPROPERTY(EditAnywhere)
+	bool bAllowNonConvex = false;
 
 	/** When true, actors without collision still contribute to the hull. */
 	UPROPERTY(EditAnywhere)
@@ -71,6 +74,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	bool Equals(const FNCellHullGenerationSettings& Other) const
 	{
 		return bCalculateOnSave == Other.bCalculateOnSave
+		&& bAllowNonConvex == Other.bAllowNonConvex
 		&& bIncludeNonColliding == Other.bIncludeNonColliding
 		&& bIncludeEditorOnly == Other.bIncludeEditorOnly && BuildMethod == Other.BuildMethod
 		&& FNArrayUtils::IsSameOrderedValues(ActorIgnoreTags, Other.ActorIgnoreTags);

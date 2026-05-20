@@ -130,10 +130,10 @@ EDataValidationResult UAssetDefinition_NCell::ValidateAsset(const FAssetData& In
 		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNoVertices", "Cell {0} hull has no vertices."), FText::FromString(Cell->GetName())));
 	}
 	
-	if (!Cell->Root.Hull.IsConvex())
+	if (!Cell->Root.HullSettings.bAllowNonConvex && !Cell->Root.Hull.IsConvex())
 	{
 		Result = EDataValidationResult::Invalid;
-		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex."), FText::FromString(Cell->GetName())));
+		Context.AddError(FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "Validate_NCell_HullNotConvex", "Cell {0} hull is not convex, and not allowed."), FText::FromString(Cell->GetName())));
 	}
 
 	if (Cell->Junctions.IsEmpty())

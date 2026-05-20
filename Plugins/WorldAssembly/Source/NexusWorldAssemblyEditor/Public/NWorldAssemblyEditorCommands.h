@@ -104,6 +104,11 @@ public:
 	static bool CellToggleBoundsCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates the hull automatically on world save. */
 	static void CellToggleHullCalculateOnSave();
+	
+	
+	static bool CellToggleHullAllowNonConvex_IsActionChecked();
+	static void CellToggleHullAllowNonConvex();
+	
 	/** @return checked state of the hull-calculate-on-save toggle for UI binding. */
 	static bool CellToggleHullCalculateOnSave_IsActionChecked();
 	/** Toggle whether the focused cell recalculates voxel data automatically on world save. */
@@ -146,6 +151,7 @@ private:
 	
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullCalculateOnSave;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullAllowNonConvex;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
 	

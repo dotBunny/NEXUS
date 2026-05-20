@@ -153,6 +153,7 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 
 			bAutoBoundsDisabled = !RootComponent->Details.BoundsSettings.bCalculateOnSave;
 			bAutoHullDisabled = !RootComponent->Details.HullSettings.bCalculateOnSave;
+			bAllowNonConvexHull = RootComponent->Details.HullSettings.bAllowNonConvex;
 			bAutoVoxelDisabled = (!RootComponent->Details.VoxelSettings.bCalculateOnSave && RootComponent->Details.VoxelSettings.bUseVoxelData);
 		}
 	}

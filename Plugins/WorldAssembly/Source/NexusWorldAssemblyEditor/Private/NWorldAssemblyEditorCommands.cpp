@@ -68,6 +68,13 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.CalculateBounds"),
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleHullAllowNonConvex,
+	"NWorldAssembly.NCellToggleHullAllowNonConvex",
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleHullAllowNonConvex", "Allow Non-Convex Hull"),
+	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleHullAllowNonConvex_Tooltip", "Allows for more complex collision mesh to be used instead of optimized convex hull."),
+	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.AllowNonConvex"),
+	EUserInterfaceActionType::ToggleButton, FInputChord());
+	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleHullCalculateOnSave,
 		"NWorldAssembly.NCell.ToggleHullCalculateOnSave",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleHullCalculateOnSave", "Calculate Hull On Save"),
@@ -137,10 +144,10 @@ FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
 	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
 	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
 	
-	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullCalculateOnSave,
-FExecuteAction::CreateStatic(&CellToggleHullCalculateOnSave),
+	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleHullAllowNonConvex,
+FExecuteAction::CreateStatic(&CellToggleHullAllowNonConvex),
 	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld),
-	FIsActionChecked::CreateStatic(&CellToggleHullCalculateOnSave_IsActionChecked));
+	FIsActionChecked::CreateStatic(&CellToggleHullAllowNonConvex_IsActionChecked));
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellToggleVoxelCalculateOnSave,
 FExecuteAction::CreateStatic(&CellToggleVoxelCalculateOnSave),
@@ -529,6 +536,40 @@ void FNWorldAssemblyEditorCommands::CellToggleHullCalculateOnSave()
 		{
 			Actor->Modify();
 			Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave = !Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave;
+			Actor->SetActorDirty();
+		}
+	}
+}
+
+bool FNWorldAssemblyEditorCommands::CellToggleHullAllowNonConvex_IsActionChecked()
+{
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
+	{
+		const ANCellActor* Actor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if ( Actor != nullptr)
+		{
+			return Actor->GetCellRoot()->Details.HullSettings.bAllowNonConvex;
+		}
+	}
+	return false;
+}
+
+void FNWorldAssemblyEditorCommands::CellToggleHullAllowNonConvex()
+{
+	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellToggleHullAllowConvex", "Toggle Allow Non-Convex Hull"));
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld != nullptr)
+	{
+		ANCellActor* Actor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+		if (Actor != nullptr)
+		{
+			Actor->Modify();
+			Actor->GetCellRoot()->Details.HullSettings.bAllowNonConvex = !Actor->GetCellRoot()->Details.HullSettings.bAllowNonConvex;
+			if (Actor->GetCellRoot()->Details.HullSettings.bAllowNonConvex)
+			{
+				Actor->GetCellRoot()->Details.HullSettings.bCalculateOnSave = false;
+			}
 			Actor->SetActorDirty();
 		}
 	}

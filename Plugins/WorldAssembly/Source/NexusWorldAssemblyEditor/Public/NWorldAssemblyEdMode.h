@@ -182,6 +182,8 @@ private:
 
 	/** User-disabled auto-hull regeneration; surfaces a HUD warning. */
 	bool bAutoHullDisabled = false;
+	
+	bool bAllowNonConvexHull = false;
 
 	/** User-disabled auto-voxel regeneration; surfaces a HUD warning. */
 	bool bAutoVoxelDisabled = false;

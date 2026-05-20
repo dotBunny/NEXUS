@@ -214,6 +214,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					
 					MenuBuilder.BeginSection("NCellExtensions_QuickSettings", NSLOCTEXT("NexusWorldAssemblyEditor", "NCellExtensions_QuickSettings", "Quick Settings"));
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellToggleBoundsCalculateOnSave);
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellToggleHullAllowNonConvex);
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellToggleHullCalculateOnSave);
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellToggleVoxelCalculateOnSave);
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellToggleVoxelData);

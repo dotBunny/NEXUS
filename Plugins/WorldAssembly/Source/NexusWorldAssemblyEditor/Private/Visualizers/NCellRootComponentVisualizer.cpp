@@ -41,10 +41,10 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		
 		// Draw Min Max
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
-		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
+		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
-		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_Foreground);
+		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 
 	}
@@ -57,7 +57,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		{
 			// TODO: Selection color?
 			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-			PDI->DrawPoint(WorldVertices[i], FNWorldAssemblyEdMode::GetCachedHullColor(), PointSize, SDPG_Foreground);
+			PDI->DrawPoint(WorldVertices[i], FNWorldAssemblyEdMode::GetCachedHullColor(), PointSize, SDPG_World);
 			PDI->SetHitProxy(nullptr);
 		}
 		
@@ -70,12 +70,12 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			
 			if (EdgeStartIndex == WorldEdges[i].X && EdgeEndIndex == WorldEdges[i].Y)
 			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FLinearColor::White, 2.f, SDPG_Foreground);
+				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FLinearColor::White, 2.f, SDPG_World);
 			
 			}
 			else
 			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FNWorldAssemblyEdMode::GetCachedHullColor(), 2.f, SDPG_Foreground);
+				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FNWorldAssemblyEdMode::GetCachedHullColor(), 2.f, SDPG_World);
 			
 			}
 			PDI->SetHitProxy(nullptr);
@@ -154,7 +154,6 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 			using enum FNWorldAssemblyEdMode::ENCellEdMode;
 			if (FNWorldAssemblyEdMode::GetCellEdMode() == Hull)
 			{
-				
 				return EditHullEdge(IndexComponent,EdgeProxy->StartIndex,EdgeProxy->EndIndex);
 			}
 		}
@@ -255,10 +254,13 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		RootComponent->Details.Hull.Vertices[VertexIndex] += DeltaTranslate;
 		RootComponent->Details.Hull.Validate();
 		RootComponent->Details.Hull.CalculateCenterAndBounds();
-		if (!RootComponent->Details.Hull.IsConvex())
+		
+		// If we're not allowing convex move it back
+		if (!RootComponent->Details.HullSettings.bAllowNonConvex && !RootComponent->Details.Hull.IsConvex())
 		{
 			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;
 		}
+		
 		RootComponent->GetNCellActor()->SetActorDirty();
 		return true;
 	}
