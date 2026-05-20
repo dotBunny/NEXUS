@@ -27,7 +27,8 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	/** Organs whose bounds are entirely inside this one. */
 	TArray<TObjectPtr<UNOrganComponent>> ContainedComponents = TArray<TObjectPtr<UNOrganComponent>>();
 
-	/** Bones whose transforms fall inside this organ's volume. */
+	/** Bones whose transforms fall inside this organ's volume. 
+	 * @note If NAssemblyOperationContext's TMap BoneData changes these pointers will dangle. */
 	TArray<FNWorldBoneData*> ContainedBones = TArray<FNWorldBoneData*>();
 
 	/** Number of times the graph builder may retry before giving up on this organ. */
