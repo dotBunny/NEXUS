@@ -53,6 +53,12 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationT
 	
 	ANCellProxy* Proxy = World->SpawnActor<ANCellProxy>(CellNode->GetWorldPosition(), CellNode->GetWorldRotation(), SpawnInfo);
 	
+	if (Proxy == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("ANCellProxy was unable to CreateInstance, returning a nullptr; most likely caused by the World in a bad state."));
+		return nullptr;
+	}
+	
 	// Straight application of settings
 	Proxy->OperationTicket = OperationTicket;
 	

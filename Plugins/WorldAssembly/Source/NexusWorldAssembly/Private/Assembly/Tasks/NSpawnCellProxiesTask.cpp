@@ -9,6 +9,15 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	N_ASSEMBLY_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
 	N_ASSEMBLY_ANALYTICS_INDEX(SpawnCellProxiesStart)
 	
+	// Dispatch Guard #1
+	UWorld* TargetWorld = SpawnCellsContextPtr->World;
+	if (!IsValid(TargetWorld) || TargetWorld->bIsTearingDown)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Skipping dispatched FNSpawnCellProxiesTask as the World is in a bad state (PIE, teardown, etc.). Any associated reports SpawnCellProxies timers will be incorrect."));
+		CompletionEvent->Unlock();
+		return;
+	}
+	
 	constexpr double MaxAllowableTime = 0.002; // 2ms budget
 	const double StartTime = FPlatformTime::Seconds();
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
@@ -28,6 +37,15 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		SpawnCellsContextPtr->OperationTicket, 
 		SpawnCellsContextPtr->CellNodes[i], 
 		SpawnCellsContextPtr->bPreloadLevels);
+		
+		// Dispatch Guard #2
+		if (Proxy == nullptr)
+		{
+			// SpawnActor failed (e.g. world began tearing down mid-batch); abandon remaining nodes.
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Bailing on FNSpawnCellProxiesTask as it was not able to spawn a proxy, most likely cause the World is in a bad state. Any associated reports SpawnCellProxies timers will be incorrect."));
+			CompletionEvent->Unlock();
+			return;
+		}
 		
 		// Registered with global?
 		TaskGraphContextPtr->CreatedProxies.Add(Proxy);
