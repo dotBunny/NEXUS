@@ -201,6 +201,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		// TODO: Add this as a global setting? Outside of RetryCount for graph, we should have some sort of number of bad starts before we ignore a graph?
 		if (BadStartCount > 100)
 		{
+			BadStartCount = 0;
 			break;
 		}
 	} 
@@ -315,8 +316,8 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
-		// We don't have any cell input data able to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
-		if (CellInputWeightedIndices.WeightedCount() == 0)
+		// We don't have any cell input data able OR junctions to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
+		if (CellInputWeightedIndices.WeightedCount() == 0 || ValidJunctions.IsEmpty())
 		{
 			// TODO: We will later go back and fill this with something.
 			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
@@ -324,10 +325,8 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
 			
 			OrganContextPtr->CellGraph->RegisterNode(NullNode);
-			
 			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
 			NullNode->Link(SourceCellNode);
-			
 			SourceCellNode->Connect(NullNode);
 			continue;
 		}
@@ -338,6 +337,23 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		// Pick the junction of the cell we are going to use
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[CellInputIndex];
+		if (ValidJunctionIndices.IsEmpty())
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Cell input index produced no valid junctions. Adding null node?"));
+			
+			// TODO: We will later go back and fill this with something.
+			FNAssemblyGraphNullNode* NullNode = FNAssemblyGraphNodeFactory::CreateNullNode(SourceJunctionValue->WorldLocation, SourceJunctionValue->WorldRotation);
+			
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddNullNode)
+			
+			OrganContextPtr->CellGraph->RegisterNode(NullNode);
+			SourceCellNode->LinkJunction(SourceJunctionKey, NullNode);
+			NullNode->Link(SourceCellNode);
+			SourceCellNode->Connect(NullNode);
+			continue;
+			
+		}
+		
 		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
 		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
