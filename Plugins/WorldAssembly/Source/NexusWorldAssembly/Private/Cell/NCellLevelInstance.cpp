@@ -20,6 +20,12 @@ ANCellLevelInstance::ANCellLevelInstance()
 void ANCellLevelInstance::OnLevelInstanceLoaded()
 {
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromLevel(GetLoadedLevel());
+	if (!CellActor)
+	{
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("No ANCellActor found in level '%s'."),*GetLoadedLevel()->GetName());
+		Super::OnLevelInstanceLoaded();
+		return;
+	}
 	CellActor->InitializeFromProxy(this);
 	Super::OnLevelInstanceLoaded();
 }
