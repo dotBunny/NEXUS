@@ -125,8 +125,6 @@ public:
 	 */
 	static UNAssemblyOperation* CreateInstance(UNOrganComponent* BaseComponent, FNAssemblyOperationSettings& OperationSettings);
 
-	void TearDownOperation();
-
 	/**
 	 * Merge the supplied settings into the operation, updating seed/display-name/level-instance behavior.
 	 * @param Settings Settings to copy in.
@@ -185,6 +183,7 @@ protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext);
 	FNAssemblyTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
+	void TearDownOperation();
 
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
