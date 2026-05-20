@@ -191,8 +191,13 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		GenerationOrderIndex = 1;
 	}
 	
+	// Theres a possibility that someone creates a circular dependence with the organs, so we are going to protect against that, just incase.
+	bool bMadeProgress = false;
 	while (PossibleComponents.Num() > 0)
 	{
+		// Reset flag
+		bMadeProgress = false;
+		
 		// We need to track the processed components per generation iteration, so if we process this loop, it needs
 		// to ensure that anything that required it bumps to the next iteration.
 		TArray<TObjectPtr<UNOrganComponent>> PhaseProcessed;
@@ -219,6 +224,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 				GenerationOrder[GenerationOrderIndex].Add(Component);
 				PossibleComponents.Remove(Component);
 				ProcessedComponents.Add(Component);
+				bMadeProgress = true;
 			}
 		}
 		
@@ -227,6 +233,13 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		{
 			GenerationOrder.Add(TArray<TObjectPtr<UNOrganComponent>>());
 			GenerationOrderIndex++;
+		}
+		
+		if (!bMadeProgress)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error,
+				TEXT("Organ containment graph has a circular cycle; generation order cannot be determined."));
+			break;
 		}
 	}
 	
