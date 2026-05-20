@@ -122,6 +122,36 @@ void UNAssemblyOperation::SetDisplayMessage(FString NewDisplayMessage)
 	}
 }
 
+FNAssemblyOperationResult UNAssemblyOperation::GetResult() const
+{
+	FNAssemblyOperationResult Result;
+	
+	// Early out cause its still running
+	if (bIsRunning == true)
+	{
+		Result.bSuccess = false;
+		Result.bWarning = true;
+		Result.Title = FText::FromString("Operation In-Flight");
+		Result.Message = FText::FromString("The Assembly Operation has not finished running.");
+		return MoveTemp(Result);
+	}
+	
+	Result.Title = FText::FromString("Assembly Operation Finished");
+	
+	// Fill with analytics
+#if !UE_BUILD_SHIPPING
+	Result.CreatedCells = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetSpawnedCellProxiesCount();
+	Result.Duration = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetTotalDuration();
+	Result.bSuccess = Result.CreatedCells > 0; // not great but it's a start
+	Result.Message = FText::FromString(FString::Printf(TEXT("%f ms / %i Cells."), Result.Duration, Result.CreatedCells));
+#else
+	Result.bSuccess = true;
+#endif
+	
+
+	return MoveTemp(Result);
+}
+
 void UNAssemblyOperation::Tick()
 {
 	if (!TaskGraph.IsValid()) return;

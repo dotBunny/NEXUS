@@ -14,9 +14,10 @@ FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperat
 
 void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	
 #if !UE_BUILD_SHIPPING	
 	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
-	Operation->OutputReportToFile();
+	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 	
 	// Send the finalized shared data back to the operation for doings

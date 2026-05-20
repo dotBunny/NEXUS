@@ -31,6 +31,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 	UPROPERTY(EditAnywhere)
 	bool bCalculateOnSave = true;
 	
+	/** When true, the hull may retain concave regions instead of being forced to a strict convex shape. */
 	UPROPERTY(EditAnywhere)
 	bool bAllowNonConvex = false;
 

@@ -169,13 +169,11 @@ public:
 	void SpawnCellProxiesSpawned(int32 Index, FName Template);
 	/** Mark the finish time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesFinish(int32 Index);
-
-	/** Start the timer for the procgen-finalize stage. */
-	void ProcGenFinalizeStart();
-	/** Stop the timer for the procgen-finalize stage. */
-	void ProcGenFinalizeFinish();
 	
 	void AddToReport(FNReport* Report);	
+	
+	float GetTotalDuration();
+	int GetSpawnedCellProxiesCount();
 	
 private:
 	/** Operation display name used as the heading in generated reports. */

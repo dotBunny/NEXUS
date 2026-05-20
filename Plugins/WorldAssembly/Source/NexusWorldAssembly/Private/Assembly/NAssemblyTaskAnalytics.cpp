@@ -259,6 +259,36 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
 }
 
+float FNAssemblyTaskAnalytics::GetTotalDuration()
+{
+	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
+		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
+	
+	for (const auto Analytic : OrganGraphBuilderAnalytics)
+	{
+		DurationTotal += Analytic.Timer.Duration;
+	}
+	for (const auto Analytic : ProcessPassAnalytics)
+	{
+		DurationTotal += Analytic.Timer.Duration;
+	}
+	for (const auto Analytic : SpawnCellProxiesAnalytics)
+	{
+		DurationTotal += Analytic.Timer.Duration;
+	}
+	return DurationTotal;
+}
+
+int FNAssemblyTaskAnalytics::GetSpawnedCellProxiesCount()
+{
+	int Count = 0;
+	for (const auto Analytic : SpawnCellProxiesAnalytics)
+	{
+		Count += Analytic.Spawned.Num();
+	}
+	return Count;
+}
+
 void FNAssemblyTaskAnalytics::OrganGraphBuilderFinish(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];

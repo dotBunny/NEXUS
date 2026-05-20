@@ -5,7 +5,9 @@
 
 #include "Assembly/NAssemblyOperation.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 void UNWorldAssemblyEditorSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -58,6 +60,38 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
+	
+	// Toast
+	const FNAssemblyOperationResult Results = Operation->GetResult();
+	FNotificationInfo Info(Results.Title);
+	Info.SubText = Results.Message;
+	Info.ExpireDuration = 5.0f;
+	Info.bFireAndForget = true;
+	
+	// Create Report Link
+	if (!TaskGraphContext->ReportFilePath.IsEmpty())
+	{
+		FString FilePath = TaskGraphContext->ReportFilePath;
+		Info.HyperlinkText = FText::FromString(FPaths::GetCleanFilename(FilePath));
+		Info.Hyperlink = FSimpleDelegate::CreateLambda([FilePath]
+		{
+			FPlatformProcess::LaunchFileInDefaultExternalApplication(*FPaths::ConvertRelativePathToFull(FilePath));
+		});
+	}
+	
+	if (Results.bWarning)
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.WarningWithColor");
+	}
+	else if (Results.bSuccess)
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.SuccessWithColor");
+	}
+	else
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.ErrorWithColor");
+	}
+	FSlateNotificationManager::Get().AddNotification(Info);
 }
 
 void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)

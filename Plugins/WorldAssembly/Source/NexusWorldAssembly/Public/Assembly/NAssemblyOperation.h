@@ -28,6 +28,21 @@ enum class ENWorldAssemblyOperationState : uint8
 	Unregistered = 5
 };
 
+USTRUCT(BlueprintType)
+struct FNAssemblyOperationResult
+{
+	GENERATED_BODY()
+	
+	bool bSuccess = false;
+	bool bWarning = false;
+	
+	FText Title;
+	FText Message;
+	
+	float Duration = 0.0f;
+	int CreatedCells;
+};
+
 /** Broadcast when the display message shown in UI changes. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssemblyOperationDisplayMessageChanged, const FString&, NewMessage);
 /** Broadcast when the completed/total task counts change. */
@@ -57,17 +72,19 @@ class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
 	explicit UNAssemblyOperation(const FObjectInitializer& ObjectInitializer);
 public:
 #if !UE_BUILD_SHIPPING
-	void OutputReportToFile()
+	FString OutputReportToFile()
 	{
-		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
-		Async(EAsyncExecution::TaskGraph,
-			[Output = MoveTemp(Output)]()
-			{
-				FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
+		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
 					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
+		
+		Async(EAsyncExecution::TaskGraph,
+			[Output = MoveTemp(Output), OutputFile]()
+			{
 				FFileHelper::SaveStringArrayToFile(Output, *OutputFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 				UE_LOG(LogNexusWorldAssembly, Log, TEXT("Report written to %s."), *OutputFile);
 			});
+		return OutputFile;
 	}
 	void OutputReportToLog()
 	{
@@ -179,6 +196,9 @@ public:
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	uint32 GetTicket() const { return Ticket; }
+	
+	FNAssemblyOperationResult GetResult() const;
+	
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext);
@@ -199,6 +219,7 @@ private:
 
 	/** true while StartBuild has been called and the task graph has not yet finished. */
 	bool bIsRunning;
+	
 	/** Mirrors Context->IsLocked(); cached here to avoid reaching through the TUniquePtr from const callers. */
 	bool bIsContextLocked;
 	/** Human-friendly label for UI. */

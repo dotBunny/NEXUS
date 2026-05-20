@@ -45,6 +45,9 @@ public:
 	 */
 	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
+	
+	FString ReportFilePath;
+	
 private:
 	FCriticalSection GraphsMutex;
 };
