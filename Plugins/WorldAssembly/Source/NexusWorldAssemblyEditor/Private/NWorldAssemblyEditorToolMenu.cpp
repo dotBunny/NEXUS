@@ -483,6 +483,6 @@ void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
 bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 {
 	
-	return true;
-
+	// TODO: and selected edge?
+	return FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Hull;
 }
