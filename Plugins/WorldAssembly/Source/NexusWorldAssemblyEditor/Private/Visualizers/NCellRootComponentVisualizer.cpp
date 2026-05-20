@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "Visualizers/NCellRootComponentVisualizer.h"
+
+#include "EditorModes.h"
 #include "Cell/NCellRootComponent.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
@@ -152,6 +154,7 @@ bool FNCellRootComponentVisualizer::VisProxyHandleClick(FEditorViewportClient* I
 			using enum FNWorldAssemblyEdMode::ENCellEdMode;
 			if (FNWorldAssemblyEdMode::GetCellEdMode() == Hull)
 			{
+				
 				return EditHullEdge(IndexComponent,EdgeProxy->StartIndex,EdgeProxy->EndIndex);
 			}
 		}
@@ -166,15 +169,20 @@ bool FNCellRootComponentVisualizer::EditHullEdge(UNCellRootComponent* Component,
 	ClearSelection();
 	EdgeStartIndex = IndexA;
 	EdgeEndIndex = IndexB;
+	
+	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_None);
 	return true;
 }
 
 bool FNCellRootComponentVisualizer::EditHullVertex(UNCellRootComponent* Component, int32 Index)
 {
+	
 	CurrentEditMode = ENCellEditMode::HullVertex;
 	RootComponent = Component;
 	ClearSelection();
 	VertexIndex = Index;
+	
+	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_Translate);
 	return true;
 }
 
@@ -184,6 +192,8 @@ bool FNCellRootComponentVisualizer::EditBoundsVertex(UNCellRootComponent* Compon
 	RootComponent = Component;
 	ClearSelection();
 	VertexIndex = Index;
+	
+	GLevelEditorModeTools().SetWidgetMode(UE::Widget::WM_Translate);
 	return true;
 }
 
