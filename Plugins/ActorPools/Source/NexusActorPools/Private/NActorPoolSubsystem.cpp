@@ -246,13 +246,13 @@ void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 	if (ActorPool->IsStubMode()) return;
 	
 	TickableActorPools.Add(ActorPool);
-	bHasTickableActorPools = (TickableActorPools.Num() > 0);
+	bHasTickableActorPools = !TickableActorPools.IsEmpty();
 }
 
 void UNActorPoolSubsystem::RemoveTickableActorPool(FNActorPool* ActorPool)
 {
 	TickableActorPools.Remove(ActorPool);
-	bHasTickableActorPools = (TickableActorPools.Num() > 0);
+	bHasTickableActorPools = !TickableActorPools.IsEmpty();
 }
 
 bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
@@ -334,11 +334,11 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 void UNActorPoolSubsystem::RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
 	TickableSpawners.Add(TargetComponent);
-	bHasTickableSpawners = (TickableSpawners.Num() > 0);
+	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }
 
 void UNActorPoolSubsystem::UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
 	TickableSpawners.Remove(TargetComponent);
-	bHasTickableSpawners = (TickableSpawners.Num() > 0);
+	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }

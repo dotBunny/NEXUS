@@ -88,7 +88,7 @@ void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSetti
 	else
 	{
 		DrawDebugLine(World, StartPosition, EndPosition, 
-			HitResults.Num() > 0 ? N_COLLISION_VISUALIZER_MID_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
+			HitResults.IsEmpty() ?  N_COLLISION_VISUALIZER_MISS_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	for (const FHitResult& HitResult : HitResults)
@@ -213,7 +213,7 @@ void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings&
 	else
 	{
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-			HitResults.Num() > 0 ? N_COLLISION_VISUALIZER_MID_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
+			HitResults.IsEmpty() ? N_COLLISION_VISUALIZER_MISS_COLOR :  N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 

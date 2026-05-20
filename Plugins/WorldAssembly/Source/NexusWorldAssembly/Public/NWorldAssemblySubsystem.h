@@ -69,7 +69,7 @@ public:
 	//End INAssemblyOperationOwner
 
 	/** @return true if the subsystem is tracking at least one active operation. */
-	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
 	/** Record a relay as the local-player relay used for client-side generation coordination. */
 	void RegisterLocalRelay(ANWorldAssemblyRelay* InRelay);
 	/** Drop the local-player relay reference when the relay is being torn down. */

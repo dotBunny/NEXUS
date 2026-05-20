@@ -112,22 +112,22 @@ UNCellRootComponent* FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(cons
 
 bool FNWorldAssemblyRegistry::HasBoneComponents()
 {
-	return Bones.Num() > 0;
+	return !Bones.IsEmpty();
 }
 
 bool FNWorldAssemblyRegistry::HasRootComponents()
 {
-	return CellRoots.Num() > 0;
+	return !CellRoots.IsEmpty();
 }
 
 bool FNWorldAssemblyRegistry::HasJunctionComponents()
 {
-	return CellJunctions.Num() > 0;
+	return !CellJunctions.IsEmpty();
 }
 
 bool FNWorldAssemblyRegistry::HasOrganComponents()
 {
-	return Organs.Num() > 0;
+	return !Organs.IsEmpty();
 }
 
 bool FNWorldAssemblyRegistry::HasOrganComponentsInWorld(const UWorld* World)
@@ -141,7 +141,7 @@ bool FNWorldAssemblyRegistry::HasOrganComponentsInWorld(const UWorld* World)
 
 bool FNWorldAssemblyRegistry::HasOperations()
 {
-	return Operations.Num() > 0;
+	return !Operations.IsEmpty();
 }
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstances(const uint32 OperationTicket, const bool bIsLevelLoaded)

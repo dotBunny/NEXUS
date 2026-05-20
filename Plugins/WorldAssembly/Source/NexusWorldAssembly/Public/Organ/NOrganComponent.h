@@ -133,5 +133,5 @@ protected:
 
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */
-	uint32 LastOperationTicket;
+	uint32 LastOperationTicket = 0;
 };

@@ -68,10 +68,10 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	//End INWorldAssemblyOperationOwner
 
 	/** @return true if at least one operation is currently tracked by this subsystem. */
-	bool HasKnownOperation() const { return KnownOperations.Num() > 0; }
+	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
 
 	/** @return true if there are cell proxies currently alive from a generation pass. */
-	bool HasGeneratedCellProxies() const { return KnownProxies.Num() > 0; }
+	bool HasGeneratedCellProxies() const { return !KnownProxies.IsEmpty(); }
 
 	/** Destroy every known proxy and drop tracking. */
 	void ClearAllProxies();

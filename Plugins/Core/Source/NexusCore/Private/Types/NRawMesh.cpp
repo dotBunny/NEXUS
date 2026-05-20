@@ -597,7 +597,7 @@ bool FNRawMesh::CheckConvex() const
 	// Prefer the polygonal face description when present — fan-triangulated coplanar faces will fail
 	// the per-triangle plane-side test after any vertex perturbation, since each triangle's Newell
 	// normal drifts independently and neighbor-triangle vertices end up infinitesimally off plane.
-	const TArray<FNRawMeshLoop>& FacesToCheck = FaceLoops.Num() > 0 ? FaceLoops : Loops;
+	const TArray<FNRawMeshLoop>& FacesToCheck = FaceLoops.IsEmpty() ? Loops : FaceLoops;
 
 	if (Vertices.IsEmpty() || FacesToCheck.IsEmpty())
 	{
