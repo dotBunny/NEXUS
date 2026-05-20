@@ -90,16 +90,20 @@ void UNCellJunctionComponent::OnRegister()
 
 #if WITH_EDITOR
 	// Delay check for root component by a frame, and then will remove the frame after that if not found
-	Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+	TWeakObjectPtr WeakJunctionComponent(this);
+	Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
 	{
-		const ULevel* Level = GetComponentLevel();
+		if (!WeakJunctionComponent.IsValid()) return;
+		
+		const ULevel* Level = WeakJunctionComponent.Get()->GetComponentLevel();
 		const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
 		if (RootComponent == nullptr)
 		{
 			UE_LOG(LogNexusWorldAssembly, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update."), *Level->GetName());
-			Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+			Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
 			{
-				this->DestroyComponent();
+				if (!WeakJunctionComponent.IsValid()) return;
+				WeakJunctionComponent.Get()->DestroyComponent();
 			}));
 		}
 	}));
@@ -124,7 +128,7 @@ void UNCellJunctionComponent::OnRegister()
 #endif // WITH_EDITOR
 	
 	// Update details based on generation.
-	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance->IsA<ANCellLevelInstance>())
+	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance != nullptr && LevelInstance->IsA<ANCellLevelInstance>())
 	{
 		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
 		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);

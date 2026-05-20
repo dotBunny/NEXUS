@@ -72,6 +72,7 @@ void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 	
 	// Setup initial query
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
+	if (OwningPC == nullptr) return;
 	
 	FVector Location  = OwningPC->GetSpawnLocation();
 	APawn* SafePawn = OwningPC->GetPawnOrSpectator();

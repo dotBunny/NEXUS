@@ -165,9 +165,9 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
 	
-	const int64 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-	const int64 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-	const int64 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
+	const uint32 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
+	const uint32 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
+	const uint32 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
 	
 	// Setup array
 	ReturnData.Resize(SizeX, SizeY, SizeZ);
@@ -190,11 +190,11 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	TArray<uint32> SurroundingIndices;
 	
 	// #SONARQUBE-DISABLE Need to loop depth to handle dimensions
-	for (int32 x = 0; x < SizeX; x++)
+	for (uint32 x = 0; x < SizeX; x++)
 	{
-		for (int32 y = 0; y < SizeY; y++)
+		for (uint32 y = 0; y < SizeY; y++)
 		{
-			for (int32 z = 0; z < SizeZ; z++)
+			for (uint32 z = 0; z < SizeZ; z++)
 			{
 				const size_t VoxelIndex = ReturnData.GetIndex(x,y,z);
 				BroadTraceTask.EnterProgressFrame(1);

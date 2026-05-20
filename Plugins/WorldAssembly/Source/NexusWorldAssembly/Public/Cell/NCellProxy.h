@@ -54,7 +54,7 @@ protected:
 	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */
 	void OnProxyMaterialLoaded();
 	/** Configure the proxy from a UNCell asset (mesh preview, junction details, etc.). */
-	void InitializeFromNCell(UNCell* InNCell);
+	void InitializeFromNCell(UNCell* InCell);
 	/** Configure the proxy from a graph node describing the cell's transform and junction layout. */
 	void InitializeFromCellNode(const FNAssemblyGraphCellNode* CellNode);
 
@@ -73,7 +73,7 @@ private:
 
 	/** The cell data asset this proxy represents. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
-	TObjectPtr<UNCell> NCell;
+	TObjectPtr<UNCell> Cell;
 
 	/** Paired runtime level-instance actor carrying the cell's streamed content. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")

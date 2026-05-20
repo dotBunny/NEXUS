@@ -116,10 +116,10 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Setup actor with our details
 #if WITH_EDITOR
-	LevelInstance->SetWorldAsset(NCell->World);
+	LevelInstance->SetWorldAsset(Cell->World);
 	LevelInstance->SetActorLabel(FString::Printf(TEXT("%s_LevelInstance"), *this->GetActorLabel()), false);
 #endif // WITH_EDITOR
-	LevelInstance->CookedWorldAsset = NCell->World;
+	LevelInstance->CookedWorldAsset = Cell->World;
 	
 	// Finalize the spawn, BeginPlay can now be called
 	SpawnedLevelInstanceActor->FinishSpawning(this->GetActorTransform());
@@ -173,9 +173,14 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance)
 	Show();
 }
 
-void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
+void ANCellProxy::InitializeFromNCell(UNCell* InCell)
 {
-	NCell = InNCell;
+	if (InCell == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Attempted to initialize an ANCellProxy with a null UNCell."));
+	}
+	
+	Cell = InCell;
 
 	// Prep dynamic mesh for changes
 	Mesh->Modify();
@@ -186,7 +191,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 #endif // WITH_EDITOR
 
 	// Convert our mesh data to UE
-	Mesh->SetMesh(NCell->Root.Hull.CreateDynamicMesh(true));
+	Mesh->SetMesh(Cell->Root.Hull.CreateDynamicMesh(true));
 
 	
 	// DISABLE IT FOR NOW? WHY DO WE NEED IT?
@@ -197,7 +202,7 @@ void ANCellProxy::InitializeFromNCell(UNCell* InNCell)
 	
 
 	// Let's rock some colors
-	Mesh->WireframeColor = NCell->Root.ProxyColor;
+	Mesh->WireframeColor = Cell->Root.ProxyColor;
 	
 	// Create the material on placement (CDO settings access = bad)
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
@@ -211,7 +216,7 @@ void ANCellProxy::InitializeFromCellNode(const FNAssemblyGraphCellNode* CellNode
 
 void ANCellProxy::OnProxyMaterialLoaded()
 {
-	if (!IsValid(NCell) || !IsValid(Mesh))
+	if (!IsValid(Cell) || !IsValid(Mesh))
 	{
 		return;
 	}
@@ -225,7 +230,7 @@ void ANCellProxy::OnProxyMaterialLoaded()
 	DynamicMaterial = UMaterialInstanceDynamic::Create(ProxyMaterial, this);
 	Mesh->SetMaterial(0, DynamicMaterial);
 
-	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), NCell->Root.ProxyColor);
+	DynamicMaterial->SetVectorParameterValue(FName("BaseColor"), Cell->Root.ProxyColor);
 	Mesh->MarkRenderStateDirty();
 }
 
@@ -250,8 +255,8 @@ void ANCellProxy::CreateCollisionMesh() const
 	}
 	
 	FKConvexElem ConvexHull;
-	ConvexHull.VertexData = NCell->Root.Hull.Vertices;
-	ConvexHull.IndexData = NCell->Root.Hull.GetFlatIndices();
+	ConvexHull.VertexData = Cell->Root.Hull.Vertices;
+	ConvexHull.IndexData = Cell->Root.Hull.GetFlatIndices();
 	ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
 	
 	FKAggregateGeom AggGeom;;
