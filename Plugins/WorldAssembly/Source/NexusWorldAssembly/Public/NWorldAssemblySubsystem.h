@@ -50,7 +50,7 @@ public:
 	 * @remark Server path: no operations are currently in flight. Client path: LocalRelay has replicated, the nearby-cell payload has been received, and no operations the client has been notified of are pending.
 	 * @note Does not gate Generate() — that can be called at any time regardless of this value.
 	 */
-	UFUNCTION(blueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
+	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady();
 
 	//~UTickableWorldSubsystem
