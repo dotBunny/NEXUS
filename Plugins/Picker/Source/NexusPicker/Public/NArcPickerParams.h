@@ -28,11 +28,14 @@ struct NEXUSPICKER_API FNArcPickerParams : public FNPickerParams
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float Degrees = 90.f;
 	
-	/** The minimum distance to start finding points. */
+	/**
+	 * The minimum distance from Origin at which points may be generated.
+	 * @note Points are sampled uniformly over the annular sector's area; the radial component is sqrt-corrected, so an even spread is produced rather than a clustering near MinimumDistance. Must be >= 0.
+	 */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float MinimumDistance = 0.f;
 
-	/** The maximum distance to find points. */
+	/** The maximum distance from Origin at which points may be generated. */
 	UPROPERTY(Category = "Arc", BlueprintReadWrite)
 	float MaximumDistance = 500.f;
 };

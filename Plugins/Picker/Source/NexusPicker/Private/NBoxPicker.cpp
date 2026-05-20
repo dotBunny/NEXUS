@@ -11,7 +11,16 @@
 #define N_PICKER_BOX_PREFIX \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumBox.IsValid == 0; \
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
+	if (bSimpleMode && Params.MaximumBox.IsValid == 0) \
+	{ \
+		for (int32 i = 0; i < Params.Count; i++) \
+		{ \
+			OutLocations.Add(Params.Origin); \
+		} \
+		UE_LOG(LogNexusPicker, Error, TEXT("Unable to pick points as FNBoxPickerParams has neither MinimumBox nor MaximumBox set. Defaulting to origin points.")) \
+		return; \
+	}
 #define N_PICKER_BOX_VALID_BOXES_CHOICE(RandomIndex) \
 	FBox ChosenBox = ValidBoxes[Random.RandomIndex(0,ValidBoxes.Num()-1)];
 #define N_PICKER_BOX_LOCATION_SIMPLE(FloatValue) \

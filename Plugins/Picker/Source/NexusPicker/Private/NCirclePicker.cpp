@@ -122,7 +122,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, const FNCirclePickerPar
 		}
 	}
 	
-	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
+	N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
 }
 #undef RANDOM_FLOAT
 
@@ -204,7 +204,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 		}
 	}
 	
-	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
+	N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
 }
 #undef RANDOM_FLOAT
 
@@ -286,7 +286,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 		}
 	}
 	
-	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
+	N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
 	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT
@@ -368,7 +368,7 @@ void FNCirclePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& R
 		}
 	}
 	
-	N_PICKER_CIRCLE_VLOG(!bSimpleMode)
+	N_PICKER_CIRCLE_VLOG(Params.MinimumRadius > 0.f)
 }
 #undef RANDOM_FLOAT
 

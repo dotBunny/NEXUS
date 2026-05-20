@@ -6,6 +6,53 @@
 #include "NCirclePicker.h"
 #include "NCirclePickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
+
+namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness
+{
+	constexpr int32 DensitySampleCount = 4000;
+	constexpr int32 DensityBinCount = 5;
+	constexpr float DensityBinTolerance = 0.20f;
+
+	// Bins points by squared radius from Origin in the picker's XY plane. Each bin spans an equal
+	// slice of (MaxR² - MinR²), so the bin areas are equal and an area-uniform sampler should
+	// drop ~N/BinCount points in each one. A radius-uniform sampler clusters near MinimumRadius
+	// and fails the inner-bin count by a wide margin.
+	inline void CheckAreaUniformity(const FString& Label, const TArray<FVector>& Points,
+		const FVector& Origin, const float MinRadius, const float MaxRadius)
+	{
+		const float MinRSq = MinRadius * MinRadius;
+		const float MaxRSq = MaxRadius * MaxRadius;
+		const float BinStep = (MaxRSq - MinRSq) / DensityBinCount;
+		TArray<int32> BinCounts;
+		BinCounts.Init(0, DensityBinCount);
+		int32 Binned = 0;
+		for (const FVector& Point : Points)
+		{
+			const float DX = static_cast<float>(Point.X - Origin.X);
+			const float DY = static_cast<float>(Point.Y - Origin.Y);
+			const float RSq = DX * DX + DY * DY;
+			if (RSq < MinRSq - 0.01f || RSq > MaxRSq + 0.01f) continue;
+			int32 Index = FMath::FloorToInt((RSq - MinRSq) / BinStep);
+			Index = FMath::Clamp(Index, 0, DensityBinCount - 1);
+			BinCounts[Index]++;
+			Binned++;
+		}
+
+		CHECK_MESSAGE(FString::Printf(TEXT("%s: every point must land inside the annulus (binned %d of %d)"),
+			*Label, Binned, Points.Num()), Binned == Points.Num());
+
+		const float ExpectedPerBin = static_cast<float>(Points.Num()) / DensityBinCount;
+		const float MaxDeviation = ExpectedPerBin * DensityBinTolerance;
+		for (int32 i = 0; i < DensityBinCount; ++i)
+		{
+			CHECK_MESSAGE(FString::Printf(
+				TEXT("%s: equal-area bin[%d] holds %d (expected %.0f ± %.0f) - radial density should be area-uniform"),
+				*Label, i, BinCounts[i], ExpectedPerBin, MaxDeviation),
+				FMath::Abs(BinCounts[i] - ExpectedPerBin) <= MaxDeviation);
+		}
+	}
+}
 
 N_TEST_CRITICAL(FNCirclePickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -109,6 +156,55 @@ N_TEST_HIGH(FNCirclePickerTests_Next_PointsInsideAnnulusInnerRadius, "NEXUS::Uni
 		CHECK_MESSAGE(FString::Printf(TEXT("Next annulus point[%d] should respect the non-zero inner radius"), i),
 			FNCirclePicker::IsPointInsideOrOn(Params.Origin, Params.MinimumRadius, Params.MaximumRadius, Params.Rotation, Points[i]));
 	}
+}
+
+N_TEST_HIGH(FNCirclePickerTests_Next_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that Next produces an area-uniform distribution. A regression that samples
+	// the radius linearly in [MinR, MaxR] (instead of the sqrt-CDF transform) would cluster
+	// points near MinimumRadius and fail by over-counting the inner equal-area bin.
+	using namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness;
+	FNCirclePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	Params.Rotation = FRotator::ZeroRotator;
+	TArray<FVector> Points;
+	FNCirclePicker::Next(Points, Params);
+	CheckAreaUniformity(TEXT("Next"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
+}
+
+N_TEST_HIGH(FNCirclePickerTests_Random_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Random_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies Random's annular distribution is area-uniform on the FRand-based path.
+	using namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness;
+	FNCirclePickerParams Params;
+	Params.Origin = FVector(5.f, -7.f, 0.f);
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	Params.Rotation = FRotator::ZeroRotator;
+	TArray<FVector> Points;
+	FNCirclePicker::Random(Points, Params);
+	CheckAreaUniformity(TEXT("Random"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
+}
+
+N_TEST_HIGH(FNCirclePickerTests_Twisted_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Twisted_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies the Mersenne-Twister path also samples uniformly by area. Twisted has its own
+	// RNG instance, so a regression in the FNMersenneTwister::Float pipeline would only show up here.
+	using namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness;
+	FNCirclePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	Params.Rotation = FRotator::ZeroRotator;
+	FNMersenneTwister Twister(0xC11C1E);
+	TArray<FVector> Points;
+	FNCirclePicker::Twisted(Points, Twister, Params);
+	CheckAreaUniformity(TEXT("Twisted"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
 }
 
 #endif //WITH_TESTS

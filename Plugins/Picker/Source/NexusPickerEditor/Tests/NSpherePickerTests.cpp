@@ -6,6 +6,52 @@
 #include "NSpherePicker.h"
 #include "NSpherePickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
+
+namespace NEXUS::UnitTests::NPicker::FNSpherePickerHarness
+{
+	constexpr int32 DensitySampleCount = 4000;
+	constexpr int32 DensityBinCount = 5;
+	constexpr float DensityBinTolerance = 0.20f;
+
+	// Bins points by cubed distance from Origin. Each bin spans an equal slice of (MaxR³ - MinR³),
+	// so bin volumes are equal and a volume-uniform sampler should drop ~N/BinCount points in each.
+	// A radius-uniform sampler clusters near MinimumRadius; a Twisted-style cube-vector sampler
+	// pushes points past MaxRadius and trips the "every point in shell" check.
+	inline void CheckVolumeUniformity(const FString& Label, const TArray<FVector>& Points,
+		const FVector& Origin, const float MinRadius, const float MaxRadius)
+	{
+		const float MinRCubed = MinRadius * MinRadius * MinRadius;
+		const float MaxRCubed = MaxRadius * MaxRadius * MaxRadius;
+		const float BinStep = (MaxRCubed - MinRCubed) / DensityBinCount;
+		TArray<int32> BinCounts;
+		BinCounts.Init(0, DensityBinCount);
+		int32 Binned = 0;
+		for (const FVector& Point : Points)
+		{
+			const float Distance = static_cast<float>(FVector::Dist(Point, Origin));
+			if (Distance < MinRadius - 0.001f || Distance > MaxRadius + 0.001f) continue;
+			const float RCubed = Distance * Distance * Distance;
+			int32 Index = FMath::FloorToInt((RCubed - MinRCubed) / BinStep);
+			Index = FMath::Clamp(Index, 0, DensityBinCount - 1);
+			BinCounts[Index]++;
+			Binned++;
+		}
+
+		CHECK_MESSAGE(FString::Printf(TEXT("%s: every point must land inside the spherical shell (binned %d of %d)"),
+			*Label, Binned, Points.Num()), Binned == Points.Num());
+
+		const float ExpectedPerBin = static_cast<float>(Points.Num()) / DensityBinCount;
+		const float MaxDeviation = ExpectedPerBin * DensityBinTolerance;
+		for (int32 i = 0; i < DensityBinCount; ++i)
+		{
+			CHECK_MESSAGE(FString::Printf(
+				TEXT("%s: equal-volume bin[%d] holds %d (expected %.0f ± %.0f) - radial density should be volume-uniform"),
+				*Label, i, BinCounts[i], ExpectedPerBin, MaxDeviation),
+				FMath::Abs(BinCounts[i] - ExpectedPerBin) <= MaxDeviation);
+		}
+	}
+}
 
 N_TEST_CRITICAL(FNSpherePickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNSpherePicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -140,6 +186,53 @@ N_TEST_HIGH(FNSpherePickerTests_Next_PointsInsideShell, "NEXUS::UnitTests::NPick
 		CHECK_MESSAGE(FString::Printf(TEXT("Next shell point[%d] (%.2f) should sit inside [%.2f, %.2f]"), i, Distance, Params.MinimumRadius, Params.MaximumRadius),
 			Distance >= Params.MinimumRadius - 0.001f && Distance <= Params.MaximumRadius + 0.001f);
 	}
+}
+
+N_TEST_HIGH(FNSpherePickerTests_Next_DensityUniformity, "NEXUS::UnitTests::NPicker::FNSpherePicker::Next_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that Next produces a volume-uniform distribution across the spherical shell.
+	// A regression sampling the radius linearly in [MinR, MaxR] would over-fill the inner bin
+	// (in 3D the surplus is even larger than the circle case: shell volume scales as r²).
+	using namespace NEXUS::UnitTests::NPicker::FNSpherePickerHarness;
+	FNSpherePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	TArray<FVector> Points;
+	FNSpherePicker::Next(Points, Params);
+	CheckVolumeUniformity(TEXT("Next"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
+}
+
+N_TEST_HIGH(FNSpherePickerTests_Random_DensityUniformity, "NEXUS::UnitTests::NPicker::FNSpherePicker::Random_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies Random's shell distribution is volume-uniform on the FRand-based path.
+	using namespace NEXUS::UnitTests::NPicker::FNSpherePickerHarness;
+	FNSpherePickerParams Params;
+	Params.Origin = FVector(5.f, -7.f, 3.f);
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	TArray<FVector> Points;
+	FNSpherePicker::Random(Points, Params);
+	CheckVolumeUniformity(TEXT("Random"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
+}
+
+N_TEST_HIGH(FNSpherePickerTests_Twisted_DensityUniformity, "NEXUS::UnitTests::NPicker::FNSpherePicker::Twisted_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies the Mersenne-Twister path. This test would also have caught the historical
+	// VectorNormalized cube-vector bug: cube_vec * radius_scalar produces magnitudes up to
+	// sqrt(3) * MaxRadius, so many points fall outside the shell and trip the "binned == count" check.
+	using namespace NEXUS::UnitTests::NPicker::FNSpherePickerHarness;
+	FNSpherePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = DensitySampleCount;
+	Params.MinimumRadius = 10.f;
+	Params.MaximumRadius = 100.f;
+	FNMersenneTwister Twister(0x5C11C1E);
+	TArray<FVector> Points;
+	FNSpherePicker::Twisted(Points, Twister, Params);
+	CheckVolumeUniformity(TEXT("Twisted"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
 }
 
 #endif //WITH_TESTS

@@ -12,11 +12,18 @@
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
 	const float MaxDegrees = (Params.Degrees * 0.5f); \
-	const float MinDegrees = -MaxDegrees;
+	const float MinDegrees = -MaxDegrees; \
+	const float MinDistanceSq = Params.MinimumDistance * Params.MinimumDistance; \
+	const float MaxDistanceSq = Params.MaximumDistance * Params.MaximumDistance; \
+	if (Params.MinimumDistance < 0.f || Params.MaximumDistance < Params.MinimumDistance) \
+	{ \
+		UE_LOG(LogNexusPicker, Warning, TEXT("FNArcPickerParams has invalid distance range (Min=%.2f, Max=%.2f); points may not be where you expect."), Params.MinimumDistance, Params.MaximumDistance); \
+	}
 
+// Inverse-CDF transform: uniform u in [0,1] maps to area-weighted radius across the annular sector.
 #define N_PICKER_RADIAL_LOCATION(FloatRange) \
 	const float RandomAngle = FMath::DegreesToRadians(Random.FloatRange(MinDegrees, MaxDegrees)); \
-	const float RandomDistance = Random.FloatRange(Params.MinimumDistance, Params.MaximumDistance); \
+	const float RandomDistance = FMath::Sqrt(Random.FloatRange(MinDistanceSq, MaxDistanceSq)); \
 	FVector Location = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(RandomAngle), FMath::Sin(RandomAngle), 0) * RandomDistance);
 
 #if ENABLE_VISUAL_LOG
