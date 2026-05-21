@@ -115,16 +115,40 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 
 float FNRawMeshUtils::GetIntersectDepth(
 	const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-	const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+	const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
+	const float EarlyExitDepth)
 {
-	// Rotated AABB early-out, mirroring DoesIntersect.
+	// Rotated AABB early-out, mirroring DoesIntersect. The world-space AABBs computed here also feed
+	// the C (AABB-overlap depth bound) and B (per-vertex AABB rejection) optimisations below.
+	FBox LeftWorldBounds(ForceInit);
+	FBox RightWorldBounds(ForceInit);
 	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
 	{
-		const FBox LeftWorldBounds = LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin));
-		const FBox RightWorldBounds = RightMesh.Bounds.TransformBy(FTransform(RightRotation, RightOrigin));
+		LeftWorldBounds = LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin));
+		RightWorldBounds = RightMesh.Bounds.TransformBy(FTransform(RightRotation, RightOrigin));
 		if (!LeftWorldBounds.Intersect(RightWorldBounds))
 		{
 			return -1.0f;
+		}
+
+		// C: AABB-overlap depth bound. The deepest a vertex of one mesh can sit inside the other is
+		// bounded by the size of the AABB overlap along its narrowest axis. If that bound is already
+		// below the caller's threshold, the actual depth must also be below it — return the bound
+		// directly and skip the per-vertex sampling loops entirely. Skipped when no threshold was
+		// supplied (default Max), because the returned value would be a conservative upper bound
+		// rather than the exact maximum and exact-depth callers shouldn't see that.
+		if (EarlyExitDepth < MAX_flt)
+		{
+			const FBox Overlap = LeftWorldBounds.Overlap(RightWorldBounds);
+			if (Overlap.IsValid)
+			{
+				const FVector OverlapSize = Overlap.GetExtent() * 2.0;
+				const float MaxPossibleDepth = static_cast<float>(FMath::Min3(OverlapSize.X, OverlapSize.Y, OverlapSize.Z));
+				if (MaxPossibleDepth < EarlyExitDepth)
+				{
+					return MaxPossibleDepth;
+				}
+			}
 		}
 	}
 
@@ -149,27 +173,46 @@ float FNRawMeshUtils::GetIntersectDepth(
 
 	float MaxDepth = 0.0f;
 
-	// Right vertices, expressed in Left's local space, tested against Left's hull.
+	// Right vertices, expressed in Left's local space, tested against Left's hull. B: skip vertices
+	// that are clearly outside Left's world AABB — they can't be inside Left's hull and would just
+	// pay the per-face ComputePointDepthInside sweep to return -1.
 	for (const FVector& V : RightMesh.Vertices)
 	{
 		const FVector WorldPos = RightQuat.RotateVector(V) + RightOrigin;
+		if (LeftWorldBounds.IsValid && !LeftWorldBounds.IsInsideOrOn(WorldPos))
+		{
+			continue;
+		}
 		const FVector LeftLocal = LeftInvQuat.RotateVector(WorldPos - LeftOrigin);
 		const float Depth = ComputePointDepthInside(LeftMesh, LeftLocal);
 		if (Depth > MaxDepth)
 		{
 			MaxDepth = Depth;
+			// A: in-loop early-exit once the running max exceeds the caller's threshold.
+			if (MaxDepth >= EarlyExitDepth)
+			{
+				return MaxDepth;
+			}
 		}
 	}
 
-	// Left vertices, expressed in Right's local space, tested against Right's hull.
+	// Left vertices, expressed in Right's local space, tested against Right's hull. Same B + A treatment.
 	for (const FVector& V : LeftMesh.Vertices)
 	{
 		const FVector WorldPos = LeftQuat.RotateVector(V) + LeftOrigin;
+		if (RightWorldBounds.IsValid && !RightWorldBounds.IsInsideOrOn(WorldPos))
+		{
+			continue;
+		}
 		const FVector RightLocal = RightInvQuat.RotateVector(WorldPos - RightOrigin);
 		const float Depth = ComputePointDepthInside(RightMesh, RightLocal);
 		if (Depth > MaxDepth)
 		{
 			MaxDepth = Depth;
+			if (MaxDepth >= EarlyExitDepth)
+			{
+				return MaxDepth;
+			}
 		}
 	}
 
@@ -399,7 +442,7 @@ float FNRawMeshUtils::ComputePointDepthInsideNonConvex(const FNRawMesh& Mesh, co
 {
 	// Minimum distance from RelativePoint to any triangle's surface. Assumes the caller has already
 	// verified the point is inside the closed manifold; this function just measures distance-to-surface.
-	double MinDist = TNumericLimits<double>::Max();
+	double MinDist = MAX_dbl;
 	for (const FNRawMeshLoop& Loop : Mesh.Loops)
 	{
 		const FVector& A = Mesh.Vertices[Loop.Indices[0]];
@@ -411,7 +454,7 @@ float FNRawMeshUtils::ComputePointDepthInsideNonConvex(const FNRawMesh& Mesh, co
 			MinDist = D;
 		}
 	}
-	return (MinDist == TNumericLimits<double>::Max()) ? 0.0f : static_cast<float>(MinDist);
+	return (MinDist == MAX_dbl) ? 0.0f : static_cast<float>(MinDist);
 }
 
 float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint)
@@ -424,7 +467,7 @@ float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const
 	const TArray<double>& InvLens = Mesh.GetCachedFaceInvNormalLen();
 	const int32 LoopCount = Mesh.Loops.Num();
 
-	float MinFaceDist = TNumericLimits<float>::Max();
+	float MinFaceDist = MAX_flt;
 	for (int32 i = 0; i < LoopCount; ++i)
 	{
 		const double InvLen = InvLens[i];
@@ -449,7 +492,7 @@ float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const
 			MinFaceDist = static_cast<float>(PerpDist);
 		}
 	}
-	return (MinFaceDist == TNumericLimits<float>::Max()) ? 0.0f : MinFaceDist;
+	return (MinFaceDist == MAX_flt) ? 0.0f : MinFaceDist;
 }
 
 bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
@@ -629,16 +672,16 @@ bool FNRawMeshUtils::DoesConvexIntersectSAT(
 			// it can never separate the two hulls, so claim overlap and let another axis disprove it.
 			return true;
 		}
-		double LMin = TNumericLimits<double>::Max();
-		double LMax = -TNumericLimits<double>::Max();
+		double LMin = MAX_dbl;
+		double LMax = -MAX_dbl;
 		for (const FVector& V : LeftVertsWS)
 		{
 			const double D = FVector::DotProduct(Axis, V);
 			if (D < LMin) LMin = D;
 			if (D > LMax) LMax = D;
 		}
-		double RMin = TNumericLimits<double>::Max();
-		double RMax = -TNumericLimits<double>::Max();
+		double RMin = MAX_dbl;
+		double RMax = -MAX_dbl;
 		for (const FVector& V : RightVertsWS)
 		{
 			const double D = FVector::DotProduct(Axis, V);

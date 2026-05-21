@@ -70,6 +70,12 @@ public:
 	 * @param RightMesh Second mesh. Same triangle / closed-manifold requirement as LeftMesh.
 	 * @param RightOrigin World-space translation applied to RightMesh.
 	 * @param RightRotation World-space rotation applied to RightMesh.
+	 * @param EarlyExitDepth Optional optimisation hint — when finite, the function may return as soon as it
+	 *        proves the depth either exceeds or is bounded below this value. Callers doing a threshold
+	 *        comparison (`if (depth >= threshold)`) should pass their threshold here; the returned value
+	 *        still produces the correct branch on that compare, but may be a conservative upper bound
+	 *        (when the shortcut proves "depth is bounded below threshold") rather than the exact maximum.
+	 *        Default MAX_flt disables every shortcut and returns the exact maximum.
 	 * @return The deepest measured penetration distance in mesh units, or -1.0 when the transformed AABBs do not
 	 *         overlap, when either mesh has zero loops (logs a warning), or when either mesh contains non-triangle
 	 *         loops (logs an error). Returns 0.0 when the AABBs overlap but no vertex of either mesh lies inside
@@ -84,7 +90,8 @@ public:
 	 */
 	static float GetIntersectDepth(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
+		float EarlyExitDepth = MAX_flt);
 
 
 	/**

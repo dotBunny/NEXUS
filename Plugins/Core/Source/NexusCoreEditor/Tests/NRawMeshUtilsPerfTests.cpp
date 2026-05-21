@@ -288,6 +288,59 @@ public:
 	}
 
 	/**
+	 * Same overlapping hulls as GetIntersectDepth_HullVsHull_Overlap, but with a tight EarlyExitDepth
+	 * so the in-loop A short-circuit fires after the first deep vertex. Exercises path A.
+	 */
+	static void GetIntersectDepth_HullVsHull_Overlap_EarlyExit()
+	{
+		const FNRawMesh Left = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeSphere(50.0, 16, 8);
+		const FNRawMesh Right = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeSphere(50.0, 16, 8);
+		const FVector LeftOrigin(0.0, 0.0, 0.0);
+		const FVector RightOrigin(30.0, 0.0, 0.0);
+		const FRotator NoRot = FRotator::ZeroRotator;
+		// Threshold deliberately tiny — any deep vertex satisfies it on the first hit.
+		constexpr float EarlyExitDepth = 5.0f;
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_GetIntersectDepth_HullVsHull_Overlap_EarlyExit,
+				NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MediumMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MediumIterations; ++i)
+			{
+				FNRawMeshUtils::GetIntersectDepth(Left, LeftOrigin, NoRot, Right, RightOrigin, NoRot, EarlyExitDepth);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/**
+	 * Same overlapping hulls but with a loose EarlyExitDepth above the AABB-overlap depth bound. The
+	 * C optimisation returns the conservative bound without sampling any vertices. Exercises path C.
+	 */
+	static void GetIntersectDepth_HullVsHull_Overlap_AABBBound()
+	{
+		const FNRawMesh Left = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeSphere(50.0, 16, 8);
+		const FNRawMesh Right = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeSphere(50.0, 16, 8);
+		const FVector LeftOrigin(0.0, 0.0, 0.0);
+		const FVector RightOrigin(30.0, 0.0, 0.0);
+		const FRotator NoRot = FRotator::ZeroRotator;
+		// AABB overlap on the X axis is 70 (offset 30 plus the 100-wide AABBs); a threshold of 100
+		// is above 70 so C proves "depth is at most 70" without touching a single vertex.
+		constexpr float EarlyExitDepth = 100.0f;
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_GetIntersectDepth_HullVsHull_Overlap_AABBBound,
+				NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::SmallMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MediumIterations; ++i)
+			{
+				FNRawMeshUtils::GetIntersectDepth(Left, LeftOrigin, NoRot, Right, RightOrigin, NoRot, EarlyExitDepth);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/**
 	 * GetIntersectDepth dense-vs-dense — closest analogue to "graph-builder cell vs large world collision mesh".
 	 * Each call does ~480 verts x ~224 faces both ways via the convex face-plane fast path.
 	 */
@@ -511,6 +564,24 @@ N_TEST_PERF(FNRawMeshUtilsPerfTests_GetIntersectDepth_HullVsWorldMesh,
 {
 	N_TESTS_PERF_START_LATENT_TEST
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::GetIntersectDepth_HullVsWorldMesh));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_GetIntersectDepth_HullVsHull_Overlap_EarlyExit,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::GetIntersectDepth_HullVsHull_Overlap_EarlyExit",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::GetIntersectDepth_HullVsHull_Overlap_EarlyExit));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_GetIntersectDepth_HullVsHull_Overlap_AABBBound,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::GetIntersectDepth_HullVsHull_Overlap_AABBBound",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::GetIntersectDepth_HullVsHull_Overlap_AABBBound));
 	N_TESTS_PERF_FINISH_LATENT_TEST
 }
 

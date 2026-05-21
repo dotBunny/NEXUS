@@ -210,10 +210,12 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
+	const float WorldHullPenetration = OrganContextPtr->WorldHullPenetration;
 	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]);
-		if (PenetrationDepth >= OrganContextPtr->WorldHullPenetration)
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionLocations[i], WorldCollisionRotations[i],
+			WorldCollisionMeshes[i], WorldHullPenetration);
+		if (PenetrationDepth >= WorldHullPenetration)
 		{
 			return true;
 		}
@@ -223,10 +225,12 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 
 bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
+	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
 	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]);
-		if (PenetrationDepth >= OrganContextPtr->CellHullPenetration)
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i],
+			ExistingNodeCollisionMeshes[i], CellHullPenetration);
+		if (PenetrationDepth >= CellHullPenetration)
 		{
 			return true;
 		}
@@ -401,11 +405,12 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		// Now check the bounds of other existing nodes
 		TArray<FNAssemblyGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
+		const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
 		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
 		{
 			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
-			const float PenetrationDepth = BoundsIntersectingNodes[j]->GetHullIntersectDepth(TargetCellNode);
-			if (PenetrationDepth < OrganContextPtr->CellHullPenetration)
+			const float PenetrationDepth = BoundsIntersectingNodes[j]->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
+			if (PenetrationDepth < CellHullPenetration)
 			{
 				BoundsIntersectingNodes.RemoveAt(j);
 			}

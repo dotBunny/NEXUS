@@ -82,24 +82,32 @@ public:
 			OtherMesh, OtherLocation, OtherRotation);
 	}
 
-	/** @return true if this cell's hull intersects Other's hull, oriented by each cell's world transform. */
-	float GetHullIntersectDepth(FNAssemblyGraphCellNode* Other) const
+	/**
+	 * @param Other Cell node whose hull is tested against this cell's hull.
+	 * @param EarlyExitDepth Caller's threshold for the typical `if (depth >= threshold)` rejection pattern.
+	 *        Passing the threshold lets FNRawMeshUtils::GetIntersectDepth short-circuit on either the
+	 *        per-vertex deep-overlap path or the AABB-overlap upper bound — see that function's docs.
+	 * @return true if this cell's hull intersects Other's hull, oriented by each cell's world transform.
+	 */
+	float GetHullIntersectDepth(FNAssemblyGraphCellNode* Other, float EarlyExitDepth = MAX_flt) const
 	{
 		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
-			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
+			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation(), EarlyExitDepth);
 	}
-	
+
 	/**
+	 * @param EarlyExitDepth Caller's threshold for the typical `if (depth >= threshold)` rejection pattern.
+	 *        See FNRawMeshUtils::GetIntersectDepth for the semantics of the short-circuit shortcuts.
 	 * @return The deepest penetration distance between this cell's hull and the supplied externally-transformed mesh,
 	 *         or -1.0 when their AABBs do not overlap or the meshes are otherwise unmeasurable (see
 	 *         FNRawMeshUtils::GetIntersectDepth for the full set of sentinel cases).
 	 * @note Intended for "max-allowed-penetration" threshold checks during graph expansion; use CheckHullIntersects
 	 *       for an exact boolean overlap test.
 	 */
-	float GetHullIntersectDepth(const FVector& OtherLocation, const FRotator& OtherRotation,  const FNRawMesh& OtherMesh) const
+	float GetHullIntersectDepth(const FVector& OtherLocation, const FRotator& OtherRotation, const FNRawMesh& OtherMesh, const float EarlyExitDepth = MAX_flt) const
 	{
 		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
-			OtherMesh, OtherLocation, OtherRotation);
+			OtherMesh, OtherLocation, OtherRotation, EarlyExitDepth);
 	}
 
 	/**
