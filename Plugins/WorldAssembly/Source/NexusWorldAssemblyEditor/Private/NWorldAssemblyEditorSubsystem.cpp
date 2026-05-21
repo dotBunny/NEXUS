@@ -3,9 +3,10 @@
 
 #include "NWorldAssemblyEditorSubsystem.h"
 
-#include "NWorldAssemblyEdMode.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "Assembly/Contexts/NAssemblyOperationContext.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
+#include "Cell/NCellProxy.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -46,10 +47,7 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 			ClearGenerated(LastOperationTicket);
 		}
 	}
-	
-	// TODO: #TEMP - ensuring i see what is the collision getting injected
-	FNWorldAssemblyEdMode::CreateCollisionVisualizer(GetDefaultWorld());
-	
+
 	KnownOperations.AddUnique(Operation);
 	Operation->StartBuild(this);
 }
