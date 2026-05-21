@@ -165,6 +165,38 @@ public:
 		}
 	}
 
+	/**
+	 * Box-vs-box where AABBs overlap but the meshes don't actually touch — the SAT face-normal
+	 * early-out case. Two boxes can't directly produce this configuration (axis-aligned + rotated
+	 * always yields mesh overlap whenever AABBs overlap), so we use one large rotated box and one
+	 * small box parked outside the rotated box's nearest face. Both have FaceLoops populated so the
+	 * SAT path is exercised.
+	 */
+	static void DoesIntersect_BoxVsBox_AABBHitMeshMiss()
+	{
+		const FNRawMesh Left = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(10.0);
+		const FNRawMesh Right = NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::MakeChaosBox(2.0);
+		const FVector LeftOrigin(0.0, 0.0, 0.0);
+		// Left rotated 45 deg yaw extends its AABB out to (~7.07, 7.07, 5). Right at (6, 6, 0) puts
+		// the small box's [5..7, 5..7] AABB squarely inside Left's AABB envelope, but Left's nearest
+		// rotated face is the line x + y = 7.07 — every Right corner satisfies x + y >= 10 and so
+		// lives outside Left's actual hull.
+		const FVector RightOrigin(6.0, 6.0, 0.0);
+		const FRotator LeftRot(0.0, 45.0, 0.0);
+		const FRotator RightRot = FRotator::ZeroRotator;
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshUtilsPerfTests_DoesIntersect_BoxVsBox_AABBHitMeshMiss,
+				NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::SmallMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshUtilsHarness::SmallIterations; ++i)
+			{
+				FNRawMeshUtils::DoesIntersect(Left, LeftOrigin, LeftRot, Right, RightOrigin, RightRot);
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
 	/** Medium-hull-vs-medium-hull overlap — exercises the O(L * R) triangle pair sweep at ~50k pairs. */
 	static void DoesIntersect_HullVsHull_Hit()
 	{
@@ -434,6 +466,15 @@ N_TEST_PERF(FNRawMeshUtilsPerfTests_DoesIntersect_HullVsHull_Hit,
 {
 	N_TESTS_PERF_START_LATENT_TEST
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::DoesIntersect_HullVsHull_Hit));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshUtilsPerfTests_DoesIntersect_BoxVsBox_AABBHitMeshMiss,
+	"NEXUS::PerfTests::NCore::FNRawMeshUtils::DoesIntersect_BoxVsBox_AABBHitMeshMiss",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::DoesIntersect_BoxVsBox_AABBHitMeshMiss));
 	N_TESTS_PERF_FINISH_LATENT_TEST
 }
 

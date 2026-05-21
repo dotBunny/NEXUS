@@ -164,4 +164,27 @@ private:
 	static bool DoesIntersectTriangles(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+
+	/**
+	 * Separating Axis Theorem (SAT) test for convex-vs-convex overlap. Returns true when the two transformed
+	 * meshes overlap. Requires both meshes to be flagged convex AND carry a polygonal FaceLoops description
+	 * (the per-face axis set comes from FaceLoop normals + cross-products of unique edge directions).
+	 *
+	 * Fast on the no-overlap path — typically rejects after testing a handful of face normals before reaching
+	 * the O(E_L * E_R) edge-cross loop. The hit path must exhaust every axis, so SAT is only dispatched for
+	 * mesh pairs small enough that the worst-case cost stays competitive with the tri-tri sweep; the gate
+	 * lives in CanUseSAT.
+	 */
+	static bool DoesConvexIntersectSAT(
+		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+
+	/**
+	 * Gate for the SAT fast path: both inputs must be convex with a populated FaceLoops description and
+	 * face count under the per-mesh threshold. Threshold is empirical — the SAT hit-path cost grows as
+	 * O(F^2) on edge crosses, so the cap keeps the worst case within striking distance of the tri-tri
+	 * sweep while still catching every primitive / Chaos-built cell hull (boxes, capsules, spheres of
+	 * modest resolution, artist hulls).
+	 */
+	static bool CanUseSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 };

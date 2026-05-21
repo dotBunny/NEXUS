@@ -100,7 +100,16 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection checks."));
 		return false;
 	}
-	
+
+	// Convex fast path: SAT on the polygonal face description. Decisive for primitives / Chaos-built
+	// hulls because face-normal axes typically separate non-overlapping pairs after only a handful of
+	// projections. Falls through to the tri-tri sweep when SAT's preconditions aren't met or the meshes
+	// are large enough that SAT's O(F^2) edge-cross worst case would beat us.
+	if (CanUseSAT(LeftMesh, RightMesh))
+	{
+		return DoesConvexIntersectSAT(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
+	}
+
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
@@ -544,4 +553,152 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	}
 
 	return false;
+}
+
+bool FNRawMeshUtils::CanUseSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
+{
+	// Empirical cap. SAT face/edge counts grow with FaceLoops.Num(); the worst-case (overlap) cost
+	// scales O(F^2) on edge crosses. 32 keeps every primitive emitter (box=6, sphere/sphyl=tens of
+	// faces) and typical artist-authored hulls inside the fast path while leaving dense static-mesh
+	// hulls on the tri-tri sweep where they fare better.
+	constexpr int32 MaxFacesForSAT = 32;
+	return LeftMesh.IsConvex() && RightMesh.IsConvex()
+		&& !LeftMesh.FaceLoops.IsEmpty() && !RightMesh.FaceLoops.IsEmpty()
+		&& LeftMesh.FaceLoops.Num() <= MaxFacesForSAT
+		&& RightMesh.FaceLoops.Num() <= MaxFacesForSAT;
+}
+
+bool FNRawMeshUtils::DoesConvexIntersectSAT(
+	const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+	const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+{
+	const FQuat LeftQuat = LeftRotation.Quaternion();
+	const FQuat RightQuat = RightRotation.Quaternion();
+
+	// World-space vertex buffers — every axis test re-projects these, so transform once.
+	TArray<FVector> LeftVertsWS;
+	LeftVertsWS.Reserve(LeftMesh.Vertices.Num());
+	for (const FVector& V : LeftMesh.Vertices)
+	{
+		LeftVertsWS.Add(LeftQuat.RotateVector(V) + LeftOrigin);
+	}
+	TArray<FVector> RightVertsWS;
+	RightVertsWS.Reserve(RightMesh.Vertices.Num());
+	for (const FVector& V : RightMesh.Vertices)
+	{
+		RightVertsWS.Add(RightQuat.RotateVector(V) + RightOrigin);
+	}
+
+	// Project both vertex buffers onto Axis and return true when the intervals overlap. The axis does
+	// not need to be unit-length — interval comparisons survive scaling, and skipping the normalise
+	// keeps the per-axis cost to two min/max reductions over the vertex sets.
+	auto IntervalsOverlap = [&LeftVertsWS, &RightVertsWS](const FVector& Axis) -> bool
+	{
+		if (Axis.SizeSquared() < UE_KINDA_SMALL_NUMBER)
+		{
+			// Degenerate axis (zero cross product on parallel edges, or a degenerate face normal):
+			// it can never separate the two hulls, so claim overlap and let another axis disprove it.
+			return true;
+		}
+		double LMin = TNumericLimits<double>::Max();
+		double LMax = -TNumericLimits<double>::Max();
+		for (const FVector& V : LeftVertsWS)
+		{
+			const double D = FVector::DotProduct(Axis, V);
+			if (D < LMin) LMin = D;
+			if (D > LMax) LMax = D;
+		}
+		double RMin = TNumericLimits<double>::Max();
+		double RMax = -TNumericLimits<double>::Max();
+		for (const FVector& V : RightVertsWS)
+		{
+			const double D = FVector::DotProduct(Axis, V);
+			if (D < RMin) RMin = D;
+			if (D > RMax) RMax = D;
+		}
+		return LMax >= RMin && RMax >= LMin;
+	};
+
+	// 1. Left face normals — for axis-aligned / near-axis-aligned placements these usually find the
+	//    separating axis in the first few iterations.
+	for (const FNRawMeshLoop& Face : LeftMesh.FaceLoops)
+	{
+		if (Face.Indices.Num() < 3) continue;
+		const FVector& V0 = LeftMesh.Vertices[Face.Indices[0]];
+		const FVector& V1 = LeftMesh.Vertices[Face.Indices[1]];
+		const FVector& V2 = LeftMesh.Vertices[Face.Indices[2]];
+		const FVector LocalNormal = FVector::CrossProduct(V1 - V0, V2 - V0);
+		const FVector WorldAxis = LeftQuat.RotateVector(LocalNormal);
+		if (!IntervalsOverlap(WorldAxis))
+		{
+			return false;
+		}
+	}
+
+	// 2. Right face normals.
+	for (const FNRawMeshLoop& Face : RightMesh.FaceLoops)
+	{
+		if (Face.Indices.Num() < 3) continue;
+		const FVector& V0 = RightMesh.Vertices[Face.Indices[0]];
+		const FVector& V1 = RightMesh.Vertices[Face.Indices[1]];
+		const FVector& V2 = RightMesh.Vertices[Face.Indices[2]];
+		const FVector LocalNormal = FVector::CrossProduct(V1 - V0, V2 - V0);
+		const FVector WorldAxis = RightQuat.RotateVector(LocalNormal);
+		if (!IntervalsOverlap(WorldAxis))
+		{
+			return false;
+		}
+	}
+
+	// 3. Edge-cross axes — required by SAT to catch "edge-on-edge" separations that no face normal
+	//    can witness (think a box edge running along another box's edge at 45 degrees). Builds the
+	//    unique edge direction lists from FaceLoops, deduped by (min, max) vertex index pair so an
+	//    edge shared between two adjacent faces contributes only one axis.
+	auto BuildEdgeDirections = [](const FNRawMesh& Mesh, const FQuat& Quat) -> TArray<FVector>
+	{
+		int32 EdgeBudget = 0;
+		for (const FNRawMeshLoop& Face : Mesh.FaceLoops)
+		{
+			EdgeBudget += Face.Indices.Num();
+		}
+		TSet<FIntVector2> Seen;
+		Seen.Reserve(EdgeBudget);
+		TArray<FVector> Dirs;
+		Dirs.Reserve(EdgeBudget);
+		for (const FNRawMeshLoop& Face : Mesh.FaceLoops)
+		{
+			const int32 N = Face.Indices.Num();
+			for (int32 k = 0; k < N; ++k)
+			{
+				const int32 V0 = Face.Indices[k];
+				const int32 V1 = Face.Indices[(k + 1) % N];
+				const FIntVector2 Key(FMath::Min(V0, V1), FMath::Max(V0, V1));
+				bool bAlready = false;
+				Seen.Add(Key, &bAlready);
+				if (!bAlready)
+				{
+					Dirs.Add(Quat.RotateVector(Mesh.Vertices[V1] - Mesh.Vertices[V0]));
+				}
+			}
+		}
+		return Dirs;
+	};
+
+	const TArray<FVector> LeftEdges = BuildEdgeDirections(LeftMesh, LeftQuat);
+	const TArray<FVector> RightEdges = BuildEdgeDirections(RightMesh, RightQuat);
+
+	for (const FVector& EA : LeftEdges)
+	{
+		for (const FVector& EB : RightEdges)
+		{
+			const FVector Axis = FVector::CrossProduct(EA, EB);
+			if (!IntervalsOverlap(Axis))
+			{
+				return false;
+			}
+		}
+	}
+
+	// No separating axis found across face normals or edge crosses → the convex hulls overlap.
+	return true;
 }
