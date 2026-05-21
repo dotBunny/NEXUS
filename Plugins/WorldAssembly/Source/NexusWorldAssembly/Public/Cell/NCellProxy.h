@@ -41,14 +41,14 @@ public:
 	/** Spawn the paired ANCellLevelInstance so the cell's content can be loaded into the world. */
 	void CreateLevelInstance();
 	/** Begin loading the paired level instance's level asset. */
-	void LoadLevelInstance();
+	void LoadLevelInstance(bool bBlocking = false);
 	/** Unload the paired level instance's level asset without destroying the actor. */
-	void UnloadLevelInstance() const;
+	void UnloadLevelInstance(bool bBlocking = false) const;
 	/**
-	 * Destroy the paired level instance, async based on level streaming subsystem.
+	 * Destroy the paired level instance, async based on level streaming subsystem, unless otherwise flagged with bBlockingUnload.
 	 * @param bUnregisterCellLevelInstance When true, also remove the level instance from FNWorldAssemblyRegistry.
 	 */
-	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false);
+	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false, bool bBlocking = false);
 
 protected:
 	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */

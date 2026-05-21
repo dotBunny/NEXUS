@@ -128,46 +128,73 @@ void ANCellProxy::CreateLevelInstance()
 	FNWorldAssemblyRegistry::RegisterCellLevelInstance(LevelInstance);
 }
 
-void ANCellProxy::LoadLevelInstance()
+void ANCellProxy::LoadLevelInstance(bool bBlocking)
 {
 	if (LevelInstance == nullptr)
 	{
 		CreateLevelInstance();
 	}
 	
-	// Something about IsLoaded occasionally causes a crash?
-	if (!LevelInstance->IsLoaded())
+	ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
+		
+	// Inflight loading currently
+	if (!Subsystem->IsLoading(LevelInstance))
 	{
-		LevelInstance->LoadLevelInstance();
-		Hide();
+		if (bBlocking)
+		{
+			Subsystem->BlockLoadLevelInstance(LevelInstance);
+		}
+		else
+		{
+			LevelInstance->LoadLevelInstance();
+		}
 	}
+	
+	Hide();
 }
 
-void ANCellProxy::UnloadLevelInstance() const
+void ANCellProxy::UnloadLevelInstance(bool bBlocking) const
 {
-	if (LevelInstance != nullptr && LevelInstance->IsLoaded())
+	if (LevelInstance != nullptr)
 	{
-		LevelInstance->UnloadLevelInstance();
+		ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
+		
+		// Inflight loading currently
+		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
+		{
+			Subsystem->BlockUnloadLevelInstance(LevelInstance);
+		}
+		else if (Subsystem->IsLoaded(LevelInstance))
+		{
+			Subsystem->RequestUnloadLevelInstance(LevelInstance);
+		}
 	}
 	Show();
 }
 
-void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance)
+void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool bBlocking)
 {
 	if (LevelInstance != nullptr)
 	{
-		if (LevelInstance->IsLoaded())
-		{
-			LevelInstance->UnloadLevelInstance();
-		}
+		ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
 		
+		// Unregister before the descruction starts
 		if (bUnregisterCellLevelInstance)
 		{
 			FNWorldAssemblyRegistry::UnregisterCellLevelInstance(LevelInstance);
 		}
 		
-		LevelInstance->Destroy(true, false);
+		// Inflight loading currently
+		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
+		{
+			Subsystem->BlockUnloadLevelInstance(LevelInstance);
+		}
+		else if (Subsystem->IsLoaded(LevelInstance))
+		{
+			Subsystem->RequestUnloadLevelInstance(LevelInstance);
+		}
 		
+		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
 	}
 	Show();

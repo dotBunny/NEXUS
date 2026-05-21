@@ -133,7 +133,7 @@ void UNWorldAssemblyEditorSubsystem::ClearGeneratedProxies(const uint32& Operati
 			KnownProxies.Remove(ProxiesArray[i]);
 			if (IsValid(ProxiesArray[i]))
 			{
-				ProxiesArray[i]->DestroyLevelInstance(true);
+				ProxiesArray[i]->DestroyLevelInstance(true, true);
 				ProxiesArray[i]->Destroy(true, false);
 			}
 		}

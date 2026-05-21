@@ -48,7 +48,13 @@ public:
 	 */
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
+		// It's being destroyed so dont even bother with it
+		if (Actor->IsPendingKillPending()) return false;
+		
+		// Organs should not effect collision
 		if (Actor->IsA<ANOrganVolume>()) return false;
+		
+		// Nor should any of our debug actors
 		if (Actor->IsA<ANDebugActor>()) return false;
 		
 		return true;
