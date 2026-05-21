@@ -74,7 +74,11 @@ public:
 	void RegisterLocalRelay(ANWorldAssemblyRelay* InRelay);
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
-	
+
+	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
+	UPROPERTY(BlueprintAssignable)
+	FNSimpleDynamicMulticastDelegate OnOperationStarted;
+
 	/** Fired when the last tracked operation finishes or is destroyed, i.e. when the tracked set transitions from non-empty to empty. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationsCompleted;

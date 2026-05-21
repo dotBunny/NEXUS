@@ -8,6 +8,7 @@
 #include "GameFramework/Actor.h"
 #include "NWorldAssemblyRelay.generated.h"
 
+class UNWorldAssemblySubsystem;
 /**
  * Per-player networking helper spawned by the World Assembly subsystem.
  *
@@ -66,6 +67,7 @@ protected:
 	void Client_ReceiveNearbyCells(const TArray<FNCellLevelInstanceLocator>& Results);
 
 private:
+	
 	/** Handle for the delegate wiring this relay into the registry's nearby-request pipeline. */
 	FDelegateHandle OnRequestNearbyHandle;
 
@@ -80,4 +82,6 @@ private:
 
 	/** @return true if a nearby-cell payload is currently cached. */
 	bool HasNearbyCellLevelInstances();
+	
+	TObjectPtr<UNWorldAssemblySubsystem> Subsystem;
 };

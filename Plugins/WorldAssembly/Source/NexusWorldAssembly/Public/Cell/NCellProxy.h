@@ -60,12 +60,11 @@ protected:
 
 private:
 
-	/** Reveal the proxy's preview mesh and enable its visualisation components. */
+	/** Reveal the proxy's preview mesh and enable its visualization components. */
 	void Show() const;
+	
 	/** Hide the proxy's preview mesh — used once the paired level instance is fully loaded. */
 	void Hide() const;
-	/** Build the proxy's dynamic collision mesh from the cell's bounds. */
-	void CreateCollisionMesh() const;
 
 	/** Dynamic mesh used as the visual preview while the underlying level instance streams in. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")

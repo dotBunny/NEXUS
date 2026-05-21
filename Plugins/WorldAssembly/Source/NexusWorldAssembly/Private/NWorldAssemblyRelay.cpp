@@ -39,10 +39,14 @@ void ANWorldAssemblyRelay::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Link to world Subsystem regardless of ownership
+	// We will use this at times to callback to things on a client that get subscribed.
+	Subsystem = UNWorldAssemblySubsystem::Get(GetWorld());
+	
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
 	if (OwningPC != nullptr && OwningPC->IsLocalController())
 	{
-		if (UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(GetWorld()))
+		if (Subsystem != nullptr)
 		{
 			Subsystem->RegisterLocalRelay(this);
 		}
@@ -56,7 +60,7 @@ void ANWorldAssemblyRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
 	if (OwningPC != nullptr && OwningPC->IsLocalController())
 	{
-		if (UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(GetWorld()))
+		if (Subsystem != nullptr)
 		{
 			Subsystem->UnregisterLocalRelay(this);
 		}

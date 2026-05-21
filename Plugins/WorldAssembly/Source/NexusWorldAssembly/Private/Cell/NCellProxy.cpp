@@ -192,15 +192,12 @@ void ANCellProxy::InitializeFromNCell(UNCell* InCell)
 
 	// Convert our mesh data to UE
 	Mesh->SetMesh(Cell->Root.Hull.CreateDynamicMesh(true));
-
 	
-	// DISABLE IT FOR NOW? WHY DO WE NEED IT?
+	// Clear all collision
 	SetActorEnableCollision(false);
 	Mesh->SetCanEverAffectNavigation(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
-	
-
 	// Let's rock some colors
 	Mesh->WireframeColor = Cell->Root.ProxyColor;
 	
@@ -237,30 +234,11 @@ void ANCellProxy::OnProxyMaterialLoaded()
 void ANCellProxy::Show() const
 {
 	Mesh->SetVisibility(true);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	Mesh->MarkRenderStateDirty();
 }
 
 void ANCellProxy::Hide() const
 {
 	Mesh->SetVisibility(false);
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
-
-void ANCellProxy::CreateCollisionMesh() const
-{
-	UBodySetup* BodySetup = Mesh->GetBodySetup();
-	if (BodySetup != nullptr)
-	{
-		BodySetup->Modify();
-	}
-	
-	FKConvexElem ConvexHull;
-	ConvexHull.VertexData = Cell->Root.Hull.Vertices;
-	ConvexHull.IndexData = Cell->Root.Hull.GetFlatIndices();
-	ConvexHull.CalcAABB(FTransform::Identity, FVector::One());
-	
-	FKAggregateGeom AggGeom;;
-	AggGeom.ConvexElems.Add(ConvexHull);
-	
-	Mesh->SetSimpleCollisionShapes(AggGeom, true);		
+	Mesh->MarkRenderStateDirty();
 }

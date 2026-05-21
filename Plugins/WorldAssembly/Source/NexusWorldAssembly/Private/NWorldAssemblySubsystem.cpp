@@ -50,7 +50,11 @@ bool UNWorldAssemblySubsystem::IsTickable() const
 
 void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 {
+	if (Operation == nullptr) return;
+	
 	KnownOperations.AddUnique(Operation);
+	OnOperationStarted.Broadcast();
+	
 	Operation->StartBuild(this);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
