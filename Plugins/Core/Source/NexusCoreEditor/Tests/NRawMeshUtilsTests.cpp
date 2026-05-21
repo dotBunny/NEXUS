@@ -558,6 +558,26 @@ N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_RotatedOverlap_True,
 	CHECK_MESSAGE(TEXT("Co-located cubes with a yaw offset must still be reported as intersecting"), bResult);
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_FullyContainedDifferentRotations_TrueViaContainmentFallback,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::FullyContainedDifferentRotations_TrueViaContainmentFallback",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Small cube fully inside a large cube with DISTINCT rotations on each side. The containment
+	// fallback transforms one mesh's vertex into the other mesh's local space; an earlier version
+	// of that code mis-rotated using the source mesh's inverse rotation instead of the destination
+	// mesh's, producing wrong containment results when Left and Right carried different rotations.
+	// The dual-direction nature of the check often masked the bug, so this test locks in the correct
+	// transformation by pairing distinct rotations and asserting containment is still reported.
+	const FNRawMesh Big = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(1.0);
+
+	const bool bResult = FNRawMeshUtils::DoesIntersect(
+		Big,   FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Small, FVector(0, 0, 0), FRotator(60.f, 0.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Inner cube fully contained by outer cube must be reported as intersecting even when the two meshes carry distinct rotations"), bResult);
+}
+
 N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_EmptyLoops_FalseWithWarning,
 	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::EmptyLoops_FalseWithWarning",
 	N_TEST_CONTEXT_ANYWHERE)

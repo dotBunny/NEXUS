@@ -532,24 +532,53 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 		}
 	}
 
-	// Triangle-triangle tests only catch surface crossings. If one mesh is entirely contained
-	// within the other, no triangles will intersect but the meshes still overlap. Check
-	// containment by testing one vertex from each mesh against the other mesh; for a closed
-	// manifold (convex or not), a single sample is enough — either every vertex is enclosed or
-	// none is, because any surface intersection would have been caught above.
-	const FQuat LeftInvQuat = LeftRotation.Quaternion().Inverse();
-	const FQuat RightInvQuat = RightRotation.Quaternion().Inverse();
-
-	const FVector LeftSample = LeftInvQuat.RotateVector(LeftVerticesWorld[0] - RightOrigin);
-	if (IsRelativePointInside(RightMesh, LeftSample))
+	// Triangle-triangle tests only catch surface crossings. If one mesh is entirely contained within
+	// the other, no triangles will intersect but the meshes still overlap. Gate the (relatively
+	// expensive) IsRelativePointInside probes on whether enclosure is geometrically possible at all:
+	// transform each mesh's local Bounds into world space and check whether one's AABB fully contains
+	// the other's. If neither contains the other, no mesh enclosure can occur and both probes are
+	// skipped — this is the common case for equal-sized cells in the World Assembly graph builder.
+	auto BoxAContainsBoxB = [](const FBox& A, const FBox& B) -> bool
 	{
-		return true;
+		return A.Min.X <= B.Min.X && B.Max.X <= A.Max.X
+			&& A.Min.Y <= B.Min.Y && B.Max.Y <= A.Max.Y
+			&& A.Min.Z <= B.Min.Z && B.Max.Z <= A.Max.Z;
+	};
+
+	const FBox LeftWorldBounds = LeftMesh.HasBounds()
+		? LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin))
+		: FBox(ForceInit);
+	const FBox RightWorldBounds = RightMesh.HasBounds()
+		? RightMesh.Bounds.TransformBy(FTransform(RightRotation, RightOrigin))
+		: FBox(ForceInit);
+
+	const bool bLeftCouldBeInsideRight = LeftWorldBounds.IsValid && RightWorldBounds.IsValid
+		&& BoxAContainsBoxB(RightWorldBounds, LeftWorldBounds);
+	const bool bRightCouldBeInsideLeft = LeftWorldBounds.IsValid && RightWorldBounds.IsValid
+		&& BoxAContainsBoxB(LeftWorldBounds, RightWorldBounds);
+
+	// Note: to put a world-space point into mesh M's local space, we invert M's rotation. The original
+	// code here inverted the source mesh's rotation by mistake (LeftInvQuat applied to a sample we then
+	// tested against RightMesh), which produced wrong containment results whenever Left and Right had
+	// different rotations. Both probes below now use the destination mesh's inverse rotation.
+	if (bLeftCouldBeInsideRight)
+	{
+		const FQuat RightInvQuat = RightRotation.Quaternion().Inverse();
+		const FVector LeftSampleInRightLocal = RightInvQuat.RotateVector(LeftVerticesWorld[0] - RightOrigin);
+		if (IsRelativePointInside(RightMesh, LeftSampleInRightLocal))
+		{
+			return true;
+		}
 	}
 
-	const FVector RightSample = RightInvQuat.RotateVector(RightVerticesWorld[0] - LeftOrigin);
-	if (IsRelativePointInside(LeftMesh, RightSample))
+	if (bRightCouldBeInsideLeft)
 	{
-		return true;
+		const FQuat LeftInvQuat = LeftRotation.Quaternion().Inverse();
+		const FVector RightSampleInLeftLocal = LeftInvQuat.RotateVector(RightVerticesWorld[0] - LeftOrigin);
+		if (IsRelativePointInside(LeftMesh, RightSampleInLeftLocal))
+		{
+			return true;
+		}
 	}
 
 	return false;
@@ -650,55 +679,12 @@ bool FNRawMeshUtils::DoesConvexIntersectSAT(
 		}
 	}
 
-	// 3. Edge-cross axes — required by SAT to catch "edge-on-edge" separations that no face normal
-	//    can witness (think a box edge running along another box's edge at 45 degrees). Builds the
-	//    unique edge direction lists from FaceLoops, deduped by (min, max) vertex index pair so an
-	//    edge shared between two adjacent faces contributes only one axis.
-	auto BuildEdgeDirections = [](const FNRawMesh& Mesh, const FQuat& Quat) -> TArray<FVector>
-	{
-		int32 EdgeBudget = 0;
-		for (const FNRawMeshLoop& Face : Mesh.FaceLoops)
-		{
-			EdgeBudget += Face.Indices.Num();
-		}
-		TSet<FIntVector2> Seen;
-		Seen.Reserve(EdgeBudget);
-		TArray<FVector> Dirs;
-		Dirs.Reserve(EdgeBudget);
-		for (const FNRawMeshLoop& Face : Mesh.FaceLoops)
-		{
-			const int32 N = Face.Indices.Num();
-			for (int32 k = 0; k < N; ++k)
-			{
-				const int32 V0 = Face.Indices[k];
-				const int32 V1 = Face.Indices[(k + 1) % N];
-				const FIntVector2 Key(FMath::Min(V0, V1), FMath::Max(V0, V1));
-				bool bAlready = false;
-				Seen.Add(Key, &bAlready);
-				if (!bAlready)
-				{
-					Dirs.Add(Quat.RotateVector(Mesh.Vertices[V1] - Mesh.Vertices[V0]));
-				}
-			}
-		}
-		return Dirs;
-	};
-
-	const TArray<FVector> LeftEdges = BuildEdgeDirections(LeftMesh, LeftQuat);
-	const TArray<FVector> RightEdges = BuildEdgeDirections(RightMesh, RightQuat);
-
-	for (const FVector& EA : LeftEdges)
-	{
-		for (const FVector& EB : RightEdges)
-		{
-			const FVector Axis = FVector::CrossProduct(EA, EB);
-			if (!IntervalsOverlap(Axis))
-			{
-				return false;
-			}
-		}
-	}
-
-	// No separating axis found across face normals or edge crosses → the convex hulls overlap.
-	return true;
+	// 3. No face normal separated. Hand off to the tri-tri sweep instead of running the O(E_L * E_R)
+	//    edge-cross axes — for the actual-overlap case (which is what reaches this point most often)
+	//    tri-tri terminates on the first surface hit and beats SAT's exhaustive axis enumeration.
+	//    The narrow case where edge-cross axes would have decided things (edge-on-edge near-touch
+	//    with no surface intersection) falls through to tri-tri, which returns "no surface hit" plus
+	//    "no enclosure via containment fallback" — the correct "no overlap" answer for that
+	//    configuration. See the function-level doc comment for the safety argument.
+	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }

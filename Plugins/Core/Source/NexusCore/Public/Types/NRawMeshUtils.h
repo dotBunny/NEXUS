@@ -166,14 +166,20 @@ private:
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
 	/**
-	 * Separating Axis Theorem (SAT) test for convex-vs-convex overlap. Returns true when the two transformed
-	 * meshes overlap. Requires both meshes to be flagged convex AND carry a polygonal FaceLoops description
-	 * (the per-face axis set comes from FaceLoop normals + cross-products of unique edge directions).
+	 * Hybrid convex-vs-convex overlap test. First runs a SAT-style face-normal rejection pass that
+	 * cheaply proves non-overlap when any face plane separates the two meshes. When no face normal
+	 * separates, falls through to the standard tri-tri sweep (DoesIntersectTriangles), which
+	 * terminates on the first surface hit and so beats SAT's O(E_L * E_R) edge-cross loop on the
+	 * actual-overlap case.
 	 *
-	 * Fast on the no-overlap path — typically rejects after testing a handful of face normals before reaching
-	 * the O(E_L * E_R) edge-cross loop. The hit path must exhaust every axis, so SAT is only dispatched for
-	 * mesh pairs small enough that the worst-case cost stays competitive with the tri-tri sweep; the gate
-	 * lives in CanUseSAT.
+	 * Why this is safe: the only convex-vs-convex configuration where face normals fail to separate
+	 * AND tri-tri finds no surface intersection is "fully enclosed" (handled by the containment
+	 * fallback inside DoesIntersectTriangles) or an exotic edge-on-edge near-touch (where tri-tri
+	 * correctly returns no intersection and we report no overlap). Pure-SAT edge-cross axes can only
+	 * be the deciding factor in that narrow corner — not worth their cost on the dominant hit path.
+	 *
+	 * Requires both meshes to be flagged convex AND carry a polygonal FaceLoops description. The
+	 * CanUseSAT gate enforces both preconditions plus a face-count cap.
 	 */
 	static bool DoesConvexIntersectSAT(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
