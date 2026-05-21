@@ -45,7 +45,7 @@ public:
 	/** Unload the paired level instance's level asset without destroying the actor. */
 	void UnloadLevelInstance() const;
 	/**
-	 * Destroy the paired level instance.
+	 * Destroy the paired level instance, async based on level streaming subsystem.
 	 * @param bUnregisterCellLevelInstance When true, also remove the level instance from FNWorldAssemblyRegistry.
 	 */
 	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false);

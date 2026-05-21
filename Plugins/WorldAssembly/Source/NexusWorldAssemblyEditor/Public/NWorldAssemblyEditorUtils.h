@@ -111,7 +111,7 @@ public:
 	 * @param CellActor Specific cell actor to save, or nullptr to use the world's primary cell actor.
 	 * @note Editor-only. Triggers the same slow-task UI as UpdateCell (it's invoked internally) and performs synchronous disk I/O.
 	 */
-	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr);
+	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
 
 	/**
 	 * Refresh the cell asset from the supplied cell actor.

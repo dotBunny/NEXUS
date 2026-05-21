@@ -122,6 +122,9 @@ public:
 
 	/** Reset the focused cell to its default authored state (clears cached bounds/hull/voxel). */
 	static void CellResetCell();
+
+	static void CellSaveCell();
+
 	/** Remove the focused cell actor from the level, deleting its side-car package. */
 	static void CellRemoveActor();
 
@@ -147,6 +150,7 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateHull;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateVoxelData;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellResetCell;
+	TSharedPtr<FUICommandInfo> CommandInfo_CellSaveCell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellRemoveActor;
 	
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleBoundsCalculateOnSave;

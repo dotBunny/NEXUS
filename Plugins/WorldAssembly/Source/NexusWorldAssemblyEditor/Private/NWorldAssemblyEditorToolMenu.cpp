@@ -222,6 +222,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					
 					MenuBuilder.BeginSection("NCellExtensions_CleanupSection", NSLOCTEXT("NexusWorldAssemblyEditor", "NCellExtensions_CleanupSection", "Cleanup"));
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellResetCell);
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellSaveCell);
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_CellRemoveActor);
 					MenuBuilder.EndSection();
 					

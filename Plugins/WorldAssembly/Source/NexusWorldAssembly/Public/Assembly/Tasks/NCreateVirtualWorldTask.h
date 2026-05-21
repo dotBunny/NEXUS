@@ -49,6 +49,8 @@ public:
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
 		if (Actor->IsA<ANOrganVolume>()) return false;
+		if (Actor->IsA<ANDebugActor>()) return false;
+		
 		return true;
 	}
 

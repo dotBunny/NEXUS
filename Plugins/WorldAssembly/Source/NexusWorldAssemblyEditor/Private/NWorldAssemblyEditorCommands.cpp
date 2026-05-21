@@ -102,6 +102,13 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ResetCell_Tooltip", "Reset the cell data."),
 		FSlateIcon(FNUIEditorStyle::GetStyleSetName(), "Command.Reset"),
 		EUserInterfaceActionType::Button, FInputChord());
+	
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellSaveCell,
+		"NWorldAssembly.NCell.SaveCell",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell", "Save Cell"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SaveCell_Tooltip", "Forcibly write out the Cells data to the sidecar file."),
+		FSlateIcon(FAppStyle::GetAppStyleSetName(), "LevelEditor.Save"),
+		EUserInterfaceActionType::Button, FInputChord());
 
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellRemoveActor,
 		"NWorldAssembly.NCell.RemoveActor",
@@ -161,6 +168,10 @@ FExecuteAction::CreateStatic(&CellToggleVoxelData),
 	
 	CommandList_Cell->MapAction(Get().CommandInfo_CellResetCell,
 	FExecuteAction::CreateStatic(&CellResetCell),
+	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
+	
+	CommandList_Cell->MapAction(Get().CommandInfo_CellSaveCell,
+	FExecuteAction::CreateStatic(&CellSaveCell),
 	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld));
 
 	CommandList_Cell->MapAction(Get().CommandInfo_CellRemoveActor,
@@ -676,6 +687,12 @@ void FNWorldAssemblyEditorCommands::CellResetCell()
 
 	// Flag the actor as dirty
 	CellActor->SetActorDirty();
+}
+
+void FNWorldAssemblyEditorCommands::CellSaveCell()
+{
+	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	FNWorldAssemblyEditorUtils::SaveCell(CurrentWorld, FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true), true);
 }
 
 void FNWorldAssemblyEditorCommands::CellRemoveActor()

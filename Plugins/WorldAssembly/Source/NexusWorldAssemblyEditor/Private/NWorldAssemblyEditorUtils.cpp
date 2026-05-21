@@ -171,7 +171,7 @@ bool FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies()
 	return false;
 }
 
-void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
+void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor, bool bForceSave)
 {
 	if (CellActor == nullptr)
 	{
@@ -186,7 +186,7 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor)
 	}
 
 	if (UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World); 
-		UpdateCell(Cell, CellActor))
+		(UpdateCell(Cell, CellActor) || bForceSave))
 	{
 		// Need to tell the cell it's dirty so it gets saved to disk
 		// ReSharper disable once CppExpressionWithoutSideEffects
