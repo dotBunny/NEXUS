@@ -65,11 +65,15 @@ void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& Bas
 		BaseMesh.FaceLoops.Reset();
 	}
 
-	// A merged mesh is no longer a single Chaos-cooked body; force Validate() to re-evaluate convexity and tri-ness.
+	// A merged mesh is no longer a single Chaos-cooked body; mark validation dirty so the next
+	// consumer query (or an explicit Validate call) re-evaluates convexity and tri-ness. Marking
+	// rather than re-running is the entire point of lazy validation — a tight CombineMesh loop
+	// would otherwise pay O(V * F) per merge for a convexity check the caller may never need.
 	BaseMesh.bIsChaosGenerated = false;
+	BaseMesh.InvalidateCachedFacePlanes();
 
 	BaseMesh.CalculateCenterAndBounds();
-	BaseMesh.Validate();
+	BaseMesh.InvalidateValidation();
 }
 
 bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
@@ -296,19 +300,20 @@ bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector&
 
 	if (Mesh.IsConvex())
 	{
-		// Convex fast path: for every face plane, the test point must lie on the same side as
-		// the mesh centroid. Exact and branch-free for closed convex hulls.
-		for (const FNRawMeshLoop& Loop : Mesh.Loops)
+		// Convex fast path: for every face plane, the test point must lie on the same side as the mesh
+		// centroid. Reads the cached face-plane data (Normal + PlaneD precomputed once per mesh edit)
+		// so each query is two dot products per face — no Cross, no per-vertex subtraction.
+		const TArray<FVector>& Normals = Mesh.GetCachedFaceNormals();
+		const TArray<double>& PlaneDs = Mesh.GetCachedFacePlaneD();
+		const int32 LoopCount = Mesh.Loops.Num();
+		for (int32 i = 0; i < LoopCount; ++i)
 		{
-			const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
-			const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
-			const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
+			const FVector& Normal = Normals[i];
+			const double PlaneD = PlaneDs[i];
+			const double CenterSide = FVector::DotProduct(Normal, Mesh.Center) - PlaneD;
+			const double PointSide  = FVector::DotProduct(Normal, RelativePoint) - PlaneD;
 
-			const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
-			const float CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
-			const float PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
-
-			if (CenterSide * PointSide < 0.0f)
+			if (CenterSide * PointSide < 0.0)
 			{
 				return false;
 			}
@@ -402,30 +407,34 @@ float FNRawMeshUtils::ComputePointDepthInsideNonConvex(const FNRawMesh& Mesh, co
 
 float FNRawMeshUtils::ComputePointDepthInsideConvex(const FNRawMesh& Mesh, const FVector& RelativePoint)
 {
-	float MinFaceDist = TNumericLimits<float>::Max();
-	for (const FNRawMeshLoop& Loop : Mesh.Loops)
-	{
-		const FVector& V0 = Mesh.Vertices[Loop.Indices[0]];
-		const FVector& V1 = Mesh.Vertices[Loop.Indices[1]];
-		const FVector& V2 = Mesh.Vertices[Loop.Indices[2]];
+	// Cached face planes turn each per-face query into two dot products + a precomputed multiply,
+	// eliminating the per-face Cross / Sqrt that used to dominate this loop. Degenerate triangles
+	// get InvNormalLen == 0 at cache-build time and naturally contribute no perpendicular distance.
+	const TArray<FVector>& Normals = Mesh.GetCachedFaceNormals();
+	const TArray<double>& PlaneDs = Mesh.GetCachedFacePlaneD();
+	const TArray<double>& InvLens = Mesh.GetCachedFaceInvNormalLen();
+	const int32 LoopCount = Mesh.Loops.Num();
 
-		const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
-		const double NormalLenSq = Normal.SizeSquared();
-		if (NormalLenSq <= UE_KINDA_SMALL_NUMBER)
+	float MinFaceDist = TNumericLimits<float>::Max();
+	for (int32 i = 0; i < LoopCount; ++i)
+	{
+		const double InvLen = InvLens[i];
+		if (InvLen == 0.0)
 		{
-			// Degenerate triangle: contributes no half-space constraint to the hull.
 			continue;
 		}
 
-		const double CenterSide = FVector::DotProduct(Normal, Mesh.Center - V0);
-		const double PointSide  = FVector::DotProduct(Normal, RelativePoint - V0);
+		const FVector& Normal = Normals[i];
+		const double PlaneD = PlaneDs[i];
+		const double CenterSide = FVector::DotProduct(Normal, Mesh.Center) - PlaneD;
+		const double PointSide  = FVector::DotProduct(Normal, RelativePoint) - PlaneD;
 
 		if (CenterSide * PointSide < 0.0)
 		{
 			return -1.0f;
 		}
 
-		const double PerpDist = FMath::Abs(PointSide) / FMath::Sqrt(NormalLenSq);
+		const double PerpDist = FMath::Abs(PointSide) * InvLen;
 		if (PerpDist < MinFaceDist)
 		{
 			MinFaceDist = static_cast<float>(PerpDist);
@@ -452,14 +461,48 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 		RightVerticesWorld.Add(FNVectorUtils::TransformPoint(Vertex, RightOrigin, RightRotation));
 	}
 	
-	// Check every triangle against every other triangle
 	const int32 LeftLoopCount = LeftMesh.Loops.Num();
 	const int32 RightLoopCount = RightMesh.Loops.Num();
+
+	// Precompute world-space per-triangle AABBs so the inner loop pays a 6-compare overlap rejection
+	// instead of the full Möller test on every pair. Adds O(L+R) build cost amortized across O(L*R)
+	// tests — a clear win on any hull with more than a few triangles, and decisive on the worst case
+	// (AABB-hit-mesh-miss) where every Möller call previously ran to completion only to fail.
+	TArray<FBox> LeftTriBounds;
+	LeftTriBounds.SetNumUninitialized(LeftLoopCount);
+	for (int32 i = 0; i < LeftLoopCount; ++i)
+	{
+		if (!LeftMesh.Loops[i].IsTriangle())
+		{
+			LeftTriBounds[i] = FBox(ForceInit);
+			continue;
+		}
+		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
+		const FVector& V1 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[1]];
+		const FVector& V2 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[2]];
+		LeftTriBounds[i] = FBox(FVector::Min(FVector::Min(V0, V1), V2), FVector::Max(FVector::Max(V0, V1), V2));
+	}
+
+	TArray<FBox> RightTriBounds;
+	RightTriBounds.SetNumUninitialized(RightLoopCount);
+	for (int32 j = 0; j < RightLoopCount; ++j)
+	{
+		if (!RightMesh.Loops[j].IsTriangle())
+		{
+			RightTriBounds[j] = FBox(ForceInit);
+			continue;
+		}
+		const FVector& U0 = RightVerticesWorld[RightMesh.Loops[j].Indices[0]];
+		const FVector& U1 = RightVerticesWorld[RightMesh.Loops[j].Indices[1]];
+		const FVector& U2 = RightVerticesWorld[RightMesh.Loops[j].Indices[2]];
+		RightTriBounds[j] = FBox(FVector::Min(FVector::Min(U0, U1), U2), FVector::Max(FVector::Max(U0, U1), U2));
+	}
 
 	for (int32 i = 0; i < LeftLoopCount; ++i)
 	{
 		if (!LeftMesh.Loops[i].IsTriangle()) continue;
-		
+		const FBox& LeftTriBox = LeftTriBounds[i];
+
 		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
 		const FVector& V1 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[1]];
 		const FVector& V2 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[2]];
@@ -467,6 +510,7 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 		for (int32 j = 0; j < RightLoopCount; ++j)
 		{
 			if (!RightMesh.Loops[j].IsTriangle()) continue;
+			if (!LeftTriBox.Intersect(RightTriBounds[j])) continue;
 
 			const FVector& U0 = RightVerticesWorld[RightMesh.Loops[j].Indices[0]];
 			const FVector& U1 = RightVerticesWorld[RightMesh.Loops[j].Indices[1]];

@@ -8,6 +8,64 @@
 
 // #SONARQUBE-DISABLE-CPP_S3776 It just is what it is to handle edge cases
 
+void FNRawMesh::EnsureValidated() const
+{
+	if (!bValidationDirty)
+	{
+		return;
+	}
+	// Chaos-cooked meshes are trusted: clear the dirty bit without running the checks, matching the
+	// fast-path skip the eager Validate() used to take.
+	if (bIsChaosGenerated)
+	{
+		bValidationDirty = false;
+		return;
+	}
+	bIsConvex = CheckConvex();
+	bHasNonTris = CheckNonTris();
+	bHasBounds = CheckBounds();
+	bValidationDirty = false;
+}
+
+void FNRawMesh::EnsureCachedFacePlanes() const
+{
+	if (bCachedFacePlanesValid)
+	{
+		return;
+	}
+
+	const int32 LoopCount = Loops.Num();
+	CachedFaceNormals.SetNumUninitialized(LoopCount);
+	CachedFacePlaneD.SetNumUninitialized(LoopCount);
+	CachedFaceInvNormalLen.SetNumUninitialized(LoopCount);
+
+	for (int32 i = 0; i < LoopCount; ++i)
+	{
+		const FNRawMeshLoop& Loop = Loops[i];
+		// Non-triangle / under-determined loops contribute no usable plane. Zero everything so consumers
+		// branch on InvNormalLen == 0 and skip.
+		if (Loop.Indices.Num() < 3)
+		{
+			CachedFaceNormals[i] = FVector::ZeroVector;
+			CachedFacePlaneD[i] = 0.0;
+			CachedFaceInvNormalLen[i] = 0.0;
+			continue;
+		}
+		const FVector& V0 = Vertices[Loop.Indices[0]];
+		const FVector& V1 = Vertices[Loop.Indices[1]];
+		const FVector& V2 = Vertices[Loop.Indices[2]];
+		const FVector Normal = FVector::CrossProduct(V1 - V0, V2 - V0);
+		const double LenSq = Normal.SizeSquared();
+		CachedFaceNormals[i] = Normal;
+		CachedFacePlaneD[i] = FVector::DotProduct(Normal, V0);
+		// Degenerate triangle: leave InvLen at 0 so consumers treat this face as a no-op contribution,
+		// matching the existing "if (NormalLenSq <= UE_KINDA_SMALL_NUMBER) continue" behaviour.
+		CachedFaceInvNormalLen[i] = (LenSq > UE_KINDA_SMALL_NUMBER) ? 1.0 / FMath::Sqrt(LenSq) : 0.0;
+	}
+
+	bCachedFacePlanesValid = true;
+}
+
 TArray<int32> FNRawMesh::GetFlatIndices() const
 {
 	int32 Total = 0;
@@ -239,6 +297,8 @@ void FNRawMesh::ConvertToTriangles()
 	}
 
 	Loops = MoveTemp(NewLoops);
+	InvalidateCachedFacePlanes();
+	InvalidateValidation();
 }
 
 void FNRawMesh::CalculateFaceLoops(const double AngleToleranceDeg, const double RelativeDistanceTolerance)
@@ -622,8 +682,9 @@ int32 FNRawMesh::SplitEdge(const int32 VertexAIndex, const int32 VertexBIndex)
 	}
 
 	bIsChaosGenerated = false;
+	InvalidateCachedFacePlanes();
 	CalculateCenterAndBounds();
-	Validate();
+	InvalidateValidation();
 
 	return MidpointIndex;
 }
@@ -648,10 +709,18 @@ bool FNRawMesh::CheckConvex() const
 	// the bumped vertex, and rejecting at 1e-3 keeps small edits accepted while still catching
 	// real off-plane drags (5%+ of extent). Coincidence is tighter — two vertices a full per-mille
 	// of extent apart aren't "the same point", they're just close.
-	FBox VertexBounds(ForceInit);
-	for (const FVector& V : Vertices)
+	//
+	// Prefer the cached Bounds field when populated — every mutator path updates Bounds before
+	// triggering Validate, so the live AABB is virtually always current. Fall back to a vertex
+	// scan only for the rare case where Bounds was never computed (defensive guard for friend
+	// callers that mutate Vertices directly without running CalculateCenterAndBounds).
+	FBox VertexBounds = Bounds.IsValid ? Bounds : FBox(ForceInit);
+	if (!VertexBounds.IsValid)
 	{
-		VertexBounds += V;
+		for (const FVector& V : Vertices)
+		{
+			VertexBounds += V;
+		}
 	}
 	const double Extent = VertexBounds.IsValid != 0 ? VertexBounds.GetExtent().GetMax() * 2.0 : 1.0;
 	const double ScaledExtent = FMath::Max(Extent, 1.0);
@@ -735,14 +804,16 @@ bool FNRawMesh::CheckConvex() const
 		}
 
 		// Plane-side test: every vertex not on this face must lie on or behind its supporting plane.
+		// Ordering matters here — the original code called Loop.Indices.Contains(v) on every vertex
+		// to skip the K face vertices, paying O(K) per vertex even though the vast majority of
+		// non-face vertices on a convex hull have Signed << 0 and never need the skip at all.
+		// Test the cheap dot first; only consult Contains when Signed would otherwise trip the
+		// threshold, which on a clean convex mesh happens only for the K face vertices themselves
+		// (where FP noise can leave them a hair in front of their own plane).
 		for (int32 v = 0; v < Vertices.Num(); v++)
 		{
-			if (Loop.Indices.Contains(v))
-			{
-				continue;
-			}
 			const double Signed = FVector::DotProduct(FaceNormal, Vertices[v]) - PlaneD;
-			if (Signed > UE_DOUBLE_KINDA_SMALL_NUMBER)
+			if (Signed > UE_DOUBLE_KINDA_SMALL_NUMBER && !Loop.Indices.Contains(v))
 			{
 				return false;
 			}

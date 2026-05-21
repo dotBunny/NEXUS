@@ -92,23 +92,68 @@ struct NEXUSCORE_API FNRawMesh
 	void CalculateFaceLoops(double AngleToleranceDeg = 1.0, double RelativeDistanceTolerance = 1e-4);
 
 	/**
-	 * Cached convexity result from the most recent Validate(). Defaults to false; returns false until
-	 * Validate() (or an external setter via a friend) has populated it. Not live — mutating Vertices
-	 * or Loops can leave this stale.
+	 * Lazily populates per-triangle face-plane data (raw Cross normal, plane offset, inverse normal length)
+	 * derived from Loops + Vertices. Called automatically by the convex-path consumers in FNRawMeshUtils
+	 * the first time they need it after a topology / vertex change. Safe to call repeatedly — no-ops when
+	 * the cache is already valid.
+	 * @note Only triangle loops contribute meaningful entries. Non-triangle loops (or degenerate triangles
+	 *       with a zero-length cross product) yield a zero normal and zero InvNormalLen, which the
+	 *       consumers treat as "skip this face".
 	 */
-	bool IsConvex() const { return bIsConvex; }
+	void EnsureCachedFacePlanes() const;
+
+	/** @return true when the face-plane cache reflects the current Loops / Vertices state. */
+	bool HasCachedFacePlanes() const { return bCachedFacePlanesValid; }
+
+	/** @return Per-triangle raw face normals (Cross(V1-V0, V2-V0), un-normalized). Lazily populated. */
+	const TArray<FVector>& GetCachedFaceNormals() const { EnsureCachedFacePlanes(); return CachedFaceNormals; }
+
+	/** @return Per-triangle plane offsets such that PlaneD[i] = Dot(Normal[i], V0[i]). Lazily populated. */
+	const TArray<double>& GetCachedFacePlaneD() const { EnsureCachedFacePlanes(); return CachedFacePlaneD; }
 
 	/**
-	 * Cached AABB-set flag from the most recent Validate(). Defaults to false; CalculateCenterAndBounds()
-	 * and RotatedAroundPivot() also keep it in sync. Not live — direct vertex mutation can leave this stale.
+	 * @return Per-triangle 1/||Normal||. Zero for degenerate triangles — consumers should treat zero
+	 *         entries as "no perpendicular distance contribution".
 	 */
-	bool HasBounds() const { return bHasBounds; }
+	const TArray<double>& GetCachedFaceInvNormalLen() const { EnsureCachedFacePlanes(); return CachedFaceInvNormalLen; }
 
 	/**
-	 * Cached non-triangle-loop flag from the most recent Validate(). Defaults to false; returns false until
-	 * Validate() has populated it. Not live — mutating Loops can leave this stale.
+	 * Marks the face-plane cache stale so the next consumer query rebuilds it. Called by every mutator
+	 * inside FNRawMesh; external callers that bypass those mutators (the friend classes) must invoke
+	 * this themselves after touching Vertices or Loops.
 	 */
-	bool HasNonTris() const { return bHasNonTris; }
+	void InvalidateCachedFacePlanes() const { bCachedFacePlanesValid = false; }
+
+	/**
+	 * Cached convexity result. Lazily re-evaluated on first read after a mutator marks validation dirty,
+	 * so consumers never see stale data even when many edits happen between queries.
+	 */
+	bool IsConvex() const { EnsureValidated(); return bIsConvex; }
+
+	/**
+	 * Cached AABB-set flag. Lazily re-evaluated on first read after a mutator marks validation dirty.
+	 */
+	bool HasBounds() const { EnsureValidated(); return bHasBounds; }
+
+	/**
+	 * Cached non-triangle-loop flag. Lazily re-evaluated on first read after a mutator marks validation dirty.
+	 */
+	bool HasNonTris() const { EnsureValidated(); return bHasNonTris; }
+
+	/**
+	 * Marks the cached convexity / non-tri / bounds flags stale so the next IsConvex / HasNonTris /
+	 * HasBounds query (or the next explicit Validate call) re-evaluates them. Cheap — just sets a
+	 * bit — so mutators can call it freely without paying the O(V * F) CheckConvex cost up front.
+	 */
+	void InvalidateValidation() const { bValidationDirty = true; }
+
+	/**
+	 * Runs the convexity / non-tri / bounds checks if the validation cache is dirty, otherwise no-ops.
+	 * Triggered automatically by IsConvex / HasNonTris / HasBounds; consumers that want eager
+	 * evaluation can call this directly. Honours bIsChaosGenerated as a trust signal that skips
+	 * the work entirely.
+	 */
+	void EnsureValidated() const;
 
 	/**
 	 * Deep equality comparison: vertices, loops, center, bounds, and the cached validation flags
@@ -152,6 +197,8 @@ struct NEXUSCORE_API FNRawMesh
 		Center = Quat.RotateVector(Center - WorldPoint) + WorldPoint;
 		Bounds = NewBounds;
 		bHasBounds = (Count > 0);
+		InvalidateCachedFacePlanes();
+		InvalidateValidation();
 	}
 
 	/**
@@ -168,6 +215,8 @@ struct NEXUSCORE_API FNRawMesh
 			Vertices[i] *= Scale;
 		}
 		CalculateCenterAndBounds();
+		InvalidateCachedFacePlanes();
+		InvalidateValidation();
 	}
 
 	/**
@@ -198,18 +247,15 @@ struct NEXUSCORE_API FNRawMesh
 	}
 
 	/**
-	 * Re-evaluates convex / non-triangle flags from the current vertex and loop data.
+	 * Forces an immediate re-evaluation of the convex / non-triangle / bounds flags. Equivalent to
+	 * marking the cache dirty and calling EnsureValidated(); kept for back-compat with callers that
+	 * want eager evaluation (typically factory methods finishing mesh construction).
 	 * @note Skipped for meshes marked as Chaos-generated, since those are trusted to already be tri-based and valid.
 	 */
 	void Validate()
 	{
-		if (bIsChaosGenerated)
-		{
-			return;
-		}
-		bIsConvex = CheckConvex();
-		bHasNonTris = CheckNonTris();
-		bHasBounds = CheckBounds();
+		bValidationDirty = true;
+		EnsureValidated();
 	}
 
 	/**
@@ -277,19 +323,37 @@ private:
 		return Normal.GetSafeNormal();
 	}
 
-	/** Cached result of the most recent convexity check. */
+	/** Cached result of the most recent convexity check. Mutable so EnsureValidated() can refresh it lazily from const queries. */
 	UPROPERTY(VisibleAnywhere)
-	bool bIsConvex = false;
+	mutable bool bIsConvex = false;
 
 	/** When true, the mesh originated from a Chaos destruction result and should be trusted as-is. */
 	UPROPERTY(VisibleAnywhere)
 	bool bIsChaosGenerated = false;
 
-	/** Cached result of the most recent non-triangle loop check. */
+	/** Cached result of the most recent non-triangle loop check. Mutable for the same lazy-refresh reason as bIsConvex. */
 	UPROPERTY(VisibleAnywhere)
-	bool bHasNonTris = false;
-	
-	/** Cached result of the most bounds check. */
+	mutable bool bHasNonTris = false;
+
+	/** Cached result of the most bounds check. Mutable for the same lazy-refresh reason as bIsConvex. */
 	UPROPERTY(VisibleAnywhere)
-	bool bHasBounds = false;
+	mutable bool bHasBounds = false;
+
+	/**
+	 * When true, the cached validation flags (bIsConvex, bHasNonTris, bHasBounds) are stale and will be
+	 * recomputed by the next IsConvex / HasNonTris / HasBounds query (or by an explicit Validate call).
+	 * Set by every internal mutator; external code that bypasses those mutators must call
+	 * InvalidateValidation() after touching Loops or Vertices.
+	 */
+	mutable bool bValidationDirty = false;
+
+	/**
+	 * Transient face-plane cache derived from Loops + Vertices. Not serialized; rebuilt on demand
+	 * after any topology / vertex change. Marked mutable so EnsureCachedFacePlanes can populate it
+	 * from const consumers (the convex-path queries in FNRawMeshUtils).
+	 */
+	mutable bool bCachedFacePlanesValid = false;
+	mutable TArray<FVector> CachedFaceNormals;
+	mutable TArray<double> CachedFacePlaneD;
+	mutable TArray<double> CachedFaceInvNormalLen;
 };
