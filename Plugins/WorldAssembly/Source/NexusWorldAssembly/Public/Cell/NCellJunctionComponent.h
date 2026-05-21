@@ -53,7 +53,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 
 public:
 	/** Junction shape, orientation, and flags authored per junction. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NCell Junction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	FNCellJunctionDetails Details;
 
 	//~USceneComponent

@@ -34,10 +34,10 @@ public:
 protected:
 
 	/** Organ rules (tissues, counts, trigger) for this volume. */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "NEXUS")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Organ Volume")
 	TObjectPtr<UNOrganComponent> OrganComponent;
 
 	/** Spatial skeleton that shapes cell placement inside the volume. */
-	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "NEXUS")
+	UPROPERTY(BlueprintReadOnly, VisibleAnywhere, Category = "Organ Volume")
 	TObjectPtr<UNBoneComponent> BoneComponent;
 };

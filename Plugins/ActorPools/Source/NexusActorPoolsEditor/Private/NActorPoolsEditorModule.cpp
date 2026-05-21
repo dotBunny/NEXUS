@@ -11,6 +11,7 @@
 #include "NEditorUtils.h"
 #include "NKillZoneActor.h"
 #include "NPooledActor.h"
+#include "NPropertySections.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NModuleMacros.h"
@@ -81,6 +82,10 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 			TOptional<int32>(),
 			NSLOCTEXT("NexusActorPoolsEditor", "Placement_NPooledActor", "Pooled Actor"))));
 	}
+	
+	// Inspector Category Filter
+	FNPropertySections::AddActorComponentCategory("Actor Pool Spawner");
+	FNPropertySections::AddActorComponentCategory("Kill Zone");
 }
 
 

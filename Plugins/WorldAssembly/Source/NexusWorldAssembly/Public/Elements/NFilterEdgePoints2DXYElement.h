@@ -16,7 +16,7 @@ struct FNFilterEdgePoints2DParams
 	GENERATED_BODY()
 
 	/** Grid spacing (world units) used when testing for neighbours to identify border points. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Setting)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings)
 	float Spacing = 100.f;
 };
 

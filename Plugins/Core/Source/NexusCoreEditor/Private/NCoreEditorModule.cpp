@@ -7,6 +7,7 @@
 #include "NEditorCommands.h"
 #include "NEditorStyle.h"
 #include "NEditorUtils.h"
+#include "NPropertySections.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
@@ -43,6 +44,9 @@ void FNCoreEditorModule::OnPostEngineInit()
 	
 	FNEditorCommands::Register();
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::AddMenuEntries));
+	
+	// Initialize our simplified property section manager
+	FNPropertySections::Register();
 	
 	// Start update check
 	UNUpdateCheckDelayedEditorTask::Create();

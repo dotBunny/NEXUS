@@ -15,6 +15,7 @@
 #include "EditorModeRegistry.h"
 #include "IPlacementModeModule.h"
 #include "NEditorDefaults.h"
+#include "NPropertySections.h"
 #include "Customizations/NCellRootComponentCustomization.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Visualizers/NCellJunctionComponentVisualizer.h"
@@ -166,6 +167,15 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 		TOptional<int32>(),
 		NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganVolumePlacement", "Organ Volume"))));
 	}
+	
+	// Inspector Category Filter
+	FNPropertySections::AddActorCategory("Cell Actor");
+	FNPropertySections::AddActorCategory("Cell Proxy");
+	FNPropertySections::AddActorCategory("Organ Volume");
+	FNPropertySections::AddActorComponentCategory("Organ Component");
+	FNPropertySections::AddSceneComponentCategory("Cell Root");
+	FNPropertySections::AddSceneComponentCategory("Cell Junction");
+	FNPropertySections::AddSceneComponentCategory("Bone Component");
 }
 
 IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, NexusWorldAssemblyEditor)

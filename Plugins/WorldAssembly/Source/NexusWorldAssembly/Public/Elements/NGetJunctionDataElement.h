@@ -16,7 +16,7 @@ struct FNGetJunctionDataParams
 	GENERATED_BODY()
 
 	/** Depth (along the junction normal) used when extruding the junction's emitted geometry. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Setting)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings)
 	float SocketDepth = 100.f;
 };
 

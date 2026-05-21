@@ -65,7 +65,7 @@ public:
 	 * Details about the NCell that is used during the generation process.
 	 * This information is synced with a separate file as to ensure that we only load asset data when needed.
 	 */
-	UPROPERTY(EditAnywhere, Category = "NCell Root")
+	UPROPERTY(EditAnywhere, Category="Cell Root")
 	FNCellRootDetails Details;
 
 private:

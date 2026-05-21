@@ -4,6 +4,7 @@
 #include "NDynamicRefsEditorModule.h"
 #include "NEditorUtils.h"
 #include "NDynamicRefsEditorStyle.h"
+#include "NPropertySections.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -31,6 +32,9 @@ void FNDynamicRefsEditorModule::OnPostEngineInit()
 	{
 		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NDynamicRefs)));
 	}
+	
+	// Inspector Category Filter
+	FNPropertySections::AddActorComponentCategory("DynamicRef");
 }
 
 IMPLEMENT_MODULE(FNDynamicRefsEditorModule, NexusDynamicRefsEditor)

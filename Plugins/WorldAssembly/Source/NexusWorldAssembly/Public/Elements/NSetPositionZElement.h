@@ -16,7 +16,7 @@ struct FNSetPositionZParams
 	GENERATED_BODY()
 
 	/** Target world Z value that every input point is snapped to. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Setting)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = Settings)
 	float ZValue = 0.f;
 };
 

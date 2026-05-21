@@ -120,24 +120,24 @@ public:
 
 protected:
 	/** The root component for this cell; also the actor's root component. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Cell Actor")
 	TObjectPtr<UNCellRootComponent> CellRoot;
 
 	/** Junction components owned by this cell, keyed by the junction identifier. */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Transient, Category="Cell Actor")
 	TMap<int32, TObjectPtr<UNCellJunctionComponent>> CellJunctions;
 
 private:
 	/** This is something that needs to be turned off when we spawn */
-	UPROPERTY(EditInstanceOnly)
+	UPROPERTY(EditInstanceOnly, Category="Cell Actor")
 	TArray<TObjectPtr<AActor>> AuthorTimeActors;
 
 	/** Reference to the paired UNCell data asset that stores derived cell data on disk. */
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")
 	TSoftObjectPtr<UNCell> Sidecar = nullptr;
 
 	/** Next identifier to hand out when a new junction is added to this cell. */
-	UPROPERTY(VisibleInstanceOnly)
+	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")
 	int32 CellJunctionNextIdentifier = 0;
 
 	/** true when the actor has author-time changes that have not yet been saved. */
