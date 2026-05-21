@@ -733,6 +733,11 @@ N_TEST_HIGH(FNRawMeshTests_ApplyScale_Identity_NoOp, "NEXUS::UnitTests::NCore::F
 N_TEST_HIGH(FNRawMeshTests_ApplyScale_Uniform_ScalesAllAxes, "NEXUS::UnitTests::NCore::FNRawMesh::ApplyScale::Uniform_ScalesAllAxes", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Uniform 2x scale — every vertex doubles and the recompute path updates Center + Bounds.
+	// HasBounds() below drives EnsureValidated, which calls CheckConvex; on a vertex-only mesh that
+	// path warns by design (see CheckConvex_Empty_FalseWithWarning) — silence it here so the
+	// validation-cache assertion can stand.
+	AddExpectedMessage(TEXT("No vertices or loops were found in the FNRawMesh"), ELogVerbosity::Warning);
+
 	FNRawMesh Mesh;
 	Mesh.Vertices = { FVector(1, 2, 3), FVector(4, 5, 6) };
 
