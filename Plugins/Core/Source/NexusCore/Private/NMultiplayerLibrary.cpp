@@ -45,13 +45,16 @@ bool UNMultiplayerLibrary::HasRemotePlayers(UObject* WorldContextObject)
 	if (const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject))
 	{
 		const AGameModeBase* GameMode = World->GetAuthGameMode();
-		if (GameMode == nullptr || GameMode->GameSession == nullptr)
+		if (GameMode == nullptr || GameMode->GameSession == nullptr || GameMode->GameState == nullptr)
 		{
 			return false;
 		}
 		for (const TObjectPtr<APlayerState> PlayerState : GameMode->GameState->PlayerArray)
 		{
-			if (PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->IsLocalController() == false)
+			if (PlayerState == nullptr) continue;
+			
+			if (PlayerState->GetPlayerController() != nullptr && 
+				PlayerState->GetPlayerController()->IsLocalController() == false)
 			{
 				return true;
 			}

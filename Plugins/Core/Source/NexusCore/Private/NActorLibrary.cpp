@@ -7,25 +7,21 @@ bool UNActorLibrary::IsSameActors(const TArray<AActor*>& A, const TArray<AActor*
 {
 	const int32 Length = A.Num();
 	if (Length != B.Num()) return false;
-	
-	TArray<bool> FindCache;
-	FindCache.Reserve(Length);
-	FindCache.AddDefaulted(Length);
-	
-	for (int32 i = 0; i < Length; i++)
+
+	TMap<AActor*, int32> Counts;
+	Counts.Reserve(Length);
+	for (AActor* Actor : A)
 	{
-		bool Found = false;
-		for (int32 j = 0; j < Length; j++)
-		{
-			if (FindCache[j]) continue;
-			if (A[i] == B[j])
-			{
-				FindCache[j] = true;
-				Found = true;
-			}
-		}
-		if (!Found) return false;
+		++Counts.FindOrAdd(Actor);
 	}
+
+	for (AActor* Actor : B)
+	{
+		int32* Count = Counts.Find(Actor);
+		if (Count == nullptr || *Count == 0) return false;
+		--(*Count);
+	}
+
 	return true;
 }
 

@@ -30,7 +30,7 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 	for (FString& PathRoot : SearchPaths)
 	{
 		ObjectLibrary->LoadAssetDataFromPath(PathRoot);
-		ObjectLibrary->GetAssetDataList(AssetDataArray);
+		ObjectLibrary->GetAssetDataList(AssetDataArray); // Copies its internal array to AssetDataArray
 
 		const int32 Count = AssetDataArray.Num();
 		for (int32 i = 0; i < Count; ++i)

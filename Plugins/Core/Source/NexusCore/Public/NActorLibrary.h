@@ -18,7 +18,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNSimpleDynamicMulticastDelegate);
  * related to Actor manipulation, comparison, and management.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Library")
-class UNActorLibrary : public UBlueprintFunctionLibrary
+class NEXUSCORE_API UNActorLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 

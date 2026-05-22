@@ -57,6 +57,13 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 
 void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfull)
 {
+	// Editor may have started shutting down between Execute() releasing this task and the HTTP
+	// response landing. Avoid touching settings or opening dialogs once exit has been requested.
+	if (!GIsRunning || IsEngineExitRequested())
+	{
+		return;
+	}
+
 	if (!bProcessedSuccessfull)
 	{
 		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."));
@@ -111,8 +118,17 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		return;
 	}
 
+	// Guard against a malformed or attacker-supplied response writing nonsense into user settings.
+	// Number is a monotonically increasing build counter; one million is well beyond any plausible
+	// real value while keeping parse-overflow and negative-sign cases out.
+	constexpr int32 MaxPlausibleVersionNumber = 1000000;
 	const int32 VersionNumberActual = FCString::Atoi(*TargetVersion);
-	
+	if (VersionNumberActual <= 0 || VersionNumberActual > MaxPlausibleVersionNumber)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Remote plugin version(%i) is outside the expected range; ignoring."), VersionNumberActual);
+		return;
+	}
+
 	// Notify about upgrade
 	if (VersionNumberActual > Settings->UpdatesIgnoreVersion)
 	{
