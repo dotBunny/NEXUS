@@ -51,8 +51,8 @@ public:
 		// It's being destroyed so dont even bother with it
 		if (Actor->IsPendingKillPending()) return false;
 		
-		// Organs should not effect collision
-		if (Actor->IsA<ANOrganVolume>()) return false;
+		// We are going to outright ignore volumes as collision data
+		if (Actor->IsA<AVolume>()) return false;
 		
 		// Nor should any of our debug actors
 		if (Actor->IsA<ANDebugActor>()) return false;
