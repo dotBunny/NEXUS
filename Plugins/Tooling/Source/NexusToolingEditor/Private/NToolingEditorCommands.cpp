@@ -240,6 +240,6 @@ void FNToolingEditorCommands::RemoveMenuEntries()
 		Menu->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
 		
 		Menu->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
-			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");
+			"EdGraphSchemaDocumentation", "NEXUS_ExternalDocumentation");
 	}
 }

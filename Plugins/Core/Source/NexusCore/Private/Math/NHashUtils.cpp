@@ -3,12 +3,12 @@
 
 #include "Math/NHashUtils.h"
 
-uint64 FNHashUtils::dbj2(const FString& InString)
+uint64 FNHashUtils::djb2(const FString& InString)
 {
-	auto Array = InString.GetCharArray();
-	const auto Data = Array.GetData();
+	const TCHAR* Data = *InString;
+	const int32 Length = InString.Len();
 	uint64 ComputeHash = 5381;
-	for (size_t i = 0; i < Array.Num(); ++i)
+	for (int32 i = 0; i < Length; ++i)
 		ComputeHash = 33 * ComputeHash + static_cast<unsigned char>(Data[i]);
 	return ComputeHash;
 }

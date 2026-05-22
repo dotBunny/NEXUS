@@ -159,7 +159,7 @@ public:
 	* @return a pseudo random unsigned integer.
 	*/
 	uint32 UnsignedIntegerRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32);
-	FORCEINLINE float RandRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32)
+	FORCEINLINE uint32 RandRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32)
 	{
 		return UnsignedIntegerRange(MinimumValue, MaximumValue);
 	}

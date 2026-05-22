@@ -56,7 +56,7 @@ void UNDynamicRefListViewEntry::Refresh() const
 		// Remake buttons for referenced objects
 		References->ClearListItems();
 		
-		for (TSoftObjectPtr ReferenceObject : Object->GetObjects())
+		for (TWeakObjectPtr ReferenceObject : Object->GetObjects())
 		{
 			UObject* ReferencePtr = ReferenceObject.Get();
 			if (IsValid(ReferencePtr))

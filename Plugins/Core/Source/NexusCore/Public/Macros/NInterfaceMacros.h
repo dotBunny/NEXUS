@@ -22,11 +22,11 @@
 			I##InterfaceName* InterfaceObject = Cast<I##InterfaceName>(BaseObject); \
 			if (InterfaceObject != nullptr) \
 			{ \
-				InterfaceObject->##MethodName(BaseObject); \
+				InterfaceObject->MethodName(); \
 			} \
 			else \
 			{ \
-				Execute_##EventName(BaseObject); \
+				I##InterfaceName::Execute_##EventName(BaseObject); \
 			} \
 		} \
 	}
@@ -43,11 +43,11 @@
 			I##InterfaceName* InterfaceObject = Cast<I##InterfaceName>(BaseObject); \
 			if (InterfaceObject != nullptr) \
 			{ \
-				InterfaceObject->##MethodName(BaseObject, ParamName); \
+				InterfaceObject->MethodName(ParamName); \
 			} \
 			else \
 			{ \
-				Execute_##EventName(BaseObject, ParamName); \
+				I##InterfaceName::Execute_##EventName(BaseObject, ParamName); \
 			} \
 		} \
 	}
@@ -66,11 +66,11 @@
 			I##InterfaceName* InterfaceObject = Cast<I##InterfaceName>(BaseObject); \
 			if (InterfaceObject != nullptr) \
 			{ \
-				InterfaceObject->##MethodName(BaseObject, ParamOneName, ParamTwoName); \
+				InterfaceObject->MethodName(ParamOneName, ParamTwoName); \
 			} \
 			else \
 			{ \
-				Execute_##EventName(BaseObject, ParamOneName, ParamTwoName); \
+				I##InterfaceName::Execute_##EventName(BaseObject, ParamOneName, ParamTwoName); \
 			} \
 		} \
 	}

@@ -216,8 +216,8 @@ private:
 	TArray<FNActorPool*> TickableActorPools;
 
 	/** Spawners that require per-frame ticking. */
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNActorPoolSpawnerComponent*> TickableSpawners;
+	UPROPERTY()
+	TArray<TObjectPtr<UNActorPoolSpawnerComponent>> TickableSpawners;
 
 	/** Per-class default settings registered at runtime. */
 	UPROPERTY()

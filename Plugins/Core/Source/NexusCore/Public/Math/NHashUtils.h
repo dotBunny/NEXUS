@@ -15,5 +15,5 @@ public:
 	 * @return The 64-bit djb2 hash of InString.
 	 * @note Not cryptographically secure; suitable for hash tables and non-security-sensitive identity checks.
 	 */
-	static uint64 dbj2(const FString& InString);
+	static uint64 djb2(const FString& InString);
 };

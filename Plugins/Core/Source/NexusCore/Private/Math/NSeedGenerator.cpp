@@ -145,7 +145,7 @@ FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)
 
 uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 {
-	const uint64 Seed = FNHashUtils::dbj2(InSeed);
+	const uint64 Seed = FNHashUtils::djb2(InSeed);
 	return Seed;
 }
 

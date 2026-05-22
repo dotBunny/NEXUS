@@ -12,6 +12,7 @@ void FNBlockoutModule::StartupModule()
 	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNBlockoutModule, OnPostEngineInit);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNBlockoutModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusBlockoutSamples")

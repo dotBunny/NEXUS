@@ -64,7 +64,7 @@
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
 		return FNRandom::GetNonDeterministic().RandRange(MinimumValue, MaximumValue); \
 	} \
-	inline Type RandonTrackedValueInSubRange(FRandomStream& RandomStream, Type MinimumValue, Type MaximumValue) const \
+	inline Type RandomTrackedValueInSubRange(FRandomStream& RandomStream, Type MinimumValue, Type MaximumValue) const \
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
