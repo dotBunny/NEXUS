@@ -130,7 +130,7 @@ void ANCellProxy::CreateLevelInstance()
 	FNWorldAssemblyRegistry::RegisterCellLevelInstance(LevelInstance);
 }
 
-void ANCellProxy::LoadLevelInstance(bool bBlocking)
+void ANCellProxy::LoadLevelInstance(const bool bBlocking)
 {
 	if (LevelInstance == nullptr)
 	{
@@ -142,6 +142,7 @@ void ANCellProxy::LoadLevelInstance(bool bBlocking)
 	// Inflight loading currently
 	if (!Subsystem->IsLoading(LevelInstance))
 	{
+#if WITH_EDITOR		
 		if (bBlocking)
 		{
 			Subsystem->BlockLoadLevelInstance(LevelInstance);
@@ -150,23 +151,24 @@ void ANCellProxy::LoadLevelInstance(bool bBlocking)
 		{
 			LevelInstance->LoadLevelInstance();
 		}
+#else
+		LevelInstance->LoadLevelInstance();
+#endif		
 	}
 	
 	Hide();
 }
 
-void ANCellProxy::UnloadLevelInstance(bool bBlocking) const
+void ANCellProxy::UnloadLevelInstance(const bool bBlocking) const
 {
 	if (LevelInstance != nullptr)
 	{
 		ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
 		
-#if WITH_EDITOR
 		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
 		// unload can leave the level in World->Levels even after the LI actor is destroyed.
 		ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
-#endif // WITH_EDITOR		
-		
+#if WITH_EDITOR
 		// Inflight loading currently
 		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
 		{
@@ -176,16 +178,14 @@ void ANCellProxy::UnloadLevelInstance(bool bBlocking) const
 		{
 			Subsystem->RequestUnloadLevelInstance(LevelInstance);
 		}
+#else
+		Subsystem->RequestUnloadLevelInstance(LevelInstance);
+#endif // WITH_EDITOR
 		
-#if WITH_EDITOR
-		// Editor-mode unload can leave the streamed sub-level loaded in World->Levels after the LI
-		// actor is destroyed, orphaning its actors and letting them leak into the next world-collision
-		// capture. Remove it explicitly if it is still present.
 		if (LoadedLevel != nullptr)
 		{
 			GetWorld()->RemoveLevel(LoadedLevel);
 		}
-#endif // WITH_EDITOR
 	}
 	Show();
 }
@@ -197,18 +197,17 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool b
 		UWorld* World = GetWorld();
 		ULevelInstanceSubsystem* Subsystem = World->GetSubsystem<ULevelInstanceSubsystem>();
 
-#if WITH_EDITOR
-		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
-		// unload can leave the level in World->Levels even after the LI actor is destroyed.
-		ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
-#endif // WITH_EDITOR		
-
 		// Unregister before the destruction starts
 		if (bUnregisterCellLevelInstance)
 		{
 			FNWorldAssemblyRegistry::UnregisterCellLevelInstance(LevelInstance);
 		}
-
+		
+		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
+		// unload can leave the level in World->Levels even after the LI actor is destroyed.
+		ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
+		
+#if WITH_EDITOR
 		// Inflight loading currently
 		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
 		{
@@ -218,19 +217,17 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool b
 		{
 			Subsystem->RequestUnloadLevelInstance(LevelInstance);
 		}
+#else
+		Subsystem->RequestUnloadLevelInstance(LevelInstance);
+#endif // WITH_EDITOR	
+
 
 		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
-
-#if WITH_EDITOR
-		// Editor-mode unload can leave the streamed sub-level loaded in World->Levels after the LI
-		// actor is destroyed, orphaning its actors and letting them leak into the next world-collision
-		// capture. Remove it explicitly if it is still present.
 		if (LoadedLevel != nullptr)
 		{
 			World->RemoveLevel(LoadedLevel);
 		}
-#endif // WITH_EDITOR		
 	}
 	Show();
 }
