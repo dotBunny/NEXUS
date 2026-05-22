@@ -24,7 +24,7 @@ void FNPropertySections::Register()
 	ActorPropertySection->AddCategory(BaseCategory);
 	if (!PendingActors.IsEmpty())
 	{
-		for (FName Entry : PendingActors)
+		for (const FName Entry : PendingActors)
 		{
 			if (!ActorPropertySection->HasAddedCategory(Entry))
 			{
@@ -38,7 +38,7 @@ void FNPropertySections::Register()
 	ActorComponentPropertySection->AddCategory(BaseCategory);
 	if (!PendingActorComponents.IsEmpty())
 	{
-		for (FName Entry : PendingActorComponents)
+		for (const FName Entry : PendingActorComponents)
 		{
 			if (!ActorComponentPropertySection->HasAddedCategory(Entry))
 			{
@@ -52,7 +52,7 @@ void FNPropertySections::Register()
 	SceneComponentPropertySection->AddCategory(BaseCategory);
 	if (!PendingSceneComponents.IsEmpty())
 	{
-		for (FName Entry : PendingSceneComponents)
+		for (const FName Entry : PendingSceneComponents)
 		{
 			if (!SceneComponentPropertySection->HasAddedCategory(Entry))
 			{
@@ -66,7 +66,7 @@ void FNPropertySections::Register()
 	ObjectPropertySection->AddCategory(BaseCategory);
 	if (!PendingObjectComponents.IsEmpty())
 	{
-		for (FName Entry : PendingObjectComponents)
+		for (const FName Entry : PendingObjectComponents)
 		{
 			if (!ObjectPropertySection->HasAddedCategory(Entry))
 			{

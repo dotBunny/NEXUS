@@ -6,6 +6,7 @@
 #include "EditorModeManager.h"
 #include "EdMode.h"
 #include "NWorldAssemblyEditorModule.h"
+#include "CanvasItems/NMultiLineTextBoxCanvasItem.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
@@ -192,4 +193,6 @@ private:
 	uint32 PreviousSelectedOrganHash = 0;
 	
 	FDelegateHandle OnLevelActorDeletedHandle;
+	
+	FNMultiLineTextBoxCanvasItem CanvasMessageBox = FNMultiLineTextBoxCanvasItem();
 };

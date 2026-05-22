@@ -3,7 +3,9 @@
 
 #include "NWorldAssemblyEdMode.h"
 
+#include "CanvasItem.h"
 #include "CanvasTypes.h"
+#include "NCanvasUtils.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyRegistry.h"
@@ -252,35 +254,34 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
-	int32 MessageOffset = 35;
+	CanvasMessageBox.Clear();
 	
 	if (bHasDirtyActors)
 	{
-		Canvas->DrawShadowedText(10,MessageOffset, DirtyMessage, GEngine->GetSmallFont(), FLinearColor::Yellow);
-		MessageOffset += MessageSpacing;
+		CanvasMessageBox.AddSeverity(ENSeverity::Warning);
+		CanvasMessageBox.AddSmallLine(DirtyMessage, FLinearColor::Yellow);
 	}
 
 	if (bAutoBoundsDisabled && bAutoHullDisabled)
 	{
-		Canvas->DrawShadowedText(10,MessageOffset, AutoBoundsHullMessage, GEngine->GetSmallFont(), FLinearColor::White);
-		MessageOffset += MessageSpacing;	
+		CanvasMessageBox.AddSmallLine(AutoBoundsHullMessage);
 	}
 	else if (bAutoBoundsDisabled)
 	{
-		Canvas->DrawShadowedText(10,MessageOffset, AutoBoundsMessage, GEngine->GetSmallFont(), FLinearColor::White);
-		MessageOffset += MessageSpacing;	
+		CanvasMessageBox.AddSmallLine(AutoBoundsMessage);
 	}
 	else if (bAutoHullDisabled)
 	{
-
-		Canvas->DrawShadowedText(10,MessageOffset, AutoHullMessage, GEngine->GetSmallFont(), FLinearColor::White);
-		MessageOffset += MessageSpacing;	
+		CanvasMessageBox.AddSmallLine(AutoHullMessage);
 	}
 	else if (bAutoVoxelDisabled)
 	{
-
-		Canvas->DrawShadowedText(10,MessageOffset, AutoVoxelMessage, GEngine->GetSmallFont(), FLinearColor::White);
-		MessageOffset += MessageSpacing;	
+		CanvasMessageBox.AddSmallLine(AutoVoxelMessage);
+	}
+	
+	if (CanvasMessageBox.HasContent())
+	{
+		FNCanvasUtils::DrawCanvasTextBox(&CanvasMessageBox, Canvas, FVector2D(10,10));
 	}
 	
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
