@@ -13,7 +13,8 @@ FNObjectSnapshot FNObjectSnapshotUtils::CachedSnapshot;
 FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
 	check(IsInGameThread());
-
+	FGCScopeGuard Guard;
+	
 	// Create our Snapshot struct
 	FNObjectSnapshot Snapshot(FNDeveloperUtils::GetCurrentObjectCount());
 	Snapshot.Ticket = TakeTicket();
