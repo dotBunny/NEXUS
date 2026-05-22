@@ -59,11 +59,11 @@ void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 }
 
 const FEditorModeID FNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
-const FText FNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty NCellActor");
-const FText FNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("NCell Bounds not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("NCell Bounds and Hull not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("NCell Hull not calculated on save.");
-const FText FNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("NCell Voxel not calculated on save.");
+const FText FNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty Cell Actor");
+const FText FNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("Cell Bounds not calculated on save.");
+const FText FNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("Cell Bounds and Hull not calculated on save.");
+const FText FNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("Cell Hull not calculated on save.");
+const FText FNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("Cell Voxel not calculated on save.");
 
 ANCellActor* FNWorldAssemblyEdMode::CellActor = nullptr;
 FNWorldAssemblyEdMode::ENCellEdMode FNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
