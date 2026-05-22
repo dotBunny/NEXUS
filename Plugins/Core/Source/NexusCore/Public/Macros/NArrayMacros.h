@@ -36,12 +36,12 @@ public: \
 			for (IndexType y = 0; y < SizeY; y++) \
 			{ \
 				if (y >= NewSizeY) continue; \
-				NewData[x + (y * NewSizeX)] = MoveTemp(Data[GetIndex(x, y)]); \
+				NewData[x + (y * NewSizeX)] = MoveTemp(DataArray[GetIndex(x, y)]); \
 			} \
 		} \
 		SizeX = NewSizeX; \
 		SizeY = NewSizeY; \
-		Data = MoveTemp(NewData); \
+		DataArray = MoveTemp(NewData); \
 	} \
 	\
 	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y) const \
@@ -170,14 +170,14 @@ public: \
 				for (IndexType z = 0; z < SizeZ; z++) \
 				{ \
 					if (z >= NewSizeZ) continue; \
-					NewData[x + (y * NewSizeX) + (z * NewSizeX * NewSizeY)] = MoveTemp(Data[GetIndex(x, y, z)]); \
+					NewData[x + (y * NewSizeX) + (z * NewSizeX * NewSizeY)] = MoveTemp(DataArray[GetIndex(x, y, z)]); \
 				} \
 			} \
 		} \
 		SizeX = NewSizeX; \
 		SizeY = NewSizeY; \
 		SizeZ = NewSizeZ; \
-		Data = MoveTemp(NewData); \
+		DataArray = MoveTemp(NewData); \
 	} \
 	\
 	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y, const IndexType Z) const \
