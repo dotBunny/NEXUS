@@ -97,7 +97,8 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
 		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
-
+		CaptureSnapshot.Reset();
+		
 		FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 			FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		Async(EAsyncExecution::TaskGraph,
