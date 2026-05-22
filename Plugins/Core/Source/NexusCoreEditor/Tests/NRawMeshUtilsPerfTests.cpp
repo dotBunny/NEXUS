@@ -634,6 +634,9 @@ N_TEST_PERF(FNRawMeshUtilsPerfTests_ToConvexHull_PointCloud,
 	"NEXUS::PerfTests::NCore::FNRawMeshUtils::ToConvexHull_PointCloud",
 	N_TEST_CONTEXT_ANYWHERE)
 {
+	// Setup strips Loops/FaceLoops so ToConvexHull takes the Chaos-builder path; the subsequent Validate
+	// then fires CheckConvex's "no vertices or loops" warning by design — silence it like the unit test does.
+	AddExpectedMessage(TEXT("No vertices or loops were found in the FNRawMesh"), ELogVerbosity::Warning);
 	N_TESTS_PERF_START_LATENT_TEST
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshUtilsPerfTests::ToConvexHull_PointCloud));
 	N_TESTS_PERF_FINISH_LATENT_TEST
