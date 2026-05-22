@@ -39,7 +39,8 @@ public:
 	/** Push current widget Settings onto Actor so its transform/draw state matches. */
 	void PushSettings(ANCollisionVisualizerActor* Actor) const;
 
-	/** Pull Actor state back into the widget's Settings (used after viewport-driven moves). */
+	/** Pull Actor state back into the widget's Settings (used after viewport-driven moves). 
+	 * Validates if a change actually has occured before an actual write is done. */
 	void UpdateSettings(const ANCollisionVisualizerActor* Actor);
 
 protected:
