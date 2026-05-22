@@ -9,6 +9,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyUtils.h"
@@ -252,6 +253,13 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
+	// Messages disabled
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages)
+	{
+		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
+		return;
+	}
+	
 	CanvasMessageBox.Clear();
 	
 	if (bHasDirtyActors)
