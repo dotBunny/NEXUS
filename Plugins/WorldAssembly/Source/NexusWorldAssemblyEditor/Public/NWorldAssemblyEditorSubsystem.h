@@ -117,7 +117,7 @@ private:
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
 
 	/** Index from operation ticket to the proxies spawned by that operation, for fast per-operation cleanup. */
-	TMap<uint32, TArray<ANCellProxy*>> ProxyMap;
+	TMap<uint32, TArray<TObjectPtr<ANCellProxy>>> ProxyMap;
 
 	/** Frame number of the last Tick — guards against re-entrant ticking from multiple callers. */
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;

@@ -60,7 +60,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	}
 	
 	// Make our own map to the created proxies tied to the operation ticket
-	ProxyMap.Add(Operation->GetTicket(), TArray<ANCellProxy*>(TaskGraphContext->CreatedProxies));
+	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
 	
 	// Toast

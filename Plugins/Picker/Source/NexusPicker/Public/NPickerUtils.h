@@ -55,10 +55,16 @@
 class NEXUSPICKER_API FNPickerUtils
 {
 public:
-	/** Collision query parameters used by the trace-based projection path. */
+	/** Collision query parameters used by the trace-based projection path. 
+	 * @note Should only be accessed from the Game-thread.
+	 */
 	static FCollisionQueryParams CollisionQueryParams;
-	/** Query extent used when projecting onto the navmesh; adjust if your navmesh tolerance needs widening. */
+	/** Query extent used when projecting onto the navmesh; adjust if your navmesh tolerance needs widening. 
+	 * @note Should only be accessed from the Game-thread.
+	 */
 	static FVector NavQueryExtent;
-	/** Nav agent properties used when resolving a navmesh location for a generated point. */
+	/** Nav agent properties used when resolving a navmesh location for a generated point.
+	 * @note Should only be accessed from the Game-thread. 
+	 */
 	static FNavAgentProperties NavAgentProperties;
 };

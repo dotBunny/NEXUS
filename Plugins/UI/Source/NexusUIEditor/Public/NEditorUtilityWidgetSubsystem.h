@@ -115,6 +115,7 @@ protected:
 	TArray<FName> TabIdentifiers;
 private:
 	/** Transient map of currently-alive widget instances keyed by identifier. */
+	UPROPERTY()
 	TMap<FName, TObjectPtr<UNEditorUtilityWidget>> KnownWidgets;
 };
 
