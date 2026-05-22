@@ -46,15 +46,23 @@ public:
 	 * GetIgnoreSelectedActorsToggleMode: if no actor in the selection is tagged the tag is added to all,
 	 * otherwise the tag is removed from all.
 	 */
-	static void IgnoreSelectedActorsToggle();
+	static void TagSelectedActors_CellIgnore();
 	
-	static bool IgnoreSelectedActorsToggle_CanShow();
-
+	static bool TagSelectedActors_CellIgnore_CanShow();
+	
 	/**
 	 * @return Toggle state for the ignore-selected-actors action: 0 to add the tag, 1 to remove it, or -1
 	 * when the action should be disabled (empty selection or a mixed-tag selection where the intent is ambiguous).
 	 */
-	static int32 GetIgnoreSelectedActorsToggleMode();
+	static int32 TagSelectedActors_CellIgnore_Mode();
+	
+	static void TagSelectedActors_WorldCollisionIgnore();
+	
+	static bool TagSelectedActors_WorldCollisionIgnore_CanShow();
+	
+	static int32 TagSelectedActors_WorldIgnore_Mode();
+
+
 	
 	static void Hull_SplitEdge();
 	static bool Hull_SplitEdge_CanShow();

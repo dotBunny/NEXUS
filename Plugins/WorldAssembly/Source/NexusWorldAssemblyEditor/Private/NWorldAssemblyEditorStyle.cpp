@@ -60,19 +60,33 @@ FSlateIcon FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon()
 	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CreateCollisionVisualizer");
 }
 
-FSlateIcon FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon()
+FSlateIcon FNWorldAssemblyEditorStyle::CellIgnoreIcon()
 {
-	const int32 Mode = FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode();
+	const int32 Mode = FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_Mode();
 	switch (Mode)
 	{
 	case 0:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_NotIgnored");
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_NotIgnored");
 	case 1:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_Ignored");
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_Ignored");
 	default:
-		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.IgnoreActorToggle_Unknown");
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CellIgnore_Unknown");
 	}
 	
+}
+
+FSlateIcon FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon()
+{
+	const int32 Mode = FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode();
+	switch (Mode)
+	{
+	case 0:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored");
+	case 1:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_Ignored");
+	default:
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.WorldCollisionIgnore_Unknown");
+	}
 }
 
 TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
@@ -149,9 +163,14 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Command.WorldAssemblyEd.HasCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_HasCollisionVisualizer"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.CreateCollisionVisualizer", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CreateCollisionVisualizer"), Icon16x16));
 	
-	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_Unknown"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_NotIgnored"), Icon16x16));
-	Style.Set("Command.WorldAssemblyEd.IgnoreActorToggle_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_IgnoreActorToggle_Ignored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.CellIgnore_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_NotIgnored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.CellIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Ignored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.CellIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CellIgnore_Unknown"), Icon16x16));
+
+	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_NotIgnored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_NotIgnored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Ignored"), Icon16x16));
+	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Unknown"), Icon16x16));
+	
 	
 	return StyleRef;
 }

@@ -33,7 +33,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellVoxelGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the voxel calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnoreActorTag, "NCell_VoxelIgnore" };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnore, NEXUS::WorldAssembly::Tags::CellVoxelIgnore };
 
 	/** Collision channel used when tracing against the cell to determine occupancy. */
 	UPROPERTY(EditAnywhere)

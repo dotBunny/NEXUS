@@ -10,7 +10,13 @@ namespace NEXUS::WorldAssembly
 {
 	namespace Tags
 	{
-		inline const FName CellIgnoreActorTag = FName("NCell_Ignore");
+		inline const FName CellIgnore = FName("NCell_Ignore");
+		
+		inline const FName CellBoundsIgnore = FName("NCell_BoundsIgnore");
+		inline const FName CellHullIgnore = FName("NCell_HullIgnore");
+		inline const FName CellVoxelIgnore = FName("NCell_VoxelIgnore");
+		
+		inline const FName WorldCollisionIgnore = FName("NWorldCollision_Ignore");
 	}
 	/**
 	 * Debug-draw tuning.

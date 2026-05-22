@@ -313,19 +313,34 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Ignore Actor Toggle
-		FToolMenuEntry IgnoreActorToggle  = FToolMenuEntry::InitToolBarButton(
-			"NWorldAssembly_IgnoreActorToggle",
+		FToolMenuEntry CellIgnoreToggle  = FToolMenuEntry::InitToolBarButton(
+			"NWorldAssembly_CellIgnoreToggle",
 			FUIAction(
-				FExecuteAction::CreateStatic(&IgnoreSelectedActorsToggle),
+				FExecuteAction::CreateStatic(&TagSelectedActors_CellIgnore),
 				FCanExecuteAction(),
 				FIsActionChecked(),
-				FIsActionButtonVisible::CreateStatic(&IgnoreSelectedActorsToggle_CanShow)),
-				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle", "Ignore Actor Toggle"),
-				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_IgnoreActorToggle_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a NCell."),
+				FIsActionButtonVisible::CreateStatic(&TagSelectedActors_CellIgnore_CanShow)),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CellIgnoreToggle", "Ignore Actor (Cell Calculations)"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CellIgnoreToggle_Tooltip", "Toggles the necessary tag to have the selected actors ignored when calculating the bounds/hull/etc for a Cell."),
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
-				&FNWorldAssemblyEditorStyle::IgnoreActorToggleIcon)));
-		NexusSection.AddEntry(IgnoreActorToggle);
+				&FNWorldAssemblyEditorStyle::CellIgnoreIcon)));
+		NexusSection.AddEntry(CellIgnoreToggle);
+		
+		// Ignore Actor Toggle
+		FToolMenuEntry WorldCollisionIgnoreToggle  = FToolMenuEntry::InitToolBarButton(
+			"NWorldAssembly_WorldCollisionIgnoreToggle",
+			FUIAction(
+				FExecuteAction::CreateStatic(&TagSelectedActors_WorldCollisionIgnore),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible::CreateStatic(&TagSelectedActors_WorldCollisionIgnore_CanShow)),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_WorldCollisionIgnoreToggle", "Ignore Actor (World Collision))"),
+				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_WorldCollisionIgnoreToggle_Tooltip", "Toggles the necessary tag to have the selected actors ignored in the world collision system when placing Cells during assembly."),
+				TAttribute<FSlateIcon>::Create(
+					TAttribute<FSlateIcon>::FGetter::CreateStatic(
+				&FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon)));
+		NexusSection.AddEntry(WorldCollisionIgnoreToggle);
 		
 		FToolMenuEntry HullSplitEdgeEntry  = FToolMenuEntry::InitToolBarButton(
 			"NWorldAssembly_Hull_SplitEdge",
@@ -416,38 +431,45 @@ void FNWorldAssemblyEditorToolMenu::CollisionVisualizerToggle()
 	}
 }
 
-void FNWorldAssemblyEditorToolMenu::IgnoreSelectedActorsToggle()
+void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 {
-	if (GetIgnoreSelectedActorsToggleMode() == 0)
+	
+	if (TagSelectedActors_CellIgnore_Mode() == 0)
 	{
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore", "Add CellIgnore Tags"));
+		
 		// ADD
 		USelection* AddSelection = GEditor->GetSelectedActors();
 		for (FSelectionIterator It(*AddSelection); It; ++It)
 		{
 			AActor* Actor = Cast<AActor>(*It);
-			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag);
+			Actor->Modify(true);
+			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::CellIgnore);
 		}
 	}
 	else
 	{
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore", "Remove CellIgnore Tags"));
+		
 		// REMOVE
 		USelection* RemoveSelection = GEditor->GetSelectedActors();
 		for (FSelectionIterator It(*RemoveSelection); It; ++It)
 		{
 			AActor* Actor = Cast<AActor>(*It);
-			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag);
+			Actor->Modify(true);
+			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::CellIgnore);
 		}
 	}
 }
 
-bool FNWorldAssemblyEditorToolMenu::IgnoreSelectedActorsToggle_CanShow()
+bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_CanShow()
 {
 	return FNWorldAssemblyEdMode::HasCellActor() 
 		&& FNEditorUtils::HasActorsSelected() 
 		&& !FNWorldAssemblyEditorUtils::IsCellActorSelected();
 }
 
-int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
+int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_Mode()
 {
 	USelection* Selection = GEditor->GetSelectedActors();
 	if (Selection == nullptr || Selection->Num() == 0)
@@ -463,7 +485,7 @@ int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
 		const AActor* Actor = Cast<AActor>(*It);
 		ActorCount++;
 		
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::CellIgnoreActorTag))
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::CellIgnore))
 		{
 			TaggedActorCount++;
 		}
@@ -479,6 +501,75 @@ int32 FNWorldAssemblyEditorToolMenu::GetIgnoreSelectedActorsToggleMode()
 	}
 	return 0; // Add
 }
+
+
+void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
+{
+	if (TagSelectedActors_WorldIgnore_Mode() == 0)
+	{
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore", "Add WorldCollisionIgnore Tags"));
+		// ADD
+		USelection* AddSelection = GEditor->GetSelectedActors();
+		for (FSelectionIterator It(*AddSelection); It; ++It)
+		{
+			AActor* Actor = Cast<AActor>(*It);
+			Actor->Modify(true);
+			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+		}
+	}
+	else
+	{
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore", "Remove WorldCollisionIgnore Tags"));
+		
+		// REMOVE
+		USelection* RemoveSelection = GEditor->GetSelectedActors();
+		for (FSelectionIterator It(*RemoveSelection); It; ++It)
+		{
+			AActor* Actor = Cast<AActor>(*It);
+			Actor->Modify(true);
+			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+		}
+	}
+}
+
+bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow()
+{
+	return FNWorldAssemblyEdMode::IsActive() && FNEditorUtils::HasActorsSelected();
+}
+
+int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode()
+{
+	USelection* Selection = GEditor->GetSelectedActors();
+	if (Selection == nullptr || Selection->Num() == 0)
+	{
+		return -1; // Disabled
+	}
+	
+	int32 ActorCount = 0;
+	int32 TaggedActorCount = 0;
+	
+	for (FSelectionIterator It(*Selection); It; ++It)
+	{
+		const AActor* Actor = Cast<AActor>(*It);
+		ActorCount++;
+		
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore))
+		{
+			TaggedActorCount++;
+		}
+	}
+	
+	if (TaggedActorCount > 0)
+	{
+		if (ActorCount == TaggedActorCount)
+		{
+			return 1; // Remove
+		}
+		return -1; // Unknown
+	}
+	return 0; // Add
+}
+
 
 void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
 {
