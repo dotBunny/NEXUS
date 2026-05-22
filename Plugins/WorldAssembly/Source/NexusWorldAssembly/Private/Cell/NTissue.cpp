@@ -4,10 +4,12 @@
 #include "Cell/NTissue.h"
 #include "Cell/NCell.h"
 
-void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets)
+void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FGameplayTagContainer& OutUniqueTags, TArray<UNTissue*>& OutProcessedSets)
 {
-	// Base level entries
 	
+	OutUniqueTags.AppendTags(Tissue->UniqueGroupTags);
+	
+	// Base level entries
 	for (FNTissueEntry Entry : Tissue->Cells)
 	{
 		TObjectPtr<UNCell> Cell = Entry.Cell.LoadSynchronous();
@@ -21,6 +23,8 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 			// TODO: what do we want to do if settings are different? like uniqueness? or weighting?
 		}
 	}
+	
+	
 
 	// Additional Set Recursion
 	for (auto Additional : Tissue->AdditionalTissue)
@@ -31,6 +35,6 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 		// Add before recursion to stop double
 		OutProcessedSets.Add(AdditionalTissue);
 		
-		BuildTissueMap(AdditionalTissue, OutCellMap, OutProcessedSets);
+		BuildTissueMap(AdditionalTissue, OutCellMap, OutUniqueTags, OutProcessedSets);
 	}
 }

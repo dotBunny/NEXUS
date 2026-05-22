@@ -83,7 +83,7 @@ public:
 	 * @param OutCellMap Populated with every cell reachable from Tissue and the effective entry to use.
 	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
 	 */
-	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, TArray<UNTissue*>& OutProcessedSets);
+	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FGameplayTagContainer& OutUniqueTags, TArray<UNTissue*>& OutProcessedSets);
 	
 	UPROPERTY(EditAnywhere, DisplayName="Unique Groups", meta = (Categories="NEXUS.WorldAssembly"))
 	FGameplayTagContainer UniqueGroupTags = FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique);

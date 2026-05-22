@@ -367,7 +367,11 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 			const int32 TissuesContentTicket = Report->CreateContentBlock(SourceContentTicket);
 			FNReportContentBlock* TissuesContentBlock = Report->GetContentBlock(TissuesContentTicket);
 			TissuesContentBlock->SetHeading("Tissues");
-			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue = Data.Value.SourceComponent->GetTissueMap();
+			
+			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue;
+			FGameplayTagContainer UniqueTags; // TODO: Add to report?
+			Data.Value.SourceComponent->GetTissueMap(BuildTissue, UniqueTags);
+			
 			for (const auto& TissuePair : BuildTissue)
 			{
 				TissuesContentBlock->AddLine(FString::Printf(TEXT("- %s (%i)"), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting));

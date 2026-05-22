@@ -7,8 +7,10 @@
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Starter);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_StarterOnly);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_NotStarter);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Finisher);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_FinisherOnly);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_NotFinisher);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Unique);

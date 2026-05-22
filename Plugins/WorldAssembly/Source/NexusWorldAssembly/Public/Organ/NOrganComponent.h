@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -128,8 +129,8 @@ protected:
 	virtual void OnUnregister() override;
 	//End UActorComponent
 
-	/** @return Map of candidate cells to the tissue entry they belong to, flattened from Tissues. */
-	TMap<TObjectPtr<UNCell>, FNTissueEntry> GetTissueMap() const;
+	/** Map of candidate cells to the tissue entry they belong to, flattened from Tissues. */
+	void GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FGameplayTagContainer& OutUniqueTags) const;
 
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */

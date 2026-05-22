@@ -10,6 +10,8 @@
 
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 {
+	FGameplayTagContainer UniqueTags;
+	
 	bool bFoundStarterTagged = false;
 	
 	bool bFoundStarterOnlyTagged = false;
@@ -28,7 +30,6 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
  */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
-	
 	FGameplayTagContainer Tags;
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */

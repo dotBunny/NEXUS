@@ -78,6 +78,8 @@ public:
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
 
+	FGameplayTagContainer PlacedUniqueTagGroups;
+	
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;
 

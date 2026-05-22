@@ -188,6 +188,13 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		{
 			OrganContextPtr->CellGraph->RegisterNode(StartNode);
 			
+			// Our starting cell has unique tags that need to get added to the used
+			if (OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(StartCellInputData->Tags))
+			{
+				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
+				OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(StartCellInputData->Tags));
+			}
+			
 			// Link our nodes
 			BoneNode->Link(StartNode);
 			StartNode->LinkJunction(TargetJunctionKey, BoneNode);
@@ -419,6 +426,14 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		// Only build when we are not colliding with anything
 		if (BoundsIntersectingNodes.IsEmpty())
 		{
+			// Our cell has unique tags that need to get added to the used
+			// TODO: In future we are going to have to remove this cell .. we need to remove from the placed array
+			if (OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(CellInputData->Tags))
+			{
+				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
+				OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(CellInputData->Tags));
+			}
+			
 			// We've passed validation, lets register it and move on
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
 			

@@ -32,15 +32,16 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	Origin = WorldOrganContext->Origin;
 	
 	// Build a safe reference to all the data so we can operate off-thread without issue
-	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap = WorldOrganContext->SourceComponent->GetTissueMap();
+	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
+	CellInputDataSummary = FNVirtualCellDataSummary();
 	
+	WorldOrganContext->SourceComponent->GetTissueMap(TissueMap, CellInputDataSummary.UniqueTags);
 	
 	// We're going to process the input cells to see what behavior we are going to be exercising down the road.
 	
 	// Validate the tissue map has a start
 	bool bFoundSomeCells = false;
 	
-	CellInputDataSummary = FNVirtualCellDataSummary();
 	for (auto Pair : TissueMap)
 	{
 		if (Pair.Value.MaximumCount > 0 || Pair.Value.MaximumCount == -1)
@@ -237,6 +238,11 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
+		if (Filter.bIsStartNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_NotStarter))
+		{
+			continue;
+		}
+		
 		// FINISHER TAGS
 		
 		// Handle Starter Nodes
@@ -252,6 +258,17 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		
 		// Bail out from list if it is FinisherOnly.
 		if (!Filter.bIsEndNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		{
+			continue;
+		}
+		
+		if (Filter.bIsEndNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_NotFinisher))
+		{
+			continue;
+		}
+		
+		// CHECK UNIQUE TAGS
+		if (PlacedUniqueTagGroups.HasAny(CellData->Tags))
 		{
 			continue;
 		}
@@ -327,6 +344,9 @@ bool FNVirtualOrganContext::ResetForRetry()
 	{
 		CellInputData[i].UsedCount = 0;
 	}
+	
+	// Reset placed tags
+	PlacedUniqueTagGroups = FGameplayTagContainer::EmptyContainer;
 		
 	// Clear Graph
 	if (CellGraph != nullptr)
