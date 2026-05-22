@@ -31,7 +31,21 @@ public:
 	//~ALevelInstance
 	virtual void OnLevelInstanceLoaded() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsUserManaged() const override { return false; }
 	//End ALevelInstance
+	
+#if WITH_EDITOR
+	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
+	{
+		if (OutReason)
+		{
+			*OutReason = NSLOCTEXT("NexusWorldAssembly",
+				"CellLevelInstance_NotEditable",
+				"Cell level instances are managed by World Assembly and cannot be edited in place (for now).");
+		}
+		return false;
+	}
+#endif // WITH_EDITOR
 
 	/** @return The World Assembly operation ticket this level instance belongs to. */
 	uint32 GetOperationTicket() const { return OperationTicket; }
