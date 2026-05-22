@@ -3,8 +3,6 @@
 
 #include "NWorldAssemblyEdMode.h"
 
-#include "CanvasItem.h"
-#include "CanvasTypes.h"
 #include "NCanvasUtils.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
