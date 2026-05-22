@@ -93,13 +93,18 @@ void UNMultiplayerTestSubsystem::StopMultiplayerTest()
 		return;
 	}
 	
-	const FNToolingEditorModule& Module = FNToolingEditorModule::Get();
+	// Some analysis says that we could receive this call via Deinitialize which *could* have the editor already torn down, so were going to
+	// be explicit about the in editor callbacks.
+	if (GUnrealEd && !GIsRequestingExit)
+	{
+		const FNToolingEditorModule& Module = FNToolingEditorModule::Get();
 	
-	GUnrealEd->EndPlayOnLocalPc();
-	Module.OnMultiplayerTestEnded.Broadcast();
+		GUnrealEd->EndPlayOnLocalPc();
+		Module.OnMultiplayerTestEnded.Broadcast();
 	
-	FEditorDelegates::BeginStandaloneLocalPlay.Remove(LocalProcessDelegateHandle);
-	LocalProcessDelegateHandle.Reset();
+		FEditorDelegates::BeginStandaloneLocalPlay.Remove(LocalProcessDelegateHandle);
+		LocalProcessDelegateHandle.Reset();
+	}
 
 	// FProcHandle's destructor does not release the underlying OS handle; CloseProcess is required to avoid leaking
 	// a kernel handle per spawned PIE process every Start/Stop cycle.
