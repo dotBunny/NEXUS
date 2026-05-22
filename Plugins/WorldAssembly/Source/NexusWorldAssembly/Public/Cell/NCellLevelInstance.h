@@ -31,10 +31,10 @@ public:
 	//~ALevelInstance
 	virtual void OnLevelInstanceLoaded() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	virtual bool IsUserManaged() const override { return false; }
 	//End ALevelInstance
 	
 #if WITH_EDITOR
+	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
 	{
 		if (OutReason)
