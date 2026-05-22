@@ -534,7 +534,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 
 bool FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore_CanShow()
 {
-	return FNWorldAssemblyEdMode::IsActive() && FNEditorUtils::HasActorsSelected();
+	return FNWorldAssemblyEdMode::IsActive() && !FNWorldAssemblyEdMode::HasCellActor() && FNEditorUtils::HasActorsSelected();
 }
 
 int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode()
