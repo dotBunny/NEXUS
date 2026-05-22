@@ -95,7 +95,7 @@ void UNMultiplayerTestSubsystem::StopMultiplayerTest()
 	
 	// Some analysis says that we could receive this call via Deinitialize which *could* have the editor already torn down, so were going to
 	// be explicit about the in editor callbacks.
-	if (GUnrealEd && !GIsRequestingExit)
+	if (GUnrealEd && !IsEngineExitRequested())
 	{
 		const FNToolingEditorModule& Module = FNToolingEditorModule::Get();
 	
