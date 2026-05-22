@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
@@ -49,3 +51,5 @@ public:
 private:
 	FAutomationTestBase* Test;
 };
+
+#endif // WITH_TESTS

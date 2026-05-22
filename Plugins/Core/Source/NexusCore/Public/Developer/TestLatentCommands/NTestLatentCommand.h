@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 
 class FNTestLatentCommand : public IAutomationLatentCommand
@@ -26,3 +28,5 @@ public:
 private:
 	TFunction<void()> TestFunctionality;
 };
+
+#endif // WITH_TESTS

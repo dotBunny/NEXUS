@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 
 class FNTestLatentCommand_PostPerformanceTest : public IAutomationLatentCommand
@@ -18,3 +20,5 @@ public:
 		return true;
 	}
 };
+
+#endif // WITH_TESTS

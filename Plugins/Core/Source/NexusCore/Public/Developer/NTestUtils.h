@@ -3,12 +3,14 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "NObjectSnapshotUtils.h"
 #include "NTestEnvironment.h"
 #include "Misc/LowLevelTestAdapter.h"
 
 /**
- * Helpers that standardise how NEXUS tests set up and tear down worlds and measure performance.
+ * Helpers that standardize how NEXUS tests set up and tear down worlds and measure performance.
  *
  * These utilities are only meaningful inside the Low-Level Test framework and therefore depend on
  * its macros (REQUIRE_MESSAGE, ADD_ERROR). All methods are designed to be safely re-entrant — every
@@ -178,3 +180,5 @@ public:
 	 */
 	static FString WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds = 5.0);
 };
+
+#endif // WITH_TESTS

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 
 class FNTestLatentCommand_FrameWait : public IAutomationLatentCommand
@@ -32,3 +34,5 @@ private:
 	int32 ElapsedFrames = 0;
 	int32 TotalFramesToWait;
 };
+
+#endif // WITH_TESTS

@@ -3,6 +3,8 @@
 
 #include "Developer/NTestUtils.h"
 
+#if WITH_TESTS
+
 FNTestEnvironment FNTestUtils::Environment;
 
 FString FNTestUtils::WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString>& PreExisting, const double TimeoutSeconds)
@@ -38,3 +40,5 @@ FString FNTestUtils::WaitForNewLogFile(const TCHAR* Wildcard, const TSet<FString
 	}
 	return FString();
 }
+
+#endif // WITH_TESTS

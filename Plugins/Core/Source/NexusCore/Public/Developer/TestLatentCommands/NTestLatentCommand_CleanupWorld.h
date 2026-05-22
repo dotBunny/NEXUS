@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
@@ -31,3 +33,5 @@ public:
 		return true;
 	}
 };
+
+#endif // WITH_TESTS

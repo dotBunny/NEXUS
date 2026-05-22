@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
@@ -39,3 +41,5 @@ private:
 	TFunction<void(UWorld*)> TestFunctionality;
 	const bool bDisableGarbageCollection;
 };
+
+#endif // WITH_TESTS

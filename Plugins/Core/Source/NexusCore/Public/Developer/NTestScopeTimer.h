@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "NCoreMinimal.h"
 #include "Misc/LowLevelTestAdapter.h"
 
@@ -102,3 +104,5 @@ private:
 	double StartTime;
 	double EndTime = 0;
 };
+
+#endif // WITH_TESTS

@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
@@ -41,3 +43,5 @@ private:
 	const bool bDisableGarbageCollection;
 	FAutomationTestBase* Test;
 };
+
+#endif // WITH_TESTS

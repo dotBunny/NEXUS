@@ -3,6 +3,8 @@
 
 #pragma once
 
+#if WITH_TESTS
+
 struct NEXUSCORE_API FNTestEnvironment
 {
 	UWorld* World = nullptr;
@@ -19,3 +21,5 @@ struct NEXUSCORE_API FNTestEnvironment
 		}
 	}
 };
+
+#endif // WITH_TESTS
