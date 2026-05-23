@@ -7,17 +7,14 @@ FOnCheckBoxComponentStateChanged UNCheckBox::EmptyChangedDelegate;
 
 void UNCheckBox::SetIsChecked_NoBroadcast(const bool bNewValue)
 {
-	
 	if (IsChecked() != bNewValue)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedDelegate = OnCheckStateChanged;
-		OnCheckStateChanged = EmptyChangedDelegate;
+		TGuardValue<FOnCheckBoxComponentStateChanged> DelegateGuard(OnCheckStateChanged, EmptyChangedDelegate);
 
 		SetIsChecked(bNewValue);
 
-		OnCheckStateChanged = CachedChangedDelegate;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
@@ -28,12 +25,10 @@ void UNCheckBox::SetCheckedState_NoBroadcast(const ECheckBoxState NewState)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedDelegate = OnCheckStateChanged;
-		OnCheckStateChanged = EmptyChangedDelegate;
+		TGuardValue<FOnCheckBoxComponentStateChanged> DelegateGuard(OnCheckStateChanged, EmptyChangedDelegate);
 
 		SetCheckedState(NewState);
 
-		OnCheckStateChanged = CachedChangedDelegate;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

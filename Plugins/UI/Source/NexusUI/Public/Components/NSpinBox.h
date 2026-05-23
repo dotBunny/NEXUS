@@ -31,11 +31,7 @@ public:
 	void SetValue_NoBroadcast(const float NewValue);
 	
 private:
-	/** Cached value of the OnValueChanged used to prevent it from being called when setting the value. */
-	FOnSpinBoxValueChangedEvent CachedChangedEvent;
-	FOnSpinBoxValueCommittedEvent CachedCommittedEvent;
-	
-	/** Empty OnValueChanged event used to swap in for the CachedOnValueChanged to prevent it from being called. */
+	/** Empty events used to swap in for OnValueChanged / OnValueCommitted to prevent them from being called. */
 	static FOnSpinBoxValueChangedEvent EmptyChangedEvent;
 	static FOnSpinBoxValueCommittedEvent EmptyCommittedEvent;
 };

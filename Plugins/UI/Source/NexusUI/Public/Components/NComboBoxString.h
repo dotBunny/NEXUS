@@ -39,9 +39,6 @@ public:
 	void SetSelectedIndex_NoBroadcast(const int32 Index);
 
 private:
-	/** Cached value of the OnSelectionChanged used to prevent it from being called when setting the value. */
-	FOnSelectionChangedEvent CachedChangedEvent;
-
-	/** Empty OnSelectionChanged event used to swap in for the CachedOnSelectionChanged to prevent it from being called. */
+	/** Empty OnSelectionChanged event used to swap in for OnSelectionChanged to prevent it from being called. */
 	static FOnSelectionChangedEvent EmptyChangedEvent;
 };

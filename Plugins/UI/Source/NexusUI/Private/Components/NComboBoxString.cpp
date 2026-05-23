@@ -11,12 +11,10 @@ void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedEvent = OnSelectionChanged;
-		OnSelectionChanged = EmptyChangedEvent;
+		TGuardValue<UComboBoxString::FOnSelectionChangedEvent> EventGuard(OnSelectionChanged, EmptyChangedEvent);
 
 		SetSelectedOption(Option);
-		
-		OnSelectionChanged = CachedChangedEvent;
+
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
@@ -27,12 +25,10 @@ void UNComboBoxString::SetSelectedIndex_NoBroadcast(const int32 Index)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedEvent = OnSelectionChanged;
-		OnSelectionChanged = EmptyChangedEvent;
-		
+		TGuardValue<UComboBoxString::FOnSelectionChangedEvent> EventGuard(OnSelectionChanged, EmptyChangedEvent);
+
 		SetSelectedIndex(Index);
 
-		OnSelectionChanged = CachedChangedEvent;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

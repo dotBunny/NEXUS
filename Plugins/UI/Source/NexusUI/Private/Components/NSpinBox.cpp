@@ -12,15 +12,11 @@ void UNSpinBox::SetValue_NoBroadcast(const float NewValue)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedEvent = OnValueChanged;
-		CachedCommittedEvent = OnValueCommitted;		
-		OnValueChanged = EmptyChangedEvent;
-		OnValueCommitted = EmptyCommittedEvent;
-		
+		TGuardValue<USpinBox::FOnSpinBoxValueChangedEvent> ChangedGuard(OnValueChanged, EmptyChangedEvent);
+		TGuardValue<USpinBox::FOnSpinBoxValueCommittedEvent> CommittedGuard(OnValueCommitted, EmptyCommittedEvent);
+
 		SetValue(NewValue);
-		
-		OnValueChanged = CachedChangedEvent;
-		OnValueCommitted = CachedCommittedEvent;
+
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

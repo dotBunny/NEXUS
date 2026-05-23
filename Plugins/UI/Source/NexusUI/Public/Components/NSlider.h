@@ -31,9 +31,6 @@ public:
 	void SetValue_NoBroadcast(const float NewValue);
 
 private:
-	/** Cached value of the OnValueChanged used to prevent it from being called when setting the value. */
-	FOnFloatValueChangedEvent CachedChangedEvent;
-
-	/** Empty OnValueChanged event used to swap in for the CachedOnValueChanged to prevent it from being called. */
+	/** Empty OnValueChanged event used to swap in for OnValueChanged to prevent it from being called. */
 	static FOnFloatValueChangedEvent EmptyChangedEvent;
 };

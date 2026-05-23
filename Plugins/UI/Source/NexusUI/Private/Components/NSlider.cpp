@@ -11,12 +11,10 @@ void UNSlider::SetValue_NoBroadcast(const float NewValue)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedChangedEvent = OnValueChanged;
-		OnValueChanged = EmptyChangedEvent;
-		
+		TGuardValue<FOnFloatValueChangedEvent> EventGuard(OnValueChanged, EmptyChangedEvent);
+
 		SetValue(NewValue);
 
-		OnValueChanged = CachedChangedEvent;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
