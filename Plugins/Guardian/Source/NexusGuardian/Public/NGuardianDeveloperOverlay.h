@@ -68,8 +68,8 @@ private:
 
 	/** Placeholder text shown while no game world is active. */
 	FText RuntimeOnlyText = NSLOCTEXT("NexusGuardian", "RuntimeOnly", "Only Available At Runtime");
-
-
+	
 	/** Every Guardian subsystem currently being observed (one per active world). */
+	UPROPERTY()
 	TArray<TObjectPtr<UNGuardianSubsystem>> Subsystems;
 };

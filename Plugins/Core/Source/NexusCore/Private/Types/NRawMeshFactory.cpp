@@ -23,6 +23,8 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 
 	for (AActor* Actor : Actors)
 	{
+		if (!IsValid(Actor)) continue;
+		
 		// Actor-bounds containment filter: include only when the actor's bounds fit inside at least one supplied bounds.
 		if (!ContainingBounds.IsEmpty())
 		{

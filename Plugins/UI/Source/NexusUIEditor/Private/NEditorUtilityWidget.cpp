@@ -13,7 +13,9 @@
 UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, const FName Identifier)
 {
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
-	if (Identifier != NAME_None && System != nullptr && System->HasWidget(Identifier))
+	if (System == nullptr) return nullptr;
+	
+	if (Identifier != NAME_None && System->HasWidget(Identifier))
 	{
 		UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
 		if (Widget != nullptr)
@@ -152,8 +154,15 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."));
 	}
 	
-	// We need a render to happen so this can be updated
-	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();
+	// We need a render to happen so this can be updated; leave UnitScale at its default if the
+	// widget hasn't been laid out yet (collapsed tab, detached, never ticked), otherwise the
+	// component-wise division would produce NaN/inf.
+	const FGeometry& TickGeometry = GetTickSpaceGeometry();
+	const FVector2D LocalSize = TickGeometry.GetLocalSize();
+	if (LocalSize.X > KINDA_SMALL_NUMBER && LocalSize.Y > KINDA_SMALL_NUMBER)
+	{
+		UnitScale = TickGeometry.GetAbsoluteSize() / LocalSize;
+	}
 }
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const

@@ -38,9 +38,12 @@
 - Renamed `NEXUS: ProcGen` plugin to `NEXUS: World Assembly` (`NexusProcGen` → `NexusWorldAssembly`, `NexusProcGenSamples` → `NexusWorldAssemblySamples`, `NProcGen*` class prefix → `NWorldAssembly*`). `CoreRedirects` in `DefaultEngine.ini` handle package + class renames so existing assets continue to load.
 - `FNLevelUtils::DetermineLevelBounds` now by default ignores transient actors, but has an option to include them.
 - DynamicRef Overlay now just holds WeakPtrs to the objects.
+- NGuardian system now has a tick rate configurable in settings (defaults to 1s).
 
 ### Fixed
 
+- `UNEditorUtilityWidget::DelayedConstructTask` no longer divides by a zero geometry size when the widget hasn't been laid out yet, which previously left `UnitScale` as NaN/inf.
+- `FNDrawDebugHelpers::DrawString`, `FNPrimitiveFont::DrawPDI`, and `FNPrimitiveFont::DrawBatchString` now take the string as `const FString&`, allowing literals and rvalues to be passed.
 - `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
 - `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
 - Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.

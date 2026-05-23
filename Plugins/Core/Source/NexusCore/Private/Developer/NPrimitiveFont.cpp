@@ -10,7 +10,7 @@ TArray<TArray<FNPrimitiveFontPoint>> FNPrimitiveFont::Glyphs = TArray<TArray<FNP
 
 // #SONARQUBE-DISABLE-CPP_S107 Necessary verbosity of methods to fully convey the drawing methods
 
-void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, const FVector& Position,
+void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, const FString& String, const FVector& Position,
 	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, const float LineHeight, const float Thickness,
 	const bool bInvertLineFeed, const bool bDrawBelowPosition, const ESceneDepthPriorityGroup DepthPriorityGroup)
 {
@@ -23,11 +23,11 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 	// Calculate the working scale to multiply our glyph points by
 	const float WorkingScale = Scale * 12; // Our pseudo font-size
 
-	// Reserve some room, assuming an average of 5 lines per character
-	TArray<TCHAR>& Characters = String.GetCharArray();
+	const TCHAR* CharData = *String;
+	const int32 CharCount = String.Len();
 
-	PDI->AddReserveLines(SDPG_World, 6 * Characters.Num(), false, true);
-	
+	PDI->AddReserveLines(SDPG_World, 6 * CharCount, false, true);
+
 	float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
 	FVector BasePosition = Position;
 	if (bDrawBelowPosition)
@@ -36,20 +36,20 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 	}
 	FVector CurrentPosition = BasePosition;
 	int32 LineIndex = 0;
-	
+
 	// Make it stack up if inverted
 	if (bInvertLineFeed)
 	{
 		WorkingLineHeight *= -1;
 	}
-	
+
 	const FVector CharacterOffset = FVector(0.f, 8 * WorkingScale, 0.f);
 	const UE::Math::TRotationMatrix<double> RotationMatrix = UE::Math::TRotationMatrix(Rotation);
 	const bool bNeedsRotation = Rotation != FRotator::ZeroRotator;
-	
-	for (const auto Character : Characters)
+
+	for (int32 CharIndex = 0; CharIndex < CharCount; ++CharIndex)
 	{
-		switch (const int32 GlyphIndex = Character)
+		switch (const int32 GlyphIndex = CharData[CharIndex])
 		{
 		case 0: // String terminator, stop now
 			return;
@@ -101,7 +101,7 @@ void FNPrimitiveFont::DrawPDI(FPrimitiveDrawInterface* PDI, FString& String, con
 	}
 }
 
-void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& String, const FVector& Position,
+void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, const FString& String, const FVector& Position,
 	const FRotator& Rotation, const FLinearColor ForegroundColor, const float Scale, float LineHeight, float Thickness, float LifeTime,
 	const bool bInvertLineFeed, const bool bDrawBelowPosition, const ESceneDepthPriorityGroup DepthPriorityGroup)
 {
@@ -114,9 +114,9 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 	// Calculate the working scale to multiply our glyph points by
 	const float WorkingScale = Scale * 12; // Our pseudo font-size
 
-	// Reserve some room, assuming an average of 5 lines per character
-	TArray<TCHAR>& Characters = String.GetCharArray();
-	
+	const TCHAR* CharData = *String;
+	const int32 CharCount = String.Len();
+
 	float WorkingLineHeight = ((8 + LineHeight) * WorkingScale) * -1;
 	FVector BasePosition = Position;
 	if (bDrawBelowPosition)
@@ -125,20 +125,20 @@ void FNPrimitiveFont::DrawBatchString(ULineBatchComponent* LineBatch, FString& S
 	}
 	FVector CurrentPosition = BasePosition;
 	int32 LineIndex = 0;
-	
+
 	// Make it stack up if inverted
 	if (bInvertLineFeed)
 	{
 		WorkingLineHeight *= -1;
 	}
-	
+
 	const FVector CharacterOffset = FVector(0.f, 8 * WorkingScale, 0.f);
 	const UE::Math::TRotationMatrix<double> RotationMatrix = UE::Math::TRotationMatrix(Rotation);
 	const bool bNeedsRotation = Rotation != FRotator::ZeroRotator;
-	
-	for (const auto Character : Characters)
+
+	for (int32 CharIndex = 0; CharIndex < CharCount; ++CharIndex)
 	{
-		switch (const int32 GlyphIndex = Character)
+		switch (const int32 GlyphIndex = CharData[CharIndex])
 		{
 		case 0: // String terminator, stop now
 			return;

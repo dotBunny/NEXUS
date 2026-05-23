@@ -20,8 +20,10 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 public:	
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(
 		UNGuardianSubsystem, 
-		FNBuildConfigurationAvailability::IsAvailableInBuild(
-			static_cast<ENBuildConfigurationAvailability>(UNGuardianSettings::Get()->BuildAvailability)))
+		(UNGuardianSettings::Get() != nullptr) ? 
+			FNBuildConfigurationAvailability::IsAvailableInBuild(
+				static_cast<ENBuildConfigurationAvailability>(UNGuardianSettings::Get()->BuildAvailability)) : 
+			false)
 
 	/**
 	 * Capture the current UObject count as the baseline all subsequent deltas are measured against.
@@ -30,9 +32,10 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Set Baseline", Category = "NEXUS|Developer",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/guardian/types/guardian-subsystem/#setting-a-baseline"))
 	void SetBaseline();
-
+	
 	virtual void Tick(float DeltaTime) override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); }
 
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
@@ -85,4 +88,10 @@ private:
 
 	/** In-memory snapshot captured at the snapshot threshold and compared at the compare threshold. */
 	FNObjectSnapshot CaptureSnapshot;
+	
+	
+	FTimerHandle BaselineTimerHandle;
+	
+	float TickTimer = 0;
+	float TickRate = 1;
 };

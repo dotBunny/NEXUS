@@ -8,7 +8,7 @@
 
 // #SONARQUBE-DISABLE-CPP_S107 Verbosity necessary, most are defaulted regardless.
 
-void FNDrawDebugHelpers::DrawString(const UWorld* InWorld, FString& String, const FVector& Position,
+void FNDrawDebugHelpers::DrawString(const UWorld* InWorld, const FString& String, const FVector& Position,
 	const FRotator& Rotation, const bool bPersistentLines, const float LifeTime, const uint8 DepthPriority, const FLinearColor ForegroundColor,
 	const float Scale, const float LineHeight, const float Thickness, const bool bInvertLineFeed, const bool bDrawBelowPosition)
 {

@@ -66,4 +66,7 @@ public:
 	/** Bound UVerticalBox where subclasses add diagnostic rows. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UVerticalBox> ContainerBox;
+
+protected:
+	virtual void NativeConstruct() override;
 };

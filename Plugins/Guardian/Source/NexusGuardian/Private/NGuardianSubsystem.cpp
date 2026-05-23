@@ -3,7 +3,6 @@
 
 #include "NGuardianSubsystem.h"
 
-#include "NCoreMinimal.h"
 #include "NGuardianMinimal.h"
 #include "NGuardianSettings.h"
 #include "Async/Async.h"
@@ -13,6 +12,8 @@
 
 void UNGuardianSubsystem::SetBaseline()
 {
+	BaselineTimerHandle.Invalidate();
+	
 	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
 	if (Settings == nullptr)
 	{
@@ -35,9 +36,13 @@ void UNGuardianSubsystem::SetBaseline()
 	
 	BaseObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 
-	ObjectCountWarningThreshold = FMath::Clamp(BaseObjectCount + Settings->ObjectCountWarningThreshold, 1, MAX_int32);
-	ObjectCountSnapshotThreshold =  FMath::Clamp(BaseObjectCount + Settings->ObjectCountSnapshotThreshold, 2, MAX_int32-1);
-	ObjectCountCompareThreshold =  FMath::Clamp(BaseObjectCount + Settings->ObjectCountCompareThreshold, 3, MAX_int32-2);
+	// Prevent Overflow
+	const int64 ResolvedWarning  = static_cast<int64>(BaseObjectCount) + Settings->ObjectCountWarningThreshold;
+	const int64 ResolvedSnapshot = static_cast<int64>(BaseObjectCount) + Settings->ObjectCountSnapshotThreshold;
+	const int64 ResolvedCompare  = static_cast<int64>(BaseObjectCount) + Settings->ObjectCountCompareThreshold;
+	ObjectCountWarningThreshold  = static_cast<int32>(FMath::Clamp<int64>(ResolvedWarning,  1, MAX_int32));
+	ObjectCountSnapshotThreshold = static_cast<int32>(FMath::Clamp<int64>(ResolvedSnapshot, 2, MAX_int32 - 1));
+	ObjectCountCompareThreshold  = static_cast<int32>(FMath::Clamp<int64>(ResolvedCompare,  3, MAX_int32 - 2));
 	
 	bShouldOutputSnapshot = Settings->bObjectCountCaptureOutput;
 
@@ -52,6 +57,13 @@ void UNGuardianSubsystem::SetBaseline()
 
 void UNGuardianSubsystem::Tick(float DeltaTime)
 {
+	TickTimer -= DeltaTime;
+	if (TickTimer > 0)
+	{
+		return;
+	}
+	TickTimer = TickRate;
+	
 	LastObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 	
 	if (LastObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
@@ -78,6 +90,9 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		{
 			FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 				FString::Printf(TEXT("%s_%s.txt"), *SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			
+			// The thought process here is that the ToReport is actually more expensive then you would think given it is doing more string manipulation/etc.
+			// Maybe it's faster to generate it on the main thread and pass the report in, but the idea was to minimize hitch on GameThread.
 			Async(EAsyncExecution::TaskGraph,
 				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
 				{
@@ -121,14 +136,24 @@ void UNGuardianSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		UE_LOG(LogNexusGuardian, Error, TEXT("Guardian settings was null; unable to auto baseline."));
 		return;
 	}
+	TickRate = Settings->TickRate;
+	TickTimer = TickRate;
 	
 	// Spin up doing a baseline after the delay
 	if (Settings->bAutoBaseline)
 	{
-		FTimerHandle TimerHandle;
-		InWorld.GetTimerManager().SetTimer(TimerHandle,                                                                                                          
+		InWorld.GetTimerManager().SetTimer(BaselineTimerHandle,                                                                                                          
 			FTimerDelegate::CreateUObject(this, &UNGuardianSubsystem::SetBaseline),
 			Settings->AutoBaselineDelay,
 			false);
 	}
+}
+
+void UNGuardianSubsystem::OnWorldEndPlay(UWorld& InWorld)
+{
+	if (BaselineTimerHandle.IsValid())
+	{
+		InWorld.GetTimerManager().ClearTimer(BaselineTimerHandle);
+	}
+	Super::OnWorldEndPlay(InWorld);
 }

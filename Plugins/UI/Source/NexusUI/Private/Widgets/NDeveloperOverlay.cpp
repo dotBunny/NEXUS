@@ -3,6 +3,16 @@
 
 #include "Widgets/NDeveloperOverlay.h"
 
+#include "NUIMinimal.h"
+#include "Macros/NValidationMacros.h"
+
+void UNDeveloperOverlay::NativeConstruct()
+{
+	N_VALIDATE(LogNexusUI, ContainerBanner);
+	
+	Super::NativeConstruct();
+}
+
 void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageColor, ENColor BannerColor) const
 {
 	if (IsValid(ContainerBanner))

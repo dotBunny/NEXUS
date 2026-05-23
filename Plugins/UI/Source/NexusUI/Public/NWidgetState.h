@@ -92,6 +92,19 @@ struct FNWidgetState
 	/** Append a new boolean entry without checking for an existing one; returns the new index. */
 	int32 AddBoolean(const FName& Key, const bool bValue)
 	{
+		if (BooleanKeys.Contains(Key))
+		{
+			for (int i = 0; i < BooleanKeys.Num(); i++)
+			{
+				if (BooleanKeys[i] == Key)
+				{
+					BooleanValues[i] = bValue;
+					return i;
+				}
+			}
+		}
+		
+		
 		BooleanKeys.Add(Key);
 		BooleanValues.Add(bValue);
 		return BooleanValues.Num() - 1;
@@ -132,9 +145,22 @@ struct FNWidgetState
 		const int32 Index = FloatKeys.IndexOfByKey(Key);
 		return Index != INDEX_NONE ? FloatValues[Index] : DefaultValue;
 	}
-	/** Append a new float entry without checking for an existing one; returns the new index. */
+	/** Append a new float entry without checking for an existing one; overwrites if already exists. */
 	int32 AddFloat(const FName& Key, const float Value)
 	{
+		if (FloatKeys.Contains(Key))
+		{
+			for (int i = 0; i < FloatKeys.Num(); i++)
+			{
+				if (FloatKeys[i] == Key)
+				{
+					FloatValues[i] = Value;
+					return i;
+				}
+			}
+		}
+		
+		
 		FloatKeys.Add(Key);
 		FloatValues.Add(Value);
 		return FloatValues.Num() - 1;

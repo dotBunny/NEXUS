@@ -37,6 +37,7 @@ public:
 
 	/**
 	 * Current number of live UObjects, computed from GUObjectArray's allocated count minus free slots.
+	 * @note This does NOT walk  the GUObjectArray, it looks at the cached Num() and subtracts ObjAvailableListEstimateCount (atomic).
 	 * @return The approximate number of live UObjects in the global object array.
 	 */
 	FORCEINLINE static int32 GetCurrentObjectCount() { return GUObjectArray.GetObjectArrayNumMinusAvailable(); }

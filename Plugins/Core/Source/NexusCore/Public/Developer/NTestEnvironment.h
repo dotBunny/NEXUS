@@ -7,6 +7,7 @@
 
 struct NEXUSCORE_API FNTestEnvironment
 {
+	// Cleaned up in FNTestLatentCommand_CleanupWorld
 	UWorld* World = nullptr;
 	FWorldContext* WorldContext = nullptr;
 	UGameInstance* GameInstance = nullptr;

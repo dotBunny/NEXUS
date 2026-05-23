@@ -111,7 +111,7 @@ void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float I
 	if (Subsystems.IsEmpty()) return;
 
 	// TODO: This forces us to only show the active game world or PIE, despite the possibility there is more
-	// We should make this a list entry like the others to support multiple worlds
+	// TODO: We should make this a list entry like the others to support multiple worlds
 	UNGuardianSubsystem* System = Subsystems[0];
 	
 	ObjectCountNumber->SetCurrentValue(System->GetLastObjectCount());

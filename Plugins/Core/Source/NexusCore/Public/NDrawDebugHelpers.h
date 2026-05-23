@@ -27,9 +27,9 @@ public:
 	 * @param bInvertLineFeed Should new lines be stacked on top of older lines?
 	 * @param bDrawBelowPosition Should the top of the first line align with the position?
 	 */
-	static void DrawString(const UWorld* InWorld, FString& String, const FVector& Position,
-		const FRotator& Rotation, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = SDPG_World, 
-		FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, float LineHeight = 4.f, 
+	static void DrawString(const UWorld* InWorld, const FString& String, const FVector& Position,
+		const FRotator& Rotation, bool bPersistentLines = false, float LifeTime=-1.f, uint8 DepthPriority = SDPG_World,
+		FLinearColor ForegroundColor = FLinearColor::White, float Scale = 1, float LineHeight = 4.f,
 		float Thickness = 8.f, const bool bInvertLineFeed = false, const bool bDrawBelowPosition = true);
 	
 	/**

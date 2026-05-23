@@ -2,7 +2,9 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+
 #include "NColor.h"
+#include "NUIMinimal.h"
 #include "Engine/Font.h"
 #include "Types/NSeverity.h"
 
@@ -117,8 +119,8 @@ private:
 		Width = 0;
 		Height = 0;
 		int32 LinePositionOffset = LineSpacing;
-		
-		for (int i = 0; i < Lines.Num(); ++i)
+		const int LineCount = Lines.Num();
+		for (int i = 0; i < LineCount; ++i)
 		{
 			const FString Line = Lines[i].ToString();
 			if (bIsLargeFont[i])
@@ -146,9 +148,24 @@ private:
 				Height += LineSpacing;
 			}
 		}
+
+		// Validate
 		
-		bDirty = false;
-		
+		if (Lines.Num() == LineCount &&  
+			Colors.Num() == LineCount && 
+			bIsLargeFont.Num() == LineCount && 
+			LineWidths.Num() == LineCount && 
+			LineHeights.Num() == LineCount && 
+			LinePositions.Num() == LineCount)
+		{
+			bDirty = false;
+		}
+		else
+		{
+			
+			UE_LOG(LogNexusUI, Warning, TEXT("Invalid MultiLineTextBoxCanvasItem contents, clearing and resetting."))
+			Clear();
+		}
 	}
 	
 	bool bDirty = false;

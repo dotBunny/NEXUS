@@ -26,6 +26,11 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability"))
 	uint8 BuildAvailability = N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Tick Rate",
+		meta=(ToolTip="How often should the system poll the object count? and respond.",
+			EditCondition="BuildAvailability!=0", ClampMin="0.0", UIMin="0.0", ClampMin="0.0", UIMin="0.0", ClampMax="300.0", UIMax="300.0", Units="s"))
+	float TickRate = 1.0f;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Save Capture",
 		meta=(ToolTip="Should the capture data be saved to the project's logs folder? Saving the capture to disk is not required to compare, the snapshot will be stored in memory.",
 			EditCondition="BuildAvailability!=0"))
@@ -42,16 +47,16 @@ public:
 	float AutoBaselineDelay = 15.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Warning Threshold",
-	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown.", EditCondition="BuildAvailability!=0"))
+	meta=(ToolTip="The number of added UObjects to a world when a warning should be thrown.", EditCondition="BuildAvailability!=0", ClampMin="1", UIMin="1"))
 	int32 ObjectCountWarningThreshold = 25000;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Snapshot Threshold",
 	meta=(ToolTip="The number of added UObjects to a world when a snapshot should be taken. This snapshot will be compared with later if the counts exceed the compare threshold.",
-		EditCondition="BuildAvailability!=0"))
+		EditCondition="BuildAvailability!=0", ClampMin="2", UIMin="2"))
 	int32 ObjectCountSnapshotThreshold = 30000;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Thresholds", DisplayName ="Compare Threshold",
 		meta=(ToolTip="The number of added UObjects to a world when a compare against the previous capture should be done.",
-			EditCondition="BuildAvailability!=0"))
+			EditCondition="BuildAvailability!=0", ClampMin="3", UIMin="3"))
 	int32 ObjectCountCompareThreshold = 40000;
 };

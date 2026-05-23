@@ -3,6 +3,7 @@
 
 #include "SceneComponents/NTextRenderComponent.h"
 
+#include "NUIMinimal.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 
@@ -25,6 +26,7 @@ void UNTextRenderComponent::BeginPlay()
 	// Ensure an owner is replicating
 	if (!GetOwner()->GetIsReplicated())
 	{
+		UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s) turned on replication for its Owner(%s); was this a mistake?"), *GetName(), *GetOwner()->GetActorNameOrLabel());
 		GetOwner()->SetReplicates(true);
 	}
 	

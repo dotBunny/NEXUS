@@ -48,12 +48,18 @@ TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,
 	const TArray<FName>& ActorIgnoreTags, const bool bIncludeEditorOnly, const bool bIncludeNonColliding, const bool bIncludeTransientActors)
 {
+	// Ensure we have a valid level
+	if (!IsValid(InLevel)) return;;
+	
 	const int32 NumActors = InLevel->Actors.Num();
 	
 #if WITH_EDITOR			
 	FScopedSlowTask BoundsTask = FScopedSlowTask(NumActors, NSLOCTEXT("NexusCore", "Task_DetermineLevelBounds", "Determine Level Bounds"));
 	BoundsTask.MakeDialog(false);
 #endif // WITH_EDITOR	
+	
+	// Initialize our empty box
+	OutBounds = FBox(ForceInit);
 	
 	for (int32 ActorIndex = 0; ActorIndex < NumActors; ++ActorIndex)
 	{
