@@ -8,7 +8,6 @@
 #include "NActorPoolSubsystem.h"
 #include "NActorUtils.h"
 #include "NActorPoolsMinimal.h"
-#include "DSP/FloatArrayMath.h"
 
 #if WITH_EDITOR
 int32 FNActorPool::ActorPoolTicket = 0;
@@ -135,6 +134,11 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 {
 	World = TargetWorld;
 	Template = ActorClass;
+	if (!ensureMsgf(Template != nullptr, TEXT("Preinitialized ActorPool with a null actor class. Pool will not be usable!")))
+	{
+		return;
+	}
+	
 	USceneComponent* RootComponent = FNActorUtils::GetRootComponentFromDefaultObject(ActorClass);
 	bImplementsInterface = Template->ImplementsInterface(UNActorPoolItem::StaticClass());
 

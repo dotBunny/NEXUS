@@ -72,7 +72,7 @@ public:
 	void AddObject(UObject* Object)
 	{
 		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object)
-		TargetObjects.Add(Object);
+		TargetObjects.AddUnique(Object);
 		Changed.ExecuteIfBound();
 	}
 
@@ -83,8 +83,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void RemoveObject(UObject* Object)
 	{
-		TargetObjects.Remove(Object);
-		Changed.ExecuteIfBound();
+		if (TargetObjects.Remove(Object) > 0)
+		{
+			Changed.ExecuteIfBound();
+		}
 	}
 
 	/** @return The number of objects currently tracked by this wrapper. */

@@ -20,7 +20,7 @@ NEXUS/
 
 - The `TestProject` is a thin host project.
 - Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-- Resolve `___UEROOT___` from value in `./claude/local-memory/ueroot`. If absent, probe `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, `D:\EGS\UE_5.7` in order, then save the found path there.
+- Resolve `___UEROOT___` from value in the projects `./claude/local-memory/ueroot`. If absent, probe `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, `D:\EGS\UE_5.7` in order, then save the found path there.
 - `___PROJECTROOT___` is the absolute path to the `TestProject/` directory — the current working directory. Resolve it from the working directory rather than hardcoding a path.
 
 ## Plugin Architecture

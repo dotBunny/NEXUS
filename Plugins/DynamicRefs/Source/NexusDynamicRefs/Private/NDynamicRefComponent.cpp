@@ -2,11 +2,14 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NDynamicRefComponent.h"
+
+#include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 
-UNDynamicRefComponent::UNDynamicRefComponent()
+void UNDynamicRefComponent::OnComponentCreated()
 {
-	bWantsInitializeComponent = true;
+	Super::OnComponentCreated();
+	bWantsInitializeComponent = (Lifecycle == ENActorComponentLifecycle::InitializeComponent);
 }
 
 void UNDynamicRefComponent::BeginPlay()
@@ -57,7 +60,7 @@ void UNDynamicRefComponent::Register()
 		
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogTemp, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
 			return;
 		}
 		
@@ -85,7 +88,7 @@ void UNDynamicRefComponent::Unregister()
 		
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
 			return;
 		}
 		

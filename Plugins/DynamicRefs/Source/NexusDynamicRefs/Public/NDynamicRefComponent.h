@@ -19,8 +19,6 @@ class NEXUSDYNAMICREFS_API UNDynamicRefComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	UNDynamicRefComponent();
-
 	/**
 	 * Resolve an ENDynamicRef value to its human-readable display name via UE reflection.
 	 * @param DynamicReference The enum value to convert.
@@ -32,6 +30,7 @@ public:
 		return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
 	}
 
+	virtual void OnComponentCreated() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

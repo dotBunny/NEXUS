@@ -4,10 +4,16 @@
 #if WITH_TESTS
 
 #include "NActorUtils.h"
+#include "Components/InputComponent.h"
+#include "Components/SceneComponent.h"
 #include "Developer/NDebugActor.h"
 #include "Developer/NTestUtils.h"
+#include "Engine/BlueprintGeneratedClass.h"
+#include "Engine/SCS_Node.h"
+#include "Engine/SimpleConstructionScript.h"
 #include "GameFramework/PlayerStart.h"
 #include "Macros/NTestMacros.h"
+#include "UObject/StrongObjectPtr.h"
 
 namespace NEXUS::UnitTests::NCore::FNActorUtilsHarness
 {
@@ -20,6 +26,39 @@ namespace NEXUS::UnitTests::NCore::FNActorUtilsHarness
 		FNWorldActorFilterSettings Settings;
 		Settings.ExclusionFunction = [](const AActor* Actor) { return Actor->Tags.Contains(TestTag); };
 		return Settings;
+	}
+
+	/**
+	 * Build a USCS_Node parented to OwningSCS. When ComponentClass is non-null a transient template instance of that class is
+	 * created and assigned; passing nullptr leaves ComponentTemplate null — useful for simulating SCS nodes whose underlying
+	 * component class has been deleted or has not yet been regenerated.
+	 */
+	static USCS_Node* MakeNode(USimpleConstructionScript* OwningSCS, UClass* ComponentClass)
+	{
+		USCS_Node* Node = NewObject<USCS_Node>(OwningSCS, NAME_None, RF_Transient);
+		if (ComponentClass != nullptr)
+		{
+			Node->ComponentClass = ComponentClass;
+			Node->ComponentTemplate = NewObject<UActorComponent>(OwningSCS, ComponentClass, NAME_None, RF_Transient);
+		}
+		return Node;
+	}
+
+	/**
+	 * Build a synthetic UBlueprintGeneratedClass parented to SuperClass, with an SCS populated by Populate.
+	 * The class is never instantiated or asked for a CDO, so Bind/StaticLink are deliberately skipped — only the SCS
+	 * traversal path of FNActorUtils::GetRootComponentFromDefaultObject is exercised through it. The synthetic class has
+	 * no owning UBlueprint, so USimpleConstructionScript::ValidateSceneRootNodes (invoked from AddNode) is a no-op and
+	 * does not auto-insert a DefaultSceneRoot we did not ask for.
+	 */
+	static UBlueprintGeneratedClass* MakeSyntheticBPGC(UClass* SuperClass, TFunctionRef<void(USimpleConstructionScript*)> Populate)
+	{
+		UBlueprintGeneratedClass* BPGC = NewObject<UBlueprintGeneratedClass>(
+			GetTransientPackage(), UBlueprintGeneratedClass::StaticClass(), NAME_None, RF_Transient);
+		BPGC->SetSuperStruct(SuperClass);
+		BPGC->SimpleConstructionScript = NewObject<USimpleConstructionScript>(BPGC, NAME_None, RF_Transient);
+		Populate(BPGC->SimpleConstructionScript);
+		return BPGC;
 	}
 }
 
@@ -219,6 +258,91 @@ N_TEST_HIGH(FNActorUtilsTests_GetRootComponentFromDefaultObject_PlainAActor_Null
 	// indirectly via the "nullptr if none is found" return contract).
 	USceneComponent* Root = FNActorUtils::GetRootComponentFromDefaultObject(AActor::StaticClass());
 	CHECK_MESSAGE(TEXT("AActor::StaticClass() CDO has no root component → expect nullptr"), Root == nullptr);
+}
+
+N_TEST_HIGH(FNActorUtilsTests_GetRootComponentFromDefaultObject_NullClass_ReturnsNull,
+	"NEXUS::UnitTests::NCore::FNActorUtils::GetRootComponentFromDefaultObject::NullClass_ReturnsNull",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A null TSubclassOf<AActor> must short-circuit to nullptr — defensive callers (NActorPool::PreInitialize, etc.)
+	// rely on this contract instead of pre-validating the class themselves.
+	const TSubclassOf<AActor> NullClass = nullptr;
+	USceneComponent* Root = FNActorUtils::GetRootComponentFromDefaultObject(NullClass);
+	CHECK_MESSAGE(TEXT("Null TSubclassOf must return nullptr without crashing"), Root == nullptr);
+}
+
+N_TEST_HIGH(FNActorUtilsTests_GetRootComponentFromDefaultObject_NullSCSTemplate_Skipped,
+	"NEXUS::UnitTests::NCore::FNActorUtils::GetRootComponentFromDefaultObject::NullSCSTemplate_Skipped",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// First root node carries a null ComponentTemplate (mirrors an SCS node whose component class was deleted or has
+	// not been regenerated). The second node has a real USceneComponent template — the function must skip the null
+	// one without crashing and return the scene template.
+	USceneComponent* ExpectedTemplate = nullptr;
+	UBlueprintGeneratedClass* BPGC = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeSyntheticBPGC(
+		AActor::StaticClass(),
+		[&ExpectedTemplate](USimpleConstructionScript* SCS)
+		{
+			SCS->AddNode(NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeNode(SCS, nullptr));
+			USCS_Node* SceneNode = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeNode(SCS, USceneComponent::StaticClass());
+			SCS->AddNode(SceneNode);
+			ExpectedTemplate = Cast<USceneComponent>(SceneNode->ComponentTemplate);
+		});
+	const TStrongObjectPtr<UBlueprintGeneratedClass> GCGuard(BPGC);
+
+	USceneComponent* Root = FNActorUtils::GetRootComponentFromDefaultObject(TSubclassOf<AActor>(BPGC));
+	CHECK_MESSAGE(TEXT("Null ComponentTemplate must be skipped and the next scene template returned"),
+		Root != nullptr && Root == ExpectedTemplate);
+}
+
+N_TEST_HIGH(FNActorUtilsTests_GetRootComponentFromDefaultObject_NonSceneRoot_Skipped,
+	"NEXUS::UnitTests::NCore::FNActorUtils::GetRootComponentFromDefaultObject::NonSceneRoot_Skipped",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// First root node holds a non-scene UActorComponent template (UInputComponent); the second holds a USceneComponent.
+	// The function must iterate past the non-scene one rather than aborting at RootNodes[0].
+	USceneComponent* ExpectedTemplate = nullptr;
+	UBlueprintGeneratedClass* BPGC = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeSyntheticBPGC(
+		AActor::StaticClass(),
+		[&ExpectedTemplate](USimpleConstructionScript* SCS)
+		{
+			SCS->AddNode(NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeNode(SCS, UInputComponent::StaticClass()));
+			USCS_Node* SceneNode = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeNode(SCS, USceneComponent::StaticClass());
+			SCS->AddNode(SceneNode);
+			ExpectedTemplate = Cast<USceneComponent>(SceneNode->ComponentTemplate);
+		});
+	const TStrongObjectPtr<UBlueprintGeneratedClass> GCGuard(BPGC);
+
+	USceneComponent* Root = FNActorUtils::GetRootComponentFromDefaultObject(TSubclassOf<AActor>(BPGC));
+	CHECK_MESSAGE(TEXT("Non-scene RootNodes[0] must be skipped in favour of the scene-component sibling"),
+		Root != nullptr && Root == ExpectedTemplate);
+}
+
+N_TEST_HIGH(FNActorUtilsTests_GetRootComponentFromDefaultObject_InheritedSCS_ReturnsParentRoot,
+	"NEXUS::UnitTests::NCore::FNActorUtils::GetRootComponentFromDefaultObject::InheritedSCS_ReturnsParentRoot",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Child BPGC has an empty SCS; parent BPGC's SCS defines a scene root. The walk must climb the BP chain and return
+	// the parent's scene template — this is the inheritance case the pre-fix implementation could not resolve.
+	USceneComponent* ExpectedTemplate = nullptr;
+	UBlueprintGeneratedClass* ParentBPGC = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeSyntheticBPGC(
+		AActor::StaticClass(),
+		[&ExpectedTemplate](USimpleConstructionScript* SCS)
+		{
+			USCS_Node* SceneNode = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeNode(SCS, USceneComponent::StaticClass());
+			SCS->AddNode(SceneNode);
+			ExpectedTemplate = Cast<USceneComponent>(SceneNode->ComponentTemplate);
+		});
+	const TStrongObjectPtr<UBlueprintGeneratedClass> ParentGCGuard(ParentBPGC);
+
+	UBlueprintGeneratedClass* ChildBPGC = NEXUS::UnitTests::NCore::FNActorUtilsHarness::MakeSyntheticBPGC(
+		ParentBPGC,
+		[](USimpleConstructionScript*) { /* empty — child does not override the root */ });
+	const TStrongObjectPtr<UBlueprintGeneratedClass> ChildGCGuard(ChildBPGC);
+
+	USceneComponent* Root = FNActorUtils::GetRootComponentFromDefaultObject(TSubclassOf<AActor>(ChildBPGC));
+	CHECK_MESSAGE(TEXT("Child BPGC with empty SCS must inherit the parent BPGC's scene-root template"),
+		Root != nullptr && Root == ExpectedTemplate);
 }
 
 #endif //WITH_TESTS

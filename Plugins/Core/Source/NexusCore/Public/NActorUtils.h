@@ -43,17 +43,20 @@ class NEXUSCORE_API FNActorUtils
 {
 public:
 	/**
-	 * Find the RootComponent (USceneComponent) on a Default Object.
-	 * @param ActorClass The target class to search for the root component.
-	 * @return The root USceneComponent of the specified Actor class, or nullptr if none is found.
-	 * @note This has a flaw when navigating through the CDO of a Blueprint-generated class. The first found USceneComponent
-	 *		 will be treated as the root component. When combined with the NActorPool system, that found components scale
-	 *		 is then used as the base scale for the actor. The point here is to do your actor-wide scaling on the root
-	 *		 component.
-	 * 
-	 * @details For Blueprint-generated classes, this function attempts to find the first USceneComponent in the
-	 *          SimpleConstructionScript hierarchy. If the class is not Blueprint-generated or no USceneComponent
-	 *          is found in the SCS, it falls back to the default object's root component.
+	 * Find the root USceneComponent template for an Actor class.
+	 * @param ActorClass The target class to inspect. A null TSubclassOf is tolerated and returns nullptr.
+	 * @return The first USceneComponent template encountered while walking up the Blueprint class chain; or — when no
+	 *         UBlueprintGeneratedClass in the chain contributes a scene-component root — the native CDO's RootComponent.
+	 *         May still be nullptr for classes that have no native root (e.g. AActor::StaticClass()).
+	 * @note Callers that read spawn-time settings off the returned template (scale, BodyInstance flags, etc.) are reading
+	 *       the live class template, not a copy — configure actor-wide defaults on the root component itself so that
+	 *       systems like NActorPool pick them up.
+	 *
+	 * @details For Blueprint-generated classes, walks each UBlueprintGeneratedClass in the inheritance chain and returns
+	 *          the first USceneComponent found among that class's SCS root-node ComponentTemplates. The walk stops at
+	 *          the first non-Blueprint ancestor and falls back to the native CDO's RootComponent. Null SCS nodes and
+	 *          non-scene ComponentTemplates are skipped rather than aborting the search, so a child BP that does not
+	 *          override its root still resolves to an ancestor BP's SCS-defined root.
 	 */
 	static USceneComponent* GetRootComponentFromDefaultObject(const TSubclassOf<AActor>& ActorClass);
 
