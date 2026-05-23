@@ -9,8 +9,41 @@
 void UNDeveloperOverlay::NativeConstruct()
 {
 	N_VALIDATE(LogNexusUI, ContainerBanner);
-	
+
+	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(
+		this, &UNDeveloperOverlay::OnWorldPostInitialization);
+	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(
+		this, &UNDeveloperOverlay::OnWorldBeginTearDown);
+
+	BindAllCurrentWorlds();
+
 	Super::NativeConstruct();
+}
+
+void UNDeveloperOverlay::NativeDestruct()
+{
+	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
+	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
+
+	UnbindAllCurrentWorlds();
+
+	Super::NativeDestruct();
+}
+
+void UNDeveloperOverlay::OnWorldPostInitialization(UWorld* World, FWorldInitializationValues)
+{
+	if (World != nullptr)
+	{
+		BindWorld(World);
+	}
+}
+
+void UNDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
+{
+	if (World != nullptr)
+	{
+		UnbindWorld(World);
+	}
 }
 
 void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageColor, ENColor BannerColor) const

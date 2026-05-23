@@ -11,27 +11,12 @@
 
 void UNGuardianDeveloperOverlay::NativeConstruct()
 {
+	Super::NativeConstruct();
+	
 	N_VALIDATE(LogNexusGuardian, ObjectCountBox)
 	N_VALIDATE(LogNexusGuardian, ObjectCountNumber)
 	N_VALIDATE(LogNexusGuardian, BaseCountNumber)
 	N_VALIDATE(LogNexusGuardian, ObjectCountNextNumber)
-	
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldBeginTearDown);
-	
-	BindAllCurrentWorlds();
-
-	Super::NativeConstruct();
-}
-
-void UNGuardianDeveloperOverlay::NativeDestruct()
-{
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
-	
-	UnbindAllCurrentWorlds();
-
-	Super::NativeDestruct();
 }
 
 void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
@@ -63,24 +48,6 @@ void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 	}
 	UpdateBanner();
 }
-
-void UNGuardianDeveloperOverlay::OnWorldPostInitialization(UWorld* World, 
-	FWorldInitializationValues WorldInitializationValues)
-{
-	if (World != nullptr)
-	{
-		BindWorld(World);
-	}
-}
-
-void UNGuardianDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		UnbindWorld(World);
-	}
-}
-
 
 void UNGuardianDeveloperOverlay::UpdateBanner() const
 {

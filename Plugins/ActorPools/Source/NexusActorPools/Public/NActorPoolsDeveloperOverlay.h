@@ -38,11 +38,6 @@ protected:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	//End UUserWidget
 
-	/** Engine callback: Bind() the new world's actor-pool subsystem once the world is fully initialized. */
-	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
-	/** Engine callback: Unbind() the departing world and release its cached delegate handles. */
-	void OnWorldBeginTearDown(UWorld* World);
-
 	/** The bound list view used to display pool rows. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UNListView> ActorPoolList;
@@ -57,12 +52,6 @@ private:
 	/** Per-world delegate handles used to listen for new pools being added. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<UWorld*, FDelegateHandle> OnActorPoolAddedDelegates;
-
-	/** Delegate handle for FWorldDelegates::OnPostWorldInitialization. */
-	FDelegateHandle AddWorldDelegateHandle;
-
-	/** Delegate handle for FWorldDelegates::OnWorldBeginTearDown. */
-	FDelegateHandle RemoveWorldDelegateHandle;
 
 	/** Placeholder text shown when no pools are present. */
 	FText NoActorPoolsFoundText = NSLOCTEXT("NexusActorPools", "NoActorPoolsFound", "No Actor Pools Found");

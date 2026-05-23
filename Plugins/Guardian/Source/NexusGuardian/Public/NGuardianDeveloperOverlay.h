@@ -29,8 +29,6 @@ public:
 protected:
 	//~UUserWidget
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	//End UUserWidget
 
@@ -50,25 +48,13 @@ protected:
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonNumericTextBlock> ObjectCountNextNumber;
 
-
-	/** Engine callback: Bind() the new world's Guardian subsystem once the world is fully initialized. */
-	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
-	/** Engine callback: Unbind() the departing world so we drop any cached subsystem handles. */
-	void OnWorldBeginTearDown(UWorld* World);
-
-
 private:
 	/** Refresh the overlay banner's color and message based on the current count vs. thresholds. */
 	void UpdateBanner() const;
 
-	/** Handle for the world-post-initialization delegate subscription. */
-	FDelegateHandle AddWorldDelegateHandle;
-	/** Handle for the world-begin-teardown delegate subscription. */
-	FDelegateHandle RemoveWorldDelegateHandle;
-
 	/** Placeholder text shown while no game world is active. */
 	FText RuntimeOnlyText = NSLOCTEXT("NexusGuardian", "RuntimeOnly", "Only Available At Runtime");
-	
+
 	/** Every Guardian subsystem currently being observed (one per active world). */
 	UPROPERTY()
 	TArray<TObjectPtr<UNGuardianSubsystem>> Subsystems;

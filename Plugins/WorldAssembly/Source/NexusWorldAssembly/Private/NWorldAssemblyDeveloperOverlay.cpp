@@ -10,9 +10,9 @@
 
 void UNWorldAssemblyDeveloperOverlay::NativeConstruct()
 {
-	N_VALIDATE(LogNexusWorldAssembly, OperationsList)
-	
 	Super::NativeConstruct();
+	
+	N_VALIDATE(LogNexusWorldAssembly, OperationsList)
 	
 	// Bind to Registry
 	for (TArray<UNAssemblyOperation*>& Operations = FNWorldAssemblyRegistry::GetOperations(); 

@@ -36,13 +36,7 @@ protected:
 
 	//~UUserWidget
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
 	//End UUserWidget
-
-	/** Engine callback: Bind() the new world's dynamic-ref subsystem once the world is fully initialized. */
-	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
-	/** Engine callback: Unbind() the departing world and release its cached delegate handles. */
-	void OnWorldBeginTearDown(UWorld* World);
 
 	/** Header displayed above the ENDynamicRef list (hidden when empty). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
@@ -94,8 +88,4 @@ private:
 
 	/** Placeholder text shown when no references are present. */
 	FText NoReferencesFoundText = NSLOCTEXT("NexusDynamicRefs", "NoReferencesFound", "No References Found");
-	/** Handle for the world-post-initialization delegate subscription. */
-	FDelegateHandle AddWorldDelegateHandle;
-	/** Handle for the world-begin-teardown delegate subscription. */
-	FDelegateHandle RemoveWorldDelegateHandle;
 };

@@ -7,6 +7,7 @@
 #include "CommonTextBlock.h"
 #include "NColor.h"
 #include "CommonUserWidget.h"
+#include "Engine/World.h"
 #include "NDeveloperOverlay.generated.h"
 
 class UVerticalBox;
@@ -68,5 +69,19 @@ public:
 	TObjectPtr<UVerticalBox> ContainerBox;
 
 protected:
+	//~UUserWidget
 	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	//End UUserWidget
+
+private:
+	/** Engine callback: forwards a newly initialized world to BindWorld() for subclass handling. */
+	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	/** Engine callback: forwards a tearing-down world to UnbindWorld() for subclass handling. */
+	void OnWorldBeginTearDown(UWorld* World);
+
+	/** Handle for the world-post-initialization delegate subscription. */
+	FDelegateHandle AddWorldDelegateHandle;
+	/** Handle for the world-begin-teardown delegate subscription. */
+	FDelegateHandle RemoveWorldDelegateHandle;
 };

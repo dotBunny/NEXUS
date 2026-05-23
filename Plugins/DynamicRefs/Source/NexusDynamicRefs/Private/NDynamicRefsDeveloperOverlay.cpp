@@ -10,27 +10,12 @@
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
+	Super::NativeConstruct();
+	
 	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader)
 	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences)
 	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader)
 	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
-	
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown);
-	
-	BindAllCurrentWorlds();
-
-	Super::NativeConstruct();
-}
-
-void UNDynamicRefsDeveloperOverlay::NativeDestruct()
-{
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
-	
-	UnbindAllCurrentWorlds();
-
-	Super::NativeDestruct();
 }
 
 void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
@@ -166,20 +151,6 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 	}
 	
 	UpdateBanner();
-}
-
-void UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization(UWorld* World,
-	FWorldInitializationValues WorldInitializationValues)
-{
-	BindWorld(World);
-}
-
-void UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		UnbindWorld(World);
-	}
 }
 
 void UNDynamicRefsDeveloperOverlay::UpdateBanner() const

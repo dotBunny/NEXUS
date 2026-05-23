@@ -22,29 +22,20 @@ namespace NEXUS::ActorPools::ConsoleCommands
 
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
+	Super::NativeConstruct();
+	
 	N_VALIDATE(LogNexusActorPools, ActorPoolList)
-	
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
-	
-	BindAllCurrentWorlds();
 
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 
 	UpdateBanner();
-	
-	Super::NativeConstruct();
 }
 
 void UNActorPoolsDeveloperOverlay::NativeDestruct()
 {
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
-	
-	UnbindAllCurrentWorlds();
+	Super::NativeDestruct();
 
 	ActorPoolList->ClearListItems();
-	Super::NativeDestruct();
 }
 
 void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -127,19 +118,6 @@ void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 			}
 		}
 		UpdateBanner();
-	}
-}
-
-void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues)
-{
-	BindWorld(World);
-}
-
-void UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		UnbindWorld(World);
 	}
 }
 
