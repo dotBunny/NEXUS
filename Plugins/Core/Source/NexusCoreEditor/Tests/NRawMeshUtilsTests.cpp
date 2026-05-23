@@ -1129,4 +1129,217 @@ N_TEST_HIGH(FNRawMeshUtilsTests_CreateRawMeshVisualizers_SingleActor_SpawnsOneAt
 	});
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_EarlyExit_ThresholdExceeded_ComparisonProducesTrue,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::EarlyExit_ThresholdExceeded_ComparisonProducesTrue",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirrors the WorldAssembly production pattern:
+	//   float Depth = GetHullIntersectDepth(..., Threshold);
+	//   if (Depth >= Threshold) { /* reject */ }
+	// Left cube(10) at origin, Right cube(5) at (12,0,0). Actual depth = 3.0 (Right's -X vertices
+	// land at world x=7, which is 3 units from Left's +X face at x=10). Threshold = 2.0 < 3.0
+	// so the in-loop early-exit (path A) fires and the caller's >= comparison must produce true.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	constexpr float Threshold = 2.0f;
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0),  FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator,
+		Threshold);
+
+	CHECK_MESSAGE(TEXT("Returned depth must satisfy the caller's >= threshold comparison (production rejection pattern)"),
+		Depth >= Threshold);
+	CHECK_MESSAGE(TEXT("Returned depth should still reflect the actual penetration distance (3.0)"),
+		FMath::IsNearlyEqual(Depth, 3.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_EarlyExit_ThresholdNotReached_ComparisonProducesFalse,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::EarlyExit_ThresholdNotReached_ComparisonProducesFalse",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Same production pattern but the penetration is shallow — the caller's >= comparison must be false.
+	// Left cube(5) at origin, Right cube(5) at (9,0,0). Actual depth = 1.0 (Right's -X vertices at
+	// world x=4, 1 unit from Left's +X face at x=5). Threshold = 5.0 > 1.0, so no shortcut fires
+	// that could inflate the value above threshold.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	constexpr float Threshold = 5.0f;
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator::ZeroRotator,
+		Right, FVector(9, 0, 0), FRotator::ZeroRotator,
+		Threshold);
+
+	CHECK_FALSE_MESSAGE(TEXT("Returned depth must NOT satisfy the caller's >= threshold comparison (production pass-through pattern)"),
+		Depth >= Threshold);
+	CHECK_MESSAGE(TEXT("Returned depth should reflect the actual penetration distance (1.0)"),
+		FMath::IsNearlyEqual(Depth, 1.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_EarlyExit_ExactMatchesNoThreshold,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::EarlyExit_ExactMatchesNoThreshold",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that supplying an EarlyExitDepth above the actual depth produces the same exact result
+	// as the default (MAX_flt) — the shortcuts must not corrupt the value when they don't fire.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float DepthExact = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0),  FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator);
+
+	const float DepthWithHighThreshold = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0),  FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator,
+		100.0f);
+
+	CHECK_MESSAGE(TEXT("High threshold (above actual depth) must produce the same result as no threshold"),
+		FMath::IsNearlyEqual(DepthExact, DepthWithHighThreshold, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_AABBBound_PathC_ReturnsValueBelowThreshold,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::AABBBound_PathC_ReturnsValueBelowThreshold",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Exercises the AABB-overlap depth bound (path C). Two cubes(5) at distance 9 on X produce an
+	// AABB overlap of width 1 on X (narrowest axis). With EarlyExitDepth = 5.0, the bound (1.0) is
+	// less than 5.0, so path C fires and returns the bound without sampling any vertices. The
+	// returned value must satisfy the caller's < threshold comparison.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	constexpr float Threshold = 5.0f;
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator::ZeroRotator,
+		Right, FVector(9, 0, 0), FRotator::ZeroRotator,
+		Threshold);
+
+	CHECK_MESSAGE(TEXT("Path C bound must be less than the supplied threshold"),
+		Depth < Threshold);
+	CHECK_MESSAGE(TEXT("Path C bound must be positive (AABBs do overlap)"),
+		Depth > 0.0f);
+	CHECK_MESSAGE(TEXT("Path C bound should equal the AABB overlap's narrowest dimension (1.0)"),
+		FMath::IsNearlyEqual(Depth, 1.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BothMeshesRotated_PositiveDepth,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BothMeshesRotated_PositiveDepth",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The WorldAssembly graph builder places cells at arbitrary positions AND rotations. Both the
+	// LeftQuat/RightQuat vertex transformation and the LeftInvQuat/RightInvQuat inverse mapping must
+	// compose correctly. Left cube(10) gives enough room that Right cube(5)'s rotated vertices land
+	// strictly inside (not on the Z boundary, which yaw-only rotations preserve).
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Right, FVector(8, 0, 0), FRotator(0.f, -45.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Two rotated cubes at close range must report a positive penetration depth"),
+		Depth > 0.0f);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_BothMeshesRotated_SymmetricSwap,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BothMeshesRotated_SymmetricSwap",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float DepthA = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Right, FVector(8, 0, 0), FRotator(0.f, -45.f, 0.f));
+
+	const float DepthB = FNRawMeshUtils::GetIntersectDepth(
+		Right, FVector(8, 0, 0), FRotator(0.f, -45.f, 0.f),
+		Left,  FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Depth must be symmetric when swapping Left/Right with distinct rotations on each side"),
+		FMath::IsNearlyEqual(DepthA, DepthB, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_IdenticalMeshes_SamePosition_ReturnsZero,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::IdenticalMeshes_SamePosition_ReturnsZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Two identical cubes at the same origin. Every corner vertex of each cube lies exactly ON three
+	// faces of the other, so ComputePointDepthInsideConvex reports perpendicular distance = 0 for
+	// each. The vertex-sampling metric returns 0 despite total overlap — this is the documented
+	// boundary case: "Returns 0.0 when no vertex of either mesh lies [strictly] inside the other."
+	// Callers who need to detect complete overlap should use DoesIntersect instead.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Cube, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Identical cubes at same position return 0 — all vertices sit on boundary faces, not strictly inside"),
+		FMath::IsNearlyEqual(Depth, 0.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_ShallowPenetration_SubUnit_Positive,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::ShallowPenetration_SubUnit_Positive",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Sub-unit penetration exercises floating-point precision at the scale typical of the graph
+	// builder's CellHullPenetration threshold (often < 1 UU). Left cube(10), Right cube(5) shifted
+	// so only 0.1 units poke in: Right at (14.9, 0, 0) → left face at world x = 9.9, 0.1 units
+	// inside Left's +X boundary at x = 10.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0),    FRotator::ZeroRotator,
+		Right, FVector(14.9, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Sub-unit penetration must be reported as positive"),
+		Depth > 0.0f);
+	CHECK_MESSAGE(TEXT("Sub-unit penetration depth should be approximately 0.1"),
+		FMath::IsNearlyEqual(Depth, 0.1f, 0.01f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_AdjacentTouching_ReturnsZero,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::AdjacentTouching_ReturnsZero",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Two cubes with faces exactly flush (no gap, no overlap). This is the most common non-violating
+	// configuration in the graph builder — neighbouring cells share a face. Boundary vertices sit
+	// exactly on the opposite mesh's face plane, producing ComputePointDepthInsideConvex = 0. The
+	// returned depth must be exactly 0, not -1 (AABBs do touch) and not positive.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0,  0, 0), FRotator::ZeroRotator,
+		Right, FVector(10, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("Flush-adjacent cubes must return 0 — boundary touch without penetration"),
+		FMath::IsNearlyEqual(Depth, 0.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_EarlyExitDepth_Zero_AnyPenetrationTriggersReturn,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::EarlyExitDepth_Zero_AnyPenetrationTriggersReturn",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// EarlyExitDepth = 0 means "reject any penetration at all." The first vertex found inside the
+	// other mesh (with depth > 0) satisfies MaxDepth >= 0 and triggers immediate return. The result
+	// must be positive so the caller's `if (Depth >= 0)` fires.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0),  FRotator::ZeroRotator,
+		Right, FVector(12, 0, 0), FRotator::ZeroRotator,
+		0.0f);
+
+	CHECK_MESSAGE(TEXT("With threshold 0, any penetration must produce a positive return value"),
+		Depth > 0.0f);
+	CHECK_MESSAGE(TEXT("With threshold 0, the caller's >= 0 comparison must succeed"),
+		Depth >= 0.0f);
+}
+
 #endif //WITH_TESTS

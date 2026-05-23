@@ -10,6 +10,7 @@
 - `NexusCore`, `NDynamicRefs`, `NGuardian`, `NUI` all have Unit and Performance-based testing.
 - `NValidationMacros` to support providing easy to use validation for Blueprint-facing methods.
 - `NGuardian` now supports automatically setting its baseline after a defined period (default 15 seconds).
+- `NCell` side-car data file now has an action button, that when clicked in the Content Browser will select the source world/level. 
 
 ### Changed
 
@@ -39,6 +40,7 @@
 - `FNLevelUtils::DetermineLevelBounds` now by default ignores transient actors, but has an option to include them.
 - DynamicRef Overlay now just holds WeakPtrs to the objects.
 - NGuardian system now has a tick rate configurable in settings (defaults to 1s).
+- When a thumbnail is captured for the NCell in the level editor, it now propogates to the NCell side-car data file as well.
 
 ### Fixed
 
