@@ -9,28 +9,33 @@
 
 USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclassOf<AActor>& ActorClass)
 {
-	const UBlueprintGeneratedClass* BlueprintGeneratedClass = Cast<UBlueprintGeneratedClass>(ActorClass);
-	
-	if (BlueprintGeneratedClass == nullptr || BlueprintGeneratedClass->SimpleConstructionScript == nullptr)
+	if (ActorClass == nullptr) return nullptr;
+
+	// Walk the (possibly multi-level) Blueprint class chain, returning the first
+	// USceneComponent template found on any SCS root node.
+	for (UClass* Cursor = *ActorClass; Cursor; Cursor = Cursor->GetSuperClass())
 	{
-		return ActorClass->GetDefaultObject<AActor>()->GetRootComponent();
+		const UBlueprintGeneratedClass* BPGC = Cast<UBlueprintGeneratedClass>(Cursor);
+		if (BPGC == nullptr) break; // hit the first native class — stop SCS walk
+
+		const USimpleConstructionScript* SCS = BPGC->SimpleConstructionScript;
+		if (SCS == nullptr) continue;
+
+		for (const USCS_Node* Node : SCS->GetRootNodes())
+		{
+			if (Node == nullptr) continue;
+			if (USceneComponent* SceneTemplate = Cast<USceneComponent>(Node->ComponentTemplate))
+			{
+				return SceneTemplate;
+			}
+		}
 	}
-	
-	const TArray<USCS_Node*>& RootNodes =  BlueprintGeneratedClass->SimpleConstructionScript->GetRootNodes();
-	if (RootNodes.IsEmpty() || RootNodes[0] == nullptr)
-	{
-		return ActorClass->GetDefaultObject<AActor>()->GetRootComponent();
-	}
-	
-	
-	UActorComponent* RootTemplate = RootNodes[0]->ComponentTemplate;
-	if (RootTemplate->IsA<USceneComponent>())
-	{
-		return Cast<USceneComponent>(RootTemplate);
-	}
-	
-	return ActorClass->GetDefaultObject<AActor>()->GetRootComponent();
+
+	// Native fallback: read the CDO's root (set by the native constructor).
+	const AActor* CDO = ActorClass->GetDefaultObject<AActor>();
+	return CDO ? CDO->GetRootComponent() : nullptr;
 }
+
 
 TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldActorFilterSettings& Settings)
 {
