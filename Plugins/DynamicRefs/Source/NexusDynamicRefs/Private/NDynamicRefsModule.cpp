@@ -11,10 +11,9 @@ DEFINE_LOG_CATEGORY(LogNexusDynamicRefs);
 void FNDynamicRefsModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusDynamicRefs")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNDynamicRefsModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNDynamicRefsModule::OnPostEngineInit);
 }
- 
-// ReSharper disable once CppMemberFunctionMayBeStatic
+
 void FNDynamicRefsModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusDynamicRefsSamples")

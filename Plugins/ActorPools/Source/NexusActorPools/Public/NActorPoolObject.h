@@ -46,6 +46,7 @@ public:
 	{
 		NewPool->LinkedActorPoolObject = this;
 		this->Pool = NewPool;
+		this->OwningWorld = NewPool->GetWorld();
 
 		FString ClassNameOriginal = NewPool->GetTemplate()->GetFName().ToString();
 		ClassNameOriginal.RemoveFromEnd("_C");
@@ -121,8 +122,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
 	UWorld* GetPoolWorld() const
 	{
-		if (Pool == nullptr) return nullptr;
-		return Pool->GetWorld();
+		if (Pool != nullptr) return Pool->GetWorld();
+		return OwningWorld.Get();
 	}
 
 	/** @return true if the pool's Actor class implements INActorPoolItem. */
@@ -161,6 +162,9 @@ public:
 private:
 	/** The native Actor Pool this wrapper reflects. */
 	FNActorPool* Pool = nullptr;
+
+	/** Cached world pointer so GetPoolWorld() remains valid after pool destruction. */
+	TWeakObjectPtr<UWorld> OwningWorld;
 
 	/** Cached display name of the pool's Actor template. */
 	FText ClassName;

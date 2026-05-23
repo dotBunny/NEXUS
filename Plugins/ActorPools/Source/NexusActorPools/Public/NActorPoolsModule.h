@@ -16,5 +16,5 @@ public:
 	N_IMPLEMENT_MODULE(FNActorPoolsModule, "NexusActorPools")
 
 private:
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

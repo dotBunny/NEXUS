@@ -41,7 +41,6 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

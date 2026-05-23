@@ -17,5 +17,5 @@ public:
 	N_IMPLEMENT_MODULE(FNDynamicRefsModule, "NexusDynamicRefs")
 
 private:
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

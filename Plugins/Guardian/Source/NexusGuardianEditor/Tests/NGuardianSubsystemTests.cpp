@@ -65,6 +65,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         Subsystem->SetBaseline();
 
@@ -104,6 +105,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_Disabled,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         World->GetTimerManager().Tick(1.0f);
 
@@ -140,6 +142,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         // When SetTimer runs before the manager has been ticked this frame, the new timer
         // is queued in PendingTimerSet — it doesn't reach ActiveTimerHeap until the END of
@@ -174,6 +177,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -207,6 +211,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_SetBaseline_ThresholdOrdering,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         Subsystem->SetBaseline();
 
@@ -239,6 +244,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -285,6 +291,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
@@ -322,6 +329,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
@@ -381,6 +389,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -455,6 +464,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -531,6 +541,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
+        Subsystem->UpdateTickRate(0.f);
 
         // Use large, strictly-increasing thresholds so no flags are triggered.
         NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;

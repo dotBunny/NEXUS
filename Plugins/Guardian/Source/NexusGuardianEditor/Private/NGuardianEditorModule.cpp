@@ -9,7 +9,7 @@
 
 void FNGuardianEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNGuardianEditorModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNGuardianEditorModule::OnPostEngineInit);
 }
 
 void FNGuardianEditorModule::ShutdownModule()
@@ -18,7 +18,6 @@ void FNGuardianEditorModule::ShutdownModule()
 	FNGuardianEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNGuardianEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

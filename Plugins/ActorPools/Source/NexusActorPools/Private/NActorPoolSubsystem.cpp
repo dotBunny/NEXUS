@@ -245,7 +245,8 @@ void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 	// Don't add a stub pool to be ticked.
 	if (ActorPool->IsStubMode()) return;
 	
-	TickableActorPools.Add(ActorPool);
+	// Ensure we only ever add a pool once
+	TickableActorPools.AddUnique(ActorPool);
 	bHasTickableActorPools = !TickableActorPools.IsEmpty();
 }
 

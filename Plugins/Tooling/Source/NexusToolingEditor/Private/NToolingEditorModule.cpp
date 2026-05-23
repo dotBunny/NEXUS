@@ -49,7 +49,6 @@ void FNToolingEditorModule::ShutdownModule()
 	FNToolingEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNToolingEditorModule::OnPostEngineInit()
 {
 	FNToolingEditorUtils::SetBlueprintEditorAssetTypes();

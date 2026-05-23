@@ -16,5 +16,5 @@ public:
 	N_IMPLEMENT_MODULE(FNPickerModule, "NexusPicker")
 
 private:
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

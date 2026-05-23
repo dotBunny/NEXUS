@@ -22,5 +22,5 @@ public:
 
 private:
 	/** Deferred initialization bound to FCoreDelegates::OnPostEngineInit; completes wiring that depends on the editor being fully started. */
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

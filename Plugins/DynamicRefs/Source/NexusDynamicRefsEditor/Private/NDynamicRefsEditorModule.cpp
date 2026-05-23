@@ -10,7 +10,7 @@
 
 void FNDynamicRefsEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNDynamicRefsEditorModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNDynamicRefsEditorModule::OnPostEngineInit);
 }
 
 void FNDynamicRefsEditorModule::ShutdownModule()
@@ -19,7 +19,6 @@ void FNDynamicRefsEditorModule::ShutdownModule()
 	FNDynamicRefsEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNDynamicRefsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

@@ -10,16 +10,15 @@
 
 void FNUIEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNUIEditorModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNUIEditorModule::OnPostEngineInit);
 }
-
 
 void FNUIEditorModule::ShutdownModule()
 {
 	FNUIEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
+
 void FNUIEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;

@@ -21,5 +21,5 @@ public:
 
 private:
 	/** Post-engine-init hook used to register things that depend on slate/umg being fully live. */
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

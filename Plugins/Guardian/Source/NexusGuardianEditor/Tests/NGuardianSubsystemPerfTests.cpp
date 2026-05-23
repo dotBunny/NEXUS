@@ -62,6 +62,7 @@ public:
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
+        Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -95,6 +96,7 @@ public:
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
+        Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();

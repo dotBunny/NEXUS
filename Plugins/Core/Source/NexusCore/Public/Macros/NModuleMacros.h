@@ -38,6 +38,16 @@ public: \
 		FCoreDelegates::OnPostEngineInit.AddRaw(this, &Type::Method); \
 	}
 
+#define N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(Method) \
+	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \
+	{ \
+		Method(); \
+	} \
+	else \
+	{ \
+		FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
+	}
+
 /**
  * Editor-only: synchronises a plugin's .uplugin Version / VersionName with NEXUS::Version.
  *

@@ -39,6 +39,18 @@ public:
 	virtual bool IsTickable() const override { return bBaselineSet && IsInitialized(); }
 
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
+
+	/**
+	 * Override the sampling interval used to throttle Tick.
+	 * @param NewTickRate Seconds between samples; pass 0 to sample every frame.
+	 * @note The change takes effect on the next tick; the current countdown is reset to NewTickRate.
+	 * @note Not persisted — the rate is reset for the next world/subsystem.
+	 */
+	void UpdateTickRate(const float NewTickRate)
+	{
+		TickTimer = NewTickRate;
+		TickRate = NewTickRate;
+	}
 	
 	/** @return The last sampled total UObject count. */
 	int32 GetLastObjectCount() const { return LastObjectCount; }

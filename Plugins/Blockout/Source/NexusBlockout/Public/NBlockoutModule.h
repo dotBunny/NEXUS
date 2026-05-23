@@ -16,5 +16,5 @@ public:
 	N_IMPLEMENT_MODULE(FNBlockoutModule, "NexusBlockout")
 
 private:
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

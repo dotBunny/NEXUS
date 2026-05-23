@@ -19,7 +19,7 @@ public:
 	N_IMPLEMENT_MODULE(FNGuardianEditorModule, "NexusGuardianEditor")
 	
 private:	
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };
 
 N_IMPLEMENT_TOOLS_MENU_EUW_ENTRY(
