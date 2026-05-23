@@ -28,7 +28,6 @@ void UNGuardianSubsystem::SetBaseline()
 		return;
 	}
 	
-	
 	bPassedObjectCountWarningThreshold = false;
 	bPassedObjectCountSnapshotThreshold = false;
 	bPassedObjectCountCompareThreshold = false;
@@ -68,6 +67,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	
 	if (LastObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
 	{
+		UE_LOG(LogNexusGuardian, Log, TEXT("The last UObject count has dropped below the warning threshold, resetting threshold triggers and releasing any captured snapshot."));
 		bPassedObjectCountWarningThreshold = false;
 		bPassedObjectCountSnapshotThreshold = false;
 		bPassedObjectCountCompareThreshold = false;

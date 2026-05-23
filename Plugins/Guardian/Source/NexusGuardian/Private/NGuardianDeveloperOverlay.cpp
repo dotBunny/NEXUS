@@ -41,7 +41,7 @@ void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
-		if (System != nullptr)
+		if (System != nullptr && Subsystems.Contains(System))
 		{
 			Subsystems.Remove(System);
 		}
