@@ -769,13 +769,28 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 		GCurrentLevelEditingViewportClient = nullptr;
 		Viewport->Draw();
 		
+		
+		TArray<FAssetData> SelectedAssets;
+		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+		
+		// Level
 		const UWorld* World = FNEditorUtils::GetCurrentWorld();
 		if (World != nullptr)
 		{
-			TArray<FAssetData> SelectedAssets;
-			const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-			FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(World));
-			SelectedAssets.Emplace(AssetData);
+			FAssetData LevelAssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(World));
+			SelectedAssets.Emplace(LevelAssetData);
+		}
+		
+		// Cell Data
+		ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+		if (CellActor != nullptr)
+		{
+			FAssetData CellAssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(CellActor->Sidecar.ToSoftObjectPath()));
+			SelectedAssets.Emplace(CellAssetData);
+		}
+
+		if (SelectedAssets.Num() > 0)
+		{
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
 		}
 

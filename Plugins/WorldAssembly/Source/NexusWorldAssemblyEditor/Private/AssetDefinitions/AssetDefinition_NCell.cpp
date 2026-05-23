@@ -3,16 +3,23 @@
 
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "AssetToolsModule.h"
+#include "AssetViewUtils.h"
 #include "EditorAssetLibrary.h"
 #include "IAssetTools.h"
 #include "Cell/NCellActor.h"
 #include "NEditorDefaults.h"
+#include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyUtils.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "AssetViewUtils.h"
+#include "ContentBrowserModule.h"
 #include "Factories/DataAssetFactory.h"
+#include "IContentBrowserSingleton.h"
 #include "Misc/DataValidation.h"
 #include "UObject/ObjectSaveContext.h"
+#include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SButton.h"
 
 TConstArrayView<FAssetCategoryPath> UAssetDefinition_NCell::GetAssetCategories() const
 {
@@ -27,6 +34,36 @@ FText UAssetDefinition_NCell::GetAssetDescription(const FAssetData& AssetData) c
 		return FText::FromString(FString::Printf(TEXT("%s"), *Asset->World.GetAssetName()));
 	}
 	return FText::GetEmpty();
+}
+
+bool UAssetDefinition_NCell::GetThumbnailActionOverlay(const FAssetData& InAssetData, FAssetActionThumbnailOverlayInfo& OutActionOverlayInfo) const
+{
+	OutActionOverlayInfo.ActionImageWidget = SNew(SImage)
+		.Image(FNWorldAssemblyEditorStyle::Get().GetBrush("AssetOverlay.NCell"));
+
+	OutActionOverlayInfo.ActionButtonArgs = SButton::FArguments()
+		.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "NCell_SelectInContentBrowser", "Select Level in Content Browser"))
+		.OnClicked_Lambda([InAssetData]() -> FReply
+		{
+			const UNCell* Cell = Cast<UNCell>(InAssetData.GetAsset());
+			if (Cell == nullptr || Cell->World.IsNull())
+			{
+				return FReply::Handled();
+			}
+
+			const IAssetRegistry& AssetRegistry = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+			const FAssetData WorldAssetData = AssetRegistry.GetAssetByObjectPath(Cell->World.ToSoftObjectPath());
+			if (!WorldAssetData.IsValid())
+			{
+				return FReply::Handled();
+			}
+
+			FContentBrowserModule& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser");
+			ContentBrowser.Get().SyncBrowserToAssets({ WorldAssetData });
+			return FReply::Handled();
+		});
+	
+	return true;
 }
 
 FText UAssetDefinition_NCell::GetAssetDisplayName() const

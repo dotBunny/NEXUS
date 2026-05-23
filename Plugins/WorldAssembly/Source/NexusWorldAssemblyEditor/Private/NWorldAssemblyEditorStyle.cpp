@@ -126,6 +126,7 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("ClassThumbnail.NOrganVolume",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NOrganVolume"), Icon128x128));
 	
 	// NCell
+	Style.Set("AssetOverlay.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("AssetOverlay_NCell"), Icon16x16));
 	Style.Set("ClassIcon.NCell", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon16x16));
 	Style.Set("ClassThumbnail.NCell",  new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCell"), Icon128x128));
 
