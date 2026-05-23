@@ -19,7 +19,6 @@ void UNDynamicRefComponent::BeginPlay()
 		Register();
 	}
 	Super::BeginPlay();
-	
 }
 
 void UNDynamicRefComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
