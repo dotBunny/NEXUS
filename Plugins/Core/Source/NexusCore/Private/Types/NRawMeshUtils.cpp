@@ -131,22 +131,26 @@ float FNRawMeshUtils::GetIntersectDepth(
 			return -1.0f;
 		}
 
-		// C: AABB-overlap depth bound. The deepest a vertex of one mesh can sit inside the other is
-		// bounded by the size of the AABB overlap along its narrowest axis. If that bound is already
-		// below the caller's threshold, the actual depth must also be below it — return the bound
-		// directly and skip the per-vertex sampling loops entirely. Skipped when no threshold was
-		// supplied (default Max), because the returned value would be a conservative upper bound
-		// rather than the exact maximum and exact-depth callers shouldn't see that.
+		// C: AABB-overlap depth bound. When the overlap is a partial slice of both AABBs, the
+		// narrowest overlap axis bounds how deep any vertex can sit inside the other mesh. If that
+		// bound is below the caller's threshold, skip the per-vertex loops. NOT valid when one AABB
+		// fully contains the other — the narrow dimension is just the smaller mesh's extent, not a
+		// penetration bound.
 		if (EarlyExitDepth < MAX_flt)
 		{
-			const FBox Overlap = LeftWorldBounds.Overlap(RightWorldBounds);
-			if (Overlap.IsValid)
+			const bool bOneContainsOther = LeftWorldBounds.IsInside(RightWorldBounds)
+				|| RightWorldBounds.IsInside(LeftWorldBounds);
+			if (!bOneContainsOther)
 			{
-				const FVector OverlapSize = Overlap.GetExtent() * 2.0;
-				const float MaxPossibleDepth = static_cast<float>(FMath::Min3(OverlapSize.X, OverlapSize.Y, OverlapSize.Z));
-				if (MaxPossibleDepth < EarlyExitDepth)
+				const FBox Overlap = LeftWorldBounds.Overlap(RightWorldBounds);
+				if (Overlap.IsValid)
 				{
-					return MaxPossibleDepth;
+					const FVector OverlapSize = Overlap.GetExtent() * 2.0;
+					const float MaxPossibleDepth = static_cast<float>(FMath::Min3(OverlapSize.X, OverlapSize.Y, OverlapSize.Z));
+					if (MaxPossibleDepth < EarlyExitDepth)
+					{
+						return MaxPossibleDepth;
+					}
 				}
 			}
 		}

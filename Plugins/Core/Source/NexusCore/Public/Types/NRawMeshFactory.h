@@ -24,14 +24,14 @@ public:
 	/**
 	 * Walks each supplied actor's registered UPrimitiveComponents and extracts their simple-collision
 	 * representation as FNRawMesh entries, along with parallel world-space transforms.
-	 * - Only actors whose world-space bounds are fully contained within at least one of the
-	 *   supplied ContainingBounds are processed. Passing an empty array skips the containment test entirely.
+	 * - Only actors whose world-space bounds intersect at least one of the
+	 *   supplied ContainingBounds are processed. Passing an empty array skips the overlap test entirely.
 	 * - Aggregate-geometry path covers FKConvexElem, FKBoxElem, FKSphereElem and FKSphylElem (capsule).
 	 * - Complex-as-simple falls back to the source static-mesh render data (route 1) or Chaos TriMeshGeometries (route 2).
 	 * - UInstancedStaticMeshComponent emits one FNRawMesh entry per instance.
 	 * - Landscape-based primitives are skipped.
 	 * @param Actors Candidate actors to process. Pre-filter at the call site (e.g. via FNActorUtils::GetWorldActors).
-	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds are contained within any one of these. Skipped when empty.
+	 * @param ContainingBounds Actor-bounds filter; an actor is processed when its bounds overlap any one of these. Skipped when empty.
 	 * @param OutMeshes Each mesh in element-local space, appended to the array.
 	 * @param OutTransforms Matching world-space transform per entry in OutMeshes.
 	 * @note In editor builds, force-flushes any pending async static-mesh compilation (via FNDeveloperUtils::WaitForStaticMeshCompilation)

@@ -85,6 +85,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			Frontier = MoveTemp(NextFrontier);
 		}
 
+		// TODO: This seems like it could end up in a infinite loop
 		// If still below minimum, try filling remaining open junctions
 		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
@@ -101,7 +102,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
 		
+		// TODO: Add cap analytics
 		CapBranchesWithFinishers(Random);
+		
+		// TODO: Add enforce finishers analytics
 		EnforceNotFinisherConstraint();
 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
@@ -230,10 +234,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			BoneNode->Connect(StartNode);
 		}
 		
-		
-		
-		// TODO: Add this as a global setting? Outside of RetryCount for graph, we should have some sort of number of bad starts before we ignore a graph?
-		if (BadStartCount > 100)
+		// We can only take so much shit
+		if (BadStartCount > OrganContextPtr->BadStartLimit)
 		{
 			BadStartCount = 0;
 			break;
@@ -251,6 +253,11 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 			WorldCollisionMeshes[i], WorldHullPenetration);
 		if (PenetrationDepth >= WorldHullPenetration)
 		{
+			if (PenetrationDepth == 0.0f
+				&& !CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+			{
+				continue;
+			}
 			return true;
 		}
 	}
@@ -266,6 +273,11 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 			ExistingNodeCollisionMeshes[i], CellHullPenetration);
 		if (PenetrationDepth >= CellHullPenetration)
 		{
+			if (PenetrationDepth == 0.0f
+				&& !CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
+			{
+				continue;
+			}
 			return true;
 		}
 	}
@@ -436,7 +448,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			continue;
 		}
 		
-		// Check previous pass existing node world collision
+		// Check previous pass existing node world collision (this doesnt check concurrent pass as they have been already filtered as outside of its collision)
 		if (DoesExistingNodeWorldCollide(TargetCellNode))
 		{
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
@@ -453,6 +465,12 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			const float PenetrationDepth = BoundsIntersectingNodes[j]->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
 			if (PenetrationDepth < CellHullPenetration)
 			{
+				// GetHullIntersectDepth returns 0 when AABBs overlap but no vertex of either mesh is inside
+				// the other (surface-only crossings). Fall back to exact tri-tri intersection to catch those.
+				if (PenetrationDepth == 0.0f && BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+				{
+					continue;
+				}
 				BoundsIntersectingNodes.RemoveAt(j);
 			}
 		}

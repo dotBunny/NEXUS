@@ -25,23 +25,23 @@ void FNRawMeshFactory::FromActorsInBounds(const TArray<AActor*>& Actors, const T
 	{
 		if (!IsValid(Actor)) continue;
 		
-		// Actor-bounds containment filter: include only when the actor's bounds fit inside at least one supplied bounds.
+		// Actor-bounds overlap filter: include when the actor's bounds intersect at least one supplied bounds.
 		if (!ContainingBounds.IsEmpty())
 		{
 			FVector ActorOrigin;
 			FVector ActorExtent;
 			Actor->GetActorBounds(true, ActorOrigin, ActorExtent, true);
-			const FBoxSphereBounds ActorBounds(ActorOrigin, ActorExtent, ActorExtent.Size());
-			bool bWithinAny = false;
+			const FBox ActorBox(ActorOrigin - ActorExtent, ActorOrigin + ActorExtent);
+			bool bOverlapsAny = false;
 			for (const FBoxSphereBounds& Bounds : ContainingBounds)
 			{
-				if (FNBoundsUtils::IsBoundsContainedInBounds(ActorBounds, Bounds))
+				if (ActorBox.Intersect(Bounds.GetBox()))
 				{
-					bWithinAny = true;
+					bOverlapsAny = true;
 					break;
 				}
 			}
-			if (!bWithinAny) continue;
+			if (!bOverlapsAny) continue;
 		}
 
 		TInlineComponentArray<UPrimitiveComponent*> ActorPrimitives(Actor);

@@ -20,6 +20,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	MinimumCellCount = WorldOrganContext->SourceComponent->MinimumCellCount;
 	MaximumCellCount = WorldOrganContext->SourceComponent->MaximumCellCount;
 	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
+	BadStartLimit = WorldOrganContext->BadStartLimit;
 	
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
