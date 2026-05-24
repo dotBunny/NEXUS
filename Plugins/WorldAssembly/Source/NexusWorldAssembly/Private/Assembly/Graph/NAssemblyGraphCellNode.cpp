@@ -151,6 +151,18 @@ void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGr
 	Links.Add(JunctionKey, Node);
 }
 
+int32 FNAssemblyGraphCellNode::FindJunctionKeyLinkedTo(const FNAssemblyGraphNode* Node) const
+{
+	for (const auto& Link : Links)
+	{
+		if (Link.Value == Node)
+		{
+			return Link.Key;
+		}
+	}
+	return INDEX_NONE;
+}
+
 void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 {
 	if (!Links.Contains(JunctionKey))

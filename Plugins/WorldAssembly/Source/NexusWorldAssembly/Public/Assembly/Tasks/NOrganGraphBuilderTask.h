@@ -82,4 +82,10 @@ private:
 
 	/** Cell-node specialization of ProcessNode: picks candidates for each open junction. */
 	TArray<FNAssemblyGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode) const;
+
+	/** Remove a single cell node from the graph, cleaning up junctions, connections, null children, and unique tags. */
+	void RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const;
+
+	/** Fixed-point pass that removes any NotFinisher-tagged leaf nodes from the graph. */
+	void EnforceNotFinisherConstraint() const;
 };

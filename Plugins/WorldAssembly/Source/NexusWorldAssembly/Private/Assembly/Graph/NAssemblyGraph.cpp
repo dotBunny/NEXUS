@@ -28,9 +28,14 @@ FNAssemblyGraph::~FNAssemblyGraph()
 
 void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 {
-	
+
 	Nodes.Add(Node);
 	Node->NodeID = Ticket++;
+}
+
+void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)
+{
+	Nodes.Remove(Node);
 }
 
 TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()

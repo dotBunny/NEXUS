@@ -30,6 +30,9 @@ public:
 	/** Take ownership of Node and add it to the graph. */
 	void RegisterNode(FNAssemblyGraphNode* Node);
 
+	/** Remove Node from the graph's ownership array without deleting it; caller takes ownership. */
+	void UnregisterNode(FNAssemblyGraphNode* Node);
+
 	/** @return Every node that still has at least one unconnected junction. */
 	TArray<FNAssemblyGraphNode*> GetNodesWithOpenJunctions();
 

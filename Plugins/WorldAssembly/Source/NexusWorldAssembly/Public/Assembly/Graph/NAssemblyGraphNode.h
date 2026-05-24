@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
+
 /**
  * Discriminator for a graph node's concrete subclass.
  */
@@ -62,6 +64,21 @@ public:
 	}
 	
 	FGameplayTagContainer& GetTags() { return Tags; }
+
+	/** Sever all upstream/downstream links between this node and Other, in both directions. */
+	void Disconnect(FNAssemblyGraphNode* Other)
+	{
+		DownstreamNodes.Remove(Other);
+		UpstreamNodes.Remove(Other);
+		Other->DownstreamNodes.Remove(this);
+		Other->UpstreamNodes.Remove(this);
+	}
+
+	/** @return All nodes downstream of this node. */
+	const TArray<FNAssemblyGraphNode*>& GetDownstreamNodes() const { return DownstreamNodes; }
+
+	/** @return All nodes upstream of this node. */
+	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
 
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */

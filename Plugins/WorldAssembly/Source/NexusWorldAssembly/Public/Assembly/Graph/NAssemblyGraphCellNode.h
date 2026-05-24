@@ -36,6 +36,9 @@ public:
 	/** @return The graph node linked through the given junction, or nullptr if the junction is free. */
 	FNAssemblyGraphNode* GetLinkedNode(int32 JunctionKey);
 
+	/** @return The junction key whose link points to Node, or INDEX_NONE if not found. */
+	int32 FindJunctionKeyLinkedTo(const FNAssemblyGraphNode* Node) const;
+
 	/** @return The cell template this node was instantiated from. */
 	TObjectPtr<UNCell> GetTemplate() const { return TemplatePtr; }
 

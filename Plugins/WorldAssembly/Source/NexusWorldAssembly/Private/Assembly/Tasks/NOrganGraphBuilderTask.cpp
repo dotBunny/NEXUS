@@ -4,9 +4,12 @@
 #include "Assembly/Tasks/NOrganGraphBuilderTask.h"
 
 #include "NWorldAssemblyMinimal.h"
+#include "NWorldAssemblyGameplayTags.h"
+#include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Graph/NAssemblyGraphBoneNode.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
+#include "Assembly/Graph/NAssemblyGraphNullNode.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
 #include "Math/NMersenneTwister.h"
 
@@ -98,6 +101,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
 		
+		EnforceNotFinisherConstraint();
+
 		// At this point we need to validate the graph against the overall requirements from the input settings.
 		// The bSuccessful flag gets set at this point, but if it isn't valid we then need to take our chances and regenerate,
 		// but only if we have not run out of attempts.
@@ -484,4 +489,83 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	}
 	
 	return MoveTemp(NewNodes);
+}
+
+void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const
+{
+	const TMap<int32, FNCellJunctionDetails>& Junctions = CellNode->GetJunctions();
+	TArray<int32> JunctionKeys;
+	Junctions.GetKeys(JunctionKeys);
+
+	for (const int32 JunctionKey : JunctionKeys)
+	{
+		FNAssemblyGraphNode* LinkedNode = CellNode->GetLinkedNode(JunctionKey);
+		if (LinkedNode == nullptr) continue;
+
+		if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			FNAssemblyGraphCellNode* LinkedCell = static_cast<FNAssemblyGraphCellNode*>(LinkedNode);
+			const int32 ReverseKey = LinkedCell->FindJunctionKeyLinkedTo(CellNode);
+			if (ReverseKey != INDEX_NONE)
+			{
+				LinkedCell->UnlinkJunction(ReverseKey);
+			}
+			CellNode->UnlinkJunction(JunctionKey);
+			CellNode->Disconnect(LinkedNode);
+		}
+		else if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Null)
+		{
+			FNAssemblyGraphNullNode* NullNode = static_cast<FNAssemblyGraphNullNode*>(LinkedNode);
+			NullNode->Unlink();
+			CellNode->UnlinkJunction(JunctionKey);
+			CellNode->Disconnect(NullNode);
+			OrganContextPtr->CellGraph->UnregisterNode(NullNode);
+			delete NullNode;
+		}
+	}
+
+	// Reverse unique-tag tracking so the cell template becomes eligible again
+	FNVirtualCellData* InputData = CellNode->GetInputDataPtr();
+	if (InputData != nullptr && OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(InputData->Tags))
+	{
+		OrganContextPtr->PlacedUniqueTagGroups.RemoveTags(
+			OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(InputData->Tags));
+	}
+
+	OrganContextPtr->CellGraph->UnregisterNode(CellNode);
+	delete CellNode;
+}
+
+void FNOrganGraphBuilderTask::EnforceNotFinisherConstraint() const
+{
+	bool bRemovedAny = true;
+	while (bRemovedAny)
+	{
+		bRemovedAny = false;
+		const TArray<FNAssemblyGraphNode*>& Nodes = OrganContextPtr->CellGraph->GetNodes();
+
+		for (int32 i = Nodes.Num() - 1; i >= 0; i--)
+		{
+			if (Nodes[i]->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Nodes[i]);
+			if (!CellNode->GetTags().HasTag(NWorldAssembly_BuiltIn_NotFinisher)) continue;
+
+			// Check if this is a leaf (no Cell-type downstream children)
+			bool bHasCellChild = false;
+			for (const FNAssemblyGraphNode* Downstream : CellNode->GetDownstreamNodes())
+			{
+				if (Downstream->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+				{
+					bHasCellChild = true;
+					break;
+				}
+			}
+			if (bHasCellChild) continue;
+
+			RemoveCellNode(CellNode);
+			bRemovedAny = true;
+			break; // Restart scan — Nodes array was modified
+		}
+	}
 }
