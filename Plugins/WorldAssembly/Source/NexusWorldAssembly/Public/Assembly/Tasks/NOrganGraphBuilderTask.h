@@ -13,7 +13,7 @@
 class FNVirtualWorldContext;
 
 /**
- * Task-graph job that builds the FNAssemblyGraph for a single organ.
+ * Task-graph job that builds the FNAssemblyGraph for a single organ using the Frontier model.
  *
  * Runs on a background worker; draws from the per-organ cell/bone input and expands outward
  * from each bone until no open junctions remain or the organ bounds/limits are hit.

@@ -60,6 +60,8 @@ public:
 		DownstreamNode->NodeDepth = Candidate;
 		PropagateDepth(DownstreamNode);
 	}
+	
+	FGameplayTagContainer& GetTags() { return Tags; }
 
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */
@@ -76,6 +78,7 @@ protected:
 
 	TArray<FNAssemblyGraphNode*> UpstreamNodes;
 	TArray<FNAssemblyGraphNode*> DownstreamNodes;
+	FGameplayTagContainer Tags;
 
 private:
 	static void PropagateDepth(FNAssemblyGraphNode* Root)

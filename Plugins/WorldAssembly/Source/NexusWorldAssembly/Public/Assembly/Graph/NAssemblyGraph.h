@@ -39,6 +39,20 @@ public:
 		return Nodes.Num();
 	}
 
+	/** @return Number of Cell-type nodes only (excludes Bone and Null nodes). */
+	int32 GetCellNodeCount() const
+	{
+		int32 Count = 0;
+		for (const FNAssemblyGraphNode* Node : Nodes)
+		{
+			if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+			{
+				Count++;
+			}
+		}
+		return Count;
+	}
+
 	/** @return true if the graph was allowed to extend outside its organ bounds. */
 	bool IsUnbounded() const { return bUnbounded; }
 

@@ -50,32 +50,53 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		int32 NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
 		if (NodeCount == 0) { return; }
 		
-		// TODO: Create better logic for placement / etc.
-		// #START Temp Generation -------------------------------------------------------------------------------------------------------------------
-		TArray<FNAssemblyGraphNode*> NewNodes = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
-		for (int32 i = 0; i < 5; i++)
+		// Break before this could have been bad
+		if (OrganContextPtr->CellGraph->GetNodesWithOpenJunctions().Num() == 0)
 		{
-			TArray<FNAssemblyGraphNode*> NextBatch = NewNodes;
-			NewNodes.Empty();
-			for (int32 j = 0; j < NextBatch.Num(); j++)
-			{
-				TArray<FNAssemblyGraphNode*> BatchNodes = ProcessNode(Random, NextBatch[j]);
-				for (int32 k = 0; k < BatchNodes.Num(); k++)
-				{
-					NewNodes.Add(BatchNodes[k]);
-				}
-			}
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("The starter cell has no open junctions. This is a BAD cell to have as a starter. Retrying ..."));
+			return;
 		}
-	
-		if (OrganContextPtr->CellGraph->GetNodeCount() < 10)
+		
+		const int32 MinCellCount = FMath::Max(OrganContextPtr->MinimumCellCount, 1);
+		const int32 MaxCellCount = OrganContextPtr->MaximumCellCount;
+		const int32 TargetCellCount = Random.IntegerRange(MinCellCount, MaxCellCount);
+
+		// BFS expansion: grow the graph wave-by-wave, stopping when we reach the maximum
+		TArray<FNAssemblyGraphNode*> Frontier = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
+		while (Frontier.Num() > 0)
+		{
+			if (MaxCellCount > 0 && OrganContextPtr->CellGraph->GetCellNodeCount() >= MaxCellCount)
+			{
+				break;
+			}
+
+			TArray<FNAssemblyGraphNode*> NextFrontier;
+			for (int32 j = 0; j < Frontier.Num(); j++)
+			{
+				if (MaxCellCount > 0 && OrganContextPtr->CellGraph->GetCellNodeCount() >= MaxCellCount)
+				{
+					break;
+				}
+				NextFrontier.Append(ProcessNode(Random, Frontier[j]));
+			}
+			Frontier = MoveTemp(NextFrontier);
+		}
+
+		// If still below minimum, try filling remaining open junctions
+		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
 			TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
+			if (OpenNodes.Num() == 0) break;
+
+			const int32 CountBefore = OrganContextPtr->CellGraph->GetCellNodeCount();
 			for (int32 j = 0; j < OpenNodes.Num(); j++)
 			{
+				if (OrganContextPtr->CellGraph->GetCellNodeCount() >= TargetCellCount) break;
 				ProcessNode(Random, OpenNodes[j]);
 			}
+
+			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
-		// #END Temp Generation ---------------------------------------------------------------------------------------------------------------------
 		
 		// At this point we need to validate the graph against the overall requirements from the input settings.
 		// The bSuccessful flag gets set at this point, but if it isn't valid we then need to take our chances and regenerate,
@@ -310,6 +331,12 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	
 	for (int32 i = 0; i < OpenJunctionCount; ++i)
 	{
+		if (OrganContextPtr->MaximumCellCount > 0 &&
+			OrganContextPtr->CellGraph->GetCellNodeCount() >= OrganContextPtr->MaximumCellCount)
+		{
+			break;
+		}
+
 		// Select the next junction to fill, using weighted priority.
 		int32 SourceJunctionKey = WeightedOpenJunctionKeys.TwistedValueAndRemove(Random);
 		FNCellJunctionDetails* SourceJunctionValue = OpenJunctions[SourceJunctionKey];
