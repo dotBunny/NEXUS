@@ -467,16 +467,17 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
 		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
 		{
-			// Refine the bounds check to look to see if the node violates the hull as it is a tighter collision check.
-			const float PenetrationDepth = BoundsIntersectingNodes[j]->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
-			if (PenetrationDepth < CellHullPenetration)
+			if (BoundsIntersectingNodes[j] == SourceCellNode)
 			{
-				// GetHullIntersectDepth returns 0 when AABBs overlap but no vertex of either mesh is inside
-				// the other (surface-only crossings). Fall back to exact tri-tri intersection to catch those.
-				if (PenetrationDepth == 0.0f && BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+				// Junction-connected pair: tolerate overlap up to CellHullPenetration
+				const float PenetrationDepth = SourceCellNode->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
+				if (PenetrationDepth < CellHullPenetration)
 				{
-					continue;
+					BoundsIntersectingNodes.RemoveAt(j);
 				}
+			}
+			else if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+			{
 				BoundsIntersectingNodes.RemoveAt(j);
 			}
 		}
