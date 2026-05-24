@@ -78,10 +78,13 @@ private:
 	TArray<FNAssemblyGraphCellNode*> CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const;
 
 	/** Expand the graph from SourceNode, returning the newly-created neighbours. */
-	TArray<FNAssemblyGraphNode*> ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode) const;
+	TArray<FNAssemblyGraphNode*> ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode, bool bIsEndNode = false) const;
 
 	/** Cell-node specialization of ProcessNode: picks candidates for each open junction. */
-	TArray<FNAssemblyGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode) const;
+	TArray<FNAssemblyGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode, bool bIsEndNode = false) const;
+
+	/** Cap open branch tips with Finisher/FinisherOnly cells when the tissue provides them. */
+	void CapBranchesWithFinishers(FNMersenneTwister& Random) const;
 
 	/** Remove a single cell node from the graph, cleaning up junctions, connections, null children, and unique tags. */
 	void RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const;

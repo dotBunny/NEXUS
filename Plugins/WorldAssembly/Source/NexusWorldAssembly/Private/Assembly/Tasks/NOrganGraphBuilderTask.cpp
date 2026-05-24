@@ -101,6 +101,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
 		
+		CapBranchesWithFinishers(Random);
 		EnforceNotFinisherConstraint();
 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
@@ -303,13 +304,13 @@ TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNAssemb
 	return MoveTemp(HitNodes);
 }
 
-TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode) const
+TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode, const bool bIsEndNode) const
 {
 	switch (SourceNode->GetNodeType())
 	{
 		using enum ENAssemblyGraphNodeType;
 	case Cell:
-		return ProcessCellNode(Random, static_cast<FNAssemblyGraphCellNode*>(SourceNode));
+		return ProcessCellNode(Random, static_cast<FNAssemblyGraphCellNode*>(SourceNode), bIsEndNode);
 	case Bone:
 	case Null:
 	default:
@@ -318,7 +319,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwis
 	return TArray<FNAssemblyGraphNode*>();
 }
 
-TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode) const
+TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode, const bool bIsEndNode) const
 {
 	TMap<int32, FNCellJunctionDetails*> OpenJunctions = SourceCellNode->GetOpenJunctions();
 	FNWeightedIntegerArray WeightedOpenJunctionKeys;
@@ -354,9 +355,10 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
 		NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
-		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr(); 
+		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
 		NodeFilter.SourceCellNode = SourceCellNode;
-		
+		NodeFilter.bIsEndNode = bIsEndNode;
+
 		OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
 		
 		// We don't have any cell input data able OR junctions to fill this spot, so we have to null it out. We will add a NullNode to the graph and connect it up.
@@ -489,6 +491,21 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	}
 	
 	return MoveTemp(NewNodes);
+}
+
+void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random) const
+{
+	if (!OrganContextPtr->CellInputDataSummary.bFoundFinisherTagged &&
+		!OrganContextPtr->CellInputDataSummary.bFoundFinisherOnlyTagged)
+	{
+		return;
+	}
+
+	TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
+	for (int32 j = 0; j < OpenNodes.Num(); j++)
+	{
+		ProcessNode(Random, OpenNodes[j], true);
+	}
 }
 
 void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const
