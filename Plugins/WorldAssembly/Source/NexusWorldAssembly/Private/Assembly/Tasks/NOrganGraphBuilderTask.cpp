@@ -251,13 +251,16 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 	{
 		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionLocations[i], WorldCollisionRotations[i],
 			WorldCollisionMeshes[i], WorldHullPenetration);
+		if (PenetrationDepth == 0.0f)
+		{
+			if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+			{
+				return true;
+			}
+			continue;
+		}
 		if (PenetrationDepth >= WorldHullPenetration)
 		{
-			if (PenetrationDepth == 0.0f
-				&& !CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
-			{
-				continue;
-			}
 			return true;
 		}
 	}
@@ -271,13 +274,16 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 	{
 		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i],
 			ExistingNodeCollisionMeshes[i], CellHullPenetration);
+		if (PenetrationDepth == 0.0f)
+		{
+			if (CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
+			{
+				return true;
+			}
+			continue;
+		}
 		if (PenetrationDepth >= CellHullPenetration)
 		{
-			if (PenetrationDepth == 0.0f
-				&& !CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
-			{
-				continue;
-			}
 			return true;
 		}
 	}
