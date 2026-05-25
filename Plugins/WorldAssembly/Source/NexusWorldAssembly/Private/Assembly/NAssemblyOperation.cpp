@@ -69,11 +69,12 @@ void UNAssemblyOperation::TearDownOperation()
 		return;
 	}
 
-	if (Owner != nullptr)
+	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
 		Owner->OnOperationDestroyed(this);
-		Owner = nullptr;
 	}
+	Owner = nullptr;
+	OwnerWeakRef.Reset();
 	
 	if (Context.IsValid())
 	{
@@ -184,7 +185,7 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	const FIntVector2 Status = TaskGraph->GetTaskStatus();
 	OnTasksChanged.Broadcast(Status.X, Status.Y);
 	
-	if (Owner != nullptr)
+	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
 		Owner->OnOperationFinished(this, TaskGraphContext);
 	}
@@ -198,13 +199,14 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	TearDownOperation();
 }
 
-void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller)
+void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* CallerObject)
 {
 	// Don't double run
 	if (bIsRunning) return;
-	
+
 	// Cache our caller
 	Owner = Caller;
+	OwnerWeakRef = CallerObject;
 	
 	// Ensure that we have locked context and done the preprocessing.
 	if (!Context->IsLocked())

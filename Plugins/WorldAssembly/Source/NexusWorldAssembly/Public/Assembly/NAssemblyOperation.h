@@ -153,9 +153,11 @@ public:
 
 	/**
 	 * Start build process.
-	 * @param Caller Owning system that will get callbacks for building process
+	 * @param Caller Owning system that will get callbacks for building process.
+	 * @param CallerObject The Caller as a UObject, used for weak-reference lifetime validation.
 	 */
-	void StartBuild(INAssemblyOperationOwner* Caller);
+	void StartBuild(INAssemblyOperationOwner* Caller, UObject* CallerObject);
+
 	/**
 	 * Append an organ component to the generation context.
 	 * @param Component Organ to include.
@@ -211,9 +213,11 @@ private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
 	static uint32 NextTicket;
 
-	/** Current owner receiving lifecycle callbacks; raw pointer because the owner may be a non-UObject subsystem. */
+	/** Current owner receiving lifecycle callbacks; raw pointer because the owner may be a non-UObject type. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	INAssemblyOperationOwner* Owner = nullptr;
+	/** Weak reference to the owner as a UObject, used to detect owner destruction before calling through Owner. */
+	TWeakObjectPtr<UObject> OwnerWeakRef;
 	/** Task graph executing the current build. */
 	TUniquePtr<FNAssemblyTaskGraph> TaskGraph;
 	/** Context describing the organs/cells/tissue participating in this pass. */

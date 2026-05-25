@@ -55,7 +55,7 @@ void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 	KnownOperations.AddUnique(Operation);
 	OnOperationStarted.Broadcast();
 	
-	Operation->StartBuild(this);
+	Operation->StartBuild(this, this);
 
 	// Snapshot to guard against reentrant mutation of RelayMap during the broadcast.
 	TArray<TObjectPtr<ANWorldAssemblyRelay>> Relays;

@@ -62,7 +62,7 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 	}
 
 	KnownOperations.AddUnique(Operation);
-	Operation->StartBuild(this);
+	Operation->StartBuild(this, this);
 }
 
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
