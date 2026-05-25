@@ -729,6 +729,7 @@ void FNWorldAssemblyEditorCommands::CellJunctionAddComponent()
 		Actor->Modify();
 		NewComponent->AttachToComponent(Actor->GetRootComponent(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 		Actor->AddInstanceComponent(NewComponent);
+		NewComponent->SetFlags(RF_Transactional);
 		NewComponent->RegisterComponent();
 
 		SelectComponents.Add(NewComponent);
