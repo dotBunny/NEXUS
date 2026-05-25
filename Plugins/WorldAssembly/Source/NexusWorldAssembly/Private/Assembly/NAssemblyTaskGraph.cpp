@@ -176,9 +176,14 @@ void FNAssemblyTaskGraph::TearDownGraph()
 {
 	// Remove all references
 	AllTasks.Empty();
-	CollectionTasks.Empty();
-	FinalizerTasks.Empty();
+	
+	PreGameThreadTasks.Empty();
+	ProcessInitialGameThreadTasks.Empty();
 	ProcessPassTasks.Empty();
+	CollectionTasks.Empty();
+	SpawnContextTasks.Empty();
+	
+	FinalizerTasks.Empty();
 	FinalizeTask = nullptr;
 	
 	N_ASSEMBLY_ANALYTICS_DELETE
