@@ -8,6 +8,7 @@
 
 class UNAssemblyOperation;
 class FNAssemblyOperationContext;
+class FNSpawnContext;
 
 /**
  * Task-graph wrapper that drives a single UNAssemblyOperation through its graph-builder,
@@ -40,6 +41,9 @@ public:
 
 	/** @return true once UnlockTasks has dispatched the graph. */
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
+
+	/** Signal the spawn pass to stop producing new proxies at the next time-slice boundary. */
+	void Cancel();
 
 	/** Tear down the created objects in the graph in preparation for deletion. */
 	void TearDownGraph();
@@ -80,4 +84,7 @@ private:
 
 	/** Finalizer tasks that run immediately before FinalizeTask. */
 	FGraphEventArray FinalizerTasks;
+
+	/** Spawn context shared with the spawn tasks; held here so Cancel() can set its cancellation flag. */
+	TSharedPtr<FNSpawnContext> SpawnContextPtr;
 };

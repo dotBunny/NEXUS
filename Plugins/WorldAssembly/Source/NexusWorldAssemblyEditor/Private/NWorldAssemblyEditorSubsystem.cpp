@@ -32,6 +32,19 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 	FEditorDelegates::PreBeginPIE.Remove(PreBeginPIEHandle);
 	PreBeginPIEHandle.Reset();
 	
+	// Stop all known operations
+	for (UNAssemblyOperation* Operation : KnownOperations)
+	{
+		if (Operation->IsRunning())
+		{
+			Operation->Cancel();
+		}
+		else
+		{
+			Operation->TearDownOperation();
+		}
+	}
+	
 	Super::Deinitialize();
 }
 

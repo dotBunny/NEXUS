@@ -199,6 +199,8 @@ public:
 	
 	FNAssemblyOperationResult GetResult() const;
 	
+	void Cancel();
+	
 protected:
 	void Tick();
 	void FinishBuild(TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext);

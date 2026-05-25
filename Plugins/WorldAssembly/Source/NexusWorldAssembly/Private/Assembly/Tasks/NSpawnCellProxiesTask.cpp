@@ -9,6 +9,13 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	N_ASSEMBLY_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
 	N_ASSEMBLY_ANALYTICS_INDEX(SpawnCellProxiesStart)
 	
+	// Cancellation check — the operation may have been cancelled between timeslice dispatches
+	if (SpawnCellsContextPtr->bCancelled.Load())
+	{
+		CompletionEvent->Unlock();
+		return;
+	}
+
 	// Dispatch Guard #1
 	UWorld* TargetWorld = SpawnCellsContextPtr->World;
 	if (!IsValid(TargetWorld) || TargetWorld->bIsTearingDown)

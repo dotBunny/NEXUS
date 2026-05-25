@@ -152,6 +152,16 @@ FNAssemblyOperationResult UNAssemblyOperation::GetResult() const
 	return MoveTemp(Result);
 }
 
+void UNAssemblyOperation::Cancel()
+{
+	if (TaskGraph.IsValid())
+	{
+		TaskGraph->Cancel();
+	}
+
+	TearDownOperation();
+}
+
 void UNAssemblyOperation::Tick()
 {
 	if (!TaskGraph.IsValid()) return;

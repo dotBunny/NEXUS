@@ -155,6 +155,19 @@ void UNWorldAssemblySubsystem::Deinitialize()
 	}
 	RelayMap.Reset();
 	LocalRelay = nullptr;
+	
+	// Stop all known operations
+	for (UNAssemblyOperation* Operation : KnownOperations)
+	{
+		if (Operation->IsRunning())
+		{
+			Operation->Cancel();
+		}
+		else
+		{
+			Operation->TearDownOperation();
+		}
+	}
 
 	Super::Deinitialize();
 }

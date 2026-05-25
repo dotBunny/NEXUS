@@ -127,7 +127,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 
 	
 	// Create our context of what we are going to need to spawn back on the game-thread
-	TSharedPtr<FNSpawnContext> SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(), 
+	SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(),
 		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
 
 	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
@@ -150,6 +150,14 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	
 	// Record end time
 	N_ASSEMBLY_ANALYTICS(TaskGraphCreationFinish)
+}
+
+void FNAssemblyTaskGraph::Cancel()
+{
+	if (SpawnContextPtr.IsValid())
+	{
+		SpawnContextPtr->bCancelled.Store(true);
+	}
 }
 
 void FNAssemblyTaskGraph::UnlockTasks()
@@ -185,6 +193,7 @@ void FNAssemblyTaskGraph::TearDownGraph()
 	
 	FinalizerTasks.Empty();
 	FinalizeTask = nullptr;
+	SpawnContextPtr.Reset();
 	
 	N_ASSEMBLY_ANALYTICS_DELETE
 	

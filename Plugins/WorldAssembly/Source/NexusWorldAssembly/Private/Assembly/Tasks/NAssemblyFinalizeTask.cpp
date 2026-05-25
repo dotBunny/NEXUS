@@ -14,15 +14,19 @@ FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperat
 
 void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	
-#if !UE_BUILD_SHIPPING	
+	if (!IsValid(Operation))
+	{
+		return;
+	}
+
+#if !UE_BUILD_SHIPPING
 	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
 	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
-	
+
 	// Send the finalized shared data back to the operation for doings
 	// This usually means recording the spawned things somewhere, but also could be useful for triggering events.
 	Operation->FinishBuild(TaskGraphContextPtr);
-	
+
 	// The operation at this point has been flagged as garbage, don't use it.
 }

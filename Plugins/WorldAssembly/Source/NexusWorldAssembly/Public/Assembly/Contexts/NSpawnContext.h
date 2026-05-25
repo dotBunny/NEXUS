@@ -27,6 +27,9 @@ public:
 	/** When true, level instances should be created for each spawned proxy. */
 	bool bSpawnLevelInstances;
 
+	/** Set to request early termination of the spawn pass. */
+	TAtomic<bool> bCancelled{false};
+
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
 	int32 CellNodesCurrentIndex = 0;
 
