@@ -29,9 +29,7 @@ void UNAssemblyOperationListViewEntry::NativeOnListItemObjectSet(UObject* ListIt
 
 void UNAssemblyOperationListViewEntry::Reset() const
 {
-	
-	
-	if (Operation != nullptr)
+	if (IsValid(Operation))
 	{
 		LeftText->SetText(Operation->GetDisplayName());
 		const FIntVector2 Tasks = Operation->GetCachedTaskStatusCounts();
@@ -47,7 +45,6 @@ void UNAssemblyOperationListViewEntry::Reset() const
 			RightText->SetText(FText::GetEmpty());
 			ProgressBar->SetPercent(1.f);
 		}
-		
 	}
 	else
 	{
@@ -57,11 +54,14 @@ void UNAssemblyOperationListViewEntry::Reset() const
 		CenterText->SetText(FText::GetEmpty());
 		ProgressBar->SetPercent(1.f);
 	}
+	
+	UpdateCancelButtonVisibility();
 }
 
 void UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged(const FString& NewDisplayMessage)
 {
 	CenterText->SetText(FText::FromString(NewDisplayMessage));
+	UpdateCancelButtonVisibility();
 }
 
 void UNAssemblyOperationListViewEntry::OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks)
@@ -75,5 +75,34 @@ void UNAssemblyOperationListViewEntry::OnOperationTasksChanged(const int32 Compl
 	{
 		RightText->SetText(FText::GetEmpty());
 		ProgressBar->SetPercent(1.f);
+	}
+	
+	UpdateCancelButtonVisibility();
+}
+
+void UNAssemblyOperationListViewEntry::OnCancelButtonClicked()
+{
+	if (IsValid(Operation))
+	{
+		Operation->Cancel();
+	}
+}
+
+void UNAssemblyOperationListViewEntry::UpdateCancelButtonVisibility() const
+{
+	if (IsValid(Operation))
+	{
+		if (Operation->IsRunning())
+		{
+			CancelButton->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			CancelButton->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+	else
+	{
+		CancelButton->SetVisibility(ESlateVisibility::Hidden);
 	}
 }

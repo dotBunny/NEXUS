@@ -3,10 +3,14 @@
 
 #pragma once
 
+#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NActorPoolObject.h"
+#include "NActorPoolsMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Image.h"
+#include "Components/ProgressBar.h"
+#include "Macros/NValidationMacros.h"
 #include "NActorPoolListViewEntry.generated.h"
 
 class UProgressBar;
@@ -33,7 +37,17 @@ public:
 	void Refresh() const;
 
 protected:
-	
+	virtual void NativeConstruct() override
+	{
+		Super::NativeConstruct();
+		
+		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
+		N_VALIDATE(LogNexusActorPools, TypeImage)
+		N_VALIDATE(LogNexusActorPools, ProgressBar)
+		N_VALIDATE(LogNexusActorPools, LeftText)
+		N_VALIDATE(LogNexusActorPools, CenterText)
+		N_VALIDATE(LogNexusActorPools, RightText)
+	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 

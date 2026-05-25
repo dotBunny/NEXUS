@@ -3,8 +3,14 @@
 
 #pragma once
 
+#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
+#include "NWorldAssemblyMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
+#include "Components/NListView.h"
+#include "Components/ProgressBar.h"
+#include "Macros/NValidationMacros.h"
 #include "NAssemblyOperationListViewEntry.generated.h"
 
 class UNAssemblyOperation;
@@ -33,7 +39,23 @@ public:
 	void Reset() const;
 
 protected:
-
+	virtual void NativeConstruct() override
+	{
+		Super::NativeConstruct();
+		
+		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
+		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView)
+		N_VALIDATE(LogNexusWorldAssembly, ProgressBar)
+		N_VALIDATE(LogNexusWorldAssembly, LeftText)
+		N_VALIDATE(LogNexusWorldAssembly, CenterText)
+		N_VALIDATE(LogNexusWorldAssembly, RightText)
+		N_VALIDATE(LogNexusWorldAssembly, CancelButton)
+		
+		if (IsValid(CancelButton))
+		{
+			CancelButton->OnClicked.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnCancelButtonClicked);
+		}
+	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	
@@ -60,6 +82,10 @@ protected:
 	/** Right-aligned label (task counts / percentage). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> RightText;
+	
+	/** Left-aligned label (operation display name). */
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UButton> CancelButton;
 
 	/** Delegate callback: the operation's display message changed. */
 	UFUNCTION()
@@ -68,9 +94,14 @@ protected:
 	/** Delegate callback: the operation's task counts changed. */
 	UFUNCTION()
 	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
+	
+	UFUNCTION()
+	void OnCancelButtonClicked();
 
 private:
+	void UpdateCancelButtonVisibility() const;
+	
 	/** Operation this row is bound to; updated via NativeOnListItemObjectSet. */
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
+	UPROPERTY()
 	TObjectPtr<UNAssemblyOperation> Operation = nullptr;
 };

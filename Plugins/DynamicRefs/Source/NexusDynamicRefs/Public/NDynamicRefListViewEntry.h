@@ -4,8 +4,12 @@
 #pragma once
 
 
+#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
+#include "NDynamicRefsMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 #include "NDynamicRefListViewEntry.generated.h"
 
 class UNDynamicRefObject;
@@ -53,6 +57,14 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	TObjectPtr<UNListView> References;
 	
+	virtual void NativeConstruct() override
+	{
+		Super::NativeConstruct();
+		
+		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
+		N_VALIDATE(LogNexusDynamicRefs, Reference)
+		N_VALIDATE(LogNexusDynamicRefs, References)
+	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 	virtual void NativeOnEntryReleased() override;
