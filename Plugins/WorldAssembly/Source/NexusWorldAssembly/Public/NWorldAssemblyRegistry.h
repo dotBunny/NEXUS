@@ -119,6 +119,11 @@ public:
 
 	/** @return All currently tracked operations. */
 	static TArray<UNAssemblyOperation*>& GetOperations() { return Operations; }
+	
+	/** 
+	 * Scrub any registry entries still associated with World that were not properly unregistered during teardown. 
+	 * Bound to FWorldDelegates::OnPostWorldCleanup. */
+	static void OnPostWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources);
 
 private:
 

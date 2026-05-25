@@ -9,13 +9,14 @@
 /**
  * NEXUS: Procedural Generation Module
  */
-// ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNWorldAssemblyModule final : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
+	virtual void ShutdownModule() override;
 	N_IMPLEMENT_MODULE(FNWorldAssemblyModule, "NexusWorldAssembly")
 
 private:
 	void OnPostEngineInit();
+	FDelegateHandle PostWorldCleanupHandle;
 };

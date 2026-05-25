@@ -399,3 +399,66 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 	}
 	return true;
 }
+
+void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
+{
+	// We're not going to handle Operations here, it will be handled elsewhere.
+	
+	// Scrub Bones
+	for (int i = Bones.Num() - 1; i >= 0; --i)
+	{
+		if (Bones[i]->GetWorld() == World)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned bone(%s), scrubbing."), *Bones[i]->GetName());
+			Bones.RemoveAt(i);
+		}
+	}
+	
+	// Scrub Cell Junctions
+	for (int i = CellJunctions.Num() - 1; i >= 0; --i)
+	{
+		if (CellJunctions[i]->GetWorld() == World)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetJunctionName());
+			CellJunctions.RemoveAt(i);
+		}
+	}
+	
+	// Scrub Cell Roots
+	for (int i = CellRoots.Num() - 1; i >= 0; --i)
+	{
+		if (CellRoots[i]->GetWorld() == World)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellRoot(%s), scrubbing."), *CellRoots[i]->GetName());
+			CellRoots.RemoveAt(i);
+		}
+	}
+	
+	
+	// Scrub Organs
+	for (int i = Organs.Num() - 1; i >= 0; --i)
+	{
+		if (Organs[i]->GetWorld() == World)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned Organ(%s), scrubbing."), *Organs[i]->GetName());
+			Organs.RemoveAt(i);
+		}
+	}
+	
+	// Scrub CellLevelInstances
+	TArray<uint32> OperationTickets;
+	CellLevelInstances.GetKeys(OperationTickets);
+	
+	for (int i = OperationTickets.Num() - 1; i >= 0; --i)
+	{
+		int ItemCount = CellLevelInstances[i].Num();
+		for (int j = ItemCount - 1; j >= 0; --j)
+		{
+			if (CellLevelInstances[i][j]->GetWorld()== World)
+			{
+				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellLevelInstances(%s), scrubbing."), *CellLevelInstances[i][j]->GetName());
+				CellLevelInstances[i].RemoveAt(j);
+			}
+		}
+	}
+}
