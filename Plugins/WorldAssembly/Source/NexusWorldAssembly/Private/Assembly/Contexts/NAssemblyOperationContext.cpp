@@ -27,7 +27,8 @@ void FNAssemblyOperationContext::ResetContext()
 	ComponentBoneMap.Empty();
 	GenerationOrder.Empty();
 	InputComponents.Empty();
-
+	TargetWorld = nullptr;
+	
 	bIsLocked = false;
 }
 

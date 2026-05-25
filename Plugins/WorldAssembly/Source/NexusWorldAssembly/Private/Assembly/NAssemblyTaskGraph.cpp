@@ -35,13 +35,13 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	
 	// We need something that each task can share context to others with
-	TSharedPtr<FNAssemblyTaskGraphContext> TaskGraphContextPtr = MakeShared<FNAssemblyTaskGraphContext, ESPMode::ThreadSafe>(
+	TaskGraphContextPtr = MakeShared<FNAssemblyTaskGraphContext, ESPMode::ThreadSafe>(
 		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
-	
+
 	// ----- STEP 0 - CAPTURE WORLD (GAME THREAD) ---------------------------------------------------------------------------------------------------
-	
+
 	// Create our world context holder
-	TSharedPtr<FNVirtualWorldContext> VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
+	VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
 
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateVirtualWorldTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(
@@ -184,15 +184,32 @@ void FNAssemblyTaskGraph::TearDownGraph()
 {
 	// Remove all references
 	AllTasks.Empty();
-	
+
 	PreGameThreadTasks.Empty();
 	ProcessInitialGameThreadTasks.Empty();
 	ProcessPassTasks.Empty();
 	CollectionTasks.Empty();
 	SpawnContextTasks.Empty();
-	
+
 	FinalizerTasks.Empty();
 	FinalizeTask = nullptr;
+
+	// Null out world pointers before releasing shared contexts so they don't
+	// dangle if ref-counted copies outlive the operation teardown.
+	if (TaskGraphContextPtr.IsValid())
+	{
+		TaskGraphContextPtr->TargetWorld = nullptr;
+	}
+	if (VirtualWorldContextPtr.IsValid())
+	{
+		VirtualWorldContextPtr->InputWorld = nullptr;
+	}
+	if (SpawnContextPtr.IsValid())
+	{
+		SpawnContextPtr->World = nullptr;
+	}
+	TaskGraphContextPtr.Reset();
+	VirtualWorldContextPtr.Reset();
 	SpawnContextPtr.Reset();
 	
 	N_ASSEMBLY_ANALYTICS_DELETE

@@ -8,7 +8,9 @@
 
 class UNAssemblyOperation;
 class FNAssemblyOperationContext;
+class FNAssemblyTaskGraphContext;
 class FNSpawnContext;
+class FNVirtualWorldContext;
 
 /**
  * Task-graph wrapper that drives a single UNAssemblyOperation through its graph-builder,
@@ -84,6 +86,12 @@ private:
 
 	/** Finalizer tasks that run immediately before FinalizeTask. */
 	FGraphEventArray FinalizerTasks;
+
+	/** Task-graph-wide context shared across all stages; held here so TearDownGraph() can null the world pointer. */
+	TSharedPtr<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
+
+	/** Virtual-world collision snapshot; held here so TearDownGraph() can null the world pointer. */
+	TSharedPtr<FNVirtualWorldContext> VirtualWorldContextPtr;
 
 	/** Spawn context shared with the spawn tasks; held here so Cancel() can set its cancellation flag. */
 	TSharedPtr<FNSpawnContext> SpawnContextPtr;
