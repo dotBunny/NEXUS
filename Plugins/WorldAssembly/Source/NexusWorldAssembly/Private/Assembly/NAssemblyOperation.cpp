@@ -12,14 +12,13 @@ uint32 UNAssemblyOperation::NextTicket = 1;
 
 UNAssemblyOperation::UNAssemblyOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Ticket = NextTicket++;
-	Context = MakeUnique<FNAssemblyOperationContext>(Ticket);
-	
-	// A generator should never be deleted
-	this->AddToRoot();
-	
+	// Only do things when it is NOT the CDO
 	if (!this->IsTemplate())
 	{
+		Ticket = NextTicket++;
+		Context = MakeUnique<FNAssemblyOperationContext>(Ticket);
+		this->AddToRoot();
+		
 		FNWorldAssemblyRegistry::RegisterOperation(this);
 	}
 }
@@ -64,6 +63,12 @@ UNAssemblyOperation* UNAssemblyOperation::CreateInstance(UNOrganComponent* BaseC
 
 void UNAssemblyOperation::TearDownOperation()
 {
+	// Don't do anything for CDO
+	if (this->IsTemplate())
+	{
+		return;
+	}
+
 	if (Owner != nullptr)
 	{
 		Owner->OnOperationDestroyed(this);
@@ -82,13 +87,8 @@ void UNAssemblyOperation::TearDownOperation()
 		TaskGraph.Reset();
 	}
 	
-	if (!this->IsTemplate())
-	{
-		FNWorldAssemblyRegistry::UnregisterOperation(this);
-	}
-	
+	FNWorldAssemblyRegistry::UnregisterOperation(this);
 	RemoveFromRoot();
-	
 	MarkAsGarbage();
 }
 
@@ -179,6 +179,10 @@ void UNAssemblyOperation::Tick()
 void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
 	bIsRunning = false;
+	
+	// Add one last update to subscribers for task updates
+	const FIntVector2 Status = TaskGraph->GetTaskStatus();
+	OnTasksChanged.Broadcast(Status.X, Status.Y);
 	
 	if (Owner != nullptr)
 	{
