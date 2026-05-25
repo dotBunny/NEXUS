@@ -118,4 +118,8 @@ public:
 	 * @return true if Cell was updated and marked dirty, false if there was nothing to copy.
 	 */
 	static bool UpdateCell(UNCell* Cell, ANCellActor* CellActor);
+	
+	static bool CanGenerateSelectedOrgan();
+	
+	static bool CanGenerateAllOrgans();
 };

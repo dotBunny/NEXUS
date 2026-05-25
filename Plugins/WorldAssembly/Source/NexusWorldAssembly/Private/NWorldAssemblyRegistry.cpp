@@ -139,8 +139,14 @@ bool FNWorldAssemblyRegistry::HasOrganComponentsInWorld(const UWorld* World)
 	return false;
 }
 
-bool FNWorldAssemblyRegistry::HasOperations()
+bool FNWorldAssemblyRegistry::HasOperations(bool bIgnoreEditorModeOperation)
 {
+#if WITH_EDITOR	
+	if (Operations.Num() == 1 && Operations[0]->GetName() == NEXUS::WorldAssembly::Operations::EditorMode)
+	{
+		return false;
+	}
+#endif // WITH_EDITOR
 	return !Operations.IsEmpty();
 }
 

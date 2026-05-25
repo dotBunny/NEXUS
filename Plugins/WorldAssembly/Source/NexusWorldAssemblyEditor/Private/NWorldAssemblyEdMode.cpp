@@ -171,6 +171,13 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 {
 	bHasDirtyActors = false;
 	
+	// We don't have anything to do in play mode - maybe in the future.
+	if (FNEditorUtils::IsPlayInEditor())
+	{
+		FEdMode::Render(View, Viewport, PDI);
+		return;
+	}
+	
 	// Iterate all roots and draw their bounds
 	if (FNWorldAssemblyRegistry::HasRootComponents())
 	{
@@ -259,7 +266,7 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
 	// Messages disabled
-	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages)
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor())
 	{
 		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 		return;

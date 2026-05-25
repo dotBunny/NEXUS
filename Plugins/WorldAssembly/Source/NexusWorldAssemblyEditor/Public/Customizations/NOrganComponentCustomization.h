@@ -13,7 +13,7 @@ class FNOrganComponentCustomization final : public IDetailCustomization
 public:
 	/** Factory entry point registered with the property editor module. */
 	static TSharedRef<IDetailCustomization> MakeInstance();
-
+	
 	//~IDetailCustomization
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 	//End IDetailCustomization
@@ -27,9 +27,6 @@ private:
 
 	/** Remove previously-spawned generated proxies for the selected organ component(s). */
 	FReply OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object);
-
-	/** @return Visible when no operation is active and generation is possible. */
-	EVisibility GenerateButtonVisible() const;
 
 	/** @return Visible only while an operation is running for the selected component(s). */
 	EVisibility CancelButtonVisible() const;

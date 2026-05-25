@@ -261,11 +261,11 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateProxies,
 		FExecuteAction::CreateStatic(&OrganGenerateProxies),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::IsOrganVolumeSelected));
+		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan));
 	
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateAllProxies,
 		FExecuteAction::CreateStatic(&OrganGenerateAllProxies),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyRegistry::HasOrganComponents));
+		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateAllOrgans));
 	
 	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
 	FExecuteAction::CreateStatic(&OrganClearGenerated),

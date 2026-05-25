@@ -6,6 +6,8 @@
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
 #include "NWorldAssemblyEditorSubsystem.h"
+#include "NWorldAssemblyEditorUtils.h"
+#include "NWorldAssemblyRegistry.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Organ/NOrganComponent.h"
 
@@ -45,7 +47,7 @@ FText::FromString("Organ Component"), ECategoryPriority::Important);
 					.HAlign(HAlign_Left)
 					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentGenerate", "Generate"))
 					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentGenerateTooltip", "Generate content for volume and contained volumes."))
-					.Visibility(this, &FNOrganComponentCustomization::GenerateButtonVisible)
+					.IsEnabled_Lambda(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan)
 					.OnClicked(this, &FNOrganComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
 			]
 			+ SHorizontalBox::Slot()
@@ -107,12 +109,6 @@ FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObje
 	}
 	
 	return FReply::Handled();
-}
-
-
-EVisibility FNOrganComponentCustomization::GenerateButtonVisible() const
-{
-	return EVisibility::Visible;
 }
 
 EVisibility FNOrganComponentCustomization::CancelButtonVisible() const

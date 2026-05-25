@@ -318,3 +318,21 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 	
 	return bUpdatedCellData;
 }
+
+bool FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan()
+{
+	if (FNEditorUtils::IsNotPlayInEditor() && IsOrganVolumeSelected() && !FNWorldAssemblyRegistry::HasOperations())
+	{
+		return true;
+	}
+	return false;
+}
+
+bool FNWorldAssemblyEditorUtils::CanGenerateAllOrgans()
+{
+	if (FNEditorUtils::IsNotPlayInEditor() && FNWorldAssemblyRegistry::HasOrganComponents() && !FNWorldAssemblyRegistry::HasOperations())
+	{
+		return true;
+	}
+	return false;
+}
