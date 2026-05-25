@@ -78,6 +78,11 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 
 void UNCellJunctionComponent::OnRegister()
 {
+#if WITH_EDITOR
+	// Ensure that undo system works
+	SetFlags(RF_Transactional);
+#endif
+	
 	// Is this part of a level instance?
 	ILevelInstanceInterface* Interface = FNLevelUtils::GetActorComponentLevelInstance(this);
 	if (Interface != nullptr)
@@ -121,6 +126,7 @@ void UNCellJunctionComponent::OnRegister()
 		{
 			Actor->Modify();
 			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
+			Actor->SetActorDirty();
 		}
 	}
 
@@ -199,6 +205,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		if (ComponentLocation != Details.WorldLocation)
 		{
 			// We do not try to store anything about the voxel/final location here as the bounds of the data can change
+			Modify();
 			Details.WorldLocation = ComponentLocation;
 			bHasMadeChanges = true;
 		}
@@ -207,6 +214,7 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		const FRotator ComponentRotation = GetComponentRotation();
 		if (ComponentRotation != Details.WorldRotation)
 		{
+			Modify();
 			Details.WorldRotation = ComponentRotation;
 			bHasMadeChanges = true;
 		}
@@ -244,6 +252,7 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 	DrawDebugPoint(GetWorld(), RotatedCornerPoints[1], 10.f, FColor::Red, false, 0.5f);
 	DrawDebugPoint(GetWorld(), RotatedCornerPoints[2], 10.f, FColor::Red, false, 0.5f);
 	DrawDebugPoint(GetWorld(), RotatedCornerPoints[3], 10.f, FColor::Red, false, 0.5f);
+	
 	
 	const bool bIsInside = FNRawMeshUtils::AnyRelativePointsInside(
 		RootComponent->Details.Hull, 

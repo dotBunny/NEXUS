@@ -36,6 +36,9 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 void UNBoneComponent::OnRegister()
 {
 #if WITH_EDITOR
+	// Ensure that undo system works
+	SetFlags(RF_Transactional);
+	
 	const ULevel* Level = GetComponentLevel();
 	TWeakObjectPtr WeakBoneComponent(this);
 	if (const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level); 
