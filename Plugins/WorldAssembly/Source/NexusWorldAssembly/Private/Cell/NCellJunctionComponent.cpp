@@ -257,3 +257,16 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 		MarkPackageDirty();
 	}
 }
+
+TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& SocketSize) const
+{
+	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+	const FRotator DisplayRotation = DisplayQuat.Rotator();
+	
+	// TODO: Should this maybe be cached at spawning at runtime? 
+	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(Details.SocketSize, SocketSize);
+
+	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
+	return RotatedCornerPoints;
+}

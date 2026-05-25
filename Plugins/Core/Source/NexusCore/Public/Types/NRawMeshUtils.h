@@ -92,6 +92,12 @@ public:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
 		float EarlyExitDepth = MAX_flt);
+	
+	
+	static float GetIntersectDepth(
+		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
+		const FVector& WorldPosition, 
+		float EarlyExitDepth = MAX_flt);
 
 
 	/**

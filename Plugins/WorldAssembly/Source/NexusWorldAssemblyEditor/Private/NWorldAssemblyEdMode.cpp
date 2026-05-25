@@ -12,12 +12,14 @@
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
+#include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Developer/NMethodScopeTimer.h"
+#include "Types/NRawMeshUtils.h"
 
 void FNWorldAssemblyEdMode::ProtectCellEdMode()
 {
@@ -207,10 +209,14 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
 	{
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		const FVector2D SocketSize = Settings->SocketSize;
+		const float MatchingDepth = Settings->AssemblyJunctionMatchingCellHullPenetration;
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
 			JunctionComponent->DrawDebugPDI(PDI);
+			RenderCellJunctionPenetrationDistance(PDI, JunctionComponent, SocketSize, MatchingDepth);
 		}	
 	}
 
@@ -303,4 +309,35 @@ void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FView
 	}
 	
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
+}
+
+void FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, 
+	const UNCellJunctionComponent* JunctionComponent, const FVector2D SocketSize, const float MatchingDepth)
+{
+	// Check Level
+	const ULevel* Level = JunctionComponent->GetComponentLevel();
+	if (Level == nullptr) return;
+			
+	// Check Cell Root
+	const UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
+	if (CellRoot == nullptr) return;
+			
+	const FNRawMesh& Hull = CellRoot->Details.Hull;
+		
+	TArray<FVector> CornerPoints = JunctionComponent->GetWorldCornerPoints(SocketSize);
+	float MaximumDepth = 0;
+	for (int i = 0; i < CornerPoints.Num(); i++)
+	{
+		const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull,FVector::Zero(), FRotator::ZeroRotator,  CornerPoints[i]);
+		if (Depth > MaximumDepth)
+		{
+			MaximumDepth = Depth;
+		}
+	}
+	if (MaximumDepth == 0) return;
+			
+	const FVector BottomLeftPos = CornerPoints[1] - JunctionComponent->GetUpVector() * 4.0f;
+	FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), BottomLeftPos, JunctionComponent->GetComponentRotation(), 
+			MaximumDepth > MatchingDepth ? FLinearColor::Red : FNColor::Pink, 
+			0.15f, 1.f, 1.f, false, true, SDPG_Foreground);
 }

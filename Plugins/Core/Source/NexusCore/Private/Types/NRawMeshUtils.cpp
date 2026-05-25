@@ -223,6 +223,32 @@ float FNRawMeshUtils::GetIntersectDepth(
 	return MaxDepth;
 }
 
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition, float EarlyExitDepth)
+{
+	if (LeftMesh.HasBounds())
+	{
+		const FBox LeftWorldBounds = LeftMesh.Bounds.TransformBy(FTransform(LeftRotation, LeftOrigin));
+		if (!LeftWorldBounds.IsInsideOrOn(WorldPosition))
+		{
+			return -1.0f;
+		}
+	}
+
+	if (LeftMesh.Loops.IsEmpty())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMesh, unable to determine intersection depth."));
+		return -1.0f;
+	}
+	if (LeftMesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Error, TEXT("The provided FNRawMesh has non-triangle based geometry (NGons), this is not supported for intersection depth checks."));
+		return -1.0f;
+	}
+
+	const FVector LeftLocal = LeftRotation.Quaternion().Inverse().RotateVector(WorldPosition - LeftOrigin);
+	return ComputePointDepthInside(LeftMesh, LeftLocal);
+}
+
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
 {
 	TArray<ANDebugActor*> DebugActors;

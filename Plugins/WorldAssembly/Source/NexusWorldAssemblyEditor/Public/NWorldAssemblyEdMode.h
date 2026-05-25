@@ -154,6 +154,8 @@ public:
 	//End FEdMode
 
 private:
+	static void RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, const UNCellJunctionComponent* JunctionComponent, FVector2D SocketSize, float MatchingDepth = 0);
+	
 	/** Pixel spacing between stacked HUD messages. */
 	const int32 MessageSpacing = 20;
 

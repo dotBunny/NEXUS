@@ -81,7 +81,6 @@ public:
 	
 	FString GetJunctionName() const;
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
-	
 #endif // WITH_EDITOR
 	
 	/** Draw the junction's debug visualization through the supplied PDI. */
@@ -92,6 +91,8 @@ public:
 	 */
 	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
 
+	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
+	
 private:
 	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
 	TWeakObjectPtr<ALevelInstance> LevelInstance;
