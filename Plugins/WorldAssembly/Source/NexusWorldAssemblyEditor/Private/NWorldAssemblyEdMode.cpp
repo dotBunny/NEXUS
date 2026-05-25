@@ -21,7 +21,8 @@
 
 void FNWorldAssemblyEdMode::ProtectCellEdMode()
 {
-	if (CellActor != nullptr && CellActor->GetCellRoot()->Details.Hull.HasNonTris() && 
+	if (ANCellActor* Actor = CellActor.Get();
+		Actor != nullptr && Actor->GetCellRoot()->Details.Hull.HasNonTris() &&
 		GetCellEdMode() == ENCellEdMode::Hull)
 	{
 		SetCellEdMode(ENCellEdMode::Bounds);
@@ -30,6 +31,10 @@ void FNWorldAssemblyEdMode::ProtectCellEdMode()
 
 void FNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 {
+	if (Actor == CellActor.Get())
+	{
+		CellActor.Reset();
+	}
 	if (Actor == CollisionVisualizer)
 	{
 		CollisionVisualizer = nullptr;
@@ -64,7 +69,7 @@ const FText FNWorldAssemblyEdMode::AutoBoundsHullMessage = FText::FromString("Ce
 const FText FNWorldAssemblyEdMode::AutoHullMessage = FText::FromString("Cell Hull not calculated on save.");
 const FText FNWorldAssemblyEdMode::AutoVoxelMessage = FText::FromString("Cell Voxel not calculated on save.");
 
-ANCellActor* FNWorldAssemblyEdMode::CellActor = nullptr;
+TWeakObjectPtr<ANCellActor> FNWorldAssemblyEdMode::CellActor = nullptr;
 FNWorldAssemblyEdMode::ENCellEdMode FNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
 TArray<FVector> FNWorldAssemblyEdMode::CachedHullVertices;
 TArray<FIntVector2> FNWorldAssemblyEdMode::CachedHullEdges;
@@ -134,14 +139,14 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 	if (bCanTick == false) return;
 	
 	// Cache if we have a NCellActor setup
-	CellActor = nullptr;
-	
+	CellActor.Reset();
+
 	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld(); CurrentWorld != nullptr)
 	{
 		CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
-		if (CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
+		if (ANCellActor* Actor = CellActor.Get(); Actor != nullptr && !Actor->WasSpawnedFromProxy())
 		{
-			UNCellRootComponent* RootComponent = CellActor->GetCellRoot();
+			UNCellRootComponent* RootComponent = Actor->GetCellRoot();
 			const FRotator Rotation = RootComponent->GetOffsetRotator();;
 			const FVector Offset = RootComponent->GetOffsetLocation();
 

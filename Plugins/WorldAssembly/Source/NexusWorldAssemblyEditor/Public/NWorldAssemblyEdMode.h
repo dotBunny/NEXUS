@@ -65,8 +65,8 @@ public:
 	/** @return Cached hull overlay vertex positions. */
 	static const TArray<FIntVector2>& GetCachedHullEdges() { return CachedHullEdges; }
 
-	/** @return The cell actor this mode is currently focused on. */
-	static ANCellActor* GetCellActor() { return CellActor; }
+	/** @return The cell actor this mode is currently focused on, or nullptr if none or stale. */
+	static ANCellActor* GetCellActor() { return CellActor.Get(); }
 
 	/** @return The currently active cell-edit sub-mode. */
 	static ENCellEdMode GetCellEdMode() { return CellEdMode; }
@@ -81,10 +81,10 @@ public:
 	static void SetCellVoxelMode(const ENCellVoxelMode InCellVoxelMode) { CellVoxelMode = InCellVoxelMode; }
 
 	/** @return true if a cell actor is currently focused. */
-	static bool HasCellActor() { return CellActor != nullptr; }
+	static bool HasCellActor() { return CellActor.IsValid(); }
 
 	/** @return true if no cell actor is currently focused. */
-	static bool HasNoCellActor() { return CellActor == nullptr; }
+	static bool HasNoCellActor() { return !CellActor.IsValid(); }
 
 	/** @return true if this editor mode is currently the active level-editor mode. */
 	static bool IsActive() { return GLevelEditorModeTools().IsModeActive(Identifier); }
@@ -164,7 +164,7 @@ private:
 	static FNCellVoxelData CachedVoxelData;
 	static FLinearColor CachedBoundsColor;
 	static TArray<FVector> CachedBoundsVertices;
-	static ANCellActor* CellActor;
+	static TWeakObjectPtr<ANCellActor> CellActor;
 	static ENCellEdMode CellEdMode;
 	static ENCellVoxelMode CellVoxelMode;
 	static TObjectPtr<ANDebugActor> CollisionVisualizer;
