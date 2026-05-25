@@ -451,13 +451,14 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 	
 	for (int i = OperationTickets.Num() - 1; i >= 0; --i)
 	{
-		int ItemCount = CellLevelInstances[i].Num();
+		const uint32 Ticket = OperationTickets[i];
+		const int ItemCount = CellLevelInstances[Ticket].Num();
 		for (int j = ItemCount - 1; j >= 0; --j)
 		{
-			if (CellLevelInstances[i][j]->GetWorld()== World)
+			if (CellLevelInstances[Ticket][j]->GetWorld()== World)
 			{
-				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellLevelInstances(%s), scrubbing."), *CellLevelInstances[i][j]->GetName());
-				CellLevelInstances[i].RemoveAt(j);
+				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellLevelInstances(%s), scrubbing."), *CellLevelInstances[Ticket][j]->GetName());
+				CellLevelInstances[Ticket].RemoveAt(j);
 			}
 		}
 	}
