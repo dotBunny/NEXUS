@@ -419,7 +419,11 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 	{
 		if (CellJunctions[i]->GetWorld() == World)
 		{
+#if WITH_EDITOR			
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetJunctionName());
+#else
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellJunctions(%s), scrubbing."), *CellJunctions[i]->GetFName().ToString()
+#endif // WITH_EDITOR			
 			CellJunctions.RemoveAt(i);
 		}
 	}
