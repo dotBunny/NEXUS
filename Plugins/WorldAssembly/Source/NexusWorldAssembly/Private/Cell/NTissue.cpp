@@ -14,13 +14,15 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 	{
 		TObjectPtr<UNCell> Cell = Entry.Cell.LoadSynchronous();
 		if (Cell == nullptr) continue;
-		if (!OutCellMap.Find(Cell))
+		FNTissueEntry* FoundEntry = OutCellMap.Find(Cell);
+		if (!FoundEntry)
 		{
 			OutCellMap.Add(Cell, Entry);
 		}
 		else
 		{
-			// TODO: what do we want to do if settings are different? like uniqueness? or weighting?
+			// We are going to combine the tags when we have an existing entry
+			FoundEntry->Tags.AppendTags(Entry.Tags);
 		}
 	}
 	

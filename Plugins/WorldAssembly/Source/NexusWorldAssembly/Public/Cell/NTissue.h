@@ -81,6 +81,7 @@ public:
 	 * Flatten a tissue (and any referenced AdditionalTissue) into a single cell-to-entry map.
 	 * @param Tissue The root tissue to start from.
 	 * @param OutCellMap Populated with every cell reachable from Tissue and the effective entry to use.
+	 * @param OutUniqueTags Accumulated unique-group tags from all visited tissues.
 	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
 	 */
 	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FGameplayTagContainer& OutUniqueTags, TArray<UNTissue*>& OutProcessedSets);
