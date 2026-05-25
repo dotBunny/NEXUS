@@ -35,16 +35,19 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 
 void UNBoneComponent::OnRegister()
 {
-
 #if WITH_EDITOR
 	const ULevel* Level = GetComponentLevel();
+	TWeakObjectPtr WeakBoneComponent(this);
 	if (const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level); 
 		RootComponent != nullptr)
 	{
 		UE_LOG(LogNexusWorldAssembly, Error, TEXT("You cannot place UNBoneComponent in a ULevel(%s) where an NCellRootComponent is defined; removing next update."), *Level->GetName());
-		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([this]()
+		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakBoneComponent]()
 		{
-			if (AActor* Actor = this->GetOwner(); Actor != nullptr)
+			// Early out for dead ref
+			if (!WeakBoneComponent.IsValid()) return;
+			
+			if (AActor* Actor = WeakBoneComponent.Get()->GetOwner(); Actor != nullptr)
 			{
 				if (ANBoneActor* BoneActor = Cast<ANBoneActor>(Actor); BoneActor != nullptr)
 				{
@@ -52,7 +55,7 @@ void UNBoneComponent::OnRegister()
 					return;
 				}
 			}
-			this->DestroyComponent();
+			WeakBoneComponent.Get()->DestroyComponent();
 		}));
 	}
 #endif // WITH_EDITOR	
