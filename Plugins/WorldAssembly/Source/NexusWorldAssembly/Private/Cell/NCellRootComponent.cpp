@@ -11,30 +11,30 @@
 
 FRotator UNCellRootComponent::GetOffsetRotator() const
 {
-	if (LevelInstance != nullptr)
+	if (ALevelInstance* Instance = LevelInstance.Get())
 	{
-		return LevelInstance->GetActorRotation();
+		return Instance->GetActorRotation();
 	}
 	return FRotator::ZeroRotator;
 }
 
 FVector UNCellRootComponent::GetOffsetLocation() const
 {
-	if (LevelInstance != nullptr)
+	if (ALevelInstance* Instance = LevelInstance.Get())
 	{
-		return LevelInstance->GetActorLocation();
+		return Instance->GetActorLocation();
 	}
 	return FVector::ZeroVector;
 }
 
 FBox UNCellRootComponent::GetOffsetBounds() const
 {
-	if (LevelInstance != nullptr)
+	if (ALevelInstance* Instance = LevelInstance.Get())
 	{
 		return FNWorldAssemblyUtils::CreateRotatedBox(
-			this->Details.Bounds, 
-			LevelInstance->GetActorRotation(), 
-			LevelInstance->GetActorLocation());
+			this->Details.Bounds,
+			Instance->GetActorRotation(),
+			Instance->GetActorLocation());
 	}
 	return this->Details.Bounds;
 }

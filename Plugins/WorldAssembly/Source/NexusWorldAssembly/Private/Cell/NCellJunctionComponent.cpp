@@ -39,18 +39,18 @@ FString UNCellJunctionComponent::GetJunctionName() const
 
 FRotator UNCellJunctionComponent::GetOffsetRotator() const
 {
-	if (LevelInstance != nullptr)
+	if (ALevelInstance* Instance = LevelInstance.Get())
 	{
-		return LevelInstance->GetActorRotation();
+		return Instance->GetActorRotation();
 	}
 	return FRotator::ZeroRotator;
 }
 
 FVector UNCellJunctionComponent::GetOffsetLocation() const
 {
-	if (LevelInstance != nullptr)
+	if (ALevelInstance* Instance = LevelInstance.Get())
 	{
-		return LevelInstance->GetActorLocation();
+		return Instance->GetActorLocation();
 	}
 	return FVector::ZeroVector;
 }
@@ -128,9 +128,10 @@ void UNCellJunctionComponent::OnRegister()
 #endif // WITH_EDITOR
 	
 	// Update details based on generation.
-	if (Actor != nullptr && Actor->WasSpawnedFromProxy() && LevelInstance != nullptr && LevelInstance->IsA<ANCellLevelInstance>())
+	if (ALevelInstance* Instance = LevelInstance.Get();
+		Actor != nullptr && Actor->WasSpawnedFromProxy() && Instance != nullptr && Instance->IsA<ANCellLevelInstance>())
 	{
-		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LevelInstance);
+		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(Instance);
 		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
 		if (UpdatedDetails != nullptr)
 		{

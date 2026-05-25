@@ -94,6 +94,6 @@ public:
 
 private:
 	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
-	ALevelInstance* LevelInstance;
+	TWeakObjectPtr<ALevelInstance> LevelInstance;
 	N_WORLD_ICON_HEADER()
 };

@@ -70,5 +70,5 @@ public:
 
 private:
 	/** Cached level-instance owner; set when the component is spawned as part of a streamed-in cell level. */
-	ALevelInstance* LevelInstance;
+	TWeakObjectPtr<ALevelInstance> LevelInstance;
 };
