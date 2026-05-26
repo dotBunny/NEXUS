@@ -39,7 +39,7 @@ public:
 	 * @param bRemoveKnownLeaks Remove entries classified as known-leaks from the result if true.
 	 * @return A fully populated FNObjectSnapshotDiff describing the Added/Maintained/Removed sets.
 	 */
-	static FNObjectSnapshotDiff Diff(FNObjectSnapshot OldSnapshot, FNObjectSnapshot NewSnapshot, bool bRemoveKnownLeaks = false);
+	static FNObjectSnapshotDiff Diff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, bool bRemoveKnownLeaks = false);
 
 	/**
 	 * Strips known-leak entries from a diff in place so only real churn remains.

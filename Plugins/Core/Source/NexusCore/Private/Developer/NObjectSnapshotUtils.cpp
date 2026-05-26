@@ -41,73 +41,65 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	return MoveTemp(Snapshot);
 }
 
-FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, FNObjectSnapshot NewSnapshot, const bool bRemoveKnownLeaks)
+FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, const bool bRemoveKnownLeaks)
 {
 	FNObjectSnapshotDiff Diff;
 
-
+	const FNObjectSnapshot* OlderSnapshot = &OldSnapshot;
+	const FNObjectSnapshot* NewerSnapshot = &NewSnapshot;
 	if (OldSnapshot.Ticket > NewSnapshot.Ticket)
 	{
-		const FNObjectSnapshot TempSnapshot = OldSnapshot;
-		OldSnapshot = NewSnapshot;
-		NewSnapshot = TempSnapshot;
+		OlderSnapshot = &NewSnapshot;
+		NewerSnapshot = &OldSnapshot;
 		UE_LOG(LogNexusCore, VeryVerbose, TEXT("The provided FNObjectSnapshot(OldSnapshot) was actually newer then the comparator FNObjectSnapshot(NewSnapshot); swapping for comparison purposes."));
 	}
 
-	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;
-	Diff.UntrackedObjectCountB = NewSnapshot.UntrackedObjectCount;
-	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
-	
-	// If we check what has been maintained or removed, that leaves what's left in the array as having been added.
-	for (int32 OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
+	Diff.UntrackedObjectCountA = OlderSnapshot->UntrackedObjectCount;
+	Diff.UntrackedObjectCountB = NewerSnapshot->UntrackedObjectCount;
+	Diff.ObjectCount = NewerSnapshot->CapturedObjectCount;
+
+	TMap<int32, int32> NewSerialToIndex;
+	NewSerialToIndex.Reserve(NewerSnapshot->CapturedObjectCount);
+	for (int32 i = 0; i < NewerSnapshot->CapturedObjects.Num(); i++)
 	{
-		FNObjectSnapshotEntry& EntryA = OldSnapshot.CapturedObjects[OldIndex];
-		bool bFoundEntry = false;
+		NewSerialToIndex.Add(NewerSnapshot->CapturedObjects[i].SerialNumber, i);
+	}
 
-		// Find things we have
-		for (int32 NewIndex = NewSnapshot.CapturedObjectCount - 1; NewIndex >= 0 ; NewIndex--)
+	TSet<int32> ConsumedNewIndices;
+	ConsumedNewIndices.Reserve(OlderSnapshot->CapturedObjectCount);
+
+	for (int32 OldIndex = 0; OldIndex < OlderSnapshot->CapturedObjects.Num(); OldIndex++)
+	{
+		const FNObjectSnapshotEntry& OldEntry = OlderSnapshot->CapturedObjects[OldIndex];
+		if (const int32* NewIndex = NewSerialToIndex.Find(OldEntry.SerialNumber))
 		{
-			if (FNObjectSnapshotEntry& EntryB = NewSnapshot.CapturedObjects[NewIndex];
-				EntryA.IsEqual(EntryB))
-			{
-				Diff.Maintained.Add(EntryB);
-				OldSnapshot.CapturedObjects.RemoveAt(OldIndex);
-				NewSnapshot.CapturedObjects.RemoveAt(NewIndex);
-				NewSnapshot.CapturedObjectCount--;
-				bFoundEntry = true;
-				break;
-			}
+			Diff.Maintained.Add(NewerSnapshot->CapturedObjects[*NewIndex]);
+			ConsumedNewIndices.Add(*NewIndex);
 		}
-
-		// Not found, must have been removed
-		if (!bFoundEntry)
+		else
 		{
-			Diff.Removed.Add(EntryA);
-			OldSnapshot.CapturedObjects.RemoveAt(OldIndex);
+			Diff.Removed.Add(OldEntry);
 		}
 	}
 
-	// What's left is added
-	for (int32 i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
+	for (int32 i = 0; i < NewerSnapshot->CapturedObjects.Num(); i++)
 	{
-		Diff.Added.Add(NewSnapshot.CapturedObjects[i]);
+		if (!ConsumedNewIndices.Contains(i))
+		{
+			Diff.Added.Add(NewerSnapshot->CapturedObjects[i]);
+		}
 	}
 
-	// Update counts
 	Diff.AddedCount = Diff.Added.Num();
 	Diff.RemovedCount = Diff.Removed.Num();
 	Diff.MaintainedCount = Diff.Maintained.Num();
-
-	
-	// Calculate before we start chopping things up
 	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
-
 
 	if (bRemoveKnownLeaks)
 	{
 		RemoveKnownLeaks(Diff);
 	}
-	
+
 	return MoveTemp(Diff);
 }
 

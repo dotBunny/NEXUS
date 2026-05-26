@@ -8,6 +8,7 @@
 #include "PackageTools.h"
 #include "Animation/PoseAsset.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Misc/MessageDialog.h"
 #include "Misc/ScopedSlowTask.h"
 #include "Subsystems/EditorAssetSubsystem.h"
 
@@ -78,6 +79,31 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 					CleanupPackages.AddUnique(LoadedAsset->GetOutermost());
 				}
 			}
+		}
+	}
+	
+	if (PoseAssets.IsEmpty())
+	{
+		UE_LOG(LogNexusToolingEditor, Log, TEXT("No pose assets found to update."));
+		return;
+	}
+
+	if (FNEditorUtils::IsUserControlled())
+	{
+		// Bail out if they don't wanna
+		const EAppReturnType::Type Result = FMessageDialog::Open(
+			EAppMsgType::YesNo,
+			FText::Format(
+				NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Confirm",
+					"Found {0} pose asset(s).\n\nDo you want to proceed with updating them?"),
+				FText::AsNumber(PoseAssets.Num())),
+			NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_ConfirmTitle",
+				"Confirm Pose Asset Update"));
+
+		if (Result != EAppReturnType::Yes)
+		{
+			UPackageTools::UnloadPackages(CleanupPackages);
+			return;
 		}
 	}
 
