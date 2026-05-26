@@ -101,8 +101,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
-		
-		// TODO: Add cap analytics
+
 		CapBranchesWithFinishers(Random);
 		
 		EnforceNotFinisherConstraint();
@@ -485,7 +484,6 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		if (BoundsIntersectingNodes.IsEmpty())
 		{
 			// Our cell has unique tags that need to get added to the used
-			// TODO: In future we are going to have to remove this cell .. we need to remove from the placed array
 			if (OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(CellInputData->Tags))
 			{
 				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
@@ -502,10 +500,6 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
 			NewNodes.Add(TargetCellNode);
-			
-			// TODO: Its at this point we could iterate through the graph and see if theres any open junctions near any of this 
-			// cell's open junctions and auto link them too. Maybe we do the same task at the end of the graph as well ? 
-			// Based on a settings for distance?
 		}
 		else
 		{
@@ -534,7 +528,7 @@ void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random
 #if !UE_BUILD_SHIPPING		
 		CapNum += ProcessNode(Random, OpenNodes[j], true).Num();
 #else
-		ProcessNode(Random, OpenNodes[j], true)
+		ProcessNode(Random, OpenNodes[j], true);
 #endif // !UE_BUILD_SHIPPING		
 	}
 #if !UE_BUILD_SHIPPING
