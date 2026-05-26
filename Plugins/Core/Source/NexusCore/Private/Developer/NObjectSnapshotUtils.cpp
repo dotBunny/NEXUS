@@ -58,11 +58,11 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnap
 	Diff.UntrackedObjectCountB = NewerSnapshot->UntrackedObjectCount;
 	Diff.ObjectCount = NewerSnapshot->CapturedObjectCount;
 
-	TMap<int32, int32> NewSerialToIndex;
-	NewSerialToIndex.Reserve(NewerSnapshot->CapturedObjectCount);
+	TMap<TWeakObjectPtr<UObject>, int32> NewPtrToIndex;
+	NewPtrToIndex.Reserve(NewerSnapshot->CapturedObjectCount);
 	for (int32 i = 0; i < NewerSnapshot->CapturedObjects.Num(); i++)
 	{
-		NewSerialToIndex.Add(NewerSnapshot->CapturedObjects[i].SerialNumber, i);
+		NewPtrToIndex.Add(NewerSnapshot->CapturedObjects[i].ObjectPtr, i);
 	}
 
 	TSet<int32> ConsumedNewIndices;
@@ -71,7 +71,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnap
 	for (int32 OldIndex = 0; OldIndex < OlderSnapshot->CapturedObjects.Num(); OldIndex++)
 	{
 		const FNObjectSnapshotEntry& OldEntry = OlderSnapshot->CapturedObjects[OldIndex];
-		if (const int32* NewIndex = NewSerialToIndex.Find(OldEntry.SerialNumber))
+		if (const int32* NewIndex = NewPtrToIndex.Find(OldEntry.ObjectPtr))
 		{
 			Diff.Maintained.Add(NewerSnapshot->CapturedObjects[*NewIndex]);
 			ConsumedNewIndices.Add(*NewIndex);
