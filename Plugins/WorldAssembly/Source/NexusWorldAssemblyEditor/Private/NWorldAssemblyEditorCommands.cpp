@@ -768,9 +768,6 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 	{
 		FLevelEditorViewportClient* OldViewportClient = GCurrentLevelEditingViewportClient;
 		GCurrentLevelEditingViewportClient = nullptr;
-		Viewport->Draw();
-		
-		
 		TArray<FAssetData> SelectedAssets;
 		const FAssetRegistryModule& AssetRegistryModule = FModuleManager::Get().LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 		
@@ -781,21 +778,30 @@ void FNWorldAssemblyEditorCommands::CellCaptureThumbnail()
 			FAssetData LevelAssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(World));
 			SelectedAssets.Emplace(LevelAssetData);
 		}
+		if (SelectedAssets.Num() > 0)
+		{
+			FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::LevelScreenshot);
+			Viewport->Draw();
+			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
+		}
 		
 		// Cell Data
+		SelectedAssets.Empty();
 		ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
 		if (CellActor != nullptr)
 		{
 			FAssetData CellAssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(CellActor->Sidecar.ToSoftObjectPath()));
 			SelectedAssets.Emplace(CellAssetData);
 		}
-
 		if (SelectedAssets.Num() > 0)
 		{
+			FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::CellScreenshot);
+			Viewport->Draw();
 			AssetViewUtils::CaptureThumbnailFromViewport(Viewport, SelectedAssets);
 		}
-
+		
 		GCurrentLevelEditingViewportClient = OldViewportClient;
+		FNWorldAssemblyEdMode::SetRenderMode(ENWorldAssemblyEdModeRenderMode::All);
 		Viewport->Draw();
 	}
 }

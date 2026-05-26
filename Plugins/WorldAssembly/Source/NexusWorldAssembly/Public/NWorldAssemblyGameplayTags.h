@@ -14,3 +14,5 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_FinisherOnly);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_NotFinisher);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Unique);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_MustHave);

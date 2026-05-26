@@ -218,10 +218,10 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			OrganContextPtr->CellGraph->RegisterNode(StartNode);
 			
 			// Our starting cell has unique tags that need to get added to the used
-			if (OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(StartCellInputData->Tags))
+			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(StartCellInputData->Tags))
 			{
 				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
-				OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(StartCellInputData->Tags));
+				OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(StartCellInputData->Tags));
 			}
 			
 			// Link our nodes
@@ -484,10 +484,10 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		if (BoundsIntersectingNodes.IsEmpty())
 		{
 			// Our cell has unique tags that need to get added to the used
-			if (OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(CellInputData->Tags))
+			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(CellInputData->Tags))
 			{
 				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
-				OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(CellInputData->Tags));
+				OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(CellInputData->Tags));
 			}
 			
 			// We've passed validation, lets register it and move on
@@ -572,10 +572,10 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 
 	// Reverse unique-tag tracking so the cell template becomes eligible again
 	FNVirtualCellData* InputData = CellNode->GetInputDataPtr();
-	if (InputData != nullptr && OrganContextPtr->CellInputDataSummary.UniqueTags.HasAny(InputData->Tags))
+	if (InputData != nullptr && OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(InputData->Tags))
 	{
 		OrganContextPtr->PlacedUniqueTagGroups.RemoveTags(
-			OrganContextPtr->CellInputDataSummary.UniqueTags.Filter(InputData->Tags));
+			OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(InputData->Tags));
 	}
 
 	OrganContextPtr->CellGraph->UnregisterNode(CellNode);

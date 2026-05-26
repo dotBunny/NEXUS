@@ -23,3 +23,6 @@ UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_NotFinisher, "NEXUS.WorldA
 
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_Unique, "NEXUS.WorldAssembly.BuiltIn.Unique", 
 	"Only one of tagged items could be placed in an Organ Assembly. This is just a built-in default unique group, you can make your own to create discrete groups.");
+
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_BuiltIn_MustHave, "NEXUS.WorldAssembly.BuiltIn.MustHave", 
+	"Flags this group that it must be included (at least once) in the graph when generating for it to be validated. When combined with the Unique groups, it will allow the ignoring of MinimumCount (which should still be left at 1) to ensure one from the group is part of the graph.");

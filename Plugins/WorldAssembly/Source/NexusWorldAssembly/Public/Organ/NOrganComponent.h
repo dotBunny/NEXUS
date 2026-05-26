@@ -4,10 +4,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
+struct FNTissueTagGroups;
 struct FNTissueEntry;
 class UNCell;
 class UNTissue;
@@ -130,7 +130,7 @@ protected:
 	//End UActorComponent
 
 	/** Map of candidate cells to the tissue entry they belong to, flattened from Tissues. */
-	void GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FGameplayTagContainer& OutUniqueTags) const;
+	void GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FNTissueTagGroups& OutTagGroups) const;
 
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */

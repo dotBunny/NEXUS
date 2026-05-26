@@ -4,10 +4,9 @@
 #include "Cell/NTissue.h"
 #include "Cell/NCell.h"
 
-void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FGameplayTagContainer& OutUniqueTags, TArray<UNTissue*>& OutProcessedSets)
+void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FNTissueTagGroups& OutTagGroups, TArray<UNTissue*>& OutProcessedSets)
 {
-	
-	OutUniqueTags.AppendTags(Tissue->UniqueGroupTags);
+	OutTagGroups.AppendTags(Tissue->TagGroups);
 	
 	// Base level entries
 	for (FNTissueEntry Entry : Tissue->Cells)
@@ -26,7 +25,6 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 		}
 	}
 	
-	
 
 	// Additional Set Recursion
 	for (auto Additional : Tissue->AdditionalTissue)
@@ -37,6 +35,6 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 		// Add before recursion to stop double
 		OutProcessedSets.Add(AdditionalTissue);
 		
-		BuildTissueMap(AdditionalTissue, OutCellMap, OutUniqueTags, OutProcessedSets);
+		BuildTissueMap(AdditionalTissue, OutCellMap, OutTagGroups, OutProcessedSets);
 	}
 }

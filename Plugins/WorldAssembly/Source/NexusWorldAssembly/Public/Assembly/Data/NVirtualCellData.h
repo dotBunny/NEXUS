@@ -7,10 +7,11 @@
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellRootDetails.h"
+#include "Cell/NTissueTagGroups.h"
 
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 {
-	FGameplayTagContainer UniqueTags;
+	FNTissueTagGroups GroupTags;
 	
 	bool bFoundStarterTagged = false;
 	

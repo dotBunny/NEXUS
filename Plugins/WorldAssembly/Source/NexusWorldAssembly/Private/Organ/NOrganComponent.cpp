@@ -88,14 +88,14 @@ void UNOrganComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
-void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FGameplayTagContainer& OutUniqueTags) const
+void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FNTissueTagGroups& OutTagGroups) const
 {
 	TArray<UNTissue*> ReferencedTissues;
 	for (auto Tissue : Tissues)
 	{
 		TObjectPtr<UNTissue> LoadedTissue = Tissue.LoadSynchronous();
 		if (LoadedTissue == nullptr) continue;
-		UNTissue::BuildTissueMap(LoadedTissue, OutMap, OutUniqueTags, ReferencedTissues);
+		UNTissue::BuildTissueMap(LoadedTissue, OutMap, OutTagGroups, ReferencedTissues);
 	}
 	
 }

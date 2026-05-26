@@ -36,7 +36,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> TissueMap;
 	CellInputDataSummary = FNVirtualCellDataSummary();
 	
-	WorldOrganContext->SourceComponent->GetTissueMap(TissueMap, CellInputDataSummary.UniqueTags);
+	WorldOrganContext->SourceComponent->GetTissueMap(TissueMap, CellInputDataSummary.GroupTags);
 	
 	// We're going to process the input cells to see what behavior we are going to be exercising down the road.
 	

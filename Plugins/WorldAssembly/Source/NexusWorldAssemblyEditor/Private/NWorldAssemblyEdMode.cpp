@@ -82,6 +82,7 @@ FLinearColor FNWorldAssemblyEdMode::CachedBoundsColor = FColor::Red;
 TArray<FVector> FNWorldAssemblyEdMode::CachedBoundsVertices;
 FNWorldAssemblyEdMode::ENCellVoxelMode FNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
 TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
+ENWorldAssemblyEdModeRenderMode FNWorldAssemblyEdMode::RenderMode = ENWorldAssemblyEdModeRenderMode::All;
 
 FNWorldAssemblyEdMode::~FNWorldAssemblyEdMode()
 {
@@ -103,7 +104,8 @@ void FNWorldAssemblyEdMode::Enter()
 	CachedVoxelData = FNCellVoxelData();
 	CachedBoundsColor = FColor::Red;
 	CachedBoundsVertices.Empty();
-
+	RenderMode = ENWorldAssemblyEdModeRenderMode::All;
+	
 	bCanTick = true;
 
 	// Create our temp organ generator to use with any selections
@@ -174,7 +176,9 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	bHasDirtyActors = false;
 	
 	// We don't have anything to do in play mode - maybe in the future.
-	if (FNEditorUtils::IsPlayInEditor())
+	if (FNEditorUtils::IsPlayInEditor() || 
+		RenderMode == ENWorldAssemblyEdModeRenderMode::None ||
+		RenderMode == ENWorldAssemblyEdModeRenderMode::LevelScreenshot)
 	{
 		FEdMode::Render(View, Viewport, PDI);
 		return;
@@ -272,7 +276,8 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas)
 {
 	// Messages disabled
-	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor())
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bCellDisplayViewportMessages || FNEditorUtils::IsPlayInEditor() || 
+		RenderMode != ENWorldAssemblyEdModeRenderMode::All)
 	{
 		FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
 		return;

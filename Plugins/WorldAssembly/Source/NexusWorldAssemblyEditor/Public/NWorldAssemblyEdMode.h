@@ -14,6 +14,14 @@
 class FNAssemblyOperationContext;
 class UNAssemblyOperation;
 
+enum class ENWorldAssemblyEdModeRenderMode
+{
+	All,
+	CellScreenshot,
+	LevelScreenshot,
+	None,
+};
+
 /**
  * Custom editor mode for World Assembly cell/organ authoring.
  *
@@ -108,6 +116,8 @@ public:
 	
 	static void OnActorDeleted(AActor* Actor);
 	
+	static void SetRenderMode(const ENWorldAssemblyEdModeRenderMode Mode) { RenderMode = Mode; }
+	
 	/**
 	 * Spawns the world-collision visualizer — a single merged ANDebugActor whose mesh is the union of the
 	 * simple-collision geometry of every world actor that passes the World Assembly world-actor filter
@@ -170,6 +180,7 @@ private:
 	static ENCellEdMode CellEdMode;
 	static ENCellVoxelMode CellVoxelMode;
 	static TObjectPtr<ANDebugActor> CollisionVisualizer;
+	static ENWorldAssemblyEdModeRenderMode RenderMode;
 
 	/** Editor-side operation used to preview organ generation. */
 	TObjectPtr<UNAssemblyOperation> OrganGenerator;

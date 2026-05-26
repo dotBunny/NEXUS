@@ -380,8 +380,8 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 		if (bBuildTissues)
 		{
 			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue;
-			FGameplayTagContainer UniqueTags; // TODO: Add to report?
-			Data.Value.SourceComponent->GetTissueMap(BuildTissue, UniqueTags);
+			FNTissueTagGroups TagGroups; // TODO: Add to report?
+			Data.Value.SourceComponent->GetTissueMap(BuildTissue, TagGroups);
 			
 			Builder.Reset();
 			for (const auto& TissuePair : BuildTissue)

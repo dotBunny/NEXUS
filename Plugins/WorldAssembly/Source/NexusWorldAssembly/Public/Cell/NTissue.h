@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "NTissueTagGroups.h"
 #include "NWorldAssemblyGameplayTags.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
@@ -81,13 +82,15 @@ public:
 	 * Flatten a tissue (and any referenced AdditionalTissue) into a single cell-to-entry map.
 	 * @param Tissue The root tissue to start from.
 	 * @param OutCellMap Populated with every cell reachable from Tissue and the effective entry to use.
-	 * @param OutUniqueTags Accumulated unique-group tags from all visited tissues.
+	 * @param OutTagGroups Accumulated tag groups from all visited tissues.
 	 * @param OutProcessedSets Tracks tissue assets already visited so cycles do not cause infinite recursion.
 	 */
-	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FGameplayTagContainer& OutUniqueTags, TArray<UNTissue*>& OutProcessedSets);
+	static void BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, 
+		FNTissueTagGroups& OutTagGroups, 
+		TArray<UNTissue*>& OutProcessedSets);
 	
-	UPROPERTY(EditAnywhere, DisplayName="Unique Groups", meta = (Categories="NEXUS.WorldAssembly"))
-	FGameplayTagContainer UniqueGroupTags = FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique);
+	UPROPERTY(EditAnywhere, DisplayName="Tag Groups")
+	FNTissueTagGroups TagGroups = FNTissueTagGroups();
 	
 	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */
 	UPROPERTY(EditAnywhere, meta=(TitleProperty="{Cell}"))

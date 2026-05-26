@@ -40,7 +40,7 @@
 - `FNLevelUtils::DetermineLevelBounds` now by default ignores transient actors, but has an option to include them.
 - DynamicRef Overlay now just holds WeakPtrs to the objects.
 - NGuardian system now has a tick rate configurable in settings (defaults to 1s).
-- When a thumbnail is captured for the NCell in the level editor, it now propogates to the NCell side-car data file as well.
+- When a thumbnail is captured for the NCell in the level editor, it now propogates to the NCell side-car data file as well (but with data visible in the thumbnail)
 - `FNObjectSnapshotUtils::Diff` now uses a consumed model to calculate changes (no more copying of entries around)
 - `FNOrganGraphBuilderTask` now uses a frontier model to create a node-based graph.
 - `NPoseAssetFixer` now prompts with a total number of Pose Assets its about to operate on allowing for cancelling; will not prompt in commandlet.
