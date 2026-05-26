@@ -16,6 +16,37 @@ struct FNTissueTagGroups
 	const FGameplayTagContainer& GetMustHaveTags() { return MustHaveTags; }
 	const FGameplayTagContainer& GetUniqueTags() { return UniqueTags; }
 	
+	bool HasMustHaveTags() const
+	{
+		return !MustHaveTags.IsEmpty();
+	}
+	
+	bool HasUniqueTags() const
+	{
+		return !UniqueTags.IsEmpty();
+	}
+	
+	
+	void AppendUniqueTags(const FGameplayTagContainer& Tags)
+	{
+		UniqueTags.AppendTags(Tags);
+	}
+	
+	void RemoveUniqueTags(const FGameplayTagContainer& Tags)
+	{
+		UniqueTags.RemoveTags(Tags);
+	}
+	
+	void RemoveMustHaveTags(const FGameplayTagContainer& Tags)
+	{
+		MustHaveTags.RemoveTags(Tags);
+	}
+	
+	void AppendMustHaveTags(const FGameplayTagContainer& Tags)
+	{
+		MustHaveTags.AppendTags(Tags);
+	}
+	
 	bool HasAnyUniqueTags(const FGameplayTagContainer& Tags) const
 	{
 		return UniqueTags.HasAny(Tags);
@@ -24,6 +55,11 @@ struct FNTissueTagGroups
 	bool HasAnyMustHaveTags(const FGameplayTagContainer& Tags) const
 	{
 		return MustHaveTags.HasAny(Tags);
+	}
+	
+	bool HasAllMustHaveTags(const FGameplayTagContainer& Tags) const
+	{
+		return MustHaveTags.HasAllExact(Tags);
 	}
 	
 	FGameplayTagContainer FilterUniqueTags(const FGameplayTagContainer& Tags) const

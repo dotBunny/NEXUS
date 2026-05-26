@@ -220,8 +220,13 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			// Our starting cell has unique tags that need to get added to the used
 			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(StartCellInputData->Tags))
 			{
-				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
-				OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(StartCellInputData->Tags));
+				OrganContextPtr->PlacedTagGroups.AppendUniqueTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(StartCellInputData->Tags));
+			}
+			
+			// Our starting cell has some must have tags to be added to the collection
+			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyMustHaveTags(StartCellInputData->Tags))
+			{
+				OrganContextPtr->PlacedTagGroups.AppendMustHaveTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterMustHaveTags(StartCellInputData->Tags));
 			}
 			
 			// Link our nodes
@@ -486,8 +491,11 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			// Our cell has unique tags that need to get added to the used
 			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(CellInputData->Tags))
 			{
-				OrganContextPtr->PlacedUniqueTagGroups.AppendTags(
-				OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(CellInputData->Tags));
+				OrganContextPtr->PlacedTagGroups.AppendUniqueTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(CellInputData->Tags));
+			}
+			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyMustHaveTags(CellInputData->Tags))
+			{
+				OrganContextPtr->PlacedTagGroups.AppendMustHaveTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterMustHaveTags(CellInputData->Tags));
 			}
 			
 			// We've passed validation, lets register it and move on
@@ -574,8 +582,32 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 	FNVirtualCellData* InputData = CellNode->GetInputDataPtr();
 	if (InputData != nullptr && OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyUniqueTags(InputData->Tags))
 	{
-		OrganContextPtr->PlacedUniqueTagGroups.RemoveTags(
+		OrganContextPtr->PlacedTagGroups.RemoveUniqueTags(
 			OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(InputData->Tags));
+	}
+
+	// We need to handle the must-have tags differently, figure out what is not covered when this is removed.
+	if (InputData != nullptr && OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyMustHaveTags(InputData->Tags))
+	{
+		FGameplayTagContainer UncoveredMustHaveTags = OrganContextPtr->CellInputDataSummary.GroupTags.FilterMustHaveTags(InputData->Tags);
+
+		const TArray<FNAssemblyGraphNode*>& Nodes = OrganContextPtr->CellGraph->GetNodes();
+		for (const FNAssemblyGraphNode* Node : Nodes)
+		{
+			// Skip same cell, and non cell types
+			if (Node == CellNode || Node->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+			const FNVirtualCellData* OtherData = static_cast<const FNAssemblyGraphCellNode*>(Node)->GetInputDataPtr();
+			if (OtherData == nullptr) continue;
+
+			UncoveredMustHaveTags.RemoveTags(OtherData->Tags);
+			if (UncoveredMustHaveTags.IsEmpty()) break;
+		}
+
+		if (!UncoveredMustHaveTags.IsEmpty())
+		{
+			OrganContextPtr->PlacedTagGroups.RemoveMustHaveTags(UncoveredMustHaveTags);
+		}
 	}
 
 	OrganContextPtr->CellGraph->UnregisterNode(CellNode);

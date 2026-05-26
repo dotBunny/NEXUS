@@ -170,7 +170,7 @@ FNVirtualOrganContext::~FNVirtualOrganContext()
 	}
 }
 
-bool FNVirtualOrganContext::CheckGraph() const
+bool FNVirtualOrganContext::CheckGraph()
 {
 	// We're going to look over all the nodes
 	int32 CellNodeCount = 0;
@@ -189,14 +189,26 @@ bool FNVirtualOrganContext::CheckGraph() const
 	// Enforce check for the minimum amount of cells wanted
 	if (MinimumCellCount > 0 && CellNodeCount < MinimumCellCount)
 	{
+		// Could log analytics about rejection based on cell count
 		return false;
 	}
 	
 	// Enforce check for maximum amount of cells wanted
 	if (MaximumCellCount > 0 && CellNodeCount > MaximumCellCount)
 	{
+		// Could log analytics about rejection based on cell count
 		return false;
 	}
+	
+	// We need to check that each of the MustHave groups are met
+	if (CellInputDataSummary.GroupTags.HasMustHaveTags() && !CellInputDataSummary.GroupTags.HasAllMustHaveTags(PlacedTagGroups.GetMustHaveTags()))
+	{
+		// Could log analytics about rejection based on musthave
+		return false;
+	}
+	
+	// We need to check the input cell data minimum counts (but ignore for unique/musthave)
+	
 
 	return true;
 }
@@ -269,7 +281,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// CHECK UNIQUE TAGS
-		if (PlacedUniqueTagGroups.HasAny(CellData->Tags))
+		if (PlacedTagGroups.HasAnyUniqueTags(CellData->Tags))
 		{
 			continue;
 		}
@@ -347,7 +359,7 @@ bool FNVirtualOrganContext::ResetForRetry()
 	}
 	
 	// Reset placed tags
-	PlacedUniqueTagGroups = FGameplayTagContainer::EmptyContainer;
+	PlacedTagGroups = FNTissueTagGroups();
 		
 	// Clear Graph
 	if (CellGraph != nullptr)

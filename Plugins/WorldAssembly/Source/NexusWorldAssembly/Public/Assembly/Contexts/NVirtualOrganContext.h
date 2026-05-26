@@ -80,7 +80,8 @@ public:
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
 
-	FGameplayTagContainer PlacedUniqueTagGroups;
+	FNTissueTagGroups PlacedTagGroups;
+	
 	
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;
@@ -109,7 +110,7 @@ public:
 	bool IsValid() const { return bIsValid; };
 
 	/** @return true if the current graph satisfies all required invariants (debug helper). */
-	bool CheckGraph() const;
+	bool CheckGraph();
 
 	/**
 	 * Filter CellInputData into a weighted candidate list for selection.
