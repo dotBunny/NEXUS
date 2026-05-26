@@ -6,6 +6,7 @@
 
 void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutCellMap, FNTissueTagGroups& OutTagGroups, TArray<UNTissue*>& OutProcessedSets)
 {
+	OutTagGroups.EnsureBaseTags();
 	OutTagGroups.AppendTags(Tissue->TagGroups);
 	
 	// Base level entries

@@ -44,6 +44,7 @@
 - `FNObjectSnapshotUtils::Diff` now uses a consumed model to calculate changes (no more copying of entries around)
 - `FNOrganGraphBuilderTask` now uses a frontier model to create a node-based graph.
 - `NPoseAssetFixer` now prompts with a total number of Pose Assets its about to operate on allowing for cancelling; will not prompt in commandlet.
+- `NEXUS.WorldAssembly.BuiltIn.Unique` and `NEXUS.WorldAssembly.BuiltIn.MustHave` tags automatically applied to respective groups.
 
 ### Fixed
 
