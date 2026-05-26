@@ -26,11 +26,18 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 		ClearAllProxies();
 	}
 
-	FEditorDelegates::OnMapLoad.Remove(OnMapLoadHandle);
-	OnMapLoadHandle.Reset();
+	if (OnMapLoadHandle.IsValid())
+	{
+		FEditorDelegates::OnMapLoad.Remove(OnMapLoadHandle);
+		OnMapLoadHandle.Reset();
+	}
 	
-	FEditorDelegates::PreBeginPIE.Remove(PreBeginPIEHandle);
-	PreBeginPIEHandle.Reset();
+	if (PreBeginPIEHandle.IsValid())
+	{
+		FEditorDelegates::PreBeginPIE.Remove(PreBeginPIEHandle);
+		PreBeginPIEHandle.Reset();
+	}
+	
 	
 	// Stop all known operations
 	for (UNAssemblyOperation* Operation : KnownOperations)

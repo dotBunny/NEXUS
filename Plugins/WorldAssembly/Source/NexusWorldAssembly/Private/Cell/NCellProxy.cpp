@@ -163,7 +163,8 @@ void ANCellProxy::UnloadLevelInstance(const bool bBlocking) const
 {
 	if (LevelInstance != nullptr)
 	{
-		ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();
+		UWorld* World = GetWorld();
+		ULevelInstanceSubsystem* Subsystem = World->GetSubsystem<ULevelInstanceSubsystem>();
 		
 		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
 		// unload can leave the level in World->Levels even after the LI actor is destroyed.
@@ -184,7 +185,11 @@ void ANCellProxy::UnloadLevelInstance(const bool bBlocking) const
 		
 		if (LoadedLevel != nullptr)
 		{
-			GetWorld()->RemoveLevel(LoadedLevel);
+			World->RemoveLevel(LoadedLevel);
+			// Maybe? World->FlushLevelStreaming();
+			UPackage* Package = LoadedLevel->GetPackage();
+			UWorld* PackageWorld = UWorld::FindWorldInPackage(Package);
+			PackageWorld->DestroyWorld(false);
 		}
 	}
 	Show();
@@ -227,6 +232,10 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool b
 		if (LoadedLevel != nullptr)
 		{
 			World->RemoveLevel(LoadedLevel);
+			// Maybe? World->FlushLevelStreaming();
+			UPackage* Package = LoadedLevel->GetPackage();
+			UWorld* PackageWorld = UWorld::FindWorldInPackage(Package);
+			PackageWorld->DestroyWorld(false);
 		}
 	}
 	Show();
