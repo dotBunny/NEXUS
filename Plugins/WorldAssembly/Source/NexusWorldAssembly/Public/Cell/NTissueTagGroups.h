@@ -13,12 +13,12 @@ struct FNTissueTagGroups
 {
 	GENERATED_BODY()
 
-	const FGameplayTagContainer& GetMustHaveTags() { return MustHaveTags; }
+	const FGameplayTagContainer& GetRequiredTags() { return RequiredTags; }
 	const FGameplayTagContainer& GetUniqueTags() { return UniqueTags; }
 	
-	bool HasMustHaveTags() const
+	bool HasRequiredTags() const
 	{
-		return !MustHaveTags.IsEmpty();
+		return !RequiredTags.IsEmpty();
 	}
 	
 	bool HasUniqueTags() const
@@ -37,14 +37,14 @@ struct FNTissueTagGroups
 		UniqueTags.RemoveTags(Tags);
 	}
 	
-	void RemoveMustHaveTags(const FGameplayTagContainer& Tags)
+	void RemoveRequiredTags(const FGameplayTagContainer& Tags)
 	{
-		MustHaveTags.RemoveTags(Tags);
+		RequiredTags.RemoveTags(Tags);
 	}
 	
-	void AppendMustHaveTags(const FGameplayTagContainer& Tags)
+	void AppendRequiredTags(const FGameplayTagContainer& Tags)
 	{
-		MustHaveTags.AppendTags(Tags);
+		RequiredTags.AppendTags(Tags);
 	}
 	
 	bool HasAnyUniqueTags(const FGameplayTagContainer& Tags) const
@@ -52,14 +52,14 @@ struct FNTissueTagGroups
 		return UniqueTags.HasAny(Tags);
 	}
 	
-	bool HasAnyMustHaveTags(const FGameplayTagContainer& Tags) const
+	bool HasAnyRequiredTags(const FGameplayTagContainer& Tags) const
 	{
-		return MustHaveTags.HasAny(Tags);
+		return RequiredTags.HasAny(Tags);
 	}
 	
-	bool HasAllMustHaveTags(const FGameplayTagContainer& Tags) const
+	bool HasAllRequiredTags(const FGameplayTagContainer& Tags) const
 	{
-		return MustHaveTags.HasAllExact(Tags);
+		return RequiredTags.HasAllExact(Tags);
 	}
 	
 	FGameplayTagContainer FilterUniqueTags(const FGameplayTagContainer& Tags) const
@@ -67,15 +67,15 @@ struct FNTissueTagGroups
 		return UniqueTags.Filter(Tags);
 	}
 	
-	FGameplayTagContainer FilterMustHaveTags(const FGameplayTagContainer& Tags) const
+	FGameplayTagContainer FilterRequiredTags(const FGameplayTagContainer& Tags) const
 	{
-		return MustHaveTags.Filter(Tags);
+		return RequiredTags.Filter(Tags);
 	}	
 	
 	void AppendTags(const FNTissueTagGroups& OtherTagGroup)
 	{
 		UniqueTags.AppendTags(OtherTagGroup.UniqueTags);
-		MustHaveTags.AppendTags(OtherTagGroup.MustHaveTags);
+		RequiredTags.AppendTags(OtherTagGroup.RequiredTags);
 	}
 	
 	void EnsureBaseTags()
@@ -84,9 +84,9 @@ struct FNTissueTagGroups
 		{
 			UniqueTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique));
 		}
-		if (!MustHaveTags.HasTag(NWorldAssembly_BuiltIn_MustHave))
+		if (!RequiredTags.HasTag(NWorldAssembly_BuiltIn_Required))
 		{
-			MustHaveTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_MustHave));
+			RequiredTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_Required));
 		}
 	}
 	
@@ -95,7 +95,7 @@ protected:
 		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.BuiltIn.Unique is auto-added to this group. NOTE: If combined with Must Have, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
 	FGameplayTagContainer UniqueTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Must Have", meta = (Categories="NEXUS.WorldAssembly", 
-		ToolTip="When a tag group is marked Must Have, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.MustHave is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
-	FGameplayTagContainer MustHaveTags;
+	UPROPERTY(EditAnywhere, DisplayName="Required", meta = (Categories="NEXUS.WorldAssembly", 
+		ToolTip="When a tag group is marked Must Have, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.Required is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+	FGameplayTagContainer RequiredTags;
 };

@@ -200,14 +200,14 @@ bool FNVirtualOrganContext::CheckGraph()
 		return false;
 	}
 	
-	// We need to check that each of the MustHave groups are met
-	if (CellInputDataSummary.GroupTags.HasMustHaveTags() && !CellInputDataSummary.GroupTags.HasAllMustHaveTags(PlacedTagGroups.GetMustHaveTags()))
+	// We need to check that each of the Required groups are met
+	if (CellInputDataSummary.GroupTags.HasRequiredTags() && !CellInputDataSummary.GroupTags.HasAllRequiredTags(PlacedTagGroups.GetRequiredTags()))
 	{
-		// Could log analytics about rejection based on musthave
+		// Could log analytics about rejection based on required
 		return false;
 	}
 	
-	// We need to check the input cell data minimum counts (but ignore for unique/musthave)
+	// TODO: We need to check the input cell data minimum counts (but ignore for unique/required)
 	
 
 	return true;
