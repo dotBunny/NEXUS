@@ -320,79 +320,102 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	
 	const int32 OverviewTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
 	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
-	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime"});
-	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}"});
+	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime", "Iterations"});
+	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}", "{{ITERATIONS}}"});
+	
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
+	Report->AddReplaceToken("{{ITERATIONS}}", ""); // We'll fill this out later
 	
 	// Components
-	const int32 ComponentContentTicket = Report->CreateContentBlock(OperationContextContentTicket);
-	FNReportContentBlock* ComponentContentBlock = Report->GetContentBlock(ComponentContentTicket);
-	ComponentContentBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
+	const int32 ComponentTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	FNReportTableBlock* ComponentTableBlock = Report->GetTableBlock(ComponentTableTicket);
+	ComponentTableBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
+	ComponentTableBlock->Initialize({ "Component", "Intersections", "Contains", "Bones", "Tissues" });
+	
+	FStringBuilderBase Builder;
 	
 	for (auto Data : OrganData)
 	{
-		const int32 SourceContentTicket = Report->CreateContentBlock(OperationContextContentTicket);
-		FNReportContentBlock* SourceContentBlock = Report->GetContentBlock(SourceContentTicket);
-		SourceContentBlock->SetHeading(FString::Printf(TEXT("%s (Source)"), *Data.Value.SourceComponent->GetDebugLabel()));
-		
-		// INTERSECTIONS
-		const int32 IntersectsContentTicket = Report->CreateContentBlock(SourceContentTicket);
-		FNReportContentBlock* IntersectsContentBlock = Report->GetContentBlock(IntersectsContentTicket);
-		IntersectsContentBlock->SetHeading("Intersections");
+		// Intersections
+		Builder.Reset();
 		for (const auto IntersectComponent : Data.Value.IntersectComponents)
 		{
-			IntersectsContentBlock->AddLine(FString::Printf(TEXT("- %s"),*IntersectComponent->GetDebugLabel()));
+			Builder.Append(IntersectComponent->GetDebugLabel());
+			Builder.Append(", ");
 		}
+		if (Builder.Len() > 2)
+		{
+			Builder.RemoveSuffix(2);
+		}
+		FString Intersections = Builder.ToString();
 		
-		// FULLY CONTAINS
-		const int32 ContainsContentTicket = Report->CreateContentBlock(SourceContentTicket);
-		FNReportContentBlock* ContainsContentBlock = Report->GetContentBlock(ContainsContentTicket);
-		ContainsContentBlock->SetHeading("Contains");
+		// Fully Contains
+		Builder.Reset();
 		for (const auto ContainedComponent : Data.Value.ContainedComponents)
 		{
-			ContainsContentBlock->AddLine(FString::Printf(TEXT("- %s"),*ContainedComponent->GetDebugLabel()));
+			Builder.Append(ContainedComponent->GetDebugLabel());
+			Builder.Append(", ");
 		}
+		if (Builder.Len() > 2)
+		{
+			Builder.RemoveSuffix(2);
+		}
+		FString Contains = Builder.ToString();
 		
-		// BONES
-		const int32 BonesContentTicket = Report->CreateContentBlock(SourceContentTicket);
-		FNReportContentBlock* BonesContentBlock = Report->GetContentBlock(BonesContentTicket);
-		BonesContentBlock->SetHeading("Bones");
+		// Bones
+		Builder.Reset();
 		for (const auto ContainedBone : Data.Value.ContainedBones)
 		{
-			BonesContentBlock->AddLine(FString::Printf(TEXT("- %s"),*ContainedBone->SourceComponent->GetDebugLabel()));
+			Builder.Append(ContainedBone->SourceComponent->GetDebugLabel());
+			Builder.Append(", ");
 		}
+		if (Builder.Len() > 2)
+		{
+			Builder.RemoveSuffix(2);
+		}
+		FString Bones = Builder.ToString();
 		
 		// Optionally list tissue buildout
+		FString TissueList = TEXT("");
 		if (bBuildTissues)
 		{
-			const int32 TissuesContentTicket = Report->CreateContentBlock(SourceContentTicket);
-			FNReportContentBlock* TissuesContentBlock = Report->GetContentBlock(TissuesContentTicket);
-			TissuesContentBlock->SetHeading("Tissues");
-			
 			TMap<TObjectPtr<UNCell>, FNTissueEntry> BuildTissue;
 			FGameplayTagContainer UniqueTags; // TODO: Add to report?
 			Data.Value.SourceComponent->GetTissueMap(BuildTissue, UniqueTags);
 			
+			Builder.Reset();
 			for (const auto& TissuePair : BuildTissue)
 			{
-				TissuesContentBlock->AddLine(FString::Printf(TEXT("- %s (%i)"), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting));
+				Builder.Append(FString::Printf(TEXT("%s (%i), "), *TissuePair.Value.Cell.GetAssetName(), TissuePair.Value.Weighting));
 			}
+			if (Builder.Len() > 2)
+			{
+				Builder.RemoveSuffix(2);
+			}
+			TissueList = Builder.ToString();
 		}
+		
+		ComponentTableBlock->AddRow({ *Data.Value.SourceComponent->GetDebugLabel(), *Intersections, *Contains, *Bones, *TissueList });
 	}
 	
-	const int32 GenerationOrderContentTicket = Report->CreateContentBlock(OperationContextContentTicket);
-	FNReportContentBlock* GenerationOrderContentBlock = Report->GetContentBlock(GenerationOrderContentTicket);
-	GenerationOrderContentBlock->SetHeading(FString::Printf(TEXT("Generation Order (%i)"), GenerationOrder.Num()));
 	
+	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	FNReportTableBlock* GenerationOrderTableBlock = Report->GetTableBlock(GenerationOrderContentTicket);
+	GenerationOrderTableBlock->SetHeading(FString::Printf(TEXT("Generation Order (%i)"), GenerationOrder.Num()));
+	GenerationOrderTableBlock->Initialize( { "Phase", "Organs" } );
 	for (int32 i = 0; i < GenerationOrder.Num(); i++)
 	{
-		const int32 PhaseContentTicket = Report->CreateContentBlock(GenerationOrderContentTicket);
-		FNReportContentBlock* PhaseContentBlock = Report->GetContentBlock(PhaseContentTicket);
-		PhaseContentBlock->SetHeading(FString::Printf(TEXT("Phase (%i)"), i));
+		Builder.Reset();
 		for (const auto Component : GenerationOrder[i])
 		{
-			PhaseContentBlock->AddLine(*Component->GetDebugLabel());
+			Builder.Append(*Component->GetDebugLabel());
+			Builder.Append(", ");
 		}
+		if (Builder.Len() > 2)
+		{
+			Builder.RemoveSuffix(2);
+		}
+		GenerationOrderTableBlock->AddRow({ FString::FromInt(i), Builder.ToString() });
 	}
 }
 #endif // !UE_BUILD_SHIPPING

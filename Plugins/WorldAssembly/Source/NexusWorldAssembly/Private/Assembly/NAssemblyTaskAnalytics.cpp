@@ -86,6 +86,18 @@ void FNAssemblyTaskAnalytics::OrganGraphBuilder_DiscardExistingNodeWorldCollidin
 	Analytic.DiscardExistingNodeWorldCollidingCellNode.Increment();
 }
 
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_DiscardDueToNonFinisherConstraint(int32 Index)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.DiscardDueToNonFinisherConstraint.Increment();
+}
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_CappedWithFinisher(int32 Index, int32 Value)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.CappedWithFinisher.Add(Value);
+}
+
 void FNAssemblyTaskAnalytics::OrganGraphBuilder_NextIteration(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
@@ -175,7 +187,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	LoopTotal = 0;
 	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
-	OrganBuilderTable->SetHeading("Organs");
+	OrganBuilderTable->SetHeading("FNOrganGraphBuildTasks");
 	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "ms" });
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
@@ -192,7 +204,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	LoopTotal = 0;
 	const int32 ProcessPassTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* ProcessPassTable = Report->GetTableBlock(ProcessPassTableTicket);
-	ProcessPassTable->SetHeading("Collection Passes");
+	ProcessPassTable->SetHeading("FNProcessPassTasks");
 	ProcessPassTable->Initialize({ "Thread", "Phase", "ms" });
 	for (const auto Analytic : ProcessPassAnalytics)
 	{
@@ -209,7 +221,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	LoopTotal = 0;
 	const int32 SpawnCellProxiesTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* SpawnCellProxiesTable = Report->GetTableBlock(SpawnCellProxiesTableTicket);
-	SpawnCellProxiesTable->SetHeading("Spawn Cells (Sliced)");
+	SpawnCellProxiesTable->SetHeading("FNSpawnCellProxiesTask (Sliced)");
 	SpawnCellProxiesTable->Initialize({ "Thread", "Spawns", "ms" });
 	for (const auto Analytic : SpawnCellProxiesAnalytics)
 	{
@@ -218,45 +230,46 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 		LoopTotal += Analytic.Timer.Duration;
 	}
 	
-	// Need to re-get as it may have moved
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
 	
-	const int32 CountersContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
-	FNReportContentBlock* CountersContentBlock = Report->GetContentBlock(CountersContentTicket);
-	CountersContentBlock->SetHeading("Counters");
 	
+	// Counters
+	const int32 CounterTableTicket = Report->CreateTableBlock(AnalyticsContentTicket);
+	FNReportTableBlock* CountersTableBlock = Report->GetTableBlock(CounterTableTicket);
+	CountersTableBlock->SetHeading("Counters");
+	CountersTableBlock->Initialize({ "Component", "Iteration", "Null Nodes", "Cell Nodes", "Finisher Capped", 
+		"False Start / Out Of Bounds", "False Start / World Colliding", 
+		"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
+		"Constraint / Non-Finisher" });
+	
+	int MaxIterations = 0;
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		const int32 OrganContentTicket = Report->CreateContentBlock(CountersContentTicket);
-		FNReportContentBlock* OrganContentBlock = Report->GetContentBlock(OrganContentTicket);
-		OrganContentBlock->SetHeading(Analytic.Name);
-		
+		if (Analytic.Iterations > MaxIterations)
+		{
+			MaxIterations = Analytic.Iterations;
+		}
 		for (int32 i = 0; i < Analytic.Iterations; i++)
 		{
-			const int32 FalseStartTicket = Report->CreateTableBlock(OrganContentTicket);
-			FNReportTableBlock* FalseStartTable = Report->GetTableBlock(FalseStartTicket);
-			FalseStartTable->SetHeading("False Starts");
-			FalseStartTable->Initialize({ "Out Of Bounds", "World Colliding" });
-			FalseStartTable->AddRow({ FString::FromInt(Analytic.DiscardOutOfBoundsStart.Counter[i]), FString::FromInt(Analytic.DiscardWorldCollidingStart.Counter[i]) });
-		
-			const int32 AddingNodesTicket = Report->CreateTableBlock(OrganContentTicket);
-			FNReportTableBlock* AddingNodesTable = Report->GetTableBlock(AddingNodesTicket);
-			AddingNodesTable->SetHeading("Adding Nodes");
-			AddingNodesTable->Initialize({ "Null", "Cell" });
-			AddingNodesTable->AddRow({ FString::FromInt(Analytic.AddNullNodes.Counter[i]), FString::FromInt(Analytic.AddCellNodes.Counter[i]) });
-		
-			const int32 BadPlacementCellTicket = Report->CreateTableBlock(OrganContentTicket);
-			FNReportTableBlock* BadPlacementCellTable = Report->GetTableBlock(BadPlacementCellTicket);
-			BadPlacementCellTable->SetHeading("Bad Placement (Cell)");
-			BadPlacementCellTable->Initialize({ "Intersecting", "World Colliding", "Existing Node World Colliding", "Out Of Bounds" });
-			BadPlacementCellTable->AddRow({ FString::FromInt(Analytic.DiscardIntersectingCellNode.Counter[i]), FString::FromInt(Analytic.DiscardWorldCollidingCellNode.Counter[i]),
-			FString::FromInt(Analytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]), FString::FromInt(Analytic.DiscardOutOfBoundsCellNode.Counter[i])});
-		
+			CountersTableBlock->AddRow({ 
+				Analytic.Name, FString::FromInt(i), 
+				FString::FromInt(Analytic.AddNullNodes.Counter[i]), 
+				FString::FromInt(Analytic.AddCellNodes.Counter[i]),
+				FString::FromInt(Analytic.CappedWithFinisher.Counter[i]),
+				FString::FromInt(Analytic.DiscardOutOfBoundsStart.Counter[i]), 
+				FString::FromInt(Analytic.DiscardWorldCollidingStart.Counter[i]),
+				FString::FromInt(Analytic.DiscardIntersectingCellNode.Counter[i]), 
+				FString::FromInt(Analytic.DiscardWorldCollidingCellNode.Counter[i]), 
+				FString::FromInt(Analytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]), 
+				FString::FromInt(Analytic.DiscardOutOfBoundsCellNode.Counter[i]),
+				FString::FromInt(Analytic.DiscardDueToNonFinisherConstraint.Counter[i])
+			});
 		}
 	}
 	
 	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
+	Report->AddReplaceToken("{{ITERATIONS}}",  FString::FromInt(MaxIterations));
 }
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()

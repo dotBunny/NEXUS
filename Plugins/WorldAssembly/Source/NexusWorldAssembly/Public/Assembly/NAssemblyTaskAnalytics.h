@@ -145,6 +145,9 @@ public:
 	void OrganGraphBuilder_DiscardWorldCollidingCellNode(int32 Index);
 	/** Increment the cell-vs-existing-node collision discard counter for the record at Index. */
 	void OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index);
+	
+	void OrganGraphBuilder_DiscardDueToNonFinisherConstraint(int32 Index);
+	void OrganGraphBuilder_CappedWithFinisher(int32 Index, int32 Value);
 
 	/** Advance the per-iteration counters in the organ-graph-builder record at Index. */
 	void OrganGraphBuilder_NextIteration(int32 Index);

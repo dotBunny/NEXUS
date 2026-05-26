@@ -47,6 +47,9 @@ struct FNOrganGraphBuilderAnalytics
 
 	/** Candidate cell nodes rejected because they collided with another organ's existing nodes. */
 	FNIterationCounter DiscardExistingNodeWorldCollidingCellNode;
+	
+	FNIterationCounter DiscardDueToNonFinisherConstraint;
+	FNIterationCounter CappedWithFinisher;
 
 	/** Advance every contained counter to the next iteration slot and bump Iterations. */
 	void NextIteration()
@@ -62,5 +65,7 @@ struct FNOrganGraphBuilderAnalytics
 		DiscardIntersectingCellNode.NextIteration();
 		DiscardWorldCollidingCellNode.NextIteration();
 		DiscardExistingNodeWorldCollidingCellNode.NextIteration();
+		DiscardDueToNonFinisherConstraint.NextIteration();
+		CappedWithFinisher.NextIteration();
 	}
 };

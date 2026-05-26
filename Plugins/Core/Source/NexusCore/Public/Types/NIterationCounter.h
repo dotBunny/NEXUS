@@ -26,6 +26,11 @@ struct FNIterationCounter
 	{
 		Counter[Iteration] = Counter[Iteration] + 1;
 	}
+	
+	void Add(int32 Value)
+	{
+		Counter[Iteration] = Counter[Iteration] + Value;
+	}
 
 	/** Subtract one from the current iteration's tally. */
 	void Decrement()

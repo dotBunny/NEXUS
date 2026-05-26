@@ -105,7 +105,6 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// TODO: Add cap analytics
 		CapBranchesWithFinishers(Random);
 		
-		// TODO: Add enforce finishers analytics
 		EnforceNotFinisherConstraint();
 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
@@ -527,10 +526,21 @@ void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random
 	}
 
 	TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
+#if !UE_BUILD_SHIPPING
+	int CapNum = 0;
+#endif // !UE_BUILD_SHIPPING
 	for (int32 j = 0; j < OpenNodes.Num(); j++)
 	{
-		ProcessNode(Random, OpenNodes[j], true);
+#if !UE_BUILD_SHIPPING		
+		CapNum += ProcessNode(Random, OpenNodes[j], true).Num();
+#else
+		ProcessNode(Random, OpenNodes[j], true)
+#endif // !UE_BUILD_SHIPPING		
 	}
+#if !UE_BUILD_SHIPPING
+	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_CappedWithFinisher, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, CapNum);
+#endif // !UE_BUILD_SHIPPING
+	
 }
 
 void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const
@@ -604,7 +614,7 @@ void FNOrganGraphBuilderTask::EnforceNotFinisherConstraint() const
 				}
 			}
 			if (bHasCellChild) continue;
-
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
 			RemoveCellNode(CellNode);
 			bRemovedAny = true;
 			break; // Restart scan — Nodes array was modified
