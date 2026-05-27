@@ -409,6 +409,7 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnded, bool bCleanupResources)
 {
 	// We're not going to handle Operations here, it will be handled elsewhere.
+	if (IsEngineExitRequested()) return;
 	
 	// Scrub Bones
 	for (int i = Bones.Num() - 1; i >= 0; --i)
@@ -443,7 +444,6 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 			CellRoots.RemoveAt(i);
 		}
 	}
-	
 	
 	// Scrub Organs
 	for (int i = Organs.Num() - 1; i >= 0; --i)

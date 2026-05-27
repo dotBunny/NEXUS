@@ -159,19 +159,23 @@ void ANCellProxy::LoadLevelInstance(const bool bBlocking)
 	Hide();
 }
 
-void ANCellProxy::UnloadLevelInstance(const bool bBlocking) const
+void ANCellProxy::UnloadLevelInstance(const bool bTagActorsToIgnore) const
 {
 	if (LevelInstance != nullptr)
 	{
 		UWorld* World = GetWorld();
 		ULevelInstanceSubsystem* Subsystem = World->GetSubsystem<ULevelInstanceSubsystem>();
 		
-		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
-		// unload can leave the level in World->Levels even after the LI actor is destroyed.
-		ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
+		// We are going to iterate the Actors and flag them to be ignored by the next generation
+		// We are going to iterate the Actors and flag them to be ignored by the next generation
+		if (bTagActorsToIgnore)
+		{
+			TagActorsToIgnore();
+		}
+		
 #if WITH_EDITOR
 		// Inflight loading currently
-		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
+		if (Subsystem->IsLoading(LevelInstance))
 		{
 			Subsystem->BlockUnloadLevelInstance(LevelInstance);
 		}
@@ -182,20 +186,11 @@ void ANCellProxy::UnloadLevelInstance(const bool bBlocking) const
 #else
 		Subsystem->RequestUnloadLevelInstance(LevelInstance);
 #endif // WITH_EDITOR
-		
-		if (LoadedLevel != nullptr)
-		{
-			World->RemoveLevel(LoadedLevel);
-			// Maybe? World->FlushLevelStreaming();
-			UPackage* Package = LoadedLevel->GetPackage();
-			UWorld* PackageWorld = UWorld::FindWorldInPackage(Package);
-			PackageWorld->DestroyWorld(false);
-		}
 	}
 	Show();
 }
 
-void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool bBlocking)
+void ANCellProxy::DestroyLevelInstance(const bool bUnregisterCellLevelInstance, const bool bTagActorsToIgnore)
 {
 	if (LevelInstance != nullptr)
 	{
@@ -208,13 +203,15 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool b
 			FNWorldAssemblyRegistry::UnregisterCellLevelInstance(LevelInstance);
 		}
 		
-		// Snapshot the streamed sub-level before unload; the LI clears it during teardown and editor
-		// unload can leave the level in World->Levels even after the LI actor is destroyed.
-		ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
+		// We are going to iterate the Actors and flag them to be ignored by the next generation
+		if (bTagActorsToIgnore)
+		{
+			TagActorsToIgnore();
+		}
 		
 #if WITH_EDITOR
 		// Inflight loading currently
-		if (Subsystem->IsLoading(LevelInstance) || bBlocking)
+		if (Subsystem->IsLoading(LevelInstance))
 		{
 			Subsystem->BlockUnloadLevelInstance(LevelInstance);
 		}
@@ -226,17 +223,8 @@ void ANCellProxy::DestroyLevelInstance(bool bUnregisterCellLevelInstance, bool b
 		Subsystem->RequestUnloadLevelInstance(LevelInstance);
 #endif // WITH_EDITOR	
 
-
 		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
-		if (LoadedLevel != nullptr)
-		{
-			World->RemoveLevel(LoadedLevel);
-			// Maybe? World->FlushLevelStreaming();
-			UPackage* Package = LoadedLevel->GetPackage();
-			UWorld* PackageWorld = UWorld::FindWorldInPackage(Package);
-			PackageWorld->DestroyWorld(false);
-		}
 	}
 	Show();
 }
@@ -309,4 +297,19 @@ void ANCellProxy::Hide() const
 {
 	Mesh->SetVisibility(false);
 	Mesh->MarkRenderStateDirty();
+}
+
+void ANCellProxy::TagActorsToIgnore() const
+{
+	if (LevelInstance == nullptr) return;
+	
+	ULevel* LoadedLevel = LevelInstance->GetLoadedLevel();
+	if (LoadedLevel == nullptr) return;
+	
+	// We are going to iterate the Actors and flag them to be ignored by the next generation
+	for (AActor* Actor : LoadedLevel->Actors)
+	{
+		if (!IsValid(Actor)) continue;
+		Actor->Tags.Add(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+	}
 }

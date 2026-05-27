@@ -127,7 +127,7 @@ void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
 	{
 		if (IsValid(KnownProxies[i]))
 		{
-			KnownProxies[i]->DestroyLevelInstance(true);
+			KnownProxies[i]->DestroyLevelInstance(true, true);
 			KnownProxies[i]->Destroy(true, false);
 		}
 	}

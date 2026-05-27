@@ -43,12 +43,13 @@ public:
 	/** Begin loading the paired level instance's level asset. */
 	void LoadLevelInstance(bool bBlocking = false);
 	/** Unload the paired level instance's level asset without destroying the actor. */
-	void UnloadLevelInstance(bool bBlocking = false) const;
+	void UnloadLevelInstance(bool bTagActorsToIgnore = false) const;
 	/**
-	 * Destroy the paired level instance, async based on level streaming subsystem, unless otherwise flagged with bBlockingUnload.
+	 * Destroy the paired level instance, async based on level streaming subsystem.
 	 * @param bUnregisterCellLevelInstance When true, also remove the level instance from FNWorldAssemblyRegistry.
+	 * @param bTagActorsToIgnore When true, tag the level instance's actors so they are skipped during subsequent operations.
 	 */
-	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false, bool bBlocking = false);
+	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false, bool bTagActorsToIgnore = false);
 
 protected:
 	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */
@@ -65,6 +66,9 @@ private:
 	
 	/** Hide the proxy's preview mesh — used once the paired level instance is fully loaded. */
 	void Hide() const;
+	
+	/** Mark all actors owned by the paired level instance so they are skipped during subsequent operations. */
+	void TagActorsToIgnore() const;
 
 	/** Dynamic mesh used as the visual preview while the underlying level instance streams in. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
