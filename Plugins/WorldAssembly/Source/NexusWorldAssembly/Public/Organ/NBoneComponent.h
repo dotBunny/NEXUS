@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Macros/NActorMacros.h"
-#include "Types/NCardinalRotation.h"
 #include "NBoneComponent.generated.h"
 
 class UNOrganComponent;
@@ -22,7 +21,6 @@ enum class ENBoneMode : uint8
 	Disabled = 2
 };
 
-
 /**
  * Scene component that acts as a junction anchor inside an organ.
  *
@@ -30,7 +28,8 @@ enum class ENBoneMode : uint8
  * transform, socket size, and type/requirements determine what fits there. In Automatic mode
  * the editor snaps the bone onto a safe location inside the owning organ.
  */
-UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Bone", meta=(BlueprintSpawnableComponent),
+UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Bone", meta=(BlueprintSpawnableComponent,
+	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/concepts/bone/"),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSWORLDASSEMBLY_API UNBoneComponent : public USceneComponent
 {
@@ -42,7 +41,7 @@ public:
 
 	/** Width/height of the junction socket this bone anchors, measured in grid units. */
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
-	FIntVector2 SocketSize = FIntVector2(4, 4);
+	FIntVector2 SocketSize = FIntVector2(2, 4);
 
 	/** Which junction connectivity pattern applies at this bone. */
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
@@ -50,7 +49,7 @@ public:
 
 	/** Whether the bone's junction must be filled, may be blocked, or is optional. */
 	UPROPERTY(EditInstanceOnly, Category = "Bone Component")
-	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::Required;
+	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::AllowEmpty;
 
 	/** How the bone's transform is managed (automatic snap, manual placement, or disabled). */
 	UPROPERTY(EditAnywhere, Category = "Bone Component")
