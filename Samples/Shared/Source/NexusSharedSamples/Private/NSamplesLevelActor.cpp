@@ -174,13 +174,16 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 		LevelName,
 		LevelName);
 
+	// Stripped on Dedicated Servers
 	if (Components->DemoName != nullptr)
 	{
 		Components->DemoName->SetText(CachedLevelName);
+		Components->DemoName->SetVisibility(bShowLevelName);
 	}
-	
-	Components->Brand->SetVisibility(bShowLogo);
-	Components->DemoName->SetVisibility(bShowLevelName);
+	if (Components->Brand != nullptr)
+	{
+		Components->Brand->SetVisibility(bShowLogo);
+	}
 	
 	Super::OnConstruction(Transform);
 }

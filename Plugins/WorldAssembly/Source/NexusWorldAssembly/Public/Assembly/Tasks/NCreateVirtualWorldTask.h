@@ -6,6 +6,7 @@
 #include "NActorUtils.h"
 #include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
+#include "Cell/NCellLevelInstance.h"
 #include "Organ/NOrganVolume.h"
 
 /**

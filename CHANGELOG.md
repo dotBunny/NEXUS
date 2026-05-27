@@ -69,6 +69,7 @@
 - `FNActorPool` spawning with designated rotation now properly applies.
 - `INActorPoolItem` now handles invocation during teardown gracefully.
 - `FNMersenneTwister::VectorNormalized` now provides `-1` to `1` component values.
+- `UNTextRenderComponent` now guards away from visuals on Dedicated Servers, but still replicates data to clients.
 
 ### Removed
 

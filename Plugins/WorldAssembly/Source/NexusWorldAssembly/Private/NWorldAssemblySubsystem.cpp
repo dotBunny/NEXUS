@@ -3,13 +3,48 @@
 
 #include "NWorldAssemblySubsystem.h"
 
+
+#include "EngineUtils.h"
 #include "NMultiplayerUtils.h"
+#include "NWorldUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyRelay.h"
+#include "Cell/NCellProxy.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
+
+namespace NEXUS::WorldAssembly::ConsoleCommands
+{
+	static FAutoConsoleCommand SnapshotToDisk(TEXT("N.WorldAssembly.Regenerate"),
+		TEXT("Regenerates all Organs in a given world, clearing the previous generation."),
+		FConsoleCommandDelegate::CreateLambda([]
+		{
+			AsyncTask(ENamedThreads::GameThread, []
+			{
+				UWorld* World = FNWorldUtils::GetGameWorld();
+				if (World == nullptr)
+				{
+					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to regenerate the world, as the world was NULL."));
+					return;
+				}
+				
+				if (FNMultiplayerUtils::HasWorldAuthority(World))
+				{
+					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
+					System->Clear();
+					
+					FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
+					System->Generate(Settings);
+				}
+				else
+				{
+					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to regenerate the world as you do not have authority."));
+				}
+			});
+		}));
+}
 
 void UNWorldAssemblySubsystem::Generate(FNAssemblyOperationSettings& Settings)
 {
@@ -17,6 +52,24 @@ void UNWorldAssemblySubsystem::Generate(FNAssemblyOperationSettings& Settings)
 		FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(GetWorld()->GetCurrentLevel()), Settings);
 
 	StartOperation(Operation);
+}
+
+void UNWorldAssemblySubsystem::Clear()
+{
+	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+	{
+		if (KnownOperations[i]->IsRunning())
+		{
+			KnownOperations[i]->Cancel();
+		}
+	}
+
+	for (TActorIterator<ANCellProxy> It(GetWorld(), ANCellProxy::StaticClass()); It; ++It)
+	{
+		ANCellProxy* Proxy = *It;
+		Proxy->DestroyLevelInstance(true, true);
+		Proxy->Destroy();
+	}
 }
 
 bool UNWorldAssemblySubsystem::IsReady()

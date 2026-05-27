@@ -226,7 +226,12 @@ void ANCellProxy::DestroyLevelInstance(const bool bUnregisterCellLevelInstance, 
 		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
 	}
-	Show();
+	
+	// If we're tagging the actors that means were making something new right away so lets not show the mesh
+	if (!bTagActorsToIgnore)
+	{
+		Show();
+	}
 }
 
 void ANCellProxy::InitializeFromNCell(UNCell* InCell)

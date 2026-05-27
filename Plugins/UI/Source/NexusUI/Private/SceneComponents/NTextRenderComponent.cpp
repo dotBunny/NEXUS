@@ -22,20 +22,26 @@ void UNTextRenderComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>
 void UNTextRenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	// Ensure an owner is replicating
 	if (!GetOwner()->GetIsReplicated())
 	{
 		UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s) turned on replication for its Owner(%s); was this a mistake?"), *GetName(), *GetOwner()->GetActorNameOrLabel());
 		GetOwner()->SetReplicates(true);
 	}
-	
-	CachedValue = Text.ToString();
+
+	if (!IsRunningDedicatedServer())
+	{
+		CachedValue = Text.ToString();
+	}
 }
 
 void UNTextRenderComponent::OnRep_TextValue()
 {
-	SetText(FText::FromString(CachedValue));
+	if (!IsRunningDedicatedServer())
+	{
+		SetText(FText::FromString(CachedValue));
+	}
 	OnTextChanged.Broadcast(CachedValue);
 }
 
@@ -52,8 +58,11 @@ void UNTextRenderComponent::SetFromName(const FName& NewValue)
 		
 		CachedValue = NewString;
 		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-		
-		SetText(FText::FromString(CachedValue));
+
+		if (!IsRunningDedicatedServer())
+		{
+			SetText(FText::FromString(CachedValue));
+		}
 		OnTextChanged.Broadcast(CachedValue);
 	}
 }
@@ -66,11 +75,14 @@ void UNTextRenderComponent::SetFromString(const FString& NewValue)
 		{
 			return;
 		}
-	
+
 		CachedValue = NewValue;
 		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-		
-		SetText(FText::FromString(CachedValue));
+
+		if (!IsRunningDedicatedServer())
+		{
+			SetText(FText::FromString(CachedValue));
+		}
 		OnTextChanged.Broadcast(CachedValue);
 	}
 }
@@ -83,11 +95,14 @@ void UNTextRenderComponent::SetFromText(const FText& NewValue)
 		{
 			return;
 		}
-		
+
 		CachedValue = NewValue.ToString();
 		MARK_PROPERTY_DIRTY_FROM_NAME(UNTextRenderComponent, CachedValue, this);
-		
-		SetText(FText::FromString(CachedValue));
+
+		if (!IsRunningDedicatedServer())
+		{
+			SetText(FText::FromString(CachedValue));
+		}
 		OnTextChanged.Broadcast(CachedValue);
 	}
 }

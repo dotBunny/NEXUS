@@ -42,6 +42,9 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|WorldAssembly")
 	void Generate(UPARAM(ref) FNAssemblyOperationSettings& Settings);
 
+	UFUNCTION(BlueprintCallable, DisplayName="Clear", Category = "NEXUS|WorldAssembly")
+	void Clear();
+	
 	/** @return Relay associated with the local player, or nullptr if it has not yet been spawned. */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Local Relay", Category = "NEXUS|WorldAssembly")
 	ANWorldAssemblyRelay* GetLocalRelay() const { return LocalRelay; }
