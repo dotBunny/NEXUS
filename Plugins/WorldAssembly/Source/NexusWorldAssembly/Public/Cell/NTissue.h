@@ -29,6 +29,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	bool bAlwaysRelevant = false;
 	
 	/**
+	 * DOES NOT DO ANYTHING CURRENTLY - Only used to determine Unique early out (1:1).
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
 	 * @note A value of -1 indicates no minimum constraint.
 	 */
