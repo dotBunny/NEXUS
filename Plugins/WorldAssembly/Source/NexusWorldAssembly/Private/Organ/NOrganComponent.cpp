@@ -5,6 +5,7 @@
 
 #include "DynamicMeshBuilder.h"
 #include "NWorldAssemblyRegistry.h"
+#include "NWorldAssemblySubsystem.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
 #include "Components/BrushComponent.h"
@@ -73,6 +74,15 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 			GEngine->ConstraintLimitMaterialPrismatic->GetRenderProxy(), SDPG_World);
 		}
 		
+	}
+}
+
+void UNOrganComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if (GenerationTrigger == ENOrganGenerationTrigger::BeginPlay)
+	{
+		UNWorldAssemblySubsystem::Get(GetWorld())->RegisterOrganForAssembly(this);
 	}
 }
 

@@ -40,11 +40,24 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 	{
 		KnownOperations[i]->Tick();
 	}
+	
+	// If we have anything queued for generation, lets get it going
+	if (QueuedOrgansForAssembly.Num() > 0)
+	{
+		FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
+		Settings.DisplayName = FText::FromString("QueuedOrganAssembly");
+		UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
+
+		StartOperation(InstanceOperation);
+		
+		// We issue the generation and then clear the queue.
+		QueuedOrgansForAssembly.Empty();
+	}
 }
 
 bool UNWorldAssemblySubsystem::IsTickable() const
 {
-	if (KnownOperations.Num() > 0) return true;
+	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0) return true;
 	return false;
 }
 
@@ -120,6 +133,11 @@ void UNWorldAssemblySubsystem::UnregisterLocalRelay(const ANWorldAssemblyRelay* 
 	{
 		LocalRelay = nullptr;
 	}
+}
+
+void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ)
+{
+	QueuedOrgansForAssembly.AddUnique(Organ);
 }
 
 void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)

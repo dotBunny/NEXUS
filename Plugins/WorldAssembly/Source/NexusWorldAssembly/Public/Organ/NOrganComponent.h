@@ -18,9 +18,8 @@ class UNTissue;
 UENUM(BlueprintType)
 enum class ENOrganGenerationTrigger : uint8
 {
-	GenerateOnLoad = 0		UMETA(DisplayName="Generate On Load", ToolTip = "Generates only when the component is loaded into the level."),
-	GenerateOnDemand = 1	UMETA(DisplayName="Generate On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint)."),
-	GenerateAtRuntime = 2	UMETA(DisplayName="Generate At Runtime", ToolTip = "Generates only when scheduled by the Runtime Generation Scheduler.")
+	OnDemand = 0	UMETA(DisplayName="On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint or Subsystem)."),
+	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the compent receives it's BeginPlay call.")
 };
 
 /**
@@ -61,9 +60,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
 	int32 Seed = -1;
 
-	/** Controls when the organ is allowed to generate (load-time, on-demand, or runtime-scheduled). */
+	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
-	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::GenerateOnLoad;
+	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
 
 	/** Tissues (and transitively, cells) the organ may draw from during generation. */
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
@@ -122,6 +121,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
 	FGuid Identifier = FGuid::NewGuid();
 
+	//~UActorComponent
+	virtual void BeginPlay() override;
+	//End UActorComponent
 protected:
 
 	//~UActorComponent

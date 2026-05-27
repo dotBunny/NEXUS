@@ -10,6 +10,7 @@
 #include "NWorldAssemblyRelay.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
+class UNOrganComponent;
 class ANWorldAssemblyRelay;
 class UNAssemblyOperation;
 class FNAssemblyTaskGraph;
@@ -74,6 +75,9 @@ public:
 	void RegisterLocalRelay(ANWorldAssemblyRelay* InRelay);
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
+	
+	bool HasQueuedOrgansForAssembly() const { return !QueuedOrgansForAssembly.IsEmpty(); }
+	void RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ);
 
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
 	UPROPERTY(BlueprintAssignable)
@@ -88,6 +92,8 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
+	
+	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
 
 	/** Map from player controller to the relay actor spawned for that player. */
 	UPROPERTY()
