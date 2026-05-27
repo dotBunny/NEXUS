@@ -29,7 +29,7 @@ enum class ENBoneMode : uint8
  * the editor snaps the bone onto a safe location inside the owning organ.
  */
 UCLASS(ClassGroup="NEXUS", DisplayName = "NEXUS | Bone", meta=(BlueprintSpawnableComponent,
-	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/concepts/bone/"),
+	DocsURL="https://nexus-framework.com/docs/plugins/world-assembly/types/bone-component"),
 	HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSWORLDASSEMBLY_API UNBoneComponent : public USceneComponent
 {
