@@ -60,7 +60,10 @@ void UNWorldAssemblySubsystem::Clear()
 	{
 		if (KnownOperations[i]->IsRunning())
 		{
-			KnownOperations[i]->Cancel();
+			if (FNAssemblyTaskGraph* Graph = KnownOperations[i]->GetTaskGraph())
+			{
+				Graph->Cancel();
+			}
 		}
 	}
 

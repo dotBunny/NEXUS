@@ -12,6 +12,7 @@
 
 
 class FNAssemblyTaskGraphContext;
+class UNCell;
 class UNOrganComponent;
 
 /**
@@ -64,6 +65,7 @@ class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
 	friend class UNWorldAssemblyEditorSubsystem;
 	friend class FNWorldAssemblyEdMode;
 
+	friend class FNAssemblyTaskGraph;
 	friend struct FNOrganGeneratorFinalizeTask;
 	friend struct FNAssemblyFinalizeTask;
 
@@ -222,6 +224,10 @@ private:
 	TUniquePtr<FNAssemblyTaskGraph> TaskGraph;
 	/** Context describing the organs/cells/tissue participating in this pass. */
 	TUniquePtr<FNAssemblyOperationContext> Context;
+
+	/** Hard references keeping UNCell assets alive while the operation is in flight. */
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UNCell>> ReferencedCells;
 
 	/** true while StartBuild has been called and the task graph has not yet finished. */
 	bool bIsRunning;

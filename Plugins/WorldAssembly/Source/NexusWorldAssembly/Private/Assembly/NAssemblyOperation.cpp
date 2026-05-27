@@ -87,7 +87,9 @@ void UNAssemblyOperation::TearDownOperation()
 		TaskGraph->TearDownGraph();
 		TaskGraph.Reset();
 	}
-	
+
+	ReferencedCells.Empty();
+
 	FNWorldAssemblyRegistry::UnregisterOperation(this);
 	RemoveFromRoot();
 	MarkAsGarbage();
@@ -214,7 +216,9 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 		Context->LockAndPreprocess(Owner->GetDefaultWorld());
 		SetDisplayMessage(NEXUS::WorldAssembly::DisplayMessages::ContextLocked);
 	}
-	
+
+	ReferencedCells.Empty();
+
 	if (TaskGraph.IsValid())
 	{
 		TaskGraph->TearDownGraph();

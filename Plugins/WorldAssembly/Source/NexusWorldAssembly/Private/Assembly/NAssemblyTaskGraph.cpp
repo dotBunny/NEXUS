@@ -86,6 +86,15 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 				WorldOrganData, BaseGenerator.UnsignedInteger64(),
 				FString::Printf(TEXT("%i:%i_%s"), PassCount, ComponentCount, *Component->GetDebugLabel()));
 
+			for (const FNVirtualCellData& CellData : VirtualOrganContextPtr->CellInputData)
+			{
+				if (CellData.Template != nullptr)
+				{
+					// We hold the references here as they are pinned against GC
+					Operation->ReferencedCells.AddUnique(CellData.Template);
+				}
+			}
+
 			// Create a task and pass the context to the constructor. Chain onto the previous pass's FNProcessPassTask
 			// (not its organ-builders) so this pass sees the previous pass's collision data fully propagated into
 			// the world context before any organ-builder reads NodeCollisionMeshes.
@@ -157,6 +166,10 @@ void FNAssemblyTaskGraph::Cancel()
 	if (SpawnContextPtr.IsValid())
 	{
 		SpawnContextPtr->bCancelled.Store(true);
+	}
+	if (TaskGraphContextPtr.IsValid())
+	{
+		TaskGraphContextPtr->CreatedProxies.Empty();
 	}
 }
 
