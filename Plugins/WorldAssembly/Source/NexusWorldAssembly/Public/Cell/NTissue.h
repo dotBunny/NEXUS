@@ -20,7 +20,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, DisplayName="Behavior Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
+	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
 	
 	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get applied to the output graph, used by gameplay generation systems for awareness and quick context."))
