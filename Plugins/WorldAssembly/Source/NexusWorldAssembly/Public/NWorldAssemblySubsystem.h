@@ -42,6 +42,15 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Generate", Category = "NEXUS|WorldAssembly")
 	void Generate(UPARAM(ref) FNAssemblyOperationSettings& Settings);
 
+	/**
+	 * Tear down every assembled object owned by the subsystem and return it to an empty state.
+	 *
+	 * Cancels any in-flight operations, destroys every ANCellProxy in the world along with its streamed level instance,
+	 * destroys any actors previously enrolled via RegisterActorForCleanup, then empties the tracked-actor list and broadcasts OnCleared.
+	 * In editor builds the global selection is cleared first so the typed-element registry does not assert on a stale handle
+	 * after sub-level actors are torn down.
+	 * @note Does not destroy player relays — those are tied to player controller lifetime, not generation lifetime.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Clear", Category = "NEXUS|WorldAssembly")
 	void Clear();
 	
@@ -57,9 +66,23 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady();
 	
-	UFUNCTION(BlueprintCallable)
+	/**
+	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.
+	 *
+	 * Stored as a weak reference, so the actor is free to be destroyed by other systems first without leaving a dangling entry.
+	 * Safe to call repeatedly with the same actor — duplicates are ignored.
+	 * @param Actor Actor to enroll in cleanup. Null is tolerated but ignored.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Register Actor For Cleanup", Category = "NEXUS|WorldAssembly")
 	void RegisterActorForCleanup(AActor* Actor);
-	UFUNCTION(BlueprintCallable)
+
+	/**
+	 * Stop tracking an actor for Clear()-driven destruction.
+	 *
+	 * Call when the actor's lifetime is taken over elsewhere, or when it has already been destroyed and the slot should be reclaimed early.
+	 * @param Actor Actor previously passed to RegisterActorForCleanup. A no-op if the actor was never registered.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Unregister Actor For Cleanup", Category = "NEXUS|WorldAssembly")
 	void UnregisterActorForCleanup(AActor* Actor);
 
 	//~UTickableWorldSubsystem
@@ -105,10 +128,18 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
 	
+	/**
+	 * Externally-owned actors enrolled via RegisterActorForCleanup that should be destroyed on the next Clear() pass.
+	 * Held weakly so entries become inert (rather than dangling) if the actor is destroyed by another system first.
+	 */
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
-	
-	
+
+	/**
+	 * Organs waiting to be folded into an assembly operation.
+	 * Populated by RegisterOrganForAssembly (called by UNOrganComponent on begin play) and drained each tick
+	 * into a freshly-created UNAssemblyOperation; the presence of entries keeps the subsystem tickable.
+	 */
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
 
 	/** Map from player controller to the relay actor spawned for that player. */
