@@ -52,7 +52,8 @@ void UNDynamicRefComponent::Register()
 {
 	const int32 FastReferenceCount = FastReferences.Num();
 	const int32 NamedReferenceCount = NamedReferences.Num();
-	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
+	const int32 TagReferenceCount = TagReferences.Num();
+	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
@@ -73,6 +74,15 @@ void UNDynamicRefComponent::Register()
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->AddObjectByName(NamedReferences[i], Owner);
 		}
+		
+		// Store gameplay tags as if they are named
+		TArray<FGameplayTag> GameplayTags;
+		TagReferences.GetGameplayTagArray(GameplayTags);
+		for (int32 i = 0; i < TagReferenceCount; i++)
+		{
+			if (GameplayTags[i] == FGameplayTag::EmptyTag) continue;
+			Subsystem->AddObjectByName(GameplayTags[i].GetTagName(), Owner);
+		}
 	}
 }
 
@@ -80,7 +90,9 @@ void UNDynamicRefComponent::Unregister()
 {	
 	const int32 FastReferenceCount = FastReferences.Num();
 	const int32 NamedReferenceCount = NamedReferences.Num();
-	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
+	const int32 TagReferenceCount = TagReferences.Num();
+	
+	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
@@ -100,6 +112,15 @@ void UNDynamicRefComponent::Unregister()
 		{
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->RemoveObjectByName(NamedReferences[i], Owner);
+		}
+		
+		// Store gameplay tags as if they are named
+		TArray<FGameplayTag> GameplayTags;
+		TagReferences.GetGameplayTagArray(GameplayTags);
+		for (int32 i = 0; i < TagReferenceCount; i++)
+		{
+			if (GameplayTags[i] == FGameplayTag::EmptyTag) continue;
+			Subsystem->RemoveObjectByName(GameplayTags[i].GetTagName(), Owner);
 		}
 	}
 }

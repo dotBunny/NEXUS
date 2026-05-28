@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "NDynamicRef.h"
 #include "Types/NActorComponentLifecycle.h"
 #include "NDynamicRefComponent.generated.h"
@@ -49,7 +50,10 @@ protected:
 	/** The set of named identifiers this Actor will claim (map-backed lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	TArray<FName> NamedReferences;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
+	FGameplayTagContainer TagReferences;
+	
 private:
 	/** Register this Actor with UNDynamicRefSubsystem under all configured references. */
 	void Register();

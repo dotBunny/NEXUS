@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "NDynamicRef.h"
 #include "Macros/NSubsystemMacros.h"
 #include "NDynamicRefSubsystem.generated.h"
@@ -287,6 +288,138 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	TArray<FName> GetNames() const;
 	/** @return All ENDynamicRef slots that currently have at least one registered object. */
 	TArray<ENDynamicRef> GetDynamicRefs() const;
+	/**
+	 * @return All FGameplayTags whose corresponding FName bucket currently has at least one registered object.
+	 * @remark Bucket FNames that do not resolve to a known FGameplayTag (e.g. raw names added via the FName API) are skipped.
+	 */
+	TArray<FGameplayTag> GetTags() const;
+
+	/**
+	 * Gets an array of AActor dynamically associated with the provided FGameplayTag.
+	 * @note This method will only return AActor objects, filtering out any non-AActor UObject.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return An array of AActor.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Tag)", Category = "NEXUS|DynamicRefs")
+	TArray<AActor*> GetActorsByTag(FGameplayTag Tag);
+
+	/**
+	 * Retrieves the count of UObjects associated with a specified FGameplayTag collection.
+	 * @param Tag The desired FGameplayTag collection.
+	 * @return The number of UObjects associated with the specified FGameplayTag collection.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Tag)", Category = "NEXUS|DynamicRefs")
+	int32 GetCountByTag(FGameplayTag Tag);
+
+	/**
+	 * Gets an array of UObject dynamically associated with the provided FGameplayTag.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return An array of UObject.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Tag)", Category = "NEXUS|DynamicRefs")
+	TArray<UObject*> GetObjectsByTag(FGameplayTag Tag);
+
+	/**
+	 * Retrieves the first/oldest AActor associated with a specified FGameplayTag.
+	 * @param Tag The FGameplayTag collection to iterate.
+	 * @return A pointer to the first AActor found for the specified FGameplayTag, or nullptr if no actors are found.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get First Actor (By Tag)", Category = "NEXUS|DynamicRefs")
+	AActor* GetFirstActorByTag(FGameplayTag Tag);
+
+	/**
+	 * Gets the first/oldest UObject associated with the provided FGameplayTag.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return The first UObject in the collection.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get First Object (By Tag)", Category = "NEXUS|DynamicRefs")
+	UObject* GetFirstObjectByTag(FGameplayTag Tag);
+
+	/**
+	 * Gets the first/oldest UObject associated with the provided FGameplayTag without any bounds/range checking.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return The first UObject in the collection.
+	 */
+	UObject* GetFirstObjectByTagUnsafe(FGameplayTag Tag);
+
+	/**
+	 * Retrieves the last/newest AActor associated with a specified FGameplayTag.
+	 * @param Tag The FGameplayTag collection to iterate.
+	 * @return A pointer to the last AActor found for the specified FGameplayTag, or nullptr if no actors are found.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor (By Tag)", Category = "NEXUS|DynamicRefs")
+	AActor* GetLastActorByTag(FGameplayTag Tag);
+
+	/**
+	 * Gets the last/newest UObject associated with the provided FGameplayTag.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return The last UObject in the collection.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Last Object (By Tag)", Category = "NEXUS|DynamicRefs")
+	UObject* GetLastObjectByTag(FGameplayTag Tag);
+
+	/**
+	 * Gets the last/newest UObject associated with the provided FGameplayTag without any bounds/range checking.
+	 * @param Tag The desired FGameplayTag to access.
+	 * @return The last UObject in the collection.
+	 */
+	UObject* GetLastObjectByTagUnsafe(FGameplayTag Tag);
+
+	/**
+	 * Gets a const reference to the underlying collection for the provided FGameplayTag bucket.
+	 * @remark Native code only; prefer this over GetObjectsByTag() when you only need to read the registered objects.
+	 * @warning Unsafe: performs no key existence check and will assert/crash (FindChecked) if the tag's bucket does not exist.
+	 *          The returned reference is only valid until the next mutation of the named map; any such call may invalidate it.
+	 * @param Tag The desired FGameplayTag bucket to access.
+	 * @return A const reference to the FNDynamicRefCollection for the bucket.
+	 */
+	const FNDynamicRefCollection& GetObjectCollectionByTagRefUnsafe(FGameplayTag Tag);
+
+	/**
+	 * Gets the union of UObjects registered under any of the supplied FGameplayTags. Results are deduplicated.
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
+	 * @return An array of UObject. Empty if no provided tag has a registered bucket.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Any Tags)", Category = "NEXUS|DynamicRefs")
+	TArray<UObject*> GetObjectsByAnyTags(const FGameplayTagContainer& Tags);
+
+	/**
+	 * Gets the union of AActors registered under any of the supplied FGameplayTags. Results are deduplicated and non-AActor UObjects are filtered out.
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
+	 * @return An array of AActor.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Any Tags)", Category = "NEXUS|DynamicRefs")
+	TArray<AActor*> GetActorsByAnyTags(const FGameplayTagContainer& Tags);
+
+	/**
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
+	 * @return The number of unique UObjects registered under any of the supplied tags.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Any Tags)", Category = "NEXUS|DynamicRefs")
+	int32 GetCountByAnyTags(const FGameplayTagContainer& Tags);
+
+	/**
+	 * Gets the intersection of UObjects registered under every supplied FGameplayTag. A UObject must appear under every requested tag to be returned.
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
+	 * @return An array of UObject. Empty if any provided tag has no registered bucket.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By All Tags)", Category = "NEXUS|DynamicRefs")
+	TArray<UObject*> GetObjectsByAllTags(const FGameplayTagContainer& Tags);
+
+	/**
+	 * Gets the intersection of AActors registered under every supplied FGameplayTag. Non-AActor UObjects are filtered out.
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
+	 * @return An array of AActor.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By All Tags)", Category = "NEXUS|DynamicRefs")
+	TArray<AActor*> GetActorsByAllTags(const FGameplayTagContainer& Tags);
+
+	/**
+	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
+	 * @return The number of UObjects registered under every supplied tag.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By All Tags)", Category = "NEXUS|DynamicRefs")
+	int32 GetCountByAllTags(const FGameplayTagContainer& Tags);
 	
 
 	/**

@@ -3,6 +3,7 @@
 
 #include "NDynamicRefSubsystem.h"
 
+#include "GameplayTagsManager.h"
 #include "NDynamicRefsMinimal.h"
 #include "Macros/NValidationMacros.h"
 
@@ -370,4 +371,189 @@ const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionRefUnsaf
 const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionByNameRefUnsafe(const FName Name)
 {
 	return NamedCollection.FindChecked(Name);
+}
+
+TArray<FGameplayTag> UNDynamicRefSubsystem::GetTags() const
+{
+	TArray<FGameplayTag> Result;
+	const UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
+	for (const TPair<FName, FNDynamicRefCollection>& Pair : NamedCollection)
+	{
+		FGameplayTag Tag = Manager.RequestGameplayTag(Pair.Key, false);
+		if (Tag.IsValid())
+		{
+			Result.Add(Tag);
+		}
+	}
+	return MoveTemp(Result);
+}
+
+TArray<AActor*> UNDynamicRefSubsystem::GetActorsByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return TArray<AActor*>();
+	return GetActorsByName(Tag.GetTagName());
+}
+
+int32 UNDynamicRefSubsystem::GetCountByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return 0;
+	return GetCountByName(Tag.GetTagName());
+}
+
+TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return TArray<UObject*>();
+	return GetObjectsByName(Tag.GetTagName());
+}
+
+AActor* UNDynamicRefSubsystem::GetFirstActorByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return nullptr;
+	return GetFirstActorByName(Tag.GetTagName());
+}
+
+UObject* UNDynamicRefSubsystem::GetFirstObjectByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return nullptr;
+	return GetFirstObjectByName(Tag.GetTagName());
+}
+
+UObject* UNDynamicRefSubsystem::GetFirstObjectByTagUnsafe(FGameplayTag Tag)
+{
+	return GetFirstObjectByNameUnsafe(Tag.GetTagName());
+}
+
+AActor* UNDynamicRefSubsystem::GetLastActorByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return nullptr;
+	return GetLastActorByName(Tag.GetTagName());
+}
+
+UObject* UNDynamicRefSubsystem::GetLastObjectByTag(FGameplayTag Tag)
+{
+	if (!Tag.IsValid()) return nullptr;
+	return GetLastObjectByName(Tag.GetTagName());
+}
+
+UObject* UNDynamicRefSubsystem::GetLastObjectByTagUnsafe(FGameplayTag Tag)
+{
+	return GetLastObjectByNameUnsafe(Tag.GetTagName());
+}
+
+const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionByTagRefUnsafe(FGameplayTag Tag)
+{
+	return NamedCollection.FindChecked(Tag.GetTagName());
+}
+
+TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAnyTags(const FGameplayTagContainer& Tags)
+{
+	TArray<UObject*> Result;
+	if (Tags.IsEmpty()) return Result;
+
+	TArray<FGameplayTag> TagArray;
+	Tags.GetGameplayTagArray(TagArray);
+
+	int32 ReserveCount = 0;
+	for (const FGameplayTag& Tag : TagArray)
+	{
+		if (!Tag.IsValid()) continue;
+		if (const FNDynamicRefCollection* Collection = NamedCollection.Find(Tag.GetTagName()))
+		{
+			ReserveCount += Collection->Objects.Num();
+		}
+	}
+	Result.Reserve(ReserveCount);
+
+	for (const FGameplayTag& Tag : TagArray)
+	{
+		if (!Tag.IsValid()) continue;
+		const FNDynamicRefCollection* Collection = NamedCollection.Find(Tag.GetTagName());
+		if (Collection == nullptr) continue;
+		for (const TObjectPtr<UObject>& ObjPtr : Collection->Objects)
+		{
+			Result.AddUnique(ObjPtr.Get());
+		}
+	}
+	return MoveTemp(Result);
+}
+
+TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAnyTags(const FGameplayTagContainer& Tags)
+{
+	TArray<AActor*> Result;
+	for (UObject* Object : GetObjectsByAnyTags(Tags))
+	{
+		AActor* Actor = Cast<AActor>(Object);
+		if (Actor) Result.Add(Actor);
+	}
+	return MoveTemp(Result);
+}
+
+int32 UNDynamicRefSubsystem::GetCountByAnyTags(const FGameplayTagContainer& Tags)
+{
+	return GetObjectsByAnyTags(Tags).Num();
+}
+
+TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAllTags(const FGameplayTagContainer& Tags)
+{
+	TArray<UObject*> Result;
+	if (Tags.IsEmpty()) return Result;
+
+	TArray<FGameplayTag> TagArray;
+	Tags.GetGameplayTagArray(TagArray);
+
+	// Resolve every requested tag to its bucket; if any tag is missing, the intersection is empty.
+	TArray<const FNDynamicRefCollection*> Collections;
+	Collections.Reserve(TagArray.Num());
+	for (const FGameplayTag& Tag : TagArray)
+	{
+		if (!Tag.IsValid()) return Result;
+		const FNDynamicRefCollection* Collection = NamedCollection.Find(Tag.GetTagName());
+		if (Collection == nullptr || !Collection->HasObjects()) return Result;
+		Collections.Add(Collection);
+	}
+
+	// Pick the smallest bucket as the iteration source to minimize work.
+	int32 SmallestIndex = 0;
+	for (int32 i = 1; i < Collections.Num(); ++i)
+	{
+		if (Collections[i]->Objects.Num() < Collections[SmallestIndex]->Objects.Num())
+		{
+			SmallestIndex = i;
+		}
+	}
+
+	const FNDynamicRefCollection* Smallest = Collections[SmallestIndex];
+	Result.Reserve(Smallest->Objects.Num());
+	for (const TObjectPtr<UObject>& ObjPtr : Smallest->Objects)
+	{
+		UObject* Object = ObjPtr.Get();
+		bool bInAll = true;
+		for (int32 i = 0; i < Collections.Num(); ++i)
+		{
+			if (i == SmallestIndex) continue;
+			if (!Collections[i]->Objects.Contains(Object))
+			{
+				bInAll = false;
+				break;
+			}
+		}
+		if (bInAll) Result.Add(Object);
+	}
+	return MoveTemp(Result);
+}
+
+TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAllTags(const FGameplayTagContainer& Tags)
+{
+	TArray<AActor*> Result;
+	for (UObject* Object : GetObjectsByAllTags(Tags))
+	{
+		AActor* Actor = Cast<AActor>(Object);
+		if (Actor) Result.Add(Actor);
+	}
+	return MoveTemp(Result);
+}
+
+int32 UNDynamicRefSubsystem::GetCountByAllTags(const FGameplayTagContainer& Tags)
+{
+	return GetObjectsByAllTags(Tags).Num();
 }
