@@ -29,7 +29,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellBoundsGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the bounds calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnore, NEXUS::WorldAssembly::Tags::CellBoundsIgnore };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellBoundsIgnore };
 
 	// TODO: Padding to surfaces ? character height
 	/** @return true if all fields match structurally; used when diffing live vs. side-car cell data. */

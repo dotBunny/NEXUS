@@ -444,7 +444,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 		{
 			AActor* Actor = Cast<AActor>(*It);
 			Actor->Modify(true);
-			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::CellIgnore);
+			Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::CellIgnore);
 		}
 	}
 	else
@@ -457,7 +457,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 		{
 			AActor* Actor = Cast<AActor>(*It);
 			Actor->Modify(true);
-			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::CellIgnore);
+			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::CellIgnore);
 		}
 	}
 }
@@ -485,7 +485,7 @@ int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore_Mode()
 		const AActor* Actor = Cast<AActor>(*It);
 		ActorCount++;
 		
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::CellIgnore))
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::CellIgnore))
 		{
 			TaggedActorCount++;
 		}
@@ -514,7 +514,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 		{
 			AActor* Actor = Cast<AActor>(*It);
 			Actor->Modify(true);
-			Actor->Tags.Add(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+			Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 		}
 	}
 	else
@@ -527,7 +527,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 		{
 			AActor* Actor = Cast<AActor>(*It);
 			Actor->Modify(true);
-			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+			Actor->Tags.RemoveSwap(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 		}
 	}
 }
@@ -553,7 +553,7 @@ int32 FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode()
 		const AActor* Actor = Cast<AActor>(*It);
 		ActorCount++;
 		
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore))
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore))
 		{
 			TaggedActorCount++;
 		}

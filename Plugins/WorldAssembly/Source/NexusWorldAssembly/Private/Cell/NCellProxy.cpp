@@ -340,6 +340,6 @@ void ANCellProxy::TagActorsToIgnore() const
 	for (AActor* Actor : LoadedLevel->Actors)
 	{
 		if (!IsValid(Actor)) continue;
-		Actor->Tags.Add(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore);
+		Actor->Tags.Add(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore);
 	}
 }

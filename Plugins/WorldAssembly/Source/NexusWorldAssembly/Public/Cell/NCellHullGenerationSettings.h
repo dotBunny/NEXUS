@@ -49,7 +49,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellHullGenerationSettings
 
 	/** Actors carrying any of these tags are excluded from the hull calculation. */
 	UPROPERTY(EditAnywhere)
-	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::Tags::CellIgnore, NEXUS::WorldAssembly::Tags::CellHullIgnore };
+	TArray<FName> ActorIgnoreTags = { NEXUS::WorldAssembly::ActorTags::CellIgnore, NEXUS::WorldAssembly::ActorTags::CellHullIgnore };
 
 	/** @return The Chaos enum matching BuildMethod. */
 	Chaos::FConvexBuilder::EBuildMethod GetChaosBuildMethod() const

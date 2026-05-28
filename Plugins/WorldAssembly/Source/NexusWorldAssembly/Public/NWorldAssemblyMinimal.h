@@ -8,7 +8,7 @@
  */
 namespace NEXUS::WorldAssembly
 {
-	namespace Tags
+	namespace ActorTags
 	{
 		inline const FName CellIgnore = FName("NCell_Ignore");
 		

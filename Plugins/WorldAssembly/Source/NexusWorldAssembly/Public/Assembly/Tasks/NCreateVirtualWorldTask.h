@@ -53,7 +53,7 @@ public:
 		if (Actor->IsPendingKillPending()) return false;
 		
 		// Check global ignore tag
-		if (Actor->ActorHasTag(NEXUS::WorldAssembly::Tags::WorldCollisionIgnore)) return false;
+		if (Actor->ActorHasTag(NEXUS::WorldAssembly::ActorTags::WorldCollisionIgnore)) return false;
 		
 		// We are going to outright ignore volumes as collision data
 		if (Actor->IsA<AVolume>()) return false;
