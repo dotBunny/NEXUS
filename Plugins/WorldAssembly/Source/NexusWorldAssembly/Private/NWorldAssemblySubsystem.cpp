@@ -92,7 +92,7 @@ void UNWorldAssemblySubsystem::Clear()
 	// Handle our track for cleanup
 	for (TWeakObjectPtr Actor : TrackedActorsForCleanup)
 	{
-		if (Actor.Get() != nullptr)
+		if (Actor.IsValid())
 		{
 			Actor.Get()->Destroy(true, false);
 		}
