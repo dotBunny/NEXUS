@@ -43,7 +43,10 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	FNWorldAssemblyRegistry::UnregisterCellLevelInstance(this);
+	if (bRegistered)
+	{
+		FNWorldAssemblyRegistry::UnregisterCellLevelInstance(this);
+	}
 	Super::EndPlay(EndPlayReason);
 }
 

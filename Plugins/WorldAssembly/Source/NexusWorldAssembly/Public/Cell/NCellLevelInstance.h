@@ -19,6 +19,7 @@ UCLASS(NotPlaceable, HideDropdown, Hidden, Transient, ClassGroup = "NEXUS", Disp
 class NEXUSWORLDASSEMBLY_API ANCellLevelInstance final : public ALevelInstance
 {
 	friend class ANCellProxy;
+	friend class FNWorldAssemblyRegistry;
 
 	GENERATED_BODY()
 
@@ -67,6 +68,7 @@ protected:
 	void FillJunctionData();
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	
-	
+
+	/** Whether this cell is currently registered with the World Assembly registry. */
+	bool bRegistered = false;
 };

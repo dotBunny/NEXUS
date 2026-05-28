@@ -309,10 +309,12 @@ bool FNWorldAssemblyRegistry::RegisterCellLevelInstance(ANCellLevelInstance* Cel
 			return false;
 		}
 		CellLevelInstances[OperationTicket].Add(CellLevelInstance);
+		CellLevelInstance->bRegistered = true;
 		return true;
 	}
 	CellLevelInstances.Add(OperationTicket, TArray<ANCellLevelInstance*>());
 	CellLevelInstances[OperationTicket].Add(CellLevelInstance);
+	CellLevelInstance->bRegistered = true;
 	return true;
 
 }
@@ -387,6 +389,8 @@ bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* C
 		if (LevelInstances->Contains(CellLevelInstance))
 		{
 			LevelInstances->RemoveSwap(CellLevelInstance);
+			CellLevelInstance->bRegistered = false;
+	
 			if (LevelInstances->IsEmpty())
 			{
 				CellLevelInstances.Remove(OperationTicket);

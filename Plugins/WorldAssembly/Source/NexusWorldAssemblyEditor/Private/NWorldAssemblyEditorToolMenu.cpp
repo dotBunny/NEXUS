@@ -299,7 +299,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			"NWorldAssembly_ToggleCollisionVisualizer",
 			FUIAction(
 				FExecuteAction::CreateStatic(&CollisionVisualizerToggle),
-				FCanExecuteAction(),
+				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEdMode::IsActive)),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_ToggleCollisionVisualizer", "Toggle Collision Visualizer"),
