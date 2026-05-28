@@ -41,8 +41,9 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 	
 	
 	// Stop all known operations
-	for (UNAssemblyOperation* Operation : KnownOperations)
+	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
+		UNAssemblyOperation* Operation = KnownOperations[i];
 		if (Operation->IsRunning())
 		{
 			Operation->Cancel();
