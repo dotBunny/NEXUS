@@ -33,10 +33,11 @@ public:
 	 * @param World World to spawn into.
 	 * @param OperationTicket Owning operation's ticket, stored on the proxy for later lookup.
 	 * @param CellNode The graph node that sourced this cell (supplies transform and junction data).
+	 * @param OutputTags The global output tags from the generation to pass down to the cell.
 	 * @param bPreLoadLevel When true, the underlying level asset begins loading immediately.
 	 * @return The new proxy actor.
 	 */
-	static ANCellProxy* CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode, bool bPreLoadLevel = true);
+	static ANCellProxy* CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode,  const FGameplayTagContainer& OutputTags, bool bPreLoadLevel = true);
 
 	/** Spawn the paired ANCellLevelInstance so the cell's content can be loaded into the world. */
 	void CreateLevelInstance();
@@ -50,7 +51,7 @@ public:
 	 * @param bTagActorsToIgnore When true, tag the level instance's actors so they are skipped during subsequent operations.
 	 */
 	void DestroyLevelInstance(bool bUnregisterCellLevelInstance = false, bool bTagActorsToIgnore = false);
-
+	
 protected:
 	/** Applies the freshly-streamed proxy material to DynamicMaterial once its async load completes. */
 	void OnProxyMaterialLoaded();
@@ -89,6 +90,10 @@ private:
 	/** Dynamic material applied to the proxy mesh while it stands in for the level. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
+	
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
+	FGameplayTagContainer OutputTags;
+	
 	
 	/** 
 	 * Per-junction data mirrored from the cell.

@@ -7,6 +7,7 @@
 #include "Assembly/Contexts/NAssemblyOperationContext.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellProxy.h"
+#include "Editor.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -123,6 +124,13 @@ void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* O
 
 void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
 {
+	// Bulk clears can tear down streamed sub-level actors the user may have selected; drop the entire
+	// selection so the typed-element registry does not assert on a stale handle next mouse-move.
+	if (GEditor != nullptr)
+	{
+		GEditor->SelectNone(false, true, false);
+	}
+
 	for (int32 i = 0; i < KnownProxies.Num(); i++)
 	{
 		if (IsValid(KnownProxies[i]))
@@ -144,6 +152,13 @@ void UNWorldAssemblyEditorSubsystem::ClearGeneratedProxies(const uint32& Operati
 {
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
+		// Per-ticket clears can also tear down streamed sub-level actors the user may have selected;
+		// drop the entire selection so the typed-element registry does not assert next mouse-move.
+		if (GEditor != nullptr)
+		{
+			GEditor->SelectNone(false, true, false);
+		}
+
 		TArray<ANCellProxy*> ProxiesArray = *ProxyMap.Find(OperationTicket);
 		const int32 FoundCount = ProxiesArray.Num();
 		for (int32 i = 0; i < FoundCount; i++)

@@ -12,16 +12,19 @@
 class FNPassContext
 {
 public:
-	/** Transfer ownership of a completed graph into this pass context. */
-	void TakeGraph(TUniquePtr<FNAssemblyGraph> Graph)
+	/** Transfer ownership of a completed graph /tags into this pass context. */
+	void TakeOutput(TUniquePtr<FNAssemblyGraph> Graph, const FGameplayTagContainer& NewOutputTags)
 	{
-		FScopeLock Lock(&GraphsMutex);
+		FScopeLock Lock(&TakeOutputMutex);
+		
 		Graphs.Add(MoveTemp(Graph));
+		OutputTags.AppendTags(NewOutputTags);
 	}
 
 	/** Graphs accumulated from this collect pass. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
+	FGameplayTagContainer OutputTags;
 
 private:
-	FCriticalSection GraphsMutex;
+	FCriticalSection TakeOutputMutex;
 };

@@ -63,7 +63,8 @@ public:
 		PropagateDepth(DownstreamNode);
 	}
 	
-	FGameplayTagContainer& GetTags() { return Tags; }
+	FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
+	FGameplayTagContainer& GetOutputTags() { return OutputTags; }
 
 	/** Sever all upstream/downstream links between this node and Other, in both directions. */
 	void Disconnect(FNAssemblyGraphNode* Other)
@@ -95,7 +96,8 @@ protected:
 
 	TArray<FNAssemblyGraphNode*> UpstreamNodes;
 	TArray<FNAssemblyGraphNode*> DownstreamNodes;
-	FGameplayTagContainer Tags;
+	FGameplayTagContainer AssemblyTags;
+	FGameplayTagContainer OutputTags;
 
 private:
 	static void PropagateDepth(FNAssemblyGraphNode* Root)

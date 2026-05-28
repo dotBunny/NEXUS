@@ -37,7 +37,12 @@ namespace UnrealBuildTool.Rules
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
 			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker", "NexusUI"]);
 
-			ShortName = "NexusWorldAssembly";						
+			if (Target.bBuildEditor)
+			{
+				PrivateDependencyModuleNames.Add("UnrealEd");
+			}
+
+			ShortName = "NexusWorldAssembly";
 		}
 	}
 }

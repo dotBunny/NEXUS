@@ -236,11 +236,6 @@ void UNCellJunctionComponent::PostEditImport()
 	Details.InstanceIdentifier = -1;
 }
 
-void UNCellJunctionComponent::OnComponentDestroyed(bool bDestroyingHierarchy)
-{
-	N_WORLD_ICON_CLEANUP(bDestroyingHierarchy)
-}
-
 #endif // WITH_EDITOR
 
 void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)

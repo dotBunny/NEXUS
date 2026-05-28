@@ -22,7 +22,8 @@ void UNTissue::BuildTissueMap(UNTissue* Tissue, TMap<TObjectPtr<UNCell>, FNTissu
 		else
 		{
 			// We are going to combine the tags when we have an existing entry
-			FoundEntry->Tags.AppendTags(Entry.Tags);
+			FoundEntry->AssemblyTags.AppendTags(Entry.AssemblyTags);
+			FoundEntry->OutputTags.AppendTags(Entry.OutputTags);
 		}
 	}
 	

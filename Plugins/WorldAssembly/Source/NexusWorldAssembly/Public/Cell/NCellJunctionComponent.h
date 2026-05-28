@@ -76,8 +76,7 @@ public:
 	FLinearColor GetColor() const;
 
 #if WITH_EDITOR
-	
-	virtual void OnComponentDestroyed(bool bDestroyingHierarchy) override;
+
 	virtual void PostEditImport() override;
 	
 	FString GetJunctionName() const;

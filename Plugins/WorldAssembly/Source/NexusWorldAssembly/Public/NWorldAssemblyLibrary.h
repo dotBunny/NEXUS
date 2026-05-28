@@ -4,6 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Cell/NCellActor.h"
+#include "Cell/NCellLevelInstance.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Math/NSeedGenerator.h"
 #include "NWorldAssemblyLibrary.generated.h"
@@ -20,4 +22,10 @@ public:
 	/** @return A freshly generated human-friendly seed string suitable for use as FNAssemblyOperationSettings::Seed. */
 	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed")
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); }
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Output Tags (ANCellLevelInstance)")
+	static FGameplayTagContainer& GetOutputTagsFromCellLevelInstance(ANCellLevelInstance* LevelInstance)
+	{
+		return LevelInstance->GetOutputTags();
+	}
 };

@@ -31,12 +31,19 @@ public:
 	/** Transfer ownership of a built organ-graph into this context. */
 	void TakeGraph(TUniquePtr<FNAssemblyGraph> Graph)
 	{
-		FScopeLock Lock(&GraphsMutex);
+		FScopeLock Lock(&TakeGraphMutex);
 		Graphs.Add(MoveTemp(Graph));
 	}
 
+	void AddOutputTags(const FGameplayTagContainer& NewOutputTags)
+	{
+		OutputTags.AppendTags(NewOutputTags);
+	}
+	
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
+	
+	FGameplayTagContainer OutputTags;
 
 	/**
 	 * @param OutputWorld World to target when spawning proxies.
@@ -49,5 +56,5 @@ public:
 	FString ReportFilePath;
 	
 private:
-	FCriticalSection GraphsMutex;
+	FCriticalSection TakeGraphMutex;
 };

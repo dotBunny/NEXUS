@@ -15,6 +15,10 @@
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#endif // WITH_EDITOR
+
 namespace NEXUS::WorldAssembly::ConsoleCommands
 {
 	static FAutoConsoleCommand SnapshotToDisk(TEXT("N.WorldAssembly.Regenerate"),
@@ -66,6 +70,15 @@ void UNWorldAssemblySubsystem::Clear()
 			}
 		}
 	}
+
+#if WITH_EDITOR
+	// Bulk clears can tear down streamed sub-level actors the user may have selected; drop the entire
+	// selection so the typed-element registry does not assert on a stale handle next mouse-move.
+	if (GIsEditor && GEditor != nullptr)
+	{
+		GEditor->SelectNone(false, true, false);
+	}
+#endif // WITH_EDITOR
 
 	for (TActorIterator<ANCellProxy> It(GetWorld(), ANCellProxy::StaticClass()); It; ++It)
 	{

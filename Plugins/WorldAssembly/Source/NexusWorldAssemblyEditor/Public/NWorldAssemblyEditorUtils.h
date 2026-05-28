@@ -113,6 +113,8 @@ public:
 	 */
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
 
+	static void EnsureCellInitializedCallbackActors(const UWorld* World, ANCellActor* CellActor);
+	
 	/**
 	 * Refresh the cell asset from the supplied cell actor.
 	 * @return true if Cell was updated and marked dirty, false if there was nothing to copy.

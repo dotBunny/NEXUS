@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "NCellJunctionDetails.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
@@ -34,6 +35,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	//End ALevelInstance
 	
+	FGameplayTagContainer& GetOutputTags()
+	{
+		return OutputTags;
+	}
+	
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
@@ -57,6 +63,9 @@ protected:
 	/** The replicated identifier that created this ANCellLevelInstance on the server. */
 	UPROPERTY(Replicated)
 	uint32 OperationTicket = 0;
+	
+	UPROPERTY(Replicated)
+	FGameplayTagContainer OutputTags;
 	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
 	TArray<FNCellJunctionDetails> JunctionDetails;

@@ -5,6 +5,7 @@
 
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "EditorAssetLibrary.h"
+#include "EngineUtils.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NEditorUtils.h"
@@ -192,6 +193,25 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor,
 		// ReSharper disable once CppExpressionWithoutSideEffects
 		Cell->MarkPackageDirty();
 		UEditorAssetLibrary::SaveLoadedAsset(Cell);
+	}
+}
+
+void FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(const UWorld* World, ANCellActor* CellActor)
+{
+	TArray<TObjectPtr<AActor>> FoundActors;
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		AActor* Actor = *It;
+		if (IsValid(Actor) && Actor->Implements<UNCellInitialized>())
+		{
+			FoundActors.Add(Actor);
+		}
+	}
+	if (!FNArrayUtils::IsSameUnorderedValues<TObjectPtr<AActor>>(CellActor->InitializeCallbackActors, FoundActors))
+	{
+		CellActor->InitializeCallbackActors = FoundActors;
+		// ReSharper disable once CppExpressionWithoutSideEffects
+		CellActor->MarkPackageDirty();
 	}
 }
 

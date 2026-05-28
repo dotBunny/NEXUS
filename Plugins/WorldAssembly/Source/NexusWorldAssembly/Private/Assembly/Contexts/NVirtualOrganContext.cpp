@@ -51,25 +51,25 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		}
 		
 		// bFoundStarterTagged
-		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_Starter))
+		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Starter))
 		{
 			CellInputDataSummary.bFoundStarterTagged = true;
 		}
 		
 		// bFoundStarterOnlyTagged
-		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
 		{
 			CellInputDataSummary.bFoundStarterOnlyTagged = true;
 		}
 		
 		// bFoundFinisherTagged
-		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_Finisher))
+		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Finisher))
 		{
 			CellInputDataSummary.bFoundFinisherTagged = true;
 		}
 		
 		// bFoundFinisherOnlyTagged
-		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
 		{
 			CellInputDataSummary.bFoundFinisherOnlyTagged = true;
 		}
@@ -96,7 +96,8 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	for (const auto& Cell : TissueMap)
 	{
 		FNVirtualCellData CellDetails;
-		CellDetails.Tags = Cell.Value.Tags;
+		CellDetails.AssemblyTags = Cell.Value.AssemblyTags;
+		CellDetails.OutputTags = Cell.Value.OutputTags;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 		CellDetails.Weighting = Cell.Value.Weighting;
@@ -238,7 +239,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		if (Filter.bIsStartNode && (CellInputDataSummary.bFoundStarterTagged || CellInputDataSummary.bFoundStarterOnlyTagged))
 		{
 			// We had some tagged content specific to starting off
-			if (!CellData->Tags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CellData->Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+			if (!CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
 			{
 				// Didn't have what we were looking for
 				continue;
@@ -246,12 +247,12 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// Bail out from list if it is StarterOnly.
-		if (!Filter.bIsStartNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		if (!Filter.bIsStartNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
 		{
 			continue;
 		}
 		
-		if (Filter.bIsStartNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_NotStarter))
+		if (Filter.bIsStartNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_NotStarter))
 		{
 			continue;
 		}
@@ -262,7 +263,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		if (Filter.bIsEndNode && (CellInputDataSummary.bFoundFinisherTagged || CellInputDataSummary.bFoundFinisherOnlyTagged))
 		{
 			// We had some tagged content specific to ending off
-			if (!CellData->Tags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CellData->Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+			if (!CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
 			{
 				// Didn't have what we were looking for
 				continue;
@@ -270,18 +271,18 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// Bail out from list if it is FinisherOnly.
-		if (!Filter.bIsEndNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		if (!Filter.bIsEndNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
 		{
 			continue;
 		}
 		
-		if (Filter.bIsEndNode && CellData->Tags.HasTag(NWorldAssembly_BuiltIn_NotFinisher))
+		if (Filter.bIsEndNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_NotFinisher))
 		{
 			continue;
 		}
 		
 		// CHECK UNIQUE TAGS
-		if (PlacedTagGroups.HasAnyUniqueTags(CellData->Tags))
+		if (PlacedTagGroups.HasAnyUniqueTags(CellData->AssemblyTags))
 		{
 			continue;
 		}

@@ -86,8 +86,14 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 		Actor->Destroy(true, false);
 	}
 
-	// Callback
-	OnInitializedFromProxy.Broadcast();
+	// Code-callback
+	OnInitializedFromProxy.ExecuteIfBound(LevelInstance);
+	
+	// Level-based callback
+	for (auto Actor : InitializeCallbackActors)
+	{
+		INCellInitialized::Execute_OnInitializedFromProxy(Actor, LevelInstance);
+	}
 }
 
 void ANCellActor::CalculateBounds()

@@ -81,6 +81,7 @@ public:
 	FVector Origin;
 
 	FNTissueTagGroups PlacedTagGroups;
+	FGameplayTagContainer OutputTags;
 	
 	
 	/** Bones the builder will anchor the graph on. */

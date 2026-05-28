@@ -137,6 +137,10 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 
 	// We don't have a cell actor, get out of here!
 	if (CellActor == nullptr) return;
+	
+	// Ensure CellActor settings
+	FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(World, CellActor);
+	
 
 	// Create or get our package for the world
 	FNWorldAssemblyEditorUtils::SaveCell(World, CellActor);

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "INCellInitialized.h"
 #include "NCellRootComponent.h"
 #include "NCellActor.generated.h"
 
@@ -11,13 +12,12 @@ class UNCellJunctionComponent;
 class ANCellLevelInstance;
 
 /** Broadcast after InitializeFromProxy has finished applying data from a cell proxy. */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInitializedFromProxy);
-
+DECLARE_DELEGATE_OneParam(FOnInitializedFromProxy, ANCellLevelInstance* LevelInstance);
 /**
  * The persistent in-level representation of a cell.
  *
  * A cell actor is locked to its level's origin, hosts the UNCellRootComponent as its root, and owns the
- * map of junction components that define its connectivity.
+ * map of junction components that define its connectivity. 
  */
 UCLASS(NotPlaceable, HideDropdown, Hidden, ClassGroup = "NEXUS", DisplayName = "NEXUS | Cell Actor", HideCategories=(Tags, Activation, Cooking,
 	AssetUserData, Navigation, Actor, Input, LevelInstance, WorldPartition, DataLayers, Rendering, LOD, HLOD, Physics,
@@ -87,9 +87,9 @@ public:
 	 */
 	void InitializeFromProxy(ANCellLevelInstance* LevelInstance);
 
-	/** Broadcast after InitializeFromProxy completes, so Blueprints can react to post-spawn initialization. */
-	UPROPERTY(BlueprintAssignable)
+	/** Broadcast after InitializeFromProxy completes */
 	FOnInitializedFromProxy OnInitializedFromProxy;
+	
 	
 #if WITH_EDITOR
 	/** Purposely monitor for any sort of movement and reset it back to origin */
@@ -131,6 +131,9 @@ private:
 	/** This is something that needs to be turned off when we spawn */
 	UPROPERTY(EditInstanceOnly, Category="Cell Actor")
 	TArray<TObjectPtr<AActor>> AuthorTimeActors;
+
+	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")
+	TArray<TObjectPtr<AActor>> InitializeCallbackActors;
 
 	/** Reference to the paired UNCell data asset that stores derived cell data on disk. */
 	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")

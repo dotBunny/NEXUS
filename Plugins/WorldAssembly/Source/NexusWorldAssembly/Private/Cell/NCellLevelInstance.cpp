@@ -37,7 +37,9 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	// Special
 	FDoRepLifetimeParams Params;
 	Params.Condition = COND_InitialOnly;
+	
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OperationTicket, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OutputTags, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, JunctionDetails, Params);
 }
 

@@ -5,7 +5,6 @@
 
 #include "GameplayTagContainer.h"
 #include "NTissueTagGroups.h"
-#include "NWorldAssemblyGameplayTags.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
 
@@ -21,8 +20,11 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, DisplayName="Tags", meta = (Categories="NEXUS.WorldAssembly"))
-	FGameplayTagContainer Tags;
+	UPROPERTY(EditAnywhere, DisplayName="Behavior Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
+	FGameplayTagContainer AssemblyTags;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get applied to the output graph, used by gameplay generation systems for awareness and quick context."))
+	FGameplayTagContainer OutputTags;
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	UPROPERTY(EditAnywhere)

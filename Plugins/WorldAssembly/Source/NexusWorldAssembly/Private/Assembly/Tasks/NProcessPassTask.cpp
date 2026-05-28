@@ -34,6 +34,7 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 		
 		TaskGraphContextPtr->TakeGraph(MoveTemp(Graph));
 	}
+	TaskGraphContextPtr->AddOutputTags(PassContextPtr->OutputTags);
 	PassContextPtr->Graphs.Reset();
 	
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesFinish)

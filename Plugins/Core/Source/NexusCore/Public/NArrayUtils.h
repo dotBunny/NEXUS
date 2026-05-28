@@ -48,6 +48,27 @@ public:
 	}
 
 	/**
+	 * Compares two arrays for equality without regard to ordering. Assumes elements are unique within each array.
+	 * @param Left The first array to compare.
+	 * @param Right The second array to compare.
+	 * @return true if both arrays have the same length and contain the same set of elements.
+	 */
+	template<typename T>
+	FORCEINLINE static bool IsSameUnorderedValues(const TArray<T>& Left, const TArray<T>& Right)
+	{
+		if (Left.Num() != Right.Num())
+		{
+			return false;
+		}
+		const TSet<T> LeftSet(Left);
+		for (const T& Value : Right)
+		{
+			if (!LeftSet.Contains(Value)) return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Computes an order-independent hash derived from an array of pointers.
 	 * @param Elements The pointers whose hashes should be combined.
 	 * @return A 32-bit hash produced by XOR-combining each pointer's GetTypeHash value.

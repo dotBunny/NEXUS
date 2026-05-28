@@ -15,6 +15,11 @@
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "LevelInstance/LevelInstanceActor.h"
 
+#if WITH_EDITOR
+#include "Editor.h"
+#include "Selection.h"
+#endif // WITH_EDITOR
+
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	// TODO: Is the proxy sync option doable?
@@ -45,7 +50,7 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
-ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode, const bool bPreLoadLevel)
+ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode, const FGameplayTagContainer& OutputTags,const bool bPreLoadLevel)
 {
 
 	FActorSpawnParameters SpawnInfo;
@@ -63,6 +68,7 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationT
 	
 	// Straight application of settings
 	Proxy->OperationTicket = OperationTicket;
+	Proxy->OutputTags = OutputTags;
 	
 	// Context initialization
 	Proxy->InitializeFromCellNode(CellNode);
@@ -107,6 +113,8 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Replicated settings
 	LevelInstance->OperationTicket = OperationTicket;
+	LevelInstance->OutputTags = OutputTags;
+	
 	JunctionsData.GenerateValueArray(LevelInstance->JunctionDetails);
 	LevelInstance->FillJunctionData(); // this is really for the server
 	
@@ -202,14 +210,31 @@ void ANCellProxy::DestroyLevelInstance(const bool bUnregisterCellLevelInstance, 
 		{
 			FNWorldAssemblyRegistry::UnregisterCellLevelInstance(LevelInstance);
 		}
-		
+
 		// We are going to iterate the Actors and flag them to be ignored by the next generation
 		if (bTagActorsToIgnore)
 		{
 			TagActorsToIgnore();
 		}
-		
+
 #if WITH_EDITOR
+		// Drop any selection handles into this level instance / its components before destruction so
+		// the editor's typed-element registry does not assert on a stale handle next mouse-move.
+		if (GIsEditor && GEditor != nullptr)
+		{
+			if (USelection* ActorSelection = GEditor->GetSelectedActors())
+			{
+				ActorSelection->Deselect(LevelInstance);
+			}
+			if (USelection* ComponentSelection = GEditor->GetSelectedComponents())
+			{
+				for (UActorComponent* Component : LevelInstance->GetComponents())
+				{
+					ComponentSelection->Deselect(Component);
+				}
+			}
+		}
+
 		// Inflight loading currently
 		if (Subsystem->IsLoading(LevelInstance))
 		{
@@ -221,7 +246,7 @@ void ANCellProxy::DestroyLevelInstance(const bool bUnregisterCellLevelInstance, 
 		}
 #else
 		Subsystem->RequestUnloadLevelInstance(LevelInstance);
-#endif // WITH_EDITOR	
+#endif // WITH_EDITOR
 
 		LevelInstance->Destroy(true, false);
 		LevelInstance = nullptr;
