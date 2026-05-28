@@ -3,6 +3,7 @@
 
 #include "Assembly/Tasks/NAssemblyFinalizeTask.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "Containers/Ticker.h"
 
 
 FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperation, 
@@ -44,9 +45,20 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 
-	// Send the finalized shared data back to the operation for doings
-	// This usually means recording the spawned things somewhere, but also could be useful for triggering events.
-	Operation->FinishBuild(TaskGraphContextPtr);
-
-	// The operation at this point has been flagged as garbage, don't use it.
+	// Send the finalized shared data back to the operation for doings.
+	// Defer to next tick so FinishBuild never runs inside a named-thread pump triggered by
+	// a sync load / FlushRenderingCommands — ProcessEvent (e.g. relay Client_* RPCs) would
+	// assert if a PostLoad is still on the stack above us.
+	TWeakObjectPtr<UNAssemblyOperation> WeakOperation(Operation);
+	TSharedRef<FNAssemblyTaskGraphContext> ContextRef = TaskGraphContextPtr;
+	FTSTicker::GetCoreTicker().AddTicker(TEXT("NAssemblyFinalize"), 0.0f,
+		[WeakOperation, ContextRef](float) -> bool
+		{
+			if (UNAssemblyOperation* Op = WeakOperation.Get(); IsValid(Op))
+			{
+				Op->FinishBuild(ContextRef);
+				// The operation at this point has been flagged as garbage, don't use it.
+			}
+			return false;
+		});
 }
