@@ -18,6 +18,6 @@ class NEXUSWORLDASSEMBLY_API INCellInitialized
 {
 	GENERATED_BODY()
 public:
-	UFUNCTION(BlueprintNativeEvent, Category="NEXUS|World Assembly")
+	UFUNCTION(BlueprintNativeEvent, CallInEditor, Category="NEXUS|World Assembly")
 	void OnInitializedFromProxy(ANCellLevelInstance* CellLevelInstance);
 };

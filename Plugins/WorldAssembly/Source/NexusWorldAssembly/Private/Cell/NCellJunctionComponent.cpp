@@ -94,24 +94,31 @@ void UNCellJunctionComponent::OnRegister()
 	ANCellActor* Actor = FNWorldAssemblyUtils::GetCellActorFromLevel(Level);
 
 #if WITH_EDITOR
-	// Delay check for root component by a frame, and then will remove the frame after that if not found
-	TWeakObjectPtr WeakJunctionComponent(this);
-	Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
+	// Author-time validation: catch junctions placed into a level that has no cell root. Skipped for
+	// junctions streamed in as part of a cell level instance, where AddToWorld can chunk component
+	// registration across ticks and race this check.
+	if (!LevelInstance.IsValid())
 	{
-		if (!WeakJunctionComponent.IsValid()) return;
-		
-		const ULevel* Level = WeakJunctionComponent.Get()->GetComponentLevel();
-		const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
-		if (RootComponent == nullptr)
+		TWeakObjectPtr WeakJunctionComponent(this);
+		Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
 		{
-			UE_LOG(LogNexusWorldAssembly, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update."), *Level->GetName());
-			Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
+			if (!WeakJunctionComponent.IsValid()) return;
+
+			const ULevel* Level = WeakJunctionComponent.Get()->GetComponentLevel();
+			const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
+			if (RootComponent == nullptr)
 			{
-				if (!WeakJunctionComponent.IsValid()) return;
-				WeakJunctionComponent.Get()->DestroyComponent();
-			}));
-		}
-	}));
+				UE_LOG(LogNexusWorldAssembly, Error, TEXT("No UNCellRootComponent found for ULevel(%s); removing added UNCellJunctionComponent next update. [registered roots=%d]"),
+					*Level->GetPathName(),
+					FNWorldAssemblyRegistry::GetCellRootComponents().Num());
+				Level->GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateLambda([WeakJunctionComponent]()
+				{
+					if (!WeakJunctionComponent.IsValid()) return;
+					WeakJunctionComponent.Get()->DestroyComponent();
+				}));
+			}
+		}));
+	}
 	
 	if (Actor != nullptr && !Actor->WasSpawnedFromProxy())
 	{

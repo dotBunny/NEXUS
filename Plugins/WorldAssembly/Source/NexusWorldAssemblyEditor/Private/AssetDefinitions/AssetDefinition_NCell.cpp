@@ -140,7 +140,6 @@ void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPre
 	
 	// Ensure CellActor settings
 	FNWorldAssemblyEditorUtils::EnsureCellInitializedCallbackActors(World, CellActor);
-	
 
 	// Create or get our package for the world
 	FNWorldAssemblyEditorUtils::SaveCell(World, CellActor);

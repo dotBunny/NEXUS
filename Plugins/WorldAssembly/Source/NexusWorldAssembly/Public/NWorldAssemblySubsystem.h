@@ -89,6 +89,10 @@ public:
 	/** Fired when the last tracked operation finishes or is destroyed, i.e. when the tracked set transitions from non-empty to empty. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationsCompleted;
+	
+	/** Fired at the end of Clear() once tracked operations have been cancelled and all cell proxies in the world have been destroyed. */
+	UPROPERTY(BlueprintAssignable)
+	FNSimpleDynamicMulticastDelegate OnCleared;
 
 private:
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */

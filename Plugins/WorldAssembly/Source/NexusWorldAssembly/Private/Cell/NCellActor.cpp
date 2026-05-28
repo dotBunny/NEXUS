@@ -90,7 +90,7 @@ void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
 	OnInitializedFromProxy.ExecuteIfBound(LevelInstance);
 	
 	// Level-based callback
-	for (auto Actor : InitializeCallbackActors)
+	for (const auto& Actor : InitializeCallbackActors)
 	{
 		INCellInitialized::Execute_OnInitializedFromProxy(Actor, LevelInstance);
 	}

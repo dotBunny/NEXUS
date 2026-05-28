@@ -86,6 +86,9 @@ void UNWorldAssemblySubsystem::Clear()
 		Proxy->DestroyLevelInstance(true, true);
 		Proxy->Destroy();
 	}
+	
+	// Allow folks to subscribe for this event
+	OnCleared.Broadcast();
 }
 
 bool UNWorldAssemblySubsystem::IsReady()
