@@ -60,6 +60,8 @@ void UNWorldAssemblySubsystem::Generate(FNAssemblyOperationSettings& Settings)
 
 void UNWorldAssemblySubsystem::Clear()
 {
+	UWorld* World = GetWorld();
+	
 	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 	{
 		if (KnownOperations[i]->IsRunning())
@@ -80,12 +82,19 @@ void UNWorldAssemblySubsystem::Clear()
 	}
 #endif // WITH_EDITOR
 
-	for (TActorIterator<ANCellProxy> It(GetWorld(), ANCellProxy::StaticClass()); It; ++It)
+	for (TActorIterator<ANCellProxy> It(World, ANCellProxy::StaticClass()); It; ++It)
 	{
 		ANCellProxy* Proxy = *It;
 		Proxy->DestroyLevelInstance(true, true);
 		Proxy->Destroy();
 	}
+	
+	// Handle our track for cleanup
+	for (TObjectPtr<AActor> Actor : TrackedActorsForCleanup)
+	{
+		Actor->Destroy(true, false);
+	}
+	TrackedActorsForCleanup.Empty();
 	
 	// Allow folks to subscribe for this event
 	OnCleared.Broadcast();
@@ -104,6 +113,16 @@ bool UNWorldAssemblySubsystem::IsReady()
 	
 	// Client properly checking
 	return LocalRelay->IsReady();
+}
+
+void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
+{
+	TrackedActorsForCleanup.AddUnique(Actor);
+}
+
+void UNWorldAssemblySubsystem::UnregisterActorForCleanup(AActor* Actor)
+{
+	TrackedActorsForCleanup.Remove(Actor);
 }
 
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)

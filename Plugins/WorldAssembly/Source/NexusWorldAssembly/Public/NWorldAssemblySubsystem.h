@@ -56,6 +56,11 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady();
+	
+	UFUNCTION(BlueprintCallable)
+	void RegisterActorForCleanup(AActor* Actor);
+	UFUNCTION(BlueprintCallable)
+	void UnregisterActorForCleanup(AActor* Actor);
 
 	//~UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
@@ -99,6 +104,10 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<AActor>> TrackedActorsForCleanup;
+	
 	
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
 
