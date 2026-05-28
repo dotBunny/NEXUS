@@ -90,9 +90,12 @@ void UNWorldAssemblySubsystem::Clear()
 	}
 	
 	// Handle our track for cleanup
-	for (TObjectPtr<AActor> Actor : TrackedActorsForCleanup)
+	for (TWeakObjectPtr Actor : TrackedActorsForCleanup)
 	{
-		Actor->Destroy(true, false);
+		if (Actor.Get() != nullptr)
+		{
+			Actor.Get()->Destroy(true, false);
+		}
 	}
 	TrackedActorsForCleanup.Empty();
 	
@@ -263,6 +266,8 @@ void UNWorldAssemblySubsystem::Deinitialize()
 		OnLogoutHandle.Reset();
 	}
 	RelayMap.Reset();
+	TrackedActorsForCleanup.Empty();
+	
 	LocalRelay = nullptr;
 	
 	// Stop all known operations

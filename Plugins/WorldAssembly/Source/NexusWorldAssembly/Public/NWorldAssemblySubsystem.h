@@ -106,7 +106,7 @@ private:
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
 	
 	UPROPERTY()
-	TArray<TObjectPtr<AActor>> TrackedActorsForCleanup;
+	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
 	
 	
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
