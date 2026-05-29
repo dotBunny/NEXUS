@@ -23,7 +23,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get applied to the output graph, used by gameplay generation systems for awareness and quick context."))
+	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get accumulated and are made available post-assembly for context to other gameplay generation systems as well as INCellInitialized-implementors via the ANCellLevelInstance."))
 	FGameplayTagContainer OutputTags;
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
