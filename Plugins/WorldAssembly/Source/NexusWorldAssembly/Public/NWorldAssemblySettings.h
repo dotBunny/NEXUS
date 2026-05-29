@@ -55,18 +55,19 @@ public:
 		meta=(ToolTip="What is the size of the player's collider?"))
 	FVector PlayerSize = FVector(72.f, 184.f, 72.f);
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Mode")
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Mode",
+		meta=(ToolTip="How should ANCellLevelInstances be replicated to clients, either based on relevancy (proximity) or treated as always relevant."))
 	ENWorldAssemblyNetworkMode NetworkingMode = ENWorldAssemblyNetworkMode::ReplicatedLevelInstances;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Initial Range",
-	meta=(ToolTip="The range to query for nearby ANCellLevelInstances by ANWorldAssemblyRelay, used to determine if the client is considered loaded."))
+	meta=(ToolTip="The range to query for nearby ANCellLevelInstances by ANWorldAssemblyRelay, used to determine if the client is considered loaded. Distance is calculated to the world position point of the ANCellLevelInstance."))
 	float NetworkNearbyRange = 20000.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
 	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))
 	ENDirection OrganAutomaticBoneDirection = ENDirection::Backward;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction (Offset)",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction Offset",
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
@@ -75,8 +76,7 @@ public:
 		meta=(ToolTip="The maximum amount of bad starts that can occur before an assembly is considered a failure."))
 	int32 AssemblyBadStartLimit = 1000;
 	
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Assembly Retry Count",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
 	int32 AssemblyGenerationRetryCount = 10000;
 	
@@ -88,6 +88,7 @@ public:
 		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material")
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
+		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;
 };
