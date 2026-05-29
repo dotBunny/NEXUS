@@ -202,7 +202,7 @@ bool FNVirtualOrganContext::CheckGraph()
 	}
 	
 	// We need to check that each of the Required groups are met
-	if (CellInputDataSummary.GroupTags.HasRequiredTags() && !CellInputDataSummary.GroupTags.HasAllRequiredTags(PlacedTagGroups.GetRequiredTags()))
+	if (CellInputDataSummary.GroupTags.HasRequiredAnyTags() && !CellInputDataSummary.GroupTags.HasAllRequiredAnyTags(PlacedTagGroups.GetRequiredAnyTags()))
 	{
 		// Could log analytics about rejection based on required
 		return false;

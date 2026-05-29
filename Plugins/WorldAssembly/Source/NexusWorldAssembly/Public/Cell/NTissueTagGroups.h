@@ -13,12 +13,12 @@ struct FNTissueTagGroups
 {
 	GENERATED_BODY()
 
-	const FGameplayTagContainer& GetRequiredTags() { return RequiredTags; }
+	const FGameplayTagContainer& GetRequiredAnyTags() { return RequiredAnyTags; }
 	const FGameplayTagContainer& GetUniqueTags() { return UniqueTags; }
 	
-	bool HasRequiredTags() const
+	bool HasRequiredAnyTags() const
 	{
-		return !RequiredTags.IsEmpty();
+		return !RequiredAnyTags.IsEmpty();
 	}
 	
 	bool HasUniqueTags() const
@@ -37,14 +37,14 @@ struct FNTissueTagGroups
 		UniqueTags.RemoveTags(Tags);
 	}
 	
-	void RemoveRequiredTags(const FGameplayTagContainer& Tags)
+	void RemoveRequiredAnyTags(const FGameplayTagContainer& Tags)
 	{
-		RequiredTags.RemoveTags(Tags);
+		RequiredAnyTags.RemoveTags(Tags);
 	}
 	
-	void AppendRequiredTags(const FGameplayTagContainer& Tags)
+	void AppendRequiredAnyTags(const FGameplayTagContainer& Tags)
 	{
-		RequiredTags.AppendTags(Tags);
+		RequiredAnyTags.AppendTags(Tags);
 	}
 	
 	bool HasAnyUniqueTags(const FGameplayTagContainer& Tags) const
@@ -52,14 +52,14 @@ struct FNTissueTagGroups
 		return UniqueTags.HasAny(Tags);
 	}
 	
-	bool HasAnyRequiredTags(const FGameplayTagContainer& Tags) const
+	bool HasAnyRequiredAnyTags(const FGameplayTagContainer& Tags) const
 	{
-		return RequiredTags.HasAny(Tags);
+		return RequiredAnyTags.HasAny(Tags);
 	}
 	
-	bool HasAllRequiredTags(const FGameplayTagContainer& Tags) const
+	bool HasAllRequiredAnyTags(const FGameplayTagContainer& Tags) const
 	{
-		return RequiredTags.HasAllExact(Tags);
+		return RequiredAnyTags.HasAllExact(Tags);
 	}
 	
 	FGameplayTagContainer FilterUniqueTags(const FGameplayTagContainer& Tags) const
@@ -67,15 +67,15 @@ struct FNTissueTagGroups
 		return UniqueTags.Filter(Tags);
 	}
 	
-	FGameplayTagContainer FilterRequiredTags(const FGameplayTagContainer& Tags) const
+	FGameplayTagContainer FilterRequiredAnyTags(const FGameplayTagContainer& Tags) const
 	{
-		return RequiredTags.Filter(Tags);
+		return RequiredAnyTags.Filter(Tags);
 	}	
 	
 	void AppendTags(const FNTissueTagGroups& OtherTagGroup)
 	{
 		UniqueTags.AppendTags(OtherTagGroup.UniqueTags);
-		RequiredTags.AppendTags(OtherTagGroup.RequiredTags);
+		RequiredAnyTags.AppendTags(OtherTagGroup.RequiredAnyTags);
 	}
 	
 	void EnsureBaseTags()
@@ -84,18 +84,18 @@ struct FNTissueTagGroups
 		{
 			UniqueTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique));
 		}
-		if (!RequiredTags.HasTag(NWorldAssembly_BuiltIn_Required))
+		if (!RequiredAnyTags.HasTag(NWorldAssembly_BuiltIn_RequiredAny))
 		{
-			RequiredTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_Required));
+			RequiredAnyTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_RequiredAny));
 		}
 	}
 	
 protected:
 	UPROPERTY(EditAnywhere, DisplayName="Unique", meta = (Categories="NEXUS.WorldAssembly", 
-		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.BuiltIn.Unique is auto-added to this group. NOTE: If combined with Must Have, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.BuiltIn.Unique is auto-added to this group. NOTE: If combined with RequiredAny, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
 	FGameplayTagContainer UniqueTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Required", meta = (Categories="NEXUS.WorldAssembly", 
-		ToolTip="When a tag group is marked Must Have, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.Required is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
-	FGameplayTagContainer RequiredTags;
+	UPROPERTY(EditAnywhere, DisplayName="Required Any", meta = (Categories="NEXUS.WorldAssembly", 
+		ToolTip="When a tag group is marked Required Any, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.RequiredAny is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+	FGameplayTagContainer RequiredAnyTags;
 };
