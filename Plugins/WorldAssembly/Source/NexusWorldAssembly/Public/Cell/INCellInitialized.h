@@ -30,6 +30,7 @@ public:
 	/**
 	 * Called once the owning cell has been initialized from its proxy.
 	 * @param CellLevelInstance The level instance the cell was initialized from, providing post-assembly context.
+	 * @remark The callback occurs before the Cell's Actors have been positioned to their final world position. Anything involving accessing the placed World Position or World Rotation of an Actor should be done during or after BeginPlay.
 	 */
 	UFUNCTION(BlueprintNativeEvent, CallInEditor, Category="NEXUS|World Assembly")
 	void OnInitializedFromProxy(ANCellLevelInstance* CellLevelInstance);
