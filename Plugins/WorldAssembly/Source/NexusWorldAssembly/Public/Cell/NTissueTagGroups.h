@@ -95,7 +95,7 @@ protected:
 		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.BuiltIn.Unique is auto-added to this group. NOTE: If combined with RequiredAny, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
 	FGameplayTagContainer UniqueTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Required Any", meta = (Categories="NEXUS.WorldAssembly", 
-		ToolTip="When a tag group is marked Required Any, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.RequiredAny is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+	UPROPERTY(EditAnywhere, DisplayName="Required (Any)", meta = (Categories="NEXUS.WorldAssembly", 
+		ToolTip="When a tag group is marked RequiredAny, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.RequiredAny is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
 	FGameplayTagContainer RequiredAnyTags;
 };
