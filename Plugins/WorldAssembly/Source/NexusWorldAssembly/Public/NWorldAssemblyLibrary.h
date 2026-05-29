@@ -23,6 +23,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed")
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); }
 	
+	/**
+	 * Get the mutable output tags of a cell level instance.
+	 * @param LevelInstance The cell level instance whose output tags to retrieve.
+	 * @return A mutable reference to the level instance's output tag container.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Output Tags (ANCellLevelInstance)")
 	static FGameplayTagContainer& GetOutputTagsFromCellLevelInstance(ANCellLevelInstance* LevelInstance)
 	{
