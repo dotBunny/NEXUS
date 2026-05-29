@@ -15,6 +15,13 @@ FNCreateSpawnsTask::FNCreateSpawnsTask(
 
 void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	// Early out if we've already canceled it.
+	if (SpawnCellsContextPtr->bCancelled.Load())
+	{
+		CompletionGraphEvent->Unlock();
+		return;
+	}
+		
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextStart)
 	
 	// Iterate over all graphs that we have had generate
