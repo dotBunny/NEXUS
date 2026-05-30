@@ -15,10 +15,12 @@
 #include "NWorldAssemblyUtils.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetViewUtils.h"
+#include "Cell/NTissue.h"
 #include "ContentBrowserModule.h"
 #include "Factories/DataAssetFactory.h"
 #include "IContentBrowserSingleton.h"
 #include "Misc/DataValidation.h"
+#include "Misc/ScopedSlowTask.h"
 #include "UObject/ObjectSaveContext.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
@@ -49,6 +51,95 @@ namespace
 				UEditorAssetLibrary::DeleteAsset(SidecarPath);
 			}
 		}));
+	}
+
+	/** @return the full object path of the side-car asset within the given side-car package. */
+	FSoftObjectPath MakeSidecarObjectPath(const FString& SidecarPackage)
+	{
+		// The side-car object name matches its package short name (see GetOrCreatePackage), so the
+		// object path is "<Package>.<ShortName>".
+		const FString AssetName = FPackageName::GetShortName(SidecarPackage);
+		return FSoftObjectPath(FString::Printf(TEXT("%s.%s"), *SidecarPackage, *AssetName));
+	}
+
+	/** Pending old-cell -> new-cell side-car remaps accumulated across a rename batch. */
+	TMap<FSoftObjectPath, FSoftObjectPath> PendingTissueRepoints;
+
+	/**
+	 * Scan every UNTissue once and apply all pending cell-reference remaps, saving changed tissues.
+	 *
+	 * The cell side-car is delete+recreated on rename rather than truly renamed, so no redirector exists
+	 * for UE's reference fixup to follow — tissue TSoftObjectPtr<UNCell> entries are left dangling. We scan
+	 * the tissues directly (rather than GetReferencers on the deleted side-car, whose dependency data the
+	 * registry may already have dropped) and rewrite the soft paths ourselves. Renaming several cells at
+	 * once queues multiple remaps that this single deferred pass resolves together.
+	 */
+	void FlushTissueRepoints()
+	{
+		const TMap<FSoftObjectPath, FSoftObjectPath> Remaps = MoveTemp(PendingTissueRepoints);
+		PendingTissueRepoints.Reset();
+		if (Remaps.IsEmpty())
+		{
+			return;
+		}
+
+		const IAssetRegistry& AssetRegistry =
+			FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+
+		TArray<FAssetData> Tissues;
+		AssetRegistry.GetAssetsByClass(UNTissue::StaticClass()->GetClassPathName(), Tissues);
+		if (Tissues.IsEmpty())
+		{
+			return;
+		}
+
+		FScopedSlowTask SlowTask(static_cast<float>(Tissues.Num()),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissues", "Updating tissue cell references..."));
+		SlowTask.MakeDialog();
+
+		for (const FAssetData& TissueData : Tissues)
+		{
+			SlowTask.EnterProgressFrame(1.0f, FText::Format(
+				NSLOCTEXT("NexusWorldAssemblyEditor", "RepointTissuesItem", "Checking {0}"),
+				FText::FromName(TissueData.AssetName)));
+
+			UNTissue* Tissue = Cast<UNTissue>(TissueData.GetAsset());
+			if (Tissue == nullptr)
+			{
+				continue;
+			}
+
+			bool bChanged = false;
+			for (FNTissueEntry& Entry : Tissue->Cells)
+			{
+				if (const FSoftObjectPath* NewCell = Remaps.Find(Entry.Cell.ToSoftObjectPath()))
+				{
+					Entry.Cell = TSoftObjectPtr<UNCell>(*NewCell);
+					bChanged = true;
+				}
+			}
+
+			if (bChanged)
+			{
+				Tissue->MarkPackageDirty();
+				UEditorAssetLibrary::SaveLoadedAsset(Tissue, false);
+			}
+		}
+	}
+
+	/**
+	 * Queue a cell remap and ensure a single deferred FlushTissueRepoints is scheduled for the batch.
+	 * The first call of a batch arms the next-tick flush; subsequent calls only add to the map, so
+	 * renaming N cells results in one tissue scan rather than N.
+	 */
+	void QueueTissueRepoint(const FSoftObjectPath& OldCell, const FSoftObjectPath& NewCell)
+	{
+		const bool bAlreadyScheduled = !PendingTissueRepoints.IsEmpty();
+		PendingTissueRepoints.Add(OldCell, NewCell);
+		if (!bAlreadyScheduled)
+		{
+			GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda(&FlushTissueRepoints));
+		}
 	}
 }
 
@@ -153,10 +244,17 @@ void UAssetDefinition_NCell::OnAssetRenamed(const FAssetData& AssetData, const F
 	// mount-point-qualified (e.g. /Game/Cells/CELL_Foo_NCell) rather than a bare short name. This
 	// mirrors how OnAssetRemoved derives the path from the full package name.
 	const FString OldPackage = FPackageName::ObjectPathToPackageName(String);
+	const FString OldSidecarPackage = GetCellPackagePath(OldPackage);
+	const FString NewSidecarPackage = GetCellPackagePath(AssetData.PackageName.ToString());
+
+	// Queue a tissue cell-reference remap from the old side-car path to the new one. Deferred for the
+	// same reason as the delete: saving packages from inside the rename broadcast is unsafe. Renaming
+	// several cells at once coalesces into a single tissue scan via FlushTissueRepoints.
+	QueueTissueRepoint(MakeSidecarObjectPath(OldSidecarPackage), MakeSidecarObjectPath(NewSidecarPackage));
 
 	// Delete the old side-car (a new one is created during the resave under the new name). Deferred —
 	// see ScheduleSidecarDelete for why this must not run synchronously inside the rename broadcast.
-	ScheduleSidecarDelete(GetCellPackagePath(OldPackage));
+	ScheduleSidecarDelete(OldSidecarPackage);
 }
 
 void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPreSaveContext ObjectPreSaveContext)
