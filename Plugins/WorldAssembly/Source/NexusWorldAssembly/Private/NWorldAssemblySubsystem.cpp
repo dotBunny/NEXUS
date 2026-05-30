@@ -21,7 +21,7 @@
 
 namespace NEXUS::WorldAssembly::ConsoleCommands
 {
-	static FAutoConsoleCommand SnapshotToDisk(TEXT("N.WorldAssembly.Regenerate"),
+	static FAutoConsoleCommand WorldAssemblyRegenerate(TEXT("N.WorldAssembly.Regenerate"),
 		TEXT("Regenerates all Organs in a given world, clearing the previous generation."),
 		FConsoleCommandDelegate::CreateLambda([]
 		{
@@ -45,6 +45,30 @@ namespace NEXUS::WorldAssembly::ConsoleCommands
 				else
 				{
 					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to regenerate the world as you do not have authority."));
+				}
+			});
+		}));
+	static FAutoConsoleCommand WorldAssemblyClear(TEXT("N.WorldAssembly.Clear"),
+		TEXT("Clears the previous generation and any registered cleanup actors."),
+		FConsoleCommandDelegate::CreateLambda([]
+		{
+			AsyncTask(ENamedThreads::GameThread, []
+			{
+				UWorld* World = FNWorldUtils::GetGameWorld();
+				if (World == nullptr)
+				{
+					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to clear the world, as the world was NULL."));
+					return;
+				}
+				
+				if (FNMultiplayerUtils::HasWorldAuthority(World))
+				{
+					UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(World);
+					System->Clear();
+				}
+				else
+				{
+					UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to clear the world as you do not have authority."));
 				}
 			});
 		}));

@@ -12,6 +12,7 @@
 - `NGuardian` now supports automatically setting its baseline after a defined period (default 15 seconds).
 - `NCell` side-car data file now has an action button, that when clicked in the Content Browser will select the source world/level. 
 - `FGameplayTag` support to `NDynamicRefs`.
+- `Generate` and `Cleanup` console commands for `UNWordAssemblySubsystem`.
 
 ### Changed
 
