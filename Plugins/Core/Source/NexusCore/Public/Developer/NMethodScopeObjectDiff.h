@@ -18,7 +18,7 @@ class NEXUSCORE_API FNMethodScopeObjectDiff
 {
 public:
 	/**
-	 * Captures a baseline UObject snapshot labelled with InName.
+	 * Captures a baseline UObject snapshot labeled with InName.
 	 * @param InName Human-readable label included in the destructor log line.
 	 */
 	explicit FNMethodScopeObjectDiff(const FString& InName) : Name(InName), StartSnapshot(FNObjectSnapshotUtils::Snapshot())

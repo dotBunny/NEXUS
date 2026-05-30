@@ -121,7 +121,7 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#spawn"))
 	void Spawn(bool bIgnoreSpawningFlag = false);
 
-	/** Disables the component's internal flag to stop any spawning from occuring. */
+	/** Disables the component's internal flag to stop any spawning from occurring. */
 	UFUNCTION(BlueprintCallable, DisplayName="Disable Spawning", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-spawner-component/#disable-spawning"))
 	void DisableSpawning()
