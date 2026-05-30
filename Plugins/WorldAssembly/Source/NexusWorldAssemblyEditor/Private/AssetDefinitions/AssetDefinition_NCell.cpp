@@ -4,7 +4,9 @@
 #include "AssetDefinitions/AssetDefinition_NCell.h"
 #include "AssetToolsModule.h"
 #include "AssetViewUtils.h"
+#include "Editor.h"
 #include "EditorAssetLibrary.h"
+#include "TimerManager.h"
 #include "IAssetTools.h"
 #include "Cell/NCellActor.h"
 #include "NEditorDefaults.h"
@@ -20,6 +22,35 @@
 #include "UObject/ObjectSaveContext.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
+
+namespace
+{
+	/**
+	 * Queue a side-car package for deletion on the next editor tick.
+	 *
+	 * Both OnAssetRemoved and OnAssetRenamed can fire while the engine is still unwinding an asset
+	 * rename/delete (a rename is internally a create-new + delete-old). UEditorAssetLibrary::DeleteAsset
+	 * runs CollectGarbage, so calling it synchronously from those broadcasts can free the very package
+	 * the engine's CleanupAfterSuccessfulDelete loop is mid-iteration over, leaving FUnsavedAssetsTracker
+	 * with a stale UPackage* that crashes in GetPathName. Deferring moves the delete (and its GC) out of
+	 * that call stack entirely.
+	 */
+	void ScheduleSidecarDelete(const FString& SidecarPath)
+	{
+		if (!FPackageName::DoesPackageExist(SidecarPath))
+		{
+			return;
+		}
+
+		GEditor->GetTimerManager()->SetTimerForNextTick(FTimerDelegate::CreateLambda([SidecarPath]()
+		{
+			if (FPackageName::DoesPackageExist(SidecarPath))
+			{
+				UEditorAssetLibrary::DeleteAsset(SidecarPath);
+			}
+		}));
+	}
+}
 
 TConstArrayView<FAssetCategoryPath> UAssetDefinition_NCell::GetAssetCategories() const
 {
@@ -107,11 +138,7 @@ void UAssetDefinition_NCell::OnAssetRemoved(const FAssetData& AssetData)
 		return;
 	}
 
-	if (const FString SidecarPath = GetCellPackagePath(AssetData.PackageName.ToString());
-		FPackageName::DoesPackageExist(SidecarPath))
-	{
-		UEditorAssetLibrary::DeleteAsset(SidecarPath);
-	}
+	ScheduleSidecarDelete(GetCellPackagePath(AssetData.PackageName.ToString()));
 }
 
 void UAssetDefinition_NCell::OnAssetRenamed(const FAssetData& AssetData, const FString& String)
@@ -121,14 +148,15 @@ void UAssetDefinition_NCell::OnAssetRenamed(const FAssetData& AssetData, const F
 	{
 		return;
 	}
-	
-	const FString OldPath = FPackageName::GetShortName(String);
-	if (const FString SidecarPath = GetCellPackagePath(OldPath);
-		FPackageName::DoesPackageExist(SidecarPath))
-	{
-		// We need to delete the old asset as a new asset will have been created during the resave.
-		UEditorAssetLibrary::DeleteAsset(SidecarPath);
-	}
+
+	// String is the old object path; resolve it back to the old package so the side-car path is
+	// mount-point-qualified (e.g. /Game/Cells/CELL_Foo_NCell) rather than a bare short name. This
+	// mirrors how OnAssetRemoved derives the path from the full package name.
+	const FString OldPackage = FPackageName::ObjectPathToPackageName(String);
+
+	// Delete the old side-car (a new one is created during the resave under the new name). Deferred —
+	// see ScheduleSidecarDelete for why this must not run synchronously inside the rename broadcast.
+	ScheduleSidecarDelete(GetCellPackagePath(OldPackage));
 }
 
 void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPreSaveContext ObjectPreSaveContext)

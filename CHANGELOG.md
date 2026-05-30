@@ -12,7 +12,7 @@
 - `NGuardian` now supports automatically setting its baseline after a defined period (default 15 seconds).
 - `NCell` side-car data file now has an action button, that when clicked in the Content Browser will select the source world/level. 
 - `FGameplayTag` support to `NDynamicRefs`.
-- `Generate` and `Cleanup` console commands for `UNWordAssemblySubsystem`.
+- `Generate` and `Cleanup` console commands for `UNWordAssemblySubsystem`.ing on
 
 ### Changed
 
@@ -72,6 +72,7 @@
 - `INActorPoolItem` now handles invocation during teardown gracefully.
 - `FNMersenneTwister::VectorNormalized` now provides `-1` to `1` component values.
 - `UNTextRenderComponent` now guards away from visuals on Dedicated Servers, but still replicates data to clients.
+- Deferred deletion of sidecar `NCell` data asset to next tick when renaming, speculative crash fix.
 
 ### Removed
 
