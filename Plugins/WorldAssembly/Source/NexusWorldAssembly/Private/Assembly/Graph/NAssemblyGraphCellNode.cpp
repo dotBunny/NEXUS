@@ -144,10 +144,6 @@ void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGr
 		return;
 	}
 	
-	if (InputDataPtr != nullptr)
-	{
-		InputDataPtr->UsedCount++;
-	}
 	FreeJunctionKeys.Remove(JunctionKey);
 	Links.Add(JunctionKey, Node);
 }
@@ -172,10 +168,6 @@ void FNAssemblyGraphCellNode::UnlinkJunction(const int32 JunctionKey)
 		return;
 	}
 	
-	if (InputDataPtr != nullptr)
-	{
-		InputDataPtr->UsedCount--;
-	}
 	Links.Remove(JunctionKey);
 	FreeJunctionKeys.Add(JunctionKey);
 }

@@ -28,6 +28,15 @@ FNAssemblyGraph::~FNAssemblyGraph()
 
 void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 {
+	// A cell instance begins when its node joins the graph. Counting here (rather than per-junction in
+	// LinkJunction) keeps UsedCount aligned with placed instances, not junction connections.
+	if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+	{
+		if (FNVirtualCellData* InputData = static_cast<FNAssemblyGraphCellNode*>(Node)->GetInputDataPtr())
+		{
+			InputData->UsedCount++;
+		}
+	}
 
 	Nodes.Add(Node);
 	Node->NodeID = Ticket++;
@@ -35,6 +44,15 @@ void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 
 void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)
 {
+	// Mirror of RegisterNode: the instance ends when the node leaves the graph.
+	if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+	{
+		if (FNVirtualCellData* InputData = static_cast<FNAssemblyGraphCellNode*>(Node)->GetInputDataPtr())
+		{
+			InputData->UsedCount--;
+		}
+	}
+
 	Nodes.Remove(Node);
 }
 
