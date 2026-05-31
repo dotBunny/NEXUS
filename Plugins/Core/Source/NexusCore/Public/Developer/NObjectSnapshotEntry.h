@@ -12,7 +12,9 @@
  * Stores the minimum identifying information needed to recognize the same object in a later
  * snapshot (pointer, serial number, names) alongside a few flags that are useful for leak
  * diagnosis (root-set membership, garbage flag, ref count). Diff logic (see FNObjectSnapshotUtils)
- * uses IsEqual() to decide whether two entries refer to the same object.
+ * keys entries by ObjectPtr; because TWeakObjectPtr identity is the object's index and serial
+ * number, that key already distinguishes objects (and survives garbage collection) without a
+ * separate serial-number comparison.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNObjectSnapshotEntry
@@ -50,24 +52,6 @@ struct NEXUSCORE_API FNObjectSnapshotEntry
 			FullName = FString::Printf(TEXT("NULL [%i:%i]"), Item.GetClusterIndex(), Item.GetSerialNumber());;
 			ObjectPtr = nullptr;
 		}
-	}
-
-	/**
-	 * Tests whether two entries describe the same UObject.
-	 * @param Other The entry to compare against.
-	 * @return true when both entries share a pointer or a serial number.
-	 * @note Uses pointer identity first and falls back to serial number when pointers are unavailable.
-	 */
-	bool IsEqual(const FNObjectSnapshotEntry& Other) const
-	{
-		// Pointer check
-		if (ObjectPtr != nullptr && Other.ObjectPtr != nullptr && ObjectPtr == Other.ObjectPtr)
-		{
-			return true;
-		}
-
-		// Check serial next?
-		return SerialNumber == Other.SerialNumber;
 	}
 
 	/** True when the object was on the engine root set at snapshot time. */
