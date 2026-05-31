@@ -113,6 +113,20 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
+bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
+	return false;
+}
+
+bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that both LeftMesh and RightMesh have had a transform applied to it and are in worldspace
+	return false;
+}
+
 float FNRawMeshUtils::GetIntersectDepth(
 	const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 	const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation,
@@ -223,6 +237,20 @@ float FNRawMeshUtils::GetIntersectDepth(
 	return MaxDepth;
 }
 
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation, float EarlyExitDepth)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
+	return -1.f;
+}
+
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, float EarlyExitDepth)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that both LeftMesh and RightMesh has had a transform applied to them are is in worldspace
+	return -1.f;
+}
+
 float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition, float EarlyExitDepth)
 {
 	if (LeftMesh.HasBounds())
@@ -247,6 +275,13 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector
 
 	const FVector LeftLocal = LeftRotation.Quaternion().Inverse().RotateVector(WorldPosition - LeftOrigin);
 	return ComputePointDepthInside(LeftMesh, LeftLocal);
+}
+
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
+	return -1.f;
 }
 
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
@@ -657,6 +692,20 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	return false;
 }
 
+bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that LeftMesh has had a transform applied to it already and is worldspace
+	return false;
+}
+
+bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that both LeftMesh and RightMesh have had a transform applied to it and are now in worldspace
+	return false;
+}
+
 bool FNRawMeshUtils::CanUseSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
 {
 	// Empirical cap. SAT face/edge counts grow with FaceLoops.Num(); the worst-case (overlap) cost
@@ -760,4 +809,18 @@ bool FNRawMeshUtils::DoesConvexIntersectSAT(
 	//    "no enclosure via containment fallback" — the correct "no overlap" answer for that
 	//    configuration. See the function-level doc comment for the safety argument.
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
+}
+
+bool FNRawMeshUtils::DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
+	return false;
+}
+
+bool FNRawMeshUtils::DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
+{
+	// TODO: Implement 0.3.5 release
+	// The assumption is that both LeftMesh and RightMesh have had a transform applied them both and are in worldspace
+	return false;
 }

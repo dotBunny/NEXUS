@@ -139,6 +139,8 @@ struct NEXUSCORE_API FNRawMesh
 	 * Cached non-triangle-loop flag. Lazily re-evaluated on first read after a mutator marks validation dirty.
 	 */
 	bool HasNonTris() const { EnsureValidated(); return bHasNonTris; }
+	
+	bool HasAppliedTransform() const { return bHasAppliedTransform; }
 
 	/**
 	 * Marks the cached convexity / non-tri / bounds flags stale so the next IsConvex / HasNonTris /
@@ -165,6 +167,7 @@ struct NEXUSCORE_API FNRawMesh
 		return bIsConvex == Other.bIsConvex
 			&& bHasNonTris == Other.bHasNonTris
 			&& bHasBounds == Other.bHasBounds
+			&& bHasAppliedTransform == Other.bHasAppliedTransform
 			&& bIsChaosGenerated == Other.bIsChaosGenerated
 			&& Center == Other.Center
 			&& Bounds == Other.Bounds
@@ -195,6 +198,43 @@ struct NEXUSCORE_API FNRawMesh
 			NewBounds += Vertices[i];
 		}
 		Center = Quat.RotateVector(Center - WorldPoint) + WorldPoint;
+		Bounds = NewBounds;
+		bHasBounds = (Count > 0);
+		InvalidateCachedFacePlanes();
+		InvalidateValidation();
+	}
+	
+	/**
+	 * Bakes a full transform (translation, rotation, scale) into every vertex and the center, then
+	 * refreshes Bounds from the transformed vertices. No-op when Transform is the identity.
+	 * @param Transform Transform to apply to the mesh, in vertex space.
+	 */
+	void ApplyTransform(const FTransform& Transform)
+	{
+		bHasAppliedTransform = true;
+		if (Transform.Equals(FTransform::Identity)) return;
+
+		FBox NewBounds(ForceInit);
+		const int32 Count = Vertices.Num();
+		FVector CenterCalc;
+		
+		for (int32 i = 0; i < Count; i++)
+		{
+			Vertices[i] = Transform.TransformPosition(Vertices[i]);
+			NewBounds += Vertices[i];
+			CenterCalc += Vertices[i];
+		}
+		
+		// Ensure that we never divide by zero
+		if (Vertices.Num() > 0)
+		{
+			Center = CenterCalc / Vertices.Num();
+		}
+		else
+		{
+			Center = FVector::ZeroVector;
+		}
+		
 		Bounds = NewBounds;
 		bHasBounds = (Count > 0);
 		InvalidateCachedFacePlanes();
@@ -252,7 +292,7 @@ struct NEXUSCORE_API FNRawMesh
 	 * want eager evaluation (typically factory methods finishing mesh construction).
 	 * @note Skipped for meshes marked as Chaos-generated, since those are trusted to already be tri-based and valid.
 	 */
-	void Validate()
+	void Validate() const
 	{
 		bValidationDirty = true;
 		EnsureValidated();
@@ -346,6 +386,9 @@ private:
 	 * InvalidateValidation() after touching Loops or Vertices.
 	 */
 	mutable bool bValidationDirty = false;
+	
+	UPROPERTY(VisibleAnywhere)
+	mutable bool bHasAppliedTransform = false;
 
 	/**
 	 * Transient face-plane cache derived from Loops + Vertices. Not serialized; rebuilt on demand

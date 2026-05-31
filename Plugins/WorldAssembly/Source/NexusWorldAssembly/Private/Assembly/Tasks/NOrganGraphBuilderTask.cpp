@@ -34,9 +34,13 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
 	
 	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
+	
+	// TODO: Feels like we can also make the world collision meshes origin based
 	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
 	WorldCollisionLocations = WorldContextPtr->WorldCollisionMeshLocations;
 	WorldCollisionRotations = WorldContextPtr->WorldCollisionMeshRotations;
+	
+	// TODO: Once existing are baked we would just store the mesh (no rotation/location)
 	ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
 	ExistingNodeCollisionLocations = WorldContextPtr->NodeCollisionMeshLocations;
 	ExistingNodeCollisionRotations = WorldContextPtr->NodeCollisionMeshRotations;
