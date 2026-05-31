@@ -1,5 +1,94 @@
 # Changelog
 
+## [0.3.0] - 2026-05-31
+
+### Added
+
+- `FNDeveloperUtils` and `UNDeveloperLibrary` now have `IsBuildDemo()` methods to support `IS_BUILD_DEMO` definitions from build targets.
+- Pickers all now have a `Twisted` method to support passing a `FNMersenneTwister`.
+- `ANDebugPointActor` for quick point debugging.
+- `NexusCore`, `NDynamicRefs`, `NGuardian`, `NUI` all have Unit and Performance-based testing.
+- `NValidationMacros` to support providing easy to use validation for Blueprint-facing methods.
+- `NGuardian` now supports automatically setting its baseline after a defined period (default 15 seconds).
+- `NCell` side-car data file now has an action button, that when clicked in the Content Browser will select the source world/level. 
+- `FGameplayTag` support to `NDynamicRefs`.
+- `Generate` and `Cleanup` console commands for `UNWordAssemblySubsystem`.ing on
+
+### Changed
+
+- Performance tests now use automation latent commands to attempt to stabalize the world prior to running tests.
+- Block meshes now end in `_0` suffix to make auto-incrementing cleaner in map placement.
+- `ANSamplesPawn` now replicates movement.
+- Synthetic graph navigation has been expanded to being a synthetic-ish event and now works with every asset editor.
+- `NActorPool` tests now run in PIE worlds.
+- Forces `ANPooledActor` to be `abstract`.
+- Updated project-wide to enforcing `American English` for spelling.
+- `FNActorPool::DoesSupportInterface` renamed to `FNActorPool::ImplementsPoolItemInterface`
+- `FNActorPool::HasInvokeUFunctionFlag` renamed to `FNActorPool::ShouldInvokeUFunctions`
+- `FNActorPool::GetInCount` renamed to `FNActorPool::GetAvailableCount`
+- `FNActorPool::GetOutCount` renamed to `FNActorPool::GetSpawnedCount`
+- `UNActorPoolObject::DoesSupportInterface` renamed to `UNActorPoolObject::ImplementsPoolItemInterface`
+- `UNActorPoolObject::HasInvokeUFunctionFlag` renamed to `UNActorPoolObject::ShouldInvokeUFunctions`
+- `UNActorPoolObject::GetInCount` renamed to `UNActorPoolObject::GetAvailableCount`
+- `UNActorPoolObject::GetOutCount` renamed to `UNActorPoolObject::GetSpawnedCount`
+- All `int` now replaced with `int32` to be explicit.
+- `NGuardianSubsystem` now does writing of reports using async tasks.
+- `FNActorPool::OnDestroyedByActorPool` to `FNActorPool::OnReleasedFromActorPool` to better reflect actual doing
+- `UNKillZoneComponent::UnknownBehaviour` to define behavior when an AActor is not known or able to be processed.
+- `FNActorPool` preallocates more appropriately for its In/Out arrays.
+- Started using pattern in Widgets where `BindWidget` members are validated in `NativeConstructor` only.
+- Moved `Multiplayer Test` into `NexusTooling`.
+- Renamed `NEXUS: ProcGen` plugin to `NEXUS: World Assembly` (`NexusProcGen` → `NexusWorldAssembly`, `NexusProcGenSamples` → `NexusWorldAssemblySamples`, `NProcGen*` class prefix → `NWorldAssembly*`). `CoreRedirects` in `DefaultEngine.ini` handle package + class renames so existing assets continue to load.
+- `FNLevelUtils::DetermineLevelBounds` now by default ignores transient actors, but has an option to include them.
+- DynamicRef Overlay now just holds WeakPtrs to the objects.
+- NGuardian system now has a tick rate configurable in settings (defaults to 1s).
+- When a thumbnail is captured for the NCell in the level editor, it now propogates to the NCell side-car data file as well (but with data visible in the thumbnail)
+- `FNObjectSnapshotUtils::Diff` now uses a consumed model to calculate changes (no more copying of entries around)
+- `FNOrganGraphBuilderTask` now uses a frontier model to create a node-based graph.
+- `NPoseAssetFixer` now prompts with a total number of Pose Assets its about to operate on allowing for cancelling; will not prompt in commandlet.
+- `NEXUS.WorldAssembly.BuiltIn.Unique` and `NEXUS.WorldAssembly.BuiltIn.MustHave` tags automatically applied to respective groups.
+
+### Fixed
+
+- `UNEditorUtilityWidget::DelayedConstructTask` no longer divides by a zero geometry size when the widget hasn't been laid out yet, which previously left `UnitScale` as NaN/inf.
+- `FNDrawDebugHelpers::DrawString`, `FNPrimitiveFont::DrawPDI`, and `FNPrimitiveFont::DrawBatchString` now take the string as `const FString&`, allowing literals and rvalues to be passed.
+- `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
+- `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
+- Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.
+- Fixed `FNSpherePicker` scenarios where points could be ever-so-slightly out of the `MaximumRadius`.
+- `FNRawMesh::CreateDynamicMesh` no longer crashes on non-triangle based meshes, now returns default and errors.
+- NDynamicRefs events fired when removing object from the fast-path when it was not actually previously added.
+- `FNEditorUtils::DisallowConfigFileFromStaging` and `FNEditorUtils::AllowConfigFileForStaging` now properly use the project name.
+- `FNActorPool` now properly marks created `AActor` as root-object.
+- `UNActorPoolSubsystem` will no longer crash returning null actors, and returns false when the actor is destroyed, as it doesnt get returned to the pool.
+- `UNMultiplayerTestSubsystem` now concretely shutdown process handles, not relying on natural causes.
+- `UNActorPoolSubsystem` crash where a tickable `FNActorPool` gets invoked during world teardown.
+- `FNActorPool` crash when applying settings where `UWorld` does not exist.
+- `FNActorPool` crash when dealing with MaximumActorCount=0, now minimum of 1.
+- `FNActorPool::Return` now rejects actors whose class does not match the pool's `Template`, and rejects actors already present in the pool (non-Shipping builds only) — previously these would silently pollute `InActors` or be handed back twice from subsequent `Get()`/`Spawn()` calls.
+- `FNRawMesh` crash when calculating center with no verticies.
+- `FNActorPool` protect against the odd change that an actor is requsted and needs to be created when the pools world is being torn down.
+- `FNActorPool` spawning with designated rotation now properly applies.
+- `INActorPoolItem` now handles invocation during teardown gracefully.
+- `FNMersenneTwister::VectorNormalized` now provides `-1` to `1` component values.
+- `UNTextRenderComponent` now guards away from visuals on Dedicated Servers, but still replicates data to clients.
+- Deferred deletion of sidecar `NCell` data asset to next tick when renaming, speculative crash fix.
+- `FNMersenneTwister` now is cross-platform guaranteed, regardless of compiler to produce same results.
+
+### Removed
+
+- `Server_*` variant methods on `NTextRenderComponent` streamlining method calls; use `Set*` methods directly.
+
+### Core Redirects
+
+```ini
+[CoreRedirects]                                                  
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorOperationalState",ValueChanges=(("Destroyed","Released")))                                                                              
++EnumRedirects=(OldName="/Script/NexusActorPools.ENActorPoolFlags",ValueChanges=(("BroadcastDestroy","BroadcastRelease")))
++ClassRedirects=(OldName="/Script/NexusMultiplayer.UNMultiplayerLibrary",NewName="/Script/NexusCore.UNMultiplayerLibrary")
++ClassRedirects=(OldName="/Script/NexusMultiplayer.UNTextRenderComponent",NewName="/Script/NexusUI.UNTextRenderComponent")
+```
+
 ## [0.2.7] - 2026-02-22
 
 ### Added
@@ -7,14 +96,14 @@
 - `ANSamplesLevelActor` now has `bShowLevelName` and `bShowLogo` properties to control whether the level name and logo are shown.
 - `ANSamplesDisplayActor` title settings now has `bShowTitleHorizontalRule` allowing for the title to be drawn with or without a horizontal rule.
 - `ANSamplesDisplayActor` title settings now has `TitleTextPadding` allowing for the title to have some padding from the edges.
-- `Window > Log > Clean Logs Folder` will remove much of the chaffe in the projects saved/logs folder.
+- `Window > Log > Clean Logs Folder` will remove much of the chaff in the projects saved/logs folder.
 - `NexusPicker` distributions now support finding the nearest point on a NavMesh (V1) via projection mode, with `FNPickerUtils::NavQueryExtent` controlling the distance from the NavMesh volume projectable.
 - `FNOrientedBoxPicker` for generating points in a box with rotation.
 - `FNEditorSlateUtils` and `FNSlateUtils`.
 - [#117](https://github.com/dotBunny/NEXUS/issues/117)`Collision Visualizer` added to `Tools -> Debug`.
 - [#120](https://github.com/dotBunny/NEXUS/issues/120) `FNArcPicker` for generating points in an arc distribution.
 - [#70](https://github.com/dotBunny/NEXUS/issues/70) Add `Create Actor Pool Set` button to `UNActorPoolsEditorUtilityWidget` to create an `UNActorPoolSet` based on the currently found pools in **PIE**. 
-- `Invoke UFunctions` flag to `UNActorPoolSettings` to enable `UFUNCTION` invoking on non-interfaced `AActors`, specifically invoking `OnCreatedByActorPool`, `OnSpawnedFromActorPool`, `OnReturnToActorPool`, and `OnDestroyedByActorPool` (when enabled) named `UFUNCTION` on the `AActor` if it does not implement the `INActorPoolItem` interface..
+- `Invoke UFunctions` flag to `UNActorPoolSettings` to enable `UFUNCTION` invoking on non-interfaced `AActors`, specifically invoking `OnCreatedByActorPool`, `OnSpawnedFromActorPool`, `OnReturnToActorPool`, and `OnDestroyedByActorPool` (when enabled) named `UFUNCTION` on the `AActor` if it does not implement the `INActorPoolItem` interface.
 - `UNActorPoolsDeveloperOverlay` now has tooltips with detailed information about the behavior of the associated `FNActorPool`.
 
 ### Changed
@@ -25,7 +114,7 @@
 - `UNDeveloperOverlayWidget` has been renamed to `UNDeveloperOverlay` and moved to the `NEXUS: UI` plugin.
 - All `NexusPicker` functionality has been changed to take variants of `FNPickerParams` structs to consolidate options; this is a **breaking** change without any direct upgrade path.
 - [#122](https://github.com/dotBunny/NEXUS/issues/122)  `NexusBlockout` now contain simplified collision primitives and UVs.
-- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full FTransfrom set.
+- `ENActorPoolFlags::ReturnToStorageLocation` renamed to `ENActorPoolFlags::ReturnToStorage` to match expansion to full `FTransfrom` set.
 - `UNDeveloperSubsystem` renamed to `UNGuardianSubsystem` and moved to `NexusGuardian` plugin.
 - `ANPooledActor` now has `OnCreatedByActorPoolEvent`, `OnSpawnedFromActorPoolEvent`, `OnReturnToActorPoolEvent`, and `OnDestroyedByActorPoolEvent` bindable events.
 - `UNActorPoolsDeveloperOverlay` now prefixes pool bars with a color representing the `AActor` interface and invoke state.
@@ -182,7 +271,7 @@
 - Allow adding multiple `UNCellJunctionComponent` to a single parent.
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
-- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` resepectively.
+- The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` respectively.
 - `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
 - Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 - Lowered warning level to `Log` when creating a new `FNActorPool` that already exists in a nested `UNActorPoolSet`.
@@ -278,7 +367,7 @@
 - Moved `Leak Check` duration setting to user level preference.
 - Clearly defined usage of `FNMetaUtils` static methods in helper macros.
 - `NEXUS: Material Library` renamed to `NEXUS: Blockout`.
-- External documentation now supports comma delimited multiple entries.
+- External documentation now supports comma-delimited multiple entries.
 
 
 ### Removed
@@ -295,7 +384,7 @@
 ### Experimental
 
 - `NEXUS: Developer Console` renamed to `NEXUS: Developer Menu` still not functioning stub.
-- `NEXUS: ProcGen` has some intial structural work done, but is still not functioanl.
+- `NEXUS: ProcGen` has some initial structural work done, but is still not functional.
 
 
 ## [0.1.1] - 2025-08-01
@@ -319,6 +408,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.3.0]: https://github.com/dotBunny/NEXUS/compare/v0.2.7...v0.3.0
 [0.2.7]: https://github.com/dotBunny/NEXUS/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/dotBunny/NEXUS/compare/v0.2.5...v0.2.6
 [0.2.5]: https://github.com/dotBunny/NEXUS/compare/v0.2.4...v0.2.5

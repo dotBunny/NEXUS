@@ -19,6 +19,12 @@ TSharedRef<FSlateStyleSet> FNToolingEditorStyle::Create()
 	Style.Set("Command.FindAndFix.Item", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_FindAndFix_Item"), Icon16x16));
 	Style.Set("Command.ProjectLevels", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_ProjectLevels"), Icon16x16));
 	
+	// Multiplayer Test
+	Style.Set("Command.Multiplayer.StartMultiplayerTest.On", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StartMultiplayerTest_On"), Icon16x16));
+	Style.Set("Command.Multiplayer.StartMultiplayerTest.Off", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StartMultiplayerTest_Off"), Icon16x16));
+	Style.Set("Command.Multiplayer.StopMultiplayerTest.On", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StopMultiplayerTest_On"), Icon16x16));
+	Style.Set("Command.Multiplayer.StopMultiplayerTest.Off", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_StopMultiplayerTest_Off"), Icon16x16));
+	
 	
 	// NCollisionVisualizerActor / Window
 	Style.Set("ClassIcon.NCollisionVisualizerActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCollisionVisualizerActor"), Icon16x16));

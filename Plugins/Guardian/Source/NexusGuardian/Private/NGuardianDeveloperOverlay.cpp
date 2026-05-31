@@ -3,41 +3,26 @@
 
 #include "NGuardianDeveloperOverlay.h"
 
+#include "NGuardianMinimal.h"
 #include "NGuardianSubsystem.h"
 #include "NStyleLibrary.h"
 #include "Components/HorizontalBox.h"
+#include "Macros/NValidationMacros.h"
 
 void UNGuardianDeveloperOverlay::NativeConstruct()
 {
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNGuardianDeveloperOverlay::OnWorldBeginTearDown);
-	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
-
 	Super::NativeConstruct();
+	
+	N_VALIDATE(LogNexusGuardian, ObjectCountBox)
+	N_VALIDATE(LogNexusGuardian, ObjectCountNumber)
+	N_VALIDATE(LogNexusGuardian, BaseCountNumber)
+	N_VALIDATE(LogNexusGuardian, ObjectCountNextNumber)
 }
 
-void UNGuardianDeveloperOverlay::NativeDestruct()
+void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)
 {
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
+	if (World == nullptr) return;
 	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
-	
-	Super::NativeDestruct();
-}
-
-void UNGuardianDeveloperOverlay::Bind(UWorld* World)
-{
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
@@ -49,12 +34,14 @@ void UNGuardianDeveloperOverlay::Bind(UWorld* World)
 	UpdateBanner();
 }
 
-void UNGuardianDeveloperOverlay::Unbind(const UWorld* World)
+void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
 		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
-		if (System != nullptr)
+		if (System != nullptr && Subsystems.Contains(System))
 		{
 			Subsystems.Remove(System);
 		}
@@ -62,27 +49,9 @@ void UNGuardianDeveloperOverlay::Unbind(const UWorld* World)
 	UpdateBanner();
 }
 
-void UNGuardianDeveloperOverlay::OnWorldPostInitialization(UWorld* World, 
-	FWorldInitializationValues WorldInitializationValues)
-{
-	if (World != nullptr)
-	{
-		Bind(World);
-	}
-}
-
-void UNGuardianDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		Unbind(World);
-	}
-}
-
-
 void UNGuardianDeveloperOverlay::UpdateBanner() const
 {
-	if (Subsystems.Num() <= 0)
+	if (Subsystems.IsEmpty())
 	{
 		ShowContainerBanner(RuntimeOnlyText,
 				UNStyleLibrary::GetInfoForegroundColor(), 
@@ -106,8 +75,10 @@ void UNGuardianDeveloperOverlay::UpdateBanner() const
 
 void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	if (Subsystems.Num() <= 0) return;
+	if (Subsystems.IsEmpty()) return;
 
+	// TODO: This forces us to only show the active game world or PIE, despite the possibility there is more
+	// TODO: We should make this a list entry like the others to support multiple worlds
 	UNGuardianSubsystem* System = Subsystems[0];
 	
 	ObjectCountNumber->SetCurrentValue(System->GetLastObjectCount());

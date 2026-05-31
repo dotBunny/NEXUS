@@ -4,6 +4,7 @@
 #pragma once
 
 #include "EditorUtilityLibrary.h"
+#include "EditorUtilitySubsystem.h"
 #include "NDelayedEditorTask.generated.h"
 
 /**
@@ -14,23 +15,34 @@ UCLASS(Abstract)
 class NEXUSCOREEDITOR_API UNDelayedEditorTask : public UObject
 {
 	GENERATED_BODY()
+
 public:
+	/**
+	 * Factory for the UAsyncEditorDelay that drives the delay timer.
+	 * @return A new delay mechanism the derived task can schedule work on.
+	 */
 	static UAsyncEditorDelay* CreateDelayMechanism() { return NewObject<UAsyncEditorDelay>(); };
-	
+
 protected:
+	/**
+	 * Associates the task with DelayMechanism and root-sets both so neither is GC'd while the task is pending.
+	 * @param DelayMechanism The delay driver that will fire this task's work.
+	 */
 	void Lock(UAsyncEditorDelay* DelayMechanism)
 	{
 		Parent = DelayMechanism;
-		Parent->AddToRoot();
-
-		AddToRoot();
+		
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		EditorUtilitySubsystem->RegisterReferencedObject(this);
 	}
+
+	/** Unbinds the task from its delay mechanism and removes both from the root set; safe to call from the completion callback. */
 	void Release()
 	{
 		Parent->Complete.RemoveAll(this);
-		Parent->RemoveFromRoot();
-
-		RemoveFromRoot();
+		
+		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
+		EditorUtilitySubsystem->UnregisterReferencedObject(this);
 	}
 
 private:

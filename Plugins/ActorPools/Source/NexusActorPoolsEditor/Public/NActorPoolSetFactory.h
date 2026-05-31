@@ -9,6 +9,9 @@
 #include "Macros/NEditorAssetMacros.h"
 #include "NActorPoolSetFactory.generated.h"
 
+/**
+ * Asset factory that creates new UNActorPoolSet assets from the Content Browser's "Create Asset" menu.
+ */
 UCLASS(MinimalAPI, HideCategories = Object)
 class UNActorPoolSetFactory : public UFactory
 {

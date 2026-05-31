@@ -5,6 +5,10 @@
 
 #include "ComponentVisualizer.h"
 
+/**
+ * Editor component visualizer that draws the distribution shape of a UNActorPoolSpawnerComponent
+ * in level viewports.
+ */
 class FNActorPoolSpawnerComponentVisualizer final : public FComponentVisualizer
 {
 	virtual void DrawVisualization(const UActorComponent* Component, const FSceneView* View, FPrimitiveDrawInterface* PDI) override;

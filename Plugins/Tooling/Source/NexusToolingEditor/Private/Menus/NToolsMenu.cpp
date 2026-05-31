@@ -1,5 +1,7 @@
-﻿#include "Menus/NToolsMenu.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
 
+#include "Menus/NToolsMenu.h"
 
 TMap<FName, FNMenuEntry> FNToolsMenu::Entries;
 TMap<FName, FText> FNToolsMenu::Sections;

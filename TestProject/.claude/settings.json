@@ -1,0 +1,45 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Read",
+      "Edit",
+      "Write",
+      "Bash(D:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
+      "Bash(C:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
+      "Bash(E:/UE/UE_5.7/Engine/Build/BatchFiles/Build.bat NEXUSEditor *)",
+      "Skill(build)",
+      "Skill(running-tests)",
+      "Skill(writing-tests)",
+      "Skill(coding-style)",
+      "Bash(echo \"C:/UE/UE_5.7\")",
+      "Bash(echo \"D:/UE/UE_5.7\")",
+      "Bash(echo \"E:/UE/UE_5.7\")",
+      "Bash(echo \"D:/EGS/UE_5.7\")",
+      "Bash(\"C:/UE/UE_5.7/Engine/Build/BatchFiles/Build.bat\" NEXUSEditor Win64 Development \"D:/Repositories/dotBunny/NEXUS/TestProject/NEXUS.uproject\" -progress)",
+      "Bash(\"D:/UE/UE_5.7/Engine/Build/BatchFiles/Build.bat\" NEXUSEditor Win64 Development \"D:/Repositories/dotBunny/NEXUS/TestProject/NEXUS.uproject\" -progress)",
+      "Bash(\"E:/UE/UE_5.7/Engine/Build/BatchFiles/Build.bat\" NEXUSEditor Win64 Development \"D:/Repositories/dotBunny/NEXUS/TestProject/NEXUS.uproject\" -progress)",
+      "Bash(\"D:/EGS/UE_5.7/Engine/Build/BatchFiles/Build.bat\" NEXUSEditor Win64 Development \"D:/Repositories/dotBunny/NEXUS/TestProject/NEXUS.uproject\" -progress)",
+      "Bash(mkdir -p .claude/local-memory)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git -C \"d:/Repositories/dotBunny/NEXUS\" status)",
+      "Bash(git -C \"d:/Repositories/dotBunny/NEXUS\" log *)",
+      "Bash(git -C \"d:/Repositories/dotBunny/NEXUS\" diff *)",
+      "Bash(git -C \"d:/Repositories/dotBunny/NEXUS\" show *)"
+    ],
+    "ask": [
+      "Bash(git push *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Read(Binaries)",
+      "Read(Intermediate)",
+      "Read(DerivedDataCache)",
+      "Read(*.uasset)",
+      "Read(*.umap)"
+    ],
+    "additionalDirectories": [
+      "../Plugins/"
+    ]
+  }
+}

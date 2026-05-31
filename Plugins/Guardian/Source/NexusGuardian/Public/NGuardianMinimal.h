@@ -3,4 +3,5 @@
 
 #pragma once
 
+/** Log category used by all NexusGuardian logging. */
 DECLARE_LOG_CATEGORY_EXTERN(LogNexusGuardian, Log, All);

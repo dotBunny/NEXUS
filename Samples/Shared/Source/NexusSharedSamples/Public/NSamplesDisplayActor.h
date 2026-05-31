@@ -23,7 +23,7 @@ class USpotLightComponent;
  * A display used in NEXUS demonstration levels
  * @notes Yes, we did rebuild/nativize Epic's content display blueprint!
  */
-UCLASS(DisplayName = "NEXUS: Samples Display Actor", BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+UCLASS(DisplayName = "NEXUS | Samples Display Actor", BlueprintType, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
 	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics))
 class NEXUSSHAREDSAMPLES_API ANSamplesDisplayActor : public AActor
 {
@@ -44,7 +44,7 @@ public:
 	static TArray<ANSamplesDisplayActor*> KnownDisplays;
 	static void SortKnownDisplays();
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	void Rebuild();
 	
 	UFUNCTION(BlueprintImplementableEvent, meta=(DisplayName="Prepare Test"))
@@ -114,8 +114,11 @@ private:
 
 	FTimerHandle TimerHandle;
 	
-	TUniquePtr<FNSamplesDisplayComponents> Parts;
-	TUniquePtr<FNSamplesDisplayMaterials> Materials;
+	UPROPERTY()
+	TObjectPtr<UNSamplesDisplayComponents> Parts;
+	
+	UPROPERTY()
+	TObjectPtr<UNSamplesDisplayMaterials> Materials;
 
 	FTransform MainPanelTransform;
 	FTransform FloorPanelTransform;

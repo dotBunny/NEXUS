@@ -3,6 +3,13 @@
 
 #pragma once
 
+/**
+ * Unregisters every FPlacementModeID inside the supplied collection and clears it.
+ *
+ * Use during an editor module's ShutdownModule to undo RegisterPlaceableItem calls made during StartupModule.
+ *
+ * @param PlacementActors A container of TOptional<FPlacementModeID> captured at registration time.
+ */
 #define N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors) \
 if (IPlacementModeModule::IsAvailable()) \
 { \

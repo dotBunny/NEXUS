@@ -17,9 +17,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 {
 	GENERATED_BODY()
 	
-	/**
-	 * The center point when attempting to generate new points.
-	 */
+	/** The center point when attempting to generate new points. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector Origin = FVector::ZeroVector;
 	/**
@@ -29,15 +27,11 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MinimumDimensions = FVector::ZeroVector;
 	
-	/**
-	 * The maximum dimensions to use when generating a point.
-	 */
+	/** The maximum dimensions to use when generating a point. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FVector MaximumDimensions = FVector::OneVector;
 	
-	/**
-	 * The rotation of the OrientedBox.
-	 */
+	/** The rotation of the OrientedBox. */
 	UPROPERTY(Category = "OrientedBox", BlueprintReadWrite)
 	FRotator Rotation = FRotator::ZeroRotator;
 
@@ -51,7 +45,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		
 		// We need to figure out the final corners
 		TArray<FVector> Vertices;
-		Vertices.Reserve(8);
+		Vertices.SetNum(8);
 		OrientedBox.CalcVertices(Vertices.GetData());
 		FVector MinPoint = Vertices[0];
 		FVector MaxPoint = Vertices[0];
@@ -101,9 +95,9 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		{
 			Boxes.Add(MaximumBox);
 		}
-		else if (MinimumDimensions.X > MaximumDimensions.X && MinimumDimensions.Y > MaximumDimensions.Y && MinimumDimensions.Z > MaximumDimensions.Z)
+		else if (MinimumDimensions.X > MaximumDimensions.X || MinimumDimensions.Y > MaximumDimensions.Y || MinimumDimensions.Z > MaximumDimensions.Z)
 		{
-			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions completely encompasses the MaximumDimensions, using MaximumDimensions instead."));
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions exceeds the MaximumDimensions on at least one axis, using MaximumDimensions instead."));
 			Boxes.Add(MaximumBox);
 		}
 		else

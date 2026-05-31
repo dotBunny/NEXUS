@@ -14,7 +14,7 @@ class UNComboBoxString;
  * A collection of functionality used to interact with a games' UGameUserSettings helping build UI components around them.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/">UNGameUserSettingsLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Game User Settings Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Game User Settings Library")
 class UNGameUserSettingsLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -42,11 +42,11 @@ public:
 
 	/**
 	 * Get the current window modes selection FString.
-	 * @return The cached FString representing the current EWindowMode::Type.
+	 * @return The FString representing the current EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-current-windowmode-string"))
-	static FString& GetSelectionStringFromCurrentWindowMode();
+	static FString GetSelectionStringFromCurrentWindowMode();
 
 	/**
 	 * Get the current window modes selection FText.
@@ -57,13 +57,13 @@ public:
 	static FText& GetSelectionTextFromCurrentWindowMode();
 
 	/**
-	 * Get the cached selection string from a EWindowMode::Type.
+	 * Get the selection string from a EWindowMode::Type.
 	 * @param Mode the EWindowMode::Type to find the associated FString for.
-	 * @return The cached FString representing the target EWindowMode::Type. 
+	 * @return The FString representing the target EWindowMode::Type.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-windowmode-string"))
-	static FString& GetSelectionStringFromWindowMode(EWindowMode::Type Mode);
+	static FString GetSelectionStringFromWindowMode(EWindowMode::Type Mode);
 
 	/**
 	 * Get the cached selection text from a EWindowMode::Type.
@@ -75,12 +75,12 @@ public:
 	static FText& GetSelectionTextFromWindowMode(EWindowMode::Type Mode);
 
 	/**
-	 * Get the cached EWindowMode::Type selection FStrings.
-	 * @return The FString array holding the different cached selection strings.
+	 * Get the EWindowMode::Type selection FStrings.
+	 * @return The FString array holding the different selection strings.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections (String)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-selections-string"))
-	static TArray<FString>& GetWindowModeStringSelections() { return DisplayModeLabels; };
+	static TArray<FString> GetWindowModeStringSelections();
 
 	/**
 	 * Get the cached EWindowMode::Type selection FTexts.
@@ -142,7 +142,7 @@ public:
 	static void InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent = true);
 
 private:
-	
+
+	/** Localized FText labels for each EWindowMode::Type; resolved to FString lazily on demand. */
 	static TArray<FText> DisplayModeTexts;
-	static TArray<FString> DisplayModeLabels;
 };

@@ -1,0 +1,18 @@
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+#include "NativeGameplayTags.h"
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Starter);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_StarterOnly);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_NotStarter);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Finisher);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_FinisherOnly);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_NotFinisher);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_Unique);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_BuiltIn_RequiredAny);

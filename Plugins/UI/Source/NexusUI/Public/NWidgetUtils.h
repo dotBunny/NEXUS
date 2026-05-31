@@ -5,9 +5,13 @@
 
 #include "Components/SlateWrapperTypes.h"
 
+/**
+ * Thin adapter helpers that bridge between UMG wrapper types and raw Slate equivalents.
+ */
 class FNWidgetUtils
 {
 public:
+	/** Convert a UMG ESlateVisibility value into the equivalent Slate EVisibility value. */
 	FORCEINLINE static EVisibility ToEVisibility(const ESlateVisibility Visibility)
 	{
 		switch ( Visibility )

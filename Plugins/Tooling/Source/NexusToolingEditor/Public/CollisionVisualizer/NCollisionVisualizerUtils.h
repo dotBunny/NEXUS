@@ -7,43 +7,58 @@
 #include "NCollisionVisualizerSettings.h"
 
 
+/**
+ * Query dispatch and debug-draw helpers for the collision visualizer. Each Do* entry issues the
+ * corresponding UE collision query against World using Settings and draws the result into the
+ * viewport using the configured colors/thickness/lifetime.
+ */
 class FNCollisionVisualizerUtils
 {
 public:
-	
-	static void DoLineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a single-result line trace and draw the outcome. */
+	static void LineTraceSingle(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
-	
-	static void DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a multi-result line trace and draw each hit. */
+	static void LineTraceMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
-	
-	static void DoLineTraceTest(const FNCollisionVisualizerSettings& Settings,
+
+	/** Issue a boolean line-trace test and draw a hit/miss segment. */
+	static void LineTraceTest(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition);
-	
-	static void DoSweepSingle(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a single-result shape sweep and draw the outcome. */
+	static void SweepSingle(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
-	
-	static void DoSweepMulti(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a multi-result shape sweep and draw each hit. */
+	static void SweepMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
-	
-	static void DoSweepTest(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a boolean shape-sweep test and draw a hit/miss result. */
+	static void SweepTest(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation);
-	
-	static void DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a blocking-only overlap query at Position/Rotation and draw the outcome. */
+	static void OverlapBlocking(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
-	
-	static void DoOverlapAny(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue an any-overlap query at Position/Rotation and draw the outcome. */
+	static void OverlapAny(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
-	
-	static void DoOverlapMulti(const FNCollisionVisualizerSettings& Settings, 
+
+	/** Issue a multi-overlap query at Position/Rotation and draw each overlapping primitive. */
+	static void OverlapMulti(const FNCollisionVisualizerSettings& Settings,
 		const UWorld* World, const FVector& Position, const FQuat& Rotation);
-	
+
 private:
-	static EQueryMobilityType ToQueryMobilityType(const ECollisionVisualizerMobility Mobility)
+	/** Map the visualizer's mobility enum onto the engine's EQueryMobilityType. */
+	static EQueryMobilityType ToQueryMobilityType(const ENCollisionVisualizerMobility Mobility)
 	{
 		switch (Mobility)
 		{
-			using enum ECollisionVisualizerMobility;
+			using enum ENCollisionVisualizerMobility;
 		case Any: 
 			return EQueryMobilityType::Any;
 		case Static: 

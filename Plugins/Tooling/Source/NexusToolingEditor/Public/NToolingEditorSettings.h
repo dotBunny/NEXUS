@@ -6,9 +6,13 @@
 #include "NEditorDefaults.h"
 #include "Engine/DeveloperSettings.h"
 #include "Macros/NEditorSettingsMacros.h"
-#include "NEditorUtils.h"
+#include "MultiplayerTest/NMultiplayerTestToolbarSection.h"
 #include "NToolingEditorSettings.generated.h"
 
+/**
+ * Per-validator severity used by NexusTooling validators to decide how to respond to a match.
+ * Drives both the UE data-validation verdict (Valid/Invalid/NotValidated) and the message bus.
+ */
 UENUM(BlueprintType)
 enum class ENValidatorSeverity : uint8
 {
@@ -19,28 +23,43 @@ enum class ENValidatorSeverity : uint8
 	Message = 4
 };
 
+/**
+ * Project-wide editor settings for NexusTooling.
+ *
+ * Shipped in NexusEditor.ini so they travel with the project — per-user overrides live on
+ * UNToolingEditorUserSettings instead. Groups icon overrides, level bookmarks, and per-validator
+ * severities.
+ */
 UCLASS(config = NexusEditor, defaultconfig)
 class UNToolingEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings);
-	
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Tooling"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		const FText SectionDescription = FText::FromString(TEXT("A collection of tools for fixing content in the Unreal Editor."));
-		return SectionDescription;
-	}
-	
-#if WITH_EDITOR	
+	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings, "Tooling", "Specific settings for NEXUS: Tooling included with the framework.");
+
+#if WITH_EDITOR
+	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */
 	bool IsAssetIgnored(const FSoftObjectPath& AssetPath) const;
+	
+	//~UObject
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override
+	{
+		Super::PostEditChangeProperty(PropertyChangedEvent);
+		const FName PropertyName = (PropertyChangedEvent.Property != nullptr) ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(UNToolingEditorSettings, bMultiplayerTestEnabled))
+		{
+			const bool bHasMultiplayerTestEnabled = FNMultiplayerTestToolbarSection::HasSection();
+			if (bMultiplayerTestEnabled && !bHasMultiplayerTestEnabled)
+			{
+				FNMultiplayerTestToolbarSection::AddSection();
+			}
+			else if (!bMultiplayerTestEnabled && bHasMultiplayerTestEnabled)
+			{
+				FNMultiplayerTestToolbarSection::RemoveSection();
+			}
+		}
+	}
+	//End UObject
 #endif // WITH_EDITOR
 
 #if WITH_EDITORONLY_DATA
@@ -54,26 +73,40 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World"))
 	TArray<FSoftObjectPath> ProjectLevels;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Blueprint: Empty Tick")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick")
 	ENValidatorSeverity ValidatorBlueprintEmptyTick = ENValidatorSeverity::Error;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Blueprint: Multi-Pin Pure Node")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Multi-Pin Pure Node")
 	ENValidatorSeverity ValidatorBlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Engine: Content Change")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change")
 	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Severity", DisplayName = "Level: Blueprint Logic",
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Level: Blueprint Logic",
 		meta=(Tooltip="Determine if there are any non-ghost nodes in the level blueprint."))
 	ENValidatorSeverity ValidatorLevelBlueprint = ENValidatorSeverity::Disable;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Ignored", DisplayName = "Ignored Assets")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Assets")
 	TArray<FSoftObjectPath> ValidatorIgnoredAssets;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators: Ignored", DisplayName = "Ignored Prefixes",
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Prefixes",
 		meta = (ToolTip = "This can be folder paths which will ignore by looking if a path starts with this."))
 	TArray<FString> ValidatorIgnoredPrefixes;
 	
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", DisplayName = "Enabled", meta=(ToolTip="Should the Multiplayer Test be enabled?"))
+	bool bMultiplayerTestEnabled = true;
+	
+	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
+	bool bMultiplayerTestUseOnlineSubsystem = false;
+	
+	/**
+	 * Forwards the project-level multiplayer-test toggles onto the supplied play-session request.
+	 * @param Params The play-session request whose Online Subsystem behavior should be set.
+	 */
+	void ApplySettings(FRequestPlaySessionParams& Params) const
+	{
+		Params.bAllowOnlineSubsystem = bMultiplayerTestUseOnlineSubsystem;
+	}
 #endif // WITH_EDITORONLY_DATA
 
 };

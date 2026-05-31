@@ -7,17 +7,20 @@
 #include "Developer/NDeveloperUtils.h"
 #include "Runtime/Launch/Resources/Version.h"
 
-int32 FNObjectSnapshotUtils::SnapshotTicket = 0;
+TAtomic<int32> FNObjectSnapshotUtils::SnapshotTicket(0);
 FNObjectSnapshot FNObjectSnapshotUtils::CachedSnapshot;
 
 FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 {
+	check(IsInGameThread());
+	FGCScopeGuard Guard;
+	
 	// Create our Snapshot struct
 	FNObjectSnapshot Snapshot(FNDeveloperUtils::GetCurrentObjectCount());
 	Snapshot.Ticket = TakeTicket();
 	
 	FChunkedFixedUObjectArray& Objects = GUObjectArray.GetObjectItemArrayUnsafe();
-	for (int i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
+	for (int32 i = 0; i < GUObjectArray.GetObjectArrayNum(); i++)
 	{
 #if UE_VERSION_OLDER_THAN(5, 6, 0) // .Object gets deprecated in 5.6
 		if (Objects[i].Object)
@@ -38,139 +41,131 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	return MoveTemp(Snapshot);
 }
 
-FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(FNObjectSnapshot OldSnapshot, FNObjectSnapshot NewSnapshot, const bool bRemoveKnownLeaks)
+FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, const bool bRemoveKnownLeaks)
 {
 	FNObjectSnapshotDiff Diff;
 
-
+	const FNObjectSnapshot* OlderSnapshot = &OldSnapshot;
+	const FNObjectSnapshot* NewerSnapshot = &NewSnapshot;
 	if (OldSnapshot.Ticket > NewSnapshot.Ticket)
 	{
-		const FNObjectSnapshot TempSnapshot = OldSnapshot;
-		OldSnapshot = NewSnapshot;
-		NewSnapshot = TempSnapshot;
-		UE_LOG(LogNexusCore, VeryVerbose, TEXT("The provided FNObjectSnapshot(OldSnapshot) was actually newer then the comparator FNObjectSnapshot(NewSnapshot); swapping for comparison purposes."))
+		OlderSnapshot = &NewSnapshot;
+		NewerSnapshot = &OldSnapshot;
+		UE_LOG(LogNexusCore, VeryVerbose, TEXT("The provided FNObjectSnapshot(OldSnapshot) was actually newer then the comparator FNObjectSnapshot(NewSnapshot); swapping for comparison purposes."));
 	}
 
-	Diff.UntrackedObjectCountA = OldSnapshot.UntrackedObjectCount;
-	Diff.UntrackedObjectCountB = NewSnapshot.UntrackedObjectCount;
-	Diff.ObjectCount = NewSnapshot.CapturedObjectCount;
-	
-	// If we check what has been maintained or removed, that leaves what's left in the array as having been added.
-	for (int OldIndex = OldSnapshot.CapturedObjectCount - 1; OldIndex >= 0; OldIndex--)
+	Diff.UntrackedObjectCountA = OlderSnapshot->UntrackedObjectCount;
+	Diff.UntrackedObjectCountB = NewerSnapshot->UntrackedObjectCount;
+	Diff.ObjectCount = NewerSnapshot->CapturedObjectCount;
+
+	TMap<TWeakObjectPtr<UObject>, int32> NewPtrToIndex;
+	NewPtrToIndex.Reserve(NewerSnapshot->CapturedObjectCount);
+	for (int32 i = 0; i < NewerSnapshot->CapturedObjects.Num(); i++)
 	{
-		FNObjectSnapshotEntry& EntryA = OldSnapshot.CapturedObjects[OldIndex];
-		bool bFoundEntry = false;
+		NewPtrToIndex.Add(NewerSnapshot->CapturedObjects[i].ObjectPtr, i);
+	}
 
-		// Find things we have
-		for (int NewIndex = NewSnapshot.CapturedObjectCount - 1; NewIndex >= 0 ; NewIndex--)
+	TSet<int32> ConsumedNewIndices;
+	ConsumedNewIndices.Reserve(OlderSnapshot->CapturedObjectCount);
+
+	for (int32 OldIndex = 0; OldIndex < OlderSnapshot->CapturedObjects.Num(); OldIndex++)
+	{
+		const FNObjectSnapshotEntry& OldEntry = OlderSnapshot->CapturedObjects[OldIndex];
+		if (const int32* NewIndex = NewPtrToIndex.Find(OldEntry.ObjectPtr))
 		{
-			if (FNObjectSnapshotEntry& EntryB = NewSnapshot.CapturedObjects[NewIndex];
-				EntryA.IsEqual(EntryB))
-			{
-				Diff.Maintained.Add(EntryB);
-				OldSnapshot.CapturedObjects.RemoveAt(OldIndex);
-				NewSnapshot.CapturedObjects.RemoveAt(NewIndex);
-				NewSnapshot.CapturedObjectCount--;
-				bFoundEntry = true;
-				break;
-			}
+			Diff.Maintained.Add(NewerSnapshot->CapturedObjects[*NewIndex]);
+			ConsumedNewIndices.Add(*NewIndex);
 		}
-
-		// Not found, must have been removed
-		if (!bFoundEntry)
+		else
 		{
-			Diff.Removed.Add(EntryA);
-			OldSnapshot.CapturedObjects.RemoveAt(OldIndex);
+			Diff.Removed.Add(OldEntry);
 		}
 	}
 
-	// What's left is added
-	for (int i = 0; i < NewSnapshot.CapturedObjects.Num(); i++)
+	for (int32 i = 0; i < NewerSnapshot->CapturedObjects.Num(); i++)
 	{
-		Diff.Added.Add(NewSnapshot.CapturedObjects[i]);
+		if (!ConsumedNewIndices.Contains(i))
+		{
+			Diff.Added.Add(NewerSnapshot->CapturedObjects[i]);
+		}
 	}
 
-	// Update counts
 	Diff.AddedCount = Diff.Added.Num();
 	Diff.RemovedCount = Diff.Removed.Num();
 	Diff.MaintainedCount = Diff.Maintained.Num();
-
-	
-	// Calculate before we start chopping things up
 	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
-
 
 	if (bRemoveKnownLeaks)
 	{
 		RemoveKnownLeaks(Diff);
 	}
-	
+
 	return MoveTemp(Diff);
 }
 
 void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 {
-	for (int i = Diff.AddedCount - 1; i >= 0; i--)
+	for (int32 i = Diff.AddedCount - 1; i >= 0; i--)
 	{
-		FNObjectSnapshotEntry& Entry = Diff.Added[i];
+		const FNObjectSnapshotEntry& Entry = Diff.Added[i];
 
-		// Remove Engine Entry
-		if (Entry.Name.Equals(TEXT("/Script/Engine")) && Entry.SerialNumber == 0)
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
+		// These are what we are labeling as "known leaks"
+		const bool bRemove =
+			(Entry.Name.Equals(TEXT("/Script/Engine")) && Entry.SerialNumber == 0) ||
+			Entry.Name.Equals(TEXT("/Script/InputCore")) ||
+			Entry.Name.StartsWith(TEXT("ChaosEventRelay")) ||
+			Entry.Name.StartsWith(TEXT("NiagaraComponentPool")) ||
+			// UBoxComponent lazily creates a UBodySetup the first time an instance is registered with the physics system.
+			// That body setup lives in the transient package — not the world — so it survives the world teardown and shows up as a "leak".
+			(Entry.Name.StartsWith(TEXT("BodySetup")) && Entry.Name.EndsWith(TEXT("BodySetup_0")));
 
-		// Remove InputCore
-		if (Entry.Name.Equals(TEXT("/Script/InputCore")))
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
-
-		// Remove ChaosEventRelay (physics world) entry (will have a _# in its name)
-		if (Entry.Name.StartsWith(TEXT("ChaosEventRelay")))
-		{
-			Diff.Added.RemoveAt(i, EAllowShrinking::No);
-			Diff.AddedCount--;
-		}
-		
-		// Remove Niagara Component Pool entry (will have a _# in its name)
-		if (Entry.Name.StartsWith(TEXT("NiagaraComponentPool")))
+		if (bRemove)
 		{
 			Diff.Added.RemoveAt(i, EAllowShrinking::No);
 			Diff.AddedCount--;
 		}
 	}
+	
+	// Keep the churn total consistent with the now-reduced added count.
+	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
 }
 
 void FNObjectSnapshotUtils::SnapshotToDisk()
 {
+	check(IsInGameThread());
+
 	const FNObjectSnapshot Snapshot = FNObjectSnapshotUtils::Snapshot();
 
 	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 		FString::Printf(TEXT("NEXUS_SnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 
-	FFileHelper::SaveStringToFile(Snapshot.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+	const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
+	FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
 	UE_LOG(LogNexusCore, Log, TEXT("UObject snapshot written to %s."), *DumpFilePath);
 }
 
 void FNObjectSnapshotUtils::ClearCachedSnapshot()
 {
+	check(IsInGameThread());
+
 	CachedSnapshot.Reset();
 	UE_LOG(LogNexusCore, Verbose, TEXT("Cached UObject snapshot cleared."));
-	
+
 }
 
 void FNObjectSnapshotUtils::CacheSnapshot()
 {
+	check(IsInGameThread());
+
 	CachedSnapshot = Snapshot();
 	UE_LOG(LogNexusCore, Verbose, TEXT("UObject snapshot cached for future compare."));
 }
 
 void FNObjectSnapshotUtils::CompareSnapshotToDisk()
 {
+	check(IsInGameThread());
+
 	if (CachedSnapshot.Ticket == -1)
 	{
 		return;
@@ -179,8 +174,9 @@ void FNObjectSnapshotUtils::CompareSnapshotToDisk()
 	FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CachedSnapshot, CompareSnapshot, false);
 
 	const FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-	FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-	FFileHelper::SaveStringToFile(Diff.ToDetailedString(), *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+		FString::Printf(TEXT("NEXUS_CompareSnapshotToDisk_%s.txt"),*FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+	const TArray<FString> Output = Diff.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
+	FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 
 	UE_LOG(LogNexusCore, Log, TEXT("UObject comparison written to %s."), *DumpFilePath);
 }

@@ -5,68 +5,98 @@
 #include "NDynamicRef.h"
 #include "NDynamicRefComponent.h"
 #include "NDynamicRefsDeveloperOverlay.h"
+#include "NDynamicRefsMinimal.h"
+#include "Macros/NValidationMacros.h"
 #include "NDynamicRefObject.generated.h"
 
-UCLASS(BlueprintType)
+/**
+ * Blueprint-friendly UObject wrapper around a single ENDynamicRef slot or FName bucket.
+ *
+ * Used primarily by the developer overlay to let UMG bind to a single reference's live object list.
+ */
+UCLASS(BlueprintType, ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef Object")
 class NEXUSDYNAMICREFS_API UNDynamicRefObject : public UObject
 {
 	GENERATED_BODY()
 
-	DECLARE_DELEGATE( OnDynamicRefObjectChangeDelegate );
-	
 public:
-	
-	// ADD DELEGATE TO BIND TO THAT WILL GET CALLED WHEN A CHANGE HAPPENS
-	
+
+	/**
+	 * Factory for an FName-bucket wrapper.
+	 * @param Outer The UObject owner (typically the developer overlay).
+	 * @param Name The FName bucket this wrapper reflects.
+	 */
 	static UNDynamicRefObject* Create(UObject* Outer, const FName Name)
 	{
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
 		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetName = Name;
+		Object->TargetDynamicRef = NDR_None;
 		return Object;
 	};
 
+	/**
+	 * Factory for an ENDynamicRef-slot wrapper.
+	 * @param Outer The UObject owner (typically the developer overlay).
+	 * @param DynamicRef The ENDynamicRef slot this wrapper reflects.
+	 */
 	static UNDynamicRefObject* Create(UObject* Outer, const ENDynamicRef DynamicRef)
 	{
 		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
 		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
 		Object->TargetDynamicRef = DynamicRef;
+		Object->TargetName = NAME_None;
 		return Object;
 	};
-	
-	
-	UFUNCTION(BlueprintCallable)
+
+
+	/** @return The ENDynamicRef slot this wrapper targets (meaningful only when TargetName is None). */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	ENDynamicRef GetDynamicRef() const
 	{
 		return TargetDynamicRef;
 	}
-	
-	UFUNCTION(BlueprintCallable)
+
+	/** @return The FName bucket this wrapper targets (NAME_None when targeting an ENDynamicRef slot). */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	FName GetTargetName() const
 	{
 		return TargetName;
 	}
-	
-	UFUNCTION(BlueprintCallable)
+
+	/**
+	 * Append an object to this wrapper's cached list and broadcast Changed.
+	 * @param Object The object to add.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void AddObject(UObject* Object)
 	{
-		TargetObjects.Add(Object);
+		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object)
+		TargetObjects.AddUnique(Object);
 		Changed.ExecuteIfBound();
 	}
-	
-	UFUNCTION(BlueprintCallable)
+
+	/**
+	 * Remove an object from this wrapper's cached list and broadcast Changed.
+	 * @param Object The object to remove.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void RemoveObject(UObject* Object)
 	{
-		TargetObjects.Remove(Object);
-		Changed.ExecuteIfBound();
+		if (TargetObjects.Remove(Object) > 0)
+		{
+			Changed.ExecuteIfBound();
+		}
 	}
-	
-	UFUNCTION(BlueprintCallable)
+
+	/** @return The number of objects currently tracked by this wrapper. */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	int32 GetCount()
 	{
 		return TargetObjects.Num();
 	}
-	
+
+	/** @return A display-friendly label for the target (FName when set, otherwise the ENDynamicRef display name). */
 	FText GetReferenceText() const
 	{
 		if (TargetName != NAME_None)
@@ -75,21 +105,31 @@ public:
 		}
 		return FText::FromString(UNDynamicRefComponent::ToStringSlow(TargetDynamicRef));
 	}
-	
-	TArray<TObjectPtr<UObject>>& GetObjects()
+
+	/** @return A mutable view of the tracked objects. */
+	TArray<TWeakObjectPtr<UObject>>& GetObjects()
 	{
 		return TargetObjects;
 	}
-	
-	OnDynamicRefObjectChangeDelegate Changed;
-	
+
+	/** Fired whenever AddObject/RemoveObject is called so bound UI can refresh. */
+	FSimpleDelegate Changed;
+
+	/** @return The overlay this wrapper belongs to, if any. */
 	TObjectPtr<UNDynamicRefsDeveloperOverlay> GetOverlay() const { return Overlay; }
 
 private:
+	/** The developer overlay that owns this wrapper. */
 	UPROPERTY()
 	TObjectPtr<UNDynamicRefsDeveloperOverlay> Overlay;
-	
-	TArray<TObjectPtr<UObject>> TargetObjects;
+
+	/** The objects registered for this slot/bucket, mirrored into this wrapper for UI binding. */
+	UPROPERTY()
+	TArray<TWeakObjectPtr<UObject>> TargetObjects;
+
+	/** The FName bucket this wrapper targets (NAME_None when targeting an ENDynamicRef slot). */
 	FName TargetName;
+
+	/** The ENDynamicRef slot this wrapper targets (meaningful only when TargetName is NAME_None). */
 	ENDynamicRef TargetDynamicRef;
 };

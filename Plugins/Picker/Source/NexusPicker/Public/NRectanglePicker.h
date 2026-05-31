@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NRectanglePickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points the plane of a rectangle using different
@@ -54,6 +55,14 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params);
 	
 	/**
+	 * Generate random points inside or on the plane of a rectangle using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNRectanglePickerParams& Params);
+	
+	/**
 	 * Checks if a point is inside or on the plane of a rectangle.
 	 * Takes into account the rotation of the rectangle, if any.
 	 * @param Origin The center point of the rectangle.
@@ -85,6 +94,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			if (IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point) || !IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point))

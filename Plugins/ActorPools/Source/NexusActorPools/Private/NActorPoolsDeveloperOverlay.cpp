@@ -8,6 +8,7 @@
 #include "NActorPoolSubsystem.h"
 #include "NStyleLibrary.h"
 #include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 
 namespace NEXUS::ActorPools::ConsoleCommands
 {
@@ -21,36 +22,20 @@ namespace NEXUS::ActorPools::ConsoleCommands
 
 void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown);
+	Super::NativeConstruct();
 	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
-	
+	N_VALIDATE(LogNexusActorPools, ActorPoolList)
+
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 
 	UpdateBanner();
-	
-	Super::NativeConstruct();
 }
 
 void UNActorPoolsDeveloperOverlay::NativeDestruct()
 {
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
-	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
+	Super::NativeDestruct();
 
 	ActorPoolList->ClearListItems();
-	Super::NativeDestruct();
 }
 
 void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
@@ -75,7 +60,7 @@ void UNActorPoolsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float
 	Super::NativeTick(MyGeometry, InDeltaTime);
 }
 
-void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
+void UNActorPoolsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	if (World == nullptr) return;
 	
@@ -103,7 +88,7 @@ void UNActorPoolsDeveloperOverlay::Bind(UWorld* World)
 	}));
 }
 
-void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
+void UNActorPoolsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
 	
@@ -115,42 +100,30 @@ void UNActorPoolsDeveloperOverlay::Unbind(const UWorld* World)
 	}
 	
 	
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel())
+	if (IsValid(ActorPoolList))
 	{
 		TArray<UObject*> Items = ActorPoolList->GetListItems();
-		const int ItemCount = Items.Num();
-		for (int i = ItemCount - 1; i >= 0; i--)
+		const int32 ItemCount = Items.Num();
+		for (int32 i = ItemCount - 1; i >= 0; i--)
 		{
 			UNActorPoolObject* Object = Cast<UNActorPoolObject>(Items[i]);
+			if (!IsValid(Object)) continue;
 			
 			if (Object->GetPoolWorld() == World)
 			{
 				ActorPoolList->RemoveItem(Object);
 				
 				// Remove our created object
-				Object->ConditionalBeginDestroy();
+				Object->MarkAsGarbage();
 			}
 		}
 		UpdateBanner();
 	}
 }
 
-void UNActorPoolsDeveloperOverlay::OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues)
-{
-	Bind(World);
-}
-
-void UNActorPoolsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		Unbind(World);
-	}
-}
-
 void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 {
-	if (ActorPoolList != nullptr && ActorPoolList->IsValidLowLevel() && ActorPoolList->GetNumItems() > 0)
+	if (IsValid(ActorPoolList) && ActorPoolList->GetNumItems() > 0)
 	{
 		HideContainerBanner();
 	}
@@ -164,5 +137,9 @@ void UNActorPoolsDeveloperOverlay::UpdateBanner() const
 
 void UNActorPoolsDeveloperOverlay::CreateListItem(FNActorPool* ActorPool)
 {
-	ActorPoolList->AddItem(UNActorPoolObject::Create(this, ActorPool));
+	UNActorPoolObject* Object = UNActorPoolObject::Create(this, ActorPool);
+	if (!ActorPoolList->GetListItems().Contains(Object))
+	{
+		ActorPoolList->AddItem(Object);
+	}
 }

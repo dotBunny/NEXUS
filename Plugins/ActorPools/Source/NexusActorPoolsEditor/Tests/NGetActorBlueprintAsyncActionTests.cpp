@@ -1,0 +1,126 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#if WITH_TESTS
+
+#include "NActorPool.h"
+#include "NActorPoolSubsystem.h"
+#include "NGetActorBlueprintAsyncAction.h"
+#include "NTestPooledActor.h"
+#include "Developer/NDebugActor.h"
+#include "Developer/NTestUtils.h"
+#include "Macros/NTestMacros.h"
+
+N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnHasPool_NullPool,
+	"NEXUS::UnitTests::NActorPools::UNGetActorBlueprintAsyncAction::OnHasPool::NullPool",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that the defensive guard at the top of OnHasPool short-circuits on a null pool —
+	// the OnCreatedPoolHandle reset and Completed broadcast that follow must not run.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
+		Action->WorldContext = World;
+		Action->ActorClass = TSoftClassPtr<AActor>(ANTestPooledActor::StaticClass());
+
+		// Plant a real handle so we can observe whether OnHasPool would Reset() it.
+		Action->OnCreatedPoolHandle = Subsystem->OnActorPoolAdded.AddUObject(Action, &UNGetActorBlueprintAsyncAction::OnHasPool);
+		CHECK_MESSAGE(TEXT("Pre-condition: OnCreatedPoolHandle should be valid before OnHasPool runs."), Action->OnCreatedPoolHandle.IsValid())
+
+		Action->OnHasPool(nullptr);
+
+		CHECK_MESSAGE(TEXT("OnHasPool(null) must not reach the handle Reset() path."), Action->OnCreatedPoolHandle.IsValid())
+		CHECK_MESSAGE(TEXT("Subsystem must still see the binding after OnHasPool(null) short-circuits."), Subsystem->OnActorPoolAdded.IsBound())
+
+		Action->ConditionalBeginDestroy();
+	});
+}
+
+N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate,
+	"NEXUS::UnitTests::NActorPools::UNGetActorBlueprintAsyncAction::OnHasPool::MismatchedTemplate",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that OnHasPool ignores broadcasts whose pool template does not match this action's
+	// ActorClass — the handle must not be reset and the subsystem binding must remain.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		FNActorPoolSettings PoolSettings;
+		PoolSettings.MinimumActorCount = 0;
+		PoolSettings.MaximumActorCount = 1;
+		PoolSettings.Strategy = ENActorPoolStrategy::Fixed;
+		PoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage);
+
+		FNActorPool OtherPool = FNActorPool(World, ANDebugActor::StaticClass(), PoolSettings);
+
+		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
+		Action->WorldContext = World;
+		Action->ActorClass = TSoftClassPtr<AActor>(ANTestPooledActor::StaticClass());
+		Action->OnCreatedPoolHandle = Subsystem->OnActorPoolAdded.AddUObject(Action, &UNGetActorBlueprintAsyncAction::OnHasPool);
+
+		Action->OnHasPool(&OtherPool);
+
+		CHECK_MESSAGE(TEXT("OnHasPool(mismatched) must not reach the handle Reset() path."), Action->OnCreatedPoolHandle.IsValid())
+		CHECK_MESSAGE(TEXT("Subsystem must still see the binding after a mismatched-template broadcast."), Subsystem->OnActorPoolAdded.IsBound())
+
+		OtherPool.Clear();
+		Action->ConditionalBeginDestroy();
+	});
+}
+
+N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
+	"NEXUS::UnitTests::NActorPools::UNGetActorBlueprintAsyncAction::HandleCleanup::OnDestroy",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Verifies that BeginDestroy unregisters the OnActorPoolAdded subscription left behind when
+	// no matching pool ever arrived. If this cleanup is skipped the subsystem retains a binding
+	// to a destroyed UObject (the H-5 handle leak).
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		// The developer-overlay framework (UNDeveloperOverlay) subscribes one lambda per world via
+		// FWorldDelegates::OnPostWorldInitialization, so a freshly created world's subsystem can already
+		// carry a subscriber whenever an overlay instance is alive (e.g. an interactive editor session).
+		// Clear the delegate first so this test exercises only its own action's add/remove lifecycle.
+		Subsystem->OnActorPoolAdded.Clear();
+		CHECK_FALSE_MESSAGE(TEXT("Pre-condition: subsystem should start with no OnActorPoolAdded subscribers."), Subsystem->OnActorPoolAdded.IsBound())
+
+		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
+		Action->WorldContext = World;
+		Action->ActorClass = TSoftClassPtr<AActor>(ANTestPooledActor::StaticClass());
+
+		// Mirror the registration that OnLoaded() would perform once the streamable load resolves.
+		Action->OnCreatedPoolHandle = Subsystem->OnActorPoolAdded.AddUObject(Action, &UNGetActorBlueprintAsyncAction::OnHasPool);
+		CHECK_MESSAGE(TEXT("Subsystem should report a binding after the action registers."), Subsystem->OnActorPoolAdded.IsBound())
+
+		// Broadcast a non-matching pool — OnHasPool early-returns without clearing the handle,
+		// which is the leak scenario BeginDestroy must clean up.
+		Subsystem->CreateActorPool(ANDebugActor::StaticClass(), FNActorPoolSettings());
+		CHECK_MESSAGE(TEXT("Binding should still be live after a non-matching pool was broadcast."), Subsystem->OnActorPoolAdded.IsBound())
+
+		Action->ConditionalBeginDestroy();
+
+		CHECK_FALSE_MESSAGE(TEXT("Subsystem must not retain a binding after the action is destroyed."), Subsystem->OnActorPoolAdded.IsBound())
+	});
+}
+
+#endif //WITH_TESTS

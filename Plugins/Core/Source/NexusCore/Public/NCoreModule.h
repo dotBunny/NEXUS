@@ -11,7 +11,14 @@
  */
 class FNCoreModule final : public IModuleInterface
 {
+public:
 	virtual void StartupModule() override;
-
 	N_IMPLEMENT_MODULE(FNCoreModule, "NexusCore")
+
+#if WITH_EDITOR	
+private:
+	/** Cached localized title used by the multiplayer test window. */
+	FText MultiplayerTestWindowTitle;
+	void OnPostEngineInit();	
+#endif // WITH_EDITOR	
 };

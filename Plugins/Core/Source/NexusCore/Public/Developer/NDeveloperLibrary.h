@@ -13,20 +13,39 @@
 
 /**
  * A small collection of functionality to wrap the usage of developer tools.
- * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer-library/">UNDeveloperLibrary</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/">UNDeveloperLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Developer Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Developer Library")
 class UNDeveloperLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
 public:
+	
+	/**
+	 * Is this a demo build?
+	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
+	 * @return true/false if IS_DEMO_BUILD is defined in this build.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build", Category = "NEXUS|Developer",
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#is-demo-build"))
+	static bool IsDemoBuild() { return FNDeveloperUtils::IsDemoBuild(); }
+	
+	/**
+	 * Is this a demo build?
+	 * @remark Requires a BuildTarget definition of IS_DEMO_BUILD=1
+	 * @return true/false if IS_DEMO_BUILD is defined in this build.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName = "Is Demo Build ?", Category = "NEXUS|Developer",
+		meta = (ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#is-demo-build"))
+	static bool IsDemoBuildExec() { return FNDeveloperUtils::IsDemoBuild(); }
+	
 	/**
 	 * Gets the current number of known UObjects by looking at the global UObject array and subtracting the number of available spots.
 	 * @return The number of objects.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Count", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-count"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-count"))
 	static int32 GetCurrentObjectCount() { return FNDeveloperUtils::GetCurrentObjectCount(); };
 
 	/**
@@ -34,7 +53,7 @@ public:
 	 * @return The FNObjectSnapshot recording structure.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Create UObject Snapshot", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#create-uobject-snapshot"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#create-uobject-snapshot"))
 	static FNObjectSnapshot CreateObjectSnapshot() { return FNObjectSnapshotUtils::Snapshot(); }
 
 	/**
@@ -45,7 +64,7 @@ public:
 	 * @return A FNObjectSnapshotDiff structure outlining the differences.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Create UObject Snapshot Diff", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#create-uobject-snapshot-dff"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#create-uobject-snapshot-diff"))
 	static FNObjectSnapshotDiff CreateSnapshotDiff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, const bool bRemoveKnownLeaks = false)
 	{
 		return FNObjectSnapshotUtils::Diff(OldSnapshot, NewSnapshot, bRemoveKnownLeaks);
@@ -57,7 +76,7 @@ public:
 	 * @return The output-friendly string.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Entry Summary", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-snapshot-entry-summary"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-entry-summary"))
 	static FString GetObjectSnapshotEntrySummary(const FNObjectSnapshotEntry& Entry) { return Entry.ToString(); }
 
 	/**
@@ -66,7 +85,7 @@ public:
 	 * @return The output-friendly string.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Summary", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-snapshot-summary"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-summary"))
 	static FString GetObjectSnapshotSummary(const FNObjectSnapshot& Snapshot) { return Snapshot.ToString(); }
 
 	/**
@@ -75,7 +94,7 @@ public:
 	 * @return The output-friendly string.
 	 */	
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Detailed Summary", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-snapshot-detailed-summary"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-detailed-summary"))
 	static FString GetObjectSnapshotDetailedSummary(const FNObjectSnapshot& Snapshot) { return Snapshot.ToDetailedString(); }
 	
 	/**
@@ -84,7 +103,7 @@ public:
 	 * @return The output-friendly string.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Diff Summary", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-snapshot-diff-summary"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-diff-summary"))
 	static FString GetObjectSnapshotDiffSummary(const FNObjectSnapshotDiff& Diff) { return Diff.ToString(); }
 
 	/**
@@ -93,7 +112,7 @@ public:
 	 * @return The output-friendly string.
 	 */	
 	UFUNCTION(BlueprintCallable, DisplayName = "Get UObject Snapshot Diff Detailed Summary", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#get-uobject-snapshot-diff-detailed-summary"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#get-uobject-snapshot-diff-detailed-summary"))
 	static FString GetObjectSnapshotDiffDetailedSummary(const FNObjectSnapshotDiff& Diff) { return Diff.ToDetailedString(); }
 
 	/**
@@ -101,7 +120,7 @@ public:
 	 * @param Diff The FNObjectSnapshotDiff to generate output from.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Output Snapshot To Log", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#output-snapshot-to-log"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#output-snapshot-to-log"))
 	static void DumpSnapshotDiffToLog(const FNObjectSnapshotDiff& Diff) { Diff.DumpToLog(); }
 	
 	/**
@@ -122,7 +141,7 @@ public:
 	 * @param bDrawBelowPosition Should the top of the first line align with the position?
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Draw Debug String", Category = "NEXUS|Developer",
-		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer-library/#draw-debug-string", WorldContext = "WorldContextObject"))
+		meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/developer/developer-library/#draw-debug-string", WorldContext = "WorldContextObject"))
 	static void DrawDebugString(const UObject* WorldContextObject, FString String, const FVector Position,
 		const FRotator Rotation, const bool bPersistentLines = false, const float LifeTime = 0, const uint8 DepthPriority = 0,
 		const FLinearColor ForegroundColor = FLinearColor::White, const float Scale = 1,

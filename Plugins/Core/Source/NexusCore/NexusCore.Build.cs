@@ -22,9 +22,11 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
+					"Chaos",
 					"CoreUObject",
 					"DeveloperSettings",
 					"ModelingComponents",
+					"PhysicsCore",
 					"Projects"
 				]
 			);

@@ -14,7 +14,8 @@
 
 ANSamplesLevelActor::ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Components = MakeUnique<FNSamplesLevelActorComponents>();
+	// Create reference storage
+	Components = CreateDefaultSubobject<UNSamplesLevelComponents>(TEXT("ComponentsObject"));
 	
 	Components->SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("SceneRoot"), false);
 	Components->SceneRoot->SetMobility(EComponentMobility::Static);
@@ -173,34 +174,40 @@ void ANSamplesLevelActor::OnConstruction(const FTransform& Transform)
 		LevelName,
 		LevelName);
 
+	// Stripped on Dedicated Servers
 	if (Components->DemoName != nullptr)
 	{
 		Components->DemoName->SetText(CachedLevelName);
+		Components->DemoName->SetVisibility(bShowLevelName);
 	}
-	
-	Components->Brand->SetVisibility(bShowLogo);
-	Components->DemoName->SetVisibility(bShowLevelName);
+	if (Components->Brand != nullptr)
+	{
+		Components->Brand->SetVisibility(bShowLogo);
+	}
 	
 	Super::OnConstruction(Transform);
 }
 
-void ANSamplesLevelActor::BeginDestroy()
-{
-	if (Components != nullptr)
-	{
-		Components.Reset();
-	}
-	Super::BeginDestroy();
-}
-
 void ANSamplesLevelActor::ResizeLevel(const float InX, const float InY) const
 {
+	if (!bBuildArea)
+	{
+		Components->Floor->SetWorldScale3D(FVector::Zero());
+		
+		SetWallScale(Components->WallNorth, 0.f, false);
+		SetWallScale(Components->WallEast, 0.f, false);
+		SetWallScale(Components->WallSouth, 0.f, false);
+		SetWallScale(Components->WallWest, 0.f, false);
+		return;
+	}
+	
 	// Get transform information
 	const FVector RootLocation = RootComponent->GetComponentLocation();
 
 	// Change floor
 	if (Components->Floor != nullptr)
 	{
+		Components->Floor->SetWorldScale3D(FVector::One());
 		FVector FloorScale = Components->Floor->GetComponentScale();
 		FloorScale.X = InX;
 		FloorScale.Y = InY;

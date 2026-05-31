@@ -30,12 +30,8 @@
 			"Name": "NexusDynamicRefs",
 			"Enabled": true
 		},
-				{
-			"Name": "NexusGuardian",
-			"Enabled": true
-		},
 		{
-			"Name": "NexusMultiplayer",
+			"Name": "NexusGuardian",
 			"Enabled": true
 		},
 		{
@@ -75,19 +71,19 @@
 			"Enabled": true
 		},
 		{
-			"Name": "NexusMultiplayerSamples",
+			"Name": "NexusWorldAssembly",
 			"Enabled": true
 		},
 		{
-			"Name": "NexusProcGen",
-			"Enabled": true
-		},
-		{
-			"Name": "NexusProcGenSamples",
+			"Name": "NexusWorldAssemblySamples",
 			"Enabled": true
 		},
 		{
 			"Name": "AIAssistant",
+			"Enabled": true
+		},
+		{
+			"Name": "PCG",
 			"Enabled": true
 		}
 	],

@@ -3,6 +3,12 @@
 
 #pragma once
 
+/**
+ * A named enumeration of the colors made available by FNColor.
+ *
+ * Each value maps to a matching FLinearColor constant on FNColor and is used so Blueprint-facing
+ * APIs and pickers can surface the curated NEXUS palette without exposing raw color values.
+ */
 UENUM(BlueprintType)
 enum class ENColor : uint8
 {
@@ -25,10 +31,10 @@ enum class ENColor : uint8
 	NC_Green = 30				UMETA(DisplayName = "Green"),
 	NC_Pink	= 35				UMETA(DisplayName = "Pink"),
 	
-	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS: Dark Blue"),
-	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS: Light Blue"),
-	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS: Black"),
-	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS: Pink"),
+	NC_NexusDarkBlue = 100		UMETA(DisplayName = "NEXUS | Dark Blue"),
+	NC_NexusLightBlue = 101		UMETA(DisplayName = "NEXUS | Light Blue"),
+	NC_NexusBlack = 102			UMETA(DisplayName = "NEXUS | Black"),
+	NC_NexusPink = 103			UMETA(DisplayName = "NEXUS | Pink"),
 
 	NC_HalfBlack = 200			UMETA(DisplayName = "Half Black"),
 	NC_QuarterBlack = 201		UMETA(DisplayName = "Quarter Black"),
@@ -37,12 +43,27 @@ enum class ENColor : uint8
 };
 
 /**
- * A collection of color values used throughout the Nexus modules.
+ * A collection of color values used throughout the NEXUS modules.
+ *
+ * FNColor centralises the framework's palette so that debug drawing, editor tooling and runtime UI
+ * can share a consistent look. Callers can either use the strongly-typed FLinearColor constants
+ * below (preferred in C++) or resolve a color by ENColor value at runtime.
  */
 class NEXUSCORE_API FNColor
 {
 public:
+	/**
+	 * Resolves an ENColor enumeration value to its matching linear color.
+	 * @param Color The palette entry to resolve.
+	 * @return The FLinearColor associated with the supplied palette entry.
+	 */
 	static FLinearColor GetLinearColor(const ENColor& Color);
+
+	/**
+	 * Resolves an ENColor enumeration value to its matching sRGB color.
+	 * @param Color The palette entry to resolve.
+	 * @return The FColor associated with the supplied palette entry.
+	 */
 	static FColor GetColor(const ENColor& Color);
 	
 	static constexpr FLinearColor BlueDark = FLinearColor(0.0352941176470588f, 0.0509803921568627f, 0.1450980392156863f, 1.0f);
@@ -69,4 +90,8 @@ public:
 	static constexpr FLinearColor QuarterBlack = FLinearColor(0.f,0.f,0.f, 0.25f);
 	
 	static constexpr FLinearColor Transparent = FLinearColor(0.f,0.f,0.f, 0.0f);
+	
+	static constexpr FLinearColor SortElement = FLinearColor(0.4f,0.62f,1.f, 1.f);
+	static constexpr FLinearColor FilterElement = FLinearColor(0.24f,0.09f,0.85f, 1.f);
+	static constexpr FLinearColor GetElement = FLinearColor(1.0f,0.2f,1.0f, 1.f);
 };

@@ -1,0 +1,52 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+/**
+ * Boilerplate for PCG element prologue: reads World Assembly settings, prepares the output point data,
+ * and creates the SocketSize / WorldSize metadata attributes that N_PCG_JUNCTION_DATA populates.
+ */
+#define N_PCG_JUNCTION_PREFIX \
+	const FVector2D SocketSize = UNWorldAssemblySettings::Get()->SocketSize; \
+	const float SocketDepth = UNWorldAssemblySettings::Get()->SocketDepth; \
+	TArray<FPCGTaggedData>& Outputs = Context->OutputData.TaggedData; \
+	UPCGPointData* OutputData = NewObject<UPCGPointData>(); \
+	TArray<FPCGPoint>& MutablePoints = OutputData->GetMutablePoints(); \
+	FPCGMetadataAttribute<FVector2D>* SocketSizeAtr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(TEXT("SocketSize"),FVector2D::ZeroVector, false, true); \
+	FPCGMetadataAttribute<FVector2D>* WorldSizeAttr = OutputData->Metadata->FindOrCreateAttribute<FVector2D>(TEXT("WorldSize"), FVector2D::ZeroVector, false, true);
+
+/**
+ * Boilerplate for emitting a single junction as a PCG point, applying the socket's bounds
+ * based on its ENCellJunctionType. Expects the variables declared by N_PCG_JUNCTION_PREFIX.
+ */
+#define N_PCG_JUNCTION_DATA \
+	FPCGPoint& NewPoint = MutablePoints.Emplace_GetRef(); \
+	OutputData->Metadata->InitializeOnSet(NewPoint.MetadataEntry); \
+	NewPoint.Transform.SetLocation(JunctionComponent->Details.WorldLocation); \
+	NewPoint.Transform.SetRotation(JunctionComponent->Details.WorldRotation.Quaternion()); \
+	SocketSizeAtr->SetValue(NewPoint.MetadataEntry, JunctionComponent->Details.SocketSize); \
+	FVector2D WorldSize = FVector2D(JunctionComponent->Details.SocketSize.X * SocketSize.X, JunctionComponent->Details.SocketSize.Y * SocketSize.Y); \
+	WorldSizeAttr->SetValue(NewPoint.MetadataEntry, WorldSize); \
+	switch (JunctionComponent->Details.Type) \
+	{ \
+		using enum ENCellJunctionType; \
+		case TwoWaySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * 0.5f; \
+			break; \
+		case InOnlySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, 0, WorldSize.Y) * 0.5f; \
+			break; \
+		case OutOnlySocket: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, 0, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, SocketDepth, WorldSize.Y) * 0.5f; \
+			break; \
+		case OneWaySocket: \
+		default: \
+			NewPoint.BoundsMin = FVector(WorldSize.X, 0, WorldSize.Y) * -0.5f; \
+			NewPoint.BoundsMax = FVector(WorldSize.X, 0, WorldSize.Y) * 0.5f; \
+			break; \
+	} \
+	NewPoint.Seed = 0;

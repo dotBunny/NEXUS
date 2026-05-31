@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NOrientedBoxPickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points inside or on the surface of the FOrientedBox using different
@@ -54,6 +55,14 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNOrientedBoxPickerParams& Params);
 	
 	/**
+	 * Generate random points in relation to an FOrientedBox using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params);
+	
+	/**
 	 * Checks if a point is inside or on the surface of the FOrientedBox.
 	 * @param Origin The center point of the FOrientedBox.
 	 * @param Dimensions The dimensions of the FOrientedBox.
@@ -92,6 +101,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FVector& MinimumDimensions, const FVector& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			if (IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point) || !IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point))

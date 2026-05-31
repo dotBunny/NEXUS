@@ -7,60 +7,77 @@
 
 void ANSamplesHUD::Tick(float DeltaSeconds)
 {
-
 	Super::Tick(DeltaSeconds);
 }
 
 void ANSamplesHUD::DrawHUD()
 {
-
 	Super::DrawHUD();
-
-	if (bHideHUD) return;
+	
+	// Don't show if no one wants it or is around
+	if (bHideHUD || FApp::IsUnattended()) return;
 	
 	if (Canvas)
 	{
-		if (Font == nullptr)
-		{
-			Font = GEngine->GetMediumFont();
-		}
+		DrawRect(FNColor::HalfBlack, 0,  0, CachedBackgroundWidth, Canvas->SizeY);
+		FVector2D LineCursor =  FVector2D(CachedBackgroundWidth, 20);
 
-		// Calculate background size
-		float OutHeight;
-		float OutWidth;
-		GetTextSize(FString::Printf(TEXT("Screenshot Multiplier (%i): -/="), ScreenshotMultiplier), OutWidth, OutHeight, Font, TextScale);
-		float InstructionWidth = OutWidth;
-		GetTextSize(CurrentCameraName, OutWidth, OutHeight, Font, TextScale);
-		float CalculatedTextWidth = OutWidth;
-		if (InstructionWidth > CalculatedTextWidth)
-		{
-			CalculatedTextWidth = InstructionWidth;
-		}
-		const float CalculatedTextHeight = OutHeight * 9;
-
-		// Text position
-		const FVector2D TextPosition(ScreenSafeZone, ScreenSafeZone);
+		constexpr FLinearColor TextColor = FNColor::BlueLight;
+		const FLinearColor TitleColor = FLinearColor::White;
 		
-		// Render Background
-		FVector2D RectPosition = TextPosition;
-		RectPosition.X -= BackgroundPadding;
-		RectPosition.Y -= BackgroundPadding;
-		DrawRect(BackgroundColor, RectPosition.X, RectPosition.Y,
-			CalculatedTextWidth + (BackgroundPadding * 2), CalculatedTextHeight + (BackgroundPadding * 2));
-
-		// Render Text
-		const FString DebugText = FString::Printf(
-			TEXT("%s\n\n"
-				"Next Display: Tab, }\n"
-				"Previous Display: {\n"
-				"Select Pawn: Backslash\n"
-				"Toggle HUD: Backspace\n"
-				"Screenshot: F12\n"
-				"Screenshot Multiplier (%i): -/=\n"
-				"Auto-Screenshot: F10"),
-				*CurrentCameraName,
-				ScreenshotMultiplier);
+		DrawMonoText("Map", 1.1f, TitleColor, 15, LineCursor);
+		if (bIsLoading)
+		{
+			DrawMonoText(FString::Printf(TEXT("%i: Loading Map"), MapIndex), 1.0f, TextColor, 20, LineCursor);
+		}
+		else
+		{
+			DrawMonoText(FString::Printf(TEXT("%i: %s"), MapIndex, *GetWorld()->GetMapName()), 1.0f, TextColor, 20, LineCursor);
+		}
+		DrawMonoText(TEXT("Change Map (,) / Next Map (.)"), 1.0f, TextColor, 20, LineCursor);
 		
-		DrawText(DebugText, TextColor, TextPosition.X, TextPosition.Y, Font, TextScale);
+		LineCursor.Y += 20;
+		
+		DrawMonoText("Player", 1.1f,  TitleColor, 15, LineCursor);		
+		DrawMonoText(PlayerPosition.ToString(),1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(PlayerRotation.ToString(),1.0f, TextColor, 20, LineCursor);
+		
+		LineCursor.Y += 20;
+		
+		DrawMonoText("Camera", 1.1f,  TitleColor, 15, LineCursor);
+		DrawMonoText(CurrentCameraName, 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Previous Display (Tab,[) / Next Display (])"), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Select Pawn (Backslash)"), 1.0f, TextColor, 20, LineCursor);
+		
+		LineCursor.Y += 20;
+		
+		DrawMonoText("Screenshot", 1.1f, TitleColor, 15, LineCursor);
+		DrawMonoText(FString::Printf(TEXT("Multiplier (x%i): - / ="), ScreenshotMultiplier), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Capture (F12)"), 1.0f, TextColor, 20, LineCursor);
+		DrawMonoText(TEXT("Capture Sequence (F10)"), 1.0f, TextColor, 20, LineCursor);
+		
+
+		// Footer
+		LineCursor.Y = Canvas->SizeY - 40;
+		DrawMonoText(TEXT("Toggle (Backspace)"), 1.1f, FLinearColor::Yellow, 20, LineCursor);
+		
+		CachedBackgroundWidth = LineCursor.X;
 	}
 }
+
+void ANSamplesHUD::DrawMonoText(const FString& Text, const float TextScale, const FLinearColor Color, const float Indent, FVector2D& OutCursor)
+{
+	if (MonospaceFont == nullptr)
+	{
+		MonospaceFont = GEngine->GetMonospaceFont();
+	}
+
+	float OutWidth;
+	float OutHeight;
+	GetTextSize(Text, OutWidth, OutHeight, MonospaceFont, TextScale);
+	DrawText(Text, Color, Indent, OutCursor.Y, MonospaceFont, TextScale);
+
+	const float WidthWithPadding = OutWidth + 40;
+	if (WidthWithPadding > OutCursor.X) { OutCursor.X = WidthWithPadding; }
+	OutCursor.Y = OutCursor.Y + OutHeight + 2; // Line Spacing
+};

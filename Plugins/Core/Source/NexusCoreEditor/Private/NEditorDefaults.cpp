@@ -21,24 +21,16 @@ const FPlacementCategoryInfo* FNEditorDefaults::GetPlacementCategory()
 	// Ensure we are initialized
 	FNEditorStyle::Initialize();
 	
-	if (const ISlateStyle* Style = &FNEditorStyle::Get(); 
-		Style != nullptr)
-	{
-		FPlacementCategoryInfo Info(
+	FPlacementCategoryInfo Info(
 			NSLOCTEXT("NexusCoreEditor", "PlacementCategoryName", "NEXUS"),
-			FSlateIcon(Style->GetStyleSetName(), "NEXUS.Icon"),
+			FSlateIcon(FNEditorStyle::GetStyleSetName(), "NEXUS.Icon"),
 			PlacementModeCategoryHandle,
 			TEXT("NEXUS"),
 			42 // Determines where the category shows up in the list with respect to the others.
 		);
 
-		Info.ShortDisplayName = NSLOCTEXT("NexusCoreEditor", "PlacementCategoryShortName", "NEXUS");
-		IPlacementModeModule::Get().RegisterPlacementCategory(Info);
+	Info.ShortDisplayName = NSLOCTEXT("NexusCoreEditor", "PlacementCategoryShortName", "NEXUS");
+	IPlacementModeModule::Get().RegisterPlacementCategory(Info);
 
-		return PlacementModeModule.GetRegisteredPlacementCategory(PlacementModeCategoryHandle);
-	}
-	else
-	{
-		return nullptr;
-	}
+	return PlacementModeModule.GetRegisteredPlacementCategory(PlacementModeCategoryHandle);
 }

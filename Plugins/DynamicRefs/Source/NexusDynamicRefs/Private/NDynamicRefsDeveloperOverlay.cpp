@@ -10,34 +10,15 @@
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
-	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization);
-	RemoveWorldDelegateHandle = FWorldDelegates::OnWorldBeginTearDown.AddUObject(this, &UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown);
-	
-	// Look at all worlds and add them to bindings
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Bind(Context.World());
-	}
-
 	Super::NativeConstruct();
+	
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader)
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences)
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader)
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
 }
 
-void UNDynamicRefsDeveloperOverlay::NativeDestruct()
-{
-	FWorldDelegates::OnPostWorldInitialization.Remove(AddWorldDelegateHandle);
-	FWorldDelegates::OnWorldBeginTearDown.Remove(RemoveWorldDelegateHandle);
-	
-	const TIndirectArray<FWorldContext>& WorldContexts = GEngine->GetWorldContexts();
-	for (const auto& Context : WorldContexts)
-	{
-		Unbind(Context.World());
-	}
-	
-	Super::NativeDestruct();
-}
-
-void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
+void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (System == nullptr)
@@ -52,7 +33,7 @@ void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
 	{
 		if (!DynamicRefObjects.Contains(DynamicRef))
 		{
-			NamedReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
+			DynamicReferences->AddItem(DynamicRefObjects.Add(DynamicRef, UNDynamicRefObject::Create(this, DynamicRef)));
 		}
 		for (UObject* Object : System->GetObjects(DynamicRef))
 		{
@@ -102,26 +83,50 @@ void UNDynamicRefsDeveloperOverlay::Bind(UWorld* World)
 
 
 
-void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World)
+void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 {
 	if (World == nullptr) return;
 	
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
-	if (OnAddedDelegates.Contains(World) && System != nullptr)
+	
+	// OnAddedDelegates
+	if (OnAddedDelegates.Contains(World))
 	{
-		System->OnAdded.Remove(OnAddedDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnAdded.Remove(OnAddedDelegates[World]);
+		}
+		OnAddedDelegates.Remove(World);
 	}
-	if (OnAddedByNameDelegates.Contains(World) && System != nullptr)
+	
+	// OnAddedByNameDelegates
+	if (OnAddedByNameDelegates.Contains(World))
 	{
-		System->OnAddedByName.Remove(OnAddedByNameDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnAddedByName.Remove(OnAddedByNameDelegates[World]);
+		}
+		OnAddedByNameDelegates.Remove(World);
 	}
-	if (OnRemovedDelegates.Contains(World) && System != nullptr)
+	
+	// OnRemovedDelegates
+	if (OnRemovedDelegates.Contains(World))
 	{
-		System->OnRemoved.Remove(OnRemovedDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnRemoved.Remove(OnRemovedDelegates[World]);
+		}
+		OnRemovedDelegates.Remove(World);
 	}
-	if (OnRemovedByNameDelegates.Contains(World) && System != nullptr)
+	
+	// OnRemovedByNameDelegates
+	if (OnRemovedByNameDelegates.Contains(World))
 	{
-		System->OnRemovedByName.Remove(OnRemovedByNameDelegates[World]);
+		if (System != nullptr)
+		{
+			System->OnRemovedByName.Remove(OnRemovedByNameDelegates[World]);
+		}
+		OnRemovedByNameDelegates.Remove(World);
 	}
 	
 	if (System != nullptr)
@@ -148,27 +153,11 @@ void UNDynamicRefsDeveloperOverlay::Unbind(const UWorld* World)
 	UpdateBanner();
 }
 
-void UNDynamicRefsDeveloperOverlay::OnWorldPostInitialization(UWorld* World,
-	FWorldInitializationValues WorldInitializationValues)
-{
-	Bind(World);
-}
-
-void UNDynamicRefsDeveloperOverlay::OnWorldBeginTearDown(UWorld* World)
-{
-	if (World != nullptr)
-	{
-		Unbind(World);
-	}
-}
-
 void UNDynamicRefsDeveloperOverlay::UpdateBanner() const
 {
-	const bool bNamedReferences = (NamedReferences != nullptr && 
-		NamedReferences->IsValidLowLevel() && 
+	const bool bNamedReferences = (IsValid(NamedReferences) &&
 		NamedReferences->GetNumItems() > 0);
-	const bool bDynamicReferences = (DynamicReferences != nullptr && 
-		DynamicReferences->IsValidLowLevel() && 
+	const bool bDynamicReferences = (IsValid(DynamicReferences) &&
 		DynamicReferences->GetNumItems() > 0);
 		
 	if (bNamedReferences || bDynamicReferences)

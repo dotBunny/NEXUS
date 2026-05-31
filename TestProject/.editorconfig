@@ -6,8 +6,10 @@ charset = utf-8
 indent_style = tab
 indent_size = 4
 tab_width = 4
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 max_line_length = 150
+file_header_template = Copyright dotBunny Inc. All Rights Reserved.\nSee the LICENSE file at the repository root for more information.
+
 
 # ReSharper properties
 resharper_cpp_keep_user_linebreaks = false
@@ -42,7 +44,7 @@ indent_size = 4
 tab_width = 4
 max_line_length = off
 
-file_header_template = Copyright dotBunny Inc. All Rights Reserved.\nSee the LICENSE file at the repository root for more information.
+[*.{cpp,h}]
 
 # Visual C++ Code Style settings
 
@@ -109,7 +111,6 @@ cpp_space_pointer_reference_alignment = left
 cpp_space_around_ternary_operator = insert
 cpp_wrap_preserve_blocks = one_liners
 
-[*.{cpp,h}]
 
 # Naming convention rules (note: currently need to be ordered from more to less specific)
 

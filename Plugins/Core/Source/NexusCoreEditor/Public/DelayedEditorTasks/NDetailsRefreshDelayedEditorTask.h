@@ -7,13 +7,20 @@
 #include "NDelayedEditorTask.h"
 #include "NDetailsRefreshDelayedEditorTask.generated.h"
 
+/**
+ * Delayed editor task that forces the Details panel to reload its property customizations.
+ *
+ * Useful after registering or unregistering a detail customization at runtime — the panel
+ * needs a refresh tick to pick up the change.
+ */
 UCLASS()
 class NEXUSCOREEDITOR_API UNDetailsRefreshDelayedEditorTask : public UNDelayedEditorTask
 {
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
+	/** Schedules the refresh to run after a short delay (0.5s, 5 ticks). */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Core")
 	static void Create()
 	{
 		UAsyncEditorDelay* DelayedMechanism = CreateDelayMechanism();

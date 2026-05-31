@@ -14,6 +14,7 @@ namespace UnrealBuildTool.Rules
 					"CommonUI",
 					"Core",
 					"Engine",
+					"GameplayTags",
 					"UMG"
 				]
 			);

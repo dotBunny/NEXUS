@@ -35,8 +35,15 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	}
 
 	// Register with the management system so it will handle ticking the component
-	Manager = UNActorPoolSubsystem::Get(GetWorld());
-	Manager->RegisterTickableSpawner(this);
+	Subsystem = UNActorPoolSubsystem::Get(GetWorld());
+	if (!Subsystem.IsValid())
+	{
+		// No subsystem on this world (e.g. preview/thumbnail/inactive worlds); skip registration.
+		UE_LOG(LogNexusActorPools, Verbose, TEXT("UNActorPoolSpawnerComponent on AActor(%s) could not resolve UNActorPoolSubsystem for UWorld(%s); skipping registration."),
+			*GetNameSafe(GetOwner()), *GetNameSafe(GetWorld()));
+		return;
+	}
+	Subsystem->RegisterTickableSpawner(this);
 	WeightedIndices.Empty();
 
 	// Create / validate pools
@@ -50,11 +57,11 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		}
 
 		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
-		if (!Manager->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
+		if (!Subsystem->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
 			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());
 		}
-		
+
 		// Add to the weighted list
 		WeightedIndices.Add(i, Templates[i].Weight);
 	}
@@ -62,7 +69,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	
 	if (TemplateCount > 0 && bRandomizeSeed)
 	{
-		Seed = FNRandom::NonDeterministic.RandHelper(42);
+		Seed = FNRandom::GetNonDeterministic().RandHelper(42);
 	}
 
 	if (Distribution == ENActorPoolSpawnerDistribution::Spline)
@@ -75,9 +82,9 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 void UNActorPoolSpawnerComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-	if (Manager != nullptr) // !Client
+	if (Subsystem.IsValid())
 	{
-		Manager->UnregisterTickableSpawner(this);
+		Subsystem->UnregisterTickableSpawner(this);
 	}
 }
 
@@ -90,8 +97,11 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 
 void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 {
-	if (!bSpawningEnabled && !bIgnoreSpawningFlag || !WeightedIndices.HasData()) return;
+	if ((!bSpawningEnabled && !bIgnoreSpawningFlag) || !WeightedIndices.HasData()) return;
+
+	if (!Subsystem.IsValid()) { return; }
 	
+
 	TArray<FVector> OutLocations;
 	switch (Distribution)
 	{
@@ -162,14 +172,15 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 	}
 	
 	const FRotator SpawnRotator = this->GetComponentRotation();
-	for (int32 i = 0; i < Count; i++)
+	const int32 OutCount = OutLocations.Num();
+	for (int32 i = 0; i < OutCount; i++)
 	{
 		int32 RandomIndex = 0;
 		if (TemplateCount > 1)
 		{
 			RandomIndex = WeightedIndices.RandomTrackedValue(Seed);
 		}
-		Manager->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
+		Subsystem->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
 	}
 	TimeSinceSpawned = 0;
 }
@@ -200,6 +211,7 @@ void UNActorPoolSpawnerComponent::CacheSplineComponent()
 			if (FoundSplineComponents[i]->GetFName() == SplineComponentName)
 			{
 				CachedSplineComponent = FoundSplineComponents[i];
+				break;
 			}
 		}
 	}

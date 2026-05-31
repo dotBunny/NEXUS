@@ -38,30 +38,23 @@ void FNEditorUtils::UnregisterSettings(const UDeveloperSettings* SettingsObject)
 	}
 }
 
-FBlueprintEditor* FNEditorUtils::GetForegroundBlueprintEditor()
+IAssetEditorInstance* FNEditorUtils::GetForegroundAssetEditor()
 {
-	for (TArray<UObject*> EditedAssets = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllEditedAssets();
-		UObject* Asset : EditedAssets)
+	TArray<IAssetEditorInstance*> AssetEditorInstances = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllOpenEditors();
+	const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
+	for (IAssetEditorInstance* AssetEditorInstance : AssetEditorInstances)
 	{
-		IAssetEditorInstance* AssetEditorInstance = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset(Asset, false);
-		FAssetEditorToolkit* AssetEditorToolkit = static_cast<FAssetEditorToolkit*>(AssetEditorInstance);
-
-		if (const TSharedPtr<SDockTab> Tab = AssetEditorToolkit->GetTabManager()->GetOwnerTab();
-			Tab->IsForeground())
+		const TSharedPtr<SDockTab> Tab = AssetEditorInstance->GetAssociatedTabManager()->GetOwnerTab();
+		if (Tab->IsForeground())
 		{
-  			return static_cast<FBlueprintEditor*>(AssetEditorToolkit);
+			TSharedPtr<SWindow> ParentWindow = Tab->GetParentWindow();
+			if (ParentWindow == ActiveWindow)
+			{
+				return AssetEditorInstance;
+			}
 		}
 	}
 	return nullptr;
-}
-
-bool FNEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection)
-{
-	const FBlueprintEditor* BlueprintEditor = GetForegroundBlueprintEditor();
-	if (BlueprintEditor == nullptr) return false;
-
-	OutSelection = BlueprintEditor->GetSelectedNodes();
-	return true;
 }
 
 UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclassOf<UObject>& InParentClass)
@@ -108,7 +101,7 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 	const TCHAR* StagingSectionKey = TEXT("Staging");
 	const TCHAR* DisallowedConfigFilesKey = TEXT("+DisallowedConfigFiles");
 	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
 	
 	if (!GConfig->IsReadyForUse())
 	{
@@ -151,7 +144,7 @@ void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
 	const TCHAR* StagingSectionKey = TEXT("Staging");
 	const TCHAR* AllowedConfigFilesKey = TEXT("+AllowedConfigFiles");
 	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), *FPaths::GetPathLeaf(FPaths::ProjectDir()), *Config);
+	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
 	
 	if (!GConfig->IsReadyForUse())
 	{
@@ -216,10 +209,53 @@ void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDock
 	}
 }
 
+void FNEditorUtils::CleanLogsFolder()
+{
+	TArray<FString> FilePaths;
+	IFileManager& FileManager = IFileManager::Get();
+	
+	TArray<FString> Searches;
+	Searches.Add(TEXT("*BuildOut*"));
+	Searches.Add(TEXT("*-backup-*")); // Backups
+	Searches.Add(TEXT("NEXUS_Compare*")); // NEXUS Compares
+	Searches.Add(TEXT("NEXUS_Snapshot*")); // NEXUS Snapshots
+	Searches.Add(TEXT("NEXUS_WorldAssembly*")); // NEXUS Snapshots
+	Searches.Add(TEXT("*VersionSelect*")); // UE Version Selector
+	Searches.Add(FString::Printf(TEXT("%s_*"), FApp::GetProjectName())); // Project secondary logs
+
+	const FString ProjectLogDir = FPaths::ProjectLogDir();
+	int32 DeleteCount = 0;
+
+	for (const FString& Search : Searches)
+	{
+		FilePaths.Reset();
+		FileManager.FindFilesRecursive(FilePaths, *ProjectLogDir, *Search, true, false);
+		for (const FString& File : FilePaths)
+		{
+			FileManager.Delete(*File, false, true);
+			DeleteCount++;
+		}
+	}
+	
+	if (DeleteCount > 0)
+	{
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Deleted %i files from %s."), DeleteCount, *FPaths::ProjectLogDir());
+	}
+	else
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("No files found to delete from %s."), *FPaths::ProjectLogDir());
+	}
+}
+
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
-	
+	if (BlutilityModule == nullptr)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Attempting to access the Blutility Module prior to it being loaded."));
+		return;
+	}
+
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)
 	{
@@ -238,6 +274,12 @@ void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FTe
 void FNEditorUtils::RemoveWorkspaceItem(const FName& WidgetIdentifier)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
+	if (BlutilityModule == nullptr)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Attempting to access the Blutility Module prior to it being loaded."));
+		return;
+	}
+
 	const TArray<TSharedRef<FWorkspaceItem>>& Children = BlutilityModule->GetMenuGroup()->GetChildItems();
 	TSharedPtr<FWorkspaceItem> Found;
 	for (const TSharedRef<FWorkspaceItem>& Child : Children)

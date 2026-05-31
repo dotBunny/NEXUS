@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCirclePickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points in the plane of a circle using different
@@ -55,6 +56,14 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNCirclePickerParams& Params);
 	
 	/**
+	 * Generate random points inside or on the perimeter of a circle using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNCirclePickerParams& Params);
+	
+	/**
 	 * Checks if a point is inside or on the perimeter of a circle.	 
 	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
@@ -85,6 +94,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point));

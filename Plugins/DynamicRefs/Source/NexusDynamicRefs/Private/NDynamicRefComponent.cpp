@@ -2,22 +2,28 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NDynamicRefComponent.h"
+
+#include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
+
+void UNDynamicRefComponent::OnComponentCreated()
+{
+	Super::OnComponentCreated();
+	bWantsInitializeComponent = (Lifecycle == ENActorComponentLifecycle::InitializeComponent);
+}
 
 void UNDynamicRefComponent::BeginPlay()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::BeginPlay)
+	if (Lifecycle == ENActorComponentLifecycle::BeginPlay)
 	{
-		// Register the references with the subsystem
 		Register();
 	}
 	Super::BeginPlay();
-	
 }
 
 void UNDynamicRefComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::EndPlay)
+	if (Lifecycle == ENActorComponentLifecycle::BeginPlay)
 	{
 		Unregister();
 	}
@@ -26,7 +32,7 @@ void UNDynamicRefComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void UNDynamicRefComponent::InitializeComponent()
 {
-	if (LinkPhase == ENActorComponentLifecycleStart::InitializeComponent)
+	if (Lifecycle == ENActorComponentLifecycle::InitializeComponent)
 	{
 		Register();
 	}
@@ -35,9 +41,8 @@ void UNDynamicRefComponent::InitializeComponent()
 
 void UNDynamicRefComponent::UninitializeComponent()
 {
-	if (BreakPhase == ENActorComponentLifecycleEnd::UninitializeComponent)
+	if (Lifecycle == ENActorComponentLifecycle::InitializeComponent)
 	{
-		// Unregister the references with the subsystem
 		Unregister();
 	}
 	Super::UninitializeComponent();
@@ -45,42 +50,77 @@ void UNDynamicRefComponent::UninitializeComponent()
 
 void UNDynamicRefComponent::Register()
 {
-	const int FastReferenceCount = FastReferences.Num();
-	const int NamedReferenceCount = NamedReferences.Num();
-	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
+	const int32 FastReferenceCount = FastReferences.Num();
+	const int32 NamedReferenceCount = NamedReferences.Num();
+	const int32 TagReferenceCount = TagReferences.Num();
+	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
-		for (int i = 0; i < FastReferenceCount; i++)
+		
+		if (Subsystem == nullptr)
+		{
+			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			return;
+		}
+		
+		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
 			Subsystem->AddObject(FastReferences[i], Owner);
 		}
-		for (int i = 0; i < NamedReferenceCount; i++)
+		for (int32 i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->AddObjectByName(NamedReferences[i], Owner);
+		}
+		
+		// Store gameplay tags as if they are named
+		TArray<FGameplayTag> GameplayTags;
+		TagReferences.GetGameplayTagArray(GameplayTags);
+		for (int32 i = 0; i < TagReferenceCount; i++)
+		{
+			if (GameplayTags[i] == FGameplayTag::EmptyTag) continue;
+			Subsystem->AddObjectByName(GameplayTags[i].GetTagName(), Owner);
 		}
 	}
 }
 
 void UNDynamicRefComponent::Unregister()
 {	
-	const int FastReferenceCount = FastReferences.Num();
-	const int NamedReferenceCount = NamedReferences.Num();
-	if (FastReferenceCount > 0 || NamedReferenceCount > 0)
+	const int32 FastReferenceCount = FastReferences.Num();
+	const int32 NamedReferenceCount = NamedReferences.Num();
+	const int32 TagReferenceCount = TagReferences.Num();
+	
+	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
 		AActor* Owner = GetOwner();
-		for (int i = 0; i < FastReferenceCount; i++)
+		
+		if (Subsystem == nullptr)
+		{
+			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			return;
+		}
+		
+		for (int32 i = 0; i < FastReferenceCount; i++)
 		{
 			if (FastReferences[i] == NDR_None) continue;
 			Subsystem->RemoveObject(FastReferences[i], Owner);
 		}
-		for (int i = 0; i < NamedReferenceCount; i++)
+		for (int32 i = 0; i < NamedReferenceCount; i++)
 		{
 			if (NamedReferences[i] == NAME_None) continue;
 			Subsystem->RemoveObjectByName(NamedReferences[i], Owner);
+		}
+		
+		// Store gameplay tags as if they are named
+		TArray<FGameplayTag> GameplayTags;
+		TagReferences.GetGameplayTagArray(GameplayTags);
+		for (int32 i = 0; i < TagReferenceCount; i++)
+		{
+			if (GameplayTags[i] == FGameplayTag::EmptyTag) continue;
+			Subsystem->RemoveObjectByName(GameplayTags[i].GetTagName(), Owner);
 		}
 	}
 }

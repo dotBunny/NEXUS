@@ -5,7 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "NSplinePicker.h"
+#include "NPickerMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Macros/NValidationMacros.h"
 #include "Macros/NWorldMacros.h"
 #include "NSplinePickerLibrary.generated.h"
 
@@ -14,7 +16,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/spline/">UNSplinePickerLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Spline Picker Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Spline Picker Library")
 class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
@@ -40,7 +42,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param Params The parameters for the point generation. 
 	 * @param WorldContextObject Object that provides access to the world.
@@ -60,7 +62,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Updates the seed value to enable sequential random point generation.	 
 	 * @param Params The parameters for the point generation.
 	 * @param Seed The random seed to start with, and update.	  
@@ -81,7 +83,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	}
 	
 	/**
-	 * Generates a deterministic point on a spline.
+	 * Generates a random point on a spline.
 	 * Useful for one-time random point generation with reproducible results. 
 	 * @param Params The parameters for the point generation.
 	 * @param Seed The random seed to start with, and update.	  
@@ -111,6 +113,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Point On?", Category = "NEXUS|Picker|Spline")
 	static bool IsPointOn(const USplineComponent* SplineComponent, const FVector& Point)
 	{
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, false)
 		return FNSplinePicker::IsPointOn(SplineComponent, Point);
 	}
 	
@@ -123,6 +126,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	UFUNCTION(BlueprintCallable, DisplayName="Spline: Is Points On?", Category = "NEXUS|Picker|Spline")
 	static TArray<bool> IsPointsOn(const TArray<FVector>& Points, const USplineComponent* SplineComponent)
 	{
+		N_VALIDATE_RETURN(LogNexusPicker, SplineComponent, TArray<bool>())
 		return FNSplinePicker::IsPointsOn(Points, SplineComponent);
 	}
 };

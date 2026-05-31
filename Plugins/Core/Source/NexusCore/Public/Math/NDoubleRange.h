@@ -8,16 +8,21 @@
 #include "NDoubleRange.generated.h"
 
 /**
- * A double-based range structure.
+ * A double-precision inclusive range [Minimum, Maximum].
+ *
+ * Defaults span the entire representable range of double; override either bound at author time.
+ * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_IMPLEMENT_RANGE.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNDoubleRange
 {
 	GENERATED_BODY()
-	
+
+	/** Lower bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	double Minimum = MIN_dbl;
-	
+
+	/** Upper bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	double Maximum = MAX_dbl;
 

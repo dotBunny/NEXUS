@@ -9,7 +9,7 @@ void FNBlockoutModule::StartupModule()
 {
 	
 	N_UPDATE_UPLUGIN("NexusBlockout")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNBlockoutModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNBlockoutModule::OnPostEngineInit);
 }
 
 void FNBlockoutModule::OnPostEngineInit()

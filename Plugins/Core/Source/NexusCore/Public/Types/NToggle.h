@@ -9,11 +9,11 @@
  * An enumeration representing a boolean value, with a default option.
  */
 UENUM(BlueprintType)
-enum ENToggle : int8
+enum class ENToggle : uint8
 {
-	T_Default = -1		UMETA(DisplayName = "Default", Description = "Take no action"),
-	T_False = 0			UMETA(DisplayName = "False"),
-	T_True = 1			UMETA(DisplayName = "True")
+	Default = 0			UMETA(DisplayName = "Default", Description = "Take no action"),
+	Disabled = 1		UMETA(DisplayName = "Disabled"),
+	Enabled = 2			UMETA(DisplayName = "Enabled")
 };
 
 /**
@@ -22,13 +22,19 @@ enum ENToggle : int8
 class NEXUSCORE_API FNToggle
 {
 public:
+	/**
+	 * Returns a human-readable name for InToggle.
+	 * @param InToggle The enum value to stringify.
+	 * @return "Default", "Disabled", "Enabled", or "Unknown" for unrecognized values.
+	 */
 	static FString ToString(const ENToggle& InToggle)
 	{
 		switch (InToggle)
 		{
-			case T_Default: return TEXT("Default");
-			case T_False: return TEXT("False");
-			case T_True: return TEXT("True");
+			using enum ENToggle;
+			case Default: return TEXT("Default");
+			case Disabled: return TEXT("Disabled");
+			case Enabled: return TEXT("Enabled");
 			default: return TEXT("Unknown");
 		}
 	}

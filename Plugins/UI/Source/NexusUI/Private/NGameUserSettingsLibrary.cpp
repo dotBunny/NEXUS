@@ -3,9 +3,11 @@
 
 #include "NGameUserSettingsLibrary.h"
 
+#include "NUIMinimal.h"
 #include "Components/NComboBoxString.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Macros/NValidationMacros.h"
 
 TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 	NSLOCTEXT("NexusUI", "FullscreenDisplayModeLabel", "Fullscreen"),
@@ -15,22 +17,14 @@ TArray<FText> UNGameUserSettingsLibrary::DisplayModeTexts = {
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 };
 
-TArray<FString> UNGameUserSettingsLibrary::DisplayModeLabels = {
-	DisplayModeTexts[0].ToString(),
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
-	DisplayModeTexts[1].ToString(),
-	DisplayModeTexts[2].ToString()
-#endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
-};
-
 EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromString(const FString& Selection)
 {
-#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX		
-	if (DisplayModeLabels[2].Compare(Selection) == 0)
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+	if (DisplayModeTexts[2].ToString().Compare(Selection) == 0)
 	{
 		return EWindowMode::Type::Windowed;
 	}
-	if (DisplayModeLabels[1].Compare(Selection) == 0)
+	if (DisplayModeTexts[1].ToString().Compare(Selection) == 0)
 	{
 		return EWindowMode::Type::WindowedFullscreen;
 	}
@@ -57,30 +51,43 @@ EWindowMode::Type UNGameUserSettingsLibrary::GetWindowModeFromText(const FText& 
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
-FString& UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
+TArray<FString> UNGameUserSettingsLibrary::GetWindowModeStringSelections()
 {
+	TArray<FString> Selections;
+	Selections.Reserve(DisplayModeTexts.Num());
+	for (const FText& Text : DisplayModeTexts)
+	{
+		Selections.Add(Text.ToString());
+	}
+	return MoveTemp(Selections);
+}
+
+FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
+{
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
 FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 {
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
-FString& UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
+FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
 {
 #if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 	switch(Mode)
 	{
 	case EWindowMode::WindowedFullscreen:
-		return DisplayModeLabels[1];
+		return DisplayModeTexts[1].ToString();
 	case EWindowMode::Windowed:
-		return DisplayModeLabels[2];
+		return DisplayModeTexts[2].ToString();
 	default:
-		return DisplayModeLabels[0];
+		return DisplayModeTexts[0].ToString();
 	}
 #else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
-	return DisplayModeLabels[0];
+	return DisplayModeTexts[0].ToString();
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
@@ -97,12 +104,13 @@ FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Ty
 		return DisplayModeTexts[0];
 	}
 #else // !(PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX)
-	return DisplayModeLabels[0];
+	return DisplayModeTexts[0];
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
 {
+	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionFromDisplayResolution(GEngine->GetGameUserSettings()->GetScreenResolution());
 }
 
@@ -114,7 +122,17 @@ FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntP
 FIntPoint UNGameUserSettingsLibrary::GetDisplayResolutionFromSelection(const FString& Selection)
 {
 	TArray<FString> Resolution;
-	Selection.ParseIntoArray(Resolution, TEXT("x"), true);
+	
+	// Parse
+	const int32 ElementCount = Selection.ParseIntoArray(Resolution, TEXT("x"), true);
+	
+	// Ensure we can convert to a FIntPoint (in-case the provided string isn't one we made)
+	if (ElementCount < 2)
+	{
+		return FIntPoint(-1,-1);
+	}
+	
+	// Return our value
 	return FIntPoint(
 		FCString::Atoi(*Resolution[0].TrimStartAndEnd()),
 		FCString::Atoi(*Resolution[1].TrimStartAndEnd())
@@ -128,17 +146,18 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 	UKismetSystemLibrary::GetSupportedFullscreenResolutions(AllResolutions);
 	for (const FIntPoint& Resolution : AllResolutions)
 	{
-		SupportedResolutions.Add(FString::Printf(TEXT("%dx%d"), Resolution.X, Resolution.Y));
+		SupportedResolutions.Add(FString::Printf(TEXT("%ix%i"), Resolution.X, Resolution.Y));
 	}
 	return MoveTemp(SupportedResolutions);
 }
 
 void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
 	ComboBox->ClearOptions();
-	for (auto& Label : DisplayModeLabels)
+	for (const FText& Text : DisplayModeTexts)
 	{
-		ComboBox->AddOption(Label);
+		ComboBox->AddOption(Text.ToString());
 	}
 	if (bSelectCurrent)
 	{
@@ -148,6 +167,7 @@ void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxStr
 
 void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
 	ComboBox->ClearOptions();
 	for (auto& Resolution : GetSupportedDisplayResolutions())
 	{

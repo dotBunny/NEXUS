@@ -57,14 +57,21 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 
 void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfull)
 {
+	// Editor may have started shutting down between Execute() releasing this task and the HTTP
+	// response landing. Avoid touching settings or opening dialogs once exit has been requested.
+	if (!GIsRunning || IsEngineExitRequested())
+	{
+		return;
+	}
+
 	if (!bProcessedSuccessfull)
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."));
 		return;
 	}
 	if (!Response.IsValid())
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request response was invalid."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request response was invalid."));
 		return;
 	}
 	
@@ -74,7 +81,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	
 	for (int32 i = Lines.Num() - 1; i >= 0; i--)
 	{
-		if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int Number")))
+		if (Lines[i].TrimStart().StartsWith(TEXT("constexpr int32 Number")))
 		{
 			TargetVersion = Lines[i];
 			break;
@@ -84,7 +91,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	// We didn't find anything, bail
 	if (TargetVersion.IsEmpty())
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to find remote plugin version for update."))
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to find remote plugin version for update."));
 		return;
 	}
 	
@@ -100,7 +107,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 	}
 	
 	// We need to clean up the line and look just for the number
-	TargetVersion = TargetVersion.Replace(TEXT("constexpr int Number ="), TEXT(""));
+	TargetVersion = TargetVersion.Replace(TEXT("constexpr int32 Number ="), TEXT(""));
 	TargetVersion = TargetVersion.Replace(TEXT(";"), TEXT(""));
 	TargetVersion = TargetVersion.TrimStartAndEnd();
 	UE_LOG(LogNexusCoreEditor, Log, TEXT("Found remote plugin version(%s)."), *TargetVersion);
@@ -111,8 +118,17 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		return;
 	}
 
+	// Guard against a malformed or attacker-supplied response writing nonsense into user settings.
+	// Number is a monotonically increasing build counter; one million is well beyond any plausible
+	// real value while keeping parse-overflow and negative-sign cases out.
+	constexpr int32 MaxPlausibleVersionNumber = 1000000;
 	const int32 VersionNumberActual = FCString::Atoi(*TargetVersion);
-	
+	if (VersionNumberActual <= 0 || VersionNumberActual > MaxPlausibleVersionNumber)
+	{
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Remote plugin version(%i) is outside the expected range; ignoring."), VersionNumberActual);
+		return;
+	}
+
 	// Notify about upgrade
 	if (VersionNumberActual > Settings->UpdatesIgnoreVersion)
 	{

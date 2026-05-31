@@ -32,8 +32,8 @@ void ANSamplesDisplayActor::SortKnownDisplays()
 ANSamplesDisplayActor::ANSamplesDisplayActor(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	// Create reference storage
-	Parts = MakeUnique<FNSamplesDisplayComponents>();
-	Materials = MakeUnique<FNSamplesDisplayMaterials>();
+	Parts = CreateDefaultSubobject<UNSamplesDisplayComponents>(TEXT("PartsObject"));
+	Materials = CreateDefaultSubobject<UNSamplesDisplayMaterials>(TEXT("MaterialsObject"));
 	
 	Parts->SceneRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneRoot"));
 	Parts->SceneRoot->SetMobility(EComponentMobility::Static);
@@ -263,15 +263,6 @@ void ANSamplesDisplayActor::BeginDestroy()
 		TestInstance->ClearBindings();
 		TestInstance->RemoveFromRoot();
 		TestInstance = nullptr;
-	}
-	
-	if (Parts != nullptr)
-	{
-		Parts.Reset();
-	}
-	if (Materials != nullptr)
-	{
-		Materials.Reset();	
 	}
 	
 	Super::BeginDestroy();

@@ -9,11 +9,17 @@
 #include "CollisionVisualizer/NCollisionVisualizerUtils.h"
 #include "Selection.h"
 #include "Macros/NFlagsMacros.h"
+#include "Macros/NValidationMacros.h"
 
 void UNCollisionVisualizerWidget::NativeConstruct()
 {
 	UniqueIdentifier = NEXUS::ToolingEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
+	
+	N_VALIDATE(LogNexusToolingEditor, SelectStartButton)
+	N_VALIDATE(LogNexusToolingEditor, SelectEndButton)
+	N_VALIDATE(LogNexusToolingEditor, ActorNameText)
+	N_VALIDATE(LogNexusToolingEditor, ObjectDetails)
 	
 	Super::NativeConstruct();
 	
@@ -61,64 +67,64 @@ void UNCollisionVisualizerWidget::OnWorldTick(const ANCollisionVisualizerActor* 
 	UpdateSettings(Actor);
 	
 	// Draw Actor w/ Settings
-	using enum ECollisionVisualizerMethod;
+	using enum ENCollisionVisualizerMethod;
 	if (Settings.Query.QueryMethod == LineTrace)
 	{
-		using enum ECollisionVisualizerPrefix;
+		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::DoLineTraceTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::LineTraceTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Sweep)
 	{
-		using enum ECollisionVisualizerPrefix;
+		using enum ENCollisionVisualizerPrefix;
 		if (Settings.Query.QueryPrefix == Single)
 		{
-			FNCollisionVisualizerUtils::DoSweepSingle(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepSingle(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Multi)
 		{
-			FNCollisionVisualizerUtils::DoSweepMulti(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryPrefix == Test)
 		{
-			FNCollisionVisualizerUtils::DoSweepTest(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::SweepTest(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetEndPosition(), 
 				Actor->GetRotation());
 		}
 	}
 	else if (Settings.Query.QueryMethod == Overlap)
 	{
-		using enum ECollisionVisualizerOverlapBlocking;
+		using enum ENCollisionVisualizerOverlapBlocking;
 		if (Settings.Query.QueryOverlapBlocking == Blocking)
 		{
-			FNCollisionVisualizerUtils::DoOverlapBlocking(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapBlocking(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Any)
 		{
-			FNCollisionVisualizerUtils::DoOverlapAny(Settings, Actor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapAny(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 		else if (Settings.Query.QueryOverlapBlocking == Multi)
 		{
-			FNCollisionVisualizerUtils::DoOverlapMulti(Settings, QueryActor->GetWorld(), 
+			FNCollisionVisualizerUtils::OverlapMulti(Settings, Actor->GetWorld(), 
 				Actor->GetStartPosition(), Actor->GetRotation());
 		}
 	}
@@ -134,9 +140,9 @@ void UNCollisionVisualizerWidget::PushSettings(ANCollisionVisualizerActor* Actor
 		
 		Actor->SetActorTickInterval(Settings.Drawing.DrawTimer);
 		
-		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::EditorOnly));
-		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::PlayInEditor));
-		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ECollisionVisualizerDrawMode::SimulateInEditor));
+		Actor->SetTickInEditor(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::EditorOnly));
+		Actor->SetTickInGame(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::PlayInEditor));
+		Actor->SetTickInSimulation(N_FLAGS_HAS_UINT8(Settings.Drawing.DrawMode, ENCollisionVisualizerDrawMode::SimulateInEditor));
 	}
 }
 
@@ -269,6 +275,9 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		
 		QueryActor = World->SpawnActor<ANCollisionVisualizerActor>(
 			Settings.Points.StartPoint, Settings.Points.Rotation, SpawnParams);
+		
+		if (QueryActor == nullptr) return;
+		
 		QueryActor->SetFlags(RF_Transient);
 		
 		PushSettings(QueryActor);

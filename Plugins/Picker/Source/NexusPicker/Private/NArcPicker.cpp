@@ -8,16 +8,22 @@
 #include "NPickerUtils.h"
 #include "NRandom.h"
 
-
 #define N_PICKER_ARC_PREFIX \
-	const int OutLocationsStartIndex = OutLocations.Num(); \
+	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
 	const float MaxDegrees = (Params.Degrees * 0.5f); \
-	const float MinDegrees = -MaxDegrees;
+	const float MinDegrees = -MaxDegrees; \
+	const float MinDistanceSq = Params.MinimumDistance * Params.MinimumDistance; \
+	const float MaxDistanceSq = Params.MaximumDistance * Params.MaximumDistance; \
+	if (Params.MinimumDistance < 0.f || Params.MaximumDistance < Params.MinimumDistance) \
+	{ \
+		UE_LOG(LogNexusPicker, Warning, TEXT("FNArcPickerParams has invalid distance range (Min=%.2f, Max=%.2f); points may not be where you expect."), Params.MinimumDistance, Params.MaximumDistance); \
+	}
 
+// Inverse-CDF transform: uniform u in [0,1] maps to area-weighted radius across the annular sector.
 #define N_PICKER_RADIAL_LOCATION(FloatRange) \
-	const float RandomAngle = FMath::DegreesToRadians(FloatRange(MinDegrees, MaxDegrees)); \
-	const float RandomDistance = FloatRange(Params.MinimumDistance, Params.MaximumDistance); \
+	const float RandomAngle = FMath::DegreesToRadians(Random.FloatRange(MinDegrees, MaxDegrees)); \
+	const float RandomDistance = FMath::Sqrt(Random.FloatRange(MinDistanceSq, MaxDistanceSq)); \
 	FVector Location = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(RandomAngle), FMath::Sin(RandomAngle), 0) * RandomDistance);
 
 #if ENABLE_VISUAL_LOG
@@ -32,7 +38,7 @@
 		const FVector OutMaxPoint = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(MaxAngle), FMath::Sin(MaxAngle), 0) *Params.MaximumDistance); \
 		UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, InMinPoint, OutMinPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, InMaxPoint, OutMaxPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		for (int i = 0; i < Params.Count; i++) \
+		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
 			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
@@ -41,15 +47,15 @@
 #define N_PICKER_RADIAL_VLOG
 #endif // ENABLE_VISUAL_LOG
 
-
-#define RANDOM_FLOAT_RANGE FNRandom::Deterministic.FloatRange
+#define RANDOM_FLOAT_RANGE  FloatRange
 void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -59,7 +65,7 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& P
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -68,7 +74,7 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& P
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			OutLocations.Add(Location);
@@ -78,14 +84,15 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, const FNArcPickerParams& P
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FNRandom::NonDeterministic.FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams& Params)
 {
+	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -95,7 +102,7 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -104,7 +111,7 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			OutLocations.Add(Location);
@@ -114,15 +121,15 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 }
 #undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE RandomStream.FRandRange
+#define RANDOM_FLOAT_RANGE FRandRange
 void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNArcPickerParams& Params)
 {
-	const FRandomStream RandomStream(Seed);
+	const FRandomStream Random(Seed);
 	N_PICKER_ARC_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_TRACE
@@ -132,7 +139,7 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
 		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
@@ -141,13 +148,50 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 	}
 	else
 	{
-		for (int i = 0; i < Params.Count; i++)
+		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
 			OutLocations.Add(Location);
 		}
 	}
 	N_PICKER_RADIAL_VLOG
-	Seed = RandomStream.GetCurrentSeed();
+	Seed = Random.GetCurrentSeed();
+}
+#undef RANDOM_FLOAT_RANGE
+
+
+#define RANDOM_FLOAT_RANGE FloatRange
+void FNArcPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params)
+{
+	N_PICKER_ARC_PREFIX
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		for (int32 i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			OutLocations.Add(Location);
+		}
+	}
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	{
+		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		for (int32 i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			OutLocations.Add(Location);
+		}
+	}
+	else
+	{
+		for (int32 i = 0; i < Params.Count; i++)
+		{
+			N_PICKER_RADIAL_LOCATION(RANDOM_FLOAT_RANGE)
+			OutLocations.Add(Location);
+		}
+	}
+	N_PICKER_RADIAL_VLOG
 }
 #undef RANDOM_FLOAT_RANGE

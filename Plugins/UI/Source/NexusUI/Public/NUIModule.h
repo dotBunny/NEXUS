@@ -12,8 +12,14 @@
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNUIModule final : public IModuleInterface
 {
+public:
+	//~IModuleInterface
 	virtual void StartupModule() override;
-	void OnPostEngineInit();
+	//End IModuleInterface
 
 	N_IMPLEMENT_MODULE(FNUIModule, "NexusUI")
+
+private:
+	/** Post-engine-init hook used to register things that depend on slate/umg being fully live. */
+	static void OnPostEngineInit();
 };

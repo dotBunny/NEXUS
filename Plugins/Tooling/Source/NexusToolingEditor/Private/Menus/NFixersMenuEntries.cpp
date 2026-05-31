@@ -18,5 +18,6 @@ void FNFixersMenuEntries::AddMenuEntries()
 	FixPoseAssetMenuEntry.Tooltip = NSLOCTEXT("NexusToolingEditor", "PoseAsset_OutOfDateAnimationSource_Tooltip", "Find and fix any PoseAssets in the selected content with out-of-date source animations.");
 	FixPoseAssetMenuEntry.Icon = FSlateIcon(FNToolingEditorStyle::GetStyleSetName(), "Command.FindAndFix.Item");
 	FixPoseAssetMenuEntry.Execute = FExecuteAction::CreateStatic(&FNPoseAssetFixer::OutOfDateAnimationSource, true);
+	FixPoseAssetMenuEntry.CanExecute = FCanExecuteAction::CreateStatic(&FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource);
 	FNFixersMenu::AddMenuEntry(FixPoseAssetMenuEntry);
 }

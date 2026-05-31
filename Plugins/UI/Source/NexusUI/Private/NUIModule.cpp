@@ -9,10 +9,9 @@
 void FNUIModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusUI")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNUIModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNUIModule::OnPostEngineInit);
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNUIModule::OnPostEngineInit()
 {
 	N_UPDATE_UPLUGIN("NexusUISamples")

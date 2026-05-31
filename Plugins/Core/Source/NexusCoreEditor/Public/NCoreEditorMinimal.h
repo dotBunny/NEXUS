@@ -3,4 +3,13 @@
 
 #pragma once
 
+/** Log category used by all NexusCoreEditor logging. */
 DECLARE_LOG_CATEGORY_EXTERN(LogNexusCoreEditor, Log, All);
+
+/**
+ * Identifiers used when trying to map to ToolMenus.
+ */
+namespace NEXUS::CoreEditor::ToolMenus
+{
+	inline FName LevelEditorToolBarUser = TEXT("LevelEditor.LevelEditorToolBar.User");
+}

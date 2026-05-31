@@ -10,26 +10,17 @@
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "NEditorSettings.generated.h"
 
+/**
+ * Project-level NEXUS editor settings (updates channel, update-check cadence).
+ *
+ * Saved to the NexusEditor config hierarchy and surfaced under Project Settings → NEXUS → Core.
+ */
 UCLASS(config = NexusEditor, defaultconfig)
 class UNEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNEditorSettings);
-	
-	virtual FName GetContainerName() const override { return FNEditorDefaults::GetEditorSettingsContainerName(); }
-	virtual FName GetCategoryName() const override {  return FNEditorDefaults::GetEditorSettingsCategoryName();  }
-	virtual FText GetSectionText() const override
-	{
-		const FText SectionText =  FText::FromString(TEXT("Core"));
-		return SectionText;
-	}
-	virtual FText GetSectionDescription() const override
-	{
-		
-		const FText SectionDescription = FText::FromString("General settings for the NEXUS: Core plugin.");
-		return SectionDescription;
-	}
+	N_IMPLEMENT_EDITOR_SETTINGS(UNEditorSettings, "Core", "General settings for the NEXUS: Core plugin.");
 
 #if WITH_EDITORONLY_DATA
 

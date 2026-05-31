@@ -13,23 +13,23 @@
 #define N_COLLISION_VISUALIZER_MID_COLOR Settings.Drawing.DrawMidColor
 #define N_COLLISION_VISUALIZER_MISS_COLOR Settings.Drawing.DrawMissColor
 
-void FNCollisionVisualizerUtils::DoLineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceSingle(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	FHitResult HitResult;
 	
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->LineTraceSingleByChannel(HitResult, StartPosition, EndPosition, 
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->LineTraceSingleByObjectType(HitResult, StartPosition, EndPosition, N_COLLISION_VISUALIZER_OBJECT_PARAMS);
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->LineTraceSingleByProfile(HitResult, StartPosition, EndPosition, 
 			Settings.Query.CollisionProfileName, Settings.Options.GetCollisionQueryParams());
@@ -51,23 +51,23 @@ void FNCollisionVisualizerUtils::DoLineTraceSingle(const FNCollisionVisualizerSe
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceMulti(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	TArray<FHitResult> HitResults;
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->LineTraceMultiByChannel(HitResults, StartPosition, EndPosition, 
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->LineTraceMultiByObjectType(HitResults, StartPosition, EndPosition, 
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->LineTraceMultiByProfile(HitResults, StartPosition, EndPosition, 
 			Settings.Query.CollisionProfileName, Settings.Options.GetCollisionQueryParams());
@@ -78,7 +78,7 @@ void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSet
 	{
 		// Adjust the end point to being the last hit point, unless it's by ObjectType.
 		FVector TraceEndPosition = HitResults.Last().Location;
-		if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+		if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 		{
 			TraceEndPosition = EndPosition;
 		}
@@ -88,7 +88,7 @@ void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSet
 	else
 	{
 		DrawDebugLine(World, StartPosition, EndPosition, 
-			HitResults.Num() > 0 ? N_COLLISION_VISUALIZER_MID_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
+			HitResults.IsEmpty() ?  N_COLLISION_VISUALIZER_MISS_COLOR : N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 	for (const FHitResult& HitResult : HitResults)
@@ -100,22 +100,22 @@ void FNCollisionVisualizerUtils::DoLineTraceMulti(const FNCollisionVisualizerSet
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::LineTraceTest(const FNCollisionVisualizerSettings& Settings, 
                                                 const UWorld* World, const FVector& StartPosition, const FVector& EndPosition)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->LineTraceTestByChannel(StartPosition, EndPosition, 
 			Settings.Query.Channel, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->LineTraceTestByObjectType(StartPosition, EndPosition, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
 			Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->LineTraceTestByProfile(StartPosition, EndPosition, Settings.Query.CollisionProfileName, Settings.Options.GetCollisionQueryParams());
 	}
@@ -129,24 +129,24 @@ void FNCollisionVisualizerUtils::DoLineTraceTest(const FNCollisionVisualizerSett
 
 
 
-void FNCollisionVisualizerUtils::DoSweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepSingle(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape CollisionShape = Settings.Query.GetCollisionShape();
 	FHitResult HitResult;
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->SweepSingleByChannel(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.Channel, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->SweepSingleByObjectType(HitResult, StartPosition, EndPosition, Rotation, 
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->SweepSingleByProfile(HitResult, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
@@ -170,24 +170,24 @@ void FNCollisionVisualizerUtils::DoSweepSingle(const FNCollisionVisualizerSettin
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
+void FNCollisionVisualizerUtils::SweepMulti(const FNCollisionVisualizerSettings& Settings, const UWorld* World, 
 	const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape CollisionShape = Settings.Query.GetCollisionShape();
 	TArray<FHitResult> HitResults;
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->SweepMultiByChannel(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.Channel, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->SweepMultiByObjectType(HitResults, StartPosition, EndPosition, Rotation, 
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->SweepMultiByProfile(HitResults, StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
@@ -197,7 +197,7 @@ void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSetting
 	if (bHit)
 	{
 		FVector SweepEnd = HitResults.Last().Location;
-		if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+		if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 		{
 			SweepEnd = EndPosition;
 		}
@@ -213,7 +213,7 @@ void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSetting
 	else
 	{
 		FNDrawDebugHelpers::DrawSweep(World, StartPosition, EndPosition, Rotation, CollisionShape, 
-			HitResults.Num() > 0 ? N_COLLISION_VISUALIZER_MID_COLOR : N_COLLISION_VISUALIZER_MISS_COLOR, 
+			HitResults.IsEmpty() ? N_COLLISION_VISUALIZER_MISS_COLOR :  N_COLLISION_VISUALIZER_MID_COLOR, 
 			false, Settings.Drawing.DrawTimer, SDPG_World, Settings.Drawing.DrawLineThickness);
 	}
 
@@ -226,22 +226,22 @@ void FNCollisionVisualizerUtils::DoSweepMulti(const FNCollisionVisualizerSetting
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings& Settings, const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
+void FNCollisionVisualizerUtils::SweepTest(const FNCollisionVisualizerSettings& Settings, const UWorld* World, const FVector& StartPosition, const FVector& EndPosition, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->SweepTestByChannel(StartPosition, EndPosition, Rotation, Settings.Query.Channel, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->SweepTestByObjectType(StartPosition, EndPosition, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->SweepTestByProfile(StartPosition, EndPosition, Rotation, Settings.Query.CollisionProfileName, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
@@ -254,23 +254,23 @@ void FNCollisionVisualizerUtils::DoSweepTest(const FNCollisionVisualizerSettings
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
+void FNCollisionVisualizerUtils::OverlapBlocking(const FNCollisionVisualizerSettings& Settings, const UWorld* World,
 	const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->OverlapBlockingTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->OverlapBlockingTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams());
@@ -283,23 +283,23 @@ void FNCollisionVisualizerUtils::DoOverlapBlocking(const FNCollisionVisualizerSe
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapAny(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->OverlapAnyTestByChannel(Position, Rotation, Settings.Query.Channel, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->OverlapAnyTestByObjectType(Position, Rotation, N_COLLISION_VISUALIZER_OBJECT_PARAMS, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->OverlapAnyTestByProfile(Position, Rotation, Settings.Query.CollisionProfileName, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams());
@@ -312,24 +312,24 @@ void FNCollisionVisualizerUtils::DoOverlapAny(const FNCollisionVisualizerSetting
 #endif // UE_ENABLE_DEBUG_DRAWING
 }
 
-void FNCollisionVisualizerUtils::DoOverlapMulti(const FNCollisionVisualizerSettings& Settings, 
+void FNCollisionVisualizerUtils::OverlapMulti(const FNCollisionVisualizerSettings& Settings, 
 	const UWorld* World, const FVector& Position, const FQuat& Rotation)
 {
 	N_COLLISION_VISUALIZER_COMMON
 	TArray<FOverlapResult>OverlapsResults;
 	const FCollisionShape& CollisionShape = Settings.Query.GetCollisionShape();
 	
-	if (Settings.Query.QueryBy == ECollisionVisualizerBy::Channel)
+	if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Channel)
 	{
 		bHit = World->OverlapMultiByChannel(OverlapsResults, Position, Rotation, Settings.Query.Channel, CollisionShape, 
 			Settings.Options.GetCollisionQueryParams(), Settings.Query.GetCollisionResponseParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::ObjectType)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::ObjectType)
 	{
 		bHit = World->OverlapMultiByObjectType(OverlapsResults, Position, Rotation, 
 			N_COLLISION_VISUALIZER_OBJECT_PARAMS, CollisionShape, Settings.Options.GetCollisionQueryParams());
 	}
-	else if (Settings.Query.QueryBy == ECollisionVisualizerBy::Profile)
+	else if (Settings.Query.QueryBy == ENCollisionVisualizerBy::Profile)
 	{
 		bHit = World->OverlapMultiByProfile(OverlapsResults, Position, Rotation, Settings.Query.CollisionProfileName, 
 			CollisionShape, Settings.Options.GetCollisionQueryParams());

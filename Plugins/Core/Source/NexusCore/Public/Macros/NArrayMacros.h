@@ -3,32 +3,45 @@
 
 #pragma once
 
+/**
+ * Generates the member set used by classes that wrap a flat TArray as a logical 2D grid.
+ *
+ * Expands to public Reset/Resize helpers, index conversion helpers (GetIndex/GetInverseIndex),
+ * typed GetData/SetData overloads, GetCount, and GetSurroundingIndices. Expects the host to
+ * declare TArray<DataType> DataArray plus IndexType-typed SizeX and SizeY members.
+ *
+ * @param IndexType Integer type used for grid coordinates (e.g. int32, uint32).
+ * @param DataType Element type stored in the backing array.
+ * @param DataArray Name of the TArray<DataType> member holding the flat storage.
+ * @param SizeX Name of the member holding the grid width.
+ * @param SizeY Name of the member holding the grid height.
+ */
 #define N_IMPLEMENT_FLAT_2D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY) \
 	{ \
 		SizeX = InSizeX; \
 		SizeY = InSizeY; \
-		Data.Empty(); \
-		Data.SetNum(SizeX * SizeY); \
+		DataArray.Empty(); \
+		DataArray.SetNum(SizeX * SizeY); \
 	} \
 	void Resize(const IndexType NewSizeX, const IndexType NewSizeY) \
 	{ \
 		TArray<DataType> NewData; \
 		NewData.Empty(); \
-		NewData.SetNum(NewSizeX * NewSizeY * NewSizeZ); \
+		NewData.SetNum(NewSizeX * NewSizeY); \
 		for (IndexType x = 0; x < SizeX; x++) \
 		{ \
 			if (x >= NewSizeX) continue; \
 			for (IndexType y = 0; y < SizeY; y++) \
 			{ \
 				if (y >= NewSizeY) continue; \
-				NewData[x + (y * NewSizeX)] = MoveTemp(Data[GetIndex(x, y)]); \
+				NewData[x + (y * NewSizeX)] = MoveTemp(DataArray[GetIndex(x, y)]); \
 			} \
 		} \
 		SizeX = NewSizeX; \
 		SizeY = NewSizeY; \
-		Data = MoveTemp(NewData); \
+		DataArray = MoveTemp(NewData); \
 	} \
 	\
 	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y) const \
@@ -97,29 +110,42 @@ public: \
 	void GetSurroundingIndices(const IndexType X, const IndexType Y, TArray<IndexType>& OutIndices) const \
 	{ \
 		const bool bCanXSubtract = X > 0; \
-		const uint32 XMinus = (X - 1); \
 		const bool bCanXAdd = X < (SizeX - 1); \
-		const uint32 XAdd = X + 1; \
 		const bool bCanYSubtract = Y > 0; \
-		const uint32 YMinus = (Y - 1); \
 		const bool bCanYAdd = Y < (SizeY - 1); \
-		const uint32 YAdd = (Y + 1); \
 		if (bCanXSubtract) \
 		{ \
+			const IndexType XMinus = X - 1; \
 			OutIndices.Add(GetIndex(XMinus, Y)); \
-			if (bCanYAdd) OutIndices.Add(GetIndex(XMinus, YAdd)); \
-			if (bCanYSubtract) OutIndices.Add(GetIndex(XMinus, YMinus)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XMinus, Y + 1)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XMinus, Y - 1)); \
 		} \
 		if (bCanXAdd) \
 		{ \
+			const IndexType XAdd = X + 1; \
 			OutIndices.Add(GetIndex(XAdd, Y)); \
-			if (bCanYAdd) OutIndices.Add(GetIndex(XAdd, YAdd)); \
-			if (bCanYSubtract) OutIndices.Add(GetIndex(XAdd, YMinus)); \
+			if (bCanYAdd) OutIndices.Add(GetIndex(XAdd, Y + 1)); \
+			if (bCanYSubtract) OutIndices.Add(GetIndex(XAdd, Y - 1)); \
 		} \
-		if (bCanYSubtract) OutIndices.Add(GetIndex(X, YMinus)); \
-		if (bCanYAdd) OutIndices.Add(GetIndex(X, YAdd)); \
+		if (bCanYSubtract) OutIndices.Add(GetIndex(X, Y - 1)); \
+		if (bCanYAdd) OutIndices.Add(GetIndex(X, Y + 1)); \
 	}
 
+/**
+ * 3D analogue of N_IMPLEMENT_FLAT_2D_ARRAY — generates the wrapping accessors around a flat TArray
+ * exposed as a logical 3D grid.
+ *
+ * Expects the host class to declare TArray<DataType> DataArray plus IndexType-typed SizeX, SizeY,
+ * and SizeZ members. Generates Reset/Resize, GetIndex/GetInverseIndex overloads (for IndexType,
+ * FVector, FIntVector3), GetData/SetData overloads, GetCount, and 26-neighbour GetSurroundingIndices.
+ *
+ * @param IndexType Integer type used for grid coordinates (e.g. int32, uint32).
+ * @param DataType Element type stored in the backing array.
+ * @param DataArray Name of the TArray<DataType> member holding the flat storage.
+ * @param SizeX Name of the member holding the grid width.
+ * @param SizeY Name of the member holding the grid height.
+ * @param SizeZ Name of the member holding the grid depth.
+ */
 #define N_IMPLEMENT_FLAT_3D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY, const IndexType InSizeZ) \
@@ -127,8 +153,8 @@ public: \
 		SizeX = InSizeX; \
 		SizeY = InSizeY; \
 		SizeZ = InSizeZ; \
-		Data.Empty(); \
-		Data.SetNum(SizeX * SizeY * SizeZ); \
+		DataArray.Empty(); \
+		DataArray.SetNum(SizeX * SizeY * SizeZ); \
 	} \
 	void Resize(const IndexType NewSizeX, const IndexType NewSizeY, const IndexType NewSizeZ) \
 	{ \
@@ -144,14 +170,14 @@ public: \
 				for (IndexType z = 0; z < SizeZ; z++) \
 				{ \
 					if (z >= NewSizeZ) continue; \
-					NewData[x + (y * NewSizeX) + (z * NewSizeX * NewSizeY)] = MoveTemp(Data[GetIndex(x, y, z)]); \
+					NewData[x + (y * NewSizeX) + (z * NewSizeX * NewSizeY)] = MoveTemp(DataArray[GetIndex(x, y, z)]); \
 				} \
 			} \
 		} \
 		SizeX = NewSizeX; \
 		SizeY = NewSizeY; \
 		SizeZ = NewSizeZ; \
-		Data = MoveTemp(NewData); \
+		DataArray = MoveTemp(NewData); \
 	} \
 	\
 	FORCEINLINE IndexType GetIndex(const IndexType X, const IndexType Y, const IndexType Z) const \
@@ -221,71 +247,71 @@ public: \
 	void GetSurroundingIndices(const IndexType X, const IndexType Y, const IndexType Z, TArray<IndexType>& OutIndices) const \
 	{ \
 		const bool bCanXSubtract = X > 0; \
-		const uint32 XMinus = (X - 1); \
 		const bool bCanXAdd = X < (SizeX - 1); \
-		const uint32 XAdd = X + 1; \
 		const bool bCanYSubtract = Y > 0; \
-		const uint32 YMinus = (Y - 1); \
 		const bool bCanYAdd = Y < (SizeY - 1); \
-		const uint32 YAdd = (Y + 1); \
 		const bool bCanZSubtract = Z > 0; \
-		const uint32 ZMinus = (Z - 1); \
 		const bool bCanZAdd = Z < (SizeZ - 1); \
-		const uint32 ZAdd = (Z + 1); \
 		if (bCanXSubtract) \
 		{ \
+			const IndexType XMinus = X - 1; \
 			OutIndices.Add(GetIndex(XMinus, Y, Z)); \
 			if (bCanYAdd) \
 			{ \
-				OutIndices.Add(GetIndex(XMinus, YAdd, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YAdd, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YAdd, ZMinus)); \
+				OutIndices.Add(GetIndex(XMinus, Y + 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, Y + 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, Y + 1, Z - 1)); \
 			} \
 			if (bCanYSubtract) \
 			{ \
-				OutIndices.Add(GetIndex(XMinus, YMinus, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, YMinus, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, YMinus, ZMinus)); \
+				OutIndices.Add(GetIndex(XMinus, Y - 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XMinus, Y - 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XMinus, Y - 1, Z - 1)); \
 			} \
 		} \
 		if (bCanXAdd) \
 		{ \
+			const IndexType XAdd = X + 1; \
 			OutIndices.Add(GetIndex(XAdd, Y, Z)); \
 			if (bCanYAdd) \
 			{ \
-				OutIndices.Add(GetIndex(XAdd, YAdd, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YAdd, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YAdd, ZMinus)); \
+				OutIndices.Add(GetIndex(XAdd, Y + 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, Y + 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, Y + 1, Z - 1)); \
 			} \
 			if (bCanYSubtract) \
 			{ \
-				OutIndices.Add(GetIndex(XAdd, YMinus, Z)); \
-				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, YMinus, ZAdd)); \
-				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, YMinus, ZMinus)); \
+				OutIndices.Add(GetIndex(XAdd, Y - 1, Z)); \
+				if (bCanZAdd) OutIndices.Add(GetIndex(XAdd, Y - 1, Z + 1)); \
+				if (bCanZSubtract) OutIndices.Add(GetIndex(XAdd, Y - 1, Z - 1)); \
 			} \
 		} \
 		if (bCanYSubtract) \
 		{ \
+			const IndexType YMinus = Y - 1; \
 			OutIndices.Add(GetIndex(X, YMinus, Z)); \
-			if (bCanZAdd) OutIndices.Add(GetIndex(X, YMinus, ZAdd)); \
-			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YMinus, ZMinus)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YMinus, Z + 1)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YMinus, Z - 1)); \
 		} \
 		if (bCanYAdd) \
 		{ \
+			const IndexType YAdd = Y + 1; \
 			OutIndices.Add(GetIndex(X, YAdd, Z)); \
-			if (bCanZAdd) OutIndices.Add(GetIndex(X, YAdd, ZAdd)); \
-			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YAdd, ZMinus)); \
+			if (bCanZAdd) OutIndices.Add(GetIndex(X, YAdd, Z + 1)); \
+			if (bCanZSubtract) OutIndices.Add(GetIndex(X, YAdd, Z - 1)); \
 		} \
 		if (bCanZSubtract) \
 		{ \
+			const IndexType ZMinus = Z - 1; \
 			OutIndices.Add(GetIndex(X, Y, ZMinus)); \
-			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZMinus)); \
-			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZMinus)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(X + 1, Y, ZMinus)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(X - 1, Y, ZMinus)); \
 		} \
 		if (bCanZAdd) \
 		{ \
+			const IndexType ZAdd = Z + 1; \
 			OutIndices.Add(GetIndex(X, Y, ZAdd)); \
-			if (bCanXAdd) OutIndices.Add(GetIndex(XAdd, Y, ZAdd)); \
-			if (bCanXSubtract) OutIndices.Add(GetIndex(XMinus, Y, ZAdd)); \
+			if (bCanXAdd) OutIndices.Add(GetIndex(X + 1, Y, ZAdd)); \
+			if (bCanXSubtract) OutIndices.Add(GetIndex(X - 1, Y, ZAdd)); \
 		} \
 	}

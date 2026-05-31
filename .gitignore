@@ -82,6 +82,8 @@ DerivedDataCache/*
 TestProject/DerivedDataCache/*
 TestProject/Saved/*
 TestProject/Build/*
+TestProject/Staging/*
+
 TestProject/.vsconfig
 TestProject/NEXUS.unrealvs
 *.DotSettings.user
@@ -90,13 +92,17 @@ TestProject/NEXUS.unrealvs
 *~lock~
 *.blend1
 
-# Build Configuration
-!TestProject/Saved/UnrealBuildTool/BuildConfiguration.xml
 
-# GitHub Pages
-_site/*
-.github/pages/_site
-.github/pages/.sass-cache
-.github/pages/.jekyll-cache
-.github/pages/.jekyll-metadata
-.github/pages/vendor
+# Claude
+
+TestProject/.claude/tmp
+TestProject/.claude/settings.local.json
+TestProject/.claude/local-memory
+
+# Coverage
+LastCoverageResults.log
+
+# Horde Build Graph
+!/TestProject/Build/Graph
+GIT_COMMIT_SHA
+*.k9.tmp

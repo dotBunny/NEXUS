@@ -11,7 +11,7 @@
  * A specialized AActor base-class designed to work seamlessly with a FNActorPool.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor/">ANPooledActor</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Pooled Actor", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
+UCLASS(Abstract, ClassGroup = "NEXUS", DisplayName = "NEXUS | Pooled Actor", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
 class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 {
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActorPoolDelegate);
@@ -29,10 +29,10 @@ class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 		OnCreatedByActorPoolEvent.Broadcast();
 	};
 
-	virtual void OnDestroyedByActorPool() override
+	virtual void OnReleasedFromActorPool() override
 	{
-		INActorPoolItem::OnDestroyedByActorPool();
-		OnDestroyedByActorPoolEvent.Broadcast();
+		INActorPoolItem::OnReleasedFromActorPool();
+		OnReleasedFromActorPoolEvent.Broadcast();
 	};
 
 	virtual void OnReturnToActorPool() override
@@ -47,16 +47,20 @@ class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
 		OnSpawnedFromActorPoolEvent.Broadcast();
 	};
 
-public:	
+public:
+	/** Event broadcast when the Actor has been created by its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnCreatedByActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been spawned from its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnSpawnedFromActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been returned to its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
 	FOnActorPoolDelegate OnReturnToActorPoolEvent;
-	
+
+	/** Event broadcast when the Actor has been released from its Actor Pool. */
 	UPROPERTY(BlueprintAssignable)
-	FOnActorPoolDelegate OnDestroyedByActorPoolEvent;
+	FOnActorPoolDelegate OnReleasedFromActorPoolEvent;
 };

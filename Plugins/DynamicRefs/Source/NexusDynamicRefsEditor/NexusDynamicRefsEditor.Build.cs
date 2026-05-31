@@ -20,6 +20,7 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"EditorSubsystem",
 					"Engine",
+					"GameplayTags",
 					"Projects",
 					"Slate",
 					"SlateCore",

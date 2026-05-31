@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NArcPickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points as part of an arc using different
@@ -53,6 +54,13 @@ public:
 	 */
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNArcPickerParams& Params);
 	
+	/**
+	 * Generate random points as part of an arc using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params);
 	
 	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
@@ -94,6 +102,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, Rotation, Degrees, MinimumDistance, MaximumDistance, Point));

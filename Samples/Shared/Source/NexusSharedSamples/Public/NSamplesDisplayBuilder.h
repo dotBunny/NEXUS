@@ -9,16 +9,16 @@
 class FNSamplesDisplayBuilder
 {
 public:
-	static void CreateDisplayInstances(FNSamplesDisplayComponents* Components,
+	static void CreateDisplayInstances(UNSamplesDisplayComponents* Components,
 		FTransform& MainPanelTransform, FTransform& FloorPanelTransform, float Depth, float Width, float Height);
 	
-	static void CreateScalablePanelInstances(const FTransform& BaseTransform, const FNSamplesDisplayComponents* Components, 
+	static void CreateScalablePanelInstances(const FTransform& BaseTransform, const UNSamplesDisplayComponents* Components, 
 		float Depth, float Width, bool bIgnoreMainPanel = false);
 	
-	static void CreateShadowBoxInstances(const FNSamplesDisplayComponents* Components, 
+	static void CreateShadowBoxInstances(const UNSamplesDisplayComponents* Components, 
 		float ShadowBoxCoverDepthPercentage, float Depth, float Width, float Height);
 	
-	static void CreateTitlePanelInstances(const FNSamplesDisplayComponents* Components, float Depth, float Width);
+	static void CreateTitlePanelInstances(const UNSamplesDisplayComponents* Components, float Depth, float Width);
 	
 	static void ApplyDefaultInstanceStaticMeshSettings(UInstancedStaticMeshComponent* Instance, USceneComponent* PartRoot);
 	

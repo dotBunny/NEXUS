@@ -20,7 +20,7 @@ namespace NEXUS::Samples::Level
 /**
  * An actor used to control the base NEXUS demo level
  */
-UCLASS(DisplayName = "Samples Level Actor", Config = Game, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
+UCLASS(DisplayName = "NEXUS | Samples Level Actor", Config = Game, HideCategories=(Activation, AssetUserData, Cooking, Navigation, Tags, Actor, Input,
 	DataLayers, LevelInstance, WorldPartition, HLOD, LOD, Rendering, Collision, Physics, Networking, Replication))
 class NEXUSSHAREDSAMPLES_API ANSamplesLevelActor : public AActor
 {
@@ -30,10 +30,12 @@ public:
 
 	explicit ANSamplesLevelActor(const FObjectInitializer& ObjectInitializer);
 	virtual void OnConstruction(const FTransform& Transform) override;
-	virtual void BeginDestroy() override;
 
 protected:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
+	bool bBuildArea = true;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "NEXUS|Space")
 	FVector2D AreaSize = FVector2D(4, 7);
 
@@ -72,5 +74,6 @@ private:
 	const FVector DemoNameBaseLocation = FVector(-125.f , 0, 10);
 	const FRotator DemoNameBaseRotation = FRotator(90.f, -180.f, 0);
 	
-	TUniquePtr<FNSamplesLevelActorComponents> Components;
+	UPROPERTY()
+	TObjectPtr<UNSamplesLevelComponents> Components;
 };

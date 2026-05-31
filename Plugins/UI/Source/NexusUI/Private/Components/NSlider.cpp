@@ -3,7 +3,7 @@
 
 #include "Components/NSlider.h"
 
-FOnFloatValueChangedEvent UNSlider::EmptyValueChanged;
+FOnFloatValueChangedEvent UNSlider::EmptyChangedEvent;
 
 void UNSlider::SetValue_NoBroadcast(const float NewValue)
 {
@@ -11,12 +11,10 @@ void UNSlider::SetValue_NoBroadcast(const float NewValue)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnValueChanged = OnValueChanged;
-		OnValueChanged = EmptyValueChanged;
-		
+		TGuardValue<FOnFloatValueChangedEvent> EventGuard(OnValueChanged, EmptyChangedEvent);
+
 		SetValue(NewValue);
 
-		OnValueChanged = CachedOnValueChanged;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

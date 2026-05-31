@@ -8,6 +8,7 @@
 #include "PackageTools.h"
 #include "Animation/PoseAsset.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "Misc/MessageDialog.h"
 #include "Misc/ScopedSlowTask.h"
 #include "Subsystems/EditorAssetSubsystem.h"
 
@@ -40,22 +41,28 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting Everything ..."));
 		SelectedPaths = { TEXT("/Game") };
 	}
-	const int PathCount = SelectedPaths.Num();
+	const int32 PathCount = SelectedPaths.Num();
 
 	// STEP 2 - Look for PoseAssets
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2", "Scanning ..."));
 	FScopedSlowTask ScanTask = FScopedSlowTask(PathCount, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Scan", "Scanning For Pose Assets"));
 	ScanTask.MakeDialog(false);
-	for (int i = 0; i < PathCount; i++)
+	for (int32 i = 0; i < PathCount; i++)
 	{
+		if (SelectedPaths[i] == "/All")
+		{
+			UE_LOG(LogNexusToolingEditor, Warning, TEXT("Skipping /All as it is not a valid path. Make sure to select the Content folder if you are wanting to search project wide."));
+			continue;
+		}
+		
 		// Plugins should be their root path
 		SelectedPaths[i].RemoveFromStart("/All/Plugins");
-		// We just dont want the all, just incase.
+		// We just don't want the /All, just in case.
 		SelectedPaths[i].RemoveFromStart("/All");
 		
 		ScanTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step2_Item", "Scanning {0}"), FText::FromString(SelectedPaths[i])));
-		
-		if (!EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
+	
+		if (SelectedPaths[i].Len() == 0 || !EditorAssetSubsystem->DoesDirectoryExist(SelectedPaths[i]))
 		{
 			continue;
 		}
@@ -66,9 +73,37 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			if (AssetData.IsValid() && AssetData.AssetClassPath == UPoseAsset::StaticClass()->GetClassPathName())
 			{
 				UObject* LoadedAsset = EditorAssetSubsystem->LoadAsset(AssetPath);
-				PoseAssets.AddUnique(LoadedAsset);
-				CleanupPackages.AddUnique(LoadedAsset->GetOutermost());
+				if (IsValid(LoadedAsset))
+				{
+					PoseAssets.AddUnique(LoadedAsset);
+					CleanupPackages.AddUnique(LoadedAsset->GetOutermost());
+				}
 			}
+		}
+	}
+	
+	if (PoseAssets.IsEmpty())
+	{
+		UE_LOG(LogNexusToolingEditor, Log, TEXT("No pose assets found to update."));
+		return;
+	}
+
+	if (FNEditorUtils::IsUserControlled())
+	{
+		// Bail out if they don't wanna
+		const EAppReturnType::Type Result = FMessageDialog::Open(
+			EAppMsgType::YesNo,
+			FText::Format(
+				NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Confirm",
+					"Found {0} pose asset(s).\n\nDo you want to proceed with updating them?"),
+				FText::AsNumber(PoseAssets.Num())),
+			NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_ConfirmTitle",
+				"Confirm Pose Asset Update"));
+
+		if (Result != EAppReturnType::Yes)
+		{
+			UPackageTools::UnloadPackages(CleanupPackages);
+			return;
 		}
 	}
 
@@ -76,10 +111,17 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step3", "Processing ..."));
 	FScopedSlowTask FixTask = FScopedSlowTask(PoseAssets.Num(), NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix", "Processing Pose Assets"));
 	FixTask.MakeDialog(true);
-	int ProblemsFixed = 0;
-	for (int i = 0; i < PoseAssets.Num(); i++)
+	int32 ProblemsFixed = 0;
+	for (int32 i = 0; i < PoseAssets.Num(); i++)
 	{
 		UPoseAsset* PoseAsset = Cast<UPoseAsset>(PoseAssets[i]);
+		if (!IsValid(PoseAsset))
+		{
+			FixTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item_Bad", "Skipping Bad Asset ..."));
+			
+			// Bad asset check
+			continue;
+		}
 		
 		FixTask.EnterProgressFrame(1, FText::Format(NSLOCTEXT("NexusToolingEditor", "OutOfDateAnimationSource_Fix_Item", "Processing {0}"), FText::FromString(PoseAssets[i]->GetName())));
 
@@ -101,6 +143,29 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	// Step 4 - Cleanup
 	MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step4", "Cleanup ..."));
 	UPackageTools::UnloadPackages(CleanupPackages);
+}
+
+bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
+{
+	TArray<FString>SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
+	for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+	{
+		SelectedPaths.AddUnique(AdditionalPath);
+	}
+	
+	// Nothing selected, don't allow execution.
+	if (SelectedPaths.IsEmpty())
+	{
+		return false;
+	}
+	
+	// We cannot operate on /All
+	if (SelectedPaths[0] == "/All")
+	{
+		return false;
+	}
+	
+	return true;
 }
 
 bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsystem, UPoseAsset* PoseAsset, TArray<UPackage*>& CleanupPackages)

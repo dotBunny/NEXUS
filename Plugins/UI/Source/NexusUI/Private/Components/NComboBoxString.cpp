@@ -1,6 +1,9 @@
-﻿#include "Components/NComboBoxString.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
 
-UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptySelectionChanged;
+#include "Components/NComboBoxString.h"
+
+UComboBoxString::FOnSelectionChangedEvent UNComboBoxString::EmptyChangedEvent;
 
 void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 {
@@ -8,12 +11,10 @@ void UNComboBoxString::SetSelectedOption_NoBroadcast(const FString Option)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnSelectionChanged = OnSelectionChanged;
-		OnSelectionChanged = EmptySelectionChanged;
+		TGuardValue<UComboBoxString::FOnSelectionChangedEvent> EventGuard(OnSelectionChanged, EmptyChangedEvent);
 
 		SetSelectedOption(Option);
-		
-		OnSelectionChanged = CachedOnSelectionChanged;
+
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }
@@ -24,12 +25,10 @@ void UNComboBoxString::SetSelectedIndex_NoBroadcast(const int32 Index)
 	{
 		const bool bPreviousShouldBroadcastState = bShouldBroadcastState;
 		bShouldBroadcastState = false;
-		CachedOnSelectionChanged = OnSelectionChanged;
-		OnSelectionChanged = EmptySelectionChanged;
-		
+		TGuardValue<UComboBoxString::FOnSelectionChangedEvent> EventGuard(OnSelectionChanged, EmptyChangedEvent);
+
 		SetSelectedIndex(Index);
 
-		OnSelectionChanged = CachedOnSelectionChanged;
 		bShouldBroadcastState = bPreviousShouldBroadcastState;
 	}
 }

@@ -1,0 +1,9 @@
+<?xml version='1.0' ?>
+<BuildGraph xmlns="http://www.epicgames.com/BuildGraph" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.epicgames.com/BuildGraph ../Schema.xsd" >	
+    <Property Name="K9Repository" Value="https://github.com/dotBunny/K9.git" />
+    <Property Name="K9Checkout" Value="$(RootDir)\K9\Source" />	
+    <Property Name="K9Configuration" Value="Release" />
+
+    <Property Name="K9GitHubCommitStatusProject" Value="$(K9Checkout)\Applications\K9.Publish.GitHubCommitStatus\K9.Publish.GitHubCommitStatus.csproj" />
+    <Property Name="K9GitHubCommitStatusExecutable" Value="$(K9Checkout)\Applications\K9.Publish.GitHubCommitStatus\bin\Release\K9.Publish.GitHubCommitStatus.exe" />
+</BuildGraph>

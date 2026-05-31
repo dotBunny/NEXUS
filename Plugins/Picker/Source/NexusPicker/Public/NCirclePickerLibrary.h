@@ -14,7 +14,7 @@
  * random generation strategies (deterministic, non-deterministic, seeded).
  * @see <a href="https://nexus-framework.com/docs/plugins/picker/distributions/circle/">UNCirclePickerLibrary</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS: Circle Picker Library")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Circle Picker Library")
 class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()

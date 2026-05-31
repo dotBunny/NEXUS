@@ -11,46 +11,51 @@
 class UNDynamicRefObject;
 class UNListView;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Developer Overlay", BlueprintType, Abstract)
+/**
+ * Developer overlay widget that displays the Guardian subsystem's baseline, current count, and next threshold.
+ */
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Developer Overlay", BlueprintType, Abstract)
 class NEXUSGUARDIAN_API UNGuardianDeveloperOverlay : public UNDeveloperOverlay
 {
 	GENERATED_BODY()
+
+public:
 	
+	/** Subscribe to the Guardian subsystem hosted by World so its counters feed this overlay. */
+	virtual void BindWorld(UWorld* World) override;
+	/** Drop the subscription to the Guardian subsystem hosted by World. */
+	virtual void UnbindWorld(const UWorld* World) override;
+	
+protected:
+	//~UUserWidget
 	virtual void NativeConstruct() override;
-	virtual void NativeDestruct() override;
-	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
-	void Bind(UWorld* World);
-	void Unbind(const UWorld* World);
+	//End UUserWidget
 
-protected:	
-	
+	/** Container showing the object count trio (current / base / next threshold). */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UHorizontalBox> ObjectCountBox;	
-	
-	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UCommonNumericTextBlock> ObjectCountNumber;	
-	
-	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UCommonNumericTextBlock> BaseCountNumber;	
-	
-	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
-	TObjectPtr<UCommonNumericTextBlock> ObjectCountNextNumber;	
-	
-	
-	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
-	void OnWorldBeginTearDown(UWorld* World);
+	TObjectPtr<UHorizontalBox> ObjectCountBox;
 
-	
+	/** Current UObject count. */
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonNumericTextBlock> ObjectCountNumber;
+
+	/** Baseline UObject count captured via SetBaseline. */
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonNumericTextBlock> BaseCountNumber;
+
+	/** Value of the next threshold the current count is approaching. */
+	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
+	TObjectPtr<UCommonNumericTextBlock> ObjectCountNextNumber;
+
 private:
+	/** Refresh the overlay banner's color and message based on the current count vs. thresholds. */
 	void UpdateBanner() const;
-	
-	FDelegateHandle AddWorldDelegateHandle;
-	FDelegateHandle RemoveWorldDelegateHandle;
-	
+
+	/** Placeholder text shown while no game world is active. */
 	FText RuntimeOnlyText = NSLOCTEXT("NexusGuardian", "RuntimeOnly", "Only Available At Runtime");
-	
-	
-	TArray<TObjectPtr<UNGuardianSubsystem>> Subsystems; 
+
+	/** Every Guardian subsystem currently being observed (one per active world). */
+	UPROPERTY()
+	TArray<TObjectPtr<UNGuardianSubsystem>> Subsystems;
 };

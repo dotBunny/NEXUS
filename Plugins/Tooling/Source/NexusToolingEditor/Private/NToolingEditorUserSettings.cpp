@@ -42,7 +42,10 @@ void UNToolingEditorUserSettings::ApplyEditorFrameRateLimit() const
 		UE_LOG(LogNexusToolingEditor, Log, TEXT("Apply framerate limit(%f)."), EditorFrameRateLimit);
 
 		GEngine->SetMaxFPS(EditorFrameRateLimit);
-		GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
+		if (IsValid(GEngine->GameUserSettings))
+		{
+			GEngine->GameUserSettings->SetFrameRateLimit(EditorFrameRateLimit);
+		}
 	}
 }
 
@@ -68,5 +71,96 @@ void UNToolingEditorUserSettings::ApplySpaceToPan() const
 		FNEditorInputProcessor* InputProcessor = ToolingModule.GetInputProcessor();
 		InputProcessor->bCachedGraphNavigationSpaceToPan = bGraphNavigationSpaceToPan;
 		InputProcessor->CachedGraphNavigationPanSpeedMultiplier = GraphNavigationPanSpeedMultiplier;
+	}
+}
+
+FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
+{
+	FString ClientArguments = TEXT("-") + NEXUS::Tooling::MultiplayerTest::Argument;
+		
+	if (bClientGenerateNetworkProfile)
+	{
+		// ReSharper disable once StringLiteralTypo
+		ClientArguments.Append(" networkprofiler=true");
+	}
+		
+	if (bClientDisableSound)
+	{
+		// ReSharper disable once StringLiteralTypo
+		ClientArguments.Append(" -nosound");
+	}
+	if (ClientSimulateLagMinimum > 0)
+	{
+		ClientArguments.Append(FString::Printf(TEXT(" -PktLagMin=%i"), FMath::FloorToInt(ClientSimulateLagMinimum * 0.5f)));
+	}
+	else if (ClientSimulateLagMaximum > 0)
+	{
+		ClientArguments.Append(" -PktLagMin=0");
+	}
+		
+	if (ClientSimulateLagMaximum > 0)
+	{
+		ClientArguments.Append(FString::Printf(TEXT(" -PktLagMax=%i"), FMath::FloorToInt(ClientSimulateLagMaximum * 0.5f)));
+	}
+		
+	if (ClientSimulatePacketLoss > 0)
+	{
+		ClientArguments.Append(FString::Printf(TEXT(" -PktLoss=%i"), ClientSimulatePacketLoss));
+	}
+		
+	if (ClientSimulatePacketDuplication > 0)
+	{
+		ClientArguments.Append(FString::Printf(TEXT(" -PktDup=%i"), ClientSimulatePacketDuplication));
+	}
+		
+	if (bClientSimulateReceiveOutOfOrderPackets)
+	{
+		ClientArguments.Append(" -PktOrder=1");
+	}
+		
+	ClientArguments.Append(FString::Printf(TEXT(" %s"), *ClientParameters.TrimStartAndEnd()));
+		
+	return MoveTemp(ClientArguments);
+}
+
+FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
+{
+	FString ServerAdditionalArguments = TEXT("");
+		
+	if (bServerGenerateNetworkProfile)
+	{
+		// ReSharper disable once StringLiteralTypo
+		ServerAdditionalArguments.Append(" networkprofiler=true");
+	}
+		
+	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerParameters.TrimStartAndEnd()));
+		
+	return MoveTemp(ServerAdditionalArguments);
+}
+
+void UNToolingEditorUserSettings::ApplySettings(FRequestPlaySessionParams& Params) const
+{
+	// Set window sized
+	Params.EditorPlaySettings->SetClientWindowSize(ClientWindowSize);
+		
+	// Build out SERVER parameters
+	Params.EditorPlaySettings->AdditionalServerLaunchParameters = GetMultiplayerTestServerArguments();
+		
+	// Build out CLIENT parameters
+	Params.EditorPlaySettings->AdditionalLaunchParameters = GetMultiplayerTestClientArguments();
+		
+	// Set the number of clients
+	Params.EditorPlaySettings->SetPlayNumberOfClients(ClientCount);
+		
+	// Setup server mode
+	if (bUseDedicatedServer || ServerParameters.Len() > 0)
+	{
+		Params.EditorPlaySettings->SetPlayNetMode(PIE_Client);
+		Params.EditorPlaySettings->bLaunchSeparateServer = bSpawnSeparateServer;
+	}
+	else
+	{
+		Params.EditorPlaySettings->SetPlayNetMode(PIE_ListenServer);
+		Params.EditorPlaySettings->bLaunchSeparateServer = false;
 	}
 }

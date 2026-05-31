@@ -17,11 +17,11 @@ class UNActorPoolSpawnerComponent;
  * A centralized management system that provides UWorld-specific access to AActor pooling functionality, acting as the primary interface for creating, managing, and accessing multiple FNActorPools.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/">UNActorPoolSubsystem</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Actor Pool Subsystem")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Actor Pool Subsystem")
 class NEXUSACTORPOOLS_API UNActorPoolSubsystem : public UTickableWorldSubsystem
 {
 	friend class FNActorPool;
-	
+
 	GENERATED_BODY()
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(UNActorPoolSubsystem, true)
 
@@ -33,12 +33,13 @@ public:
 	 * Gets an actor from a given pool, creating a pool as necessary.
 	 * @note This does not trigger any events on the given actor, it does not activate them in any way.
 	 * @param ActorClass The class of the actor which you would like to get from the actor pool.
-	 * @param ReturnedActor The returned actor.
+	 * @param ReturnedActor The returned actor, or nullptr if the pool could not provide one.
+	 * @return true if an actor was successfully retrieved, false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "ReturnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actor"))
-	void GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
+	bool GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor);
 
 	/**
 	 * Gets an actor from a given pool, creating a pool as necessary.
@@ -50,30 +51,33 @@ public:
 	T* GetActor(TSubclassOf<AActor> ActorClass);
 
 	/**
-	* Spawns an actor from a given pool, creating a pool as necessary.
-	* @param ActorClass The class of the actor which you would like to get from the actor pool.
-	* @param Position The world position to spawn the actor at.
-	* @param Rotation The world rotation to apply to the spawned actor.
-	* @param SpawnedActor The returned actor.
-	*/
+	 * Spawns an actor from a given pool, creating a pool as necessary, positioning it in the world and activating it.
+	 * @note Unlike GetActor, this places the actor at the supplied transform and triggers OnSpawnedFromActorPool on the returned actor.
+	 * @param ActorClass The class of the actor which you would like to spawn from the actor pool.
+	 * @param Position The world position to spawn the actor at.
+	 * @param Rotation The world rotation to apply to the spawned actor.
+	 * @param SpawnedActor The spawned actor, or nullptr if the pool could not provide one.
+	 * @return true if an actor was successfully spawned, false otherwise.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn Actor", Category = "NEXUS|Actor Pools",
 		meta = (DeterminesOutputType = "ActorClass", DynamicOutputParam = "SpawnedActor",
 		DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#spawn-actor"))
-	void SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
-
+	bool SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor);
+	
 	/**
-	* Spawns an actor from a given pool, creating a pool as necessary.
-	* @param ActorClass The class of the actor which you would like to get from the actor pool.
-	* @param Position The world position to spawn the actor at.
-	* @param Rotation The world rotation to apply to the spawned actor.
-	* @return SpawnedActor The spawned actor.
-	*/
+	 * Spawns an actor from a given pool, creating a pool as necessary, positioning it in the world and activating it.
+	 * @note Unlike GetActor, this places the actor at the supplied transform and triggers OnSpawnedFromActorPool on the returned actor.
+	 * @param ActorClass The class of the actor which you would like to spawn from the actor pool.
+	 * @param Position The world position to spawn the actor at.
+	 * @param Rotation The world rotation to apply to the spawned actor.
+	 * @return The spawned actor cast to T, or nullptr if the pool could not provide one.
+	 */
 	template<typename T>
 	T* SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation);
 
 	/**
 	 * Attempts to return an Actor to its owning pool.
-	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehaviour is applied.
+	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehavior is applied.
 	 * @param Actor The target actor to return to a pool.
 	 * @return true/false if the Actor was returned to a pool.
 	 */
@@ -81,14 +85,26 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-actor"))
 	bool ReturnActor(AActor* Actor);
 
+	/**
+	 * Register a spawner component as tickable so the subsystem drives its periodic updates.
+	 * @param TargetComponent The spawner to register.
+	 */
 	void RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
+
+	/**
+	 * Unregister a previously registered tickable spawner.
+	 * @param TargetComponent The spawner to remove.
+	 */
 	void UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent);
 
 	//~UTickableWorldSubsystem
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	virtual void OnWorldEndPlay(UWorld& InWorld) override;
+	
 	virtual bool IsTickable() const final override;
-	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
+	
+	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
+	
 	virtual void Tick(float DeltaTime) final override;
 	//End UTickableWorldSubsystem
 
@@ -126,7 +142,8 @@ public:
 	 */
 	FNActorPool* GetActorPool(const TSubclassOf<AActor> ActorClass) const
 	{
-		return ActorPools.Find(ActorClass)->Get();
+		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);
+		return Found ? Found->Get() : nullptr;
 	}
 
 	/**
@@ -178,24 +195,42 @@ public:
 	 * @return The default settings for the specified AActor class, or the global defaults if none are registered.
 	 */
 	FNActorPoolSettings GetDefaultSettings(TSubclassOf<AActor> ActorClass) const;
-	
+
+	/**
+	 * Override the policy applied when ReturnActor is called with an Actor unknown to this subsystem.
+	 * @note Initialized from UNActorPoolsSettings::UnknownBehavior on world begin play; use this to override at runtime.
+	 * @param Behavior The new unknown-actor policy to apply.
+	 */
+	void SetUnknownBehavior(const ENActorPoolUnknownBehavior Behavior) { UnknownBehavior = Behavior; }
+
 private:
 	void AddTickableActorPool(FNActorPool* ActorPool);
 	void RemoveTickableActorPool(FNActorPool* ActorPool);
 	bool HasTickableActorPool(FNActorPool* ActorPool) const;
 
+	/** All Actor pools managed by this subsystem, keyed by Actor class. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	TMap<UClass*, TUniquePtr<FNActorPool>> ActorPools;
-	TArray<FNActorPool*> TickableActorPools;
-	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
-	TArray<UNActorPoolSpawnerComponent*> TickableSpawners;
-	
-	UPROPERTY()
-	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;	
 
+	/** Subset of pools that require per-frame ticking. */
+	TArray<FNActorPool*> TickableActorPools;
+
+	/** Spawners that require per-frame ticking. */
+	UPROPERTY()
+	TArray<TObjectPtr<UNActorPoolSpawnerComponent>> TickableSpawners;
+
+	/** Per-class default settings registered at runtime. */
+	UPROPERTY()
+	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;
+
+	/** Cached flag to skip the tickable-pool loop when empty. */
 	bool bHasTickableActorPools;
+
+	/** Cached flag to skip the tickable-spawner loop when empty. */
 	bool bHasTickableSpawners;
-	ENActorPoolUnknownBehaviour UnknownBehaviour = ENActorPoolUnknownBehaviour::Destroy;
+
+	/** Policy used when ReturnActor is called with an Actor unknown to this subsystem. */
+	ENActorPoolUnknownBehavior UnknownBehavior = ENActorPoolUnknownBehavior::Destroy;
 
 };
 

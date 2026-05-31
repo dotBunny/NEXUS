@@ -30,12 +30,12 @@ public:
 	static void FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TSharedPtr<SWidget> ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop = NAME_None);
 	
 	/**
-	 * Attempt to find the SDocTab for a given SWidget.
+	 * Attempt to find the SDockTab for a given SWidget.
 	 * @param BaseWidget The SWidget to search upward from.
 	 * @param TargetLabel The label is used to ensure we are finding the correct tab.
-	 * @return The desired SDocTab or nullptr if not found
+	 * @return The desired SDockTab or nullptr if not found
 	 */
-	static TSharedPtr<SDockTab> FindDocTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel);
+	static TSharedPtr<SDockTab> FindDockTabWithLabel(const TSharedPtr<SWidget>& BaseWidget, const FText& TargetLabel);
 
 private:
 	static const FName SDockingTabStackName;

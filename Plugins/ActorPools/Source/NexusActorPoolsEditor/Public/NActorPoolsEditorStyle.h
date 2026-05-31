@@ -11,6 +11,9 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
+/**
+ * Slate style set for the NexusActorPoolsEditor module.
+ */
 class FNActorPoolsEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusActorPools", "NActorPoolsEditorStyle")

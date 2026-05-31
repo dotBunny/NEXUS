@@ -1,4 +1,7 @@
-﻿#include "NActorPoolsEditorCommands.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NActorPoolsEditorCommands.h"
 
 #include "BlueprintEditor.h"
 #include "NActorPool.h"
@@ -50,7 +53,7 @@ void FNActorPoolsEditorCommands::AddMenuEntries()
 
 void FNActorPoolsEditorCommands::RemoveMenuEntries()
 {
-	UToolMenus* ToolMenus = UToolMenus::Get();
+	UToolMenus* ToolMenus = UToolMenus::TryGet();
 	if (ToolMenus)
 	{
 		ToolMenus->RemoveEntry("AssetEditor.BlueprintEditor.MainMenu.Asset", "AssetEditorActions", "NEXUS_AddActorPoolMethods");
@@ -70,10 +73,10 @@ void FNActorPoolsEditorCommands::AddActorPoolMethods(const UObject* EditedObject
 		FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(EditorInstance);
 		UBlueprint* Blueprint = BlueprintEditor->GetBlueprintObj();
 		
-		N_ACTOR_POOL_INVOKE_METHODS(OnCreated, NEXUS::ActorPools::InvokeMethods::OnCreated, NEXUS::ActorPools::InvokeMethods::Category)
-		N_ACTOR_POOL_INVOKE_METHODS(OnSpawned, NEXUS::ActorPools::InvokeMethods::OnSpawned, NEXUS::ActorPools::InvokeMethods::Category)
-		N_ACTOR_POOL_INVOKE_METHODS(OnReturn, NEXUS::ActorPools::InvokeMethods::OnReturn, NEXUS::ActorPools::InvokeMethods::Category)
-		N_ACTOR_POOL_INVOKE_METHODS(OnDestroyed, NEXUS::ActorPools::InvokeMethods::OnDestroyed, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnCreated, NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnSpawned, NEXUS::ActorPools::InvokeMethods::OnSpawnedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnReturn, NEXUS::ActorPools::InvokeMethods::OnReturnToActorPool, NEXUS::ActorPools::InvokeMethods::Category)
+		N_ACTOR_POOL_INVOKE_METHODS(OnReleased, NEXUS::ActorPools::InvokeMethods::OnReleasedFromActorPool, NEXUS::ActorPools::InvokeMethods::Category)
 		
 		FBlueprintEditorUtils::MarkBlueprintAsStructurallyModified(Blueprint);
 	}

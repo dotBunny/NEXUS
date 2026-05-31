@@ -62,7 +62,7 @@ void UNEditorUtilityWidgetSubsystem::UnregisterWidget(const UNEditorUtilityWidge
 		}
 		else
 		{
-			UE_LOG(LogNexusUIEditor, Warning, TEXT("Widget(%s) is not the registered reference for the identifier. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString())
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Widget(%s) is not the registered reference for the identifier. This can be an indicator of an object leak."), *Widget->GetUniqueIdentifier().ToString());
 		}
 	}
 }
@@ -79,11 +79,11 @@ bool UNEditorUtilityWidgetSubsystem::HasWidget(const FName& Identifier)
 
 FName UNEditorUtilityWidgetSubsystem::GetTabIdentifier(const FName WidgetIdentifier)
 {
-	for (int i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
+	for (int32 i = 0; i < WidgetIdentifiers.Num(); i++)
 	{
-		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
+		if (WidgetIdentifiers[i] == WidgetIdentifier)
 		{
-			return WidgetTabIdentifiers.TabIdentifier[i];
+			return TabIdentifiers[i];
 		}
 	}
 	return NAME_None;
@@ -91,30 +91,31 @@ FName UNEditorUtilityWidgetSubsystem::GetTabIdentifier(const FName WidgetIdentif
 
 void UNEditorUtilityWidgetSubsystem::SetTabIdentifier(const FName WidgetIdentifier, const FName TabIdentifier)
 {
-	for (int i = 0; i < WidgetTabIdentifiers.WidgetIdentifiers.Num(); i++)
+	for (int32 i = 0; i < WidgetIdentifiers.Num(); i++)
 	{
-		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
+		if (WidgetIdentifiers[i] == WidgetIdentifier)
 		{
-			WidgetTabIdentifiers.TabIdentifier[i] = TabIdentifier;
+			TabIdentifiers[i] = TabIdentifier;
 			SaveConfig();
 			return;
 		}
 	}
-	
-	WidgetTabIdentifiers.WidgetIdentifiers.Add(WidgetIdentifier);
-	WidgetTabIdentifiers.TabIdentifier.Add(TabIdentifier);
+
+	WidgetIdentifiers.Add(WidgetIdentifier);
+	TabIdentifiers.Add(TabIdentifier);
 	SaveConfig();
 }
 
 void UNEditorUtilityWidgetSubsystem::RemoveTabIdentifier(const FName WidgetIdentifier)
 {
-	for (int i = WidgetTabIdentifiers.WidgetIdentifiers.Num() - 1; i >= 0; i--)
+	for (int32 i = WidgetIdentifiers.Num() - 1; i >= 0; i--)
 	{
-		if (WidgetTabIdentifiers.WidgetIdentifiers[i] == WidgetIdentifier)
+		if (WidgetIdentifiers[i] == WidgetIdentifier)
 		{
-			WidgetTabIdentifiers.WidgetIdentifiers.RemoveAt(i);
-			WidgetTabIdentifiers.TabIdentifier.RemoveAt(i);
+			WidgetIdentifiers.RemoveAt(i);
+			TabIdentifiers.RemoveAt(i);
 			SaveConfig();
+			break;
 		}
 	}
 }

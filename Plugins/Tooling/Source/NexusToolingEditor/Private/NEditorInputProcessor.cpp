@@ -1,6 +1,7 @@
-﻿#include "NEditorInputProcessor.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
 
-#include "BlueprintEditor.h"
+#include "NEditorInputProcessor.h"
 #include "NEditorUtils.h"
 
 bool FNEditorInputProcessor::HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent)
@@ -66,19 +67,30 @@ bool FNEditorInputProcessor::HandleKeyUpEvent(FSlateApplication& SlateApp, const
 
 bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
-	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse)
+	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse && 
+		&MouseEvent != &LastSyntheticEvent) // Dont resend the last synthetic event
 	{
-		FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-		if (Editor != nullptr && Editor->IsBlueprintEditor())
-		{
-			// Handle the traditional blueprint editor
-			FVector2D ViewLocation;
-			float ViewZoom;
-			Editor->GetViewLocation(ViewLocation, ViewZoom);
-			ViewLocation += -MouseEvent.GetCursorDelta() * (FMath::Lerp(0.75, 4, 1 - ViewZoom) * CachedGraphNavigationPanSpeedMultiplier);
-			Editor->SetViewLocation(ViewLocation, ViewZoom);
-			return true;
-		}
+		IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
+		if (ForegroundAssetEditor == nullptr) return false;
+		
+		// We're going to make a synthetic mouse event from the current event
+		TSet<FKey> PressedButtons = MouseEvent.GetPressedButtons();
+		PressedButtons.Remove(EKeys::LeftMouseButton);
+		PressedButtons.Add(EKeys::RightMouseButton);
+		
+		// Build a synthetic event
+     	LastSyntheticEvent = FPointerEvent(
+		FSlateApplicationBase::CursorPointerIndex, 
+		MouseEvent.GetScreenSpacePosition(), 
+		MouseEvent.GetLastScreenSpacePosition(), 
+		PressedButtons, 
+		EKeys::RightMouseButton, 
+		MouseEvent.GetWheelDelta(), 
+		MouseEvent.GetModifierKeys());
+		
+		// The event CANNOT be synthetic for the SNodePanel to capture it.
+		SlateApp.ProcessMouseMoveEvent(LastSyntheticEvent, false);
+ 		return true;
 	}
 	return false;
 }
@@ -179,4 +191,3 @@ bool FNEditorInputProcessor::IsAnyMouseButtonDown() const
 {
 	return bLeftMouse || bRightMouse || bMiddleMouse;
 }
-

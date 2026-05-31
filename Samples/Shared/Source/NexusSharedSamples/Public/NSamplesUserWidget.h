@@ -20,13 +20,13 @@ class NEXUSSHAREDSAMPLES_API UNSamplesUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	void ResetEventCount() { EventCount = 0;};
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	void PrepareForTest();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	int IncrementEventCount()
 	{
 		++EventCount;
@@ -35,14 +35,14 @@ class NEXUSSHAREDSAMPLES_API UNSamplesUserWidget : public UUserWidget
 		return EventCount;
 	};
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples")
 	int GetEventCount() const { return EventCount; };
 
-	UFUNCTION(BlueprintCallable, meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples", meta=(ExpandBoolAsExecs="ReturnValue"))
 	// ReSharper disable once CppUE4BlueprintCallableFunctionMayBeConst
 	bool HasEvents() { return EventCount != 0; };
 	
-	UFUNCTION(BlueprintCallable, meta=(ExpandBoolAsExecs="ReturnValue"))
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|Samples", meta=(ExpandBoolAsExecs="ReturnValue"))
 	// ReSharper disable once CppUE4BlueprintCallableFunctionMayBeConst
 	bool HasNoEvents() { return EventCount == 0; };
 	

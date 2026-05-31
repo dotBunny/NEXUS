@@ -5,6 +5,14 @@
 
 #include "UObject/ObjectMacros.h"
 
+/**
+ * Compact, fixed-identifier enum used as the key for a dynamic reference.
+ *
+ * Each value identifies a slot that can be claimed by at most one UNDynamicRefComponent per world.
+ * Slots are grouped by conceptual role (Location, Objective, Target, Secret, Spawn, Enemy, Pickup, Item)
+ * to make manually assigning them in the editor ergonomic.
+ * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref/">ENDynamicRef</a>
+ */
 UENUM(BlueprintType)
 enum ENDynamicRef : int32
 {

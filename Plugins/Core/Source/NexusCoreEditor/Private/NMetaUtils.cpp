@@ -54,7 +54,6 @@ bool FNMetaUtils::HasKey(const UClass* Class, const FName& Key)
 
 FString FNMetaUtils::GetData(UEdGraphNode* Node, const FName& Key)
 {
-	
 	if (Node == nullptr) return EmptyString;
 	if (const UK2Node_CallFunction* FunctionCall = Cast<UK2Node_CallFunction>(Node))
 	{
@@ -85,6 +84,8 @@ FString FNMetaUtils::GetData(UEdGraphNode* Node, const FName& Key)
 
 FString FNMetaUtils::GetData(const UScriptStruct* ScriptStruct, const FName& Key)
 {
+	if (ScriptStruct == nullptr) return EmptyString;
+	
 	if (ScriptStruct->HasMetaData(Key))
 	{
 		return ScriptStruct->GetMetaData(Key);
@@ -94,6 +95,8 @@ FString FNMetaUtils::GetData(const UScriptStruct* ScriptStruct, const FName& Key
 
 FString FNMetaUtils::GetData(const UStruct* Struct, const FName& Key)
 {
+	if (Struct == nullptr) return EmptyString;
+	
 	if (Struct->HasMetaData(Key))
 	{
 		return Struct->GetMetaData(Key);
@@ -102,6 +105,8 @@ FString FNMetaUtils::GetData(const UStruct* Struct, const FName& Key)
 }
 FString FNMetaUtils::GetData(const UClass* Class, const FName& Key)
 {
+	if (Class == nullptr) return EmptyString;
+	
 	if (Class->HasMetaData(Key))
 	{
 		return Class->GetMetaData(Key);

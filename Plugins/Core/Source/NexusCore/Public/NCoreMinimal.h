@@ -5,12 +5,22 @@
 
 #include "CoreMinimal.h"
 
+/** Log category used by all NexusCore runtime logging. */
 NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCore, Log, All);
 
+/**
+ * Compile-time version information for the NEXUS framework.
+ * @note Number is a monotonically increasing build number; Major/Minor/Patch follow semantic versioning.
+ */
 namespace NEXUS::Version
 {
-	constexpr int Number = 12;
-	constexpr int Major = 0;
-	constexpr int Minor = 2;
-	constexpr int Patch = 7;
+	constexpr int32 Number = 12;
+	constexpr int32 Major = 0;
+	constexpr int32 Minor = 3;
+	constexpr int32 Patch = 0;
+}
+
+namespace NEXUS::Multiplayer
+{
+	constexpr float InvalidPing = -1.f;
 }

@@ -7,6 +7,7 @@
 #include "NEditorCommands.h"
 #include "NEditorStyle.h"
 #include "NEditorUtils.h"
+#include "NPropertySections.h"
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
@@ -19,12 +20,14 @@ void FNCoreEditorModule::StartupModule()
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Framework initializing in an automated environment; some functionality will be ignored."));
 	}
 	
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNCoreEditorModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNCoreEditorModule::OnPostEngineInit);
 }
 
 void FNCoreEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	FNEditorCommands::RemoveMenuEntries();
+	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }
 
@@ -43,6 +46,9 @@ void FNCoreEditorModule::OnPostEngineInit()
 	
 	FNEditorCommands::Register();
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNEditorCommands::AddMenuEntries));
+	
+	// Initialize our simplified property section manager
+	FNPropertySections::Register();
 	
 	// Start update check
 	UNUpdateCheckDelayedEditorTask::Create();

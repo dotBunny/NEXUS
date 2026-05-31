@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NSpherePickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /** 
  * Provides various functions for generating points inside or on the surface of a sphere using different
@@ -55,6 +56,14 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSpherePickerParams& Params);	
 	
 	/**
+	 * Generate random points inside or on the surface of a sphere using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params);
+
+	/**
 	 * Checks if a point is inside or on the surface of a sphere.
 	 * @param Origin The center point of the sphere.
 	 * @param Radius The radius of the sphere.
@@ -77,6 +86,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			if (IsPointInsideOrOn(Origin, MinimumRadius, Point) || !IsPointInsideOrOn(Origin, MaximumRadius, Point))

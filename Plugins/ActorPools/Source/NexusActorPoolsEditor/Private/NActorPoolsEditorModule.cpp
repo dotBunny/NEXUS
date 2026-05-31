@@ -4,14 +4,14 @@
 #include "NActorPoolsEditorModule.h"
 #include "ComponentVisualizer.h"
 #include "IPlacementModeModule.h"
-#include "NActorPoolsEditorMinimal.h"
+#include "NActorPoolsEditorCommands.h"
 #include "NActorPoolsEditorStyle.h"
-#include "NActorPoolsEditorToolMenu.h"
 #include "NActorPoolSpawnerComponent.h"
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
 #include "NKillZoneActor.h"
 #include "NPooledActor.h"
+#include "NPropertySections.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NModuleMacros.h"
@@ -31,8 +31,9 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	{
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
-	
-	FNActorPoolsEditorToolMenu::Unregister();
+	UToolMenus::UnRegisterStartupCallback(this);
+	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
+	FNActorPoolsEditorCommands::RemoveMenuEntries();
 	
 	// Teardown Placement
 	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
@@ -40,18 +41,17 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	FNActorPoolsEditorStyle::Shutdown();
 }
 
-// ReSharper disable once CppMemberFunctionMayBeStatic
 void FNActorPoolsEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNActorPoolsEditorStyle::Initialize();
-	
-	
+
 	// Initialize Tool Menu
 	if (FSlateApplication::IsInitialized())
 	{
-		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(FNActorPoolsEditorToolMenu::Register));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&N_TOOLS_MENU_ENTRY_EUW_METHOD_REGISTER(EUW_NActorPools)));
+		UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateStatic(&FNActorPoolsEditorCommands::AddMenuEntries));
 	}
 	
 	if (GUnrealEd)
@@ -81,6 +81,10 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 			TOptional<int32>(),
 			NSLOCTEXT("NexusActorPoolsEditor", "Placement_NPooledActor", "Pooled Actor"))));
 	}
+	
+	// Inspector Category Filter
+	FNPropertySections::AddActorComponentCategory("Actor Pool Spawner");
+	FNPropertySections::AddActorComponentCategory("Kill Zone");
 }
 
 

@@ -6,6 +6,7 @@
 #include "NActorPool.h"
 #include "NActorPoolSet.h"
 #include "NActorPoolSpawnerComponent.h"
+#include "Macros/NValidationMacros.h"
 
 namespace NEXUS::ActorPools::ConsoleCommands
 {
@@ -20,17 +21,17 @@ namespace NEXUS::ActorPools::ConsoleCommands
 void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	const UNActorPoolsSettings* Settings = UNActorPoolsSettings::Get();
-	UnknownBehaviour = Settings->UnknownBehaviour;
+	UnknownBehavior = Settings->UnknownBehavior;
 	
 	// Check if we have anything to automatically load
-	if (Settings->AlwaysCreateSets.Num() == 0)
+	if (Settings->AlwaysCreateSets.IsEmpty())
 	{
 		Super::OnWorldBeginPlay(InWorld);
 		return;
 	}
 	
 	// Check if we have any prefixes to ignore
-	if (Settings->IgnoreWorldPrefixes.Num() > 0)
+	if (!Settings->IgnoreWorldPrefixes.IsEmpty())
 	{
 		bool bShouldIgnoreLevel = false;
 		const FString WorldName = InWorld.GetName();
@@ -53,6 +54,7 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	{
 		// Ensure the set has been loaded
 		UNActorPoolSet* LoadedSet = Set.LoadSynchronous();
+		if (LoadedSet == nullptr) continue;
 		ApplyActorPoolSet(LoadedSet);
 	}
 	
@@ -61,15 +63,17 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 void UNActorPoolSubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
+	TickableActorPools.Empty();
+	TickableSpawners.Empty();
+
 	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
-		Pool.Value->Clear();
-		Pool.Value.Reset();
+		Pool.Value->Clear(); // Releases all actors from pool (not forcibly destroying cause of world teardown)
+		Pool.Value.Reset(); // Releases back-pointer to UObject through destructor
 	}
-	
+
 	ActorPools.Empty();
-	TickableActorPools.Empty();
-	
+
 	Super::OnWorldEndPlay(InWorld);
 }
 
@@ -91,10 +95,16 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 
 	if (bHasTickableActorPools)
 	{
-		for (FNActorPool* Pool : TickableActorPools)
+		// Reverse index walk so a pool that finishes warming can be removed in-place (RemoveAtSwap) without
+		// disturbing iteration. Order is irrelevant for warm-up, so the swap is safe.
+		for (int32 Index = TickableActorPools.Num() - 1; Index >= 0; --Index)
 		{
-			Pool->Tick();
+			if (!TickableActorPools[Index]->Tick())
+			{
+				TickableActorPools.RemoveAtSwap(Index, EAllowShrinking::No);
+			}
 		}
+		bHasTickableActorPools = !TickableActorPools.IsEmpty();
 	}
 
 	if (bHasTickableSpawners)
@@ -109,8 +119,8 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 	{
 		for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
 		{
-			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetInCount())
-			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetOutCount())
+			INC_DWORD_STAT_BY(STAT_InActors, Pair->Value->GetAvailableCount())
+			INC_DWORD_STAT_BY(STAT_OutActors, Pair->Value->GetSpawnedCount())
 		}
 	};
 }
@@ -177,9 +187,9 @@ FNActorPoolSettings UNActorPoolSubsystem::GetDefaultSettings(const TSubclassOf<A
 
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
-	if (ActorPoolSet == nullptr) return;
-	
-	if (ActorPoolSet->NestedSets.Num() == 0)
+	N_VALIDATE_RETURN_VOID(LogNexusActorPools, ActorPoolSet)
+
+	if (ActorPoolSet->NestedSets.IsEmpty())
 	{
 		// Optimized fast-path for if the APS is not using nested sets.
 		for (const FNActorPoolDefinition& Definition : ActorPoolSet->ActorPools)
@@ -241,14 +251,15 @@ void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)
 	// Don't add a stub pool to be ticked.
 	if (ActorPool->IsStubMode()) return;
 	
-	TickableActorPools.Add(ActorPool);
-	bHasTickableActorPools = (TickableActorPools.Num() > 0);
+	// Ensure we only ever add a pool once
+	TickableActorPools.AddUnique(ActorPool);
+	bHasTickableActorPools = !TickableActorPools.IsEmpty();
 }
 
 void UNActorPoolSubsystem::RemoveTickableActorPool(FNActorPool* ActorPool)
 {
 	TickableActorPools.Remove(ActorPool);
-	bHasTickableActorPools = (TickableActorPools.Num() > 0);
+	bHasTickableActorPools = !TickableActorPools.IsEmpty();
 }
 
 bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
@@ -256,27 +267,35 @@ bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
 	return TickableActorPools.Contains(ActorPool);
 }
 
-void UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
+bool UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
 {
+	ReturnedActor = nullptr;
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
 	ReturnedActor = GetActor<AActor>(ActorClass);
+	return ReturnedActor != nullptr;
 }
 
-void UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor)
+bool UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor)
 {
+	SpawnedActor = nullptr;
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
 	SpawnedActor = SpawnActor<AActor>(ActorClass, Position, Rotation);
+	return SpawnedActor != nullptr;
 }
 
 bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 {
+	N_VALIDATE_RETURN(LogNexusActorPools, Actor, false)
+	
 	UClass* ActorClass = Actor->GetClass();
 	if (ActorPools.Contains(ActorClass))
 	{
 		return (*ActorPools.Find(ActorClass))->Return(Actor);
 	}
 	
-	switch (UnknownBehaviour)
+	switch (UnknownBehavior)
 	{
-		using enum ENActorPoolUnknownBehaviour;
+		using enum ENActorPoolUnknownBehavior;
 		case CreateDefaultPool:
 		{
 			if (HasDefaultSettings(ActorClass))
@@ -287,7 +306,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 				
 				const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
 				OnActorPoolAdded.Broadcast(NewPool.Get());
-				if (NewPool->DoesSupportInterface())
+				if (NewPool->ImplementsPoolItemInterface())
 				{
 					INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 					ActorItem->InitializeActorPoolItem(NewPool.Get());		
@@ -299,7 +318,7 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 				ActorClass, *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
 			OnActorPoolAdded.Broadcast(NewPool.Get());
-			if (NewPool->DoesSupportInterface())
+			if (NewPool->ImplementsPoolItemInterface())
 			{
 				INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 				ActorItem->InitializeActorPoolItem(NewPool.Get());		
@@ -314,18 +333,19 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 			{
 				return false;
 			}
-			return Actor->Destroy();
+			Actor->Destroy();
+			return false;
 	}
 }
 
 void UNActorPoolSubsystem::RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
 	TickableSpawners.Add(TargetComponent);
-	bHasTickableSpawners = (TickableSpawners.Num() > 0);
+	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }
 
 void UNActorPoolSubsystem::UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
 	TickableSpawners.Remove(TargetComponent);
-	bHasTickableSpawners = (TickableSpawners.Num() > 0);
+	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }

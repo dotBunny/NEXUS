@@ -13,12 +13,14 @@
 UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath, const FName Identifier)
 {
 	UNEditorUtilityWidgetSubsystem* System = UNEditorUtilityWidgetSubsystem::Get();
-	if (Identifier != NAME_None && System != nullptr && System->HasWidget(Identifier))
+	if (System == nullptr) return nullptr;
+	
+	if (Identifier != NAME_None && System->HasWidget(Identifier))
 	{
 		UNEditorUtilityWidget* Widget = System->GetWidget(Identifier);
 		if (Widget != nullptr)
 		{
-			const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
+			const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDockTab(
 				Widget->TakeWidget(), Widget->GetTabDisplayName(), Widget->GetTabIdentifier());
 			if (Tab.IsValid())
 			{
@@ -32,6 +34,12 @@ UEditorUtilityWidget* UNEditorUtilityWidget::SpawnTab(const FString& ObjectPath,
 	{
 		const TObjectPtr<UEditorUtilityWidgetBlueprint> LoadedWidgetBlueprint = 
 			LoadObject<UEditorUtilityWidgetBlueprint>(GetTransientPackage(), ObjectPath);
+		
+		if (!IsValid(LoadedWidgetBlueprint))
+		{
+			UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to load(%s) when trying to SpawnTab from UNEditorUtilityWidget."), *ObjectPath)
+			return nullptr;
+		}
 		
 		// Use an internal system to spawn and register the widget
 		FName TabIdentifier;
@@ -59,7 +67,7 @@ void UNEditorUtilityWidget::NativeConstruct()
 		UniqueIdentifier = FName(GetFName());
 	}
 	
-	// Bind our default behaviour
+	// Bind our default behavior
 	if (OnTabClosedCallback.IsBound())
 	{
 		OnTabClosedCallback.Unbind();
@@ -88,12 +96,12 @@ void UNEditorUtilityWidget::NativeConstruct()
 	DelayedTask = NewObject<UAsyncEditorDelay>(this, NAME_None, RF_Transient);
 	DelayedTask->RegisterWithGameInstance(this);
 	DelayedTask->Complete.AddDynamic(this, &UNEditorUtilityWidget::DelayedConstructTask);
-	DelayedTask->Start(0.01f, 1);
+	DelayedTask->Start(0, 1); // No time, we're just waiting for 1 frame
 }
 
 void UNEditorUtilityWidget::NativeDestruct()
 {
-	// Remove the delayed task to prevent dangling behaviour.
+	// Remove the delayed task to prevent dangling behavior.
 	if (DelayedTask)
 	{
 		DelayedTask->Complete.RemoveAll(this);
@@ -113,7 +121,7 @@ void UNEditorUtilityWidget::NativeDestruct()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void UNEditorUtilityWidget::DelayedConstructTask()
 {
-	const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDocTab(
+	const TSharedPtr<SDockTab> Tab = FNEditorSlateUtils::FindDockTab(
 		this->TakeWidget(), GetTabDisplayName(), GetTabIdentifier());
 	
 	if (Tab.IsValid())
@@ -143,11 +151,18 @@ void UNEditorUtilityWidget::DelayedConstructTask()
 	}
 	else
 	{
-		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."))
+		UE_LOG(LogNexusUIEditor, Warning, TEXT("Unable to update SDockTab as it could not be found."));
 	}
 	
-	// We need a render to happen so this can be updated
-	UnitScale = GetTickSpaceGeometry().GetAbsoluteSize() / GetTickSpaceGeometry().GetLocalSize();
+	// We need a render to happen so this can be updated; leave UnitScale at its default if the
+	// widget hasn't been laid out yet (collapsed tab, detached, never ticked), otherwise the
+	// component-wise division would produce NaN/inf.
+	const FGeometry& TickGeometry = GetTickSpaceGeometry();
+	const FVector2D LocalSize = TickGeometry.GetLocalSize();
+	if (LocalSize.X > KINDA_SMALL_NUMBER && LocalSize.Y > KINDA_SMALL_NUMBER)
+	{
+		UnitScale = TickGeometry.GetAbsoluteSize() / LocalSize;
+	}
 }
 
 void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const
@@ -160,7 +175,7 @@ void UNEditorUtilityWidget::OnTabClosed(TSharedRef<SDockTab> Tab) const
 			System->RemoveTabIdentifier(GetUniqueIdentifier());
 			if (!bHasPermanentState)
 			{
-				GEditor->GetEditorSubsystem<UNEditorUtilityWidgetSubsystem>()->RemoveWidgetState(GetUniqueIdentifier());
+				System->RemoveWidgetState(GetUniqueIdentifier());
 			}	
 		}
 		

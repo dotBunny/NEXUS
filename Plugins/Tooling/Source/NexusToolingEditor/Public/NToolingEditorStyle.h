@@ -9,7 +9,9 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
-// ReSharper disable once CppUE4CodingStandardNamingViolationWarning
+/**
+ * Slate style set for the NexusToolingEditor module.
+ */
 class NEXUSTOOLINGEDITOR_API FNToolingEditorStyle
 {
 	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusTooling", "NToolingEditorStyle")

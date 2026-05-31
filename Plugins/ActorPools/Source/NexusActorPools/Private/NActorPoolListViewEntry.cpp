@@ -1,4 +1,7 @@
-﻿#include "NActorPoolListViewEntry.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NActorPoolListViewEntry.h"
 
 #include "CommonTextBlock.h"
 #include "Components/ProgressBar.h"
@@ -20,12 +23,12 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 		CenterText->SetText(Pool->GetClassName());
 		
 		// Handle Color
-		if (Pool->DoesSupportInterface())
+		if (Pool->ImplementsPoolItemInterface())
 		{
 			TypeImage->SetBrushTintColor(FLinearColor::Green);
 			TypeImage->SetToolTipText(FText::FromString("INActorPoolItem"));
 		}
-		else if (Pool->HasInvokeUFunctionFlag())
+		else if (Pool->ShouldInvokeUFunctions())
 		{
 			TypeImage->SetBrushTintColor(FLinearColor::Yellow);
 			TypeImage->SetToolTipText(FText::FromString("Invoke UFUNCTION"));
@@ -51,14 +54,14 @@ void UNActorPoolListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject
 
 void UNActorPoolListViewEntry::Refresh() const
 {
-	if (Pool == nullptr)
+	if (!IsValid(Pool))
 	{
 		return;
 	}
 
-	const int InCount = Pool->GetInCount();
-	const int OutCount = Pool->GetOutCount();
-	const int Total = InCount + OutCount;
+	const int32 InCount = Pool->GetAvailableCount();
+	const int32 OutCount = Pool->GetSpawnedCount();
+	const int32 Total = InCount + OutCount;
 	
 	LeftText->SetText(FText::AsNumber(InCount));	
 	RightText->SetText(FText::Format(NSLOCTEXT("NexusActorPools", "OutAndTotal", "{0} | {1}"), FText::AsNumber(OutCount), FText::AsNumber(Total)));

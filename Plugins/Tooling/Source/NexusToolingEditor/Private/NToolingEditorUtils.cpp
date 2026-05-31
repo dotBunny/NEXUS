@@ -1,20 +1,52 @@
-﻿#include "NToolingEditorUtils.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
 
+#include "NToolingEditorUtils.h"
+
+#include "BlueprintEditor.h"
+#include "NEditorUtils.h"
 #include "NToolingEditorMinimal.h"
-
+#include "Engine/LevelScriptBlueprint.h"
 
 #if PLATFORM_WINDOWS
 #include "Windows/WindowsHWrapper.h"
 #ifdef UNICODE
 #define SEND_MESSAGE  SendMessageW
+#define LOAD_IMAGE LoadImageW
+#define LOAD_IMAGE_PATH 
 #else // !UNICODE
 #define SEND_MESSAGE  SendMessageA
+#define LOAD_IMAGE LoadImageA
+#define LOAD_IMAGE_PATH TCHAR_TO_ANSI
 #endif // UNICODE
 #endif // PLATFORM_WINDOWS
+
+TArray<FName> FNToolingEditorUtils::KnownBlueprintEditorAssetTypes;
+
+bool FNToolingEditorUtils::TryGetForegroundBlueprintEditorSelectedNodes(FGraphPanelSelectionSet& OutSelection)
+{
+	IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
+	if (ForegroundAssetEditor == nullptr) return false;
+	
+	if (IsBlueprintEditorAssetType(ForegroundAssetEditor->GetEditingAssetTypeName()))
+	{
+		const FBlueprintEditor* BlueprintEditor = static_cast<FBlueprintEditor*>(ForegroundAssetEditor);
+		OutSelection = BlueprintEditor->GetSelectedNodes();
+		return true;
+	}
+	return false;
+}
+
+void FNToolingEditorUtils::SetBlueprintEditorAssetTypes()
+{
+	KnownBlueprintEditorAssetTypes.Add(ULevelScriptBlueprint::StaticClass()->GetFName());
+	KnownBlueprintEditorAssetTypes.Add(UBlueprint::StaticClass()->GetFName());
+}
 
 
 void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 {
+	// This is dangerous, but necessary to be able to change UE internals.
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
@@ -28,6 +60,7 @@ void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 
 void FNToolingEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 {
+	// This is dangerous, but necessary to be able to change UE internals.
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
@@ -47,7 +80,7 @@ bool FNToolingEditorUtils::ReplaceWindowIcon(const FString& IconPath)
 	if (FPaths::FileExists(FinalPath))
 	{
 		const Windows::HWND WindowHandle = FWindowsPlatformMisc::GetTopLevelWindowHandle(FWindowsPlatformProcess::GetCurrentProcessId());
-		Windows::HICON hIcon = (Windows::HICON)LoadImageA(NULL, TCHAR_TO_ANSI(*FinalPath),IMAGE_ICON,
+		Windows::HICON hIcon = (Windows::HICON)LOAD_IMAGE(NULL, LOAD_IMAGE_PATH(*FinalPath),IMAGE_ICON,
 		GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), LR_LOADFROMFILE);
 		
 		if (hIcon)

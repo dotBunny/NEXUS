@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NBoxPickerParams.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points inside or on the surface of the FBox using different
@@ -31,7 +32,6 @@ public:
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
 	
-
 	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Useful for one-time random point generation with reproducible results.
@@ -55,6 +55,14 @@ public:
 	static void Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBoxPickerParams& Params);
 
 	/**
+	 * Generate random points in relation to an axis-aligned FBox using a provided Mersenne Twister.	 
+	 * @param OutLocations An array to store the generated points.
+	 * @param Random The Mersenne Twister to query for random.
+	 * @param Params The parameters for the point generation.
+	 */
+	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params);
+	
+	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
 	 * @param Origin The center point of the FBox.
 	 * @param Box The FBox to check if the point against.
@@ -77,6 +85,8 @@ public:
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox)
 	{
 		TArray<bool> OutResults;
+		OutResults.Reserve(Points.Num());
+		
 		for (const FVector& Point : Points)
 		{
 			if (IsPointInsideOrOn(Origin, MinimumBox, Point) || !IsPointInsideOrOn(Origin, MaximumBox, Point))

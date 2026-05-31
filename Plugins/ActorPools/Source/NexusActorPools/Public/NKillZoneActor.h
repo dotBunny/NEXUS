@@ -11,7 +11,7 @@
  * A specialized AActor base-class designed as a killzone for actors.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/kill-zone-actor/">ANKillZoneActor</a>
  */
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Kill Zone Actor")
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Kill Zone Actor")
 class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 {
 	GENERATED_BODY()
@@ -23,6 +23,7 @@ class NEXUSACTORPOOLS_API ANKillZoneActor : public AActor
 		RootComponent->Mobility = EComponentMobility::Static;
 	}
 
+	/** The kill zone volume used as the Actor's root component. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
 	TObjectPtr<UNKillZoneComponent> KillZoneComponent;
 };

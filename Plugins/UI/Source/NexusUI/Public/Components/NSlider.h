@@ -9,34 +9,28 @@
 
 /**
  * A wrapper around the USlider class to allow for setting the value without broadcasting events.
- * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/slider/">UNSlider</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/slider/">UNSlider</a>
  */
-UCLASS(DisplayName = "Slider", ClassGroup = UI, meta = (Category = "NEXUS"))
+UCLASS(DisplayName = "NEXUS | Slider", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNSlider : public USlider
 {
 	GENERATED_BODY()
-	
+
+public:
+
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
-#endif // WITH_EDITOR	
+#endif // WITH_EDITOR
 	
-public:
 	/**
 	 * Set the value of the USlider without triggering exposed event bindings.
 	 * @param NewValue The new value.
 	 */
 	UFUNCTION(BlueprintCallable, Category="NEXUS|User Interface", DisplayName="Set Value (No Broadcast)",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/slider/#set-value-no-broadcast"))
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/components/slider/#set-value-no-broadcast"))
 	void SetValue_NoBroadcast(const float NewValue);
 
 private:
-	/**
-	 * Cached value of the OnValueChanged used to prevent it from being called when setting the value.
-	 */
-	FOnFloatValueChangedEvent CachedOnValueChanged;
-
-	/**
-	 * Empty OnValueChanged event used to swap in for the CachedOnValueChanged to prevent it from being called.
-	 */
-	static FOnFloatValueChangedEvent EmptyValueChanged;
+	/** Empty OnValueChanged event used to swap in for OnValueChanged to prevent it from being called. */
+	static FOnFloatValueChangedEvent EmptyChangedEvent;
 };

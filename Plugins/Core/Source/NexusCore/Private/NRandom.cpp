@@ -7,4 +7,4 @@
 
 // We'll do a static initialization of the core random for now, but this eventually would be set during any sort of multiplayer or loading scenario.
 FNMersenneTwister FNRandom::Deterministic = FNMersenneTwister(FNSeedGenerator::SeedFromString(TEXT("NEXUS")));
-FRandomStream FNRandom::NonDeterministic = FRandomStream(FDateTime::Now().GetMillisecond());
+FRandomStream FNRandom::NonDeterministic = FRandomStream(FGenericPlatformMath::Rand());

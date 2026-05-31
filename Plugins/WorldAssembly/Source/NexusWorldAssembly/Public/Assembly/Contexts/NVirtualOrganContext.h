@@ -1,0 +1,151 @@
+// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#pragma once
+
+#include "Assembly/Data/NVirtualBoneData.h"
+#include "Assembly/Graph/NAssemblyGraph.h"
+#include "Assembly/Data/NVirtualCellData.h"
+#include "Collections/NWeightedIntegerArray.h"
+#include "Assembly/Graph/NAssemblyGraphCellNode.h"
+
+struct FNWorldOrganData;
+class UNOrganComponent;
+
+/**
+ * Query bundle passed into FNVirtualOrganContext::FilterCellInputData to narrow down candidate cells.
+ */
+struct FNCellInputDataFilter
+{
+	/**
+	 * Hop-count from the start node of the cell the filter is stepping away from.
+	 * Compared against each candidate's MinimumNodeDepth to gate cells that are only allowed
+	 * to appear at or beyond a certain distance from the bone. 0 means "at the start".
+	 */
+	int32 NodeDepth = 0;
+
+	/** When true, only cells flagged bCanBeStartNode are eligible. */
+	bool bIsStartNode = false;
+
+	/** When true, only cells flagged bCanBeEndNode are eligible. */
+	bool bIsEndNode = false;
+
+	/** Cell the filter is stepping away from; used for distance/uniqueness checks. */
+	FNVirtualCellData* SourceCellInputData = nullptr;
+
+	/** Graph node the filter is stepping away from; used for spatial checks. */
+	FNAssemblyGraphCellNode* SourceCellNode = nullptr;
+
+	/** Socket size the candidate cell must provide at least one junction of. */
+	FIntVector2 SocketSize = FIntVector2(0, 0);
+
+	/** Orientation applied to the candidate's junction to match the source. */
+	FQuat SourceQuat = FQuat();
+};
+
+/**
+ * Per-organ context consumed by FNOrganGraphBuilderTask.
+ *
+ * Holds the input cell/bone pools, spatial constraints, and the output graph. Re-entrant across
+ * retries: ResetForRetry drops the in-progress graph while preserving seed/name so analytics
+ * remain aggregated.
+ */
+class FNVirtualOrganContext
+{
+	friend struct FNOrganGeneratorBuildGraphTask;
+
+public:
+	
+	float CellHullPenetration = 10.f;
+
+	float WorldHullPenetration = 1.f;
+
+	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
+	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
+
+	/** Lower bound on cell count; -1 disables the check. */
+	int32 MinimumCellCount = -1;
+
+	/** Upper bound on cell count; -1 disables the check. */
+	int32 MaximumCellCount = -1;
+
+	/** Number of retries this organ is allowed before giving up. */
+	int32 MaximumRetryCount = 0;
+	
+	int32 BadStartLimit = 1000;
+
+	/** When true, the graph may extend past Bounds. */
+	bool bUnbounded = false;
+
+	/** Spatial bounds the graph must stay within unless bUnbounded. */
+	FBoxSphereBounds Bounds;
+
+	/** World origin of the organ used as the graph root. */
+	FVector Origin;
+
+	FNTissueTagGroups PlacedTagGroups;
+	FGameplayTagContainer OutputTags;
+	
+	
+	/** Bones the builder will anchor the graph on. */
+	TArray<FNVirtualBoneData> BoneInputData;
+
+	/** Candidate cells the builder may pull from. */
+	TArray<FNVirtualCellData> CellInputData;
+	
+	FNVirtualCellDataSummary CellInputDataSummary;
+
+	/** Output graph, owned by this context until handed off to the task-graph context. */
+	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;
+
+	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
+	~FNVirtualOrganContext();
+
+	/** @return Deterministic seed used to drive this organ's random stream. */
+	uint64 GetSeed() const { return Seed; };
+
+	/** @return Human-readable task name for logs/debug. */
+	const FString& GetName() { return Name; };
+
+	/** @return true once the builder has produced a valid graph (cell count within bounds, etc). */
+	bool IsSuccessful() const { return bSuccessful; };
+
+	/** @return true if the context is set up well enough to attempt a build. */
+	bool IsValid() const { return bIsValid; };
+
+	/** @return true if the current graph satisfies all required invariants (debug helper). */
+	bool CheckGraph();
+
+	/**
+	 * Filter CellInputData into a weighted candidate list for selection.
+	 * @param Filter Query constraints (socket size, start/end requirements, source node).
+	 * @param CellIndices [out] Indices into CellInputData weighted by their configured weighting.
+	 * @param JunctionIndices [out] For each cell index, the subset of its junction keys that match the filter.
+	 */
+	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
+
+	/**
+	 * Drop the current graph and bump the retry counter.	 
+	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
+	 */
+	bool ResetForRetry();
+
+	/** Run the post-build invariant checks; flips bSuccessful on success. */
+	bool ValidateGraph();
+
+private:
+	/** Number of retries consumed so far. */
+	int32 RetryCount = 0;
+
+	/** True once construction inputs have been validated. */
+	bool bIsValid = false;
+
+	/** True once ValidateGraph accepts the produced graph. */
+	bool bSuccessful = false;
+
+	/** Random-stream seed for this organ's build. */
+	uint64 Seed;
+
+	/** Human-readable task name used in logs. */
+	FString Name;
+};

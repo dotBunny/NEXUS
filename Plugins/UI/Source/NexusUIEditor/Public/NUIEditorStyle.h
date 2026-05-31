@@ -9,6 +9,11 @@
 #include "Styling/SlateStyle.h"
 #include "Styling/SlateStyleRegistry.h"
 
+/**
+ * Slate style set for the NexusUI editor module. The N_IMPLEMENT_EDITOR_STYLE_HEADER macro
+ * expands the boilerplate Get/Initialize/Shutdown helpers and wires the style against the
+ * "NexusUI" plugin's `Resources/Slate` folder.
+ */
 // ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class NEXUSUIEDITOR_API FNUIEditorStyle
 {

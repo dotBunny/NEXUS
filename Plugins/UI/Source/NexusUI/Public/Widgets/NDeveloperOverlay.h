@@ -7,6 +7,7 @@
 #include "CommonTextBlock.h"
 #include "NColor.h"
 #include "CommonUserWidget.h"
+#include "Engine/World.h"
 #include "NDeveloperOverlay.generated.h"
 
 class UVerticalBox;
@@ -15,29 +16,72 @@ class UCommonHierarchicalScrollBox;
 class UNCheckBox;
 class UButton;
 
-UCLASS(ClassGroup = "NEXUS", DisplayName = "Developer Overlay", Abstract, Blueprintable)
+/**
+ * Abstract base widget for NEXUS developer/diagnostic overlays. Supplies a banner row and a
+ * ContainerBox slot for subclasses to populate; bIsEditorUtilityWidget toggles editor-only
+ * behavior when hosted inside an EUW.
+ */
+UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Developer Overlay", Abstract, Blueprintable)
 class NEXUSUI_API UNDeveloperOverlay :  public UCommonUserWidget
 {
 	GENERATED_BODY()
-	
+
 public:
-	UFUNCTION(BlueprintCallable)
-	void ShowContainerBanner(const FText& Text = FText::GetEmpty(), 
+	/** Display the banner row with Text and the supplied foreground/background color pair. */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
+	void ShowContainerBanner(const FText& Text = FText::GetEmpty(),
 		ENColor MessageColor = ENColor::NC_White, ENColor BannerColor = ENColor::NC_NexusDarkBlue) const;
-	
-	UFUNCTION(BlueprintCallable)
+
+	/** Collapse the banner row. */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void HideContainerBanner() const;
-	
+
+	/** When true the overlay is hosted inside an EUW and should avoid runtime-only assumptions. */
 	UPROPERTY(EditDefaultsOnly)
 	bool bIsEditorUtilityWidget;
-	
-protected:
+
+	/** Iterates all current GEngine world contexts and calls Bind() on each. Safe to call when GEngine is null. */
+	void BindAllCurrentWorlds();
+	/** Iterates all current GEngine world contexts and calls Unbind() on each. Safe to call when GEngine is null. */
+	void UnbindAllCurrentWorlds();
+
+	/** Override to subscribe to a specific world's subsystems when the overlay is constructed or a world is added. */
+	virtual void BindWorld(UWorld* World) 
+	{ 
+		// To be defined by overlay implementation
+	}
+	/** Override to unsubscribe from a specific world's subsystems when the overlay is destroyed or a world is removed. */
+	virtual void UnbindWorld(const UWorld* World)
+	{ 
+		// To be defined by overlay implementation
+	}
+
+	/** Bound UCommonBorder that provides the banner row's background brush. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonBorder> ContainerBanner;
-	
+
+	/** Bound UCommonTextBlock that renders the banner row's message text. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UCommonTextBlock> ContainerBannerMessage;
-	
+
+	/** Bound UVerticalBox where subclasses add diagnostic rows. */
 	UPROPERTY(BlueprintReadOnly,meta=(BindWidget))
 	TObjectPtr<UVerticalBox> ContainerBox;
+
+protected:
+	//~UUserWidget
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
+	//End UUserWidget
+
+private:
+	/** Engine callback: forwards a newly initialized world to BindWorld() for subclass handling. */
+	void OnWorldPostInitialization(UWorld* World, FWorldInitializationValues WorldInitializationValues);
+	/** Engine callback: forwards a tearing-down world to UnbindWorld() for subclass handling. */
+	void OnWorldBeginTearDown(UWorld* World);
+
+	/** Handle for the world-post-initialization delegate subscription. */
+	FDelegateHandle AddWorldDelegateHandle;
+	/** Handle for the world-begin-teardown delegate subscription. */
+	FDelegateHandle RemoveWorldDelegateHandle;
 };

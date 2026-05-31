@@ -7,7 +7,7 @@
 #include "NActorPoolsEditorValidator.generated.h"
 
 /**
- * A generalized validator for sub-validators.
+ * Data validator that checks NexusActorPools assets (e.g. UNActorPoolSet) on save / commandlet validation.
  */
 UCLASS()
 class UNActorPoolsEditorValidator : public UEditorValidatorBase

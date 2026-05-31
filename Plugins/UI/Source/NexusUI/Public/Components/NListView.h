@@ -8,24 +8,28 @@
 #include "NUIMinimal.h"
 #include "NListView.generated.h"
 
-UCLASS(DisplayName = "ListView", ClassGroup = UI, meta = (Category = "NEXUS"))
 /**
- * A wrapper around the UComboListView class to allow for calls to an interface on the entry elements. 
- **/
+ * UCommonListView subclass that invokes INListViewEntry::SetOwnerListView on each generated
+ * entry widget. Also exposes a weak ReferenceObject slot so an outer object can be stashed on
+ * the list and retrieved from inside entry widgets (e.g. to bind to a view-model).
+ */
+UCLASS(DisplayName = "NEXUS | ListView", ClassGroup = UI, meta = (Category = "NEXUS"))
 class NEXUSUI_API UNListView : public UCommonListView
 {
 	GENERATED_BODY()
 
+public:
+	
 #if WITH_EDITOR
 	virtual const FText GetPaletteCategory() override {  return NEXUS::UIEditor::PaletteCategory; }
 #endif // WITH_EDITOR
-	
-public:
-	
-	UFUNCTION(BlueprintCallable)
+
+	/** Stash an arbitrary outer reference on the list so entries can retrieve it during construction. */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	void SetReferenceObject(UObject* Object) { ReferenceObject = Object; }
 
-	UFUNCTION(BlueprintCallable)
+	/** @return the previously-stashed reference object, or nullptr if it has been GC'd. */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
 	UObject* GetReferenceObject() const
 	{
 		if (ReferenceObject.IsValid())
@@ -36,13 +40,14 @@ public:
 	}
 
 protected:
+	//~UCommonListView
 	virtual UUserWidget& OnGenerateEntryWidgetInternal(UObject* Item, TSubclassOf<UUserWidget> DesiredEntryClass, const TSharedRef<STableViewBase>& OwnerTable) override
 	{
 		UUserWidget& Widget =  Super::OnGenerateEntryWidgetInternal(Item, DesiredEntryClass, OwnerTable);
-		
+
 		if (Widget.Implements<UNListViewEntry>())
 		{
-			if (INListViewEntry* Entry = Cast<INListViewEntry>(&Widget); 
+			if (INListViewEntry* Entry = Cast<INListViewEntry>(&Widget);
 				Entry != nullptr)
 			{
 				Entry->SetOwnerListView(&Widget, this);
@@ -54,7 +59,9 @@ protected:
 		}
 		return Widget;
 	};
+	//End UCommonListView
 
-	UPROPERTY(BlueprintreadOnly, Category = "NListView")
+	/** Weakly-held reference object surfaced via Get/SetReferenceObject for use by entry widgets. */
+	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<UObject> ReferenceObject = nullptr;
 };

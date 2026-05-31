@@ -7,12 +7,14 @@
 #include "NEditorStyle.h"
 #include "NEditorUtilityWidget.h"
 #include "NEditorUtilityWidgetSubsystem.h"
+#include "NEditorUtils.h"
 #include "NMetaUtils.h"
 #include "Menus/NFixersMenu.h"
 #include "Menus/NToolsMenu.h"
 #include "NToolingEditorMinimal.h"
 #include "NToolingEditorSettings.h"
 #include "NToolingEditorStyle.h"
+#include "NToolingEditorUtils.h"
 #include "DelayedEditorTasks/NLeakTestDelayedEditorTask.h"
 #include "Menus/NFixersMenuEntries.h"
 #include "Menus/NToolsMenuEntries.h"
@@ -99,6 +101,8 @@ void FNToolingEditorCommands::AddMenuEntries()
 		}
 	}
 	
+	// Add Multiplayer Test Bits
+	
 	// Support for DocsURL addition to nodes
 	if (UToolMenu* BlueprintNodeContextMenu = UToolMenus::Get()->ExtendMenu("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction"))
 	{
@@ -139,7 +143,7 @@ void FNToolingEditorCommands::OpenNetworkProfiler()
 		bLaunchHidden, bLaunchReallyHidden, nullptr, 0, nullptr, nullptr, nullptr);
 	if (!ProcHandle.IsValid())
 	{
-		UE_LOG(LogNexusToolingEditor, Error, TEXT("Unable to launch NetworkProfiler."))
+		UE_LOG(LogNexusToolingEditor, Error, TEXT("Unable to launch NetworkProfiler."));
 	}
 }
 
@@ -183,15 +187,21 @@ void FNToolingEditorCommands::GenerateProjectLevelsSubMenu(UToolMenu* Menu)
 
 void FNToolingEditorCommands::OnNodeExternalDocumentation()
 {
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return;
+	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
+	if (AssetEditorInstance == nullptr) return;
+	
+	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
+	{
+		return;
+	}
+	FBlueprintEditor* Editor = static_cast<FBlueprintEditor*>(AssetEditorInstance);
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return;
 
 	// Split the data so you can have multiple URIs in the data
 	TArray<FString> OutURIs;
 	FNMetaUtils::GetExternalDocumentation(Node).ParseIntoArray(OutURIs, TEXT(","), true);
-	for (int i = 0; i < OutURIs.Num(); i++)
+	for (int32 i = 0; i < OutURIs.Num(); i++)
 	{
 		FPlatformProcess::LaunchURL(*OutURIs[i].TrimStartAndEnd(),nullptr, nullptr);
 	}
@@ -199,8 +209,14 @@ void FNToolingEditorCommands::OnNodeExternalDocumentation()
 
 bool FNToolingEditorCommands::NodeExternalDocumentation_CanExecute()
 {
-	FBlueprintEditor* Editor = FNEditorUtils::GetForegroundBlueprintEditor();
-	if (Editor == nullptr) return false;
+	IAssetEditorInstance* AssetEditorInstance = FNEditorUtils::GetForegroundAssetEditor();
+	if (AssetEditorInstance == nullptr) return false;
+	
+	if (!FNToolingEditorUtils::IsBlueprintEditorAssetType(AssetEditorInstance->GetEditingAssetTypeName()))
+	{
+		return false;
+	}
+	FBlueprintEditor* Editor = static_cast<FBlueprintEditor*>(AssetEditorInstance);
 	UEdGraphNode* Node = Editor->GetSingleSelectedNode();
 	if (Node == nullptr) return false;
 	return FNMetaUtils::HasExternalDocumentation(Node);
@@ -208,7 +224,7 @@ bool FNToolingEditorCommands::NodeExternalDocumentation_CanExecute()
 
 void FNToolingEditorCommands::RemoveMenuEntries()
 {
-	UToolMenus* Menu = UToolMenus::Get();
+	UToolMenus* Menu = UToolMenus::TryGet();
 	if (Menu)
 	{
 		// Remove Collision Visualizer
@@ -224,6 +240,6 @@ void FNToolingEditorCommands::RemoveMenuEntries()
 		Menu->RemoveSection("LevelEditor.MainMenu.Tools.Profile", "External");
 		
 		Menu->RemoveEntry("GraphEditor.GraphNodeContextMenu.K2Node_CallFunction", 
-			"EdGraphSchemaDocumentation", "NCore.Node.ExternalDocumentation");
+			"EdGraphSchemaDocumentation", "NEXUS_ExternalDocumentation");
 	}
 }
