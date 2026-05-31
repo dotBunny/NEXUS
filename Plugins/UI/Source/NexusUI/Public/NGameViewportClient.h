@@ -32,7 +32,7 @@ public:
 	void ToggleWorldRendering(const bool bNewValue)
 	{
 		OnToggleWorldRendering.Broadcast(bNewValue);
-		bDisableWorldRendering = bNewValue;
+		bDisableWorldRendering = !bNewValue;
 	};
 
 protected:
