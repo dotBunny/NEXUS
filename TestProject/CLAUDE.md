@@ -20,7 +20,7 @@ NEXUS/
 
 - The `TestProject` is a thin host project.
 - Actual feature work lives in `../Plugins/<PluginName>/Source/`.
-- Resolve `___UEROOT___` from value in the projects `./claude/local-memory/ueroot`. If absent, probe `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, `D:\EGS\UE_5.7` in order, then save the found path there.
+- Resolve `___UEROOT___` from the value in the project's `.claude/local-memory/ueroot`. If absent, probe `C:\UE\UE_5.7`, `D:\UE\UE_5.7`, `E:\UE\UE_5.7`, `D:\EGS\UE_5.7` in order, then save the found path there. The editor executable is then `___UEROOT___\Engine\Binaries\Win64\UnrealEditor-Cmd.exe` and the build script `___UEROOT___\Engine\Build\BatchFiles\Build.bat`.
 - `___PROJECTROOT___` is the absolute path to the `TestProject/` directory — the current working directory. Resolve it from the working directory rather than hardcoding a path.
 
 ## Plugin Architecture
