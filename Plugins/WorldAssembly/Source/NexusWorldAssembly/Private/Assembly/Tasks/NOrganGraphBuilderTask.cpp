@@ -195,7 +195,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		
 		
 		// Create our first cell node, attaching it to the bone node
-		FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(StartCellInputData, CellWorldPosition, CellWorldRotation);
+		FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(StartCellInputData, CellWorldPosition, CellWorldRotation, OrganContextPtr->VoxelSize);
 		
 		// TODO: Intersecting or out of bounds start???
 		
@@ -441,7 +441,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
 		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
 	
-		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(CellInputData, TargetJunctionWorldPosition, RequiredRotation);
+		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(CellInputData, TargetJunctionWorldPosition, RequiredRotation, OrganContextPtr->VoxelSize);
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
 		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.

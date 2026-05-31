@@ -24,6 +24,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
+	VoxelSize = WorldOrganContext->VoxelSize;
 	
 	// Keep a local copy of this here
 	bUnbounded = WorldOrganContext->SourceComponent->bUnbounded;

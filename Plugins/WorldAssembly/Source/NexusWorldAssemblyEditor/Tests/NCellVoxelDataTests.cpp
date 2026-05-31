@@ -195,4 +195,113 @@ N_TEST_HIGH(FNCellVoxelDataTests_FlatVsCoord_Equivalence, "NEXUS::UnitTests::NWo
 	CHECK_EQUALS("Flat read should match coord write", VoxelData.GetData(Flat2), static_cast<uint8>(ENCellVoxel::Occupied));
 }
 
+N_TEST_HIGH(FNCellVoxelDataTests_RotatedAroundPivot_Identity, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::RotatedAroundPivot::Identity", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies an identity rotation about the origin preserves dimensions, origin, and occupancy.
+	FNCellVoxelData VoxelData;
+	VoxelData.Resize(2, 3, 4);
+	VoxelData.Origin = FVector::ZeroVector;
+	VoxelData.SetData(1u, 2u, 3u, static_cast<uint8>(ENCellVoxel::Occupied));
+
+	VoxelData.RotateAroundPivot(FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+
+	const FNVoxelCoordinate Size = VoxelData.GetSize();
+	CHECK_EQUALS("Identity rotation should keep X dimension", Size.X, 2u);
+	CHECK_EQUALS("Identity rotation should keep Y dimension", Size.Y, 3u);
+	CHECK_EQUALS("Identity rotation should keep Z dimension", Size.Z, 4u);
+	CHECK_EQUALS("Identity rotation should keep the cell count", VoxelData.GetCount(), static_cast<SIZE_T>(24));
+	CHECK_EQUALS("Origin X should snap to the same lattice cell", VoxelData.GetOrigin().X, 0.0);
+	CHECK_EQUALS("Occupied voxel should survive the identity rotation", VoxelData.GetData(1u, 2u, 3u), static_cast<uint8>(ENCellVoxel::Occupied));
+	CHECK_EQUALS("Unrelated voxel should stay empty", VoxelData.GetData(0u, 0u, 0u), static_cast<uint8>(ENCellVoxel::Empty));
+}
+
+N_TEST_HIGH(FNCellVoxelDataTests_RotatedAroundPivot_Yaw90, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::RotatedAroundPivot::Yaw90", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies a +90-degree yaw about the origin permutes dimensions (X<->Y) and remaps occupancy exactly
+	// via the cardinal fast-path. Mapping (x,y,z) world-center -> (-y, x, z), origin snaps to (-300,0,0).
+	FNCellVoxelData VoxelData;
+	VoxelData.Resize(2, 3, 4);
+	VoxelData.Origin = FVector::ZeroVector;
+	VoxelData.SetData(0u, 0u, 0u, static_cast<uint8>(ENCellVoxel::Occupied));
+	VoxelData.SetData(1u, 2u, 3u, static_cast<uint8>(ENCellVoxel::Occupied));
+	VoxelData.SetData(0u, 2u, 0u, static_cast<uint8>(ENCellVoxel::Occupied));
+
+	VoxelData.RotateAroundPivot(FVector::ZeroVector, FRotator(0.f, 90.f, 0.f), FVector(100.f));
+
+	const FNVoxelCoordinate Size = VoxelData.GetSize();
+	CHECK_EQUALS("Yaw 90 should swap X dimension to the old Y", Size.X, 3u);
+	CHECK_EQUALS("Yaw 90 should swap Y dimension to the old X", Size.Y, 2u);
+	CHECK_EQUALS("Yaw 90 should keep Z dimension", Size.Z, 4u);
+	CHECK_EQUALS("Origin X should re-anchor to -300", VoxelData.GetOrigin().X, -300.0);
+	CHECK_EQUALS("Source (0,0,0) should land at (0,0,0)", VoxelData.GetData(0u, 0u, 0u), static_cast<uint8>(ENCellVoxel::Occupied));
+	CHECK_EQUALS("Source (1,2,3) should land at (0,1,3)", VoxelData.GetData(0u, 1u, 3u), static_cast<uint8>(ENCellVoxel::Occupied));
+	CHECK_EQUALS("Source (0,2,0) should land at (2,0,0)", VoxelData.GetData(2u, 0u, 0u), static_cast<uint8>(ENCellVoxel::Occupied));
+}
+
+N_TEST_HIGH(FNCellVoxelDataTests_RotatedAroundPivot_Yaw180, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::RotatedAroundPivot::Yaw180", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies a 180-degree yaw keeps dimensions but flips occupancy across both X and Y.
+	FNCellVoxelData VoxelData;
+	VoxelData.Resize(2, 3, 4);
+	VoxelData.Origin = FVector::ZeroVector;
+	VoxelData.SetData(0u, 0u, 0u, static_cast<uint8>(ENCellVoxel::Occupied));
+	VoxelData.SetData(1u, 2u, 3u, static_cast<uint8>(ENCellVoxel::Occupied));
+
+	VoxelData.RotateAroundPivot(FVector::ZeroVector, FRotator(0.f, 180.f, 0.f), FVector(100.f));
+
+	const FNVoxelCoordinate Size = VoxelData.GetSize();
+	CHECK_EQUALS("Yaw 180 should keep X dimension", Size.X, 2u);
+	CHECK_EQUALS("Yaw 180 should keep Y dimension", Size.Y, 3u);
+	CHECK_EQUALS("Yaw 180 should keep Z dimension", Size.Z, 4u);
+	CHECK_EQUALS("Source (0,0,0) should land at (1,2,0)", VoxelData.GetData(1u, 2u, 0u), static_cast<uint8>(ENCellVoxel::Occupied));
+	CHECK_EQUALS("Source (1,2,3) should land at (0,0,3)", VoxelData.GetData(0u, 0u, 3u), static_cast<uint8>(ENCellVoxel::Occupied));
+}
+
+N_TEST_HIGH(FNCellVoxelDataTests_RotatedAroundPivot_Arbitrary, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::RotatedAroundPivot::Arbitrary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies a non-cardinal 45-degree yaw drives the inverse-sampling path: the footprint grows to the
+	// rotated bounding box and a fully-occupied grid keeps roughly the same occupied volume (no holes).
+	FNCellVoxelData VoxelData;
+	VoxelData.Resize(4, 4, 1);
+	VoxelData.Origin = FVector::ZeroVector;
+	for (uint32 i = 0; i < VoxelData.GetCount(); ++i)
+	{
+		VoxelData.SetData(i, static_cast<uint8>(ENCellVoxel::Occupied));
+	}
+
+	// Rotate about the grid's own center so the bounding box grows symmetrically.
+	VoxelData.RotateAroundPivot(FVector(200.f, 200.f, 50.f), FRotator(0.f, 45.f, 0.f), FVector(100.f));
+
+	const FNVoxelCoordinate Size = VoxelData.GetSize();
+	CHECK_EQUALS("45-degree yaw should grow X to the rotated bounding box", Size.X, 6u);
+	CHECK_EQUALS("45-degree yaw should grow Y to the rotated bounding box", Size.Y, 6u);
+	CHECK_EQUALS("45-degree yaw should keep the single Z layer", Size.Z, 1u);
+
+	uint32 OccupiedCount = 0;
+	for (uint32 i = 0; i < VoxelData.GetCount(); ++i)
+	{
+		if (VoxelData.GetData(i) == static_cast<uint8>(ENCellVoxel::Occupied)) ++OccupiedCount;
+	}
+	CHECK_MESSAGE(TEXT("Rotating a full 16-voxel grid should preserve roughly the same occupied volume."), OccupiedCount >= 12 && OccupiedCount <= 20);
+}
+
+N_TEST_HIGH(FNCellVoxelDataTests_RotatedAroundPivot_NonCubic, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::RotatedAroundPivot::NonCubic", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies non-uniform voxels force the inverse-sampling path (no cardinal fast-path) and still map
+	// occupancy correctly under an identity rotation.
+	FNCellVoxelData VoxelData;
+	VoxelData.Resize(2, 2, 2);
+	VoxelData.Origin = FVector::ZeroVector;
+	VoxelData.SetData(1u, 1u, 1u, static_cast<uint8>(ENCellVoxel::Occupied));
+
+	VoxelData.RotateAroundPivot(FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f, 200.f, 100.f));
+
+	const FNVoxelCoordinate Size = VoxelData.GetSize();
+	CHECK_EQUALS("Non-cubic identity should keep X dimension", Size.X, 2u);
+	CHECK_EQUALS("Non-cubic identity should keep Y dimension", Size.Y, 2u);
+	CHECK_EQUALS("Non-cubic identity should keep Z dimension", Size.Z, 2u);
+	CHECK_EQUALS("Occupied voxel should survive non-cubic resampling", VoxelData.GetData(1u, 1u, 1u), static_cast<uint8>(ENCellVoxel::Occupied));
+	CHECK_EQUALS("Unrelated voxel should stay empty", VoxelData.GetData(0u, 0u, 0u), static_cast<uint8>(ENCellVoxel::Empty));
+}
+
 #endif //WITH_TESTS

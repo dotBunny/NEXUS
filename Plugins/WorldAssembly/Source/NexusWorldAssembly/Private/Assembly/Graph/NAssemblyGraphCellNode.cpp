@@ -6,7 +6,7 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation) : FNAssemblyGraphNode(Position, Rotation)
+FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize) : FNAssemblyGraphNode(Position, Rotation)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
@@ -30,8 +30,9 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	Hull = InputData->CellDetails.Hull;
 	
 	// Copy our voxel data and rotate it into its new world-space position/rotation
-	WorldVoxel = InputData->CellDetails.VoxelData;
-	WorldVoxel.RotatedAroundPivot(Position, Rotation); // TODO: Implement
+	// TODO: Right now we dont actually use the VoxelData for anything so lets not pay for the rotation until we need it, not assigning the data to cause an error later so we know.
+	//WorldVoxel = InputData->CellDetails.VoxelData;
+	//WorldVoxel.RotateAroundPivot(Position, Rotation, VoxelSize);
 	
 	// We need to copy all the template junction data into our own local copy of the details that we will manipulate
 	for (int32 i = 0; i < FreeJunctionKeys.Num(); i++)
@@ -43,8 +44,6 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 		Details.WorldRotation = (Rotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
 		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
 	}
-	
-	
 }
 
 bool FNAssemblyGraphCellNode::HasOpenJunctions() const

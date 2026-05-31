@@ -37,9 +37,12 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	int32 BadStartLimit = 1000;
 	
 	float CellHullPenetration = 10.f;
-	
+
 	float WorldHullPenetration = 1.f;
-	
+
+	/** World-space size of a single voxel, cached from UNWorldAssemblySettings for the graph builder. */
+	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
+
 	/** Spatial bounds of the SourceComponent unless bUnbounded. */
 	FBoxSphereBounds Bounds;
 	

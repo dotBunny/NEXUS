@@ -57,8 +57,11 @@ class FNVirtualOrganContext
 public:
 	
 	float CellHullPenetration = 10.f;
-	
+
 	float WorldHullPenetration = 1.f;
+
+	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
+	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
 	/** Lower bound on cell count; -1 disables the check. */
 	int32 MinimumCellCount = -1;

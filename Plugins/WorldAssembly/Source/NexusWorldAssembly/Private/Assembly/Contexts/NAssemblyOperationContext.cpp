@@ -157,6 +157,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		Pair.Value.MaximumRetryCount = Settings->AssemblyGenerationRetryCount;
 		Pair.Value.CellHullPenetration = Settings->AssemblyJunctionMatchingCellHullPenetration;
 		Pair.Value.WorldHullPenetration = Settings->AssemblyJunctionMatchingWorldPenetration;
+		Pair.Value.VoxelSize = Settings->VoxelSize;
 		
 		if (Pair.Key->bUnbounded)
 		{

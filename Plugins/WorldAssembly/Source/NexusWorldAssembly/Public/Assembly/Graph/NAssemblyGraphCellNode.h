@@ -19,7 +19,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphCellNode : public FNAssemblyGraphNod
 public:
 	virtual ENAssemblyGraphNodeType GetNodeType() const override {  return ENAssemblyGraphNodeType::Cell; }
 
-	FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation);
+	FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize);
 
 	/** @return true if at least one junction on this cell is still unlinked. */
 	bool HasOpenJunctions() const;
