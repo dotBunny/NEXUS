@@ -137,7 +137,7 @@ private:
 			LinePositions.Add(LinePositionOffset);
 			
 			Height += OutHeight;
-			LinePositionOffset += (Height + LineSpacing);
+			LinePositionOffset += (OutHeight + LineSpacing);
 			if (OutWidth > Width)
 			{
 				Width = OutWidth;
