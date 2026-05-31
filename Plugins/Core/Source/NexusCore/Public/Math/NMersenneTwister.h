@@ -10,6 +10,7 @@
 /**
  * Mersenne Twister based FRandomStream-like API with some extras!
  * Implements the std::mt19937_64 engine to produce high-quality uint64 random numbers.
+ * Guaranteed behavior across platforms/compilers by avoiding using std::*_distribution.
  */
 class NEXUSCORE_API FNMersenneTwister
 {
@@ -227,9 +228,8 @@ public:
 	 */
 	uint64 UnsignedInteger64()
 	{
-		const uint64 PseudoRandomValue = PersistentUnsignedInteger64Distribution(this->Get());
 		this->CallCounter++;
-		return PseudoRandomValue;
+		return this->Engine();
 	}
 	
 	/**
@@ -249,36 +249,50 @@ public:
 
 private:
 
-	/** Bernoulli distribution probability function. */
-	std::bernoulli_distribution BooleanDistribution{0.5};
-
 	/** The number of times the Mersenne Twister has been called since the seed has been set. */
-	uint32 CallCounter; 
+	uint32 CallCounter;
 
 	/** Single instance of the 64-bit Mersenne Twister pseudo random engine. */
 	std::mt19937_64 Engine;
-	
-	/** Maintained a real float distribution probability function, explicitly used for 0-1. */
-	std::uniform_real_distribution<float> PersistentFloatRangeDistribution = std::uniform_real_distribution<float>(0.0, 1.0);
 
-	/** Maintained a real double distribution probability function, explicitly used for 0-1. */
-	std::uniform_real_distribution<double> PersistentDoubleRangeDistribution = std::uniform_real_distribution<double>(0.0, 1.0);
-
-	/** Maintained a real unsigned 64-bit integer distribution probability function. */
-	std::uniform_int_distribution<uint64> PersistentUnsignedInteger64Distribution = std::uniform_int_distribution<uint64>(MIN_uint64, MAX_uint64);
-	
 	/** The last seed set on the Mersenne Twister. */
 	uint64 InitialSeed;
 
-	/***
-	 * Returns the reference to the FMersenneTwister engine.
-	 * @return a reference to the class.
+	/**
+	 * Maps a raw engine draw to a float in the half-open range [0, 1).
+	 * @param Bits A raw uint64 produced by the engine.
+	 * @return a portable pseudo random float in [0, 1).
+	 * @note Uses the top 24 bits (full float mantissa precision) so the result depends only on the
+	 *       standard-defined engine output, not on the STL vendor's distribution implementation.
 	 */
-	std::mt19937_64& Get()
+	static FORCEINLINE float ToUnitFloat(const uint64 Bits)
 	{
-		return this->Engine;
+		// 2^24 = 16777216
+		return static_cast<float>(Bits >> 40) * (1.0f / 16777216.0f);
 	}
-	
+
+	/**
+	 * Maps a raw engine draw to a double in the half-open range [0, 1).
+	 * @param Bits A raw uint64 produced by the engine.
+	 * @return a portable pseudo random double in [0, 1).
+	 * @note Uses the top 53 bits (full double mantissa precision) so the result depends only on the
+	 *       standard-defined engine output, not on the STL vendor's distribution implementation.
+	 */
+	static FORCEINLINE double ToUnitDouble(const uint64 Bits)
+	{
+		// 2^53 = 9007199254740992
+		return static_cast<double>(Bits >> 11) * (1.0 / 9007199254740992.0);
+	}
+
+	/**
+	 * Draws a uniformly distributed value in the half-open range [0, Range).
+	 * @param Range The exclusive upper bound, must be >= 1.
+	 * @return a portable pseudo random uint64 in [0, Range).
+	 * @note Uses rejection sampling to remove modulo bias; the result depends only on the engine's
+	 *       (standard-defined) output, so it is identical across platforms and toolchains.
+	 */
+	uint64 NextBounded(const uint64 Range);
+
 	FNMersenneTwister(FNMersenneTwister const&) = delete;
 
 	/**

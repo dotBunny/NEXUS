@@ -73,6 +73,7 @@
 - `FNMersenneTwister::VectorNormalized` now provides `-1` to `1` component values.
 - `UNTextRenderComponent` now guards away from visuals on Dedicated Servers, but still replicates data to clients.
 - Deferred deletion of sidecar `NCell` data asset to next tick when renaming, speculative crash fix.
+- `FNMersenneTwister` now is cross-platform guaranteed, regardless of compiler to produce same results.
 
 ### Removed
 
