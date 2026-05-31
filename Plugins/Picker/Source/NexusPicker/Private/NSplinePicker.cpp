@@ -28,7 +28,7 @@
 		const float SplineLength = Params.SplineComponent->GetSplineLength(); \
 		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); \
 		const float DistancePerSegment = SplineLength / NumSegments; \
-		SplinePoints.Reserve(NumSegments); \
+		SplinePoints.Reserve(NumSegments + 1); \
 		for (int32 i = 0; i <= NumSegments; ++i) \
 		{ \
 			const float Distance = DistancePerSegment * i; \
@@ -38,10 +38,6 @@
 		for (int32 i = 0; i < NumSegments; ++i) \
 		{ \
 			UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, SplinePoints[i], SplinePoints[i+1], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		} \
-		if(Params.SplineComponent->IsClosedLoop()) \
-		{ \
-			UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, SplinePoints[NumSegments-1], SplinePoints[0], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
