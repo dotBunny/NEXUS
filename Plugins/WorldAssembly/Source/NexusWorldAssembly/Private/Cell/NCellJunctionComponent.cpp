@@ -249,13 +249,6 @@ void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* R
 {
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 	const TArray<FVector> RotatedCornerPoints = GetCornerPoints(Settings->SocketSize);
-	
-	DrawDebugPoint(GetWorld(), RotatedCornerPoints[0], 10.f, FColor::Red, false, 0.5f);
-	DrawDebugPoint(GetWorld(), RotatedCornerPoints[1], 10.f, FColor::Red, false, 0.5f);
-	DrawDebugPoint(GetWorld(), RotatedCornerPoints[2], 10.f, FColor::Red, false, 0.5f);
-	DrawDebugPoint(GetWorld(), RotatedCornerPoints[3], 10.f, FColor::Red, false, 0.5f);
-	
-	
 	const bool bIsInside = FNRawMeshUtils::AnyRelativePointsInside(
 		RootComponent->Details.Hull, 
 		RotatedCornerPoints);
