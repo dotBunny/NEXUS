@@ -26,6 +26,19 @@ N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCardinalAngle_NonCardinalAngles, "NE
 	CHECK_FALSE_MESSAGE(TEXT("123.7 degrees should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(123.7f));
 }
 
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCardinalAngle_NearCardinalTolerance, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCardinalAngle_NearCardinalTolerance", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Angles within tolerance of a heading match symmetrically: a hair above and a hair below both count.
+	CHECK_MESSAGE(TEXT("45.0001 degrees (just above) should be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(45.0001f));
+	CHECK_MESSAGE(TEXT("44.9999 degrees (just below) should be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(44.9999f));
+	CHECK_MESSAGE(TEXT("337.4999 degrees (just below) should be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(337.4999f));
+	// Deviations beyond the default tolerance are rejected on both sides of a heading.
+	CHECK_FALSE_MESSAGE(TEXT("22.6 degrees (beyond tolerance) should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(22.6f));
+	CHECK_FALSE_MESSAGE(TEXT("44.5 degrees (beyond tolerance) should not be a cardinal angle"), FNCardinalDirectionUtils::IsCardinalAngle(44.5f));
+	// An explicit wider tolerance accepts a larger deviation.
+	CHECK_MESSAGE(TEXT("44.5 degrees should be cardinal under a 1.0 tolerance"), FNCardinalDirectionUtils::IsCardinalAngle(44.5f, 1.0f));
+}
+
 N_TEST_HIGH(FNCardinalDirectionUtilsTests_GetClosestCardinalAngle_OnCardinal, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::GetClosestCardinalAngle_OnCardinal", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Exact cardinal angles should return themselves

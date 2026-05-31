@@ -195,4 +195,38 @@ N_TEST_MEDIUM(FNReportTableBlockTests_Initialize_Reset,
 		Lines[2], FString(TEXT("| fresh |")));
 }
 
+N_TEST_MEDIUM(FNReportTableBlockTests_Initialize_Reset_PlainTextWidths,
+	"NEXUS::UnitTests::NCore::FNReportTableBlock::Initialize::Reset_PlainTextWidths",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that re-initializing clears stale column widths so plain text padding reflects
+	// only the new columns. Plain text is the only path that reads MaximumCellLengths, so it
+	// is the path that catches a missing reset of that array.
+	FNReport Report;
+	const int32 Ticket = Report.CreateTableBlock(0, 0);
+	FNReportTableBlock* Block = Report.GetTableBlock(Ticket);
+	if (Block == nullptr)
+	{
+		ADD_ERROR("Newly created table block was not found in the report.");
+		return;
+	}
+	// First init seeds wide stale widths (10 and 11) that must not leak into the second render.
+	Block->Initialize({ TEXT("LongHeader"), TEXT("AnotherLong") });
+	Block->AddRow({ TEXT("stale"), TEXT("data") });
+	Block->Initialize({ TEXT("A"), TEXT("B") });
+	Block->AddRow({ TEXT("x"), TEXT("y") });
+
+	const TArray<FString> Lines = Report.GetReportLines(ENReportOutputFormat::PlainText);
+	CHECK_EQUALS("Re-initialized plain text table should emit header, divider, and one data row.",
+		Lines.Num(), 3);
+	if (Lines.Num() < 3) return;
+	// Both columns are width 1 after re-init; stale widths of 10/11 would over-pad these lines.
+	CHECK_EQUALS("Header should pad to the new column widths, not the stale ones.",
+		Lines[0], FString(TEXT("A  B")));
+	CHECK_EQUALS("Divider should match the new column widths.",
+		Lines[1], FString(TEXT("-  -")));
+	CHECK_EQUALS("Data row should pad to the new column widths.",
+		Lines[2], FString(TEXT("x  y")));
+}
+
 #endif //WITH_TESTS

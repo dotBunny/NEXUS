@@ -59,7 +59,7 @@ void UNActorPoolListViewEntry::Refresh() const
 		return;
 	}
 
-	const int32 InCount = Pool->GetOutCount();
+	const int32 InCount = Pool->GetAvailableCount();
 	const int32 OutCount = Pool->GetSpawnedCount();
 	const int32 Total = InCount + OutCount;
 	

@@ -69,12 +69,17 @@ class FNCardinalDirectionUtils
 {
 public:
 	/**
-	 * Returns true when Angle lies exactly on one of the 16 cardinal headings.
+	 * Returns true when Angle lies on (or within Tolerance of) one of the 16 cardinal headings.
+	 *
+	 * Snaps Angle to its nearest cardinal and compares, so the tolerance is symmetric: an angle a
+	 * hair above or below a heading both match. Avoids an exact float compare on a modulo result,
+	 * which would only ever be exact for the 16 representable cardinals and reject computed inputs.
 	 * @param Angle Degrees to test.
+	 * @param Tolerance Maximum absolute degree deviation from a cardinal heading that still counts.
 	 */
-	static bool IsCardinalAngle(const float Angle)
+	static bool IsCardinalAngle(const float Angle, const float Tolerance = 0.01f)
 	{
-		return FMath::Modulo(Angle, 22.5f) == 0.0f;
+		return FMath::IsNearlyEqual(Angle, static_cast<float>(GetClosestCardinalAngle(Angle)), Tolerance);
 	}
 
 	/**

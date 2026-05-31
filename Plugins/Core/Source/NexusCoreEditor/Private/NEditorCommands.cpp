@@ -18,8 +18,8 @@ void FNEditorCommands::RegisterCommands()
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_Help_Issues,
 	"NCore.Help.OpenIssues",
-	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport", "Issues"),
-	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenBugReport_Desc", "Opens the GitHub project's issue list in your browser."),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenIssues", "Issues"),
+	NSLOCTEXT("NexusCoreEditor","Command_Help_OpenIssues_Desc", "Opens the GitHub project's issue list in your browser."),
 	FSlateIcon(FAppStyle::GetAppStyleSetName(), "MainFrame.OpenIssueTracker"),
 	EUserInterfaceActionType::Button, FInputChord());
 

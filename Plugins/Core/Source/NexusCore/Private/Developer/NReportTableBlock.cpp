@@ -21,9 +21,10 @@ void FNReportTableBlock::Initialize(const int32 Columns)
 void FNReportTableBlock::Initialize(const TArray<FString>& HeaderRow)
 {
 	ColumnCount = HeaderRow.Num();
+	MaximumCellLengths.Empty();
 	HeaderCells.Empty();
 	Cells.Empty();
-	
+
 	for (int i = 0; i < ColumnCount; i++)
 	{
 		HeaderCells.Add(HeaderRow[i]);

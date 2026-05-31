@@ -56,7 +56,7 @@ public:
 
 	/** @return The number of Actors currently in the pool (available to spawn), or -1 if unlinked. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|ActorPools")
-	int32 GetOutCount() const
+	int32 GetAvailableCount() const
 	{
 		if (Pool == nullptr) return -1;
 		return Pool->GetAvailableCount();
