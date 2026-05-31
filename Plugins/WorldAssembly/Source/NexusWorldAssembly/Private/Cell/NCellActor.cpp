@@ -13,13 +13,12 @@
 #if WITH_EDITOR
 void ANCellActor::PostEditMove(bool bFinished)
 {
-	// Do not allow the cell to be moved in the editor
-	if (GetActorLocation() != FVector::ZeroVector)
-	{
-		UE_LOG(LogNexusWorldAssembly, Verbose, TEXT("Resetting cell location/rotation/scale as it cannot be moved from origin."));
-		CellRoot->SetWorldLocationAndRotationNoPhysics(FVector::ZeroVector, FRotator::ZeroRotator);
-		CellRoot->SetWorldScale3D(FVector::OneVector);
-	}
+	// Do not allow the cell to be moved, rotated, or scaled in the editor; always snap back to origin.
+	UE_LOG(LogNexusWorldAssembly, Verbose, TEXT("Resetting cell location/rotation/scale as it cannot be moved from origin."));
+	CellRoot->SetWorldLocationAndRotationNoPhysics(FVector::ZeroVector, FRotator::ZeroRotator);
+	CellRoot->SetWorldScale3D(FVector::OneVector);
+
+	Super::PostEditMove(bFinished);
 }
 
 bool ANCellActor::CanDeleteSelectedActor(FText& OutReason) const
