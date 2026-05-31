@@ -616,8 +616,11 @@ void FNActorPool::Fill()
 {
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
-	
-	const int32 Deficit = Settings.MinimumActorCount - InActors.Num();
+
+	// MinimumActorCount is a prewarm target measured against the whole pool (in + out), matching Tick().
+	// At the only call site (PostInitialize) OutActors is empty, so this is behaviourally identical today —
+	// it just keeps the two warm-up paths reading the same if Fill() is ever called after actors are checked out.
+	const int32 Deficit = Settings.MinimumActorCount - (InActors.Num() + OutActors.Num());
 	if (Deficit > 0)
 	{
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items (+%i)"), *Template->GetName(), Settings.MinimumActorCount, Deficit);
@@ -634,14 +637,18 @@ void FNActorPool::Prewarm(const int32 Count)
 	CreateActors(Count);
 }
 
-void FNActorPool::Tick()
+bool FNActorPool::Tick()
 {
-	// Ensure the pool is a stub when WorldAuthority is flagged.
-	if (bStubMode) return;
-	
+	// A stub pool has nothing to warm — let the caller drop it from the tick list.
+	if (bStubMode) return false;
+
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
 		CreateActors(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
+		return true; // still warming
 	}
+
+	// Reached the minimum — warm-up is a one-shot, so we no longer need to tick.
+	return false;
 }

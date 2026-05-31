@@ -95,10 +95,16 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 
 	if (bHasTickableActorPools)
 	{
-		for (FNActorPool* Pool : TickableActorPools)
+		// Reverse index walk so a pool that finishes warming can be removed in-place (RemoveAtSwap) without
+		// disturbing iteration. Order is irrelevant for warm-up, so the swap is safe.
+		for (int32 Index = TickableActorPools.Num() - 1; Index >= 0; --Index)
 		{
-			Pool->Tick();
+			if (!TickableActorPools[Index]->Tick())
+			{
+				TickableActorPools.RemoveAtSwap(Index, EAllowShrinking::No);
+			}
 		}
+		bHasTickableActorPools = !TickableActorPools.IsEmpty();
 	}
 
 	if (bHasTickableSpawners)

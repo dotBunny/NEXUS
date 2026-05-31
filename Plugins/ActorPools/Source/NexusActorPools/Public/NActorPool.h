@@ -82,8 +82,11 @@ public:
 	 */
 	AActor* Spawn(const FVector& Position, const FRotator& Rotation);
 
-	/** A managed-tick for the ActorPool, which creates a delayed number of actors and other maintenance. */
-	void Tick();
+	/**
+	 * A managed-tick for the ActorPool that time-slices warm-up creation across frames.
+	 * @return true if the pool still needs ticking; false once it has reached its minimum (or is a stub) and can be unregistered.
+	 */
+	bool Tick();
 
 	/**
 	 * Apply settings to ActorPool.
