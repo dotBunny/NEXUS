@@ -29,6 +29,7 @@ void FNToolingEditorModule::StartupModule()
 
 void FNToolingEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	if (WindowIconDelegateHandle.IsValid() && GEngine != nullptr)
 	{
 		GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);

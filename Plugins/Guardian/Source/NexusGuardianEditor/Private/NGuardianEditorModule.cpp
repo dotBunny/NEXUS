@@ -14,6 +14,7 @@ void FNGuardianEditorModule::StartupModule()
 
 void FNGuardianEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NGuardian)();
 	FNGuardianEditorStyle::Shutdown();
 }

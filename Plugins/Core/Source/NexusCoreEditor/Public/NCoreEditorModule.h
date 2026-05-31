@@ -19,5 +19,5 @@ public:
 	N_IMPLEMENT_MODULE(FNCoreEditorModule, "NexusCoreEditor")
 
 private:
-	void OnPostEngineInit();
+	static void OnPostEngineInit();
 };

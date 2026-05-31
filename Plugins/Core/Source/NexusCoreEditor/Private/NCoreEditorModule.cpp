@@ -20,12 +20,14 @@ void FNCoreEditorModule::StartupModule()
 		UE_LOG(LogNexusCoreEditor, Log, TEXT("Framework initializing in an automated environment; some functionality will be ignored."));
 	}
 	
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNCoreEditorModule, OnPostEngineInit);
+	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNCoreEditorModule::OnPostEngineInit);
 }
 
 void FNCoreEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	FNEditorCommands::RemoveMenuEntries();
+	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }
 

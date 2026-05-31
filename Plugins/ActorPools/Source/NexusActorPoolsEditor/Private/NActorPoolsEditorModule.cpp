@@ -31,7 +31,7 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	{
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
-	
+	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
 	FNActorPoolsEditorCommands::RemoveMenuEntries();
 	

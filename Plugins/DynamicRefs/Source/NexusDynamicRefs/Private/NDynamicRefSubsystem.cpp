@@ -331,7 +331,7 @@ AActor* UNDynamicRefSubsystem::GetLastActorByName(const FName Name)
 UObject* UNDynamicRefSubsystem::GetLastObjectByName(const FName Name)
 {
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
-	if (Collection != nullptr)
+	if (Collection != nullptr && Collection->HasObjects())
 	{
 		return Collection->Objects.Last().Get();
 	}

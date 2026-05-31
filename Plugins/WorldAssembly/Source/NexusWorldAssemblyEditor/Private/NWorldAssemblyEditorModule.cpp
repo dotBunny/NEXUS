@@ -44,6 +44,7 @@ void FNWorldAssemblyEditorModule::StartupModule()
 
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	FEditorModeRegistry::Get().UnregisterMode(FNWorldAssemblyEdMode::Identifier);
 
 	if (GUnrealEd)

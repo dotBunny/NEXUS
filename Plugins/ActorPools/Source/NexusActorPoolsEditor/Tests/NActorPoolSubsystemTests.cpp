@@ -495,7 +495,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnCreate,
 		}
 
 		int32 FireCount = 0;
-		Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)
+		const FDelegateHandle Handle = Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)
 		{
 			FireCount++;
 		});
@@ -507,6 +507,10 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnCreate,
 		// A second call for the same class must not fire the delegate again.
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 		CHECK_EQUALS("OnActorPoolAdded must not fire again when the pool already exists.", FireCount, 1)
+
+		// Lambda bindings are not tied to a UObject lifetime; remove it before the captured
+		// &FireCount stack reference goes out of scope.
+		Subsystem->OnActorPoolAdded.Remove(Handle);
 	});
 }
 
@@ -525,7 +529,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnLazyGetActor,
 		}
 
 		int32 FireCount = 0;
-		Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)
+		const FDelegateHandle Handle = Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)
 		{
 			FireCount++;
 		});
@@ -535,6 +539,11 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnLazyGetActor,
 
 		Subsystem->GetActor<AActor>(ANDebugActor::StaticClass());
 		CHECK_EQUALS("OnActorPoolAdded must not fire again when the pool already exists.", FireCount, 1)
+
+		// Lambda bindings are not tied to a UObject lifetime, so remove it before the test scope ends.
+		// Leaving it bound leaks the subscription onto the shared world subsystem (breaking later tests)
+		// and dangles the captured &FireCount stack reference.
+		Subsystem->OnActorPoolAdded.Remove(Handle);
 	});
 }
 

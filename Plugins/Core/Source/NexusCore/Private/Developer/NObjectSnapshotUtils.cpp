@@ -125,6 +125,9 @@ void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)
 			Diff.AddedCount--;
 		}
 	}
+	
+	// Keep the churn total consistent with the now-reduced added count.
+	Diff.ChangeCount = Diff.AddedCount + Diff.RemovedCount;
 }
 
 void FNObjectSnapshotUtils::SnapshotToDisk()

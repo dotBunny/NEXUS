@@ -15,6 +15,7 @@ void FNDynamicRefsEditorModule::StartupModule()
 
 void FNDynamicRefsEditorModule::ShutdownModule()
 {
+	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NDynamicRefs)();
 	FNDynamicRefsEditorStyle::Shutdown();
 }

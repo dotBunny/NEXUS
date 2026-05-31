@@ -97,6 +97,11 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 			return;
 		}
 
+		// The developer-overlay framework (UNDeveloperOverlay) subscribes one lambda per world via
+		// FWorldDelegates::OnPostWorldInitialization, so a freshly created world's subsystem can already
+		// carry a subscriber whenever an overlay instance is alive (e.g. an interactive editor session).
+		// Clear the delegate first so this test exercises only its own action's add/remove lifecycle.
+		Subsystem->OnActorPoolAdded.Clear();
 		CHECK_FALSE_MESSAGE(TEXT("Pre-condition: subsystem should start with no OnActorPoolAdded subscribers."), Subsystem->OnActorPoolAdded.IsBound())
 
 		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
