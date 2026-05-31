@@ -296,8 +296,12 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
-		// Check Minimum Node Count
-		if (CellData->MinimumNodeDepth > 0 && 
+		// Gate by minimum depth. Filter.NodeDepth is the SOURCE node's depth; the candidate lands one hop
+		// deeper. Graph depth is rooted at the bone, so the start cell is NodeDepth 1 (hop 0 from start) and
+		// "source depth" already equals "candidate's hop-count from the start cell" — the two offsets cancel.
+		// A candidate is therefore correctly first eligible at hop == MinimumNodeDepth. Do NOT add a +1 here;
+		// it would let cells appear one hop too early. Covered by NMinimumNodeDepthTests.cpp.
+		if (CellData->MinimumNodeDepth > 0 &&
 			CellData->MinimumNodeDepth > Filter.NodeDepth)
 		{
 			continue;

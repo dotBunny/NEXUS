@@ -57,9 +57,16 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	* The minimum number of nodes away from the start when this can be used.
-	* @note A value of 0 indicates no constraint.
-	*/
+	 * The minimum number of cell hops away from the start cell before this cell may be used.
+	 * The start cell itself is hop 0, its direct neighbours are hop 1, and so on. A cell with
+	 * MinimumNodeDepth = N therefore first becomes eligible N hops out from the start.
+	 * @note A value of 0 indicates no constraint.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData by comparing against
+	 *         the source node's NodeDepth. Because graph depth is rooted at the bone (start cell =
+	 *         NodeDepth 1) while the candidate is placed one hop deeper, those two offsets cancel and
+	 *         the comparison correctly resolves to "hops from the start cell". See the depth test in
+	 *         NMinimumNodeDepthTests.cpp before changing the comparison.
+	 */
 	int32 MinimumNodeDepth = 0;
 
 	/** 
