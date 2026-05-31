@@ -203,7 +203,9 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	if (PropertyChangedEvent.Property->GetFName() == NEXUS::WorldAssembly::Bone::Mode)
+	
+	const FName PropertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
+	if (PropertyName == NEXUS::WorldAssembly::Bone::Mode)
 	{
 		OnModeChanged(Mode);
 	}
