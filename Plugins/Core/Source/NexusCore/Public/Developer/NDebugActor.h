@@ -30,6 +30,7 @@ public:
 	FString Message;
 	
 	FSimpleDelegate OnDestroyed;
+	FSimpleDelegate OnEndPlay;
 	
 	/**
 	 * Spawns a debug actor in the supplied world at the given transform, labeled for quick identification.
@@ -93,7 +94,8 @@ public:
 
 
 	//~AActor
-	virtual void BeginDestroy() override;
+	virtual void Destroyed() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	//End AActor
 
 protected:

@@ -92,13 +92,12 @@ public:
 	 */
 	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
 	{
-		const int32 Count = Objects.Num();
 		TArray<TStrongObjectPtr<UObject>> Pinned;
-		Pinned.SetNumUninitialized(Count);
-		for (int32 i = 0; i < Count; ++i)
+		Pinned.Reserve(Objects.Num());
+		for (const TWeakObjectPtr<UObject>& Weak : Objects)
 		{
-			Pinned[i] = Objects[i].Pin();
+			Pinned.Emplace(Weak.Get()); // null for stale weak pointers
 		}
-		return MoveTemp(Pinned);
+		return Pinned;
 	}
 };

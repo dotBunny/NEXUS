@@ -80,7 +80,7 @@ public:
 	 * @return a pseudo random double.
 	 */
 	double DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
-	FORCEINLINE double RandRange(const double MinimumValue = MIN_flt, const double MaximumValue = MAX_flt)
+	FORCEINLINE double RandRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl)
 	{
 		return DoubleRange(MinimumValue, MaximumValue);
 	}

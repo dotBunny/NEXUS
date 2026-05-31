@@ -149,11 +149,11 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 		{
 			if (PrimitiveComponent->BodyInstance.bSimulatePhysics)
 			{
-				SpawnPhysicsSimulation = T_True;
+				SpawnPhysicsSimulation = ENToggle::Enabled;
 			}
 			else
 			{
-				SpawnPhysicsSimulation = T_False;
+				SpawnPhysicsSimulation = ENToggle::Disabled;
 			}
 		}
 	}
@@ -518,11 +518,11 @@ void FNActorPool::ApplySpawnState(AActor* Actor, const FVector& InPosition, cons
 	if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(Actor->GetRootComponent()))
 	{
 		PrimitiveComponent->ResetSceneVelocity();
-		if (SpawnPhysicsSimulation == T_True)
+		if (SpawnPhysicsSimulation == ENToggle::Enabled)
 		{
 			PrimitiveComponent->SetSimulatePhysics(true);
 		}
-		else if (SpawnPhysicsSimulation == T_False)
+		else if (SpawnPhysicsSimulation == ENToggle::Disabled)
 		{
 			PrimitiveComponent->SetSimulatePhysics(false);
 		}
@@ -548,7 +548,7 @@ void FNActorPool::ApplyReturnState(AActor* Actor) const
 	if (UPrimitiveComponent* PrimitiveComponent = Cast<UPrimitiveComponent>(Actor->GetRootComponent()))
 	{
 		PrimitiveComponent->ResetSceneVelocity();
-		if (SpawnPhysicsSimulation == T_True)
+		if (SpawnPhysicsSimulation == ENToggle::Enabled)
 		{
 			PrimitiveComponent->SetSimulatePhysics(false);
 		}

@@ -170,6 +170,6 @@ private:
 	bool bImplementsInterface = false;
 
 	
-	ENToggle SpawnPhysicsSimulation = T_Default;
+	ENToggle SpawnPhysicsSimulation = ENToggle::Default;
 	ECollisionEnabled::Type SpawnPhysicsCollisionSettings;
 };

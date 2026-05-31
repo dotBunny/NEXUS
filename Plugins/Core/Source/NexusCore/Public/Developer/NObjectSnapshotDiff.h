@@ -154,7 +154,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 				Entry.FullName,
 				FString::FromInt(Entry.RefCount), 
 				Entry.bIsRoot ? TEXT("R") : TEXT(""),
-				Entry.bIsGarbage ? TEXT("M") : TEXT("")
+				Entry.bIsGarbage ? TEXT("G") : TEXT("")
 			});
 		}
 		

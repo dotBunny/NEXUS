@@ -19,12 +19,6 @@ ANDebugActor::ANDebugActor()
 	}
 }
 
-void ANDebugActor::BeginDestroy()
-{
-	OnDestroyed.ExecuteIfBound();
-	Super::BeginDestroy();
-}
-
 ANDebugActor* ANDebugActor::CreateInstance(UWorld* World, const FVector& Position, const FRotator& Rotation, const FString& Label, const FVector& Scale)
 {
 	FActorSpawnParameters SpawnInfo;
@@ -37,4 +31,16 @@ ANDebugActor* ANDebugActor::CreateInstance(UWorld* World, const FVector& Positio
 
 	const FTransform SpawnTransform(Rotation, Position, Scale);
 	return World->SpawnActor<ANDebugActor>(StaticClass(), SpawnTransform, SpawnInfo);
+}
+
+void ANDebugActor::Destroyed()
+{
+	OnDestroyed.ExecuteIfBound();
+	Super::Destroyed();
+}
+
+void ANDebugActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	OnEndPlay.ExecuteIfBound();
+	Super::EndPlay(EndPlayReason);
 }

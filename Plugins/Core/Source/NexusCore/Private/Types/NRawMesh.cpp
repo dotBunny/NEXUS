@@ -132,7 +132,7 @@ void FNRawMesh::ConvertToTriangles()
 	TArray<FNRawMeshLoop> NewLoops;
 	NewLoops.Reserve(Loops.Num());
 
-	if (bIsConvex)
+	if (IsConvex())
 	{
 		// Fan triangulation from vertex 0 — valid for convex loops only.
 		for (const FNRawMeshLoop& Loop : Loops)

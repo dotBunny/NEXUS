@@ -263,7 +263,8 @@ void ANCellProxy::InitializeFromNCell(UNCell* InCell)
 {
 	if (InCell == nullptr)
 	{
-		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Attempted to initialize an ANCellProxy with a null UNCell."));
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("Attempted to initialize an ANCellProxy(%s) with a null UNCell."), *this->GetName());
+		return;
 	}
 	
 	Cell = InCell;

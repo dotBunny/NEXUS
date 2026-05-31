@@ -307,6 +307,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		else
 		{
 			Cell->Junctions.Add(JunctionPair.Key, JunctionPair.Value->Details);
+			bUpdatedCellData =  true;
 		}
 	}
 	
