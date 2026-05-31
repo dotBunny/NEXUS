@@ -290,8 +290,8 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		
 		// Check minimum distance in current graph for reusing the cell piece
 		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&
-			Filter.SourceCellInputData->MinimumNodeDistance >= 1 &&
-			Filter.SourceCellNode->SearchForMatchingCellInputData(CellData, Filter.SourceCellInputData->MinimumNodeDistance - 1))
+			CellData->MinimumNodeDistance >= 1 &&
+			Filter.SourceCellNode->SearchForMatchingCellInputData(CellData, CellData->MinimumNodeDistance - 1))
 		{
 			continue;
 		}
