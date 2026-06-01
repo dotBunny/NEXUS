@@ -40,7 +40,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	bool bCreateLevelInstances = true;
 	
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
-	FGameplayTagContainer InputTags;
+	FGameplayTagContainer ContextTags;
 	
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
@@ -48,7 +48,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		FNAssemblyOperationSettings Settings;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
-		Settings.InputTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyInputTags);
+		Settings.ContextTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyContextTags);
 		
 		return MoveTemp(Settings);
 	}
@@ -60,7 +60,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.bCreateLevelInstances = false;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
-		Settings.InputTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyInputTags);
+		Settings.ContextTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyContextTags);
 		
 		return MoveTemp(Settings);
 	}

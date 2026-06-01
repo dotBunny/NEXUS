@@ -20,11 +20,18 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
+	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", Category="Tagging",  meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get accumulated and are made available post-assembly for context to other gameplay generation systems as well as INCellInitialized-implementors via the ANCellLevelInstance."))
+	UPROPERTY(EditAnywhere, DisplayName="Output Tags", Category="Tagging", meta = (ToolTip="Tags which get accumulated and are made available post-assembly for context to other gameplay generation systems as well as INCellInitialized-implementors via the ANCellLevelInstance."))
 	FGameplayTagContainer OutputTags;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Added Context Tags", Category="Tagging", meta = (ToolTip="Tags added to the Context Tags collection moving forward for the graph, and future phases."))
+	FGameplayTagContainer AddedContextTags;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
+	FGameplayTagContainer RequiredContextTags;
+	
 	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	UPROPERTY(EditAnywhere)

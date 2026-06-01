@@ -31,6 +31,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 	// Copy local
 	const FGameplayTagContainer OutputTags = TaskGraphContextPtr->OutputTags;
+	const FGameplayTagContainer ContextTags = TaskGraphContextPtr->ContextTags;
 	
 	// Early out when we do not have any nodes to spawn
 	if (NodeCount == 0)
@@ -39,14 +40,17 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CompletionEvent->Unlock();
 		return;
 	}
+	FNCellAssemblyData CellAssemblyData;
+	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
+	CellAssemblyData.OutputTags = OutputTags;
+	CellAssemblyData.ContextTags = ContextTags;
 	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 
-		SpawnCellsContextPtr->OperationTicket, 
 		SpawnCellsContextPtr->CellNodes[i], 
-		OutputTags, // Early access to tags without having to deal with the graph
+		CellAssemblyData, // Early access to tags without having to deal with the graph
 		SpawnCellsContextPtr->bPreloadLevels);
 		
 		// Dispatch Guard #2

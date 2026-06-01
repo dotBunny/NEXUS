@@ -45,6 +45,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	ExistingNodeCollisionLocations = WorldContextPtr->NodeCollisionMeshLocations;
 	ExistingNodeCollisionRotations = WorldContextPtr->NodeCollisionMeshRotations;
 	
+	// Capture our context tags, base that we cant avoid, and our working copy
+	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
+	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
+	
 	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
 	
 	while (!OrganContextPtr->IsSuccessful())
@@ -136,7 +140,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
 	{
-		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->OutputTags);
+		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->OutputTags, OrganContextPtr->ContextTags);
 	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
@@ -238,6 +242,12 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			if (!StartCellInputData->OutputTags.IsEmpty())
 			{
 				OrganContextPtr->OutputTags.AppendTags(StartCellInputData->OutputTags);
+			}
+			
+			// Add tags to context
+			if (!StartCellInputData->ContextTagsAdded.IsEmpty())
+			{
+				OrganContextPtr->ContextTags.AppendTags(StartCellInputData->ContextTagsAdded);
 			}
 			
 			// Link our nodes
@@ -515,6 +525,12 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 				OrganContextPtr->OutputTags.AppendTags(CellInputData->OutputTags);
 			}
 			
+			// Add tags to context
+			if (!CellInputData->ContextTagsAdded.IsEmpty())
+			{
+				OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
+			}
+			
 			// We've passed validation, lets register it and move on
 			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
 			
@@ -603,7 +619,7 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(InputData->AssemblyTags));
 	}
 
-	// We need to handle the must-have tags and OutputTags differently, figure out what is not covered when this is removed.
+	// We need to handle the must-have tags, OutputTags and ContextTags differently, figure out what is not covered when this is removed.
 	const bool bTrackRequired = InputData != nullptr
 		&& OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyRequiredAnyTags(InputData->AssemblyTags);
 
@@ -619,7 +635,15 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 		UncoveredOutputTags = InputData->OutputTags;
 	}
 
-	if (bTrackRequired || !UncoveredOutputTags.IsEmpty())
+	FGameplayTagContainer UncoveredContextTags;
+	if (InputData != nullptr && !InputData->ContextTagsAdded.IsEmpty())
+	{
+		UncoveredContextTags = InputData->ContextTagsAdded;
+		// Base context tags belong to no cell, so they must never be reclaimed.
+		UncoveredContextTags.RemoveTags(OrganContextPtr->BaseContextTags);
+	}
+
+	if (bTrackRequired || !UncoveredOutputTags.IsEmpty() || !UncoveredContextTags.IsEmpty())
 	{
 		const TArray<FNAssemblyGraphNode*>& Nodes = OrganContextPtr->CellGraph->GetNodes();
 		for (const FNAssemblyGraphNode* Node : Nodes)
@@ -632,8 +656,10 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 
 			if (bTrackRequired) UncoveredRequiredAnyTags.RemoveTags(OtherData->AssemblyTags);
 			if (!UncoveredOutputTags.IsEmpty()) UncoveredOutputTags.RemoveTags(OtherData->OutputTags);
+			if (!UncoveredContextTags.IsEmpty()) UncoveredContextTags.RemoveTags(OtherData->ContextTagsAdded);
 
-			if ((!bTrackRequired || UncoveredRequiredAnyTags.IsEmpty()) && UncoveredOutputTags.IsEmpty()) break;
+			if ((!bTrackRequired || UncoveredRequiredAnyTags.IsEmpty())
+				&& UncoveredOutputTags.IsEmpty() && UncoveredContextTags.IsEmpty()) break;
 		}
 
 		if (bTrackRequired && !UncoveredRequiredAnyTags.IsEmpty())
@@ -644,6 +670,11 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 		if (!UncoveredOutputTags.IsEmpty())
 		{
 			OrganContextPtr->OutputTags.RemoveTags(UncoveredOutputTags);
+		}
+
+		if (!UncoveredContextTags.IsEmpty())
+		{
+			OrganContextPtr->ContextTags.RemoveTags(UncoveredContextTags);
 		}
 	}
 

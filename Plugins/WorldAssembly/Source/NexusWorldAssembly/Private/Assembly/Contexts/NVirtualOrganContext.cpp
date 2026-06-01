@@ -105,6 +105,8 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		FNVirtualCellData CellDetails;
 		CellDetails.AssemblyTags = Cell.Value.AssemblyTags;
 		CellDetails.OutputTags = Cell.Value.OutputTags;
+		CellDetails.ContextTagsRequired = Cell.Value.RequiredContextTags;
+		CellDetails.ContextTagsAdded = Cell.Value.AddedContextTags;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 		CellDetails.Weighting = Cell.Value.Weighting;
@@ -240,6 +242,18 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
 		
 		
+		// CONTEXT TAGS
+		if (!CellData->ContextTagsRequired.IsEmpty() && !ContextTags.HasAllExact(CellData->ContextTagsRequired))
+		{
+			continue;
+		}
+		
+		// CHECK UNIQUE TAGS
+		if (PlacedTagGroups.HasAnyUniqueTags(CellData->AssemblyTags))
+		{
+			continue;
+		}
+		
 		// STARTER TAGS
 		
 		// Handle Starter Nodes
@@ -287,13 +301,6 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			continue;
 		}
-		
-		// CHECK UNIQUE TAGS
-		if (PlacedTagGroups.HasAnyUniqueTags(CellData->AssemblyTags))
-		{
-			continue;
-		}
-		
 		
 		// Check minimum distance in current graph for reusing the cell piece
 		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&

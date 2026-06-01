@@ -33,4 +33,10 @@ public:
 	{
 		return LevelInstance->GetOutputTags();
 	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags (ANCellLevelInstance)")
+	static FGameplayTagContainer& GetContextTagsFromCellLevelInstance(ANCellLevelInstance* LevelInstance)
+	{
+		return LevelInstance->GetContextTags();
+	}
 };

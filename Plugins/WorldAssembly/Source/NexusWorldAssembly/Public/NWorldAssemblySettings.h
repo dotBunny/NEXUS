@@ -88,9 +88,9 @@ public:
 		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="InputTags",
-		meta=(ToolTip="The default InputTags to provide to the Assembly Operation."))
-	FGameplayTagContainer AssemblyInputTags;
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Context Tags",
+		meta=(ToolTip="The default Context Tags to provide to the Assembly Operation."))
+	FGameplayTagContainer AssemblyContextTags;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))

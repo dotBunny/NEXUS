@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NCellAssemblyData.h"
 #include "NCellJunctionDetails.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Macros/NActorMacros.h"
@@ -31,13 +32,11 @@ public:
 	/**
 	 * Factory for creating a cell proxy for a graph node.
 	 * @param World World to spawn into.
-	 * @param OperationTicket Owning operation's ticket, stored on the proxy for later lookup.
 	 * @param CellNode The graph node that sourced this cell (supplies transform and junction data).
-	 * @param OutputTags The global output tags from the generation to pass down to the cell.
 	 * @param bPreLoadLevel When true, the underlying level asset begins loading immediately.
 	 * @return The new proxy actor.
 	 */
-	static ANCellProxy* CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode,  const FGameplayTagContainer& OutputTags, bool bPreLoadLevel = true);
+	static ANCellProxy* CreateInstance(UWorld* World, FNAssemblyGraphCellNode* CellNode, const FNCellAssemblyData& InstanceData, bool bPreLoadLevel = false);
 
 	/** Spawn the paired ANCellLevelInstance so the cell's content can be loaded into the world. */
 	void CreateLevelInstance();
@@ -83,17 +82,13 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<ANCellLevelInstance> LevelInstance;
 
-	/** Ticket of the owning UNAssemblyOperation; used to group proxies per pass in the registry. */
-	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
-	uint32 OperationTicket = 0;
-
 	/** Dynamic material applied to the proxy mesh while it stands in for the level. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
 	
-	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
-	FGameplayTagContainer OutputTags;
 	
+	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
+	FNCellAssemblyData AssemblyData;
 	
 	/** 
 	 * Per-junction data mirrored from the cell.

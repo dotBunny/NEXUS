@@ -44,6 +44,8 @@ public:
 	/** World-space rotations of placed cell nodes, parallel array to NodeIndex. */
 	TArray<FRotator> NodeCollisionMeshRotations;
 
+	FGameplayTagContainer ContextTags;
+	
 	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{
 		InputWorld = TargetWorld;

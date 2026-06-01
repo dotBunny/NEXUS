@@ -22,13 +22,13 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 #if !UE_BUILD_SHIPPING
 	
-	// Add our Output Tags to report
-	const int32 OutputTagsContentTicket = Operation->GetReport()->CreateContentBlock();
-	FNReportContentBlock* OutputTagsContentBlock = Operation->GetReport()->GetContentBlock(OutputTagsContentTicket);
-	OutputTagsContentBlock->SetHeading("Output Tags");
+	// Add our Context Tags to report
+	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateContentBlock();
+	FNReportContentBlock* ContextTagsContentBlock = Operation->GetReport()->GetContentBlock(ContextTagsContentTicket);
+	ContextTagsContentBlock->SetHeading("Context Tags");
 	
 	FStringBuilderBase StringBuilder;
-	for (const FGameplayTag& Tag : TaskGraphContextPtr->OutputTags)
+	for (const FGameplayTag& Tag : TaskGraphContextPtr->ContextTags)
 	{
 		StringBuilder.Append(Tag.ToString());
 		StringBuilder.Append(", ");
@@ -37,8 +37,7 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	{
 		StringBuilder.RemoveSuffix(2);
 	}
-	OutputTagsContentBlock->AddLine(StringBuilder.ToString());
-	
+	ContextTagsContentBlock->AddLine(StringBuilder.ToString());
 	
 	// Add Analytics to report
 	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());

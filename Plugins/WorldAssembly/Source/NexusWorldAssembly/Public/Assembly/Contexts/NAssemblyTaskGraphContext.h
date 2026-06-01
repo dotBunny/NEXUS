@@ -40,10 +40,16 @@ public:
 		OutputTags.AppendTags(NewOutputTags);
 	}
 	
+	void AddContextTags(const FGameplayTagContainer& NewContextTags)
+	{
+		ContextTags.AppendTags(NewContextTags);
+	}
+	
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
 	
 	FGameplayTagContainer OutputTags;
+	FGameplayTagContainer ContextTags;
 
 	/**
 	 * @param OutputWorld World to target when spawning proxies.

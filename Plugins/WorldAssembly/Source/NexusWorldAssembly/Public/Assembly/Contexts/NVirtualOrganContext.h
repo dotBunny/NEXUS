@@ -89,6 +89,9 @@ public:
 	/** Output tags accumulated from every placed cell, handed off to the pass context and propagated down to the spawned cell proxies. */
 	FGameplayTagContainer OutputTags;
 	
+	FGameplayTagContainer BaseContextTags;
+	FGameplayTagContainer ContextTags;
+	
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;
 

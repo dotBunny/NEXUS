@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "NCellAssemblyData.h"
 #include "NCellJunctionDetails.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
@@ -37,7 +38,12 @@ public:
 	
 	FGameplayTagContainer& GetOutputTags()
 	{
-		return OutputTags;
+		return AssemblyData.OutputTags;
+	}
+	
+	FGameplayTagContainer& GetContextTags()
+	{
+		return AssemblyData.ContextTags;
 	}
 	
 #if WITH_EDITOR
@@ -55,17 +61,14 @@ public:
 #endif // WITH_EDITOR
 
 	/** @return The World Assembly operation ticket this level instance belongs to. */
-	uint32 GetOperationTicket() const { return OperationTicket; }
+	uint32 GetOperationTicket() const { return AssemblyData.OperationTicket; }
+	
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 
 protected:
-	/** The replicated identifier that created this ANCellLevelInstance on the server. */
 	UPROPERTY(Replicated)
-	uint32 OperationTicket = 0;
-	
-	UPROPERTY(Replicated)
-	FGameplayTagContainer OutputTags;
+	FNCellAssemblyData AssemblyData;;
 	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
 	TArray<FNCellJunctionDetails> JunctionDetails;

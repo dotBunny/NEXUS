@@ -35,6 +35,10 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	
 	FGameplayTagContainer OutputTags;
 	
+	FGameplayTagContainer ContextTagsRequired;
+	
+	FGameplayTagContainer ContextTagsAdded;
+	
 	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
 	bool bAlwaysRelevant = false;
 
