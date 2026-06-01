@@ -22,10 +22,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", Category="Tagging",  meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
-	
-	UPROPERTY(EditAnywhere, DisplayName="Output Tags", Category="Tagging", meta = (ToolTip="Tags which get accumulated and are made available post-assembly for context to other gameplay generation systems as well as INCellInitialized-implementors via the ANCellLevelInstance."))
-	FGameplayTagContainer OutputTags;
-	
+
 	UPROPERTY(EditAnywhere, DisplayName="Added Context Tags", Category="Tagging", meta = (ToolTip="Tags added to the Context Tags collection moving forward for the graph, and future phases."))
 	FGameplayTagContainer AddedContextTags;
 	

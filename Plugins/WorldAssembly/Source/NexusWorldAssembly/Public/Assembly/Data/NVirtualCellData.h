@@ -32,9 +32,7 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
 	FGameplayTagContainer AssemblyTags;
-	
-	FGameplayTagContainer OutputTags;
-	
+
 	FGameplayTagContainer ContextTagsRequired;
 	
 	FGameplayTagContainer ContextTagsAdded;

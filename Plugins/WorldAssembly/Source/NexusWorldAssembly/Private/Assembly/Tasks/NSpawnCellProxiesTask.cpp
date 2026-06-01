@@ -30,7 +30,6 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
 	
 	// Copy local
-	const FGameplayTagContainer OutputTags = TaskGraphContextPtr->OutputTags;
 	const FGameplayTagContainer ContextTags = TaskGraphContextPtr->ContextTags;
 	
 	// Early out when we do not have any nodes to spawn
@@ -42,7 +41,6 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 	FNCellAssemblyData CellAssemblyData;
 	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
-	CellAssemblyData.OutputTags = OutputTags;
 	CellAssemblyData.ContextTags = ContextTags;
 	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)

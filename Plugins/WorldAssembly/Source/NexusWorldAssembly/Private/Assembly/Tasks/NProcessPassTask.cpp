@@ -39,7 +39,6 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 	WorldContextPtr->ContextTags.AppendTags(PassContextPtr->ContextTags);
 	
 	// Access on post
-	TaskGraphContextPtr->AddOutputTags(PassContextPtr->OutputTags);
 	TaskGraphContextPtr->AddContextTags(PassContextPtr->ContextTags);
 	
 	PassContextPtr->Graphs.Reset();

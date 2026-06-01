@@ -136,11 +136,11 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		OrganContextPtr->CellGraph->CleanupBuilderReferences();
 	}
 	
-	// Only hand off graph and the output tag collection if it's good
+	// Only hand off graph and the context tag collection if it's good
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
 	{
-		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->OutputTags, OrganContextPtr->ContextTags);
+		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->ContextTags);
 	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
@@ -236,12 +236,6 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			if (OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyRequiredAnyTags(StartCellInputData->AssemblyTags))
 			{
 				OrganContextPtr->PlacedTagGroups.AppendRequiredAnyTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterRequiredAnyTags(StartCellInputData->AssemblyTags));
-			}
-			
-			// Add to output
-			if (!StartCellInputData->OutputTags.IsEmpty())
-			{
-				OrganContextPtr->OutputTags.AppendTags(StartCellInputData->OutputTags);
 			}
 			
 			// Add tags to context
@@ -519,12 +513,6 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 				OrganContextPtr->PlacedTagGroups.AppendRequiredAnyTags(OrganContextPtr->CellInputDataSummary.GroupTags.FilterRequiredAnyTags(CellInputData->AssemblyTags));
 			}
 			
-			// Add to output
-			if (!CellInputData->OutputTags.IsEmpty())
-			{
-				OrganContextPtr->OutputTags.AppendTags(CellInputData->OutputTags);
-			}
-			
 			// Add tags to context
 			if (!CellInputData->ContextTagsAdded.IsEmpty())
 			{
@@ -619,7 +607,7 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->CellInputDataSummary.GroupTags.FilterUniqueTags(InputData->AssemblyTags));
 	}
 
-	// We need to handle the must-have tags, OutputTags and ContextTags differently, figure out what is not covered when this is removed.
+	// We need to handle the must-have tags and ContextTags differently, figure out what is not covered when this is removed.
 	const bool bTrackRequired = InputData != nullptr
 		&& OrganContextPtr->CellInputDataSummary.GroupTags.HasAnyRequiredAnyTags(InputData->AssemblyTags);
 
@@ -629,21 +617,11 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 		UncoveredRequiredAnyTags = OrganContextPtr->CellInputDataSummary.GroupTags.FilterRequiredAnyTags(InputData->AssemblyTags);
 	}
 
-	FGameplayTagContainer UncoveredOutputTags;
-	if (InputData != nullptr && !InputData->OutputTags.IsEmpty())
-	{
-		UncoveredOutputTags = InputData->OutputTags;
-	}
+	// Use cached copy
+	FGameplayTagContainer UncoveredContextTags = CellNode->GetContextTagsAdded();
+	UncoveredContextTags.RemoveTags(OrganContextPtr->BaseContextTags);
 
-	FGameplayTagContainer UncoveredContextTags;
-	if (InputData != nullptr && !InputData->ContextTagsAdded.IsEmpty())
-	{
-		UncoveredContextTags = InputData->ContextTagsAdded;
-		// Base context tags belong to no cell, so they must never be reclaimed.
-		UncoveredContextTags.RemoveTags(OrganContextPtr->BaseContextTags);
-	}
-
-	if (bTrackRequired || !UncoveredOutputTags.IsEmpty() || !UncoveredContextTags.IsEmpty())
+	if (bTrackRequired || !UncoveredContextTags.IsEmpty())
 	{
 		const TArray<FNAssemblyGraphNode*>& Nodes = OrganContextPtr->CellGraph->GetNodes();
 		for (const FNAssemblyGraphNode* Node : Nodes)
@@ -655,21 +633,15 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			if (OtherData == nullptr) continue;
 
 			if (bTrackRequired) UncoveredRequiredAnyTags.RemoveTags(OtherData->AssemblyTags);
-			if (!UncoveredOutputTags.IsEmpty()) UncoveredOutputTags.RemoveTags(OtherData->OutputTags);
 			if (!UncoveredContextTags.IsEmpty()) UncoveredContextTags.RemoveTags(OtherData->ContextTagsAdded);
 
 			if ((!bTrackRequired || UncoveredRequiredAnyTags.IsEmpty())
-				&& UncoveredOutputTags.IsEmpty() && UncoveredContextTags.IsEmpty()) break;
+				&& UncoveredContextTags.IsEmpty()) break;
 		}
 
 		if (bTrackRequired && !UncoveredRequiredAnyTags.IsEmpty())
 		{
 			OrganContextPtr->PlacedTagGroups.RemoveRequiredAnyTags(UncoveredRequiredAnyTags);
-		}
-
-		if (!UncoveredOutputTags.IsEmpty())
-		{
-			OrganContextPtr->OutputTags.RemoveTags(UncoveredOutputTags);
 		}
 
 		if (!UncoveredContextTags.IsEmpty())

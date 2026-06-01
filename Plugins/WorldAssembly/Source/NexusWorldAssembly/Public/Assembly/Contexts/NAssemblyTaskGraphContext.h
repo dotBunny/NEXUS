@@ -35,11 +35,6 @@ public:
 		Graphs.Add(MoveTemp(Graph));
 	}
 
-	void AddOutputTags(const FGameplayTagContainer& NewOutputTags)
-	{
-		OutputTags.AppendTags(NewOutputTags);
-	}
-	
 	void AddContextTags(const FGameplayTagContainer& NewContextTags)
 	{
 		ContextTags.AppendTags(NewContextTags);
@@ -47,8 +42,7 @@ public:
 	
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
-	
-	FGameplayTagContainer OutputTags;
+
 	FGameplayTagContainer ContextTags;
 
 	/**

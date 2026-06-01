@@ -86,9 +86,6 @@ public:
 	/** Tag groups accumulated from cells already placed in the graph. */
 	FNTissueTagGroups PlacedTagGroups;
 
-	/** Output tags accumulated from every placed cell, handed off to the pass context and propagated down to the spawned cell proxies. */
-	FGameplayTagContainer OutputTags;
-	
 	FGameplayTagContainer BaseContextTags;
 	FGameplayTagContainer ContextTags;
 	

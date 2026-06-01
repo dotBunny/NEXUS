@@ -104,7 +104,6 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	{
 		FNVirtualCellData CellDetails;
 		CellDetails.AssemblyTags = Cell.Value.AssemblyTags;
-		CellDetails.OutputTags = Cell.Value.OutputTags;
 		CellDetails.ContextTagsRequired = Cell.Value.RequiredContextTags;
 		CellDetails.ContextTagsAdded = Cell.Value.AddedContextTags;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;

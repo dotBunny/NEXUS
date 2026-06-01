@@ -14,8 +14,8 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	AssemblyTags =  InputDataPtr->AssemblyTags;
-	OutputTags = InputDataPtr->OutputTags;
-	
+	ContextTagsAdded = InputDataPtr->ContextTagsAdded;
+
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
 	// but will follow the defined bounds previously defined at author-time, but rotated.
 	TStaticArray<FVector, 8> Corners;
