@@ -98,7 +98,7 @@ public:
 		FNTissueTagGroups& OutTagGroups, 
 		TArray<UNTissue*>& OutProcessedSets);
 	
-	UPROPERTY(EditAnywhere, DisplayName="Tag Groups")
+	UPROPERTY(EditAnywhere, DisplayName="Assembly Tag Groups")
 	FNTissueTagGroups TagGroups = FNTissueTagGroups();
 	
 	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */
