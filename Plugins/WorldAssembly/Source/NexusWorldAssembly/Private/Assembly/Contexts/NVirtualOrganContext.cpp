@@ -58,25 +58,25 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		}
 		
 		// bFoundStarterTagged
-		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Starter))
+		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_Starter))
 		{
 			CellInputDataSummary.bFoundStarterTagged = true;
 		}
 		
 		// bFoundStarterOnlyTagged
-		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		if (!CellInputDataSummary.bFoundStarterOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_StarterOnly))
 		{
 			CellInputDataSummary.bFoundStarterOnlyTagged = true;
 		}
 		
 		// bFoundFinisherTagged
-		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Finisher))
+		if (!CellInputDataSummary.bFoundFinisherTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_Finisher))
 		{
 			CellInputDataSummary.bFoundFinisherTagged = true;
 		}
 		
 		// bFoundFinisherOnlyTagged
-		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		if (!CellInputDataSummary.bFoundFinisherOnlyTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_FinisherOnly))
 		{
 			CellInputDataSummary.bFoundFinisherOnlyTagged = true;
 		}
@@ -111,7 +111,6 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
 		CellDetails.MinimumNodeDepth = Cell.Value.MinimumNodeDepth;
-		CellDetails.bAlwaysRelevant = Cell.Value.bAlwaysRelevant;
 		
 		// We won't touch this till later
 		CellDetails.Template = Cell.Key;
@@ -247,38 +246,38 @@ bool FNVirtualOrganContext::IsGatedByStarterTags(const bool bIsStartNode, const 
 {
 	// When the pool contains start-specific content, a start-node candidate must carry one of those tags.
 	if (bIsStartNode && (Summary.bFoundStarterTagged || Summary.bFoundStarterOnlyTagged) &&
-		!CandidateTags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CandidateTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		!CandidateTags.HasTag(NWorldAssembly_Behavior_Starter) && !CandidateTags.HasTag(NWorldAssembly_Behavior_StarterOnly))
 	{
 		return true;
 	}
 
 	// StarterOnly cells may never be placed anywhere but the start node.
-	if (!bIsStartNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+	if (!bIsStartNode && CandidateTags.HasTag(NWorldAssembly_Behavior_StarterOnly))
 	{
 		return true;
 	}
 
 	// NotStarter cells may never be the start node.
-	return bIsStartNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_NotStarter);
+	return bIsStartNode && CandidateTags.HasTag(NWorldAssembly_Behavior_NotStarter);
 }
 
 bool FNVirtualOrganContext::IsGatedByFinisherTags(const bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags)
 {
 	// When the pool contains end-specific content, an end-node candidate must carry one of those tags.
 	if (bIsEndNode && (Summary.bFoundFinisherTagged || Summary.bFoundFinisherOnlyTagged) &&
-		!CandidateTags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CandidateTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		!CandidateTags.HasTag(NWorldAssembly_Behavior_Finisher) && !CandidateTags.HasTag(NWorldAssembly_Behavior_FinisherOnly))
 	{
 		return true;
 	}
 
 	// FinisherOnly cells may never be placed anywhere but the end node.
-	if (!bIsEndNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+	if (!bIsEndNode && CandidateTags.HasTag(NWorldAssembly_Behavior_FinisherOnly))
 	{
 		return true;
 	}
 
 	// NotFinisher cells may never be the end node.
-	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_NotFinisher);
+	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_Behavior_NotFinisher);
 }
 
 bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDepth, const int32 SourceNodeDepth)

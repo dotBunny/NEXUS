@@ -36,9 +36,6 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	FGameplayTagContainer ContextTagsRequired;
 	
 	FGameplayTagContainer ContextTagsAdded;
-	
-	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
-	bool bAlwaysRelevant = false;
 
 	/** 
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.

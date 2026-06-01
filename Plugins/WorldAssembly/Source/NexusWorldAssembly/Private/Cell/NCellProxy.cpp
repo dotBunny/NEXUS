@@ -117,7 +117,7 @@ void ANCellProxy::CreateLevelInstance()
 	LevelInstance->FillJunctionData(); // this is really for the server
 	
 	// Apply relevancy flag to created actor
-	if (bAlwaysRelevant)
+	if (AssemblyData.AssemblyTags.HasTagExact(NWorldAssembly_Flag_AlwaysRelevant))
 	{
 		LevelInstance->bAlwaysRelevant = true;
 	}

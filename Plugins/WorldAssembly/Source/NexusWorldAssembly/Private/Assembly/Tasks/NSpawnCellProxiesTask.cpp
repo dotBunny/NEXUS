@@ -41,10 +41,8 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 	FNCellAssemblyData CellAssemblyData;
 	
-	// TODO: Assign seed from cell?
 	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
 	CellAssemblyData.ContextTags = ContextTags;
-	
 	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{

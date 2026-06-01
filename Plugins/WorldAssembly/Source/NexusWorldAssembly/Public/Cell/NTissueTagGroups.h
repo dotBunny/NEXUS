@@ -136,17 +136,17 @@ struct FNTissueTagGroups
 	/** Ensure each set contains its built-in baseline tag, adding it if missing. */
 	void EnsureBaseTags()
 	{
-		if (!UniqueTags.HasTag(NWorldAssembly_BuiltIn_Unique))
+		if (!UniqueTags.HasTag(NWorldAssembly_Behavior_Unique))
 		{
-			UniqueTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_Unique));
+			UniqueTags.AppendTags(FGameplayTagContainer(NWorldAssembly_Behavior_Unique));
 		}
-		if (!RequiredAnyTags.HasTag(NWorldAssembly_BuiltIn_RequiredAny))
+		if (!RequiredAnyTags.HasTag(NWorldAssembly_Behavior_RequiredAny))
 		{
-			RequiredAnyTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_RequiredAny));
+			RequiredAnyTags.AppendTags(FGameplayTagContainer(NWorldAssembly_Behavior_RequiredAny));
 		}
-		if (!BadNeighborsTags.HasTag(NWorldAssembly_BuiltIn_BadNeighbors))
+		if (!BadNeighborsTags.HasTag(NWorldAssembly_Behavior_BadNeighbors))
 		{
-			BadNeighborsTags.AppendTags(FGameplayTagContainer(NWorldAssembly_BuiltIn_BadNeighbors));
+			BadNeighborsTags.AppendTags(FGameplayTagContainer(NWorldAssembly_Behavior_BadNeighbors));
 		}
 	}
 	

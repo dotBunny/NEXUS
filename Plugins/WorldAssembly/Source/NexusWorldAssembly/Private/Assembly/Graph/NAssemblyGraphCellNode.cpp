@@ -11,7 +11,6 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
-	bAlwaysRelevant = InputData->bAlwaysRelevant;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	AssemblyTags =  InputDataPtr->AssemblyTags;

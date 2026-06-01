@@ -18,12 +18,12 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNStarterFinisherTagsHarness
 		return FGameplayTag::RequestGameplayTag(FName(Name));
 	}
 
-	static FGameplayTag Starter() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Starter")); }
-	static FGameplayTag StarterOnly() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.StarterOnly")); }
-	static FGameplayTag NotStarter() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.NotStarter")); }
-	static FGameplayTag Finisher() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Finisher")); }
-	static FGameplayTag FinisherOnly() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.FinisherOnly")); }
-	static FGameplayTag NotFinisher() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.NotFinisher")); }
+	static FGameplayTag Starter() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.Starter")); }
+	static FGameplayTag StarterOnly() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.StarterOnly")); }
+	static FGameplayTag NotStarter() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.NotStarter")); }
+	static FGameplayTag Finisher() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.Finisher")); }
+	static FGameplayTag FinisherOnly() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.FinisherOnly")); }
+	static FGameplayTag NotFinisher() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.NotFinisher")); }
 
 	/** An empty tag set standing in for a cell that carries no starter/finisher markers. */
 	static FGameplayTagContainer Untagged() { return FGameplayTagContainer(); }

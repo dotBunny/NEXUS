@@ -29,11 +29,6 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
 	FGameplayTagContainer RequiredContextTags;
 	
-	
-	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
-	UPROPERTY(EditAnywhere)
-	bool bAlwaysRelevant = false;
-	
 	/**
 	 * DOES NOT DO ANYTHING CURRENTLY - Only used to determine Unique early out (1:1).
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.

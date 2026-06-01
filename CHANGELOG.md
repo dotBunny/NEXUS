@@ -6,9 +6,12 @@
 
 - `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
 - All `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
+- `BadNeighbors` tag group.
+- `AlwaysRelevant`
 
 ### Changed
 
+- GameplayTags renamed `NEXUS.WorldAssembly.BuiltIn.*` to `NEXUS.WorldAssembly.Behavior.*`.
 - `OutputTags` was moved to a more encompassing `ContextTags`, now having the ability to require `ContextTags` be present in the graph for a Cell to be used, associated query methods were altered to reflect this naming change.
 
 ### Fixed
@@ -18,7 +21,20 @@
 
 ### Removed
 
+### DefaultGameplayTags Redirects
 
+```ini
+[/Script/GameplayTags.GameplayTagsSettings]
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Starter", NewTagName="NEXUS.WorldAssembly.Behavior.Starter")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.StarterOnly", NewTagName="NEXUS.WorldAssembly.Behavior.StarterOnly")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.NotStarter", NewTagName="NEXUS.WorldAssembly.Behavior.NotStarter")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Finisher", NewTagName="NEXUS.WorldAssembly.Behavior.Finisher")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.FinisherOnly", NewTagName="NEXUS.WorldAssembly.Behavior.FinisherOnly")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.NotFinisher", NewTagName="NEXUS.WorldAssembly.Behavior.NotFinisher")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Unique", NewTagName="NEXUS.WorldAssembly.Behavior.Unique")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.RequiredAny", NewTagName="NEXUS.WorldAssembly.Behavior.RequiredAny")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.BadNeighbors", NewTagName="NEXUS.WorldAssembly.Behavior.BadNeighbors")
+```
 
 ## [0.3.0] - 2026-05-31
 

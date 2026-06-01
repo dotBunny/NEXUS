@@ -25,9 +25,9 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNBadNeighborsHarness
 
 	// Three distinct registered tags standing in as independent "bad-neighbor group" markers. Their built-in
 	// meaning is irrelevant here — they are only used because they are guaranteed-registered, distinct leaves.
-	static FGameplayTag GroupRed() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Starter")); }
-	static FGameplayTag GroupBlue() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Finisher")); }
-	static FGameplayTag Unrelated() { return Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.NotStarter")); }
+	static FGameplayTag GroupRed() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.Starter")); }
+	static FGameplayTag GroupBlue() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.Finisher")); }
+	static FGameplayTag Unrelated() { return Tag(TEXT("NEXUS.WorldAssembly.Behavior.NotStarter")); }
 
 	/** A tag-group registry whose BadNeighbors set marks the supplied tags as bad-neighbor groups. */
 	static FNTissueTagGroups MakeRegistry(const FGameplayTagContainer& BadNeighborGroups)

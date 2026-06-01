@@ -667,7 +667,7 @@ void FNOrganGraphBuilderTask::EnforceNotFinisherConstraint() const
 			if (Nodes[i]->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
 
 			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Nodes[i]);
-			if (!CellNode->GetAssemblyTags().HasTag(NWorldAssembly_BuiltIn_NotFinisher)) continue;
+			if (!CellNode->GetAssemblyTags().HasTag(NWorldAssembly_Behavior_NotFinisher)) continue;
 
 			// Check if this is a leaf (no Cell-type downstream children)
 			bool bHasCellChild = false;

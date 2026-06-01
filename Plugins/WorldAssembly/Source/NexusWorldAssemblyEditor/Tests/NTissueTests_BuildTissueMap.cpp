@@ -95,8 +95,8 @@ N_TEST_HIGH(FNTissueTests_BuildTissueMap_MergesDuplicateCellTags,
 
 	UNTissue* Tissue = MakeTissue();
 	UNCell* Cell = MakeCell();
-	AddCell(Tissue, Cell, Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Starter")));
-	AddCell(Tissue, Cell, Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Finisher")));
+	AddCell(Tissue, Cell, Tag(TEXT("NEXUS.WorldAssembly.Behavior.Starter")));
+	AddCell(Tissue, Cell, Tag(TEXT("NEXUS.WorldAssembly.Behavior.Finisher")));
 
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> CellMap;
 	FNTissueTagGroups TagGroups;
@@ -112,9 +112,9 @@ N_TEST_HIGH(FNTissueTests_BuildTissueMap_MergesDuplicateCellTags,
 		return;
 	}
 	CHECK_MESSAGE(TEXT("Merged entry should retain the first entry's tag."),
-		Entry->AssemblyTags.HasTag(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Starter"))))
+		Entry->AssemblyTags.HasTag(Tag(TEXT("NEXUS.WorldAssembly.Behavior.Starter"))))
 	CHECK_MESSAGE(TEXT("Merged entry should also carry the duplicate entry's tag."),
-		Entry->AssemblyTags.HasTag(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Finisher"))))
+		Entry->AssemblyTags.HasTag(Tag(TEXT("NEXUS.WorldAssembly.Behavior.Finisher"))))
 }
 
 N_TEST_HIGH(FNTissueTests_BuildTissueMap_MergesAdditionalTissue,
@@ -182,7 +182,7 @@ N_TEST_MEDIUM(FNTissueTests_BuildTissueMap_AccumulatesTagGroups,
 	UNCell* Cell = MakeCell();
 	AddCell(Tissue, Cell);
 	// Seed a distinctive tag into the tissue's Unique set so we can prove AppendTags propagated it.
-	Tissue->TagGroups.AppendUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.RequiredAny"))));
+	Tissue->TagGroups.AppendUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.Behavior.RequiredAny"))));
 
 	TMap<TObjectPtr<UNCell>, FNTissueEntry> CellMap;
 	FNTissueTagGroups TagGroups;
@@ -190,11 +190,11 @@ N_TEST_MEDIUM(FNTissueTests_BuildTissueMap_AccumulatesTagGroups,
 	UNTissue::BuildTissueMap(Tissue, CellMap, TagGroups, Processed);
 
 	CHECK_MESSAGE(TEXT("Baseline built-in Unique tag should be present after EnsureBaseTags."),
-		TagGroups.HasAnyUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.Unique")))))
+		TagGroups.HasAnyUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.Behavior.Unique")))))
 	CHECK_MESSAGE(TEXT("Baseline built-in RequiredAny tag should be present after EnsureBaseTags."),
-		TagGroups.HasAnyRequiredAnyTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.RequiredAny")))))
+		TagGroups.HasAnyRequiredAnyTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.Behavior.RequiredAny")))))
 	CHECK_MESSAGE(TEXT("The tissue's custom unique tag should have been merged into the output."),
-		TagGroups.HasAnyUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.BuiltIn.RequiredAny")))))
+		TagGroups.HasAnyUniqueTags(FGameplayTagContainer(Tag(TEXT("NEXUS.WorldAssembly.Behavior.RequiredAny")))))
 }
 
 #endif //WITH_TESTS
