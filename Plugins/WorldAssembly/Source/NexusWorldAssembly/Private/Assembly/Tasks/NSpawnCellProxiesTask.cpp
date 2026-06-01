@@ -25,7 +25,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 	
-	constexpr double MaxAllowableTime = 0.002; // 2ms budget
+	const double MaxAllowableTime = SpawnCellsContextPtr->CellTimeSlice;
 	const double StartTime = FPlatformTime::Seconds();
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
 	

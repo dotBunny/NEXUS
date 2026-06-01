@@ -32,10 +32,12 @@ public:
 
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
 	int32 CellNodesCurrentIndex = 0;
+	
+	float CellTimeSlice = 0.002f;
 
 	/** Flattened list of cell nodes awaiting proxy spawn, populated by FNCreateSpawnsTask. */
 	TArray<FNAssemblyGraphCellNode*> CellNodes;
 
-	explicit FNSpawnContext(UWorld* TargetWorld, const uint32 OperationTicket, const bool bPreloadLevels, const bool bSpawnLevelInstances)
-		: World(TargetWorld), OperationTicket(OperationTicket), bPreloadLevels(bPreloadLevels), bSpawnLevelInstances(bSpawnLevelInstances) {}
+	explicit FNSpawnContext(UWorld* TargetWorld, const uint32 OperationTicket, const bool bPreloadLevels, const bool bSpawnLevelInstances, const float CellSpawningTimeSlice = 0.002f)
+		: World(TargetWorld), OperationTicket(OperationTicket), bPreloadLevels(bPreloadLevels), bSpawnLevelInstances(bSpawnLevelInstances), CellTimeSlice(CellSpawningTimeSlice) {}
 };

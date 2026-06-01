@@ -133,11 +133,12 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	
 	// TODO: Validate task to ensure generation is completable?
 	
-
+	const FNAssemblyOperationSettings& OperatingSettings = Context->GetOperationSettings();
 	
 	// Create our context of what we are going to need to spawn back on the game-thread
 	SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(),
-		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
+		OperatingSettings.bPreLoadLevelInstances, OperatingSettings.bCreateLevelInstances, 
+		(OperatingSettings.CellSpawnTimeSlice * 0.001f)); // Convert to expected timescale
 
 	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, FNCreateSpawnsTask::GetDesiredThread())
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);

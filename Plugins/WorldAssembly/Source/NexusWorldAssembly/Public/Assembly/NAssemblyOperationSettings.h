@@ -42,13 +42,18 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
 	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
+	float CellSpawnTimeSlice = 2.f;
+	
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
+		const UNWorldAssemblySettings* AssemblySettings = UNWorldAssemblySettings::Get();
 		FNAssemblyOperationSettings Settings;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
-		Settings.ContextTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyContextTags);
+		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
+		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		
 		return MoveTemp(Settings);
 	}
@@ -56,11 +61,13 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	/** @return Default editor-preview settings (level instances disabled) with a freshly generated seed. */
 	static FNAssemblyOperationSettings GetDefaultEditorSettings()
 	{
+		const UNWorldAssemblySettings* AssemblySettings = UNWorldAssemblySettings::Get();
 		FNAssemblyOperationSettings Settings;
 		Settings.bCreateLevelInstances = false;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
-		Settings.ContextTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyContextTags);
+		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
+		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		
 		return MoveTemp(Settings);
 	}

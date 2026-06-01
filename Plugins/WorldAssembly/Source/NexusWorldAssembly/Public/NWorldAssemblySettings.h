@@ -92,6 +92,10 @@ public:
 		meta=(ToolTip="The default Context Tags to provide to the Assembly Operation."))
 	FGameplayTagContainer AssemblyContextTags;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
+	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))
+	float AssemblySpawningCellProxiesTimeSlice = 2.f;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;
