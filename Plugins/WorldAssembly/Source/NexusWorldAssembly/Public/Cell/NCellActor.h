@@ -117,6 +117,23 @@ public:
 
 	/** @return The cell's root component. */
 	UNCellRootComponent* GetCellRoot() const { return CellRoot; }
+	
+	/**
+	 * @return true if the supplied actor is one of this cell's author-time actors.
+	 * @param Actor The actor to test for membership.
+	 */
+	bool IsAuthorTimeActor(const AActor* Actor) const
+	{
+		return AuthorTimeActors.Contains(Actor);
+	}
+	/**
+	 * Append this cell's author-time actors to the supplied array.
+	 * @param OutActors Array that the author-time actors are appended to.
+	 */
+	void AppendAuthorTimeActors(TArray<const AActor*>& OutActors) const
+	{
+		OutActors.Append(AuthorTimeActors);
+	}
 
 protected:
 	/** The root component for this cell; also the actor's root component. */

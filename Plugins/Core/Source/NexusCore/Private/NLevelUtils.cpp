@@ -68,8 +68,15 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 		BoundsTask.EnterProgressFrame(1);
 #endif // WITH_EDITOR
 
+		// Early check if we've ignored already
+		if (OutIgnoredActors.Contains(Actor))
+		{
+			continue;
+		}
+		
 		if (Actor && Actor->IsLevelBoundsRelevant())
 		{
+			
 			// Ignore Tags
 			if (FNArrayUtils::ContainsAny(Actor->Tags, ActorIgnoreTags))
 			{

@@ -4,7 +4,7 @@
 
 ### Added
 
-
+- `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
 
 ### Changed
 
