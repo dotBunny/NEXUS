@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "Types/NDirection.h"
@@ -71,7 +72,6 @@ public:
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Bad Start Limit",
 		meta=(ToolTip="The maximum amount of bad starts that can occur before an assembly is considered a failure."))
 	int32 AssemblyBadStartLimit = 1000;
@@ -87,6 +87,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration",
 		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="InputTags",
+		meta=(ToolTip="The default InputTags to provide to the Assembly Operation."))
+	FGameplayTagContainer AssemblyInputTags;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))

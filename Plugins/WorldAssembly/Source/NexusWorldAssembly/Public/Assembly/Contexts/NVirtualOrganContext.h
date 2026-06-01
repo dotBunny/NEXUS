@@ -83,9 +83,11 @@ public:
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
 
+	/** Tag groups accumulated from cells already placed in the graph. */
 	FNTissueTagGroups PlacedTagGroups;
+
+	/** Output tags accumulated from every placed cell, handed off to the pass context and propagated down to the spawned cell proxies. */
 	FGameplayTagContainer OutputTags;
-	
 	
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;

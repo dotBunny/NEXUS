@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "GameplayTagContainer.h"
+#include "NWorldAssemblySettings.h"
 #include "Math/NSeedGenerator.h"
 
 #include "NAssemblyOperationSettings.generated.h"
@@ -36,12 +38,18 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	/** When true, level instances are created for generated cells; when false, only cell proxies exist. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
 	bool bCreateLevelInstances = true;
-
+	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
+	FGameplayTagContainer InputTags;
+	
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
 		FNAssemblyOperationSettings Settings;
+		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
+		Settings.InputTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyInputTags);
+		
 		return MoveTemp(Settings);
 	}
 
@@ -50,7 +58,10 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	{
 		FNAssemblyOperationSettings Settings;
 		Settings.bCreateLevelInstances = false;
+		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
+		Settings.InputTags.AppendTags(UNWorldAssemblySettings::Get()->AssemblyInputTags);
+		
 		return MoveTemp(Settings);
 	}
 };
