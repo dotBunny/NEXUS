@@ -41,6 +41,11 @@ public:
 		return AssemblyData.ContextTags;
 	}
 	
+	uint64 GetSeed() const
+	{
+		return AssemblyData.Seed;
+	}
+	
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override

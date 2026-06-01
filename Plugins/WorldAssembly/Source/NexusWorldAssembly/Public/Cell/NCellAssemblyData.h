@@ -15,6 +15,9 @@ struct FNCellAssemblyData
 	UPROPERTY(VisibleInstanceOnly)
 	uint32 OperationTicket = 0;
 	
+	UPROPERTY(VisibleInstanceOnly)
+	uint64 Seed;
+	
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer ContextTags;
 };

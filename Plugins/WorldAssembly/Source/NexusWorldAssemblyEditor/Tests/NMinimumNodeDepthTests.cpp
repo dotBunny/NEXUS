@@ -53,15 +53,15 @@ N_TEST_CRITICAL(FNMinimumNodeDepthTests_DepthRootedAtBone,
 	FNAssemblyGraphBoneNode* Bone = MakeBoneRoot();
 	FNAssemblyGraph Graph(Bone, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
 
-	FNAssemblyGraphCellNode* Start = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* Start = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
 	Graph.RegisterNode(Start);
 	Bone->Connect(Start);
 
-	FNAssemblyGraphCellNode* NeighborA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NeighborA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
 	Graph.RegisterNode(NeighborA);
 	Start->Connect(NeighborA);
 
-	FNAssemblyGraphCellNode* NeighborB = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NeighborB = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
 	Graph.RegisterNode(NeighborB);
 	NeighborA->Connect(NeighborB);
 
@@ -83,11 +83,11 @@ N_TEST_HIGH(FNMinimumNodeDepthTests_FirstEligibleAtHopN,
 	FNAssemblyGraphBoneNode* Bone = MakeBoneRoot();
 	FNAssemblyGraph Graph(Bone, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
 
-	FNAssemblyGraphCellNode* Start = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* Start = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
 	Graph.RegisterNode(Start);
 	Bone->Connect(Start);
 
-	FNAssemblyGraphCellNode* NeighborA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NeighborA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
 	Graph.RegisterNode(NeighborA);
 	Start->Connect(NeighborA);
 

@@ -28,4 +28,10 @@ public:
 	{
 		return LevelInstance->GetContextTags();
 	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Hex Seed (ANCellLevelInstance)")
+	static FString GetHexSeedFromCellLevelInstance(ANCellLevelInstance* LevelInstance)
+	{
+		return FNSeedGenerator::HexFromSeed(LevelInstance->GetSeed());
+	}
 };

@@ -40,15 +40,21 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 	FNCellAssemblyData CellAssemblyData;
+	
+	// TODO: Assign seed from cell?
 	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
 	CellAssemblyData.ContextTags = ContextTags;
 	
+	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
+		// Instance specific stuff
+		CellAssemblyData.Seed = SpawnCellsContextPtr->CellNodes[i]->GetSeed();
+		
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 
 		SpawnCellsContextPtr->CellNodes[i], 
-		CellAssemblyData, // Early access to tags without having to deal with the graph
+		CellAssemblyData,
 		SpawnCellsContextPtr->bPreloadLevels);
 		
 		// Dispatch Guard #2

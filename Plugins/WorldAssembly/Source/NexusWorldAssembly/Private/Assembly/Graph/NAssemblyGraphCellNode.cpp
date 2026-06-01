@@ -6,7 +6,7 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize) : FNAssemblyGraphNode(Position, Rotation)
+FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const uint64 CellSeed, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize) : FNAssemblyGraphNode(Position, Rotation)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
@@ -15,6 +15,7 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
 	AssemblyTags =  InputDataPtr->AssemblyTags;
 	ContextTagsAdded = InputDataPtr->ContextTagsAdded;
+	Seed = CellSeed;
 
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
 	// but will follow the defined bounds previously defined at author-time, but rotated.
