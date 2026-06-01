@@ -5,10 +5,11 @@
 ### Added
 
 - `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
+- All `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
 
 ### Changed
 
-
+- `OutputTags` was moved to a more encompassing `ContextTags`, now having the ability to require `ContextTags` be present in the graph for a Cell to be used, associated query methods were altered to reflect this naming change.
 
 ### Fixed
 
