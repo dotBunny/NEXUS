@@ -42,7 +42,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
 	
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
 	
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
