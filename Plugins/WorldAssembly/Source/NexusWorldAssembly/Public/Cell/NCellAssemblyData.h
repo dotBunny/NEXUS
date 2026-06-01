@@ -16,6 +16,9 @@ struct FNCellAssemblyData
 	uint32 OperationTicket = 0;
 	
 	UPROPERTY(VisibleInstanceOnly)
+	int32 NodeIdentifier = 0;
+	
+	UPROPERTY(VisibleInstanceOnly)
 	uint64 Seed = 0;
 	
 	UPROPERTY(BlueprintReadOnly)

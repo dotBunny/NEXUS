@@ -34,4 +34,10 @@ public:
 	{
 		return FNSeedGenerator::HexFromSeed(LevelInstance->GetSeed());
 	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Node Identifier (ANCellLevelInstance)")
+	static int32 GetNodeIdentifierFromCellLevelInstance(ANCellLevelInstance* LevelInstance)
+	{
+		return LevelInstance->GetNodeIdentifier();
+	}
 };

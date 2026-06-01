@@ -39,7 +39,7 @@ void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 	}
 
 	Nodes.Add(Node);
-	Node->NodeID = Ticket++;
+	Node->NodeIdentifier = Ticket++;
 }
 
 void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)

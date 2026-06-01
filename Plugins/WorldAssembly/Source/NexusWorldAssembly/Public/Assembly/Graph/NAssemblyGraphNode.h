@@ -39,7 +39,7 @@ public:
 	FRotator GetWorldRotation() const { return WorldRotation; }
 
 	/** @return The node's stable identifier within its owning graph. */
-	uint32 GetNodeID() const { return NodeID; }
+	int32 GetNodeIdentifier() const { return NodeIdentifier; }
 	
 	int32 GetNodeDepth() const { return NodeDepth; }
 
@@ -80,7 +80,6 @@ public:
 
 	/** @return All nodes upstream of this node. */
 	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
-
 	
 	uint64 GetSeed() const { return Seed; }
 	
@@ -92,7 +91,7 @@ protected:
 	void SetWorldRotation(const FRotator& Rotation);
 
 	/** Stable identifier assigned when the node is registered with the graph. */
-	uint32 NodeID = 0;
+	int32 NodeIdentifier = 0;
 
 	/** Hop-count from the start node along the shortest upstream path; MAX_int32 until reachable. */
 	int32 NodeDepth = MAX_int32;

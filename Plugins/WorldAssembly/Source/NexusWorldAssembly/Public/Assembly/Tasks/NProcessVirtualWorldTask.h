@@ -23,7 +23,7 @@ public:
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessVirtualWorldTask, STATGROUP_TaskGraphTasks); }
 
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyThread; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::NormalTaskPriority; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
 	/** Executed by the task graph: processes the virtual-world context's collision snapshot. */

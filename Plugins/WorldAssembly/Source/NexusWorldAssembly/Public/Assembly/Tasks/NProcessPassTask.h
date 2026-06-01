@@ -24,7 +24,7 @@ struct FNProcessPassTask
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessPassTask, STATGROUP_TaskGraphTasks); }
 
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::NormalTaskPriority; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
 	/** Executed by the task graph: moves collected graphs from the pass context up to the task-graph context. */

@@ -48,12 +48,15 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
+		FNAssemblyGraphCellNode* CellNode = SpawnCellsContextPtr->CellNodes[i];
+		
 		// Instance specific stuff
-		CellAssemblyData.Seed = SpawnCellsContextPtr->CellNodes[i]->GetSeed();
+		CellAssemblyData.Seed = CellNode->GetSeed();
+		CellAssemblyData.NodeIdentifier = CellNode->GetNodeIdentifier();
 		
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 
-		SpawnCellsContextPtr->CellNodes[i], 
+		CellNode, 
 		CellAssemblyData,
 		SpawnCellsContextPtr->bPreloadLevels);
 		

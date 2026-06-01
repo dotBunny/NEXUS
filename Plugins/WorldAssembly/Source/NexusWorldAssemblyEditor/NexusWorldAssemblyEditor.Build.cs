@@ -31,6 +31,7 @@ namespace UnrealBuildTool.Rules
 					"EditorScriptingUtilities",
 					"EditorSubsystem",
 					"Engine",
+					"GameplayTags",
 					"InputCore",
 					"LevelEditor",
 					"Projects",

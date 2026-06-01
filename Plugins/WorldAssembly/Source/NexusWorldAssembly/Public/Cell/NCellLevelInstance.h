@@ -46,6 +46,11 @@ public:
 		return AssemblyData.Seed;
 	}
 	
+	int32 GetNodeIdentifier() const
+	{
+		return AssemblyData.NodeIdentifier;
+	}
+	
 #if WITH_EDITOR
 	virtual bool IsUserManaged() const override { return false; }
 	virtual bool CanEnterEdit(FText* OutReason = nullptr) const override
