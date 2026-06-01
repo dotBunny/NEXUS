@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 12,
-	"VersionName": "0.3.0",
+	"Version": 13,
+	"VersionName": "0.3.5",
 	"FriendlyName": "NEXUS Samples: World Assembly",
 	"Description": "Sample content for the NEXUS: World Assembly plugin.",
 	"Category": "NEXUS Samples",
