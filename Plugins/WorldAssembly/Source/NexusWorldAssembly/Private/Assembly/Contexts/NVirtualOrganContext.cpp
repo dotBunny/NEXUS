@@ -22,6 +22,12 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
 	BadStartLimit = WorldOrganContext->BadStartLimit;
 	
+	// Seed override
+	if (WorldOrganContext->SourceComponent->Seed != -1)
+	{
+		Seed = WorldOrganContext->SourceComponent->Seed;
+	}
+	
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
 	VoxelSize = WorldOrganContext->VoxelSize;
