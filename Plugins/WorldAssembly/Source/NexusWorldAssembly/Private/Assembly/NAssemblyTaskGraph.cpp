@@ -46,7 +46,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateVirtualWorldTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(
 				nullptr,
-				ENamedThreads::GameThread)
+				FNCreateVirtualWorldTask::GetDesiredThread())
 				.ConstructAndHold(VirtualWorldContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	PreGameThreadTasks.Add(CreateVirtualWorldTask);
 	AllTasks.Add(CreateVirtualWorldTask);
@@ -56,7 +56,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	// Create associated data from our initial game-thread blocking task
 	FGraphEventRef ProcessVirtualWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
 				&PreGameThreadTasks,
-				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
+				FNProcessVirtualWorldTask::GetDesiredThread())
 				.ConstructAndHold(VirtualWorldContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	ProcessInitialGameThreadTasks.Add(ProcessVirtualWorldContextTask);
 	AllTasks.Add(ProcessVirtualWorldContextTask);
@@ -100,7 +100,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 			// the world context before any organ-builder reads NodeCollisionMeshes.
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(ProcessPassTasks.Num() > 0) ? &ProcessPassTasks.Last() : &ProcessInitialGameThreadTasks,
-				ENamedThreads::AnyNormalThreadNormalTask) // Doesn't need to run on game thread
+				FNOrganGraphBuilderTask::GetDesiredThread())
 				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
@@ -117,7 +117,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 
 		// Create task that will when all organ tasks are complete for this pass, collect their created graphs and move them upstream as well as
 		// any additional data like collisions, etc.
-		FGraphEventRef ProcessPassTask = TGraphTask<FNProcessPassTask>::CreateTask(&PassTasks, ENamedThreads::AnyBackgroundThreadNormalTask)
+		FGraphEventRef ProcessPassTask = TGraphTask<FNProcessPassTask>::CreateTask(&PassTasks, FNProcessPassTask::GetDesiredThread())
 			.ConstructAndHold(PassContextPtr, VirtualWorldContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 		CollectionTasks.Add(ProcessPassTask);
 		AllTasks.Add(ProcessPassTask);
@@ -139,7 +139,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	SpawnContextPtr = MakeShared<FNSpawnContext>(Context->GetTargetWorld(), Context->GetOperationTicket(),
 		Context->GetOperationSettings().bPreLoadLevelInstances, Context->GetOperationSettings().bCreateLevelInstances);
 
-	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, ENamedThreads::AnyNormalThreadNormalTask)
+	FGraphEventRef CreateSpawnsTask = TGraphTask<FNCreateSpawnsTask>::CreateTask(&CollectionTasks, FNCreateSpawnsTask::GetDesiredThread())
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(CreateSpawnsTask);
 	SpawnContextTasks.Add(CreateSpawnsTask);
@@ -147,14 +147,14 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	
 	// Create our dispatcher task that will time-slice spawning
 	FGraphEventRef SpawnCellProxiesTaskCompleted = FGraphEvent::CreateGraphEvent();
-	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, ENamedThreads::GameThread)
+	FGraphEventRef SpawnCellProxiesTask = TGraphTask<FNSpawnCellProxiesTask>::CreateTask(&SpawnContextTasks, FNSpawnCellProxiesTask::GetDesiredThread())
 		.ConstructAndHold(SpawnContextPtr, TaskGraphContextPtr, SpawnCellProxiesTaskCompleted N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	FinalizerTasks.Add(SpawnCellProxiesTask);
 	FinalizerTasks.Add(SpawnCellProxiesTaskCompleted); // This is what will actually trigger moving on post spawning
 	AllTasks.Add(SpawnCellProxiesTask);
 	
 	// Create our finalizer task on the main thread that will wait for all the other finalizers to complete and output analytics
-	FinalizeTask = TGraphTask<FNAssemblyFinalizeTask>::CreateTask(&FinalizerTasks, ENamedThreads::GameThread).ConstructAndHold(Operation, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
+	FinalizeTask = TGraphTask<FNAssemblyFinalizeTask>::CreateTask(&FinalizerTasks, FNAssemblyFinalizeTask::GetDesiredThread()).ConstructAndHold(Operation, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	AllTasks.Add(FinalizeTask);
 	
 	// Record end time

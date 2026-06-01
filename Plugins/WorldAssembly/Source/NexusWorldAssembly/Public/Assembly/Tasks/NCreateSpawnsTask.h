@@ -25,7 +25,7 @@ struct FNCreateSpawnsTask
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnsTask, STATGROUP_TaskGraphTasks); }
 
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::NormalTaskPriority; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyNormalThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
 	/** Executed by the task graph: flattens the collected graphs into the spawn context. */
