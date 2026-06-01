@@ -128,5 +128,5 @@ private:
 	/** World-space rotation. */
 	FRotator WorldRotation;
 	
-	uint64 Seed;
+	uint64 Seed = 0;
 };
