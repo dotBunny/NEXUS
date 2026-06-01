@@ -131,9 +131,11 @@ void UNCellJunctionComponent::OnRegister()
 		}
 		if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
 		{
-			Actor->Modify();
+			// CellJunctions is Transient, so this map is empty after every load and gets rebuilt here on
+			// registration. Rebuilding transient runtime state is not an author-time change, so we must not
+			// mark the actor dirty - the genuine "new junction" case is handled by the InstanceIdentifier
+			// assignment above.
 			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
-			Actor->SetActorDirty();
 		}
 	}
 

@@ -12,7 +12,7 @@
 
 ### Fixed
 
-
+- Resolved issue with `ANCellActor` being dirtied getting opened.
 
 ### Removed
 
