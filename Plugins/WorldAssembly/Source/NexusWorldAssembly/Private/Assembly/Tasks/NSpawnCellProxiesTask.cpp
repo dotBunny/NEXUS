@@ -53,6 +53,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		// Instance specific stuff
 		CellAssemblyData.Seed = CellNode->GetSeed();
 		CellAssemblyData.NodeIdentifier = CellNode->GetNodeIdentifier();
+		CellAssemblyData.AssemblyTags = CellNode->GetAssemblyTags();
 		
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 

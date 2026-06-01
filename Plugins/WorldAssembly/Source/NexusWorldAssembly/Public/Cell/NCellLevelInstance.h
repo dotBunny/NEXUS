@@ -36,9 +36,19 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	//End ALevelInstance
 	
+	FNCellAssemblyData& GetAssemblyData()
+	{
+		return AssemblyData;
+	}
+	
 	FGameplayTagContainer& GetContextTags()
 	{
 		return AssemblyData.ContextTags;
+	}
+	
+	FGameplayTagContainer& GetAssemblyTags()
+	{
+		return AssemblyData.AssemblyTags;
 	}
 	
 	uint64 GetSeed() const
