@@ -3,10 +3,12 @@
 
 #include "Assembly/Graph/NAssemblyGraphNode.h"
 
-FNAssemblyGraphNode::FNAssemblyGraphNode(const FVector& Position, const FRotator& Rotation)
+FNAssemblyGraphNode::FNAssemblyGraphNode(const uint64 NodeSeed, const FVector& Position, const FRotator& Rotation)
 {
+	Seed = NodeSeed;
 	WorldPosition = Position;
 	WorldRotation = Rotation;
+	
 }
 
 void FNAssemblyGraphNode::SetWorldPosition(const FVector& Position)

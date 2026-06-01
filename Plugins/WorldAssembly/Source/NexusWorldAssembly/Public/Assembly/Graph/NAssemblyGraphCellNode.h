@@ -132,15 +132,12 @@ public:
 	
 	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
 
-	uint64 GetSeed() const { return Seed; }
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
 	FNVirtualCellData* InputDataPtr;
 	
 	/** Whether the spawned level instance should be always-relevant for networking. */
 	bool bAlwaysRelevant;
-	
-	uint64 Seed;
 
 	/** Junction keys that are still unlinked. */
 	TArray<int32> FreeJunctionKeys;

@@ -25,7 +25,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphNode
 {
 	friend class FNAssemblyGraph;
 public:
-	FNAssemblyGraphNode(const FVector& Position, const FRotator& Rotation);
+	FNAssemblyGraphNode(uint64 NodeSeed,const FVector& Position, const FRotator& Rotation);
 
 	virtual ~FNAssemblyGraphNode() = default;
 
@@ -81,6 +81,9 @@ public:
 	/** @return All nodes upstream of this node. */
 	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
 
+	
+	uint64 GetSeed() const { return Seed; }
+	
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */
 	void SetWorldPosition(const FVector& Position);
@@ -124,4 +127,6 @@ private:
 
 	/** World-space rotation. */
 	FRotator WorldRotation;
+	
+	uint64 Seed;
 };
