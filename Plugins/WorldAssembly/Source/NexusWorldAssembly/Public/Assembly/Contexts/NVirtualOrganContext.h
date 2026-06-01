@@ -126,8 +126,52 @@ public:
 	 */
 	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
+
 	/**
-	 * Drop the current graph and bump the retry counter.	 
+	 * Resolve which bad-neighbor groups the source cell belongs to. Returns empty when there is no source
+	 * node (e.g. the start-node pre-filter) or when no bad-neighbor groups are configured, which disables
+	 * the per-candidate bad-neighbor check.
+	 * @param GroupTags Tag-group registry holding the configured bad-neighbor groups.
+	 * @param SourceCellNode Node the filter is stepping away from, or nullptr for the start pre-filter.
+	 * @return The subset of the source's assembly tags that name a bad-neighbor group.
+	 */
+	static NEXUSWORLDASSEMBLY_API FGameplayTagContainer ResolveSourceBadNeighborTags(const FNTissueTagGroups& GroupTags, FNAssemblyGraphCellNode* SourceCellNode);
+
+	/**
+	 * @param SourceBadNeighborTags Bad-neighbor groups the source belongs to (from ResolveSourceBadNeighborTags).
+	 * @param Candidate Cell being considered for placement beside the source.
+	 * @return true if Candidate shares a bad-neighbor group with the source and must not be placed beside it.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsBadNeighbor(const FGameplayTagContainer& SourceBadNeighborTags, const FNVirtualCellData& Candidate);
+
+	/**
+	 * @param bIsStartNode true when filtering candidates for the graph's start node.
+	 * @param Summary Pool summary carrying whether any starter / starter-only cells exist.
+	 * @param CandidateTags Assembly tags of the candidate cell.
+	 * @return true if the candidate is excluded by the starter tag rules.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByStarterTags(bool bIsStartNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
+
+	/**
+	 * @param bIsEndNode true when filtering candidates for the graph's end node.
+	 * @param Summary Pool summary carrying whether any finisher / finisher-only cells exist.
+	 * @param CandidateTags Assembly tags of the candidate cell.
+	 * @return true if the candidate is excluded by the finisher tag rules.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByFinisherTags(bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
+
+	/**
+	 * Gate a candidate by minimum graph depth. SourceNodeDepth is the depth of the node the filter is
+	 * stepping away from; because graph depth is rooted at the bone (start cell = depth 1) and the candidate
+	 * lands one hop deeper, the two offsets cancel and this resolves to "hops from the start cell".
+	 * @param MinimumNodeDepth The candidate's configured minimum depth; 0 disables the gate.
+	 * @param SourceNodeDepth Depth of the source node the filter is stepping away from.
+	 * @return true if the candidate is too shallow and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 SourceNodeDepth);
+
+	/**
+	 * Drop the current graph and bump the retry counter.
 	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
 	 */
 	bool ResetForRetry();

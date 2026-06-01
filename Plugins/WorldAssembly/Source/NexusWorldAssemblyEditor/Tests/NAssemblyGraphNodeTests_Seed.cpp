@@ -122,27 +122,17 @@ N_TEST_HIGH(FNAssemblyGraphNodeTests_Seed_StreamIsDeterministic,
 	CHECK_EQUALS("Each cell node should receive a distinct seed within a single build.", Unique.Num(), FirstRun.Num())
 }
 
-N_TEST_HIGH(FNAssemblyGraphNodeTests_Seed_PropagatesToCellAssemblyData,
-	"NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphNode::Seed::PropagatesToCellAssemblyData",
+N_TEST_HIGH(FNAssemblyGraphNodeTests_Seed_DefaultCellAssemblyDataSeedIsZero,
+	"NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphNode::Seed::DefaultCellAssemblyDataSeedIsZero",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// Mirrors the FNSpawnCellProxiesTask handoff (CellAssemblyData.Seed = CellNode->GetSeed()) and pins the
-	// default-initialized Seed so a default FNCellAssemblyData can never carry a garbage seed onto an instance.
-	using namespace NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphNodeSeedHarness;
-
+	// Pins the default-initialized Seed so a default FNCellAssemblyData can never carry a garbage seed onto an
+	// instance. The real handoff (CellAssemblyData.Seed = CellNode->GetSeed()) lives in
+	// FNSpawnCellProxiesTask::DoTask and runs inside a spawning world, so it is not exercised here; the node side
+	// of that copy — that GetSeed() returns exactly what the factory was handed — is covered by
+	// CellNodeRoundTripsSeed above.
 	FNCellAssemblyData DefaultData;
 	CHECK_EQUALS("A default-constructed FNCellAssemblyData should report seed 0.", DefaultData.Seed, static_cast<uint64>(0))
-
-	FNVirtualCellData Cell = MakeCell();
-	FNAssemblyGraph Graph(MakeBoneRoot(), FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
-
-	FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, SampleSeed, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
-	Graph.RegisterNode(Node);
-
-	FNCellAssemblyData CellAssemblyData;
-	CellAssemblyData.Seed = Node->GetSeed();
-
-	CHECK_EQUALS("FNCellAssemblyData should carry the node's seed after the spawn handoff.", CellAssemblyData.Seed, SampleSeed)
 }
 
 #endif //WITH_TESTS

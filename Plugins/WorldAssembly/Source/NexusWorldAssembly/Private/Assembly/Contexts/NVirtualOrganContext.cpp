@@ -228,11 +228,74 @@ bool FNVirtualOrganContext::ValidateGraph()
 	return bSuccessful;
 }
 
+FGameplayTagContainer FNVirtualOrganContext::ResolveSourceBadNeighborTags(const FNTissueTagGroups& GroupTags, FNAssemblyGraphCellNode* SourceCellNode)
+{
+	FGameplayTagContainer SourceBadNeighborTags;
+	if (SourceCellNode != nullptr && GroupTags.HasBadNeighborsTags())
+	{
+		SourceBadNeighborTags = GroupTags.FilterBadNeighborsTags(SourceCellNode->GetAssemblyTags());
+	}
+	return SourceBadNeighborTags;
+}
+
+bool FNVirtualOrganContext::IsBadNeighbor(const FGameplayTagContainer& SourceBadNeighborTags, const FNVirtualCellData& Candidate)
+{
+	return !SourceBadNeighborTags.IsEmpty() && Candidate.AssemblyTags.HasAny(SourceBadNeighborTags);
+}
+
+bool FNVirtualOrganContext::IsGatedByStarterTags(const bool bIsStartNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags)
+{
+	// When the pool contains start-specific content, a start-node candidate must carry one of those tags.
+	if (bIsStartNode && (Summary.bFoundStarterTagged || Summary.bFoundStarterOnlyTagged) &&
+		!CandidateTags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CandidateTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+	{
+		return true;
+	}
+
+	// StarterOnly cells may never be placed anywhere but the start node.
+	if (!bIsStartNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+	{
+		return true;
+	}
+
+	// NotStarter cells may never be the start node.
+	return bIsStartNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_NotStarter);
+}
+
+bool FNVirtualOrganContext::IsGatedByFinisherTags(const bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags)
+{
+	// When the pool contains end-specific content, an end-node candidate must carry one of those tags.
+	if (bIsEndNode && (Summary.bFoundFinisherTagged || Summary.bFoundFinisherOnlyTagged) &&
+		!CandidateTags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CandidateTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+	{
+		return true;
+	}
+
+	// FinisherOnly cells may never be placed anywhere but the end node.
+	if (!bIsEndNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+	{
+		return true;
+	}
+
+	// NotFinisher cells may never be the end node.
+	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_BuiltIn_NotFinisher);
+}
+
+bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDepth, const int32 SourceNodeDepth)
+{
+	return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
+}
+
 void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
 	JunctionIndices.Empty();
-	
+
+	// Resolve which bad-neighbor groups the source cell belongs to once up front; any candidate sharing one of
+	// these groups cannot be placed beside it. Stays empty when there is no source node (e.g. the start-node
+	// pre-filter) or when no bad-neighbor groups are configured, which skips the per-candidate check below.
+	const FGameplayTagContainer SourceBadNeighborTags = ResolveSourceBadNeighborTags(CellInputDataSummary.GroupTags, Filter.SourceCellNode);
+
 	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
@@ -253,54 +316,26 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
+		// FILTER BADNEIGHBORS
+		// Reject candidates that belong to a bad-neighbor group the source cell is also a member of — those
+		// two cells are not allowed to be placed beside each other.
+		if (IsBadNeighbor(SourceBadNeighborTags, *CellData))
+		{
+			continue;
+		}
+
 		// STARTER TAGS
-		
-		// Handle Starter Nodes
-		if (Filter.bIsStartNode && (CellInputDataSummary.bFoundStarterTagged || CellInputDataSummary.bFoundStarterOnlyTagged))
-		{
-			// We had some tagged content specific to starting off
-			if (!CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Starter) && !CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
-			{
-				// Didn't have what we were looking for
-				continue;
-			}
-		}
-		
-		// Bail out from list if it is StarterOnly.
-		if (!Filter.bIsStartNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_StarterOnly))
+		if (IsGatedByStarterTags(Filter.bIsStartNode, CellInputDataSummary, CellData->AssemblyTags))
 		{
 			continue;
 		}
-		
-		if (Filter.bIsStartNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_NotStarter))
-		{
-			continue;
-		}
-		
+
 		// FINISHER TAGS
-		
-		// Handle Starter Nodes
-		if (Filter.bIsEndNode && (CellInputDataSummary.bFoundFinisherTagged || CellInputDataSummary.bFoundFinisherOnlyTagged))
-		{
-			// We had some tagged content specific to ending off
-			if (!CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_Finisher) && !CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
-			{
-				// Didn't have what we were looking for
-				continue;
-			}
-		}
-		
-		// Bail out from list if it is FinisherOnly.
-		if (!Filter.bIsEndNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_FinisherOnly))
+		if (IsGatedByFinisherTags(Filter.bIsEndNode, CellInputDataSummary, CellData->AssemblyTags))
 		{
 			continue;
 		}
-		
-		if (Filter.bIsEndNode && CellData->AssemblyTags.HasTag(NWorldAssembly_BuiltIn_NotFinisher))
-		{
-			continue;
-		}
-		
+
 		// Check minimum distance in current graph for reusing the cell piece
 		if (Filter.SourceCellInputData != nullptr && Filter.SourceCellNode != nullptr &&
 			CellData->MinimumNodeDistance >= 1 &&
@@ -312,10 +347,9 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		// Gate by minimum depth. Filter.NodeDepth is the SOURCE node's depth; the candidate lands one hop
 		// deeper. Graph depth is rooted at the bone, so the start cell is NodeDepth 1 (hop 0 from start) and
 		// "source depth" already equals "candidate's hop-count from the start cell" — the two offsets cancel.
-		// A candidate is therefore correctly first eligible at hop == MinimumNodeDepth. Do NOT add a +1 here;
-		// it would let cells appear one hop too early. Covered by NMinimumNodeDepthTests.cpp.
-		if (CellData->MinimumNodeDepth > 0 &&
-			CellData->MinimumNodeDepth > Filter.NodeDepth)
+		// A candidate is therefore correctly first eligible at hop == MinimumNodeDepth. The comparison lives in
+		// IsGatedByMinimumNodeDepth (do NOT add a +1 there). Covered by NMinimumNodeDepthTests.cpp.
+		if (IsGatedByMinimumNodeDepth(CellData->MinimumNodeDepth, Filter.NodeDepth))
 		{
 			continue;
 		}

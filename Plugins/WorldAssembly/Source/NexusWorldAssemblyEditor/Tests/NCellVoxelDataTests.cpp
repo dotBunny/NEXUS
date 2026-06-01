@@ -21,16 +21,16 @@ N_TEST_CRITICAL(FNCellVoxelDataTests_Uniform, "NEXUS::UnitTests::NWorldAssembly:
 	auto [MidX, MidY, MidZ] = VoxelData.GetInverseIndex(241);
 	VoxelData.SetData(241, static_cast<uint8>(ENCellVoxel::Occupied));
 
-	CHECK_EQUALS(TEXT("Expected 1000 flat array count."), VoxelData.GetCount(), static_cast<SIZE_T>(1000));
-	CHECK_EQUALS(TEXT("Expected 9,9,9 to be occupied when read from flat array."), VoxelData.GetData(999), static_cast<uint8>(ENCellVoxel::Occupied))
+	CHECK_EQUALS("Expected 1000 flat array count.", VoxelData.GetCount(), static_cast<SIZE_T>(1000));
+	CHECK_EQUALS("Expected 9,9,9 to be occupied when read from flat array.", VoxelData.GetData(999), static_cast<uint8>(ENCellVoxel::Occupied))
 
 	auto [InverseX, InverseY, InverseZ] = VoxelData.GetInverseIndex(999);
-	CHECK_EQUALS(TEXT("InverseLastIndex:X expected 9"), InverseX, 9u)
-	CHECK_EQUALS(TEXT("InverseLastIndex:Y expected 9"), InverseY, 9u)
-	CHECK_EQUALS(TEXT("InverseLastIndex:Z expected 9"), InverseZ, 9u)
+	CHECK_EQUALS("InverseLastIndex:X expected 9", InverseX, 9u)
+	CHECK_EQUALS("InverseLastIndex:Y expected 9", InverseY, 9u)
+	CHECK_EQUALS("InverseLastIndex:Z expected 9", InverseZ, 9u)
 
 	const uint8 AlteredData = VoxelData.GetData(MidX, MidY, MidZ);
-	CHECK_EQUALS(TEXT("Expected round tripped altered data to match."), AlteredData, static_cast<uint8>(ENCellVoxel::Occupied))
+	CHECK_EQUALS("Expected round tripped altered data to match.", AlteredData, static_cast<uint8>(ENCellVoxel::Occupied))
 }
 
 N_TEST_HIGH(FNCellVoxelDataTests_DefaultCellsAreEmpty, "NEXUS::UnitTests::NWorldAssembly::FNCellVoxelData::DefaultCellsAreEmpty", N_TEST_CONTEXT_ANYWHERE)

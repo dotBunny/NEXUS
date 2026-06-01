@@ -63,7 +63,7 @@ public:
 		PropagateDepth(DownstreamNode);
 	}
 	
-	FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
+	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
 	FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
 
 	/** Sever all upstream/downstream links between this node and Other, in both directions. */

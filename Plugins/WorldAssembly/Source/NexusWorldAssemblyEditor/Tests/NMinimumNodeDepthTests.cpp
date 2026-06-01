@@ -3,6 +3,7 @@
 
 #if WITH_TESTS
 
+#include "Assembly/Contexts/NVirtualOrganContext.h"
 #include "Assembly/Data/NVirtualBoneData.h"
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
@@ -27,16 +28,6 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNMinimumNodeDepthHarness
 		static FNVirtualBoneData BoneData;
 		BoneData.SocketSize = FIntVector2(2, 4);
 		return FNAssemblyGraphNodeFactory::CreateBoneNode(&BoneData, FVector::ZeroVector, FRotator::ZeroRotator);
-	}
-
-	/**
-	 * Mirror of the depth gate in FNVirtualOrganContext::FilterCellInputData. SourceNodeDepth is the depth of
-	 * the node the filter is stepping away from (Filter.NodeDepth in production). Kept in lockstep with that
-	 * comparison on purpose — if one changes, the other must too.
-	 */
-	static bool IsGatedOut(const int32 MinimumNodeDepth, const int32 SourceNodeDepth)
-	{
-		return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
 	}
 }
 
@@ -76,7 +67,8 @@ N_TEST_HIGH(FNMinimumNodeDepthTests_FirstEligibleAtHopN,
 	N_TEST_CONTEXT_ANYWHERE)
 {
 	// Verifies the gate resolves to "hops from the start cell": a cell with MinimumNodeDepth = N is first
-	// eligible exactly N hops out, using the real depths produced by Connect as the gate's source depth.
+	// eligible exactly N hops out. Drives the real production gate (FNVirtualOrganContext::IsGatedByMinimumNodeDepth)
+	// against the real depths produced by Connect, so a change to the comparison surfaces here.
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNMinimumNodeDepthHarness;
 
 	FNVirtualCellData Cell = MakeCell();
@@ -95,20 +87,20 @@ N_TEST_HIGH(FNMinimumNodeDepthTests_FirstEligibleAtHopN,
 	// (depth 1) lands a candidate at hop 1, which must be gated out; stepping away from a hop-1 neighbour
 	// (depth 2) lands it at hop 2, which must be allowed.
 	CHECK_MESSAGE(TEXT("MinimumNodeDepth=2 must be gated out one hop from the start."),
-		IsGatedOut(2, Start->GetNodeDepth()))
+		FNVirtualOrganContext::IsGatedByMinimumNodeDepth(2, Start->GetNodeDepth()))
 	CHECK_FALSE_MESSAGE(TEXT("MinimumNodeDepth=2 must be allowed two hops from the start."),
-		IsGatedOut(2, NeighborA->GetNodeDepth()))
+		FNVirtualOrganContext::IsGatedByMinimumNodeDepth(2, NeighborA->GetNodeDepth()))
 
 	// MinimumNodeDepth = 1 may sit adjacent to the start (hop 1) but must never be the start cell itself.
 	// Start selection uses a source depth of 0 (the bone pre-filter), which must gate it out.
 	CHECK_MESSAGE(TEXT("MinimumNodeDepth=1 must be barred from being the start cell (source depth 0)."),
-		IsGatedOut(1, 0))
+		FNVirtualOrganContext::IsGatedByMinimumNodeDepth(1, 0))
 	CHECK_FALSE_MESSAGE(TEXT("MinimumNodeDepth=1 must be allowed one hop from the start."),
-		IsGatedOut(1, Start->GetNodeDepth()))
+		FNVirtualOrganContext::IsGatedByMinimumNodeDepth(1, Start->GetNodeDepth()))
 
 	// MinimumNodeDepth = 0 is the "no constraint" sentinel and must never gate anything, including the start.
 	CHECK_FALSE_MESSAGE(TEXT("MinimumNodeDepth=0 must never gate, even at source depth 0."),
-		IsGatedOut(0, 0))
+		FNVirtualOrganContext::IsGatedByMinimumNodeDepth(0, 0))
 }
 
 #endif //WITH_TESTS
