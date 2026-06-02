@@ -7,7 +7,8 @@
 - `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
 - All `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
 - `BadNeighbors` tag group.
-- `AlwaysRelevant`
+- `AlwaysRelevant` behavior tag.
+- `TagCounters` constraints and operations to `UNTissue`.
 
 ### Changed
 
