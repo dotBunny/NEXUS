@@ -29,19 +29,21 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	N_ASSEMBLY_ANALYTICS_CREATE
 	N_ASSEMBLY_ANALYTICS(TaskGraphCreationStart)
 	
+	const FNAssemblyOperationSettings& OperationSettings = Context->GetOperationSettings();
+	
 	// Convert our friendly seed to something more appropriate
-	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(Context->GetOperationSettings().Seed);
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *Context->GetOperationSettings().Seed, BaseSeed);
+	const uint64 BaseSeed = FNSeedGenerator::SeedFromFriendlySeed(OperationSettings.Seed);
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Converted friendly seed(%s) to uint64 seed(%llu)"), *OperationSettings.Seed, BaseSeed);
 	FNMersenneTwister BaseGenerator(BaseSeed);
 	
 	// We need something that each task can share context to others with
 	TaskGraphContextPtr = MakeShared<FNAssemblyTaskGraphContext, ESPMode::ThreadSafe>(
-		Context->GetTargetWorld(), Context->GetOperationTicket(), Context->GetOperationSettings());
+		Context->GetTargetWorld(), Context->GetOperationTicket(), OperationSettings);
 
 	// ----- STEP 0 - CAPTURE WORLD (GAME THREAD) ---------------------------------------------------------------------------------------------------
 
 	// Create our world context holder
-	VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds);
+	VirtualWorldContextPtr = MakeShared<FNVirtualWorldContext, ESPMode::ThreadSafe>(Context->GetTargetWorld(), Context->Bounds, OperationSettings);
 
 	// Create our base world evaluation that builds out the collision-mesh for the world.
 	FGraphEventRef CreateVirtualWorldTask = TGraphTask<FNCreateVirtualWorldTask>::CreateTask(

@@ -9,8 +9,6 @@ FNAssemblyTaskGraphContext::FNAssemblyTaskGraphContext(UWorld* OutputWorld, cons
 	TargetWorld = OutputWorld;
 	OperationSettings = Settings;
 	
-	// TBD
-	
-	// What is useful cross pass for generation? 
-	// - Key location?
+	ContextTags = Settings.ContextTags;
+	TagCounter = Settings.TagCounters;
 }

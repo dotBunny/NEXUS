@@ -31,8 +31,31 @@ struct FNGameplayTagCounterConstraint
 	UPROPERTY(EditAnywhere)
 	int32 Value = 1;
 	
-	bool Evaluate(const FNGameplayTagCounter& TagCounter)
+	
+	bool DoesPassComparison(const FNGameplayTagCounter& TagCounter) const
 	{
+		if (!TagCounter.Has(Tag)) return false;
+		
+		switch (Comparison)
+		{
+		case ENComparisonResult::Equal:
+			return TagCounter.GameplayTags[Tag] == Value;
+			
+		case ENComparisonResult::GreaterThan:
+			return TagCounter.GameplayTags[Tag] > Value;
+			
+		case ENComparisonResult::GreaterThanOrEqual:
+			return TagCounter.GameplayTags[Tag] >= Value;
+			
+		case ENComparisonResult::LessThan:
+			return TagCounter.GameplayTags[Tag] < Value;
+			
+		case ENComparisonResult::LessThanOrEqual:
+			return TagCounter.GameplayTags[Tag] <= Value;
+			
+		case ENComparisonResult::NotEqual:
+			return TagCounter.GameplayTags[Tag] != Value;
+		}
 		
 		return false;
 	}

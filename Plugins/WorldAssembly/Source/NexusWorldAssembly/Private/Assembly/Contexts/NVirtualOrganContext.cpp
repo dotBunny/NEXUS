@@ -282,6 +282,19 @@ bool FNVirtualOrganContext::IsGatedByFinisherTags(const bool bIsEndNode, const F
 	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_Behavior_NotFinisher);
 }
 
+bool FNVirtualOrganContext::IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter)
+{
+	// The candidate is only eligible when every one of its constraints passes against the current counter state.
+	for (const FNGameplayTagCounterConstraint& Constraint : Candidate.TagCounterConstraints)
+	{
+		if (!Constraint.DoesPassComparison(TagCounter))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDepth, const int32 SourceNodeDepth)
 {
 	return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
@@ -318,16 +331,12 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// GATE BASED ON TagCounter Constraints
-		if (CellData->TagCounterConstraints.Num() > 0)
+		if (IsGatedByTagCounterConstraints(*CellData, TagCounter))
 		{
-			for (int j = 0; j < CellData->TagCounterConstraints.Num(); j++)
-			{
-				const FNGameplayTagCounterConstraint& Constraint = CellData->TagCounterConstraints[j];
-				
-			}
+			continue;
 		}
 		
-		// FILTER BADNEIGHBORS
+		// FILTER BAD NEIGHBORS
 		// Reject candidates that belong to a bad-neighbor group the source cell is also a member of — those
 		// two cells are not allowed to be placed beside each other.
 		if (IsBadNeighbor(SourceBadNeighborTags, *CellData))

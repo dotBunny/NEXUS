@@ -174,6 +174,13 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByFinisherTags(bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
 
 	/**
+	 * @param Candidate Cell being considered for placement.
+	 * @param TagCounter Current tag-counter state to evaluate the candidate's constraints against.
+	 * @return true if any of the candidate's TagCounterConstraints fails its comparison and the candidate must be excluded.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter);
+
+	/**
 	 * Gate a candidate by minimum graph depth. SourceNodeDepth is the depth of the node the filter is
 	 * stepping away from; because graph depth is rooted at the bone (start cell = depth 1) and the candidate
 	 * lands one hop deeper, the two offsets cancel and this resolves to "hops from the start cell".

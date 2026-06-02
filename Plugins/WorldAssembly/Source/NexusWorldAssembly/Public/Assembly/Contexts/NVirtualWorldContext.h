@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "Assembly/NAssemblyOperationSettings.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Types/NRawMesh.h"
 
@@ -48,9 +49,11 @@ public:
 	FGameplayTagContainer ContextTags;
 	FNGameplayTagCounter TagCounter;
 
-	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
+	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds, const FNAssemblyOperationSettings& Settings)
 	{
 		InputWorld = TargetWorld;
 		InputBounds = TargetBounds;
+		ContextTags = Settings.ContextTags;
+		TagCounter = Settings.TagCounters;
 	}
 };
