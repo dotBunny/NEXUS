@@ -18,6 +18,7 @@
 
 - Resolved issue with `ANCellActor` being dirtied getting opened.
 - `UNOrganComponent::Seed` properly overrides organ level seed when value is not `-1`.
+- `UNCell` no longer get loaded / saved during cooking process.
 
 ### Removed
 

@@ -259,6 +259,13 @@ void UAssetDefinition_NCell::OnAssetRenamed(const FAssetData& AssetData, const F
 
 void UAssetDefinition_NCell::OnPreSaveWorldWithContext(UWorld* World, FObjectPreSaveContext ObjectPreSaveContext)
 {
+	// Sidecar creation/sync is editor-only authoring; never run it during a cook save of the level.
+	// Doing so loads/creates the paired UNCell mid-cook, which the cooker flags as an unexpected load.
+	if (ObjectPreSaveContext.IsCooking())
+	{
+		return;
+	}
+
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(World, true);
 
 	// We don't have a cell actor, get out of here!
