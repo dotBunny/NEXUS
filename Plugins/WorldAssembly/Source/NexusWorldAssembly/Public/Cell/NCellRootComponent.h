@@ -34,7 +34,7 @@ class NEXUSWORLDASSEMBLY_API UNCellRootComponent : public USceneComponent
 
 public:
 	/** @return The owning ANCellActor, or nullptr if the component is not owned by a cell actor. */
-	FORCEINLINE ANCellActor* GetNCellActor() const;
+	ANCellActor* GetNCellActor() const;
 
 	/** Draw the cell's debug bounds, hull and voxels using the current stored Details. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const;
