@@ -3,7 +3,7 @@
 
 #pragma once
 
-enum class ENGameplayTagCounterOperation : uint8
+enum class ENArithmeticOperation : uint8
 {
 	Add,
 	Subtract,
