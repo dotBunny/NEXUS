@@ -25,25 +25,16 @@ public:
 
 	/** Per-element simple-collision meshes gathered from the target world during preprocess, stored in element-local space. */
 	TArray<FNRawMesh> WorldCollisionMeshes;
-
-	/** World-space transforms corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FTransform> WorldCollisionMeshTransforms;
-
-	/** World-space location corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FVector> WorldCollisionMeshLocations;
-
-	/** World-space rotation corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FRotator> WorldCollisionMeshRotations;
-
+	
+	/** Initial captured transforms before baking */
+	TArray<FTransform> WorldCollisionTransforms;
 
 	/** Cell nodes already placed by earlier passes; each entry has matching mesh/location/rotation. */
 	TArray<FNAssemblyGraphCellNode*> NodeIndex;
+	
 	/** Per-cell-node collision hulls, parallel array to NodeIndex. */
 	TArray<FNRawMesh> NodeCollisionMeshes;
-	/** World-space locations of placed cell nodes, parallel array to NodeIndex. */
-	TArray<FVector> NodeCollisionMeshLocations;
-	/** World-space rotations of placed cell nodes, parallel array to NodeIndex. */
-	TArray<FRotator> NodeCollisionMeshRotations;
+	
 
 	/** Context tags associated with this world context, added to during FNProcessPassTask collecting additions. */
 	FGameplayTagContainer ContextTags;

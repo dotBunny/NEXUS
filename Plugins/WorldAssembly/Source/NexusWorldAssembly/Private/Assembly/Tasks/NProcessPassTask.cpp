@@ -27,8 +27,6 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 				FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
 				WorldContextPtr->NodeIndex.Add(CellNode);
 				WorldContextPtr->NodeCollisionMeshes.Add(CellNode->GetHullCopy());
-				WorldContextPtr->NodeCollisionMeshLocations.Add(CellNode->GetWorldPosition());
-				WorldContextPtr->NodeCollisionMeshRotations.Add(CellNode->GetWorldRotation());
 			}
 		}
 		

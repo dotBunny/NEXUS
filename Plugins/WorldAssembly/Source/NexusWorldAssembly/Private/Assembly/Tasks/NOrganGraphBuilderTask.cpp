@@ -34,16 +34,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
 	
 	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
-	
-	// TODO: Feels like we can also make the world collision meshes origin based
 	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
-	WorldCollisionLocations = WorldContextPtr->WorldCollisionMeshLocations;
-	WorldCollisionRotations = WorldContextPtr->WorldCollisionMeshRotations;
-	
-	// TODO: Once existing are baked we would just store the mesh (no rotation/location)
 	ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
-	ExistingNodeCollisionLocations = WorldContextPtr->NodeCollisionMeshLocations;
-	ExistingNodeCollisionRotations = WorldContextPtr->NodeCollisionMeshRotations;
 	
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
@@ -284,11 +276,10 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 	const float WorldHullPenetration = OrganContextPtr->WorldHullPenetration;
 	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionLocations[i], WorldCollisionRotations[i],
-			WorldCollisionMeshes[i], WorldHullPenetration);
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionMeshes[i], WorldHullPenetration);
 		if (PenetrationDepth == 0.0f)
 		{
-			if (CellNode->CheckHullIntersects(WorldCollisionLocations[i], WorldCollisionRotations[i], WorldCollisionMeshes[i]))
+			if (CellNode->CheckHullIntersects(WorldCollisionMeshes[i]))
 			{
 				return true;
 			}
@@ -307,11 +298,10 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
 	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
 	{
-		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i],
-			ExistingNodeCollisionMeshes[i], CellHullPenetration);
+		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionMeshes[i], CellHullPenetration);
 		if (PenetrationDepth == 0.0f)
 		{
-			if (CellNode->CheckHullIntersects(ExistingNodeCollisionLocations[i], ExistingNodeCollisionRotations[i], ExistingNodeCollisionMeshes[i]))
+			if (CellNode->CheckHullIntersects(ExistingNodeCollisionMeshes[i]))
 			{
 				return true;
 			}

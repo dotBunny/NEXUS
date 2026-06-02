@@ -35,17 +35,9 @@ struct FNOrganGraphBuilderTask
 private:
 	/** Cached world-collision simple-mesh hulls intersecting this organ's bounds. */
 	TArray<FNRawMesh> WorldCollisionMeshes;
-	/** World-space locations corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FVector> WorldCollisionLocations;
-	/** World-space rotations corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FRotator> WorldCollisionRotations;
 
 	/** Cached hulls of cells already placed by earlier organs that overlap this organ's bounds. */
 	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
-	/** World-space locations corresponding 1:1 with ExistingNodeCollisionMeshes. */
-	TArray<FVector> ExistingNodeCollisionLocations;
-	/** World-space rotations corresponding 1:1 with ExistingNodeCollisionMeshes. */
-	TArray<FRotator> ExistingNodeCollisionRotations;
 
 	/** Number of consecutive failed start-node attempts; used to break out of unwinnable retries. */
 	int32 BadStartCount = 0;

@@ -27,6 +27,10 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 	// Copy our hull data and rotate it into its new world-space position/rotation
 	Hull = InputData->CellDetails.Hull;
 	
+	// Bake the hull position
+	FTransform WorldTransform(Params.WorldRotation, Params.WorldPosition);
+	Hull.ApplyTransform(WorldTransform);
+	
 	// Copy our voxel data and rotate it into its new world-space position/rotation
 	// TODO: Right now we dont actually use the VoxelData for anything so lets not pay for the rotation until we need it, not assigning the data to cause an error later so we know.
 	//WorldVoxel = InputData->CellDetails.VoxelData;
@@ -123,15 +127,15 @@ bool FNAssemblyGraphCellNode::SearchForMatchingCellInputData(const FNVirtualCell
 
 bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 {
-	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Hull.Vertices, GetWorldRotation(), GetWorldPosition());
-	for (const FVector& Vertex : WorldVertices)
+	// Hull is already baked into world space at construction, so test its vertices directly.
+	for (const FVector& Vertex : Hull.Vertices)
 	{
 		if (!Bounds.IsInside(Vertex))
 		{
 			return false;
 		}
 	}
-	return WorldVertices.Num() > 0;
+	return Hull.Vertices.Num() > 0;
 }
 
 void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)

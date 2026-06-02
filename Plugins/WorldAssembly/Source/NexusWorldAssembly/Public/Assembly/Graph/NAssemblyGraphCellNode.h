@@ -69,18 +69,16 @@ public:
 	/** @return true if every hull vertex of the node lies inside Bounds. */
 	bool IsHullInside(const FBox& Bounds) const;
 
-	/** @return true if this cell's hull intersects Other's hull, oriented by each cell's world transform. */
+	/** @return true if this cell's (world-space baked) hull intersects Other's (world-space baked) hull. */
 	bool CheckHullIntersects(FNAssemblyGraphCellNode* Other) const
 	{
-		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
-			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation());
+		return FNRawMeshUtils::DoesIntersect(Hull, Other->GetHull());
 	}
-	
-	/** @return true if this cell's hull intersects the supplied externally-transformed mesh. */
-	bool CheckHullIntersects(const FVector& OtherLocation, const FRotator& OtherRotation,  const FNRawMesh& OtherMesh) const
+
+	/** @return true if this cell's (world-space baked) hull intersects the supplied world-space mesh. */
+	bool CheckHullIntersects(const FNRawMesh& OtherMesh) const
 	{
-		return FNRawMeshUtils::DoesIntersect(Hull, GetWorldPosition(), GetWorldRotation(),
-			OtherMesh, OtherLocation, OtherRotation);
+		return FNRawMeshUtils::DoesIntersect(Hull, OtherMesh);
 	}
 
 	/**
@@ -88,27 +86,26 @@ public:
 	 * @param EarlyExitDepth Caller's threshold for the typical `if (depth >= threshold)` rejection pattern.
 	 *        Passing the threshold lets FNRawMeshUtils::GetIntersectDepth short-circuit on either the
 	 *        per-vertex deep-overlap path or the AABB-overlap upper bound — see that function's docs.
-	 * @return true if this cell's hull intersects Other's hull, oriented by each cell's world transform.
+	 * @return The deepest penetration distance between this cell's (world-space baked) hull and Other's
+	 *         (world-space baked) hull. See the mesh overload for sentinel semantics.
 	 */
 	float GetHullIntersectDepth(FNAssemblyGraphCellNode* Other, float EarlyExitDepth = MAX_flt) const
 	{
-		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
-			Other->GetHull(), Other->GetWorldPosition(), Other->GetWorldRotation(), EarlyExitDepth);
+		return FNRawMeshUtils::GetIntersectDepth(Hull, Other->GetHull(), EarlyExitDepth);
 	}
 
 	/**
 	 * @param EarlyExitDepth Caller's threshold for the typical `if (depth >= threshold)` rejection pattern.
 	 *        See FNRawMeshUtils::GetIntersectDepth for the semantics of the short-circuit shortcuts.
-	 * @return The deepest penetration distance between this cell's hull and the supplied externally-transformed mesh,
-	 *         or -1.0 when their AABBs do not overlap or the meshes are otherwise unmeasurable (see
-	 *         FNRawMeshUtils::GetIntersectDepth for the full set of sentinel cases).
+	 * @return The deepest penetration distance between this cell's (world-space baked) hull and the supplied
+	 *         world-space mesh, or -1.0 when their AABBs do not overlap or the meshes are otherwise unmeasurable
+	 *         (see FNRawMeshUtils::GetIntersectDepth for the full set of sentinel cases).
 	 * @note Intended for "max-allowed-penetration" threshold checks during graph expansion; use CheckHullIntersects
 	 *       for an exact boolean overlap test.
 	 */
-	float GetHullIntersectDepth(const FVector& OtherLocation, const FRotator& OtherRotation, const FNRawMesh& OtherMesh, const float EarlyExitDepth = MAX_flt) const
+	float GetHullIntersectDepth(const FNRawMesh& OtherMesh, const float EarlyExitDepth = MAX_flt) const
 	{
-		return FNRawMeshUtils::GetIntersectDepth(Hull, GetWorldPosition(), GetWorldRotation(),
-			OtherMesh, OtherLocation, OtherRotation, EarlyExitDepth);
+		return FNRawMeshUtils::GetIntersectDepth(Hull, OtherMesh, EarlyExitDepth);
 	}
 
 	/**
@@ -145,7 +142,7 @@ private:
 	/** World-space axis-aligned bounds used for broad-phase intersection tests. */
 	FBox WorldBounds;
 
-	/** Cell hull in local space; oriented into world space by GetWorldPosition/Rotation. */
+	/** Cell hull baked into world space at construction (GetWorldPosition/Rotation already applied). */
 	FNRawMesh Hull;
 
 	/** Cell voxel data transformed into the graph's world space. */
