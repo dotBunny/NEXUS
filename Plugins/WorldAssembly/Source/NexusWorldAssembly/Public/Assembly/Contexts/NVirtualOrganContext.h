@@ -95,7 +95,10 @@ public:
 	/** Context tags currently active, updated as cells are placed into the graph. */
 	FGameplayTagContainer ContextTags;
 	
+	/** TagCounter present at the start of organ build, used to ensure we can reset our state. */
 	FNGameplayTagCounter BaseTagCounter;
+	
+	/** TagCounter values currently in-flight of this attempt. */
 	FNGameplayTagCounter TagCounter;
 
 	/** Bones the builder will anchor the graph on. */

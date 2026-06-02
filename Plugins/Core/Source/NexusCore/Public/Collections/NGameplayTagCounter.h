@@ -2,9 +2,11 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
-#include "GameplayTagContainer.h"
-#include "NGameplayTagCounter.generated.h"
 
+#include "Types/NArithmeticOperation.h"
+#include "GameplayTagContainer.h"
+#include "Types/NComparisonResult.h"
+#include "NGameplayTagCounter.generated.h"
 
 
 USTRUCT(BlueprintType)
@@ -15,6 +17,36 @@ struct FNGameplayTagCount
 	FGameplayTag Tag;
 	UPROPERTY() 
 	int32 Count = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FNGameplayTagCounterOperation
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	FGameplayTag Tag;
+	
+	UPROPERTY(EditAnywhere)
+	ENArithmeticOperation Operation = ENArithmeticOperation::Add;
+	
+	UPROPERTY(EditAnywhere)
+	int32 Value = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FNGameplayTagCounterConstraint
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	FGameplayTag Tag;
+	
+	UPROPERTY(EditAnywhere)
+	ENComparisonResult Comparison = ENComparisonResult::GreaterThanOrEqual;
+	
+	UPROPERTY(EditAnywhere)
+	int32 Value = 1;
 };
 
 

@@ -5,6 +5,7 @@
 
 #include "GameplayTagContainer.h"
 #include "NTissueTagGroups.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
 
@@ -31,6 +32,12 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	/** Tags required to be found in Context Tags for allowance to place this cell. **/
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
 	FGameplayTagContainer RequiredContextTags;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Constraints", Category="Tagging", meta = (ToolTip="TagCounter constraints that must pass for this cell to be included in cell selection."))
+	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Operations", Category="Tagging", meta = (ToolTip="Operations to apply to the TagCounter if the cell is placed/used."))
+	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 	
 	/**
 	 * DOES NOT DO ANYTHING CURRENTLY - Only used to determine Unique early out (1:1).

@@ -6,8 +6,10 @@
 UENUM(BlueprintType)
 enum class ENComparisonResult : uint8
 {
-	Equal = 0 ,
+	Equal = 0,
 	GreaterThan = 1,
-	LessThan= 2,
-	NotEqual = 3
+	GreaterThanOrEqual = 2	UMETA(DisplayName = "Greater Than Or Equal"),
+	LessThan= 3,
+	LessThanOrEqual = 4		UMETA(DisplayName = "Less Than Or Equal"),
+	NotEqual = 5
 };
