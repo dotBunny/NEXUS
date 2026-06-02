@@ -98,14 +98,22 @@ public:
 	virtual void PostEditMove(bool bFinished) override;
 	virtual bool CanDeleteSelectedActor(FText& OutReason) const override;
 	virtual bool ShouldExport() override { return false; } // Stops Copy/Paste/Cut/Duplicate
+	/** @return The next unique junction identifier for this cell, advancing the internal counter. */
 	int32 GetCellJunctionNextIdentifier() { return CellJunctionNextIdentifier++; }
 	virtual void PostRegisterAllComponents() override;
+	/** @return true if the cell's current state differs from its saved sidecar data. */
 	bool HasDifferencesFromSidecar() const;
 #endif // WITH_EDITOR
 
 	/** Recompute the cell's bounds from its level content and store the result on the root component. */
 	void CalculateBounds();
 	
+	/**
+	 * Splits the convex-hull edge between the two given vertex indices, inserting a new vertex.
+	 * @param IndexA First vertex index of the edge to split.
+	 * @param IndexB Second vertex index of the edge to split.
+	 * @param bUpdateDerivedData When true, recompute hull-derived data after the split.
+	 */
 	void SplitHullEdge(int32 IndexA, int32 IndexB, bool bUpdateDerivedData = true );
 	/**
 	 * Recompute the cell's convex hull from its level content.

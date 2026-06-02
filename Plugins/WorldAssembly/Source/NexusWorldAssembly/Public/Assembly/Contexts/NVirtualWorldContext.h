@@ -44,8 +44,9 @@ public:
 	/** World-space rotations of placed cell nodes, parallel array to NodeIndex. */
 	TArray<FRotator> NodeCollisionMeshRotations;
 
+	/** Context tags associated with this world context, added to during FNProcessPassTask collecting additions. */
 	FGameplayTagContainer ContextTags;
-	
+
 	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{
 		InputWorld = TargetWorld;

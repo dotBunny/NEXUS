@@ -27,6 +27,7 @@ struct FNIterationCounter
 		Counter[Iteration] = Counter[Iteration] + 1;
 	}
 	
+	/** Add the given amount to the current iteration's tally. */
 	void Add(int32 Value)
 	{
 		Counter[Iteration] = Counter[Iteration] + Value;

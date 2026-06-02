@@ -130,6 +130,7 @@ public:
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
 	
+	/** @return true if this cell node carries any assembly tags. */
 	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
 
 private:

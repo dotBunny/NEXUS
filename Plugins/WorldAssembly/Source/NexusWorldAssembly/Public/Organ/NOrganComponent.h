@@ -118,6 +118,7 @@ public:
 		return ReturnTicket;
 	}
 
+	/** Stable unique identifier for this organ, used to keep generation deterministic across runs. */
 	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
 	FGuid Identifier = FGuid::NewGuid();
 

@@ -107,7 +107,9 @@ public:
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
 	
+	/** @return true if at least one organ is queued awaiting assembly. */
 	bool HasQueuedOrgansForAssembly() const { return !QueuedOrgansForAssembly.IsEmpty(); }
+	/** Queue an organ component to be assembled on a subsequent tick. */
 	void RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ);
 
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */

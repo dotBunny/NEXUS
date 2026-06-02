@@ -41,6 +41,7 @@ public:
 	/** @return The node's stable identifier within its owning graph. */
 	int32 GetNodeIdentifier() const { return NodeIdentifier; }
 	
+	/** @return The shortest hop-count from the start node to this node. */
 	int32 GetNodeDepth() const { return NodeDepth; }
 
 	/**
@@ -63,7 +64,9 @@ public:
 		PropagateDepth(DownstreamNode);
 	}
 	
+	/** @return The assembly tags carried by this node. */
 	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
+	/** @return Mutable access to the context tags this node contributes to the generation context once placed. */
 	FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
 
 	/** Sever all upstream/downstream links between this node and Other, in both directions. */
@@ -81,6 +84,7 @@ public:
 	/** @return All nodes upstream of this node. */
 	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
 	
+	/** @return The seed assigned to this node. */
 	uint64 GetSeed() const { return Seed; }
 	
 protected:

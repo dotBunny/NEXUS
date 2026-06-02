@@ -9,16 +9,24 @@
 #include "Cell/NCellRootDetails.h"
 #include "Cell/NTissueTagGroups.h"
 
+/**
+ * A lightweight summary of a cell's tagging, used to classify it (starter/finisher eligibility) during virtual organ processing.
+ */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 {
+	/** Tissue tag groups collected for the cell. */
 	FNTissueTagGroups GroupTags;
-	
+
+	/** true if any processed cell carries a starter tag. */
 	bool bFoundStarterTagged = false;
-	
+
+	/** true if any processed cell carries a starter-only tag (may be used only as a start cell). */
 	bool bFoundStarterOnlyTagged = false;
-	
+
+	/** true if any processed cell carries a finisher tag. */
 	bool bFoundFinisherTagged = false;
-	
+
+	/** true if any processed cell carries a finisher-only tag (may be used only as an end cell). */
 	bool bFoundFinisherOnlyTagged = false;
 };
 
@@ -31,10 +39,13 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
  */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
+	/** Assembly tags describing this cell, copied through to generated cells. */
 	FGameplayTagContainer AssemblyTags;
 
+	/** Context tags that must be present in the generation context for this cell to be eligible for selection. */
 	FGameplayTagContainer ContextTagsRequired;
-	
+
+	/** Context tags this cell contributes to the generation context once it is placed. */
 	FGameplayTagContainer ContextTagsAdded;
 
 	/** 

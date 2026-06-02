@@ -25,6 +25,7 @@ struct FNTissueTagGroups
 	/** @return The "unique" tag set. */
 	const FGameplayTagContainer& GetUniqueTags() { return UniqueTags; }
 	
+	/** @return The "bad neighbors" tag set. */
 	const FGameplayTagContainer& GetBadNeighborsTags() { return BadNeighborsTags; }
 
 	/** @return true if any "required (any)" tags are present. */
@@ -39,6 +40,7 @@ struct FNTissueTagGroups
 		return !UniqueTags.IsEmpty();
 	}
 	
+	/** @return true if any "bad neighbors" tags are present. */
 	bool HasBadNeighborsTags() const
 	{
 		return !BadNeighborsTags.IsEmpty();
@@ -51,6 +53,7 @@ struct FNTissueTagGroups
 		UniqueTags.AppendTags(Tags);
 	}
 	
+	/** Add the supplied tags to the "bad neighbors" set. */
 	void AppendBadNeighborsTags(const FGameplayTagContainer& Tags)
 	{
 		BadNeighborsTags.AppendTags(Tags);
@@ -68,6 +71,7 @@ struct FNTissueTagGroups
 		RequiredAnyTags.RemoveTags(Tags);
 	}
 	
+	/** Remove the supplied tags from the "bad neighbors" set. */
 	void RemoveBadNeighborsTags(const FGameplayTagContainer& Tags)
 	{
 		BadNeighborsTags.RemoveTags(Tags);
@@ -91,6 +95,7 @@ struct FNTissueTagGroups
 		return RequiredAnyTags.HasAny(Tags);
 	}
 
+	/** @return true if the "bad neighbors" set contains any of the supplied tags. */
 	bool HasAnyBadNeighborsTags(const FGameplayTagContainer& Tags) const
 	{
 		return BadNeighborsTags.HasAny(Tags);
@@ -103,6 +108,7 @@ struct FNTissueTagGroups
 		return RequiredAnyTags.HasAllExact(Tags);
 	}
 	
+	/** @return true if the "bad neighbors" set contains an exact match for every supplied tag. */
 	bool HasAllBadNeighborsTags(const FGameplayTagContainer& Tags) const
 	{
 		return BadNeighborsTags.HasAllExact(Tags);
@@ -120,6 +126,7 @@ struct FNTissueTagGroups
 		return RequiredAnyTags.Filter(Tags);
 	}
 	
+	/** @return The subset of the "bad neighbors" set that matches the supplied filter tags. */
 	FGameplayTagContainer FilterBadNeighborsTags(const FGameplayTagContainer& Tags) const
 	{
 		return BadNeighborsTags.Filter(Tags);
@@ -161,6 +168,7 @@ protected:
 		ToolTip="When a tag group is marked RequiredAny, it means that when generating we require something from that group to be placed in the graph. NEXUS.WorldAssembly.BuiltIn.RequiredAny is auto-added to this group. NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
 	FGameplayTagContainer RequiredAnyTags;
 	
+	/** Tags marking items that cannot be placed adjacent to one another; built-in BadNeighbors tag is auto-added. */
 	UPROPERTY(EditAnywhere, DisplayName="Bad Neighbors", meta = (Categories="NEXUS.WorldAssembly",
 		ToolTip="When a tag group is marked BadNeighbor, they cannot be placed beside each other."))
 	FGameplayTagContainer BadNeighborsTags;

@@ -113,15 +113,22 @@ public:
 	 */
 	static void SaveCell(UWorld* World, ANCellActor* CellActor = nullptr, bool bForceSave = false);
 
+	/**
+	 * Ensures the callback actors required by the cell exist and are initialized in the world.
+	 * @param World The world containing the cell.
+	 * @param CellActor The cell actor whose callback actors should be validated.
+	 */
 	static void EnsureCellInitializedCallbackActors(const UWorld* World, ANCellActor* CellActor);
-	
+
 	/**
 	 * Refresh the cell asset from the supplied cell actor.
 	 * @return true if Cell was updated and marked dirty, false if there was nothing to copy.
 	 */
 	static bool UpdateCell(UNCell* Cell, ANCellActor* CellActor);
-	
+
+	/** @return true if the currently-selected organ can be generated. */
 	static bool CanGenerateSelectedOrgan();
-	
+
+	/** @return true if every organ in the current level can be generated. */
 	static bool CanGenerateAllOrgans();
 };

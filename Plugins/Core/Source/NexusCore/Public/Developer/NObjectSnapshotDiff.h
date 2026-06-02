@@ -103,6 +103,10 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 		return StringBuilder.ToString();
 	}
 	
+	/**
+	 * Builds a structured report summarizing this diff (captured object count, change count, and the added, removed, and changed entries).
+	 * @return An FNReport populated with the diff contents, ready for output to log or file.
+	 */
 	FNReport ToReport() const
 	{
 		FNReport Report;

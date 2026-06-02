@@ -33,6 +33,7 @@ public:
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
 	int32 CellNodesCurrentIndex = 0;
 	
+	/** Per-frame time budget for spawning cell proxies, in seconds. */
 	float CellTimeSlice = 0.002f;
 
 	/** Flattened list of cell nodes awaiting proxy spawn, populated by FNCreateSpawnsTask. */

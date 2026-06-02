@@ -23,7 +23,7 @@ class UNGuardianSettings : public UDeveloperSettings
 	N_IMPLEMENT_SETTINGS(UNGuardianSettings, "Guardian", "Settings related to the Guardian subsystem.")
 
 public:
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability"))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability",ToolTip="Which build configurations the Guardian subsystem is active in (bitmask of ENBuildConfigurationAvailability)."))
 	uint8 BuildAvailability = N_BUILD_CONFIGURATION_AVAILABILITY_ALL_NOT_SHIPPING;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName ="Tick Rate",

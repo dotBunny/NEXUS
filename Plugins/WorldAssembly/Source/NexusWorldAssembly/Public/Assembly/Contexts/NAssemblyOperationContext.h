@@ -23,6 +23,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyOperationContext
 {
 	friend class UNAssemblyOperation;
 public:
+	/** Constructs the context for the operation identified by the given ticket. */
 	explicit FNAssemblyOperationContext(uint32 NewOperationTicket);
 
 	/** Organ components fed into the operation prior to LockAndPreprocess. */
@@ -59,8 +60,13 @@ public:
 	void LockAndPreprocess(UWorld* World);
 	
 #if !UE_BUILD_SHIPPING
+	/**
+	 * Appends a summary of this context's organs, bones, and generation order to the supplied report (non-shipping builds only).
+	 * @param Report The report to append to.
+	 * @param bBuildTissues When true, also include per-tissue detail in the summary.
+	 */
 	void AddToReport(FNReport* Report, bool bBuildTissues = false);
-#endif // !UE_BUILD_SHIPPING	
+#endif // !UE_BUILD_SHIPPING
 
 	/** Clear all derived state and return the context to an unlocked, empty state. */
 	void ResetContext();

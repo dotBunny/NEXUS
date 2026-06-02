@@ -50,6 +50,7 @@
 class NEXUSCOREEDITOR_API FNMetaUtils
 {
 public:
+	/** Shared empty string returned by accessors when no meta-data value is available. */
 	static FString EmptyString;
 
 	/**

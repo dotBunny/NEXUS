@@ -8,10 +8,17 @@
 #include "Engine/Font.h"
 #include "Types/NSeverity.h"
 
+/**
+ * A buffered, multi-line text box rendered to a canvas by FNCanvasUtils.
+ *
+ * Accumulates lines with per-line color and font size, tracks a severity that drives the border color, and
+ * lazily measures/lays out its content (via the private Process pass) when marked dirty.
+ */
 struct FNMultiLineTextBoxCanvasItem
 {
 	friend class FNCanvasUtils;
-	
+
+	/** Removes all lines and resets colors, severity, and cached layout state. */
 	void Clear()
 	{
 		Lines.Empty();
@@ -29,6 +36,7 @@ struct FNMultiLineTextBoxCanvasItem
 		bDirty = false;
 	}
 	
+	/** Sets the current severity and updates the border color to match (Info/Message grey, Warning yellow, Error red, Fatal pink). */
 	void SetSeverity(const ENSeverity Severity)
 	{
 		if (CurrentSeverity!=Severity)
@@ -55,6 +63,7 @@ struct FNMultiLineTextBoxCanvasItem
 			break;
 		}
 	}
+	/** Raises the severity to the given level only when it is more severe than the current one. */
 	void AddSeverity(const ENSeverity Severity)
 	{
 		if (Severity > CurrentSeverity)
@@ -62,7 +71,8 @@ struct FNMultiLineTextBoxCanvasItem
 			SetSeverity(Severity);
 		}
 	}
-	
+
+	/** Appends a line rendered in the small font with the given color, marking the item dirty. */
 	void AddSmallLine(const FText& Line, const FLinearColor Color = FLinearColor::White)
 	{
 		Lines.Add(Line);
@@ -70,6 +80,7 @@ struct FNMultiLineTextBoxCanvasItem
 		bIsLargeFont.Add(false);
 		bDirty = true;
 	}
+	/** Appends a line rendered in the large font with the given color, marking the item dirty. */
 	void AddLargeLine(const FText& Line, const FLinearColor Color = FLinearColor::White)
 	{
 		Lines.Add(Line);
@@ -77,11 +88,13 @@ struct FNMultiLineTextBoxCanvasItem
 		bIsLargeFont.Add(true);
 		bDirty = true;
 	}
-	
+
+	/** @return true if at least one line has been added. */
 	bool HasContent() const
 	{
 		return !Lines.IsEmpty();
 	}
+	/** @return true if content has changed since the last layout pass and needs reprocessing before drawing. */
 	bool IsDirty() const
 	{
 		return bDirty;

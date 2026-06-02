@@ -27,10 +27,10 @@ public:
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Check For Updates?", meta=(ToolTip="Should the NEXUS Framework check for updates periodically and notify you?"))
 	bool bUpdatesCheck = true;
 	
-	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Frequency (Days)")
+	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Frequency (Days)", meta=(ToolTip="How often, in days, to check for updates."))
 	int32 UpdatesFrequency = 7;
-	
-	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel" )
+
+	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Channel", meta=(ToolTip="Which release channel to check for updates against."))
 	ENUpdatesChannel UpdatesChannel = ENUpdatesChannel::GithubRelease;
 
 	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Custom Query URI", meta=(
@@ -43,7 +43,7 @@ public:
 		ToolTip="A fully qualified URI to open when an update is detected as avaialble."))
 	FString UpdatesCustomUpdateURI = TEXT("");
 	
-	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=")
+	UPROPERTY(EditAnywhere, Config, Category = "Updates", DisplayName = "Ignore Version Number <=", meta=(ToolTip="Updates with a version number at or below this value are ignored and will not trigger a notification."))
 	int32 UpdatesIgnoreVersion = NEXUS::Version::Number;
 
 #endif // WITH_EDITORONLY_DATA

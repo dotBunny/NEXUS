@@ -23,6 +23,7 @@ public:
 	virtual void ShutdownModule() override;
 	N_IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, "NexusWorldAssemblyEditor")
 
+	/** The cell-root component visualizer registered by this module on startup. */
 	TSharedPtr<FNCellRootComponentVisualizer> RootComponentVisualizer;
 	
 private:

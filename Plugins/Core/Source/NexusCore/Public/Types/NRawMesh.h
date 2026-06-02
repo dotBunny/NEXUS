@@ -140,6 +140,7 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	bool HasNonTris() const { EnsureValidated(); return bHasNonTris; }
 	
+	/** @return true if a transform has been baked into this mesh's vertex positions. */
 	bool HasAppliedTransform() const { return bHasAppliedTransform; }
 
 	/**

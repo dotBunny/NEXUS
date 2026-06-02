@@ -65,6 +65,11 @@ struct NEXUSCORE_API FNReport
 	 */
 	void OutputToFile(const FString& FilePath, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
+	/**
+	 * Registers a token/value pair to be substituted when the report is rendered, overwriting any existing value for the token.
+	 * @param Token The token to search for during rendering.
+	 * @param Value The replacement text substituted for the token.
+	 */
 	void AddReplaceToken(const FString& Token, const FString& Value)
 	{
 		if (ReplaceTokens.Contains(Token))

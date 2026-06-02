@@ -7,23 +7,31 @@
 #include "GameplayTagContainer.h"
 #include "NCellAssemblyData.generated.h"
 
+/**
+ * Per-cell assembly metadata recorded on a generated cell, identifying the operation and graph node that produced it.
+ */
 USTRUCT(BlueprintType)
 struct FNCellAssemblyData
 {
 	GENERATED_BODY()
-	
+
+	/** Ticket of the operation that generated this cell. */
 	UPROPERTY(VisibleInstanceOnly)
 	uint32 OperationTicket = 0;
-	
+
+	/** Identifier of the assembly graph node this cell was generated from. */
 	UPROPERTY(VisibleInstanceOnly)
 	int32 NodeIdentifier = 0;
-	
+
+	/** Seed used to generate this cell. */
 	UPROPERTY(VisibleInstanceOnly)
 	uint64 Seed = 0;
 
+	/** Assembly tags applied to this cell during generation. */
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer AssemblyTags;
-	
+
+	/** Context tags active in the generation context when this cell was generated. */
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer ContextTags;
 };

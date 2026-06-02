@@ -40,12 +40,15 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
 	bool bCreateLevelInstances = true;
 	
+	/** Context tags applied to the operation and propagated into the generation context. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
-	
+
+	/** Per-tag usage counters seeded into the operation (e.g. to use for conditional logic during cell filtering). */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FNGameplayTagCounter TagCounters;
-	
+
+	/** Per-frame time budget for spawning cell proxies during this operation, in milliseconds. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
 	

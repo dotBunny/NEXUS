@@ -146,7 +146,9 @@ public:
 	/** Increment the cell-vs-existing-node collision discard counter for the record at Index. */
 	void OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode(int32 Index);
 	
+	/** Increment the discard-due-to-non-finisher-constraint counter for the current iteration of the record at Index. */
 	void OrganGraphBuilder_DiscardDueToNonFinisherConstraint(int32 Index);
+	/** Add Value to the capped-with-finisher counter for the current iteration of the record at Index. */
 	void OrganGraphBuilder_CappedWithFinisher(int32 Index, int32 Value);
 
 	/** Advance the per-iteration counters in the organ-graph-builder record at Index. */
@@ -173,9 +175,12 @@ public:
 	/** Mark the finish time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesFinish(int32 Index);
 	
-	void AddToReport(FNReport* Report);	
-	
+	/** Append all collected analytics for this operation to the supplied report. */
+	void AddToReport(FNReport* Report);
+
+	/** @return The total measured duration across all stages, in seconds. */
 	float GetTotalDuration();
+	/** @return The total number of cell proxies spawned across all spawn records. */
 	int GetSpawnedCellProxiesCount();
 	
 private:

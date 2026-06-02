@@ -93,6 +93,7 @@ public:
 		FNTissueTagGroups& OutTagGroups, 
 		TArray<UNTissue*>& OutProcessedSets);
 	
+	/** Tag groups that drive placement behavior for this tissue's cells. */
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tag Groups")
 	FNTissueTagGroups TagGroups = FNTissueTagGroups();
 	

@@ -48,7 +48,10 @@ struct FNOrganGraphBuilderAnalytics
 	/** Candidate cell nodes rejected because they collided with another organ's existing nodes. */
 	FNIterationCounter DiscardExistingNodeWorldCollidingCellNode;
 	
+	/** Candidate cell nodes rejected because the finisher constraint required a finisher cell and this candidate was not one. */
 	FNIterationCounter DiscardDueToNonFinisherConstraint;
+
+	/** Number of graph branches closed off by placing a finisher cell. */
 	FNIterationCounter CappedWithFinisher;
 
 	/** Advance every contained counter to the next iteration slot and bump Iterations. */

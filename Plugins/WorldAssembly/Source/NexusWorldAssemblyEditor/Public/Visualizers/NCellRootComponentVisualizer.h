@@ -39,8 +39,11 @@ public:
 	//End FComponentVisualizer
 	
 	ENCellEditMode GetMode() const { return CurrentEditMode; }
+	/** @return true if a full hull edge (both endpoints) is currently selected. */
 	bool HasEdgeSelected() const { return EdgeStartIndex != -1 && EdgeEndIndex != -1; }
+	/** @return The selected hull edge as (start vertex index, end vertex index). */
 	FIntVector2 GetEdgeSelection() const { return FIntVector2(EdgeStartIndex, EdgeEndIndex); }
+	/** Clear the current vertex and edge selection. */
 	void ClearSelection()
 	{
 		VertexIndex = -1;

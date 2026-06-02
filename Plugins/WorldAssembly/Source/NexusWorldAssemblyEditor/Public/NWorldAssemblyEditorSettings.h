@@ -59,6 +59,7 @@ public:
 		meta=(ToolTip=""))
 	FLinearColor CellProxyColor;
 	
+	/** Material applied to the world-collision visualizer's debug geometry. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "World Context", DisplayName="Collision Visualizer Material")
 	TSoftObjectPtr<UMaterialInterface> CollisionVisualizerMaterial;
 

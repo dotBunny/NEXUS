@@ -56,8 +56,10 @@ class FNVirtualOrganContext
 
 public:
 	
+	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
+	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
@@ -72,6 +74,7 @@ public:
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
 	
+	/** Maximum number of failed start attempts before the build gives up on this organ. */
 	int32 BadStartLimit = 1000;
 
 	/** When true, the graph may extend past Bounds. */
@@ -86,15 +89,19 @@ public:
 	/** Tag groups accumulated from cells already placed in the graph. */
 	FNTissueTagGroups PlacedTagGroups;
 
+	/** Context tags present at the start of organ build, used to ensure we do not lose context as cells get removed. */
 	FGameplayTagContainer BaseContextTags;
-	FGameplayTagContainer ContextTags;
 	
+	/** Context tags currently active, updated as cells are placed into the graph. */
+	FGameplayTagContainer ContextTags;
+
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;
 
 	/** Candidate cells the builder may pull from. */
 	TArray<FNVirtualCellData> CellInputData;
 	
+	/** Cached classification summary of CellInputData (starter/finisher availability and tag groups). */
 	FNVirtualCellDataSummary CellInputDataSummary;
 
 	/** Output graph, owned by this context until handed off to the task-graph context. */

@@ -51,10 +51,10 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Leak Check", DisplayName ="Duration", meta=(ToolTip="How long should the leak check run?"))
 	float LeakCheckTime = 30.f;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Outer Color")
+	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Outer Color", meta = (Tooltip = "Color used to draw the outer boundary of a distribution visualizer."))
 	FColor VisualizationDistributionOuterColor = FColor(255,0,88);
-	
-	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Inner Color")
+
+	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Inner Color", meta = (Tooltip = "Color used to draw the inner boundary of a distribution visualizer."))
 	FColor VisualizationDistributionInnerColor = FColor(150,0,89);
 	
 	UPROPERTY(EditAnywhere, config, Category = "Visualizers|Distribution", DisplayName = "Line Thickness", meta = (Tooltip = "The thickness of debug lines that are drawn."))

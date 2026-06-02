@@ -41,21 +41,25 @@ public:
 		return AssemblyData;
 	}
 	
+	/** @return Mutable access to the context tags recorded on this cell's assembly data. */
 	FGameplayTagContainer& GetContextTags()
 	{
 		return AssemblyData.ContextTags;
 	}
-	
+
+	/** @return Mutable access to the assembly tags recorded on this cell's assembly data. */
 	FGameplayTagContainer& GetAssemblyTags()
 	{
 		return AssemblyData.AssemblyTags;
 	}
-	
+
+	/** @return The seed recorded on this cell's assembly data. */
 	uint64 GetSeed() const
 	{
 		return AssemblyData.Seed;
 	}
-	
+
+	/** @return The graph node identifier recorded on this cell's assembly data. */
 	int32 GetNodeIdentifier() const
 	{
 		return AssemblyData.NodeIdentifier;

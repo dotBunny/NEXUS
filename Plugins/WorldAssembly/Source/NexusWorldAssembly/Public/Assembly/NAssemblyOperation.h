@@ -29,18 +29,27 @@ enum class ENWorldAssemblyOperationState : uint8
 	Unregistered = 5
 };
 
+/**
+ * The outcome of a completed UNAssemblyOperation, surfaced to owners and UI.
+ */
 USTRUCT(BlueprintType)
 struct FNAssemblyOperationResult
 {
 	GENERATED_BODY()
-	
+
+	/** true if the operation completed successfully. */
 	bool bSuccess = false;
+	/** true if the operation completed but produced one or more warnings. */
 	bool bWarning = false;
-	
+
+	/** Short result title for display. */
 	FText Title;
+	/** Detailed result message for display. */
 	FText Message;
-	
+
+	/** Total wall-clock time the operation took, in seconds. */
 	float Duration = 0.0f;
+	/** Number of cells created during the operation. */
 	int CreatedCells;
 };
 
@@ -74,6 +83,10 @@ class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
 	explicit UNAssemblyOperation(const FObjectInitializer& ObjectInitializer);
 public:
 #if !UE_BUILD_SHIPPING
+	/**
+	 * Writes the operation's report to the project log directory as a timestamped Markdown file (saved asynchronously).
+	 * @return The destination file path.
+	 */
 	FString OutputReportToFile()
 	{
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
@@ -88,6 +101,7 @@ public:
 			});
 		return OutputFile;
 	}
+	/** Writes the operation's report to the log as plain text, one line per entry. */
 	void OutputReportToLog()
 	{
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
@@ -96,6 +110,7 @@ public:
 			UE_LOG(LogNexusWorldAssembly, Log, TEXT("%s"), *Output[i]);
 		}
 	}
+	/** @return The operation's mutable report, accumulated during the build (non-shipping builds only). */
 	FNReport* GetReport() { return &Report; }
 #endif // !UE_BUILD_SHIPPING
 	
@@ -201,8 +216,10 @@ public:
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	uint32 GetTicket() const { return Ticket; }
 	
+	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
 	FNAssemblyOperationResult GetResult() const;
-	
+
+	/** Requests cancellation of the in-flight build. */
 	void Cancel();
 	
 protected:

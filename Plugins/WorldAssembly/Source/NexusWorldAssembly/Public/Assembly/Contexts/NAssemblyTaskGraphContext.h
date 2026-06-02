@@ -35,14 +35,16 @@ public:
 		Graphs.Add(MoveTemp(Graph));
 	}
 
+	/** Append additional context tags to this context's accumulated set. */
 	void AddContextTags(const FGameplayTagContainer& NewContextTags)
 	{
 		ContextTags.AppendTags(NewContextTags);
 	}
-	
+
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
 
+	/** Context tags accumulated across the graphs built into this context. */
 	FGameplayTagContainer ContextTags;
 
 	/**
@@ -53,8 +55,9 @@ public:
 	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
 	
+	/** Path the operation's report is written to, when report output is enabled. */
 	FString ReportFilePath;
-	
+
 private:
 	FCriticalSection TakeGraphMutex;
 };

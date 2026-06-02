@@ -23,6 +23,7 @@ public:
 
 	/** Graphs accumulated from this collect pass. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
+	/** Context tags accumulated from the graphs collected in this pass. */
 	FGameplayTagContainer ContextTags;
 
 private:

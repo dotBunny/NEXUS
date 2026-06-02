@@ -116,6 +116,7 @@ public:
 	
 	static void OnActorDeleted(AActor* Actor);
 	
+	/** Set the active render mode used to draw World Assembly debug geometry in the edit mode. */
 	static void SetRenderMode(const ENWorldAssemblyEdModeRenderMode Mode) { RenderMode = Mode; }
 	
 	/**

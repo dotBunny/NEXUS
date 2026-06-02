@@ -79,7 +79,9 @@ public:
 
 	virtual void PostEditImport() override;
 	
+	/** @return The display name of this junction. */
 	FString GetJunctionName() const;
+	/** Transform-changed callback that keeps the junction's hull-derived data in sync after the component moves. */
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 #endif // WITH_EDITOR
 	
@@ -91,6 +93,10 @@ public:
 	 */
 	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
 
+	/**
+	 * @param SocketSize The socket dimensions to size the corners to.
+	 * @return The junction's socket corner points in world space.
+	 */
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
 	
 private:
