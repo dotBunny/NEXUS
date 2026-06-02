@@ -47,6 +47,10 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 
 	/** Context tags this cell contributes/adds to the overall assembly operation / phase ContextTags once it is placed. */
 	FGameplayTagContainer ContextTagsAdded;
+	
+	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
+	
+	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 
 	/** 
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.

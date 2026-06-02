@@ -29,26 +29,26 @@ struct FNCellAssemblyData
 	uint64 Seed = 0;
 
 	/** Assembly tags applied to this cell during the assembly operation. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer AssemblyTags;
 
 	/** The final ContextTags for the Assembly Operation. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTags;
 	
 	/** The state of the ContextTags when this cell was added. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTagsState;
 	
 	/** The ContextTags this cell added. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTagsAdded;
 	
 	/** The final TagCounter */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounter;
 	
 	/** The state of the tag counter when this cell was added. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounterState;
 };

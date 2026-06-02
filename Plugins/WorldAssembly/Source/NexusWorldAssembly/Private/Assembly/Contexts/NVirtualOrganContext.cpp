@@ -106,6 +106,8 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.AssemblyTags = Cell.Value.AssemblyTags;
 		CellDetails.ContextTagsRequired = Cell.Value.RequiredContextTags;
 		CellDetails.ContextTagsAdded = Cell.Value.AddedContextTags;
+		CellDetails.TagCounterConstraints = Cell.Value.TagCounterConstraints;
+		CellDetails.TagCounterOperations = Cell.Value.TagCounterOperations;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 		CellDetails.Weighting = Cell.Value.Weighting;
@@ -409,9 +411,10 @@ bool FNVirtualOrganContext::ResetForRetry()
 		CellInputData[i].UsedCount = 0;
 	}
 	
-	// Reset placed tags
+	// Reset placed tags back to the base each was seeded from in FNOrganGraphBuilderTask, dropping anything
+	// this attempt placed. Both restore to base so a retry starts from the same state as the first attempt.
 	PlacedTagGroups = FNTissueTagGroups();
-	ContextTags     = BaseContextTags; 
+	ContextTags     = BaseContextTags;
 	TagCounter      = BaseTagCounter;
 		
 	// Clear Graph

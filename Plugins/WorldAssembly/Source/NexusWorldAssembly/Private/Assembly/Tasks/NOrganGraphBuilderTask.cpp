@@ -48,7 +48,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
 	OrganContextPtr->BaseTagCounter = WorldContextPtr->TagCounter;
-	OrganContextPtr->TagCounter = FNGameplayTagCounter();
+	OrganContextPtr->TagCounter = OrganContextPtr->BaseTagCounter;
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
 	
 	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
@@ -142,7 +142,14 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
 	{
-		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->ContextTags, OrganContextPtr->TagCounter);
+		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
+		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
+		// counter the pass Combines into; differencing it out leaves just this organ's delta to avoid
+		// multi-counting the base. ContextTags needs no such treatment as its fan-in is an idempotent union.
+		PassContextPtr->TakeOutput(
+			MoveTemp(OrganContextPtr->CellGraph),
+			OrganContextPtr->ContextTags,
+			OrganContextPtr->TagCounter.GetDifference(OrganContextPtr->BaseTagCounter));
 	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
@@ -208,7 +215,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		FNAssemblyGraphNodeParams NodeParams;
 		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
 		NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
-		// todo counterstate
+		NodeParams.TagCounterState = OrganContextPtr->TagCounter;
 		NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
 		NodeParams.Seed = Random.UnsignedInteger64();
 		NodeParams.WorldPosition = CellWorldPosition;
@@ -461,7 +468,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	
 		FNAssemblyGraphNodeParams NodeParams;
 		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
-		// TODO counter state
+		NodeParams.TagCounterState = OrganContextPtr->TagCounter;
 		NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
 		NodeParams.AssemblyTags = CellInputData->AssemblyTags;
 		NodeParams.Seed = Random.UnsignedInteger64();
@@ -535,6 +542,13 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			if (!CellInputData->ContextTagsAdded.IsEmpty())
 			{
 				OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
+			}
+			
+			// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
+			// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
+			for (int32 j = 0; j < CellInputData->TagCounterOperations.Num(); j++)
+			{
+				OrganContextPtr->TagCounter.ApplyOperation(CellInputData->TagCounterOperations[j]);
 			}
 			
 			// We've passed validation, lets register it and move on
@@ -665,6 +679,17 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 		if (!UncoveredContextTags.IsEmpty())
 		{
 			OrganContextPtr->ContextTags.RemoveTags(UncoveredContextTags);
+		}
+	}
+	
+	// Undo this cell's counter operations in reverse author order, mirroring the apply in ProcessCellNode.
+	// Valid only because operations are restricted to Add/Subtract, which are exact inverses; per-cell
+	// reversal of Multiply/Divide would not restore the prior value.
+	if (InputData != nullptr)
+	{
+		for (int32 j = InputData->TagCounterOperations.Num() - 1; j >= 0; --j)
+		{
+			OrganContextPtr->TagCounter.ReverseOperation(InputData->TagCounterOperations[j]);
 		}
 	}
 
