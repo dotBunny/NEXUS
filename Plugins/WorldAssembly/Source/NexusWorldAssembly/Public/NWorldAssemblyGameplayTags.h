@@ -14,9 +14,11 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_FinisherOnly);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_NotFinisher);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_Unique);
-
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_RequiredAny);
-
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Behavior_BadNeighbors);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Flag_AlwaysRelevant);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Counter_Alpha);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Counter_Beta);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(NWorldAssembly_Counter_Charlie);
