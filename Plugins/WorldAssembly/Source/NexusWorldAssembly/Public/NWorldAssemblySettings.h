@@ -5,6 +5,7 @@
 
 #include "GameplayTagContainer.h"
 #include "NSettingsUtils.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "Macros/NSettingsMacros.h"
 #include "Types/NDirection.h"
 #include "NWorldAssemblySettings.generated.h"
@@ -91,6 +92,10 @@ public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Context Tags",
 		meta=(ToolTip="The default Context Tags to provide to the Assembly Operation."))
 	FGameplayTagContainer AssemblyContextTags;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Starting Counters",
+		meta=(ToolTip="The starting counters associated to tags."))
+	TMap<FGameplayTag, int32> AssemblyTagCounters;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
 	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))

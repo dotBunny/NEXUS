@@ -4,6 +4,7 @@
 #pragma once
 #include "GameplayTagContainer.h"
 #include "NWorldAssemblySettings.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "Math/NSeedGenerator.h"
 
 #include "NAssemblyOperationSettings.generated.h"
@@ -42,6 +43,9 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
 	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
+	FNGameplayTagCounter TagCounters;
+	
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
 	
@@ -54,6 +58,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
+		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		
 		return MoveTemp(Settings);
 	}
@@ -68,6 +73,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
+		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		
 		return MoveTemp(Settings);
 	}
