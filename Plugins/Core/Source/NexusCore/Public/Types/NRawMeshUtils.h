@@ -188,13 +188,7 @@ private:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
-	static bool DoesIntersectTriangles(
-		const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
-	static bool DoesIntersectTriangles(
-		const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
-
-	
 	/**
 	 * Hybrid convex-vs-convex overlap test. First runs a SAT-style face-normal rejection pass that
 	 * cheaply proves non-overlap when any face plane separates the two meshes. When no face normal
@@ -215,10 +209,6 @@ private:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
-	static bool DoesConvexIntersectSAT(const FNRawMesh& LeftMesh,const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
-
-	static bool DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
-	
 	/**
 	 * Gate for the SAT fast path: both inputs must be convex with a populated FaceLoops description and
 	 * face count under the per-mesh threshold. Threshold is empirical — the SAT hit-path cost grows as
