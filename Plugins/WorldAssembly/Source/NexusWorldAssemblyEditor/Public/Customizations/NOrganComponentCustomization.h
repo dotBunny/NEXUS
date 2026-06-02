@@ -4,6 +4,8 @@
 
 #include "IDetailCustomization.h"
 
+class IPropertyUtilities;
+
 /**
  * Detail-panel customization for UNOrganComponent. Surfaces Generate/Cancel/Clear action buttons
  * that drive the editor-side World Assembly operation, with visibility gated on current operation state.
@@ -33,4 +35,10 @@ private:
 
 	/** @return Visible when previously-generated proxies exist that could be cleared. */
 	EVisibility ClearButtonVisible() const;
+
+	/** Re-evaluates the cached enabled-state of the action buttons when operation state changes. */
+	void HandleOperationsChanged();
+
+	/** Property utilities for the panel we customized, used to force a refresh. */
+	TWeakPtr<IPropertyUtilities> PropertyUtilities;
 };

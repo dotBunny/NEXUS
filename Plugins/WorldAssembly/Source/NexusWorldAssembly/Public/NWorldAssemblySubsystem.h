@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "NActorLibrary.h"
 #include "Assembly/INAssemblyOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "NWorldAssemblyRelay.h"
+#include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
 class UNOrganComponent;

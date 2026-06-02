@@ -7,6 +7,7 @@
 #include "NEditorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Macros/NEditorSubsystemMacros.h"
+#include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblyEditorSubsystem.generated.h"
 
 class ANCellProxy;
@@ -93,6 +94,9 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 
 	/** Unload the level instances for proxies from the given operation. */
 	void UnloadGeneratedProxies(const uint32& OperationTicket);
+
+	/** Delegate fired whenever the tracked operation set changes. */
+	FNSimpleMulticastDelegate OnOperationsChanged;
 
 protected:
 	/** Editor callback: drops proxies before PIE starts so transient actors don't leak into play. */

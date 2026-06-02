@@ -5,9 +5,9 @@
 #include "DetailCategoryBuilder.h"
 #include "DetailLayoutBuilder.h"
 #include "DetailWidgetRow.h"
+#include "IPropertyUtilities.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUtils.h"
-#include "NWorldAssemblyRegistry.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Organ/NOrganComponent.h"
 
@@ -18,6 +18,15 @@ TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 
 void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
 {
+	// Refresh the panel when operation state changes so the gated action buttons (e.g. "Generate")
+	// re-evaluate their IsEnabled attribute; under Slate global invalidation a bound attribute is
+	// otherwise only re-polled on incidental invalidation, leaving the button stuck until reselection.
+	PropertyUtilities = DetailBuilder.GetPropertyUtilities();
+	if (UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get())
+	{
+		Subsystem->OnOperationsChanged.AddSP(this, &FNOrganComponentCustomization::HandleOperationsChanged);
+	}
+
 	IDetailCategoryBuilder& NexusCategory = DetailBuilder.EditCategory(TEXT("Organ Component"),
 FText::FromString("Organ Component"), ECategoryPriority::Important);
 
@@ -119,4 +128,12 @@ EVisibility FNOrganComponentCustomization::CancelButtonVisible() const
 EVisibility FNOrganComponentCustomization::ClearButtonVisible() const
 {
 	return EVisibility::Visible;
+}
+
+void FNOrganComponentCustomization::HandleOperationsChanged()
+{
+	if (const TSharedPtr<IPropertyUtilities> Utilities = PropertyUtilities.Pin())
+	{
+		Utilities->RequestForceRefresh();
+	}
 }
