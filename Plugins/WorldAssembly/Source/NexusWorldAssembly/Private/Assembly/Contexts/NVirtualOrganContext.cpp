@@ -411,6 +411,8 @@ bool FNVirtualOrganContext::ResetForRetry()
 	
 	// Reset placed tags
 	PlacedTagGroups = FNTissueTagGroups();
+	ContextTags     = BaseContextTags; 
+	TagCounter      = BaseTagCounter;
 		
 	// Clear Graph
 	if (CellGraph != nullptr)
