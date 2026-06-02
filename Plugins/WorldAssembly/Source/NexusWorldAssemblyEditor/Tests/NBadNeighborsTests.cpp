@@ -66,7 +66,11 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNBadNeighborsHarness
 			BoneData.SocketSize = FIntVector2(2, 4);
 			FNAssemblyGraphBoneNode* Bone = FNAssemblyGraphNodeFactory::CreateBoneNode(&BoneData, FVector::ZeroVector, FRotator::ZeroRotator);
 			Graph = MakeUnique<FNAssemblyGraph>(Bone, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
-			SourceNode = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &SourceCell, FVector(100.f));
+			// The node caches its assembly tags from the params (exactly as the builder does); the InputData
+			// pointer no longer seeds them, so the source's tags must be supplied here for the gate to resolve.
+			FNAssemblyGraphNodeParams Params;
+			Params.AssemblyTags = SourceTags;
+			SourceNode = FNAssemblyGraphNodeFactory::CreateCellNode(Params, &SourceCell, FVector(100.f));
 			Graph->RegisterNode(SourceNode);
 		}
 	};

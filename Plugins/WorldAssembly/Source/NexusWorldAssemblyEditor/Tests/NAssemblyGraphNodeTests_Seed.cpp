@@ -57,7 +57,9 @@ N_TEST_CRITICAL(FNAssemblyGraphNodeTests_Seed_CellNodeRoundTripsSeed,
 	FNVirtualCellData Cell = MakeCell();
 	FNAssemblyGraph Graph(MakeBoneRoot(), FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
 
-	FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
+	FNAssemblyGraphNodeParams Params;
+	Params.Seed = SampleSeed;
+	FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(Params, &Cell, FVector(100.f));
 	Graph.RegisterNode(Node);
 
 	CHECK_EQUALS("Cell node should report the seed it was constructed with.", Node->GetSeed(), SampleSeed)
