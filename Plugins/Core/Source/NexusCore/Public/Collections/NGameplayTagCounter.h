@@ -29,10 +29,15 @@ struct FNGameplayTagCount
 };
 
 
+/**
+ * The arithmetic operation an FNGameplayTagCounterOperation applies to a tag's count.
+ */
 UENUM(BlueprintType)
 enum class ENGameplayTagCounterOperationType : uint8
 {
+	/** Add the operation's value to the tag's current count. */
 	Add = 0,
+	/** Subtract the operation's value from the tag's current count. */
 	Subtract = 1,
 };
 
@@ -159,11 +164,7 @@ struct FNGameplayTagCounter
 	 */
 	void Increment(const FGameplayTag& Tag)
 	{
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}	
-		GameplayTags[Tag]++;
+		Add(Tag, 1);
 	}
 	
 	/**
@@ -172,11 +173,7 @@ struct FNGameplayTagCounter
 	 */
 	void Decrement(const FGameplayTag& Tag)
 	{
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}
-		GameplayTags[Tag]--;
+		Subtract(Tag, 1);
 	}
 	
 	/**
@@ -239,6 +236,10 @@ struct FNGameplayTagCounter
 		GameplayTags[Tag] /= Value;
 	}
 	
+	/**
+	 * Applies a declarative operation to the count for its target tag.
+	 * @param Operation The tag, arithmetic operation, and value to apply.
+	 */
 	void ApplyOperation(const FNGameplayTagCounterOperation& Operation)
 	{
 		switch (Operation.Operation)
@@ -252,6 +253,11 @@ struct FNGameplayTagCounter
 		}
 	}
 	
+	/**
+	 * Applies the inverse of a declarative operation to the count for its target tag, undoing a prior
+	 * ApplyOperation call (an Add is subtracted and a Subtract is added).
+	 * @param Operation The tag, arithmetic operation, and value to reverse.
+	 */
 	void ReverseOperation(const FNGameplayTagCounterOperation& Operation)
 	{
 		switch (Operation.Operation)
