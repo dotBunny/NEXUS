@@ -475,5 +475,11 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 				CellLevelInstances[Ticket].RemoveAt(j);
 			}
 		}
+		
+		// Remove empty containers
+		if (CellLevelInstances[Ticket].IsEmpty())
+		{
+			CellLevelInstances.Remove(Ticket);
+		}
 	}
 }
