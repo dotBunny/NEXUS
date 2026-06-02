@@ -188,6 +188,14 @@ private:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
+	/**
+	 * Baked variant of DoesIntersectTriangles. Both meshes' vertices (and Bounds) are already in world
+	 * space, so the per-vertex transform and the two heap-allocated world-vertex buffers the transform-aware
+	 * version builds are skipped — the mesh vertices are referenced directly. Bit-identical to calling the
+	 * transform-aware overload with identity transforms.
+	 */
+	static bool DoesIntersectTrianglesBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
+
 
 	/**
 	 * Hybrid convex-vs-convex overlap test. First runs a SAT-style face-normal rejection pass that
@@ -208,6 +216,13 @@ private:
 	static bool DoesConvexIntersectSAT(
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+
+	/**
+	 * Baked variant of DoesConvexIntersectSAT. Both meshes' vertices are already world-space, so face
+	 * normals and projection intervals are computed straight from the stored vertices with no rotation and
+	 * no world-vertex buffers. Bit-identical to the transform-aware overload with identity transforms.
+	 */
+	static bool DoesConvexIntersectSATBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
 	/**
 	 * Gate for the SAT fast path: both inputs must be convex with a populated FaceLoops description and

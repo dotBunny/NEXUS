@@ -24,6 +24,11 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 		{
 			VirtualWorldContextPtr->WorldCollisionMeshes[i] = FNRawMeshUtils::ToConvexHull(VirtualWorldContextPtr->WorldCollisionMeshes[i]);
 		}
+
+		// Warm the face-plane cache now, off the builder thread. Each FNOrganGraphBuilderTask copies these
+		// meshes, so a cache built here propagates through the copy and spares every organ a lazy rebuild on
+		// its first intersection query.
+		VirtualWorldContextPtr->WorldCollisionMeshes[i].EnsureCachedFacePlanes();
 	}
 	
 	// No point keeping this around
