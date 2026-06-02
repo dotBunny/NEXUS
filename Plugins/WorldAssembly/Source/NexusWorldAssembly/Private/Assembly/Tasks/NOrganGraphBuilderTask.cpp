@@ -325,7 +325,7 @@ bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraph
 	return false;
 }
 
-TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(FNAssemblyGraphCellNode* NewNode) const
+TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const
 {
 	TArray<FNAssemblyGraphCellNode*> HitNodes;
 	for (const auto RegisteredNode : OrganContextPtr->CellGraph->GetNodes())

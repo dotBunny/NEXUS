@@ -317,6 +317,16 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
+		// GATE BASED ON TagCounter Constraints
+		if (CellData->TagCounterConstraints.Num() > 0)
+		{
+			for (int j = 0; j < CellData->TagCounterConstraints.Num(); j++)
+			{
+				const FNGameplayTagCounterConstraint& Constraint = CellData->TagCounterConstraints[j];
+				
+			}
+		}
+		
 		// FILTER BADNEIGHBORS
 		// Reject candidates that belong to a bad-neighbor group the source cell is also a member of — those
 		// two cells are not allowed to be placed beside each other.

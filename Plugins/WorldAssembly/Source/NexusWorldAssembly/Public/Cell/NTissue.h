@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "NTissueTagGroups.h"
 #include "Collections/NGameplayTagCounter.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
 #include "Engine/DataAsset.h"
 #include "NTissue.generated.h"
 

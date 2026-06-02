@@ -72,7 +72,7 @@ private:
 	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
 
 	/** @return Every existing cell whose world bounds intersect NewNode's. */
-	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(FNAssemblyGraphCellNode* NewNode) const;
+	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
 
 	/** @return Every existing cell whose hull intersects NewNode's hull. */
 	TArray<FNAssemblyGraphCellNode*> CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const;

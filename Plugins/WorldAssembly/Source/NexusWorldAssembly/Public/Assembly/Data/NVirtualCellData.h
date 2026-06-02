@@ -8,6 +8,7 @@
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellRootDetails.h"
 #include "Cell/NTissueTagGroups.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
 
 /**
  * A lightweight summary of a cell's tagging, used to classify it (starter/finisher eligibility) during virtual organ processing.

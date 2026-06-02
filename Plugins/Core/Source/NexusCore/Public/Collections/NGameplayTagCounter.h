@@ -4,91 +4,10 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
-#include "Types/NComparisonResult.h"
+#include "NGameplayTagCount.h"
+#include "NGameplayTagCounterOperation.h"
+#include "NGameplayTagCounterOperationType.h"
 #include "NGameplayTagCounter.generated.h"
-
-
-/**
- * A single tag paired with its count.
- *
- * Flat, Blueprint-friendly representation of one entry in an FNGameplayTagCounter, used to serialize
- * or pass counts across boundaries where the underlying map is inconvenient.
- */
-USTRUCT(BlueprintType)
-struct FNGameplayTagCount
-{
-	GENERATED_BODY()
-
-	/** The tag this count applies to. */
-	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	FGameplayTag Tag;
-
-	/** The number of times the tag has been counted. */
-	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	int32 Count = 0;
-};
-
-
-/**
- * The arithmetic operation an FNGameplayTagCounterOperation applies to a tag's count.
- */
-UENUM(BlueprintType)
-enum class ENGameplayTagCounterOperationType : uint8
-{
-	/** Add the operation's value to the tag's current count. */
-	Add = 0,
-	/** Subtract the operation's value from the tag's current count. */
-	Subtract = 1,
-};
-
-/**
- * A declarative mutation to apply to a tag's count within an FNGameplayTagCounter.
- *
- * Authored in the editor to describe how a tag's running total should change (e.g. add, subtract)
- * when the operation is evaluated.
- */
-USTRUCT(BlueprintType)
-struct FNGameplayTagCounterOperation
-{
-	GENERATED_BODY()
-
-	/** The tag whose count this operation mutates. */
-	UPROPERTY(EditAnywhere)
-	FGameplayTag Tag;
-
-	/** The arithmetic operation applied to the tag's current count using Value. */
-	UPROPERTY(EditAnywhere)
-	ENGameplayTagCounterOperationType Operation = ENGameplayTagCounterOperationType::Add;
-
-	/** The right-hand operand combined with the tag's current count via Operation. */
-	UPROPERTY(EditAnywhere)
-	int32 Value = 0;
-};
-
-/**
- * A declarative predicate tested against a tag's count within an FNGameplayTagCounter.
- *
- * Authored in the editor to gate behavior on a tag's running total (e.g. "count >= 1") when the
- * constraint is evaluated.
- */
-USTRUCT(BlueprintType)
-struct FNGameplayTagCounterConstraint
-{
-	GENERATED_BODY()
-
-	/** The tag whose count this constraint tests. */
-	UPROPERTY(EditAnywhere)
-	FGameplayTag Tag;
-
-	/** How the tag's current count is compared against Value. */
-	UPROPERTY(EditAnywhere)
-	ENComparisonResult Comparison = ENComparisonResult::GreaterThanOrEqual;
-
-	/** The value the tag's current count is compared against via Comparison. */
-	UPROPERTY(EditAnywhere)
-	int32 Value = 1;
-};
-
 
 /**
  * Tracks a running integer count per FGameplayTag.
@@ -100,7 +19,7 @@ struct FNGameplayTagCounter
 {
 	GENERATED_BODY()
 
-	/** The per-tag counts; tags absent from the map are treated as a count of zero. */
+	/** The per-tag counts, with tags absent from the map are treated as a count of zero. */
 	UPROPERTY(EditAnywhere)
 	TMap<FGameplayTag, int32> GameplayTags;
 
@@ -352,3 +271,5 @@ struct FNGameplayTagCounter
 		return ReturnValue;
 	}
 };
+
+
