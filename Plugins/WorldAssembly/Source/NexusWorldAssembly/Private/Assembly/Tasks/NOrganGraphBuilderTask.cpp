@@ -698,7 +698,7 @@ void FNOrganGraphBuilderTask::EnforceNotFinisherConstraint() const
 				}
 			}
 			if (bHasCellChild) continue;
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardDueToNonFinisherConstraint)
 			RemoveCellNode(CellNode);
 			bRemovedAny = true;
 			break; // Restart scan — Nodes array was modified
