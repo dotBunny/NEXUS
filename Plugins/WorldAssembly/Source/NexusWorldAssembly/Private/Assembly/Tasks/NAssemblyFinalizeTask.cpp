@@ -39,6 +39,8 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 	ContextTagsContentBlock->AddLine(StringBuilder.ToString());
 	
+	// TODO: Add Tag Counter
+	
 	// Add Analytics to report
 	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
 	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();

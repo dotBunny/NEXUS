@@ -48,7 +48,7 @@ N_TEST_CRITICAL(FNAssemblyGraphTests_CellInstanceCount_CountsOncePerInstance,
 
 	CHECK_EQUALS("UsedCount should start at 0.", Cell.UsedCount, 0)
 
-	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(NodeA);
 	CHECK_EQUALS("Registering one cell node should increment UsedCount to 1.", Cell.UsedCount, 1)
 
@@ -58,7 +58,7 @@ N_TEST_CRITICAL(FNAssemblyGraphTests_CellInstanceCount_CountsOncePerInstance,
 	NodeA->LinkJunction(2, BoneRoot);
 	CHECK_EQUALS("Linking junctions must not change UsedCount.", Cell.UsedCount, 1)
 
-	FNAssemblyGraphCellNode* NodeB = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NodeB = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(NodeB);
 	CHECK_EQUALS("A second instance should increment UsedCount to 2.", Cell.UsedCount, 2)
 
@@ -80,13 +80,13 @@ N_TEST_HIGH(FNAssemblyGraphTests_CellInstanceCount_MaximumCountByInstance,
 	FNAssemblyGraphBoneNode* BoneRoot = MakeBoneRoot();
 	FNAssemblyGraph Graph(BoneRoot, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
 
-	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(NodeA);
 	NodeA->LinkJunction(0, BoneRoot);
 	NodeA->LinkJunction(1, BoneRoot);
 	CHECK_MESSAGE(TEXT("One instance of two-junction cell should still be selectable when MaximumCount is 2."), Cell.IsValidSelection())
 
-	FNAssemblyGraphCellNode* NodeB = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell,0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NodeB = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(NodeB);
 	CHECK_FALSE_MESSAGE(TEXT("Two instances should reach MaximumCount and become unselectable."), Cell.IsValidSelection())
 
@@ -112,7 +112,7 @@ N_TEST_HIGH(FNAssemblyGraphTests_CellInstanceCount_UniqueByInstance,
 
 	CHECK_MESSAGE(TEXT("Unused unique cell should be selectable."), Cell.IsValidSelection())
 
-	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* NodeA = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(NodeA);
 	NodeA->LinkJunction(0, BoneRoot);
 	NodeA->LinkJunction(1, BoneRoot);

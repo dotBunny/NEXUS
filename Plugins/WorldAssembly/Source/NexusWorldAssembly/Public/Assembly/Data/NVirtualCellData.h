@@ -39,13 +39,13 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
  */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
-	/** Assembly tags describing this cell, copied through to generated cells. */
+	/** Assembly tags describing this cell's behavior, copied through to generated cells. */
 	FGameplayTagContainer AssemblyTags;
 
-	/** Context tags that must be present in the generation context for this cell to be eligible for selection. */
+	/** Context tags that must be present in the phases ContextTags context for this cell to be eligible for selection. */
 	FGameplayTagContainer ContextTagsRequired;
 
-	/** Context tags this cell contributes to the generation context once it is placed. */
+	/** Context tags this cell contributes/adds to the overall assembly operation / phase ContextTags once it is placed. */
 	FGameplayTagContainer ContextTagsAdded;
 
 	/** 

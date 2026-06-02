@@ -20,12 +20,15 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
+	/** Tags used to define behavior during the assembly process. */
 	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", Category="Tagging",  meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
 
+	/** Tags added to the Context Tags collection moving forward for the graph, and future phases. */
 	UPROPERTY(EditAnywhere, DisplayName="Added Context Tags", Category="Tagging", meta = (ToolTip="Tags added to the Context Tags collection moving forward for the graph, and future phases."))
 	FGameplayTagContainer AddedContextTags;
 	
+	/** Tags required to be found in Context Tags for allowance to place this cell. **/
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
 	FGameplayTagContainer RequiredContextTags;
 	

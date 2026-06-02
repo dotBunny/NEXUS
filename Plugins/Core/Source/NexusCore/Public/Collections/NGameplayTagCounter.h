@@ -5,6 +5,19 @@
 #include "GameplayTagContainer.h"
 #include "NGameplayTagCounter.generated.h"
 
+
+
+USTRUCT(BlueprintType)
+struct FNGameplayTagCount
+{
+	GENERATED_BODY()
+	UPROPERTY()
+	FGameplayTag Tag;
+	UPROPERTY() 
+	int32 Count = 0;
+};
+
+
 /**
  * Tracks a running integer count per FGameplayTag.
  *
@@ -32,6 +45,19 @@ struct FNGameplayTagCounter
 	{
 		GameplayTags.Append(ExistingCounters);
 	}
+	
+	/**
+	 * Constructs a counter seeded from a flat array of tag/count pairs.
+	 * @param Counts The tag/count entries to copy in; duplicate tags are summed.
+	 */
+	explicit FNGameplayTagCounter(const TArray<FNGameplayTagCount>& Counts)
+	{
+		GameplayTags.Reserve(Counts.Num());
+		for (const FNGameplayTagCount& Entry : Counts)
+		{
+			GameplayTags.FindOrAdd(Entry.Tag) += Entry.Count;
+		}
+	}
 
 	/** Copy-constructs a counter from another, duplicating its counts. */
 	FNGameplayTagCounter(const FNGameplayTagCounter& Other)
@@ -52,7 +78,7 @@ struct FNGameplayTagCounter
 	 * Adds another counter's counts into this one, summing values for tags present in both.
 	 * @param Other The counter whose counts should be merged in.
 	 */
-	void Combine(FNGameplayTagCounter& Other)
+	void Combine(const FNGameplayTagCounter& Other)
 	{
 		for (const TPair<FGameplayTag, int32>& Pair : Other.GameplayTags)
 		{
@@ -108,5 +134,22 @@ struct FNGameplayTagCounter
 	bool Has(const FGameplayTag& Tag) const
 	{
 		return GameplayTags.Contains(Tag);
+	}
+	
+	/**
+	 * Builds a flat array of tag/count pairs from the tracked counts.
+	 * @return An array containing one entry per tracked tag, in unspecified order.
+	 */
+	TArray<FNGameplayTagCount> ToTagCount() const
+	{
+		TArray<FNGameplayTagCount> ReturnArray;
+		ReturnArray.Reserve(GameplayTags.Num());
+		for (const TPair<FGameplayTag, int32>& Pair : GameplayTags)
+		{
+			FNGameplayTagCount& Entry = ReturnArray.AddDefaulted_GetRef();
+			Entry.Tag = Pair.Key;
+			Entry.Count = Pair.Value;
+		}
+		return ReturnArray;
 	}
 };

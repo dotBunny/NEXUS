@@ -66,7 +66,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNBadNeighborsHarness
 			BoneData.SocketSize = FIntVector2(2, 4);
 			FNAssemblyGraphBoneNode* Bone = FNAssemblyGraphNodeFactory::CreateBoneNode(&BoneData, FVector::ZeroVector, FRotator::ZeroRotator);
 			Graph = MakeUnique<FNAssemblyGraph>(Bone, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
-			SourceNode = FNAssemblyGraphNodeFactory::CreateCellNode(&SourceCell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+			SourceNode = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &SourceCell, FVector(100.f));
 			Graph->RegisterNode(SourceNode);
 		}
 	};

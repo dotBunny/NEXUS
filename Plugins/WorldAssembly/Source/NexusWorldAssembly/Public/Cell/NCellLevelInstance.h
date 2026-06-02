@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "NCellAssemblyData.h"
 #include "NCellJunctionDetails.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
 
@@ -45,6 +46,35 @@ public:
 	FGameplayTagContainer& GetContextTags()
 	{
 		return AssemblyData.ContextTags;
+	}
+	
+	FGameplayTagContainer& GetContextTagsAdded()
+	{
+		return AssemblyData.ContextTagsAdded;
+	}
+	
+	FGameplayTagContainer& GetContextTagsState()
+	{
+		return AssemblyData.ContextTagsState;
+	}
+	
+	TArray<FNGameplayTagCount>& GetTagCounterStateArray()
+	{
+		return AssemblyData.TagCounterState;
+	}
+	TArray<FNGameplayTagCount>& GetTagCounterArray()
+	{
+		return AssemblyData.TagCounter;
+	}
+	
+	TMap<FGameplayTag, int32> GetTagCounterState() const
+	{
+		return FNGameplayTagCounter(AssemblyData.TagCounterState).GameplayTags;
+	}
+	
+	TMap<FGameplayTag, int32> GetTagCounter() const
+	{
+		return FNGameplayTagCounter(AssemblyData.TagCounter).GameplayTags;
 	}
 
 	/** @return Mutable access to the assembly tags recorded on this cell's assembly data. */
@@ -87,7 +117,7 @@ public:
 
 protected:
 	UPROPERTY(Replicated)
-	FNCellAssemblyData AssemblyData;;
+	FNCellAssemblyData AssemblyData;
 	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
 	TArray<FNCellJunctionDetails> JunctionDetails;

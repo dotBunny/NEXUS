@@ -46,6 +46,7 @@ public:
 
 	/** Context tags associated with this world context, added to during FNProcessPassTask collecting additions. */
 	FGameplayTagContainer ContextTags;
+	FNGameplayTagCounter TagCounter;
 
 	explicit FNVirtualWorldContext(UWorld* TargetWorld, const TArray<FBoxSphereBounds>& TargetBounds)
 	{

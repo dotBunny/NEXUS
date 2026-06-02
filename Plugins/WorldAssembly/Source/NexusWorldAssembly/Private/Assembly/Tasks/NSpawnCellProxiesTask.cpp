@@ -31,6 +31,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 	// Copy local
 	const FGameplayTagContainer ContextTags = TaskGraphContextPtr->ContextTags;
+	const TArray<FNGameplayTagCount> TagCounter = TaskGraphContextPtr->TagCounter.ToTagCount();
 	
 	// Early out when we do not have any nodes to spawn
 	if (NodeCount == 0)
@@ -40,9 +41,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 	FNCellAssemblyData CellAssemblyData;
-	
 	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
 	CellAssemblyData.ContextTags = ContextTags;
+	CellAssemblyData.TagCounter = TagCounter;
 	
 	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
 	{
@@ -52,6 +53,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CellAssemblyData.Seed = CellNode->GetSeed();
 		CellAssemblyData.NodeIdentifier = CellNode->GetNodeIdentifier();
 		CellAssemblyData.AssemblyTags = CellNode->GetAssemblyTags();
+		CellAssemblyData.ContextTagsAdded = CellNode->GetContextTagsAdded();
+		CellAssemblyData.ContextTagsState = CellNode->GetContextTagsState();
+		CellAssemblyData.TagCounterState = CellNode->GetTagCountersState().ToTagCount();
 		
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 

@@ -19,7 +19,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphCellNode : public FNAssemblyGraphNod
 public:
 	virtual ENAssemblyGraphNodeType GetNodeType() const override {  return ENAssemblyGraphNodeType::Cell; }
 
-	FNAssemblyGraphCellNode(FNVirtualCellData* InputData, uint64 CellSeed, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize);
+	FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize);
 
 	/** @return true if at least one junction on this cell is still unlinked. */
 	bool HasOpenJunctions() const;
@@ -54,8 +54,6 @@ public:
 		return WorldBounds.Intersect(Other->WorldBounds);
 	}
 	
-
-
 	/**
 	 * Walks linked neighbours up to MaxDepth looking for an existing node built from the same input data.
 	 * Used to enforce MinimumNodeDistance constraints.
@@ -129,16 +127,11 @@ public:
 	FNRawMesh& GetHull() { return Hull; }
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
-	
-	/** @return true if this cell node carries any assembly tags. */
-	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
+
 
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
 	FNVirtualCellData* InputDataPtr;
-	
-	/** Whether the spawned level instance should be always-relevant for networking. */
-	bool bAlwaysRelevant;
 
 	/** Junction keys that are still unlinked. */
 	TArray<int32> FreeJunctionKeys;

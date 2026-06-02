@@ -94,6 +94,9 @@ public:
 	
 	/** Context tags currently active, updated as cells are placed into the graph. */
 	FGameplayTagContainer ContextTags;
+	
+	FNGameplayTagCounter BaseTagCounter;
+	FNGameplayTagCounter TagCounter;
 
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;

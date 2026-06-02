@@ -47,6 +47,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
+	OrganContextPtr->BaseTagCounter = WorldContextPtr->TagCounter;
+	OrganContextPtr->TagCounter = FNGameplayTagCounter();
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
 	
 	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
@@ -140,7 +142,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
 	{
-		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->ContextTags);
+		PassContextPtr->TakeOutput(MoveTemp(OrganContextPtr->CellGraph), OrganContextPtr->ContextTags, OrganContextPtr->TagCounter);
 	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
@@ -203,7 +205,15 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		
 		
 		// Create our first cell node, attaching it to the bone node
-		FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(StartCellInputData, Random.UnsignedInteger64(), CellWorldPosition, CellWorldRotation, OrganContextPtr->VoxelSize);
+		FNAssemblyGraphNodeParams NodeParams;
+		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
+		NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
+		// todo counterstate
+		NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
+		NodeParams.Seed = Random.UnsignedInteger64();
+		NodeParams.WorldPosition = CellWorldPosition;
+		NodeParams.WorldRotation = CellWorldRotation;
+		FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, StartCellInputData, OrganContextPtr->VoxelSize);
 		
 		// TODO: Intersecting or out of bounds start???
 		
@@ -449,7 +459,15 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
 		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
 	
-		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(CellInputData, Random.UnsignedInteger64(), TargetJunctionWorldPosition, RequiredRotation, OrganContextPtr->VoxelSize);
+		FNAssemblyGraphNodeParams NodeParams;
+		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
+		// TODO counter state
+		NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
+		NodeParams.AssemblyTags = CellInputData->AssemblyTags;
+		NodeParams.Seed = Random.UnsignedInteger64();
+		NodeParams.WorldPosition = TargetJunctionWorldPosition;
+		NodeParams.WorldRotation = RequiredRotation;
+		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, CellInputData, OrganContextPtr->VoxelSize);
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
 		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.

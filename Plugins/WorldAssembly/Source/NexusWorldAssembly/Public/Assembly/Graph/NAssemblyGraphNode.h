@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "Collections/NGameplayTagCounter.h"
 
 /**
  * Discriminator for a graph node's concrete subclass.
@@ -13,6 +14,18 @@ enum class ENAssemblyGraphNodeType
 	Bone,
 	Cell,
 	Null
+};
+
+
+struct FNAssemblyGraphNodeParams
+{
+	uint64 Seed = 0;
+	FGameplayTagContainer AssemblyTags;
+	FGameplayTagContainer ContextTagsAdded;
+	FGameplayTagContainer ContextTagsState;
+	FNGameplayTagCounter TagCounterState;
+	FVector WorldPosition;
+	FRotator WorldRotation;
 };
 
 /**
@@ -25,7 +38,8 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphNode
 {
 	friend class FNAssemblyGraph;
 public:
-	FNAssemblyGraphNode(uint64 NodeSeed,const FVector& Position, const FRotator& Rotation);
+	FNAssemblyGraphNode(uint64 NodeSeed, const FVector& Position, const FRotator& Rotation);
+	explicit FNAssemblyGraphNode(const FNAssemblyGraphNodeParams& Params);
 
 	virtual ~FNAssemblyGraphNode() = default;
 
@@ -66,8 +80,15 @@ public:
 	
 	/** @return The assembly tags carried by this node. */
 	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
-	/** @return Mutable access to the context tags this node contributes to the generation context once placed. */
-	FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
+	/** @return The context tags this node contributes to the generation context once placed. */
+	const FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
+	/** @return The context tags state when this placed. */
+	const FGameplayTagContainer& GetContextTagsState() { return ContextTagsState; }
+	/** @return The tag counter state when this placed. */
+	const FNGameplayTagCounter& GetTagCountersState() { return TagCounterState; }
+	
+	/** @return true if this cell node carries any assembly tags. */
+	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
 
 	/** Sever all upstream/downstream links between this node and Other, in both directions. */
 	void Disconnect(FNAssemblyGraphNode* Other)
@@ -102,8 +123,15 @@ protected:
 
 	TArray<FNAssemblyGraphNode*> UpstreamNodes;
 	TArray<FNAssemblyGraphNode*> DownstreamNodes;
+	
 	FGameplayTagContainer AssemblyTags;
 	FGameplayTagContainer ContextTagsAdded;
+	
+	/** The state of the operations ContextTags when the decision was made to place this cell. */
+	FGameplayTagContainer ContextTagsState;
+	
+	/** The state of the operations TagCounters when the decision was made to place this cell. */
+	FNGameplayTagCounter TagCounterState;
 
 private:
 	static void PropagateDepth(FNAssemblyGraphNode* Root)

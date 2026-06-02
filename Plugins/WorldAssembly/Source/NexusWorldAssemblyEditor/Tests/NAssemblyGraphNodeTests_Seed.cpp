@@ -57,7 +57,7 @@ N_TEST_CRITICAL(FNAssemblyGraphNodeTests_Seed_CellNodeRoundTripsSeed,
 	FNVirtualCellData Cell = MakeCell();
 	FNAssemblyGraph Graph(MakeBoneRoot(), FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
 
-	FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, SampleSeed, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+	FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 	Graph.RegisterNode(Node);
 
 	CHECK_EQUALS("Cell node should report the seed it was constructed with.", Node->GetSeed(), SampleSeed)
@@ -101,7 +101,9 @@ N_TEST_HIGH(FNAssemblyGraphNodeTests_Seed_StreamIsDeterministic,
 		Seeds.Reserve(NodeCount);
 		for (int32 i = 0; i < NodeCount; i++)
 		{
-			FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, Random.UnsignedInteger64(), FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+			FNAssemblyGraphNodeParams Params;
+			Params.Seed = Random.UnsignedInteger64();
+			FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(Params, &Cell, FVector(100.f));
 			Graph.RegisterNode(Node);
 			Seeds.Add(Node->GetSeed());
 		}

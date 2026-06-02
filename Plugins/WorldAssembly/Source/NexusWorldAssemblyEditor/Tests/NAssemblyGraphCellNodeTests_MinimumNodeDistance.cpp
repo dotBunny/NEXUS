@@ -36,7 +36,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNMinimumNodeDistanceHarness
 	/** Create a cell node from Cell and register it with Graph (which then owns and frees it). */
 	static FNAssemblyGraphCellNode* AddNode(FNAssemblyGraph& Graph, FNVirtualCellData& Cell)
 	{
-		FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(&Cell, 0, FVector::ZeroVector, FRotator::ZeroRotator, FVector(100.f));
+		FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
 		Graph.RegisterNode(Node);
 		return Node;
 	}

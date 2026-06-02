@@ -6,17 +6,14 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const uint64 CellSeed, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize) 
-: FNAssemblyGraphNode(CellSeed, Position, Rotation)
+FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize) 
+: FNAssemblyGraphNode(Params)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
-	AssemblyTags =  InputDataPtr->AssemblyTags;
-	ContextTagsAdded = InputDataPtr->ContextTagsAdded;
 	
-
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
 	// but will follow the defined bounds previously defined at author-time, but rotated.
 	TStaticArray<FVector, 8> Corners;
@@ -24,7 +21,7 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	WorldBounds = FBox(ForceInit);
 	for (const FVector& Corner : Corners)
 	{
-		WorldBounds += Rotation.RotateVector(Corner) + Position;
+		WorldBounds += Params.WorldRotation.RotateVector(Corner) + Params.WorldPosition;
 	}
 	
 	// Copy our hull data and rotate it into its new world-space position/rotation
@@ -42,8 +39,9 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
 
 		// Compose with quaternions - (was adding the Rotation previously, but this better?)
-		Details.WorldRotation = (Rotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
-		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
+		Details.WorldRotation = (Params.WorldRotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
+		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Params.WorldPosition, 
+			Params.WorldPosition, Params.WorldRotation);
 	}
 }
 

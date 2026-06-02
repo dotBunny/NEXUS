@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "NCellAssemblyData.generated.h"
 
 /**
@@ -27,11 +28,27 @@ struct FNCellAssemblyData
 	UPROPERTY(VisibleInstanceOnly)
 	uint64 Seed = 0;
 
-	/** Assembly tags applied to this cell during generation. */
+	/** Assembly tags applied to this cell during the assembly operation. */
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer AssemblyTags;
 
-	/** Context tags active in the generation context when this cell was generated. */
+	/** The final ContextTags for the Assembly Operation. */
 	UPROPERTY(BlueprintReadOnly)
 	FGameplayTagContainer ContextTags;
+	
+	/** The state of the ContextTags when this cell was added. */
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTagContainer ContextTagsState;
+	
+	/** The ContextTags this cell added. */
+	UPROPERTY(BlueprintReadOnly)
+	FGameplayTagContainer ContextTagsAdded;
+	
+	/** The final TagCounter */
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FNGameplayTagCount> TagCounter;
+	
+	/** The state of the tag counter when this cell was added. */
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FNGameplayTagCount> TagCounterState;
 };

@@ -40,12 +40,19 @@ public:
 	{
 		ContextTags.AppendTags(NewContextTags);
 	}
+	
+	void AddTagCounter(const FNGameplayTagCounter& NewTagCounter)
+	{
+		TagCounter.Combine(NewTagCounter);
+	}
 
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
 
 	/** Context tags accumulated across the graphs built into this context. */
 	FGameplayTagContainer ContextTags;
+	
+	FNGameplayTagCounter TagCounter;
 
 	/**
 	 * @param OutputWorld World to target when spawning proxies.
