@@ -1,25 +1,28 @@
 # Changelog
 
-## [0.3.5] - 2026-07-31
+## [0.3.1] - 2026-06-19
 
 ### Added
 
-- `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
-- All `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
-- `BadNeighbors` tag group.
-- `AlwaysRelevant` behavior tag.
+- `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
+- `Bad Neighbors` tag grouping for `UNTissue`, preventing adjacent cell placement.
+- `NEXUS.WorldAssembly.Flag.AlwaysRelevant` behavioral tag.
 - `TagCounters` constraints and operations to `UNTissue`.
+- Required `ContextTags` option on `UNTissue` entries.
 
 ### Changed
 
+- `FNRawMesh` collision meshes used inside of assembly operation tasks bake out their transforms.
+- `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
 - GameplayTags renamed `NEXUS.WorldAssembly.BuiltIn.*` to `NEXUS.WorldAssembly.Behavior.*`.
-- `OutputTags` was moved to a more encompassing `ContextTags`, now having the ability to require `ContextTags` be present in the graph for a Cell to be used, associated query methods were altered to reflect this naming change.
+- `OutputTags` was moved to a more encompassing `ContextTags`.
 
 ### Fixed
 
-- Resolved issue with `ANCellActor` being dirtied getting opened.
-- `UNOrganComponent::Seed` properly overrides organ level seed when value is not `-1`.
-- `UNCell` no longer get loaded / saved during cooking process.
+- `ANCellActor` is no longer dirtied simply being opened.
+- `UNOrganComponent::Seed` properly overrides Organs' assembly operation seed when value is not `-1`.
+- Side-car `NCell` asset is not loaded during cook process, restoring determinism.
+- `UNOrganComponent` custom-visualizer `Generate` button now refreshes accordingly after operations have finished.
 
 ### Removed
 
