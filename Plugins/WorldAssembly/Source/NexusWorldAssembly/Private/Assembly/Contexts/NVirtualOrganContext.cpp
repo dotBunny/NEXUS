@@ -300,6 +300,31 @@ bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDep
 	return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
 }
 
+FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation)
+{
+	// Flip 180 around Up to oppose the source's facing direction, then undo the junction's local rotation so only
+	// the delta we need to apply to the cell remains.
+	const FQuat TargetJunctionLocalQuat = JunctionWorldRotation.Quaternion();
+	const FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+
+	FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+	RequiredRotation.Roll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
+	RequiredRotation.Pitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
+	RequiredRotation.Yaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
+	return RequiredRotation;
+}
+
+bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
+	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
+{
+	const FRotator Required = GetRequiredJunctionRotation(SourceQuat, JunctionWorldRotation);
+
+	// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
+	// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
+	return !CellConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw) ||
+		!JunctionConstraints.IsMatchingRotationAllowed(Required.Roll, Required.Pitch, Required.Yaw);
+}
+
 void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
 	CellIndices.Empty();
@@ -383,22 +408,9 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		{
 			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
-				// Determine the rotation this junction would have to take on to match Filter.SourceQuat. Same math used in
-				// ProcessCellNode when actually placing the cell: flip 180 around Up to oppose the source's facing direction,
-				// then undo the junction's local rotation so only the delta we need to apply to the cell remains.
-				const FQuat TargetJunctionLocalQuat = Pair.Value.WorldRotation.Quaternion();
-				const FQuat RequiredRotationQuat = Filter.SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
-				const FRotator RequiredRotation = RequiredRotationQuat.Rotator();
-				const FNRotationConstraints& JunctionRotationConstraints = Pair.Value.RotationConstraints;
-				
-				const float RequiredRoll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
-				const float RequiredPitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
-				const float RequiredYaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
-
-				// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
-				// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
-				if (!CellRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw) ||
-					!JunctionRotationConstraints.IsMatchingRotationAllowed(RequiredRoll, RequiredPitch, RequiredYaw))
+				// Determine the rotation this junction would have to take on to match Filter.SourceQuat, then veto it
+				// against both the cell's and the junction's matching-rotation constraints. Covered by NJunctionRotationTests.cpp.
+				if (IsGatedByJunctionRotation(Filter.SourceQuat, Pair.Value.WorldRotation, CellRotationConstraints, Pair.Value.RotationConstraints))
 				{
 					continue;
 				}

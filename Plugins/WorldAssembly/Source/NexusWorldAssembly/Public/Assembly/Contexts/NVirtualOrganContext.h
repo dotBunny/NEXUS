@@ -8,6 +8,7 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Types/NRotationConstraints.h"
 
 struct FNWorldOrganData;
 class UNOrganComponent;
@@ -189,6 +190,30 @@ public:
 	 * @return true if the candidate is too shallow and must be gated out.
 	 */
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 SourceNodeDepth);
+
+	/**
+	 * Resolve the rotation a candidate junction must adopt to mate with the source junction. Mirrors the
+	 * placement math in ProcessCellNode: flip 180 around Up to oppose the source's facing direction, then undo
+	 * the junction's own local rotation so only the delta the cell must apply remains. The result is returned
+	 * with each axis normalized to [-180, 180] so it can be fed straight into the matching-rotation constraints.
+	 * @param SourceQuat Orientation of the source junction the candidate is mating against.
+	 * @param JunctionWorldRotation The candidate junction's authored rotation.
+	 * @return The per-axis-normalized rotation the candidate cell must take on for this junction to line up.
+	 */
+	static NEXUSWORLDASSEMBLY_API FRotator GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation);
+
+	/**
+	 * Gate a candidate junction by the rotation it would have to adopt to mate with the source. Both the cell
+	 * and the junction get an independent veto: either may disable enforcement, but whichever side enforces must
+	 * have the required rotation (from GetRequiredJunctionRotation) fall inside its matching interval.
+	 * @param SourceQuat Orientation of the source junction the candidate is mating against.
+	 * @param JunctionWorldRotation The candidate junction's authored rotation.
+	 * @param CellConstraints The candidate cell's rotation constraints (cell-wide veto).
+	 * @param JunctionConstraints The candidate junction's own rotation constraints.
+	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
 
 	/**
 	 * Drop the current graph and bump the retry counter.
