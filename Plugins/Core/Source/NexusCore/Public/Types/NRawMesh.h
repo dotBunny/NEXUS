@@ -139,9 +139,6 @@ struct NEXUSCORE_API FNRawMesh
 	 * Cached non-triangle-loop flag. Lazily re-evaluated on first read after a mutator marks validation dirty.
 	 */
 	bool HasNonTris() const { EnsureValidated(); return bHasNonTris; }
-	
-	/** @return true if a transform has been baked into this mesh's vertex positions. */
-	bool HasAppliedTransform() const { return bHasAppliedTransform; }
 
 	/**
 	 * Marks the cached convexity / non-tri / bounds flags stale so the next IsConvex / HasNonTris /
@@ -153,7 +150,7 @@ struct NEXUSCORE_API FNRawMesh
 	/**
 	 * Runs the convexity / non-tri / bounds checks if the validation cache is dirty, otherwise no-ops.
 	 * Triggered automatically by IsConvex / HasNonTris / HasBounds; consumers that want eager
-	 * evaluation can call this directly. Honours bIsChaosGenerated as a trust signal that skips
+	 * evaluation can call this directly. Honors bIsChaosGenerated as a trust signal that skips
 	 * the work entirely.
 	 */
 	void EnsureValidated() const;
@@ -168,7 +165,6 @@ struct NEXUSCORE_API FNRawMesh
 		return bIsConvex == Other.bIsConvex
 			&& bHasNonTris == Other.bHasNonTris
 			&& bHasBounds == Other.bHasBounds
-			&& bHasAppliedTransform == Other.bHasAppliedTransform
 			&& bIsChaosGenerated == Other.bIsChaosGenerated
 			&& Center == Other.Center
 			&& Bounds == Other.Bounds
@@ -212,7 +208,6 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	void ApplyTransform(const FTransform& Transform)
 	{
-		bHasAppliedTransform = true;
 		if (Transform.Equals(FTransform::Identity)) return;
 
 		FBox NewBounds(ForceInit);

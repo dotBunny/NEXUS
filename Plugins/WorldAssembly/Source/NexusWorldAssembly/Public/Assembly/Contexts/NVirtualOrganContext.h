@@ -115,7 +115,18 @@ public:
 	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;
 
 	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
-	~FNVirtualOrganContext();
+	NEXUSWORLDASSEMBLY_API ~FNVirtualOrganContext();
+
+#if WITH_TESTS
+	/**
+	 * Test-only constructor that bypasses the live-component setup the production constructor performs. Every pool,
+	 * tag, and graph member is left at its default so a unit test can populate exactly the state it needs and then
+	 * exercise the off-thread logic (e.g. ResetForRetry) in isolation. Not compiled outside test builds.
+	 * @param TaskSeed Seed the context reports through GetSeed.
+	 * @param TaskName Human-readable task name reported through GetName.
+	 */
+	FNVirtualOrganContext(const uint64 TaskSeed, FString TaskName) : Seed(TaskSeed), Name(MoveTemp(TaskName)) {}
+#endif // WITH_TESTS
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };
@@ -130,7 +141,7 @@ public:
 	bool IsValid() const { return bIsValid; };
 
 	/** @return true if the current graph satisfies all required invariants (debug helper). */
-	bool CheckGraph();
+	NEXUSWORLDASSEMBLY_API bool CheckGraph();
 
 	/**
 	 * Filter CellInputData into a weighted candidate list for selection.
@@ -138,7 +149,7 @@ public:
 	 * @param CellIndices [out] Indices into CellInputData weighted by their configured weighting.
 	 * @param JunctionIndices [out] For each cell index, the subset of its junction keys that match the filter.
 	 */
-	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
+	NEXUSWORLDASSEMBLY_API void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
 
 	/**
@@ -219,10 +230,10 @@ public:
 	 * Drop the current graph and bump the retry counter.
 	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
 	 */
-	bool ResetForRetry();
+	NEXUSWORLDASSEMBLY_API bool ResetForRetry();
 
 	/** Run the post-build invariant checks; flips bSuccessful on success. */
-	bool ValidateGraph();
+	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
 private:
 	/** Number of retries consumed so far. */

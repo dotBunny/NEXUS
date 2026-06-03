@@ -83,35 +83,35 @@ struct FNTissueTagGroups
 		RequiredAnyTags.AppendTags(Tags);
 	}
 
-	/** @return true if the "unique" set contains any of the supplied tags. */
+	/** @return true if any of the supplied tags matches a tag in the "unique" set. */
 	bool HasAnyUniqueTags(const FGameplayTagContainer& Tags) const
 	{
-		return UniqueTags.HasAny(Tags);
+		return Tags.HasAny(UniqueTags);
 	}
 
-	/** @return true if the "required (any)" set contains any of the supplied tags. */
+	/** @return true if any of the supplied tags matches a tag in the "required (any)" set. */
 	bool HasAnyRequiredAnyTags(const FGameplayTagContainer& Tags) const
 	{
-		return RequiredAnyTags.HasAny(Tags);
+		return Tags.HasAny(RequiredAnyTags);
 	}
 
-	/** @return true if the "bad neighbors" set contains any of the supplied tags. */
+	/** @return true if any of the supplied tags matches a tag in the "bad neighbors" set. */
 	bool HasAnyBadNeighborsTags(const FGameplayTagContainer& Tags) const
 	{
-		return BadNeighborsTags.HasAny(Tags);
+		return Tags.HasAny(BadNeighborsTags);
 	}
 
-	
-	/** @return true if the "required (any)" set contains an exact match for every supplied tag. */
+
+	/** @return true if the supplied tags contain an exact match for every tag in the "required (any)" set. */
 	bool HasAllRequiredAnyTags(const FGameplayTagContainer& Tags) const
 	{
-		return RequiredAnyTags.HasAllExact(Tags);
+		return Tags.HasAllExact(RequiredAnyTags);
 	}
-	
-	/** @return true if the "bad neighbors" set contains an exact match for every supplied tag. */
+
+	/** @return true if the supplied tags contain an exact match for every tag in the "bad neighbors" set. */
 	bool HasAllBadNeighborsTags(const FGameplayTagContainer& Tags) const
 	{
-		return BadNeighborsTags.HasAllExact(Tags);
+		return Tags.HasAllExact(BadNeighborsTags);
 	}
 
 	/** @return The subset of the "unique" set that matches the supplied filter tags. */
