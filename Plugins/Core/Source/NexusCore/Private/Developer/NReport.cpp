@@ -75,7 +75,7 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 
 	for (int i = 0; i < Output.Num(); i++)
 	{
-		if (Output[i].Len() < 4) continue;
+		if (Output[i].Len() < ShortestReplaceToken) continue;
 		for (int j = 0; j < Tokens.Num(); j++)
 		{
 			if (Output[i].Contains(Tokens[j]))

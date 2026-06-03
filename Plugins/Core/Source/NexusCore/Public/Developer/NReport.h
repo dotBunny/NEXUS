@@ -77,6 +77,10 @@ struct NEXUSCORE_API FNReport
 			ReplaceTokens[Token] = Value;
 			return;
 		}
+		if (Token.Len() < ShortestReplaceToken)
+		{
+			ShortestReplaceToken = Token.Len();
+		}
 		ReplaceTokens.Add(Token, Value);
 	}
 	
@@ -109,6 +113,7 @@ private:
 	/** Parent ticket -> ordered child tickets; the root's children live under key 0. */
 	TMap<int32, TArray<int32>> ChildrenMap;
 	
+	int32 ShortestReplaceToken = MAX_int32;
 	TMap<FString, FString> ReplaceTokens;
 
 	/** Monotonically increasing counter used to issue unique tickets to newly created blocks. */

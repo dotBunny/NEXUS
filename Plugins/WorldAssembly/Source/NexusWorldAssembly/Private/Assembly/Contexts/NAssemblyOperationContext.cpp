@@ -321,8 +321,8 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	
 	const int32 OverviewTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
 	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
-	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime", "Iterations"});
-	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}", "{{ITERATIONS}}"});
+	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime"});
+	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}"});
 	
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
 	
