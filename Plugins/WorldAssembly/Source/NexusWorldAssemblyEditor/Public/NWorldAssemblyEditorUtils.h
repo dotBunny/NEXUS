@@ -30,20 +30,29 @@ class NEXUSWORLDASSEMBLYEDITOR_API FNWorldAssemblyEditorUtils
 public:
 
 	/**
-	 * Spawns a single transient debug actor into World that visualizes the simple-collision geometry of every actor
-	 * whose bounds fall inside any of the supplied containment volumes.
+	 * Builds — or refreshes in place — the single transient debug actor that visualizes the merged simple-collision
+	 * geometry of every actor whose bounds fall inside any of the supplied containment volumes.
 	 *
 	 * Pulls the world-actor list via FNActorUtils::GetWorldActors using the World Assembly filter settings, extracts each
-	 * actor's simple-collision representation with FNRawMeshFactory::FromActorsInBounds, then merges every emitted
-	 * mesh into one ANDebugActor via FNRawMeshUtils::CreateRawMeshVisualizers (single-actor mode). The visualizer is
-	 * shaded with UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial.
+	 * actor's simple-collision representation with FNRawMeshFactory::FromActorsInBounds, and merges every emitted mesh
+	 * into one piece of geometry shaded with UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial.
+	 *
+	 * When ExistingActor is supplied, the merged geometry is swapped onto its dynamic-mesh component in place (no
+	 * re-spawn, preserving actor identity and selection) — even when the merged mesh is empty, which clears the
+	 * visualizer. When ExistingActor is null a fresh actor is spawned, but only if there is geometry to show and the
+	 * visualizer material is configured.
 	 *
 	 * @param World World to iterate for collision sources and to spawn the visualizer actor into. Must be valid.
 	 * @param Bounds Containment volumes; only actors whose bounds fit inside at least one are visualized.
-	 * @return The merged visualizer actor. Editor-only / diagnostic — do not use in shipping content.
+	 * @param ExistingActor Live visualizer to refresh in place, or null to spawn a new one.
+	 * @param OutSourceActors Receives every actor that passed the collision filter — the visualizer's source set, used
+	 *        by callers to decide whether a later world change is relevant to the visualizer.
+	 * @return The visualizer actor (ExistingActor when supplied; otherwise the newly spawned actor, or null when there
+	 *         was nothing to show or no material). Editor-only / diagnostic — do not use in shipping content.
 	 * @note Performs a synchronous load of the configured visualizer material.
 	 */
-	static ANDebugActor* CreateWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds);
+	static ANDebugActor* RefreshWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
+		ANDebugActor* ExistingActor, TArray<AActor*>& OutSourceActors);
 
 	/** @return true if the actor participates in generated cell data (has a cell-root or junction component). */
 	FORCEINLINE static bool EffectsGeneratedData(const AActor* ContextActor)

@@ -6,8 +6,6 @@
 #include "NActorUtils.h"
 #include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
-#include "Cell/NCellLevelInstance.h"
-#include "Organ/NOrganVolume.h"
 
 /**
  * Task-graph job that snapshots the target world into the supplied FNVirtualWorldContext.
@@ -49,7 +47,7 @@ public:
 	 */
 	static bool IsWorldCollisionSource(const AActor* Actor)
 	{
-		// It's being destroyed so dont even bother with it
+		// It's being destroyed so don't even bother with it
 		if (Actor->IsPendingKillPending()) return false;
 		
 		// Check global ignore tag

@@ -18,6 +18,7 @@
 - `OutputTags` was moved to a more encompassing `ContextTags`.
 - `FNGameplayTagCounter` does not allow for negative counter values.
 - `FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance` now always renders the distance underneath the `UNCellJunctionComponent`.
+- `WorldAssemblyEdMode` Collision Visualizer now tracks for changes in the level, accounting for its offset.
 
 ### Fixed
 

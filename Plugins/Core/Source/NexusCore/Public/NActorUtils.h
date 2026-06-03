@@ -70,4 +70,16 @@ public:
 	 *       the editor-only and collision-enabled checks and (when set) the ExclusionFunction predicate.
 	 */
 	static TArray<AActor*> GetWorldActors(const UWorld* World, const FNWorldActorFilterSettings& Settings);
+
+	/**
+	 * Evaluate a single actor against the supplied filter settings — the same per-actor logic GetWorldActors applies
+	 * while iterating a world. Lets callers reactively test one actor (e.g. an actor reported by an editor change
+	 * delegate) without re-scanning the whole world.
+	 * @param Actor Candidate actor under inspection.
+	 * @param Settings Filter criteria to apply (see FNWorldActorFilterSettings).
+	 * @return true if the actor would be kept by GetWorldActors under these settings.
+	 * @note Null and pending-kill (non-IsValid) actors return false. APlayerStart actors short-circuit to true when
+	 *       bIncludePlayerStarts is set, bypassing every other filter — identical to GetWorldActors.
+	 */
+	static bool PassesFilter(const AActor* Actor, const FNWorldActorFilterSettings& Settings);
 };

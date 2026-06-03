@@ -42,34 +42,33 @@ TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldA
 	TArray<AActor*> ReturnActors;
 	if (World == nullptr) return MoveTemp(ReturnActors);
 
-	const bool bHasExclusionFunctionRef = Settings.ExclusionFunction.IsSet();
 	for (TActorIterator<AActor> WorldActorIterator(World); WorldActorIterator; ++WorldActorIterator)
 	{
 		AActor* Actor = *WorldActorIterator;
-		
-		// Ensure it is not on its way to being destroyed
-		if (!Actor || !IsValid(Actor)) continue;
-		
-		if (Settings.bIncludePlayerStarts && Actor->IsA<APlayerStart>())
+		if (PassesFilter(Actor, Settings))
 		{
 			ReturnActors.Add(Actor);
-			continue;
 		}
-		
-		// Exclude editor only
-		if (Settings.bExcludeEditorOnly && Actor->IsEditorOnly()) continue;
-		
-		// Exclude when collision is disabled per setting
-		if (Settings.bExcludeNonCollisionEnabledActors && !Actor->GetActorEnableCollision()) continue;
-		
-		// Exclude because of filter
-		if (bHasExclusionFunctionRef && !Settings.ExclusionFunction(Actor))
-		{
-			continue;
-		}
-		
-		ReturnActors.Add(Actor);
 	}
-	
+
 	return MoveTemp(ReturnActors);
+}
+
+bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSettings& Settings)
+{
+	// Ensure it is not on its way to being destroyed
+	if (!Actor || !IsValid(Actor)) return false;
+
+	if (Settings.bIncludePlayerStarts && Actor->IsA<APlayerStart>()) return true;
+
+	// Exclude editor only
+	if (Settings.bExcludeEditorOnly && Actor->IsEditorOnly()) return false;
+
+	// Exclude when collision is disabled per setting
+	if (Settings.bExcludeNonCollisionEnabledActors && !Actor->GetActorEnableCollision()) return false;
+
+	// Exclude because of filter
+	if (Settings.ExclusionFunction.IsSet() && !Settings.ExclusionFunction(Actor)) return false;
+
+	return true;
 }
