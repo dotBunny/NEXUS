@@ -163,7 +163,7 @@ float FNRawMeshUtils::GetIntersectDepth(
 	const float EarlyExitDepth)
 {
 	// Rotated AABB early-out, mirroring DoesIntersect. The world-space AABBs computed here also feed
-	// the C (AABB-overlap depth bound) and B (per-vertex AABB rejection) optimisations below.
+	// the C (AABB-overlap depth bound) and B (per-vertex AABB rejection) optimizations below.
 	FBox LeftWorldBounds(ForceInit);
 	FBox RightWorldBounds(ForceInit);
 	if (LeftMesh.HasBounds() && RightMesh.HasBounds())

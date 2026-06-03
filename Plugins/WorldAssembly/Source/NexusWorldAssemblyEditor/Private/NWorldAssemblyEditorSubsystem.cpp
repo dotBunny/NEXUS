@@ -71,7 +71,6 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 	}
 
 	KnownOperations.AddUnique(Operation);
-	OnOperationsChanged.Broadcast();
 	Operation->StartBuild(this, this);
 }
 
@@ -85,7 +84,6 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
-	OnOperationsChanged.Broadcast();
 
 	// Toast
 	const FNAssemblyOperationResult Results = Operation->GetResult();
@@ -123,7 +121,6 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)
 {
 	KnownOperations.Remove(Operation);
-	OnOperationsChanged.Broadcast();
 }
 
 void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
