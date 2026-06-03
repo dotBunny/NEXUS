@@ -63,28 +63,33 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 		RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
 	
-	TArray<FString> Tokens;
-	Tokens.Reserve(ReplaceTokens.Num());
-	ReplaceTokens.GetKeys(Tokens);
-	
 	// Early out since we don't have any tokens
-	if (Tokens.IsEmpty())
+	if (ReplaceTokens.IsEmpty())
 	{
 		return MoveTemp(Output);
 	}
 
-	for (int i = 0; i < Output.Num(); i++)
+	// Flatten the token map once so the per-line loop avoids repeated hash lookups; cache each token's length to skip
+	// substitutions that cannot possibly fit in the current line.
+	TArray<TPair<const FString*, const FString*>> Replacements;
+	Replacements.Reserve(ReplaceTokens.Num());
+	for (const TPair<FString, FString>& Pair : ReplaceTokens)
 	{
-		if (Output[i].Len() < ShortestReplaceToken) continue;
-		for (int j = 0; j < Tokens.Num(); j++)
+		Replacements.Emplace(&Pair.Key, &Pair.Value);
+	}
+
+	for (int32 i = 0; i < Output.Num(); i++)
+	{
+		FString& Line = Output[i];
+		if (Line.Len() < ShortestReplaceToken) continue;
+		for (int32 j = 0; j < Replacements.Num(); j++)
 		{
-			if (Output[i].Contains(Tokens[j]))
-			{
-				Output[i] = Output[i].Replace(*Tokens[j],*ReplaceTokens[Tokens[j]]);
-			}
+			const FString& Token = *Replacements[j].Key;
+			if (Line.Len() < Token.Len()) continue;
+			Line.ReplaceInline(*Token, **Replacements[j].Value, ESearchCase::CaseSensitive);
 		}
 	}
-	
+
 	return MoveTemp(Output);
 }
 
