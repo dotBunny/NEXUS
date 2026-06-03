@@ -9,11 +9,13 @@
 #include "NTissueTagGroups.generated.h"
 
 /**
- * Pairs the two gameplay tag sets that drive cell placement: "unique" tags that cap an item to a single
- * placement in the graph, and "required (any)" tags that force at least one matching item to be placed.
+ * Groups the three gameplay tag sets that drive cell placement: "unique" tags that cap an item to a single
+ * placement in the graph, "required (any)" tags that force at least one matching item to be placed, and
+ * "bad neighbors" tags that stop members of a group being placed beside one another.
  *
- * Both sets default to their built-in tags (see EnsureBaseTags) so a freshly created group always carries
- * the framework's baseline behavior.
+ * These sets are empty on construction; baseline tags are not applied automatically. EnsureBaseTags() seeds
+ * the framework's built-in tag into the Unique and BadNeighbors sets only (RequiredAny is intentionally left
+ * alone, since requiring its baseline would impose an unsatisfiable success condition).
  */
 USTRUCT()
 struct FNTissueTagGroups
@@ -28,7 +30,7 @@ struct FNTissueTagGroups
 		BadNeighborsTags.AppendTags(OtherTagGroup.BadNeighborsTags);
 	}
 
-	/** Ensure each set contains its built-in baseline tag, adding it if missing. */
+	/** Ensure the Unique and BadNeighbors sets contain their built-in baseline tag, adding it if missing. */
 	void EnsureBaseTags()
 	{
 		// We don't want to assume the RequiredAny as it is a condition of success and it might not be in use.
@@ -45,12 +47,12 @@ struct FNTissueTagGroups
 	
 	/** Tags that limit placement to a single item from the group; built-in Unique tag is auto-added. */
 	UPROPERTY(EditAnywhere, DisplayName="Unique", meta = (Categories="NEXUS.WorldAssembly",
-		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.Behavior.Unique is auto-added to this group. NOTE: If combined with RequiredAny, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+		ToolTip="When a tag group is flagged as unique it means that only one item can be placed in the graph from that group. NEXUS.WorldAssembly.Behavior.Unique is auto-added to this group. NOTE: If combined with RequiredAny, per-cell MinimumCount does not apply to the group; success only requires that one member is present."))
 	FGameplayTagContainer UniqueTags;
 	
 	/** Tags that require at least one matching item to be placed during generation; built-in RequiredAny tag is auto-added. */
 	UPROPERTY(EditAnywhere, DisplayName="Required (Any)", meta = (Categories="NEXUS.WorldAssembly",
-		ToolTip="When a tag group is marked RequiredAny, it means that when generating we require something from that group to be placed in the graph.  NOTE: If combined with Unique, the MinimumCount will be ignored for all in the group, just ensuring that one is present."))
+		ToolTip="When a tag group is marked RequiredAny, it means that when generating we require something from that group to be placed in the graph.  NOTE: If combined with Unique, per-cell MinimumCount does not apply to the group; success only requires that one member is present."))
 	FGameplayTagContainer RequiredAnyTags;
 	
 	/** Tags marking items that cannot be placed adjacent to one another; built-in BadNeighbors tag is auto-added. */

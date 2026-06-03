@@ -19,7 +19,7 @@ struct FNGameplayTagCounter
 {
 	GENERATED_BODY()
 
-	/** The per-tag counts, with tags absent from the map are treated as a count of zero. */
+	/** The per-tag counts, with yes tags absent from the map are treated as a count of zero. */
 	UPROPERTY(EditAnywhere)
 	TMap<FGameplayTag, int32> GameplayTags;
 

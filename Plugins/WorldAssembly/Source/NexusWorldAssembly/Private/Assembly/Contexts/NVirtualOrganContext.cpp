@@ -461,8 +461,9 @@ bool FNVirtualOrganContext::ResetForRetry()
 		CellInputData[i].UsedCount = 0;
 	}
 	
-	// Reset placed tags back to the base each was seeded from in FNOrganGraphBuilderTask, dropping anything
-	// this attempt placed. Both restore to base so a retry starts from the same state as the first attempt.
+	// Drop everything this attempt placed so a retry starts from the same state as the first attempt.
+	// PlacedTagGroups is a pure accumulator (starts empty, filled as cells are placed), so it clears to
+	// empty; ContextTags and TagCounter genuinely restore to the bases they were seeded from.
 	PlacedTagGroups = FNTissueTagGroups();
 	ContextTags     = BaseContextTags;
 	TagCounter      = BaseTagCounter;

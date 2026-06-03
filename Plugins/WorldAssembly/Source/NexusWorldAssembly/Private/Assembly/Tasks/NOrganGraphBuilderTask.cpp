@@ -258,7 +258,14 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 			{
 				OrganContextPtr->ContextTags.AppendTags(StartCellInputData->ContextTagsAdded);
 			}
-			
+
+			// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
+			// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
+			for (int32 j = 0; j < StartCellInputData->TagCounterOperations.Num(); j++)
+			{
+				OrganContextPtr->TagCounter.ApplyOperation(StartCellInputData->TagCounterOperations[j]);
+			}
+
 			// Link our nodes
 			BoneNode->Link(StartNode);
 			StartNode->LinkJunction(TargetJunctionKey, BoneNode);
