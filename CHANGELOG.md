@@ -23,6 +23,7 @@
 - `UNOrganComponent::Seed` properly overrides Organs' assembly operation seed when value is not `-1`.
 - Side-car `NCell` asset is not loaded during cook process, restoring determinism.
 - `UNOrganComponent` custom-visualizer `Generate` button now refreshes accordingly after operations have finished.
+- `PktJitter` setting now properly applied to clients in `Multiplayer Test`.
 
 ### Removed
 

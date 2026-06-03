@@ -112,6 +112,11 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 	{
 		ClientArguments.Append(FString::Printf(TEXT(" -PktDup=%i"), ClientSimulatePacketDuplication));
 	}
+	
+	if (ClientSimulatePacketJitter > 0)
+	{
+		ClientArguments.Append(FString::Printf(TEXT(" -PktJitter=%i"), ClientSimulatePacketJitter));
+	}
 		
 	if (bClientSimulateReceiveOutOfOrderPackets)
 	{
