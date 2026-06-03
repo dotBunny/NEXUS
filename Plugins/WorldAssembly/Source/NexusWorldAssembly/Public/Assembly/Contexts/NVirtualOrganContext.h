@@ -10,6 +10,13 @@
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Types/NRotationConstraints.h"
 
+#if !UE_BUILD_SHIPPING
+#define N_VIRTUAL_ORGAN_MESSAGE(Message) \
+	Messages.Add(Message);
+#else
+#define N_VIRTUAL_ORGAN_MESSAGE(Message)
+#endif // !UE_BUILD_SHIPPING
+
 struct FNWorldOrganData;
 class UNOrganComponent;
 
@@ -130,6 +137,9 @@ public:
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };
+#if !UE_BUILD_SHIPPING
+	const TArray<FString>& GetMessages() const { return Messages; }
+#endif	
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
@@ -250,4 +260,7 @@ private:
 
 	/** Human-readable task name used in logs. */
 	FString Name;
+#if !UE_BUILD_SHIPPING
+	TArray<FString> Messages;
+#endif	
 };

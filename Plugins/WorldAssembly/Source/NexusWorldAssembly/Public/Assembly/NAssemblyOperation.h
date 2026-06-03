@@ -90,8 +90,8 @@ public:
 	FString OutputReportToFile()
 	{
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
-					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
+					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.txt"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
 		
 		Async(EAsyncExecution::TaskGraph,
 			[Output = MoveTemp(Output), OutputFile]()

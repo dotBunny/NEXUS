@@ -127,6 +127,8 @@ public:
 	 */
 	void OrganGraphBuilder_Init(int32 Index, const FString& Name, int32 MinimumCellCount, int32 MaximumCellCount, int32 MaximumRetryCount);
 
+	void OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages);
+	
 	/** Increment the AddNullNodes counter for the current iteration of the record at Index. */
 	void OrganGraphBuilder_AddNullNode(int32 Index);
 	/** Increment the AddCellNodes counter for the current iteration of the record at Index. */

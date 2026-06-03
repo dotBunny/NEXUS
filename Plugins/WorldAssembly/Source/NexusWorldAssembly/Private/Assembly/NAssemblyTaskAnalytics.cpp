@@ -44,6 +44,13 @@ void FNAssemblyTaskAnalytics::OrganGraphBuilder_Init(int32 Index, const FString&
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
 	Analytic.Name = Name;
 }
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.IterationMessages[Analytic.IterationsIndex].Append(Messages);
+}
+
 void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddNullNode(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
@@ -233,27 +240,34 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
 	
+	const int32 OrganOverviewTicket = Report->CreateContentBlock(AnalyticsContentTicket);
+	FNReportContentBlock* OrganOverviewContentBlock = Report->GetContentBlock(OrganOverviewTicket);
+	OrganOverviewContentBlock->SetHeading("Organ Overview");
 	
-	// Counters
-	const int32 CounterTableTicket = Report->CreateTableBlock(AnalyticsContentTicket);
-	FNReportTableBlock* CountersTableBlock = Report->GetTableBlock(CounterTableTicket);
-	CountersTableBlock->SetHeading("Counters");
-	CountersTableBlock->Initialize({ "Component", "Iteration", "Null Nodes", "Cell Nodes", "Finisher Capped", 
-		"False Start / Out Of Bounds", "False Start / World Colliding", 
-		"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
-		"Constraint / Non-Finisher" });
-	
-	int MaxIterations = 0;
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		if (Analytic.Iterations > MaxIterations)
-		{
-			MaxIterations = Analytic.Iterations;
-		}
+		// Header for Organ
+		const int32 OrganTicket = Report->CreateContentBlock(OrganOverviewTicket);
+		FNReportContentBlock* OrganContentBlock = Report->GetContentBlock(OrganTicket);
+		OrganContentBlock->SetHeading(Analytic.Name);
+		OrganContentBlock->AddLine(FString::Printf(TEXT("Iterations: %i"), Analytic.Iterations));
+		
 		for (int32 i = 0; i < Analytic.Iterations; i++)
 		{
+			const int32 OrganIterationTicket = Report->CreateContentBlock(OrganTicket);
+			FNReportContentBlock* OrganIterationContentBlock = Report->GetContentBlock(OrganIterationTicket);
+			OrganIterationContentBlock->SetHeading(FString::Printf(TEXT("Iteration: %i"), i));
+			
+			// Counters
+			const int32 CounterTableTicket = Report->CreateTableBlock(OrganIterationTicket);
+			FNReportTableBlock* CountersTableBlock = Report->GetTableBlock(CounterTableTicket);
+			CountersTableBlock->SetHeading("Counters");
+			CountersTableBlock->Initialize({ "Null Nodes", "Cell Nodes", "Finisher Capped", 
+				"False Start / Out Of Bounds", "False Start / World Colliding", 
+				"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
+				"Constraint / Non-Finisher" });
+			
 			CountersTableBlock->AddRow({ 
-				Analytic.Name, FString::FromInt(i), 
 				FString::FromInt(Analytic.AddNullNodes.Counter[i]), 
 				FString::FromInt(Analytic.AddCellNodes.Counter[i]),
 				FString::FromInt(Analytic.CappedWithFinisher.Counter[i]),
@@ -265,11 +279,19 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 				FString::FromInt(Analytic.DiscardOutOfBoundsCellNode.Counter[i]),
 				FString::FromInt(Analytic.DiscardDueToNonFinisherConstraint.Counter[i])
 			});
+			
+			// Message Log
+			const int32 IterationMessagesTicket = Report->CreateContentBlock(OrganIterationTicket);
+			FNReportContentBlock* IterationMessagesContentBlock = Report->GetContentBlock(IterationMessagesTicket);
+			IterationMessagesContentBlock->SetHeading("Message Log");
+			for (const FString& Message : Analytic.IterationMessages[i])
+			{
+				IterationMessagesContentBlock->AddLine(Message);
+			}
 		}
 	}
 	
 	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
-	Report->AddReplaceToken("{{ITERATIONS}}",  FString::FromInt(MaxIterations));
 }
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()

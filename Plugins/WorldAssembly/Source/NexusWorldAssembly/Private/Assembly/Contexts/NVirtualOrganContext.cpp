@@ -4,6 +4,7 @@
 #include "Assembly/Contexts/NVirtualOrganContext.h"
 
 #include "NWorldAssemblyMinimal.h"
+#include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
 #include "Collections/NWeightedIntegerArray.h"
@@ -186,7 +187,11 @@ bool FNVirtualOrganContext::CheckGraph()
 	int32 CellNodeCount = 0;
 	
 	// If we don't have a graph it's a fail
-	if (!CellGraph) return false;
+	if (!CellGraph)
+	{
+		N_VIRTUAL_ORGAN_MESSAGE("CheckGraph FAILED: Graph was null.")
+		return false;
+	}
 	
 	for (const auto Pair : CellGraph->GetNodes())
 	{
@@ -195,18 +200,20 @@ bool FNVirtualOrganContext::CheckGraph()
 			CellNodeCount++;
 		}
 	}
-	
+
 	// Enforce check for the minimum amount of cells wanted
 	if (MinimumCellCount > 0 && CellNodeCount < MinimumCellCount)
 	{
-		// Could log analytics about rejection based on cell count
+		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+			TEXT("CheckGraph FAILED: CellNodeCount(%i) < MinimumCellCount(%i)"), CellNodeCount, MinimumCellCount))
 		return false;
 	}
 	
 	// Enforce check for maximum amount of cells wanted
 	if (MaximumCellCount > 0 && CellNodeCount > MaximumCellCount)
 	{
-		// Could log analytics about rejection based on cell count
+		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+			TEXT("CheckGraph FAILED: CellNodeCount(%i) > MaximumCellCount(%i)"), CellNodeCount, MaximumCellCount))
 		return false;
 	}
 	
@@ -214,6 +221,9 @@ bool FNVirtualOrganContext::CheckGraph()
 	if (CellInputDataSummary.GroupTags.HasRequiredAnyTags() && !CellInputDataSummary.GroupTags.HasAllRequiredAnyTags(PlacedTagGroups.GetRequiredAnyTags()))
 	{
 		// Could log analytics about rejection based on required
+		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+			TEXT("CheckGraph FAILED: HasAllRequiredAnyTags(%s) != PlacedGroupTags(%s)"), 
+			*CellInputDataSummary.GroupTags.GetRequiredAnyTags().ToStringSimple(), *PlacedTagGroups.GetRequiredAnyTags().ToStringSimple()))
 		return false;
 	}
 	
@@ -226,6 +236,14 @@ bool FNVirtualOrganContext::CheckGraph()
 bool FNVirtualOrganContext::ValidateGraph()
 {
 	bSuccessful = CheckGraph();
+	if (!bSuccessful)
+	{
+		Messages.Add("ValidateGraph FAILED!");
+	}
+	else
+	{
+		Messages.Add("ValidateGraph Passed.");
+	}
 	return bSuccessful;
 }
 
@@ -455,6 +473,7 @@ bool FNVirtualOrganContext::ResetForRetry()
 	}
 	
 	RetryCount++;
+	Messages.Empty();
 	
 	if (RetryCount > MaximumRetryCount)
 	{

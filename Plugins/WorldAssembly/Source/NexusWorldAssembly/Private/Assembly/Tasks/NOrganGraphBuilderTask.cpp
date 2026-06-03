@@ -113,6 +113,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// but only if we have not run out of attempts.
 		if (!OrganContextPtr->ValidateGraph())
 		{
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_AddMessages, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetMessages())
+			
 			if (!OrganContextPtr->ResetForRetry())
 			{
 				// We cant retry we're going to have to break
@@ -121,6 +123,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			
 			// Prepare analytics for another pass
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_NextIteration)
+		}
+		else
+		{
+			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_AddMessages, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetMessages())
 		}
 	}
 	

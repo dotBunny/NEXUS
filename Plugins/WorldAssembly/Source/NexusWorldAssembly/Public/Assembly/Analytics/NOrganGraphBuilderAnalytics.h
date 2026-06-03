@@ -23,6 +23,7 @@ struct FNOrganGraphBuilderAnalytics
 
 	/** Total number of build iterations consumed (1 + retries). */
 	int32 Iterations = 1;
+	int32 IterationsIndex = 0;
 
 	/** Count of null-terminator nodes added per iteration. */
 	FNIterationCounter AddNullNodes;
@@ -53,11 +54,19 @@ struct FNOrganGraphBuilderAnalytics
 
 	/** Number of graph branches closed off by placing a finisher cell. */
 	FNIterationCounter CappedWithFinisher;
+	
+	TMap<int32, TArray<FString>> IterationMessages = {
+		{ 0, TArray<FString>() }
+	};
 
 	/** Advance every contained counter to the next iteration slot and bump Iterations. */
 	void NextIteration()
 	{
 		Iterations++;
+		IterationsIndex++;
+		IterationMessages.Add(IterationsIndex, TArray<FString>());
+		
+		
 		AddNullNodes.NextIteration();
 		AddCellNodes.NextIteration();
 
