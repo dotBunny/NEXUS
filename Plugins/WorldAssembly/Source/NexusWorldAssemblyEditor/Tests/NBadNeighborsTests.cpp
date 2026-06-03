@@ -33,7 +33,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNBadNeighborsHarness
 	static FNTissueTagGroups MakeRegistry(const FGameplayTagContainer& BadNeighborGroups)
 	{
 		FNTissueTagGroups Groups;
-		Groups.AppendBadNeighborsTags(BadNeighborGroups);
+		Groups.BadNeighborsTags.AppendTags(BadNeighborGroups);
 		return Groups;
 	}
 

@@ -118,14 +118,14 @@ N_TEST_HIGH(FNResetForRetryTests_ResetForRetry_ClearsPlacedTagGroups,
 	FNVirtualOrganContext Context(1234ull, TEXT("ResetForRetryTest"));
 	Context.MaximumRetryCount = 4;
 
-	Context.PlacedTagGroups.AppendUniqueTags(FGameplayTagContainer(UniqueTag()));
+	Context.PlacedTagGroups.UniqueTags.AppendTags(FGameplayTagContainer(UniqueTag()));
 	CHECK_MESSAGE(TEXT("Sanity: the unique tag should be present before the reset."),
-		Context.PlacedTagGroups.HasAnyUniqueTags(FGameplayTagContainer(UniqueTag())))
+		Context.PlacedTagGroups.UniqueTags.HasAnyExact(FGameplayTagContainer(UniqueTag())))
 
 	Context.ResetForRetry();
 
 	CHECK_FALSE_MESSAGE(TEXT("PlacedTagGroups must be empty after a reset."),
-		Context.PlacedTagGroups.HasAnyUniqueTags(FGameplayTagContainer(UniqueTag())))
+		Context.PlacedTagGroups.UniqueTags.HasAnyExact(FGameplayTagContainer(UniqueTag())))
 }
 
 N_TEST_HIGH(FNResetForRetryTests_ResetForRetry_ClearsGraph,

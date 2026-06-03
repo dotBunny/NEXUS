@@ -218,12 +218,13 @@ bool FNVirtualOrganContext::CheckGraph()
 	}
 	
 	// We need to check that each of the RequiredAny groups are met
-	if (CellInputDataSummary.GroupTags.HasRequiredAnyTags() && !CellInputDataSummary.GroupTags.HasAllRequiredAnyTags(PlacedTagGroups.GetRequiredAnyTags()))
+	if (!CellInputDataSummary.GroupTags.RequiredAnyTags.IsEmpty() && 
+		!PlacedTagGroups.RequiredAnyTags.HasAllExact(CellInputDataSummary.GroupTags.RequiredAnyTags))
 	{
 		// Could log analytics about rejection based on required
 		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
 			TEXT("CheckGraph FAILED: HasAllRequiredAnyTags(%s) != PlacedGroupTags(%s)"), 
-			*CellInputDataSummary.GroupTags.GetRequiredAnyTags().ToStringSimple(), *PlacedTagGroups.GetRequiredAnyTags().ToStringSimple()))
+			*CellInputDataSummary.GroupTags.RequiredAnyTags.ToStringSimple(), *PlacedTagGroups.RequiredAnyTags.ToStringSimple()))
 		return false;
 	}
 	
@@ -250,9 +251,9 @@ bool FNVirtualOrganContext::ValidateGraph()
 FGameplayTagContainer FNVirtualOrganContext::ResolveSourceBadNeighborTags(const FNTissueTagGroups& GroupTags, FNAssemblyGraphCellNode* SourceCellNode)
 {
 	FGameplayTagContainer SourceBadNeighborTags;
-	if (SourceCellNode != nullptr && GroupTags.HasBadNeighborsTags())
+	if (SourceCellNode != nullptr && !GroupTags.BadNeighborsTags.IsEmpty())
 	{
-		SourceBadNeighborTags = GroupTags.FilterBadNeighborsTags(SourceCellNode->GetAssemblyTags());
+		SourceBadNeighborTags = SourceCellNode->GetAssemblyTags().FilterExact(GroupTags.BadNeighborsTags);
 	}
 	return SourceBadNeighborTags;
 }
@@ -368,7 +369,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 		}
 		
 		// CHECK UNIQUE TAGS
-		if (PlacedTagGroups.HasAnyUniqueTags(CellData->AssemblyTags))
+		if (PlacedTagGroups.UniqueTags.HasAnyExact(CellData->AssemblyTags))
 		{
 			continue;
 		}

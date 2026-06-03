@@ -167,19 +167,19 @@ N_TEST_HIGH(FNCheckGraphTests_CheckGraph_RequiredAnyTagsEnforced,
 	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
 	Context.MinimumCellCount = 1;
 	BuildGraph(Context, Cells, 2);
-	Context.CellInputDataSummary.GroupTags.AppendRequiredAnyTags(FGameplayTagContainer(Configured));
+	Context.CellInputDataSummary.GroupTags.RequiredAnyTags.AppendTags(FGameplayTagContainer(Configured));
 
 	// Nothing placed for the required group: the requirement is unmet and the graph must be rejected.
 	CHECK_FALSE_MESSAGE(TEXT("A required-any group with nothing placed must fail the check."),
 		Context.CheckGraph())
 
 	// Only an unrelated tag placed: still does not satisfy the configured requirement.
-	Context.PlacedTagGroups.AppendRequiredAnyTags(FGameplayTagContainer(Foreign));
+	Context.PlacedTagGroups.RequiredAnyTags.AppendTags(FGameplayTagContainer(Foreign));
 	CHECK_FALSE_MESSAGE(TEXT("An unrelated placed tag must not satisfy a required-any group."),
 		Context.CheckGraph())
 
 	// The configured required tag is now placed: the requirement is satisfied.
-	Context.PlacedTagGroups.AppendRequiredAnyTags(FGameplayTagContainer(Configured));
+	Context.PlacedTagGroups.RequiredAnyTags.AppendTags(FGameplayTagContainer(Configured));
 	CHECK_MESSAGE(TEXT("Placing the configured required-any tag must satisfy the check."),
 		Context.CheckGraph())
 }

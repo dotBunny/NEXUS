@@ -188,7 +188,7 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_PlacedUniqueTagGates,
 	Context.CellInputData.Add(Untagged);
 
 	// Mark the tag as already placed (and therefore exhausted) in the graph so far.
-	Context.PlacedTagGroups.AppendUniqueTags(FGameplayTagContainer(UniqueTag));
+	Context.PlacedTagGroups.UniqueTags.AppendTags(FGameplayTagContainer(UniqueTag));
 
 	FNWeightedIntegerArray CellIndices;
 	TMap<int32, TArray<int32>> JunctionIndices;
