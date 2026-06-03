@@ -146,7 +146,21 @@ public:
 	 * @note The result is flagged Chaos-generated and convex; bounds and center are computed directly from the hull output.
 	 */
 	static FNRawMesh ToConvexHull(const FNRawMesh& Mesh);
-	
+
+	/**
+	 * Builds a valid, outward-wound convex box hull spanning the axis-aligned Box.
+	 *
+	 * Emits a hull shaped like the ones production paths produce (e.g. FNWorldAssemblyUtils::CalculateConvexHull):
+	 * both a polygonal FaceLoops description and a matching triangulated Loops buffer, plus populated Center/Bounds.
+	 * Every face is wound so its normal points away from the box interior, which is what the plane-side convexity
+	 * test in FNRawMesh::CheckConvex requires (all other vertices must sit on or behind each face plane).
+	 *
+	 * @param Box Axis-aligned bounds the hull should span.
+	 * @return A convex box hull with 8 vertices, 6 quad FaceLoops, 12 triangle Loops, populated Center/Bounds,
+	 *         and validated convexity flags (IsConvex() reports true without further mutation).
+	 */
+	static FNRawMesh MakeBoxHull(const FBox& Box);
+
 	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.
 	 *

@@ -10,6 +10,7 @@
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
 #include "Cell/NTissueTagGroups.h"
 #include "GameplayTagContainer.h"
+#include "Types/NRawMeshUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -34,6 +35,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness
 	{
 		FNVirtualCellData Cell;
 		Cell.CellDetails.Bounds = FBox(FVector(-100.0), FVector(100.0));
+		Cell.CellDetails.Hull = FNRawMeshUtils::MakeBoxHull(Cell.CellDetails.Bounds);
 		Cell.Junctions.Add(0, FNCellJunctionDetails());
 		return Cell;
 	}

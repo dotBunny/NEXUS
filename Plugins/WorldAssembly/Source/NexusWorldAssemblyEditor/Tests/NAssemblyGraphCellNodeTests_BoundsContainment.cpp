@@ -8,7 +8,7 @@
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
-#include "Types/NRawMesh.h"
+#include "Types/NRawMeshUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -27,13 +27,10 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNBoundsContainmentHarness
 		FNVirtualCellData Cell;
 		const FBox Box(Min, Max);
 		Cell.CellDetails.Bounds = Box;
-
-		TStaticArray<FVector, 8> Corners;
-		Box.GetVertices(Corners.Elements);
-		for (const FVector& Corner : Corners)
-		{
-			Cell.CellDetails.Hull.Vertices.Add(Corner);
-		}
+		// A full convex box hull (faces + triangulation), matching the shape production hulls arrive in, so the
+		// cell-node constructor's IsConvex()/EnsureCachedFacePlanes() path runs cleanly instead of warning on a
+		// vertex-only hull. The 8 hull vertices are still exactly the box corners the containment checks expect.
+		Cell.CellDetails.Hull = FNRawMeshUtils::MakeBoxHull(Box);
 		return Cell;
 	}
 

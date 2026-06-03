@@ -239,11 +239,11 @@ bool FNVirtualOrganContext::ValidateGraph()
 	bSuccessful = CheckGraph();
 	if (!bSuccessful)
 	{
-		Messages.Add("ValidateGraph FAILED!");
+		N_VIRTUAL_ORGAN_MESSAGE("ValidateGraph FAILED!");
 	}
 	else
 	{
-		Messages.Add("ValidateGraph Passed.");
+		N_VIRTUAL_ORGAN_MESSAGE("ValidateGraph Passed.");
 	}
 	return bSuccessful;
 }
@@ -475,7 +475,9 @@ bool FNVirtualOrganContext::ResetForRetry()
 	}
 	
 	RetryCount++;
+#if !UE_BUILD_SHIPPING	
 	Messages.Empty();
+#endif // !UE_BUILD_SHIPPING	
 	
 	if (RetryCount > MaximumRetryCount)
 	{

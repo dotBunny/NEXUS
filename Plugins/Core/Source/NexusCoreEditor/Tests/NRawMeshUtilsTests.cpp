@@ -1551,4 +1551,63 @@ N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BakedPoint_Rotated_Matches
 		FMath::IsNearlyEqual(Depth, Reference, 0.001f));
 }
 
+N_TEST_CRITICAL(FNRawMeshUtilsTests_MakeBoxHull_Topology_EightVertsSixQuadsTwelveTris,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::Topology_EightVertsSixQuadsTwelveTris",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A box hull must carry the full production-shaped topology: 8 corners, 6 quad FaceLoops, 12 triangle Loops.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_EQUALS("Box hull must have 8 vertices.", Hull.Vertices.Num(), 8)
+	CHECK_EQUALS("Box hull must have 6 polygonal faces.", Hull.FaceLoops.Num(), 6)
+	CHECK_EQUALS("Box hull must have 12 triangle loops.", Hull.Loops.Num(), 12)
+
+	for (const FNRawMeshLoop& Face : Hull.FaceLoops)
+	{
+		CHECK_MESSAGE(TEXT("Every FaceLoop on a box hull must be a quad."), Face.IsQuad())
+	}
+	for (const FNRawMeshLoop& Loop : Hull.Loops)
+	{
+		CHECK_MESSAGE(TEXT("Every Loop on a box hull must be a triangle."), Loop.IsTriangle())
+	}
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_MakeBoxHull_IsConvex_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::IsConvex_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The emitted faces are outward-wound, so the hull must pass CheckConvex without tripping the
+	// "no vertices or loops" warning a vertex-only hull would produce.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_MESSAGE(TEXT("A box hull must report convex."), Hull.IsConvex())
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_MakeBoxHull_BoundsAndCenterMatchInput,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::BoundsAndCenterMatchInput",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Bounds must equal the requested box and Center its midpoint, both computed from the emitted corners.
+	const FBox Box(FVector(-20.0, -30.0, -40.0), FVector(60.0, 50.0, 10.0));
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(Box);
+
+	CHECK_MESSAGE(TEXT("Box hull bounds min must match the input box."), Hull.Bounds.Min.Equals(Box.Min))
+	CHECK_MESSAGE(TEXT("Box hull bounds max must match the input box."), Hull.Bounds.Max.Equals(Box.Max))
+	CHECK_MESSAGE(TEXT("Box hull center must be the box midpoint."), Hull.Center.Equals(Box.GetCenter()))
+}
+
+N_TEST_MEDIUM(FNRawMeshUtilsTests_MakeBoxHull_ContainsCenterNotFarPoint,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::ContainsCenterNotFarPoint",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The convex-path point test must place the box centre inside and a far point outside, proving the
+	// emitted face winding yields correct (outward) half-spaces.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_MESSAGE(TEXT("The box centre must be inside the hull."),
+		FNRawMeshUtils::IsRelativePointInside(Hull, FVector::ZeroVector))
+	CHECK_FALSE_MESSAGE(TEXT("A point well outside the box must not be inside the hull."),
+		FNRawMeshUtils::IsRelativePointInside(Hull, FVector(1000.0, 0.0, 0.0)))
+}
+
 #endif //WITH_TESTS

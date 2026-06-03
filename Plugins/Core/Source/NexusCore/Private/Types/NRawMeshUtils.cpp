@@ -526,6 +526,51 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	return MoveTemp(Result);
 }
 
+FNRawMesh FNRawMeshUtils::MakeBoxHull(const FBox& Box)
+{
+	const FVector Min = Box.Min;
+	const FVector Max = Box.Max;
+
+	FNRawMesh Hull;
+	Hull.Vertices = {
+		FVector(Min.X, Min.Y, Min.Z), // 0
+		FVector(Max.X, Min.Y, Min.Z), // 1
+		FVector(Max.X, Max.Y, Min.Z), // 2
+		FVector(Min.X, Max.Y, Min.Z), // 3
+		FVector(Min.X, Min.Y, Max.Z), // 4
+		FVector(Max.X, Min.Y, Max.Z), // 5
+		FVector(Max.X, Max.Y, Max.Z), // 6
+		FVector(Min.X, Max.Y, Max.Z), // 7
+	};
+
+	// Polygonal faces, each wound so its Newell normal points away from the box interior.
+	Hull.FaceLoops = {
+		FNRawMeshLoop(0, 3, 2, 1), // -Z bottom
+		FNRawMeshLoop(4, 5, 6, 7), // +Z top
+		FNRawMeshLoop(0, 1, 5, 4), // -Y front
+		FNRawMeshLoop(1, 2, 6, 5), // +X right
+		FNRawMeshLoop(2, 3, 7, 6), // +Y back
+		FNRawMeshLoop(3, 0, 4, 7), // -X left
+	};
+
+	// Matching fan triangulation (a,b,c,d -> a,b,c + a,c,d) preserving each face's outward winding.
+	Hull.Loops = {
+		FNRawMeshLoop(0, 3, 2), FNRawMeshLoop(0, 2, 1),
+		FNRawMeshLoop(4, 5, 6), FNRawMeshLoop(4, 6, 7),
+		FNRawMeshLoop(0, 1, 5), FNRawMeshLoop(0, 5, 4),
+		FNRawMeshLoop(1, 2, 6), FNRawMeshLoop(1, 6, 5),
+		FNRawMeshLoop(2, 3, 7), FNRawMeshLoop(2, 7, 6),
+		FNRawMeshLoop(3, 0, 4), FNRawMeshLoop(3, 4, 7),
+	};
+
+	Hull.CalculateCenterAndBounds();
+	// Eagerly compute the convexity / non-tri flags. The buffers were assigned directly (bypassing the
+	// mutators that would mark validation dirty), so without this the cached flags stay at their stale
+	// defaults and IsConvex() would report false until some later mutation invalidated them.
+	Hull.Validate();
+	return Hull;
+}
+
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
 {
 	if (Mesh.HasNonTris())

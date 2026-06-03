@@ -10,9 +10,7 @@
 #include "NGameplayTagCounter.generated.h"
 
 /**
- * Tracks a running integer count per FGameplayTag.
- *
- * Used to accumulate how many times each tag has been seen, supporting increment, decrement, and merge operations.
+ * Tracks a running integer count per FGameplayTag that can never go below zero.
  */
 USTRUCT(BlueprintType)
 struct FNGameplayTagCounter
@@ -34,7 +32,11 @@ struct FNGameplayTagCounter
 	 */
 	explicit FNGameplayTagCounter(const TMap<FGameplayTag, int32>& ExistingCounters)
 	{
-		GameplayTags.Append(ExistingCounters);
+		GameplayTags.Reserve(GameplayTags.Num() + ExistingCounters.Num());
+		for (auto& Pair : ExistingCounters)
+		{
+			GameplayTags.Add(Pair.Key, FMath::Max(Pair.Value, 0));
+		}
 	}
 	
 	/**
@@ -106,7 +108,9 @@ struct FNGameplayTagCounter
 		{
 			GameplayTags.Add(Tag);
 		}
-		GameplayTags[Tag] += Value;
+		
+		// Ensure we never go below zero
+		GameplayTags[Tag] = FMath::Max(GameplayTags[Tag] + Value, 0);
 	}
 
 	/**
@@ -120,39 +124,9 @@ struct FNGameplayTagCounter
 		{
 			GameplayTags.Add(Tag);
 		}
-		GameplayTags[Tag] -= Value;
-	}
-
-	/**
-	 * Multiplies the count for a tag by a value, adding the tag (starting from zero) if it is not already tracked.
-	 * @param Tag The tag whose count should be multiplied.
-	 * @param Value The factor to multiply the tag's current count by.
-	 * @note Multiplying a freshly-added tag yields zero, since absent tags start at a count of zero.
-	 */
-	void Multiply(const FGameplayTag& Tag, const int32 Value)
-	{
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}
-		GameplayTags[Tag] *= Value;
-	}
-
-	/**
-	 * Divides the count for a tag by a value, adding the tag (starting from zero) if it is not already tracked.
-	 * @param Tag The tag whose count should be divided.
-	 * @param Value The divisor to divide the tag's current count by.
-	 */
-	void Divide(const FGameplayTag& Tag, const int32 Value)
-	{
-		// Protect against divide by zero bs
-		if (Value == 0) return;
 		
-		if (!GameplayTags.Contains(Tag))
-		{
-			GameplayTags.Add(Tag);
-		}
-		GameplayTags[Tag] /= Value;
+		// Ensure we never go below zero
+		GameplayTags[Tag] = FMath::Max(GameplayTags[Tag] - Value, 0);
 	}
 	
 	/**

@@ -8,6 +8,7 @@
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
+#include "Types/NRawMeshUtils.h"
 #include "Macros/NTestMacros.h"
 #include "Tests/TestHarnessAdapter.h"
 
@@ -18,6 +19,7 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphHarness
 	{
 		FNVirtualCellData Cell;
 		Cell.CellDetails.Bounds = FBox(FVector(-100.0), FVector(100.0));
+		Cell.CellDetails.Hull = FNRawMeshUtils::MakeBoxHull(Cell.CellDetails.Bounds);
 		for (int32 i = 0; i < JunctionCount; i++)
 		{
 			Cell.Junctions.Add(i, FNCellJunctionDetails());
