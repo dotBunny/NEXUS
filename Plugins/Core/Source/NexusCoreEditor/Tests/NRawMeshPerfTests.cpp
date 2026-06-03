@@ -336,6 +336,86 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
+
+	/**
+	 * Deep copy of a ~224-tri sphere hull whose face-plane cache is already warm — the isolated cost of the
+	 * `Hull = InputData->CellDetails.Hull;` line in FNAssemblyGraphCellNode's constructor. Each iteration copies
+	 * into a fresh (empty) destination so every Vertices / Loops / cached-plane array is allocated from scratch,
+	 * mirroring the per-candidate `new` node the graph builder churns through. The destinations escape into a
+	 * pre-sized array so the compiler cannot elide the member copies it never reads back.
+	 */
+	static void CopyConstruct_HullMedium()
+	{
+		FNRawMesh Source = NEXUS::PerfTests::NCore::FNRawMeshHarness::MakeSphere(50.0, 16, 8);
+		// Warm the source cache so the copy actually pays to duplicate the cached face-plane arrays.
+		Source.EnsureCachedFacePlanes();
+
+		TArray<FNRawMesh> Dest;
+		Dest.SetNum(NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumIterations);
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshPerfTests_CopyConstruct_HullMedium,
+				NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumIterations; ++i)
+			{
+				Dest[i] = Source;
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/** Same isolated copy cost as CopyConstruct_HullMedium but for a 12-tri Chaos box — the most common cell hull. */
+	static void CopyConstruct_Box()
+	{
+		FNRawMesh Source = NEXUS::PerfTests::NCore::FNRawMeshHarness::MakeChaosBox(10.0);
+		Source.EnsureCachedFacePlanes();
+
+		TArray<FNRawMesh> Dest;
+		Dest.SetNum(NEXUS::PerfTests::NCore::FNRawMeshHarness::SmallIterations);
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshPerfTests_CopyConstruct_Box,
+				NEXUS::PerfTests::NCore::FNRawMeshHarness::SmallMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshHarness::SmallIterations; ++i)
+			{
+				Dest[i] = Source;
+			}
+			NTestTimer.ManualStop();
+		}
+	}
+
+	/**
+	 * Full FNAssemblyGraphCellNode hull-bake pattern on a ~224-tri sphere: copy the template hull, bake a world
+	 * transform into it, then re-cache the face planes for the convex fast path. This is the realistic per-candidate
+	 * cost the graph builder pays; the copy is one component, the transform + recache are the rest.
+	 */
+	static void BakeHull_HullMedium()
+	{
+		FNRawMesh Source = NEXUS::PerfTests::NCore::FNRawMeshHarness::MakeSphere(50.0, 16, 8);
+		Source.EnsureCachedFacePlanes();
+		const FTransform WorldTransform(FRotator(15.0, 30.0, 45.0), FVector(100.0, 200.0, 300.0));
+
+		TArray<FNRawMesh> Dest;
+		Dest.SetNum(NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumIterations);
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(FNRawMeshPerfTests_BakeHull_HullMedium,
+				NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NCore::FNRawMeshHarness::MediumIterations; ++i)
+			{
+				Dest[i] = Source;
+				Dest[i].ApplyTransform(WorldTransform);
+				if (Dest[i].IsConvex())
+				{
+					Dest[i].EnsureCachedFacePlanes();
+				}
+			}
+			NTestTimer.ManualStop();
+		}
+	}
 };
 
 N_TEST_PERF(FNRawMeshPerfTests_Validate_Box,
@@ -434,6 +514,33 @@ N_TEST_PERF(FNRawMeshPerfTests_RotatedAroundPivot_HullLarge,
 {
 	N_TESTS_PERF_START_LATENT_TEST
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshPerfTests::RotatedAroundPivot_HullLarge));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshPerfTests_CopyConstruct_HullMedium,
+	"NEXUS::PerfTests::NCore::FNRawMesh::CopyConstruct_HullMedium",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshPerfTests::CopyConstruct_HullMedium));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshPerfTests_CopyConstruct_Box,
+	"NEXUS::PerfTests::NCore::FNRawMesh::CopyConstruct_Box",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshPerfTests::CopyConstruct_Box));
+	N_TESTS_PERF_FINISH_LATENT_TEST
+}
+
+N_TEST_PERF(FNRawMeshPerfTests_BakeHull_HullMedium,
+	"NEXUS::PerfTests::NCore::FNRawMesh::BakeHull_HullMedium",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	N_TESTS_PERF_START_LATENT_TEST
+	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNRawMeshPerfTests::BakeHull_HullMedium));
 	N_TESTS_PERF_FINISH_LATENT_TEST
 }
 

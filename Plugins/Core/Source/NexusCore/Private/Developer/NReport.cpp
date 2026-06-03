@@ -8,38 +8,36 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
-#define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage) \
+#define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage, BlockTypeTag) \
 	const int32 BlockTicket = ++BlockTickets; \
 	BlockStorage.Add(BlockTicket, BlockType(BlockTicket)); \
 	BlockType* Block = BlockStorage.Find(BlockTicket); \
-	const int ParentLevel = GetLevel(ParentTicket); \
+	const FBlockMeta* ParentMeta = BlockMeta.Find(ParentTicket); \
+	const int32 ParentLevel = ParentMeta != nullptr ? ParentMeta->Level : 0; \
 	Block->Level = ParentLevel + 1; \
 	Block->Priority = OrderPriority; \
-	if (!ChildrenMap.Contains(ParentTicket)) \
-	{ \
-		ChildrenMap.Add(ParentTicket, TArray<int32>()); \
-	} \
-	TArray<int32>& Children = ChildrenMap[ParentTicket]; \
+	BlockMeta.Add(BlockTicket, FBlockMeta{ BlockTypeTag, ParentLevel + 1, OrderPriority }); \
+	TArray<FChildEntry>& Children = ChildrenMap.FindOrAdd(ParentTicket); \
 	int32 InsertIndex = Children.Num(); \
 	for (int32 i = 0; i < Children.Num(); i++) \
 	{ \
-		if (GetPriority(Children[i]) > OrderPriority) \
+		if (Children[i].Priority > OrderPriority) \
 		{ \
 			InsertIndex = i; \
 			break; \
 		} \
 	} \
-	Children.Insert(BlockTicket, InsertIndex); \
+	Children.Insert(FChildEntry{ BlockTicket, OrderPriority }, InsertIndex); \
 	return BlockTicket;
 
 int32 FNReport::CreateContentBlock(const int32 ParentTicket, const int32 OrderPriority)
 {
-	N_REPORT_CREATE_BLOCK(FNReportContentBlock, ContentBlocks)
+	N_REPORT_CREATE_BLOCK(FNReportContentBlock, ContentBlocks, EBlockType::Content)
 }
 
 int32 FNReport::CreateTableBlock(const int32 ParentTicket, const int32 OrderPriority)
 {
-	N_REPORT_CREATE_BLOCK(FNReportTableBlock, TableBlocks)
+	N_REPORT_CREATE_BLOCK(FNReportTableBlock, TableBlocks, EBlockType::Table)
 }
 
 FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
@@ -118,52 +116,30 @@ void FNReport::OutputToFile(const FString& FilePath, const ENReportOutputFormat 
 
 int32 FNReport::GetPriority(const int32 Ticket)
 {
-	const FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
-	{
-		return ContentBlock->GetPriority();
-	}
-		
-	const FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
-	{
-		return TableBlock->GetPriority();
-	}
-		
-	return 0;
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	return Meta != nullptr ? Meta->Priority : 0;
 }
 
 int32 FNReport::GetLevel(const int32 Ticket)
 {
-	const FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
-	{
-		return ContentBlock->GetLevel();
-	}
-		
-	const FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
-	{
-		return TableBlock->GetLevel();
-	}
-		
-	return 0;
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	return Meta != nullptr ? Meta->Level : 0;
 }
 
 void FNReport::GetOrderedBlocks(const int32 TargetTicket, TArray<int32>& Output, const bool bIncludeChildren)
 {
-	const TArray<int32>* Children = ChildrenMap.Find(TargetTicket);
+	const TArray<FChildEntry>* Children = ChildrenMap.Find(TargetTicket);
 	if (Children == nullptr)
 	{
 		return;
 	}
 
-	for (const int32 ChildTicket : *Children)
+	for (const FChildEntry& Child : *Children)
 	{
-		Output.Add(ChildTicket);
+		Output.Add(Child.Ticket);
 		if (bIncludeChildren)
 		{
-			GetOrderedBlocks(ChildTicket, Output, true);
+			GetOrderedBlocks(Child.Ticket, Output, true);
 		}
 	}
 }
@@ -171,15 +147,19 @@ void FNReport::GetOrderedBlocks(const int32 TargetTicket, TArray<int32>& Output,
 
 void FNReport::RenderBlock(const int32 Ticket, TArray<FString>& Output, const ENReportOutputFormat OutputFormat)
 {
-	FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	if (Meta == nullptr)
 	{
-		return ContentBlock->Render(*this, Output, OutputFormat);
+		return;
 	}
-		
-	FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
+
+	switch (Meta->Type)
 	{
-		return TableBlock->Render(*this, Output, OutputFormat);
+	case EBlockType::Content:
+		ContentBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+	case EBlockType::Table:
+		TableBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
 	}
 }

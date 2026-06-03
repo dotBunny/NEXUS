@@ -104,14 +104,35 @@ protected:
 
 
 private:
+	/** Discriminates which storage map owns a ticket so dispatch resolves a block with a single targeted lookup. */
+	enum class EBlockType : uint8 { Content, Table };
+
+	/** Per-ticket dispatch and ordering metadata, kept out of the block storage so lookups touch a single small map. */
+	struct FBlockMeta
+	{
+		EBlockType Type = EBlockType::Content;
+		int32 Level = 0;
+		int32 Priority = 0;
+	};
+
+	/** A child reference carrying its priority inline so sibling insertion sorts without any per-comparison map lookup. */
+	struct FChildEntry
+	{
+		int32 Ticket = 0;
+		int32 Priority = 0;
+	};
+
 	/** Storage for every content block in the report, keyed by block ticket. */
 	TMap<int32, FNReportContentBlock> ContentBlocks;
 
 	/** Storage for every table block in the report, keyed by block ticket. */
 	TMap<int32, FNReportTableBlock> TableBlocks;
 
-	/** Parent ticket -> ordered child tickets; the root's children live under key 0. */
-	TMap<int32, TArray<int32>> ChildrenMap;
+	/** Ticket -> dispatch/ordering metadata for every block, regardless of which storage map holds the block itself. */
+	TMap<int32, FBlockMeta> BlockMeta;
+
+	/** Parent ticket -> ordered child entries; the root's children live under key 0. */
+	TMap<int32, TArray<FChildEntry>> ChildrenMap;
 	
 	int32 ShortestReplaceToken = MAX_int32;
 	TMap<FString, FString> ReplaceTokens;
