@@ -31,6 +31,12 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 	FTransform WorldTransform(Params.WorldRotation, Params.WorldPosition);
 	Hull.ApplyTransform(WorldTransform);
 	
+	// Cache optimized collision data for convex hulls ahead of any checks
+	if (Hull.IsConvex())
+	{
+		Hull.EnsureCachedFacePlanes();
+	}
+	
 	// Copy our voxel data and rotate it into its new world-space position/rotation
 	// TODO: Right now we dont actually use the VoxelData for anything so lets not pay for the rotation until we need it, not assigning the data to cause an error later so we know.
 	//WorldVoxel = InputData->CellDetails.VoxelData;
