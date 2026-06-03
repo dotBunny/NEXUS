@@ -16,6 +16,8 @@
 - `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
 - GameplayTags renamed `NEXUS.WorldAssembly.BuiltIn.*` to `NEXUS.WorldAssembly.Behavior.*`.
 - `OutputTags` was moved to a more encompassing `ContextTags`.
+- `FNGameplayTagCounter` does not allow for negative counter values.
+- `FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance` now always renders the distance underneath the `UNCellJunctionComponent`.
 
 ### Fixed
 
