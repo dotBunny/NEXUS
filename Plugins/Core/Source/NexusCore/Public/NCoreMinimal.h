@@ -17,7 +17,7 @@ namespace NEXUS::Version
 	constexpr int32 Number = 13;
 	constexpr int32 Major = 0;
 	constexpr int32 Minor = 3;
-	constexpr int32 Patch = 5;
+	constexpr int32 Patch = 1;
 }
 
 namespace NEXUS::Multiplayer
