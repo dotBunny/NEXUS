@@ -7,6 +7,11 @@
 FNAssemblyGraph::FNAssemblyGraph(FNAssemblyGraphNode* RootNodePtr, const FVector& Origin, const FBoxSphereBounds& Bounds, const bool bUnbounded)
 : bUnbounded(bUnbounded), Bounds(Bounds), Origin(Origin), RootNode(RootNodePtr)
 {
+	// Root is added directly rather than through RegisterNode, so seed the cached cell count to match.
+	if (RootNodePtr != nullptr && RootNodePtr->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+	{
+		CellNodeCount++;
+	}
 	Nodes.Add(RootNodePtr);
 }
 
@@ -32,6 +37,7 @@ void FNAssemblyGraph::RegisterNode(FNAssemblyGraphNode* Node)
 	// LinkJunction) keeps UsedCount aligned with placed instances, not junction connections.
 	if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
 	{
+		CellNodeCount++;
 		if (FNVirtualCellData* InputData = static_cast<FNAssemblyGraphCellNode*>(Node)->GetInputDataPtr())
 		{
 			InputData->UsedCount++;
@@ -47,6 +53,7 @@ void FNAssemblyGraph::UnregisterNode(FNAssemblyGraphNode* Node)
 	// Mirror of RegisterNode: the instance ends when the node leaves the graph.
 	if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
 	{
+		CellNodeCount--;
 		if (FNVirtualCellData* InputData = static_cast<FNAssemblyGraphCellNode*>(Node)->GetInputDataPtr())
 		{
 			InputData->UsedCount--;
