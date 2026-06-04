@@ -240,7 +240,7 @@ public:
 	 * @return true/false if the world is not operating in NM_Client mode.
 	 */	
 	UFUNCTION(BlueprintCallable, DisplayName = "Is Server", Category = "NEXUS|Multiplayer",
-		meta = (WorldContext = "WorldContextObject", ExpandBoolAsExecs="ReturnValue", DocsURL="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/#is-server"))
+		meta = (WorldContext = "WorldContextObject", DocsURL="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/#is-server"))
 	static bool IsServer(UObject* WorldContextObject)
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
