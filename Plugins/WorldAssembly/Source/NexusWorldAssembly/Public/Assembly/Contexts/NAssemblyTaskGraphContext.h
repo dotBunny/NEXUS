@@ -23,7 +23,7 @@ public:
 	TArray<TObjectPtr<ANCellProxy>> CreatedProxies;
 
 	/** The operation identifier for this graph. */
-	uint32 OperationTicket;
+	int32 OperationTicket;
 
 	/** Operation-specific settings effecting the behavior of some bits of the graph. */
 	FNAssemblyOperationSettings OperationSettings;
@@ -59,7 +59,7 @@ public:
 	 * @param OperationTicket Identifier of the operation that owns this context.
 	 * @param Settings Operation-wide settings forwarded to dependent tasks.
 	 */
-	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNAssemblyOperationSettings& Settings);
+	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
 	
 	/** Path the operation's report is written to, when report output is enabled. */

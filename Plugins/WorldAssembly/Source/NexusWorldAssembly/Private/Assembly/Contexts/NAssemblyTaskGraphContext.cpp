@@ -3,7 +3,7 @@
 
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 
-FNAssemblyTaskGraphContext::FNAssemblyTaskGraphContext(UWorld* OutputWorld, const uint32& OperationTicket, const FNAssemblyOperationSettings& Settings)
+FNAssemblyTaskGraphContext::FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings)
 {
 	this->OperationTicket = OperationTicket;
 	TargetWorld = OutputWorld;

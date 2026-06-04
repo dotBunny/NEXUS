@@ -91,7 +91,6 @@ public:
 	{
 		return LevelInstance->GetTagCounter();
 	}
-	
 
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Array)")
 	static TArray<FNGameplayTagCount> GetTagCounterArray(ANCellLevelInstance* LevelInstance)
@@ -105,13 +104,46 @@ public:
 		return LevelInstance->GetTagCounterStateArray();
 	}
 	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Ticket")
+	static int32 GetOperationTicket(ANCellLevelInstance* LevelInstance)
+	{
+		return LevelInstance->GetOperationTicket();
+	}
+	
 	/**
 	 * @param LevelInstance The cell level instance to query.
-	 * @return The state of the TagCounter when this cell was addded.
+	 * @return The state of the TagCounter when this cell was added.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter State (Map)")
 	static TMap<FGameplayTag, int32> GetTagCounterState(ANCellLevelInstance* LevelInstance)
 	{
 		return LevelInstance->GetTagCounterState();
 	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Context Cache")
+	static bool HasContextCache(int32 OperationTicket);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Tag Counter")
+	static int32 GetOperationTagCounter(int32 OperationTicket, FGameplayTag Tag);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="TryGet Operation Tag Counter")
+	static bool TryGetOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32& OutValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Tag Counter")
+	static bool HasOperationTagCounter(int32 OperationTicket, FGameplayTag Tag);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Operation Tag Counter")
+	static void AddOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32 Value = 1);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Operation Tag Counter")
+	static void SubtractOperationTagCounter(int32 OperationTicket, FGameplayTag Tag, int32 Value = 1);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Has Operation Context Tag(s)")
+	static bool HasOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Operation Context Tag(s)")
+	static void AppendOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer);
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Operation Context Tag(s)")
+	static void RemoveOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer);
 };

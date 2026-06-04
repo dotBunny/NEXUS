@@ -18,7 +18,7 @@ struct FNCellAssemblyData
 
 	/** Ticket of the operation that generated this cell. */
 	UPROPERTY(VisibleInstanceOnly)
-	uint32 OperationTicket = 0;
+	int32 OperationTicket = 0;
 
 	/** Identifier of the assembly graph node this cell was generated from. */
 	UPROPERTY(VisibleInstanceOnly)

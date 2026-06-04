@@ -14,7 +14,7 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
-FNAssemblyOperationContext::FNAssemblyOperationContext(const uint32 NewOperationTicket)
+FNAssemblyOperationContext::FNAssemblyOperationContext(const int32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
 }

@@ -45,7 +45,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	CellAssemblyData.ContextTags = ContextTags;
 	CellAssemblyData.TagCounter = TagCounter;
 	
-	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
+	for (int32 i = SpawnCellsContextPtr->CellNodesCreateCurrentIndex; i < NodeCount; i++)
 	{
 		FNAssemblyGraphCellNode* CellNode = SpawnCellsContextPtr->CellNodes[i];
 		
@@ -79,13 +79,14 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		if (SpawnCellsContextPtr->bSpawnLevelInstances)
 		{
 			Proxy->CreateLevelInstance();
+			// TODO: This  could be a separate pass to not block on loading the level, get all the actors in place
 			Proxy->LoadLevelInstance();
 		}
 		
-		SpawnCellsContextPtr->CellNodesCurrentIndex++;
+		SpawnCellsContextPtr->CellNodesCreateCurrentIndex++;
 		N_ASSEMBLY_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, SpawnCellsContextPtr->CellNodes[i]->GetTemplate()->GetFName())
 		
-		if (SpawnCellsContextPtr->CellNodesCurrentIndex == NodeCount)
+		if (SpawnCellsContextPtr->CellNodesCreateCurrentIndex == NodeCount)
 		{
 			N_ASSEMBLY_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			CompletionEvent->Unlock(); // Triggers

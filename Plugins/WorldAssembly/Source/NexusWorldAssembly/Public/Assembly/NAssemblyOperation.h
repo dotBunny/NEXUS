@@ -214,7 +214,7 @@ public:
 	/** @return Cached (completed, total) task counts captured since the last OnTasksChanged broadcast. */
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
-	uint32 GetTicket() const { return Ticket; }
+	int32 GetTicket() const { return Ticket; }
 	
 	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
 	FNAssemblyOperationResult GetResult() const;
@@ -230,7 +230,7 @@ protected:
 
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
-	static uint32 NextTicket;
+	static int32 NextTicket;
 
 	/** Current owner receiving lifecycle callbacks; raw pointer because the owner may be a non-UObject type. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
@@ -262,7 +262,7 @@ private:
 	int32 CachedCompletedTasks = 0;
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
-	uint32 Ticket;
+	int32 Ticket;
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;

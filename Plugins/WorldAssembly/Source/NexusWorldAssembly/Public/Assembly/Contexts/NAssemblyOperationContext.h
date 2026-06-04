@@ -24,7 +24,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyOperationContext
 	friend class UNAssemblyOperation;
 public:
 	/** Constructs the context for the operation identified by the given ticket. */
-	explicit FNAssemblyOperationContext(uint32 NewOperationTicket);
+	explicit FNAssemblyOperationContext(int32 NewOperationTicket);
 
 	/** Organ components fed into the operation prior to LockAndPreprocess. */
 	TArray<TObjectPtr<UNOrganComponent>> InputComponents;
@@ -78,7 +78,7 @@ public:
 	UWorld* GetTargetWorld() const { return TargetWorld; }
 
 	/** @return The ticket of the UNAssemblyOperation that owns this context. */
-	uint32 GetOperationTicket() const { return OperationTicket; }
+	int32 GetOperationTicket() const { return OperationTicket; }
 
 	/** @return The operation-wide settings snapshot. */
 	const FNAssemblyOperationSettings& GetOperationSettings() { return OperationSettings; }
@@ -86,7 +86,7 @@ public:
 private:
 
 	/** The identifier of the UNAssemblyOperation that owns this context. */
-	uint32 OperationTicket;
+	int32 OperationTicket;
 
 	/** Operation-wide settings snapshot, captured before preprocessing. */
 	FNAssemblyOperationSettings OperationSettings;

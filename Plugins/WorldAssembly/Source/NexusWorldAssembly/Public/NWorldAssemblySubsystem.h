@@ -143,6 +143,9 @@ private:
 	 * into a freshly-created UNAssemblyOperation; the presence of entries keeps the subsystem tickable.
 	 */
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
+	
+	/** Used to track potential operations that will cache data, so that we can clear it. **/
+	TArray<int32> CachedOperationTickets;
 
 	/** Map from player controller to the relay actor spawned for that player. */
 	UPROPERTY()

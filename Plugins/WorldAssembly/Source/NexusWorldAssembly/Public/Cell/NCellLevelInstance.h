@@ -110,7 +110,7 @@ public:
 #endif // WITH_EDITOR
 
 	/** @return The World Assembly operation ticket this level instance belongs to. */
-	uint32 GetOperationTicket() const { return AssemblyData.OperationTicket; }
+	int32 GetOperationTicket() const { return AssemblyData.OperationTicket; }
 	
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }

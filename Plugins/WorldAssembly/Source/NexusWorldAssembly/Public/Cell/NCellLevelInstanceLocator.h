@@ -19,7 +19,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellLevelInstanceLocator
 
 	/** Ticket of the owning UNAssemblyOperation. */
 	UPROPERTY()
-	uint32 OperationTicket = 0;
+	int32 OperationTicket = 0;
 
 	/** Spawn GUID unique within the owning operation. */
 	UPROPERTY()

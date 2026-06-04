@@ -77,22 +77,22 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	void ClearAllProxies();
 
 	/** Destroy the proxies (and their level instances) associated with the given operation. */
-	void ClearGenerated(const uint32& OperationTicket);
+	void ClearGenerated(const int32& OperationTicket);
 
 	/** Destroy only the proxy actors associated with the given operation, leaving level instances alone. */
-	void ClearGeneratedProxies(const uint32& OperationTicket);
+	void ClearGeneratedProxies(const int32& OperationTicket);
 
 	/** Load the level instances for every tracked proxy. */
 	void LoadAllGeneratedProxies();
 
 	/** Load the level instances for proxies from the given operation. */
-	void LoadGeneratedProxies(const uint32& OperationTicket);
+	void LoadGeneratedProxies(const int32& OperationTicket);
 
 	/** Unload the level instances for every tracked proxy. */
 	void UnloadAllGeneratedProxies();
 
 	/** Unload the level instances for proxies from the given operation. */
-	void UnloadGeneratedProxies(const uint32& OperationTicket);
+	void UnloadGeneratedProxies(const int32& OperationTicket);
 
 protected:
 	/** Editor callback: drops proxies before PIE starts so transient actors don't leak into play. */
@@ -106,6 +106,9 @@ private:
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
+	
+	/** Used to track potential operations that will cache data, so that we can clear it. **/
+	TArray<int32> CachedOperationTickets;
 
 	/**
 	 * An array of all known proxies that have been put into the level, this ensures that they are not
@@ -117,7 +120,7 @@ private:
 	TArray<TObjectPtr<ANCellProxy>> KnownProxies;
 
 	/** Index from operation ticket to the proxies spawned by that operation, for fast per-operation cleanup. */
-	TMap<uint32, TArray<TObjectPtr<ANCellProxy>>> ProxyMap;
+	TMap<int32, TArray<TObjectPtr<ANCellProxy>>> ProxyMap;
 
 	/** Frame number of the last Tick — guards against re-entrant ticking from multiple callers. */
 	uint32 LastFrameNumberWeTicked = INDEX_NONE;

@@ -64,7 +64,7 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	
 	/**
 	* The minimum number of cell hops away from the start cell before this cell may be used.
-	* The start cell is hop 0, its direct neighbours hop 1, etc. A value of N first allows the cell N hops out.
+	* The start cell is hop 0, its direct neighbors hop 1, etc. A value of N first allows the cell N hops out.
 	* @note A value of 0 indicates no constraint.
 	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))

@@ -8,7 +8,7 @@
 #include "Organ/NOrganComponent.h"
 #include "Assembly/NAssemblyTaskGraph.h"
 
-uint32 UNAssemblyOperation::NextTicket = 1;
+int32 UNAssemblyOperation::NextTicket = 1;
 
 UNAssemblyOperation::UNAssemblyOperation(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {

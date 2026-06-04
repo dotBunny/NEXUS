@@ -3,6 +3,8 @@
 
 #include "Assembly/Tasks/NCreateSpawnsTask.h"
 
+#include "NWorldAssemblyContextCache.h"
+#include "NWorldAssemblyRegistry.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Assembly/Graph/NAssemblyGraph.h"
 
@@ -24,6 +26,9 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 		
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextStart)
 	
+	// We need to prepopulate some data elsewhere
+	FNWorldAssemblyContextCache::AddOperationContext(TaskGraphContextPtr->OperationTicket, TaskGraphContextPtr->TagCounter, TaskGraphContextPtr->ContextTags);
+
 	// Iterate over all graphs that we have had generate
 	for (const TUniquePtr<FNAssemblyGraph>& Graph : TaskGraphContextPtr->Graphs)
 	{

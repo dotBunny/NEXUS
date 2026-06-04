@@ -112,10 +112,10 @@ FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObj
 FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object)
 {
 	TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(Object);
-	TArray<uint32> UniqueGenerations;
+	TArray<int32> UniqueGenerations;
 	for (auto Component : OrganComponents)
 	{
-		uint32 LastOperationTicket = Component->GetAndResetLastOperationTicket();
+		int32 LastOperationTicket = Component->GetAndResetLastOperationTicket();
 		if (LastOperationTicket != 0 && !UniqueGenerations.Contains(LastOperationTicket))
 		{
 			UniqueGenerations.Add(LastOperationTicket);
