@@ -127,7 +127,7 @@ private:
 	 */
 	void RotateAroundPivot(const FVector& WorldPoint, const FRotator& Rotation, const FVector& VoxelSize)
 	{
-		if (!IsValid() || Data.Num() == 0) return;
+		if (!IsValid() || Data.IsEmpty()) return;
 
 		// Snapshot the source grid; Reset below reallocates Data against the new dimensions.
 		const FVector OldOrigin = Origin;

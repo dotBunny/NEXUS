@@ -56,7 +56,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		if (NodeCount == 0) { return; }
 		
 		// Break before this could have been bad
-		if (OrganContextPtr->CellGraph->GetNodesWithOpenJunctions().Num() == 0)
+		if (OrganContextPtr->CellGraph->GetNodesWithOpenJunctions().IsEmpty())
 		{
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("The starter cell has no open junctions. This is a BAD cell to have as a starter. Retrying ..."));
 			return;
@@ -96,7 +96,7 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
 			TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
-			if (OpenNodes.Num() == 0) break;
+			if (OpenNodes.IsEmpty()) break;
 
 			const int32 CountBefore = OrganContextPtr->CellGraph->GetCellNodeCount();
 			for (int32 j = 0; j < OpenNodes.Num(); j++)
