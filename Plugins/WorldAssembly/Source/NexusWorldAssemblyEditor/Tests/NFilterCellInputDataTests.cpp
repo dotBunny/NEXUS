@@ -154,6 +154,8 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_RequiredContextTagGat
 	FNVirtualCellData Cell = MakeCell();
 	Cell.ContextTagsRequired = FGameplayTagContainer(Required);
 	Context.CellInputData.Add(Cell);
+	// The test-only constructor leaves the summary at defaults; flag the feature so the context-tag gate runs.
+	Context.CellInputDataSummary.bAnyContextTagsRequired = true;
 
 	FNWeightedIntegerArray BeforeIndices;
 	TMap<int32, TArray<int32>> BeforeJunctions;

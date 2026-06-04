@@ -123,7 +123,18 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		{
 			CellDetails.Junctions.Add(Junction.Key, Junction.Value);
 		}
-		
+
+		// Record once whether the pool uses these features at all, so FilterCellInputData can skip the matching
+		// gate entirely on builds where no cell could ever be affected by it.
+		if (!CellInputDataSummary.bAnyContextTagsRequired && !CellDetails.ContextTagsRequired.IsEmpty())
+		{
+			CellInputDataSummary.bAnyContextTagsRequired = true;
+		}
+		if (!CellInputDataSummary.bAnyTagCounterConstraints && CellDetails.TagCounterConstraints.Num() > 0)
+		{
+			CellInputDataSummary.bAnyTagCounterConstraints = true;
+		}
+
 		CellInputData.Add(CellDetails); // TODO: Check this is a Move
 	}
 	
@@ -346,36 +357,41 @@ bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, c
 
 void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices)
 {
-	CellIndices.Empty();
-	JunctionIndices.Empty();
+	CellIndices.Reset();
+	JunctionIndices.Reset();
 
 	// Resolve which bad-neighbor groups the source cell belongs to once up front; any candidate sharing one of
 	// these groups cannot be placed beside it. Stays empty when there is no source node (e.g. the start-node
 	// pre-filter) or when no bad-neighbor groups are configured, which skips the per-candidate check below.
 	const FGameplayTagContainer SourceBadNeighborTags = ResolveSourceBadNeighborTags(CellInputDataSummary.GroupTags, Filter.SourceCellNode);
 
+	// Unique-tag gating only bites once something carrying a unique tag has actually been placed; hoist the
+	// emptiness test out of the per-candidate loop so an empty set costs one check instead of one-per-candidate.
+	const bool bCheckUniqueTags = !PlacedTagGroups.UniqueTags.IsEmpty();
+
 	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
 		const FNVirtualCellData* CellData = &CellInputData[i];
-		
+
 		// Early out on some simple filters
 		if (!CellData->IsValidSelection(Filter.SocketSize)) continue;
-		
-		
+
+
 		// CONTEXT TAGS
-		if (!CellData->ContextTagsRequired.IsEmpty() && !ContextTags.HasAllExact(CellData->ContextTagsRequired))
+		if (CellInputDataSummary.bAnyContextTagsRequired &&
+			!CellData->ContextTagsRequired.IsEmpty() && !ContextTags.HasAllExact(CellData->ContextTagsRequired))
 		{
 			continue;
 		}
-		
+
 		// CHECK UNIQUE TAGS
-		if (PlacedTagGroups.UniqueTags.HasAnyExact(CellData->AssemblyTags))
+		if (bCheckUniqueTags && PlacedTagGroups.UniqueTags.HasAnyExact(CellData->AssemblyTags))
 		{
 			continue;
 		}
-		
+
 		// GATE BASED ON TagCounter Constraints
-		if (IsGatedByTagCounterConstraints(*CellData, TagCounter))
+		if (CellInputDataSummary.bAnyTagCounterConstraints && IsGatedByTagCounterConstraints(*CellData, TagCounter))
 		{
 			continue;
 		}
@@ -476,7 +492,7 @@ bool FNVirtualOrganContext::ResetForRetry()
 	
 	RetryCount++;
 #if !UE_BUILD_SHIPPING	
-	Messages.Empty();
+	Messages.Reset();
 #endif // !UE_BUILD_SHIPPING	
 	
 	if (RetryCount > MaximumRetryCount)

@@ -29,6 +29,22 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 
 	/** true if any processed cell carries a finisher-only tag (may be used only as an end cell). */
 	bool bFoundFinisherOnlyTagged = false;
+
+	/**
+	 * true if any cell in the pool declares required context tags. When false, the context-tag gate in
+	 * FilterCellInputData can be skipped for every candidate because no cell could ever be gated by it.
+	 * @remark Populated by the production constructor; the test-only constructor leaves this false, so a test
+	 *         exercising the context-tag gate through FilterCellInputData must set it explicitly.
+	 */
+	bool bAnyContextTagsRequired = false;
+
+	/**
+	 * true if any cell in the pool declares tag-counter constraints. When false, the tag-counter gate in
+	 * FilterCellInputData can be skipped for every candidate because no cell could ever be gated by it.
+	 * @remark Populated by the production constructor; the test-only constructor leaves this false, so a test
+	 *         exercising the tag-counter gate through FilterCellInputData must set it explicitly.
+	 */
+	bool bAnyTagCounterConstraints = false;
 };
 
 /**

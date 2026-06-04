@@ -40,6 +40,12 @@ struct FNWeightedIntegerArray
 		Data.Empty();
 		CachedMaxIndex = -1;
 	};
+	
+	void Reset()
+	{
+		Data.Reset();
+		CachedMaxIndex = -1;
+	}
 
 	/**
 	 * Removes every copy of the supplied value from the array.
