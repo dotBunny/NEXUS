@@ -60,11 +60,10 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	
 	for (auto Pair : TissueMap)
 	{
-		if (Pair.Value.MaximumCount > 0 || Pair.Value.MaximumCount == -1)
-		{
-			bFoundSomeCells = true;
-		}
-		
+		// Every cell in the map is a placement candidate (MaximumCount == 0 means unlimited, not disabled); a cell
+		// is only ever excluded by lacking matching junctions, handled later during filtering.
+		bFoundSomeCells = true;
+
 		// bFoundStarterTagged
 		if (!CellInputDataSummary.bFoundStarterTagged && Pair.Value.AssemblyTags.HasTag(NWorldAssembly_Behavior_Starter))
 		{
@@ -102,7 +101,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 
 	if (!bFoundSomeCells)
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as the it appears that no UNCells would be generated from the provided UNTissues (check MaximumCount). Skipping."));
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to validate FNOrganGeneratorTaskContext as no UNCells were provided by the supplied UNTissues. Skipping."));
 		return;
 	}
 	
@@ -119,14 +118,14 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 
-		// Contradictory configuration: a cell required at least once (MinimumCount > 0) yet never placeable
-		// (MaximumCount == 0). CheckGraph deliberately skips the minimum for such cells so generation does not
+		// Contradictory configuration: a cell required more times than it is permitted (MinimumCount exceeds a
+		// positive MaximumCount). CheckGraph deliberately skips the minimum for such cells so generation does not
 		// retry forever, but warn here so the authoring mistake surfaces.
-		if (CellDetails.MinimumCount > 0 && CellDetails.MaximumCount == 0)
+		if (CellDetails.MinimumCount > 0 && CellDetails.MaximumCount > 0 && CellDetails.MinimumCount > CellDetails.MaximumCount)
 		{
 			UE_LOG(LogNexusWorldAssembly, Warning,
-				TEXT("Cell '%s' has MinimumCount(%i) > 0 but MaximumCount of 0, so it can never be placed. Its minimum will be ignored."),
-				*GetNameSafe(Cell.Key), CellDetails.MinimumCount);
+				TEXT("Cell '%s' has MinimumCount(%i) greater than MaximumCount(%i), which can never be satisfied. Its minimum will be ignored."),
+				*GetNameSafe(Cell.Key), CellDetails.MinimumCount, CellDetails.MaximumCount);
 		}
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
@@ -280,12 +279,12 @@ bool FNVirtualOrganContext::CheckGraph()
 
 	for (const FNVirtualCellData& Cell : CellInputData)
 	{
-		// -1 (unset) and 0 carry no real minimum.
+		// 0 (and any non-positive) carries no real minimum.
 		if (Cell.MinimumCount <= 0) continue;
 
-		// A cell that can never be placed (MaximumCount == 0) makes a positive MinimumCount unsatisfiable; skip it
-		// so the graph does not retry forever on a contradictory configuration. The constructor warns about this.
-		if (Cell.MaximumCount == 0) continue;
+		// Unsatisfiable configuration: a minimum greater than a positive maximum can never be reached, so skip it
+		// rather than retry forever. MaximumCount == 0 means unlimited and is fine. The constructor warns about this.
+		if (Cell.MaximumCount > 0 && Cell.MinimumCount > Cell.MaximumCount) continue;
 
 		// Skip cells governed by a combined Unique + RequiredAny group (see above).
 		if (!UniqueAndRequiredTags.IsEmpty() && Cell.AssemblyTags.HasAnyExact(UniqueAndRequiredTags)) continue;

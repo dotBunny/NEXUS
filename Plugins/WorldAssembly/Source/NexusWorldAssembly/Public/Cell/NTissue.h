@@ -44,20 +44,22 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph for the graph to validate.
 	 * Enforced in FNVirtualOrganContext::CheckGraph against the cell's placed instance count.
-	 * @note A value of -1 (or 0) indicates no minimum constraint.
+	 * @note A value of 0 indicates no minimum constraint.
 	 * @remark The minimum is skipped for cells whose assembly tags name a group that is both Unique and RequiredAny
-	 *         (the RequiredAny group check governs success instead), and for cells with MaximumCount of 0 (which can
-	 *         never be placed). Also used to determine the Unique early out (MinimumCount == 1 && MaximumCount == 1).
+	 *         (the RequiredAny group check governs success instead), and for cells whose MinimumCount exceeds a
+	 *         positive MaximumCount (unsatisfiable). Also used to determine the Unique early out (MinimumCount == 1
+	 *         && MaximumCount == 1).
 	 */
-	UPROPERTY(EditAnywhere)
-	int32 MinimumCount = -1;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
+	int32 MinimumCount = 0;
 
 	/**
 	 * The maximum number of times this cell can be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no maximum constraint.
+	 * @note A value of 0 indicates no maximum constraint (unlimited usage). To stop a cell from being generated,
+	 *       remove it from the tissue rather than setting a count.
 	 */
-	UPROPERTY(EditAnywhere)
-	int32 MaximumCount = -1;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
+	int32 MaximumCount = 0;
 	
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.

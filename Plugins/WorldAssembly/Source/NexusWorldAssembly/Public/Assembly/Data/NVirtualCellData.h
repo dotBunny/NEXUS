@@ -72,17 +72,17 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 
 	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 (or 0) indicates no minimum constraint.
+	 * @note A value of 0 indicates no minimum constraint.
 	 * @remark Enforced in FNVirtualOrganContext::CheckGraph against UsedCount, skipping combined Unique + RequiredAny
-	 *         cells and cells with MaximumCount of 0.
+	 *         cells and cells whose MinimumCount exceeds a positive MaximumCount (an unsatisfiable configuration).
 	 */
-	int32 MinimumCount = -1;
+	int32 MinimumCount = 0;
 
-	/** 
+	/**
 	 * The maximum number of times this cell can be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no maximum constraint.
+	 * @note A value of 0 indicates no maximum constraint (unlimited usage).
 	 */
-	int32 MaximumCount = -1;
+	int32 MaximumCount = 0;
 
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
@@ -148,21 +148,21 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 */
 	TObjectPtr<UNCell> Template;
 
-	/** 
+	/**
 	 * Is a MinimumCount set?
-	 * @return True if a minimum usage count constraint is defined. 
+	 * @return True if a minimum usage count constraint is defined (MinimumCount > 0).
 	 */
-	bool HasMinimumCount() const { return MinimumCount > -1; }
+	bool HasMinimumCount() const { return MinimumCount > 0; }
 
-	/** 
+	/**
 	 * Is a MaximumCount set?
-	 * @return True if a maximum usage count constraint is defined. 
+	 * @return True if a maximum usage count constraint is defined (MaximumCount > 0); 0 means unlimited.
 	 */
-	bool HasMaximumCount() const { return MaximumCount > -1; }
+	bool HasMaximumCount() const { return MaximumCount > 0; }
 
 	/**
 	 * Is the UNCell meant to be uniquely placed?
-	 * @return True if this cell must be used exactly once (MinimumCount == 1 && MaximumCount == 1). 
+	 * @return True if this cell must be used exactly once (MinimumCount == 1 && MaximumCount == 1).
 	 */
 	bool IsUnique() const { return MinimumCount == 1 && MaximumCount == 1; }
 
@@ -172,8 +172,8 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 */
 	bool IsValidSelection() const
 	{
-		if (Junctions.IsEmpty() || MaximumCount == 0) return false;
-		if (HasMaximumCount() && UsedCount >= MaximumCount) return false;
+		if (Junctions.IsEmpty()) return false;
+		if (HasMaximumCount() && UsedCount >= MaximumCount) return false; // MaximumCount == 0 ⇒ unlimited
 		if (IsUnique() && UsedCount > 0) return false;
 
 		return true;

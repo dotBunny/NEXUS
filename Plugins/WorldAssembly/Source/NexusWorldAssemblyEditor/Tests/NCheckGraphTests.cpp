@@ -233,40 +233,42 @@ N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_MinimumCountZeroOrUnsetIgnored,
 	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountZeroOrUnsetIgnored",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// A MinimumCount of -1 (unset) or 0 carries no constraint, so a never-placed cell must still pass.
+	// A MinimumCount of 0 carries no constraint, so a never-placed cell must still pass. A MaximumCount of 0
+	// (unlimited) must likewise not stand in for a minimum.
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
 	GiveEmptyGraph(Context);
 
-	FNVirtualCellData& Unset = Context.CellInputData.AddDefaulted_GetRef();
-	Unset.MinimumCount = -1;
-	Unset.UsedCount = 0;
-
 	FNVirtualCellData& Zero = Context.CellInputData.AddDefaulted_GetRef();
 	Zero.MinimumCount = 0;
 	Zero.UsedCount = 0;
 
+	FNVirtualCellData& Unlimited = Context.CellInputData.AddDefaulted_GetRef();
+	Unlimited.MinimumCount = 0;
+	Unlimited.MaximumCount = 0;
+	Unlimited.UsedCount = 0;
+
 	CHECK_MESSAGE(TEXT("Cells with no positive MinimumCount must not gate the graph."), Context.CheckGraph())
 }
 
-N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_MinimumCountSkippedWhenNeverPlaceable,
-	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountSkippedWhenNeverPlaceable",
+N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_MinimumCountSkippedWhenAboveMaximum,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountSkippedWhenAboveMaximum",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// A cell with MaximumCount of 0 can never be placed, so its (contradictory) positive MinimumCount must be
-	// skipped rather than dead-locking the graph in a state it can never satisfy.
+	// An unsatisfiable configuration where MinimumCount exceeds a positive MaximumCount must be skipped rather
+	// than dead-locking the graph in a state it can never reach.
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
 	GiveEmptyGraph(Context);
 
 	FNVirtualCellData& Cell = Context.CellInputData.AddDefaulted_GetRef();
-	Cell.MinimumCount = 2;
-	Cell.MaximumCount = 0;
-	Cell.UsedCount = 0;
+	Cell.MinimumCount = 3;
+	Cell.MaximumCount = 2;
+	Cell.UsedCount = 2;
 
-	CHECK_MESSAGE(TEXT("A never-placeable cell (MaximumCount 0) must not fail the minimum check."), Context.CheckGraph())
+	CHECK_MESSAGE(TEXT("A cell with MinimumCount above its MaximumCount must not fail the minimum check."), Context.CheckGraph())
 }
 
 N_TEST_HIGH(FNCheckGraphTests_CheckGraph_MinimumCountSkippedForUniqueRequired,

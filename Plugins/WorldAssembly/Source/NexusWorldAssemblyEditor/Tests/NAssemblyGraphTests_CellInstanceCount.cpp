@@ -124,4 +124,31 @@ N_TEST_HIGH(FNAssemblyGraphTests_CellInstanceCount_UniqueByInstance,
 	CHECK_FALSE_MESSAGE(TEXT("A placed unique cell should no longer be selectable."), Cell.IsValidSelection())
 }
 
+N_TEST_HIGH(FNAssemblyGraphTests_CellInstanceCount_MaximumCountZeroIsUnlimited,
+	"NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraph::CellInstanceCount::MaximumCountZeroIsUnlimited",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// MaximumCount of 0 means "no maximum" (unlimited), not "disabled": the cell must stay selectable no matter
+	// how many instances are already placed.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphHarness;
+
+	FNVirtualCellData Cell = MakeCell(1);
+	Cell.MaximumCount = 0;
+	CHECK_FALSE_MESSAGE(TEXT("MaximumCount of 0 must not report as a maximum constraint."), Cell.HasMaximumCount())
+
+	FNAssemblyGraphBoneNode* BoneRoot = MakeBoneRoot();
+	FNAssemblyGraph Graph(BoneRoot, FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
+
+	CHECK_MESSAGE(TEXT("An unused cell with MaximumCount 0 should be selectable."), Cell.IsValidSelection())
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
+		Graph.RegisterNode(Node);
+	}
+
+	CHECK_EQUALS("Five instances should be tracked.", Cell.UsedCount, 5)
+	CHECK_MESSAGE(TEXT("A cell with MaximumCount 0 must remain selectable after many placements."), Cell.IsValidSelection())
+}
+
 #endif //WITH_TESTS
