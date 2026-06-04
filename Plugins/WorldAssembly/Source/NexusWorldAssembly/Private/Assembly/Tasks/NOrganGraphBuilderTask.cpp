@@ -64,7 +64,12 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		
 		const int32 MinCellCount = FMath::Max(OrganContextPtr->MinimumCellCount, 1);
 		const int32 MaxCellCount = OrganContextPtr->MaximumCellCount;
-		const int32 TargetCellCount = Random.IntegerRange(MinCellCount, MaxCellCount);
+		// MaximumCellCount <= 0 means "no upper limit": BFS expands unbounded and the target degrades to a floor
+		// (MinCellCount) for the secondary fill loop. Made explicit here because IntegerRange(min, -1) silently
+		// clamps to min, which reads like a bug.
+		const int32 TargetCellCount = (MaxCellCount > MinCellCount)
+			? Random.IntegerRange(MinCellCount, MaxCellCount)
+			: MinCellCount;
 
 		// BFS expansion: grow the graph wave-by-wave, stopping when we reach the maximum
 		TArray<FNAssemblyGraphNode*> Frontier = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
@@ -87,7 +92,6 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			Frontier = MoveTemp(NextFrontier);
 		}
 
-		// TODO: This seems like it could end up in a infinite loop
 		// If still below minimum, try filling remaining open junctions
 		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
