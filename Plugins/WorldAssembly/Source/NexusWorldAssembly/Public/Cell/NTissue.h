@@ -71,6 +71,11 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDepth = 0;
 	
+	/**
+	* The maximum number of cell hops away from the start cell at which this cell may still be used.
+	* The start cell is hop 0, its direct neighbors hop 1, etc. A value of N allows the cell up to N hops out.
+	* @note A value of -1 indicates no constraint.
+	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=-1, UIMin=-1))
 	int32 MaximumNodeDepth = -1;
 
