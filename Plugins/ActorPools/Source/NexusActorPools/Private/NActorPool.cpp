@@ -287,8 +287,14 @@ bool FNActorPool::Return(AActor* Actor)
 	return true;
 }
 
-void FNActorPool::ReturnAll()
+void FNActorPool::ReturnAll(bool bSkipCheck)
 {
+	if (!bSkipCheck && !Settings.HasSupportFlag_ReturnAll())
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName())
+		return;
+	}
+	
 	for (int i = OutActors.Num() - 1; i >= 0; --i)
 	{
 		Return(OutActors[i]);
@@ -299,6 +305,8 @@ void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
 	// Ingest flags - and update cached flags
 	Settings.Flags = InNewSettings.Flags;
+	Settings.SupportFlags = InNewSettings.SupportFlags;
+	
 	// World may have been torn down out from under a long-lived external pool reference; treat that as non-authoritative.
 	bStubMode = Settings.HasFlag_ServerOnly() && (!IsValid(World) || !World->GetAuthGameMode());
 	

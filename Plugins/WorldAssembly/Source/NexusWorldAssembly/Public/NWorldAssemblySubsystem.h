@@ -120,7 +120,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationsCompleted;
 	
-	/** Fired at the end of Clear() once tracked operations have been cancelled and all cell proxies in the world have been destroyed. */
+	/** Fired at the end of Clear() once tracked operations have been canceled and all cell proxies in the world have been destroyed. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnCleared;
 

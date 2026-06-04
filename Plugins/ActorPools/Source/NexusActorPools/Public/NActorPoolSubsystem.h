@@ -86,6 +86,14 @@ public:
 	bool ReturnActor(AActor* Actor);
 
 	/**
+	 * Return every spawned Actor back to its owning pool, across all registered pools.
+	 * @note Only pools whose settings have the ENActorPoolSupportFlags::ReturnAll support flag set are affected; pools without it are left untouched.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Return All Actors", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-all-actors"))
+	void ReturnAllActors();
+	
+	/**
 	 * Register a spawner component as tickable so the subsystem drives its periodic updates.
 	 * @param TargetComponent The spawner to register.
 	 */

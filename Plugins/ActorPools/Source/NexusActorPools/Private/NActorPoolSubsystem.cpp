@@ -338,6 +338,19 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 	}
 }
 
+void UNActorPoolSubsystem::ReturnAllActors()
+{
+	for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
+	{
+		FNActorPool* Pool = Pair->Value.Get();
+		if (Pool->GetSettings().HasSupportFlag_ReturnAll())
+		{
+			Pair->Value.Get()->ReturnAll(true);
+		}
+		
+	}
+}
+
 void UNActorPoolSubsystem::RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
 	TickableSpawners.Add(TargetComponent);

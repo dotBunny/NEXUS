@@ -78,8 +78,9 @@ public:
 	/**
 	 * Return every currently spawned ('out') actor back to the pool.
 	 * @note Iterates in reverse so each Return() can safely remove from the OutActors array as it goes.
+	 * @param bSkipCheck When false (default), the pool must have the ENActorPoolSupportFlags::ReturnAll support flag set or the call is logged and ignored; pass true to bypass that gate and force the return.
 	 */
-	void ReturnAll();
+	void ReturnAll(bool bSkipCheck = false);
 
 	/**
 	 * Spawn an actor at a given location, triggering all events associated.

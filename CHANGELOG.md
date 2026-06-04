@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.3.1] - 2026-06-19
+## [0.3.1] - 2026-06-08
 
 ### Added
 
@@ -9,6 +9,8 @@
 - `NEXUS.WorldAssembly.Flag.AlwaysRelevant` behavioral tag.
 - `TagCounters` constraints and operations to `UNTissue`.
 - Required `ContextTags` option on `UNTissue` entries.
+- Both `FNActorPool` and `UNActorPoolSubsystem` gained the ability to `ReturnAll`/`ReturnAllActors`.
+- `FNActorPoolSettings` now has a `SupportFlags` section, including `ReturnAll`.
 
 ### Changed
 

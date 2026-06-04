@@ -61,6 +61,16 @@ enum class ENActorPoolFlags : uint8
 };
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
+
+UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
+enum class ENActorPoolSupportFlags : uint8
+{
+	None = 0 UMETA(Hidden),
+	/** Does this pool support the use of the ReturnAll method? */
+	ReturnAll = 1,
+};
+ENUM_CLASS_FLAGS(ENActorPoolSupportFlags)
+
 namespace NEXUS::ActorPools
 {
 	constexpr uint8 DefaultFlags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage) | 
@@ -68,6 +78,8 @@ namespace NEXUS::ActorPools
 								  static_cast<uint8>(ENActorPoolFlags::ShouldFinishSpawning) | 
 								  static_cast<uint8>(ENActorPoolFlags::ServerOnly) | 
 								  static_cast<uint8>(ENActorPoolFlags::SetNetDormancy);
+	
+	constexpr uint8 DefaultSupportFlags = 0;
 }
 
 /**
@@ -80,6 +92,11 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 	GENERATED_BODY()
 
 public:
+	
+	FORCEINLINE bool HasSupportFlag_ReturnAll() const
+	{
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolSupportFlags::ReturnAll);
+	}
 
 	/** @return true if the DeferConstruction flag is set. */
 	FORCEINLINE bool HasFlag_DeferConstruction() const
@@ -142,6 +159,10 @@ public:
 	/** The behavioral flags to evaluate when doing operations with this pool. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolFlags"))
 	uint8 Flags = NEXUS::ActorPools::DefaultFlags;
+	
+	/** Flags outling what features this pool supports. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling", meta=(Bitmask,BitmaskEnum="/Script/NexusActorPools.ENActorPoolSupportFlags"))
+	uint8 SupportFlags = NEXUS::ActorPools::DefaultSupportFlags;
 	
 	/** The default applied transform when creating an actor, as well as where and how an actor is stored. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Actor Pooling")
