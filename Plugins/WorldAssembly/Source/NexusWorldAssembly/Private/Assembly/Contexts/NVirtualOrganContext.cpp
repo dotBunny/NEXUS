@@ -11,6 +11,13 @@
 #include "Assembly/Contexts/NAssemblyOperationContext.h"
 #include "Organ/NOrganComponent.h"
 
+namespace
+{
+	// 180 degrees about Up, written directly as a quaternion to skip the per-call axis-angle sincos.
+	// FQuat(FVector::UpVector, PI) evaluates to (Up * sin(PI/2), cos(PI/2)) == (0, 0, 1, 0) exactly.
+	const FQuat YawFlipQuat(0.0, 0.0, 1.0, 0.0);
+}
+
 FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, const uint64 TaskSeed, FString TaskName)
 	: Seed(TaskSeed), Name(TaskName)
 {
@@ -121,7 +128,12 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		Cell.Key->Root.CopyTo(CellDetails.CellDetails);
 		for (const TPair<int32, FNCellJunctionDetails>& Junction :  Cell.Key->Junctions)
 		{
-			CellDetails.Junctions.Add(Junction.Key, Junction.Value);
+			FNCellJunctionDetails& VirtualJunction = CellDetails.Junctions.Add(Junction.Key, Junction.Value);
+
+			// Precompute the inverse junction quaternion once here; the authored WorldRotation never changes for
+			// the lifetime of this virtual data (it survives ResetForRetry), so the per-candidate rotation gate
+			// can read it straight back instead of redoing the rotator->quat->inverse conversion every filter pass.
+			VirtualJunction.CachedInverseWorldQuat = Junction.Value.WorldRotation.Quaternion().Inverse();
 		}
 
 		// Record once whether the pool uses these features at all, so FilterCellInputData can skip the matching
@@ -333,11 +345,14 @@ bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDep
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation)
 {
 	// Flip 180 around Up to oppose the source's facing direction, then undo the junction's local rotation so only
-	// the delta we need to apply to the cell remains.
-	const FQuat TargetJunctionLocalQuat = JunctionWorldRotation.Quaternion();
-	const FQuat RequiredRotationQuat = SourceQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+	// the delta we need to apply to the cell remains. The hot path precomputes both terms; this convenience overload
+	// composes them on the spot for callers (and tests) holding the raw source quat and authored junction rotation.
+	return GetRequiredJunctionRotationPrepared(SourceQuat * YawFlipQuat, JunctionWorldRotation.Quaternion().Inverse());
+}
 
-	FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+FRotator FNVirtualOrganContext::GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat)
+{
+	FRotator RequiredRotation = (SourceFlippedQuat * JunctionInverseQuat).Rotator();
 	RequiredRotation.Roll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
 	RequiredRotation.Pitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
 	RequiredRotation.Yaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
@@ -347,7 +362,14 @@ FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQ
 bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
 	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
 {
-	const FRotator Required = GetRequiredJunctionRotation(SourceQuat, JunctionWorldRotation);
+	return IsGatedByJunctionRotationPrepared(SourceQuat * YawFlipQuat, JunctionWorldRotation.Quaternion().Inverse(),
+		CellConstraints, JunctionConstraints);
+}
+
+bool FNVirtualOrganContext::IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
+	const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints)
+{
+	const FRotator Required = GetRequiredJunctionRotationPrepared(SourceFlippedQuat, JunctionInverseQuat);
 
 	// Both the cell and the junction get a veto: either can independently disable enforcement, but whichever side
 	// has bEnforceMatchingRotation set must have the required rotation fall inside its Min/Max range.
@@ -368,6 +390,10 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 	// Unique-tag gating only bites once something carrying a unique tag has actually been placed; hoist the
 	// emptiness test out of the per-candidate loop so an empty set costs one check instead of one-per-candidate.
 	const bool bCheckUniqueTags = !PlacedTagGroups.UniqueTags.IsEmpty();
+
+	// The source side of the junction-rotation math is invariant for the whole call, so compose it once here:
+	// SourceQuat flipped 180 around Up. The per-junction term is read from the junction's CachedInverseWorldQuat.
+	const FQuat SourceFlippedQuat = Filter.SourceQuat * YawFlipQuat;
 
 	for (int32 i = 0; i < CellInputData.Num(); i++)
 	{
@@ -444,8 +470,10 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			if (Pair.Value.SocketSize == Filter.SocketSize)
 			{
 				// Determine the rotation this junction would have to take on to match Filter.SourceQuat, then veto it
-				// against both the cell's and the junction's matching-rotation constraints. Covered by NJunctionRotationTests.cpp.
-				if (IsGatedByJunctionRotation(Filter.SourceQuat, Pair.Value.WorldRotation, CellRotationConstraints, Pair.Value.RotationConstraints))
+				// against both the cell's and the junction's matching-rotation constraints. Both rotation terms are
+				// precomputed (SourceFlippedQuat hoisted above, CachedInverseWorldQuat built with the virtual data).
+				// Covered by NJunctionRotationTests.cpp.
+				if (IsGatedByJunctionRotationPrepared(SourceFlippedQuat, Pair.Value.CachedInverseWorldQuat, CellRotationConstraints, Pair.Value.RotationConstraints))
 				{
 					continue;
 				}

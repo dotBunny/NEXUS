@@ -224,6 +224,16 @@ public:
 	static NEXUSWORLDASSEMBLY_API FRotator GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation);
 
 	/**
+	 * Hot-path variant of GetRequiredJunctionRotation that takes both terms pre-composed, skipping the per-call
+	 * axis-angle flip and rotator->quat conversions. FilterCellInputData hoists SourceFlippedQuat out of its loops
+	 * and reads JunctionInverseQuat from FNCellJunctionDetails::CachedInverseWorldQuat.
+	 * @param SourceFlippedQuat SourceQuat already multiplied by the 180-around-Up flip.
+	 * @param JunctionInverseQuat The candidate junction's authored rotation as a quaternion, inverted.
+	 * @return The per-axis-normalized rotation the candidate cell must take on for this junction to line up.
+	 */
+	static FRotator GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat);
+
+	/**
 	 * Gate a candidate junction by the rotation it would have to adopt to mate with the source. Both the cell
 	 * and the junction get an independent veto: either may disable enforcement, but whichever side enforces must
 	 * have the required rotation (from GetRequiredJunctionRotation) fall inside its matching interval.
@@ -234,6 +244,18 @@ public:
 	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
 	 */
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
+
+	/**
+	 * Hot-path variant of IsGatedByJunctionRotation taking both rotation terms pre-composed; see
+	 * GetRequiredJunctionRotationPrepared. Used by FilterCellInputData's per-candidate junction loop.
+	 * @param SourceFlippedQuat SourceQuat already multiplied by the 180-around-Up flip.
+	 * @param JunctionInverseQuat The candidate junction's authored rotation as a quaternion, inverted.
+	 * @param CellConstraints The candidate cell's rotation constraints (cell-wide veto).
+	 * @param JunctionConstraints The candidate junction's own rotation constraints.
+	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
+	 */
+	static bool IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
 		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
 
 	/**

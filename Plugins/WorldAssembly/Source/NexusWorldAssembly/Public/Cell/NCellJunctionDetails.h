@@ -79,6 +79,14 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	UPROPERTY(VisibleAnywhere)
 	bool bInsideHull = false;
 
+	/**
+	 * Derived, non-serialized cache of WorldRotation.Quaternion().Inverse(), populated when the virtual cell data is
+	 * assembled in FNVirtualOrganContext. Lets the per-candidate junction-rotation gate skip the rotator->quat
+	 * conversion on every filter pass. Stays Identity on persistent (asset/component) instances; only meaningful on
+	 * the virtual copies the generator filters against.
+	 */
+	FQuat CachedInverseWorldQuat = FQuat::Identity;
+
 	/** Copy this struct into Other by value. @return Always true. */
 	bool CopyTo(FNCellJunctionDetails& Other) const
 	{

@@ -72,7 +72,7 @@ void ANWorldAssemblyRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 {
 	bHasNearbyCellLevelInstances = false;
-	CachedNearbyCellLevelInstances.Empty();
+	CachedNearbyCellLevelInstances.Reset();
 	
 	// Setup initial query
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
