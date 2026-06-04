@@ -41,6 +41,15 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness
 	}
 
 	/**
+	 * Give Context a non-null, cell-less graph so CheckGraph's null and cell-count gates pass, keeping a test's
+	 * focus on the per-cell MinimumCount enforcement which reads CellInputData rather than the graph nodes.
+	 */
+	static void GiveEmptyGraph(FNVirtualOrganContext& Context)
+	{
+		Context.CellGraph = MakeUnique<FNAssemblyGraph>(MakeBoneRoot(), FVector::ZeroVector, FBoxSphereBounds(ForceInit), true);
+	}
+
+	/**
 	 * Build a graph on Context holding CellCount cell nodes (plus the uncounted bone root). Cells supplies the
 	 * backing storage for the node input data and must outlive Context; it is reserved up front so the node
 	 * pointers into it stay stable.
@@ -184,6 +193,115 @@ N_TEST_HIGH(FNCheckGraphTests_CheckGraph_RequiredAnyTagsEnforced,
 	Context.PlacedTagGroups.RequiredAnyTags.AppendTags(FGameplayTagContainer(Configured));
 	CHECK_MESSAGE(TEXT("Placing the configured required-any tag must satisfy the check."),
 		Context.CheckGraph())
+}
+
+N_TEST_HIGH(FNCheckGraphTests_CheckGraph_MinimumCountUnmetFails,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountUnmetFails",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cell placed fewer times than its MinimumCount must reject the graph.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	FNVirtualCellData& Cell = Context.CellInputData.AddDefaulted_GetRef();
+	Cell.MinimumCount = 2;
+	Cell.UsedCount = 1;
+
+	CHECK_FALSE_MESSAGE(TEXT("A cell used once must fail a MinimumCount of two."), Context.CheckGraph())
+}
+
+N_TEST_HIGH(FNCheckGraphTests_CheckGraph_MinimumCountMetPasses,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountMetPasses",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cell placed at least MinimumCount times must satisfy the check.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	FNVirtualCellData& Cell = Context.CellInputData.AddDefaulted_GetRef();
+	Cell.MinimumCount = 2;
+	Cell.UsedCount = 2;
+
+	CHECK_MESSAGE(TEXT("A cell used twice must satisfy a MinimumCount of two."), Context.CheckGraph())
+}
+
+N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_MinimumCountZeroOrUnsetIgnored,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountZeroOrUnsetIgnored",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A MinimumCount of -1 (unset) or 0 carries no constraint, so a never-placed cell must still pass.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	FNVirtualCellData& Unset = Context.CellInputData.AddDefaulted_GetRef();
+	Unset.MinimumCount = -1;
+	Unset.UsedCount = 0;
+
+	FNVirtualCellData& Zero = Context.CellInputData.AddDefaulted_GetRef();
+	Zero.MinimumCount = 0;
+	Zero.UsedCount = 0;
+
+	CHECK_MESSAGE(TEXT("Cells with no positive MinimumCount must not gate the graph."), Context.CheckGraph())
+}
+
+N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_MinimumCountSkippedWhenNeverPlaceable,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountSkippedWhenNeverPlaceable",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cell with MaximumCount of 0 can never be placed, so its (contradictory) positive MinimumCount must be
+	// skipped rather than dead-locking the graph in a state it can never satisfy.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	FNVirtualCellData& Cell = Context.CellInputData.AddDefaulted_GetRef();
+	Cell.MinimumCount = 2;
+	Cell.MaximumCount = 0;
+	Cell.UsedCount = 0;
+
+	CHECK_MESSAGE(TEXT("A never-placeable cell (MaximumCount 0) must not fail the minimum check."), Context.CheckGraph())
+}
+
+N_TEST_HIGH(FNCheckGraphTests_CheckGraph_MinimumCountSkippedForUniqueRequired,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::MinimumCountSkippedForUniqueRequired",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cell whose assembly tag names a group that is BOTH Unique and RequiredAny is governed by the RequiredAny
+	// check, so its per-cell MinimumCount is skipped. A second, untagged cell proves the skip is tag-specific and
+	// the minimum is still enforced for everything else.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	const FGameplayTag Combined = Tag(TEXT("NEXUS.WorldAssembly.Behavior.Starter"));
+
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	// The group is configured as both Unique and RequiredAny, and the RequiredAny requirement is already satisfied
+	// by something placed, so the group check upstream passes and we isolate the MinimumCount skip.
+	Context.CellInputDataSummary.GroupTags.UniqueTags.AppendTags(FGameplayTagContainer(Combined));
+	Context.CellInputDataSummary.GroupTags.RequiredAnyTags.AppendTags(FGameplayTagContainer(Combined));
+	Context.PlacedTagGroups.RequiredAnyTags.AppendTags(FGameplayTagContainer(Combined));
+
+	FNVirtualCellData& Governed = Context.CellInputData.AddDefaulted_GetRef();
+	Governed.AssemblyTags.AddTag(Combined);
+	Governed.MinimumCount = 2;
+	Governed.UsedCount = 1;
+
+	CHECK_MESSAGE(TEXT("A combined Unique + RequiredAny cell must have its MinimumCount skipped."), Context.CheckGraph())
+
+	// An untagged cell with the same shortfall must still fail, confirming the skip is specific to the combined group.
+	FNVirtualCellData& Ordinary = Context.CellInputData.AddDefaulted_GetRef();
+	Ordinary.MinimumCount = 2;
+	Ordinary.UsedCount = 1;
+
+	CHECK_FALSE_MESSAGE(TEXT("An ordinary cell below its minimum must still fail the check."), Context.CheckGraph())
 }
 
 #endif //WITH_TESTS

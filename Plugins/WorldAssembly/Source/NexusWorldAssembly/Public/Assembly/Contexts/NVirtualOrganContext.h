@@ -27,9 +27,9 @@ class UNOrganComponent;
 struct FNCellInputDataFilter
 {
 	/**
-	 * Hop-count from the start node of the cell the filter is stepping away from.
-	 * Compared against each candidate's MinimumNodeDepth to gate cells that are only allowed
-	 * to appear at or beyond a certain distance from the bone. 0 means "at the start".
+	 * Real NodeDepth of the source node the filter is stepping away from (bone = 0, start cell = 1, each hop +1).
+	 * A candidate stepping off this source lands at NodeDepth + 1, which is what the depth gates compare against
+	 * each candidate's Minimum/MaximumNodeDepth. 0 means the bone (i.e. selecting the start cell).
 	 */
 	int32 NodeDepth = 0;
 
@@ -208,25 +208,25 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter);
 
 	/**
-	 * Gate a candidate by minimum graph depth. SourceNodeDepth is the depth of the node the filter is
-	 * stepping away from; because graph depth is rooted at the bone (start cell = depth 1) and the candidate
-	 * lands one hop deeper, the two offsets cancel and this resolves to "hops from the start cell".
+	 * Gate a candidate by minimum graph depth. Min/MaxNodeDepth are 1-based depths that match a cell's real
+	 * NodeDepth (bone = 0, start cell = 1, each hop +1), so CandidateNodeDepth is the prospective NodeDepth the
+	 * candidate would take on (the source node's depth + 1, computed by the caller).
 	 * @param MinimumNodeDepth The candidate's configured minimum depth; 0 disables the gate.
-	 * @param SourceNodeDepth Depth of the source node the filter is stepping away from.
+	 * @param CandidateNodeDepth The prospective NodeDepth the candidate would land at.
 	 * @return true if the candidate is too shallow and must be gated out.
 	 */
-	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 SourceNodeDepth);
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 CandidateNodeDepth);
 
 	/**
-	 * Gate a candidate by maximum graph depth. SourceNodeDepth is the depth of the node the filter is stepping
-	 * away from; the same bone-rooted offset that cancels in IsGatedByMinimumNodeDepth applies here, so this
-	 * resolves to "hops from the start cell". The comparison is inclusive: a candidate at exactly MaximumNodeDepth
+	 * Gate a candidate by maximum graph depth. Mirrors IsGatedByMinimumNodeDepth: Min/MaxNodeDepth are 1-based
+	 * depths matching a cell's real NodeDepth (bone = 0, start cell = 1), and CandidateNodeDepth is the prospective
+	 * NodeDepth the candidate would land at. The comparison is inclusive: a candidate at exactly MaximumNodeDepth
 	 * is still allowed and only deeper candidates are gated.
-	 * @param MaximumNodeDepth The candidate's configured maximum depth; -1 disables the gate.
-	 * @param SourceNodeDepth Depth of the source node the filter is stepping away from.
+	 * @param MaximumNodeDepth The candidate's configured maximum depth; 0 disables the gate.
+	 * @param CandidateNodeDepth The prospective NodeDepth the candidate would land at.
 	 * @return true if the candidate is too deep and must be gated out.
 	 */
-	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 SourceNodeDepth);
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 CandidateNodeDepth);
 
 	/**
 	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the organ's

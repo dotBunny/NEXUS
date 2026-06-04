@@ -42,9 +42,12 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 	
 	/**
-	 * DOES NOT DO ANYTHING CURRENTLY - Only used to determine Unique early out (1:1).
-	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no minimum constraint.
+	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph for the graph to validate.
+	 * Enforced in FNVirtualOrganContext::CheckGraph against the cell's placed instance count.
+	 * @note A value of -1 (or 0) indicates no minimum constraint.
+	 * @remark The minimum is skipped for cells whose assembly tags name a group that is both Unique and RequiredAny
+	 *         (the RequiredAny group check governs success instead), and for cells with MaximumCount of 0 (which can
+	 *         never be placed). Also used to determine the Unique early out (MinimumCount == 1 && MaximumCount == 1).
 	 */
 	UPROPERTY(EditAnywhere)
 	int32 MinimumCount = -1;
@@ -64,20 +67,21 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	* The minimum number of cell hops away from the start cell before this cell may be used.
-	* The start cell is hop 0, its direct neighbors hop 1, etc. A value of N first allows the cell N hops out.
-	* @note A value of 0 indicates no constraint.
+	* The minimum graph depth at which this cell may be used, as a 1-based NodeDepth.
+	* The start cell is depth 1, its direct neighbors depth 2, etc. A value of N first allows the cell at depth N.
+	* @note A value of 0 indicates no constraint (a value of 1 is the start cell and is likewise unconstrained).
 	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDepth = 0;
-	
+
 	/**
-	* The maximum number of cell hops away from the start cell at which this cell may still be used.
-	* The start cell is hop 0, its direct neighbors hop 1, etc. A value of N allows the cell up to N hops out.
-	* @note A value of -1 indicates no constraint.
+	* The maximum graph depth at which this cell may still be used, as a 1-based NodeDepth.
+	* The start cell is depth 1, its direct neighbors depth 2, etc. A value of N allows the cell up to depth N;
+	* a value of 1 restricts the cell to the start cell only.
+	* @note A value of 0 indicates no constraint.
 	*/
-	UPROPERTY(EditAnywhere,meta=(ClampMin=-1, UIMin=-1))
-	int32 MaximumNodeDepth = -1;
+	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
+	int32 MaximumNodeDepth = 0;
 
 	/**
 	 * When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point,

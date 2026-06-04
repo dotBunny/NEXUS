@@ -70,9 +70,11 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	
 	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 
-	/** 
+	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no minimum constraint.
+	 * @note A value of -1 (or 0) indicates no minimum constraint.
+	 * @remark Enforced in FNVirtualOrganContext::CheckGraph against UsedCount, skipping combined Unique + RequiredAny
+	 *         cells and cells with MaximumCount of 0.
 	 */
 	int32 MinimumCount = -1;
 
@@ -89,29 +91,24 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	 * The minimum number of cell hops away from the start cell before this cell may be used.
-	 * The start cell itself is hop 0, its direct neighbours are hop 1, and so on. A cell with
-	 * MinimumNodeDepth = N therefore first becomes eligible N hops out from the start.
-	 * @note A value of 0 indicates no constraint.
-	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData by comparing against
-	 *         the source node's NodeDepth. Because graph depth is rooted at the bone (start cell =
-	 *         NodeDepth 1) while the candidate is placed one hop deeper, those two offsets cancel and
-	 *         the comparison correctly resolves to "hops from the start cell". See the depth test in
-	 *         NMinimumNodeDepthTests.cpp before changing the comparison.
+	 * The minimum graph depth at which this cell may be used, as a 1-based NodeDepth (the start cell is depth 1,
+	 * its direct neighbours depth 2, and so on). A cell with MinimumNodeDepth = N first becomes eligible at
+	 * NodeDepth N.
+	 * @note A value of 0 indicates no constraint (a value of 1 is the start cell and is likewise unconstrained).
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the candidate's prospective
+	 *         NodeDepth (the source node's NodeDepth + 1). See NMinimumNodeDepthTests.cpp before changing it.
 	 */
 	int32 MinimumNodeDepth = 0;
-	
+
 	/**
-	 * The maximum number of cell hops away from the start cell at which this cell may still be used.
-	 * The start cell itself is hop 0, its direct neighbours are hop 1, and so on. A cell with
-	 * MaximumNodeDepth = N is therefore last eligible N hops out from the start.
-	 * @note A value of -1 indicates no constraint.
-	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData by comparing against the
-	 *         source node's NodeDepth, mirroring MinimumNodeDepth: the bone-rooted depth offset cancels so
-	 *         the comparison resolves to "hops from the start cell". See NMaximumNodeDepthTests.cpp before
-	 *         changing the comparison.
+	 * The maximum graph depth at which this cell may still be used, as a 1-based NodeDepth (the start cell is
+	 * depth 1, its direct neighbours depth 2, and so on). A cell with MaximumNodeDepth = N is last eligible at
+	 * NodeDepth N; MaximumNodeDepth = 1 restricts the cell to the start cell only.
+	 * @note A value of 0 indicates no constraint.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the candidate's prospective
+	 *         NodeDepth (the source node's NodeDepth + 1). See NMaximumNodeDepthTests.cpp before changing it.
 	 */
-	int32 MaximumNodeDepth = -1;
+	int32 MaximumNodeDepth = 0;
 
 	/** When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point. */
 	bool bHasDirectionConstraint = false;

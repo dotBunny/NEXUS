@@ -118,6 +118,16 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.TagCounterOperations = Cell.Value.TagCounterOperations;
 		CellDetails.MinimumCount = Cell.Value.MinimumCount;
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
+
+		// Contradictory configuration: a cell required at least once (MinimumCount > 0) yet never placeable
+		// (MaximumCount == 0). CheckGraph deliberately skips the minimum for such cells so generation does not
+		// retry forever, but warn here so the authoring mistake surfaces.
+		if (CellDetails.MinimumCount > 0 && CellDetails.MaximumCount == 0)
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning,
+				TEXT("Cell '%s' has MinimumCount(%i) > 0 but MaximumCount of 0, so it can never be placed. Its minimum will be ignored."),
+				*GetNameSafe(Cell.Key), CellDetails.MinimumCount);
+		}
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
 
@@ -258,8 +268,35 @@ bool FNVirtualOrganContext::CheckGraph()
 		return false;
 	}
 	
-	// TODO: We need to check the input cell data minimum counts (but ignore for unique/required)
-	
+	// Enforce per-cell MinimumCount. UsedCount is kept aligned with placed instances by the graph's
+	// Register/UnregisterNode, so by here it reflects exactly how many times each cell landed in the graph.
+	//
+	// Tooltip-faithful exception: a cell whose assembly tags name a group that is BOTH Unique AND RequiredAny
+	// is governed entirely by the RequiredAny check above ("success only requires that one member is present"),
+	// so its per-cell MinimumCount is intentionally skipped. The skip set is the exact intersection of the two
+	// configured group-tag sets.
+	const FGameplayTagContainer UniqueAndRequiredTags =
+		CellInputDataSummary.GroupTags.UniqueTags.FilterExact(CellInputDataSummary.GroupTags.RequiredAnyTags);
+
+	for (const FNVirtualCellData& Cell : CellInputData)
+	{
+		// -1 (unset) and 0 carry no real minimum.
+		if (Cell.MinimumCount <= 0) continue;
+
+		// A cell that can never be placed (MaximumCount == 0) makes a positive MinimumCount unsatisfiable; skip it
+		// so the graph does not retry forever on a contradictory configuration. The constructor warns about this.
+		if (Cell.MaximumCount == 0) continue;
+
+		// Skip cells governed by a combined Unique + RequiredAny group (see above).
+		if (!UniqueAndRequiredTags.IsEmpty() && Cell.AssemblyTags.HasAnyExact(UniqueAndRequiredTags)) continue;
+
+		if (Cell.UsedCount < Cell.MinimumCount)
+		{
+			N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+				TEXT("CheckGraph FAILED: Cell UsedCount(%i) < MinimumCount(%i)"), Cell.UsedCount, Cell.MinimumCount))
+			return false;
+		}
+	}
 
 	return true;
 }
@@ -344,14 +381,20 @@ bool FNVirtualOrganContext::IsGatedByTagCounterConstraints(const FNVirtualCellDa
 	return false;
 }
 
-bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDepth, const int32 SourceNodeDepth)
+bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDepth, const int32 CandidateNodeDepth)
 {
-	return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
+	// MinimumNodeDepth is a 1-based graph depth that matches the candidate's real NodeDepth (bone = 0, start
+	// cell = 1, each hop +1). Gate the candidate when it would land shallower than the configured minimum.
+	// 0 disables the gate.
+	return MinimumNodeDepth > 0 && CandidateNodeDepth < MinimumNodeDepth;
 }
 
-bool FNVirtualOrganContext::IsGatedByMaximumNodeDepth(const int32 MaximumNodeDepth, const int32 SourceNodeDepth)
+bool FNVirtualOrganContext::IsGatedByMaximumNodeDepth(const int32 MaximumNodeDepth, const int32 CandidateNodeDepth)
 {
-	return MaximumNodeDepth > -1 && SourceNodeDepth > MaximumNodeDepth;
+	// MaximumNodeDepth is a 1-based graph depth that matches the candidate's real NodeDepth (bone = 0, start
+	// cell = 1, each hop +1). Gate the candidate when it would land deeper than the configured maximum.
+	// 0 disables the gate.
+	return MaximumNodeDepth > 0 && CandidateNodeDepth > MaximumNodeDepth;
 }
 
 bool FNVirtualOrganContext::IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance)
@@ -466,17 +509,17 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
-		// Gate by minimum depth. Filter.NodeDepth is the SOURCE node's depth; the candidate lands one hop
-		// deeper. Graph depth is rooted at the bone, so the start cell is NodeDepth 1 (hop 0 from start) and
-		// "source depth" already equals "candidate's hop-count from the start cell" — the two offsets cancel.
-		// A candidate is therefore correctly first eligible at hop == MinimumNodeDepth. The comparison lives in
-		// IsGatedByMinimumNodeDepth (do NOT add a +1 there). Covered by NMinimumNodeDepthTests.cpp.
-		if (IsGatedByMinimumNodeDepth(CellData->MinimumNodeDepth, Filter.NodeDepth))
+		// Gate by depth. Min/MaxNodeDepth are 1-based graph depths that match a cell's real NodeDepth (bone = 0,
+		// start cell = 1, each hop +1). Filter.NodeDepth is the SOURCE node's depth, so a candidate stepping off
+		// it lands at Filter.NodeDepth + 1 — that prospective depth is what the gates compare against.
+		// Covered by NMinimumNodeDepthTests.cpp / NMaximumNodeDepthTests.cpp.
+		const int32 CandidateNodeDepth = Filter.NodeDepth + 1;
+		if (IsGatedByMinimumNodeDepth(CellData->MinimumNodeDepth, CandidateNodeDepth))
 		{
 			continue;
 		}
-		
-		if (IsGatedByMaximumNodeDepth(CellData->MaximumNodeDepth, Filter.NodeDepth))
+
+		if (IsGatedByMaximumNodeDepth(CellData->MaximumNodeDepth, CandidateNodeDepth))
 		{
 			continue;
 		}
