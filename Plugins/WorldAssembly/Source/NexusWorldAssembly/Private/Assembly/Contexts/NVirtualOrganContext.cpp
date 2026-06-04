@@ -352,11 +352,10 @@ FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQ
 
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat)
 {
-	FRotator RequiredRotation = (SourceFlippedQuat * JunctionInverseQuat).Rotator();
-	RequiredRotation.Roll  = FRotator::NormalizeAxis(RequiredRotation.Roll);
-	RequiredRotation.Pitch = FRotator::NormalizeAxis(RequiredRotation.Pitch);
-	RequiredRotation.Yaw   = FRotator::NormalizeAxis(RequiredRotation.Yaw);
-	return RequiredRotation;
+	// FQuat::Rotator() already returns each axis pre-normalized (pitch in [-90,90] from asin, yaw/roll in (-180,180]
+	// from atan2), and FRotator::NormalizeAxis is a bit-exact identity over that range, so no further normalization
+	// is needed here before feeding the matching-rotation constraints.
+	return (SourceFlippedQuat * JunctionInverseQuat).Rotator();
 }
 
 bool FNVirtualOrganContext::IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
