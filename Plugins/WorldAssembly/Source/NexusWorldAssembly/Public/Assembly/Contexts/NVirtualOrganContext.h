@@ -8,6 +8,7 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Types/NCardinalDirection.h"
 #include "Types/NRotationConstraints.h"
 
 #if !UE_BUILD_SHIPPING
@@ -49,6 +50,8 @@ struct FNCellInputDataFilter
 
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
+	
+	FVector WorldPosition;
 };
 
 /**
@@ -70,6 +73,8 @@ public:
 	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
+	float AssemblyDirectionTolerance = 15.f;
+	
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
@@ -144,7 +149,7 @@ public:
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
 
-	/** @return true once the builder has produced a valid graph (cell count within bounds, etc). */
+	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
@@ -213,7 +218,31 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 SourceNodeDepth);
 
 	/**
-	 * Resolve the rotation a candidate junction must adopt to mate with the source junction. Mirrors the
+	 * Gate a candidate by maximum graph depth. SourceNodeDepth is the depth of the node the filter is stepping
+	 * away from; the same bone-rooted offset that cancels in IsGatedByMinimumNodeDepth applies here, so this
+	 * resolves to "hops from the start cell". The comparison is inclusive: a candidate at exactly MaximumNodeDepth
+	 * is still allowed and only deeper candidates are gated.
+	 * @param MaximumNodeDepth The candidate's configured maximum depth; -1 disables the gate.
+	 * @param SourceNodeDepth Depth of the source node the filter is stepping away from.
+	 * @return true if the candidate is too deep and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 SourceNodeDepth);
+
+	/**
+	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the organ's
+	 * start point (see FilterCellInputData), and the candidate survives only when that bearing lands within
+	 * Tolerance degrees of Direction. Wrapping is handled by FNCardinalDirectionUtils::IsCloseToDirection, so the
+	 * 0/360 seam and out-of-range inputs compare correctly.
+	 * @param Angle The candidate's bearing in degrees (any range; normalized internally).
+	 * @param Direction The cardinal heading the candidate is constrained to.
+	 * @param Tolerance Maximum absolute degree deviation (+/-) from Direction that still permits placement.
+	 * @return true if the candidate's bearing is outside the tolerance window and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance);
+
+
+	/**
+	 * Resolve the rotation a candidate junction must adapt to mate with the source junction. Mirrors the
 	 * placement math in ProcessCellNode: flip 180 around Up to oppose the source's facing direction, then undo
 	 * the junction's own local rotation so only the delta the cell must apply remains. The result is returned
 	 * with each axis normalized to [-180, 180] so it can be fed straight into the matching-rotation constraints.
@@ -234,7 +263,7 @@ public:
 	static FRotator GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat);
 
 	/**
-	 * Gate a candidate junction by the rotation it would have to adopt to mate with the source. Both the cell
+	 * Gate a candidate junction by the rotation it would have to adapt to mate with the source. Both the cell
 	 * and the junction get an independent veto: either may disable enforcement, but whichever side enforces must
 	 * have the required rotation (from GetRequiredJunctionRotation) fall inside its matching interval.
 	 * @param SourceQuat Orientation of the source junction the candidate is mating against.
@@ -267,6 +296,14 @@ public:
 	/** Run the post-build invariant checks; flips bSuccessful on success. */
 	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
+	/**
+	 * Set the world-space point the directional constraint measures candidate bearings from (the organ's start bone).
+	 * @param Location World-space origin for direction-constraint bearings.
+	 */
+	void SetStartPoint(const FVector& Location) { StartPoint = Location; }
+
+	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
+	FVector GetStartPoint() const { return StartPoint; }
 private:
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;
@@ -279,6 +316,9 @@ private:
 
 	/** Random-stream seed for this organ's build. */
 	uint64 Seed;
+
+	/** World-space origin (the organ's start bone) that direction-constraint bearings are measured from. */
+	FVector StartPoint;
 
 	/** Human-readable task name used in logs. */
 	FString Name;

@@ -4,7 +4,6 @@
 #include "Assembly/Contexts/NVirtualOrganContext.h"
 
 #include "NWorldAssemblyMinimal.h"
-#include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Cell/NCell.h"
 #include "Cell/NTissue.h"
 #include "Collections/NWeightedIntegerArray.h"
@@ -38,6 +37,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	
 	CellHullPenetration = WorldOrganContext->CellHullPenetration;
 	WorldHullPenetration = WorldOrganContext->WorldHullPenetration;
+	AssemblyDirectionTolerance = WorldOrganContext->AssemblyDirectionTolerance;
 	VoxelSize = WorldOrganContext->VoxelSize;
 	
 	// Keep a local copy of this here
@@ -120,7 +120,11 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 		CellDetails.MaximumCount = Cell.Value.MaximumCount;
 		CellDetails.Weighting = Cell.Value.Weighting;
 		CellDetails.MinimumNodeDistance = Cell.Value.MinimumNodeDistance;
+
 		CellDetails.MinimumNodeDepth = Cell.Value.MinimumNodeDepth;
+		CellDetails.MaximumNodeDepth = Cell.Value.MaximumNodeDepth;
+		CellDetails.bHasDirectionConstraint = Cell.Value.bHasDirectionConstraint;
+		CellDetails.DirectionConstraint = Cell.Value.DirectionConstraint;
 		
 		// We won't touch this till later
 		CellDetails.Template = Cell.Key;
@@ -179,6 +183,9 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	PreFilter.SocketSize = BoneInputData[0].SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneInputData[0].WorldRotation);
 	PreFilter.bIsStartNode = true;
+	
+	// TODO: Odd spot but right now just using one bone
+	SetStartPoint(BoneInputData[0].WorldPosition);
 	
 	FNWeightedIntegerArray PreIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
@@ -342,6 +349,16 @@ bool FNVirtualOrganContext::IsGatedByMinimumNodeDepth(const int32 MinimumNodeDep
 	return MinimumNodeDepth > 0 && MinimumNodeDepth > SourceNodeDepth;
 }
 
+bool FNVirtualOrganContext::IsGatedByMaximumNodeDepth(const int32 MaximumNodeDepth, const int32 SourceNodeDepth)
+{
+	return MaximumNodeDepth > -1 && SourceNodeDepth > MaximumNodeDepth;
+}
+
+bool FNVirtualOrganContext::IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance)
+{
+	return !FNCardinalDirectionUtils::IsCloseToDirection(Direction, Angle, Tolerance);
+}
+
 FRotator FNVirtualOrganContext::GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation)
 {
 	// Flip 180 around Up to oppose the source's facing direction, then undo the junction's local rotation so only
@@ -459,6 +476,24 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			continue;
 		}
 		
+		if (IsGatedByMaximumNodeDepth(CellData->MaximumNodeDepth, Filter.NodeDepth))
+		{
+			continue;
+		}
+		
+		
+		// Cardinal Direction Constraint
+		if (CellData->bHasDirectionConstraint)
+		{
+			// Compass bearing from the organ's start point out to the candidate's world position. FVector::Rotation()
+			// derives yaw from atan2(Y, X), so North (+X) = 0 and East (+Y) = 90, matching ENCardinalDirection; Z is
+			// ignored, keeping this a purely horizontal heading.
+			const float Angle = (Filter.WorldPosition - StartPoint).Rotation().Yaw;
+			if (IsGatedByDirectionalConstraint(Angle, CellData->DirectionConstraint, AssemblyDirectionTolerance))
+			{
+				continue;
+			}
+		}
 		
 		const FNRotationConstraints& CellRotationConstraints = CellData->CellDetails.RotationConstraints;
 		

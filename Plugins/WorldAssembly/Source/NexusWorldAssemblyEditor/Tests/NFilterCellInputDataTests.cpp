@@ -49,6 +49,15 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness
 		Filter.SourceQuat = FQuat::Identity;
 		return Filter;
 	}
+
+	/** A MakeCell() candidate that may only be placed toward Direction from the organ's start point. */
+	static FNVirtualCellData MakeDirectionConstrainedCell(const ENCardinalDirection Direction)
+	{
+		FNVirtualCellData Cell = MakeCell();
+		Cell.bHasDirectionConstraint = true;
+		Cell.DirectionConstraint = Direction;
+		return Cell;
+	}
 }
 
 N_TEST_CRITICAL(FNFilterCellInputDataTests_FilterCellInputData_SelectsMatchingCellAndJunction,
@@ -222,6 +231,107 @@ N_TEST_MEDIUM(FNFilterCellInputDataTests_FilterCellInputData_JunctionRotationCon
 
 	CHECK_FALSE_MESSAGE(TEXT("A junction whose rotation window excludes the required 180 must be filtered out."),
 		CellIndices.HasData())
+}
+
+N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintAdmitsMatchingBearing,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData::DirectionConstraintAdmitsMatchingBearing",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A cell constrained to East stays selectable when its attach point (Filter.WorldPosition) sits due east of the
+	// start point: bearing 90 against East is within the 45-degree tolerance. +Y is East under FVector::Rotation().
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
+	Context.SetStartPoint(FVector::ZeroVector);
+	Context.AssemblyDirectionTolerance = 45.f;
+	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
+
+	FNCellInputDataFilter Filter = MakeFilter();
+	Filter.WorldPosition = FVector(0.0, 100.0, 0.0);
+
+	FNWeightedIntegerArray CellIndices;
+	TMap<int32, TArray<int32>> JunctionIndices;
+	Context.FilterCellInputData(Filter, CellIndices, JunctionIndices);
+
+	CHECK_MESSAGE(TEXT("An East-constrained cell attaching due east of the start must be selectable."), CellIndices.HasValue(0))
+}
+
+N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintRejectsWestAttach,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData::DirectionConstraintRejectsWestAttach",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The regression that motivated the fix: a cell constrained to East must be excluded when its attach point sits
+	// to the west of the start (bearing 270 / -90 is 180 degrees off East, well beyond the 45-degree tolerance).
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
+	Context.SetStartPoint(FVector::ZeroVector);
+	Context.AssemblyDirectionTolerance = 45.f;
+	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
+
+	FNCellInputDataFilter Filter = MakeFilter();
+	Filter.WorldPosition = FVector(0.0, -100.0, 0.0);
+
+	FNWeightedIntegerArray CellIndices;
+	TMap<int32, TArray<int32>> JunctionIndices;
+	Context.FilterCellInputData(Filter, CellIndices, JunctionIndices);
+
+	CHECK_FALSE_MESSAGE(TEXT("An East-constrained cell attaching to the west of the start must be excluded."), CellIndices.HasData())
+}
+
+N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintToleranceIsHalfWedge,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData::DirectionConstraintToleranceIsHalfWedge",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// At the 45-degree default tolerance the East wedge spans [45, 135]: a NorthEast attach (bearing 45) sits on the
+	// boundary and is admitted, while a due-North attach (bearing 0, 90 degrees off) is excluded. This pins that 45
+	// no longer accepts the whole eastern hemisphere the way the old 90-degree default did.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
+	Context.SetStartPoint(FVector::ZeroVector);
+	Context.AssemblyDirectionTolerance = 45.f;
+	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East)); // index 0 — NorthEast attach
+	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East)); // index 1 — North attach
+
+	// index 0 attaches NorthEast of the start (bearing 45, on the wedge boundary).
+	FNCellInputDataFilter NorthEastFilter = MakeFilter();
+	NorthEastFilter.WorldPosition = FVector(100.0, 100.0, 0.0);
+	FNWeightedIntegerArray NorthEastIndices;
+	TMap<int32, TArray<int32>> NorthEastJunctions;
+	Context.FilterCellInputData(NorthEastFilter, NorthEastIndices, NorthEastJunctions);
+	CHECK_MESSAGE(TEXT("A NorthEast attach (bearing 45) is on the East boundary and must be admitted."), NorthEastIndices.HasValue(0))
+
+	// A due-North attach (bearing 0) is 90 degrees off East and must fall outside the wedge.
+	FNCellInputDataFilter NorthFilter = MakeFilter();
+	NorthFilter.WorldPosition = FVector(100.0, 0.0, 0.0);
+	FNWeightedIntegerArray NorthIndices;
+	TMap<int32, TArray<int32>> NorthJunctions;
+	Context.FilterCellInputData(NorthFilter, NorthIndices, NorthJunctions);
+	CHECK_FALSE_MESSAGE(TEXT("A due-North attach (bearing 0) is outside the 45-degree East wedge and must be excluded."), NorthIndices.HasData())
+}
+
+N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintHeightAgnostic,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::FilterCellInputData::DirectionConstraintHeightAgnostic",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Yaw ignores Z, so a vertical offset between the start and the attach point must not change the heading: an
+	// East-constrained cell attaching due east but far above the start is still admitted.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
+
+	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
+	Context.SetStartPoint(FVector::ZeroVector);
+	Context.AssemblyDirectionTolerance = 45.f;
+	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
+
+	FNCellInputDataFilter Filter = MakeFilter();
+	Filter.WorldPosition = FVector(0.0, 100.0, 5000.0);
+
+	FNWeightedIntegerArray CellIndices;
+	TMap<int32, TArray<int32>> JunctionIndices;
+	Context.FilterCellInputData(Filter, CellIndices, JunctionIndices);
+
+	CHECK_MESSAGE(TEXT("A large Z offset must not change the heading; the East-constrained cell stays selectable."), CellIndices.HasValue(0))
 }
 
 #endif //WITH_TESTS

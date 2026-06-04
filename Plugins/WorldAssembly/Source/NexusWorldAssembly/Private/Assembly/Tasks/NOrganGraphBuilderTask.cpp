@@ -167,6 +167,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	PreFilter.SocketSize = BoneData.SocketSize;
 	PreFilter.SourceQuat = FQuat(BoneData.WorldRotation);
 	PreFilter.bIsStartNode = true;
+	PreFilter.WorldPosition = BoneData.WorldPosition;
 
 	FNWeightedIntegerArray WeightedStartIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
@@ -417,6 +418,10 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		NodeFilter.SourceQuat = SourceJunctionWorldQuat;
 		NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
 		NodeFilter.SourceCellNode = SourceCellNode;
+		// Direction constraints measure the bearing from the organ start to where the candidate will attach. The open
+		// junction's world location is that attach point; using the parent cell's centre instead reads the parent's
+		// bearing, which lets e.g. an East-constrained cell pass while it actually lands to the west of the bone.
+		NodeFilter.WorldPosition = SourceJunctionValue->WorldLocation;
 		NodeFilter.bIsEndNode = bIsEndNode;
 
 		OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);

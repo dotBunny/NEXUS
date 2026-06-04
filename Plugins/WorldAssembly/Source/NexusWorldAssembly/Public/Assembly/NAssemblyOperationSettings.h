@@ -40,6 +40,10 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Level Instances")
 	bool bCreateLevelInstances = true;
 	
+	/** Maximum absolute degree deviation (+/-) from a cell's DirectionConstraint heading that still permits placement. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Directions")
+	float AssemblyDirectionTolerance = 15.f;
+	
 	/** Context tags applied to the operation and propagated into the generation context. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Tagging")
 	FGameplayTagContainer ContextTags;
@@ -59,6 +63,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		FNAssemblyOperationSettings Settings;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
+		Settings.AssemblyDirectionTolerance = AssemblySettings->AssemblyDirectionTolerance;
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
@@ -74,6 +79,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.bCreateLevelInstances = false;
 		
 		Settings.Seed = FNSeedGenerator::RandomFriendlySeed();
+		Settings.AssemblyDirectionTolerance = AssemblySettings->AssemblyDirectionTolerance;
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);

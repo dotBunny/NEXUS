@@ -9,6 +9,7 @@
 #include "Cell/NCellRootDetails.h"
 #include "Cell/NTissueTagGroups.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
+#include "Types/NCardinalDirection.h"
 
 /**
  * A lightweight summary of a cell's tagging, used to classify it (starter/finisher eligibility) during virtual organ processing.
@@ -99,7 +100,31 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 *         NMinimumNodeDepthTests.cpp before changing the comparison.
 	 */
 	int32 MinimumNodeDepth = 0;
+	
+	/**
+	 * The maximum number of cell hops away from the start cell at which this cell may still be used.
+	 * The start cell itself is hop 0, its direct neighbours are hop 1, and so on. A cell with
+	 * MaximumNodeDepth = N is therefore last eligible N hops out from the start.
+	 * @note A value of -1 indicates no constraint.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData by comparing against the
+	 *         source node's NodeDepth, mirroring MinimumNodeDepth: the bone-rooted depth offset cancels so
+	 *         the comparison resolves to "hops from the start cell". See NMaximumNodeDepthTests.cpp before
+	 *         changing the comparison.
+	 */
+	int32 MaximumNodeDepth = -1;
 
+	/** When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point. */
+	bool bHasDirectionConstraint = false;
+
+	/**
+	 * Compass heading, measured from the organ's start point out to the candidate's attach point, this cell is
+	 * restricted to while bHasDirectionConstraint is set.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData, which admits the candidate only
+	 *         when its bearing lands within AssemblyDirectionTolerance degrees (+/-) of this heading. See
+	 *         NFilterCellInputDataTests.cpp.
+	 */
+	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
+	
 	/** 
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.

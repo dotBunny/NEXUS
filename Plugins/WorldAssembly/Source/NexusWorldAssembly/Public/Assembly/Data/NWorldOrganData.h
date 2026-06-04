@@ -33,13 +33,19 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;
-	
+
+	/** Maximum number of failed start attempts before the build gives up on this organ. */
 	int32 BadStartLimit = 1000;
-	
+
+	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
+	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
+	/** Maximum absolute degree deviation (+/-) from a cell's DirectionConstraint heading that still permits placement. */
+	float AssemblyDirectionTolerance = 15.f;
+	
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings for the graph builder. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 

@@ -12,6 +12,7 @@
 - Both `FNActorPool` and `UNActorPoolSubsystem` gained the ability to `ReturnAll`/`ReturnAllActors`.
 - `FNActorPoolSettings` now has a `SupportFlags` section, including `ReturnAll`.
 - Added accessors to a global mutable copy of the `Tag Counters` and the `Context Tags` of a generation, with supporting Blueprint functionality.
+- Added `Maximum Node Depth` and `Directional Constraints` to `UNTissue` definitions.
 
 ### Changed
 

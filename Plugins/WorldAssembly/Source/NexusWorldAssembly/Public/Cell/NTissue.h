@@ -8,6 +8,7 @@
 #include "Collections/NGameplayTagCounter.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
 #include "Engine/DataAsset.h"
+#include "Types/NCardinalRotation.h"
 #include "NTissue.generated.h"
 
 class UNCell;
@@ -69,6 +70,24 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDepth = 0;
+	
+	UPROPERTY(EditAnywhere,meta=(ClampMin=-1, UIMin=-1))
+	int32 MaximumNodeDepth = -1;
+
+	/**
+	 * When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point,
+	 * limiting it to candidates whose compass bearing from the start lands within the assembly direction tolerance.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bHasDirectionConstraint = false;
+
+	/**
+	 * The compass heading, measured from the organ's start point out to the candidate's placement, this cell is
+	 * restricted to while bHasDirectionConstraint is set.
+	 * @note Enforced within the project/operation Direction Tolerance (degrees +/-) during cell filtering.
+	 */
+	UPROPERTY(EditAnywhere, meta=(EditCondition=bHasDirectionConstraint))
+	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
 	
 	/** 
 	 * Relative weight for random selection during generation.
