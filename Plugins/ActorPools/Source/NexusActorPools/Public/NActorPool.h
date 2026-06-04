@@ -76,6 +76,12 @@ public:
 	bool Return(AActor* Actor);
 
 	/**
+	 * Return every currently spawned ('out') actor back to the pool.
+	 * @note Iterates in reverse so each Return() can safely remove from the OutActors array as it goes.
+	 */
+	void ReturnAll();
+
+	/**
 	 * Spawn an actor at a given location, triggering all events associated.
 	 * @param Position The world location where to spawn the actor.
 	 * @param Rotation The world rotation of the spawned actor.

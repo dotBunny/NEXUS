@@ -287,6 +287,14 @@ bool FNActorPool::Return(AActor* Actor)
 	return true;
 }
 
+void FNActorPool::ReturnAll()
+{
+	for (int i = OutActors.Num() - 1; i >= 0; --i)
+	{
+		Return(OutActors[i]);
+	}
+}
+
 void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
 	// Ingest flags - and update cached flags
