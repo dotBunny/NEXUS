@@ -6,10 +6,14 @@
 #include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 
-void UNDynamicRefComponent::OnComponentCreated()
+UNDynamicRefComponent::UNDynamicRefComponent()
 {
-	Super::OnComponentCreated();
-	bWantsInitializeComponent = (Lifecycle == ENActorComponentLifecycle::InitializeComponent);
+	// InitializeComponent() is gated by bWantsInitializeComponent, which the engine reads during its
+	// InitializeComponents() pass. OnComponentCreated() is NOT called for level-placed (serialized)
+	// components, so setting the flag there leaves placed actors using the InitializeComponent
+	// lifecycle unregistered. Set it unconditionally here (runs for both loaded and spawned
+	// components); InitializeComponent()/UninitializeComponent() already gate the actual work on Lifecycle.
+	bWantsInitializeComponent = true;
 }
 
 void UNDynamicRefComponent::BeginPlay()

@@ -5,7 +5,6 @@
 
 #include "GameplayTagContainer.h"
 #include "NSettingsUtils.h"
-#include "Collections/NGameplayTagCounter.h"
 #include "Macros/NSettingsMacros.h"
 #include "Types/NDirection.h"
 #include "NWorldAssemblySettings.generated.h"
@@ -18,7 +17,6 @@ enum class ENWorldAssemblyNetworkMode : uint8
 {
 	ReplicatedLevelInstances UMETA(DisplayName = "Replicated Level Instances", ToolTip = "Default behavior replicating level instances based on Replicated Level Instances for all procedures."),
 	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
-	// AlwaysRelevantCellProxies UMETA(DisplayName = "Always Replicate Cell Proxies", ToolTip="Enables replication of NCellProxy actors, making them always relevant, whilst leaving LevelInstances to be replicated based on relevancy."),
 };
 
 /**
