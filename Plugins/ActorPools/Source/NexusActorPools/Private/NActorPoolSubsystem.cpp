@@ -347,7 +347,6 @@ void UNActorPoolSubsystem::ReturnAllActors()
 		{
 			Pair->Value.Get()->ReturnAll(true);
 		}
-		
 	}
 }
 

@@ -10,6 +10,7 @@
 #include "NWorldAssemblyUtils.h"
 #include "Components/BillboardComponent.h"
 #include "Components/BrushComponent.h"
+#include "Developer/NPrimitiveFont.h"
 #include "Macros/NActorMacros.h"
 #include "Math/NVectorUtils.h"
 #include "Organ/NBoneActor.h"
@@ -272,23 +273,75 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 }
 
 
-void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
+void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth, const UNWorldAssemblySettings* Settings) const
 {
-	FLinearColor Color = FLinearColor::White;
+	FLinearColor GizmoColor = FLinearColor::White;
+
 	switch (Mode)
 	{
 		using enum ENBoneMode;
 	case Manual:
 		break;
 	case Automatic:
-		Color = FNColor::NexusLightBlue;
+		GizmoColor = FNColor::NexusLightBlue;
 		break;
 	case Disabled:
 		// Were not drawing this
 		return;
 	}
 	
-	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+	const FVector ComponentLocation = GetComponentLocation();
+	const FRotator ComponentRotation = GetComponentRotation();
+	
+	if (bShowDepth)
+	{
+		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
+		float MaximumDepth = 0;
+		
+		// TODO: Figure out maximum depth of the corners into world geometry
+		// IMPLEMENT
+		
+		if (MaximumDepth > Settings->AssemblyJunctionMatchingWorldPenetration)
+		{
+			GizmoColor = FLinearColor::Red;
+		}
+		
+		// Draw the depth text
+		if (MaximumDepth != 0)
+		{
+			// Always draw the readout upright in world space, directly beneath the junction. Using only the junction's
+			// yaw (zero pitch/roll) keeps the glyphs world-upright no matter how the junction is oriented, so the text
+			// never ends up upside down. Anchoring at the socket's lowest world-Z corner keeps it clear of the socket.
 
-	FNWorldAssemblyDebugDraw::DrawSocket(PDI,  GetComponentLocation(), GetComponentRotation(), SocketSize, Settings->SocketSize, Type, Color);
+			double LowestZ = ComponentLocation.Z;
+			for (const FVector& Corner : CornerPoints)
+			{
+				LowestZ = FMath::Min(LowestZ, Corner.Z);
+			}
+			
+			const FVector TextPosition(ComponentLocation.X, ComponentLocation.Y, LowestZ - 4.0f);
+			const FRotator TextRotation(0.0, ComponentRotation.Yaw, 0.0);
+
+			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), 
+				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f, 
+				false, true, SDPG_Foreground);
+		}
+	}
+
+	FNWorldAssemblyDebugDraw::DrawSocket(PDI,  ComponentLocation, ComponentRotation, SocketSize, Settings->SocketSize, Type, GizmoColor);
 }
+
+
+TArray<FVector> UNBoneComponent::GetWorldCornerPoints(const FVector2D& SettingSocketSize) const
+{
+	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
+	const FRotator DisplayRotation = DisplayQuat.Rotator();
+	
+	// TODO: Should this maybe be cached at spawning at runtime? 
+	const FVector2D Size = FNWorldAssemblyUtils::GetWorldSize2D(SocketSize, SettingSocketSize);
+
+	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(Size.X,Size.Y, ENAxis::Z);
+	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
+	return RotatedCornerPoints;
+}
+

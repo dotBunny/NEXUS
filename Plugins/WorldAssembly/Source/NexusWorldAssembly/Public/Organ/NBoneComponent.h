@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NWorldAssemblySettings.h"
 #include "Cell/NCellJunctionDetails.h"
 #include "Macros/NActorMacros.h"
 #include "NBoneComponent.generated.h"
@@ -95,8 +96,9 @@ public:
 	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
 
 	/** Render the bone's debug outline and socket extents via the provided primitive draw interface. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
+	TArray<FVector> GetWorldCornerPoints(const FVector2D& SettingSocketSize) const;
 private:
 	N_WORLD_ICON_HEADER()
 };

@@ -16,5 +16,5 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 	}
 
 	// We are always going to draw this
-	BoneComponent->DrawDebugPDI(PDI);
+	BoneComponent->DrawDebugPDI(PDI, true);
 }
