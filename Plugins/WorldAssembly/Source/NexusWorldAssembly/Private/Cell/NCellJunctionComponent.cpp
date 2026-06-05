@@ -71,9 +71,9 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 }
 
 
-void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, const UNWorldAssemblySettings* Settings) const
+void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor DefaultColor, const UNWorldAssemblySettings* Settings) const
 {
-	FLinearColor GizmoColor = FNColor::GreenLight; // Default color
+	FLinearColor GizmoColor = DefaultColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();
 	const FRotator ComponentRotation = GetComponentRotation();
 	const ULevel* Level = GetComponentLevel();

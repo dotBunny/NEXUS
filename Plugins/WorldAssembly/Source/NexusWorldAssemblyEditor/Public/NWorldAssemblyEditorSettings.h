@@ -62,6 +62,12 @@ public:
 	/** Material applied to the world-collision visualizer's debug geometry. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "World Context", DisplayName="Collision Visualizer Material")
 	TSoftObjectPtr<UMaterialInterface> CollisionVisualizerMaterial;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Draw Unfilled Junctions")
+	bool bDebugWorldDrawUnfilledJunctions = false;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Debug", DisplayName="Draw Unfilled Junctions")
+	FLinearColor EmptyJunctionColor = FLinearColor::Gray;
 
 	/** Copy every Cell default onto CellRoot's Details struct — called from the cell-actor factory. */
 	void ApplyDefaultSettings(UNCellRootComponent* CellRoot) const

@@ -11,6 +11,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
@@ -379,10 +380,16 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
 	{
 		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
+		const UNWorldAssemblyEditorSettings* WorldAssemblyEditorSettings = UNWorldAssemblyEditorSettings::Get();
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
-			JunctionComponent->DrawDebugPDI(PDI, true, WorldAssemblySettings);
+			
+			// WorldAssemblyEditorSettings->bDebugWorldDrawUnfilledJunctions
+			// WorldAssemblyEditorSettings->EmptyJunctionColor
+			
+			// TODO: If editor mode option to draw empty junctions, draw them ? we can fill the color here with something too
+			JunctionComponent->DrawDebugPDI(PDI, true, FNColor::GreenLight, WorldAssemblySettings);
 		}	
 	}
 

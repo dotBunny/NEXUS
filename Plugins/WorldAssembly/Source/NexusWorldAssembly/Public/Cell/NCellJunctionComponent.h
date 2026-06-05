@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NColor.h"
 #include "NWorldAssemblySettings.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
@@ -85,7 +86,9 @@ public:
 #endif // WITH_EDITOR
 	
 	/** Draw the junction's debug visualization through the supplied PDI. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, 
+		bool bShowDepth = false, FLinearColor DefaultColor = FNColor::GreenLight, 
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**
 	 * Recompute hull-derived data on the junction using the supplied root component.
