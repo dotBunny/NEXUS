@@ -170,8 +170,6 @@ public:
 	//End FEdMode
 
 private:
-	static void RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, const UNCellJunctionComponent* JunctionComponent, FVector2D SocketSize, float MatchingDepth = 0);
-
 	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
 	static void BindWorldChangeDelegates();
 

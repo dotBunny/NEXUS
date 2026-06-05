@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NWorldAssemblySettings.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "NCellJunctionComponent.generated.h"
@@ -72,8 +73,6 @@ public:
 	 * @param SocketUnitSize Project-configured socket unit size used to size the junction.
 	 */
 	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
-	/** @return The visual-debug color derived from the junction's details. */
-	FLinearColor GetColor() const;
 
 #if WITH_EDITOR
 
@@ -86,7 +85,8 @@ public:
 #endif // WITH_EDITOR
 	
 	/** Draw the junction's debug visualization through the supplied PDI. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
+
 	/**
 	 * Recompute hull-derived data on the junction using the supplied root component.
 	 * @param RootComponent Root component of the owning cell.

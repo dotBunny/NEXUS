@@ -36,8 +36,7 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None, skipping."), *InObject->GetName());
 		return;
 	}
-	
-	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
+
 	FastCollection[DynamicRef].Add(InObject);
 	OnAdded.Broadcast(DynamicRef, InObject);
 }

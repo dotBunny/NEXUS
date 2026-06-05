@@ -378,14 +378,11 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
 	{
-		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		const FVector2D SocketSize = Settings->SocketSize;
-		const float MatchingDepth = Settings->AssemblyJunctionMatchingCellHullPenetration;
+		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
-			JunctionComponent->DrawDebugPDI(PDI);
-			RenderCellJunctionPenetrationDistance(PDI, JunctionComponent, SocketSize, MatchingDepth);
+			JunctionComponent->DrawDebugPDI(PDI, true, WorldAssemblySettings);
 		}	
 	}
 
@@ -479,46 +476,4 @@ void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FView
 	}
 	
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
-}
-
-void FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, 
-	const UNCellJunctionComponent* JunctionComponent, const FVector2D SocketSize, const float MatchingDepth)
-{
-	// Check Level
-	const ULevel* Level = JunctionComponent->GetComponentLevel();
-	if (Level == nullptr) return;
-			
-	// Check Cell Root
-	const UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
-	if (CellRoot == nullptr) return;
-			
-	const FNRawMesh& Hull = CellRoot->Details.Hull;
-		
-	TArray<FVector> CornerPoints = JunctionComponent->GetWorldCornerPoints(SocketSize);
-	float MaximumDepth = 0;
-	for (int i = 0; i < CornerPoints.Num(); i++)
-	{
-		const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull,FVector::Zero(), FRotator::ZeroRotator,  CornerPoints[i]);
-		if (Depth > MaximumDepth)
-		{
-			MaximumDepth = Depth;
-		}
-	}
-	if (MaximumDepth == 0) return;
-
-	// Always draw the readout upright in world space, directly beneath the junction. Using only the junction's
-	// yaw (zero pitch/roll) keeps the glyphs world-upright no matter how the junction is oriented, so the text
-	// never ends up upside down. Anchoring at the socket's lowest world-Z corner keeps it clear of the socket.
-	const FVector JunctionLocation = JunctionComponent->GetComponentLocation();
-	double LowestZ = JunctionLocation.Z;
-	for (const FVector& Corner : CornerPoints)
-	{
-		LowestZ = FMath::Min(LowestZ, Corner.Z);
-	}
-	const FVector TextPosition(JunctionLocation.X, JunctionLocation.Y, LowestZ - 4.0f);
-	const FRotator TextRotation(0.0, JunctionComponent->GetComponentRotation().Yaw, 0.0);
-
-	FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), TextPosition, TextRotation,
-			MaximumDepth > MatchingDepth ? FLinearColor::Red : FNColor::Pink,
-			0.15f, 1.f, 1.f, false, true, SDPG_Foreground);
 }
