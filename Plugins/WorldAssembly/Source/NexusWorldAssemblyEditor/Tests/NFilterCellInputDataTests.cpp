@@ -242,7 +242,7 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintAd
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
-	Context.SetStartPoint(FVector::ZeroVector);
+	Context.SetDirectionTargetPosition(FVector::ZeroVector);
 	Context.AssemblyDirectionTolerance = 45.f;
 	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
 
@@ -265,7 +265,7 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintRe
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
-	Context.SetStartPoint(FVector::ZeroVector);
+	Context.SetDirectionTargetPosition(FVector::ZeroVector);
 	Context.AssemblyDirectionTolerance = 45.f;
 	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
 
@@ -289,7 +289,7 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintTo
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
-	Context.SetStartPoint(FVector::ZeroVector);
+	Context.SetDirectionTargetPosition(FVector::ZeroVector);
 	Context.AssemblyDirectionTolerance = 45.f;
 	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East)); // index 0 — NorthEast attach
 	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East)); // index 1 — North attach
@@ -320,7 +320,7 @@ N_TEST_HIGH(FNFilterCellInputDataTests_FilterCellInputData_DirectionConstraintHe
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNFilterCellInputDataHarness;
 
 	FNVirtualOrganContext Context(1234ull, TEXT("FilterTest"));
-	Context.SetStartPoint(FVector::ZeroVector);
+	Context.SetDirectionTargetPosition(FVector::ZeroVector);
 	Context.AssemblyDirectionTolerance = 45.f;
 	Context.CellInputData.Add(MakeDirectionConstrainedCell(ENCardinalDirection::East));
 

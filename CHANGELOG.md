@@ -13,7 +13,7 @@
 - `FNActorPoolSettings` now has a `SupportFlags` section, including `ReturnAll`.
 - Added accessors to a global mutable copy of the `Tag Counters` and the `Context Tags` of a generation, with supporting Blueprint functionality.
 - Added `Maximum Node Depth` and `Directional Constraints` to `UNTissue` definitions.
-- `Direction Tolerance` setting (default 15°, project-wide and per-operation) controlling how close a candidate's bearing must be to a `UNTissue` `Directional Constraint` to be placed.
+- `Direction Tolerance` setting (default 15-degrees, project-wide and per-operation) controlling how close a candidate's bearing must be to a `UNTissue` `Directional Constraint` to be placed.
 
 ### Changed
 
@@ -26,6 +26,7 @@
 - `WorldAssemblyEdMode` Collision Visualizer now tracks for changes in the level, accounting for its offset.
 - Reworked `FNEditorInputProcessor` to not compare pointers, instead look at screen position and button presses to determine if the same.
 - Cleaned up `IsPointInsideOrOn` for `FNOrientedBoxPicker` to be less-math.
+- `UNDynamicRefSubsystem::GetCount(NDR_None)` will return `0` instead of `-1`.
 
 ### Fixed
 

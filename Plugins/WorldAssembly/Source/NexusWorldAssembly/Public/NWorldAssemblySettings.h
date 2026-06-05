@@ -81,11 +81,11 @@ public:
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
 	int32 AssemblyGenerationRetryCount = 10000;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum Cell Hull Penetration",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum Cell Hull Penetration Toloerance",
 		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingCellHullPenetration = 10.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration",
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration Tolerance",
 		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
 	
@@ -98,9 +98,9 @@ public:
 	TMap<FGameplayTag, int32> AssemblyTagCounters;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Direction Tolerance",
-		meta=(ToolTip="How close should the range of angle be to the target direction (within this many degrees +/-)?"))
+		meta=(ToolTip="How close should the range of angle be to the target direction (within this many degrees +/-)?", Units="deg"))
 	float AssemblyDirectionTolerance = 15.f;
-	
+
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
 	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))
 	float AssemblySpawningCellProxiesTimeSlice = 2.f;

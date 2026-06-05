@@ -166,7 +166,6 @@ public:
 	 */
 	NEXUSWORLDASSEMBLY_API void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
-
 	/**
 	 * Resolve which bad-neighbor groups the source cell belongs to. Returns empty when there is no source
 	 * node (e.g. the start-node pre-filter) or when no bad-neighbor groups are configured, which disables
@@ -297,13 +296,13 @@ public:
 	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
 	/**
-	 * Set the world-space point the directional constraint measures candidate bearings from (the organ's start bone).
+	 * Set the world-space point the directional constraint measures candidate bearings from.
 	 * @param Location World-space origin for direction-constraint bearings.
 	 */
-	void SetStartPoint(const FVector& Location) { StartPoint = Location; }
+	void SetDirectionTargetPosition(const FVector& Location) { DirectionTargetPosition = Location; }
 
 	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
-	FVector GetStartPoint() const { return StartPoint; }
+	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
 private:
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;
@@ -317,8 +316,8 @@ private:
 	/** Random-stream seed for this organ's build. */
 	uint64 Seed;
 
-	/** World-space origin (the organ's start bone) that direction-constraint bearings are measured from. */
-	FVector StartPoint;
+	/** World-space target direction-constraint bearings are measured from. */
+	FVector DirectionTargetPosition;
 
 	/** Human-readable task name used in logs. */
 	FString Name;

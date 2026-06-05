@@ -32,7 +32,7 @@ bool FNSetPositionZElement::ExecuteInternal(FPCGContext* Context) const
 	for (const FPCGTaggedData& Input : Inputs)
 	{
 		const UPCGPointData* OriginalData = Cast<UPCGPointData>(Input.Data);
-		if (!OriginalData && OriginalData->GetNumPoints() == 0) continue;
+		if (!OriginalData || OriginalData->GetNumPoints() == 0) continue;
 		
 		const TArray<FPCGPoint>& Points = OriginalData->GetPoints();
 		

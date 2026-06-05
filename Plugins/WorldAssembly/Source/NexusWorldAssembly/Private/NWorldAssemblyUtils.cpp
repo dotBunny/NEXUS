@@ -203,9 +203,10 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
 	
-	const uint32 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-	const uint32 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-	const uint32 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
+	const FVector BoundsSize = UnitBounds.GetSize();
+	const uint32 SizeX = FMath::RoundToInt(BoundsSize.X);
+	const uint32 SizeY = FMath::RoundToInt(BoundsSize.Y);
+	const uint32 SizeZ = FMath::RoundToInt(BoundsSize.Z);
 	
 	// Setup array
 	ReturnData.Resize(SizeX, SizeY, SizeZ);

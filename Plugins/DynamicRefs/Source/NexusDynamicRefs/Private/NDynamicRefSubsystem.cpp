@@ -267,8 +267,8 @@ int32 UNDynamicRefSubsystem::GetCount(const ENDynamicRef DynamicRef)
 {
 	if (DynamicRef == NDR_None)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None, returning -1."));
-		return -1;
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None, returning 0."));
+		return 0;
 	}
 	return FastCollection[DynamicRef].Objects.Num();
 }

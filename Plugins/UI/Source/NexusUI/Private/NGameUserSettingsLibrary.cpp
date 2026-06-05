@@ -68,7 +68,7 @@ FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
 	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
 }
 
-FText& UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
+FText UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 {
 	// @remark: We are going to assume the GEngine exists at this point; no check!
 	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
@@ -91,7 +91,7 @@ FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindo
 #endif // PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
 }
 
-FText& UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
+FText UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Type Mode)
 {
 #if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX	
 	switch(Mode)

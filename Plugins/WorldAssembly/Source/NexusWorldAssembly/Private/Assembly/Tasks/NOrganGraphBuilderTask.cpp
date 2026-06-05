@@ -192,7 +192,8 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
 		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
 		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-		
+
+		// Source guarantees this will find something.
 		const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
 		
 		// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
@@ -465,6 +466,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		}
 		
 		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+		// Source guarantees this will find something.
 		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
 		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
 		

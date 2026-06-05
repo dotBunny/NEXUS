@@ -54,7 +54,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Current WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-current-windowmode-text"))
-	static FText& GetSelectionTextFromCurrentWindowMode();
+	static FText GetSelectionTextFromCurrentWindowMode();
 
 	/**
 	 * Get the selection string from a EWindowMode::Type.
@@ -72,7 +72,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Selection From WindowMode (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-selection-from-windowmode-text"))
-	static FText& GetSelectionTextFromWindowMode(EWindowMode::Type Mode);
+	static FText GetSelectionTextFromWindowMode(EWindowMode::Type Mode);
 
 	/**
 	 * Get the EWindowMode::Type selection FStrings.

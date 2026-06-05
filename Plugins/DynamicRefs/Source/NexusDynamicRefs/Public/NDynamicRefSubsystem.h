@@ -211,7 +211,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetFirstObject(const ENDynamicRef DynamicRef);
 	
 	/**
-	* Gets the first/oldest UObject associated with the provided ENDynamicRef without any bounds/range checking.
+	* Gets the first/oldest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
 	* @return The first UObject in the collection. 
 	*/
@@ -227,7 +227,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetFirstObjectByName(FName Name);
 	
 	/**
-	* Gets the first/oldest UObject associated with the provided FName without any bounds/range checking.
+	* Gets the first/oldest UObject associated with the provided FName with NO bounds/range checking.
 	* @param Name The desired FName to access.
 	* @return The first UObject in the collection. 
 	*/
@@ -261,7 +261,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetLastObject(const ENDynamicRef DynamicRef);
 	
 	/**
-	* Gets the last/newest UObject associated with the provided ENDynamicRef without any bounds/range checking.
+	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO any bounds/range checking.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
 	* @return The first UObject of its type. 
 	*/
@@ -277,7 +277,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetLastObjectByName(FName Name);
 	
 	/**
-	* Gets the last/newest UObject associated with the provided FName without any bounds/range checking.
+	* Gets the last/newest UObject associated with the provided FName with NO bounds/range checking.
 	* @param Name The desired FName type to access.
 	* @return The last UObject in the collection. 
 	*/
@@ -336,7 +336,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetFirstObjectByTag(FGameplayTag Tag);
 
 	/**
-	 * Gets the first/oldest UObject associated with the provided FGameplayTag without any bounds/range checking.
+	 * Gets the first/oldest UObject associated with the provided FGameplayTag with NO bounds/range checking.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The first UObject in the collection.
 	 */
@@ -359,7 +359,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetLastObjectByTag(FGameplayTag Tag);
 
 	/**
-	 * Gets the last/newest UObject associated with the provided FGameplayTag without any bounds/range checking.
+	 * Gets the last/newest UObject associated with the provided FGameplayTag with NO bounds/range checking.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The last UObject in the collection.
 	 */

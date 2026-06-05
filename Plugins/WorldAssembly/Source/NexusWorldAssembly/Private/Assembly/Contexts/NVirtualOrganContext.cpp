@@ -194,7 +194,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	PreFilter.bIsStartNode = true;
 	
 	// TODO: Odd spot but right now just using one bone
-	SetStartPoint(BoneInputData[0].WorldPosition);
+	SetDirectionTargetPosition(BoneInputData[0].WorldPosition);
 	
 	FNWeightedIntegerArray PreIndices;
 	TMap<int32, TArray<int32>> ValidJunctions;
@@ -530,7 +530,7 @@ void FNVirtualOrganContext::FilterCellInputData(const FNCellInputDataFilter& Fil
 			// Compass bearing from the organ's start point out to the candidate's world position. FVector::Rotation()
 			// derives yaw from atan2(Y, X), so North (+X) = 0 and East (+Y) = 90, matching ENCardinalDirection; Z is
 			// ignored, keeping this a purely horizontal heading.
-			const float Angle = (Filter.WorldPosition - StartPoint).Rotation().Yaw;
+			const float Angle = (Filter.WorldPosition - DirectionTargetPosition).Rotation().Yaw;
 			if (IsGatedByDirectionalConstraint(Angle, CellData->DirectionConstraint, AssemblyDirectionTolerance))
 			{
 				continue;
