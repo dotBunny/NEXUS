@@ -49,7 +49,7 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 	const TArray<FName>& ActorIgnoreTags, const bool bIncludeEditorOnly, const bool bIncludeNonColliding, const bool bIncludeTransientActors)
 {
 	// Ensure we have a valid level
-	if (!IsValid(InLevel)) return;;
+	if (!IsValid(InLevel)) return;
 	
 	const int32 NumActors = InLevel->Actors.Num();
 	
@@ -67,6 +67,12 @@ void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray
 #if WITH_EDITOR			
 		BoundsTask.EnterProgressFrame(1);
 #endif // WITH_EDITOR
+		
+		// We do not want to have any bad actors at play
+		if (!IsValid(Actor))
+		{
+			continue;
+		}
 
 		// Early check if we've ignored already
 		if (OutIgnoredActors.Contains(Actor))

@@ -291,7 +291,7 @@ void FNActorPool::ReturnAll(bool bSkipCheck)
 {
 	if (!bSkipCheck && !Settings.HasSupportFlag_ReturnAll())
 	{
-		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName())
+		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName());
 		return;
 	}
 	
@@ -467,7 +467,7 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.StorageTransform, SpawnInfo);
 	if (CreatedActor == nullptr)
 	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("FNActorPool failed to spawn actor of class %s when requested/needed."), *Template->GetName())
+		UE_LOG(LogNexusActorPools, Error, TEXT("FNActorPool failed to spawn actor of class %s when requested/needed."), *Template->GetName());
 		return false;
 	}
 

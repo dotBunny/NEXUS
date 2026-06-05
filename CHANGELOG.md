@@ -24,6 +24,8 @@
 - `FNGameplayTagCounter` does not allow for negative counter values.
 - `FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance` now always renders the distance underneath the `UNCellJunctionComponent`.
 - `WorldAssemblyEdMode` Collision Visualizer now tracks for changes in the level, accounting for its offset.
+- Reworked `FNEditorInputProcessor` to not compare pointers, instead look at screen position and button presses to determine if the same.
+- Cleaned up `IsPointInsideOrOn` for `FNOrientedBoxPicker` to be less-math.
 
 ### Fixed
 
@@ -32,6 +34,8 @@
 - Side-car `NCell` asset is not loaded during cook process, restoring determinism.
 - `UNOrganComponent` custom-visualizer `Generate` button now refreshes accordingly after operations have finished.
 - `PktJitter` setting now properly applied to clients in `Multiplayer Test`.
+- `HasSupportFlag_ReturnAll` now properly queries `SupportFlag`.
+- Protect against `NSpawnActorBlueprintAsyncAction` occuring after `UWorld` teardown.
 
 ### Removed
 

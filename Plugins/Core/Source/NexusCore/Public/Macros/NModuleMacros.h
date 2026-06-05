@@ -49,12 +49,13 @@ public: \
 	}
 
 /**
- * Editor-only: synchronises a plugin's .uplugin Version / VersionName with NEXUS::Version.
+ * Editor-only: synchronizes a plugin's .uplugin Version / VersionName with NEXUS::Version.
  *
  * Called from StartupModule to keep every plugin's descriptor in lockstep with the framework
  * version. Compiles to nothing in non-editor builds.
  *
  * @param PluginName The string name of the plugin whose descriptor should be updated.
+ * @remark Will silently fail (intentional) for plugins that are not enabled or not in the project.
  */
 // Only do version updates in the editor
 #if WITH_EDITOR && WITH_EDITORONLY_DATA

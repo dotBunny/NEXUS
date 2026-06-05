@@ -83,7 +83,10 @@ void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
 		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
-		ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		if (ActorPoolSubsystem)
+		{
+			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		}
 		OnCreatedPoolHandle.Reset();
 	}
 	

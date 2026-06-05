@@ -80,7 +80,7 @@ public:
 	 * @param Points The array of points to check.
 	 * @param Origin The center point of the FBox.
 	 * @param MinimumRadius The minimum radius of the sphere (inner bound).
-	 * @param MaximumRadius The maximum radius of the sphere (inner bound).
+	 * @param MaximumRadius The maximum radius of the sphere (outer bound).
 	 * @return An array of boolean values indicating if each point is inside or on the surface of a sphere.
 	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const float MinimumRadius, const float MaximumRadius)
@@ -90,14 +90,9 @@ public:
 		
 		for (const FVector& Point : Points)
 		{
-			if (IsPointInsideOrOn(Origin, MinimumRadius, Point) || !IsPointInsideOrOn(Origin, MaximumRadius, Point))
-			{
-				OutResults.Add(false);
-			}
-			else
-			{
-				OutResults.Add(true);
-			}
+			const bool bValid = IsPointInsideOrOn(Origin, MaximumRadius, Point)
+							 && !IsPointInsideOrOn(Origin, MinimumRadius, Point);
+			OutResults.Add(bValid);
 		}
 		return MoveTemp(OutResults);
 	}

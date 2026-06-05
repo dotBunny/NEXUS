@@ -95,7 +95,7 @@ public:
 	
 	FORCEINLINE bool HasSupportFlag_ReturnAll() const
 	{
-		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolSupportFlags::ReturnAll);
+		return N_FLAGS_HAS_UINT8(SupportFlags, ENActorPoolSupportFlags::ReturnAll);
 	}
 
 	/** @return true if the DeferConstruction flag is set. */
@@ -137,7 +137,7 @@ public:
 	/** @return true if the InvokeUFunctions flag is set. */
 	FORCEINLINE bool HasFlag_InvokeUFunctions() const
 	{
-		return N_FLAGS_HAS(Flags, (uint8)ENActorPoolFlags::InvokeUFunctions);
+		return N_FLAGS_HAS_UINT8(Flags, ENActorPoolFlags::InvokeUFunctions);
 	}
 	
 	/** When the pool is being filled during creation, what is the number of prewarmed Actor`s that should be created, either synchronously or divided across a number of frames. */
