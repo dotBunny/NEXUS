@@ -21,18 +21,7 @@ uint64 FNMersenneTwister::NextBounded(const uint64 Range)
 
 bool FNMersenneTwister::Bias(const float Chance)
 {
-	// No chance at all
-	if (FMath::IsNearlyZero(Chance))
-	{
-		return false;
-	}
-
-	if (this->Float() <= Chance)
-	{
-		return true;
-	}
-
-	return false;
+	return this->Float() <= Chance;
 }
 
 void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex)
