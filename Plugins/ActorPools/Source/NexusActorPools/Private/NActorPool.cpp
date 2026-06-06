@@ -363,34 +363,20 @@ bool FNActorPool::ApplyStrategy()
 		return CreateActors();
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-		{
-			Return(OutActors[0]);
-		}
-		else
-		{
-			return CreateActors();
-		}
-		return true;
+			return Return(OutActors[0]);
+		return CreateActors();
 	case CreateRecycleLast:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-		{
-			Return(OutActors[OutActors.Num() - 1]);
-		}
-		else
-		{
-			return CreateActors();
-		}
-		return true;
+			return Return(OutActors[OutActors.Num() - 1]);
+		return CreateActors();
 	case Fixed:
 		return false;
 	case FixedRecycleFirst:
 		if (OutActors.IsEmpty()) return false;
-		Return(OutActors[0]);
-		return true;
+		return Return(OutActors[0]);
 	case FixedRecycleLast:
 		if (OutActors.IsEmpty()) return false;
-		Return(OutActors[OutActors.Num() - 1]);
-		return true;
+		return Return(OutActors[OutActors.Num() - 1]);
 	default:
 		return false;
 	}
