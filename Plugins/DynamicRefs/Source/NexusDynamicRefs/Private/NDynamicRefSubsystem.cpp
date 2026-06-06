@@ -31,9 +31,9 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 		return;
 	}
 	
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None, skipping."), *InObject->GetName());
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None/NDR_Max, skipping."), *InObject->GetName());
 		return;
 	}
 
@@ -43,9 +43,9 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 
 void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObjects to NDR_None, skipping."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObjects to NDR_None/NDR_Max, skipping."));
 		return;
 	}
 	
@@ -84,9 +84,9 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 		return;
 	}
 	
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None, skipping."), *InObject->GetName());
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None/NDR_Max, skipping."), *InObject->GetName());
 		return;
 	}
 	// Only remove and callback if we have the actual objects
@@ -98,9 +98,9 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 
 void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObjects from NDR_None, skipping."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObjects from NDR_None/NDR_Max, skipping."));
 		return;
 	}
 	
@@ -148,9 +148,9 @@ void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get objects from NDR_None, returning empty."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get objects from NDR_None/NDR_Max, returning empty."));
 		return TArray<UObject*>();;
 	}
 	
@@ -169,9 +169,9 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 
 AActor* UNDynamicRefSubsystem::GetFirstActor(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first actor from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first actor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 	
@@ -198,9 +198,9 @@ AActor* UNDynamicRefSubsystem::GetFirstActorByName(const FName Name)
 
 UObject* UNDynamicRefSubsystem::GetFirstObject(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first object from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first object from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 
@@ -211,15 +211,15 @@ UObject* UNDynamicRefSubsystem::GetFirstObject(const ENDynamicRef DynamicRef)
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectUnsafe(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None) return nullptr;
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
 	return FastCollection[DynamicRef].Objects[0].Get();
 }
 
 UObject* UNDynamicRefSubsystem::GetLastObject(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get last object from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get last object from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 	
@@ -230,15 +230,15 @@ UObject* UNDynamicRefSubsystem::GetLastObject(const ENDynamicRef DynamicRef)
 
 UObject* UNDynamicRefSubsystem::GetLastObjectUnsafe(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None) return nullptr;
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
 	return FastCollection[DynamicRef].Objects.Last();
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested AActors from NDR_None, returning empty."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested AActors from NDR_None/NDR_Max, returning empty."));
 		return TArray<AActor*>();
 	}
 	
@@ -264,9 +264,9 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(const FName Name)
 
 int32 UNDynamicRefSubsystem::GetCount(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None, returning 0."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None/NDR_Max, returning 0."));
 		return 0;
 	}
 	return FastCollection[DynamicRef].Objects.Num();
@@ -299,9 +299,9 @@ UObject* UNDynamicRefSubsystem::GetFirstObjectByNameUnsafe(const FName Name)
 
 AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested last AActor from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested last AActor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 	
