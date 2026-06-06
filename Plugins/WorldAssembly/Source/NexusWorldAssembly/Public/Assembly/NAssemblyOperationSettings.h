@@ -56,6 +56,9 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Spawning")
 	float CellSpawnTimeSlice = 2.f;
 	
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite,  Category = "Debug", DisplayName="Log Status Messages")
+	bool bLogStatusMessages = false;
+	
 	/** @return Default runtime-generation settings with a freshly generated friendly seed. */
 	static FNAssemblyOperationSettings GetDefaultSettings()
 	{
@@ -67,6 +70,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
+		Settings.bLogStatusMessages = AssemblySettings->bLogStatusMessages;
 		
 		return MoveTemp(Settings);
 	}
@@ -83,6 +87,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.ContextTags.AppendTags(AssemblySettings->AssemblyContextTags);
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
+		Settings.bLogStatusMessages = AssemblySettings->bLogStatusMessages;
 		
 		return MoveTemp(Settings);
 	}

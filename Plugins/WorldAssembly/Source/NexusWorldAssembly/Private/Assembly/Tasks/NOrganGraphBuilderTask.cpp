@@ -11,18 +11,22 @@
 #include "Assembly/Graph/NAssemblyGraphNodeFactory.h"
 #include "Assembly/Graph/NAssemblyGraphNullNode.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Math/NMersenneTwister.h"
 
 FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
-	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
-	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER, 
-		WorldContextPtr(WorldContextPtr.ToSharedRef())
+	const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
+	const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
+	:	OrganContextPtr(OrganContextPtr.ToSharedRef()), PassContextPtr(PassContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER,
+		WorldContextPtr(WorldContextPtr.ToSharedRef()), TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef())
 {
 	N_ASSEMBLY_ANALYTICS_INDEX_SET(OrganGraphBuilderCreate)
 }
 
 void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	TaskGraphContextPtr->SetStatusMessage(TEXT("Building Organs"));
+
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderStart)
 	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(), 
 		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
@@ -43,10 +47,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	OrganContextPtr->TagCounter = OrganContextPtr->BaseTagCounter;
 	OrganContextPtr->ContextTags = OrganContextPtr->BaseContextTags;
 	
-	// TODO: If this is an unbounded volume should we be adding in all the previous creations to the context (yes)
-	
 	while (!OrganContextPtr->IsSuccessful())
 	{
+		TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Building Organs (%i/%i)"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
+		
 		// Find the bone and build our starting cell
 		StartGraph(Random);
 	

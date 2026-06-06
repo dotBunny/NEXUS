@@ -26,6 +26,8 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 		
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextStart)
 	
+	TaskGraphContextPtr->SetStatusMessage(TEXT("Create Spawn Task"));
+	
 	// We need to prepopulate some data elsewhere
 	FNWorldAssemblyContextCache::AddOperationContext(TaskGraphContextPtr->OperationTicket, TaskGraphContextPtr->TagCounter, TaskGraphContextPtr->ContextTags);
 

@@ -99,6 +99,10 @@ public:
 	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))
 	float AssemblySpawningCellProxiesTimeSlice = 2.f;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Debug", DisplayName="Log Status Messages",
+	meta=(ToolTip="Output the status messages provided as feedback during assembly to the log."))
+	bool bLogStatusMessages = false;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;

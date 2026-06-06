@@ -300,6 +300,8 @@ public:
 
 	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
 	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
+	
+	int32 GetRetryCount() const { return RetryCount; }
 private:
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;

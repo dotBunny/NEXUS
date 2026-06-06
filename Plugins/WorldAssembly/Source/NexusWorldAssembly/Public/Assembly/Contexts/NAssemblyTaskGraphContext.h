@@ -46,6 +46,36 @@ public:
 		TagCounter.Combine(NewTagCounter);
 	}
 
+	/**
+	 * Record a progress/status message for display. Safe to call from any task thread.
+	 * The message is coalesced (latest wins) and drained on the game thread via ConsumeDisplayMessage.
+	 * @param Message The new display message.
+	 */
+	void SetStatusMessage(const FString& Message)
+	{
+		FScopeLock Lock(&DisplayMessageMutex);
+		PendingDisplayMessage = Message;
+		DisplayMessageVersion.IncrementExchange();
+	}
+
+	/**
+	 * Drain the most recent display message. Game thread only.
+	 * @param OutMessage Receives the pending message when one is available.
+	 * @return true if a new message was drained since the last call; false if nothing changed.
+	 */
+	bool ConsumeDisplayMessage(FString& OutMessage)
+	{
+		// Cheap atomic gate so we only take the lock on frames where something actually changed.
+		if (DisplayMessageVersion.Load() == LastConsumedDisplayMessageVersion)
+		{
+			return false;
+		}
+		FScopeLock Lock(&DisplayMessageMutex);
+		OutMessage = PendingDisplayMessage;
+		LastConsumedDisplayMessageVersion = DisplayMessageVersion.Load();
+		return true;
+	}
+
 	/** Built per-organ graphs owned by this context. */
 	TArray<TUniquePtr<FNAssemblyGraph>> Graphs;
 
@@ -67,4 +97,13 @@ public:
 
 private:
 	FCriticalSection TakeGraphMutex;
+
+	/** Guards PendingDisplayMessage against concurrent writes from task threads. */
+	FCriticalSection DisplayMessageMutex;
+	/** Most recent display message written by a task; coalesced (latest wins). */
+	FString PendingDisplayMessage;
+	/** Bumped on every SetDisplayMessage so the game-thread reader can cheaply detect changes without locking. */
+	TAtomic<uint32> DisplayMessageVersion{0};
+	/** Version last drained by ConsumeDisplayMessage; touched only on the game thread. */
+	uint32 LastConsumedDisplayMessageVersion = 0;
 };

@@ -16,6 +16,7 @@
 - `Direction Tolerance` setting (default 15-degrees, project-wide and per-operation) controlling how close a candidate's bearing must be to a `UNTissue` `Directional Constraint` to be placed.
 - `UNActorPoolSubsystem::GetActorPoolStats()` returns Spawned/Available details for a target `FNActorPool`.
 - `FNReportListBlock` now available in reports.
+- Option in `World Assembly` project settings to enable output of status messages from operations to the log, normally only visible in the developer overlay.
 
 ### Changed
 

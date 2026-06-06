@@ -30,7 +30,7 @@ namespace NEXUS::WorldAssembly
 	/**
 	 * Stable display strings reported by the developer overlay and status UI during a generation pass.
 	 */
-	namespace DisplayMessages
+	namespace StatusMessage
 	{
 		/** Emitted while the generation context is frozen and being queued up. */
 		inline const FString ContextLocked = TEXT("Context Locked");

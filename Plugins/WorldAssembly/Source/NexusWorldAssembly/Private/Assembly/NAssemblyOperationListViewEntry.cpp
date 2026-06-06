@@ -11,7 +11,7 @@ void UNAssemblyOperationListViewEntry::NativeDestruct()
 {
 	if (IsValid(Operation))
 	{
-		Operation->OnDisplayMessageChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);\
+		Operation->OnStatusMessageChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);\
 		Operation->OnTasksChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationTasksChanged);
 	}
 	Operation = nullptr;
@@ -22,7 +22,7 @@ void UNAssemblyOperationListViewEntry::NativeOnListItemObjectSet(UObject* ListIt
 {
 	INListViewEntry::NativeOnListItemObjectSet(ListItemObject);
 	Operation = Cast<UNAssemblyOperation>(ListItemObject);
-	Operation->OnDisplayMessageChanged.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);
+	Operation->OnStatusMessageChanged.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);
 	Operation->OnTasksChanged.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationTasksChanged);
 	Reset();
 }

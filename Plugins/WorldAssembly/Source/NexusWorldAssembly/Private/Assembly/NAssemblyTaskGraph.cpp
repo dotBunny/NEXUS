@@ -103,7 +103,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 			FGraphEventRef OrganGraphBuilderTask = TGraphTask<FNOrganGraphBuilderTask>::CreateTask(
 				(ProcessPassTasks.Num() > 0) ? &ProcessPassTasks.Last() : &ProcessInitialGameThreadTasks,
 				FNOrganGraphBuilderTask::GetDesiredThread())
-				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
+				.ConstructAndHold(VirtualOrganContextPtr, PassContextPtr, VirtualWorldContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 			PassTasks.Add(OrganGraphBuilderTask);
 			AllTasks.Add(OrganGraphBuilderTask);
 
@@ -164,8 +164,18 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	N_ASSEMBLY_ANALYTICS(TaskGraphCreationFinish)
 }
 
+bool FNAssemblyTaskGraph::ConsumeStatusMessage(FString& OutMessage) const
+{
+	if (!TaskGraphContextPtr.IsValid())
+	{
+		return false;
+	}
+	return TaskGraphContextPtr->ConsumeDisplayMessage(OutMessage);
+}
+
 void FNAssemblyTaskGraph::Cancel()
 {
+	
 	if (SpawnContextPtr.IsValid())
 	{
 		SpawnContextPtr->bCancelled.Store(true);

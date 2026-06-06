@@ -102,8 +102,11 @@ void UNAssemblyOperation::ApplySettings(FNAssemblyOperationSettings& Settings)
 	{
 		Settings.DisplayName = FText::FromString(GetName());
 	}
+	
 	// Copy so it is detached
 	DisplayName = Settings.DisplayName;
+	bLogStatusMessages = Settings.bLogStatusMessages;
+	
 	Context->SetOperationSettings(Settings);
 }
 
@@ -115,13 +118,16 @@ void UNAssemblyOperation::Reset() const
 	}
 }
 
-void UNAssemblyOperation::SetDisplayMessage(FString NewDisplayMessage)
+void UNAssemblyOperation::SetStatusMessage(FString NewStatusMessage)
 {
-	if (!DisplayMessage.Equals(NewDisplayMessage))
+	if (!StatusMessage.Equals(NewStatusMessage))
 	{
-		UE_LOG(LogNexusWorldAssembly, Log, TEXT("[%s] DisplayMessage('%s' to '%s')"), *DisplayName.ToString(), *DisplayMessage,  *NewDisplayMessage);
-		DisplayMessage = NewDisplayMessage;
-		OnDisplayMessageChanged.Broadcast(DisplayMessage);
+		if (bLogStatusMessages)
+		{
+			UE_LOG(LogNexusWorldAssembly, Log, TEXT("[%s] StatusMessage('%s' to '%s')"), *DisplayName.ToString(), *StatusMessage,  *NewStatusMessage);
+		}
+		StatusMessage = NewStatusMessage;
+		OnStatusMessageChanged.Broadcast(StatusMessage);
 	}
 }
 
@@ -168,14 +174,21 @@ void UNAssemblyOperation::Cancel()
 void UNAssemblyOperation::Tick()
 {
 	if (!TaskGraph.IsValid()) return;
-	
-	if (const FIntVector2 Status = TaskGraph->GetTaskStatus(); 
+
+	if (const FIntVector2 Status = TaskGraph->GetTaskStatus();
 		Status.Y != CachedTotalTasks || Status.X != CachedCompletedTasks)
 	{
 		CachedTotalTasks = Status.Y;
 		CachedCompletedTasks = Status.X;
 
 		OnTasksChanged.Broadcast(CachedCompletedTasks, CachedTotalTasks);
+	}
+
+	// Drain any progress message published by the (possibly worker-thread) tasks and broadcast it on the game thread.
+	FString PendingMessage; 
+	if (TaskGraph->ConsumeStatusMessage(PendingMessage))
+	{
+		SetStatusMessage(MoveTemp(PendingMessage));
 	}
 }
 
@@ -186,6 +199,13 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	// Add one last update to subscribers for task updates
 	const FIntVector2 Status = TaskGraph->GetTaskStatus();
 	OnTasksChanged.Broadcast(Status.X, Status.Y);
+
+	// Flush any final display message the tasks published before the poll loop stopped.
+	FString PendingMessage;
+	if (TaskGraph->ConsumeStatusMessage(PendingMessage))
+	{
+		SetStatusMessage(MoveTemp(PendingMessage));
+	}
 	
 	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
@@ -214,7 +234,7 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 	if (!Context->IsLocked())
 	{
 		Context->LockAndPreprocess(Owner->GetDefaultWorld());
-		SetDisplayMessage(NEXUS::WorldAssembly::DisplayMessages::ContextLocked);
+		SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::ContextLocked);
 	}
 
 	ReferencedCells.Empty();
@@ -230,11 +250,11 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 #endif // !UE_BUILD_SHIPPING	
 	
 	// Build out our new graph
-	SetDisplayMessage(NEXUS::WorldAssembly::DisplayMessages::BuildingTaskGraph);
+	SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::BuildingTaskGraph);
 	TaskGraph = MakeUnique<FNAssemblyTaskGraph>(this, Context.Get());
 	
 	// Add callback to tasks?
-	SetDisplayMessage(NEXUS::WorldAssembly::DisplayMessages::StartingTasks);
+	SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::StartingTasks);
 	
 	bIsRunning = true;
 	TaskGraph->UnlockTasks();
@@ -249,6 +269,6 @@ bool UNAssemblyOperation::AddToContext(UNOrganComponent* Component) const
 void UNAssemblyOperation::LockContext(UWorld* World)
 {
 	Context->LockAndPreprocess(World);
-	SetDisplayMessage(NEXUS::WorldAssembly::DisplayMessages::ContextLocked);
+	SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::ContextLocked);
 }
 

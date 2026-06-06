@@ -11,6 +11,7 @@
 
 
 class FNVirtualWorldContext;
+class FNAssemblyTaskGraphContext;
 
 /**
  * Task-graph job that builds the FNAssemblyGraph for a single organ using the Frontier model.
@@ -21,7 +22,8 @@ class FNVirtualWorldContext;
 struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
-		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr 
+		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
+		const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
 		N_ASSEMBLY_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNWorldAssemblyGraphBuilderTask, STATGROUP_TaskGraphTasks); }
@@ -50,6 +52,9 @@ private:
 
 	/** Virtual-world context supplying world-collision data for intersection tests. */
 	TSharedRef<FNVirtualWorldContext> WorldContextPtr;
+
+	/** Top-level task-graph context; used here to publish progress/status messages for UI. */
+	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
 	
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);

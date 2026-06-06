@@ -17,6 +17,8 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 {
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesStart)
 	
+	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Collect Pass (%i)"), PassContextPtr->Graphs.Num()));
+	
 	for (TUniquePtr<FNAssemblyGraph>& Graph : PassContextPtr->Graphs)
 	{
 		// Copy our node collision data to the world

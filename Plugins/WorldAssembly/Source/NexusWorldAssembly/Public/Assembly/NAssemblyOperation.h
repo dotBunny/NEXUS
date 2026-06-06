@@ -54,7 +54,7 @@ struct FNAssemblyOperationResult
 };
 
 /** Broadcast when the display message shown in UI changes. */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssemblyOperationDisplayMessageChanged, const FString&, NewMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssemblyOperationStatusMessageChanged, const FString&, NewMessage);
 /** Broadcast when the completed/total task counts change. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationTasksChanged, const int, CompletedTasks, const int, TotalTasks);
 /** Broadcast when the overall completion percentage changes. */
@@ -220,13 +220,13 @@ public:
 	/** @return Human-friendly label for UI display. */
 	const FText& GetDisplayName() const { return DisplayName; }
 	/** @return Current progress/status message shown in UI and logs. */
-	const FString& GetDisplayMessage() const { return DisplayMessage; }
+	const FString& GetDisplayMessage() const { return StatusMessage; }
 	/** Update the display message and broadcast OnDisplayMessageChanged to any listeners. */
-	void SetDisplayMessage(FString NewDisplayMessage);
+	void SetStatusMessage(FString NewStatusMessage);
 
 	/** Broadcast whenever the display message changes. */
 	UPROPERTY(BlueprintAssignable)
-	FOnAssemblyOperationDisplayMessageChanged OnDisplayMessageChanged;
+	FOnAssemblyOperationStatusMessageChanged OnStatusMessageChanged;
 
 	/** Broadcast whenever the completed/total task counts change. */
 	UPROPERTY(BlueprintAssignable)
@@ -274,8 +274,9 @@ private:
 	bool bIsContextLocked;
 	/** Human-friendly label for UI. */
 	FText DisplayName;
+	
 	/** Current progress message for UI. */
-	FString DisplayMessage;
+	FString StatusMessage;
 
 	/** Most recent total-task count broadcast to OnTasksChanged. */
 	int32 CachedTotalTasks = 0;
@@ -284,6 +285,8 @@ private:
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	int32 Ticket;
+	
+	bool bLogStatusMessages = false;
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;
