@@ -95,8 +95,12 @@ public:
 	 */
 	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
 
-	/** Render the bone's debug outline and socket extents via the provided primitive draw interface. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
+	/**
+	 * Render the bone's debug outline and socket extents via the provided primitive draw interface.
+	 * @param WorldPenetration Deepest penetration of the socket corners into world collision (supplied by the
+	 *        visualizer from FNWorldCollisionCache); drives the red threshold and depth readout when bShowDepth.
+	 */
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth = false, const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get(), float WorldPenetration = 0.f) const;
 
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SettingSocketSize) const;
 private:

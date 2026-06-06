@@ -83,7 +83,7 @@ void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdat
 		SetAutomaticTransform();
 		return;
 	}
-	
+
 	// LOCATION
 	const FVector BoneLocation = GetComponentLocation();
 	const FVector WorkingLocation = FindSafeLocation(BoneLocation);
@@ -139,13 +139,12 @@ void UNBoneComponent::SetAutomaticTransform()
 		if (BoneLocation != WorkingPosition)
 		{
 			SetWorldLocation(WorkingPosition);
-				
+
 			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
 		}
 	}
 }
-
 
 FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 {
@@ -197,14 +196,14 @@ FVector UNBoneComponent::FindSafeLocation(const FVector& WorldLocation) const
 		}
 		IterationCount--;
 	}
-	
+
 	return WorkingLocation;
 }
 
 void UNBoneComponent::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	
+
 	const FName PropertyName = PropertyChangedEvent.Property ? PropertyChangedEvent.Property->GetFName() : NAME_None;
 	if (PropertyName == NEXUS::WorldAssembly::Bone::Mode)
 	{
@@ -273,7 +272,7 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 }
 
 
-void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth, const UNWorldAssemblySettings* Settings) const
+void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth, const UNWorldAssemblySettings* Settings, float WorldPenetration) const
 {
 	FLinearColor GizmoColor = FLinearColor::White;
 
@@ -296,11 +295,11 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth
 	if (bShowDepth)
 	{
 		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
-		float MaximumDepth = 0;
-		
-		// TODO: Figure out maximum depth of the corners into world geometry
-		// IMPLEMENT
-		
+
+		// Penetration is supplied by the caller (the visualizer samples FNWorldCollisionCache); the component itself
+		// holds no world-collision state.
+		const float MaximumDepth = WorldPenetration;
+
 		if (MaximumDepth > Settings->AssemblyJunctionMatchingWorldPenetration)
 		{
 			GizmoColor = FLinearColor::Red;
