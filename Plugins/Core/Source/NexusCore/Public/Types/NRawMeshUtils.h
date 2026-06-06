@@ -7,8 +7,6 @@
 #include "Developer/NDebugActor.h"
 #include "Templates/Function.h"
 
-// #SONARQUBE-DISABLE-CPP_S3776 Optimized for golden-path
-
 /**
  * Intersection and containment helpers for FNRawMesh geometry.
  */
@@ -76,7 +74,7 @@ public:
 	 * @param RightMesh Second mesh. Same triangle / closed-manifold requirement as LeftMesh.
 	 * @param RightOrigin World-space translation applied to RightMesh.
 	 * @param RightRotation World-space rotation applied to RightMesh.
-	 * @param EarlyExitDepth Optional optimisation hint — when finite, the function may return as soon as it
+	 * @param EarlyExitDepth Optional optimization hint — when finite, the function may return as soon as it
 	 *        proves the depth either exceeds or is bounded below this value. Callers doing a threshold
 	 *        comparison (`if (depth >= threshold)`) should pass their threshold here; the returned value
 	 *        still produces the correct branch on that compare, but may be a conservative upper bound
@@ -249,5 +247,3 @@ private:
 	 */
 	static bool CanUseSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 };
-
-// #SONARQUBE-ENABLE-CPP_S3776  Optimized for golden-path

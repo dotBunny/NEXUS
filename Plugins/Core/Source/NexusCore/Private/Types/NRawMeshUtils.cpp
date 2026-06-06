@@ -9,7 +9,7 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMeshFactory.h"
 
-// #SONARQUBE-DISABLE-CPP_S3776 Optimized for golden-path
+// #SONARQUBE-DISABLE
 
 void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& BaseMesh,
                                  const FTransform& OtherTransform, const FNRawMesh& OtherMesh)
@@ -1129,4 +1129,4 @@ bool FNRawMeshUtils::DoesConvexIntersectSATBaked(const FNRawMesh& LeftMesh, cons
 	return DoesIntersectTrianglesBaked(LeftMesh, RightMesh);
 }
 
-// #SONARQUBE-ENABLE-CPP_S3776  Optimized for golden-path
+// #SONARQUBE-ENABLE
