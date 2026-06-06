@@ -322,10 +322,11 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	
 	const int32 OverviewTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
 	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
-	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime"});
-	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}"});
-	
+	OverviewTable->Initialize({ "Ticket", "Lock Status", "Result", "Runtime"});
+	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{STATUS}}", "{{RUNTIME}}"});
+
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
+	Report->AddReplaceToken("{{STATUS}}", ""); // Filled in by FNAssemblyTaskAnalytics::AddToReports
 	
 	// Components
 	const int32 ComponentTableTicket = Report->CreateTableBlock(OperationContextContentTicket);

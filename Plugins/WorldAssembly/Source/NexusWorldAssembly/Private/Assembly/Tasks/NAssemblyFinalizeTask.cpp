@@ -28,21 +28,13 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	TaggingContentBlock->SetHeading("Tagging");
 	
 	// Add our Context Tags to report
-	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateContentBlock(TaggingContentTicket);
-	FNReportContentBlock* ContextTagsContentBlock = Operation->GetReport()->GetContentBlock(ContextTagsContentTicket);
+	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateListBlock(TaggingContentTicket);
+	FNReportListBlock* ContextTagsContentBlock = Operation->GetReport()->GetListBlock(ContextTagsContentTicket);
 	ContextTagsContentBlock->SetHeading("Context Tags");
-	
-	FStringBuilderBase StringBuilder;
 	for (const FGameplayTag& Tag : TaskGraphContextPtr->ContextTags)
 	{
-		StringBuilder.Append(Tag.ToString());
-		StringBuilder.Append(", ");
+		ContextTagsContentBlock->AddItem(Tag.ToString());
 	}
-	if (StringBuilder.Len() > 2)
-	{
-		StringBuilder.RemoveSuffix(2);
-	}
-	ContextTagsContentBlock->AddLine(StringBuilder.ToString());
 	
 	// Add our Tag Counter to report
 	const int32 TagCounterContentTicket = Operation->GetReport()->CreateTableBlock(TaggingContentTicket);
@@ -55,8 +47,8 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 
 	// Add Analytics to report
-	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReports(Operation->GetReport(), Operation->GetDetailedReports());
-	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportsToFile();
+	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReports(Operation->GetReport());
+	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 
 	// Send the finalized shared data back to the operation for doings.

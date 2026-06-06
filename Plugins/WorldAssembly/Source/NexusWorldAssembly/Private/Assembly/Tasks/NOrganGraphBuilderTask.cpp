@@ -32,7 +32,13 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		OrganContextPtr->MinimumCellCount, OrganContextPtr->MaximumCellCount, OrganContextPtr->MaximumRetryCount)
 	
 	// The context was not validated during creation, so we cannot process it
-	if (!OrganContextPtr->IsValid()) return;
+	if (!OrganContextPtr->IsValid())
+	{
+		N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
+			FString(TEXT("Organ context failed validation; build was not attempted.")))
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+		return;
+	}
 	
 	// Create our deterministic random for the task which will get passed byref to sub-methods
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
@@ -55,14 +61,30 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		StartGraph(Random);
 	
 		// Check for start placement and that it was a node too
-		if (OrganContextPtr->CellGraph == nullptr) return;
+		if (OrganContextPtr->CellGraph == nullptr)
+		{
+			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
+				FString(TEXT("Unable to place a starting cell (no valid starter cell available or every candidate collided).")))
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			return;
+		}
 		int32 NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
-		if (NodeCount == 0) { return; }
-		
+		if (NodeCount == 0)
+		{
+			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
+				FString(TEXT("Starting graph contained no nodes after placement.")))
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			return;
+		}
+
 		// Break before this could have been bad
 		if (OrganContextPtr->CellGraph->GetNodesWithOpenJunctions().IsEmpty())
 		{
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("The starter cell has no open junctions. This is a BAD cell to have as a starter. Retrying ..."));
+			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX,
+				OrganContextPtr->CellGraph->GetCellNodeCount(),
+				FString(TEXT("Starter cell has no open junctions; the graph cannot grow past it.")))
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
 			return;
 		}
 		
@@ -122,19 +144,22 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		if (!OrganContextPtr->ValidateGraph())
 		{
 			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_AddMessages, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetMessages())
-			
+			// Record the failing verdict before ResetForRetry drops the graph; last write wins if a later attempt passes.
+			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetResult, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, false, OrganContextPtr->CellGraph->GetCellNodeCount())
+
 			if (!OrganContextPtr->ResetForRetry())
 			{
 				// We cant retry we're going to have to break
 				break;
 			}
-			
+
 			// Prepare analytics for another pass
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_NextIteration)
 		}
 		else
 		{
 			N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_AddMessages, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetMessages())
+			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetResult, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, true, OrganContextPtr->CellGraph->GetCellNodeCount())
 		}
 	}
 	

@@ -127,6 +127,24 @@ public:
 	 */
 	void OrganGraphBuilder_Init(int32 Index, const FString& Name, int32 MinimumCellCount, int32 MaximumCellCount, int32 MaximumRetryCount);
 
+	/**
+	 * Record the final pass/fail verdict for the organ-graph-builder record at Index.
+	 * @param Index Record index returned from OrganGraphBuilderCreate.
+	 * @param bSucceeded Whether the final attempt passed validation.
+	 * @param FinalCellNodeCount Cell-node count of the produced graph (the last attempt's count on failure).
+	 * @note Called once per attempt; the last call before the build drains reflects the final state.
+	 */
+	void OrganGraphBuilder_SetResult(int32 Index, bool bSucceeded, int32 FinalCellNodeCount);
+
+	/**
+	 * Record a terminal failure with an explicit reason for an early bailout that never reaches graph validation
+	 * (invalid context, no placeable starting cell, starter with no open junctions).
+	 * @param Index Record index returned from OrganGraphBuilderCreate.
+	 * @param FinalCellNodeCount Cell-node count at the point of bailout (typically 0, or 1 once a start cell exists).
+	 * @param Reason Human-readable explanation surfaced directly in the report's Failures block.
+	 */
+	void OrganGraphBuilder_SetFailure(int32 Index, int32 FinalCellNodeCount, const FString& Reason);
+
 	void OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages);
 	
 	/** Increment the AddNullNodes counter for the current iteration of the record at Index. */
@@ -177,8 +195,8 @@ public:
 	/** Mark the finish time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesFinish(int32 Index);
 	
-	/** Append all collected analytics for this operation to the supplied reports. */
-	void AddToReports(FNReport* Report, TArray<FNReport>& DetailedReports);
+	/** Append all collected analytics for this operation to the supplied report. */
+	void AddToReports(FNReport* Report);
 
 	/** @return The total measured duration across all stages, in seconds. */
 	float GetTotalDuration();
