@@ -7,6 +7,8 @@
 #include "Developer/NDebugActor.h"
 #include "Templates/Function.h"
 
+// #SONARQUBE-DISABLE-CPP_S3776 Optimized for golden-path
+
 /**
  * Intersection and containment helpers for FNRawMesh geometry.
  */
@@ -247,3 +249,5 @@ private:
 	 */
 	static bool CanUseSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 };
+
+// #SONARQUBE-ENABLE-CPP_S3776  Optimized for golden-path
