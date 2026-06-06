@@ -144,6 +144,24 @@ public:
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
 	/**
+	 * Get the current usage statistics for a given Actor class's pool.
+	 * @param ActorClass The class of the actor which you would like the pool statistics for.
+	 * @return An FIntVector2 where X is the spawned (in-use) count and Y is the available count; a zeroed vector is returned if no pool exists.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get ActorPool Stats", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actorpool-stats"))
+	FIntVector2 GetActorPoolStats(const TSubclassOf<AActor> ActorClass) const
+	{
+		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);
+		if (Found)
+		{
+			const FNActorPool* Pool  = Found->Get();
+			return FIntVector2(Pool->GetSpawnedCount(), Pool->GetAvailableCount());
+		}
+		return FIntVector2();
+	}
+	
+	/**
 	 * Get the pointer to the actor pool itself for a given Actor class.
 	 * @param ActorClass The class of the actor which you would like to access a pool for.
 	 * @return The pointer to the pool, or nullptr if it was not found.
