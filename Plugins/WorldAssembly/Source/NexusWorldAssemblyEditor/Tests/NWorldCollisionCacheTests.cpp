@@ -9,7 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/StaticMeshActor.h"
-#include "GameFramework/Volume.h"
+#include "Engine/TriggerVolume.h"
 #include "Types/NRawMeshUtils.h"
 
 namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness
@@ -90,7 +90,8 @@ N_TEST_MEDIUM(FNWorldCollisionCacheTests_Build_ExcludesVolumes,
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNWorldCollisionCacheHarness;
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		World->SpawnActor<AVolume>(FVector::ZeroVector, FRotator::ZeroRotator);
+		// AVolume is abstract; ATriggerVolume is a concrete subclass that still satisfies the IsA<AVolume> filter.
+		World->SpawnActor<ATriggerVolume>(FVector::ZeroVector, FRotator::ZeroRotator);
 
 		const FNRawMesh Mesh = FNWorldCollisionCache::Build(World, WideBounds());
 		CHECK_MESSAGE(TEXT("A lone volume should contribute no world-collision geometry."), Mesh.Loops.Num() == 0)
