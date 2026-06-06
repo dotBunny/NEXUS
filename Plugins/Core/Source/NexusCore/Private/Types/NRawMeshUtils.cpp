@@ -9,6 +9,8 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMeshFactory.h"
 
+// #SONARQUBE-DISABLE-CPP_S3776
+
 void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& BaseMesh,
                                  const FTransform& OtherTransform, const FNRawMesh& OtherMesh)
 {
@@ -1126,3 +1128,5 @@ bool FNRawMeshUtils::DoesConvexIntersectSATBaked(const FNRawMesh& LeftMesh, cons
 	// No face normal separated — hand off to the baked tri-tri sweep (same reasoning as the transform path).
 	return DoesIntersectTrianglesBaked(LeftMesh, RightMesh);
 }
+
+// #SONARQUBE-ENABLE

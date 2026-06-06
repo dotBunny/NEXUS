@@ -9,7 +9,7 @@ uint64 FNMersenneTwister::NextBounded(const uint64 Range)
 	// Callers guarantee Range >= 1. Rejection sampling removes the modulo bias that a plain
 	// (Engine() % Range) would introduce, while keeping the result a pure function of the
 	// engine's portable output (no STL distribution involved).
-	const uint64 Threshold = (0ull - Range) % Range; // == 2^64 mod Range
+	const uint64 Threshold = (0ULL - Range) % Range; // == 2^64 mod Range
 	uint64 Value;
 	do
 	{
@@ -48,7 +48,7 @@ void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const fl
 bool FNMersenneTwister::Bool()
 {
 	// Use the most-significant bit of a single engine draw as a portable, unbiased coin flip.
-	const bool bPseudoRandomValue = (this->Engine() >> 63) != 0ull;
+	const bool bPseudoRandomValue = (this->Engine() >> 63) != 0ULL;
 	this->CallCounter++;
 	return bPseudoRandomValue;
 }
@@ -58,7 +58,7 @@ void FNMersenneTwister::Bool(TArray<bool>& OutArray, const int32 Count, const in
 	const int32 ActualCount = StartIndex + Count;
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
-		OutArray[i] = (this->Engine() >> 63) != 0ull;
+		OutArray[i] = (this->Engine() >> 63) != 0ULL;
 	}
 	this->CallCounter += Count;
 }
