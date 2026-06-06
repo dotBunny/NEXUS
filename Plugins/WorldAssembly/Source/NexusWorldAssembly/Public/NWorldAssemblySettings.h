@@ -75,12 +75,12 @@ public:
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
 	int32 AssemblyGenerationRetryCount = 10000;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum Cell Hull Penetration Tolerance",
-		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Cell Penetration Tolerance",
+		meta=(ToolTip="The maximum depth of penetration a cell's hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingCellHullPenetration = 10.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration Tolerance",
-		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="World Penetration Tolerance",
+		meta=(ToolTip="The maximum depth of penetration a cell's hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Context Tags",
