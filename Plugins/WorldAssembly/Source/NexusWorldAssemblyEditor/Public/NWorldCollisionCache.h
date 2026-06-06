@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Types/NRawMesh.h"
 
+class AActor;
 class UWorld;
 
 /**
@@ -29,9 +30,10 @@ public:
 	 * memoizes it. Exposed (and unit-tested) directly so the build can be exercised without the cache's static state.
 	 * @param World World to gather from; returns an empty mesh when null.
 	 * @param Bounds Containment bounds; an actor contributes when its bounds overlap any one (empty = whole level).
+	 * @param OutSourceActors Optional; receives the filtered world actors the mesh was gathered from.
 	 * @note Game-thread only (walks live actors and flushes async static-mesh compilation).
 	 */
-	static FNRawMesh Build(const UWorld* World, const TArray<FBoxSphereBounds>& Bounds);
+	static FNRawMesh Build(const UWorld* World, const TArray<FBoxSphereBounds>& Bounds, TArray<AActor*>* OutSourceActors = nullptr);
 
 	/** Mark the cache stale so the next Get rebuilds it. */
 	static void Invalidate();

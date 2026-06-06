@@ -15,6 +15,7 @@
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyUtils.h"
+#include "NWorldCollisionCache.h"
 #include "Selection.h"
 #include "Engine/Level.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
@@ -27,19 +28,9 @@
 ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
 	ANDebugActor* ExistingActor, TArray<AActor*>& OutSourceActors)
 {
-	OutSourceActors = FNActorUtils::GetWorldActors(World, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings());
-
-	TArray<FNRawMesh> WorldCollisionMeshes;
-	TArray<FTransform> WorldCollisionMeshTransforms;
-	FNRawMeshFactory::FromActorsInBounds(OutSourceActors, Bounds, WorldCollisionMeshes, WorldCollisionMeshTransforms);
-
-	// Merge every emitted mesh into one piece of geometry, mirroring the single-actor path of CreateRawMeshVisualizers.
-	FNRawMesh MergedMesh;
-	const FTransform MergedTransform = FTransform::Identity;
-	for (int32 i = 0; i < WorldCollisionMeshTransforms.Num(); i++)
-	{
-		FNRawMeshUtils::CombineMesh(MergedTransform, MergedMesh, WorldCollisionMeshTransforms[i], WorldCollisionMeshes[i]);
-	}
+	// Single producer of the merged world-collision mesh: shared with the bone penetration readout via
+	// FNWorldCollisionCache. Build also reports the source actors so the ed mode can track relevance for refreshes.
+	const FNRawMesh MergedMesh = FNWorldCollisionCache::Build(World, Bounds, &OutSourceActors);
 
 	UMaterialInterface* VisualizerMaterial = UNWorldAssemblyEditorSettings::Get()->CollisionVisualizerMaterial.LoadSynchronous();
 
@@ -51,7 +42,7 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 	}
 
 	// Initial build: nothing to show, or no material configured — don't spawn anything.
-	if (WorldCollisionMeshTransforms.IsEmpty() || VisualizerMaterial == nullptr) return nullptr;
+	if (MergedMesh.Loops.Num() == 0 || VisualizerMaterial == nullptr) return nullptr;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Name = FName("NWorldCollisionVisualizer");
@@ -61,7 +52,7 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 #endif // WITH_EDITOR
 	SpawnParams.ObjectFlags |= RF_Transient;
 
-	ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), MergedTransform, SpawnParams);
+	ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), FTransform::Identity, SpawnParams);
 	if (DebugActor == nullptr) return nullptr;
 
 	DebugActor->OverrideWithDynamicMesh(MergedMesh.CreateDynamicMesh(false), VisualizerMaterial);
