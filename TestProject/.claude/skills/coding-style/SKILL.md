@@ -37,6 +37,26 @@ Standard UE prefixes apply, with NEXUS adding `N` after the type prefix:
 | `I` | Interface | `INActorPoolItem` |
 | `b` | bool field | |
 
+### Pointer / Reference Suffixes
+
+Suffix a variable to make its indirection obvious at the use site:
+
+| Suffix | Apply to | Example |
+|---|---|---|
+| `Ptr` | A raw pointer local or non-reflected raw-pointer member (`T*`) | `UWorld* WorldPtr` |
+| `Ref` | A plain reference local you keep around (`T&`, non-`const`) | `FNRawMesh& MeshRef = GetMesh();` |
+
+**Do not suffix** (the type or an existing convention already carries the meaning):
+
+- **`TObjectPtr<>` / smart pointers** (`TSharedPtr`, `TSharedRef`, `TWeakObjectPtr`, `TWeakPtr`, `TUniquePtr`) — the type name already states the indirection. `TObjectPtr<UFoo> PoolObject`, not `PoolObjectPtr`.
+- **`const T&` parameters** — the dominant pass-by-const-ref idiom. `const FNRawMesh& BaseMesh`, not `BaseMeshRef`.
+- **`In`/`Out` direction-prefixed parameters** — the prefix already signals intent. Keep `InWorld` / `OutActors`; do not stack into `InWorldRef` / `OutActorsPtr`.
+- **Containers of pointers** — the variable is a container, not a pointer. `TArray<AActor*> SpawnedActors`, not `SpawnedActorsPtr`.
+- **Override / interface parameters** whose signature is fixed by a base class (e.g. `OnWorldBeginPlay(UWorld& InWorld)`) — match the base declaration.
+- **Range-loop and structured-binding variables** (`for (auto& Entry : Collection)`).
+
+Precedence: a direction prefix (`In`/`Out`) wins over a type suffix — never combine them.
+
 ## Module API Macro
 
 Every exported class and free function must be tagged with its module's API macro:
