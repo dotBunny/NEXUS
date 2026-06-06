@@ -3,6 +3,8 @@
 
 #include "Assembly/NAssemblyTaskAnalytics.h"
 
+#include "Developer/NReportListBlock.h"
+
 void FNAssemblyTaskAnalytics::TaskGraphCreationStart()
 {
 	TaskGraphCreationTimer.Start();
@@ -167,7 +169,7 @@ void FNAssemblyTaskAnalytics::SpawnCellProxiesFinish(int32 Index)
 }
 
 
-void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
+void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report, TArray<FNReport>& DetailedReports)
 {
 	const int32 AnalyticsContentTicket = Report->CreateContentBlock();
 	FNReportContentBlock* AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
@@ -240,34 +242,38 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
 	
-	const int32 OrganOverviewTicket = Report->CreateContentBlock(AnalyticsContentTicket);
-	FNReportContentBlock* OrganOverviewContentBlock = Report->GetContentBlock(OrganOverviewTicket);
-	OrganOverviewContentBlock->SetHeading("Organ Overview");
+	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
+	
 	
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		// Header for Organ
-		const int32 OrganTicket = Report->CreateContentBlock(OrganOverviewTicket);
-		FNReportContentBlock* OrganContentBlock = Report->GetContentBlock(OrganTicket);
-		OrganContentBlock->SetHeading(Analytic.Name);
-		OrganContentBlock->AddLine(FString::Printf(TEXT("Iterations: %i"), Analytic.Iterations));
+		FNReport& DetailedReport = DetailedReports.AddDefaulted_GetRef();
+		
+		DetailedReport.SetDesiredFileName(Analytic.Name.Replace(TEXT(":"), TEXT("_"))); // Prepopulate Organ Name
+		
+		const int32 OrganOverviewTicket = DetailedReport.CreateContentBlock();
+		FNReportContentBlock* OrganOverviewContentBlock = DetailedReport.GetContentBlock(OrganOverviewTicket);
+		OrganOverviewContentBlock->SetHeading(Analytic.Name);
+		OrganOverviewContentBlock->SetHeader(FString::Printf(TEXT("%i Iteration"), Analytic.Iterations));
+		
+		// Counter Table
+		const int32 CounterTableTicket = DetailedReport.CreateTableBlock(OrganOverviewTicket);
+		FNReportTableBlock* CountersTableBlock = DetailedReport.GetTableBlock(CounterTableTicket);
+		CountersTableBlock->SetHeading("Counters");
+		CountersTableBlock->Initialize({ "Iteration", "Null Nodes", "Cell Nodes", "Finisher Capped", 
+			"False Start / Out Of Bounds", "False Start / World Colliding", 
+			"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
+			"Constraint / Non-Finisher" });
+		
+		// Message Logs
+		const int32 IterationMessagesTicket = DetailedReport.CreateListBlock(OrganOverviewTicket);
+		FNReportListBlock* IterationMessagesContentBlock = DetailedReport.GetListBlock(IterationMessagesTicket);
+		IterationMessagesContentBlock->SetHeading("Message Log");
 		
 		for (int32 i = 0; i < Analytic.Iterations; i++)
 		{
-			const int32 OrganIterationTicket = Report->CreateContentBlock(OrganTicket);
-			FNReportContentBlock* OrganIterationContentBlock = Report->GetContentBlock(OrganIterationTicket);
-			OrganIterationContentBlock->SetHeading(FString::Printf(TEXT("Iteration: %i"), i));
-			
-			// Counters
-			const int32 CounterTableTicket = Report->CreateTableBlock(OrganIterationTicket);
-			FNReportTableBlock* CountersTableBlock = Report->GetTableBlock(CounterTableTicket);
-			CountersTableBlock->SetHeading("Counters");
-			CountersTableBlock->Initialize({ "Null Nodes", "Cell Nodes", "Finisher Capped", 
-				"False Start / Out Of Bounds", "False Start / World Colliding", 
-				"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
-				"Constraint / Non-Finisher" });
-			
 			CountersTableBlock->AddRow({ 
+				FString::FromInt(i),
 				FString::FromInt(Analytic.AddNullNodes.Counter[i]), 
 				FString::FromInt(Analytic.AddCellNodes.Counter[i]),
 				FString::FromInt(Analytic.CappedWithFinisher.Counter[i]),
@@ -280,18 +286,14 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 				FString::FromInt(Analytic.DiscardDueToNonFinisherConstraint.Counter[i])
 			});
 			
-			// Message Log
-			const int32 IterationMessagesTicket = Report->CreateContentBlock(OrganIterationTicket);
-			FNReportContentBlock* IterationMessagesContentBlock = Report->GetContentBlock(IterationMessagesTicket);
-			IterationMessagesContentBlock->SetHeading("Message Log");
 			for (const FString& Message : Analytic.IterationMessages[i])
 			{
-				IterationMessagesContentBlock->AddLine(Message);
+				IterationMessagesContentBlock->AddItem(FString::Printf(TEXT("%i: %s"), i, *Message));
 			}
 		}
 	}
 	
-	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
+	
 }
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()

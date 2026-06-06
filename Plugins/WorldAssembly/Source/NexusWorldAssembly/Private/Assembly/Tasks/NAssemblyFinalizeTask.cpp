@@ -55,8 +55,8 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 
 	// Add Analytics to report
-	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
-	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
+	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReports(Operation->GetReport(), Operation->GetDetailedReports());
+	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportsToFile();
 #endif // !UE_BUILD_SHIPPING
 
 	// Send the finalized shared data back to the operation for doings.

@@ -4,6 +4,7 @@
 #include "Developer/NReport.h"
 
 #include "NCoreMinimal.h"
+#include "Developer/NReportListBlock.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -40,6 +41,11 @@ int32 FNReport::CreateTableBlock(const int32 ParentTicket, const int32 OrderPrio
 	N_REPORT_CREATE_BLOCK(FNReportTableBlock, TableBlocks, EBlockType::Table)
 }
 
+int32 FNReport::CreateListBlock(const int32 ParentTicket, const int32 OrderPriority)
+{
+	N_REPORT_CREATE_BLOCK(FNReportListBlock, ListBlocks, EBlockType::List)
+}
+
 FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
 {
 	return ContentBlocks.Find(Ticket);
@@ -48,6 +54,11 @@ FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
 FNReportTableBlock* FNReport::GetTableBlock(const int32 Ticket)
 {
 	return TableBlocks.Find(Ticket);
+}
+
+FNReportListBlock* FNReport::GetListBlock(const int32 Ticket)
+{
+	return ListBlocks.Find(Ticket);
 }
 
 TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat)
@@ -161,5 +172,9 @@ void FNReport::RenderBlock(const int32 Ticket, TArray<FString>& Output, const EN
 	case EBlockType::Table:
 		TableBlocks[Ticket].Render(*this, Output, OutputFormat);
 		break;
+	case EBlockType::List:
+		ListBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+		
 	}
 }

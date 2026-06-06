@@ -6,6 +6,7 @@
 #include "Developer/NReportBlock.h"
 #include "Developer/NReportContentBlock.h"
 #include "Developer/NReportTableBlock.h"
+#include "Developer/NReportListBlock.h"
 
 /**
  * Composable, hierarchical report structure that can be emitted as plain text or Markdown.
@@ -17,6 +18,7 @@ struct NEXUSCORE_API FNReport
 	friend struct FNReportBlock;
 	friend struct FNReportTableBlock;
 	friend struct FNReportContentBlock;
+	friend struct FNReportListBlock;
 
 	/**
 	 * Allocate a new content block, attach it to a parent, and issue its ticket.
@@ -34,6 +36,8 @@ struct NEXUSCORE_API FNReport
 	 */
 	int32 CreateTableBlock(const int32 ParentTicket = 0, const int32 OrderPriority = 0);
 
+	int32 CreateListBlock(const int32 ParentTicket = 0, const int32 OrderPriority = 0);
+
 	/**
 	 * Look up a previously created content block by ticket.
 	 * @param Ticket Ticket returned from CreateContentBlock.
@@ -50,6 +54,9 @@ struct NEXUSCORE_API FNReport
 	 */
 	FNReportTableBlock* GetTableBlock(const int32 Ticket);
 
+	FNReportListBlock* GetListBlock(const int32 Ticket);
+
+	
 	/**
 	 * Render the entire report, walking blocks in priority order, into a flat array of lines.
 	 * @param OutputFormat Whether to emit plain text or Markdown.
@@ -83,6 +90,8 @@ struct NEXUSCORE_API FNReport
 		}
 		ReplaceTokens.Add(Token, Value);
 	}
+	void SetDesiredFileName(const FString& FileName) { DesiredFileName = FileName; }
+	FString& GetDesiredFileName() { return DesiredFileName; }
 	
 protected:
 	/** Look up the priority of a block by its ticket; returns 0 when the ticket is unknown. */
@@ -102,10 +111,9 @@ protected:
 	/** Render the block identified by Ticket into Output, dispatching to the correct concrete type. */
 	void RenderBlock(const int32 Ticket, TArray<FString>& Output, ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText);
 
-
 private:
 	/** Discriminates which storage map owns a ticket so dispatch resolves a block with a single targeted lookup. */
-	enum class EBlockType : uint8 { Content, Table };
+	enum class EBlockType : uint8 { Content, Table, List };
 
 	/** Per-ticket dispatch and ordering metadata, kept out of the block storage so lookups touch a single small map. */
 	struct FBlockMeta
@@ -127,6 +135,8 @@ private:
 
 	/** Storage for every table block in the report, keyed by block ticket. */
 	TMap<int32, FNReportTableBlock> TableBlocks;
+	
+	TMap<int32, FNReportListBlock> ListBlocks;
 
 	/** Ticket -> dispatch/ordering metadata for every block, regardless of which storage map holds the block itself. */
 	TMap<int32, FBlockMeta> BlockMeta;
@@ -139,4 +149,6 @@ private:
 
 	/** Monotonically increasing counter used to issue unique tickets to newly created blocks. */
 	int32 BlockTickets = 0;
+	
+	FString DesiredFileName;
 };

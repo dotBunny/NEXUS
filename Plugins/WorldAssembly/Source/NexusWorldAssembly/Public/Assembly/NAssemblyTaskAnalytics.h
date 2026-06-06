@@ -177,8 +177,8 @@ public:
 	/** Mark the finish time of the spawn-cell-proxies record at Index. */
 	void SpawnCellProxiesFinish(int32 Index);
 	
-	/** Append all collected analytics for this operation to the supplied report. */
-	void AddToReport(FNReport* Report);
+	/** Append all collected analytics for this operation to the supplied reports. */
+	void AddToReports(FNReport* Report, TArray<FNReport>& DetailedReports);
 
 	/** @return The total measured duration across all stages, in seconds. */
 	float GetTotalDuration();

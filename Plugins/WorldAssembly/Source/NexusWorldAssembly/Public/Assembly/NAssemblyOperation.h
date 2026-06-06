@@ -87,11 +87,12 @@ public:
 	 * Writes the operation's report to the project log directory as a timestamped Markdown file (saved asynchronously).
 	 * @return The destination file path.
 	 */
-	FString OutputReportToFile()
+	FString OutputReportsToFile()
 	{
+		FString Timestamp = FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"));
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
-					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.txt"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
-		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
+					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *Timestamp));
+		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
 		
 		Async(EAsyncExecution::TaskGraph,
 			[Output = MoveTemp(Output), OutputFile]()
@@ -99,6 +100,24 @@ public:
 				FFileHelper::SaveStringArrayToFile(Output, *OutputFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 				UE_LOG(LogNexusWorldAssembly, Log, TEXT("Report written to %s."), *OutputFile);
 			});
+		
+		// Write detailed reports out
+		if (DetailedReports.Num() != 0)
+		{
+			for (int i = 0; i < DetailedReports.Num(); i++)
+			{
+				FNReport& DetailedReport = DetailedReports[i];
+				FString DetailedFile = FPaths::Combine(FPaths::ProjectLogDir(),
+					FString::Printf(TEXT("NEXUS_WorldAssembly_%s_%s.md"), *Timestamp, *DetailedReport.GetDesiredFileName()));
+				TArray<FString> DetailedOutput = DetailedReport.GetReportLines(ENReportOutputFormat::Markdown);
+				
+				Async(EAsyncExecution::TaskGraph,
+				[DetailedOutput = MoveTemp(DetailedOutput), DetailedFile]()
+				{
+					FFileHelper::SaveStringArrayToFile(DetailedOutput, *DetailedFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
+				});
+			}
+		}
 		return OutputFile;
 	}
 	/** Writes the operation's report to the log as plain text, one line per entry. */
@@ -112,6 +131,8 @@ public:
 	}
 	/** @return The operation's mutable report, accumulated during the build (non-shipping builds only). */
 	FNReport* GetReport() { return &Report; }
+	TArray<FNReport>& GetDetailedReports() { return DetailedReports; }
+	
 #endif // !UE_BUILD_SHIPPING
 	
 	/**
@@ -266,5 +287,6 @@ private:
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;
+	TArray<FNReport> DetailedReports;
 #endif // !UE_BUILD_SHIPPING
 };

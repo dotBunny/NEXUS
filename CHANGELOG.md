@@ -15,6 +15,7 @@
 - Added `Maximum Node Depth` and `Directional Constraints` to `UNTissue` definitions.
 - `Direction Tolerance` setting (default 15-degrees, project-wide and per-operation) controlling how close a candidate's bearing must be to a `UNTissue` `Directional Constraint` to be placed.
 - `UNActorPoolSubsystem::GetActorPoolStats()` returns Spawned/Available details for a target `FNActorPool`.
+- `FNReportListBlock` now available in reports.
 
 ### Changed
 
