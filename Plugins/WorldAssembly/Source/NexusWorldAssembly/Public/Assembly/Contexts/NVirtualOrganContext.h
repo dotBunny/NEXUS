@@ -86,9 +86,6 @@ public:
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
-	
-	/** Maximum number of failed start attempts before the build gives up on this organ. */
-	int32 BadStartLimit = 1000;
 
 	/** When true, the graph may extend past Bounds. */
 	bool bUnbounded = false;

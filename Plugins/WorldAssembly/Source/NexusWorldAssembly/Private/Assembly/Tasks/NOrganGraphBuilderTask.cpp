@@ -184,109 +184,112 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 	// Our starting placement has to happen
 	do
 	{
-		// Get a weighted array of indices representing possible starting cells, and reference the cell data
-		const int32 StartCellIndex = WeightedStartIndices.TwistedValue(Random);
-		FNVirtualCellData* StartCellInputData = &OrganContextPtr->CellInputData[StartCellIndex];
-		
-		// Decide which appropriately sized junction is going to be used
-		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
-		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-
-		// Source guarantees this will find something.
-		const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
-		
-		// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing 
-		// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
-		// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
-		const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
-		const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
-		
-		const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
-		const FRotator CellWorldRotation = CellWorldQuat.Rotator();
-		const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
-		const FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
-		
-		// Create our bone node and build a graph around it.
-		FNAssemblyGraphBoneNode* BoneNode = FNAssemblyGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
-		
-		// Create our graph
-		OrganContextPtr->CellGraph = MakeUnique<FNAssemblyGraph>(
-			BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbounded);
-		
-		
-		// Create our first cell node, attaching it to the bone node
-		FNAssemblyGraphNodeParams NodeParams;
-		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
-		NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
-		NodeParams.TagCounterState = OrganContextPtr->TagCounter;
-		NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
-		NodeParams.Seed = Random.UnsignedInteger64();
-		NodeParams.WorldPosition = CellWorldPosition;
-		NodeParams.WorldRotation = CellWorldRotation;
-		FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, StartCellInputData, OrganContextPtr->VoxelSize);
-		
-		// TODO: Intersecting or out of bounds start???
-		
-		
-		if (DoesWorldCollide(StartNode))
+		// Pull a candidate starting cell and remove it so it can never be re-rolled. Because we try every
+		// one of its junctions below, removing the cell here cannot discard a junction we have not evaluated.
+		const int32 StartCellIndex = WeightedStartIndices.TwistedValueAndRemove(Random);
+		if (StartCellIndex == INDEX_NONE)
 		{
-			delete StartNode; 
-			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingStart)
-			BadStartCount++;
-		}
-		else if (DoesExistingNodeWorldCollide(StartNode))
-		{
-			delete StartNode; 
-			OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
-			BadStartCount++;
-		}
-		else
-		{
-			OrganContextPtr->CellGraph->RegisterNode(StartNode);
-			
-			// Our starting cell has unique tags that need to get added to the used
-			if (StartCellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
-			{
-				OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(StartCellInputData->AssemblyTags));
-			}
-			if (StartCellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
-			{
-				OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(StartCellInputData->AssemblyTags));
-			}
-			
-			// Add tags to context
-			if (!StartCellInputData->ContextTagsAdded.IsEmpty())
-			{
-				OrganContextPtr->ContextTags.AppendTags(StartCellInputData->ContextTagsAdded);
-			}
-
-			// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
-			// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
-			for (int32 j = 0; j < StartCellInputData->TagCounterOperations.Num(); j++)
-			{
-				OrganContextPtr->TagCounter.ApplyOperation(StartCellInputData->TagCounterOperations[j]);
-			}
-
-			// Link our nodes
-			BoneNode->Link(StartNode);
-			StartNode->LinkJunction(TargetJunctionKey, BoneNode);
-			
-			// Base node connection
-			BoneNode->Connect(StartNode);
-		}
-		
-		// We can only take so much shit
-		if (BadStartCount > OrganContextPtr->BadStartLimit)
-		{
-			BadStartCount = 0;
+			// Every candidate starting cell has been exhausted without a successful placement.
 			break;
 		}
-	} 
+		FNVirtualCellData* StartCellInputData = &OrganContextPtr->CellInputData[StartCellIndex];
+
+		// Try this cell's appropriately sized junctions in a random order, without replacement, until one
+		// places. The cell is already removed above, so draining its junction list here is safe.
+		TArray<int32>& ValidJunctionIndices = ValidJunctions[StartCellIndex];
+		while (ValidJunctionIndices.Num() > 0)
+		{
+			const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+			const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+			ValidJunctionIndices.RemoveAtSwap(TargetJunctionKeyIndex, EAllowShrinking::No);
+
+			// Source guarantees this will find something.
+			const FNCellJunctionDetails* StartCellJunctionDetails = StartCellInputData->Junctions.Find(TargetJunctionKey);
+
+			// When matching to a Bone, we want to find the rotation necessary to match the Bone's facing direction (forward) to the Junctions facing
+			// direction (forward). This is not the common-case when we match a junction to a junction, in that case we want the opposite facing directions.
+			// Since the StartGraph method is connecting a bone to a junction, we match their facing directions.
+			const FQuat BoneQuat = BoneData.WorldRotation.Quaternion();
+			const FQuat JunctionQuat = StartCellJunctionDetails->WorldRotation.Quaternion();
+
+			const FQuat CellWorldQuat = BoneQuat * JunctionQuat.Inverse();
+			const FRotator CellWorldRotation = CellWorldQuat.Rotator();
+			const FVector JunctionWorldOffset = CellWorldQuat.RotateVector(StartCellJunctionDetails->WorldLocation);
+			const FVector CellWorldPosition = BoneData.WorldPosition - JunctionWorldOffset;
+
+			// Create our bone node and build a graph around it.
+			FNAssemblyGraphBoneNode* BoneNode = FNAssemblyGraphNodeFactory::CreateBoneNode(&BoneData, CellWorldPosition, CellWorldRotation);
+
+			// Create our graph
+			OrganContextPtr->CellGraph = MakeUnique<FNAssemblyGraph>(
+				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbounded);
+
+
+			// Create our first cell node, attaching it to the bone node
+			FNAssemblyGraphNodeParams NodeParams;
+			NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
+			NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
+			NodeParams.TagCounterState = OrganContextPtr->TagCounter;
+			NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
+			NodeParams.Seed = Random.UnsignedInteger64();
+			NodeParams.WorldPosition = CellWorldPosition;
+			NodeParams.WorldRotation = CellWorldRotation;
+			FNAssemblyGraphCellNode* StartNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, StartCellInputData, OrganContextPtr->VoxelSize);
+			
+			
+			if (DoesWorldCollide(StartNode))
+			{
+				delete StartNode;
+				OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
+				N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingStart)
+			}
+			else if (DoesExistingNodeWorldCollide(StartNode))
+			{
+				delete StartNode;
+				OrganContextPtr->CellGraph.Reset(); // Bone is already part of graph
+				N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+			}
+			else
+			{
+				OrganContextPtr->CellGraph->RegisterNode(StartNode);
+
+				// Our starting cell has unique tags that need to get added to the used
+				if (StartCellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
+				{
+					OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
+						OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(StartCellInputData->AssemblyTags));
+				}
+				if (StartCellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
+				{
+					OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
+						OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(StartCellInputData->AssemblyTags));
+				}
+
+				// Add tags to context
+				if (!StartCellInputData->ContextTagsAdded.IsEmpty())
+				{
+					OrganContextPtr->ContextTags.AppendTags(StartCellInputData->ContextTagsAdded);
+				}
+
+				// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
+				// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
+				for (int32 j = 0; j < StartCellInputData->TagCounterOperations.Num(); j++)
+				{
+					OrganContextPtr->TagCounter.ApplyOperation(StartCellInputData->TagCounterOperations[j]);
+				}
+
+				// Link our nodes
+				BoneNode->Link(StartNode);
+				StartNode->LinkJunction(TargetJunctionKey, BoneNode);
+
+				// Base node connection
+				BoneNode->Connect(StartNode);
+
+				// Placed successfully - no need to try this cell's remaining junctions.
+				break;
+			}
+		}
+	}
 	while (OrganContextPtr->CellGraph == nullptr);
 }
 

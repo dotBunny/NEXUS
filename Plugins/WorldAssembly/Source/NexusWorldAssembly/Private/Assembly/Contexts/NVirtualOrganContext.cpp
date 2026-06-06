@@ -27,8 +27,7 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	MinimumCellCount = WorldOrganContext->SourceComponent->MinimumCellCount;
 	MaximumCellCount = WorldOrganContext->SourceComponent->MaximumCellCount;
 	MaximumRetryCount = WorldOrganContext->MaximumRetryCount;
-	BadStartLimit = WorldOrganContext->BadStartLimit;
-	
+
 	// Seed override
 	if (WorldOrganContext->SourceComponent->Seed != -1)
 	{

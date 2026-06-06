@@ -34,9 +34,6 @@ struct NEXUSWORLDASSEMBLY_API FNWorldOrganData
 	/** Number of times the graph builder may retry before giving up on this organ. */
 	int32 MaximumRetryCount = 3;
 
-	/** Maximum number of failed start attempts before the build gives up on this organ. */
-	int32 BadStartLimit = 1000;
-
 	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 

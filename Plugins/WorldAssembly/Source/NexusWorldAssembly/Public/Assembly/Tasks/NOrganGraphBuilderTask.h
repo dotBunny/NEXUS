@@ -39,9 +39,6 @@ private:
 	/** Cached hulls of cells already placed by earlier organs that overlap this organ's bounds. */
 	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
 
-	/** Number of consecutive failed start-node attempts; used to break out of unwinnable retries. */
-	int32 BadStartCount = 0;
-
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
 

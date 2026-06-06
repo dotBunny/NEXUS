@@ -71,10 +71,6 @@ public:
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Bad Start Limit",
-		meta=(ToolTip="The maximum amount of bad starts that can occur before an assembly is considered a failure."))
-	int32 AssemblyBadStartLimit = 1000;
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
 	int32 AssemblyGenerationRetryCount = 10000;
