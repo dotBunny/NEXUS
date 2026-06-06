@@ -68,8 +68,8 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 			{
 				// The intent is still to destroy
 				OtherActor->Destroy();
+				KillCount++;
 			}
-			KillCount++;
 			return;
 		}
 
