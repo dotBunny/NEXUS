@@ -9,6 +9,7 @@
 enum class ENWorldAssemblyOperationState : uint8;
 class UNAssemblyOperation;
 class UNListView;
+struct FNStatusChannelUpdate;
 
 /**
  * Developer overlay widget that lists every live World Assembly operation and its current state.
@@ -24,6 +25,9 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblyDeveloperOverlay : public UNDevelope
 
 	/** Bound to the registry broadcast; refreshes the operations list as operations change state. */
 	void OnOperationStatusChanged(UNAssemblyOperation* Operation, const ENWorldAssemblyOperationState NewState);
+
+	/** Bound to the registry broadcast; routes channel deltas to the operation's row for child-bar display. */
+	void OnOperationChannelsChanged(UNAssemblyOperation* Operation, const TArray<FNStatusChannelUpdate>& Changes);
 
 protected:
 
@@ -45,6 +49,9 @@ private:
 
 	/** Handle for the registry state-change subscription. */
 	FDelegateHandle OperationsStatusChangedDelegateHandle;
+
+	/** Handle for the registry channels-changed subscription. */
+	FDelegateHandle OperationChannelsChangedDelegateHandle;
 
 	/** @return true if the operation with the given name should appear in the overlay (filters internal/system operations). */
 	static bool ShouldShowOperation(const FName& OperationName);

@@ -18,7 +18,7 @@
  * button can act on a specific domain object.
  */
 UCLASS(BlueprintType)
-class NEXUSUI_API UNButtonListViewEntryObject : public UObject
+class NEXUSUI_API UNButtonListEntry : public UObject
 {
 	GENERATED_BODY()
 
@@ -115,11 +115,11 @@ protected:
 	//~INListViewEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{
-		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(ListItemObject);
+		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(ListItemObject);
 		if (IsValid(ButtonObject))
 		{
 			SetText(ButtonObject->GetText());
-			Button->OnClicked.AddDynamic(ButtonObject, &UNButtonListViewEntryObject::OnPressed);
+			Button->OnClicked.AddDynamic(ButtonObject, &UNButtonListEntry::OnPressed);
 			Object = ListItemObject;
 		}
 		OnButtonUnhovered();
@@ -129,7 +129,7 @@ protected:
 	{
 		if (Object != nullptr)
 		{
-			const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
+			const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
 			Button->OnClicked.RemoveAll(ButtonObject);
 			Object = nullptr;
 		}
@@ -160,7 +160,7 @@ protected:
 	void OnButtonPressed()
 	{
 		if (Object == nullptr) return;
-		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
+		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
 
 		if (ButtonObject != nullptr)
 		{
@@ -174,7 +174,7 @@ protected:
 	void OnButtonHovered()
 	{
 		if (Object == nullptr) return;
-		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
+		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
 
 		if (ButtonObject != nullptr)
 		{
@@ -188,7 +188,7 @@ protected:
 	void OnButtonReleased()
 	{
 		N_VALIDATE_RETURN_VOID(LogNexusUI, Object);
-		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
+		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
 
 		if (ButtonObject != nullptr)
 		{
@@ -203,7 +203,7 @@ protected:
 	{
 		
 		if (Object == nullptr) return;
-		const UNButtonListViewEntryObject* ButtonObject = Cast<UNButtonListViewEntryObject>(Object);
+		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
 
 		if (ButtonObject != nullptr)
 		{

@@ -29,8 +29,7 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	const double MaxAllowableTime = SpawnCellsContextPtr->CellTimeSlice;
 	const double StartTime = FPlatformTime::Seconds();
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
-	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Spawning Cell Proxies (%i)"), NodeCount));
-	
+
 	// Copy local
 	const FGameplayTagContainer ContextTags = TaskGraphContextPtr->ContextTags;
 	const TArray<FNGameplayTagCount> TagCounter = TaskGraphContextPtr->TagCounter.ToTagCount();

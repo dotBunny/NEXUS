@@ -14,8 +14,10 @@
 #include "NAssemblyOperationListViewEntry.generated.h"
 
 class UNAssemblyOperation;
+class UNProgressBarListEntry;
 class UProgressBar;
 class UCommonTextBlock;
+struct FNStatusChannelUpdate;
 
 /**
  * One row in the World Assembly developer overlay list — shows the operation's display name,
@@ -37,6 +39,13 @@ public:
 	
 	/** Clear all text fields and the progress bar — used between operations and on destruct. */
 	void Reset() const;
+
+	/**
+	 * Apply a batch of progress-channel deltas routed from the developer overlay. Lazily creates a
+	 * UNProgressBarListEntry (and child-list row) for any channel id not yet seen, then updates it.
+	 * @param Changes The channels that changed since the operation's last drain.
+	 */
+	void ApplyChannelUpdates(const TArray<FNStatusChannelUpdate>& Changes);
 
 protected:
 	virtual void NativeConstruct() override
@@ -94,14 +103,21 @@ protected:
 	/** Delegate callback: the operation's task counts changed. */
 	UFUNCTION()
 	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
-	
+
 	UFUNCTION()
 	void OnCancelButtonClicked();
 
 private:
 	void UpdateCancelButtonVisibility() const;
-	
+
+	/** Remove every child progress bar and release its view-model — used on (re)bind and destruct. */
+	void ClearChildProgressList();
+
 	/** Operation this row is bound to; updated via NativeOnListItemObjectSet. */
 	UPROPERTY()
 	TObjectPtr<UNAssemblyOperation> Operation = nullptr;
+
+	/** Child progress-bar view-models owned by this row, keyed by channel id; lazily created from deltas. */
+	UPROPERTY()
+	TMap<int32, TObjectPtr<UNProgressBarListEntry>> ChannelEntries;
 };

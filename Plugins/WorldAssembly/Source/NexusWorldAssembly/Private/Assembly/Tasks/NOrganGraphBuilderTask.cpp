@@ -25,7 +25,8 @@ FNOrganGraphBuilderTask::FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrgan
 
 void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	TaskGraphContextPtr->SetStatusMessage(TEXT("Building Organs"));
+	// Open a per-organ status channel so this build surfaces as its own child progress bar in the overlay.
+	const int32 StatusChannel = TaskGraphContextPtr->OpenStatusChannel(OrganContextPtr->GetName());
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderStart)
 	N_ASSEMBLY_ANALYTICS_FIVE_PARAM(OrganGraphBuilder_Init, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, OrganContextPtr->GetName(), 
@@ -55,8 +56,14 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	
 	while (!OrganContextPtr->IsSuccessful())
 	{
-		TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Building Organs (%i/%i)"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel, FString::Printf(TEXT("Iteration %i/%i"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
 		
+		// Coarse attempt-based progress for the per-organ channel; success drives it to 100% below.
+		const int32 MaxRetries = FMath::Max(OrganContextPtr->MaximumRetryCount, 1);
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel,
+			FString::Printf(TEXT("Attempt %i/%i"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount),
+			static_cast<float>(OrganContextPtr->GetRetryCount()) / MaxRetries);
+
 		// Find the bone and build our starting cell
 		StartGraph(Random);
 	
@@ -173,6 +180,11 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	// TODO: Would we do something here if we wanted required to apply ACROSS organs?
 	if (OrganContextPtr->IsSuccessful())
 	{
+		// Mark the per-organ channel complete before CellGraph is moved out below.
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel,
+			FString::Printf(TEXT("Built (%i cells)"), OrganContextPtr->CellGraph->GetCellNodeCount()), 1.f);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
+
 		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
 		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
 		// counter the pass Combines into; differencing it out leaves just this organ's delta to avoid

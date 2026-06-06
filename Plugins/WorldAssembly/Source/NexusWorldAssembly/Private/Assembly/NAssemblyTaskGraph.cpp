@@ -59,7 +59,7 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 	FGraphEventRef ProcessVirtualWorldContextTask = TGraphTask<FNProcessVirtualWorldTask>::CreateTask(
 				&PreGameThreadTasks,
 				FNProcessVirtualWorldTask::GetDesiredThread())
-				.ConstructAndHold(VirtualWorldContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
+				.ConstructAndHold(VirtualWorldContextPtr, TaskGraphContextPtr N_ASSEMBLY_ANALYTICS_CLASS_REF);
 	ProcessInitialGameThreadTasks.Add(ProcessVirtualWorldContextTask);
 	AllTasks.Add(ProcessVirtualWorldContextTask);
 	
@@ -171,6 +171,15 @@ bool FNAssemblyTaskGraph::ConsumeStatusMessage(FString& OutMessage) const
 		return false;
 	}
 	return TaskGraphContextPtr->ConsumeDisplayMessage(OutMessage);
+}
+
+bool FNAssemblyTaskGraph::ConsumeChannelUpdates(TArray<FNStatusChannelUpdate>& OutChanges) const
+{
+	if (!TaskGraphContextPtr.IsValid())
+	{
+		return false;
+	}
+	return TaskGraphContextPtr->ConsumeChannelUpdates(OutChanges);
 }
 
 void FNAssemblyTaskGraph::Cancel()

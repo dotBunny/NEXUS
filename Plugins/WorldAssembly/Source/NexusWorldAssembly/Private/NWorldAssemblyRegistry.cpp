@@ -4,6 +4,7 @@
 #include "NWorldAssemblyRegistry.h"
 
 #include "NWorldAssemblyMinimal.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellLevelInstance.h"
 #include "Cell/NCellRootComponent.h"
@@ -16,7 +17,13 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::Organs;
 
 TArray<UNAssemblyOperation*> FNWorldAssemblyRegistry::Operations;
 FOnAssemblyOperationStateChanged FNWorldAssemblyRegistry::OnOperationStateChanged;
+FOnAssemblyOperationChannelsChanged FNWorldAssemblyRegistry::OnOperationChannelsChanged;
 TMap<int32, TArray<ANCellLevelInstance*>> FNWorldAssemblyRegistry::CellLevelInstances;
+
+void FNWorldAssemblyRegistry::NotifyOperationChannelsChanged(UNAssemblyOperation* Operation, const TArray<FNStatusChannelUpdate>& Changes)
+{
+	OnOperationChannelsChanged.Broadcast(Operation, Changes);
+}
 
 
 TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted)

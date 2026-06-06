@@ -3,6 +3,7 @@
 
 #include "Assembly/Tasks/NCreateSpawnsTask.h"
 
+#include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblyContextCache.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
@@ -25,9 +26,7 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 	}
 		
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextStart)
-	
-	TaskGraphContextPtr->SetStatusMessage(TEXT("Create Spawn Task"));
-	
+
 	// We need to prepopulate some data elsewhere
 	FNWorldAssemblyContextCache::AddOperationContext(TaskGraphContextPtr->OperationTicket, TaskGraphContextPtr->TagCounter, TaskGraphContextPtr->ContextTags);
 
@@ -45,6 +44,10 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 			}
 		}
 	}
+
+	// The spawn list is now complete, so we can report the full cell count as proxy spawning begins.
+	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("%s (%i)"),
+		*NEXUS::WorldAssembly::StatusMessage::SpawningCells, SpawnCellsContextPtr->CellNodes.Num()));
 
 	N_ASSEMBLY_ANALYTICS(CreateSpawnCellsContextFinish)
 }

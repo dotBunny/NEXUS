@@ -7,6 +7,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "Organ/NOrganComponent.h"
 #include "Assembly/NAssemblyTaskGraph.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 
 int32 UNAssemblyOperation::NextTicket = 1;
 
@@ -185,10 +186,26 @@ void UNAssemblyOperation::Tick()
 	}
 
 	// Drain any progress message published by the (possibly worker-thread) tasks and broadcast it on the game thread.
-	FString PendingMessage; 
+	FString PendingMessage;
 	if (TaskGraph->ConsumeStatusMessage(PendingMessage))
 	{
 		SetStatusMessage(MoveTemp(PendingMessage));
+	}
+
+	// Drain the per-stage progress channels into their child-list view-models.
+	DrainStatusChannels();
+}
+
+void UNAssemblyOperation::DrainStatusChannels()
+{
+	if (!TaskGraph.IsValid()) return;
+
+	// Drain the (possibly worker-thread authored) channel deltas and forward them to the registry, which
+	// routes them to this operation's row. The row owns the resulting view-models and their lifecycle.
+	TArray<FNStatusChannelUpdate> Changes;
+	if (TaskGraph->ConsumeChannelUpdates(Changes))
+	{
+		FNWorldAssemblyRegistry::NotifyOperationChannelsChanged(this, Changes);
 	}
 }
 
@@ -206,7 +223,10 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	{
 		SetStatusMessage(MoveTemp(PendingMessage));
 	}
-	
+
+	// Flush any final channel states (e.g. close-to-100%) the tasks published before the poll loop stopped.
+	DrainStatusChannels();
+
 	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
 		Owner->OnOperationFinished(this, TaskGraphContext);

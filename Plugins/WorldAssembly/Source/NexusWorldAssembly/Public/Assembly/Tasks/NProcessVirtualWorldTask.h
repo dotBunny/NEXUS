@@ -6,6 +6,8 @@
 #include "Assembly/NAssemblyTaskAnalytics.h"
 #include "Assembly/Contexts/NVirtualWorldContext.h"
 
+class FNAssemblyTaskGraphContext;
+
 /**
  * Task-graph job that prepares the previously-collected world collision snapshot for use by the
  * organ-graph builder.
@@ -17,9 +19,11 @@
 class FNProcessVirtualWorldTask
 {
 public:
-	explicit FNProcessVirtualWorldTask(const TSharedPtr<FNVirtualWorldContext>& VirtualWorldContextPtr
+	explicit FNProcessVirtualWorldTask(const TSharedPtr<FNVirtualWorldContext>& VirtualWorldContextPtr,
+		const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
 		N_ASSEMBLY_ANALYTICS_CONSTRUCTOR)
-	: VirtualWorldContextPtr(VirtualWorldContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER { }
+	: VirtualWorldContextPtr(VirtualWorldContextPtr.ToSharedRef())
+	, TaskGraphContextPtr(TaskGraphContextPtr.ToSharedRef()) N_ASSEMBLY_ANALYTICS_INITIALIZER { }
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNProcessVirtualWorldTask, STATGROUP_TaskGraphTasks); }
 
@@ -32,6 +36,9 @@ public:
 private:
 	/** Virtual-world context being processed; populated by FNCreateVirtualWorldTask. */
 	TSharedRef<FNVirtualWorldContext> VirtualWorldContextPtr;
+
+	/** Task-graph-wide context used to publish the phase status message as organ building begins. */
+	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
 
 	N_ASSEMBLY_ANALYTICS_SHARED_REF
 };

@@ -3,6 +3,8 @@
 
 #include "Assembly/Tasks/NProcessVirtualWorldTask.h"
 
+#include "NWorldAssemblyMinimal.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Types/NRawMeshUtils.h"
 
 void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
@@ -33,7 +35,10 @@ void FNProcessVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const 
 	
 	// No point keeping this around
 	VirtualWorldContextPtr->WorldCollisionTransforms.Empty();
-	
+
+	// This task gates the first pass of organ builders, so its completion marks the start of organ building.
+	TaskGraphContextPtr->SetStatusMessage(NEXUS::WorldAssembly::StatusMessage::BuildingOrgans);
+
 	N_ASSEMBLY_ANALYTICS(ProcessVirtualWorldContextFinish)
 }
 

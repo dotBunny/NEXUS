@@ -231,6 +231,9 @@ protected:
 	FNAssemblyTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
 	void TearDownOperation();
 
+	/** Drain pending status-channel updates from the task graph and forward them to the registry. Game thread only. */
+	void DrainStatusChannels();
+
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
 	static int32 NextTicket;

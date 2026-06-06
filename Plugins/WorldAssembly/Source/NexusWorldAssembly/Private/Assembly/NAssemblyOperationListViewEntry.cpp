@@ -5,15 +5,19 @@
 
 #include "CommonTextBlock.h"
 #include "Assembly/NAssemblyOperation.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
+#include "Components/NListView.h"
 #include "Components/ProgressBar.h"
+#include "Widgets/NProgressBarListViewEntry.h"
 
 void UNAssemblyOperationListViewEntry::NativeDestruct()
 {
 	if (IsValid(Operation))
 	{
-		Operation->OnStatusMessageChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);\
+		Operation->OnStatusMessageChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);
 		Operation->OnTasksChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationTasksChanged);
 	}
+	ClearChildProgressList();
 	Operation = nullptr;
 	Super::NativeDestruct();
 }
@@ -21,6 +25,15 @@ void UNAssemblyOperationListViewEntry::NativeDestruct()
 void UNAssemblyOperationListViewEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 {
 	INListViewEntry::NativeOnListItemObjectSet(ListItemObject);
+
+	// Entry widgets are recycled, so drop any binding/child rows from the previously bound operation first.
+	if (IsValid(Operation))
+	{
+		Operation->OnStatusMessageChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);
+		Operation->OnTasksChanged.RemoveDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationTasksChanged);
+	}
+	ClearChildProgressList();
+
 	Operation = Cast<UNAssemblyOperation>(ListItemObject);
 	Operation->OnStatusMessageChanged.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationDisplayMessageChanged);
 	Operation->OnTasksChanged.AddDynamic(this, &UNAssemblyOperationListViewEntry::OnOperationTasksChanged);
@@ -78,6 +91,41 @@ void UNAssemblyOperationListViewEntry::OnOperationTasksChanged(const int32 Compl
 	}
 	
 	UpdateCancelButtonVisibility();
+}
+
+void UNAssemblyOperationListViewEntry::ApplyChannelUpdates(const TArray<FNStatusChannelUpdate>& Changes)
+{
+	if (!IsValid(ChildProgressListView))
+	{
+		return;
+	}
+
+	for (const FNStatusChannelUpdate& Change : Changes)
+	{
+		if (const TObjectPtr<UNProgressBarListEntry>* Existing = ChannelEntries.Find(Change.ChannelId))
+		{
+			// Known channel: update the existing view-model in place (its OnChanged refreshes the bound row).
+			(*Existing)->SetStatus(Change.Message, Change.Percent);
+		}
+		else
+		{
+			// First time we have seen this channel: create its view-model and child row on the spot.
+			UNProgressBarListEntry* Entry = NewObject<UNProgressBarListEntry>(this);
+			Entry->SetLabel(Change.Label);
+			Entry->SetStatus(Change.Message, Change.Percent);
+			ChannelEntries.Add(Change.ChannelId, Entry);
+			ChildProgressListView->AddItem(Entry);
+		}
+	}
+}
+
+void UNAssemblyOperationListViewEntry::ClearChildProgressList()
+{
+	if (IsValid(ChildProgressListView))
+	{
+		ChildProgressListView->ClearListItems();
+	}
+	ChannelEntries.Empty();
 }
 
 void UNAssemblyOperationListViewEntry::OnCancelButtonClicked()
