@@ -161,7 +161,7 @@ N_TEST_CRITICAL(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnInterfacedAct
 		PoolSettings.MinimumActorCount = 1;
 		PoolSettings.MaximumActorCount = 1;
 		PoolSettings.Strategy = ENActorPoolStrategy::Fixed;
-		PoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		PoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 
 		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), PoolSettings);
 		Pool.Fill();
@@ -217,7 +217,7 @@ N_TEST_CRITICAL(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnActorWithKnow
 		PoolSettings.MinimumActorCount = 2;
 		PoolSettings.MaximumActorCount = 2;
 		PoolSettings.Strategy = ENActorPoolStrategy::Fixed;
-		PoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		PoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Subsystem->CreateActorPool(ANDebugActor::StaticClass(), PoolSettings);
 
 		ANDebugActor* Actor = Subsystem->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
@@ -358,8 +358,8 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorReturnToActor
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Verifies that when UnknownBehaviour is ReturnToActorPool and the subsystem cannot route
-	// the unknown actor (its UnknownBehavior is forced to Destroy so ReturnActor returns false),
-	// the kill zone logs a warning and does not increment its kill count.
+	// the unknown actor (its UnknownBehavior is forced to Ignore so ReturnActor returns false
+	// without consuming the actor), the kill zone logs a warning and does not increment its kill count.
 	AddExpectedMessage(TEXT("Unable to return the unknown"), ELogVerbosity::Type::Warning);
 
 	FNTestUtils::WorldTest(EWorldType::PIE, [this](UWorld* World)
@@ -388,8 +388,8 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorReturnToActor
 		}
 
 		// Project default is CreateDefaultPool, which would auto-pool and return true; force
-		// Destroy so ReturnActor returns false and the kill zone takes the warning path.
-		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Destroy);
+		// Ignore so ReturnActor returns false (without destroying) and the kill zone takes the warning path.
+		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Ignore);
 		KillZone->UnknownBehaviour = ENKillZoneBehavior::ReturnToActorPool;
 
 		ANDebugActor* UnknownActor = World->SpawnActor<ANDebugActor>();

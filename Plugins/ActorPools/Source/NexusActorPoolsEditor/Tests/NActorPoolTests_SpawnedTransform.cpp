@@ -26,7 +26,7 @@ N_TEST_HIGH(FNActorPoolTests_SpawnState_SpawnedTransformRotationCombines,
 		Settings.MinimumActorCount = 1;
 		Settings.MaximumActorCount = 1;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Settings.SpawnedTransform = FTransform(SpawnedTransformRotation, FVector::ZeroVector, FVector::OneVector);
 
 		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), Settings);
@@ -76,7 +76,7 @@ N_TEST_MEDIUM(FNActorPoolTests_SpawnState_SpawnedTransformLocationCombines,
 		Settings.MinimumActorCount = 1;
 		Settings.MaximumActorCount = 1;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Settings.SpawnedTransform = FTransform(FRotator::ZeroRotator, SpawnedTransformOffset, FVector::OneVector);
 
 		FNActorPool Pool = FNActorPool(World, ANTestPooledActor::StaticClass(), Settings);

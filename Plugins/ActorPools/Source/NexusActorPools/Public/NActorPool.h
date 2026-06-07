@@ -11,6 +11,7 @@ class UNActorPoolObject;
 namespace NEXUS::ActorPools::InvokeMethods
 {
 	inline const FText Category = FText::FromString("NActor Pool");
+	inline const FName OnDeferredConstruction = TEXT("OnDeferredConstruction");
 	inline const FName OnCreatedByActorPool = TEXT("OnCreatedByActorPool");
 	inline const FName OnReleasedFromActorPool = TEXT("OnReleasedFromActorPool");
 	inline const FName OnReturnToActorPool = TEXT("OnReturnToActorPool");

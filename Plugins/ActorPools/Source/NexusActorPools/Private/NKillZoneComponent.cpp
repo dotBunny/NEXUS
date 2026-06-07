@@ -66,9 +66,16 @@ void UNKillZoneComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponen
 		{
 			if (!ActorItem->GetActorPoolSettings().HasFlag_ServerOnly())
 			{
-				// The intent is still to destroy
-				OtherActor->Destroy();
-				KillCount++;
+				// The intent is still to destroy, but never destroy a rooted Actor (consistent with the other kill paths).
+				if (!OtherActor->IsRooted())
+				{
+					OtherActor->Destroy();
+					KillCount++;
+				}
+				else
+				{
+					UE_LOG(LogNexusActorPools, Warning, TEXT("UNKillZoneComponent unable to destroy rooted pooled AActor(%s) that failed to return to its pool."), *OtherActor->GetName());
+				}
 			}
 			return;
 		}

@@ -17,6 +17,7 @@
 - `UNActorPoolSubsystem::GetActorPoolStats()` returns Spawned/Available details for a target `FNActorPool`.
 - `FNReportListBlock` now available in reports.
 - Option in `World Assembly` project settings to enable output of status messages from operations to the log, normally only visible in the developer overlay.
+- `FNActorPool` supports `OnDeferredConstruction` slow-invoking with flag.
 
 ### Changed
 
@@ -46,6 +47,8 @@
 - `UNGetActorBlueprintAsyncAction` and `UNSpawnActorBlueprintAsyncAction` now complete (with a null result) and tear down when their soft class fails to load, instead of leaving the Blueprint latent node hung.
 
 ### Removed
+
+- `FNActorPool::HasFlag_ShouldFinishSpawning`, was allowing `AActor` to be left in bad states when disabled.
 
 ### DefaultGameplayTags Redirects
 

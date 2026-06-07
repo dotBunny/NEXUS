@@ -111,7 +111,10 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 	{
 		for (UNActorPoolSpawnerComponent* Spawner : TickableSpawners)
 		{
-			Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+			if (Spawner != nullptr)
+			{
+				Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+			}
 		}
 	}
 
@@ -327,14 +330,17 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 		}
 		case Ignore:
 			return false;
-		case Destroy: 
+		case Destroy:
 		default:
 			if (Actor->IsRooted())
 			{
+				UE_LOG(LogNexusActorPools, Error, TEXT("Unable to return an AActor with the Destroy behavior that is rooted."));
 				return false;
 			}
 			Actor->Destroy();
-			return false;
+			
+			// The Actor was handled (destroyed), so report success to callers.
+			return true;
 	}
 }
 
@@ -352,12 +358,14 @@ void UNActorPoolSubsystem::ReturnAllActors()
 
 void UNActorPoolSubsystem::RegisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
-	TickableSpawners.Add(TargetComponent);
+	if (TargetComponent == nullptr) return;
+	TickableSpawners.AddUnique(TargetComponent);
 	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }
 
 void UNActorPoolSubsystem::UnregisterTickableSpawner(UNActorPoolSpawnerComponent* TargetComponent)
 {
+	if (TargetComponent == nullptr) return;
 	TickableSpawners.Remove(TargetComponent);
 	bHasTickableSpawners = !TickableSpawners.IsEmpty();
 }

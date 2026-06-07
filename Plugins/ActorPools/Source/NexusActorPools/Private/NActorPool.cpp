@@ -113,10 +113,6 @@ FText FNActorPool::GetDescription() const
 	{
 		FlagDetails += TEXT("\tServer Only\n");
 	}
-	if (Settings.HasFlag_ShouldFinishSpawning())
-	{
-		FlagDetails += TEXT("\tShould Finish Spawning\n");
-	}
 	if (Settings.HasFlag_SetNetDormancy())
 	{
 		FlagDetails += TEXT("\tSet Net Dormancy\n");
@@ -474,17 +470,30 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 	}
 	else
 	{
-		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
+		bool bInvokeFunctions = Settings.HasFlag_InvokeUFunctions();
+		
+		if (SpawnInfo.bDeferConstruction && bInvokeFunctions)
+		{
+			UFunction* OnDeferredConstructionFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDeferredConstruction);
+			if (OnDeferredConstructionFunction)
+			{
+				CreatedActor->ProcessEvent(OnDeferredConstructionFunction, nullptr);
+			}
+		}
+		
+		if (SpawnInfo.bDeferConstruction)
 		{
 			CreatedActor->FinishSpawning(Settings.StorageTransform);
 		}
+		
+		
 			
-		if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+		if (bInvokeFunctions) // SLOW PATH
 		{
-			UFunction* Function = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool);
-			if (Function)
+			UFunction* OnCreatedByActorPoolFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool);
+			if (OnCreatedByActorPoolFunction)
 			{
-				CreatedActor->ProcessEvent(Function, nullptr);
+				CreatedActor->ProcessEvent(OnCreatedByActorPoolFunction, nullptr);
 			}
 		}
 			
