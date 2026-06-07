@@ -25,6 +25,64 @@ FPCGElementPtr UNSortLine2DXYSettings::CreateElement() const {
     return MakeShared<FNSortLine2DXYElement>();
 }
 
+void FNSortLine2DXYElement::ClassifyLine(const TArray<float>& TurnValues, const float TurnTolerance, TArray<FNSortLinePointInfo>& OutInfo)
+{
+    const int32 NumPoints = TurnValues.Num();
+    OutInfo.Reset();
+    OutInfo.SetNum(NumPoints);
+    if (NumPoints == 0) return;
+
+    int32 SegmentIndex = 0;
+    int32 SegmentLength = 0;
+    int32 SubsegmentIndex = 0;
+    TArray<int32> SegmentLengths;     // Length of each segment, addressed by segment index.
+    TArray<int32> PointSegmentIndex;  // Segment index owning each point.
+    PointSegmentIndex.Reserve(NumPoints);
+
+    for (int32 i = 0; i < NumPoints; ++i)
+    {
+        const float TurnValue = TurnValues[i];
+
+        // A near-zero turn (within the deadzone) is a straight wall; anything past it is a corner. Classify the
+        // corner by the sign of the turn so off-grid input still resolves to a Left/Right name rather than
+        // silently keeping the default classification, while exact 0 / +/-1 grid input is unaffected (WA-3).
+        if (FMath::Abs(TurnValue) > TurnTolerance)
+        {
+            OutInfo[i].Part = TurnValue > 0.f ? ENSortLinePart::Left90 : ENSortLinePart::Right90;
+
+            // Close the wall run leading into this corner (point 0 has no preceding run to close).
+            if (i != 0)
+            {
+                SegmentIndex++;
+                SegmentLengths.Add(SegmentLength);
+            }
+            OutInfo[i].SegmentIndex = SegmentIndex;
+            PointSegmentIndex.Add(SegmentIndex);
+            SegmentIndex++;
+
+            OutInfo[i].SubsegmentIndex = 0;
+            SubsegmentIndex = 0;
+            SegmentLengths.Add(1);  // A corner is its own length-1 segment.
+            SegmentLength = 0;
+        }
+        else
+        {
+            OutInfo[i].Part = ENSortLinePart::Wall;
+            SegmentLength++;
+            OutInfo[i].SegmentIndex = SegmentIndex;
+            PointSegmentIndex.Add(SegmentIndex);
+            OutInfo[i].SubsegmentIndex = SubsegmentIndex++;  // 0-based position within the wall run.
+        }
+    }
+    SegmentLengths.Add(SegmentLength);  // Close the trailing wall run.
+
+    // Resolve each point's owning-segment length now that every segment is closed.
+    for (int32 i = 0; i < NumPoints; ++i)
+    {
+        OutInfo[i].SegmentLength = SegmentLengths[PointSegmentIndex[i]];
+    }
+}
+
 bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
     const UNSortLine2DXYSettings* Settings = Context->GetInputSettings<UNSortLine2DXYSettings>();
     TArray<FPCGTaggedData> Inputs = Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel);
@@ -155,57 +213,32 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         	// We're going to use this to figure out what way to rotate to face walls
         	bool IsClockwise = TurnDirectionTotal > 0.f;
         	
-        	// Figure out segment information
-        	int32 SegmentIndex = 0;
-        	int32 SegmentLength = 0;
-        	int32 SubsegmentIndex = 0;
-        	TArray<int32> CachedSegmentLengths;
-        	TArray<int32> CachedSegmentIndex;
-        	CachedSegmentIndex.Reserve(NumPoints);
+        	// Classify every point and resolve its segment bookkeeping (see FNSortLine2DXYElement::ClassifyLine).
+        	TArray<FNSortLinePointInfo> PointInfos;
+        	ClassifyLine(CachedTurnValues, NEXUS::WorldAssembly::SortLine::TurnDeadzone, PointInfos);
         	
         	FPCGMetadataAttribute<int32>* SegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<int32>* SubsegmentIndexAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SubsegmentIndexAttributeName, 0, false, true);
         	FPCGMetadataAttribute<FName>* PartNameAttr = OutputData->Metadata->FindOrCreateAttribute<FName>(Settings->PointNameAttributeName, Settings->DefaultPointName, false, true);
         	
         	for (int32 i = 0; i < NumPoints; ++i)
-			{
-				// We are in a turn
-        		float CachedTurnValue = CachedTurnValues[i];
-				if (CachedTurnValue!= 0.f)
-				{
-					if (CachedTurnValue == 1.f)
-					{
-						PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Left90PointName);
-					}
-					else if (CachedTurnValue == -1.f)
-					{
-						PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Right90PointName);
-					}
-					if (i != 0)
-					{
-						SegmentIndex++;
-						CachedSegmentLengths.Add(SegmentLength);
-					}
-					SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
-					CachedSegmentIndex.Add(SegmentIndex);
-					SegmentIndex++;
-					SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, 0);
-					SubsegmentIndex = -1;
-					CachedSegmentLengths.Add(1);
-					SegmentLength = 0;
-					
-				}
-				else
-				{
-					PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->WallPointName);
-					SegmentLength++;
-					SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SegmentIndex);
-					CachedSegmentIndex.Add(SegmentIndex);
-					SubsegmentIndex++;
-					SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, SubsegmentIndex);
-				}
-			}
-        	CachedSegmentLengths.Add(SegmentLength);
+        	{
+        		const FNSortLinePointInfo& Info = PointInfos[i];
+        		switch (Info.Part)
+        		{
+        			case ENSortLinePart::Left90:
+        				PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Left90PointName);
+        				break;
+        			case ENSortLinePart::Right90:
+        				PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->Right90PointName);
+        				break;
+        			default:
+        				PartNameAttr->SetValue(OutPoints[i].MetadataEntry, Settings->WallPointName);
+        				break;
+        		}
+        		SegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, Info.SegmentIndex);
+        		SubsegmentIndexAttr->SetValue(OutPoints[i].MetadataEntry, Info.SubsegmentIndex);
+        	}
         	
         	// Pass to write out finalized data
         	FPCGMetadataAttribute<int32>* SegmentLengthAttr = OutputData->Metadata->FindOrCreateAttribute<int32>(Settings->SegmentLengthAttributeName, 0, false, true);
@@ -222,13 +255,13 @@ bool FNSortLine2DXYElement::ExecuteInternal(FPCGContext* Context) const {
         	
         	for (int32 i = 0; i < NumPoints; ++i)
         	{
-        		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, CachedSegmentLengths[CachedSegmentIndex[i]]);
+        		SegmentLengthAttr->SetValue(OutPoints[i].MetadataEntry, PointInfos[i].SegmentLength);
         		
         		// Corners will get rotated to "Next Direction" where walls get turned to next direction + face rotation based on winding
         		FVector2D Position2D = NextGridDirectionAttr->GetValue(OutPoints[i].MetadataEntry);
         		FVector Position = FVector(Position2D.X, Position2D.Y, 0);
         		FRotator Rotation = Position.Rotation();
-        		if (PartNameAttr->GetValue(OutPoints[i].MetadataEntry) == Settings->WallPointName)
+        		if (PointInfos[i].Part == ENSortLinePart::Wall)
         		{
         			Rotation = Rotation + FaceRotation;
         		}
