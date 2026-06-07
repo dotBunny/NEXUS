@@ -91,10 +91,9 @@ public:
 	FORCEINLINE static FVector GetClosestGridIntersection(const FVector& Location, const FVector& GridSize)
 	{
 		return FVector(
-			FMath::RoundToInt(Location.X / GridSize.X) * GridSize.X,
-			FMath::RoundToInt(Location.Y / GridSize.Y) * GridSize.Y,
-			FMath::RoundToInt(Location.Z / GridSize.Z) * GridSize.Z
-		);
+			   FMath::IsNearlyZero(GridSize.X) ? Location.X : FMath::RoundToInt(Location.X / GridSize.X) * GridSize.X,
+			   FMath::IsNearlyZero(GridSize.Y) ? Location.Y : FMath::RoundToInt(Location.Y / GridSize.Y) * GridSize.Y,
+			   FMath::IsNearlyZero(GridSize.Z) ? Location.Z : FMath::RoundToInt(Location.Z / GridSize.Z) * GridSize.Z);
 	}
 
 	/**
@@ -126,7 +125,7 @@ public:
 	 */
 	FORCEINLINE static int32 GetCrunchedGridUnit(const double& Value, const double& Size)
 	{
-		if (FMath::IsNearlyZero(Value)) return 0;
+		if (FMath::IsNearlyZero(Value) || FMath::IsNearlyZero(Size)) return 0;
 
 		if (const double RawValue = Value / Size;
 			!FMath::IsNearlyZero(RawValue))
