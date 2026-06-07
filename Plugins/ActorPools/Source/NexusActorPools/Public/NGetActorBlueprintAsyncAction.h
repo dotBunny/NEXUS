@@ -23,6 +23,7 @@ class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyn
 	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_NullPool;
 	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate;
 	friend class UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy;
+	friend class UNGetActorBlueprintAsyncActionTests_OnLoaded_FailedLoad;
 #endif // WITH_TESTS
 
 public:

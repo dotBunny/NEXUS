@@ -58,6 +58,18 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
 				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
 		}
+		else if (MinimumDimensions.X >= MaximumDimensions.X && MinimumDimensions.Y >= MaximumDimensions.Y)
+		{
+			// Reaching here means neither axis exceeds (both Min <= Max), so this is the Min == Max case on
+			// both axes: the inner hole fully covers the rectangle and leaves zero annulus area. The strip/corner
+			// builder below uses strict '<' comparisons, so it would return an EMPTY ValidRanges, which the pickers
+			// then index out-of-bounds (ValidRanges[Random(0, -1)]). Fall back to the full rectangle so callers
+			// always receive a usable range instead of crashing.
+			UE_LOG(LogNexusPicker, Warning, TEXT("The MinimumDimensions matches the MaximumDimensions on both axes (no valid area); using MaximumDimensions instead."));
+			ValidRanges.Add( FVector4(
+				-HalfMaxDimensions.X, -HalfMaxDimensions.Y,  // Min
+				HalfMaxDimensions.X, HalfMaxDimensions.Y)); // Max
+		}
 		else
 		{
 			const FVector2D HalfMinDimensions = MinimumDimensions * 0.5f;

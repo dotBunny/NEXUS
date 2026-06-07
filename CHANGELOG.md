@@ -40,6 +40,10 @@
 - `PktJitter` setting now properly applied to clients in `Multiplayer Test`.
 - `HasSupportFlag_ReturnAll` now properly queries `SupportFlag`.
 - Protect against `NSpawnActorBlueprintAsyncAction` occuring after `UWorld` teardown.
+- `FNRectanglePicker` no longer crashes in hollow mode when `MinimumDimensions` equals `MaximumDimensions`; `FNRectanglePickerParams::GetValidRanges` now falls back to the full rectangle instead of returning an empty range that was indexed out of bounds.
+- `UNDynamicRefSubsystem` no longer broadcasts `OnAdded`/`OnAddedByName` when re-adding an object already present (a no-op `AddUnique`), keeping the add/remove delegate pairing symmetric.
+- `UNGetActorBlueprintAsyncAction` now guards against a null `UNActorPoolSubsystem` when unbinding its pool-created callback, matching `UNSpawnActorBlueprintAsyncAction`.
+- `UNGetActorBlueprintAsyncAction` and `UNSpawnActorBlueprintAsyncAction` now complete (with a null result) and tear down when their soft class fails to load, instead of leaving the Blueprint latent node hung.
 
 ### Removed
 

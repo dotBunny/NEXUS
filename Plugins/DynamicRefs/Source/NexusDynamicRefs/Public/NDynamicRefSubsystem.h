@@ -26,8 +26,13 @@ struct FNDynamicRefCollection
 	TArray<UObject*> GetObjectsCopy() { return Objects; }
 	/** @return A const reference to the registered objects; avoids the copy GetObjects() makes. */
 	const TArray<TObjectPtr<UObject>>& GetObjectsRef() const { return Objects; }
-	/** Add an object to the collection; duplicates are ignored. */
-	void Add(UObject* Object) { Objects.AddUnique(Object); }
+	/** Add an object to the collection; duplicates are ignored. @return true if the object was newly added (false when it was already present). */
+	bool Add(UObject* Object)
+	{
+		const int32 PreviousCount = Objects.Num();
+		Objects.AddUnique(Object);
+		return Objects.Num() > PreviousCount;
+	}
 	/** Remove an object from the collection if present. */
 	bool Remove(UObject* Object) { return Objects.Remove(Object) > 0; }
 	

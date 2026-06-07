@@ -130,4 +130,46 @@ N_TEST_HIGH(FNRectanglePickerTests_Next_PointsInsideRotatedRectangle, "NEXUS::Un
 	}
 }
 
+N_TEST_CRITICAL(FNRectanglePickerTests_Next_DegenerateHollow, "NEXUS::UnitTests::NPicker::FNRectanglePicker::Next_DegenerateHollow", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Regression: MinimumDimensions == MaximumDimensions leaves zero annulus area, so GetValidRanges()
+	// previously returned an empty array that the picker indexed out-of-bounds (a hard crash, not an
+	// assertion failure). It must now fall back to the full rectangle and still return Count points.
+	FNRectanglePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 16;
+	Params.MinimumDimensions = FVector2D(100.f, 100.f);
+	Params.MaximumDimensions = FVector2D(100.f, 100.f);
+	// The degenerate-hollow fallback in GetValidRanges() logs a warning; declare it expected so this test
+	// stays clean (and green under stricter automation configs that elevate log warnings to failures).
+	this->AddExpectedError(TEXT("matches the MaximumDimensions on both axes"), EAutomationExpectedErrorFlags::Contains, 1);
+	TArray<FVector> Points;
+	FNRectanglePicker::Next(Points, Params); // must not crash
+	CHECK_MESSAGE(TEXT("Degenerate hollow rectangle should still return Count points"), Points.Num() == 16);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Degenerate hollow point[%d] should be inside the rectangle"), i),
+			FNRectanglePicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_Next_HollowPointsInsideOuter, "NEXUS::UnitTests::NPicker::FNRectanglePicker::Next_HollowPointsInsideOuter", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Exercises the hollow (annulus) path the existing tests never touched: MinimumDimensions set and
+	// strictly inside MaximumDimensions. Every generated point must lie within the outer rectangle.
+	FNRectanglePickerParams Params;
+	Params.Origin = FVector::ZeroVector;
+	Params.Count = 200;
+	Params.MinimumDimensions = FVector2D(40.f, 40.f);
+	Params.MaximumDimensions = FVector2D(100.f, 100.f);
+	TArray<FVector> Points;
+	FNRectanglePicker::Next(Points, Params);
+	CHECK_MESSAGE(TEXT("Hollow rectangle should return Count points"), Points.Num() == 200);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Hollow point[%d] should be inside the outer rectangle"), i),
+			FNRectanglePicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
 #endif //WITH_TESTS

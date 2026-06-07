@@ -37,8 +37,12 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 		return;
 	}
 
-	FastCollection[DynamicRef].Add(InObject);
-	OnAdded.Broadcast(DynamicRef, InObject);
+	// Only broadcast when the object was genuinely added; a duplicate AddUnique is a no-op and must not
+	// re-fire OnAdded, otherwise the add/remove delegate pair becomes asymmetric for external listeners.
+	if (FastCollection[DynamicRef].Add(InObject))
+	{
+		OnAdded.Broadcast(DynamicRef, InObject);
+	}
 }
 
 void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
@@ -61,8 +65,10 @@ void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
 	
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
-	Collection.Add(InObject);
-	OnAddedByName.Broadcast(Name, InObject);
+	if (Collection.Add(InObject))
+	{
+		OnAddedByName.Broadcast(Name, InObject);
+	}
 }
 
 void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> InObjects)
@@ -71,8 +77,10 @@ void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> 
 	for (UObject* Object : InObjects)
 	{
 		N_VALIDATE_CONTINUE(LogNexusDynamicRefs, Object)
-		Collection.Add(Object);
-		OnAddedByName.Broadcast(Name, Object);
+		if (Collection.Add(Object))
+		{
+			OnAddedByName.Broadcast(Name, Object);
+		}
 	}
 }
 
