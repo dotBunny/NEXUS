@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 12,
-	"VersionName": "0.3.0",
+	"Version": 13,
+	"VersionName": "0.3.1",
 	"FriendlyName": "NEXUS Samples: Blockout",
 	"Description": "Sample content for the NEXUS: Blockout.",
 	"Category": "NEXUS Samples",

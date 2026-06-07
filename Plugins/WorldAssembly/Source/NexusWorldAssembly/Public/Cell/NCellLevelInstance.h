@@ -5,7 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "NCellAssemblyData.h"
 #include "NCellJunctionDetails.h"
+#include "Collections/NGameplayTagCounter.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "NCellLevelInstance.generated.h"
 
@@ -35,9 +37,62 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	//End ALevelInstance
 	
-	FGameplayTagContainer& GetOutputTags()
+	FNCellAssemblyData& GetAssemblyData()
 	{
-		return OutputTags;
+		return AssemblyData;
+	}
+	
+	/** @return Mutable access to the context tags recorded on this cell's assembly data. */
+	FGameplayTagContainer& GetContextTags()
+	{
+		return AssemblyData.ContextTags;
+	}
+	
+	FGameplayTagContainer& GetContextTagsAdded()
+	{
+		return AssemblyData.ContextTagsAdded;
+	}
+	
+	FGameplayTagContainer& GetContextTagsState()
+	{
+		return AssemblyData.ContextTagsState;
+	}
+	
+	TArray<FNGameplayTagCount>& GetTagCounterStateArray()
+	{
+		return AssemblyData.TagCounterState;
+	}
+	TArray<FNGameplayTagCount>& GetTagCounterArray()
+	{
+		return AssemblyData.TagCounter;
+	}
+	
+	TMap<FGameplayTag, int32> GetTagCounterState() const
+	{
+		return FNGameplayTagCounter(AssemblyData.TagCounterState).GameplayTags;
+	}
+	
+	TMap<FGameplayTag, int32> GetTagCounter() const
+	{
+		return FNGameplayTagCounter(AssemblyData.TagCounter).GameplayTags;
+	}
+
+	/** @return Mutable access to the assembly tags recorded on this cell's assembly data. */
+	FGameplayTagContainer& GetAssemblyTags()
+	{
+		return AssemblyData.AssemblyTags;
+	}
+
+	/** @return The seed recorded on this cell's assembly data. */
+	uint64 GetSeed() const
+	{
+		return AssemblyData.Seed;
+	}
+
+	/** @return The graph node identifier recorded on this cell's assembly data. */
+	int32 GetNodeIdentifier() const
+	{
+		return AssemblyData.NodeIdentifier;
 	}
 	
 #if WITH_EDITOR
@@ -55,17 +110,14 @@ public:
 #endif // WITH_EDITOR
 
 	/** @return The World Assembly operation ticket this level instance belongs to. */
-	uint32 GetOperationTicket() const { return OperationTicket; }
+	int32 GetOperationTicket() const { return AssemblyData.OperationTicket; }
+	
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 
 protected:
-	/** The replicated identifier that created this ANCellLevelInstance on the server. */
 	UPROPERTY(Replicated)
-	uint32 OperationTicket = 0;
-	
-	UPROPERTY(Replicated)
-	FGameplayTagContainer OutputTags;
+	FNCellAssemblyData AssemblyData;
 	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
 	TArray<FNCellJunctionDetails> JunctionDetails;

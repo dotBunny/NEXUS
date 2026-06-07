@@ -6,11 +6,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNDynamicRefsEditorStyle)
+N_EDITOR_STYLE(FNDynamicRefsEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNDynamicRefsEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	// NDynamicRefComponent
 	Style.Set("ClassIcon.NDynamicRefComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NDynamicRefComponent"), Icon16x16));

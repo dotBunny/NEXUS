@@ -19,7 +19,7 @@
  * the entry widget's defaults.
  */
 UCLASS(BlueprintType)
-class NEXUSUI_API UNTextListViewEntryObject : public UObject
+class NEXUSUI_API UNTextListEntry : public UObject
 {
 	GENERATED_BODY()
 
@@ -112,7 +112,7 @@ protected:
 	//~INListViewEntry
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
 	{
-		const UNTextListViewEntryObject* TextObject = Cast<UNTextListViewEntryObject>(ListItemObject);
+		const UNTextListEntry* TextObject = Cast<UNTextListEntry>(ListItemObject);
 		if (TextObject != nullptr)
 		{
 			SetText(TextObject->GetText());

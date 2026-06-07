@@ -35,7 +35,7 @@ void FNFixersMenu::Unregister()
 
 void FNFixersMenu::GenerateMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, Entries)
+	N_GENERATE_TOOLS_MENU(Sections, Entries)
 }
 
 void FNFixersMenu::AddMenuEntry(const FNMenuEntry& Item)

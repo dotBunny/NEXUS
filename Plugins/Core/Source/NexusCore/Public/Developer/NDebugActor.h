@@ -29,7 +29,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	FString Message;
 	
+	/** Fired when this actor is destroyed (broadcast from the AActor::Destroyed override). */
 	FSimpleDelegate OnDestroyed;
+	/** Fired when this actor ends play (broadcast from the AActor::EndPlay override). */
 	FSimpleDelegate OnEndPlay;
 	
 	/**

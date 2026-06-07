@@ -80,6 +80,7 @@ public:
 	 * @return a pseudo random double.
 	 */
 	double DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
+	/** Alias for DoubleRange, matching UE's FMath::RandRange naming. @return a pseudo random double between MinimumValue and MaximumValue. */
 	FORCEINLINE double RandRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl)
 	{
 		return DoubleRange(MinimumValue, MaximumValue);
@@ -116,6 +117,7 @@ public:
 	 * @return a pseudo random float.
 	 */
 	float FloatRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt);
+	/** Alias for FloatRange, matching UE's FMath::RandRange naming. @return a pseudo random float between MinimumValue and MaximumValue. */
 	FORCEINLINE float RandRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt)
 	{
 		return FloatRange(MinimumValue, MaximumValue);
@@ -138,6 +140,7 @@ public:
 	* @return a pseudo random integer.
 	*/
 	int32 IntegerRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32);
+	/** Alias for IntegerRange, matching UE's FMath::RandRange naming. @return a pseudo random integer between MinimumValue and MaximumValue. */
 	FORCEINLINE int32 RandRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32)
 	{
 		return IntegerRange(MinimumValue, MaximumValue);
@@ -160,6 +163,7 @@ public:
 	* @return a pseudo random unsigned integer.
 	*/
 	uint32 UnsignedIntegerRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32);
+	/** Alias for UnsignedIntegerRange, matching UE's FMath::RandRange naming. @return a pseudo random unsigned integer between MinimumValue and MaximumValue. */
 	FORCEINLINE uint32 RandRange(const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32)
 	{
 		return UnsignedIntegerRange(MinimumValue, MaximumValue);

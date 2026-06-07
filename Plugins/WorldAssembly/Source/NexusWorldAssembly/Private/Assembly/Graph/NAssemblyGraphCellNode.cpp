@@ -6,15 +6,13 @@
 #include "NWorldAssemblyMinimal.h"
 #include "Math/NVectorUtils.h"
 
-FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize) : FNAssemblyGraphNode(Position, Rotation)
+FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* InputData, const FVector& VoxelSize) 
+: FNAssemblyGraphNode(Params)
 {
 	// Copy InputData to disconnect from reference
 	InputDataPtr = InputData;
-	bAlwaysRelevant = InputData->bAlwaysRelevant;
 	TemplatePtr = InputDataPtr->Template; // Might not need in future
 	FreeJunctionKeys = InputDataPtr->GetJunctionKeys();
-	AssemblyTags =  InputDataPtr->AssemblyTags;
-	OutputTags = InputDataPtr->OutputTags;
 	
 	// Create a new WorldBounds reflecting the rotation in the world, this will make an AABB that will exceed the actual space, 
 	// but will follow the defined bounds previously defined at author-time, but rotated.
@@ -23,11 +21,21 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 	WorldBounds = FBox(ForceInit);
 	for (const FVector& Corner : Corners)
 	{
-		WorldBounds += Rotation.RotateVector(Corner) + Position;
+		WorldBounds += Params.WorldRotation.RotateVector(Corner) + Params.WorldPosition;
 	}
 	
 	// Copy our hull data and rotate it into its new world-space position/rotation
 	Hull = InputData->CellDetails.Hull;
+	
+	// Bake the hull position
+	FTransform WorldTransform(Params.WorldRotation, Params.WorldPosition);
+	Hull.ApplyTransform(WorldTransform);
+	
+	// Cache optimized collision data for convex hulls ahead of any checks
+	if (Hull.IsConvex())
+	{
+		Hull.EnsureCachedFacePlanes();
+	}
 	
 	// Copy our voxel data and rotate it into its new world-space position/rotation
 	// TODO: Right now we dont actually use the VoxelData for anything so lets not pay for the rotation until we need it, not assigning the data to cause an error later so we know.
@@ -41,8 +49,9 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(FNVirtualCellData* InputData, c
 		FNCellJunctionDetails& Details = WorldJunctions.Add(JunctionKey, InputData->Junctions[JunctionKey]);
 
 		// Compose with quaternions - (was adding the Rotation previously, but this better?)
-		Details.WorldRotation = (Rotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
-		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Position, Position, Rotation);
+		Details.WorldRotation = (Params.WorldRotation.Quaternion() * Details.WorldRotation.Quaternion()).Rotator();
+		Details.WorldLocation = FNVectorUtils::RotatedAroundPivot(Details.WorldLocation + Params.WorldPosition, 
+			Params.WorldPosition, Params.WorldRotation);
 	}
 }
 
@@ -124,15 +133,15 @@ bool FNAssemblyGraphCellNode::SearchForMatchingCellInputData(const FNVirtualCell
 
 bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 {
-	const TArray<FVector> WorldVertices = FNVectorUtils::RotateAndOffsetPoints(Hull.Vertices, GetWorldRotation(), GetWorldPosition());
-	for (const FVector& Vertex : WorldVertices)
+	// Hull is already baked into world space at construction, so test its vertices directly.
+	for (const FVector& Vertex : Hull.Vertices)
 	{
 		if (!Bounds.IsInside(Vertex))
 		{
 			return false;
 		}
 	}
-	return WorldVertices.Num() > 0;
+	return Hull.Vertices.Num() > 0;
 }
 
 void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)

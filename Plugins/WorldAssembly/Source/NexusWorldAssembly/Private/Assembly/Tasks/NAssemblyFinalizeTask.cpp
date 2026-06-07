@@ -22,24 +22,30 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	
 #if !UE_BUILD_SHIPPING
 	
-	// Add our Output Tags to report
-	const int32 OutputTagsContentTicket = Operation->GetReport()->CreateContentBlock();
-	FNReportContentBlock* OutputTagsContentBlock = Operation->GetReport()->GetContentBlock(OutputTagsContentTicket);
-	OutputTagsContentBlock->SetHeading("Output Tags");
 	
-	FStringBuilderBase StringBuilder;
-	for (const FGameplayTag& Tag : TaskGraphContextPtr->OutputTags)
+	const int32 OutputContentTicket = Operation->GetReport()->CreateContentBlock();
+	FNReportContentBlock* OutputContentBlock = Operation->GetReport()->GetContentBlock(OutputContentTicket);
+	OutputContentBlock->SetHeading("Output");
+	
+	// Add our Context Tags to report
+	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateListBlock(OutputContentTicket);
+	FNReportListBlock* ContextTagsContentBlock = Operation->GetReport()->GetListBlock(ContextTagsContentTicket);
+	ContextTagsContentBlock->SetHeading("Context Tags");
+	for (const FGameplayTag& Tag : TaskGraphContextPtr->ContextTags)
 	{
-		StringBuilder.Append(Tag.ToString());
-		StringBuilder.Append(", ");
+		ContextTagsContentBlock->AddItem(Tag.ToString());
 	}
-	if (StringBuilder.Len() > 2)
+	
+	// Add our Tag Counter to report
+	const int32 TagCounterContentTicket = Operation->GetReport()->CreateTableBlock(OutputContentTicket);
+	FNReportTableBlock* TagCounterTableBlock = Operation->GetReport()->GetTableBlock(TagCounterContentTicket);
+	TagCounterTableBlock->SetHeading("Tag Counter");
+	TagCounterTableBlock->Initialize({ "Tag", "Count"});
+	for (const TPair<FGameplayTag, int32>& Pair : TaskGraphContextPtr->TagCounter.GameplayTags)
 	{
-		StringBuilder.RemoveSuffix(2);
+		TagCounterTableBlock->AddRow({ Pair.Key.ToString(), FString::FromInt(Pair.Value) });
 	}
-	OutputTagsContentBlock->AddLine(StringBuilder.ToString());
-	
-	
+
 	// Add Analytics to report
 	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
 	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();

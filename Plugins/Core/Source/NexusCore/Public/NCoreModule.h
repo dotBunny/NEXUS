@@ -13,7 +13,8 @@ class FNCoreModule final : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
-	N_IMPLEMENT_MODULE(FNCoreModule, "NexusCore")
+	virtual void ShutdownModule() override;
+	N_MODULE_BASE(FNCoreModule, "NexusCore")
 
 #if WITH_EDITOR	
 private:

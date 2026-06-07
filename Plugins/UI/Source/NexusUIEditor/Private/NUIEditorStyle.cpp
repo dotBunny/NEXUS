@@ -6,11 +6,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNUIEditorStyle)
+N_EDITOR_STYLE(FNUIEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNUIEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 
 	Style.Set("Command.AddActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_AddActor"), Icon16x16));
 	Style.Set("Command.Calculate", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_Calculate"), Icon16x16));

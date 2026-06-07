@@ -89,10 +89,11 @@ public:
 		}
 	}
 
-	/** @return The number of objects currently tracked by this wrapper. */
+	/** @return The number of live objects currently tracked by this wrapper (stale entries are pruned first). */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	int32 GetCount()
 	{
+		Compact();
 		return TargetObjects.Num();
 	}
 
@@ -106,10 +107,17 @@ public:
 		return FText::FromString(UNDynamicRefComponent::ToStringSlow(TargetDynamicRef));
 	}
 
-	/** @return A mutable view of the tracked objects. */
+	/** @return A mutable view of the tracked objects, with stale entries pruned first. */
 	TArray<TWeakObjectPtr<UObject>>& GetObjects()
 	{
+		Compact();
 		return TargetObjects;
+	}
+
+	/** Prune entries whose object has been destroyed/GC'd so the wrapper only reflects live objects. */
+	void Compact()
+	{
+		TargetObjects.RemoveAll([](const TWeakObjectPtr<UObject>& Object){ return !Object.IsValid(); });
 	}
 
 	/** Fired whenever AddObject/RemoveObject is called so bound UI can refresh. */

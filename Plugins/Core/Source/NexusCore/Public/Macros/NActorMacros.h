@@ -9,7 +9,7 @@
  * Declares an editor-only UBillboardComponent property named SpriteComponent inside a UCLASS.
  *
  * Use in the class declaration (adds a private UPROPERTY member). Pair with the matching
- * N_WORLD_ICON_IMPLEMENTATION_* macro in the constructor and N_WORLD_ICON_CLEANUP in OnDestroy
+ * N_WORLD_ICON_* macro in the constructor and N_WORLD_ICON_CLEANUP in OnDestroy
  * to give the actor/component a world-space icon that is only present in the editor.
  */
 #if WITH_EDITORONLY_DATA
@@ -22,7 +22,7 @@
 #endif // WITH_EDITORONLY_DATA
 
 /**
- * Destroys the SpriteComponent created by N_WORLD_ICON_HEADER/N_WORLD_ICON_IMPLEMENTATION_*.
+ * Destroys the SpriteComponent created by N_WORLD_ICON_HEADER/N_WORLD_ICON_*.
  *
  * Call from the owning actor's OnDestroy / component's destruction path. The macro no-ops when
  * the outer object is already tearing down its hierarchy so it is safe to call unconditionally.
@@ -49,7 +49,7 @@
  * @param Scale Uniform scale applied to the sprite's relative transform.
  */
 #if WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale) \
+#define N_WORLD_ICON_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale) \
 	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite")); \
 	if (!IsRunningCommandlet() && (SpriteComponent != nullptr)) \
 	{ \
@@ -81,13 +81,13 @@
 		SpriteComponent->bReceivesDecals = false; \
 	}
 #else // !WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
+#define N_WORLD_ICON_SCENE_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
 #endif // WITH_EDITORONLY_DATA
 
 
 
 /**
- * Variant of N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT for owners whose attach point is a UBrushComponent.
+ * Variant of N_WORLD_ICON_SCENE_COMPONENT for owners whose attach point is a UBrushComponent.
  *
  * @param PackagePath String path to the UTexture2D used as the sprite.
  * @param AttachPoint UBrushComponent* the sprite will be attached to.
@@ -95,7 +95,7 @@
  * @param Scale Uniform scale applied to the sprite's relative transform.
  */
 #if WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_IMPLEMENTATION_BRUSH_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale) \
+#define N_WORLD_ICON_BRUSH_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale) \
 	SpriteComponent = CreateEditorOnlyDefaultSubobject<UBillboardComponent>(TEXT("Sprite")); \
 	if (!IsRunningCommandlet() && (SpriteComponent != nullptr)) \
 	{ \
@@ -127,7 +127,7 @@
 		SpriteComponent->bReceivesDecals = false; \
 	}
 #else // !WITH_EDITORONLY_DATA
-#define N_WORLD_ICON_IMPLEMENTATION_BRUSH_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
+#define N_WORLD_ICON_BRUSH_COMPONENT(PackagePath, AttachPoint, bIsStatic, Scale)
 #endif // WITH_EDITORONLY_DATA
 
 // #SONARQUBE-ENABLE

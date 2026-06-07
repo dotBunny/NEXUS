@@ -11,6 +11,7 @@
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
 #include "Cell/NCellLevelInstance.h"
+#include "Developer/NPrimitiveFont.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "Math/NVectorUtils.h"
@@ -70,10 +71,64 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 }
 
 
-void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
+void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor DefaultColor, const UNWorldAssemblySettings* Settings) const
 {
-	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-	FNWorldAssemblyDebugDraw::DrawSocket(PDI, GetComponentLocation(), GetComponentRotation(), Details.SocketSize, Settings->SocketSize, Details.Type, GetColor());
+	FLinearColor GizmoColor = DefaultColor; // Default color
+	const FVector ComponentLocation = GetComponentLocation();
+	const FRotator ComponentRotation = GetComponentRotation();
+	const ULevel* Level = GetComponentLevel();
+	
+	if (bShowDepth && Level != nullptr)
+	{
+		// Check Cell Root
+		const UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
+		if (CellRoot == nullptr)
+		{
+			FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
+			return;
+		}
+		
+		const FNRawMesh& Hull = CellRoot->Details.Hull;
+		
+		TArray<FVector> CornerPoints = GetWorldCornerPoints(Settings->SocketSize);
+		float MaximumDepth = 0;
+		for (int i = 0; i < CornerPoints.Num(); i++)
+		{
+			const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull,FVector::Zero(), FRotator::ZeroRotator,  CornerPoints[i]);
+			if (Depth > MaximumDepth)
+			{
+				MaximumDepth = Depth;
+			}
+		}
+		
+		if (MaximumDepth > Settings->AssemblyJunctionMatchingCellHullPenetration)
+		{
+			GizmoColor = FLinearColor::Red;
+		}
+		
+		// Draw the depth text
+		if (MaximumDepth != 0)
+		{
+			// Always draw the readout upright in world space, directly beneath the junction. Using only the junction's
+			// yaw (zero pitch/roll) keeps the glyphs world-upright no matter how the junction is oriented, so the text
+			// never ends up upside down. Anchoring at the socket's lowest world-Z corner keeps it clear of the socket.
+
+			double LowestZ = ComponentLocation.Z;
+			for (const FVector& Corner : CornerPoints)
+			{
+				LowestZ = FMath::Min(LowestZ, Corner.Z);
+			}
+			
+			const FVector TextPosition(ComponentLocation.X, ComponentLocation.Y, LowestZ - 4.0f);
+			const FRotator TextRotation(0.0, ComponentRotation.Yaw, 0.0);
+
+			FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), 
+				TextPosition, TextRotation, GizmoColor,0.15f, 1.f, 1.f, 
+				false, true, SDPG_Foreground);
+		}
+	}
+	
+	FNWorldAssemblyDebugDraw::DrawSocket(PDI, ComponentLocation, ComponentRotation, Details.SocketSize, Settings->SocketSize, Details.Type, GizmoColor);
 }
 
 void UNCellJunctionComponent::OnRegister()
@@ -131,9 +186,11 @@ void UNCellJunctionComponent::OnRegister()
 		}
 		if (!Actor->CellJunctions.Contains(Details.InstanceIdentifier))
 		{
-			Actor->Modify();
+			// CellJunctions is Transient, so this map is empty after every load and gets rebuilt here on
+			// registration. Rebuilding transient runtime state is not an author-time change, so we must not
+			// mark the actor dirty - the genuine "new junction" case is handled by the InstanceIdentifier
+			// assignment above.
 			Actor->CellJunctions.Add(Details.InstanceIdentifier, this);
-			Actor->SetActorDirty();
 		}
 	}
 
@@ -179,31 +236,13 @@ void UNCellJunctionComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
-FLinearColor UNCellJunctionComponent::GetColor() const
-{
-	if (Details.bInsideHull)
-	{
-		return FNColor::Pink;
-	}
-	
-	switch (Details.Requirements)
-	{
-		using enum ENCellJunctionRequirements;
-	case AllowBlocking:
-		return FNColor::GreenMid;
-	case AllowEmpty:
-		return FNColor::GreenDark;
-	case Required:
-	default:
-		return FNColor::GreenLight;
-	}
-}
 
 #if WITH_EDITOR
 void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
 	const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
-	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
+	const ANCellActor* CellActor = RootComponent != nullptr ? RootComponent->GetNCellActor() : nullptr;
+	if (CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;
 		

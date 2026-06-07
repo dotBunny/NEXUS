@@ -5,6 +5,7 @@
 
 #include "NArrayUtils.h"
 #include "NLevelUtils.h"
+#include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblySettings.h"
 #include "Organ/NOrganVolume.h"
 #include "Chaos/Convex.h"
@@ -22,6 +23,19 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	}
 	
 	TArray<const AActor*> IgnoredActors;
+	
+	// Prefill Ignored Actors to effect downstream
+	ANCellActor* CellActor = nullptr;
+	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
+	if (CellRoot != nullptr)
+	{
+		CellActor = CellRoot->GetNCellActor();	
+	}
+	if (CellActor != nullptr)
+	{
+		CellActor->AppendAuthorTimeActors(IgnoredActors);
+	}
+	
 	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
 	
 	return MoveTemp(LevelBounds);
@@ -36,6 +50,14 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	if (InLevel == nullptr)
 	{
 		return MoveTemp(Mesh);
+	}
+	
+	// Check for Cell Actor
+	ANCellActor* CellActor = nullptr;
+	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
+	if (CellRoot != nullptr)
+	{
+		CellActor = CellRoot->GetNCellActor();	
 	}
 	
 	FVector BoxVertices[8];
@@ -58,6 +80,11 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 			if (Actor->HasAnyFlags(RF_Transient)) continue;
 			
 			// Ignore Tags
+			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
+			
+			// Author Time Only
+			if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
+			
 			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
 			
 			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
@@ -146,14 +173,25 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	{
 		return MoveTemp(ReturnData);
 	}
-
+	
+	// Prefill Ignored Actors to effect downstream
+	TArray<const AActor*> IgnoredActors;
+	ANCellActor* CellActor = nullptr;
+	UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(InLevel);
+	if (CellRoot != nullptr)
+	{
+		CellActor = CellRoot->GetNCellActor();	
+	}
+	if (CellActor != nullptr)
+	{
+		CellActor->AppendAuthorTimeActors(IgnoredActors);
+	}
+	
 	// Settings
 	const UWorld* World = InLevel->GetWorld();
 	const FVector UnitSize = UNWorldAssemblySettings::Get()->VoxelSize;
 	const ECollisionChannel CollisionChannel = Settings.CollisionChannel;
 	const FVector HalfUnitSize = UnitSize * 0.5f;
-	TArray<const AActor*> IgnoredActors;
-	
 	
 	// STEP 1 - Specific Bounds / Ignore Actors
 	FBox Bounds(ForceInit);
@@ -165,9 +203,10 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(Bounds.Max, UnitSize));
 	
-	const uint32 SizeX = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.X) + FMath::Abs(UnitBounds.Max.X));	
-	const uint32 SizeY = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Y) + FMath::Abs(UnitBounds.Max.Y));	
-	const uint32 SizeZ = FMath::RoundToInt(FMath::Abs(UnitBounds.Min.Z) + FMath::Abs(UnitBounds.Max.Z));	
+	const FVector BoundsSize = UnitBounds.GetSize();
+	const uint32 SizeX = FMath::RoundToInt(BoundsSize.X);
+	const uint32 SizeY = FMath::RoundToInt(BoundsSize.Y);
+	const uint32 SizeZ = FMath::RoundToInt(BoundsSize.Z);
 	
 	// Setup array
 	ReturnData.Resize(SizeX, SizeY, SizeZ);

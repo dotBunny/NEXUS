@@ -10,7 +10,7 @@
  * construct the target asset without boilerplate. Asserts that InClass derives from Type.
  * @param Type The UObject subclass produced by the factory.
  */
-#define N_IMPLEMENT_ASSET_FACTORY(Type) \
+#define N_ASSET_FACTORY_BASE(Type) \
 	virtual UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, \
 	EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn, FName CallingContext) override \
 	{ \

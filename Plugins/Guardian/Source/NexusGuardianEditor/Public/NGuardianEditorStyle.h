@@ -15,5 +15,5 @@
  */
 class FNGuardianEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusGuardian", "NGuardianEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusGuardian", "NGuardianEditorStyle")
 };

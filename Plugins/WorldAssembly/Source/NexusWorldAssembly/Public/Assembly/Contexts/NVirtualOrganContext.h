@@ -8,6 +8,15 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
+#include "Types/NCardinalDirection.h"
+#include "Types/NRotationConstraints.h"
+
+#if !UE_BUILD_SHIPPING
+#define N_VIRTUAL_ORGAN_MESSAGE(Message) \
+	Messages.Add(Message);
+#else
+#define N_VIRTUAL_ORGAN_MESSAGE(Message)
+#endif // !UE_BUILD_SHIPPING
 
 struct FNWorldOrganData;
 class UNOrganComponent;
@@ -18,9 +27,9 @@ class UNOrganComponent;
 struct FNCellInputDataFilter
 {
 	/**
-	 * Hop-count from the start node of the cell the filter is stepping away from.
-	 * Compared against each candidate's MinimumNodeDepth to gate cells that are only allowed
-	 * to appear at or beyond a certain distance from the bone. 0 means "at the start".
+	 * Real NodeDepth of the source node the filter is stepping away from (bone = 0, start cell = 1, each hop +1).
+	 * A candidate stepping off this source lands at NodeDepth + 1, which is what the depth gates compare against
+	 * each candidate's Minimum/MaximumNodeDepth. 0 means the bone (i.e. selecting the start cell).
 	 */
 	int32 NodeDepth = 0;
 
@@ -41,6 +50,8 @@ struct FNCellInputDataFilter
 
 	/** Orientation applied to the candidate's junction to match the source. */
 	FQuat SourceQuat = FQuat();
+	
+	FVector WorldPosition;
 };
 
 /**
@@ -56,10 +67,14 @@ class FNVirtualOrganContext
 
 public:
 	
+	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
+	/** Allowed penetration, in world units, between a placed cell hull and existing world collision before it is rejected. */
 	float WorldHullPenetration = 1.f;
 
+	float AssemblyDirectionTolerance = 15.f;
+	
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
@@ -71,8 +86,6 @@ public:
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
-	
-	int32 BadStartLimit = 1000;
 
 	/** When true, the graph may extend past Bounds. */
 	bool bUnbounded = false;
@@ -83,38 +96,64 @@ public:
 	/** World origin of the organ used as the graph root. */
 	FVector Origin;
 
+	/** Tag groups accumulated from cells already placed in the graph. */
 	FNTissueTagGroups PlacedTagGroups;
-	FGameplayTagContainer OutputTags;
+
+	/** Context tags present at the start of organ build, used to ensure we do not lose context as cells get removed. */
+	FGameplayTagContainer BaseContextTags;
 	
+	/** Context tags currently active, updated as cells are placed into the graph. */
+	FGameplayTagContainer ContextTags;
 	
+	/** TagCounter present at the start of organ build, used to ensure we can reset our state. */
+	FNGameplayTagCounter BaseTagCounter;
+	
+	/** TagCounter values currently in-flight of this attempt. */
+	FNGameplayTagCounter TagCounter;
+
 	/** Bones the builder will anchor the graph on. */
 	TArray<FNVirtualBoneData> BoneInputData;
 
 	/** Candidate cells the builder may pull from. */
 	TArray<FNVirtualCellData> CellInputData;
 	
+	/** Cached classification summary of CellInputData (starter/finisher availability and tag groups). */
 	FNVirtualCellDataSummary CellInputDataSummary;
 
 	/** Output graph, owned by this context until handed off to the task-graph context. */
 	TUniquePtr<FNAssemblyGraph> CellGraph = nullptr;
 
 	FNVirtualOrganContext(const FNWorldOrganData* WorldOrganContext, uint64 TaskSeed, FString TaskName);
-	~FNVirtualOrganContext();
+	NEXUSWORLDASSEMBLY_API ~FNVirtualOrganContext();
+
+#if WITH_TESTS
+	/**
+	 * Test-only constructor that bypasses the live-component setup the production constructor performs. Every pool,
+	 * tag, and graph member is left at its default so a unit test can populate exactly the state it needs and then
+	 * exercise the off-thread logic (e.g. ResetForRetry) in isolation. Not compiled outside test builds.
+	 * @param TaskSeed Seed the context reports through GetSeed.
+	 * @param TaskName Human-readable task name reported through GetName.
+	 */
+	FNVirtualOrganContext(const uint64 TaskSeed, FString TaskName) : Seed(TaskSeed), Name(MoveTemp(TaskName)) {}
+#endif // WITH_TESTS
 
 	/** @return Deterministic seed used to drive this organ's random stream. */
 	uint64 GetSeed() const { return Seed; };
+#if !UE_BUILD_SHIPPING
+	const TArray<FString>& GetMessages() const { return Messages; }
+#endif	
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
 
-	/** @return true once the builder has produced a valid graph (cell count within bounds, etc). */
+	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
 	bool IsValid() const { return bIsValid; };
 
 	/** @return true if the current graph satisfies all required invariants (debug helper). */
-	bool CheckGraph();
+	NEXUSWORLDASSEMBLY_API bool CheckGraph();
 
 	/**
 	 * Filter CellInputData into a weighted candidate list for selection.
@@ -122,17 +161,147 @@ public:
 	 * @param CellIndices [out] Indices into CellInputData weighted by their configured weighting.
 	 * @param JunctionIndices [out] For each cell index, the subset of its junction keys that match the filter.
 	 */
-	void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
+	NEXUSWORLDASSEMBLY_API void FilterCellInputData(const FNCellInputDataFilter& Filter, FNWeightedIntegerArray& CellIndices, TMap<int32, TArray<int32>>& JunctionIndices);
 
 	/**
-	 * Drop the current graph and bump the retry counter.	 
+	 * Resolve which bad-neighbor groups the source cell belongs to. Returns empty when there is no source
+	 * node (e.g. the start-node pre-filter) or when no bad-neighbor groups are configured, which disables
+	 * the per-candidate bad-neighbor check.
+	 * @param GroupTags Tag-group registry holding the configured bad-neighbor groups.
+	 * @param SourceCellNode Node the filter is stepping away from, or nullptr for the start pre-filter.
+	 * @return The subset of the source's assembly tags that name a bad-neighbor group.
+	 */
+	static NEXUSWORLDASSEMBLY_API FGameplayTagContainer ResolveSourceBadNeighborTags(const FNTissueTagGroups& GroupTags, FNAssemblyGraphCellNode* SourceCellNode);
+
+	/**
+	 * @param SourceBadNeighborTags Bad-neighbor groups the source belongs to (from ResolveSourceBadNeighborTags).
+	 * @param Candidate Cell being considered for placement beside the source.
+	 * @return true if Candidate shares a bad-neighbor group with the source and must not be placed beside it.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsBadNeighbor(const FGameplayTagContainer& SourceBadNeighborTags, const FNVirtualCellData& Candidate);
+
+	/**
+	 * @param bIsStartNode true when filtering candidates for the graph's start node.
+	 * @param Summary Pool summary carrying whether any starter / starter-only cells exist.
+	 * @param CandidateTags Assembly tags of the candidate cell.
+	 * @return true if the candidate is excluded by the starter tag rules.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByStarterTags(bool bIsStartNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
+
+	/**
+	 * @param bIsEndNode true when filtering candidates for the graph's end node.
+	 * @param Summary Pool summary carrying whether any finisher / finisher-only cells exist.
+	 * @param CandidateTags Assembly tags of the candidate cell.
+	 * @return true if the candidate is excluded by the finisher tag rules.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByFinisherTags(bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
+
+	/**
+	 * @param Candidate Cell being considered for placement.
+	 * @param TagCounter Current tag-counter state to evaluate the candidate's constraints against.
+	 * @return true if any of the candidate's TagCounterConstraints fails its comparison and the candidate must be excluded.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter);
+
+	/**
+	 * Gate a candidate by minimum graph depth. Min/MaxNodeDepth are 1-based depths that match a cell's real
+	 * NodeDepth (bone = 0, start cell = 1, each hop +1), so CandidateNodeDepth is the prospective NodeDepth the
+	 * candidate would take on (the source node's depth + 1, computed by the caller).
+	 * @param MinimumNodeDepth The candidate's configured minimum depth; 0 disables the gate.
+	 * @param CandidateNodeDepth The prospective NodeDepth the candidate would land at.
+	 * @return true if the candidate is too shallow and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMinimumNodeDepth(int32 MinimumNodeDepth, int32 CandidateNodeDepth);
+
+	/**
+	 * Gate a candidate by maximum graph depth. Mirrors IsGatedByMinimumNodeDepth: Min/MaxNodeDepth are 1-based
+	 * depths matching a cell's real NodeDepth (bone = 0, start cell = 1), and CandidateNodeDepth is the prospective
+	 * NodeDepth the candidate would land at. The comparison is inclusive: a candidate at exactly MaximumNodeDepth
+	 * is still allowed and only deeper candidates are gated.
+	 * @param MaximumNodeDepth The candidate's configured maximum depth; 0 disables the gate.
+	 * @param CandidateNodeDepth The prospective NodeDepth the candidate would land at.
+	 * @return true if the candidate is too deep and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByMaximumNodeDepth(int32 MaximumNodeDepth, int32 CandidateNodeDepth);
+
+	/**
+	 * Gate a candidate by its required compass heading. Angle is the candidate's bearing measured from the organ's
+	 * start point (see FilterCellInputData), and the candidate survives only when that bearing lands within
+	 * Tolerance degrees of Direction. Wrapping is handled by FNCardinalDirectionUtils::IsCloseToDirection, so the
+	 * 0/360 seam and out-of-range inputs compare correctly.
+	 * @param Angle The candidate's bearing in degrees (any range; normalized internally).
+	 * @param Direction The cardinal heading the candidate is constrained to.
+	 * @param Tolerance Maximum absolute degree deviation (+/-) from Direction that still permits placement.
+	 * @return true if the candidate's bearing is outside the tolerance window and must be gated out.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByDirectionalConstraint(float Angle, ENCardinalDirection Direction, float Tolerance);
+
+
+	/**
+	 * Resolve the rotation a candidate junction must adapt to mate with the source junction. Mirrors the
+	 * placement math in ProcessCellNode: flip 180 around Up to oppose the source's facing direction, then undo
+	 * the junction's own local rotation so only the delta the cell must apply remains. The result is returned
+	 * with each axis normalized to [-180, 180] so it can be fed straight into the matching-rotation constraints.
+	 * @param SourceQuat Orientation of the source junction the candidate is mating against.
+	 * @param JunctionWorldRotation The candidate junction's authored rotation.
+	 * @return The per-axis-normalized rotation the candidate cell must take on for this junction to line up.
+	 */
+	static NEXUSWORLDASSEMBLY_API FRotator GetRequiredJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation);
+
+	/**
+	 * Hot-path variant of GetRequiredJunctionRotation that takes both terms pre-composed, skipping the per-call
+	 * axis-angle flip and rotator->quat conversions. FilterCellInputData hoists SourceFlippedQuat out of its loops
+	 * and reads JunctionInverseQuat from FNCellJunctionDetails::CachedInverseWorldQuat.
+	 * @param SourceFlippedQuat SourceQuat already multiplied by the 180-around-Up flip.
+	 * @param JunctionInverseQuat The candidate junction's authored rotation as a quaternion, inverted.
+	 * @return The per-axis-normalized rotation the candidate cell must take on for this junction to line up.
+	 */
+	static FRotator GetRequiredJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat);
+
+	/**
+	 * Gate a candidate junction by the rotation it would have to adapt to mate with the source. Both the cell
+	 * and the junction get an independent veto: either may disable enforcement, but whichever side enforces must
+	 * have the required rotation (from GetRequiredJunctionRotation) fall inside its matching interval.
+	 * @param SourceQuat Orientation of the source junction the candidate is mating against.
+	 * @param JunctionWorldRotation The candidate junction's authored rotation.
+	 * @param CellConstraints The candidate cell's rotation constraints (cell-wide veto).
+	 * @param JunctionConstraints The candidate junction's own rotation constraints.
+	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsGatedByJunctionRotation(const FQuat& SourceQuat, const FRotator& JunctionWorldRotation,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
+
+	/**
+	 * Hot-path variant of IsGatedByJunctionRotation taking both rotation terms pre-composed; see
+	 * GetRequiredJunctionRotationPrepared. Used by FilterCellInputData's per-candidate junction loop.
+	 * @param SourceFlippedQuat SourceQuat already multiplied by the 180-around-Up flip.
+	 * @param JunctionInverseQuat The candidate junction's authored rotation as a quaternion, inverted.
+	 * @param CellConstraints The candidate cell's rotation constraints (cell-wide veto).
+	 * @param JunctionConstraints The candidate junction's own rotation constraints.
+	 * @return true if the required rotation is disallowed by either constraint set and the junction must be skipped.
+	 */
+	static bool IsGatedByJunctionRotationPrepared(const FQuat& SourceFlippedQuat, const FQuat& JunctionInverseQuat,
+		const FNRotationConstraints& CellConstraints, const FNRotationConstraints& JunctionConstraints);
+
+	/**
+	 * Drop the current graph and bump the retry counter.
 	 * @return true if another retry is allowed; false once MaximumRetryCount is exhausted.
 	 */
-	bool ResetForRetry();
+	NEXUSWORLDASSEMBLY_API bool ResetForRetry();
 
 	/** Run the post-build invariant checks; flips bSuccessful on success. */
-	bool ValidateGraph();
+	NEXUSWORLDASSEMBLY_API bool ValidateGraph();
 
+	/**
+	 * Set the world-space point the directional constraint measures candidate bearings from.
+	 * @param Location World-space origin for direction-constraint bearings.
+	 */
+	void SetDirectionTargetPosition(const FVector& Location) { DirectionTargetPosition = Location; }
+
+	/** @return The world-space point candidate bearings are measured from for the directional constraint. */
+	FVector GetDirectionTargetPosition() const { return DirectionTargetPosition; }
+	
+	int32 GetRetryCount() const { return RetryCount; }
 private:
 	/** Number of retries consumed so far. */
 	int32 RetryCount = 0;
@@ -146,6 +315,12 @@ private:
 	/** Random-stream seed for this organ's build. */
 	uint64 Seed;
 
+	/** World-space target direction-constraint bearings are measured from. */
+	FVector DirectionTargetPosition;
+
 	/** Human-readable task name used in logs. */
 	FString Name;
+#if !UE_BUILD_SHIPPING
+	TArray<FString> Messages;
+#endif	
 };

@@ -98,14 +98,9 @@ public:
 		
 		for (const FVector& Point : Points)
 		{
-			if (IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point) || !IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point))
-			{
-				OutResults.Add(false);
-			}
-			else
-			{
-				OutResults.Add(true);
-			}
+			const bool bValid = IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point)
+							 && !IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point);
+			OutResults.Add(bValid);
 		}
 		return MoveTemp(OutResults);
 	}

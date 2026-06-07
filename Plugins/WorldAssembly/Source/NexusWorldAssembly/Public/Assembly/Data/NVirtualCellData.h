@@ -8,18 +8,44 @@
 #include "Cell/NCellJunctionDetails.h"
 #include "Cell/NCellRootDetails.h"
 #include "Cell/NTissueTagGroups.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
+#include "Types/NCardinalDirection.h"
 
+/**
+ * A lightweight summary of a cell's tagging, used to classify it (starter/finisher eligibility) during virtual organ processing.
+ */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
 {
+	/** Tissue tag groups collected for the cell. */
 	FNTissueTagGroups GroupTags;
-	
+
+	/** true if any processed cell carries a starter tag. */
 	bool bFoundStarterTagged = false;
-	
+
+	/** true if any processed cell carries a starter-only tag (may be used only as a start cell). */
 	bool bFoundStarterOnlyTagged = false;
-	
+
+	/** true if any processed cell carries a finisher tag. */
 	bool bFoundFinisherTagged = false;
-	
+
+	/** true if any processed cell carries a finisher-only tag (may be used only as an end cell). */
 	bool bFoundFinisherOnlyTagged = false;
+
+	/**
+	 * true if any cell in the pool declares required context tags. When false, the context-tag gate in
+	 * FilterCellInputData can be skipped for every candidate because no cell could ever be gated by it.
+	 * @remark Populated by the production constructor; the test-only constructor leaves this false, so a test
+	 *         exercising the context-tag gate through FilterCellInputData must set it explicitly.
+	 */
+	bool bAnyContextTagsRequired = false;
+
+	/**
+	 * true if any cell in the pool declares tag-counter constraints. When false, the tag-counter gate in
+	 * FilterCellInputData can be skipped for every candidate because no cell could ever be gated by it.
+	 * @remark Populated by the production constructor; the test-only constructor leaves this false, so a test
+	 *         exercising the tag-counter gate through FilterCellInputData must set it explicitly.
+	 */
+	bool bAnyTagCounterConstraints = false;
 };
 
 /**
@@ -31,24 +57,32 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellDataSummary
  */
 struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 {
+	/** Assembly tags describing this cell's behavior, copied through to generated cells. */
 	FGameplayTagContainer AssemblyTags;
-	
-	FGameplayTagContainer OutputTags;
-	
-	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
-	bool bAlwaysRelevant = false;
 
-	/** 
+	/** Context tags that must be present in the phases ContextTags context for this cell to be eligible for selection. */
+	FGameplayTagContainer ContextTagsRequired;
+
+	/** Context tags this cell contributes/adds to the overall assembly operation / phase ContextTags once it is placed. */
+	FGameplayTagContainer ContextTagsAdded;
+	
+	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
+	
+	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
+
+	/**
 	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no minimum constraint.
+	 * @note A value of 0 indicates no minimum constraint.
+	 * @remark Enforced in FNVirtualOrganContext::CheckGraph against UsedCount, skipping combined Unique + RequiredAny
+	 *         cells and cells whose MinimumCount exceeds a positive MaximumCount (an unsatisfiable configuration).
 	 */
-	int32 MinimumCount = -1;
+	int32 MinimumCount = 0;
 
-	/** 
+	/**
 	 * The maximum number of times this cell can be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no maximum constraint.
+	 * @note A value of 0 indicates no maximum constraint (unlimited usage).
 	 */
-	int32 MaximumCount = -1;
+	int32 MaximumCount = 0;
 
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
@@ -57,18 +91,37 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	 * The minimum number of cell hops away from the start cell before this cell may be used.
-	 * The start cell itself is hop 0, its direct neighbours are hop 1, and so on. A cell with
-	 * MinimumNodeDepth = N therefore first becomes eligible N hops out from the start.
-	 * @note A value of 0 indicates no constraint.
-	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData by comparing against
-	 *         the source node's NodeDepth. Because graph depth is rooted at the bone (start cell =
-	 *         NodeDepth 1) while the candidate is placed one hop deeper, those two offsets cancel and
-	 *         the comparison correctly resolves to "hops from the start cell". See the depth test in
-	 *         NMinimumNodeDepthTests.cpp before changing the comparison.
+	 * The minimum graph depth at which this cell may be used, as a 1-based NodeDepth (the start cell is depth 1,
+	 * its direct neighbours depth 2, and so on). A cell with MinimumNodeDepth = N first becomes eligible at
+	 * NodeDepth N.
+	 * @note A value of 0 indicates no constraint (a value of 1 is the start cell and is likewise unconstrained).
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the candidate's prospective
+	 *         NodeDepth (the source node's NodeDepth + 1). See NMinimumNodeDepthTests.cpp before changing it.
 	 */
 	int32 MinimumNodeDepth = 0;
 
+	/**
+	 * The maximum graph depth at which this cell may still be used, as a 1-based NodeDepth (the start cell is
+	 * depth 1, its direct neighbours depth 2, and so on). A cell with MaximumNodeDepth = N is last eligible at
+	 * NodeDepth N; MaximumNodeDepth = 1 restricts the cell to the start cell only.
+	 * @note A value of 0 indicates no constraint.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData against the candidate's prospective
+	 *         NodeDepth (the source node's NodeDepth + 1). See NMaximumNodeDepthTests.cpp before changing it.
+	 */
+	int32 MaximumNodeDepth = 0;
+
+	/** When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point. */
+	bool bHasDirectionConstraint = false;
+
+	/**
+	 * Compass heading, measured from the organ's start point out to the candidate's attach point, this cell is
+	 * restricted to while bHasDirectionConstraint is set.
+	 * @remark Gating is enforced in FNVirtualOrganContext::FilterCellInputData, which admits the candidate only
+	 *         when its bearing lands within AssemblyDirectionTolerance degrees (+/-) of this heading. See
+	 *         NFilterCellInputDataTests.cpp.
+	 */
+	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
+	
 	/** 
 	 * Relative weight for random selection during generation.
 	 * @note Higher values increase the probability of this cell being chosen.
@@ -95,21 +148,21 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 */
 	TObjectPtr<UNCell> Template;
 
-	/** 
+	/**
 	 * Is a MinimumCount set?
-	 * @return True if a minimum usage count constraint is defined. 
+	 * @return True if a minimum usage count constraint is defined (MinimumCount > 0).
 	 */
-	bool HasMinimumCount() const { return MinimumCount > -1; }
+	bool HasMinimumCount() const { return MinimumCount > 0; }
 
-	/** 
+	/**
 	 * Is a MaximumCount set?
-	 * @return True if a maximum usage count constraint is defined. 
+	 * @return True if a maximum usage count constraint is defined (MaximumCount > 0); 0 means unlimited.
 	 */
-	bool HasMaximumCount() const { return MaximumCount > -1; }
+	bool HasMaximumCount() const { return MaximumCount > 0; }
 
 	/**
 	 * Is the UNCell meant to be uniquely placed?
-	 * @return True if this cell must be used exactly once (MinimumCount == 1 && MaximumCount == 1). 
+	 * @return True if this cell must be used exactly once (MinimumCount == 1 && MaximumCount == 1).
 	 */
 	bool IsUnique() const { return MinimumCount == 1 && MaximumCount == 1; }
 
@@ -119,8 +172,8 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 */
 	bool IsValidSelection() const
 	{
-		if (Junctions.IsEmpty() || MaximumCount == 0) return false;
-		if (HasMaximumCount() && UsedCount >= MaximumCount) return false;
+		if (Junctions.IsEmpty()) return false;
+		if (HasMaximumCount() && UsedCount >= MaximumCount) return false; // MaximumCount == 0 ⇒ unlimited
 		if (IsUnique() && UsedCount > 0) return false;
 
 		return true;

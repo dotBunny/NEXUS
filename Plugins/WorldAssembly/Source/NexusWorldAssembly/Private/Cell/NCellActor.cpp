@@ -42,7 +42,6 @@ void ANCellActor::PostRegisterAllComponents()
 	}
 }
 
-
 bool ANCellActor::HasDifferencesFromSidecar() const
 {
 	// If we don't have a side-car, we are naturally dirty.
@@ -72,7 +71,6 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 				
 	return false;
 }
-
 #endif // WITH_EDITOR
 
 void ANCellActor::InitializeFromProxy(ANCellLevelInstance* LevelInstance)
@@ -107,15 +105,16 @@ void ANCellActor::CalculateBounds()
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Min, UnitSize),
 				FNVectorUtils::GetFurthestGridIntersection(CellRoot->Details.Bounds.Max, UnitSize));
 	
+	const FVector UnitBoundsSize = CellRoot->Details.UnitBounds.GetSize();
 	CellRoot->Details.UnitSize = FVector(
-		FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.X) + FMath::Abs(CellRoot->Details.UnitBounds.Max.X)),
-	FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.Y) + FMath::Abs(CellRoot->Details.UnitBounds.Max.Y)),
-	FMath::RoundToInt(FMath::Abs(CellRoot->Details.UnitBounds.Min.Z) + FMath::Abs(CellRoot->Details.UnitBounds.Max.Z)));
+		FMath::RoundToInt(UnitBoundsSize.X),
+		FMath::RoundToInt(UnitBoundsSize.Y),
+		FMath::RoundToInt(UnitBoundsSize.Z));
 	
 	SetActorDirty();
 }
 
-void ANCellActor::SplitHullEdge(int32 IndexA, int32 IndexB, const bool bUpdateDerivedData)
+void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB, const bool bUpdateDerivedData)
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull.SplitEdge(IndexA, IndexB);

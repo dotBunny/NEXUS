@@ -4,6 +4,7 @@
 #include "NWorldAssemblyRegistry.h"
 
 #include "NWorldAssemblyMinimal.h"
+#include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellLevelInstance.h"
 #include "Cell/NCellRootComponent.h"
@@ -16,7 +17,14 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::Organs;
 
 TArray<UNAssemblyOperation*> FNWorldAssemblyRegistry::Operations;
 FOnAssemblyOperationStateChanged FNWorldAssemblyRegistry::OnOperationStateChanged;
-TMap<uint32, TArray<ANCellLevelInstance*>> FNWorldAssemblyRegistry::CellLevelInstances;
+FOnAssemblyOperationChannelsChanged FNWorldAssemblyRegistry::OnOperationChannelsChanged;
+TMap<int32, TArray<ANCellLevelInstance*>> FNWorldAssemblyRegistry::CellLevelInstances;
+
+void FNWorldAssemblyRegistry::NotifyOperationChannelsChanged(UNAssemblyOperation* Operation, const TArray<FNStatusChannelUpdate>& Changes)
+{
+	OnOperationChannelsChanged.Broadcast(Operation, Changes);
+}
+
 
 TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsComponentsFromLevel(const ULevel* Level, const bool bSorted)
 {
@@ -150,7 +158,7 @@ bool FNWorldAssemblyRegistry::HasOperations(bool bIgnoreEditorModeOperation)
 	return !Operations.IsEmpty();
 }
 
-bool FNWorldAssemblyRegistry::HasCellLevelInstances(const uint32 OperationTicket, const bool bIsLevelLoaded)
+bool FNWorldAssemblyRegistry::HasCellLevelInstances(const int32 OperationTicket, const bool bIsLevelLoaded)
 {
 	if (OperationTicket == 0)
 	{
@@ -164,7 +172,7 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const uint32 OperationTicket
 	return false;
 }
 
-TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const uint32 OperationTicket)
+TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const int32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
 	if (CellLevelInstances.IsEmpty()) return MoveTemp(Results);
@@ -206,7 +214,7 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 	return MoveTemp(Results);
 }
 
-bool FNWorldAssemblyRegistry::HasCellLevelInstance(const uint32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
+bool FNWorldAssemblyRegistry::HasCellLevelInstance(const int32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
 {
 	TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
 	if (LevelInstances != nullptr && LevelInstances->Num() > 0)
@@ -299,7 +307,7 @@ bool FNWorldAssemblyRegistry::RegisterOperation(UNAssemblyOperation* Operation)
 
 bool FNWorldAssemblyRegistry::RegisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
-	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
+	const int32 OperationTicket = CellLevelInstance->GetOperationTicket();
 	const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
 	if (LevelInstances != nullptr)
 	{
@@ -318,6 +326,7 @@ bool FNWorldAssemblyRegistry::RegisterCellLevelInstance(ANCellLevelInstance* Cel
 	return true;
 
 }
+
 
 bool FNWorldAssemblyRegistry::UnregisterBoneComponent(UNBoneComponent* Component)
 {
@@ -382,7 +391,7 @@ bool FNWorldAssemblyRegistry::UnregisterOperation(UNAssemblyOperation* Operation
 
 bool FNWorldAssemblyRegistry::UnregisterCellLevelInstance(ANCellLevelInstance* CellLevelInstance)
 {
-	const uint32 OperationTicket = CellLevelInstance->GetOperationTicket();
+	const int32 OperationTicket = CellLevelInstance->GetOperationTicket();
 	TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
 	if (LevelInstances != nullptr)
 	{
@@ -460,12 +469,12 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 	}
 	
 	// Scrub CellLevelInstances
-	TArray<uint32> OperationTickets;
+	TArray<int32> OperationTickets;
 	CellLevelInstances.GetKeys(OperationTickets);
 	
 	for (int i = OperationTickets.Num() - 1; i >= 0; --i)
 	{
-		const uint32 Ticket = OperationTickets[i];
+		const int32 Ticket = OperationTickets[i];
 		const int ItemCount = CellLevelInstances[Ticket].Num();
 		for (int j = ItemCount - 1; j >= 0; --j)
 		{
@@ -474,6 +483,12 @@ void FNWorldAssemblyRegistry::OnPostWorldCleanup(UWorld* World, bool bSessionEnd
 				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Found uncleaned CellLevelInstances(%s), scrubbing."), *CellLevelInstances[Ticket][j]->GetName());
 				CellLevelInstances[Ticket].RemoveAt(j);
 			}
+		}
+		
+		// Remove empty containers
+		if (CellLevelInstances[Ticket].IsEmpty())
+		{
+			CellLevelInstances.Remove(Ticket);
 		}
 	}
 }

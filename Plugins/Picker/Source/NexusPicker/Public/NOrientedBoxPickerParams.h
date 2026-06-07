@@ -65,6 +65,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 			MaxPoint.Z - MinPoint.Z);
 	}
 	
+	/** @return An origin-centered, axis-aligned box sized from MinimumDimensions, or an empty box when MinimumDimensions is zero. */
 	FBox GetMinimumAlignedBox() const
 	{
 		if (MinimumDimensions.IsZero())
@@ -75,6 +76,7 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		return FBox(- Half,  Half);
 	}
 	
+	/** @return An origin-centered, axis-aligned box sized from MaximumDimensions, or an empty box when MaximumDimensions is zero. */
 	FBox GetMaximumAlignedBox() const
 	{
 		if (MaximumDimensions.IsZero())
@@ -85,6 +87,10 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 		return FBox( -Half,  Half);
 	}
 	
+	/**
+	 * Builds the axis-aligned regions valid for point generation, in box-local space (before Rotation is applied).
+	 * @return The maximum box alone when no valid minimum is set (or the minimum exceeds the maximum on any axis); otherwise the six side regions of the shell between the minimum and maximum boxes.
+	 */
 	TArray<FBox> GetValidBoxes() const
 	{
 		const FBox MinimumBox = GetMinimumAlignedBox();

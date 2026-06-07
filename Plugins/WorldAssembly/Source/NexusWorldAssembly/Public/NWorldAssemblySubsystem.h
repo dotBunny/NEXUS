@@ -3,11 +3,11 @@
 
 #pragma once
 
-#include "NActorLibrary.h"
 #include "Assembly/INAssemblyOperationOwner.h"
 #include "Macros/NSubsystemMacros.h"
 #include "Assembly/NAssemblyOperationSettings.h"
 #include "NWorldAssemblyRelay.h"
+#include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
 class UNOrganComponent;
@@ -107,7 +107,9 @@ public:
 	/** Drop the local-player relay reference when the relay is being torn down. */
 	void UnregisterLocalRelay(const ANWorldAssemblyRelay* InRelay);
 	
+	/** @return true if at least one organ is queued awaiting assembly. */
 	bool HasQueuedOrgansForAssembly() const { return !QueuedOrgansForAssembly.IsEmpty(); }
+	/** Queue an organ component to be assembled on a subsequent tick. */
 	void RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ);
 
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
@@ -118,7 +120,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnOperationsCompleted;
 	
-	/** Fired at the end of Clear() once tracked operations have been cancelled and all cell proxies in the world have been destroyed. */
+	/** Fired at the end of Clear() once tracked operations have been canceled and all cell proxies in the world have been destroyed. */
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnCleared;
 
@@ -141,6 +143,9 @@ private:
 	 * into a freshly-created UNAssemblyOperation; the presence of entries keeps the subsystem tickable.
 	 */
 	TArray<TObjectPtr<UNOrganComponent>> QueuedOrgansForAssembly;
+	
+	/** Used to track potential operations that will cache data, so that we can clear it. **/
+	TArray<int32> CachedOperationTickets;
 
 	/** Map from player controller to the relay actor spawned for that player. */
 	UPROPERTY()

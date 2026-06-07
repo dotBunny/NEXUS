@@ -4,42 +4,51 @@
 #include "Developer/NReport.h"
 
 #include "NCoreMinimal.h"
+#include "Developer/NReportListBlock.h"
 #include "HAL/PlatformFileManager.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
-#define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage) \
+#define N_REPORT_CREATE_BLOCK(BlockType, BlockStorage, BlockTypeTag) \
 	const int32 BlockTicket = ++BlockTickets; \
 	BlockStorage.Add(BlockTicket, BlockType(BlockTicket)); \
 	BlockType* Block = BlockStorage.Find(BlockTicket); \
-	const int ParentLevel = GetLevel(ParentTicket); \
+	const FBlockMeta* ParentMeta = BlockMeta.Find(ParentTicket); \
+	const int32 ParentLevel = ParentMeta != nullptr ? ParentMeta->Level : 0; \
 	Block->Level = ParentLevel + 1; \
 	Block->Priority = OrderPriority; \
-	if (!ChildrenMap.Contains(ParentTicket)) \
-	{ \
-		ChildrenMap.Add(ParentTicket, TArray<int32>()); \
-	} \
-	TArray<int32>& Children = ChildrenMap[ParentTicket]; \
+	BlockMeta.Add(BlockTicket, FBlockMeta{ BlockTypeTag, ParentLevel + 1, OrderPriority }); \
+	TArray<FChildEntry>& Children = ChildrenMap.FindOrAdd(ParentTicket); \
 	int32 InsertIndex = Children.Num(); \
 	for (int32 i = 0; i < Children.Num(); i++) \
 	{ \
-		if (GetPriority(Children[i]) > OrderPriority) \
+		if (Children[i].Priority > OrderPriority) \
 		{ \
 			InsertIndex = i; \
 			break; \
 		} \
 	} \
-	Children.Insert(BlockTicket, InsertIndex); \
+	Children.Insert(FChildEntry{ BlockTicket, OrderPriority }, InsertIndex); \
 	return BlockTicket;
 
 int32 FNReport::CreateContentBlock(const int32 ParentTicket, const int32 OrderPriority)
 {
-	N_REPORT_CREATE_BLOCK(FNReportContentBlock, ContentBlocks)
+	N_REPORT_CREATE_BLOCK(FNReportContentBlock, ContentBlocks, EBlockType::Content)
 }
 
 int32 FNReport::CreateTableBlock(const int32 ParentTicket, const int32 OrderPriority)
 {
-	N_REPORT_CREATE_BLOCK(FNReportTableBlock, TableBlocks)
+	N_REPORT_CREATE_BLOCK(FNReportTableBlock, TableBlocks, EBlockType::Table)
+}
+
+int32 FNReport::CreateListBlock(const int32 ParentTicket, const int32 OrderPriority)
+{
+	N_REPORT_CREATE_BLOCK(FNReportListBlock, ListBlocks, EBlockType::List)
+}
+
+int32 FNReport::CreateCollapsableBlock(const int32 ParentTicket, const int32 OrderPriority)
+{
+	N_REPORT_CREATE_BLOCK(FNReportCollapsableBlock, CollapsableBlocks, EBlockType::Collapsable)
 }
 
 FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
@@ -50,6 +59,78 @@ FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
 FNReportTableBlock* FNReport::GetTableBlock(const int32 Ticket)
 {
 	return TableBlocks.Find(Ticket);
+}
+
+FNReportListBlock* FNReport::GetListBlock(const int32 Ticket)
+{
+	return ListBlocks.Find(Ticket);
+}
+
+FNReportCollapsableBlock* FNReport::GetCollapsableBlock(const int32 Ticket)
+{
+	return CollapsableBlocks.Find(Ticket);
+}
+
+// Heading lives on the base FNReportBlock (private); FNReport is a friend, so the search reads it directly.
+#define N_REPORT_FIND_BLOCK(BlockStorage, SearchHeading) \
+	for (auto& Pair : BlockStorage) \
+	{ \
+		if (Pair.Value.Heading.Equals(SearchHeading, ESearchCase::CaseSensitive)) \
+		{ \
+			return &Pair.Value; \
+		} \
+	} \
+	return nullptr;
+
+FNReportContentBlock* FNReport::FindContentBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(ContentBlocks, Heading)
+}
+
+FNReportTableBlock* FNReport::FindTableBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(TableBlocks, Heading)
+}
+
+FNReportListBlock* FNReport::FindListBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(ListBlocks, Heading)
+}
+
+FNReportCollapsableBlock* FNReport::FindCollapsableBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(CollapsableBlocks, Heading)
+}
+
+// As N_REPORT_FIND_BLOCK, but yields the matching block's ticket (the storage key) instead of a pointer.
+#define N_REPORT_FIND_BLOCK_TICKET(BlockStorage, SearchHeading) \
+	for (auto& Pair : BlockStorage) \
+	{ \
+		if (Pair.Value.Heading.Equals(SearchHeading, ESearchCase::CaseSensitive)) \
+		{ \
+			return Pair.Key; \
+		} \
+	} \
+	return INDEX_NONE;
+
+int32 FNReport::FindContentBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(ContentBlocks, Heading)
+}
+
+int32 FNReport::FindTableBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(TableBlocks, Heading)
+}
+
+int32 FNReport::FindListBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(ListBlocks, Heading)
+}
+
+int32 FNReport::FindCollapsableBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(CollapsableBlocks, Heading)
 }
 
 TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat)
@@ -63,28 +144,33 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 		RenderBlock(ChildrenTickets[i], Output, OutputFormat);
 	}
 	
-	TArray<FString> Tokens;
-	Tokens.Reserve(ReplaceTokens.Num());
-	ReplaceTokens.GetKeys(Tokens);
-	
 	// Early out since we don't have any tokens
-	if (Tokens.IsEmpty())
+	if (ReplaceTokens.IsEmpty())
 	{
 		return MoveTemp(Output);
 	}
 
-	for (int i = 0; i < Output.Num(); i++)
+	// Flatten the token map once so the per-line loop avoids repeated hash lookups; cache each token's length to skip
+	// substitutions that cannot possibly fit in the current line.
+	TArray<TPair<const FString*, const FString*>> Replacements;
+	Replacements.Reserve(ReplaceTokens.Num());
+	for (const TPair<FString, FString>& Pair : ReplaceTokens)
 	{
-		if (Output[i].Len() < 4) continue;
-		for (int j = 0; j < Tokens.Num(); j++)
+		Replacements.Emplace(&Pair.Key, &Pair.Value);
+	}
+
+	for (int32 i = 0; i < Output.Num(); i++)
+	{
+		FString& Line = Output[i];
+		if (Line.Len() < ShortestReplaceToken) continue;
+		for (int32 j = 0; j < Replacements.Num(); j++)
 		{
-			if (Output[i].Contains(Tokens[j]))
-			{
-				Output[i] = Output[i].Replace(*Tokens[j],*ReplaceTokens[Tokens[j]]);
-			}
+			const FString& Token = *Replacements[j].Key;
+			if (Line.Len() < Token.Len()) continue;
+			Line.ReplaceInline(*Token, **Replacements[j].Value, ESearchCase::CaseSensitive);
 		}
 	}
-	
+
 	return MoveTemp(Output);
 }
 
@@ -113,52 +199,30 @@ void FNReport::OutputToFile(const FString& FilePath, const ENReportOutputFormat 
 
 int32 FNReport::GetPriority(const int32 Ticket)
 {
-	const FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
-	{
-		return ContentBlock->GetPriority();
-	}
-		
-	const FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
-	{
-		return TableBlock->GetPriority();
-	}
-		
-	return 0;
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	return Meta != nullptr ? Meta->Priority : 0;
 }
 
 int32 FNReport::GetLevel(const int32 Ticket)
 {
-	const FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
-	{
-		return ContentBlock->GetLevel();
-	}
-		
-	const FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
-	{
-		return TableBlock->GetLevel();
-	}
-		
-	return 0;
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	return Meta != nullptr ? Meta->Level : 0;
 }
 
 void FNReport::GetOrderedBlocks(const int32 TargetTicket, TArray<int32>& Output, const bool bIncludeChildren)
 {
-	const TArray<int32>* Children = ChildrenMap.Find(TargetTicket);
+	const TArray<FChildEntry>* Children = ChildrenMap.Find(TargetTicket);
 	if (Children == nullptr)
 	{
 		return;
 	}
 
-	for (const int32 ChildTicket : *Children)
+	for (const FChildEntry& Child : *Children)
 	{
-		Output.Add(ChildTicket);
+		Output.Add(Child.Ticket);
 		if (bIncludeChildren)
 		{
-			GetOrderedBlocks(ChildTicket, Output, true);
+			GetOrderedBlocks(Child.Ticket, Output, true);
 		}
 	}
 }
@@ -166,15 +230,26 @@ void FNReport::GetOrderedBlocks(const int32 TargetTicket, TArray<int32>& Output,
 
 void FNReport::RenderBlock(const int32 Ticket, TArray<FString>& Output, const ENReportOutputFormat OutputFormat)
 {
-	FNReportContentBlock* ContentBlock = ContentBlocks.Find(Ticket);
-	if (ContentBlock != nullptr)
+	const FBlockMeta* Meta = BlockMeta.Find(Ticket);
+	if (Meta == nullptr)
 	{
-		return ContentBlock->Render(*this, Output, OutputFormat);
+		return;
 	}
-		
-	FNReportTableBlock* TableBlock = TableBlocks.Find(Ticket);
-	if (TableBlock != nullptr)
+
+	switch (Meta->Type)
 	{
-		return TableBlock->Render(*this, Output, OutputFormat);
+	case EBlockType::Content:
+		ContentBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+	case EBlockType::Table:
+		TableBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+	case EBlockType::List:
+		ListBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+	case EBlockType::Collapsable:
+		CollapsableBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+
 	}
 }

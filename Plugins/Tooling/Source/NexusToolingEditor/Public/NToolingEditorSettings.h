@@ -35,7 +35,7 @@ class UNToolingEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings, "Tooling", "Specific settings for NEXUS: Tooling included with the framework.");
+	N_EDITOR_SETTINGS_BASE(UNToolingEditorSettings, "Tooling", "Specific settings for NEXUS: Tooling included with the framework.");
 
 #if WITH_EDITOR
 	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */
@@ -70,23 +70,23 @@ public:
 	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "Window Icon Path", meta=(ToolTip="Replaces the Unreal Editor window icon at a platform level. This should simply be the path to the file WITHOUT any extension. The extension will be determined by the platform, thus all resources should have the same base name, and be located in the same folder. A restart of the editor is required for it to take effect."))
 	FString ProjectWindowIconPath;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World"))
+	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World", ToolTip="The set of project levels referenced by NEXUS tooling."))
 	TArray<FSoftObjectPath> ProjectLevels;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick", meta=(ToolTip="Severity reported when a Blueprint contains an empty Tick event."))
 	ENValidatorSeverity ValidatorBlueprintEmptyTick = ENValidatorSeverity::Error;
-	
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Multi-Pin Pure Node")
+
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Multi-Pin Pure Node", meta=(ToolTip="Severity reported when a Blueprint pure node has multiple connected output pins (which causes it to be re-evaluated per pin)."))
 	ENValidatorSeverity ValidatorBlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change", meta=(ToolTip="Severity reported when engine content has been modified."))
 	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Level: Blueprint Logic",
 		meta=(Tooltip="Determine if there are any non-ghost nodes in the level blueprint."))
 	ENValidatorSeverity ValidatorLevelBlueprint = ENValidatorSeverity::Disable;
 	
-	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Assets")
+	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Assets", meta=(ToolTip="Specific assets excluded from all validators."))
 	TArray<FSoftObjectPath> ValidatorIgnoredAssets;
 	
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Prefixes",

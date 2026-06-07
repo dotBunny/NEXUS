@@ -28,9 +28,9 @@ public:
 	}
 
 	/** Allocate a new cell node at the given transform, bound to the provided input data. */
-	FORCEINLINE static FNAssemblyGraphCellNode* CreateCellNode(FNVirtualCellData* Cell, const FVector& Position, const FRotator& Rotation, const FVector& VoxelSize)
+	FORCEINLINE static FNAssemblyGraphCellNode* CreateCellNode(const FNAssemblyGraphNodeParams& Params, FNVirtualCellData* Cell, const FVector& VoxelSize)
 	{
-		FNAssemblyGraphCellNode* CellNode = new FNAssemblyGraphCellNode(Cell, Position, Rotation, VoxelSize);
+		FNAssemblyGraphCellNode* CellNode = new FNAssemblyGraphCellNode(Params, Cell, VoxelSize);
 		return CellNode;
 	}
 

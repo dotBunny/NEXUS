@@ -31,7 +31,7 @@ public:
 	virtual void ShutdownModule() override;
 	//End IModuleInterface
 
-	N_IMPLEMENT_MODULE(FNToolingEditorModule, "NexusToolingEditor")
+	N_MODULE_BASE(FNToolingEditorModule, "NexusToolingEditor")
 
 	/** @return the shared editor input processor owned by this module, or nullptr before startup. */
 	FNEditorInputProcessor* GetInputProcessor() const

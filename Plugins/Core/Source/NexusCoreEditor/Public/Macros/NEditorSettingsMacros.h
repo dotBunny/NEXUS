@@ -27,7 +27,7 @@
  * @param Description String literal shown as the section description / tooltip in Editor Preferences.
  */
 #if WITH_EDITOR
-#define N_IMPLEMENT_EDITOR_SETTINGS(Type, Title, Description) \
+#define N_EDITOR_SETTINGS_BASE(Type, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \
@@ -57,7 +57,7 @@
 			return SectionDescription; \
 		}
 #else
-#define N_IMPLEMENT_EDITOR_SETTINGS(Type, Title, Description) \
+#define N_EDITOR_SETTINGS_BASE(Type, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \
@@ -78,7 +78,7 @@
 
 
 /**
- * Variant of N_IMPLEMENT_EDITOR_SETTINGS for classes that should not appear anywhere in the Editor Preferences UI.
+ * Variant of N_EDITOR_SETTINGS_BASE for classes that should not appear anywhere in the Editor Preferences UI.
  *
  * Returns NAME_None for both GetContainerName and GetCategoryName, which causes Unreal's settings registry
  * to skip the class when building the preferences tree. The class still gets the standard Get() /
@@ -90,7 +90,7 @@
  *
  * @param Type The UDeveloperSettings subclass that receives the accessors.
  */
-#define N_IMPLEMENT_HIDDEN_EDITOR_SETTINGS(Type) \
+#define N_HIDDEN_EDITOR_SETTINGS_BASE(Type) \
 	public: \
 		static const Type* Get() \
 		{ \

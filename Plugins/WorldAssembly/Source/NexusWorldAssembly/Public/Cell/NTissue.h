@@ -5,7 +5,10 @@
 
 #include "GameplayTagContainer.h"
 #include "NTissueTagGroups.h"
+#include "Collections/NGameplayTagCounter.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
 #include "Engine/DataAsset.h"
+#include "Types/NCardinalRotation.h"
 #include "NTissue.generated.h"
 
 class UNCell;
@@ -20,30 +23,43 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 {
 	GENERATED_BODY()
 	
-	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
+	/** Tags used to define behavior during the assembly process. */
+	UPROPERTY(EditAnywhere, DisplayName="Assembly Tags", Category="Tagging",  meta = (Categories="NEXUS.WorldAssembly", ToolTip="Tags used to define behavior during the assembly process."))
 	FGameplayTagContainer AssemblyTags;
+
+	/** Tags added to the Context Tags collection moving forward for the graph, and future phases. */
+	UPROPERTY(EditAnywhere, DisplayName="Added Context Tags", Category="Tagging", meta = (ToolTip="Tags added to the Context Tags collection moving forward for the graph, and future phases."))
+	FGameplayTagContainer AddedContextTags;
 	
-	UPROPERTY(EditAnywhere, DisplayName="Output Tags", meta = (ToolTip="Tags which get accumulated and are made available post-assembly for context to other gameplay generation systems as well as INCellInitialized-implementors via the ANCellLevelInstance."))
-	FGameplayTagContainer OutputTags;
+	/** Tags required to be found in Context Tags for allowance to place this cell. **/
+	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
+	FGameplayTagContainer RequiredContextTags;
 	
-	/** Whether the NCellLevelInstance should be spawned always relevant for networking purposes. */
-	UPROPERTY(EditAnywhere)
-	bool bAlwaysRelevant = false;
+	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Constraints", Category="Tagging", meta = (ToolTip="TagCounter constraints that must pass for this cell to be included in cell selection."))
+	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
+	
+	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Operations", Category="Tagging", meta = (ToolTip="Operations to apply to the TagCounter if the cell is placed/used."))
+	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 	
 	/**
-	 * DOES NOT DO ANYTHING CURRENTLY - Only used to determine Unique early out (1:1).
-	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no minimum constraint.
+	 * A minimum number of times this cell must be used in the generated FNAssemblyGraph for the graph to validate.
+	 * Enforced in FNVirtualOrganContext::CheckGraph against the cell's placed instance count.
+	 * @note A value of 0 indicates no minimum constraint.
+	 * @remark The minimum is skipped for cells whose assembly tags name a group that is both Unique and RequiredAny
+	 *         (the RequiredAny group check governs success instead), and for cells whose MinimumCount exceeds a
+	 *         positive MaximumCount (unsatisfiable). Also used to determine the Unique early out (MinimumCount == 1
+	 *         && MaximumCount == 1).
 	 */
-	UPROPERTY(EditAnywhere)
-	int32 MinimumCount = -1;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
+	int32 MinimumCount = 0;
 
 	/**
 	 * The maximum number of times this cell can be used in the generated FNAssemblyGraph.
-	 * @note A value of -1 indicates no maximum constraint.
+	 * @note A value of 0 indicates no maximum constraint (unlimited usage). To stop a cell from being generated,
+	 *       remove it from the tissue rather than setting a count.
 	 */
-	UPROPERTY(EditAnywhere)
-	int32 MaximumCount = -1;
+	UPROPERTY(EditAnywhere, meta=(ClampMin=0, UIMin=0))
+	int32 MaximumCount = 0;
 	
 	/**
 	 * The minimum number of cell links away this cell must be to be used again.
@@ -53,12 +69,36 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	int32 MinimumNodeDistance = 1;
 	
 	/**
-	* The minimum number of cell hops away from the start cell before this cell may be used.
-	* The start cell is hop 0, its direct neighbours hop 1, etc. A value of N first allows the cell N hops out.
-	* @note A value of 0 indicates no constraint.
+	* The minimum graph depth at which this cell may be used, as a 1-based NodeDepth.
+	* The start cell is depth 1, its direct neighbors depth 2, etc. A value of N first allows the cell at depth N.
+	* @note A value of 0 indicates no constraint (a value of 1 is the start cell and is likewise unconstrained).
 	*/
 	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
 	int32 MinimumNodeDepth = 0;
+
+	/**
+	* The maximum graph depth at which this cell may still be used, as a 1-based NodeDepth.
+	* The start cell is depth 1, its direct neighbors depth 2, etc. A value of N allows the cell up to depth N;
+	* a value of 1 restricts the cell to the start cell only.
+	* @note A value of 0 indicates no constraint.
+	*/
+	UPROPERTY(EditAnywhere,meta=(ClampMin=0, UIMin=0))
+	int32 MaximumNodeDepth = 0;
+
+	/**
+	 * When true, this cell may only be placed toward DirectionConstraint relative to the organ's start point,
+	 * limiting it to candidates whose compass bearing from the start lands within the assembly direction tolerance.
+	 */
+	UPROPERTY(EditAnywhere)
+	bool bHasDirectionConstraint = false;
+
+	/**
+	 * The compass heading, measured from the organ's start point out to the candidate's placement, this cell is
+	 * restricted to while bHasDirectionConstraint is set.
+	 * @note Enforced within the project/operation Direction Tolerance (degrees +/-) during cell filtering.
+	 */
+	UPROPERTY(EditAnywhere, meta=(EditCondition=bHasDirectionConstraint))
+	ENCardinalDirection DirectionConstraint = ENCardinalDirection::North;
 	
 	/** 
 	 * Relative weight for random selection during generation.
@@ -94,7 +134,8 @@ public:
 		FNTissueTagGroups& OutTagGroups, 
 		TArray<UNTissue*>& OutProcessedSets);
 	
-	UPROPERTY(EditAnywhere, DisplayName="Tag Groups")
+	/** Tag groups that drive placement behavior for this tissue's cells. */
+	UPROPERTY(EditAnywhere, DisplayName="Assembly Tag Groups")
 	FNTissueTagGroups TagGroups = FNTissueTagGroups();
 	
 	/** The cells that directly belong to this tissue, along with per-cell generation constraints. */

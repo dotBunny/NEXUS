@@ -119,4 +119,64 @@ N_TEST_HIGH(FNCardinalDirectionUtilsTests_ToDecimalDegreesNormalized_EasternDire
 	CHECK_MESSAGE(TEXT("South should normalize to 180"), FMath::IsNearlyEqual(FNCardinalDirectionUtils::ToDecimalDegreesNormalized(ENCardinalDirection::South), 180.f, 0.01f));
 }
 
+namespace NEXUS::UnitTests::NCore::FNCardinalDirectionUtilsHarness
+{
+	/** All 16 compass headings in enum order, for table-driven sweeps. */
+	static const TArray<ENCardinalDirection> AllDirections = {
+		ENCardinalDirection::North, ENCardinalDirection::NorthNorthEast, ENCardinalDirection::NorthEast, ENCardinalDirection::EastNorthEast,
+		ENCardinalDirection::East, ENCardinalDirection::EastSouthEast, ENCardinalDirection::SouthEast, ENCardinalDirection::SouthSouthEast,
+		ENCardinalDirection::South, ENCardinalDirection::SouthSouthWest, ENCardinalDirection::SouthWest, ENCardinalDirection::WestSouthWest,
+		ENCardinalDirection::West, ENCardinalDirection::WestNorthWest, ENCardinalDirection::NorthWest, ENCardinalDirection::NorthNorthWest};
+}
+
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCloseToDirection_ExactDirections, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCloseToDirection_ExactDirections", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Every heading is close to its own exact bearing, and is NOT close to the midpoint to its neighbour
+	// (11.25 degrees away — equidistant between two headings, so well beyond the default tolerance).
+	using namespace NEXUS::UnitTests::NCore::FNCardinalDirectionUtilsHarness;
+	for (const ENCardinalDirection Direction : AllDirections)
+	{
+		const float Bearing = FNCardinalDirectionUtils::ToDecimalDegrees(Direction);
+		CHECK_MESSAGE(FString::Printf(TEXT("Bearing %f should be close to its own direction"), Bearing),
+			FNCardinalDirectionUtils::IsCloseToDirection(Direction, Bearing));
+		CHECK_FALSE_MESSAGE(FString::Printf(TEXT("Bearing %f offset by 11.25 should not be close to direction"), Bearing),
+			FNCardinalDirectionUtils::IsCloseToDirection(Direction, Bearing + 11.25f));
+	}
+}
+
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCloseToDirection_Wraparound, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCloseToDirection_Wraparound", N_TEST_CONTEXT_ANYWHERE)
+{
+	// The 0/360 seam wraps: an angle a hair below 360 is close to North (0), and a hair above 0 likewise.
+	CHECK_MESSAGE(TEXT("359.995 should be close to North across the seam"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::North, 359.995f));
+	CHECK_MESSAGE(TEXT("0.005 should be close to North"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::North, 0.005f));
+	// A full 359.0 is a degree off North and must be rejected at the default tolerance despite being near the seam.
+	CHECK_FALSE_MESSAGE(TEXT("359.0 should not be close to North at default tolerance"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::North, 359.0f));
+}
+
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCloseToDirection_OutOfRange, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCloseToDirection_OutOfRange", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Inputs outside [0, 360) are reduced via NormalizeAxis before comparison, so multi-turn and large negative
+	// values resolve to the same heading as their in-range equivalent.
+	CHECK_MESSAGE(TEXT("720 should be close to North (two full turns)"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::North, 720.f));
+	CHECK_MESSAGE(TEXT("450 should be close to East (90 + a turn)"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::East, 450.f));
+	CHECK_MESSAGE(TEXT("-270 should be close to East"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::East, -270.f));
+}
+
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCloseToDirection_NormalizedInput, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCloseToDirection_NormalizedInput", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Signed [-180, 180) FRotator-style input matches the same headings as the unsigned [0, 360) form.
+	CHECK_MESSAGE(TEXT("-90 should be close to West"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::West, -90.f));
+	CHECK_MESSAGE(TEXT("-135 should be close to SouthWest"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::SouthWest, -135.f));
+	CHECK_MESSAGE(TEXT("-45 should be close to NorthWest"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::NorthWest, -45.f));
+}
+
+N_TEST_HIGH(FNCardinalDirectionUtilsTests_IsCloseToDirection_Tolerance, "NEXUS::UnitTests::NCore::FNCardinalDirectionUtils::IsCloseToDirection_Tolerance", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A 10-degree deviation is rejected at the default tolerance but accepted once the tolerance widens past it,
+	// and a clearly different heading stays rejected even under a generous tolerance.
+	CHECK_FALSE_MESSAGE(TEXT("100 should not be close to East at default tolerance"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::East, 100.f));
+	CHECK_MESSAGE(TEXT("100 should be close to East under a 15-degree tolerance"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::East, 100.f, 15.f));
+	CHECK_FALSE_MESSAGE(TEXT("180 (South) should not be close to North even under a 15-degree tolerance"), FNCardinalDirectionUtils::IsCloseToDirection(ENCardinalDirection::North, 180.f, 15.f));
+}
+
 #endif //WITH_TESTS

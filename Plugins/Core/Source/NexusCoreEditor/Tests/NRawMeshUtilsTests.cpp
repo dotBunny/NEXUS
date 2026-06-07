@@ -146,6 +146,18 @@ namespace NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness
 		Mesh.Validate();
 		return Mesh;
 	}
+
+	/**
+	 * Returns a copy of Mesh with (Rotation, Origin) baked into its vertices and Bounds — mirroring how the
+	 * transform-applied overloads place a mesh in world space. Lets the world-space (already-transformed)
+	 * overloads be checked for agreement against their six-argument transform-applied equivalents.
+	 */
+	static FNRawMesh Baked(const FNRawMesh& Mesh, const FVector& Origin, const FRotator& Rotation)
+	{
+		FNRawMesh Copy = Mesh;
+		Copy.ApplyTransform(FTransform(Rotation, Origin));
+		return Copy;
+	}
 }
 
 N_TEST_HIGH(FNRawMeshUtilsTests_CombineMesh_EmptyOther_NoOp,
@@ -1340,6 +1352,262 @@ N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_EarlyExitDepth_Zero_AnyPenetra
 		Depth > 0.0f);
 	CHECK_MESSAGE(TEXT("With threshold 0, the caller's >= 0 comparison must succeed"),
 		Depth >= 0.0f);
+}
+
+// ---------------------------------------------------------------------------------------------------------
+// World-space (already-transformed) overloads. These bake the placement transform into a mesh's vertices via
+// the harness Baked() helper, then assert the baked-vertex overload agrees with the six-argument
+// transform-applied reference. The "Left baked" overloads place only Left in world space; the "both baked"
+// overloads place both.
+// ---------------------------------------------------------------------------------------------------------
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_BakedBoth_Overlap_MatchesTransformed,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::BakedBoth_Overlap_MatchesTransformed",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Half-overlapping cubes, but with both placements baked into the vertices and the no-transform overload
+	// invoked. Must agree with the transform-applied reference (true).
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const bool bReference = FNRawMeshUtils::DoesIntersect(
+		Cube, FVector(0, 0, 0), FRotator::ZeroRotator,
+		Cube, FVector(5, 0, 0), FRotator::ZeroRotator);
+
+	const FNRawMesh LeftBaked  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+	const FNRawMesh RightBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(5, 0, 0), FRotator::ZeroRotator);
+	const bool bBaked = FNRawMeshUtils::DoesIntersect(LeftBaked, RightBaked);
+
+	CHECK_MESSAGE(TEXT("Baked half-overlapping cubes must be reported as intersecting"), bBaked);
+	CHECK_EQUALS("Both-baked overload must agree with the transform-applied reference", bBaked, bReference);
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_BakedBoth_Separated_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::BakedBoth_Separated_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Far-apart placements baked into the vertices — the AABB early-out must still fire on the world-space data.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const FNRawMesh LeftBaked  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+	const FNRawMesh RightBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(1000, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_FALSE_MESSAGE(TEXT("Baked far-apart cubes must be rejected by the AABB early-out"),
+		FNRawMeshUtils::DoesIntersect(LeftBaked, RightBaked));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_BakedBoth_RotatedContainment_MatchesTransformed,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::BakedBoth_RotatedContainment_MatchesTransformed",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Mirrors FullyContainedDifferentRotations but with both rotations baked into the vertices. Exercises the
+	// containment fallback on already-world-space data and confirms it matches the transform-applied reference.
+	const FNRawMesh Big   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(1.0);
+
+	const bool bReference = FNRawMeshUtils::DoesIntersect(
+		Big,   FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Small, FVector(0, 0, 0), FRotator(60.f, 0.f, 0.f));
+
+	const FNRawMesh BigBaked   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Big,   FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f));
+	const FNRawMesh SmallBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Small, FVector(0, 0, 0), FRotator(60.f, 0.f, 0.f));
+	const bool bBaked = FNRawMeshUtils::DoesIntersect(BigBaked, SmallBaked);
+
+	CHECK_MESSAGE(TEXT("Baked rotated containment must be reported as intersecting"), bBaked);
+	CHECK_EQUALS("Both-baked containment must agree with the transform-applied reference", bBaked, bReference);
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_DoesIntersect_BakedLeft_MatchesTransformed,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::BakedLeft_MatchesTransformed",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Left baked into world space, Right still placed by the supplied origin/rotation. Uses the distinct-rotation
+	// containment scenario so the asymmetric transform handling (identity left, live right) is exercised, and
+	// asserts agreement with the fully transform-applied reference.
+	const FNRawMesh Big   = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Small = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(1.0);
+
+	const bool bReference = FNRawMeshUtils::DoesIntersect(
+		Big,   FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Small, FVector(0, 0, 0), FRotator(60.f, 0.f, 0.f));
+
+	const FNRawMesh BigBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Big, FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f));
+	const bool bBaked = FNRawMeshUtils::DoesIntersect(BigBaked, Small, FVector(0, 0, 0), FRotator(60.f, 0.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Baked-left containment must be reported as intersecting"), bBaked);
+	CHECK_EQUALS("Baked-left overload must agree with the transform-applied reference", bBaked, bReference);
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_DoesIntersect_BakedLeft_Separated_False,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::DoesIntersect::BakedLeft_Separated_False",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const FNRawMesh LeftBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_FALSE_MESSAGE(TEXT("Baked-left cube against a far-placed right cube must be rejected"),
+		FNRawMeshUtils::DoesIntersect(LeftBaked, Cube, FVector(1000, 0, 0), FRotator::ZeroRotator));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BakedBoth_PartialOverlap_NearestFaceDistance,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedBoth_PartialOverlap_NearestFaceDistance",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Same geometry as the transform-applied PartialOverlap_NearestFaceDistance (Left half-extent 10, Right
+	// half-extent 5 at +12 X → analytic depth 3), with both placements baked into the vertices.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const FNRawMesh LeftBaked  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Left,  FVector(0,  0, 0), FRotator::ZeroRotator);
+	const FNRawMesh RightBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Right, FVector(12, 0, 0), FRotator::ZeroRotator);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(LeftBaked, RightBaked);
+
+	CHECK_MESSAGE(TEXT("Both-baked partial overlap must report the nearest-face depth (3.0)"),
+		FMath::IsNearlyEqual(Depth, 3.0f, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_BakedBoth_Separated_NegativeOne,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedBoth_Separated_NegativeOne",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const FNRawMesh LeftBaked  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+	const FNRawMesh RightBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(1000, 0, 0), FRotator::ZeroRotator);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(LeftBaked, RightBaked);
+
+	CHECK_MESSAGE(TEXT("Both-baked far-apart cubes must return the -1 'no overlap' sentinel"),
+		FMath::IsNearlyEqual(Depth, -1.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BakedLeft_MatchesTransformed,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedLeft_MatchesTransformed",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Left baked into world space (with rotation), Right still placed by origin/rotation. Mirrors
+	// BothMeshesRotated_PositiveDepth and asserts the baked-left overload reproduces the reference depth.
+	const FNRawMesh Left  = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(10.0);
+	const FNRawMesh Right = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+
+	const float Reference = FNRawMeshUtils::GetIntersectDepth(
+		Left,  FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f),
+		Right, FVector(8, 0, 0), FRotator(0.f, -45.f, 0.f));
+
+	const FNRawMesh LeftBaked = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Left, FVector(0, 0, 0), FRotator(0.f, 30.f, 0.f));
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(LeftBaked, Right, FVector(8, 0, 0), FRotator(0.f, -45.f, 0.f));
+
+	CHECK_MESSAGE(TEXT("Baked-left rotated overlap must report a positive depth"), Depth > 0.0f);
+	CHECK_MESSAGE(TEXT("Baked-left depth must match the transform-applied reference"),
+		FMath::IsNearlyEqual(Depth, Reference, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BakedPoint_InsideCube_NearestFaceDistance,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedPoint_InsideCube_NearestFaceDistance",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// World-space point against a baked cube. Cube(5) at origin, point at world (3,0,0) → nearest face is +X
+	// at x=5, so depth = 2. Must also agree with the transform-applied point overload at identity.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh BakedCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(BakedCube, FVector(3, 0, 0));
+	const float Reference = FNRawMeshUtils::GetIntersectDepth(Cube, FVector(0, 0, 0), FRotator::ZeroRotator, FVector(3, 0, 0));
+
+	CHECK_MESSAGE(TEXT("World point 3 units along X inside a cube(5) must report nearest-face depth (2.0)"),
+		FMath::IsNearlyEqual(Depth, 2.0f, 0.001f));
+	CHECK_MESSAGE(TEXT("Baked-point overload must agree with the transform-applied point reference"),
+		FMath::IsNearlyEqual(Depth, Reference, 0.001f));
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_GetIntersectDepth_BakedPoint_Outside_NegativeOne,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedPoint_Outside_NegativeOne",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh BakedCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(0, 0, 0), FRotator::ZeroRotator);
+
+	CHECK_MESSAGE(TEXT("World point well outside the baked cube must return the -1 sentinel via the AABB early-out"),
+		FMath::IsNearlyEqual(FNRawMeshUtils::GetIntersectDepth(BakedCube, FVector(100, 0, 0)), -1.0f, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_GetIntersectDepth_BakedPoint_Rotated_MatchesTransformed,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::GetIntersectDepth::BakedPoint_Rotated_MatchesTransformed",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Cube(5) baked with a yaw rotation and a translation to (10,0,0). The mesh centre maps to world (10,0,0),
+	// so a world point there sits dead centre → depth = 5 (rotation preserves face distances). Must match the
+	// transform-applied point overload fed the same placement.
+	const FNRawMesh Cube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::MakeCube(5.0);
+	const FNRawMesh BakedCube = NEXUS::UnitTests::NCore::FNRawMeshUtilsHarness::Baked(Cube, FVector(10, 0, 0), FRotator(0.f, 30.f, 0.f));
+
+	const float Depth = FNRawMeshUtils::GetIntersectDepth(BakedCube, FVector(10, 0, 0));
+	const float Reference = FNRawMeshUtils::GetIntersectDepth(Cube, FVector(10, 0, 0), FRotator(0.f, 30.f, 0.f), FVector(10, 0, 0));
+
+	CHECK_MESSAGE(TEXT("World point at the baked cube's centre must report depth 5.0 (rotation preserves face distances)"),
+		FMath::IsNearlyEqual(Depth, 5.0f, 0.001f));
+	CHECK_MESSAGE(TEXT("Baked rotated-point overload must agree with the transform-applied point reference"),
+		FMath::IsNearlyEqual(Depth, Reference, 0.001f));
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_MakeBoxHull_Topology_EightVertsSixQuadsTwelveTris,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::Topology_EightVertsSixQuadsTwelveTris",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A box hull must carry the full production-shaped topology: 8 corners, 6 quad FaceLoops, 12 triangle Loops.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_EQUALS("Box hull must have 8 vertices.", Hull.Vertices.Num(), 8)
+	CHECK_EQUALS("Box hull must have 6 polygonal faces.", Hull.FaceLoops.Num(), 6)
+	CHECK_EQUALS("Box hull must have 12 triangle loops.", Hull.Loops.Num(), 12)
+
+	for (const FNRawMeshLoop& Face : Hull.FaceLoops)
+	{
+		CHECK_MESSAGE(TEXT("Every FaceLoop on a box hull must be a quad."), Face.IsQuad())
+	}
+	for (const FNRawMeshLoop& Loop : Hull.Loops)
+	{
+		CHECK_MESSAGE(TEXT("Every Loop on a box hull must be a triangle."), Loop.IsTriangle())
+	}
+}
+
+N_TEST_CRITICAL(FNRawMeshUtilsTests_MakeBoxHull_IsConvex_True,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::IsConvex_True",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The emitted faces are outward-wound, so the hull must pass CheckConvex without tripping the
+	// "no vertices or loops" warning a vertex-only hull would produce.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_MESSAGE(TEXT("A box hull must report convex."), Hull.IsConvex())
+}
+
+N_TEST_HIGH(FNRawMeshUtilsTests_MakeBoxHull_BoundsAndCenterMatchInput,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::BoundsAndCenterMatchInput",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Bounds must equal the requested box and Center its midpoint, both computed from the emitted corners.
+	const FBox Box(FVector(-20.0, -30.0, -40.0), FVector(60.0, 50.0, 10.0));
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(Box);
+
+	CHECK_MESSAGE(TEXT("Box hull bounds min must match the input box."), Hull.Bounds.Min.Equals(Box.Min))
+	CHECK_MESSAGE(TEXT("Box hull bounds max must match the input box."), Hull.Bounds.Max.Equals(Box.Max))
+	CHECK_MESSAGE(TEXT("Box hull center must be the box midpoint."), Hull.Center.Equals(Box.GetCenter()))
+}
+
+N_TEST_MEDIUM(FNRawMeshUtilsTests_MakeBoxHull_ContainsCenterNotFarPoint,
+	"NEXUS::UnitTests::NCore::FNRawMeshUtils::MakeBoxHull::ContainsCenterNotFarPoint",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The convex-path point test must place the box centre inside and a far point outside, proving the
+	// emitted face winding yields correct (outward) half-spaces.
+	const FNRawMesh Hull = FNRawMeshUtils::MakeBoxHull(FBox(FVector(-50.0), FVector(50.0)));
+
+	CHECK_MESSAGE(TEXT("The box centre must be inside the hull."),
+		FNRawMeshUtils::IsRelativePointInside(Hull, FVector::ZeroVector))
+	CHECK_FALSE_MESSAGE(TEXT("A point well outside the box must not be inside the hull."),
+		FNRawMeshUtils::IsRelativePointInside(Hull, FVector(1000.0, 0.0, 0.0)))
 }
 
 #endif //WITH_TESTS

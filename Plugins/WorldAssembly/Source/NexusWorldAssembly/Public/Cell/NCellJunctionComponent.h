@@ -5,6 +5,8 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NColor.h"
+#include "NWorldAssemblySettings.h"
 #include "Components/BillboardComponent.h"
 #include "Macros/NActorMacros.h"
 #include "NCellJunctionComponent.generated.h"
@@ -49,7 +51,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 		TransformUpdated.AddUObject(this, &UNCellJunctionComponent::OnTransformUpdated);
 #endif // WITH_EDITOR
 
-		N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
+		N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
 	}
 
 public:
@@ -72,25 +74,32 @@ public:
 	 * @param SocketUnitSize Project-configured socket unit size used to size the junction.
 	 */
 	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
-	/** @return The visual-debug color derived from the junction's details. */
-	FLinearColor GetColor() const;
 
 #if WITH_EDITOR
 
 	virtual void PostEditImport() override;
 	
+	/** @return The display name of this junction. */
 	FString GetJunctionName() const;
+	/** Transform-changed callback that keeps the junction's hull-derived data in sync after the component moves. */
 	void OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport);
 #endif // WITH_EDITOR
 	
 	/** Draw the junction's debug visualization through the supplied PDI. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, 
+		bool bShowDepth = false, FLinearColor DefaultColor = FNColor::GreenLight, 
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
+
 	/**
 	 * Recompute hull-derived data on the junction using the supplied root component.
 	 * @param RootComponent Root component of the owning cell.
 	 */
 	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
 
+	/**
+	 * @param SocketSize The socket dimensions to size the corners to.
+	 * @return The junction's socket corner points in world space.
+	 */
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
 	
 private:

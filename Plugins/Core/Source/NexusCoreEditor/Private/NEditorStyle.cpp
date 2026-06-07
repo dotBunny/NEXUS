@@ -7,11 +7,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNEditorStyle)
+N_EDITOR_STYLE(FNEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 
 	Style.Set("NEXUS.Icon", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("NEXUS"), Icon16x16));
 	Style.Set("Command.OpenDiscordInviteLink", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_OpenDiscordInviteLink"), Icon16x16));

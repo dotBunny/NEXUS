@@ -36,15 +36,15 @@ public:
 
 	/** Notify the client that an operation has started on the server. */
 	UFUNCTION(Client, Reliable)
-	void Client_OperationStarted(uint32 OperationTicket);
+	void Client_OperationStarted(int32 OperationTicket);
 
 	/** Notify the client that an operation has completed. */
 	UFUNCTION(Client, Reliable)
-	void Client_OperationFinished(uint32 OperationTicket);
+	void Client_OperationFinished(int32 OperationTicket);
 
 	/** Notify the client that an operation has been destroyed. */
 	UFUNCTION(Client, Reliable)
-	void Client_OperationDestroyed(uint32 OperationTicket);
+	void Client_OperationDestroyed(int32 OperationTicket);
 
 protected:
 	//~AActor
@@ -60,7 +60,7 @@ protected:
 	 * @remark Must be called on the owning client. On the server it is a no-op on remote relays.
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_RequestNearbyCells(FVector Location, uint32 OperationTicket, bool bIsLevelLoaded = true);
+	void Server_RequestNearbyCells(FVector Location, int32 OperationTicket, bool bIsLevelLoaded = true);
 
 	/** Server response payload: cell-instance locators within range of the client's request. */
 	UFUNCTION(Client, Reliable)
@@ -78,7 +78,7 @@ private:
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
 
 	/** Operation tickets the client has been informed about. */
-	TArray<uint32> KnownOperations;
+	TArray<int32> KnownOperations;
 
 	/** @return true if a nearby-cell payload is currently cached. */
 	bool HasNearbyCellLevelInstances();

@@ -36,6 +36,7 @@ protected:
 
 	//~UUserWidget
 	virtual void NativeConstruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	//End UUserWidget
 
 	/** Header displayed above the ENDynamicRef list (hidden when empty). */
@@ -65,6 +66,13 @@ protected:
 private:
 	/** Refresh the overlay banner's text based on whether any references are currently live. */
 	void UpdateBanner() const;
+
+	/**
+	 * Drop wrapper rows whose tracked objects have all gone stale (destroyed without a matching remove).
+	 * Weak references go invalid silently with no delegate, so this is polled each tick to keep the
+	 * displayed list in sync with the live objects.
+	 */
+	void ReconcileStaleEntries();
 
 	/** Add a row to the FName-keyed list for Object under Name. */
 	void AddListItem(FName Name, UObject* Object);

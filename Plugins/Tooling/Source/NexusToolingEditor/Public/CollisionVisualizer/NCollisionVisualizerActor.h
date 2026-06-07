@@ -56,9 +56,11 @@ public:
 	/** @return world-space rotation applied to sweep/overlap shapes. */
 	FQuat GetRotation() const { return StartPointComponent->GetComponentQuat(); }
 
+	/** Scene component marking the start point of the collision query. */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UNCollisionVisualizerSceneComponent> StartPointComponent;
 
+	/** Scene component marking the end point of the collision query (used by sweep/trace queries). */
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UNCollisionVisualizerSceneComponent> EndPointComponent;
 protected:

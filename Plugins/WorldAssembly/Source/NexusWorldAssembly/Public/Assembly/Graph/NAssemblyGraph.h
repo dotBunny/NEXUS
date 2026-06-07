@@ -24,9 +24,6 @@ public:
 	/** @return All nodes currently in the graph, in registration order. */
 	const TArray<FNAssemblyGraphNode*>& GetNodes() const { return Nodes; }
 
-	/** @return Mutable access to all nodes, for builder/collector mutation. */
-	TArray<FNAssemblyGraphNode*>& GetMutableNodes() { return Nodes; }
-
 	/** Take ownership of Node and add it to the graph. */
 	void RegisterNode(FNAssemblyGraphNode* Node);
 
@@ -45,15 +42,7 @@ public:
 	/** @return Number of Cell-type nodes only (excludes Bone and Null nodes). */
 	int32 GetCellNodeCount() const
 	{
-		int32 Count = 0;
-		for (const FNAssemblyGraphNode* Node : Nodes)
-		{
-			if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
-			{
-				Count++;
-			}
-		}
-		return Count;
+		return CellNodeCount;
 	}
 
 	/** @return true if the graph was allowed to extend outside its organ bounds. */
@@ -80,4 +69,7 @@ private:
 
 	/** All owned nodes, in registration order. */
 	TArray<FNAssemblyGraphNode*> Nodes;
+
+	/** Cached count of Cell-type nodes, kept in sync by Register/UnregisterNode to avoid O(N) recounts. */
+	int32 CellNodeCount = 0;
 };

@@ -14,5 +14,5 @@
  */
 class NEXUSTOOLINGEDITOR_API FNToolingEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusTooling", "NToolingEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusTooling", "NToolingEditorStyle")
 };

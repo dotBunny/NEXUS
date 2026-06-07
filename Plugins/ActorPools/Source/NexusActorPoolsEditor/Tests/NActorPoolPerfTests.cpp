@@ -21,7 +21,7 @@ public:
 	static void Return(UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 		Pool.Prewarm(NEXUS::PerfTests::NActorPools::FNActorPoolHarness::ObjectCount);
 
@@ -49,7 +49,7 @@ public:
 	static void Warm(UWorld* World)
 	{
 		FNActorPoolSettings ActorPoolSettings = FNActorPoolSettings();
-		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		ActorPoolSettings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), ActorPoolSettings);
 
 		// TEST

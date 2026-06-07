@@ -23,7 +23,8 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyOperationContext
 {
 	friend class UNAssemblyOperation;
 public:
-	explicit FNAssemblyOperationContext(uint32 NewOperationTicket);
+	/** Constructs the context for the operation identified by the given ticket. */
+	explicit FNAssemblyOperationContext(int32 NewOperationTicket);
 
 	/** Organ components fed into the operation prior to LockAndPreprocess. */
 	TArray<TObjectPtr<UNOrganComponent>> InputComponents;
@@ -59,8 +60,13 @@ public:
 	void LockAndPreprocess(UWorld* World);
 	
 #if !UE_BUILD_SHIPPING
+	/**
+	 * Appends a summary of this context's organs, bones, and generation order to the supplied report (non-shipping builds only).
+	 * @param Report The report to append to.
+	 * @param bBuildTissues When true, also include per-tissue detail in the summary.
+	 */
 	void AddToReport(FNReport* Report, bool bBuildTissues = false);
-#endif // !UE_BUILD_SHIPPING	
+#endif // !UE_BUILD_SHIPPING
 
 	/** Clear all derived state and return the context to an unlocked, empty state. */
 	void ResetContext();
@@ -72,7 +78,7 @@ public:
 	UWorld* GetTargetWorld() const { return TargetWorld; }
 
 	/** @return The ticket of the UNAssemblyOperation that owns this context. */
-	uint32 GetOperationTicket() const { return OperationTicket; }
+	int32 GetOperationTicket() const { return OperationTicket; }
 
 	/** @return The operation-wide settings snapshot. */
 	const FNAssemblyOperationSettings& GetOperationSettings() { return OperationSettings; }
@@ -80,7 +86,7 @@ public:
 private:
 
 	/** The identifier of the UNAssemblyOperation that owns this context. */
-	uint32 OperationTicket;
+	int32 OperationTicket;
 
 	/** Operation-wide settings snapshot, captured before preprocessing. */
 	FNAssemblyOperationSettings OperationSettings;

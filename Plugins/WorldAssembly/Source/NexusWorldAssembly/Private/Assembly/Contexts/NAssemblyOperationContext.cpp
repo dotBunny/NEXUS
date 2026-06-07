@@ -14,7 +14,7 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
-FNAssemblyOperationContext::FNAssemblyOperationContext(const uint32 NewOperationTicket)
+FNAssemblyOperationContext::FNAssemblyOperationContext(const int32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
 }
@@ -157,6 +157,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		Pair.Value.MaximumRetryCount = Settings->AssemblyGenerationRetryCount;
 		Pair.Value.CellHullPenetration = Settings->AssemblyJunctionMatchingCellHullPenetration;
 		Pair.Value.WorldHullPenetration = Settings->AssemblyJunctionMatchingWorldPenetration;
+		Pair.Value.AssemblyDirectionTolerance = Settings->AssemblyDirectionTolerance;
 		Pair.Value.VoxelSize = Settings->VoxelSize;
 		
 		if (Pair.Key->bUnbounded)
@@ -321,14 +322,23 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	
 	const int32 OverviewTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
 	FNReportTableBlock* OverviewTable = Report->GetTableBlock(OverviewTableTicket);
-	OverviewTable->Initialize({ "Ticket", "Lock Status", "Runtime", "Iterations"});
-	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{RUNTIME}}", "{{ITERATIONS}}"});
-	
+	OverviewTable->Initialize({ "Ticket", "Lock Status", "Result", "Runtime"});
+	OverviewTable->AddRow({FString::FromInt(OperationTicket), bIsLocked ? "Yes" : "No", "{{STATUS}}", "{{RUNTIME}}"});
+
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
-	Report->AddReplaceToken("{{ITERATIONS}}", ""); // We'll fill this out later
+	Report->AddReplaceToken("{{STATUS}}", ""); // Filled in by FNAssemblyTaskAnalytics::AddToReports
 	
-	// Components
-	const int32 ComponentTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	const int32 LatentSummaryTicket  = Report->CreateCollapsableBlock(OperationContextContentTicket);
+	FNReportCollapsableBlock* LatentSummaryContentBlock = Report->GetCollapsableBlock(LatentSummaryTicket);
+	LatentSummaryContentBlock->SetHeading(TEXT("Insights"));
+	
+	// # INPUTS
+	const int32 InputsTicket = Report->CreateContentBlock();
+	FNReportContentBlock* InputsBlock = Report->GetContentBlock(InputsTicket);
+	InputsBlock->SetHeading("Inputs");
+	
+	// ## Components
+	const int32 ComponentTableTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* ComponentTableBlock = Report->GetTableBlock(ComponentTableTicket);
 	ComponentTableBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
 	ComponentTableBlock->Initialize({ "Component", "Intersections", "Contains", "Bones", "Tissues" });
@@ -399,8 +409,8 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 		ComponentTableBlock->AddRow({ *Data.Value.SourceComponent->GetDebugLabel(), *Intersections, *Contains, *Bones, *TissueList });
 	}
 	
-	
-	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	// ## Generation Order
+	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* GenerationOrderTableBlock = Report->GetTableBlock(GenerationOrderContentTicket);
 	GenerationOrderTableBlock->SetHeading(FString::Printf(TEXT("Generation Order (%i)"), GenerationOrder.Num()));
 	GenerationOrderTableBlock->Initialize( { "Phase", "Organs" } );

@@ -37,6 +37,8 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 
 FNActorPool::~FNActorPool()
 {
+	// The world creates and tears down the pools, so we probably dont need to remove it from tickable.
+	
 	if (IsValid(LinkedActorPoolObject))
 	{
 		LinkedActorPoolObject->Pool = nullptr;
@@ -112,10 +114,6 @@ FText FNActorPool::GetDescription() const
 	if (Settings.HasFlag_ServerOnly())
 	{
 		FlagDetails += TEXT("\tServer Only\n");
-	}
-	if (Settings.HasFlag_ShouldFinishSpawning())
-	{
-		FlagDetails += TEXT("\tShould Finish Spawning\n");
 	}
 	if (Settings.HasFlag_SetNetDormancy())
 	{
@@ -287,10 +285,26 @@ bool FNActorPool::Return(AActor* Actor)
 	return true;
 }
 
+void FNActorPool::ReturnAll(bool bSkipCheck)
+{
+	if (!bSkipCheck && !Settings.HasSupportFlag_ReturnAll())
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName());
+		return;
+	}
+	
+	for (int i = OutActors.Num() - 1; i >= 0; --i)
+	{
+		Return(OutActors[i]);
+	}
+}
+
 void FNActorPool::UpdateSettings(const FNActorPoolSettings& InNewSettings)
 {
 	// Ingest flags - and update cached flags
 	Settings.Flags = InNewSettings.Flags;
+	Settings.SupportFlags = InNewSettings.SupportFlags;
+	
 	// World may have been torn down out from under a long-lived external pool reference; treat that as non-authoritative.
 	bStubMode = Settings.HasFlag_ServerOnly() && (!IsValid(World) || !World->GetAuthGameMode());
 	
@@ -347,34 +361,20 @@ bool FNActorPool::ApplyStrategy()
 		return CreateActors();
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-		{
-			Return(OutActors[0]);
-		}
-		else
-		{
-			return CreateActors();
-		}
-		return true;
+			return Return(OutActors[0]);
+		return CreateActors();
 	case CreateRecycleLast:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-		{
-			Return(OutActors[OutActors.Num() - 1]);
-		}
-		else
-		{
-			return CreateActors();
-		}
-		return true;
+			return Return(OutActors[OutActors.Num() - 1]);
+		return CreateActors();
 	case Fixed:
 		return false;
 	case FixedRecycleFirst:
 		if (OutActors.IsEmpty()) return false;
-		Return(OutActors[0]);
-		return true;
+		return Return(OutActors[0]);
 	case FixedRecycleLast:
 		if (OutActors.IsEmpty()) return false;
-		Return(OutActors[OutActors.Num() - 1]);
-		return true;
+		return Return(OutActors[OutActors.Num() - 1]);
 	default:
 		return false;
 	}
@@ -451,7 +451,7 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 	AActor* CreatedActor = World->SpawnActorAbsolute(Template, Settings.StorageTransform, SpawnInfo);
 	if (CreatedActor == nullptr)
 	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("FNActorPool failed to spawn actor of class %s when requested/needed."), *Template->GetName())
+		UE_LOG(LogNexusActorPools, Error, TEXT("FNActorPool failed to spawn actor of class %s when requested/needed."), *Template->GetName());
 		return false;
 	}
 
@@ -472,17 +472,30 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 	}
 	else
 	{
-		if (SpawnInfo.bDeferConstruction && Settings.HasFlag_ShouldFinishSpawning())
+		bool bInvokeFunctions = Settings.HasFlag_InvokeUFunctions();
+		
+		if (SpawnInfo.bDeferConstruction && bInvokeFunctions)
+		{
+			UFunction* OnDeferredConstructionFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnDeferredConstruction);
+			if (OnDeferredConstructionFunction)
+			{
+				CreatedActor->ProcessEvent(OnDeferredConstructionFunction, nullptr);
+			}
+		}
+		
+		if (SpawnInfo.bDeferConstruction)
 		{
 			CreatedActor->FinishSpawning(Settings.StorageTransform);
 		}
+		
+		
 			
-		if (Settings.HasFlag_InvokeUFunctions()) // SLOW PATH
+		if (bInvokeFunctions) // SLOW PATH
 		{
-			UFunction* Function = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool);
-			if (Function)
+			UFunction* OnCreatedByActorPoolFunction = CreatedActor->FindFunction(NEXUS::ActorPools::InvokeMethods::OnCreatedByActorPool);
+			if (OnCreatedByActorPoolFunction)
 			{
-				CreatedActor->ProcessEvent(Function, nullptr);
+				CreatedActor->ProcessEvent(OnCreatedByActorPoolFunction, nullptr);
 			}
 		}
 			

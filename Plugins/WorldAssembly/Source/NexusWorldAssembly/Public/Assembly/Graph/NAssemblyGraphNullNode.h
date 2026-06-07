@@ -17,7 +17,7 @@ public:
 	virtual ENAssemblyGraphNodeType GetNodeType() const override {  return ENAssemblyGraphNodeType::Null; }
 
 	FNAssemblyGraphNullNode(const FVector& Position, const FRotator& Rotation)
-		: FNAssemblyGraphNode(Position, Rotation)
+		: FNAssemblyGraphNode(0, Position, Rotation) // no need for seed atm
 	{
 	}
 

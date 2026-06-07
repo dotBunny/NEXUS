@@ -21,8 +21,9 @@ class FNWorldAssemblyEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	N_IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, "NexusWorldAssemblyEditor")
+	N_MODULE_BASE(FNWorldAssemblyEditorModule, "NexusWorldAssemblyEditor")
 
+	/** The cell-root component visualizer registered by this module on startup. */
 	TSharedPtr<FNCellRootComponentVisualizer> RootComponentVisualizer;
 	
 private:
@@ -36,7 +37,7 @@ private:
 	void OnPostEngineInit();
 };
 
-N_IMPLEMENT_TOOLS_MENU_EUW_ENTRY(
+N_TOOLS_MENU_EUW_ENTRY(
 	"Developer Overlay", EUW_NWorldAssemblySystem,
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Create_EUW_DisplayName", "World Assembly"), 
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Create_EUW_Tooltip", "Opens the NWorldAssembly Developer Overlay inside of an editor tab."),

@@ -1,5 +1,73 @@
 # Changelog
 
+## [0.3.1] - 2026-06-07
+
+### Added
+
+- `FNAssemblyGraphNodes` now have a deterministic seed stored along side their generation, accesible at `INCellInitialized` time.
+- `Bad Neighbors` tag grouping for `UNTissue`, preventing adjacent cell placement.
+- `NEXUS.WorldAssembly.Flag.AlwaysRelevant` behavioral tag.
+- `TagCounters` constraints and operations to `UNTissue`.
+- Required `ContextTags` option on `UNTissue` entries.
+- Both `FNActorPool` and `UNActorPoolSubsystem` gained the ability to `ReturnAll`/`ReturnAllActors`.
+- `FNActorPoolSettings` now has a `SupportFlags` section, including `ReturnAll`.
+- Added accessors to a global mutable copy of the `Tag Counters` and the `Context Tags` of a generation, with supporting Blueprint functionality.
+- Added `Maximum Node Depth` and `Directional Constraints` to `UNTissue` definitions.
+- `Direction Tolerance` setting (default 15-degrees, project-wide and per-operation) controlling how close a candidate's bearing must be to a `UNTissue` `Directional Constraint` to be placed.
+- `UNActorPoolSubsystem::GetActorPoolStats()` returns Spawned/Available details for a target `FNActorPool`.
+- `FNReportListBlock` now available in reports.
+- Option in `World Assembly` project settings to enable output of status messages from operations to the log, normally only visible in the developer overlay.
+- `FNActorPool` supports `OnDeferredConstruction` slow-invoking with flag.
+- Quick `Has Tag ?` and `Has Exact Tag ?` helper nodes for `FGameplayTags`.
+
+### Changed
+
+- `FNRawMesh` collision meshes used inside of assembly operation tasks bake out their transforms.
+- `ANCellActor::AuthorTimeActors` are no longer factored into spatial calculations for `UNCells`.
+- GameplayTags renamed `NEXUS.WorldAssembly.BuiltIn.*` to `NEXUS.WorldAssembly.Behavior.*`.
+- `OutputTags` was moved to a more encompassing `ContextTags`.
+- `FNGameplayTagCounter` does not allow for negative counter values.
+- `FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance` now always renders the distance underneath the `UNCellJunctionComponent`.
+- `WorldAssemblyEdMode` Collision Visualizer now tracks for changes in the level, accounting for its offset.
+- Reworked `FNEditorInputProcessor` to not compare pointers, instead look at screen position and button presses to determine if the same.
+- Cleaned up `IsPointInsideOrOn` for `FNOrientedBoxPicker` to be less-math.
+- `UNDynamicRefSubsystem::GetCount(NDR_None)` will return `0` instead of `-1`.
+- `UNDynamicRefSubsystem` now holds registered objects as weak references; it no longer keeps a `UObject` alive simply by referencing it, and entries are pruned lazily as objects are destroyed.
+
+### Fixed
+
+- `ANCellActor` is no longer dirtied simply being opened.
+- `UNOrganComponent::Seed` properly overrides Organs' assembly operation seed when value is not `-1`.
+- Side-car `NCell` asset is not loaded during cook process, restoring determinism.
+- `UNOrganComponent` custom-visualizer `Generate` button now refreshes accordingly after operations have finished.
+- `PktJitter` setting now properly applied to clients in `Multiplayer Test`.
+- `HasSupportFlag_ReturnAll` now properly queries `SupportFlag`.
+- Protect against `NSpawnActorBlueprintAsyncAction` occuring after `UWorld` teardown.
+- `FNRectanglePicker` no longer crashes in hollow mode when `MinimumDimensions` equals `MaximumDimensions`; `FNRectanglePickerParams::GetValidRanges` now falls back to the full rectangle instead of returning an empty range that was indexed out of bounds.
+- `UNDynamicRefSubsystem` no longer broadcasts `OnAdded`/`OnAddedByName` when re-adding an object already present (a no-op `AddUnique`), keeping the add/remove delegate pairing symmetric.
+- DynamicRefs developer overlay no longer leaks `UNDynamicRefObject` list-view wrappers for objects destroyed without removal; `UNDynamicRefObject` now prunes stale entries so emptied wrappers are cleaned up.
+- `UNGetActorBlueprintAsyncAction` now guards against a null `UNActorPoolSubsystem` when unbinding its pool-created callback, matching `UNSpawnActorBlueprintAsyncAction`.
+- `UNGetActorBlueprintAsyncAction` and `UNSpawnActorBlueprintAsyncAction` now complete (with a null result) and tear down when their soft class fails to load, instead of leaving the Blueprint latent node hung.
+
+### Removed
+
+- `FNActorPool::HasFlag_ShouldFinishSpawning`, was allowing `AActor` to be left in bad states when disabled.
+
+### DefaultGameplayTags Redirects
+
+```ini
+[/Script/GameplayTags.GameplayTagsSettings]
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Starter", NewTagName="NEXUS.WorldAssembly.Behavior.Starter")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.StarterOnly", NewTagName="NEXUS.WorldAssembly.Behavior.StarterOnly")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.NotStarter", NewTagName="NEXUS.WorldAssembly.Behavior.NotStarter")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Finisher", NewTagName="NEXUS.WorldAssembly.Behavior.Finisher")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.FinisherOnly", NewTagName="NEXUS.WorldAssembly.Behavior.FinisherOnly")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.NotFinisher", NewTagName="NEXUS.WorldAssembly.Behavior.NotFinisher")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.Unique", NewTagName="NEXUS.WorldAssembly.Behavior.Unique")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.RequiredAny", NewTagName="NEXUS.WorldAssembly.Behavior.RequiredAny")
++GameplayTagRedirects=(OldTagName="NEXUS.WorldAssembly.BuiltIn.BadNeighbors", NewTagName="NEXUS.WorldAssembly.Behavior.BadNeighbors")
+```
+
 ## [0.3.0] - 2026-05-31
 
 ### Added
@@ -272,7 +340,7 @@
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
 - The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` respectively.
-- `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
+- `N_SETTINGS_BASE` now offers a `GetMutable` non-const accessor, copying `N_EDITOR_SETTINGS_BASE`.
 - Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 - Lowered warning level to `Log` when creating a new `FNActorPool` that already exists in a nested `UNActorPoolSet`.
 
@@ -408,6 +476,7 @@
 - `NPicker` *Selection functionality for points and other items.*
 - `NUI` *Components for creating a user interface based on UMG/Slate.*
 
+[0.3.1]: https://github.com/dotBunny/NEXUS/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/dotBunny/NEXUS/compare/v0.2.7...v0.3.0
 [0.2.7]: https://github.com/dotBunny/NEXUS/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/dotBunny/NEXUS/compare/v0.2.5...v0.2.6

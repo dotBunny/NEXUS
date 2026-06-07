@@ -47,13 +47,13 @@ ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(Ob
 	bCanPlayFromHere = 0;
 #endif // WITH_EDITOR
 	
-	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
+	N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellProxy", RootComponent, false, 0.5f)
 }
 
-ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationTicket, const FNAssemblyGraphCellNode* CellNode, const FGameplayTagContainer& OutputTags,const bool bPreLoadLevel)
+ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, FNAssemblyGraphCellNode* CellNode, const FNCellAssemblyData& InstanceData, const bool bPreLoadLevel)
 {
-
 	FActorSpawnParameters SpawnInfo;
+	
 	
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -66,9 +66,7 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationT
 		return nullptr;
 	}
 	
-	// Straight application of settings
-	Proxy->OperationTicket = OperationTicket;
-	Proxy->OutputTags = OutputTags;
+	Proxy->AssemblyData = InstanceData;
 	
 	// Context initialization
 	Proxy->InitializeFromCellNode(CellNode);
@@ -79,12 +77,13 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, const uint32& OperationT
 	// TODO: Do something with this || this only works on server, clients wont get preload, is it even worth it?
 	if (bPreLoadLevel)
 	{
-		
 		CellNode->GetTemplate()->World.LoadAsync(FLoadSoftObjectPathAsyncDelegate::CreateLambda(
-								[](const FSoftObjectPath&, UObject* InLoadedObject)
-								{
-								}));	
+			[](const FSoftObjectPath&, UObject* InLoadedObject)
+			{
+			}));	
 	}
+	
+	// Moving outside this we cant be sure we will have a CellNode again.
 	return Proxy;
 }
 
@@ -111,15 +110,14 @@ void ANCellProxy::CreateLevelInstance()
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
 	
-	// Replicated settings
-	LevelInstance->OperationTicket = OperationTicket;
-	LevelInstance->OutputTags = OutputTags;
+	// Replicated assembly data
+	LevelInstance->AssemblyData = AssemblyData;
 	
 	JunctionsData.GenerateValueArray(LevelInstance->JunctionDetails);
 	LevelInstance->FillJunctionData(); // this is really for the server
 	
 	// Apply relevancy flag to created actor
-	if (bAlwaysRelevant)
+	if (AssemblyData.AssemblyTags.HasTagExact(NWorldAssembly_Flag_AlwaysRelevant))
 	{
 		LevelInstance->bAlwaysRelevant = true;
 	}

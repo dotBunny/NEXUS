@@ -33,7 +33,7 @@ public:
 		Settings.MinimumActorCount = 0;
 		Settings.MaximumActorCount = NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness::ObjectCount;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 
 		// Pre-warm outside the timed region.
@@ -61,7 +61,7 @@ public:
 		Settings.MinimumActorCount = 0;
 		Settings.MaximumActorCount = NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness::ObjectCount;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 
 		Subsystem->GetActorPool(AActor::StaticClass())->Prewarm(NEXUS::PerfTests::NActorPools::UNActorPoolSubsystemHarness::ObjectCount);

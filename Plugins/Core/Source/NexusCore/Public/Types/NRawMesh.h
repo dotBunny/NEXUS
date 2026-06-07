@@ -55,6 +55,62 @@ struct NEXUSCORE_API FNRawMesh
 	UPROPERTY(VisibleAnywhere)
 	TArray<FNRawMeshLoop> FaceLoops;
 
+	FNRawMesh() = default;
+
+	/**
+	 * Copy constructor. Duplicates geometry, topology, and the cached validation flags, but intentionally
+	 * drops the transient face-plane cache (CachedFaceNormals / PlaneD / InvNormalLen) — it is rebuilt
+	 * lazily by the first convex-path consumer via EnsureCachedFacePlanes(). Copying it is wasted work:
+	 * the dominant copy site (baking a template hull into a world-space cell node) mutates vertices
+	 * immediately after the copy, which would invalidate a copied cache anyway. The cache members carry
+	 * no UPROPERTY, so reflection / serialization copies are unaffected by this override.
+	 */
+	FNRawMesh(const FNRawMesh& Other)
+		: Vertices(Other.Vertices)
+		, Center(Other.Center)
+		, Bounds(Other.Bounds)
+		, Loops(Other.Loops)
+		, FaceLoops(Other.FaceLoops)
+		, bIsConvex(Other.bIsConvex)
+		, bIsChaosGenerated(Other.bIsChaosGenerated)
+		, bHasNonTris(Other.bHasNonTris)
+		, bHasBounds(Other.bHasBounds)
+		, bValidationDirty(Other.bValidationDirty)
+		, bHasAppliedTransform(Other.bHasAppliedTransform)
+	{
+		// bCachedFacePlanesValid stays false and the cache arrays stay empty — rebuilt on first use.
+	}
+
+	/** Copy assignment. Mirrors the copy constructor: copies geometry + validation flags, drops the face-plane cache. */
+	FNRawMesh& operator=(const FNRawMesh& Other)
+	{
+		if (this != &Other)
+		{
+			Vertices = Other.Vertices;
+			Center = Other.Center;
+			Bounds = Other.Bounds;
+			Loops = Other.Loops;
+			FaceLoops = Other.FaceLoops;
+			bIsConvex = Other.bIsConvex;
+			bIsChaosGenerated = Other.bIsChaosGenerated;
+			bHasNonTris = Other.bHasNonTris;
+			bHasBounds = Other.bHasBounds;
+			bValidationDirty = Other.bValidationDirty;
+			bHasAppliedTransform = Other.bHasAppliedTransform;
+
+			// Drop any existing cache; rebuilt lazily on first use.
+			bCachedFacePlanesValid = false;
+			CachedFaceNormals.Reset();
+			CachedFacePlaneD.Reset();
+			CachedFaceInvNormalLen.Reset();
+		}
+		return *this;
+	}
+
+	/** Moves are defaulted so MoveTemp / return-by-value paths stay allocation-free (cache included). */
+	FNRawMesh(FNRawMesh&&) = default;
+	FNRawMesh& operator=(FNRawMesh&&) = default;
+
 	/**
 	 * Flattens Loops into a single contiguous index buffer.
 	 * @return A concatenation of every loop's indices.
@@ -139,8 +195,6 @@ struct NEXUSCORE_API FNRawMesh
 	 * Cached non-triangle-loop flag. Lazily re-evaluated on first read after a mutator marks validation dirty.
 	 */
 	bool HasNonTris() const { EnsureValidated(); return bHasNonTris; }
-	
-	bool HasAppliedTransform() const { return bHasAppliedTransform; }
 
 	/**
 	 * Marks the cached convexity / non-tri / bounds flags stale so the next IsConvex / HasNonTris /
@@ -152,7 +206,7 @@ struct NEXUSCORE_API FNRawMesh
 	/**
 	 * Runs the convexity / non-tri / bounds checks if the validation cache is dirty, otherwise no-ops.
 	 * Triggered automatically by IsConvex / HasNonTris / HasBounds; consumers that want eager
-	 * evaluation can call this directly. Honours bIsChaosGenerated as a trust signal that skips
+	 * evaluation can call this directly. Honors bIsChaosGenerated as a trust signal that skips
 	 * the work entirely.
 	 */
 	void EnsureValidated() const;
@@ -167,7 +221,6 @@ struct NEXUSCORE_API FNRawMesh
 		return bIsConvex == Other.bIsConvex
 			&& bHasNonTris == Other.bHasNonTris
 			&& bHasBounds == Other.bHasBounds
-			&& bHasAppliedTransform == Other.bHasAppliedTransform
 			&& bIsChaosGenerated == Other.bIsChaosGenerated
 			&& Center == Other.Center
 			&& Bounds == Other.Bounds
@@ -211,7 +264,6 @@ struct NEXUSCORE_API FNRawMesh
 	 */
 	void ApplyTransform(const FTransform& Transform)
 	{
-		bHasAppliedTransform = true;
 		if (Transform.Equals(FTransform::Identity)) return;
 
 		FBox NewBounds(ForceInit);

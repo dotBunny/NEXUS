@@ -79,6 +79,8 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	{
 		UE_LOG(LogNexusGuardian, Warning, TEXT("The UObject count warning threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountWarningThreshold);
 		bPassedObjectCountWarningThreshold = true;
+		
+		// We want to wait till next tick/frame at this point before we evaluate the next threshold.
 		return;
 	}
 	
@@ -91,7 +93,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 			FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
 				FString::Printf(TEXT("%s_%s.txt"), *SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			
-			// The thought process here is that the ToReport is actually more expensive then you would think given it is doing more string manipulation/etc.
+			// The thought process here is that the ToReport is actually more expensive than you would think given it is doing more string manipulation/etc.
 			// Maybe it's faster to generate it on the main thread and pass the report in, but the idea was to minimize hitch on GameThread.
 			Async(EAsyncExecution::TaskGraph,
 				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
@@ -102,6 +104,8 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 				});
 		}
 		bPassedObjectCountSnapshotThreshold = true;
+		
+		// We want to wait till next tick/frame at this point before we evaluate the next threshold.
 		return;
 	}
 	
@@ -123,6 +127,8 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 				UE_LOG(LogNexusGuardian, Error, TEXT("A UObject comparison written to %s."), *DumpFilePath);
 			});
 		bPassedObjectCountCompareThreshold = true;
+		
+		// We are at the end of the block so we don't need to return, but again this concept is to move the next threshold eval to the next tick/frame.
 	}
 }
 

@@ -6,6 +6,7 @@
 
 #include "EngineUtils.h"
 #include "NMultiplayerUtils.h"
+#include "NWorldAssemblyContextCache.h"
 #include "NWorldUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "NWorldAssemblyRegistry.h"
@@ -98,7 +99,7 @@ void UNWorldAssemblySubsystem::Clear()
 	}
 
 #if WITH_EDITOR
-	// Bulk clears can tear down streamed sub-level actors the user may have selected; drop the entire
+	// Bulk clears can tear down streamed sublevel actors the user may have selected; drop the entire
 	// selection so the typed-element registry does not assert on a stale handle next mouse-move.
 	if (GIsEditor && GEditor != nullptr)
 	{
@@ -185,6 +186,7 @@ void UNWorldAssemblySubsystem::StartOperation(UNAssemblyOperation* Operation)
 	
 	KnownOperations.AddUnique(Operation);
 	OnOperationStarted.Broadcast();
+	CachedOperationTickets.Add(Operation->GetTicket());
 	
 	Operation->StartBuild(this, this);
 
@@ -279,6 +281,13 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 void UNWorldAssemblySubsystem::Deinitialize()
 {
+	// Clear cached persistent operation data
+	if (CachedOperationTickets.Num() > 0)
+	{
+		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
+		CachedOperationTickets.Empty();
+	}
+	
 	if (OnLoginHandle.IsValid())
 	{
 		FGameModeEvents::GameModePostLoginEvent.Remove(OnLoginHandle);

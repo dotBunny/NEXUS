@@ -2,6 +2,8 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NGuardianModule.h"
+
+#include "NCoreMinimal.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 

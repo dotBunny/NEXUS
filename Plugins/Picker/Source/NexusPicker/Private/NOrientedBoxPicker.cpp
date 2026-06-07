@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NOrientedBoxPicker.h"
+#include "Algo/BinarySearch.h"
 #include "NavigationSystem.h"
 #include "NPickerMinimal.h"
 #include "NPickerUtils.h"
@@ -19,8 +20,19 @@
 		Random.FloatValue(-MaximumExtent.X, MaximumExtent.X), \
 		Random.FloatValue(-MaximumExtent.Y, MaximumExtent.Y), \
 		Random.FloatValue(-MaximumExtent.Z, MaximumExtent.Z))
-#define N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RandomIndex) \
-	FBox ChosenBox = ValidBoxes[Random.RandomIndex(0,ValidBoxes.Num()-1)];
+#define N_PICKER_ORIENTED_BOX_CUMULATIVE \
+	TArray<double> CumulativeVolumes; \
+	CumulativeVolumes.Reserve(ValidBoxes.Num()); \
+	double TotalVolume = 0.0; \
+	for (const FBox& CumulativeBox : ValidBoxes) \
+	{ \
+		TotalVolume += CumulativeBox.GetVolume(); \
+		CumulativeVolumes.Add(TotalVolume); \
+	}
+#define N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(FloatValue) \
+	const double VolumePick = Random.FloatValue(0.f, 1.f) * TotalVolume; \
+	const int32 ChosenIndex = FMath::Min(Algo::LowerBound(CumulativeVolumes, VolumePick), ValidBoxes.Num() - 1); \
+	const FBox ChosenBox = ValidBoxes[ChosenIndex];
 #define N_PICKER_ORIENTED_BOX_LOCATION(FloatValue) \
 	Params.Origin + FVector( \
 		Random.FloatValue(ChosenBox.Min.X, ChosenBox.Max.X), \
@@ -48,7 +60,8 @@
 		{ \
 			UE_VLOG_WIREOBOX(Params.CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v], Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
-	}
+	} \
+	N_PICKER_ORIENTED_BOX_CUMULATIVE
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions) \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
@@ -67,30 +80,30 @@
 #else // !ENABLE_VISUAL_LOG
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions)
 #define N_PICKER_ORIENTED_BOX_VALID_BOXES \
-	TArray<FBox> ValidBoxes = Params.GetValidBoxes();
+	TArray<FBox> ValidBoxes = Params.GetValidBoxes(); \
+	N_PICKER_ORIENTED_BOX_CUMULATIVE
 #endif // ENABLE_VISUAL_LOG
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
 #define RANDOM_FLOAT_RANGE FloatRange
-#define RANDOM_INDEX IntegerRange
 void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
+	N_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)
 	{
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -99,20 +112,20 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -121,7 +134,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -149,14 +162,14 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -164,23 +177,23 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -188,9 +201,9 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -201,7 +214,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -209,7 +222,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -218,26 +231,24 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, const FNOrientedBo
 	N_PICKER_ORIENTED_BOX_VLOG(!bSimpleMode)
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FRandRange
-#define RANDOM_INDEX RandRange
 void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
+	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_ORIENTED_BOX_PREFIX
 	if (bSimpleMode)
 	{
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -246,20 +257,20 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -268,7 +279,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -296,14 +307,14 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -311,23 +322,23 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -335,9 +346,9 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -348,7 +359,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -356,7 +367,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -365,10 +376,8 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 	N_PICKER_ORIENTED_BOX_VLOG(!bSimpleMode)
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FRandRange
-#define RANDOM_INDEX RandRange
 void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNOrientedBoxPickerParams& Params)
 {
 	const FRandomStream Random(Seed);
@@ -378,13 +387,13 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -393,20 +402,20 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -415,7 +424,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -443,14 +452,14 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -458,23 +467,23 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -482,9 +491,9 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -495,7 +504,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -503,7 +512,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -513,11 +522,9 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 	Seed = Random.GetCurrentSeed();
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 
 #define RANDOM_FLOAT_RANGE FloatRange
-#define RANDOM_INDEX IntegerRange
 void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params)
 {
 	N_PICKER_ORIENTED_BOX_PREFIX
@@ -526,13 +533,13 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -541,20 +548,20 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -563,7 +570,7 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -591,14 +598,14 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -606,23 +613,23 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -630,9 +637,9 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -643,7 +650,7 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -651,7 +658,7 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_INDEX)
+					N_PICKER_ORIENTED_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_ORIENTED_BOX_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -660,6 +667,5 @@ void FNOrientedBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwist
 	N_PICKER_ORIENTED_BOX_VLOG(!bSimpleMode)
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 // #SONARQUBE-ENABLE

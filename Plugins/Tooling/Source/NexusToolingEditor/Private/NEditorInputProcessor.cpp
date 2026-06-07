@@ -65,10 +65,38 @@ bool FNEditorInputProcessor::HandleKeyUpEvent(FSlateApplication& SlateApp, const
 	return false;
 }
 
+bool FNEditorInputProcessor::IsMouseEventLastSyntheticEvent(const FPointerEvent& MouseEvent)
+{
+	// Quick check for screenspace position as its cheap
+	if (MouseEvent.GetScreenSpacePosition() != LastSyntheticEvent.GetScreenSpacePosition())
+	{
+		return false;
+	}
+	
+	const TSet<FKey>& MouseEventButtons = MouseEvent.GetPressedButtons();
+	const TSet<FKey>& LastSyntheticEventButtons = LastSyntheticEvent.GetPressedButtons();
+	
+	// Quick check the counts
+	if (MouseEventButtons.Num() != LastSyntheticEventButtons.Num())
+	{
+		return false;
+	}
+	
+	// Loop through and check that the keys are identical
+	for (const FKey& Button : MouseEventButtons)
+	{
+		if (!LastSyntheticEventButtons.Contains(Button))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
 bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, const FPointerEvent& MouseEvent)
 {
 	if (bCachedGraphNavigationSpaceToPan && bSpaceBar && bLeftMouse && 
-		&MouseEvent != &LastSyntheticEvent) // Dont resend the last synthetic event
+		!IsMouseEventLastSyntheticEvent(MouseEvent)) // Dont resend the last synthetic event
 	{
 		IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
 		if (ForegroundAssetEditor == nullptr) return false;

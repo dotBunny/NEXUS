@@ -20,7 +20,7 @@ N_TEST_HIGH(FNActorPoolTests_Strategy_FixedRecycleFirst_EmptyOutActors,
 		Settings.MinimumActorCount = 0;
 		Settings.MaximumActorCount = 3;
 		Settings.Strategy = ENActorPoolStrategy::FixedRecycleFirst;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), Settings);
 		// Intentionally no Fill() / no prior Spawn(); both InActors and OutActors are empty.
@@ -50,7 +50,7 @@ N_TEST_HIGH(FNActorPoolTests_Strategy_FixedRecycleLast_EmptyOutActors,
 		Settings.MinimumActorCount = 0;
 		Settings.MaximumActorCount = 3;
 		Settings.Strategy = ENActorPoolStrategy::FixedRecycleLast;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), Settings);
 		// Intentionally no Fill() / no prior Spawn(); both InActors and OutActors are empty.
@@ -79,7 +79,7 @@ N_TEST_MEDIUM(FNActorPoolTests_Strategy_FixedRecycleFirst_GetEmptyOutActors,
 		Settings.MinimumActorCount = 0;
 		Settings.MaximumActorCount = 3;
 		Settings.Strategy = ENActorPoolStrategy::FixedRecycleFirst;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 
 		FNActorPool Pool = FNActorPool(World, AActor::StaticClass(), Settings);
 

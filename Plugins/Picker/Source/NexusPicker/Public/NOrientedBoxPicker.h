@@ -72,21 +72,12 @@ public:
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FVector& Dimensions, const FRotator& Rotation, const FVector& Point)
 	{
-		const FVector Extents = Dimensions * 0.5f;
-		const float MinX =  Origin.X - Extents.X;
-		const float MaxX =  Origin.X + Extents.X;
-		const float MinY =  Origin.Y - Extents.Y;
-		const float MaxY =  Origin.Y + Extents.Y;
-		const float MinZ =  Origin.Z - Extents.Z;
-		const float MaxZ =  Origin.Z + Extents.Z;
-		
 		const FVector Translated = Point - Origin;
-		const FVector Unrotated = Rotation.UnrotateVector(Translated);
-		const FVector Result = Unrotated + Origin;
-		
-		return (Result.X >= MinX && Result.X <= MaxX && 
-			Result.Y >= MinY && Result.Y <= MaxY && 
-			Result.Z >= MinZ && Result.Z <= MaxZ);
+		const FVector Unrotated  = Rotation.UnrotateVector(Translated);
+		const FVector Extents = Dimensions * 0.5f;
+		return (FMath::Abs(Unrotated.X) <= Extents.X &&
+				FMath::Abs(Unrotated.Y) <= Extents.Y &&
+				FMath::Abs(Unrotated.Z) <= Extents.Z);
 	}
 
 	/**
@@ -105,14 +96,9 @@ public:
 		
 		for (const FVector& Point : Points)
 		{
-			if (IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point) || !IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point))
-			{
-				OutResults.Add(false);
-			}
-			else
-			{
-				OutResults.Add(true);
-			}
+			const bool bValid = IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point)
+							 && !IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point);
+			OutResults.Add(bValid);
 		}
 		return MoveTemp(OutResults);
 	}

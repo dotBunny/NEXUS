@@ -60,7 +60,17 @@ void UNSpawnActorBlueprintAsyncAction::OnLoaded()
 	}
 	
 	UClass* ActorLoaded = ActorClass.Get();
-	
+	if (ActorLoaded == nullptr)
+	{
+		// The soft class resolved to null (e.g. the referenced asset was deleted/renamed). CreateActorPool
+		// would reject a null class and never broadcast OnActorPoolAdded, leaving this latent node hung and
+		// the action object alive until GC. Complete with null and tear down instead.
+		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to complete Spawn Actor Async as the soft class failed to load (%s)."), *ActorClass.ToString());
+		Completed.Broadcast(nullptr);
+		SetReadyToDestroy();
+		return;
+	}
+
 	// Already has pool created
 	if (ActorPoolSubsystem->HasActorPool(ActorLoaded))
 	{
@@ -83,7 +93,10 @@ void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 	{
 		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
 		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
-		ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		if (ActorPoolSubsystem)
+		{
+			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
+		}
 		OnCreatedPoolHandle.Reset();
 	}
 	

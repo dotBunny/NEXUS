@@ -31,22 +31,25 @@ void UNDynamicRefSubsystem::AddObject(const ENDynamicRef DynamicRef, UObject* In
 		return;
 	}
 	
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None, skipping."), *InObject->GetName());
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObject(%s) to NDR_None/NDR_Max, skipping."), *InObject->GetName());
 		return;
 	}
-	
-	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
-	FastCollection[DynamicRef].Add(InObject);
-	OnAdded.Broadcast(DynamicRef, InObject);
+
+	// Only broadcast when the object was genuinely added; a duplicate AddUnique is a no-op and must not
+	// re-fire OnAdded, otherwise the add/remove delegate pair becomes asymmetric for external listeners.
+	if (FastCollection[DynamicRef].Add(InObject))
+	{
+		OnAdded.Broadcast(DynamicRef, InObject);
+	}
 }
 
 void UNDynamicRefSubsystem::AddObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObjects to NDR_None, skipping."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to add UObjects to NDR_None/NDR_Max, skipping."));
 		return;
 	}
 	
@@ -62,18 +65,35 @@ void UNDynamicRefSubsystem::AddObjectByName(const FName Name, UObject* InObject)
 	N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, InObject)
 	
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
-	Collection.Add(InObject);
-	OnAddedByName.Broadcast(Name, InObject);
+	if (Collection.Add(InObject))
+	{
+		OnAddedByName.Broadcast(Name, InObject);
+	}
 }
 
 void UNDynamicRefSubsystem::AddObjectsByName(const FName Name, TArray<UObject*> InObjects)
 {
+	// Validate objects to ensure we are not creating an empty bucket
+	bool bHasObjects = false;
+	for (const UObject* Object : InObjects)
+	{
+		if (IsValid(Object))
+		{
+			bHasObjects = true;
+			break;
+		}
+	}
+	if (!bHasObjects) return;
+	
+	// Go about adding
 	FNDynamicRefCollection& Collection = NamedCollection.FindOrAdd(Name);
 	for (UObject* Object : InObjects)
 	{
 		N_VALIDATE_CONTINUE(LogNexusDynamicRefs, Object)
-		Collection.Add(Object);
-		OnAddedByName.Broadcast(Name, Object);
+		if (Collection.Add(Object))
+		{
+			OnAddedByName.Broadcast(Name, Object);
+		}
 	}
 }
 
@@ -85,9 +105,9 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 		return;
 	}
 	
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None, skipping."), *InObject->GetName());
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObject(%s) from NDR_None/NDR_Max, skipping."), *InObject->GetName());
 		return;
 	}
 	// Only remove and callback if we have the actual objects
@@ -99,9 +119,9 @@ void UNDynamicRefSubsystem::RemoveObject(const ENDynamicRef DynamicRef, UObject*
 
 void UNDynamicRefSubsystem::RemoveObjects(const ENDynamicRef DynamicRef, TArray<UObject*> InObjects)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObjects from NDR_None, skipping."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to remove UObjects from NDR_None/NDR_Max, skipping."));
 		return;
 	}
 	
@@ -149,13 +169,15 @@ void UNDynamicRefSubsystem::RemoveObjectsByName(const FName Name, TArray<UObject
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjects(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get objects from NDR_None, returning empty."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get objects from NDR_None/NDR_Max, returning empty."));
 		return TArray<UObject*>();;
 	}
-	
-	return FastCollection[DynamicRef].GetObjectsCopy();
+
+	FNDynamicRefCollection& Collection = FastCollection[DynamicRef];
+	Collection.Compact();
+	return Collection.GetObjectsCopy();
 }
 
 TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
@@ -163,6 +185,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
 	if (Collection != nullptr)
 	{
+		Collection->Compact();
 		return Collection->GetObjectsCopy();
 	}
 	return TArray<UObject*>();
@@ -170,13 +193,13 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByName(const FName Name)
 
 AActor* UNDynamicRefSubsystem::GetFirstActor(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first actor from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first actor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 	
-	for (const TObjectPtr<UObject>& ObjPtr : FastCollection[DynamicRef].Objects)
+	for (const TWeakObjectPtr<UObject>& ObjPtr : FastCollection[DynamicRef].Objects)
 	{
 		AActor* Actor = Cast<AActor>(ObjPtr.Get());
 		if (Actor != nullptr)
@@ -199,47 +222,43 @@ AActor* UNDynamicRefSubsystem::GetFirstActorByName(const FName Name)
 
 UObject* UNDynamicRefSubsystem::GetFirstObject(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first object from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get first object from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 
-	FNDynamicRefCollection& Collection = FastCollection[DynamicRef];
-	if (!Collection.HasObjects()) return nullptr;
-	return Collection.Objects[0].Get();
+	return FastCollection[DynamicRef].GetFirstValid();
 }
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectUnsafe(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None) return nullptr;
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
 	return FastCollection[DynamicRef].Objects[0].Get();
 }
 
 UObject* UNDynamicRefSubsystem::GetLastObject(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get last object from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Attempted to get last object from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
-	
-	FNDynamicRefCollection& Collection = FastCollection[DynamicRef];
-	if (!Collection.HasObjects()) return nullptr;
-	return Collection.Objects.Last();
+
+	return FastCollection[DynamicRef].GetLastValid();
 }
 
 UObject* UNDynamicRefSubsystem::GetLastObjectUnsafe(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None) return nullptr;
-	return FastCollection[DynamicRef].Objects.Last();
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
+	return FastCollection[DynamicRef].Objects.Last().Get();
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested AActors from NDR_None, returning empty."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested AActors from NDR_None/NDR_Max, returning empty."));
 		return TArray<AActor*>();
 	}
 	
@@ -265,12 +284,13 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(const FName Name)
 
 int32 UNDynamicRefSubsystem::GetCount(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None, returning -1."));
-		return -1;
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested count of NDR_None/NDR_Max, returning 0."));
+		return 0;
 	}
-	return FastCollection[DynamicRef].Objects.Num();
+	// Compact() prunes stale weak entries and returns the live count.
+	return FastCollection[DynamicRef].Compact();
 }
 
 int32 UNDynamicRefSubsystem::GetCountByName(const FName Name)
@@ -278,7 +298,7 @@ int32 UNDynamicRefSubsystem::GetCountByName(const FName Name)
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
 	if (Collection != nullptr)
 	{
-		return Collection->Objects.Num();
+		return Collection->Compact();
 	}
 	return 0;
 }
@@ -286,23 +306,23 @@ int32 UNDynamicRefSubsystem::GetCountByName(const FName Name)
 UObject* UNDynamicRefSubsystem::GetFirstObjectByName(const FName Name)
 {
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
-	if (Collection != nullptr && Collection->HasObjects())
+	if (Collection != nullptr)
 	{
-		return Collection->Objects[0];
+		return Collection->GetFirstValid();
 	}
 	return nullptr;
 }
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectByNameUnsafe(const FName Name)
 {
-	return NamedCollection[Name].Objects[0];
+	return NamedCollection[Name].Objects[0].Get();
 }
 
 AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef)
 {
-	if (DynamicRef == NDR_None)
+	if (DynamicRef == NDR_None || DynamicRef == NDR_Max)
 	{
-		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested last AActor from NDR_None, returning null."));
+		UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Requested last AActor from NDR_None/NDR_Max, returning null."));
 		return nullptr;
 	}
 	
@@ -331,22 +351,30 @@ AActor* UNDynamicRefSubsystem::GetLastActorByName(const FName Name)
 UObject* UNDynamicRefSubsystem::GetLastObjectByName(const FName Name)
 {
 	FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
-	if (Collection != nullptr && Collection->HasObjects())
+	if (Collection != nullptr)
 	{
-		return Collection->Objects.Last().Get();
+		return Collection->GetLastValid();
 	}
 	return nullptr;
 }
 
 UObject* UNDynamicRefSubsystem::GetLastObjectByNameUnsafe(const FName Name)
 {
-	return NamedCollection[Name].Objects.Last();
+	return NamedCollection[Name].Objects.Last().Get();
 }
 
 TArray<FName> UNDynamicRefSubsystem::GetNames() const
 {
 	TArray<FName> Result;
-	NamedCollection.GetKeys(Result);
+	Result.Reserve(NamedCollection.Num());
+	for (const TPair<FName, FNDynamicRefCollection>& Pair : NamedCollection)
+	{
+		// Skip buckets whose objects have all gone stale so callers only see live names.
+		if (Pair.Value.HasObjects())
+		{
+			Result.Add(Pair.Key);
+		}
+	}
 	return MoveTemp(Result);
 }
 
@@ -379,6 +407,8 @@ TArray<FGameplayTag> UNDynamicRefSubsystem::GetTags() const
 	const UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
 	for (const TPair<FName, FNDynamicRefCollection>& Pair : NamedCollection)
 	{
+		// Skip buckets whose objects have all gone stale so callers only see live tags.
+		if (!Pair.Value.HasObjects()) continue;
 		FGameplayTag Tag = Manager.RequestGameplayTag(Pair.Key, false);
 		if (Tag.IsValid())
 		{
@@ -469,9 +499,12 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAnyTags(const FGameplayTagCo
 		if (!Tag.IsValid()) continue;
 		const FNDynamicRefCollection* Collection = NamedCollection.Find(Tag.GetTagName());
 		if (Collection == nullptr) continue;
-		for (const TObjectPtr<UObject>& ObjPtr : Collection->Objects)
+		for (const TWeakObjectPtr<UObject>& ObjPtr : Collection->Objects)
 		{
-			Result.AddUnique(ObjPtr.Get());
+			if (UObject* Object = ObjPtr.Get())
+			{
+				Result.AddUnique(Object);
+			}
 		}
 	}
 	return MoveTemp(Result);
@@ -524,14 +557,16 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAllTags(const FGameplayTagCo
 
 	const FNDynamicRefCollection* Smallest = Collections[SmallestIndex];
 	Result.Reserve(Smallest->Objects.Num());
-	for (const TObjectPtr<UObject>& ObjPtr : Smallest->Objects)
+	for (const TWeakObjectPtr<UObject>& ObjPtr : Smallest->Objects)
 	{
 		UObject* Object = ObjPtr.Get();
+		if (Object == nullptr) continue;
+		const TWeakObjectPtr<UObject> WeakObject(Object);
 		bool bInAll = true;
 		for (int32 i = 0; i < Collections.Num(); ++i)
 		{
 			if (i == SmallestIndex) continue;
-			if (!Collections[i]->Objects.Contains(Object))
+			if (!Collections[i]->Objects.Contains(WeakObject))
 			{
 				bInAll = false;
 				break;

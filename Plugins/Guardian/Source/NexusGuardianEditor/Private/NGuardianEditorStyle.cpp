@@ -6,11 +6,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNGuardianEditorStyle)
+N_EDITOR_STYLE(FNGuardianEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNGuardianEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	Style.Set("Icon.NGuardian", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NGuardianSubsystem"), Icon16x16));
 	

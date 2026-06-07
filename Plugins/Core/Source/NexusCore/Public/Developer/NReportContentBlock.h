@@ -43,7 +43,6 @@ struct NEXUSCORE_API FNReportContentBlock : FNReportBlock
 	 * @param OutputFormat Whether to emit plain text or Markdown.
 	 */
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
-
 private:
 	/** Body lines, emitted in insertion order with a blank line between entries. */
 	TArray<FString> Content;

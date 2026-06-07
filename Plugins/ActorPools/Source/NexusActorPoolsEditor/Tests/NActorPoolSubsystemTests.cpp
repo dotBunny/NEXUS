@@ -218,7 +218,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 		Settings.MinimumActorCount = 3;
 		Settings.MaximumActorCount = 3;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
-		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction | ENActorPoolFlags::ShouldFinishSpawning);
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
 
 		FNActorPool* Pool = Subsystem->GetActorPool(AActor::StaticClass());
@@ -246,13 +246,13 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 	});
 }
 
-N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_DestroyModeReturnsFalse,
-	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::ReturnActor::DestroyModeReturnsFalse",
+N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_DestroyModeReturnsTrue,
+	"NEXUS::UnitTests::NActorPools::UNActorPoolSubsystem::ReturnActor::DestroyModeReturnsTrue",
 	N_TEST_CONTEXT_EDITOR)
 {
-	// Verifies that ReturnActor reports false for an actor with no registered pool when the
-	// subsystem's UnknownBehavior is Destroy. The actor is disposed of internally but the call
-	// returns false so callers can distinguish "pooled" from "consumed by fallback".
+	// Verifies that ReturnActor reports true for an actor with no registered pool when the
+	// subsystem's UnknownBehavior is Destroy. The actor is consumed (destroyed) by the fallback,
+	// so the call reports success ("handled") rather than false.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
@@ -271,7 +271,8 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_DestroyModeReturnsFalse,
 		}
 
 		const bool bReturned = Subsystem->ReturnActor(Actor);
-		CHECK_FALSE_MESSAGE(TEXT("ReturnActor must return false in Destroy mode when no pool exists."), bReturned)
+		CHECK_MESSAGE(TEXT("ReturnActor must return true in Destroy mode when it consumes the actor."), bReturned)
+		CHECK_FALSE_MESSAGE(TEXT("Actor must be destroyed by the Destroy fallback."), IsValid(Actor))
 		CHECK_FALSE_MESSAGE(TEXT("HasActorPool must remain false; Destroy mode does not create a pool."),
 			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
 	});

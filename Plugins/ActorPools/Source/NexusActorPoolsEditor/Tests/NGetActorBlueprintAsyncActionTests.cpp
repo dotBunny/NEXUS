@@ -123,4 +123,43 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 	});
 }
 
+N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnLoaded_FailedLoad,
+	"NEXUS::UnitTests::NActorPools::UNGetActorBlueprintAsyncAction::OnLoaded::FailedLoad",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Regression: when the soft class resolves to null (deleted/renamed asset), OnLoaded must complete and
+	// tear the action down instead of registering an OnActorPoolAdded callback that never fires — otherwise
+	// CreateActorPool(null) returns without broadcasting and the latent node hangs / the binding leaks.
+	// Observe that no subscription is left behind after a failed load.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		// Start from a known-empty delegate so we only observe this action's behavior (see HandleCleanup test
+		// for why an interactive editor session can otherwise carry overlay subscribers).
+		Subsystem->OnActorPoolAdded.Clear();
+
+		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
+		Action->WorldContext = World;
+		// A soft path to an asset that does not exist resolves to null via Get() without triggering a load.
+		Action->ActorClass = TSoftClassPtr<AActor>(FSoftObjectPath(TEXT("/Game/NEXUS/DoesNotExist.DoesNotExist_C")));
+
+		// The fix logs the failed load at Error severity (appropriate for production); the automation
+		// framework auto-fails a test on an unexpected Error, so register it as expected.
+		this->AddExpectedError(TEXT("soft class failed to load"), EAutomationExpectedErrorFlags::Contains, 1);
+
+		Action->OnLoaded();
+
+		CHECK_FALSE_MESSAGE(TEXT("A failed load must not leave an OnActorPoolAdded subscription behind."), Subsystem->OnActorPoolAdded.IsBound())
+		CHECK_FALSE_MESSAGE(TEXT("A failed load must not retain a pending pool-created handle."), Action->OnCreatedPoolHandle.IsValid())
+
+		Action->ConditionalBeginDestroy();
+	});
+}
+
 #endif //WITH_TESTS

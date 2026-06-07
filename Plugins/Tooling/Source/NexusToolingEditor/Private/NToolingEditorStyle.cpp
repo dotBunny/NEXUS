@@ -6,11 +6,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNToolingEditorStyle)
+N_EDITOR_STYLE(FNToolingEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNToolingEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	Style.Set("Command.LeakCheck", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_LeakCheck"), Icon16x16));
 	Style.Set("Command.CleanLogsFolder", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_CleanLogsFolder"), Icon16x16));

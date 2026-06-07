@@ -3,23 +3,28 @@
 
 #include "NWorldAssemblyEdMode.h"
 
+#include "Editor.h"
+#include "NActorUtils.h"
 #include "NCanvasUtils.h"
 #include "Cell/NCellActor.h"
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Cell/NCellRootComponent.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Developer/NPrimitiveFont.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
+#include "Assembly/Tasks/NCreateVirtualWorldTask.h"
 #include "Macros/NFlagsMacros.h"
 #include "Math/NBoxUtils.h"
 #include "Math/NVectorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Developer/NMethodScopeTimer.h"
 #include "Types/NRawMeshUtils.h"
+#include "UObject/UnrealType.h"
 
 void FNWorldAssemblyEdMode::ProtectCellEdMode()
 {
@@ -39,20 +44,67 @@ void FNWorldAssemblyEdMode::OnActorDeleted(AActor* Actor)
 	}
 	if (Actor == CollisionVisualizer)
 	{
+		// The visualizer itself was removed (e.g. deleted by the user) — stop listening and clear our state.
+		UnbindWorldChangeDelegates();
+		CollisionSourceActors.Reset();
+		bCollisionVisualizerDirty = false;
 		CollisionVisualizer = nullptr;
+	}
+	else if (CollisionVisualizer != nullptr && CollisionSourceActors.Contains(FObjectKey(Actor)))
+	{
+		// A source actor was deleted; it can no longer pass the live filter (it's pending kill), so the source-set
+		// membership is what tells us the visualizer needs rebuilding.
+		MarkCollisionVisualizerDirty();
 	}
 }
 
 TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CreateCollisionVisualizer(UWorld* World)
 {
-	DestroyCollisionVisualizer();
-	FNMethodScopeTimer("World Collision Build Time");
-	CollisionVisualizer = FNWorldAssemblyEditorUtils::CreateWorldCollisionVisualizerActor(World, TArray<FBoxSphereBounds>());
+	const bool bWasAlive = CollisionVisualizer != nullptr;
+
+	// Only time the initial build; in-place refreshes are frequent and would otherwise spam the log.
+	TOptional<FNMethodScopeTimer> Timer;
+	if (!bWasAlive)
+	{
+		Timer.Emplace(TEXT("World Collision Build Time"));
+	}
+
+	TArray<AActor*> SourceActors;
+	CollisionVisualizer = FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(
+		World, TArray<FBoxSphereBounds>(), CollisionVisualizer, SourceActors);
+
+	bCollisionVisualizerDirty = false;
+
+	if (CollisionVisualizer == nullptr)
+	{
+		// Nothing was spawned (no geometry / no material) — nothing to track or listen for.
+		CollisionSourceActors.Reset();
+		return nullptr;
+	}
+
+	// Refresh the source set used to test relevance of future world changes.
+	CollisionSourceActors.Reset();
+	CollisionSourceActors.Reserve(SourceActors.Num());
+	for (const AActor* SourceActor : SourceActors)
+	{
+		CollisionSourceActors.Add(FObjectKey(SourceActor));
+	}
+
+	// Start listening only once a visualizer is actually alive.
+	if (!bWasAlive)
+	{
+		BindWorldChangeDelegates();
+	}
+
 	return CollisionVisualizer;
 }
 
 void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 {
+	UnbindWorldChangeDelegates();
+	CollisionSourceActors.Reset();
+	bCollisionVisualizerDirty = false;
+
 	if (CollisionVisualizer != nullptr)
 	{
 		if (CollisionVisualizer->IsSelected())
@@ -61,6 +113,104 @@ void FNWorldAssemblyEdMode::DestroyCollisionVisualizer()
 		}
 		CollisionVisualizer->GetWorld()->DestroyActor(CollisionVisualizer, false, false);
 		CollisionVisualizer = nullptr;
+	}
+}
+
+void FNWorldAssemblyEdMode::BindWorldChangeDelegates()
+{
+	if (!OnLevelActorAddedHandle.IsValid())
+	{
+		OnLevelActorAddedHandle = GEngine->OnLevelActorAdded().AddStatic(&FNWorldAssemblyEdMode::OnLevelActorAdded);
+	}
+	if (!OnObjectMovedHandle.IsValid())
+	{
+		OnObjectMovedHandle = GEditor->OnEndObjectMovement().AddStatic(&FNWorldAssemblyEdMode::OnObjectMoved);
+	}
+	if (!OnObjectPropertyChangedHandle.IsValid())
+	{
+		OnObjectPropertyChangedHandle = FCoreUObjectDelegates::OnObjectPropertyChanged.AddStatic(&FNWorldAssemblyEdMode::OnObjectPropertyChanged);
+	}
+	if (!OnUndoRedoHandle.IsValid())
+	{
+		OnUndoRedoHandle = FEditorDelegates::PostUndoRedo.AddStatic(&FNWorldAssemblyEdMode::OnUndoRedo);
+	}
+}
+
+void FNWorldAssemblyEdMode::UnbindWorldChangeDelegates()
+{
+	if (OnLevelActorAddedHandle.IsValid())
+	{
+		GEngine->OnLevelActorAdded().Remove(OnLevelActorAddedHandle);
+		OnLevelActorAddedHandle.Reset();
+	}
+	if (OnObjectMovedHandle.IsValid())
+	{
+		GEditor->OnEndObjectMovement().Remove(OnObjectMovedHandle);
+		OnObjectMovedHandle.Reset();
+	}
+	if (OnObjectPropertyChangedHandle.IsValid())
+	{
+		FCoreUObjectDelegates::OnObjectPropertyChanged.Remove(OnObjectPropertyChangedHandle);
+		OnObjectPropertyChangedHandle.Reset();
+	}
+	if (OnUndoRedoHandle.IsValid())
+	{
+		FEditorDelegates::PostUndoRedo.Remove(OnUndoRedoHandle);
+		OnUndoRedoHandle.Reset();
+	}
+}
+
+bool FNWorldAssemblyEdMode::ShouldRebuildForActor(const AActor* Actor)
+{
+	if (Actor == nullptr || CollisionVisualizer == nullptr) return false;
+
+	// Was it part of the geometry we last built? (covers delete / collision-off / ignore-tag-added transitions)
+	if (CollisionSourceActors.Contains(FObjectKey(Actor))) return true;
+
+	// Is it relevant now? (covers add / collision-on transitions) — same predicate the visualizer build uses.
+	return FNActorUtils::PassesFilter(Actor, FNCreateVirtualWorldTask::CreateWorldActorFilterSettings());
+}
+
+AActor* FNWorldAssemblyEdMode::ResolveAffectedActor(UObject* Object)
+{
+	if (Object == nullptr) return nullptr;
+	if (AActor* Actor = Cast<AActor>(Object)) return Actor;
+	if (const UActorComponent* Component = Cast<UActorComponent>(Object)) return Component->GetOwner();
+	return nullptr;
+}
+
+void FNWorldAssemblyEdMode::OnLevelActorAdded(AActor* Actor)
+{
+	if (ShouldRebuildForActor(Actor))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void FNWorldAssemblyEdMode::OnObjectMoved(UObject& Object)
+{
+	if (ShouldRebuildForActor(ResolveAffectedActor(&Object)))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void FNWorldAssemblyEdMode::OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent)
+{
+	// Ignore the continuous mid-edit stream (slider scrubs, gizmo drags); we rebuild on the finalizing change instead.
+	if (PropertyChangedEvent.ChangeType == EPropertyChangeType::Interactive) return;
+
+	if (ShouldRebuildForActor(ResolveAffectedActor(Object)))
+	{
+		MarkCollisionVisualizerDirty();
+	}
+}
+
+void FNWorldAssemblyEdMode::OnUndoRedo()
+{
+	if (CollisionVisualizer != nullptr)
+	{
+		MarkCollisionVisualizerDirty();
 	}
 }
 
@@ -83,6 +233,12 @@ TArray<FVector> FNWorldAssemblyEdMode::CachedBoundsVertices;
 FNWorldAssemblyEdMode::ENCellVoxelMode FNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
 TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
 ENWorldAssemblyEdModeRenderMode FNWorldAssemblyEdMode::RenderMode = ENWorldAssemblyEdModeRenderMode::All;
+TSet<FObjectKey> FNWorldAssemblyEdMode::CollisionSourceActors;
+bool FNWorldAssemblyEdMode::bCollisionVisualizerDirty = false;
+FDelegateHandle FNWorldAssemblyEdMode::OnLevelActorAddedHandle;
+FDelegateHandle FNWorldAssemblyEdMode::OnObjectMovedHandle;
+FDelegateHandle FNWorldAssemblyEdMode::OnObjectPropertyChangedHandle;
+FDelegateHandle FNWorldAssemblyEdMode::OnUndoRedoHandle;
 
 FNWorldAssemblyEdMode::~FNWorldAssemblyEdMode()
 {
@@ -141,7 +297,17 @@ void FNWorldAssemblyEdMode::Exit()
 void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float DeltaTime)
 {
 	if (bCanTick == false) return;
-	
+
+	// Coalesce any world changes flagged since the last tick into a single in-place rebuild of the visualizer.
+	if (bCollisionVisualizerDirty && CollisionVisualizer != nullptr)
+	{
+		if (UWorld* VisualizerWorld = CollisionVisualizer->GetWorld())
+		{
+			CreateCollisionVisualizer(VisualizerWorld);
+		}
+		bCollisionVisualizerDirty = false;
+	}
+
 	// Cache if we have a NCellActor setup
 	CellActor.Reset();
 
@@ -213,14 +379,17 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
 	{
-		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		const FVector2D SocketSize = Settings->SocketSize;
-		const float MatchingDepth = Settings->AssemblyJunctionMatchingCellHullPenetration;
+		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
+		const UNWorldAssemblyEditorSettings* WorldAssemblyEditorSettings = UNWorldAssemblyEditorSettings::Get();
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
-			JunctionComponent->DrawDebugPDI(PDI);
-			RenderCellJunctionPenetrationDistance(PDI, JunctionComponent, SocketSize, MatchingDepth);
+			
+			// WorldAssemblyEditorSettings->bDebugWorldDrawUnfilledJunctions
+			// WorldAssemblyEditorSettings->EmptyJunctionColor
+			
+			// TODO: If editor mode option to draw empty junctions, draw them ? we can fill the color here with something too
+			JunctionComponent->DrawDebugPDI(PDI, true, FNColor::GreenLight, WorldAssemblySettings);
 		}	
 	}
 
@@ -314,35 +483,4 @@ void FNWorldAssemblyEdMode::DrawHUD(FEditorViewportClient* ViewportClient, FView
 	}
 	
 	FEdMode::DrawHUD(ViewportClient, Viewport, View, Canvas);
-}
-
-void FNWorldAssemblyEdMode::RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, 
-	const UNCellJunctionComponent* JunctionComponent, const FVector2D SocketSize, const float MatchingDepth)
-{
-	// Check Level
-	const ULevel* Level = JunctionComponent->GetComponentLevel();
-	if (Level == nullptr) return;
-			
-	// Check Cell Root
-	const UNCellRootComponent* CellRoot = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(Level);
-	if (CellRoot == nullptr) return;
-			
-	const FNRawMesh& Hull = CellRoot->Details.Hull;
-		
-	TArray<FVector> CornerPoints = JunctionComponent->GetWorldCornerPoints(SocketSize);
-	float MaximumDepth = 0;
-	for (int i = 0; i < CornerPoints.Num(); i++)
-	{
-		const float Depth = FNRawMeshUtils::GetIntersectDepth(Hull,FVector::Zero(), FRotator::ZeroRotator,  CornerPoints[i]);
-		if (Depth > MaximumDepth)
-		{
-			MaximumDepth = Depth;
-		}
-	}
-	if (MaximumDepth == 0) return;
-			
-	const FVector BottomLeftPos = CornerPoints[1] - JunctionComponent->GetUpVector() * 4.0f;
-	FNPrimitiveFont::DrawPDI(PDI, FString::Printf(TEXT("%.1f"),MaximumDepth), BottomLeftPos, JunctionComponent->GetComponentRotation(), 
-			MaximumDepth > MatchingDepth ? FLinearColor::Red : FNColor::Pink, 
-			0.15f, 1.f, 1.f, false, true, SDPG_Foreground);
 }

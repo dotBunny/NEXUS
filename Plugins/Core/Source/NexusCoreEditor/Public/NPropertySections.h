@@ -3,15 +3,28 @@
 
 #pragma once
 
+/**
+ * Registers and manages the "NEXUS" property sections (the grouping tabs shown at the top of the Details panel)
+ * for Actors, Actor Components, Scene Components, and Objects.
+ *
+ * Categories added before Register() runs are queued and flushed during registration, so callers can request
+ * sections during module startup without ordering concerns.
+ */
 class NEXUSCOREEDITOR_API FNPropertySections
 {
 public:
+	/** Creates the NEXUS property sections with the PropertyEditor module and flushes any categories queued beforehand. */
 	static void Register();
-	
+
+	/** Adds a category to all four NEXUS property sections (Actor, Actor Component, Scene Component, and Object). */
 	static void AddCategory(FName Category);
+	/** Adds a category to the Actor property section, queueing it if registration has not yet occurred. */
 	static void AddActorCategory(FName Category);
+	/** Adds a category to the Actor Component property section, queueing it if registration has not yet occurred. */
 	static void AddActorComponentCategory(FName Category);
+	/** Adds a category to the Scene Component property section, queueing it if registration has not yet occurred. */
 	static void AddSceneComponentCategory(FName Category);
+	/** Adds a category to the Object property section, queueing it if registration has not yet occurred. */
 	static void AddObjectCategory(FName Category);
 	
 private:

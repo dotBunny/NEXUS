@@ -14,7 +14,9 @@ class UNAssemblyOperation;
  * Task-graph job that flattens every collected per-organ graph into the spawn context's cell-node
  * list, ready for FNSpawnCellProxiesTask to consume.
  *
- * Runs on the game thread so the spawn context can be safely re-built ahead of the spawn passes.
+ * Runs on any worker thread (see GetDesiredThread), and multiple operations may run their own instance
+ * concurrently, so any shared state it touches must be thread-safe — e.g. it writes the per-operation
+ * context through FNWorldAssemblyCache, whose accessors are guarded by a critical section.
  * Acts as the bridge between the world/pass collection stages and the actual proxy-spawning stage.
  */
 struct FNCreateSpawnsTask
@@ -25,7 +27,7 @@ struct FNCreateSpawnsTask
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNCreateSpawnsTask, STATGROUP_TaskGraphTasks); }
 
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::GameThread; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyNormalThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
 	/** Executed by the task graph: flattens the collected graphs into the spawn context. */

@@ -17,6 +17,8 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 {
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesStart)
 	
+	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Collect Pass (%i)"), PassContextPtr->Graphs.Num()));
+	
 	for (TUniquePtr<FNAssemblyGraph>& Graph : PassContextPtr->Graphs)
 	{
 		// Copy our node collision data to the world
@@ -27,14 +29,20 @@ void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEv
 				FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
 				WorldContextPtr->NodeIndex.Add(CellNode);
 				WorldContextPtr->NodeCollisionMeshes.Add(CellNode->GetHullCopy());
-				WorldContextPtr->NodeCollisionMeshLocations.Add(CellNode->GetWorldPosition());
-				WorldContextPtr->NodeCollisionMeshRotations.Add(CellNode->GetWorldRotation());
 			}
 		}
 		
 		TaskGraphContextPtr->TakeGraph(MoveTemp(Graph));
 	}
-	TaskGraphContextPtr->AddOutputTags(PassContextPtr->OutputTags);
+	
+	// Next pass access
+	WorldContextPtr->ContextTags.AppendTags(PassContextPtr->ContextTags);
+	WorldContextPtr->TagCounter.Combine(PassContextPtr->TagCounter);
+	
+	// Access on post
+	TaskGraphContextPtr->AddContextTags(PassContextPtr->ContextTags);
+	TaskGraphContextPtr->AddTagCounter(PassContextPtr->TagCounter);
+	
 	PassContextPtr->Graphs.Reset();
 	
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesFinish)

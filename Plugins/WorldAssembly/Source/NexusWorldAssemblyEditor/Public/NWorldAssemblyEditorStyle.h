@@ -15,7 +15,7 @@
  */
 class FNWorldAssemblyEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusWorldAssembly", "NWorldAssemblyEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusWorldAssembly", "NWorldAssemblyEditorStyle")
 
 public:
 	/** @return Icon for the "edit hull" mode action on the cell-actor toolbar. */
@@ -33,6 +33,8 @@ public:
 	/** @return Icon for the "toggle world-collision visualizer" action on the World Assembly toolbar. */
 	static FSlateIcon CollisionVisualizerToggleIcon();
 	
+	/** @return Icon for the cell-ignore tagging action. */
 	static FSlateIcon CellIgnoreIcon();
+	/** @return Icon for the world-collision-ignore tagging action. */
 	static FSlateIcon WorldCollisionIgnoreIcon();
 };

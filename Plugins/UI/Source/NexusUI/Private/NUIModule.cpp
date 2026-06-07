@@ -3,13 +3,20 @@
 
 #include "NUIModule.h"
 
+#include "NCoreMinimal.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
 void FNUIModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusUI")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNUIModule::OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT_STATIC(FNUIModule::OnPostEngineInit);
+}
+
+void FNUIModule::ShutdownModule()
+{
+	N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE()
+	IModuleInterface::ShutdownModule();
 }
 
 void FNUIModule::OnPostEngineInit()

@@ -3,13 +3,20 @@
 
 #include "NActorPoolsModule.h"
 
+#include "NCoreMinimal.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
 void FNActorPoolsModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusActorPools")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNActorPoolsModule::OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT_STATIC(FNActorPoolsModule::OnPostEngineInit);
+}
+
+void FNActorPoolsModule::ShutdownModule()
+{
+	N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE()
+	IModuleInterface::ShutdownModule();
 }
 
 void FNActorPoolsModule::OnPostEngineInit()

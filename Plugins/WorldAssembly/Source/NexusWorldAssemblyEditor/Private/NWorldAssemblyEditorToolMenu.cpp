@@ -277,7 +277,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(NCellJunctionDropdownMenu);
 		
 		// Visualizers Section
-		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Toggle Drawing Voxel Data
 		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
@@ -310,7 +310,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(CollisionVisualizerEntry);
 		
 		// Actions Section - based on selection
-		NexusSection.AddEntry(N_IMPLEMENT_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// Ignore Actor Toggle
 		FToolMenuEntry CellIgnoreToggle  = FToolMenuEntry::InitToolBarButton(

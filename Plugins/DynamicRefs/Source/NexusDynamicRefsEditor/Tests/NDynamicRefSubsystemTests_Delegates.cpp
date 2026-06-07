@@ -137,8 +137,8 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemoved_DoesNotFireForMissing
     "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnRemoved::DoesNotFireForMissingObject",
     N_TEST_CONTEXT_EDITOR)
 {
-    // Verifies RemoveObject still fires OnRemoved even when the object was never
-    // registered (subsystem does not guard the broadcast).
+    // Verifies RemoveObject does NOT fire OnRemoved when the object was never registered:
+    // the broadcast is guarded on the removal actually succeeding (Remove() returning > 0).
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
         UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
@@ -158,7 +158,67 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemoved_DoesNotFireForMissing
         // Intentionally skip AddObject to test remove-without-add.
         Subsystem->RemoveObject(NDR_NonPlayableCharacter, Actor);
     	
-        CHECK_EQUALS("OnRemoved fired even for an object that was never added.", Tracker->Counter, 0)
+        CHECK_EQUALS("OnRemoved must not fire for an object that was never added.", Tracker->Counter, 0)
+    });
+}
+
+N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAdded_DoesNotFireForDuplicate,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnAdded::DoesNotFireForDuplicate",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // Regression: AddObject must broadcast OnAdded only when the object is genuinely added. A duplicate
+    // AddObject is a no-op (AddUnique), so it must not re-fire OnAdded — otherwise the add/remove delegate
+    // pair drifts for any external listener (RemoveObject only fires once, on the real removal).
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+    {
+        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
+            return;
+        }
+
+        const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
+        FNTestObject* Tracker = TestObject.Get();
+
+        FDelegateHandle Handle = Subsystem->OnAdded.AddLambda(
+            [Tracker](ENDynamicRef, UObject*) { Tracker->Counter++; });
+
+        AActor* Actor = World->SpawnActor<AActor>();
+        Subsystem->AddObject(NDR_Player, Actor);
+        Subsystem->AddObject(NDR_Player, Actor); // duplicate — no-op, must not re-broadcast
+
+        CHECK_EQUALS("OnAdded should fire exactly once across a duplicate add.", Tracker->Counter, 1)
+    });
+}
+
+N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAddedByName_DoesNotFireForDuplicate,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::Delegates::OnAddedByName::DoesNotFireForDuplicate",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // Regression: the FName path must match the ENDynamicRef path — a duplicate AddObjectByName is a
+    // no-op and must not re-fire OnAddedByName.
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+    {
+        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
+            return;
+        }
+
+        const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
+        FNTestObject* Tracker = TestObject.Get();
+
+        FDelegateHandle Handle = Subsystem->OnAddedByName.AddLambda(
+            [Tracker](FName, UObject*) { Tracker->Counter++; });
+
+        const FName TestName = TEXT("TestDelegateDuplicateAdd");
+        AActor* Actor = World->SpawnActor<AActor>();
+        Subsystem->AddObjectByName(TestName, Actor);
+        Subsystem->AddObjectByName(TestName, Actor); // duplicate — no-op, must not re-broadcast
+
+        CHECK_EQUALS("OnAddedByName should fire exactly once across a duplicate add.", Tracker->Counter, 1)
     });
 }
 

@@ -8,6 +8,7 @@
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellProxy.h"
 #include "Editor.h"
+#include "NWorldAssemblyContextCache.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -22,6 +23,13 @@ void UNWorldAssemblyEditorSubsystem::Initialize(FSubsystemCollectionBase& Collec
 
 void UNWorldAssemblyEditorSubsystem::Deinitialize()
 {
+	// Clear cached persistent operation data
+	if (CachedOperationTickets.Num() > 0)
+	{
+		FNWorldAssemblyContextCache::ClearContext(CachedOperationTickets);
+		CachedOperationTickets.Empty();
+	}
+	
 	if (HasGeneratedCellProxies())
 	{
 		ClearAllProxies();
@@ -63,7 +71,7 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 	// Clear for anything in operation
 	for (UNOrganComponent* Component :  Operation->Context->InputComponents)
 	{
-		uint32 LastOperationTicket = Component->GetAndResetLastOperationTicket();
+		int32 LastOperationTicket = Component->GetAndResetLastOperationTicket();
 		if (LastOperationTicket != 0)
 		{
 			ClearGenerated(LastOperationTicket);
@@ -71,6 +79,7 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 	}
 
 	KnownOperations.AddUnique(Operation);
+	CachedOperationTickets.Add(Operation->GetTicket());
 	Operation->StartBuild(this, this);
 }
 
@@ -84,7 +93,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
-	
+
 	// Toast
 	const FNAssemblyOperationResult Results = Operation->GetResult();
 	FNotificationInfo Info(Results.Title);
@@ -125,7 +134,7 @@ void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* O
 
 void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
 {
-	// Bulk clears can tear down streamed sub-level actors the user may have selected; drop the entire
+	// Bulk clears can tear down streamed sublevel actors the user may have selected; drop the entire
 	// selection so the typed-element registry does not assert on a stale handle next mouse-move.
 	if (GEditor != nullptr)
 	{
@@ -144,16 +153,16 @@ void UNWorldAssemblyEditorSubsystem::ClearAllProxies()
 	KnownProxies.Empty();
 }
 
-void UNWorldAssemblyEditorSubsystem::ClearGenerated(const uint32& OperationTicket)
+void UNWorldAssemblyEditorSubsystem::ClearGenerated(const int32& OperationTicket)
 {
 	ClearGeneratedProxies(OperationTicket);
 }
 
-void UNWorldAssemblyEditorSubsystem::ClearGeneratedProxies(const uint32& OperationTicket)
+void UNWorldAssemblyEditorSubsystem::ClearGeneratedProxies(const int32& OperationTicket)
 {
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
-		// Per-ticket clears can also tear down streamed sub-level actors the user may have selected;
+		// Per-ticket clears can also tear down streamed sublevel actors the user may have selected;
 		// drop the entire selection so the typed-element registry does not assert next mouse-move.
 		if (GEditor != nullptr)
 		{
@@ -183,7 +192,7 @@ void UNWorldAssemblyEditorSubsystem::LoadAllGeneratedProxies()
 	}
 }
 
-void UNWorldAssemblyEditorSubsystem::LoadGeneratedProxies(const uint32& OperationTicket)
+void UNWorldAssemblyEditorSubsystem::LoadGeneratedProxies(const int32& OperationTicket)
 {
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{
@@ -200,7 +209,7 @@ void UNWorldAssemblyEditorSubsystem::UnloadAllGeneratedProxies()
 {
 	if (ProxyMap.Num() > 0)
 	{
-		TArray<uint32> KnownKeys;
+		TArray<int32> KnownKeys;
 		ProxyMap.GetKeys(KnownKeys);
 		for (auto Key : KnownKeys)
 		{
@@ -209,7 +218,7 @@ void UNWorldAssemblyEditorSubsystem::UnloadAllGeneratedProxies()
 	}
 }
 
-void UNWorldAssemblyEditorSubsystem::UnloadGeneratedProxies(const uint32& OperationTicket)
+void UNWorldAssemblyEditorSubsystem::UnloadGeneratedProxies(const int32& OperationTicket)
 {
 	if (ProxyMap.Num() > 0 && ProxyMap.Contains(OperationTicket))
 	{

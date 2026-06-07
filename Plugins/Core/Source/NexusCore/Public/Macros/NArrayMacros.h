@@ -16,7 +16,7 @@
  * @param SizeX Name of the member holding the grid width.
  * @param SizeY Name of the member holding the grid height.
  */
-#define N_IMPLEMENT_FLAT_2D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY) \
+#define N_FLAT_2D_ARRAY_BASE(IndexType, DataType, DataArray, SizeX, SizeY) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY) \
 	{ \
@@ -132,7 +132,7 @@ public: \
 	}
 
 /**
- * 3D analogue of N_IMPLEMENT_FLAT_2D_ARRAY — generates the wrapping accessors around a flat TArray
+ * 3D analogue of N_FLAT_2D_ARRAY — generates the wrapping accessors around a flat TArray
  * exposed as a logical 3D grid.
  *
  * Expects the host class to declare TArray<DataType> DataArray plus IndexType-typed SizeX, SizeY,
@@ -146,7 +146,7 @@ public: \
  * @param SizeY Name of the member holding the grid height.
  * @param SizeZ Name of the member holding the grid depth.
  */
-#define N_IMPLEMENT_FLAT_3D_ARRAY(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
+#define N_FLAT_3D_ARRAY_BASE(IndexType, DataType, DataArray, SizeX, SizeY, SizeZ) \
 public: \
 	void Reset(const IndexType InSizeX, const IndexType InSizeY, const IndexType InSizeZ) \
 	{ \

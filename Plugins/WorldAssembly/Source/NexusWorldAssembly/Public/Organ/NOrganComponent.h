@@ -105,19 +105,20 @@ public:
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI) const;
 
 	/** Stash the ticket of the most recent operation that targeted this organ. */
-	void SetLastOperationTicket(const uint32& Ticket) { LastOperationTicket = Ticket; }
+	void SetLastOperationTicket(const int32& Ticket) { LastOperationTicket = Ticket; }
 
 	/** @return The ticket of the most recent operation that targeted this organ. */
-	const uint32& GetLastOperationTicket() const { return LastOperationTicket; }
+	const int32& GetLastOperationTicket() const { return LastOperationTicket; }
 
 	/** @return The stored ticket, clearing the slot so subsequent callers see zero. */
-	uint32 GetAndResetLastOperationTicket()
+	int32 GetAndResetLastOperationTicket()
 	{
-		const uint32 ReturnTicket = LastOperationTicket;
+		const int32 ReturnTicket = LastOperationTicket;
 		LastOperationTicket = 0;
 		return ReturnTicket;
 	}
 
+	/** Stable unique identifier for this organ, used to keep generation deterministic across runs. */
 	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
 	FGuid Identifier = FGuid::NewGuid();
 
@@ -136,5 +137,5 @@ protected:
 
 private:
 	/** Ticket of the operation most recently scheduled against this organ; zeroed by GetAndResetLastOperationTicket. */
-	uint32 LastOperationTicket = 0;
+	int32 LastOperationTicket = 0;
 };

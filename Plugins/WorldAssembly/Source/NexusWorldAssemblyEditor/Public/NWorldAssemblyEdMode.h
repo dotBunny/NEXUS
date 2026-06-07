@@ -9,10 +9,12 @@
 #include "CanvasItems/NMultiLineTextBoxCanvasItem.h"
 #include "Cell/NCellActor.h"
 #include "Developer/NDebugActor.h"
+#include "UObject/ObjectKey.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
 class FNAssemblyOperationContext;
 class UNAssemblyOperation;
+struct FPropertyChangedEvent;
 
 enum class ENWorldAssemblyEdModeRenderMode
 {
@@ -116,17 +118,21 @@ public:
 	
 	static void OnActorDeleted(AActor* Actor);
 	
+	/** Set the active render mode used to draw World Assembly debug geometry in the edit mode. */
 	static void SetRenderMode(const ENWorldAssemblyEdModeRenderMode Mode) { RenderMode = Mode; }
 	
 	/**
-	 * Spawns the world-collision visualizer — a single merged ANDebugActor whose mesh is the union of the
-	 * simple-collision geometry of every world actor that passes the World Assembly world-actor filter
-	 * (FNWorldAssemblyOperationContext::CreateWorldActorFilterSettings), shaded with
-	 * UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial — and caches it on the mode. Any previously-spawned
-	 * visualizer is destroyed first, so this doubles as a refresh. Editor-only / diagnostic; the actor is
-	 * transient and will not be saved with the level.
+	 * Builds — or refreshes in place — the world-collision visualizer: a single merged ANDebugActor whose mesh is the
+	 * union of the simple-collision geometry of every world actor that passes the World Assembly world-actor filter
+	 * (FNCreateVirtualWorldTask::CreateWorldActorFilterSettings), shaded with
+	 * UNWorldAssemblyEditorSettings::CollisionVisualizerMaterial, and caches it on the mode.
+	 *
+	 * When no visualizer is cached this spawns one and starts listening for world changes; when one already exists its
+	 * geometry is swapped in place (preserving actor identity and selection). The cached set of source actors is
+	 * refreshed and the dirty flag cleared each call. Editor-only / diagnostic; the actor is transient and will not be
+	 * saved with the level.
 	 * @param World World to iterate for collision sources and to spawn the visualizer into. Must be valid.
-	 * @return The newly cached visualizer actor, or nullptr if no collision geometry was extracted.
+	 * @return The cached visualizer actor, or nullptr if none exists and no collision geometry was extracted.
 	 */
 	static TObjectPtr<ANDebugActor> CreateCollisionVisualizer(UWorld* World);
 	/**
@@ -164,8 +170,37 @@ public:
 	//End FEdMode
 
 private:
-	static void RenderCellJunctionPenetrationDistance(FPrimitiveDrawInterface* PDI, const UNCellJunctionComponent* JunctionComponent, FVector2D SocketSize, float MatchingDepth = 0);
-	
+	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
+	static void BindWorldChangeDelegates();
+
+	/** Unsubscribe from the editor world-change delegates. Called when the visualizer is destroyed or the mode exits. */
+	static void UnbindWorldChangeDelegates();
+
+	/** Flag the cached visualizer for a rebuild on the next Tick. Bursts of changes coalesce into a single rebuild. */
+	static void MarkCollisionVisualizerDirty() { bCollisionVisualizerDirty = true; }
+
+	/**
+	 * @return true when a change to Actor could alter the cached visualizer — i.e. Actor currently passes the collision
+	 *         filter, or it was part of the source set the live visualizer was last built from (so a delete / collision
+	 *         toggle / ignore-tag still forces it to drop out). Always false while no visualizer is alive.
+	 */
+	static bool ShouldRebuildForActor(const AActor* Actor);
+
+	/** @return The actor affected by a change delegate payload — the object itself, or its owner when it is a component. */
+	static AActor* ResolveAffectedActor(UObject* Object);
+
+	/** Delegate: a relevant actor was added to the level — flag a refresh. */
+	static void OnLevelActorAdded(AActor* Actor);
+
+	/** Delegate: a transform gizmo drag ended on Object — flag a refresh when it is relevant. */
+	static void OnObjectMoved(UObject& Object);
+
+	/** Delegate: a finalized (non-interactive) property edit landed on Object — flag a refresh when it is relevant. */
+	static void OnObjectPropertyChanged(UObject* Object, FPropertyChangedEvent& PropertyChangedEvent);
+
+	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
+	static void OnUndoRedo();
+
 	/** Pixel spacing between stacked HUD messages. */
 	const int32 MessageSpacing = 20;
 
@@ -181,6 +216,17 @@ private:
 	static ENCellVoxelMode CellVoxelMode;
 	static TObjectPtr<ANDebugActor> CollisionVisualizer;
 	static ENWorldAssemblyEdModeRenderMode RenderMode;
+
+	/** Actors that sourced the geometry of the live visualizer; lets change delegates test relevance in O(1). */
+	static TSet<FObjectKey> CollisionSourceActors;
+
+	/** Set by the world-change delegates when the visualizer needs rebuilding; consumed (and cleared) in Tick. */
+	static bool bCollisionVisualizerDirty;
+
+	static FDelegateHandle OnLevelActorAddedHandle;
+	static FDelegateHandle OnObjectMovedHandle;
+	static FDelegateHandle OnObjectPropertyChangedHandle;
+	static FDelegateHandle OnUndoRedoHandle;
 
 	/** Editor-side operation used to preview organ generation. */
 	TObjectPtr<UNAssemblyOperation> OrganGenerator;

@@ -74,7 +74,7 @@ public:
 	 * @param RightMesh Second mesh. Same triangle / closed-manifold requirement as LeftMesh.
 	 * @param RightOrigin World-space translation applied to RightMesh.
 	 * @param RightRotation World-space rotation applied to RightMesh.
-	 * @param EarlyExitDepth Optional optimisation hint — when finite, the function may return as soon as it
+	 * @param EarlyExitDepth Optional optimization hint — when finite, the function may return as soon as it
 	 *        proves the depth either exceeds or is bounded below this value. Callers doing a threshold
 	 *        comparison (`if (depth >= threshold)`) should pass their threshold here; the returned value
 	 *        still produces the correct branch on that compare, but may be a conservative upper bound
@@ -146,7 +146,21 @@ public:
 	 * @note The result is flagged Chaos-generated and convex; bounds and center are computed directly from the hull output.
 	 */
 	static FNRawMesh ToConvexHull(const FNRawMesh& Mesh);
-	
+
+	/**
+	 * Builds a valid, outward-wound convex box hull spanning the axis-aligned Box.
+	 *
+	 * Emits a hull shaped like the ones production paths produce (e.g. FNWorldAssemblyUtils::CalculateConvexHull):
+	 * both a polygonal FaceLoops description and a matching triangulated Loops buffer, plus populated Center/Bounds.
+	 * Every face is wound so its normal points away from the box interior, which is what the plane-side convexity
+	 * test in FNRawMesh::CheckConvex requires (all other vertices must sit on or behind each face plane).
+	 *
+	 * @param Box Axis-aligned bounds the hull should span.
+	 * @return A convex box hull with 8 vertices, 6 quad FaceLoops, 12 triangle Loops, populated Center/Bounds,
+	 *         and validated convexity flags (IsConvex() reports true without further mutation).
+	 */
+	static FNRawMesh MakeBoxHull(const FBox& Box);
+
 	/**
 	 * Tests whether RelativePoint lies inside Mesh using the mesh's local space.
 	 *
@@ -188,13 +202,15 @@ private:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
-	static bool DoesIntersectTriangles(
-		const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+	/**
+	 * Baked variant of DoesIntersectTriangles. Both meshes' vertices (and Bounds) are already in world
+	 * space, so the per-vertex transform and the two heap-allocated world-vertex buffers the transform-aware
+	 * version builds are skipped — the mesh vertices are referenced directly. Bit-identical to calling the
+	 * transform-aware overload with identity transforms.
+	 */
+	static bool DoesIntersectTrianglesBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
-	static bool DoesIntersectTriangles(
-		const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
-	
 	/**
 	 * Hybrid convex-vs-convex overlap test. First runs a SAT-style face-normal rejection pass that
 	 * cheaply proves non-overlap when any face plane separates the two meshes. When no face normal
@@ -215,10 +231,13 @@ private:
 		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
 		const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
 
-	static bool DoesConvexIntersectSAT(const FNRawMesh& LeftMesh,const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation);
+	/**
+	 * Baked variant of DoesConvexIntersectSAT. Both meshes' vertices are already world-space, so face
+	 * normals and projection intervals are computed straight from the stored vertices with no rotation and
+	 * no world-vertex buffers. Bit-identical to the transform-aware overload with identity transforms.
+	 */
+	static bool DoesConvexIntersectSATBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
 
-	static bool DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh);
-	
 	/**
 	 * Gate for the SAT fast path: both inputs must be convex with a populated FaceLoops description and
 	 * face count under the per-mesh threshold. Threshold is empirical — the SAT hit-path cost grows as

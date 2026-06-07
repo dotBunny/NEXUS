@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "NAssemblyTaskAnalytics.h"
 
+struct FNStatusChannelUpdate;
 class UNAssemblyOperation;
 class FNAssemblyOperationContext;
 class FNAssemblyTaskGraphContext;
@@ -43,6 +44,20 @@ public:
 
 	/** @return true once UnlockTasks has dispatched the graph. */
 	bool IsTasksUnlocked() const { return bTasksUnlocked; }
+
+	/**
+	 * Drain the most recent task-authored display message. Game thread only.
+	 * @param OutMessage Receives the pending message when one is available.
+	 * @return true if a new message was drained since the last call; false if nothing changed (or the graph context is gone).
+	 */
+	bool ConsumeStatusMessage(FString& OutMessage) const;
+
+	/**
+	 * Drain every per-stage status channel that changed since the last call. Game thread only.
+	 * @param OutChanges Receives the current state of each dirtied channel, in stable open order.
+	 * @return true if any channel was drained since the last call; false if nothing changed (or the graph context is gone).
+	 */
+	bool ConsumeChannelUpdates(TArray<FNStatusChannelUpdate>& OutChanges) const;
 
 	/** Signal the spawn pass to stop producing new proxies at the next time-slice boundary. */
 	void Cancel();

@@ -41,6 +41,6 @@ void FNToolsMenu::RemoveMenuEntry(const FName Identifier)
 
 void FNToolsMenu::GenerateMenu(UToolMenu* Menu, bool bIsContextMenu)
 {
-	N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, Entries)
+	N_GENERATE_TOOLS_MENU(Sections, Entries)
 }
 

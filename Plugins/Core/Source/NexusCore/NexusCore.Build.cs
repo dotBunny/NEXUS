@@ -25,6 +25,7 @@ namespace UnrealBuildTool.Rules
 					"Chaos",
 					"CoreUObject",
 					"DeveloperSettings",
+					"GameplayTags",
 					"ModelingComponents",
 					"PhysicsCore",
 					"Projects"

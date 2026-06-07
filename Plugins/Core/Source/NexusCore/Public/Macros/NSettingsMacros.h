@@ -26,7 +26,7 @@
  * @param Description String literal shown as the section description / tooltip in the editor's Project Settings tree.
  */
 #if WITH_EDITOR
-#define N_IMPLEMENT_SETTINGS(Type, Title, Description) \
+#define N_SETTINGS_BASE(Type, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \
@@ -63,7 +63,7 @@
 			return SectionDescription; \
 		}
 #else
-#define N_IMPLEMENT_SETTINGS(Type, Title, Description) \
+#define N_SETTINGS_BASE(Type, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \
@@ -106,7 +106,7 @@
  * @param Description String literal shown as the section description / tooltip in the editor's Project Settings tree.
  */
 #if WITH_EDITOR
-#define N_IMPLEMENT_CUSTOM_SETTINGS(Type, Container, Category, Title, Description) \
+#define N_CUSTOM_SETTINGS_BASE(Type, Container, Category, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \
@@ -143,7 +143,7 @@
 			return SectionDescription; \
 		}
 #else
-#define N_IMPLEMENT_CUSTOM_SETTINGS(Type, Container, Category, Title, Description) \
+#define N_CUSTOM_SETTINGS_BASE(Type, Container, Category, Title, Description) \
 	public: \
 		static const Type* Get() \
 		{ \

@@ -14,8 +14,9 @@ class FNDynamicRefsModule final : public IModuleInterface
 {
 public:	
 	virtual void StartupModule() override;
-	N_IMPLEMENT_MODULE(FNDynamicRefsModule, "NexusDynamicRefs")
+	virtual void ShutdownModule() override;
+	N_MODULE_BASE(FNDynamicRefsModule, "NexusDynamicRefs")
 
 private:
-	static void OnPostEngineInit();
+	N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE()
 };

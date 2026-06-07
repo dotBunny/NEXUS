@@ -16,12 +16,13 @@ namespace NEXUS::PerfTests::NWorldAssembly::FNCellVoxelDataHarness
 	constexpr int32 LargeIterations = 100;
 
 	// MaxDuration values are in milliseconds and bound the total cost of the inner loop (NOT per call).
-	// Sized to roughly 5x the observed baseline so the tests don't false-fail under CI / contended cores
-	// while still flagging genuine regressions.
-	constexpr float CardinalSmallMaxDuration = 350.0f;
-	constexpr float CardinalLargeMaxDuration = 300.0f;
-	constexpr float ArbitrarySmallMaxDuration = 2800.0f;
-	constexpr float ArbitraryLargeMaxDuration = 2200.0f;
+	// Sized to roughly 3x the observed baseline: enough headroom to absorb CI / contended-core jitter without
+	// false-failing, but tight enough to catch a genuine ~3x regression rather than only a catastrophic one.
+	// Fine-grained drift is tracked by the performance.csv trend captured on the CI perf run, not by these gates.
+	constexpr float CardinalSmallMaxDuration = 210.0f;
+	constexpr float CardinalLargeMaxDuration = 180.0f;
+	constexpr float ArbitrarySmallMaxDuration = 1680.0f;
+	constexpr float ArbitraryLargeMaxDuration = 1320.0f;
 
 	constexpr float VoxelExtent = 100.0f;
 

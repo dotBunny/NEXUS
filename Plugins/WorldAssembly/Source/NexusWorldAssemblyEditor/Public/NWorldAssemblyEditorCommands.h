@@ -106,7 +106,9 @@ public:
 	static void CellToggleHullCalculateOnSave();
 	
 	
+	/** @return checked state of the allow-non-convex-hull toggle for UI binding. */
 	static bool CellToggleHullAllowNonConvex_IsActionChecked();
+	/** Toggle whether the focused cell's hull is allowed to be non-convex. */
 	static void CellToggleHullAllowNonConvex();
 	
 	/** @return checked state of the hull-calculate-on-save toggle for UI binding. */
@@ -123,6 +125,7 @@ public:
 	/** Reset the focused cell to its default authored state (clears cached bounds/hull/voxel). */
 	static void CellResetCell();
 
+	/** Save the focused cell to its side-car package. */
 	static void CellSaveCell();
 
 	/** Remove the focused cell actor from the level, deleting its side-car package. */

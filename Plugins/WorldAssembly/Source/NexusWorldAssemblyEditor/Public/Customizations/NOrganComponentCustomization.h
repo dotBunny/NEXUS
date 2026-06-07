@@ -4,6 +4,10 @@
 
 #include "IDetailCustomization.h"
 
+class IPropertyUtilities;
+class UNAssemblyOperation;
+enum class ENWorldAssemblyOperationState : uint8;
+
 /**
  * Detail-panel customization for UNOrganComponent. Surfaces Generate/Cancel/Clear action buttons
  * that drive the editor-side World Assembly operation, with visibility gated on current operation state.
@@ -13,7 +17,9 @@ class FNOrganComponentCustomization final : public IDetailCustomization
 public:
 	/** Factory entry point registered with the property editor module. */
 	static TSharedRef<IDetailCustomization> MakeInstance();
-	
+
+	virtual ~FNOrganComponentCustomization() override;
+
 	//~IDetailCustomization
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 	//End IDetailCustomization
@@ -33,4 +39,26 @@ private:
 
 	/** @return Visible when previously-generated proxies exist that could be cleared. */
 	EVisibility ClearButtonVisible() const;
+
+	/**
+	 * @return true when the panel's organ component(s) can be generated: not in PIE, no operation
+	 * currently running, and at least one valid organ component is being customized.
+	 *
+	 * Gates on the customized objects rather than the live editor selection: regenerating silently
+	 * clears the actor selection (ClearGeneratedProxies -> GEditor->SelectNone), which would otherwise
+	 * leave the button stuck disabled even though this panel is still bound to a valid component.
+	 */
+	bool CanGenerate() const;
+
+	/** Re-evaluates the cached enabled-state of the action buttons when an operation registers/unregisters. */
+	void HandleOperationStateChanged(UNAssemblyOperation* Operation, ENWorldAssemblyOperationState NewState);
+
+	/** The organ component object(s) this panel instance is bound to; drives the action buttons. */
+	TArray<TWeakObjectPtr<UObject>> CustomizedObjects;
+
+	/** Property utilities for the panel we customized, used to force a refresh. */
+	TWeakPtr<IPropertyUtilities> PropertyUtilities;
+
+	/** Handle for our subscription to FNWorldAssemblyRegistry::OnOperationStateChanged. */
+	FDelegateHandle OperationStateChangedHandle;
 };

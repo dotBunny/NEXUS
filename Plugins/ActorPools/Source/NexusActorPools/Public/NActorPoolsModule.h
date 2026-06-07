@@ -13,8 +13,9 @@ class FNActorPoolsModule final : public IModuleInterface
 {
 public:	
 	virtual void StartupModule() override;
-	N_IMPLEMENT_MODULE(FNActorPoolsModule, "NexusActorPools")
+	virtual void ShutdownModule() override;
+	N_MODULE_BASE(FNActorPoolsModule, "NexusActorPools")
 
 private:
-	static void OnPostEngineInit();
+	N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE()
 };

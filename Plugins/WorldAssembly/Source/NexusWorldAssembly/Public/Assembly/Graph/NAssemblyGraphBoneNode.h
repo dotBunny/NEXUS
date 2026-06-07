@@ -17,7 +17,7 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphBoneNode  : public FNAssemblyGraphNo
 public:
 	virtual ENAssemblyGraphNodeType GetNodeType() const override {  return ENAssemblyGraphNodeType::Bone; }
 	FNAssemblyGraphBoneNode(const FNVirtualBoneData* InputData, const FVector& Position, const FRotator& Rotation)
-	: FNAssemblyGraphNode(Position, Rotation)
+	: FNAssemblyGraphNode(0, Position, Rotation) // No need for seed atm
 	{
 		SocketSize = InputData->SocketSize;
 		NodeDepth = 0;

@@ -11,6 +11,7 @@
 
 
 class FNVirtualWorldContext;
+class FNAssemblyTaskGraphContext;
 
 /**
  * Task-graph job that builds the FNAssemblyGraph for a single organ using the Frontier model.
@@ -21,12 +22,13 @@ class FNVirtualWorldContext;
 struct FNOrganGraphBuilderTask
 {
 	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
-		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr 
+		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
+		const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
 		N_ASSEMBLY_ANALYTICS_CONSTRUCTOR);
 
 	FORCEINLINE TStatId GetStatId() const { RETURN_QUICK_DECLARE_CYCLE_STAT(FNWorldAssemblyGraphBuilderTask, STATGROUP_TaskGraphTasks); }
 
-	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyBackgroundThreadNormalTask; }
+	static ENamedThreads::Type GetDesiredThread() { return ENamedThreads::AnyNormalThreadNormalTask; }
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::TrackSubsequents; }
 
 	/** Executed by the task graph: performs the full organ build. */
@@ -35,20 +37,9 @@ struct FNOrganGraphBuilderTask
 private:
 	/** Cached world-collision simple-mesh hulls intersecting this organ's bounds. */
 	TArray<FNRawMesh> WorldCollisionMeshes;
-	/** World-space locations corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FVector> WorldCollisionLocations;
-	/** World-space rotations corresponding 1:1 with WorldCollisionMeshes. */
-	TArray<FRotator> WorldCollisionRotations;
 
 	/** Cached hulls of cells already placed by earlier organs that overlap this organ's bounds. */
 	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
-	/** World-space locations corresponding 1:1 with ExistingNodeCollisionMeshes. */
-	TArray<FVector> ExistingNodeCollisionLocations;
-	/** World-space rotations corresponding 1:1 with ExistingNodeCollisionMeshes. */
-	TArray<FRotator> ExistingNodeCollisionRotations;
-
-	/** Number of consecutive failed start-node attempts; used to break out of unwinnable retries. */
-	int32 BadStartCount = 0;
 
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
@@ -61,6 +52,9 @@ private:
 
 	/** Virtual-world context supplying world-collision data for intersection tests. */
 	TSharedRef<FNVirtualWorldContext> WorldContextPtr;
+
+	/** Top-level task-graph context; used here to publish progress/status messages for UI. */
+	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;
 	
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
@@ -72,7 +66,7 @@ private:
 	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
 
 	/** @return Every existing cell whose world bounds intersect NewNode's. */
-	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(FNAssemblyGraphCellNode* NewNode) const;
+	TArray<FNAssemblyGraphCellNode*> CheckNodeBounds(const FNAssemblyGraphCellNode* NewNode) const;
 
 	/** @return Every existing cell whose hull intersects NewNode's hull. */
 	TArray<FNAssemblyGraphCellNode*> CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const;

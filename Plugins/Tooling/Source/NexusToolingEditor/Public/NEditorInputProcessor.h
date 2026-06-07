@@ -29,6 +29,8 @@ public:
 	};
 	virtual const TCHAR* GetDebugName() const override { return TEXT("FNEditorInputProcessor"); }
 	//End IInputProcessor
+	
+	bool IsMouseEventLastSyntheticEvent(const FPointerEvent& MouseEvent);
 
 	/**
 	 * Is the left shift-key pressed?

@@ -72,7 +72,7 @@ void ANWorldAssemblyRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 {
 	bHasNearbyCellLevelInstances = false;
-	CachedNearbyCellLevelInstances.Empty();
+	CachedNearbyCellLevelInstances.Reset();
 	
 	// Setup initial query
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
@@ -88,7 +88,7 @@ void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 	Server_RequestNearbyCells(Location, 0, bIsLevelLoaded);
 }
 
-void ANWorldAssemblyRelay::Client_OperationFinished_Implementation(const uint32 OperationTicket)
+void ANWorldAssemblyRelay::Client_OperationFinished_Implementation(const int32 OperationTicket)
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received finished notification for operation(%i)."), OperationTicket);	
 	KnownOperations.RemoveSwap(OperationTicket);
@@ -96,20 +96,20 @@ void ANWorldAssemblyRelay::Client_OperationFinished_Implementation(const uint32 
 	UpdateNearbyCells(true);
 }
 
-void ANWorldAssemblyRelay::Client_OperationStarted_Implementation(const uint32 OperationTicket)
+void ANWorldAssemblyRelay::Client_OperationStarted_Implementation(const int32 OperationTicket)
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received starting notification for operation(%i)."), OperationTicket);
 	KnownOperations.AddUnique(OperationTicket);
 }
 
-void ANWorldAssemblyRelay::Client_OperationDestroyed_Implementation(const uint32 OperationTicket)
+void ANWorldAssemblyRelay::Client_OperationDestroyed_Implementation(const int32 OperationTicket)
 {
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received destruction notification for operation(%i)."), OperationTicket);
 	KnownOperations.RemoveSwap(OperationTicket);
 }
 
 
-void ANWorldAssemblyRelay::Server_RequestNearbyCells_Implementation(const FVector Location, const uint32 OperationTicket, const bool bIsLevelLoaded)
+void ANWorldAssemblyRelay::Server_RequestNearbyCells_Implementation(const FVector Location, const int32 OperationTicket, const bool bIsLevelLoaded)
 {
 	// Find our instances
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();

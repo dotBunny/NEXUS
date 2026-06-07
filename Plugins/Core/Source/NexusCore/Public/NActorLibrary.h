@@ -7,8 +7,6 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NActorLibrary.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNSimpleDynamicMulticastDelegate);
-
 /**
  * A utility class providing core functions and operations for Actors.
  *
@@ -23,6 +21,7 @@ class NEXUSCORE_API UNActorLibrary : public UBlueprintFunctionLibrary
 	GENERATED_BODY()
 
 public:
+
 	/**
 	 * Compares two arrays of actors to determine if they contain the same actors.
 	 * @param A The first array of actors to compare.

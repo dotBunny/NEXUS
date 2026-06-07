@@ -13,5 +13,5 @@ class FNSharedSamplesModule final : public IModuleInterface
 {
 public:	
 	virtual void StartupModule() override;
-	N_IMPLEMENT_MODULE(FNSharedSamplesModule, "NexusSharedSamples")
+	N_MODULE_BASE(FNSharedSamplesModule, "NexusSharedSamples")
 };

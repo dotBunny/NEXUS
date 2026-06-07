@@ -19,7 +19,7 @@ public:
 	TObjectPtr<UWorld> World;
 
 	/** Operation identifier propagated into spawned proxies for traceability. */
-	uint32 OperationTicket;
+	int32 OperationTicket;
 
 	/** When true, level instances should be preloaded as part of the spawn pass. */
 	bool bPreloadLevels;
@@ -31,11 +31,16 @@ public:
 	TAtomic<bool> bCancelled{false};
 
 	/** Cursor into CellNodes tracking how many entries have already been spawned. */
-	int32 CellNodesCurrentIndex = 0;
+	int32 CellNodesCreateCurrentIndex = 0;
+	
+	int32 CellNodesLoadCurrentIndex = 0;
+	
+	/** Per-frame time budget for spawning cell proxies, in seconds. */
+	float CellTimeSlice = 0.002f;
 
 	/** Flattened list of cell nodes awaiting proxy spawn, populated by FNCreateSpawnsTask. */
 	TArray<FNAssemblyGraphCellNode*> CellNodes;
 
-	explicit FNSpawnContext(UWorld* TargetWorld, const uint32 OperationTicket, const bool bPreloadLevels, const bool bSpawnLevelInstances)
-		: World(TargetWorld), OperationTicket(OperationTicket), bPreloadLevels(bPreloadLevels), bSpawnLevelInstances(bSpawnLevelInstances) {}
+	explicit FNSpawnContext(UWorld* TargetWorld, const int32 OperationTicket, const bool bPreloadLevels, const bool bSpawnLevelInstances, const float CellSpawningTimeSlice = 0.002f)
+		: World(TargetWorld), OperationTicket(OperationTicket), bPreloadLevels(bPreloadLevels), bSpawnLevelInstances(bSpawnLevelInstances), CellTimeSlice(CellSpawningTimeSlice) {}
 };

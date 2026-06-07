@@ -35,7 +35,7 @@ class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	N_IMPLEMENT_SETTINGS(UNActorPoolsSettings, "Actor Pools", "Settings related to the Actor Pools.");
+	N_SETTINGS_BASE(UNActorPoolsSettings, "Actor Pools", "Settings related to the Actor Pools.");
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",

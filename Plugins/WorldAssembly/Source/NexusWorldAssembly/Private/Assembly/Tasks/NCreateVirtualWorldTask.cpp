@@ -13,8 +13,10 @@ void FNCreateVirtualWorldTask::DoTask(ENamedThreads::Type CurrentThread, const F
 	
 	// Gather simple-collision meshes from every primitive in the target world, restricted
 	// to actors whose bounds fall inside one of the input organs' volume bounds.
-	FNRawMeshFactory::FromActorsInBounds(WorldActors, VirtualWorldContextPtr->InputBounds,
-		VirtualWorldContextPtr->WorldCollisionMeshes, VirtualWorldContextPtr->WorldCollisionMeshTransforms);
+	FNRawMeshFactory::FromActorsInBounds(WorldActors, 
+		VirtualWorldContextPtr->InputBounds,
+		VirtualWorldContextPtr->WorldCollisionMeshes, 
+		VirtualWorldContextPtr->WorldCollisionTransforms); // We'll bake the meshes off thread in the process phase
 
 	N_ASSEMBLY_ANALYTICS(CreateVirtualWorldContextFinish)
 }

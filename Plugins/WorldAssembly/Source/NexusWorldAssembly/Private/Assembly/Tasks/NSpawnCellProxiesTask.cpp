@@ -6,6 +6,7 @@
 
 void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
+	
 	N_ASSEMBLY_ANALYTICS_INDEX_DEFINE(SpawnCellProxiesCreate)
 	N_ASSEMBLY_ANALYTICS_INDEX(SpawnCellProxiesStart)
 	
@@ -25,12 +26,13 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		return;
 	}
 	
-	constexpr double MaxAllowableTime = 0.002; // 2ms budget
+	const double MaxAllowableTime = SpawnCellsContextPtr->CellTimeSlice;
 	const double StartTime = FPlatformTime::Seconds();
 	const int32 NodeCount = SpawnCellsContextPtr->CellNodes.Num();
-	
+
 	// Copy local
-	const FGameplayTagContainer OutputTags = TaskGraphContextPtr->OutputTags;
+	const FGameplayTagContainer ContextTags = TaskGraphContextPtr->ContextTags;
+	const TArray<FNGameplayTagCount> TagCounter = TaskGraphContextPtr->TagCounter.ToTagCount();
 	
 	// Early out when we do not have any nodes to spawn
 	if (NodeCount == 0)
@@ -39,14 +41,27 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CompletionEvent->Unlock();
 		return;
 	}
+	FNCellAssemblyData CellAssemblyData;
+	CellAssemblyData.OperationTicket = SpawnCellsContextPtr->OperationTicket;
+	CellAssemblyData.ContextTags = ContextTags;
+	CellAssemblyData.TagCounter = TagCounter;
 	
-	for (int32 i = SpawnCellsContextPtr->CellNodesCurrentIndex; i < NodeCount; i++)
+	for (int32 i = SpawnCellsContextPtr->CellNodesCreateCurrentIndex; i < NodeCount; i++)
 	{
+		FNAssemblyGraphCellNode* CellNode = SpawnCellsContextPtr->CellNodes[i];
+		
+		// Instance specific stuff
+		CellAssemblyData.Seed = CellNode->GetSeed();
+		CellAssemblyData.NodeIdentifier = CellNode->GetNodeIdentifier();
+		CellAssemblyData.AssemblyTags = CellNode->GetAssemblyTags();
+		CellAssemblyData.ContextTagsAdded = CellNode->GetContextTagsAdded();
+		CellAssemblyData.ContextTagsState = CellNode->GetContextTagsState();
+		CellAssemblyData.TagCounterState = CellNode->GetTagCountersState().ToTagCount();
+		
 		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
 		SpawnCellsContextPtr->World, 
-		SpawnCellsContextPtr->OperationTicket, 
-		SpawnCellsContextPtr->CellNodes[i], 
-		OutputTags, // Early access to tags without having to deal with the graph
+		CellNode, 
+		CellAssemblyData,
 		SpawnCellsContextPtr->bPreloadLevels);
 		
 		// Dispatch Guard #2
@@ -65,13 +80,14 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		if (SpawnCellsContextPtr->bSpawnLevelInstances)
 		{
 			Proxy->CreateLevelInstance();
+			// TODO: This  could be a separate pass to not block on loading the level, get all the actors in place
 			Proxy->LoadLevelInstance();
 		}
 		
-		SpawnCellsContextPtr->CellNodesCurrentIndex++;
+		SpawnCellsContextPtr->CellNodesCreateCurrentIndex++;
 		N_ASSEMBLY_ANALYTICS_TWO_PARAM(SpawnCellProxiesSpawned, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, SpawnCellsContextPtr->CellNodes[i]->GetTemplate()->GetFName())
 		
-		if (SpawnCellsContextPtr->CellNodesCurrentIndex == NodeCount)
+		if (SpawnCellsContextPtr->CellNodesCreateCurrentIndex == NodeCount)
 		{
 			N_ASSEMBLY_ANALYTICS_INDEX(SpawnCellProxiesFinish)
 			CompletionEvent->Unlock(); // Triggers

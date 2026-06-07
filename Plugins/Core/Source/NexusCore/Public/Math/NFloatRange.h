@@ -11,7 +11,7 @@
  * A single-precision inclusive range [Minimum, Maximum].
  *
  * Defaults span the entire representable range of float; override either bound at author time.
- * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_IMPLEMENT_RANGE.
+ * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNFloatRange
@@ -26,5 +26,5 @@ struct NEXUSCORE_API FNFloatRange
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float Maximum = MAX_flt;
 
-	N_IMPLEMENT_RANGE(float)
+	N_RANGE_BASE(float)
 };

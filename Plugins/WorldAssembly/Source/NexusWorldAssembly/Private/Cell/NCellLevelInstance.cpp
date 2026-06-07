@@ -6,6 +6,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Net/UnrealNetwork.h"
 
 ANCellLevelInstance::ANCellLevelInstance()
@@ -38,8 +39,7 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	FDoRepLifetimeParams Params;
 	Params.Condition = COND_InitialOnly;
 	
-	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OperationTicket, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, OutputTags, Params);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, AssemblyData, Params);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, JunctionDetails, Params);
 }
 
@@ -63,5 +63,6 @@ void ANCellLevelInstance::FillJunctionData()
 	for (int32 i = 0; i < JunctionDetails.Num(); i++)
 	{
 		JunctionData.Add(JunctionDetails[i].InstanceIdentifier, JunctionDetails[i]);
+		
 	}
 }

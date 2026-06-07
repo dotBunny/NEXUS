@@ -9,7 +9,7 @@
 #include "Brushes/SlateImageBrush.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
+N_EDITOR_STYLE(FNWorldAssemblyEditorStyle)
 
 FSlateIcon FNWorldAssemblyEditorStyle::CellActorEditHullModeIcon()
 {
@@ -91,7 +91,7 @@ FSlateIcon FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon()
 
 TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	// NCellActor
 	Style.Set("ClassIcon.NCellActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NCellActor"), Icon16x16));

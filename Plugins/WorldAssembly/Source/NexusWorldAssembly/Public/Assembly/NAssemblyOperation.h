@@ -29,23 +29,32 @@ enum class ENWorldAssemblyOperationState : uint8
 	Unregistered = 5
 };
 
+/**
+ * The outcome of a completed UNAssemblyOperation, surfaced to owners and UI.
+ */
 USTRUCT(BlueprintType)
 struct FNAssemblyOperationResult
 {
 	GENERATED_BODY()
-	
+
+	/** true if the operation completed successfully. */
 	bool bSuccess = false;
+	/** true if the operation completed but produced one or more warnings. */
 	bool bWarning = false;
-	
+
+	/** Short result title for display. */
 	FText Title;
+	/** Detailed result message for display. */
 	FText Message;
-	
+
+	/** Total wall-clock time the operation took, in seconds. */
 	float Duration = 0.0f;
+	/** Number of cells created during the operation. */
 	int CreatedCells;
 };
 
 /** Broadcast when the display message shown in UI changes. */
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssemblyOperationDisplayMessageChanged, const FString&, NewMessage);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAssemblyOperationStatusMessageChanged, const FString&, NewMessage);
 /** Broadcast when the completed/total task counts change. */
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationTasksChanged, const int, CompletedTasks, const int, TotalTasks);
 /** Broadcast when the overall completion percentage changes. */
@@ -74,10 +83,15 @@ class NEXUSWORLDASSEMBLY_API UNAssemblyOperation : public UObject
 	explicit UNAssemblyOperation(const FObjectInitializer& ObjectInitializer);
 public:
 #if !UE_BUILD_SHIPPING
+	/**
+	 * Writes the operation's report to the project log directory as a timestamped Markdown file (saved asynchronously).
+	 * @return The destination file path.
+	 */
 	FString OutputReportToFile()
 	{
+		FString Timestamp = FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"));
 		FString OutputFile = FPaths::Combine(FPaths::ProjectLogDir(),
-					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+					FString::Printf(TEXT("NEXUS_WorldAssembly_%s.md"), *Timestamp));
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::Markdown);
 		
 		Async(EAsyncExecution::TaskGraph,
@@ -86,8 +100,10 @@ public:
 				FFileHelper::SaveStringArrayToFile(Output, *OutputFile, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
 				UE_LOG(LogNexusWorldAssembly, Log, TEXT("Report written to %s."), *OutputFile);
 			});
+
 		return OutputFile;
 	}
+	/** Writes the operation's report to the log as plain text, one line per entry. */
 	void OutputReportToLog()
 	{
 		TArray<FString> Output = Report.GetReportLines(ENReportOutputFormat::PlainText);
@@ -96,7 +112,9 @@ public:
 			UE_LOG(LogNexusWorldAssembly, Log, TEXT("%s"), *Output[i]);
 		}
 	}
+	/** @return The operation's mutable report, accumulated during the build (non-shipping builds only). */
 	FNReport* GetReport() { return &Report; }
+
 #endif // !UE_BUILD_SHIPPING
 	
 	/**
@@ -184,13 +202,13 @@ public:
 	/** @return Human-friendly label for UI display. */
 	const FText& GetDisplayName() const { return DisplayName; }
 	/** @return Current progress/status message shown in UI and logs. */
-	const FString& GetDisplayMessage() const { return DisplayMessage; }
+	const FString& GetDisplayMessage() const { return StatusMessage; }
 	/** Update the display message and broadcast OnDisplayMessageChanged to any listeners. */
-	void SetDisplayMessage(FString NewDisplayMessage);
+	void SetStatusMessage(FString NewStatusMessage);
 
 	/** Broadcast whenever the display message changes. */
 	UPROPERTY(BlueprintAssignable)
-	FOnAssemblyOperationDisplayMessageChanged OnDisplayMessageChanged;
+	FOnAssemblyOperationStatusMessageChanged OnStatusMessageChanged;
 
 	/** Broadcast whenever the completed/total task counts change. */
 	UPROPERTY(BlueprintAssignable)
@@ -199,10 +217,12 @@ public:
 	/** @return Cached (completed, total) task counts captured since the last OnTasksChanged broadcast. */
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
-	uint32 GetTicket() const { return Ticket; }
+	int32 GetTicket() const { return Ticket; }
 	
+	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
 	FNAssemblyOperationResult GetResult() const;
-	
+
+	/** Requests cancellation of the in-flight build. */
 	void Cancel();
 	
 protected:
@@ -211,9 +231,12 @@ protected:
 	FNAssemblyTaskGraph* GetTaskGraph() const { return TaskGraph.Get(); }
 	void TearDownOperation();
 
+	/** Drain pending status-channel updates from the task graph and forward them to the registry. Game thread only. */
+	void DrainStatusChannels();
+
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
-	static uint32 NextTicket;
+	static int32 NextTicket;
 
 	/** Current owner receiving lifecycle callbacks; raw pointer because the owner may be a non-UObject type. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObject
@@ -236,8 +259,9 @@ private:
 	bool bIsContextLocked;
 	/** Human-friendly label for UI. */
 	FText DisplayName;
+	
 	/** Current progress message for UI. */
-	FString DisplayMessage;
+	FString StatusMessage;
 
 	/** Most recent total-task count broadcast to OnTasksChanged. */
 	int32 CachedTotalTasks = 0;
@@ -245,7 +269,7 @@ private:
 	int32 CachedCompletedTasks = 0;
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
-	uint32 Ticket;
+	int32 Ticket;
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;

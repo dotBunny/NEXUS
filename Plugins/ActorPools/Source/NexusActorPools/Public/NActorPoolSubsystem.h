@@ -79,12 +79,20 @@ public:
 	 * Attempts to return an Actor to its owning pool.
 	 * @note If the returned actor does not belong in a pool the UNActorPoolsSettings::UnknownBehavior is applied.
 	 * @param Actor The target actor to return to a pool.
-	 * @return true/false if the Actor was returned to a pool.
+	 * @return true if the Actor was handled (returned to a pool, or destroyed under the Destroy unknown behavior); false otherwise.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Return Actor", Category = "NEXUS|Actor Pools",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-actor"))
 	bool ReturnActor(AActor* Actor);
 
+	/**
+	 * Return every spawned Actor back to its owning pool, across all registered pools.
+	 * @note Only pools whose settings have the ENActorPoolSupportFlags::ReturnAll support flag set are affected; pools without it are left untouched.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Return All Actors", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#return-all-actors"))
+	void ReturnAllActors();
+	
 	/**
 	 * Register a spawner component as tickable so the subsystem drives its periodic updates.
 	 * @param TargetComponent The spawner to register.
@@ -135,6 +143,24 @@ public:
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#apply-actorpoolset"))
 	void ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet);
 
+	/**
+	 * Get the current usage statistics for a given Actor class's pool.
+	 * @param ActorClass The class of the actor which you would like the pool statistics for.
+	 * @return An FIntVector2 where X is the spawned (in-use) count and Y is the available count; a zeroed vector is returned if no pool exists.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Get ActorPool Stats", Category = "NEXUS|Actor Pools",
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-subsystem/#get-actorpool-stats"))
+	FIntVector2 GetActorPoolStats(const TSubclassOf<AActor> ActorClass) const
+	{
+		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);
+		if (Found)
+		{
+			const FNActorPool* Pool  = Found->Get();
+			return FIntVector2(Pool->GetSpawnedCount(), Pool->GetAvailableCount());
+		}
+		return FIntVector2();
+	}
+	
 	/**
 	 * Get the pointer to the actor pool itself for a given Actor class.
 	 * @param ActorClass The class of the actor which you would like to access a pool for.
@@ -224,10 +250,10 @@ private:
 	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;
 
 	/** Cached flag to skip the tickable-pool loop when empty. */
-	bool bHasTickableActorPools;
+	bool bHasTickableActorPools = false;
 
 	/** Cached flag to skip the tickable-spawner loop when empty. */
-	bool bHasTickableSpawners;
+	bool bHasTickableSpawners = false;
 
 	/** Policy used when ReturnActor is called with an Actor unknown to this subsystem. */
 	ENActorPoolUnknownBehavior UnknownBehavior = ENActorPoolUnknownBehavior::Destroy;

@@ -3,6 +3,7 @@
 
 #include "NToolingEditorModule.h"
 
+#include "NCoreMinimal.h"
 #include "NEditorUtils.h"
 #include "MultiplayerTest/NMultiplayerTestToolbarSection.h"
 #include "NToolingEditorCommands.h"
@@ -17,7 +18,7 @@
 void FNToolingEditorModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusTooling")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNToolingEditorModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNToolingEditorModule, OnPostEngineInit);
 	
 	if (!IsRunningCommandlet() && InputProcessor == nullptr)
 	{
@@ -29,6 +30,7 @@ void FNToolingEditorModule::StartupModule()
 
 void FNToolingEditorModule::ShutdownModule()
 {
+	N_MODULE_REMOVE_POST_ENGINE_INIT()
 	UToolMenus::UnRegisterStartupCallback(this);
 	if (WindowIconDelegateHandle.IsValid() && GEngine != nullptr)
 	{

@@ -7,12 +7,12 @@
  * Implements the standard boilerplate (Initialize/Shutdown/Get/GetStyleSetName/GetStyleInstance)
  * for a NEXUS Slate style class.
  *
- * Pair with N_IMPLEMENT_EDITOR_STYLE and N_IMPLEMENT_EDITOR_STYLE_CREATE in the matching .cpp.
+ * Pair with N_EDITOR_STYLE and N_EDITOR_STYLE_CREATE in the matching .cpp.
  *
  * @param ModuleName The plugin's module name; used to locate the plugin base directory.
  * @param StyleName The Slate style set's registered name.
  */
-#define N_IMPLEMENT_EDITOR_STYLE_HEADER(ModuleName, StyleName) \
+#define N_EDITOR_STYLE_HEADER(ModuleName, StyleName) \
 	public: \
 		static void Initialize() \
 		{ \
@@ -43,11 +43,11 @@
 		static FString PluginDirectory;
 
 /**
- * Allocates the static storage declared by N_IMPLEMENT_EDITOR_STYLE_HEADER.
+ * Allocates the static storage declared by N_EDITOR_STYLE_HEADER.
  * Place in the style class's .cpp file.
  * @param Type The style class.
  */
-#define N_IMPLEMENT_EDITOR_STYLE(Type) \
+#define N_EDITOR_STYLE(Type) \
 	TSharedPtr<FSlateStyleSet> Type::StyleInstance = nullptr; \
 	FString Type::PluginDirectory = TEXT("");
 
@@ -56,7 +56,7 @@
  *
  * Use at the top of Type::Create() to reduce boilerplate when authoring Slate style sets.
  */
-#define N_IMPLEMENT_EDITOR_STYLE_CREATE \
+#define N_EDITOR_STYLE_CREATE \
 	TSharedRef<FSlateStyleSet> StyleRef = MakeShareable(new FSlateStyleSet(GetStyleSetName())); \
 	FSlateStyleSet& Style = StyleRef.Get(); \
 	const FVector2D Icon128x128(128.0f, 128.0f); \

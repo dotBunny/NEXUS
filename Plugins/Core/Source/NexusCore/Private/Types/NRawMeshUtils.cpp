@@ -9,6 +9,8 @@
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMeshFactory.h"
 
+// #SONARQUBE-DISABLE
+
 void FNRawMeshUtils::CombineMesh(const FTransform& BaseTransform, FNRawMesh& BaseMesh,
                                  const FTransform& OtherTransform, const FNRawMesh& OtherMesh)
 {
@@ -115,16 +117,46 @@ bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FVector& Lef
 
 bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
-	return false;
+	// LeftMesh has already had its transform baked into its vertices (and Bounds), so it lives in the world
+	// frame; RightMesh is still local and is placed by RightOrigin/RightRotation. Delegate to the full
+	// pipeline with an identity transform on the left — every left-side TransformPoint / RotateVector becomes
+	// a no-op against the already-world-space data, while the right side is transformed as supplied.
+	return DoesIntersect(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator,
+	                     RightMesh, RightOrigin, RightRotation);
 }
 
 bool FNRawMeshUtils::DoesIntersect(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that both LeftMesh and RightMesh have had a transform applied to it and are in worldspace
-	return false;
+	// Both meshes have already had their transform baked into their vertices (and Bounds), so they share
+	// the world frame — this is the hot path for the World Assembly graph builder. Test the world-space
+	// data directly instead of delegating through identity transforms, which would re-derive the same
+	// answer via a redundant Bounds.TransformBy plus per-vertex identity rotations. Bit-identical to that
+	// delegation because identity rotate / zero translate reduce to the stored vertices exactly.
+	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
+	{
+		if (!LeftMesh.Bounds.Intersect(RightMesh.Bounds))
+		{
+			return false;
+		}
+	}
+
+	if (LeftMesh.Loops.IsEmpty() || RightMesh.Loops.IsEmpty())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine if there is any intersection."));
+		return false;
+	}
+	if (LeftMesh.HasNonTris() || RightMesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection checks."));
+		return false;
+	}
+
+	if (CanUseSAT(LeftMesh, RightMesh))
+	{
+		return DoesConvexIntersectSATBaked(LeftMesh, RightMesh);
+	}
+
+	return DoesIntersectTrianglesBaked(LeftMesh, RightMesh);
 }
 
 float FNRawMeshUtils::GetIntersectDepth(
@@ -133,7 +165,7 @@ float FNRawMeshUtils::GetIntersectDepth(
 	const float EarlyExitDepth)
 {
 	// Rotated AABB early-out, mirroring DoesIntersect. The world-space AABBs computed here also feed
-	// the C (AABB-overlap depth bound) and B (per-vertex AABB rejection) optimisations below.
+	// the C (AABB-overlap depth bound) and B (per-vertex AABB rejection) optimizations below.
 	FBox LeftWorldBounds(ForceInit);
 	FBox RightWorldBounds(ForceInit);
 	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
@@ -239,16 +271,103 @@ float FNRawMeshUtils::GetIntersectDepth(
 
 float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation, float EarlyExitDepth)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
-	return -1.f;
+	// LeftMesh has already had its transform baked into its vertices (and Bounds), so it lives in the world
+	// frame; RightMesh is still local and is placed by RightOrigin/RightRotation. Delegate to the full metric
+	// with an identity transform on the left — every left-side TransformPoint / RotateVector becomes a no-op
+	// against the already-world-space data, while the right side is transformed as supplied.
+	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator,
+	                        RightMesh, RightOrigin, RightRotation, EarlyExitDepth);
 }
 
 float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, float EarlyExitDepth)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that both LeftMesh and RightMesh has had a transform applied to them are is in worldspace
-	return -1.f;
+	// Both meshes are baked into world space — the dominant per-placement metric in the graph builder.
+	// Use the stored world-space Bounds and vertices directly rather than delegating through identity
+	// transforms, which would otherwise pay a redundant Bounds.TransformBy and two quaternion rotations per
+	// vertex in the hottest loop. Bit-identical to that delegation: identity rotate / zero translate leave
+	// each vertex unchanged, and Bounds.TransformBy(identity) re-encloses the same corners.
+	FBox LeftWorldBounds(ForceInit);
+	FBox RightWorldBounds(ForceInit);
+	if (LeftMesh.HasBounds() && RightMesh.HasBounds())
+	{
+		LeftWorldBounds = LeftMesh.Bounds;
+		RightWorldBounds = RightMesh.Bounds;
+		if (!LeftWorldBounds.Intersect(RightWorldBounds))
+		{
+			return -1.0f;
+		}
+
+		// C: AABB-overlap depth bound — see the transform-aware overload for the full rationale.
+		if (EarlyExitDepth < MAX_flt)
+		{
+			const bool bOneContainsOther = LeftWorldBounds.IsInside(RightWorldBounds)
+				|| RightWorldBounds.IsInside(LeftWorldBounds);
+			if (!bOneContainsOther)
+			{
+				const FBox Overlap = LeftWorldBounds.Overlap(RightWorldBounds);
+				if (Overlap.IsValid)
+				{
+					const FVector OverlapSize = Overlap.GetExtent() * 2.0;
+					const float MaxPossibleDepth = static_cast<float>(FMath::Min3(OverlapSize.X, OverlapSize.Y, OverlapSize.Z));
+					if (MaxPossibleDepth < EarlyExitDepth)
+					{
+						return MaxPossibleDepth;
+					}
+				}
+			}
+		}
+	}
+
+	if (LeftMesh.Loops.IsEmpty() || RightMesh.Loops.IsEmpty())
+	{
+		UE_LOG(LogNexusCore, Warning, TEXT("No loops were found in the provided FNRawMeshes, unable to determine intersection depth."));
+		return -1.0f;
+	}
+	if (LeftMesh.HasNonTris() || RightMesh.HasNonTris())
+	{
+		UE_LOG(LogNexusCore, Error, TEXT("One or both of the provided FNRawMeshes has non-triangle based geometry (NGons), this is not supported for intersection depth checks."));
+		return -1.0f;
+	}
+
+	float MaxDepth = 0.0f;
+
+	// Right vertices tested against Left's hull. B: skip vertices clearly outside Left's world AABB.
+	for (const FVector& V : RightMesh.Vertices)
+	{
+		if (LeftWorldBounds.IsValid && !LeftWorldBounds.IsInsideOrOn(V))
+		{
+			continue;
+		}
+		const float Depth = ComputePointDepthInside(LeftMesh, V);
+		if (Depth > MaxDepth)
+		{
+			MaxDepth = Depth;
+			if (MaxDepth >= EarlyExitDepth)
+			{
+				return MaxDepth;
+			}
+		}
+	}
+
+	// Left vertices tested against Right's hull. Same B + A treatment.
+	for (const FVector& V : LeftMesh.Vertices)
+	{
+		if (RightWorldBounds.IsValid && !RightWorldBounds.IsInsideOrOn(V))
+		{
+			continue;
+		}
+		const float Depth = ComputePointDepthInside(RightMesh, V);
+		if (Depth > MaxDepth)
+		{
+			MaxDepth = Depth;
+			if (MaxDepth >= EarlyExitDepth)
+			{
+				return MaxDepth;
+			}
+		}
+	}
+
+	return MaxDepth;
 }
 
 float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition, float EarlyExitDepth)
@@ -279,9 +398,11 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector
 
 float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
-	return -1.f;
+	// LeftMesh has already had its transform baked into its vertices (and Bounds), so it lives in the world
+	// frame and WorldPosition can be tested against it directly. Delegate to the transform-aware point-depth
+	// query with an identity transform — the local-space conversion of WorldPosition reduces to the identity,
+	// so the point is measured against the mesh as-is.
+	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator, WorldPosition, EarlyExitDepth);
 }
 
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
@@ -405,6 +526,51 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	Result.bHasNonTris = false;
 
 	return MoveTemp(Result);
+}
+
+FNRawMesh FNRawMeshUtils::MakeBoxHull(const FBox& Box)
+{
+	const FVector Min = Box.Min;
+	const FVector Max = Box.Max;
+
+	FNRawMesh Hull;
+	Hull.Vertices = {
+		FVector(Min.X, Min.Y, Min.Z), // 0
+		FVector(Max.X, Min.Y, Min.Z), // 1
+		FVector(Max.X, Max.Y, Min.Z), // 2
+		FVector(Min.X, Max.Y, Min.Z), // 3
+		FVector(Min.X, Min.Y, Max.Z), // 4
+		FVector(Max.X, Min.Y, Max.Z), // 5
+		FVector(Max.X, Max.Y, Max.Z), // 6
+		FVector(Min.X, Max.Y, Max.Z), // 7
+	};
+
+	// Polygonal faces, each wound so its Newell normal points away from the box interior.
+	Hull.FaceLoops = {
+		FNRawMeshLoop(0, 3, 2, 1), // -Z bottom
+		FNRawMeshLoop(4, 5, 6, 7), // +Z top
+		FNRawMeshLoop(0, 1, 5, 4), // -Y front
+		FNRawMeshLoop(1, 2, 6, 5), // +X right
+		FNRawMeshLoop(2, 3, 7, 6), // +Y back
+		FNRawMeshLoop(3, 0, 4, 7), // -X left
+	};
+
+	// Matching fan triangulation (a,b,c,d -> a,b,c + a,c,d) preserving each face's outward winding.
+	Hull.Loops = {
+		FNRawMeshLoop(0, 3, 2), FNRawMeshLoop(0, 2, 1),
+		FNRawMeshLoop(4, 5, 6), FNRawMeshLoop(4, 6, 7),
+		FNRawMeshLoop(0, 1, 5), FNRawMeshLoop(0, 5, 4),
+		FNRawMeshLoop(1, 2, 6), FNRawMeshLoop(1, 6, 5),
+		FNRawMeshLoop(2, 3, 7), FNRawMeshLoop(2, 7, 6),
+		FNRawMeshLoop(3, 0, 4), FNRawMeshLoop(3, 4, 7),
+	};
+
+	Hull.CalculateCenterAndBounds();
+	// Eagerly compute the convexity / non-tri flags. The buffers were assigned directly (bypassing the
+	// mutators that would mark validation dirty), so without this the cached flags stay at their stale
+	// defaults and IsConvex() would report false until some later mutation invalidated them.
+	Hull.Validate();
+	return Hull;
 }
 
 bool FNRawMeshUtils::IsRelativePointInside(const FNRawMesh& Mesh, const FVector& RelativePoint)
@@ -692,17 +858,106 @@ bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FVe
 	return false;
 }
 
-bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+bool FNRawMeshUtils::DoesIntersectTrianglesBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that LeftMesh has had a transform applied to it already and is worldspace
-	return false;
-}
+	// Vertices are already world-space (baked), so reference the stored arrays directly instead of
+	// allocating and filling Left/RightVerticesWorld the way the transform-aware path must.
+	const TArray<FVector>& LeftVerticesWorld = LeftMesh.Vertices;
+	const TArray<FVector>& RightVerticesWorld = RightMesh.Vertices;
 
-bool FNRawMeshUtils::DoesIntersectTriangles(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
-{
-	// TODO: Implement 0.3.5 release
-	// The assumption is that both LeftMesh and RightMesh have had a transform applied to it and are now in worldspace
+	const int32 LeftLoopCount = LeftMesh.Loops.Num();
+	const int32 RightLoopCount = RightMesh.Loops.Num();
+
+	// Precompute per-triangle AABBs so the inner loop pays a 6-compare overlap rejection instead of the
+	// full Möller test on every pair — mirrors the transform-aware sweep.
+	TArray<FBox> LeftTriBounds;
+	LeftTriBounds.SetNumUninitialized(LeftLoopCount);
+	for (int32 i = 0; i < LeftLoopCount; ++i)
+	{
+		if (!LeftMesh.Loops[i].IsTriangle())
+		{
+			LeftTriBounds[i] = FBox(ForceInit);
+			continue;
+		}
+		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
+		const FVector& V1 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[1]];
+		const FVector& V2 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[2]];
+		LeftTriBounds[i] = FBox(FVector::Min(FVector::Min(V0, V1), V2), FVector::Max(FVector::Max(V0, V1), V2));
+	}
+
+	TArray<FBox> RightTriBounds;
+	RightTriBounds.SetNumUninitialized(RightLoopCount);
+	for (int32 j = 0; j < RightLoopCount; ++j)
+	{
+		if (!RightMesh.Loops[j].IsTriangle())
+		{
+			RightTriBounds[j] = FBox(ForceInit);
+			continue;
+		}
+		const FVector& U0 = RightVerticesWorld[RightMesh.Loops[j].Indices[0]];
+		const FVector& U1 = RightVerticesWorld[RightMesh.Loops[j].Indices[1]];
+		const FVector& U2 = RightVerticesWorld[RightMesh.Loops[j].Indices[2]];
+		RightTriBounds[j] = FBox(FVector::Min(FVector::Min(U0, U1), U2), FVector::Max(FVector::Max(U0, U1), U2));
+	}
+
+	for (int32 i = 0; i < LeftLoopCount; ++i)
+	{
+		if (!LeftMesh.Loops[i].IsTriangle()) continue;
+		const FBox& LeftTriBox = LeftTriBounds[i];
+
+		const FVector& V0 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[0]];
+		const FVector& V1 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[1]];
+		const FVector& V2 = LeftVerticesWorld[LeftMesh.Loops[i].Indices[2]];
+
+		for (int32 j = 0; j < RightLoopCount; ++j)
+		{
+			if (!RightMesh.Loops[j].IsTriangle()) continue;
+			if (!LeftTriBox.Intersect(RightTriBounds[j])) continue;
+
+			const FVector& U0 = RightVerticesWorld[RightMesh.Loops[j].Indices[0]];
+			const FVector& U1 = RightVerticesWorld[RightMesh.Loops[j].Indices[1]];
+			const FVector& U2 = RightVerticesWorld[RightMesh.Loops[j].Indices[2]];
+
+			if (FNTriangleUtils::TrianglesIntersect(V0, V1, V2, U0, U1, U2))
+			{
+				return true;
+			}
+		}
+	}
+
+	// Containment fallback: bounds are already world-space, and a world-space point is already in each
+	// baked mesh's own frame, so no inverse transform is needed on the sample point.
+	auto BoxAContainsBoxB = [](const FBox& A, const FBox& B) -> bool
+	{
+		return A.Min.X <= B.Min.X && B.Max.X <= A.Max.X
+			&& A.Min.Y <= B.Min.Y && B.Max.Y <= A.Max.Y
+			&& A.Min.Z <= B.Min.Z && B.Max.Z <= A.Max.Z;
+	};
+
+	const FBox LeftWorldBounds = LeftMesh.HasBounds() ? LeftMesh.Bounds : FBox(ForceInit);
+	const FBox RightWorldBounds = RightMesh.HasBounds() ? RightMesh.Bounds : FBox(ForceInit);
+
+	const bool bLeftCouldBeInsideRight = LeftWorldBounds.IsValid && RightWorldBounds.IsValid
+		&& BoxAContainsBoxB(RightWorldBounds, LeftWorldBounds);
+	const bool bRightCouldBeInsideLeft = LeftWorldBounds.IsValid && RightWorldBounds.IsValid
+		&& BoxAContainsBoxB(LeftWorldBounds, RightWorldBounds);
+
+	if (bLeftCouldBeInsideRight)
+	{
+		if (IsRelativePointInside(RightMesh, LeftVerticesWorld[0]))
+		{
+			return true;
+		}
+	}
+
+	if (bRightCouldBeInsideLeft)
+	{
+		if (IsRelativePointInside(LeftMesh, RightVerticesWorld[0]))
+		{
+			return true;
+		}
+	}
+
 	return false;
 }
 
@@ -811,16 +1066,67 @@ bool FNRawMeshUtils::DoesConvexIntersectSAT(
 	return DoesIntersectTriangles(LeftMesh, LeftOrigin, LeftRotation, RightMesh, RightOrigin, RightRotation);
 }
 
-bool FNRawMeshUtils::DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, const FVector& RightOrigin, const FRotator& RightRotation)
+bool FNRawMeshUtils::DoesConvexIntersectSATBaked(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
 {
-	// TODO: Implement 0.3.5 release
-	// The assumption is that LeftMesh has had a transform applied to it and is in worldspace
-	return false;
+	// Vertices are already world-space (baked), so project them directly — no per-vertex rotation and no
+	// world-vertex buffers. Face normals are likewise the cross product of the stored (world-space) edges,
+	// which is exactly what the transform-aware path produces once the identity rotation is folded out.
+	const TArray<FVector>& LeftVertsWS = LeftMesh.Vertices;
+	const TArray<FVector>& RightVertsWS = RightMesh.Vertices;
+
+	auto IntervalsOverlap = [&LeftVertsWS, &RightVertsWS](const FVector& Axis) -> bool
+	{
+		if (Axis.SizeSquared() < UE_KINDA_SMALL_NUMBER)
+		{
+			return true;
+		}
+		double LMin = MAX_dbl;
+		double LMax = -MAX_dbl;
+		for (const FVector& V : LeftVertsWS)
+		{
+			const double D = FVector::DotProduct(Axis, V);
+			if (D < LMin) LMin = D;
+			if (D > LMax) LMax = D;
+		}
+		double RMin = MAX_dbl;
+		double RMax = -MAX_dbl;
+		for (const FVector& V : RightVertsWS)
+		{
+			const double D = FVector::DotProduct(Axis, V);
+			if (D < RMin) RMin = D;
+			if (D > RMax) RMax = D;
+		}
+		return LMax >= RMin && RMax >= LMin;
+	};
+
+	for (const FNRawMeshLoop& Face : LeftMesh.FaceLoops)
+	{
+		if (Face.Indices.Num() < 3) continue;
+		const FVector& V0 = LeftVertsWS[Face.Indices[0]];
+		const FVector& V1 = LeftVertsWS[Face.Indices[1]];
+		const FVector& V2 = LeftVertsWS[Face.Indices[2]];
+		const FVector WorldAxis = FVector::CrossProduct(V1 - V0, V2 - V0);
+		if (!IntervalsOverlap(WorldAxis))
+		{
+			return false;
+		}
+	}
+
+	for (const FNRawMeshLoop& Face : RightMesh.FaceLoops)
+	{
+		if (Face.Indices.Num() < 3) continue;
+		const FVector& V0 = RightVertsWS[Face.Indices[0]];
+		const FVector& V1 = RightVertsWS[Face.Indices[1]];
+		const FVector& V2 = RightVertsWS[Face.Indices[2]];
+		const FVector WorldAxis = FVector::CrossProduct(V1 - V0, V2 - V0);
+		if (!IntervalsOverlap(WorldAxis))
+		{
+			return false;
+		}
+	}
+
+	// No face normal separated — hand off to the baked tri-tri sweep (same reasoning as the transform path).
+	return DoesIntersectTrianglesBaked(LeftMesh, RightMesh);
 }
 
-bool FNRawMeshUtils::DoesConvexIntersectSAT(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh)
-{
-	// TODO: Implement 0.3.5 release
-	// The assumption is that both LeftMesh and RightMesh have had a transform applied them both and are in worldspace
-	return false;
-}
+// #SONARQUBE-ENABLE

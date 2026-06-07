@@ -96,8 +96,13 @@ public:
 		const double VC = D1 * D4 - D3 * D2;
 		if (VC <= 0.0 && D1 >= 0.0 && D3 <= 0.0)
 		{
-			const double V = D1 / (D1 - D3);
-			return FVector::Distance(P, A + AB * V);
+			const double DenomProtectionA = D1 - D3;
+			if (FMath::Abs(DenomProtectionA) > UE_DOUBLE_SMALL_NUMBER)
+			{
+				const double V = D1 / DenomProtectionA;
+				return FVector::Distance(P, A + AB * V);
+			}
+			return FVector::Distance(P, A);  // degenerate edge — snap to vertex
 		}
 
 		const FVector CP = P - C;
@@ -111,8 +116,13 @@ public:
 		const double VB = D5 * D2 - D1 * D6;
 		if (VB <= 0.0 && D2 >= 0.0 && D6 <= 0.0)
 		{
-			const double W = D2 / (D2 - D6);
-			return FVector::Distance(P, A + AC * W);
+			const double DenomProtectionB = D2 - D6;
+			if (FMath::Abs(DenomProtectionB) > UE_DOUBLE_SMALL_NUMBER)
+			{
+				const double W = D2 / DenomProtectionB;
+				return FVector::Distance(P, A + AC * W);
+			}
+			return FVector::Distance(P, A);
 		}
 
 		const double VA = D3 * D6 - D5 * D4;
@@ -123,9 +133,11 @@ public:
 		}
 
 		// P projects inside the triangle — distance is the perpendicular to the plane.
-		const double Denom = 1.0 / (VA + VB + VC);
-		const double V = VB * Denom;
-		const double W = VC * Denom;
+		const double Sum = VA + VB + VC;
+		if (FMath::Abs(Sum) < UE_DOUBLE_SMALL_NUMBER) return FVector::Distance(P, A);
+		const double DenomProtectionC = 1.0 / Sum;
+		const double V = VB * DenomProtectionC;
+		const double W = VC * DenomProtectionC;
 		return FVector::Distance(P, A + AB * V + AC * W);
 	}
 

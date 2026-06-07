@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "Collections/NGameplayTagCounter.h"
 
 /**
  * Discriminator for a graph node's concrete subclass.
@@ -13,6 +14,18 @@ enum class ENAssemblyGraphNodeType
 	Bone,
 	Cell,
 	Null
+};
+
+
+struct FNAssemblyGraphNodeParams
+{
+	uint64 Seed = 0;
+	FGameplayTagContainer AssemblyTags;
+	FGameplayTagContainer ContextTagsAdded;
+	FGameplayTagContainer ContextTagsState;
+	FNGameplayTagCounter TagCounterState;
+	FVector WorldPosition;
+	FRotator WorldRotation;
 };
 
 /**
@@ -25,7 +38,8 @@ class NEXUSWORLDASSEMBLY_API FNAssemblyGraphNode
 {
 	friend class FNAssemblyGraph;
 public:
-	FNAssemblyGraphNode(const FVector& Position, const FRotator& Rotation);
+	FNAssemblyGraphNode(uint64 NodeSeed, const FVector& Position, const FRotator& Rotation);
+	explicit FNAssemblyGraphNode(const FNAssemblyGraphNodeParams& Params);
 
 	virtual ~FNAssemblyGraphNode() = default;
 
@@ -39,8 +53,9 @@ public:
 	FRotator GetWorldRotation() const { return WorldRotation; }
 
 	/** @return The node's stable identifier within its owning graph. */
-	uint32 GetNodeID() const { return NodeID; }
+	int32 GetNodeIdentifier() const { return NodeIdentifier; }
 	
+	/** @return The shortest hop-count from the start node to this node. */
 	int32 GetNodeDepth() const { return NodeDepth; }
 
 	/**
@@ -63,8 +78,17 @@ public:
 		PropagateDepth(DownstreamNode);
 	}
 	
-	FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
-	FGameplayTagContainer& GetOutputTags() { return OutputTags; }
+	/** @return The assembly tags carried by this node. */
+	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
+	/** @return The context tags this node contributes to the generation context once placed. */
+	const FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
+	/** @return The context tags state when this placed. */
+	const FGameplayTagContainer& GetContextTagsState() { return ContextTagsState; }
+	/** @return The tag counter state when this placed. */
+	const FNGameplayTagCounter& GetTagCountersState() { return TagCounterState; }
+	
+	/** @return true if this cell node carries any assembly tags. */
+	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
 
 	/** Sever all upstream/downstream links between this node and Other, in both directions. */
 	void Disconnect(FNAssemblyGraphNode* Other)
@@ -80,7 +104,10 @@ public:
 
 	/** @return All nodes upstream of this node. */
 	const TArray<FNAssemblyGraphNode*>& GetUpstreamNodes() const { return UpstreamNodes; }
-
+	
+	/** @return The seed assigned to this node. */
+	uint64 GetSeed() const { return Seed; }
+	
 protected:
 	/** Subclass-only setter; the graph mutates transform during builder expansion. */
 	void SetWorldPosition(const FVector& Position);
@@ -89,15 +116,22 @@ protected:
 	void SetWorldRotation(const FRotator& Rotation);
 
 	/** Stable identifier assigned when the node is registered with the graph. */
-	uint32 NodeID = 0;
+	int32 NodeIdentifier = 0;
 
 	/** Hop-count from the start node along the shortest upstream path; MAX_int32 until reachable. */
 	int32 NodeDepth = MAX_int32;
 
 	TArray<FNAssemblyGraphNode*> UpstreamNodes;
 	TArray<FNAssemblyGraphNode*> DownstreamNodes;
+	
 	FGameplayTagContainer AssemblyTags;
-	FGameplayTagContainer OutputTags;
+	FGameplayTagContainer ContextTagsAdded;
+	
+	/** The state of the operations ContextTags when the decision was made to place this cell. */
+	FGameplayTagContainer ContextTagsState;
+	
+	/** The state of the operations TagCounters when the decision was made to place this cell. */
+	FNGameplayTagCounter TagCounterState;
 
 private:
 	static void PropagateDepth(FNAssemblyGraphNode* Root)
@@ -124,4 +158,6 @@ private:
 
 	/** World-space rotation. */
 	FRotator WorldRotation;
+	
+	uint64 Seed = 0;
 };

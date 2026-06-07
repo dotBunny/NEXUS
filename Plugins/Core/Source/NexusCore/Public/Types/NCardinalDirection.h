@@ -103,6 +103,22 @@ public:
 			GetClosestCardinalAngle(Rotator.Yaw),
 			GetClosestCardinalAngle(Rotator.Roll));
 	}
+	
+	/**
+	 * Returns true when Angle lies within Tolerance of Direction's cardinal heading.
+	 *
+	 * Compares via the shortest signed arc, so the 0/360 boundary wraps (359.99° matches North) and
+	 * any input form is accepted — unnormalized [0, 360), signed [-180, 180), or out-of-range values
+	 * such as a raw FRotator yaw of 720° or -450°.
+	 * @param Direction Cardinal heading to test against.
+	 * @param Angle Degrees to test.
+	 * @param Tolerance Maximum absolute degree deviation from the heading that still counts.
+	 */
+	static bool IsCloseToDirection(const ENCardinalDirection Direction, const float Angle, const float Tolerance = 0.01f)
+	{
+		const float Delta = FRotator::NormalizeAxis(Angle - ToDecimalDegrees(Direction));
+		return FMath::IsNearlyEqual(Delta, 0.0f, Tolerance);
+	}
 
 	/**
 	 * Maps an unnormalized [0, 360) angle to its ENCardinalDirection value.

@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 12,
-	"VersionName": "0.3.0",
+	"Version": 13,
+	"VersionName": "0.3.1",
 	"FriendlyName": "NEXUS: Tooling",
 	"Description": "An assortment of developer tooling for the Unreal Editor.",
 	"Category": "NEXUS",

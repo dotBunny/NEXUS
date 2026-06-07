@@ -52,7 +52,7 @@ void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageC
 	{
 		ContainerBanner->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 		ContainerBanner->SetBrushColor(FNColor::GetLinearColor(BannerColor));
-		if (!Text.IsEmpty())
+		if (!Text.IsEmpty() && IsValid(ContainerBannerMessage))
 		{
 			ContainerBannerMessage->SetText(Text);
 			ContainerBannerMessage->SetColorAndOpacity(FNColor::GetLinearColor(MessageColor));
@@ -62,7 +62,10 @@ void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageC
 
 void UNDeveloperOverlay::HideContainerBanner() const
 {
-	ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
+	if (IsValid(ContainerBanner))
+	{
+		ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void UNDeveloperOverlay::BindAllCurrentWorlds()

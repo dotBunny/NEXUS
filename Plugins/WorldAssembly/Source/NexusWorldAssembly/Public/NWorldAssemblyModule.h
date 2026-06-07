@@ -14,7 +14,7 @@ class FNWorldAssemblyModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	N_IMPLEMENT_MODULE(FNWorldAssemblyModule, "NexusWorldAssembly")
+	N_MODULE_BASE(FNWorldAssemblyModule, "NexusWorldAssembly")
 
 private:
 	void OnPostEngineInit();

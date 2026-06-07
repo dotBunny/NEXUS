@@ -34,6 +34,15 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnActorOperationalStateChangedDelegate, co
 /**
  * An interface to add support to an Actor allowing for it to be pooled more effectively with the ActorPoolSystem.
  * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/actor-pool-item/">UNActorPoolItem</a>
+ *
+ * @note CannotImplementInterfaceInBlueprint is intentional and load-bearing; do not remove it without a full refactor.
+ *       INActorPoolItem is a stateful C++ mixin, not a pure Blueprint-style contract: it owns the operational-state
+ *       machine, the owning FNActorPool* back-pointer, and the change delegate, and none of its methods are UFUNCTIONs.
+ *       FNActorPool dispatches via the fast path Cast<INActorPoolItem>(Actor) (see NActorPool.cpp), which only succeeds
+ *       for native C++ implementers. A Blueprint that implemented this interface would make UClass::ImplementsInterface()
+ *       return true (taking the fast path) while Cast<INActorPoolItem>() returned nullptr - an immediate null deref.
+ *       Blueprint actors are supported through other routes instead: derive from ANPooledActor (native interface +
+ *       BlueprintAssignable events), or set the InvokeUFunctions pool flag and define matching named UFUNCTIONs.
  */
 UINTERFACE(meta=(CannotImplementInterfaceInBlueprint))
 class NEXUSACTORPOOLS_API UNActorPoolItem : public UInterface

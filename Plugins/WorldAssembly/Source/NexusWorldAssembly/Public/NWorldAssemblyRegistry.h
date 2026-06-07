@@ -10,10 +10,12 @@ class ANCellLevelInstance;
 class UNOrganComponent;
 class UNCellJunctionComponent;
 class UNCellRootComponent;
+struct FNStatusChannelUpdate;
 
 /** Broadcast whenever a World Assembly operation's lifecycle state changes. */
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationStateChanged, UNAssemblyOperation* Operation, const ENWorldAssemblyOperationState NewState);
-
+/** Broadcast whenever an operation's per-stage progress channels change; carries only the changed channels. */
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAssemblyOperationChannelsChanged, UNAssemblyOperation* Operation, const TArray<FNStatusChannelUpdate>& Changes);
 
 /**
  * Process-wide registry of the components, operations and level instances that participate in World Assembly.
@@ -27,6 +29,16 @@ class NEXUSWORLDASSEMBLY_API FNWorldAssemblyRegistry
 public:
 	/** Broadcast when any operation transitions between lifecycle states. */
 	static FOnAssemblyOperationStateChanged OnOperationStateChanged;
+
+	/** Broadcast when an operation's per-stage progress channels change (delta only). Game thread only. */
+	static FOnAssemblyOperationChannelsChanged OnOperationChannelsChanged;
+
+	/**
+	 * Forward an operation's drained channel deltas to OnOperationChannelsChanged subscribers. Game thread only.
+	 * @param Operation The operation whose channels changed.
+	 * @param Changes The channels that changed since the last drain.
+	 */
+	static void NotifyOperationChannelsChanged(UNAssemblyOperation* Operation, const TArray<FNStatusChannelUpdate>& Changes);
 
 	/** @return All registered cell root components. */
 	FORCEINLINE static TArray<UNCellRootComponent*>& GetCellRootComponents() { return CellRoots; }
@@ -66,7 +78,7 @@ public:
 	 * @param OperationTicket The operation ticket to query for ANCellLevelInstances, if you provide 0 in this case it will search all known ANCellLevelInstance.
 	 * @return An array of ANCellLevelInstance pointers.
 	 */
-	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, bool bIsLevelLoaded = true, uint32 OperationTicket = 0);
+	static TArray<ANCellLevelInstance*> GetCellLevelInstancesInRange(const FVector& Location, double Range, bool bIsLevelLoaded = true, int32 OperationTicket = 0);
 	
 	/** @return true if any bone components are currently registered. */
 	static bool HasBoneComponents();
@@ -84,11 +96,11 @@ public:
 	 * @param OperationTicket Ticket to scope the query; 0 queries across all operations.
 	 * @param bIsLevelLoaded Consider only level instances whose underlying level has finished loading.
 	 */
-	static bool HasCellLevelInstances(uint32 OperationTicket = 0, bool bIsLevelLoaded = true);
+	static bool HasCellLevelInstances(int32 OperationTicket = 0, bool bIsLevelLoaded = true);
 	/** Query whether every locator in the supplied set is currently registered. */
 	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
 	/** Query whether a specific (operation, spawn GUID) level instance is registered. */
-	static bool HasCellLevelInstance(uint32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
+	static bool HasCellLevelInstance(int32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
 
 
 	/** Register a bone component with the registry. @return true on first registration. */
@@ -139,6 +151,7 @@ private:
 	static TArray<UNCellJunctionComponent*> CellJunctions;
 	static TArray<UNOrganComponent*> Organs;
 	static TArray<UNAssemblyOperation*> Operations;
+	
 	/** Level instances keyed by operation ticket; ticket 0 denotes "any operation" in query helpers. */
-	static TMap<uint32, TArray<ANCellLevelInstance*>> CellLevelInstances;
+	static TMap<int32, TArray<ANCellLevelInstance*>> CellLevelInstances;
 };

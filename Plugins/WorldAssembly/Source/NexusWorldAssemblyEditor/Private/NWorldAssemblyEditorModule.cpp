@@ -39,11 +39,12 @@
 
 void FNWorldAssemblyEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNWorldAssemblyEditorModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNWorldAssemblyEditorModule, OnPostEngineInit);
 }
 
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
+	N_MODULE_REMOVE_POST_ENGINE_INIT()
 	UToolMenus::UnRegisterStartupCallback(this);
 	FEditorModeRegistry::Get().UnregisterMode(FNWorldAssemblyEdMode::Identifier);
 
@@ -69,7 +70,7 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
 	
-	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
+	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NWorldAssemblySystem)();
 	
 	FNWorldAssemblyEditorToolMenu::RemoveMenuEntries();

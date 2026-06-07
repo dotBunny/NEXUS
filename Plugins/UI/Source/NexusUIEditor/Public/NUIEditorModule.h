@@ -18,7 +18,7 @@ public:
 	virtual void ShutdownModule() override;
 	//End IModuleInterface
 
-	N_IMPLEMENT_MODULE(FNUIEditorModule, "NexusUIEditor")
+	N_MODULE_BASE(FNUIEditorModule, "NexusUIEditor")
 
 private:
 	/** Deferred initialization bound to FCoreDelegates::OnPostEngineInit; completes wiring that depends on the editor being fully started. */

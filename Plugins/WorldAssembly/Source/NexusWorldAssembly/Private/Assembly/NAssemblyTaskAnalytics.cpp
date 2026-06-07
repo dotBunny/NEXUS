@@ -3,6 +3,8 @@
 
 #include "Assembly/NAssemblyTaskAnalytics.h"
 
+#include "Developer/NReportListBlock.h"
+
 void FNAssemblyTaskAnalytics::TaskGraphCreationStart()
 {
 	TaskGraphCreationTimer.Start();
@@ -43,7 +45,32 @@ void FNAssemblyTaskAnalytics::OrganGraphBuilder_Init(int32 Index, const FString&
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
 	Analytic.Name = Name;
+	Analytic.MinimumCellCount = MinimumCellCount;
+	Analytic.MaximumCellCount = MaximumCellCount;
+	Analytic.MaximumRetryCount = MaximumRetryCount;
 }
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetResult(int32 Index, bool bSucceeded, int32 FinalCellNodeCount)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.bSucceeded = bSucceeded;
+	Analytic.FinalCellNodeCount = FinalCellNodeCount;
+}
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_SetFailure(int32 Index, int32 FinalCellNodeCount, const FString& Reason)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.bSucceeded = false;
+	Analytic.FinalCellNodeCount = FinalCellNodeCount;
+	Analytic.FailureReasonOverride = Reason;
+}
+
+void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddMessages(int32 Index, const TArray<FString>& Messages)
+{
+	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
+	Analytic.IterationMessages[Analytic.IterationsIndex].Append(Messages);
+}
+
 void FNAssemblyTaskAnalytics::OrganGraphBuilder_AddNullNode(int32 Index)
 {
 	FNOrganGraphBuilderAnalytics& Analytic = OrganGraphBuilderAnalytics[Index];
@@ -168,7 +195,7 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
-	double LoopTotal = 0;
+
 
 	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
 	FNReportContentBlock* TimespanContentBlock = Report->GetContentBlock(TimespanContentTicket);
@@ -184,16 +211,18 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable->AddRow({"Task", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
 	
 	// Organ Builders Individual Times
-	LoopTotal = 0;
+	double LoopTotal = 0;
+	int32 SucceededOrganCount = 0;
 	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
 	OrganBuilderTable->SetHeading("FNOrganGraphBuildTasks");
-	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "ms" });
+	OrganBuilderTable->Initialize({ "Thread", "Organ", "Iterations", "Status", "ms" });
 	for (const auto Analytic : OrganGraphBuilderAnalytics)
 	{
-		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), FString::SanitizeFloat(Analytic.Timer.Duration)});
+		OrganBuilderTable->AddRow({"Task", *Analytic.Name, FString::FromInt(Analytic.Iterations), Analytic.GetStatusString(), FString::SanitizeFloat(Analytic.Timer.Duration)});
 		DurationTotal += Analytic.Timer.Duration;
 		LoopTotal += Analytic.Timer.Duration;
+		if (Analytic.bSucceeded) { SucceededOrganCount++; }
 	}
 	
 	// Need to re-get as it may have moved
@@ -233,43 +262,94 @@ void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 	OverviewTable = Report->GetTableBlock(OverviewTableTicket);
 	OverviewTable->AddRow({"Game", "Spawn Cells (Sliced)", FString::SanitizeFloat(LoopTotal)});
 	
-	
-	// Counters
-	const int32 CounterTableTicket = Report->CreateTableBlock(AnalyticsContentTicket);
-	FNReportTableBlock* CountersTableBlock = Report->GetTableBlock(CounterTableTicket);
-	CountersTableBlock->SetHeading("Counters");
-	CountersTableBlock->Initialize({ "Component", "Iteration", "Null Nodes", "Cell Nodes", "Finisher Capped", 
-		"False Start / Out Of Bounds", "False Start / World Colliding", 
-		"Bad Placement / Intersecting", "Bad Placement / World Colliding", "Bad Placement / Existing Node World", "Bad Placement / Out Of Bounds", 
-		"Constraint / Non-Finisher" });
-	
-	int MaxIterations = 0;
-	for (const auto Analytic : OrganGraphBuilderAnalytics)
+	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
+
+	// Headline the overall verdict: on the Analytics block header, in the operation overview's {{STATUS}} cell,
+	// and -- when anything failed -- in a dedicated Failures block floated to the very top of the report.
+	const int32 OrganCount = OrganGraphBuilderAnalytics.Num();
+	const int32 FailedOrganCount = OrganCount - SucceededOrganCount;
+
+	AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
+	if (FailedOrganCount > 0)
 	{
-		if (Analytic.Iterations > MaxIterations)
+		AnalyticsContentBlock->SetHeader(FString::Printf(TEXT("%i/%i organs succeeded - %i failed"), SucceededOrganCount, OrganCount, FailedOrganCount));
+		Report->AddReplaceToken("{{STATUS}}", FString::Printf(TEXT("%i/%i FAILED"), FailedOrganCount, OrganCount));
+	}
+	else
+	{
+		AnalyticsContentBlock->SetHeader(FString::Printf(TEXT("%i/%i organs succeeded"), SucceededOrganCount, OrganCount));
+		Report->AddReplaceToken("{{STATUS}}", FString::Printf(TEXT("OK (%i/%i)"), SucceededOrganCount, OrganCount));
+	}
+
+	// Format a dominant-rejection diagnosis the same way for both the Failures and Strained Successes recaps.
+	auto FormatLikelyCause = [](const FNOrganGraphBuilderAnalytics& Analytic) -> FString
+	{
+		FString DominantReason;
+		int32 RejectCount = 0;
+		int32 TotalAttempts = 0;
+		if (!Analytic.GetDominantRejection(DominantReason, RejectCount, TotalAttempts))
 		{
-			MaxIterations = Analytic.Iterations;
+			return FString(TEXT("-"));
 		}
-		for (int32 i = 0; i < Analytic.Iterations; i++)
+		const int32 Percent = TotalAttempts > 0 ? FMath::RoundToInt((RejectCount * 100.0) / TotalAttempts) : 0;
+		return FString::Printf(TEXT("%s (%i, %i%%)"), *DominantReason, RejectCount, Percent);
+	};
+
+	
+	int32 InsightsTicket = Report->FindCollapsableBlockTicket("Insights");
+	if (FailedOrganCount > 0)
+	{
+		const int32 FailuresContentTicket = Report->CreateContentBlock(InsightsTicket);
+		FNReportContentBlock* FailuresContentBlock = Report->GetContentBlock(FailuresContentTicket);
+		FailuresContentBlock->SetHeading("Failures");
+		FailuresContentBlock->SetHeader(FString::Printf(TEXT("%i of %i organs failed to generate"), FailedOrganCount, OrganCount));
+
+		const int32 FailuresTableTicket = Report->CreateTableBlock(FailuresContentTicket);
+		FNReportTableBlock* FailuresTable = Report->GetTableBlock(FailuresTableTicket);
+		FailuresTable->Initialize({ "Organ", "Cells", "Likely Cause", "Reason" });
+		for (const auto Analytic : OrganGraphBuilderAnalytics)
 		{
-			CountersTableBlock->AddRow({ 
-				Analytic.Name, FString::FromInt(i), 
-				FString::FromInt(Analytic.AddNullNodes.Counter[i]), 
-				FString::FromInt(Analytic.AddCellNodes.Counter[i]),
-				FString::FromInt(Analytic.CappedWithFinisher.Counter[i]),
-				FString::FromInt(Analytic.DiscardOutOfBoundsStart.Counter[i]), 
-				FString::FromInt(Analytic.DiscardWorldCollidingStart.Counter[i]),
-				FString::FromInt(Analytic.DiscardIntersectingCellNode.Counter[i]), 
-				FString::FromInt(Analytic.DiscardWorldCollidingCellNode.Counter[i]), 
-				FString::FromInt(Analytic.DiscardExistingNodeWorldCollidingCellNode.Counter[i]), 
-				FString::FromInt(Analytic.DiscardOutOfBoundsCellNode.Counter[i]),
-				FString::FromInt(Analytic.DiscardDueToNonFinisherConstraint.Counter[i])
-			});
+			if (Analytic.bSucceeded) continue;
+
+			FString CellSummary = FString::FromInt(Analytic.FinalCellNodeCount);
+			if (Analytic.MinimumCellCount > 0)
+			{
+				CellSummary = FString::Printf(TEXT("%i / min %i"), Analytic.FinalCellNodeCount, Analytic.MinimumCellCount);
+			}
+
+			// Turn the per-iteration discard counters into a single dominant cause with its share of placement attempts.
+			FString Reason = Analytic.GetFailureReason();
+			if (Reason.IsEmpty()) { Reason = TEXT("No diagnostics captured (early bailout)."); }
+
+			FailuresTable->AddRow({ *Analytic.Name, CellSummary, FormatLikelyCause(Analytic), Reason });
 		}
 	}
-	
-	Report->AddReplaceToken("{{RUNTIME}}",  FString::SanitizeFloat(DurationTotal));
-	Report->AddReplaceToken("{{ITERATIONS}}",  FString::FromInt(MaxIterations));
+
+	// Recap organs that succeeded only after consuming retries -- same diagnosis surface as Failures, so the cost of a
+	// strained build is visible at a glance without opening the per-organ detailed report.
+	int32 StrainedSuccessCount = 0;
+	for (const FNOrganGraphBuilderAnalytics& Analytic : OrganGraphBuilderAnalytics)
+	{
+		if (Analytic.bSucceeded && Analytic.Iterations > 1) { StrainedSuccessCount++; }
+	}
+	if (StrainedSuccessCount > 0)
+	{
+		const int32 RetriesContentTicket = Report->CreateContentBlock(InsightsTicket);
+		FNReportContentBlock* RetriesContentBlock = Report->GetContentBlock(RetriesContentTicket);
+		RetriesContentBlock->SetHeading("Strained Successes");
+		RetriesContentBlock->SetHeader(FString::Printf(TEXT("%i organ(s) needed retries before succeeding"), StrainedSuccessCount));
+
+		const int32 RetriesTableTicket = Report->CreateTableBlock(RetriesContentTicket);
+		FNReportTableBlock* RetriesTable = Report->GetTableBlock(RetriesTableTicket);
+		RetriesTable->Initialize({ "Organ", "Retries", "Likely Cause" });
+		for (const auto Analytic : OrganGraphBuilderAnalytics)
+		{
+			if (!Analytic.bSucceeded || Analytic.Iterations <= 1) continue;
+
+			const FString RetrySummary = FString::Printf(TEXT("%i / %i"), Analytic.Iterations - 1, Analytic.MaximumRetryCount);
+			RetriesTable->AddRow({ *Analytic.Name, RetrySummary, FormatLikelyCause(Analytic) });
+		}
+	}
 }
 
 float FNAssemblyTaskAnalytics::GetTotalDuration()

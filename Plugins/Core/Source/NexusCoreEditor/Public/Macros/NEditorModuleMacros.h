@@ -10,7 +10,7 @@
  *
  * @param PlacementActors A container of TOptional<FPlacementModeID> captured at registration time.
  */
-#define N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors) \
+#define N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors) \
 if (IPlacementModeModule::IsAvailable()) \
 { \
 	IPlacementModeModule& PlacementModeModule = IPlacementModeModule::Get(); \

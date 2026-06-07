@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "GameplayTagContainer.h"
 #include "NSettingsUtils.h"
 #include "Macros/NSettingsMacros.h"
 #include "Types/NDirection.h"
@@ -16,7 +17,6 @@ enum class ENWorldAssemblyNetworkMode : uint8
 {
 	ReplicatedLevelInstances UMETA(DisplayName = "Replicated Level Instances", ToolTip = "Default behavior replicating level instances based on Replicated Level Instances for all procedures."),
 	AlwaysRelevantLevelInstances UMETA(DisplayName = "Always Replicate Level Instances", ToolTip="All created level instances will be flagged as always relevant, ignoring normal relevancy culling methods."),
-	// AlwaysRelevantCellProxies UMETA(DisplayName = "Always Replicate Cell Proxies", ToolTip="Enables replication of NCellProxy actors, making them always relevant, whilst leaving LevelInstances to be replicated based on relevancy."),
 };
 
 /**
@@ -36,7 +36,7 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblySettings : public UDeveloperSettings
 		}
 	}
 
-	N_IMPLEMENT_SETTINGS(UNWorldAssemblySettings, "World Assembly", "Settings related to World Assembly.");
+	N_SETTINGS_BASE(UNWorldAssemblySettings, "World Assembly", "Settings related to World Assembly.");
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Voxel Size",
@@ -71,22 +71,33 @@ public:
 		meta=(ToolTip="Offset value applied to the direction provided by the enumeration."))
 	FVector OrganAutomaticBoneDirectionOffset = FVector::ZeroVector;
 	
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Bad Start Limit",
-		meta=(ToolTip="The maximum amount of bad starts that can occur before an assembly is considered a failure."))
-	int32 AssemblyBadStartLimit = 1000;
-	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Retry Count",
 		meta=(ToolTip="The maximum amount of full attempts at assembling a space before it is considered a complete failure."))
 	int32 AssemblyGenerationRetryCount = 10000;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum Cell Hull Penetration",
-		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Cell Penetration Tolerance",
+		meta=(ToolTip="The maximum depth of penetration a cell's hull can penetrate another to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingCellHullPenetration = 10.f;
 	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="Maximum World Penetration",
-		meta=(ToolTip="The maximum depth of penetration a cell's convex hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Junction Matching", DisplayName="World Penetration Tolerance",
+		meta=(ToolTip="The maximum depth of penetration a cell's hull can penetrate world geometry to make a junction connection.", ClampMin="1", ClampMax="100", UIMin="1", UIMax="100", SliderExponent = 1))
 	float AssemblyJunctionMatchingWorldPenetration = 2.f;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Context Tags",
+		meta=(ToolTip="The default Context Tags to provide to the Assembly Operation."))
+	FGameplayTagContainer AssemblyContextTags;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Tagging", DisplayName="Starting Counters",
+		meta=(ToolTip="The starting counters associated to tags."))
+	TMap<FGameplayTag, int32> AssemblyTagCounters;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly", DisplayName="Direction Tolerance",
+		meta=(ToolTip="How close should the range of angle be to the target direction (within this many degrees +/-)?", Units="deg"))
+	float AssemblyDirectionTolerance = 15.f;
+
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
+	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))
+	float AssemblySpawningCellProxiesTimeSlice = 2.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
