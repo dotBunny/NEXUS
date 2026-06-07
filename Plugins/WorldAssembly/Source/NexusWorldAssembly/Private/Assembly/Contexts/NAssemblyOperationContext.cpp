@@ -328,8 +328,17 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 	Report->AddReplaceToken("{{RUNTIME}}", ""); // We'll fill this out later
 	Report->AddReplaceToken("{{STATUS}}", ""); // Filled in by FNAssemblyTaskAnalytics::AddToReports
 	
-	// Components
-	const int32 ComponentTableTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	const int32 LatentSummaryTicket  = Report->CreateCollapsableBlock(OperationContextContentTicket);
+	FNReportCollapsableBlock* LatentSummaryContentBlock = Report->GetCollapsableBlock(LatentSummaryTicket);
+	LatentSummaryContentBlock->SetHeading(TEXT("Insights"));
+	
+	// # INPUTS
+	const int32 InputsTicket = Report->CreateContentBlock();
+	FNReportContentBlock* InputsBlock = Report->GetContentBlock(InputsTicket);
+	InputsBlock->SetHeading("Inputs");
+	
+	// ## Components
+	const int32 ComponentTableTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* ComponentTableBlock = Report->GetTableBlock(ComponentTableTicket);
 	ComponentTableBlock->SetHeading(FString::Printf(TEXT("Components (%i)"), OrganData.Num()));
 	ComponentTableBlock->Initialize({ "Component", "Intersections", "Contains", "Bones", "Tissues" });
@@ -400,8 +409,8 @@ void FNAssemblyOperationContext::AddToReport(FNReport* Report, const bool bBuild
 		ComponentTableBlock->AddRow({ *Data.Value.SourceComponent->GetDebugLabel(), *Intersections, *Contains, *Bones, *TissueList });
 	}
 	
-	
-	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(OperationContextContentTicket);
+	// ## Generation Order
+	const int32 GenerationOrderContentTicket = Report->CreateTableBlock(InputsTicket);
 	FNReportTableBlock* GenerationOrderTableBlock = Report->GetTableBlock(GenerationOrderContentTicket);
 	GenerationOrderTableBlock->SetHeading(FString::Printf(TEXT("Generation Order (%i)"), GenerationOrder.Num()));
 	GenerationOrderTableBlock->Initialize( { "Phase", "Organs" } );

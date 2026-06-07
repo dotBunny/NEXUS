@@ -187,7 +187,7 @@ void FNAssemblyTaskAnalytics::SpawnCellProxiesFinish(int32 Index)
 }
 
 
-void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report)
+void FNAssemblyTaskAnalytics::AddToReport(FNReport* Report)
 {
 	const int32 AnalyticsContentTicket = Report->CreateContentBlock();
 	FNReportContentBlock* AnalyticsContentBlock = Report->GetContentBlock(AnalyticsContentTicket);
@@ -195,7 +195,7 @@ void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report)
 	
 	double DurationTotal = TaskGraphCreationTimer.Duration + CreateVirtualWorldContextTimer.Duration + 
 		ProcessVirtualWorldContextTimer.Duration + CreateSpawnCellsContextTimer.Duration;
-	double LoopTotal = 0;
+
 
 	const int32 TimespanContentTicket = Report->CreateContentBlock(AnalyticsContentTicket);
 	FNReportContentBlock* TimespanContentBlock = Report->GetContentBlock(TimespanContentTicket);
@@ -211,7 +211,7 @@ void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report)
 	OverviewTable->AddRow({"Task", "Process VirtualWorldContext", FString::SanitizeFloat(ProcessVirtualWorldContextTimer.Duration)});
 	
 	// Organ Builders Individual Times
-	LoopTotal = 0;
+	double LoopTotal = 0;
 	int32 SucceededOrganCount = 0;
 	const int32 OrganBuilderTableTicket = Report->CreateTableBlock(TimespanContentTicket);
 	FNReportTableBlock* OrganBuilderTable = Report->GetTableBlock(OrganBuilderTableTicket);
@@ -295,10 +295,11 @@ void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report)
 		return FString::Printf(TEXT("%s (%i, %i%%)"), *DominantReason, RejectCount, Percent);
 	};
 
+	
+	int32 InsightsTicket = Report->FindCollapsableBlockTicket("Insights");
 	if (FailedOrganCount > 0)
 	{
-		// Negative priority floats this above the operation and analytics blocks so failures are the first thing read.
-		const int32 FailuresContentTicket = Report->CreateContentBlock(0, -100);
+		const int32 FailuresContentTicket = Report->CreateContentBlock(InsightsTicket);
 		FNReportContentBlock* FailuresContentBlock = Report->GetContentBlock(FailuresContentTicket);
 		FailuresContentBlock->SetHeading("Failures");
 		FailuresContentBlock->SetHeader(FString::Printf(TEXT("%i of %i organs failed to generate"), FailedOrganCount, OrganCount));
@@ -333,8 +334,7 @@ void FNAssemblyTaskAnalytics::AddToReports(FNReport* Report)
 	}
 	if (StrainedSuccessCount > 0)
 	{
-		// Priority below the Failures block (-100) but above the regular report body (0).
-		const int32 RetriesContentTicket = Report->CreateContentBlock(0, -50);
+		const int32 RetriesContentTicket = Report->CreateContentBlock(InsightsTicket);
 		FNReportContentBlock* RetriesContentBlock = Report->GetContentBlock(RetriesContentTicket);
 		RetriesContentBlock->SetHeading("Strained Successes");
 		RetriesContentBlock->SetHeader(FString::Printf(TEXT("%i organ(s) needed retries before succeeding"), StrainedSuccessCount));

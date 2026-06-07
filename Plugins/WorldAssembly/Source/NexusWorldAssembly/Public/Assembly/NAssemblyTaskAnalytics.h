@@ -196,7 +196,7 @@ public:
 	void SpawnCellProxiesFinish(int32 Index);
 	
 	/** Append all collected analytics for this operation to the supplied report. */
-	void AddToReports(FNReport* Report);
+	void AddToReport(FNReport* Report);
 
 	/** @return The total measured duration across all stages, in seconds. */
 	float GetTotalDuration();

@@ -43,7 +43,7 @@ struct NEXUSCORE_API FNReportTableBlock : FNReportBlock
 	 * @param OutputFormat Whether to emit plain text (column-aligned) or Markdown (pipe-separated).
 	 */
 	virtual void Render(FNReport& Report, TArray<FString>& Output, const ENReportOutputFormat OutputFormat = ENReportOutputFormat::PlainText) override;
-
+	
 private:
 	/** Header row cells; empty when the table was initialized with a column count rather than a header row. */
 	TArray<FString> HeaderCells;

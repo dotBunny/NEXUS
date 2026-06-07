@@ -23,12 +23,12 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 #if !UE_BUILD_SHIPPING
 	
 	
-	const int32 TaggingContentTicket = Operation->GetReport()->CreateContentBlock();
-	FNReportContentBlock* TaggingContentBlock = Operation->GetReport()->GetContentBlock(TaggingContentTicket);
-	TaggingContentBlock->SetHeading("Tagging");
+	const int32 OutputContentTicket = Operation->GetReport()->CreateContentBlock();
+	FNReportContentBlock* OutputContentBlock = Operation->GetReport()->GetContentBlock(OutputContentTicket);
+	OutputContentBlock->SetHeading("Output");
 	
 	// Add our Context Tags to report
-	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateListBlock(TaggingContentTicket);
+	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateListBlock(OutputContentTicket);
 	FNReportListBlock* ContextTagsContentBlock = Operation->GetReport()->GetListBlock(ContextTagsContentTicket);
 	ContextTagsContentBlock->SetHeading("Context Tags");
 	for (const FGameplayTag& Tag : TaskGraphContextPtr->ContextTags)
@@ -37,7 +37,7 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 	
 	// Add our Tag Counter to report
-	const int32 TagCounterContentTicket = Operation->GetReport()->CreateTableBlock(TaggingContentTicket);
+	const int32 TagCounterContentTicket = Operation->GetReport()->CreateTableBlock(OutputContentTicket);
 	FNReportTableBlock* TagCounterTableBlock = Operation->GetReport()->GetTableBlock(TagCounterContentTicket);
 	TagCounterTableBlock->SetHeading("Tag Counter");
 	TagCounterTableBlock->Initialize({ "Tag", "Count"});
@@ -47,7 +47,7 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 
 	// Add Analytics to report
-	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReports(Operation->GetReport());
+	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
 	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 

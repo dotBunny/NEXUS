@@ -46,6 +46,11 @@ int32 FNReport::CreateListBlock(const int32 ParentTicket, const int32 OrderPrior
 	N_REPORT_CREATE_BLOCK(FNReportListBlock, ListBlocks, EBlockType::List)
 }
 
+int32 FNReport::CreateCollapsableBlock(const int32 ParentTicket, const int32 OrderPriority)
+{
+	N_REPORT_CREATE_BLOCK(FNReportCollapsableBlock, CollapsableBlocks, EBlockType::Collapsable)
+}
+
 FNReportContentBlock* FNReport::GetContentBlock(const int32 Ticket)
 {
 	return ContentBlocks.Find(Ticket);
@@ -59,6 +64,73 @@ FNReportTableBlock* FNReport::GetTableBlock(const int32 Ticket)
 FNReportListBlock* FNReport::GetListBlock(const int32 Ticket)
 {
 	return ListBlocks.Find(Ticket);
+}
+
+FNReportCollapsableBlock* FNReport::GetCollapsableBlock(const int32 Ticket)
+{
+	return CollapsableBlocks.Find(Ticket);
+}
+
+// Heading lives on the base FNReportBlock (private); FNReport is a friend, so the search reads it directly.
+#define N_REPORT_FIND_BLOCK(BlockStorage, SearchHeading) \
+	for (auto& Pair : BlockStorage) \
+	{ \
+		if (Pair.Value.Heading.Equals(SearchHeading, ESearchCase::CaseSensitive)) \
+		{ \
+			return &Pair.Value; \
+		} \
+	} \
+	return nullptr;
+
+FNReportContentBlock* FNReport::FindContentBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(ContentBlocks, Heading)
+}
+
+FNReportTableBlock* FNReport::FindTableBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(TableBlocks, Heading)
+}
+
+FNReportListBlock* FNReport::FindListBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(ListBlocks, Heading)
+}
+
+FNReportCollapsableBlock* FNReport::FindCollapsableBlock(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK(CollapsableBlocks, Heading)
+}
+
+// As N_REPORT_FIND_BLOCK, but yields the matching block's ticket (the storage key) instead of a pointer.
+#define N_REPORT_FIND_BLOCK_TICKET(BlockStorage, SearchHeading) \
+	for (auto& Pair : BlockStorage) \
+	{ \
+		if (Pair.Value.Heading.Equals(SearchHeading, ESearchCase::CaseSensitive)) \
+		{ \
+			return Pair.Key; \
+		} \
+	} \
+	return INDEX_NONE;
+
+int32 FNReport::FindContentBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(ContentBlocks, Heading)
+}
+
+int32 FNReport::FindTableBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(TableBlocks, Heading)
+}
+
+int32 FNReport::FindListBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(ListBlocks, Heading)
+}
+
+int32 FNReport::FindCollapsableBlockTicket(const FString& Heading)
+{
+	N_REPORT_FIND_BLOCK_TICKET(CollapsableBlocks, Heading)
 }
 
 TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat)
@@ -175,6 +247,9 @@ void FNReport::RenderBlock(const int32 Ticket, TArray<FString>& Output, const EN
 	case EBlockType::List:
 		ListBlocks[Ticket].Render(*this, Output, OutputFormat);
 		break;
-		
+	case EBlockType::Collapsable:
+		CollapsableBlocks[Ticket].Render(*this, Output, OutputFormat);
+		break;
+
 	}
 }

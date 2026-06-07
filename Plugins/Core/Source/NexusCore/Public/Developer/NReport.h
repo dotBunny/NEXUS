@@ -7,6 +7,7 @@
 #include "Developer/NReportContentBlock.h"
 #include "Developer/NReportTableBlock.h"
 #include "Developer/NReportListBlock.h"
+#include "Developer/NReportCollapsableBlock.h"
 
 /**
  * Composable, hierarchical report structure that can be emitted as plain text or Markdown.
@@ -19,6 +20,7 @@ struct NEXUSCORE_API FNReport
 	friend struct FNReportTableBlock;
 	friend struct FNReportContentBlock;
 	friend struct FNReportListBlock;
+	friend struct FNReportCollapsableBlock;
 
 	/**
 	 * Allocate a new content block, attach it to a parent, and issue its ticket.
@@ -39,6 +41,15 @@ struct NEXUSCORE_API FNReport
 	int32 CreateListBlock(const int32 ParentTicket = 0, const int32 OrderPriority = 0);
 
 	/**
+	 * Allocate a new collapsable block, attach it to a parent, and issue its ticket. The block renders only
+	 * when it has child blocks; otherwise it produces no output.
+	 * @param ParentTicket Ticket of the block this one is nested under; 0 attaches to the report root.
+	 * @param OrderPriority Sort priority among siblings; lower values render first.
+	 * @return The ticket assigned to the new block, used with GetCollapsableBlock and as a ParentTicket for children.
+	 */
+	int32 CreateCollapsableBlock(const int32 ParentTicket = 0, const int32 OrderPriority = 0);
+
+	/**
 	 * Look up a previously created content block by ticket.
 	 * @param Ticket Ticket returned from CreateContentBlock.
 	 * @return Pointer to the block, or nullptr if no content block with that ticket exists.
@@ -56,7 +67,83 @@ struct NEXUSCORE_API FNReport
 
 	FNReportListBlock* GetListBlock(const int32 Ticket);
 
-	
+	/**
+	 * Look up a previously created collapsable block by ticket.
+	 * @param Ticket Ticket returned from CreateCollapsableBlock.
+	 * @return Pointer to the block, or nullptr if no collapsable block with that ticket exists.
+	 * @note The pointer is owned by the report and is invalidated when another block is created.
+	 */
+	FNReportCollapsableBlock* GetCollapsableBlock(const int32 Ticket);
+
+	/**
+	 * Find the first content block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return Pointer to the first matching content block, or nullptr if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 * @note The pointer is owned by the report and is invalidated when another block is created.
+	 */
+	FNReportContentBlock* FindContentBlock(const FString& Heading);
+
+	/**
+	 * Find the first table block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return Pointer to the first matching table block, or nullptr if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 * @note The pointer is owned by the report and is invalidated when another block is created.
+	 */
+	FNReportTableBlock* FindTableBlock(const FString& Heading);
+
+	/**
+	 * Find the first list block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return Pointer to the first matching list block, or nullptr if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 * @note The pointer is owned by the report and is invalidated when another block is created.
+	 */
+	FNReportListBlock* FindListBlock(const FString& Heading);
+
+	/**
+	 * Find the first collapsable block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return Pointer to the first matching collapsable block, or nullptr if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 * @note The pointer is owned by the report and is invalidated when another block is created.
+	 */
+	FNReportCollapsableBlock* FindCollapsableBlock(const FString& Heading);
+
+	/**
+	 * Find the ticket of the first content block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return The matching block's ticket, or INDEX_NONE if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 */
+	int32 FindContentBlockTicket(const FString& Heading);
+
+	/**
+	 * Find the ticket of the first table block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return The matching block's ticket, or INDEX_NONE if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 */
+	int32 FindTableBlockTicket(const FString& Heading);
+
+	/**
+	 * Find the ticket of the first list block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return The matching block's ticket, or INDEX_NONE if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 */
+	int32 FindListBlockTicket(const FString& Heading);
+
+	/**
+	 * Find the ticket of the first collapsable block whose heading matches Heading.
+	 * @param Heading The heading text to match (case-sensitive, exact).
+	 * @return The matching block's ticket, or INDEX_NONE if none matches.
+	 * @note Iteration order is unspecified, so the result is undefined when several blocks share a heading.
+	 */
+	int32 FindCollapsableBlockTicket(const FString& Heading);
+
+
 	/**
 	 * Render the entire report, walking blocks in priority order, into a flat array of lines.
 	 * @param OutputFormat Whether to emit plain text or Markdown.
@@ -113,7 +200,7 @@ protected:
 
 private:
 	/** Discriminates which storage map owns a ticket so dispatch resolves a block with a single targeted lookup. */
-	enum class EBlockType : uint8 { Content, Table, List };
+	enum class EBlockType : uint8 { Content, Table, List, Collapsable };
 
 	/** Per-ticket dispatch and ordering metadata, kept out of the block storage so lookups touch a single small map. */
 	struct FBlockMeta
@@ -137,6 +224,9 @@ private:
 	TMap<int32, FNReportTableBlock> TableBlocks;
 	
 	TMap<int32, FNReportListBlock> ListBlocks;
+
+	/** Storage for every collapsable block in the report, keyed by block ticket. */
+	TMap<int32, FNReportCollapsableBlock> CollapsableBlocks;
 
 	/** Ticket -> dispatch/ordering metadata for every block, regardless of which storage map holds the block itself. */
 	TMap<int32, FBlockMeta> BlockMeta;
