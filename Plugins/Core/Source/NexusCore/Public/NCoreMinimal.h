@@ -14,10 +14,10 @@ NEXUSCORE_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusCore, Log, All);
  */
 namespace NEXUS::Version
 {
-	constexpr int32 Number = 13;
+	constexpr int32 Number = 14;
 	constexpr int32 Major = 0;
 	constexpr int32 Minor = 3;
-	constexpr int32 Patch = 1;
+	constexpr int32 Patch = 2;
 }
 
 namespace NEXUS::Multiplayer

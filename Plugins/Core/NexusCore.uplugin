@@ -1,7 +1,7 @@
 {
 	"FileVersion": 3,
-	"Version": 13,
-	"VersionName": "0.3.1",
+	"Version": 14,
+	"VersionName": "0.3.2",
 	"FriendlyName": "NEXUS: Core",
 	"Description": "Functionality used by all NEXUS plugins in the framework.",
 	"Category": "NEXUS",
