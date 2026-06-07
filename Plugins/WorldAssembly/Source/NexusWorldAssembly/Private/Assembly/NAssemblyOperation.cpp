@@ -132,7 +132,7 @@ FNAssemblyOperationResult UNAssemblyOperation::GetResult() const
 {
 	FNAssemblyOperationResult Result;
 	
-	// Early out cause its still running
+	// Early out cause it's still running
 	if (bIsRunning == true)
 	{
 		Result.bSuccess = false;
