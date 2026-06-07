@@ -18,6 +18,45 @@ void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
 }
 
+void UNDynamicRefsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, const float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+	ReconcileStaleEntries();
+}
+
+void UNDynamicRefsDeveloperOverlay::ReconcileStaleEntries()
+{
+	bool bChanged = false;
+
+	// Objects removed via the subsystem fire OnRemoved and are handled by RemoveListItem; objects destroyed
+	// without a matching remove go stale silently, so sweep the wrappers and drop any that are now empty.
+	// UNDynamicRefObject::GetCount() prunes stale weak entries first, so == 0 means every tracked object is gone.
+	for (auto It = DynamicRefObjects.CreateIterator(); It; ++It)
+	{
+		if (It.Value()->GetCount() == 0)
+		{
+			DynamicReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
+			bChanged = true;
+		}
+	}
+
+	for (auto It = NamedObjects.CreateIterator(); It; ++It)
+	{
+		if (It.Value()->GetCount() == 0)
+		{
+			NamedReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
+			bChanged = true;
+		}
+	}
+
+	if (bChanged)
+	{
+		UpdateBanner();
+	}
+}
+
 void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);

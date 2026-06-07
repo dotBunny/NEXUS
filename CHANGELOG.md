@@ -18,6 +18,7 @@
 - `FNReportListBlock` now available in reports.
 - Option in `World Assembly` project settings to enable output of status messages from operations to the log, normally only visible in the developer overlay.
 - `FNActorPool` supports `OnDeferredConstruction` slow-invoking with flag.
+- Quick `Has Tag ?` and `Has Exact Tag ?` helper nodes for `FGameplayTags`.
 
 ### Changed
 
@@ -44,6 +45,7 @@
 - Protect against `NSpawnActorBlueprintAsyncAction` occuring after `UWorld` teardown.
 - `FNRectanglePicker` no longer crashes in hollow mode when `MinimumDimensions` equals `MaximumDimensions`; `FNRectanglePickerParams::GetValidRanges` now falls back to the full rectangle instead of returning an empty range that was indexed out of bounds.
 - `UNDynamicRefSubsystem` no longer broadcasts `OnAdded`/`OnAddedByName` when re-adding an object already present (a no-op `AddUnique`), keeping the add/remove delegate pairing symmetric.
+- DynamicRefs developer overlay no longer leaks `UNDynamicRefObject` list-view wrappers for objects destroyed without removal; `UNDynamicRefObject` now prunes stale entries so emptied wrappers are cleaned up.
 - `UNGetActorBlueprintAsyncAction` now guards against a null `UNActorPoolSubsystem` when unbinding its pool-created callback, matching `UNSpawnActorBlueprintAsyncAction`.
 - `UNGetActorBlueprintAsyncAction` and `UNSpawnActorBlueprintAsyncAction` now complete (with a null result) and tear down when their soft class fails to load, instead of leaving the Blueprint latent node hung.
 
