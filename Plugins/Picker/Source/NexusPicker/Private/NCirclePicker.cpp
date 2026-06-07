@@ -12,7 +12,11 @@
 	const bool bSimpleMode = Params.Rotation.IsZero(); \
 	const float MinRadiusSq = Params.MinimumRadius * Params.MinimumRadius; \
 	const float MaxRadiusSq = Params.MaximumRadius * Params.MaximumRadius; \
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
+	if (Params.MinimumRadius < 0.f || Params.MaximumRadius < Params.MinimumRadius) \
+	{ \
+		UE_LOG(LogNexusPicker, Warning, TEXT("FNCirclePickerParams has invalid radius range (Min=%.2f, Max=%.2f); points may not be where you expect."), Params.MinimumRadius, Params.MaximumRadius); \
+	}
 #define N_PICKER_CIRCLE_THETA(FloatSingle) \
 	const float PointTheta = Random.FloatSingle() * 2.0f * PI;
 // Inverse-CDF transform: uniform u in [0,1] maps to area-weighted radius across the annulus.

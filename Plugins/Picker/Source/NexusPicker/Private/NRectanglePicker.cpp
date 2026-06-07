@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #include "NRectanglePicker.h"
+#include "Algo/BinarySearch.h"
 #include "NavigationSystem.h"
 #include "NPickerMinimal.h"
 #include "NPickerUtils.h"
@@ -12,8 +13,19 @@
 	const bool bSimpleMode = Params.MinimumDimensions.IsZero(); \
 	const bool bHasRotation = !Params.Rotation.IsZero(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
-#define N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RandomIndex) \
-	FVector4 ChosenRange = ValidRanges[Random.RandomIndex(0,ValidRanges.Num()-1)];
+#define N_PICKER_RECTANGLE_CUMULATIVE \
+	TArray<double> CumulativeAreas; \
+	CumulativeAreas.Reserve(ValidRanges.Num()); \
+	double TotalArea = 0.0; \
+	for (const FVector4& CumulativeRange : ValidRanges) \
+	{ \
+		TotalArea += (CumulativeRange.Z - CumulativeRange.X) * (CumulativeRange.W - CumulativeRange.Y); \
+		CumulativeAreas.Add(TotalArea); \
+	}
+#define N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(FloatValue) \
+	const double AreaPick = Random.FloatValue(0.f, 1.f) * TotalArea; \
+	const int32 ChosenIndex = FMath::Min(Algo::LowerBound(CumulativeAreas, AreaPick), ValidRanges.Num() - 1); \
+	const FVector4 ChosenRange = ValidRanges[ChosenIndex];
 #define N_PICKER_RECTANGLE_EXTENTS_SIMPLE \
 	const float ExtentX = Params.MaximumDimensions.X * 0.5f; \
 	const float ExtentY = Params.MaximumDimensions.Y * 0.5f;
@@ -43,7 +55,8 @@
 			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(FVector(MinPoint.X, MaxPoint.Y, 0.f))); \
 			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, RangeVertices, NEXUS::Picker::VLog::OuterColor) \
 		} \
-	}
+	} \
+	N_PICKER_RECTANGLE_CUMULATIVE
 #define N_PICKER_RECTANGLE_VLOG_VERTICES(Origin, Dimensions, Rotation, VerticesVariable) \
 	const float VerticesVariable##ExtentX = Dimensions.X * 0.5f; \
 	const float VerticesVariable##ExtentY = Dimensions.Y * 0.5f; \
@@ -76,13 +89,13 @@
 #else // !ENABLE_VISUAL_LOG
 #define N_PICKER_RECTANGLE_VLOG(HasMinimumDimensions)
 #define N_PICKER_RECTANGLE_VALID_RANGES \
-	TArray<FVector4> ValidRanges = Params.GetValidRanges();
+	TArray<FVector4> ValidRanges = Params.GetValidRanges(); \
+	N_PICKER_RECTANGLE_CUMULATIVE
 #endif // ENABLE_VISUAL_LOG
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_INDEX IntegerRange
 #define RANDOM_FLOAT_RANGE FloatRange
 #define RANDOM_BOOL Bool()
 void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
@@ -165,7 +178,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -175,7 +188,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -189,7 +202,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
@@ -200,7 +213,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
@@ -213,7 +226,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -221,7 +234,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -230,10 +243,8 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FRandRange
-#define RANDOM_INDEX RandRange
 void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RANDOM_NONDETERMINISTIC
@@ -313,7 +324,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -323,7 +334,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -337,7 +348,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
@@ -348,7 +359,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
@@ -361,7 +372,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -369,7 +380,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -378,10 +389,8 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 	N_PICKER_RECTANGLE_VLOG(!bSimpleMode)
 }
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FRandRange
-#define RANDOM_INDEX RandRange
 void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNRectanglePickerParams& Params)
 {
 	const FRandomStream Random(Seed);
@@ -461,7 +470,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -471,7 +480,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -485,7 +494,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
@@ -496,7 +505,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
@@ -509,7 +518,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -517,7 +526,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -528,10 +537,8 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 }
 
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 #define RANDOM_FLOAT_RANGE FloatRange
-#define RANDOM_INDEX IntegerRange
 void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNRectanglePickerParams& Params)
 {
 	N_PICKER_RECTANGLE_PREFIX
@@ -610,7 +617,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -620,7 +627,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
@@ -634,7 +641,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
@@ -645,7 +652,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
 					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
@@ -658,7 +665,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -666,7 +673,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
-					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
+					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_FLOAT_RANGE)
 					OutLocations.Add(N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE));
 				}
 			}
@@ -676,6 +683,5 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 }
 
 #undef RANDOM_FLOAT_RANGE
-#undef RANDOM_INDEX
 
 // #SONARQUBE-ENABLE

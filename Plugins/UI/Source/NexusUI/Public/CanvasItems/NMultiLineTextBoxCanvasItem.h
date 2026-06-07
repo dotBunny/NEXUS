@@ -122,7 +122,8 @@ private:
 	{
 		LineWidths.Empty();
 		LineHeights.Empty();
-		
+		LinePositions.Empty();
+
 		UFont* SmallFont = GEngine->GetSmallFont();
 		UFont* LargeFont = GEngine->GetLargeFont();
 		

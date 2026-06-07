@@ -11,7 +11,11 @@
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const float MinRadiusCubed = Params.MinimumRadius * Params.MinimumRadius * Params.MinimumRadius; \
 	const float MaxRadiusCubed = Params.MaximumRadius * Params.MaximumRadius * Params.MaximumRadius; \
-	OutLocations.Reserve(OutLocationsStartIndex + Params.Count);
+	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
+	if (Params.MinimumRadius < 0.f || Params.MaximumRadius < Params.MinimumRadius) \
+	{ \
+		UE_LOG(LogNexusPicker, Warning, TEXT("FNSpherePickerParams has invalid radius range (Min=%.2f, Max=%.2f); points may not be where you expect."), Params.MinimumRadius, Params.MaximumRadius); \
+	}
 // Inverse-CDF transform: uniform u in [0,1] maps to volume-weighted radius across the shell.
 #define N_PICKER_SPHERE_RADIUS(FloatSingle) \
 	const float PointRadius = FMath::Pow(Random.FloatSingle() * (MaxRadiusCubed - MinRadiusCubed) + MinRadiusCubed, 1.0f / 3.0f);

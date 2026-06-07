@@ -62,7 +62,10 @@ void UNDeveloperOverlay::ShowContainerBanner(const FText& Text, ENColor MessageC
 
 void UNDeveloperOverlay::HideContainerBanner() const
 {
-	ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
+	if (IsValid(ContainerBanner))
+	{
+		ContainerBanner->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }
 
 void UNDeveloperOverlay::BindAllCurrentWorlds()

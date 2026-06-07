@@ -20,7 +20,8 @@
 		return; \
 	}
 #define N_PICKER_SPLINE_LOCATION(FloatRange) \
-	Params.SplineComponent->GetWorldLocationAtTime(Random.FloatRange(0, Params.SplineComponent->Duration))
+	Params.SplineComponent->GetLocationAtDistanceAlongSpline( \
+		Random.FloatRange(0.f, Params.SplineComponent->GetSplineLength()), ESplineCoordinateSpace::World)
 #if ENABLE_VISUAL_LOG
 #define N_VLOG_SPLINE \
 	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) { \
