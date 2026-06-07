@@ -241,7 +241,8 @@ void UNCellJunctionComponent::OnUnregister()
 void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags, ETeleportType Teleport)
 {
 	const UNCellRootComponent* RootComponent = FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(GetComponentLevel());
-	if (RootComponent != nullptr && !RootComponent->GetNCellActor()->WasSpawnedFromProxy())
+	const ANCellActor* CellActor = RootComponent != nullptr ? RootComponent->GetNCellActor() : nullptr;
+	if (CellActor != nullptr && !CellActor->WasSpawnedFromProxy())
 	{
 		bool bHasMadeChanges = false;
 		

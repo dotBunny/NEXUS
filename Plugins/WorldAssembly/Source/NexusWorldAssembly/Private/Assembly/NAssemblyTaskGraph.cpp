@@ -78,10 +78,10 @@ FNAssemblyTaskGraph::FNAssemblyTaskGraph(UNAssemblyOperation* Operation, FNAssem
 		for (const auto Component : PassComponents)
 		{
 			// Get the data generated during pre-generation process
-			FNWorldOrganData* WorldOrganData = Context->OrganData.Find(Component);
+			const FNWorldOrganData* WorldOrganData = Context->OrganData.Find(Component);
 
 			// Do not generate a component if it is not activated, don't make the tasks
-			if (!WorldOrganData->SourceComponent->bActivated) continue;
+			if (WorldOrganData == nullptr || !WorldOrganData->SourceComponent->bActivated) continue;
 
 			// Create individual organ builder context object, building out a list of all available cells to use to fill the defined space
 			TSharedPtr<FNVirtualOrganContext> VirtualOrganContextPtr = MakeShared<FNVirtualOrganContext>(
