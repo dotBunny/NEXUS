@@ -6,11 +6,11 @@
 #include "Brushes/SlateImageBrush.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNActorPoolsEditorStyle)
+N_EDITOR_STYLE(FNActorPoolsEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNActorPoolsEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	// NPooledActor
 	Style.Set("ClassIcon.NPooledActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NPooledActor"), Icon16x16));

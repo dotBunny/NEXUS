@@ -29,7 +29,7 @@ UNBoneComponent::UNBoneComponent(const FObjectInitializer& ObjectInitializer) : 
 	TransformUpdated.AddUObject(this, &UNBoneComponent::OnTransformUpdated);
 #endif
 	
-	N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NBoneComponent", this, false, 0.35f)
+	N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NBoneComponent", this, false, 0.35f)
 }
 
 

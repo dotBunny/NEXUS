@@ -18,7 +18,7 @@ class NEXUSCOREEDITOR_API UNEditorUserSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_HIDDEN_EDITOR_SETTINGS(UNEditorUserSettings);
+	N_HIDDEN_EDITOR_SETTINGS_BASE(UNEditorUserSettings);
 
 
 #if WITH_EDITORONLY_DATA

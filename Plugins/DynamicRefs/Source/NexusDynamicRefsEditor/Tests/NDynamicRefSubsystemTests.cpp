@@ -580,4 +580,80 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetNames,
     });
 }
 
+N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_StaleEntryDropped,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::FastCollection::StaleEntryDropped",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // Verifies that an object destroyed without being removed leaves no stale entry behind: the weak
+    // reference goes invalid and every accessor skips it (count drops, getters return the survivor/null).
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+    {
+        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
+            return;
+        }
+
+        AActor* Doomed = World->SpawnActor<AActor>();
+        AActor* Survivor = World->SpawnActor<AActor>();
+        Subsystem->AddObject(NDR_Target_C, Doomed);
+        Subsystem->AddObject(NDR_Target_C, Survivor);
+        CHECK_EQUALS("Count should be 2 with both actors alive.", Subsystem->GetCount(NDR_Target_C), 2)
+
+        // Destroy the first actor WITHOUT calling RemoveObject; its weak entry should now be stale.
+        Doomed->Destroy();
+
+        CHECK_EQUALS("Count should drop to 1 once the destroyed actor's entry goes stale.", Subsystem->GetCount(NDR_Target_C), 1)
+
+        TArray<UObject*> Objects = Subsystem->GetObjects(NDR_Target_C);
+        CHECK_EQUALS("GetObjects should exclude the stale entry.", Objects.Num(), 1)
+        if (Objects.Num() > 0 && Objects[0] != Survivor)
+        {
+            ADD_ERROR("GetObjects returned the destroyed actor instead of the survivor.");
+        }
+
+        // GetFirstObject must skip the stale leading entry and return the survivor, never null/garbage.
+        if (Subsystem->GetFirstObject(NDR_Target_C) != Survivor)
+        {
+            ADD_ERROR("GetFirstObject should skip the stale entry and return the survivor.");
+        }
+    });
+}
+
+N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_StaleEntryDropped,
+    "NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystem::NamedCollection::StaleEntryDropped",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // Verifies the named-bucket path also drops stale entries, and that GetNames no longer lists a
+    // bucket whose only object was destroyed without removal.
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+    {
+        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
+        if (!Subsystem)
+        {
+            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
+            return;
+        }
+
+        const FName TestName = TEXT("TestStaleByName");
+        AActor* Doomed = World->SpawnActor<AActor>();
+        Subsystem->AddObjectByName(TestName, Doomed);
+        CHECK_EQUALS("Count by name should be 1 with the actor alive.", Subsystem->GetCountByName(TestName), 1)
+
+        Doomed->Destroy();
+
+        CHECK_EQUALS("Count by name should drop to 0 once the destroyed actor's entry goes stale.",
+            Subsystem->GetCountByName(TestName), 0)
+        if (Subsystem->GetFirstObjectByName(TestName) != nullptr)
+        {
+            ADD_ERROR("GetFirstObjectByName should return nullptr once the only entry is stale.");
+        }
+        if (Subsystem->GetNames().Contains(TestName))
+        {
+            ADD_ERROR("GetNames should not list a bucket whose only object has gone stale.");
+        }
+    });
+}
+
 #endif //WITH_TESTS

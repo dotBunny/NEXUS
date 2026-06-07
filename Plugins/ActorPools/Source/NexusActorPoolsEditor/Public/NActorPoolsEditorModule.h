@@ -17,7 +17,7 @@ class FNActorPoolsEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	N_IMPLEMENT_MODULE(FNActorPoolsEditorModule, "NexusActorPoolsEditor")
+	N_MODULE_BASE(FNActorPoolsEditorModule, "NexusActorPoolsEditor")
 
 private:
 	/** Registered placement-mode entries, tracked so they can be unregistered on shutdown. */
@@ -25,7 +25,7 @@ private:
 	void OnPostEngineInit();
 };
 
-N_IMPLEMENT_TOOLS_MENU_EUW_ENTRY(
+N_TOOLS_MENU_EUW_ENTRY(
 	"Developer Overlay", EUW_NActorPools,
 	NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_DisplayName", "Actor Pools"), 
 	NSLOCTEXT("NexusActorPoolsEditor", "Create_EUW_Tooltip", "Opens the NActorPools Developer Overlay inside of an editor tab."),

@@ -41,7 +41,7 @@ struct FNMenuEntry
 	FSlateIcon Icon;
 };
 
-#define N_IMPLEMENT_GENERATE_TOOLS_MENU(Sections, MenuEntries) \
+#define N_GENERATE_TOOLS_MENU(Sections, MenuEntries) \
 	for (const auto& Section : Sections) \
 	{ \
 		FToolMenuSection& MenuSection = Menu->AddSection(Section.Key, Section.Value); \

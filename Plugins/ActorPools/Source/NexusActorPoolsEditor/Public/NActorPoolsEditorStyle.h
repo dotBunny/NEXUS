@@ -16,5 +16,5 @@
  */
 class FNActorPoolsEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusActorPools", "NActorPoolsEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusActorPools", "NActorPoolsEditorStyle")
 };

@@ -40,27 +40,27 @@
 #define RANDOM_FLOAT Float
 void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
+	N_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			N_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
 	}
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			N_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
 	}
@@ -81,27 +81,27 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, const FNSpherePickerPar
 #define RANDOM_FLOAT FRand
 void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
+	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			N_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
 	}
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			N_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
 	}
@@ -126,23 +126,23 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			N_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
 	}
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			N_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
 	}
@@ -168,23 +168,23 @@ void FNSpherePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& R
 	N_PICKER_SPHERE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE
+			N_PICKER_PROJECTION_TRACE
 			OutLocations.Add(Location);
 		}
 	}
 	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 	{
-		N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
 		{
 			N_PICKER_SPHERE_RADIUS(RANDOM_FLOAT)
 			FVector Location = N_PICKER_SPHERE_LOCATION(RANDOM_VECTOR);
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+			N_PICKER_PROJECTION_NAVMESH_V1
 			OutLocations.Add(Location);
 		}
 	}

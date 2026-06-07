@@ -10,11 +10,12 @@
 
 void FNDynamicRefsEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNDynamicRefsEditorModule::OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT_STATIC(FNDynamicRefsEditorModule::OnPostEngineInit);
 }
 
 void FNDynamicRefsEditorModule::ShutdownModule()
 {
+	N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE()
 	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NDynamicRefs)();
 	FNDynamicRefsEditorStyle::Shutdown();

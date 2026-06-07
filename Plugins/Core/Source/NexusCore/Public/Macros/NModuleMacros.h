@@ -4,7 +4,6 @@
 #pragma once
 
 #include "Logging/LogMacros.h"
-#include "NCoreMinimal.h"
 
 /**
  * Injects a strongly-typed Type& Get() accessor into an IModuleInterface subclass.
@@ -12,12 +11,12 @@
  * @param Type Concrete module class, e.g. FNCoreModule.
  * @param Name Module name string, e.g. "NexusCore".
  */
-#define N_IMPLEMENT_MODULE(Type, Name) \
+#define N_MODULE_BASE(Type, Name) \
 public: \
 	FORCEINLINE static Type& Get() \
 	{ \
 		return FModuleManager::LoadModuleChecked<Type>(Name); \
-	} \
+	}
 
 /**
  * Runs Method() now if the engine is already past PostDefault loading, otherwise defers to OnPostEngineInit.
@@ -28,7 +27,7 @@ public: \
  * @param Type Enclosing module class used when binding the delegate.
  * @param Method Member function to invoke once the engine has finished post-engine init.
  */
-#define N_IMPLEMENT_MODULE_POST_ENGINE_INIT(Type, Method) \
+#define N_MODULE_POST_ENGINE_INIT(Type, Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \
 	{ \
 		Method(); \
@@ -38,7 +37,14 @@ public: \
 		FCoreDelegates::OnPostEngineInit.AddRaw(this, &Type::Method); \
 	}
 
-#define N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(Method) \
+#define N_MODULE_REMOVE_POST_ENGINE_INIT() \
+	FCoreDelegates::OnPostEngineInit.RemoveAll(this);
+
+#define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE() \
+	static void OnPostEngineInit();
+	static FDelegateHandle OnPostEngineInitDelegateHandle;
+
+#define N_MODULE_POST_ENGINE_INIT_STATIC(Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \
 	{ \
 		Method(); \
@@ -47,6 +53,9 @@ public: \
 	{ \
 		FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
 	}
+
+#define N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE() \
+	FCoreDelegates::OnPostEngineInit.Remove(OnPostEngineInitDelegateHandle);
 
 /**
  * Editor-only: synchronizes a plugin's .uplugin Version / VersionName with NEXUS::Version.

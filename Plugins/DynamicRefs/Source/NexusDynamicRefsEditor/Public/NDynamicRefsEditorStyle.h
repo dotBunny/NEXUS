@@ -15,5 +15,5 @@
  */
 class FNDynamicRefsEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusDynamicRefs", "NDynamicRefsEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusDynamicRefs", "NDynamicRefsEditorStyle")
 };

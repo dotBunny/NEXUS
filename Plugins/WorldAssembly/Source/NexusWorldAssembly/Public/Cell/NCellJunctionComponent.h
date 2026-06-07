@@ -51,7 +51,7 @@ class NEXUSWORLDASSEMBLY_API UNCellJunctionComponent : public USceneComponent
 		TransformUpdated.AddUObject(this, &UNCellJunctionComponent::OnTransformUpdated);
 #endif // WITH_EDITOR
 
-		N_WORLD_ICON_IMPLEMENTATION_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
+		N_WORLD_ICON_SCENE_COMPONENT("/NexusWorldAssembly/EditorResources/S_NCellJunctionComponent", this, false, 0.35f)
 	}
 
 public:

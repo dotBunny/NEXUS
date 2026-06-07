@@ -25,6 +25,6 @@ class UNActorPoolSetFactory : public UFactory
 		bEditorImport = false;
 		bEditAfterNew = false;
 	}
-	N_IMPLEMENT_ASSET_FACTORY(UNActorPoolSet)
+	N_ASSET_FACTORY_BASE(UNActorPoolSet)
 };
 

@@ -7,11 +7,11 @@
 #include "Macros/NEditorStyleMacros.h"
 #include "Styling/SlateStyle.h"
 
-N_IMPLEMENT_EDITOR_STYLE(FNSharedSamplesEditorStyle)
+N_EDITOR_STYLE(FNSharedSamplesEditorStyle)
 
 TSharedRef<FSlateStyleSet> FNSharedSamplesEditorStyle::Create()
 {
-	N_IMPLEMENT_EDITOR_STYLE_CREATE
+	N_EDITOR_STYLE_CREATE
 	
 	// NSamplesDisplayActor
 	Style.Set("ClassIcon.NSamplesDisplayActor", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("ClassIcon_NSamplesDisplayActor"), Icon16x16));

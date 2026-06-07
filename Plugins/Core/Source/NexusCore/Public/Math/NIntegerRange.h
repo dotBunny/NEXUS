@@ -11,7 +11,7 @@
  * A 32-bit integer inclusive range [Minimum, Maximum].
  *
  * Defaults span the entire representable range of int32; override either bound at author time.
- * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_IMPLEMENT_RANGE.
+ * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNIntegerRange
@@ -26,5 +26,5 @@ struct NEXUSCORE_API FNIntegerRange
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Maximum = MAX_int32;
 
-	N_IMPLEMENT_RANGE(int32)
+	N_RANGE_BASE(int32)
 };

@@ -87,20 +87,20 @@
 #define RANDOM_BOOL Bool()
 void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC
+	N_PICKER_RANDOM_DETERMINISTIC
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -109,20 +109,20 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -131,7 +131,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -160,14 +160,14 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 		
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -177,14 +177,14 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
@@ -192,7 +192,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -202,7 +202,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -236,20 +236,20 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, const FNRectanglePic
 #define RANDOM_INDEX RandRange
 void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectanglePickerParams& Params)
 {
-	N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC
+	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_RECTANGLE_PREFIX
 	if (bSimpleMode)
 	{
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -258,20 +258,20 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -280,7 +280,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -308,14 +308,14 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 		N_PICKER_RECTANGLE_VALID_RANGES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -325,14 +325,14 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
@@ -340,7 +340,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -350,7 +350,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -391,13 +391,13 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -406,20 +406,20 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -428,7 +428,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -456,14 +456,14 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 		N_PICKER_RECTANGLE_VALID_RANGES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -473,14 +473,14 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
@@ -488,7 +488,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -498,7 +498,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -540,13 +540,13 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -555,20 +555,20 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -577,7 +577,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -605,14 +605,14 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 		N_PICKER_RECTANGLE_VALID_RANGES
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX
+			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
@@ -622,14 +622,14 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_TRACE
+					N_PICKER_PROJECTION_TRACE
 					OutLocations.Add(Location);
 				}
 			}
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
 		{
-			N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX
+			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
 			{
 				for (int32 i = 0; i < Params.Count; i++)
@@ -637,7 +637,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					
 					FVector Location = N_PICKER_RECTANGLE_LOCATION_ROTATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}
@@ -647,7 +647,7 @@ void FNRectanglePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister
 				{
 					N_PICKER_RECTANGLE_VALID_RANGES_CHOICE(RANDOM_INDEX)
 					FVector Location = N_PICKER_RECTANGLE_LOCATION(RANDOM_FLOAT_RANGE);
-					N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1
+					N_PICKER_PROJECTION_NAVMESH_V1
 					OutLocations.Add(Location);
 				}
 			}

@@ -8,22 +8,22 @@
 #include "CoreMinimal.h"
 #include "CollisionQueryParams.h"
 
-#define N_IMPLEMENT_PICKER_RANDOM_DETERMINISTIC FNMersenneTwister& Random = FNRandom::GetDeterministic();
+#define N_PICKER_RANDOM_DETERMINISTIC FNMersenneTwister& Random = FNRandom::GetDeterministic();
 
-#define N_IMPLEMENT_PICKER_RANDOM_NONDETERMINISTIC FRandomStream& Random = FNRandom::GetNonDeterministic();
+#define N_PICKER_RANDOM_NONDETERMINISTIC FRandomStream& Random = FNRandom::GetNonDeterministic();
 
-#define N_IMPLEMENT_PICKER_PROJECTION_TRACE_PREFIX \
+#define N_PICKER_PROJECTION_TRACE_PREFIX \
 	FHitResult HitResult(ForceInit);
-#define N_IMPLEMENT_PICKER_PROJECTION_TRACE \
+#define N_PICKER_PROJECTION_TRACE \
 	if (Params.CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::CollisionQueryParams)) \
 	{ \
 		Location = HitResult.Location; \
 	}
 
-#define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1_PREFIX \
+#define N_PICKER_PROJECTION_NAVMESH_V1_PREFIX \
 	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Params.CachedWorld); \
 	FNavLocation NavLocation;
-#define N_IMPLEMENT_PICKER_PROJECTION_NAVMESH_V1 \
+#define N_PICKER_PROJECTION_NAVMESH_V1 \
 	if (NavigationSystem != nullptr) \
 	{ \
 		if (!NavigationSystem->IsInitialized()) \

@@ -12,5 +12,5 @@
 
 class FNSharedSamplesEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusSharedSamples", "NSharedSamplesEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusSharedSamples", "NSharedSamplesEditorStyle")
 };

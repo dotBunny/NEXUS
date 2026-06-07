@@ -10,11 +10,12 @@
 
 void FNUIEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT_STATIC(FNUIEditorModule::OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT_STATIC(FNUIEditorModule::OnPostEngineInit);
 }
 
 void FNUIEditorModule::ShutdownModule()
 {
+	N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE()
 	FNUIEditorStyle::Shutdown();
 }
 

@@ -30,6 +30,13 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	{
 		MainTask.EnterProgressFrame(1, NSLOCTEXT("NexusToolingEditor", "FindAndFix_PoseAssets_OutOfDateAnimationSource_Step1", "Collecting ..."));
 		PoseAssets = UEditorUtilityLibrary::GetSelectedAssetsOfClass(UPoseAsset::StaticClass());
+		
+		// The Pose Assets will be loaded from the selection, so for the sake of consistency we'll also add them to be unloaded after the operation.
+		for (UObject* Object : PoseAssets)
+		{
+			CleanupPackages.AddUnique(Object->GetOutermost());
+		}
+		
 		SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
 		for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 		{
@@ -186,7 +193,14 @@ bool FNPoseAssetFixer::UpdatePoseAsset(UEditorAssetSubsystem* EditorAssetSubsyst
 	}
 	PoseAsset->SourceAnimation->ConditionalPostLoad();
 		
-	if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != PoseAsset->SourceAnimation->GetDataModel()->GenerateGuid())
+	const IAnimationDataModel* DataModel = PoseAsset->SourceAnimation->GetDataModel();
+	if (DataModel == nullptr)
+	{
+		UE_LOG(LogNexusToolingEditor, Warning, TEXT("PoseAsset(%s) source animation has no data model; skipping."), *PoseAsset->GetName());
+		return false;
+	}
+	
+	if (PoseAsset->SourceAnimationRawDataGUID.IsValid() && PoseAsset->SourceAnimationRawDataGUID != DataModel->GenerateGuid())
 	{
 		PoseAsset->UpdatePoseFromAnimation(PoseAsset->SourceAnimation);
 		

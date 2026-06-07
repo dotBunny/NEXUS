@@ -11,7 +11,7 @@
  * Blueprint-exposed wrappers around FNIntegerRange's sampling API.
  *
  * Thin passthroughs so that Blueprint authors can reach the same NextValue / RandomValue /
- * PercentageValue helpers that native code uses via N_IMPLEMENT_RANGE.
+ * PercentageValue helpers that native code uses via N_RANGE.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Integer Range Library")
 class NEXUSCORE_API UNIntegerRangeLibrary : public UBlueprintFunctionLibrary

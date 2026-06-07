@@ -16,12 +16,13 @@
 
 void FNSharedSamplesEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNSharedSamplesEditorModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNSharedSamplesEditorModule, OnPostEngineInit);
 }
 
 void FNSharedSamplesEditorModule::ShutdownModule()
 {
-	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
+	N_MODULE_REMOVE_POST_ENGINE_INIT()
+	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	
 	FNSharedSamplesEditorStyle::Shutdown();
 }

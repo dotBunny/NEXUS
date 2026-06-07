@@ -11,7 +11,7 @@
  * A double-precision inclusive range [Minimum, Maximum].
  *
  * Defaults span the entire representable range of double; override either bound at author time.
- * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_IMPLEMENT_RANGE.
+ * The member API (NextValue, RandomValue, PercentageValue, etc.) is supplied by N_RANGE.
  */
 USTRUCT(BlueprintType)
 struct NEXUSCORE_API FNDoubleRange
@@ -26,5 +26,5 @@ struct NEXUSCORE_API FNDoubleRange
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	double Maximum = MAX_dbl;
 
-	N_IMPLEMENT_RANGE(double)
+	N_RANGE_BASE(double)
 };

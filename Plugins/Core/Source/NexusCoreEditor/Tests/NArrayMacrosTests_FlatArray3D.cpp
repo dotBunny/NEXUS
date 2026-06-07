@@ -15,7 +15,7 @@ namespace NEXUS::UnitTests::NCore::NArrayMacrosHarness
 		int32 SizeZ = 0;
 		TArray<int32> Data;
 
-		N_IMPLEMENT_FLAT_3D_ARRAY(int32, int32, Data, SizeX, SizeY, SizeZ)
+		N_FLAT_3D_ARRAY_BASE(int32, int32, Data, SizeX, SizeY, SizeZ)
 	};
 }
 

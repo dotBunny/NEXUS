@@ -22,7 +22,7 @@
 
 void FNActorPoolsEditorModule::StartupModule()
 {
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNActorPoolsEditorModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNActorPoolsEditorModule, OnPostEngineInit);
 }
 
 void FNActorPoolsEditorModule::ShutdownModule()
@@ -36,7 +36,7 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	FNActorPoolsEditorCommands::RemoveMenuEntries();
 	
 	// Teardown Placement
-	N_IMPLEMENT_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
+	N_UNREGISTER_PLACEABLE_ACTORS(PlacementActors)
 	
 	FNActorPoolsEditorStyle::Shutdown();
 }

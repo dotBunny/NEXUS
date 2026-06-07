@@ -10,22 +10,65 @@
 
 /**
  * Holds the set of UObjects registered for a single ENDynamicRef slot or FName bucket.
+ * @remark References are stored weakly; the subsystem never keeps a registered object alive. Entries whose
+ *         object is destroyed/GC'd go stale and are skipped by every accessor and pruned lazily by Compact().
  */
 USTRUCT()
 struct FNDynamicRefCollection
 {
 	GENERATED_BODY()
 
-	/** The registered UObjects, in registration order. */
+	/** The registered UObjects (weak), in registration order. May contain stale entries until Compact() runs. */
 	UPROPERTY()
-	TArray<TObjectPtr<UObject>> Objects;
+	TArray<TWeakObjectPtr<UObject>> Objects;
 
-	/** @return true if the collection has at least one registered object. */
-	bool HasObjects() const { return Objects.Num() > 0; }
-	/** @return A copy of the currently registered objects. */
-	TArray<UObject*> GetObjectsCopy() { return Objects; }
-	/** @return A const reference to the registered objects; avoids the copy GetObjects() makes. */
-	const TArray<TObjectPtr<UObject>>& GetObjectsRef() const { return Objects; }
+	/** Prune entries whose object has been destroyed/GC'd. @return the number of live entries remaining. */
+	int32 Compact()
+	{
+		Objects.RemoveAll([](const TWeakObjectPtr<UObject>& Object){ return !Object.IsValid(); });
+		return Objects.Num();
+	}
+	/** @return true if the collection has at least one live object. */
+	bool HasObjects() const
+	{
+		for (const TWeakObjectPtr<UObject>& Object : Objects)
+		{
+			if (Object.IsValid()) return true;
+		}
+		return false;
+	}
+	/** @return A copy of the currently registered objects as raw pointers, excluding any stale entries. */
+	TArray<UObject*> GetObjectsCopy() const
+	{
+		TArray<UObject*> Result;
+		Result.Reserve(Objects.Num());
+		for (const TWeakObjectPtr<UObject>& Object : Objects)
+		{
+			if (UObject* Raw = Object.Get())
+			{
+				Result.Add(Raw);
+			}
+		}
+		return Result;
+	}
+	/** @return The first/oldest live object, or nullptr if none remain. */
+	UObject* GetFirstValid() const
+	{
+		for (const TWeakObjectPtr<UObject>& Object : Objects)
+		{
+			if (UObject* Raw = Object.Get()) return Raw;
+		}
+		return nullptr;
+	}
+	/** @return The last/newest live object, or nullptr if none remain. */
+	UObject* GetLastValid() const
+	{
+		for (int32 i = Objects.Num() - 1; i >= 0; --i)
+		{
+			if (UObject* Raw = Objects[i].Get()) return Raw;
+		}
+		return nullptr;
+	}
 	/** Add an object to the collection; duplicates are ignored. @return true if the object was newly added (false when it was already present). */
 	bool Add(UObject* Object)
 	{
@@ -35,7 +78,7 @@ struct FNDynamicRefCollection
 	}
 	/** Remove an object from the collection if present. */
 	bool Remove(UObject* Object) { return Objects.Remove(Object) > 0; }
-	
+
 };
 
 /**
@@ -217,8 +260,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	
 	/**
 	* Gets the first/oldest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
+	* @warning References are weak: if the slot's first entry has been destroyed without removal this returns nullptr even
+	*          though the slot is non-empty. Use GetFirstObject() to skip stale entries.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
-	* @return The first UObject in the collection. 
+	* @return The first UObject in the collection.
 	*/
 	UObject* GetFirstObjectUnsafe(const ENDynamicRef DynamicRef);
 	
@@ -233,8 +278,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	
 	/**
 	* Gets the first/oldest UObject associated with the provided FName with NO bounds/range checking.
+	* @warning References are weak: if the bucket's first entry has been destroyed without removal this returns nullptr even
+	*          though the bucket is non-empty. Use GetFirstObjectByName() to skip stale entries.
 	* @param Name The desired FName to access.
-	* @return The first UObject in the collection. 
+	* @return The first UObject in the collection.
 	*/
 	UObject* GetFirstObjectByNameUnsafe(FName Name);
 	
@@ -267,8 +314,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	
 	/**
 	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO any bounds/range checking.
+	* @warning References are weak: if the slot's last entry has been destroyed without removal this returns nullptr even
+	*          though the slot is non-empty. Use GetLastObject() to skip stale entries.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
-	* @return The first UObject of its type. 
+	* @return The first UObject of its type.
 	*/
 	UObject* GetLastObjectUnsafe(const ENDynamicRef DynamicRef);
 	
@@ -283,8 +332,10 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	
 	/**
 	* Gets the last/newest UObject associated with the provided FName with NO bounds/range checking.
+	* @warning References are weak: if the bucket's last entry has been destroyed without removal this returns nullptr even
+	*          though the bucket is non-empty. Use GetLastObjectByName() to skip stale entries.
 	* @param Name The desired FName type to access.
-	* @return The last UObject in the collection. 
+	* @return The last UObject in the collection.
 	*/
 	UObject* GetLastObjectByNameUnsafe(FName Name);
 

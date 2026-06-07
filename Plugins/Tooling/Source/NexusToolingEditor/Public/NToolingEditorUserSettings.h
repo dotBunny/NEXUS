@@ -23,7 +23,7 @@ class NEXUSTOOLINGEDITOR_API UNToolingEditorUserSettings : public UDeveloperSett
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorUserSettings, "Tooling (User)", "Specific settings for NEXUS: Tooling included with the framework.");
+	N_EDITOR_SETTINGS_BASE(UNToolingEditorUserSettings, "Tooling (User)", "Specific settings for NEXUS: Tooling included with the framework.");
 
 	/** Post-engine-init hook that applies the persisted values to their respective editor systems. */
 	static void OnPostEngineInit();

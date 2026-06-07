@@ -14,5 +14,5 @@
  */
 class NEXUSCOREEDITOR_API FNEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusCore", "NEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusCore", "NEditorStyle")
 };

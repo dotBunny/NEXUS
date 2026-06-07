@@ -48,5 +48,5 @@ class UNCellSetFactory : public UFactory
 		bEditorImport = false;
 		bEditAfterNew = false;
 	};
-	N_IMPLEMENT_ASSET_FACTORY(UNTissue)
+	N_ASSET_FACTORY_BASE(UNTissue)
 };

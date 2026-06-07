@@ -35,7 +35,7 @@ class UNToolingEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNToolingEditorSettings, "Tooling", "Specific settings for NEXUS: Tooling included with the framework.");
+	N_EDITOR_SETTINGS_BASE(UNToolingEditorSettings, "Tooling", "Specific settings for NEXUS: Tooling included with the framework.");
 
 #if WITH_EDITOR
 	/** @return true if AssetPath matches ValidatorIgnoredAssets or starts with an entry in ValidatorIgnoredPrefixes. */

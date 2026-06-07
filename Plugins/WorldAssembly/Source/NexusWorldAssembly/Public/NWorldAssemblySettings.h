@@ -36,7 +36,7 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblySettings : public UDeveloperSettings
 		}
 	}
 
-	N_IMPLEMENT_SETTINGS(UNWorldAssemblySettings, "World Assembly", "Settings related to World Assembly.");
+	N_SETTINGS_BASE(UNWorldAssemblySettings, "World Assembly", "Settings related to World Assembly.");
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "General", DisplayName="Voxel Size",

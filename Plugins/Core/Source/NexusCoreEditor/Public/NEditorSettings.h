@@ -20,7 +20,7 @@ class UNEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()
-	N_IMPLEMENT_EDITOR_SETTINGS(UNEditorSettings, "Core", "General settings for the NEXUS: Core plugin.");
+	N_EDITOR_SETTINGS_BASE(UNEditorSettings, "Core", "General settings for the NEXUS: Core plugin.");
 
 #if WITH_EDITORONLY_DATA
 

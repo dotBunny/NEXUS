@@ -14,5 +14,5 @@ class FNGuardianModule final : public IModuleInterface
 {
 public:
 	virtual void StartupModule() override;
-	N_IMPLEMENT_MODULE(FNGuardianModule, "NexusGuardian")
+	N_MODULE_BASE(FNGuardianModule, "NexusGuardian")
 };

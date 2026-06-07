@@ -23,7 +23,7 @@
  *
  * @param Type The underlying scalar type of the range (double, float, int32, ...).
  */
-#define N_IMPLEMENT_RANGE(Type) \
+#define N_RANGE_BASE(Type) \
 	inline Type NextValue() const \
 	{ \
 		return FNRandom::GetDeterministic().RandRange(Minimum, Maximum); \

@@ -31,6 +31,7 @@
 - Reworked `FNEditorInputProcessor` to not compare pointers, instead look at screen position and button presses to determine if the same.
 - Cleaned up `IsPointInsideOrOn` for `FNOrientedBoxPicker` to be less-math.
 - `UNDynamicRefSubsystem::GetCount(NDR_None)` will return `0` instead of `-1`.
+- `UNDynamicRefSubsystem` now holds registered objects as weak references; it no longer keeps a `UObject` alive simply by referencing it, and entries are pruned lazily as objects are destroyed.
 
 ### Fixed
 
@@ -337,7 +338,7 @@
 - `UNCellJunctionComponent` will now draw indicators for the unit size as well as their actual size.
 - The `NCellActor` will rename itself to reflect the map name that it creates data for.
 - The `Is Host` and `? Is Host` Blueprint methods have had their display names changed to `Is Server` and `? Is Server` respectively.
-- `N_IMPLEMENT_SETTINGS` now offers a `GetMutable` non-const accessor, copying `N_IMPLEMENT_EDITOR_SETTINGS`.
+- `N_SETTINGS_BASE` now offers a `GetMutable` non-const accessor, copying `N_EDITOR_SETTINGS_BASE`.
 - Renamed `FNSeedGenerator::SeedFromText` to ` FNSeedGenerator::SeedFromString`.
 - Lowered warning level to `Log` when creating a new `FNActorPool` that already exists in a nested `UNActorPoolSet`.
 

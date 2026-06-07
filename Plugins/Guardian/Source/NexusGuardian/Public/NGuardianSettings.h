@@ -20,7 +20,7 @@ class UNGuardianSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
-	N_IMPLEMENT_SETTINGS(UNGuardianSettings, "Guardian", "Settings related to the Guardian subsystem.")
+	N_SETTINGS_BASE(UNGuardianSettings, "Guardian", "Settings related to the Guardian subsystem.")
 
 public:
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Subsystem", DisplayName="Build Availability", meta=(Bitmask,BitmaskEnum="/Script/NexusCore.ENBuildConfigurationAvailability",ToolTip="Which build configurations the Guardian subsystem is active in (bitmask of ENBuildConfigurationAvailability)."))

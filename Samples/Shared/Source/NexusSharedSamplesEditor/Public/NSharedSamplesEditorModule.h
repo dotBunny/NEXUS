@@ -15,7 +15,7 @@ class FNSharedSamplesEditorModule final : public IModuleInterface
 public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
-	N_IMPLEMENT_MODULE(FNSharedSamplesEditorModule, "NexusSharedSamplesEditor")
+	N_MODULE_BASE(FNSharedSamplesEditorModule, "NexusSharedSamplesEditor")
 	
 private:
 	TArray<TOptional<FPlacementModeID>> PlacementActors;

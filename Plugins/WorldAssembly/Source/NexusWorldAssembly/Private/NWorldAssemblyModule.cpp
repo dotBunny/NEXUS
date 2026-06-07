@@ -3,6 +3,7 @@
 
 #include "NWorldAssemblyModule.h"
 
+#include "NCoreMinimal.h"
 #include "NWorldAssemblyRegistry.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -10,11 +11,12 @@
 void FNWorldAssemblyModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusWorldAssembly")
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNWorldAssemblyModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNWorldAssemblyModule, OnPostEngineInit);
 }
 
 void FNWorldAssemblyModule::ShutdownModule()
 {
+	N_MODULE_REMOVE_POST_ENGINE_INIT()
 	if (PostWorldCleanupHandle.IsValid())
 	{
 		FWorldDelegates::OnPostWorldCleanup.Remove(PostWorldCleanupHandle);

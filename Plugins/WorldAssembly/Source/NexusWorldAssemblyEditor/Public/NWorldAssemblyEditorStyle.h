@@ -15,7 +15,7 @@
  */
 class FNWorldAssemblyEditorStyle
 {
-	N_IMPLEMENT_EDITOR_STYLE_HEADER("NexusWorldAssembly", "NWorldAssemblyEditorStyle")
+	N_EDITOR_STYLE_HEADER("NexusWorldAssembly", "NWorldAssemblyEditorStyle")
 
 public:
 	/** @return Icon for the "edit hull" mode action on the cell-actor toolbar. */

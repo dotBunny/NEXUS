@@ -3,6 +3,7 @@
 
 #include "NSharedSamplesModule.h"
 
+#include "NCoreMinimal.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 

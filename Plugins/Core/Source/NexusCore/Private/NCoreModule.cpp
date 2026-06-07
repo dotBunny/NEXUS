@@ -22,8 +22,14 @@ void FNCoreModule::StartupModule()
 	FNPrimitiveFont::Initialize();
 
 #if WITH_EDITOR	
-	N_IMPLEMENT_MODULE_POST_ENGINE_INIT(FNCoreModule, OnPostEngineInit);
+	N_MODULE_POST_ENGINE_INIT(FNCoreModule, OnPostEngineInit);
 #endif // WITH_EDITOR
+}
+
+void FNCoreModule::ShutdownModule()
+{
+	N_MODULE_REMOVE_POST_ENGINE_INIT()
+	IModuleInterface::ShutdownModule();
 }
 
 IMPLEMENT_MODULE(FNCoreModule, NexusCore)
