@@ -270,8 +270,6 @@ private:
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	int32 Ticket;
-	
-	bool bLogStatusMessages = false;
 
 #if !UE_BUILD_SHIPPING
 	FNReport Report;

@@ -106,7 +106,6 @@ void UNAssemblyOperation::ApplySettings(FNAssemblyOperationSettings& Settings)
 	
 	// Copy so it is detached
 	DisplayName = Settings.DisplayName;
-	bLogStatusMessages = Settings.bLogStatusMessages;
 	
 	Context->SetOperationSettings(Settings);
 }
@@ -123,10 +122,7 @@ void UNAssemblyOperation::SetStatusMessage(FString NewStatusMessage)
 {
 	if (!StatusMessage.Equals(NewStatusMessage))
 	{
-		if (bLogStatusMessages)
-		{
-			UE_LOG(LogNexusWorldAssembly, Log, TEXT("[%s] StatusMessage('%s' to '%s')"), *DisplayName.ToString(), *StatusMessage,  *NewStatusMessage);
-		}
+		UE_LOG(LogNexusWorldAssembly, Log, TEXT("[%s] StatusMessage('%s' to '%s')"), *DisplayName.ToString(), *StatusMessage,  *NewStatusMessage);
 		StatusMessage = NewStatusMessage;
 		OnStatusMessageChanged.Broadcast(StatusMessage);
 	}
