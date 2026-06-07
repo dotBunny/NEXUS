@@ -37,6 +37,8 @@ FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorCl
 
 FNActorPool::~FNActorPool()
 {
+	// The world creates and tears down the pools, so we probably dont need to remove it from tickable.
+	
 	if (IsValid(LinkedActorPoolObject))
 	{
 		LinkedActorPoolObject->Pool = nullptr;

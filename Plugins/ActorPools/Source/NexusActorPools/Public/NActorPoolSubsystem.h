@@ -250,10 +250,10 @@ private:
 	TMap<TSubclassOf<AActor>, FNActorPoolSettings> DefaultSettings;
 
 	/** Cached flag to skip the tickable-pool loop when empty. */
-	bool bHasTickableActorPools;
+	bool bHasTickableActorPools = false;
 
 	/** Cached flag to skip the tickable-spawner loop when empty. */
-	bool bHasTickableSpawners;
+	bool bHasTickableSpawners = false;
 
 	/** Policy used when ReturnActor is called with an Actor unknown to this subsystem. */
 	ENActorPoolUnknownBehavior UnknownBehavior = ENActorPoolUnknownBehavior::Destroy;
