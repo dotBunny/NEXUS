@@ -71,6 +71,8 @@ public:
 	/** Block the calling thread until every stage finishes. */
 	void WaitForTasks();
 	
+	TSharedRef<FNAssemblyTaskGraphContext> GetContext() const { return TaskGraphContextPtr.ToSharedRef(); }
+	
 	N_ASSEMBLY_ANALYTICS_SHARED_PTR
 	
 private:

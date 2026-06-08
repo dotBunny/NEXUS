@@ -58,12 +58,20 @@ public:
 	/** Append additional context tags to this context's accumulated set. */
 	void AddContextTags(const FGameplayTagContainer& NewContextTags)
 	{
+		FScopeLock Lock(&ContextTagMutex);
 		ContextTags.AppendTags(NewContextTags);
 	}
 	
 	void AddTagCounter(const FNGameplayTagCounter& NewTagCounter)
 	{
+		FScopeLock Lock(&TagCounterMutex);
 		TagCounter.Combine(NewTagCounter);
+	}
+	
+	void SetOrganCellCount(const FGuid& OrganIdentifier, const int32 NewCount)
+	{
+		FScopeLock Lock(&OrganCellMutex);
+		OrganCellCount.FindOrAdd(OrganIdentifier, NewCount);
 	}
 
 	/**
@@ -207,6 +215,8 @@ public:
 	FGameplayTagContainer ContextTags;
 	
 	FNGameplayTagCounter TagCounter;
+	
+	TMap<FGuid, int> OrganCellCount;
 
 	/**
 	 * @param OutputWorld World to target when spawning proxies.
@@ -220,7 +230,10 @@ public:
 	FString ReportFilePath;
 
 private:
+	FCriticalSection ContextTagMutex;
+	FCriticalSection TagCounterMutex;
 	FCriticalSection TakeGraphMutex;
+	FCriticalSection OrganCellMutex;
 
 	/** Guards PendingDisplayMessage against concurrent writes from task threads. */
 	FCriticalSection DisplayMessageMutex;

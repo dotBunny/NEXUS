@@ -51,6 +51,16 @@ struct FNAssemblyOperationResult
 	float Duration = 0.0f;
 	/** Number of cells created during the operation. */
 	int CreatedCells;
+	
+	void Reset()
+	{
+		bSuccess = false;
+		bWarning = false;
+		Title = FText::GetEmpty();
+		Message = FText::GetEmpty();
+		Duration = 0.f;
+		CreatedCells = 0;
+	}
 };
 
 /** Broadcast when the display message shown in UI changes. */
@@ -219,11 +229,13 @@ public:
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
 	int32 GetTicket() const { return Ticket; }
 	
-	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
-	FNAssemblyOperationResult GetResult() const;
+	void UpdateCachedResult();
 
 	/** Requests cancellation of the in-flight build. */
 	void Cancel();
+	
+	/** @return A snapshot of the operation's outcome (success/warning flags, title, message, duration, and created-cell count). */
+	const FNAssemblyOperationResult& GetResult() const { return Result; }
 	
 protected:
 	void Tick();
@@ -274,4 +286,6 @@ private:
 #if !UE_BUILD_SHIPPING
 	FNReport Report;
 #endif // !UE_BUILD_SHIPPING
+	
+	FNAssemblyOperationResult Result;
 };

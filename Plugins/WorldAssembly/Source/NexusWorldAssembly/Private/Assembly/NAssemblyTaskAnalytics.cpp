@@ -3,8 +3,6 @@
 
 #include "Assembly/NAssemblyTaskAnalytics.h"
 
-#include "Developer/NReportListBlock.h"
-
 void FNAssemblyTaskAnalytics::TaskGraphCreationStart()
 {
 	TaskGraphCreationTimer.Start();

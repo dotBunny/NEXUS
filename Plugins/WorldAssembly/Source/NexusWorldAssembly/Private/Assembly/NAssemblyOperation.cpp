@@ -128,35 +128,107 @@ void UNAssemblyOperation::SetStatusMessage(FString NewStatusMessage)
 	}
 }
 
-FNAssemblyOperationResult UNAssemblyOperation::GetResult() const
+UE_DISABLE_OPTIMIZATION
+
+void UNAssemblyOperation::UpdateCachedResult()
 {
-	FNAssemblyOperationResult Result;
+	Result.Reset();
 	
 	// Early out cause it's still running
-	if (bIsRunning == true)
+	if (bIsRunning)
 	{
 		Result.bSuccess = false;
 		Result.bWarning = true;
 		Result.Title = FText::FromString("Operation In-Flight");
 		Result.Message = FText::FromString("The Assembly Operation has not finished running.");
-		return MoveTemp(Result);
+		return;
 	}
 	
 	Result.Title = FText::FromString("Assembly Operation Finished");
 	
-	// Fill with analytics
-#if !UE_BUILD_SHIPPING
-	Result.CreatedCells = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetSpawnedCellProxiesCount();
-	Result.Duration = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetTotalDuration();
-	Result.bSuccess = Result.CreatedCells > 0; // not great but it's a start
-	Result.Message = FText::FromString(FString::Printf(TEXT("%f ms / %i Cells."), Result.Duration, Result.CreatedCells));
-#else
-	Result.bSuccess = true;
-#endif
+	// Build our state map
+	TMap<FGuid, bool> OrganResults;
+	int32 CreatedCells = 0;
+	int32 AcceptableFails = 0;
 	
+	for (int i = 0; i < Context->InputComponents.Num(); i++)
+	{
+		UNOrganComponent* Organ = Context->InputComponents[i];
+		FGuid OrganIdentifier = Organ->Identifier;
+		if (Organ == nullptr) continue;
+		
+		// Add default fail
+		OrganResults.Add(OrganIdentifier, false);
+		const bool bIsRequired = Organ->bRequired;
+		
+		// Check for cell counts
+		const TSharedRef<FNAssemblyTaskGraphContext> GraphContext = TaskGraph->GetContext();
+		if (GraphContext->OrganCellCount.Contains(OrganIdentifier))
+		{
+			int32 CellCountGenerated = GraphContext->OrganCellCount[OrganIdentifier];
+			CreatedCells += CellCountGenerated;
+			
+			if (Organ->MinimumCellCount > 0 && CellCountGenerated < Organ->MinimumCellCount)
+			{
+				if (!bIsRequired)
+				{
+					AcceptableFails++;
+					OrganResults[OrganIdentifier] = true;
+				}
+				continue;
+			}
+			
+			if (Organ->MaximumCellCount > 0 && CellCountGenerated > Organ->MaximumCellCount)
+			{
+				if (!bIsRequired)
+				{
+					AcceptableFails++;
+					OrganResults[OrganIdentifier] = true;
+				}
+				continue;
+			}
+			
+			// Made it through the gauntlet, it is a good assembly
+			OrganResults[OrganIdentifier] = true;
+		}
+		else
+		{
+			// Not in the graph 
+			if (!bIsRequired)
+			{
+				AcceptableFails++;
+				OrganResults[OrganIdentifier] = true;
+			}
 
-	return MoveTemp(Result);
+		}
+	}
+	
+	
+	// Give some number
+	Result.CreatedCells = CreatedCells;
+	
+	// Iterate for any fails
+	bool bAssemblySuccess = true;
+	for (auto Itr = OrganResults.CreateConstIterator(); Itr; ++Itr)
+	{
+		if (!Itr.Value())
+		{
+			bAssemblySuccess = false;
+			break;
+		}
+	}
+	Result.bSuccess = bAssemblySuccess;
+	
+#if !UE_BUILD_SHIPPING
+	Result.Duration = TaskGraph->N_ASSEMBLY_ANALYTICS_MEMBER_PTR->GetTotalDuration();
+	Result.Message = FText::FromString(FString::Printf(TEXT("%f ms / %i Cells / %i Skips"), Result.Duration, CreatedCells, AcceptableFails));
+#else
+	Result.Message = FText::FromString(FString::Printf(TEXT("%i Cells / %i Skips"), CreatedCells, AcceptableFails));
+#endif
 }
+
+UE_ENABLE_OPTIMIZATION
+
 
 void UNAssemblyOperation::Cancel()
 {
@@ -208,6 +280,7 @@ void UNAssemblyOperation::DrainStatusChannels()
 void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
 	bIsRunning = false;
+	UpdateCachedResult();
 	
 	// Add one last update to subscribers for task updates
 	const FIntVector2 Status = TaskGraph->GetTaskStatus();
@@ -222,7 +295,7 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 
 	// Flush any final channel states (e.g. close-to-100%) the tasks published before the poll loop stopped.
 	DrainStatusChannels();
-
+	
 	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{
 		Owner->OnOperationFinished(this, TaskGraphContext);
@@ -274,6 +347,8 @@ void UNAssemblyOperation::StartBuild(INAssemblyOperationOwner* Caller, UObject* 
 	
 	bIsRunning = true;
 	TaskGraph->UnlockTasks();
+	
+	UpdateCachedResult();
 	
 }
 

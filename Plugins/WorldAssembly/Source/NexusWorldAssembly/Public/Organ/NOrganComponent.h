@@ -43,18 +43,22 @@ public:
 	/** When false, the organ is skipped entirely by the World Assembly pipeline. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
 	bool bActivated = true;
+	
+	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 101))
+	bool bRequired = true;
 
 	/** When true, the organ is not clipped to its owning volume — cells may extend past the volume bounds. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component")
 	bool bUnbounded = false;
 
-	/** Lower bound on the cell count placed in this organ; -1 means no minimum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
-	int32 MinimumCellCount = -1;
+	/** Lower bound on the cell count placed in this organ; 0 means no minimum. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=0))
+	int32 MinimumCellCount = 0;
 
-	/** Upper bound on the cell count placed in this organ; -1 means no maximum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=-1))
-	int32 MaximumCellCount = -1;
+	/** Upper bound on the cell count placed in this organ; 0 means no maximum. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=0))
+	int32 MaximumCellCount = 0;
 
 	/** Deterministic seed mixed into the organ's generation decisions. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))

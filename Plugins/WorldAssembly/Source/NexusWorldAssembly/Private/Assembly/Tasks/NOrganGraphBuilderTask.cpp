@@ -185,6 +185,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			FString::Printf(TEXT("Built (%i cells)"), OrganContextPtr->CellGraph->GetCellNodeCount()), 1.f);
 		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 
+		// Report findings for later
+		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), OrganContextPtr->CellGraph->GetCellNodeCount());
+		
 		// Hand off only this organ's contribution. The working TagCounter was seeded with BaseTagCounter so
 		// constraints could gate against absolute counts, but the base already lives in the world/task-graph
 		// counter the pass Combines into; differencing it out leaves just this organ's delta to avoid
@@ -193,6 +196,20 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			MoveTemp(OrganContextPtr->CellGraph),
 			OrganContextPtr->ContextTags,
 			OrganContextPtr->TagCounter.GetDifference(OrganContextPtr->BaseTagCounter));
+	}
+	else
+	{
+		// Ensure we close the channel
+		if (OrganContextPtr->IsRequired())
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Unsuccessful"), 0.f);
+		}
+		else
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Unsuccessful (Not Required)"), 1.f);
+		}
+		TaskGraphContextPtr->SetOrganCellCount(OrganContextPtr->GetIdentifier(), 0);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 	}
 
 	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)

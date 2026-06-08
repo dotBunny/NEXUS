@@ -67,6 +67,8 @@ class FNVirtualOrganContext
 
 public:
 	
+	FGuid Identifier;
+	
 	/** Allowed penetration, in world units, between adjacent cell hulls before they are treated as overlapping. */
 	float CellHullPenetration = 10.f;
 
@@ -78,11 +80,14 @@ public:
 	/** World-space size of a single voxel, cached from UNWorldAssemblySettings so placed cells re-voxelize without re-reading settings. */
 	FVector VoxelSize = FVector(100.f, 100.f, 100.f);
 
-	/** Lower bound on cell count; -1 disables the check. */
-	int32 MinimumCellCount = -1;
+	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
+	bool bRequired = true;
+	
+	/** Lower bound on cell count; 0 disables the check. */
+	int32 MinimumCellCount = 0;
 
-	/** Upper bound on cell count; -1 disables the check. */
-	int32 MaximumCellCount = -1;
+	/** Upper bound on cell count; 0 disables the check. */
+	int32 MaximumCellCount = 0;
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
@@ -145,9 +150,13 @@ public:
 
 	/** @return Human-readable task name for logs/debug. */
 	const FString& GetName() { return Name; };
+	
+	const FGuid& GetIdentifier() const { return Identifier; };
 
 	/** @return true once the builder has produced a valid graph (cell count within bounds, etc.). */
 	bool IsSuccessful() const { return bSuccessful; };
+	
+	bool IsRequired() const { return bRequired; };
 
 	/** @return true if the context is set up well enough to attempt a build. */
 	bool IsValid() const { return bIsValid; };
