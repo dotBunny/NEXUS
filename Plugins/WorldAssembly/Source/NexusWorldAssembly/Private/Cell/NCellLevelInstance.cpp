@@ -25,7 +25,7 @@ ANCellLevelInstance::ANCellLevelInstance()
 		}
 	}
 	
-	if (UNWorldAssemblySettings::Get()->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantLevelInstances)
+	if (Settings->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantLevelInstances)
 	{
 		bAlwaysRelevant = true;
 	}
