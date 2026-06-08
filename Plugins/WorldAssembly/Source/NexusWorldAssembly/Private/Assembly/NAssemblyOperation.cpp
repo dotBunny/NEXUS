@@ -128,8 +128,6 @@ void UNAssemblyOperation::SetStatusMessage(FString NewStatusMessage)
 	}
 }
 
-UE_DISABLE_OPTIMIZATION
-
 void UNAssemblyOperation::UpdateCachedResult()
 {
 	Result.Reset();
@@ -226,9 +224,6 @@ void UNAssemblyOperation::UpdateCachedResult()
 	Result.Message = FText::FromString(FString::Printf(TEXT("%i Cells / %i Skips"), CreatedCells, AcceptableFails));
 #endif
 }
-
-UE_ENABLE_OPTIMIZATION
-
 
 void UNAssemblyOperation::Cancel()
 {
