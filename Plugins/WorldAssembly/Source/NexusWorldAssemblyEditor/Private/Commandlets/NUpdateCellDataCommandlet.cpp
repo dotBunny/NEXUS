@@ -26,14 +26,19 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 	TArray<FString> Switches;
 	TMap<FString, FString> ParamMap;
 	ParseCommandLine(*Params, Tokens, Switches, ParamMap);
-	
-	bool bShouldErrorOnChanges = Switches.Contains(TEXT("ErrorOnChanges"));
-	bool bShouldCommitChanges = Switches.Contains(TEXT("CommitChanges"));
-	
+
+	return Execute(
+		Switches.Contains(TEXT("ErrorOnChanges")), 
+			Switches.Contains(TEXT("CommitChanges")));
+}
+
+int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShouldCommitChanges)
+{
 	TArray<FString> ChangedAssetPaths;
 	TArray<FAssetData> CellAssetData = FNWorldAssemblyEditorUtils::GetAllCellDataAssetData();
 	UEditorAssetSubsystem* EditorAssetSubsystem = GEditor->GetEditorSubsystem<UEditorAssetSubsystem>();
 	TArray<FString> CommitPaths;
+	int32 ReturnCode = 0;
 	
 	// Process Cell Assets
 	for (auto AssetData : CellAssetData)
@@ -65,6 +70,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 					if (bShouldErrorOnChanges)
 					{
 						UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("NCell(%s) is not up-to-date @ %s"),*Cell->GetName(), *FullPath);
+						ReturnCode = 1;
 					}
 					else
 					{
@@ -75,6 +81,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 			else
 			{
 				UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("Failed to load World(%s)."), *WorldPath)
+				ReturnCode = 1;
 			}
 			LoadedAsset->MarkAsGarbage();
 		}
@@ -105,7 +112,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 		if (Result == ECommandResult::Succeeded)
 		{
 			UE_LOG(LogNexusWorldAssemblyEditor, Log, TEXT("Successfully submitted changes to version control!"));
-			return 0;
+			return ReturnCode;
 		}
 		else if (Result == ECommandResult::Cancelled)
 		{
@@ -116,7 +123,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 		UE_LOG(LogNexusWorldAssemblyEditor, Error, TEXT("Failed to submit changes to version control. Check log for details."));
 		return 1;
 	}
-
-	return Super::Main(Params);
 	
+	return ReturnCode;
 }
+

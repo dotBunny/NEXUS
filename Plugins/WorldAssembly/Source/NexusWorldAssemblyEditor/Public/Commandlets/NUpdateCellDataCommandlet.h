@@ -26,10 +26,21 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNUpdateCellDataCommandlet : public UCommandl
 public:
 	UNUpdateCellDataCommandlet();
 
+	//~UCommandlet
 	/**
-	 * Entry point invoked by the commandlet host.
-	 * @param Params Raw command-line string; parsed for the -ErrorOnly and -CommitChanges switches.
-	 * @return 0 on success, 1 if a source control commit was requested but could not be completed.
+	 * Commandlet entry point; parses the command line and runs the cell data update.
+	 * @param Params Raw command-line string. Recognized switches: -ErrorOnChanges, -CommitChanges.
+	 * @return 0 on success; non-zero if any cell was out-of-date (with -ErrorOnChanges), a world failed to load, or a commit failed.
 	 */
 	virtual int32 Main(const FString& Params) override;
+	//End UCommandlet
+
+	/**
+	 * Re-saves every NCell asset so its cached data matches the current state of its referenced world.
+	 * @param bShouldErrorOnChanges When true, out-of-date cells are logged as errors and the return code is set to 1 instead of being updated silently (validation/CI gating).
+	 * @param bShouldCommitChanges When true, updated cell assets are submitted to the project's configured source control provider.
+	 * @return 0 on success; 1 if a cell was out-of-date under bShouldErrorOnChanges, a world failed to load, or the source control commit failed.
+	 * @remark Editor/commandlet use only; loads and saves maps, so it must run on the game thread.
+	 */
+	static int32 Execute(bool bShouldErrorOnChanges = true, bool bShouldCommitChanges = false);
 };

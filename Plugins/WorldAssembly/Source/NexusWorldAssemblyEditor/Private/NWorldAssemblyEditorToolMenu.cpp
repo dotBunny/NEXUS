@@ -3,6 +3,7 @@
 
 #include "NWorldAssemblyEditorToolMenu.h"
 
+#include "FileHelpers.h"
 #include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
 #include "Widgets/Layout/SBox.h"
@@ -15,6 +16,7 @@
 #include "NWorldAssemblyEditorModule.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
+#include "Commandlets/NUpdateCellDataCommandlet.h"
 #include "Macros/NEditorToolsMacros.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
@@ -354,6 +356,23 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.SplitEdge"));
 		NexusSection.AddEntry(HullSplitEdgeEntry);
 	}
+
+	// Tools/Commandlets Menu
+	auto UpdateCellDataMenuEntry = FNMenuEntry();
+	UpdateCellDataMenuEntry.Section = TEXT("Commandlets");
+	UpdateCellDataMenuEntry.Identifier = "UpdateCellData";
+	UpdateCellDataMenuEntry.DisplayName = NSLOCTEXT("NexusWorldAssemblyEditor","UpdateCellData", "Update Cell Data");
+	UpdateCellDataMenuEntry.Tooltip = NSLOCTEXT("NexusWorldAssemblyEditor","UpdateCellData_Tooltip", "Finds and opens all levels associated to NCells, resaving their associated NCell data, correcting any drift."),
+	UpdateCellDataMenuEntry.Icon = FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCell");
+	UpdateCellDataMenuEntry.Execute = FExecuteAction::CreateLambda([]()
+	{
+		const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+		const FString CurrentWorldPath = CurrentWorld->GetPackage()->GetName();
+		UNUpdateCellDataCommandlet::Execute();
+		FEditorFileUtils::LoadMap(CurrentWorldPath);
+	});
+	UpdateCellDataMenuEntry.CanExecute = FCanExecuteAction::CreateStatic(FNEditorUtils::IsNotPlayInEditor);
+	FNToolsMenu::AddMenuEntry(UpdateCellDataMenuEntry);
 }
 
 void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
@@ -377,6 +396,9 @@ void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_ToggleCollisionVisualizer");
 		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_IgnoreSelectedActorsToggle");
 	}
+
+	// Tools/Commandlets Menu
+	FNToolsMenu::RemoveMenuEntry("UpdateCellData");
 }
 
 bool FNWorldAssemblyEditorToolMenu::ShowCellEditMode()
