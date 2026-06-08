@@ -21,7 +21,7 @@ ANCellLevelInstance::ANCellLevelInstance()
 		const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
 		if (NetCullDistanceSquared < SquaredNearbyRange)
 		{
-			NetCullDistanceSquared = SquaredNearbyRange;
+			SetNetCullDistanceSquared(SquaredNearbyRange);
 		}
 	}
 	
