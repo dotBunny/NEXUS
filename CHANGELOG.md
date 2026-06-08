@@ -6,6 +6,10 @@
 
 - `UNWorldAssemblySubsystem::IsReady()` now  `UNWorldAssemblySubsystem::IsReady(bool bWaitOnStreaming = true)` defaulting to waiting for level streaming to complete.
 
+### Fixed
+
+- Crash when displaying collision visualizer twice in a level.
+
 ## [0.3.1] - 2026-06-07
 
 ### Added

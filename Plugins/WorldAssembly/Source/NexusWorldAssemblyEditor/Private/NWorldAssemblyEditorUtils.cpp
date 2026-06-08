@@ -44,7 +44,7 @@ ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(U
 	if (MergedMesh.Loops.Num() == 0 || VisualizerMaterial == nullptr) return nullptr;
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Name = FName("NWorldCollisionVisualizer");
+	SpawnParams.Name = MakeUniqueObjectName(World, ANDebugActor::StaticClass(), FName("NWorldCollisionVisualizer"));
 	FString ActorLabel = SpawnParams.Name.ToString();
 #if WITH_EDITOR
 	SpawnParams.InitialActorLabel = ActorLabel;
