@@ -280,7 +280,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 
 			// Create our graph
 			OrganContextPtr->CellGraph = MakeUnique<FNAssemblyGraph>(
-				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbounded);
+				BoneNode, OrganContextPtr->Origin, OrganContextPtr->Bounds, OrganContextPtr->bUnbound);
 
 
 			// Create our first cell node, attaching it to the bone node
@@ -553,7 +553,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		
 		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
 		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
-		if (!OrganContextPtr->bUnbounded)
+		if (!OrganContextPtr->bUnbound)
 		{
 			const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
 			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))

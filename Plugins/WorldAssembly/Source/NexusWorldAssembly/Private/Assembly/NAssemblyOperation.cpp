@@ -166,6 +166,16 @@ void UNAssemblyOperation::UpdateCachedResult()
 			int32 CellCountGenerated = GraphContext->OrganCellCount[OrganIdentifier];
 			CreatedCells += CellCountGenerated;
 			
+			if (CellCountGenerated == 0)
+			{
+				if (!bIsRequired)
+				{
+					AcceptableFails++;
+					OrganResults[OrganIdentifier] = true;
+				}
+				continue;
+			}
+			
 			if (Organ->MinimumCellCount > 0 && CellCountGenerated < Organ->MinimumCellCount)
 			{
 				if (!bIsRequired)

@@ -63,7 +63,7 @@ void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const
 				Data.Indices[i+2]
 			);
 		}
-		if (bUnbounded)
+		if (bUnbound)
 		{
 			MeshBuilder.Draw(PDI, Volume->GetBrushComponent()->GetRenderMatrix(), 
 			GEngine->ConstraintLimitMaterial->GetRenderProxy(), SDPG_World);
@@ -107,5 +107,4 @@ void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& Out
 		if (LoadedTissue == nullptr) continue;
 		UNTissue::BuildTissueMap(LoadedTissue, OutMap, OutTagGroups, ReferencedTissues);
 	}
-	
 }

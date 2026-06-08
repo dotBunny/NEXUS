@@ -91,9 +91,13 @@ public:
 
 	/** Number of retries this organ is allowed before giving up. */
 	int32 MaximumRetryCount = 0;
+	
+	FGameplayTagContainer RequiredContextTags;
+	
+	TArray<FNGameplayTagCounterConstraint> RequiredTagCounters;
 
 	/** When true, the graph may extend past Bounds. */
-	bool bUnbounded = false;
+	bool bUnbound = false;
 
 	/** Spatial bounds the graph must stay within unless bUnbounded. */
 	FBoxSphereBounds Bounds;

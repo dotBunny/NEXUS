@@ -69,7 +69,7 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	TArray<UNOrganComponent*> LevelComponents = FNWorldAssemblyUtils::GetOrganComponentsFromLevel(Component->GetComponentLevel());
 
 	// We've got ourselves a volume and it has dimensions
-	if (Component->IsVolumeBased() && !Component->bUnbounded)
+	if (Component->IsVolumeBased() && !Component->bUnbound)
 	{
 		// Assign Bounds
 		const AVolume* ComponentVolume = Cast<AVolume>(Component->GetOwner());
@@ -160,7 +160,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 		Pair.Value.AssemblyDirectionTolerance = Settings->AssemblyDirectionTolerance;
 		Pair.Value.VoxelSize = Settings->VoxelSize;
 		
-		if (Pair.Key->bUnbounded)
+		if (Pair.Key->bUnbound)
 		{
 			// These will get generated last
 			UnboundComponents.AddUnique(Pair.Key);
@@ -175,7 +175,7 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	for (auto& Pair : OrganData)
 	{
 		// Again dont look at Unbounded here
-		if (Pair.Key->bUnbounded) continue;
+		if (Pair.Key->bUnbound) continue;
 		
 		// Handle "easy" work parallelization classification
 		if (FNWorldOrganData& ComponentContext = Pair.Value; 

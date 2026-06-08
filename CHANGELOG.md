@@ -2,6 +2,11 @@
 
 ## [0.3.2] - 2026-07-13
 
+
+### Added
+
+- `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
+
 ### Changed
 
 - `UNWorldAssemblySubsystem::IsReady()` now  `UNWorldAssemblySubsystem::IsReady(bool bWaitOnStreaming = true)` defaulting to waiting for level streaming to complete.

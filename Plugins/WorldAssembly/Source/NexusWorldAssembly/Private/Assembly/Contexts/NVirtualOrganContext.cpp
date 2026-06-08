@@ -42,7 +42,9 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 	VoxelSize = WorldOrganContext->VoxelSize;
 	
 	// Keep a local copy of this here
-	bUnbounded = WorldOrganContext->SourceComponent->bUnbounded;
+	bUnbound = WorldOrganContext->SourceComponent->bUnbound;
+	RequiredTagCounters = WorldOrganContext->SourceComponent->TagCounters;
+	RequiredContextTags = WorldOrganContext->SourceComponent->ContextTags;
 	
 	// We are going to establish some base understanding of the space, specifically its world origin as well as the bounds.
 	Bounds = WorldOrganContext->Bounds;
@@ -256,6 +258,30 @@ bool FNVirtualOrganContext::CheckGraph()
 			TEXT("CheckGraph FAILED: CellNodeCount(%i) > MaximumCellCount(%i)"), CellNodeCount, MaximumCellCount))
 		return false;
 	}
+	
+	// Enforce TagCounter Constraints
+	if (RequiredTagCounters.Num() > 0)
+	{
+		for (int i = 0; i < RequiredTagCounters.Num(); i++)
+		{
+			if (!RequiredTagCounters[i].DoesPassComparison(TagCounter))
+			{
+				
+				N_VIRTUAL_ORGAN_MESSAGE(TEXT("CheckGraph FAILED: RequiredTagCounters were not met"));
+				return false;
+			}
+		}
+	}
+	
+	// Enforce ContextTag Requirements
+	if (!RequiredContextTags.IsEmpty() && !ContextTags.HasAllExact(RequiredContextTags))
+	{
+		N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+			TEXT("CheckGraph FAILED: RequiredContextTags(%s) not met (%s)"), 
+			*RequiredContextTags.ToStringSimple(), *ContextTags.ToStringSimple()))
+		return false;
+	}
+	
 	
 	// We need to check that each of the RequiredAny groups are met
 	if (!CellInputDataSummary.GroupTags.RequiredAnyTags.IsEmpty() && 

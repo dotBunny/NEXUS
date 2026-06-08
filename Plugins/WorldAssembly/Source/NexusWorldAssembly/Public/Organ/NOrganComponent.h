@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Collections/NGameplayTagCounterConstraint.h"
 #include "Types/NPositionRotation.h"
 #include "NOrganComponent.generated.h"
 
@@ -41,36 +42,42 @@ class NEXUSWORLDASSEMBLY_API UNOrganComponent : public UActorComponent
 
 public:
 	/** When false, the organ is skipped entirely by the World Assembly pipeline. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 100))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bActivated = true;
 	
 	/** When false, the organ can produce no results and still be considered a successful assembly operation. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 101))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
 	bool bRequired = true;
 
 	/** When true, the organ is not clipped to its owning volume — cells may extend past the volume bounds. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component")
-	bool bUnbounded = false;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Inputs")
+	bool bUnbound = false;
 
 	/** Lower bound on the cell count placed in this organ; 0 means no minimum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=0))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
 	int32 MinimumCellCount = 0;
 
 	/** Upper bound on the cell count placed in this organ; 0 means no maximum. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta=(ClampMin=0))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
 	int32 MaximumCellCount = 0;
-
-	/** Deterministic seed mixed into the organ's generation decisions. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 600))
-	int32 Seed = -1;
-
-	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component", meta = (DisplayPriority = 200))
-	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
+	FGameplayTagContainer ContextTags;
+	
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
+	TArray<FNGameplayTagCounterConstraint> TagCounters;
 
 	/** Tissues (and transitively, cells) the organ may draw from during generation. */
 	UPROPERTY(EditAnywhere, Category = "Organ Component")
 	TArray<TSoftObjectPtr<UNTissue>> Tissues;
+	
+	/** Controls when the organ is allowed to generate (on-demand, begin-play). */
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Organ Component|Operation", meta = (DisplayPriority = 200))
+	ENOrganGenerationTrigger GenerationTrigger = ENOrganGenerationTrigger::OnDemand;
+	
+	/** Deterministic seed mixed into the organ's generation decisions. */
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Operation")
+	int32 Seed = -1;
 
 	/** @return true if the owning actor is a volume-derived actor. */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|World Assembly")
@@ -123,7 +130,7 @@ public:
 	}
 
 	/** Stable unique identifier for this organ, used to keep generation deterministic across runs. */
-	UPROPERTY(VisibleAnywhere, Category = "Organ Component")
+	UPROPERTY(VisibleAnywhere, Category = "Organ Component|Operation")
 	FGuid Identifier = FGuid::NewGuid();
 
 	//~UActorComponent
