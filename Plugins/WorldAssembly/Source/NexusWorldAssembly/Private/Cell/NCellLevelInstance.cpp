@@ -29,9 +29,6 @@ ANCellLevelInstance::ANCellLevelInstance()
 	{
 		bAlwaysRelevant = true;
 	}
-	
-	
-
 }
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
