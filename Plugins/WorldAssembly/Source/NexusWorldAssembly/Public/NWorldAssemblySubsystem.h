@@ -66,6 +66,9 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady();
 	
+	UFUNCTION(BlueprintCallable, DisplayName="Is Streaming?", Category = "NEXUS|WorldAssembly")
+	bool IsStreaming() const;
+	
 	/**
 	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.
 	 *

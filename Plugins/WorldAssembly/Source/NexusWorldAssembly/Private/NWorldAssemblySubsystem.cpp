@@ -143,6 +143,30 @@ bool UNWorldAssemblySubsystem::IsReady()
 	return LocalRelay->IsReady();
 }
 
+bool UNWorldAssemblySubsystem::IsStreaming() const
+{
+	const UWorld* World = GetWorld();
+	if (!World) return false;
+	
+	const TArray<ULevelStreaming*>& StreamingLevels = World->GetStreamingLevels();
+	for (ULevelStreaming* Level : StreamingLevels)
+	{
+		if (Level)
+		{
+			if (Level->IsLevelLoaded() && !Level->IsLevelVisible() && Level->ShouldBeVisible())
+			{
+				return true; 
+			}
+			
+			if (Level->HasLoadRequestPending())
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
 {
 	TrackedActorsForCleanup.AddUnique(Actor);
