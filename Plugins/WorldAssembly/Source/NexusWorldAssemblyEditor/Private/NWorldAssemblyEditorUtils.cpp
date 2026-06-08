@@ -18,12 +18,11 @@
 #include "NWorldCollisionCache.h"
 #include "Selection.h"
 #include "Engine/Level.h"
-#include "Assembly/Contexts/NVirtualWorldContext.h"
-#include "Assembly/Tasks/NCreateVirtualWorldTask.h"
+
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "AssetRegistry/IAssetRegistry.h"
 #include "Macros/NFlagsMacros.h"
 #include "Organ/NOrganVolume.h"
-#include "Types/NRawMeshFactory.h"
-#include "Types/NRawMeshUtils.h"
 
 ANDebugActor* FNWorldAssemblyEditorUtils::RefreshWorldCollisionVisualizerActor(UWorld* World, const TArray<FBoxSphereBounds>& Bounds,
 	ANDebugActor* ExistingActor, TArray<AActor*>& OutSourceActors)
@@ -372,4 +371,20 @@ bool FNWorldAssemblyEditorUtils::CanGenerateAllOrgans()
 		return true;
 	}
 	return false;
+}
+
+TArray<FAssetData> FNWorldAssemblyEditorUtils::GetAllCellDataAssetData()
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+	AssetRegistry.SearchAllAssets(true);
+
+	
+	FARFilter Filter;
+	Filter.ClassPaths.Add(UNCell::StaticClass()->GetClassPathName());
+	Filter.bRecursiveClasses = true;
+	
+	TArray<FAssetData> FoundAssets;
+	AssetRegistry.GetAssets(Filter, FoundAssets);
+	return MoveTemp(FoundAssets);
 }

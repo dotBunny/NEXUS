@@ -22,6 +22,7 @@ namespace UnrealBuildTool.Rules
 			PrivateDependencyModuleNames.AddRange(
 				[
 					"AssetDefinition",
+					"AssetRegistry",
 					"AssetTools",
 					"Chaos",
 					"ContentBrowser",

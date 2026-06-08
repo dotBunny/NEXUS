@@ -31,6 +31,12 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
 
+	/**
+	 * Returns the cell's stored schema version.
+	 * @return The version captured when the data was last written; compare against the current schema to detect stale data.
+	 */
+	int32 GetVersion() const { return Version; }
+	
 private:
 	/** Schema version stored alongside the asset so older data can be upgraded after reloads. */
 	UPROPERTY(VisibleAnywhere)

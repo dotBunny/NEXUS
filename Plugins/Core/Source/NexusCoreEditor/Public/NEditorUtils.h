@@ -232,4 +232,12 @@ public:
 
 	/** Deletes the contents of the project's Saved/Logs folder. */
 	static void CleanLogsFolder();
+	
+	/**
+	 * Resolves the absolute path to the package file backing Asset on disk.
+	 * @param Asset Asset whose owning package to locate; may be null.
+	 * @return The full, absolute path to the package file, or an empty string if Asset is null or no file exists.
+	 */
+	static FString GetAssetPathOnDisk(const UObject* Asset);
+	
 };

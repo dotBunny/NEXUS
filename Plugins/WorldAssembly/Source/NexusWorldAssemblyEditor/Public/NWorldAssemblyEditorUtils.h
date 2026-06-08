@@ -140,4 +140,7 @@ public:
 
 	/** @return true if every organ in the current level can be generated. */
 	static bool CanGenerateAllOrgans();
+	
+	
+	static TArray<FAssetData> GetAllCellDataAssetData();
 };

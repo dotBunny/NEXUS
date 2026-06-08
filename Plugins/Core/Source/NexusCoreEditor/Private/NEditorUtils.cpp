@@ -247,6 +247,23 @@ void FNEditorUtils::CleanLogsFolder()
 	}
 }
 
+FString FNEditorUtils::GetAssetPathOnDisk(const UObject* Asset)
+{
+	if (!Asset)
+	{
+		return FString();
+	}
+
+	FString PackageName = Asset->GetOutermost()->GetName();
+	FString RelativePackagePath;
+	if (FPackageName::DoesPackageExist(PackageName, &RelativePackagePath))
+	{
+		return FPaths::ConvertRelativePathToFull(RelativePackagePath);
+	}
+
+	return FString();
+}
+
 void FNEditorUtils::UpdateWorkspaceItem(const FName& WidgetIdentifier, const FText& Label, const FSlateIcon& Icon)
 {
 	IBlutilityModule* BlutilityModule = FModuleManager::GetModulePtr<IBlutilityModule>("Blutility");
