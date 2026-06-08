@@ -116,7 +116,7 @@ public:
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 
 protected:
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, ReplicatedUsing=OnRep_AssemblyData)
 	FNCellAssemblyData AssemblyData;
 	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
@@ -124,6 +124,9 @@ protected:
 	
 	UFUNCTION()
 	void OnRep_JunctionDetails();
+	
+	UFUNCTION()
+	void OnRep_AssemblyData();
 	
 	/** Take the flat JunctionDetails array and produce the JunctionData instance-keyed map. **/
 	void FillJunctionData();

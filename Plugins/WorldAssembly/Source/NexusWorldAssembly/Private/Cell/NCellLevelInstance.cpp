@@ -57,6 +57,12 @@ void ANCellLevelInstance::OnRep_JunctionDetails()
 	FillJunctionData();
 }
 
+void ANCellLevelInstance::OnRep_AssemblyData()
+{
+	// This ensures that a cell gets registered on the clients
+	FNWorldAssemblyRegistry::RegisterCellLevelInstance(this);
+}
+
 void ANCellLevelInstance::FillJunctionData()
 {
 	JunctionData.Empty();
