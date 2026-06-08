@@ -59,15 +59,13 @@ public:
 	ANWorldAssemblyRelay* GetLocalRelay() const { return LocalRelay; }
 
 	/**
-	 * @return true when the local procgen view is settled relative to the server.
+	 * @param bWaitOnStreaming When true, also report not-ready while any level streaming is still in flight (see FNWorldUtils::IsStreaming). Pass false to ignore streaming and gate purely on operation/relay state.
+	 * @return true when the local WorldAssembly view is settled relative to the server.
 	 * @remark Server path: no operations are currently in flight. Client path: LocalRelay has replicated, the nearby-cell payload has been received, and no operations the client has been notified of are pending.
 	 * @note Does not gate Generate() — that can be called at any time regardless of this value.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
-	bool IsReady();
-	
-	UFUNCTION(BlueprintCallable, DisplayName="Is Streaming?", Category = "NEXUS|WorldAssembly")
-	bool IsStreaming() const;
+	bool IsReady(bool bWaitOnStreaming = true);
 	
 	/**
 	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.

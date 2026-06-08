@@ -128,10 +128,16 @@ void UNWorldAssemblySubsystem::Clear()
 	OnCleared.Broadcast();
 }
 
-bool UNWorldAssemblySubsystem::IsReady()
+bool UNWorldAssemblySubsystem::IsReady(const bool bWaitOnStreaming)
 {
+	const UWorld* World = GetWorld();
+	if (bWaitOnStreaming && FNWorldUtils::IsStreaming(World))
+	{
+		return false;
+	}
+	
 	// Server always has stuff replicated
-	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+	if (FNMultiplayerUtils::HasWorldAuthority(World))
 	{
 		return KnownOperations.IsEmpty();
 	}
@@ -141,30 +147,6 @@ bool UNWorldAssemblySubsystem::IsReady()
 	
 	// Client properly checking
 	return LocalRelay->IsReady();
-}
-
-bool UNWorldAssemblySubsystem::IsStreaming() const
-{
-	const UWorld* World = GetWorld();
-	if (!World) return false;
-	
-	const TArray<ULevelStreaming*>& StreamingLevels = World->GetStreamingLevels();
-	for (ULevelStreaming* Level : StreamingLevels)
-	{
-		if (Level)
-		{
-			if (Level->IsLevelLoaded() && !Level->IsLevelVisible() && Level->ShouldBeVisible())
-			{
-				return true; 
-			}
-			
-			if (Level->HasLoadRequestPending())
-			{
-				return true;
-			}
-		}
-	}
-	return false;
 }
 
 void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)

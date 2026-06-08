@@ -25,4 +25,27 @@ public:
 		}
 		return nullptr;
 	}
+	
+	static bool IsStreaming(const UWorld* InWorld)
+	{
+		if (!InWorld) return false;
+	
+		const TArray<ULevelStreaming*>& StreamingLevels = InWorld->GetStreamingLevels();
+		for (ULevelStreaming* Level : StreamingLevels)
+		{
+			if (Level)
+			{
+				if (Level->IsLevelLoaded() && !Level->IsLevelVisible() && Level->ShouldBeVisible())
+				{
+					return true; 
+				}
+			
+				if (Level->HasLoadRequestPending())
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 };

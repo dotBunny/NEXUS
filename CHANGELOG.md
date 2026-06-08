@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.2] - 2026-07-13
+
+### Changed
+
+- `UNWorldAssemblySubsystem::IsReady()` now  `UNWorldAssemblySubsystem::IsReady(bool bWaitOnStreaming = true)` defaulting to waiting for level streaming to complete.
+
 ## [0.3.1] - 2026-06-07
 
 ### Added
