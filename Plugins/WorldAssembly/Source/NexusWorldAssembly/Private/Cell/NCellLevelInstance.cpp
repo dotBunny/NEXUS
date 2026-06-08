@@ -19,7 +19,7 @@ ANCellLevelInstance::ANCellLevelInstance()
 	if (HasAuthority())
 	{
 		const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
-		if (NetCullDistanceSquared < SquaredNearbyRange)
+		if (GetNetCullDistanceSquared() < SquaredNearbyRange)
 		{
 			SetNetCullDistanceSquared(SquaredNearbyRange);
 		}
