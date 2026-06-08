@@ -12,10 +12,26 @@
 ANCellLevelInstance::ANCellLevelInstance()
 {
 	bReplicates = true;
+	
+	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+	
+	// Ensure that we are never less than what we consider nearby
+	if (HasAuthority())
+	{
+		const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
+		if (NetCullDistanceSquared < SquaredNearbyRange)
+		{
+			NetCullDistanceSquared = SquaredNearbyRange;
+		}
+	}
+	
 	if (UNWorldAssemblySettings::Get()->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantLevelInstances)
 	{
 		bAlwaysRelevant = true;
 	}
+	
+	
+
 }
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
@@ -69,6 +85,5 @@ void ANCellLevelInstance::FillJunctionData()
 	for (int32 i = 0; i < JunctionDetails.Num(); i++)
 	{
 		JunctionData.Add(JunctionDetails[i].InstanceIdentifier, JunctionDetails[i]);
-		
 	}
 }

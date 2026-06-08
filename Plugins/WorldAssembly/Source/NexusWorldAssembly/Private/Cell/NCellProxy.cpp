@@ -99,6 +99,8 @@ void ANCellProxy::CreateLevelInstance()
 	SpawnInfo.ObjectFlags |= RF_Transient;
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnInfo.bDeferConstruction = true;
+	// IMPORTANT for replication
+	SpawnInfo.Name = MakeUniqueObjectName(GetWorld(), ANCellLevelInstance::StaticClass(), "NCellLevelInstance");
 	
 	// Spawn Actor
 	const FVector SpawnLocation = this->GetActorLocation();
