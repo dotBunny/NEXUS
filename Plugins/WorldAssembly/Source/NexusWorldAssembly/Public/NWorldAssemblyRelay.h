@@ -72,7 +72,7 @@ private:
 	FDelegateHandle OnRequestNearbyHandle;
 
 	/** True when CachedNearbyCellLevelInstances has been populated by the server at least once. */
-	bool bHasNearbyCellLevelInstances = false;
+	bool bHasNearbyCellLevelInstances = true;
 
 	/** Most recently received nearby-cell payload. */
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
