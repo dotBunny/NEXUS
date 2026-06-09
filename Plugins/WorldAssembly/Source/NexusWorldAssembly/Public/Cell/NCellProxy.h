@@ -84,16 +84,10 @@ private:
 	/** Dynamic material applied to the proxy mesh while it stands in for the level. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
-	
-	
+
+	/** Assembly metadata (operation, node, seed, tags, junction/link details) recorded for this cell at generation time. */
 	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
 	FNCellAssemblyData AssemblyData;
-	
-	/** 
-	 * Per-junction data mirrored from the cell.
-	 * Kept on the proxy for fast access before the level instance is available, but gets copied over when made. */
-	UPROPERTY(VisibleAnywhere, Category = "Cell Proxy")
-	TMap<int32, FNCellJunctionDetails> JunctionsData;
 
 	N_WORLD_ICON_HEADER()
 };

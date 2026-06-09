@@ -54,9 +54,11 @@ struct FNCellAssemblyData
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounterState;
 	
+	/** World-space details for every junction on this cell, captured from the source graph node. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNCellJunctionDetails> JunctionDetails;
-	
+
+	/** Per-junction connection state (what each junction linked to, if anything) generated alongside JunctionDetails. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNCellLinkDetails> LinkDetails;
 };

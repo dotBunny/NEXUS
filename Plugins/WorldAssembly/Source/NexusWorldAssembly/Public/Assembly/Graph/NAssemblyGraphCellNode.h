@@ -123,14 +123,13 @@ public:
 		InputDataPtr = nullptr;
 	}
 	
+	/** Populate LinkDetails with one entry per junction describing its connection state; no-op once generated. */
 	void GenerateLinkDetails();
 
 	/** @return Mutable access to the cell's world-space hull for intersection tests. */
 	FNRawMesh& GetHull() { return Hull; }
 	/** @return A by-value copy of the cell's hull for callers that need an independent mesh. */
 	FNRawMesh GetHullCopy() { return Hull; }
-
-
 	
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */

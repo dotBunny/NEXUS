@@ -146,8 +146,33 @@ bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 void FNAssemblyGraphCellNode::GenerateLinkDetails()
 {
 	if (LinkDetails.Num() > 0) return;
-	
-	// TODO: Generate Link Details
+
+	// One entry per junction, in WorldJunctions map order so it stays aligned with the JunctionDetails
+	// array the spawn task generates from GetJunctions().
+	LinkDetails.Reserve(WorldJunctions.Num());
+	for (const TPair<int32, FNCellJunctionDetails>& Junction : WorldJunctions)
+	{
+		FNCellLinkDetails& Details = LinkDetails.AddDefaulted_GetRef();
+		Details.JunctionInstanceIdentifier = Junction.Value.InstanceIdentifier;
+
+		// A junction that is still free has no link, leave the connection fields at their defaults.
+		FNAssemblyGraphNode** LinkedNodePtr = Links.Find(Junction.Key);
+		if (LinkedNodePtr == nullptr) continue;
+
+		FNAssemblyGraphNode* LinkedNode = *LinkedNodePtr;
+		Details.bConnected = true;
+		Details.ConnectedNodeIdentifier = LinkedNode->GetNodeIdentifier();
+
+		// Only cell nodes carry junctions; resolve the junction on the far cell that links back to us.
+		if (LinkedNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+		FNAssemblyGraphCellNode* LinkedCellNode = static_cast<FNAssemblyGraphCellNode*>(LinkedNode);
+		const int32 ConnectedJunctionKey = LinkedCellNode->FindJunctionKeyLinkedTo(this);
+		if (const FNCellJunctionDetails* ConnectedJunction = LinkedCellNode->GetJunctionDetails(ConnectedJunctionKey))
+		{
+			Details.ConnectedJunctionInstanceIdentifier = ConnectedJunction->InstanceIdentifier;
+		}
+	}
 }
 
 void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)

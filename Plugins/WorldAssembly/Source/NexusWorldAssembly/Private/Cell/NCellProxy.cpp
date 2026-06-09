@@ -22,13 +22,6 @@
 
 ANCellProxy::ANCellProxy(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	// TODO: Is the proxy sync option doable?
-	// if (UNWorldAssemblySettings::Get()->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantCellProxies)
-	// {
-	// 	bReplicates = true;
-	// 	bAlwaysRelevant = true;
-	// }
-	
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 	

@@ -10,6 +10,7 @@
 ### Changed
 
 - `UNWorldAssemblySubsystem::IsReady()` now  `UNWorldAssemblySubsystem::IsReady(bool bWaitOnStreaming = true)` defaulting to waiting for level streaming to complete.
+- `ANCellProxy` now hold and pass to `ANCellLevelInstance` information about `UNCellJunctionComponent` and their linkage.
 
 ### Fixed
 
