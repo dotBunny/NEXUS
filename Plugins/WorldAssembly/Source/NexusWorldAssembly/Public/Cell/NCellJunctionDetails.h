@@ -74,11 +74,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	/** Unique per-cell identifier; allocated by ANCellActor::GetCellJunctionNextIdentifier. */
 	UPROPERTY(VisibleAnywhere)
 	int32 InstanceIdentifier = -1;
-
-	/** Derived: true if the junction point lies inside the cell's hull (set during UpdateHullDerivedData). */
-	UPROPERTY(VisibleAnywhere)
-	bool bInsideHull = false;
-
+	
 	/**
 	 * Derived, non-serialized cache of WorldRotation.Quaternion().Inverse(), populated when the virtual cell data is
 	 * assembled in FNVirtualOrganContext. Lets the per-candidate junction-rotation gate skip the rotator->quat
@@ -100,7 +96,6 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 		return
 			InstanceIdentifier == Other.InstanceIdentifier
 			&& Weighting == Other.Weighting
-			&& bInsideHull == Other.bInsideHull
 			
 			&& Requirements == Other.Requirements
 			&& Type == Other.Type
@@ -111,4 +106,3 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 			&& RotationConstraints.IsEqual(Other.RotationConstraints);
 	}
 };
-

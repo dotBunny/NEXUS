@@ -5,7 +5,6 @@
 #include "NActorPoolSubsystem.h"
 #include "NBoxPicker.h"
 #include "NCirclePicker.h"
-#include "NCoreMinimal.h"
 #include "NOrientedBoxPicker.h"
 #include "NOrientedBoxPickerParams.h"
 #include "NSpherePicker.h"
@@ -56,7 +55,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 			continue;
 		}
 
-		// We want to register some settings, we dont create the pool here so that APS can be ahead of this.
+		// We want to register some settings, we don't create the pool here so that APS can be ahead of this.
 		if (!Subsystem->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
 			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());

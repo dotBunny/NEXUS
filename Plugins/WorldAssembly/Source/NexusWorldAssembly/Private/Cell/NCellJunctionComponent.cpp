@@ -268,8 +268,6 @@ void UNCellJunctionComponent::OnTransformUpdated(USceneComponent* SceneComponent
 		// Have we made changes, let the people know!
 		if (bHasMadeChanges)
 		{
-			UpdateHullDerivedData(RootComponent);
-			
 			// ReSharper disable once CppExpressionWithoutSideEffects
 			MarkPackageDirty();
 		}
@@ -283,23 +281,6 @@ void UNCellJunctionComponent::PostEditImport()
 }
 
 #endif // WITH_EDITOR
-
-void UNCellJunctionComponent::UpdateHullDerivedData(const UNCellRootComponent* RootComponent)
-{
-	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-	const TArray<FVector> RotatedCornerPoints = GetCornerPoints(Settings->SocketSize);
-	const bool bIsInside = FNRawMeshUtils::AnyRelativePointsInside(
-		RootComponent->Details.Hull, 
-		RotatedCornerPoints);
-	
-	if (Details.bInsideHull != bIsInside)
-	{
-		Details.bInsideHull = bIsInside;
-
-		// ReSharper disable once CppExpressionWithoutSideEffects
-		MarkPackageDirty();
-	}
-}
 
 TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& SocketSize) const
 {

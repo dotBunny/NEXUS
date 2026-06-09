@@ -57,12 +57,13 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CellAssemblyData.ContextTagsAdded = CellNode->GetContextTagsAdded();
 		CellAssemblyData.ContextTagsState = CellNode->GetContextTagsState();
 		CellAssemblyData.TagCounterState = CellNode->GetTagCountersState().ToTagCount();
+		CellAssemblyData.LinkDetails = CellNode->GetLinkDetails();
 		
-		ANCellProxy* Proxy = ANCellProxy::CreateInstance(
-		SpawnCellsContextPtr->World, 
-		CellNode, 
-		CellAssemblyData,
-		SpawnCellsContextPtr->bPreloadLevels);
+		// Convert to basic array
+		CellNode->GetJunctions().GenerateValueArray(CellAssemblyData.JunctionDetails);
+		
+		// Create the instance
+		ANCellProxy* Proxy = ANCellProxy::CreateInstance(SpawnCellsContextPtr->World, CellNode, CellAssemblyData, SpawnCellsContextPtr->bPreloadLevels);
 		
 		// Dispatch Guard #2
 		if (Proxy == nullptr)

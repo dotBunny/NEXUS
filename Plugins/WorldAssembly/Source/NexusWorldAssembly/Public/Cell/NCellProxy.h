@@ -33,6 +33,7 @@ public:
 	 * Factory for creating a cell proxy for a graph node.
 	 * @param World World to spawn into.
 	 * @param CellNode The graph node that sourced this cell (supplies transform and junction data).
+	 * @param InstanceData Information about the generation of this cell.
 	 * @param bPreLoadLevel When true, the underlying level asset begins loading immediately.
 	 * @return The new proxy actor.
 	 */
@@ -56,9 +57,7 @@ protected:
 	void OnProxyMaterialLoaded();
 	/** Configure the proxy from a UNCell asset (mesh preview, junction details, etc.). */
 	void InitializeFromNCell(UNCell* InCell);
-	/** Configure the proxy from a graph node describing the cell's transform and junction layout. */
-	void InitializeFromCellNode(const FNAssemblyGraphCellNode* CellNode);
-
+	
 private:
 
 	/** Reveal the proxy's preview mesh and enable its visualization components. */

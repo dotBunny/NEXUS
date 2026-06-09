@@ -40,6 +40,10 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 			{
 				// Add to our list of things to spawn
 				FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
+				
+				// Build out the data we are going to use
+				CellNode->GenerateLinkDetails();
+				
 				SpawnCellsContextPtr->CellNodes.Add(CellNode);
 			}
 		}

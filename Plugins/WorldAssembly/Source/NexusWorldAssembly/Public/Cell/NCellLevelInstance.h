@@ -115,21 +115,16 @@ public:
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
 
+		
+	void UpdateFromAssemblyData();
+	
 protected:
+	
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_AssemblyData)
 	FNCellAssemblyData AssemblyData;
 	
-	UPROPERTY(Replicated, ReplicatedUsing=OnRep_JunctionDetails);
-	TArray<FNCellJunctionDetails> JunctionDetails;
-	
-	UFUNCTION()
-	void OnRep_JunctionDetails();
-	
 	UFUNCTION()
 	void OnRep_AssemblyData();
-	
-	/** Take the flat JunctionDetails array and produce the JunctionData instance-keyed map. **/
-	void FillJunctionData();
 
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 

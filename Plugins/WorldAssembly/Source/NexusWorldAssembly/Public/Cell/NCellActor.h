@@ -111,15 +111,13 @@ public:
 	/**
 	 * Splits the convex-hull edge between the two given vertex indices, inserting a new vertex.
 	 * @param IndexA First vertex index of the edge to split.
-	 * @param IndexB Second vertex index of the edge to split.
-	 * @param bUpdateDerivedData When true, recompute hull-derived data after the split.
+	 * @param IndexB Second vertex index of the edge to split.	 
 	 */
-	void SplitHullEdge(int32 IndexA, int32 IndexB, bool bUpdateDerivedData = true );
+	void SplitHullEdge(int32 IndexA, int32 IndexB);
 	/**
-	 * Recompute the cell's convex hull from its level content.
-	 * @param bUpdateDerivedData When true, dependent derived data (voxels) is also refreshed.
+	 * Recompute the cell's convex hull from its level content.	 
 	 */
-	void CalculateHull(bool bUpdateDerivedData = true);
+	void CalculateHull();
 	/** Recompute the cell's voxel data using the current bounds/hull and project voxel settings. */
 	void CalculateVoxelData();
 

@@ -16,6 +16,10 @@
 - Crash when displaying collision visualizer twice in a level.
 - `ANWorldAssemblyRelay` now properly responds to `IsReady` (`ANCellLevelInstances` now register appropriately when on clients)
 
+### Removed
+
+- Junctions no longer store if they are inside of a hull.
+
 ## [0.3.1] - 2026-06-07
 
 ### Added

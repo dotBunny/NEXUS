@@ -66,10 +66,8 @@ ANCellProxy* ANCellProxy::CreateInstance(UWorld* World, FNAssemblyGraphCellNode*
 		return nullptr;
 	}
 	
+	// Assign data generated from assembly (it will get used by the level instance)
 	Proxy->AssemblyData = InstanceData;
-	
-	// Context initialization
-	Proxy->InitializeFromCellNode(CellNode);
 	
 	// Default initialization
 	Proxy->InitializeFromNCell(CellNode->GetTemplate());
@@ -114,9 +112,8 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Replicated assembly data
 	LevelInstance->AssemblyData = AssemblyData;
-	
-	JunctionsData.GenerateValueArray(LevelInstance->JunctionDetails);
-	LevelInstance->FillJunctionData(); // this is really for the server
+	// Server needs to do its process of the level assembly data (junctions rotate/etc based)
+	LevelInstance->UpdateFromAssemblyData();
 	
 	// Apply relevancy flag to created actor
 	if (AssemblyData.AssemblyTags.HasTagExact(NWorldAssembly_Flag_AlwaysRelevant))
@@ -291,11 +288,6 @@ void ANCellProxy::InitializeFromNCell(UNCell* InCell)
 	// Create the material on placement (CDO settings access = bad)
 	FStreamableManager& Streamable = UAssetManager::GetStreamableManager();
 	Streamable.RequestAsyncLoad(UNWorldAssemblySettings::Get()->ProxyMaterial.ToSoftObjectPath(), FStreamableDelegate::CreateUObject(this, &ANCellProxy::OnProxyMaterialLoaded));
-}
-
-void ANCellProxy::InitializeFromCellNode(const FNAssemblyGraphCellNode* CellNode)
-{
-	JunctionsData = CellNode->GetJunctions();
 }
 
 void ANCellProxy::OnProxyMaterialLoaded()

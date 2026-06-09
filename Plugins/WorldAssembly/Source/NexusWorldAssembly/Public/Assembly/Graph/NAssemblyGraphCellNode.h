@@ -6,6 +6,7 @@
 #include "Assembly/Data/NVirtualCellData.h"
 #include "NAssemblyGraphNode.h"
 #include "Cell/NCell.h"
+#include "Cell/NCellLinkDetails.h"
 #include "Types/NRawMeshUtils.h"
 
 /**
@@ -29,6 +30,8 @@ public:
 
 	/** @return All of the cell's junctions in world-space. */
 	const TMap<int32, FNCellJunctionDetails>& GetJunctions() const;
+
+	const TArray<FNCellLinkDetails>& GetLinkDetails() const { return LinkDetails; }
 
 	/** @return Details for the junction with the given key, or nullptr if no such junction exists. */
 	FNCellJunctionDetails* GetJunctionDetails(int32 JunctionKey);
@@ -119,6 +122,8 @@ public:
 	{
 		InputDataPtr = nullptr;
 	}
+	
+	void GenerateLinkDetails();
 
 	/** @return Mutable access to the cell's world-space hull for intersection tests. */
 	FNRawMesh& GetHull() { return Hull; }
@@ -126,6 +131,7 @@ public:
 	FNRawMesh GetHullCopy() { return Hull; }
 
 
+	
 private:
 	/** Non-owning pointer to the input data this cell was chosen from; only valid during builder phase. */
 	FNVirtualCellData* InputDataPtr;
@@ -138,6 +144,9 @@ private:
 
 	/** Cell junctions transformed into world space. */
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
+	
+	/** Generated just before spawning, before on main thread, traverses graph and generates useful additional data. */
+	TArray<FNCellLinkDetails> LinkDetails;
 
 	/** World-space axis-aligned bounds used for broad-phase intersection tests. */
 	FBox WorldBounds;

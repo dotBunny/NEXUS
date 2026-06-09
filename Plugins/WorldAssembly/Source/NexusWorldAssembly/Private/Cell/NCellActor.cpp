@@ -114,34 +114,18 @@ void ANCellActor::CalculateBounds()
 	SetActorDirty();
 }
 
-void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB, const bool bUpdateDerivedData)
+void ANCellActor::SplitHullEdge(const int32 IndexA, const int32 IndexB)
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull.SplitEdge(IndexA, IndexB);
 	
-	if (bUpdateDerivedData)
-	{
-		for (const auto Pair : CellJunctions)
-		{
-			Pair.Value->UpdateHullDerivedData(CellRoot);
-		}
-	}
-	
 	SetActorDirty();
 }
 
-void ANCellActor::CalculateHull(const bool bUpdateDerivedData)
+void ANCellActor::CalculateHull()
 {
 	CellRoot->Modify();
 	CellRoot->Details.Hull = FNWorldAssemblyUtils::CalculateConvexHull(GetLevel(), CellRoot->Details.HullSettings);
-	
-	if (bUpdateDerivedData)
-	{
-		for (const auto Pair : CellJunctions)
-		{
-			Pair.Value->UpdateHullDerivedData(CellRoot);
-		}
-	}
 	
 	SetActorDirty();
 }

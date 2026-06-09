@@ -36,7 +36,7 @@ void ANCellLevelInstance::OnLevelInstanceLoaded()
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromLevel(GetLoadedLevel());
 	if (!CellActor)
 	{
-		UE_LOG(LogNexusWorldAssembly, Error, TEXT("No ANCellActor found in level '%s'."),*GetLoadedLevel()->GetName());
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("No ANCellActor found in level '%s'."), *GetLoadedLevel()->GetName());
 		Super::OnLevelInstanceLoaded();
 		return;
 	}
@@ -51,9 +51,8 @@ void ANCellLevelInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	// Special
 	FDoRepLifetimeParams Params;
 	Params.Condition = COND_InitialOnly;
-	
+
 	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, AssemblyData, Params);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ANCellLevelInstance, JunctionDetails, Params);
 }
 
 void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -65,22 +64,22 @@ void ANCellLevelInstance::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
-void ANCellLevelInstance::OnRep_JunctionDetails()
-{
-	FillJunctionData();
-}
+
 
 void ANCellLevelInstance::OnRep_AssemblyData()
 {
 	// This ensures that a cell gets registered on the clients
 	FNWorldAssemblyRegistry::RegisterCellLevelInstance(this);
+	
+	// Apply updates
+	UpdateFromAssemblyData();
 }
 
-void ANCellLevelInstance::FillJunctionData()
+void ANCellLevelInstance::UpdateFromAssemblyData()
 {
 	JunctionData.Empty();
-	for (int32 i = 0; i < JunctionDetails.Num(); i++)
+	for (int32 i = 0; i < AssemblyData.JunctionDetails.Num(); i++)
 	{
-		JunctionData.Add(JunctionDetails[i].InstanceIdentifier, JunctionDetails[i]);
+		JunctionData.Add(AssemblyData.JunctionDetails[i].InstanceIdentifier, AssemblyData.JunctionDetails[i]);
 	}
 }

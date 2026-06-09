@@ -6,6 +6,8 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Collections/NGameplayTagCounter.h"
+#include "NCellJunctionDetails.h"
+#include "NCellLinkDetails.h"
 #include "NCellAssemblyData.generated.h"
 
 /**
@@ -51,4 +53,10 @@ struct FNCellAssemblyData
 	/** The state of the tag counter when this cell was added. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounterState;
+	
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<FNCellJunctionDetails> JunctionDetails;
+	
+	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
+	TArray<FNCellLinkDetails> LinkDetails;
 };

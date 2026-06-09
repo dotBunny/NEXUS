@@ -91,12 +91,6 @@ public:
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**
-	 * Recompute hull-derived data on the junction using the supplied root component.
-	 * @param RootComponent Root component of the owning cell.
-	 */
-	void UpdateHullDerivedData(const UNCellRootComponent* RootComponent);
-
-	/**
 	 * @param SocketSize The socket dimensions to size the corners to.
 	 * @return The junction's socket corner points in world space.
 	 */

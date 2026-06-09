@@ -72,7 +72,6 @@ TMap<int32, FNCellJunctionDetails*> FNAssemblyGraphCellNode::GetOpenJunctions()
 	}
 	return Junctions;
 }
-
 const TMap<int32, FNCellJunctionDetails>& FNAssemblyGraphCellNode::GetJunctions() const
 {
 	return WorldJunctions;
@@ -142,6 +141,13 @@ bool FNAssemblyGraphCellNode::IsHullInside(const FBox& Bounds) const
 		}
 	}
 	return Hull.Vertices.Num() > 0;
+}
+
+void FNAssemblyGraphCellNode::GenerateLinkDetails()
+{
+	if (LinkDetails.Num() > 0) return;
+	
+	// TODO: Generate Link Details
 }
 
 void FNAssemblyGraphCellNode::LinkJunction(const int32 JunctionKey, FNAssemblyGraphNode* Node)
