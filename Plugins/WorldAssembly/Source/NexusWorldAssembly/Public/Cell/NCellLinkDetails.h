@@ -17,8 +17,8 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	bool bConnected = false;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 ConnectedNodeIndex;
+	int32 ConnectedNodeIndex = -1;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	int32 ConnectedJunctionInstanceIdentifier;	
+	int32 ConnectedJunctionInstanceIdentifier = -1;	
 };
