@@ -201,7 +201,7 @@ void UNCellJunctionComponent::OnRegister()
 	if (ALevelInstance* Instance = LevelInstance.Get();
 		Actor != nullptr && Actor->WasSpawnedFromProxy() && Instance != nullptr && Instance->IsA<ANCellLevelInstance>())
 	{
-		const ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(Instance);
+		ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(Instance);
 		const FNCellJunctionDetails* UpdatedDetails = CellLevelInstance->JunctionData.Find(Details.InstanceIdentifier);
 		if (UpdatedDetails != nullptr)
 		{
@@ -219,6 +219,7 @@ void UNCellJunctionComponent::OnRegister()
 			// It might be related --- I don't know --- hopefully this information might be useful in the future.
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
+		LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
 	}
 	
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);

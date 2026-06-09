@@ -83,3 +83,24 @@ void ANCellLevelInstance::UpdateFromAssemblyData()
 		JunctionData.Add(AssemblyData.JunctionDetails[i].InstanceIdentifier, AssemblyData.JunctionDetails[i]);
 	}
 }
+
+FNCellLinkDetails ANCellLevelInstance::GetCellLinkDetails(const int32 JunctionIdentifier)
+{
+	if (AssemblyData.LinkDetails.Num() == 0)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Junction(%i) has requested link details prior to it being replicated."), JunctionIdentifier);
+		return FNCellLinkDetails();
+	}
+	
+	for (int32 i = 0; i < AssemblyData.LinkDetails.Num(); i++)
+	{
+		const FNCellLinkDetails& LinkDetails = AssemblyData.LinkDetails[i];
+		if (LinkDetails.JunctionInstanceIdentifier == JunctionIdentifier)
+		{
+			return LinkDetails;
+		}
+	}
+	
+	UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Junction(%i) has requested link details that couldn't be found."), JunctionIdentifier);
+	return FNCellLinkDetails();
+}

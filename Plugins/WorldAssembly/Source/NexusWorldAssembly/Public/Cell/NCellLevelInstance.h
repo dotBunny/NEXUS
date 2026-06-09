@@ -114,9 +114,10 @@ public:
 	
 	/** @return Spawn GUID used to uniquely identify this level instance within its operation. */
 	FGuid& GetLevelInstanceSpawnGuid() { return LevelInstanceSpawnGuid; }
-
 		
 	void UpdateFromAssemblyData();
+	
+	FNCellLinkDetails GetCellLinkDetails(int32 JunctionIdentifier);
 	
 protected:
 	

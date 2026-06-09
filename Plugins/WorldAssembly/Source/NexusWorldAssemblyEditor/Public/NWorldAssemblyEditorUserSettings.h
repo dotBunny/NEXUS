@@ -24,5 +24,11 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Cell", DisplayName="Display Viewport Messages", meta=(Tooltip="Show alerts and messages in the viewport while editing Cells."))
 	bool bCellDisplayViewportMessages = true;
 
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Junctions", DisplayName="Draw Unfilled Junctions")
+	bool bDebugWorldDrawUnfilledJunctions = true;
+	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Junctions", DisplayName="Unfilled Junctions Color")
+	FLinearColor EmptyJunctionColor = FLinearColor::Gray;
+	
 #endif // WITH_EDITORONLY_DATA
 };

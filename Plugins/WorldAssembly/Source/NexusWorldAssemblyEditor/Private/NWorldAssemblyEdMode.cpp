@@ -380,16 +380,22 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
 	{
 		const UNWorldAssemblySettings* WorldAssemblySettings = UNWorldAssemblySettings::Get();
-		const UNWorldAssemblyEditorSettings* WorldAssemblyEditorSettings = UNWorldAssemblyEditorSettings::Get();
+		const UNWorldAssemblyEditorUserSettings* WorldAssemblyEditorUserSettings = UNWorldAssemblyEditorUserSettings::Get();
 		for (const auto JunctionComponent : FNWorldAssemblyRegistry::GetCellJunctionComponents())
 		{
 			if (JunctionComponent == nullptr) continue;
 			
-			// WorldAssemblyEditorSettings->bDebugWorldDrawUnfilledJunctions
-			// WorldAssemblyEditorSettings->EmptyJunctionColor
-			
-			// TODO: If editor mode option to draw empty junctions, draw them ? we can fill the color here with something too
-			JunctionComponent->DrawDebugPDI(PDI, true, FNColor::GreenLight, WorldAssemblySettings);
+			if (!JunctionComponent->LinkDetails.bConnected)
+			{
+				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
+				{
+					JunctionComponent->DrawDebugPDI(PDI, true, WorldAssemblyEditorUserSettings->EmptyJunctionColor, WorldAssemblySettings);
+				}
+			}
+			else
+			{
+				JunctionComponent->DrawDebugPDI(PDI, true, FNColor::GreenLight, WorldAssemblySettings);
+			}
 		}	
 	}
 

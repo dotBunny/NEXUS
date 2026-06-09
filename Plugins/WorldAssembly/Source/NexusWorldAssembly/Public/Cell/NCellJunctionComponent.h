@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NCellLinkDetails.h"
 #include "NColor.h"
 #include "NWorldAssemblySettings.h"
 #include "Components/BillboardComponent.h"
@@ -58,6 +59,9 @@ public:
 	/** Junction shape, orientation, and flags authored per junction. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	FNCellJunctionDetails Details;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
+	FNCellLinkDetails LinkDetails;
 
 	//~USceneComponent
 	virtual void OnRegister() override;
