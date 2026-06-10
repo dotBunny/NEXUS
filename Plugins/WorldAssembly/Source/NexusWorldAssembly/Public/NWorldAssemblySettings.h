@@ -63,6 +63,10 @@ public:
 	meta=(ToolTip="The range to query for nearby ANCellLevelInstances by ANWorldAssemblyRelay, used to determine if the client is considered loaded. Distance is calculated to the world position point of the ANCellLevelInstance."))
 	float NetworkNearbyRange = 20000.f;
 	
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Network", DisplayName="Support Seamless Travel",
+	meta=(ToolTip="This will cause the subsystem to periodically poll for PlayerControllers and add relays for them. You can avoid this method, with Seamless travel if you call SpawnRelay(PC) on the UNWorldAssemblySubsystem manually from the GameMode."))
+	bool bSupportSeamlessTravel = false;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Organ", DisplayName="Automatic Bone Direction",
 	meta=(ToolTip="The direction used to calculate the automatic bone placement on the volume."))
 	ENDirection OrganAutomaticBoneDirection = ENDirection::Backward;

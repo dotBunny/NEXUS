@@ -171,9 +171,18 @@ void UNWorldAssemblySubsystem::UnregisterActorForCleanup(AActor* Actor)
 
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 {
-	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+	// Not ideal but keeps seamless better
+	if (bCachedSeamlessTravelMonitor)
 	{
-		KnownOperations[i]->Tick();
+		EnsurePlayerControllerRelays(GetWorld());
+	}
+	
+	if (HasKnownOperation())
+	{
+		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+		{
+			KnownOperations[i]->Tick();
+		}
 	}
 	
 	// If we have anything queued for generation, lets get it going
@@ -192,7 +201,7 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 
 bool UNWorldAssemblySubsystem::IsTickable() const
 {
-	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0) return true;
+	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
 	return false;
 }
 
@@ -281,14 +290,13 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// Only do this on the server
 	if (FNMultiplayerUtils::HasWorldAuthority(InWorld))
 	{
-		OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
-		OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
-		for (FConstPlayerControllerIterator It = InWorld.GetPlayerControllerIterator(); It; ++It)
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
+		if (!bCachedSeamlessTravelMonitor)
 		{
-			if (APlayerController* PC = It->Get())
-			{
-				SpawnRelay(PC);
-			}
+			OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
+			OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
+			EnsurePlayerControllerRelays(InWorld.GetWorld());
 		}
 	}
 
@@ -379,5 +387,16 @@ void UNWorldAssemblySubsystem::DestroyRelay(APlayerController* PlayerController)
 	if (RelayMap.RemoveAndCopyValue(PlayerController, Existing) && Existing != nullptr)
 	{
 		Existing->Destroy();
+	}
+}
+
+void UNWorldAssemblySubsystem::EnsurePlayerControllerRelays(const UWorld* World)
+{
+	for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+	{
+		if (APlayerController* PC = It->Get())
+		{
+			SpawnRelay(PC);
+		}
 	}
 }

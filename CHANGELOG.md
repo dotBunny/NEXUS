@@ -21,6 +21,13 @@
 
 - Junctions no longer store if they are inside of a hull.
 
+### Core Redirects
+
+```ini
+[CoreRedirects]
++PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NOrganComponent.bUnbounded",NewName="/Script/NexusWorldAssembly.NOrganComponent.bUnbound")
+```
+
 ## [0.3.1] - 2026-06-07
 
 ### Added

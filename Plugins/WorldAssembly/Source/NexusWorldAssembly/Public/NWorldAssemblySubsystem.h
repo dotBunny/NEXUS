@@ -133,6 +133,15 @@ public:
 	void SpawnRelay(APlayerController* PlayerController);
 	
 private:
+	
+	/**
+	 * Cached copy of UNWorldAssemblySettings::bSupportSeamlessTravel, captured on world begin play (authority only).
+	 * When true, the GameMode OnPostLogin/OnLogout delegates are not bound (they do not reliably survive seamless
+	 * travel); instead the subsystem stays tickable and re-runs EnsurePlayerControllerRelays every Tick to keep each
+	 * player's relay in sync. When false, those delegates manage relays and this per-tick monitor stays off.
+	 */
+	bool bCachedSeamlessTravelMonitor = false;
+	
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
@@ -174,4 +183,13 @@ private:
 	void OnLogout(AGameModeBase* GameMode, AController* Exiting);
 	/** Destroy the relay previously spawned for PlayerController and remove it from RelayMap. */
 	void DestroyRelay(APlayerController* PlayerController);
+	
+	
+	/**
+	 * Back-fill relays for player controllers that already exist in InWorld, spawning one for any not yet in RelayMap.
+	 * Complements the OnPostLogin path (which only fires for players joining afterward) to cover controllers present
+	 * before the relay machinery is wired up; SpawnRelay is idempotent, so already-served controllers are skipped.
+	 * This is also useful in solving the problem of seamless travel.
+	 */
+	void EnsurePlayerControllerRelays(const UWorld* InWorld);
 };
