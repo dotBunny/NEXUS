@@ -28,6 +28,7 @@ public:
 	 */
 	FORCEINLINE static FRandomStream& GetNonDeterministic()
 	{
+		static FRandomStream NonDeterministic(static_cast<int32>(FPlatformTime::Cycles64() ^ FDateTime::UtcNow().GetTicks()));
 		return NonDeterministic;
 	}
 	
@@ -37,6 +38,4 @@ private:
 	 * @note It is SUPER important that values are called from this in a deterministic order.
 	 */
 	static FNMersenneTwister Deterministic;
-	/** A non-deterministic random number generator that can be used at any time. */
-	static FRandomStream NonDeterministic;
 };

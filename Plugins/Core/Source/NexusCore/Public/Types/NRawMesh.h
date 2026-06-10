@@ -36,7 +36,7 @@ struct NEXUSCORE_API FNRawMesh
 	
 	/** Relative AABB **/
 	UPROPERTY(VisibleAnywhere)
-	FBox Bounds;
+	FBox Bounds = FBox(ForceInit);
 
 	/**
 	 * Ordered shape-edge definition.
@@ -268,7 +268,7 @@ struct NEXUSCORE_API FNRawMesh
 
 		FBox NewBounds(ForceInit);
 		const int32 Count = Vertices.Num();
-		FVector CenterCalc;
+		FVector CenterCalc(ForceInitToZero);
 		
 		for (int32 i = 0; i < Count; i++)
 		{

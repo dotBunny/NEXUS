@@ -59,6 +59,8 @@ void UNDynamicRefsDeveloperOverlay::ReconcileStaleEntries()
 
 void UNDynamicRefsDeveloperOverlay::BindWorld(UWorld* World)
 {
+	if (World == nullptr) return;
+	
 	UNDynamicRefSubsystem* System = UNDynamicRefSubsystem::Get(World);
 	if (System == nullptr)
 	{

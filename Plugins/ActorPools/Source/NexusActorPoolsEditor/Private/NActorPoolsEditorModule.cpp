@@ -10,7 +10,7 @@
 #include "NEditorDefaults.h"
 #include "NEditorUtils.h"
 #include "NKillZoneActor.h"
-#include "NPooledActor.h"
+#include "NPooledActorBase.h"
 #include "NPropertySections.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
@@ -72,14 +72,6 @@ void FNActorPoolsEditorModule::OnPostEngineInit()
 		TOptional<FLinearColor>(),
 		TOptional<int32>(),
 		NSLOCTEXT("NexusActorPoolsEditor", "Placement_NKillZoneActor", "KillZone Actor"))));
-		PlacementActors.Add(IPlacementModeModule::Get().RegisterPlaceableItem(Info->UniqueHandle, MakeShared<FPlaceableItem>(
-			*ANPooledActor::StaticClass(),
-			FAssetData(ANPooledActor::StaticClass()),
-			NAME_None,
-			NAME_None,
-			TOptional<FLinearColor>(),
-			TOptional<int32>(),
-			NSLOCTEXT("NexusActorPoolsEditor", "Placement_NPooledActor", "Pooled Actor"))));
 	}
 	
 	// Inspector Category Filter

@@ -11,6 +11,8 @@
 #include "DelayedEditorTasks/NUpdateCheckDelayedEditorTask.h"
 #include "Modules/ModuleManager.h"
 
+N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNCoreEditorModule)
+
 void FNCoreEditorModule::StartupModule()
 {
 	if (IsRunningGame()) return;

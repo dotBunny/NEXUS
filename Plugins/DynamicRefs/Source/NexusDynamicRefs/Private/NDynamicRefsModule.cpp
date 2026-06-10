@@ -9,6 +9,7 @@
 #include "Modules/ModuleManager.h"
 
 DEFINE_LOG_CATEGORY(LogNexusDynamicRefs);
+N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNDynamicRefsModule)
 
 void FNDynamicRefsModule::StartupModule()
 {

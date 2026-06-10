@@ -19,7 +19,7 @@ public:
 	N_MODULE_BASE(FNDynamicRefsEditorModule, "NexusDynamicRefsEditor")
 	
 private:	
-	static void OnPostEngineInit();
+	N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE()
 };
 
 N_TOOLS_MENU_EUW_ENTRY(

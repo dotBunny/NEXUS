@@ -131,7 +131,7 @@ public:
 	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
 	UFUNCTION(BlueprintCallable, DisplayName="Spawn Relay", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Helpful for seamless travel, on server to spawn relays after a travel."))
 	void SpawnRelay(APlayerController* PlayerController);
-	
+
 private:
 	
 	/**
@@ -183,7 +183,6 @@ private:
 	void OnLogout(AGameModeBase* GameMode, AController* Exiting);
 	/** Destroy the relay previously spawned for PlayerController and remove it from RelayMap. */
 	void DestroyRelay(APlayerController* PlayerController);
-	
 	
 	/**
 	 * Back-fill relays for player controllers that already exist in InWorld, spawning one for any not yet in RelayMap.

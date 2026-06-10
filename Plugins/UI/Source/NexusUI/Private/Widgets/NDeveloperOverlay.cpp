@@ -73,7 +73,10 @@ void UNDeveloperOverlay::BindAllCurrentWorlds()
 	if (GEngine == nullptr) return;
 	for (const FWorldContext& Context : GEngine->GetWorldContexts())
 	{
-		BindWorld(Context.World());
+		if (UWorld* World = Context.World())
+		{
+			BindWorld(World);
+		}
 	}
 }
 
@@ -82,6 +85,9 @@ void UNDeveloperOverlay::UnbindAllCurrentWorlds()
 	if (GEngine == nullptr) return;
 	for (const FWorldContext& Context : GEngine->GetWorldContexts())
 	{
-		UnbindWorld(Context.World());
+		if (const UWorld* World = Context.World())
+		{
+			UnbindWorld(World);
+		}
 	}
 }

@@ -7,6 +7,9 @@
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
+N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(FNUIModule)
+
+
 void FNUIModule::StartupModule()
 {
 	N_UPDATE_UPLUGIN("NexusUI")

@@ -11,21 +11,29 @@
 
 - `UNWorldAssemblySubsystem::IsReady()` now  `UNWorldAssemblySubsystem::IsReady(bool bWaitOnStreaming = true)` defaulting to waiting for level streaming to complete.
 - `ANCellProxy` now hold and pass to `ANCellLevelInstance` information about `UNCellJunctionComponent` and their linkage.
+- `FNMersenneTwister` Double/Float/Integer minimum default values now properly negative by default.
+- `FNMultiplayerUtils::GetPlayerIdentifier` now returns `-1` when the `PlayerState` is not available.
+- `ANPooledActor` renamed `ANPooledActorBase`.
+- Clients with `BeginPlay` flagged `UNOrganComponents` will not generate without authority.
 
 ### Fixed
 
 - Crash when displaying collision visualizer twice in a level.
 - `ANWorldAssemblyRelay` now properly responds to `IsReady` (`ANCellLevelInstances` now register appropriately when on clients)
+- Macros for PostEngineInit for modules now function properly during teardown.
+- Bounds and Center on `FNRawMesh` now initialized at creation (no more garbage memory comparisons).
 
 ### Removed
 
 - Junctions no longer store if they are inside of a hull.
+- `ANPooledActor` from the placement pallete.
 
 ### Core Redirects
 
 ```ini
 [CoreRedirects]
 +PropertyRedirects=(OldName="/Script/NexusWorldAssembly.NOrganComponent.bUnbounded",NewName="/Script/NexusWorldAssembly.NOrganComponent.bUnbound")
++ClassRedirects=(OldName="/Script/NexusActorPools.NPooledActor",NewName="/Script/NexusActorPools.NPooledActorBase")
 ```
 
 ## [0.3.1] - 2026-06-07

@@ -5,14 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "INActorPoolItem.h"
-#include "NPooledActor.generated.h"
+#include "NPooledActorBase.generated.h"
 
 /**
  * A specialized AActor base-class designed to work seamlessly with a FNActorPool.
- * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor/">ANPooledActor</a>
+ * @see <a href="https://nexus-framework.com/docs/plugins/actor-pools/types/pooled-actor-base/">ANPooledActorBase</a>
  */
-UCLASS(Abstract, ClassGroup = "NEXUS", DisplayName = "NEXUS | Pooled Actor", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
-class NEXUSACTORPOOLS_API ANPooledActor : public AActor, public INActorPoolItem
+UCLASS(Abstract, ClassGroup = "NEXUS", DisplayName = "NEXUS | Pooled Actor Base", Meta = (ShortTooltip = "An actor base which support utilizing an NActorPool."))
+class NEXUSACTORPOOLS_API ANPooledActorBase : public AActor, public INActorPoolItem
 {
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnActorPoolDelegate);
 	GENERATED_BODY()

@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
+#include "Organ/NOrganComponent.h"
 
 #if WITH_EDITOR
 #include "Editor.h"
@@ -188,14 +189,21 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 	// If we have anything queued for generation, lets get it going
 	if (QueuedOrgansForAssembly.Num() > 0)
 	{
-		FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
-		Settings.DisplayName = FText::FromString("QueuedOrganAssembly");
-		UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
+		if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
+		{
+			QueuedOrgansForAssembly.Empty();
+		}
+		else
+		{
+			FNAssemblyOperationSettings Settings = FNAssemblyOperationSettings::GetDefaultSettings();
+			Settings.DisplayName = FText::FromString("QueuedOrganAssembly");
+			UNAssemblyOperation* InstanceOperation = UNAssemblyOperation::CreateInstance(QueuedOrgansForAssembly, Settings);
 
-		StartOperation(InstanceOperation);
+			StartOperation(InstanceOperation);
 		
-		// We issue the generation and then clear the queue.
-		QueuedOrgansForAssembly.Empty();
+			// We issue the generation and then clear the queue.
+			QueuedOrgansForAssembly.Empty();
+		}
 	}
 }
 
@@ -282,6 +290,8 @@ void UNWorldAssemblySubsystem::UnregisterLocalRelay(const ANWorldAssemblyRelay* 
 
 void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ)
 {
+	
+	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return;
 	QueuedOrgansForAssembly.AddUnique(Organ);
 }
 

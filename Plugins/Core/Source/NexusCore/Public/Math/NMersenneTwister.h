@@ -79,9 +79,9 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random double.
 	 */
-	double DoubleRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl);
+	double DoubleRange(const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl);
 	/** Alias for DoubleRange, matching UE's FMath::RandRange naming. @return a pseudo random double between MinimumValue and MaximumValue. */
-	FORCEINLINE double RandRange(const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl)
+	FORCEINLINE double RandRange(const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl)
 	{
 		return DoubleRange(MinimumValue, MaximumValue);
 	}
@@ -94,7 +94,7 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
 	 */
-	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
+	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
 	
 	/**
 	 * Returns a pseudo random float between 0 and 1.
@@ -116,9 +116,9 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @return a pseudo random float.
 	 */
-	float FloatRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt);
+	float FloatRange(const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt);
 	/** Alias for FloatRange, matching UE's FMath::RandRange naming. @return a pseudo random float between MinimumValue and MaximumValue. */
-	FORCEINLINE float RandRange(const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt)
+	FORCEINLINE float RandRange(const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt)
 	{
 		return FloatRange(MinimumValue, MaximumValue);
 	}
@@ -131,7 +131,7 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
 	 */
-	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
+	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
 
 	/**
 	* Generate a pseudo random integer between minimum and maximum.
@@ -139,9 +139,9 @@ public:
 	* @param MaximumValue The highest possible value.
 	* @return a pseudo random integer.
 	*/
-	int32 IntegerRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32);
+	int32 IntegerRange(const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32);
 	/** Alias for IntegerRange, matching UE's FMath::RandRange naming. @return a pseudo random integer between MinimumValue and MaximumValue. */
-	FORCEINLINE int32 RandRange(const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32)
+	FORCEINLINE int32 RandRange(const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32)
 	{
 		return IntegerRange(MinimumValue, MaximumValue);
 	}
@@ -154,7 +154,7 @@ public:
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
 	 */
-	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
+	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
 
 	/**
 	* Generate a pseudo random unsigned integer between minimum and maximum.
@@ -185,7 +185,7 @@ public:
 	 * @param MaximumRange  The maximum X, Y, Z range.
 	 * @return The random FVector.
 	 */
-	FVector Vector(const float MinimumRange = MIN_flt, const float MaximumRange = MAX_flt);
+	FVector Vector(const float MinimumRange = -MIN_flt, const float MaximumRange = MAX_flt);
 	
 	/**
 	 * Generate a pseudo random normalized FVector.

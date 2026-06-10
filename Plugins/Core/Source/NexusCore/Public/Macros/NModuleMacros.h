@@ -41,8 +41,11 @@ public: \
 	FCoreDelegates::OnPostEngineInit.RemoveAll(this);
 
 #define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE() \
-	static void OnPostEngineInit();
+	static void OnPostEngineInit(); \
 	static FDelegateHandle OnPostEngineInitDelegateHandle;
+
+#define N_MODULE_POST_ENGINE_INIT_STATIC_DELEGATE_IMPLEMENTATION(Type) \
+	FDelegateHandle Type::OnPostEngineInitDelegateHandle;
 
 #define N_MODULE_POST_ENGINE_INIT_STATIC(Method) \
 	if (IPluginManager::Get().GetLastCompletedLoadingPhase() >= ELoadingPhase::PostDefault) \
@@ -55,7 +58,11 @@ public: \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE() \
-	FCoreDelegates::OnPostEngineInit.Remove(OnPostEngineInitDelegateHandle);
+	if (OnPostEngineInitDelegateHandle.IsValid()) \
+	{ \
+		FCoreDelegates::OnPostEngineInit.Remove(OnPostEngineInitDelegateHandle); \
+		OnPostEngineInitDelegateHandle.Reset(); \
+	}
 
 /**
  * Editor-only: synchronizes a plugin's .uplugin Version / VersionName with NEXUS::Version.

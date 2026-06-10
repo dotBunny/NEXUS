@@ -68,7 +68,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 	
 	if (TemplateCount > 0 && bRandomizeSeed)
 	{
-		Seed = FNRandom::GetNonDeterministic().RandHelper(42);
+		Seed = FNRandom::GetNonDeterministic().RandHelper(MAX_int32);
 	}
 
 	if (Distribution == ENActorPoolSpawnerDistribution::Spline)

@@ -109,13 +109,15 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 
 	if (bHasTickableSpawners)
 	{
-		for (UNActorPoolSpawnerComponent* Spawner : TickableSpawners)
+		// Reverse mainly so if one of these things unregisters due to some callback we don't implode (ub)
+		for (int32 Index = TickableSpawners.Num() - 1; Index >= 0; --Index)
 		{
-			if (Spawner != nullptr)
+			if (UNActorPoolSpawnerComponent* Spawner = TickableSpawners[Index])
 			{
 				Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
 			}
 		}
+		bHasTickableSpawners = !TickableSpawners.IsEmpty();
 	}
 
 	if (NEXUS::ActorPools::ConsoleCommands::bTrackStats)

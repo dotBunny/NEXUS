@@ -85,15 +85,20 @@ public:
 	/**
 	 * Get a player's unique identifier from the APlayerController.
 	 * @param PlayerController The target APlayerController to use when querying for the player identification number.
-	 * @return The player's identifier.
+	 * @param bShouldLogWarning Should a warning be logged when the player's APlayerState is unavailable? Pass false for expected-failure polling (e.g. while a player is still connecting).
+	 * @return The player's identifier, or -1 when the APlayerState is unavailable.
+	 * @note A return of 0 is a valid identifier state — it means the APlayerState exists but the session has not assigned an identifier yet; only -1 indicates the state was missing entirely.
 	 */
-	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
+	FORCEINLINE static int32 GetPlayerIdentifier(const APlayerController* PlayerController, const bool bShouldLogWarning = true)
 	{
 		APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
 		if (PlayerState == nullptr)
 		{
-			UE_LOG(LogNexusCore, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning 0."));
-			return 0;
+			if (bShouldLogWarning)
+			{
+				UE_LOG(LogNexusCore, Warning, TEXT("GetPlayerIdentifier: Player state is nullptr, returning -1."));
+			}
+			return -1;
 		}
 		return PlayerState->GetPlayerId();
 	}

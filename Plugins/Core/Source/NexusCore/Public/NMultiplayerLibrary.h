@@ -161,10 +161,7 @@ public:
 			meta = (DocsURL="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/#get-playeridentifier"))
 	static int32 GetPlayerIdentifier(const APlayerController* PlayerController)
 	{
-		N_VALIDATE_RETURN(LogNexusCore, PlayerController, 0)
-		const APlayerState* PlayerState = PlayerController->GetPlayerState<APlayerState>();
-		N_VALIDATE_RETURN(LogNexusCore, PlayerState, 0)
-		return PlayerState->GetPlayerId();
+		return FNMultiplayerUtils::GetPlayerIdentifier(PlayerController);
 	}
 
 	/**

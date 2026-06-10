@@ -4,7 +4,7 @@
 #if WITH_TESTS
 
 #include "NActorPool.h"
-#include "NPooledActor.h"
+#include "NPooledActorBase.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
@@ -27,7 +27,7 @@ N_TEST_HIGH(FNActorPoolTests_CreateActor_SpawnReturnsNull,
 		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage);
 
 		// ANPooledActor is UCLASS(Abstract); World->SpawnActorAbsolute returns nullptr for it.
-		FNActorPool Pool = FNActorPool(World, ANPooledActor::StaticClass(), Settings);
+		FNActorPool Pool = FNActorPool(World, ANPooledActorBase::StaticClass(), Settings);
 		// PostInitialize -> Fill() -> CreateActors(1) -> CreateActor; spawn fails, error logged.
 
 		CHECK_EQUALS("InActors must remain empty when CreateActor's SpawnActorAbsolute returns null.", Pool.GetAvailableCount(), 0)
@@ -54,7 +54,7 @@ N_TEST_HIGH(FNActorPoolTests_Spawn_PropagatesCreateFailure,
 		Settings.Strategy = ENActorPoolStrategy::Create;
 		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage);
 
-		FNActorPool Pool = FNActorPool(World, ANPooledActor::StaticClass(), Settings);
+		FNActorPool Pool = FNActorPool(World, ANPooledActorBase::StaticClass(), Settings);
 
 		AActor* Result = Pool.Spawn(FVector::ZeroVector, FRotator::ZeroRotator);
 		if (Result != nullptr)
