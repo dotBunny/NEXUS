@@ -149,6 +149,16 @@ bool UNWorldAssemblySubsystem::IsReady(const bool bWaitOnStreaming)
 	return LocalRelay->IsReady();
 }
 
+FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
+{
+	if (LocalRelay == nullptr)
+	{
+		return FIntVector2::ZeroValue;
+	}
+	
+	return LocalRelay->GetRemainingStatus();
+}
+
 void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
 {
 	TrackedActorsForCleanup.AddUnique(Actor);

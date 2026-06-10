@@ -67,6 +67,9 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady(bool bWaitOnStreaming = true);
 	
+	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the remaining Cell Level Instances to sync (Remaining/Total) on clients. Zero if server."))
+	FIntVector2 GetRemainingStatus();
+	
 	/**
 	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.
 	 *
@@ -125,6 +128,10 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FNSimpleDynamicMulticastDelegate OnCleared;
 
+	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
+	UFUNCTION(BlueprintCallable, DisplayName="Spawn Relay", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Helpful for seamless travel, on server to spawn relays after a travel."))
+	void SpawnRelay(APlayerController* PlayerController);
+	
 private:
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
@@ -165,8 +172,6 @@ private:
 	void OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer);
 	/** GameMode::OnLogout handler — destroys the relay associated with Exiting, if any. */
 	void OnLogout(AGameModeBase* GameMode, AController* Exiting);
-	/** Spawn an ANWorldAssemblyRelay bound to PlayerController and store it in RelayMap. */
-	void SpawnRelay(APlayerController* PlayerController);
 	/** Destroy the relay previously spawned for PlayerController and remove it from RelayMap. */
 	void DestroyRelay(APlayerController* PlayerController);
 };

@@ -97,11 +97,15 @@ public:
 	 * @param bIsLevelLoaded Consider only level instances whose underlying level has finished loading.
 	 */
 	static bool HasCellLevelInstances(int32 OperationTicket = 0, bool bIsLevelLoaded = true);
+	
 	/** Query whether every locator in the supplied set is currently registered. */
 	static bool HasCellLevelInstances(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
+
+	/** Returns an array of FNCellLevelInstanceLocator that have not been sync/registered yet. */
+	static TArray<FNCellLevelInstanceLocator> GetRemainingCellLevelInstancesToSync(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded = true);
+	
 	/** Query whether a specific (operation, spawn GUID) level instance is registered. */
 	static bool HasCellLevelInstance(int32 OperationTicket, FGuid LevelInstanceSpawnGuid, bool bIsLevelLoaded = true);
-
 
 	/** Register a bone component with the registry. @return true on first registration. */
 	static bool RegisterBoneComponent(UNBoneComponent* Component);

@@ -243,6 +243,19 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const TArray<FNCellLevelInst
 	return true;
 }
 
+TArray<FNCellLevelInstanceLocator> FNWorldAssemblyRegistry::GetRemainingCellLevelInstancesToSync(const TArray<FNCellLevelInstanceLocator>& LevelInstances, bool bIsLevelLoaded)
+{
+	TArray<FNCellLevelInstanceLocator> WaitingOnInstances;
+	for (const auto Locator : LevelInstances)
+	{
+		if (!HasCellLevelInstance(Locator.OperationTicket, Locator.LevelInstanceSpawnGuid, bIsLevelLoaded))
+		{
+			WaitingOnInstances.Add(Locator);
+		}
+	}
+	return MoveTemp(WaitingOnInstances);
+}
+
 bool FNWorldAssemblyRegistry::RegisterBoneComponent(UNBoneComponent* Component)
 {
 	if (Bones.Contains(Component))
