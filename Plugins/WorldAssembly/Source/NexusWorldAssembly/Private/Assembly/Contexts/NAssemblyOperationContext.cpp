@@ -141,7 +141,7 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 	else
 	{
 		// An unbounded component intersects with everything, no good way about this, they will generate first
-		WorkingOrganData->Bounds = FBox(FVector(MIN_dbl, MIN_dbl, MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
+		WorkingOrganData->Bounds = FBox(FVector(-MIN_dbl, -MIN_dbl, -MIN_dbl), FVector(MAX_dbl, MAX_dbl, MAX_dbl));
 		for (UNOrganComponent* OtherComponent : LevelComponents)
 		{
 			if (OtherComponent == Component) continue;
