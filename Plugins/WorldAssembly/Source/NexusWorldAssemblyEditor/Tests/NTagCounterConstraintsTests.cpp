@@ -97,8 +97,8 @@ N_TEST_HIGH(FNTagCounterConstraintsTests_TagCounterConstraints_MissingTagGated,
 	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::TagCounterConstraints::MissingTagGated",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// A constraint on a tag the counter has never seen fails (absent tags are not treated as zero by
-	// DoesPassComparison — it short-circuits on Has), so the candidate is gated out.
+	// A constraint on a tag the counter has never seen compares against a count of zero (DoesPassComparison treats an
+	// absent tag as zero), and 0 >= 1 fails, so the constraint fails and the candidate is gated out.
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNTagCounterConstraintsHarness;
 
 	const FNVirtualCellData Cell = MakeCell({ MakeConstraint(CounterTagA(), ENComparisonResult::GreaterThanOrEqual, 1) });

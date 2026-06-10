@@ -68,7 +68,7 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		
-		return MoveTemp(Settings);
+		return Settings;
 	}
 
 	/** @return Default editor-preview settings (level instances disabled) with a freshly generated seed. */
@@ -84,6 +84,6 @@ struct NEXUSWORLDASSEMBLY_API FNAssemblyOperationSettings
 		Settings.CellSpawnTimeSlice = AssemblySettings->AssemblySpawningCellProxiesTimeSlice;
 		Settings.TagCounters = FNGameplayTagCounter(AssemblySettings->AssemblyTagCounters);
 		
-		return MoveTemp(Settings);
+		return Settings;
 	}
 };

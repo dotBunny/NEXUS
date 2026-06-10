@@ -121,6 +121,6 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 				ValidRanges.Add(FVector4(-HalfMaxDimensions.X, HoleMaxY, HoleMinX, HalfMaxDimensions.Y));
 			}
 		}
-		return MoveTemp(ValidRanges);
+		return ValidRanges;
 	}
 };

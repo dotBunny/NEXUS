@@ -59,7 +59,7 @@ TArray<FString> UNGameUserSettingsLibrary::GetWindowModeStringSelections()
 	{
 		Selections.Add(Text.ToString());
 	}
-	return MoveTemp(Selections);
+	return Selections;
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
@@ -148,7 +148,7 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 	{
 		SupportedResolutions.Add(FString::Printf(TEXT("%ix%i"), Resolution.X, Resolution.Y));
 	}
-	return MoveTemp(SupportedResolutions);
+	return SupportedResolutions;
 }
 
 void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)

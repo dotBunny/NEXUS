@@ -36,7 +36,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNOrientedBoxPicker::Next(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -56,7 +56,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNOrientedBoxPicker::Random(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -77,7 +77,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNOrientedBoxPicker::Tracked(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNOrientedBoxPicker::OneShot(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 
 	/**
@@ -140,6 +140,6 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	{
 		FNOrientedBoxPickerParams Params;
 		Params.InitializeFrom(OrientedBox);
-		return MoveTemp(Params);
+		return Params;
 	}
 };

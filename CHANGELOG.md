@@ -2,7 +2,6 @@
 
 ## [0.3.2] - 2026-07-13
 
-
 ### Added
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
@@ -15,6 +14,8 @@
 - `FNMultiplayerUtils::GetPlayerIdentifier` now returns `-1` when the `PlayerState` is not available.
 - `ANPooledActor` renamed `ANPooledActorBase`.
 - Clients with `BeginPlay` flagged `UNOrganComponents` will not generate without authority.
+- `FNGameplayTagCounterConstraint` defaults the comparison value to `0` if the tag is not found.
+- `FNGameplayTagCounter` no longer floors counts at zero; the mutation API (`Add`/`Subtract`/`Increment`/`Decrement`) now produces signed values, keeping operations losslessly reversible and consistent with `GetDifference`/`Combine`.
 
 ### Fixed
 
@@ -22,6 +23,7 @@
 - `ANWorldAssemblyRelay` now properly responds to `IsReady` (`ANCellLevelInstances` now register appropriately when on clients)
 - Macros for PostEngineInit for modules now function properly during teardown.
 - Bounds and Center on `FNRawMesh` now initialized at creation (no more garbage memory comparisons).
+- `FNMultiplayerUtils` player-lookup helpers now guard against a null `AGameStateBase`, and `HasWorldAuthority(const UWorld*)` guards against a null `UWorld`, preventing crashes during world startup/teardown and on clients before initial replication.
 
 ### Removed
 

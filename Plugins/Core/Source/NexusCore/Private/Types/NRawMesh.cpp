@@ -571,7 +571,7 @@ FDynamicMesh3 FNRawMesh::CreateDynamicMesh(const bool bProcessMesh) const
 		FMeshNormals::QuickComputeVertexNormals(DynamicMesh);
 	}
 
-	return MoveTemp(DynamicMesh);
+	return DynamicMesh;
 }
 
 int32 FNRawMesh::SplitEdge(const int32 VertexAIndex, const int32 VertexBIndex)

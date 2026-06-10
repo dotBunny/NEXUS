@@ -36,7 +36,7 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNRectanglePicker::Next(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -56,7 +56,7 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNRectanglePicker::Random(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -77,7 +77,7 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNRectanglePicker::Tracked(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNRectanglePicker::OneShot(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 
 	/**

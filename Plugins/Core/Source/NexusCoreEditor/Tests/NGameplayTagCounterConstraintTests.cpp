@@ -36,23 +36,37 @@ namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterConstraintHarness
 	}
 }
 
-N_TEST_CRITICAL(FNGameplayTagCounterConstraintTests_DoesPassComparison_AbsentTagAlwaysFails,
-	"NEXUS::UnitTests::NCore::FNGameplayTagCounterConstraint::DoesPassComparison::AbsentTagAlwaysFails",
+N_TEST_CRITICAL(FNGameplayTagCounterConstraintTests_DoesPassComparison_AbsentTagComparesAsZero,
+	"NEXUS::UnitTests::NCore::FNGameplayTagCounterConstraint::DoesPassComparison::AbsentTagComparesAsZero",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// A constraint on a tag the counter has never seen fails for every comparison — DoesPassComparison short-circuits
-	// on Has() and does NOT treat an absent tag as a count of zero. This even includes NotEqual, which would otherwise
-	// pass against any non-matching value.
+	// A constraint on a tag the counter has never seen compares against a count of zero rather than asserting:
+	// TryGetValue leaves Current at 0 for an absent tag, so the constraint behaves exactly as it would for a tag
+	// explicitly tracked at 0. This mirrors GetValue/TryGetValue elsewhere in FNGameplayTagCounter, and every
+	// comparison operator is covered with both a passing and a failing value.
 	using namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterConstraintHarness;
 
 	const FNGameplayTagCounter Counter = CounterWith(PresentTag(), 5);
 
-	CHECK_FALSE_MESSAGE(TEXT("Equal on an absent tag must fail."),
+	CHECK_MESSAGE(TEXT("Equal 0 on an absent tag passes (absent counts as zero)."),
 		MakeConstraint(AbsentTag(), ENComparisonResult::Equal, 0).DoesPassComparison(Counter))
-	CHECK_FALSE_MESSAGE(TEXT("NotEqual on an absent tag must still fail (absence is not zero)."),
+	CHECK_FALSE_MESSAGE(TEXT("Equal 1 on an absent tag fails (0 != 1)."),
+		MakeConstraint(AbsentTag(), ENComparisonResult::Equal, 1).DoesPassComparison(Counter))
+
+	CHECK_MESSAGE(TEXT("NotEqual 999 on an absent tag passes (0 != 999)."),
 		MakeConstraint(AbsentTag(), ENComparisonResult::NotEqual, 999).DoesPassComparison(Counter))
-	CHECK_FALSE_MESSAGE(TEXT("GreaterThanOrEqual on an absent tag must fail."),
+	CHECK_FALSE_MESSAGE(TEXT("NotEqual 0 on an absent tag fails (0 == 0)."),
+		MakeConstraint(AbsentTag(), ENComparisonResult::NotEqual, 0).DoesPassComparison(Counter))
+
+	CHECK_MESSAGE(TEXT("GreaterThanOrEqual 0 on an absent tag passes (0 >= 0)."),
 		MakeConstraint(AbsentTag(), ENComparisonResult::GreaterThanOrEqual, 0).DoesPassComparison(Counter))
+	CHECK_FALSE_MESSAGE(TEXT("GreaterThan 0 on an absent tag fails (0 is not > 0)."),
+		MakeConstraint(AbsentTag(), ENComparisonResult::GreaterThan, 0).DoesPassComparison(Counter))
+
+	CHECK_MESSAGE(TEXT("LessThan 1 on an absent tag passes (0 < 1)."),
+		MakeConstraint(AbsentTag(), ENComparisonResult::LessThan, 1).DoesPassComparison(Counter))
+	CHECK_FALSE_MESSAGE(TEXT("LessThanOrEqual -1 on an absent tag fails (0 is not <= -1)."),
+		MakeConstraint(AbsentTag(), ENComparisonResult::LessThanOrEqual, -1).DoesPassComparison(Counter))
 }
 
 N_TEST_HIGH(FNGameplayTagCounterConstraintTests_DoesPassComparison_Equal,

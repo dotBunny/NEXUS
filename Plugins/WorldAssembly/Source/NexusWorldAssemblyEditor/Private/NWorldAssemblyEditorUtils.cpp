@@ -92,7 +92,7 @@ TArray<ANCellActor*> FNWorldAssemblyEditorUtils::GetSelectedCellActors()
 	{
 		if (ANCellActor* TestActor = Cast<ANCellActor>( *SelectedActor )) Result.Add(TestActor);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 bool FNWorldAssemblyEditorUtils::IsOrganVolumeSelected()
@@ -127,7 +127,7 @@ TArray<ANOrganVolume*> FNWorldAssemblyEditorUtils::GetSelectedOrganVolumes(const
 			return A.GetOrganComponent()->Identifier < B.GetOrganComponent()->Identifier;
 		});
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<UNOrganComponent*> FNWorldAssemblyEditorUtils::GetSelectedOrganComponents(const bool bSorted)
@@ -148,7 +148,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyEditorUtils::GetSelectedOrganComponents
 		});
 	}
 	
-	return MoveTemp(Components);
+	return Components;
 }
 
 ENWorldAssemblySelectionFlags FNWorldAssemblyEditorUtils::GetSelectionFlags()
@@ -386,5 +386,5 @@ TArray<FAssetData> FNWorldAssemblyEditorUtils::GetAllCellDataAssetData()
 	
 	TArray<FAssetData> FoundAssets;
 	AssetRegistry.GetAssets(Filter, FoundAssets);
-	return MoveTemp(FoundAssets);
+	return FoundAssets;
 }

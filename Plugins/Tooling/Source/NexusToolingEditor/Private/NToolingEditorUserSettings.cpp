@@ -125,7 +125,7 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestClientArguments() const
 		
 	ClientArguments.Append(FString::Printf(TEXT(" %s"), *ClientParameters.TrimStartAndEnd()));
 		
-	return MoveTemp(ClientArguments);
+	return ClientArguments;
 }
 
 FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
@@ -140,7 +140,7 @@ FString UNToolingEditorUserSettings::GetMultiplayerTestServerArguments() const
 		
 	ServerAdditionalArguments.Append(FString::Printf(TEXT(" %s"), *ServerParameters.TrimStartAndEnd()));
 		
-	return MoveTemp(ServerAdditionalArguments);
+	return ServerAdditionalArguments;
 }
 
 void UNToolingEditorUserSettings::ApplySettings(FRequestPlaySessionParams& Params) const

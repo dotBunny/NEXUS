@@ -51,7 +51,7 @@ N_TEST_CRITICAL(FNGameplayTagCounterTests_Operations_SubtractThenReverseRestores
 	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::Operations::SubtractThenReverseRestoresOriginal",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// Applying a Subtract then reversing it restores the original count, provided the value never hit the zero floor.
+	// Applying a Subtract then reversing it restores the original count.
 	using namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterHarness;
 
 	FNGameplayTagCounter Counter;
@@ -65,45 +65,47 @@ N_TEST_CRITICAL(FNGameplayTagCounterTests_Operations_SubtractThenReverseRestores
 	CHECK_EQUALS("Reversing the Subtract should restore the original 5.", Counter.GetValue(TagX()), 5)
 }
 
-N_TEST_HIGH(FNGameplayTagCounterTests_Operations_SubtractClampsAtZero,
-	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::Operations::SubtractClampsAtZero",
+N_TEST_HIGH(FNGameplayTagCounterTests_Operations_SubtractGoesNegativeBelowZero,
+	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::Operations::SubtractGoesNegativeBelowZero",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// The counter is documented to never go below zero; subtracting past zero floors at zero rather than going negative.
+	// The mutation API is not floored at zero; subtracting past the current count yields a negative value. This keeps
+	// Subtract the exact inverse of Add and matches the signed counts GetDifference and Combine already produce.
 	using namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterHarness;
 
 	FNGameplayTagCounter Counter;
 	Counter.Add(TagX(), 2);
 	Counter.Subtract(TagX(), 5);
 
-	CHECK_EQUALS("Subtracting 5 from 2 must clamp at zero, not go negative.", Counter.GetValue(TagX()), 0)
+	CHECK_EQUALS("Subtracting 5 from 2 should go negative to -3, not floor at zero.", Counter.GetValue(TagX()), -3)
 }
 
-N_TEST_MEDIUM(FNGameplayTagCounterTests_Operations_ClampedSubtractReverseIsLossy,
-	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::Operations::ClampedSubtractReverseIsLossy",
+N_TEST_MEDIUM(FNGameplayTagCounterTests_Operations_SubtractPastZeroReverseIsLossless,
+	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::Operations::SubtractPastZeroReverseIsLossless",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// Characterizes a real limitation: once a Subtract clamps at zero, the lost magnitude cannot be recovered, so the
-	// reverse over-restores (2 -> clamp 0 -> +5 = 5, not 2). The generator avoids this by never driving a counter
-	// below zero; this test pins the behavior so any future change to the clamping contract is deliberate.
+	// With no zero floor, a Subtract that drives the count negative is still losslessly reversible: the apply goes
+	// 2 -> -3 and the reverse restores +5 back to 2. This is the property the per-cell backtrack in the organ builder
+	// relies on, now sound regardless of whether a counter dips below zero mid-traversal.
 	using namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterHarness;
 
 	FNGameplayTagCounter Counter;
 	Counter.Add(TagX(), 2);
 
 	const FNGameplayTagCounterOperation Op = MakeOp(TagX(), ENGameplayTagCounterOperationType::Subtract, 5);
-	Counter.ApplyOperation(Op);  // clamps to 0, losing 3
-	Counter.ReverseOperation(Op); // adds 5
+	Counter.ApplyOperation(Op);  // 2 -> -3
+	CHECK_EQUALS("Subtract of 5 from 2 should go to -3.", Counter.GetValue(TagX()), -3)
 
-	CHECK_EQUALS("A clamped Subtract is not losslessly reversible; the reverse over-restores to 5.", Counter.GetValue(TagX()), 5)
+	Counter.ReverseOperation(Op); // -3 -> 2
+	CHECK_EQUALS("Reversing the Subtract restores the original 2 exactly.", Counter.GetValue(TagX()), 2)
 }
 
 N_TEST_HIGH(FNGameplayTagCounterTests_GetDifference_IsPerTagSubtraction,
 	"NEXUS::UnitTests::NCore::FNGameplayTagCounter::GetDifference::IsPerTagSubtraction",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// GetDifference yields this-minus-other per tag, treating an absent tag as zero on either side, and (unlike
-	// Add/Subtract) is not floored — a tag present only in Other comes back negative.
+	// GetDifference yields this-minus-other per tag, treating an absent tag as zero on either side; a tag present
+	// only in Other comes back negative.
 	using namespace NEXUS::UnitTests::NCore::FNGameplayTagCounterHarness;
 
 	// Guard the reused-tag dependency: if these registered tags ever disappear they would all resolve to the same

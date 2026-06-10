@@ -33,7 +33,7 @@ FNPositionRotation UNOrganComponent::GetDebugLabelPositionRotation() const
 		PositionRotation.Rotation = Owner->GetActorRotation();
 	}
 	
-	return MoveTemp(PositionRotation);
+	return PositionRotation;
 }
 
 void UNOrganComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI) const

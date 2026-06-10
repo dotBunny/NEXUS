@@ -21,28 +21,31 @@ ILevelInstanceInterface* FNLevelUtils::GetActorLevelInstance(const AActor* Actor
 
 TArray<FString> FNLevelUtils::GetAllMapNames(TArray<FString> SearchPaths)
 {
-	TArray<FString> ReturnArray = TArray<FString>();
+	TArray<FString> ReturnArray;
 	TArray<FAssetData> AssetDataArray;
 
 	// Create our search library
 	UObjectLibrary* ObjectLibrary = UObjectLibrary::CreateLibrary(UWorld::StaticClass(), false, true);
-	
-	for (FString& PathRoot : SearchPaths)
+
+	// Load every search path into the library first. UObjectLibrary accumulates across LoadAssetDataFromPath calls.
+	for (const FString& PathRoot : SearchPaths)
 	{
 		ObjectLibrary->LoadAssetDataFromPath(PathRoot);
-		ObjectLibrary->GetAssetDataList(AssetDataArray); // Copies its internal array to AssetDataArray
+	}
 
-		const int32 Count = AssetDataArray.Num();
-		for (int32 i = 0; i < Count; ++i)
-		{
-			ReturnArray.Add(AssetDataArray[i].AssetName.ToString());
-		}
+	// Harvest once. GetAssetDataList snapshots the whole accumulated library, so collecting inside the load loop
+	// above would re-add every earlier path's maps on each subsequent iteration (one duplicate per extra path).
+	ObjectLibrary->GetAssetDataList(AssetDataArray);
+	ReturnArray.Reserve(AssetDataArray.Num());
+	for (const FAssetData& Data : AssetDataArray)
+	{
+		ReturnArray.Add(Data.AssetName.ToString());
 	}
 
 	// Flag object to be destroyed
 	ObjectLibrary->MarkAsGarbage();
 
-	return MoveTemp(ReturnArray);
+	return ReturnArray;
 }
 
 void FNLevelUtils::DetermineLevelBounds(ULevel* InLevel, FBox& OutBounds, TArray<const AActor*>& OutIgnoredActors,

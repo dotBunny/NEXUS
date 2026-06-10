@@ -33,5 +33,5 @@ TArray<AActor*> UNActorLibrary::ToActorArray(const TArray<UObject*> InObjects)
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor != nullptr) ReturnArray.Add(Actor);
 	}
-	return MoveTemp(ReturnArray);
+	return ReturnArray;
 }

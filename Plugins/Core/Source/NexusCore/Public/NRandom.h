@@ -19,6 +19,8 @@ public:
 	 */
 	FORCEINLINE static FNMersenneTwister& GetDeterministic()
 	{
+		// Not really sure if this 
+		check(IsInGameThread())
 		return Deterministic;
 	}
 

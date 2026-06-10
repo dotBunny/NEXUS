@@ -21,15 +21,17 @@ uint64 FNMersenneTwister::NextBounded(const uint64 Range)
 
 bool FNMersenneTwister::Bias(const float Chance)
 {
-	return this->Float() <= Chance;
+	return this->Float() < Chance;
 }
 
 void FNMersenneTwister::Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
-		OutArray[i] = ToUnitFloat(this->Engine()) <= Chance;
+		OutArray[i] = ToUnitFloat(this->Engine()) < Chance;
 	}
 	this->CallCounter += Count;
 }
@@ -45,6 +47,8 @@ bool FNMersenneTwister::Bool()
 void FNMersenneTwister::Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = (this->Engine() >> 63) != 0ULL;
@@ -62,6 +66,8 @@ double FNMersenneTwister::Double()
 void FNMersenneTwister::Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = ToUnitDouble(this->Engine());
@@ -73,6 +79,8 @@ void FNMersenneTwister::DoubleRange(TArray<double>& OutArray, const int32 Count,
 	const double MaximumValue, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	const double Span = MaximumValue - MinimumValue;
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
@@ -91,6 +99,8 @@ float FNMersenneTwister::Float()
 void FNMersenneTwister::Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
 		OutArray[i] = ToUnitFloat(this->Engine());
@@ -116,6 +126,8 @@ void FNMersenneTwister::FloatRange(TArray<float>& OutArray, const int32 Count, c
 	const float MaximumValue, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	const float Span = MaximumValue - MinimumValue;
 	for (int32 i = StartIndex; i < ActualCount; i++)
 	{
@@ -140,6 +152,8 @@ void FNMersenneTwister::IntegerRange(TArray<int32>& OutArray, const int32 Count,
 	const int32 MaximumValue, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	if (MaximumValue <= MinimumValue)
 	{
 		for (int32 i = StartIndex; i < ActualCount; i++)
@@ -173,6 +187,8 @@ void FNMersenneTwister::UnsignedIntegerRange(TArray<uint32>& OutArray, const int
 	const uint32 MaximumValue, const int32 StartIndex)
 {
 	const int32 ActualCount = StartIndex + Count;
+	checkf(OutArray.Num() >= ActualCount,
+		TEXT("OutArray (%d) is smaller than StartIndex + Count (%d)."), OutArray.Num(), ActualCount);
 	if (MaximumValue <= MinimumValue)
 	{
 		for (int32 i = StartIndex; i < ActualCount; i++)

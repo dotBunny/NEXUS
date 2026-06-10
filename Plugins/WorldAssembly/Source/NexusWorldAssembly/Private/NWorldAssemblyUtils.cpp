@@ -19,7 +19,7 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	// Go home early
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(LevelBounds);
+		return LevelBounds;
 	}
 	
 	TArray<const AActor*> IgnoredActors;
@@ -38,7 +38,7 @@ FBox FNWorldAssemblyUtils::CalculatePlayableBounds(ULevel* InLevel, const FNCell
 	
 	FNLevelUtils::DetermineLevelBounds(InLevel, LevelBounds, IgnoredActors, Settings.ActorIgnoreTags, Settings.bIncludeEditorOnly, Settings.bIncludeNonColliding);
 	
-	return MoveTemp(LevelBounds);
+	return LevelBounds;
 }
 
 
@@ -49,7 +49,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 	
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(Mesh);
+		return Mesh;
 	}
 	
 	// Check for Cell Actor
@@ -171,7 +171,7 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	// Go home early
 	if (InLevel == nullptr)
 	{
-		return MoveTemp(ReturnData);
+		return ReturnData;
 	}
 	
 	// Prefill Ignored Actors to effect downstream
@@ -250,7 +250,7 @@ FNCellVoxelData FNWorldAssemblyUtils::CalculateVoxelData(ULevel* InLevel, const 
 	}
 	// #SONARQUBE-ENABLE
 	
-	return MoveTemp(ReturnData);
+	return ReturnData;
 }
 
 int32 FNWorldAssemblyUtils::GetCellActorCountFromLevel(const ULevel* Level)
@@ -335,7 +335,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyUtils::GetOrganComponentsFromLevel(cons
 		});
 	}
     
-	return MoveTemp(Result);
+	return Result;
 
 }
 
@@ -388,7 +388,7 @@ TArray<FVector2D> FNWorldAssemblyUtils::GetSocketPoints2D(const FIntVector2& Uni
 			Points.Add(FVector2D(WidthStart + (i * UnitSize.X), HeightStart + (y * UnitSize.Y)));
 		}
 	}
-	return MoveTemp(Points);
+	return Points;
 }
 
 TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
@@ -421,7 +421,7 @@ TArray<FVector> FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
 		ReturnPositions[3] = FVector(-HalfWidth,HalfHeight, 0);
 	}
 
-	return MoveTemp(ReturnPositions);
+	return ReturnPositions;
 }
 
 void FNWorldAssemblyUtils::GetVoxelQueryPoints(const FVector& WorldCenter, const FVector& VoxelSize, TArray<FVector>& OutPositions)

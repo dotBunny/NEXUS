@@ -196,7 +196,7 @@ public:
 		{
 			SelectedPaths.AddUnique(AdditionalPath);
 		}
-		return MoveTemp(SelectedPaths);
+		return SelectedPaths;
 	}
 	
 	/** Marks Config so it will not be bundled with staged/packaged builds. */

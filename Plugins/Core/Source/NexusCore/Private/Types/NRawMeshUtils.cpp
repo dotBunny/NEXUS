@@ -427,7 +427,7 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, co
 		SpawnParams.ObjectFlags |= RF_Transient;
 		
 		ANDebugActor* DebugActor = World->SpawnActor<ANDebugActor>(ANDebugActor::StaticClass(), BaseTransform, SpawnParams);
-		if (DebugActor == nullptr) return MoveTemp(DebugActors);
+		if (DebugActor == nullptr) return DebugActors;
 		
 		DebugActor->OverrideWithDynamicMesh(BaseMesh.CreateDynamicMesh(bProcessMeshes), MaterialInterface);
 		DebugActors.Add(DebugActor);
@@ -451,7 +451,7 @@ TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, co
 			DebugActors.Add(DebugActor);
 		}
 	}
-	return MoveTemp(DebugActors);
+	return DebugActors;
 }
 
 FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
@@ -466,7 +466,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	if (Mesh.Vertices.Num() < 4)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("Cannot build a convex hull from fewer than 4 vertices; returning empty mesh."));
-		return MoveTemp(Result);
+		return Result;
 	}
 
 	// Feed the source vertex cloud into Chaos's hull builder; the source loops are discarded.
@@ -488,7 +488,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	if (VerticesCount == 0 || LoopCount == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("Convex hull build returned no geometry; returning empty mesh."));
-		return MoveTemp(Result);
+		return Result;
 	}
 
 	Result.Vertices.Reserve(VerticesCount);
@@ -525,7 +525,7 @@ FNRawMesh FNRawMeshUtils::ToConvexHull(const FNRawMesh& Mesh)
 	Result.ConvertToTriangles();
 	Result.bHasNonTris = false;
 
-	return MoveTemp(Result);
+	return Result;
 }
 
 FNRawMesh FNRawMeshUtils::MakeBoxHull(const FBox& Box)

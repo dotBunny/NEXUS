@@ -31,7 +31,7 @@ TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsCompon
 	TArray<UNCellJunctionComponent*> JunctionComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(JunctionComponents);
+		return JunctionComponents;
 	}
 
 	for (UNCellJunctionComponent* Junction : GetCellJunctionComponents())
@@ -50,7 +50,7 @@ TArray<UNCellJunctionComponent*> FNWorldAssemblyRegistry::GetCellJunctionsCompon
 		});
 	}
 	
-	return MoveTemp(JunctionComponents);
+	return JunctionComponents;
 }
 
 TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(const ULevel* Level, const bool bSorted)
@@ -58,7 +58,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(c
 	TArray<UNOrganComponent*> OrganComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(OrganComponents);
+		return OrganComponents;
 	}
 
 	for (UNOrganComponent* Organ : GetOrganComponents())
@@ -77,7 +77,7 @@ TArray<UNOrganComponent*> FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(c
 	}
 	
 
-	return MoveTemp(OrganComponents);
+	return OrganComponents;
 }
 
 TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(const ULevel* Level, const bool bSorted)
@@ -85,7 +85,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 	TArray<UNBoneComponent*> BoneComponents;
 	if (Level == nullptr)
 	{
-		return MoveTemp(BoneComponents);
+		return BoneComponents;
 	}
 
 	for (UNBoneComponent* Bone : GetBoneComponents())
@@ -103,7 +103,7 @@ TArray<UNBoneComponent*> FNWorldAssemblyRegistry::GetBoneComponentsFromLevel(con
 		});
 	}
 
-	return MoveTemp(BoneComponents);
+	return BoneComponents;
 }
 
 UNCellRootComponent* FNWorldAssemblyRegistry::GetCellRootComponentFromLevel(const ULevel* Level)
@@ -175,7 +175,7 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstances(const int32 OperationTicket,
 TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRange(const FVector& Location, const double Range, const bool bIsLevelLoaded, const int32 OperationTicket)
 {
 	TArray<ANCellLevelInstance*> Results;
-	if (CellLevelInstances.IsEmpty()) return MoveTemp(Results);
+	if (CellLevelInstances.IsEmpty()) return Results;
 	
 	const double RangeSquared = Range * Range;
 
@@ -211,7 +211,7 @@ TArray<ANCellLevelInstance*> FNWorldAssemblyRegistry::GetCellLevelInstancesInRan
 		}
 	}
 
-	return MoveTemp(Results);
+	return Results;
 }
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstance(const int32 OperationTicket, const FGuid LevelInstanceSpawnGuid, const bool bIsLevelLoaded)
@@ -253,7 +253,7 @@ TArray<FNCellLevelInstanceLocator> FNWorldAssemblyRegistry::GetRemainingCellLeve
 			WaitingOnInstances.Add(Locator);
 		}
 	}
-	return MoveTemp(WaitingOnInstances);
+	return WaitingOnInstances;
 }
 
 bool FNWorldAssemblyRegistry::RegisterBoneComponent(UNBoneComponent* Component)

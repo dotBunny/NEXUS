@@ -38,7 +38,7 @@ FNObjectSnapshot FNObjectSnapshotUtils::Snapshot()
 	}
 
 	// Send it back
-	return MoveTemp(Snapshot);
+	return Snapshot;
 }
 
 FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnapshot, const FNObjectSnapshot& NewSnapshot, const bool bRemoveKnownLeaks)
@@ -100,7 +100,7 @@ FNObjectSnapshotDiff FNObjectSnapshotUtils::Diff(const FNObjectSnapshot& OldSnap
 		RemoveKnownLeaks(Diff);
 	}
 
-	return MoveTemp(Diff);
+	return Diff;
 }
 
 void FNObjectSnapshotUtils::RemoveKnownLeaks(FNObjectSnapshotDiff& Diff)

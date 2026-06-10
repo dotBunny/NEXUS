@@ -44,7 +44,7 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 	FNRawMesh MergedMesh;
 	if (World == nullptr)
 	{
-		return MoveTemp(MergedMesh);
+		return MergedMesh;
 	}
 
 	// Same world-geometry definition assembly uses: filtered actors' simple collision, gathered within Bounds.
@@ -65,7 +65,7 @@ FNRawMesh FNWorldCollisionCache::Build(const UWorld* World, const TArray<FBoxSph
 		FNRawMeshUtils::CombineMesh(MergedTransform, MergedMesh, CollisionTransforms[i], CollisionMeshes[i]);
 	}
 
-	return MoveTemp(MergedMesh);
+	return MergedMesh;
 }
 
 void FNWorldCollisionCache::Invalidate()

@@ -248,7 +248,7 @@ TArray<FNActorPool*> UNActorPoolSubsystem::GetAllPools() const
 	{
 		ReturnPools.Add(Pair.Value().Get());
 	}
-	return MoveTemp(ReturnPools);
+	return ReturnPools;
 }
 
 void UNActorPoolSubsystem::AddTickableActorPool(FNActorPool* ActorPool)

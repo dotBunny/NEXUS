@@ -40,7 +40,7 @@ USceneComponent* FNActorUtils::GetRootComponentFromDefaultObject(const TSubclass
 TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldActorFilterSettings& Settings)
 {
 	TArray<AActor*> ReturnActors;
-	if (World == nullptr) return MoveTemp(ReturnActors);
+	if (World == nullptr) return ReturnActors;
 
 	for (TActorIterator<AActor> WorldActorIterator(World); WorldActorIterator; ++WorldActorIterator)
 	{
@@ -51,7 +51,7 @@ TArray<AActor*> FNActorUtils::GetWorldActors(const UWorld* World, const FNWorldA
 		}
 	}
 
-	return MoveTemp(ReturnActors);
+	return ReturnActors;
 }
 
 bool FNActorUtils::PassesFilter(const AActor* Actor, const FNWorldActorFilterSettings& Settings)

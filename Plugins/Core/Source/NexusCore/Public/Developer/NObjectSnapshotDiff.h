@@ -162,7 +162,7 @@ struct NEXUSCORE_API FNObjectSnapshotDiff
 			});
 		}
 		
-		return MoveTemp(Report);
+		return Report;
 	}
 
 	/** Writes a detailed summary of the diff to LogNexusCore, one category and one entry per line. */

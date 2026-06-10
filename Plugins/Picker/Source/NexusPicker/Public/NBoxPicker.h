@@ -93,6 +93,6 @@ public:
 							 && !IsPointInsideOrOn(Origin, MinimumBox, Point);
 			OutResults.Add(bValid);
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

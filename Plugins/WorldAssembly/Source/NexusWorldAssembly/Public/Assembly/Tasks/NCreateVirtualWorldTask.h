@@ -37,7 +37,7 @@ public:
 		ActorFilterSettings.bExcludeNonCollisionEnabledActors = true;
 		ActorFilterSettings.bIncludePlayerStarts = true;
 		ActorFilterSettings.ExclusionFunction = &IsWorldCollisionSource;
-		return MoveTemp(ActorFilterSettings);
+		return ActorFilterSettings;
 	}
 
 	/**

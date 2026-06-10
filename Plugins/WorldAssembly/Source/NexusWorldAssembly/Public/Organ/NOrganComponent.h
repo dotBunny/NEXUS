@@ -109,7 +109,7 @@ public:
 				Components.Add(Cast<UNOrganComponent>(Object));
 			}
 		}
-		return MoveTemp(Components);
+		return Components;
 	}
 
 	/** Render the organ's debug outline and labels via the provided primitive draw interface. */

@@ -36,7 +36,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNArcPicker::Next(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -56,7 +56,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNArcPicker::Random(ReturnLocations, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -77,7 +77,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNArcPicker::Tracked(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**
@@ -98,7 +98,7 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
 		FNArcPicker::OneShot(ReturnLocations, Seed, Params);
-		return MoveTemp(ReturnLocations);
+		return ReturnLocations;
 	}
 	
 	/**

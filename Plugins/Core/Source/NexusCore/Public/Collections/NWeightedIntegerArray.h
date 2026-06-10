@@ -240,7 +240,7 @@ struct FNWeightedIntegerArray
 		{
 			Values.AddUnique(Data[i]);
 		}
-		return MoveTemp(Values);
+		return Values;
 	}
 
 	/**

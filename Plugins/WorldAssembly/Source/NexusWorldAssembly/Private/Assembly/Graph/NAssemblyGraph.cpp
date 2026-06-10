@@ -77,7 +77,7 @@ TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()
 			}
 		}
 	}
-	return MoveTemp(ReturnNodes);
+	return ReturnNodes;
 }
 
 void FNAssemblyGraph::CleanupBuilderReferences()

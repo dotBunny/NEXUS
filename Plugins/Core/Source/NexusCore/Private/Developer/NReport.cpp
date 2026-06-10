@@ -147,7 +147,7 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 	// Early out since we don't have any tokens
 	if (ReplaceTokens.IsEmpty())
 	{
-		return MoveTemp(Output);
+		return Output;
 	}
 
 	// Flatten the token map once so the per-line loop avoids repeated hash lookups; cache each token's length to skip
@@ -171,7 +171,7 @@ TArray<FString> FNReport::GetReportLines(const ENReportOutputFormat OutputFormat
 		}
 	}
 
-	return MoveTemp(Output);
+	return Output;
 }
 
 void FNReport::OutputToFile(const FString& FilePath, const ENReportOutputFormat OutputFormat)

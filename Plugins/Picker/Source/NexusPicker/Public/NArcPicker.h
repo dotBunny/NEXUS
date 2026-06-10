@@ -108,6 +108,6 @@ public:
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, Rotation, Degrees, MinimumDistance, MaximumDistance, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

@@ -100,6 +100,6 @@ public:
 		{
 			OutResults.Add(IsPointInsideOrOn(Origin, MinimumRadius, MaximumRadius, Rotation, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

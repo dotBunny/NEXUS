@@ -42,6 +42,7 @@ public:
 	 * @param Count The number of results to generate.
 	 * @param Chance The 0-1 percent chance of success
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Bias(TArray<bool>& OutArray, const int32 Count, const float Chance, const int32 StartIndex = 0);
 
@@ -56,6 +57,7 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Bool(TArray<bool>& OutArray, const int32 Count, const int32 StartIndex = 0);
 
@@ -70,6 +72,7 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Double(TArray<double>& OutArray, const int32 Count, const int32 StartIndex = 0);
 	
@@ -93,6 +96,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void DoubleRange(TArray<double>& OutArray, const int32 Count, const double MinimumValue = -MIN_dbl, const double MaximumValue = MAX_dbl, const int32 StartIndex = 0);
 	
@@ -107,6 +111,7 @@ public:
 	 * @param OutArray A pre-allocated array to fill with the results.
 	 * @param Count The number of results to generate.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void Float(TArray<float>& OutArray, const int32 Count, const int32 StartIndex = 0);
 
@@ -130,6 +135,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void FloatRange(TArray<float>& OutArray, const int32 Count, const float MinimumValue = -MIN_flt, const float MaximumValue = MAX_flt, const int32 StartIndex = 0);
 
@@ -153,6 +159,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void IntegerRange(TArray<int32>& OutArray, const int32 Count, const int32 MinimumValue = -MIN_int32, const int32 MaximumValue = MAX_int32, const int32 StartIndex = 0);
 
@@ -176,6 +183,7 @@ public:
 	 * @param MinimumValue The lowest possible value.
 	 * @param MaximumValue The highest possible value.
 	 * @param StartIndex The index to start writing at.
+	 * @note Asserts via checkf that OutArray holds at least StartIndex + Count elements; an undersized array is a caller error, not handled gracefully.
 	 */
 	void UnsignedIntegerRange(TArray<uint32>& OutArray, const int32 Count,const uint32 MinimumValue = MIN_uint32, const uint32 MaximumValue = MAX_uint32, const int32 StartIndex = 0);
 

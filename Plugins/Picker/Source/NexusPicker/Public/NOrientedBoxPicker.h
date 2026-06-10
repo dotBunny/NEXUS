@@ -100,6 +100,6 @@ public:
 							 && !IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point);
 			OutResults.Add(bValid);
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

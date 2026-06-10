@@ -114,7 +114,7 @@ FString FNSeedGenerator::RandomFriendlySeed()
 			ReturnSeed.AppendChar('-');
 		}
 	}
-	return MoveTemp(ReturnSeed);
+	return ReturnSeed;
 }
 
 FString FNSeedGenerator::SanitizeHexSeed(const FString& InHexSeed)

@@ -268,7 +268,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef)
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor) Result.Add(Actor);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(const FName Name)
@@ -279,7 +279,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActorsByName(const FName Name)
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor) Result.Add(Actor);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 int32 UNDynamicRefSubsystem::GetCount(const ENDynamicRef DynamicRef)
@@ -375,7 +375,7 @@ TArray<FName> UNDynamicRefSubsystem::GetNames() const
 			Result.Add(Pair.Key);
 		}
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
@@ -388,7 +388,7 @@ TArray<ENDynamicRef> UNDynamicRefSubsystem::GetDynamicRefs() const
 			Result.Add(static_cast<ENDynamicRef>(i));
 		}
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 const FNDynamicRefCollection& UNDynamicRefSubsystem::GetObjectCollectionRefUnsafe(const ENDynamicRef DynamicRef)
@@ -415,7 +415,7 @@ TArray<FGameplayTag> UNDynamicRefSubsystem::GetTags() const
 			Result.Add(Tag);
 		}
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActorsByTag(FGameplayTag Tag)
@@ -507,7 +507,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAnyTags(const FGameplayTagCo
 			}
 		}
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAnyTags(const FGameplayTagContainer& Tags)
@@ -518,7 +518,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAnyTags(const FGameplayTagCont
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor) Result.Add(Actor);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 int32 UNDynamicRefSubsystem::GetCountByAnyTags(const FGameplayTagContainer& Tags)
@@ -574,7 +574,7 @@ TArray<UObject*> UNDynamicRefSubsystem::GetObjectsByAllTags(const FGameplayTagCo
 		}
 		if (bInAll) Result.Add(Object);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAllTags(const FGameplayTagContainer& Tags)
@@ -585,7 +585,7 @@ TArray<AActor*> UNDynamicRefSubsystem::GetActorsByAllTags(const FGameplayTagCont
 		AActor* Actor = Cast<AActor>(Object);
 		if (Actor) Result.Add(Actor);
 	}
-	return MoveTemp(Result);
+	return Result;
 }
 
 int32 UNDynamicRefSubsystem::GetCountByAllTags(const FGameplayTagContainer& Tags)

@@ -408,7 +408,7 @@ TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeBounds(const 
 			HitNodes.Add(SourceNode);
 		}
 	}
-	return MoveTemp(HitNodes);
+	return HitNodes;
 }
 
 TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNAssemblyGraphCellNode* NewNode) const
@@ -424,7 +424,7 @@ TArray<FNAssemblyGraphCellNode*> FNOrganGraphBuilderTask::CheckNodeHull(FNAssemb
 			HitNodes.Add(SourceNode);
 		}
 	}
-	return MoveTemp(HitNodes);
+	return HitNodes;
 }
 
 TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessNode(FNMersenneTwister& Random, FNAssemblyGraphNode* SourceNode, const bool bIsEndNode) const
@@ -646,7 +646,7 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		}
 	}
 	
-	return MoveTemp(NewNodes);
+	return NewNodes;
 }
 
 void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random) const

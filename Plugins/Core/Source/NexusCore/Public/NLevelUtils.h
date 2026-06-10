@@ -38,9 +38,9 @@ public:
 	};
 
 	/**
-	 * Enumerates all known map package names reachable from the supplied search paths.
+	 * Enumerates the names of all maps reachable from the supplied search paths.
 	 * @param SearchPaths A list of content-root relative paths (e.g. "/Game/Maps") to scan for maps.
-	 * @return An array of package names of all maps found underneath the search paths.
+	 * @return The short asset name of every map found under the search paths, one entry per map asset (not the full package path).
 	 */
 	static TArray<FString> GetAllMapNames(TArray<FString> SearchPaths);
 

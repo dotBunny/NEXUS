@@ -235,6 +235,6 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	{
 		TArray<int32> Keys;
 		Junctions.GetKeys(Keys);
-		return MoveTemp(Keys);
+		return Keys;
 	}
 };

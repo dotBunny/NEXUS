@@ -146,6 +146,6 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 				FVector(MinimumBox.Max.X, MinimumBox.Max.Y, MaximumBox.Max.Z)
 			));
 		}
-		return MoveTemp(Boxes);
+		return Boxes;
 	}
 };

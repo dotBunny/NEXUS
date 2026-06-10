@@ -30,31 +30,39 @@ struct FNGameplayTagCounterConstraint
 	/** The value the tag's current count is compared against via Comparison. */
 	UPROPERTY(EditAnywhere)
 	int32 Value = 1;
-	
-	
+
+	/**
+	 * Tests whether a tag's current count in a counter satisfies this constraint.
+	 * @param TagCounter The counter whose count for Tag is compared against Value via Comparison.
+	 * @return true if the comparison holds; false otherwise, including when Comparison is unrecognized.
+	 * @note A tag the counter does not track is compared as a count of zero.
+	 */
 	bool DoesPassComparison(const FNGameplayTagCounter& TagCounter) const
 	{
-		if (!TagCounter.Has(Tag)) return false;
-		
+		// TryGetValue leaves Current at zero for an untracked tag, so an absent tag compares as a count of zero
+		// rather than asserting on a missing key the way GameplayTags[Tag] would.
+		int32 Current = 0;
+		TagCounter.TryGetValue(Tag, Current);
+
 		switch (Comparison)
 		{
 		case ENComparisonResult::Equal:
-			return TagCounter.GameplayTags[Tag] == Value;
-			
+			return Current == Value;
+
 		case ENComparisonResult::GreaterThan:
-			return TagCounter.GameplayTags[Tag] > Value;
-			
+			return Current > Value;
+
 		case ENComparisonResult::GreaterThanOrEqual:
-			return TagCounter.GameplayTags[Tag] >= Value;
-			
+			return Current >= Value;
+
 		case ENComparisonResult::LessThan:
-			return TagCounter.GameplayTags[Tag] < Value;
-			
+			return Current < Value;
+
 		case ENComparisonResult::LessThanOrEqual:
-			return TagCounter.GameplayTags[Tag] <= Value;
-			
+			return Current <= Value;
+
 		case ENComparisonResult::NotEqual:
-			return TagCounter.GameplayTags[Tag] != Value;
+			return Current != Value;
 		}
 		
 		return false;

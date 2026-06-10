@@ -94,6 +94,6 @@ public:
 							 && !IsPointInsideOrOn(Origin, MinimumRadius, Point);
 			OutResults.Add(bValid);
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

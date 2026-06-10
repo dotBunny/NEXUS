@@ -109,7 +109,7 @@ struct NEXUSCORE_API FNObjectSnapshot
 			});
 		}
 		
-		return MoveTemp(Report);
+		return Report;
 	}
 
 	/** Writes a detailed summary of the snapshot to LogNexusCore, one entry per line. */

@@ -98,6 +98,6 @@ public:
 		{
 			OutResults.Add(IsPointOn(SplineComponent, Point));
 		}
-		return MoveTemp(OutResults);
+		return OutResults;
 	}
 };

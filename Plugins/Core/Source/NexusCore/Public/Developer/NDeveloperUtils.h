@@ -69,7 +69,7 @@ public:
 				}
 			}
 		}
-		return MoveTemp(RootedObjects);
+		return RootedObjects;
 	}
 
 	/**

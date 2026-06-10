@@ -168,7 +168,7 @@ struct FNCollisionVisualizerQuery
 	{
 		FCollisionResponseParams Parameters;
 		Parameters.CollisionResponse = CollisionResponses;
-		return MoveTemp(Parameters);
+		return Parameters;
 	}
 
 	/**
@@ -207,7 +207,7 @@ struct FNCollisionVisualizerQuery
 			Names.Add(ProfileTemplate->Name);
 		}
 
-		return MoveTemp(Names);
+		return Names;
 	}
 };
 
@@ -248,7 +248,7 @@ struct FNCollisionVisualizerOptions
 		Parameters.bIgnoreBlocks = bIgnoreBlocks;
 		Parameters.bIgnoreTouches = bIgnoreTouches;
 		Parameters.bSkipNarrowPhase = bSkipNarrowPhase;
-		return MoveTemp(Parameters);
+		return Parameters;
 	}
 };
 
