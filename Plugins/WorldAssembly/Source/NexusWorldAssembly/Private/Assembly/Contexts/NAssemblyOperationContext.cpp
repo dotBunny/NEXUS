@@ -14,6 +14,25 @@
 #include "Math/NBoundsUtils.h"
 #include "Organ/NOrganComponent.h"
 
+namespace
+{
+	// Unbound organs are deliberately scheduled into their own trailing passes (see LockAndPreprocess), so a
+	// container must never wait on an unbound organ it merely encloses — doing so would leave the container
+	// permanently unschedulable and dropped as a false "circular cycle". Returns true only when Data has at
+	// least one *bound* contained organ that genuinely gates its ordering.
+	bool HasBoundContainedOrgan(const FNWorldOrganData& Data)
+	{
+		for (const TObjectPtr<UNOrganComponent>& Contained : Data.ContainedComponents)
+		{
+			if (Contained != nullptr && !Contained->bUnbound)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+}
+
 FNAssemblyOperationContext::FNAssemblyOperationContext(const int32 NewOperationTicket)
 {
 	OperationTicket = NewOperationTicket;
@@ -88,7 +107,15 @@ bool FNAssemblyOperationContext::AddOrganComponent(UNOrganComponent* Component)
 				continue;
 			}
 
+			// Organs are not guaranteed to live on a volume (a non-volume organ is treated as unbounded elsewhere),
+			// so an owner that is not an AVolume has no bounds to test against — skip it rather than dereferencing a
+			// null cast.
 			const AVolume* OtherComponentVolume = Cast<AVolume>(OtherComponent->GetOwner());
+			if (OtherComponentVolume == nullptr)
+			{
+				continue;
+			}
+			
 			FBoxSphereBounds OtherVolumeBounds = OtherComponentVolume->GetBounds();
 
 			// Check for intersection of any type
@@ -176,10 +203,12 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 	{
 		// Again dont look at Unbounded here
 		if (Pair.Key->bUnbound) continue;
-		
-		// Handle "easy" work parallelization classification
-		if (FNWorldOrganData& ComponentContext = Pair.Value; 
-			ComponentContext.ContainedComponents.IsEmpty())
+
+		// Handle "easy" work parallelization classification. Only *bound* contained organs gate ordering;
+		// unbound ones are scheduled last in their own passes, so an organ that contains only unbound organs
+		// still qualifies for the first parallel phase.
+		if (FNWorldOrganData& ComponentContext = Pair.Value;
+			!HasBoundContainedOrgan(ComponentContext))
 		{
 			PossibleComponents.Remove(Pair.Key);
 			ProcessedComponents.Add(Pair.Key);
@@ -210,11 +239,15 @@ void FNAssemblyOperationContext::LockAndPreprocess(UWorld* World)
 			UNOrganComponent* Component = PossibleComponents[i];
 			FNWorldOrganData* TargetOrganData = OrganData.Find(Component);
 			
-			// Ensure all contained organs are processed / not this iteration
+			// Ensure all contained organs are processed / not this iteration. Unbound contained organs are
+			// scheduled last in their own pass and never gate their container, so skip them here — otherwise a
+			// container enclosing an unbound organ could never be ordered and would be dropped.
 			bool bAllContainsProcessed = true;
 			for (auto ContainedComponent : TargetOrganData->ContainedComponents)
 			{
-				if (!ProcessedComponents.Contains(ContainedComponent) || 
+				if (ContainedComponent == nullptr || ContainedComponent->bUnbound) continue;
+
+				if (!ProcessedComponents.Contains(ContainedComponent) ||
 					PhaseProcessed.Contains(ContainedComponent))
 				{
 					bAllContainsProcessed = false;

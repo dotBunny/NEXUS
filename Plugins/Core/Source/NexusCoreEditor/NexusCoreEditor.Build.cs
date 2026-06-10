@@ -31,6 +31,7 @@ namespace UnrealBuildTool.Rules
 					"CoreUObject",
 					"DeveloperSettings",
 					"Engine",
+					"GameplayTags",
 					"GeometryCore",
 					"HTTP",
 					"Kismet",
