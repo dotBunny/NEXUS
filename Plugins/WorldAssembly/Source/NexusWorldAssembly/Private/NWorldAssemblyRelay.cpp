@@ -28,13 +28,6 @@ FIntVector2 ANWorldAssemblyRelay::GetRemainingStatus() const
 {
 	const TArray<FNCellLevelInstanceLocator> RemainingLocators = FNWorldAssemblyRegistry::GetRemainingCellLevelInstancesToSync(CachedNearbyCellLevelInstances);
 	const int RemainingCount = RemainingLocators.Num();
-	
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Waiting %i/%i"), RemainingLocators.Num(), CachedNearbyCellLevelInstances.Num());
-	for (int i = 0; i < RemainingCount; i++)
-	{
-		UE_LOG(LogNexusWorldAssembly, Log, TEXT("Waiting on %i:%s @ %s"), RemainingLocators[i].OperationTicket, 
-			*RemainingLocators[i].LevelInstanceSpawnGuid.ToString(), *RemainingLocators[i].Location.ToString());
-	}
 	return FIntVector2(RemainingCount, CachedNearbyCellLevelInstances.Num());
 }
 

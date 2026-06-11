@@ -91,7 +91,7 @@ public:
 	/** @return true if at least one registered organ component belongs to an actor in the supplied world. */
 	static bool HasOrganComponentsInWorld(const UWorld* World);
 	/** @return true if any World Assembly operations are currently known. */
-	static bool HasOperations(bool bIgnoreEditorModeOperation = true);
+	static bool HasOperations();
 	/**
 	 * @param OperationTicket Ticket to scope the query; 0 queries across all operations.
 	 * @param bIsLevelLoaded Consider only level instances whose underlying level has finished loading.

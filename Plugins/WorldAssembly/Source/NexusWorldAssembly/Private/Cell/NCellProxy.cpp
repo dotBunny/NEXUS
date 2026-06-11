@@ -102,6 +102,12 @@ void ANCellProxy::CreateLevelInstance()
 	
 	// Cache reference to spawned actor
 	LevelInstance = Cast<ANCellLevelInstance>(SpawnedLevelInstanceActor);
+	if (LevelInstance == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssembly, Warning,
+			TEXT("ANCellProxy(%s) failed to spawn its ANCellLevelInstance; the world is likely tearing down."), *GetName());
+		return;
+	}
 	
 	// Replicated assembly data
 	LevelInstance->AssemblyData = AssemblyData;
@@ -133,6 +139,7 @@ void ANCellProxy::LoadLevelInstance(const bool bBlocking)
 	if (LevelInstance == nullptr)
 	{
 		CreateLevelInstance();
+		if (LevelInstance == nullptr) return;
 	}
 	
 	ULevelInstanceSubsystem* Subsystem = GetWorld()->GetSubsystem<ULevelInstanceSubsystem>();

@@ -20,7 +20,7 @@ UENUM(BlueprintType)
 enum class ENOrganGenerationTrigger : uint8
 {
 	OnDemand = 0	UMETA(DisplayName="On Demand", ToolTip = "Generates only when requested (e.g. via Blueprint or Subsystem)."),
-	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the compent receives it's BeginPlay call.")
+	BeginPlay = 1	UMETA(DisplayName="Begin Play", ToolTip = "Generates when the component receives it's BeginPlay call.")
 };
 
 /**

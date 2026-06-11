@@ -47,7 +47,7 @@ struct FNAssemblyOperationResult
 	/** Detailed result message for display. */
 	FText Message;
 
-	/** Total wall-clock time the operation took, in seconds. */
+	/** Total wall-clock time the operation took, in milliseconds. */
 	float Duration = 0.0f;
 	/** Number of cells created during the operation. */
 	int CreatedCells;

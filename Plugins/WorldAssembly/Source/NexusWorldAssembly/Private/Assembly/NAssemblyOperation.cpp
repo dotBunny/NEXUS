@@ -152,8 +152,9 @@ void UNAssemblyOperation::UpdateCachedResult()
 	for (int i = 0; i < Context->InputComponents.Num(); i++)
 	{
 		UNOrganComponent* Organ = Context->InputComponents[i];
-		FGuid OrganIdentifier = Organ->Identifier;
 		if (Organ == nullptr) continue;
+		
+		FGuid OrganIdentifier = Organ->Identifier;
 		
 		// Add default fail
 		OrganResults.Add(OrganIdentifier, false);

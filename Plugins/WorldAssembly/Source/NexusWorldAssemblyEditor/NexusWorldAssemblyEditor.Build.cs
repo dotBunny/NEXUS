@@ -40,8 +40,7 @@ namespace UnrealBuildTool.Rules
 					"SlateCore",
 					"ToolMenus",
 					"UMG",
-					"UMGEditor",
-					"UnrealEd"
+					"UMGEditor"
 				]
 			);
 			

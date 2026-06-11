@@ -100,7 +100,7 @@ public:
 	float AssemblyDirectionTolerance = 15.f;
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
-	meta=(ToolTip="The target maxium allowed frame time to spawn cells before a new task is queued with the remainder."))
+	meta=(ToolTip="The target maximum allowed frame time to spawn cells before a new task is queued with the remainder."))
 	float AssemblySpawningCellProxiesTimeSlice = 2.f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
