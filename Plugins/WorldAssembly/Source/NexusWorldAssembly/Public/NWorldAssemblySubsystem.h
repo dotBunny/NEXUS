@@ -93,7 +93,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual bool IsTickable() const override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
-	virtual void Deinitialize() override;
+	virtual void OnWorldEndPlay(UWorld& InWorld) override;
 	N_TICKABLE_WORLD_SUBSYSTEM_GET_TICKABLE_TICK_TYPE(ETickableTickType::Conditional)
 	//End UTickableWorldSubsystem
 

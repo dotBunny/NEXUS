@@ -309,12 +309,30 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 			EnsurePlayerControllerRelays(InWorld.GetWorld());
 		}
 	}
-
+	//FWorldDelegates::OnSeamlessTravelTransition
 	Super::OnWorldBeginPlay(InWorld);
 }
 
-void UNWorldAssemblySubsystem::Deinitialize()
+void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
+	RelayMap.Reset();
+	TrackedActorsForCleanup.Empty();
+	LocalRelay = nullptr;
+	
+	// Stop all known operations
+	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
+	{
+		UNAssemblyOperation* Operation = KnownOperations[i];
+		if (Operation->IsRunning())
+		{
+			Operation->Cancel();
+		}
+		else
+		{
+			Operation->TearDownOperation();
+		}
+	}
+	
 	// Clear cached persistent operation data
 	if (CachedOperationTickets.Num() > 0)
 	{
@@ -332,26 +350,8 @@ void UNWorldAssemblySubsystem::Deinitialize()
 		FGameModeEvents::GameModeLogoutEvent.Remove(OnLogoutHandle);
 		OnLogoutHandle.Reset();
 	}
-	RelayMap.Reset();
-	TrackedActorsForCleanup.Empty();
 	
-	LocalRelay = nullptr;
-	
-	// Stop all known operations
-	for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
-	{
-		UNAssemblyOperation* Operation = KnownOperations[i];
-		if (Operation->IsRunning())
-		{
-			Operation->Cancel();
-		}
-		else
-		{
-			Operation->TearDownOperation();
-		}
-	}
-
-	Super::Deinitialize();
+	Super::OnWorldEndPlay(InWorld);
 }
 
 void UNWorldAssemblySubsystem::OnPostLogin(AGameModeBase* GameMode, APlayerController* NewPlayer)
