@@ -71,7 +71,7 @@ public:
 	void SetOrganCellCount(const FGuid& OrganIdentifier, const int32 NewCount)
 	{
 		FScopeLock Lock(&OrganCellMutex);
-		OrganCellCount.FindOrAdd(OrganIdentifier, NewCount);
+		OrganCellCount.Add(OrganIdentifier, NewCount);
 	}
 
 	/**

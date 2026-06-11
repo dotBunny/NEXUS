@@ -50,7 +50,7 @@ struct FNAssemblyOperationResult
 	/** Total wall-clock time the operation took, in milliseconds. */
 	float Duration = 0.0f;
 	/** Number of cells created during the operation. */
-	int CreatedCells;
+	int32 CreatedCells = 0;
 	
 	void Reset()
 	{
