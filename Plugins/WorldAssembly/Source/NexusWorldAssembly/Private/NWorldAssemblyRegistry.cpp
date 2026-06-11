@@ -160,14 +160,28 @@ bool FNWorldAssemblyRegistry::HasOperations()
 
 bool FNWorldAssemblyRegistry::HasCellLevelInstances(const int32 OperationTicket, const bool bIsLevelLoaded)
 {
-	if (OperationTicket == 0)
+	// An entry only qualifies if it is non-null and, when bIsLevelLoaded is set, its underlying level has finished loading.
+	auto HasQualifying = [bIsLevelLoaded](const TArray<ANCellLevelInstance*>& Instances)
 	{
-		return !CellLevelInstances.IsEmpty();
+		for (ANCellLevelInstance* Instance : Instances)
+		{
+			if (Instance == nullptr) continue;
+			if (bIsLevelLoaded && !Instance->IsLoaded()) continue;
+			return true;
+		}
+		return false;
+	};
+
+	if (OperationTicket != 0)
+	{
+		const TArray<ANCellLevelInstance*>* LevelInstances = CellLevelInstances.Find(OperationTicket);
+		return LevelInstances != nullptr && HasQualifying(*LevelInstances);
 	}
-	
-	if (CellLevelInstances.Contains(OperationTicket))
+
+	// Search across all operations.
+	for (const auto& Pair : CellLevelInstances)
 	{
-		return !CellLevelInstances[OperationTicket].IsEmpty();
+		if (HasQualifying(Pair.Value)) return true;
 	}
 	return false;
 }
@@ -221,11 +235,10 @@ bool FNWorldAssemblyRegistry::HasCellLevelInstance(const int32 OperationTicket, 
 	{
 		for (ANCellLevelInstance* LevelInstance : *LevelInstances)
 		{
-			if (LevelInstance->GetLevelInstanceSpawnGuid() == LevelInstanceSpawnGuid)
-			{
-				if (bIsLevelLoaded && !LevelInstance->IsLoaded()) continue;
-				return true;
-			}
+			if (LevelInstance == nullptr) continue;
+			if (LevelInstance->GetLevelInstanceSpawnGuid() != LevelInstanceSpawnGuid) continue;
+			if (bIsLevelLoaded && !LevelInstance->IsLoaded()) continue;
+			return true;
 		}
 	}
 	return false;
