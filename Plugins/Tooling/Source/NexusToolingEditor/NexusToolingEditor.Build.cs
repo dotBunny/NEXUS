@@ -34,8 +34,6 @@ namespace UnrealBuildTool.Rules
 					"JsonUtilities",
 					"Kismet",
 					"LevelEditor",
-					"PCG",
-					"PCGEditor",
 					"Projects",
 					"ScriptableEditorWidgets",
 					"Slate",
