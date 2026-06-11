@@ -52,6 +52,7 @@ protected:
 	//~AActor
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void OnRep_Owner() override;
 	//End AActor
 
 	/**
@@ -74,7 +75,7 @@ private:
 	FDelegateHandle OnRequestNearbyHandle;
 
 	/** True when CachedNearbyCellLevelInstances has been populated by the server at least once. */
-	bool bHasNearbyCellLevelInstances = true;
+	bool bHasNearbyCellLevelInstances = false;
 
 	/** Most recently received nearby-cell payload. */
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;
@@ -84,6 +85,13 @@ private:
 
 	/** @return true if a nearby-cell payload is currently cached. */
 	bool HasNearbyCellLevelInstances();
-	
+
+	/**
+	 * Register this relay as the subsystem's local relay and kick an initial nearby-cell query.
+	 * No-ops unless the owner is the local player controller; safe to call more than once.
+	 * @remark Driven from both BeginPlay and OnRep_Owner so registration survives owner-replication ordering on clients.
+	 */
+	void TryRegisterAsLocalRelay();
+
 	TObjectPtr<UNWorldAssemblySubsystem> Subsystem;
 };

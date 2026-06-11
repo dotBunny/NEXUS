@@ -49,17 +49,38 @@ void ANWorldAssemblyRelay::BeginPlay()
 	// Link to world Subsystem regardless of ownership
 	// We will use this at times to callback to things on a client that get subscribed.
 	Subsystem = UNWorldAssemblySubsystem::Get(GetWorld());
-	
+
+	// Owner may already be set here (listen-server / owner replicated before BeginPlay).
+	// When it replicates afterwards on a client, OnRep_Owner drives the same path.
+	TryRegisterAsLocalRelay();
+}
+
+void ANWorldAssemblyRelay::OnRep_Owner()
+{
+	Super::OnRep_Owner();
+
+	// On owner-only actors the Owner property can replicate after BeginPlay (or during the initial
+	// bunch before it), so registration is anchored to whenever the owner actually resolves.
+	TryRegisterAsLocalRelay();
+}
+
+void ANWorldAssemblyRelay::TryRegisterAsLocalRelay()
+{
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
-	if (OwningPC != nullptr && OwningPC->IsLocalController())
+	if (OwningPC == nullptr || !OwningPC->IsLocalController()) return;
+
+	// OnRep_Owner can fire during the initial bunch before BeginPlay, so resolve the subsystem lazily.
+	if (Subsystem == nullptr)
 	{
-		if (Subsystem != nullptr)
-		{
-			Subsystem->RegisterLocalRelay(this);
-		}
-		// Initial check
-		UpdateNearbyCells();
+		Subsystem = UNWorldAssemblySubsystem::Get(GetWorld());
 	}
+	if (Subsystem == nullptr) return;
+
+	// Idempotent: re-registering the same relay is a no-op, so both entry points can call this safely.
+	Subsystem->RegisterLocalRelay(this);
+
+	// Initial check
+	UpdateNearbyCells();
 }
 
 void ANWorldAssemblyRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
