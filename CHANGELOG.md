@@ -2,6 +2,8 @@
 
 ## [0.3.2] - 2026-07-13
 
+>  It's important that you rebake any `UNCell` data (use the commandlet) as calculations and existing data needs to be rebuilt.
+
 ### Added
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
