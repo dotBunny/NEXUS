@@ -43,4 +43,21 @@ N_TEST_MEDIUM(FNHashUtilsTests_Dbj2_SingleChar, "NEXUS::UnitTests::NCore::FNHash
 	CHECK_MESSAGE(TEXT("Single-character hash should not be the initial seed"), HashA != 5381ull);
 }
 
+N_TEST_HIGH(FNHashUtilsTests_Dbj2_KnownValue, "NEXUS::UnitTests::NCore::FNHashUtils::Dbj2_KnownValue", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that ASCII input produces the canonical byte-wise djb2 value, pinning
+	// backward compatibility with hashes computed before the UTF-8 encoding pass.
+	const uint64 Hash = FNHashUtils::djb2(TEXT("hello"));
+	CHECK_EQUALS("ASCII input should match the canonical djb2 value", Hash, 210714636441ull);
+}
+
+N_TEST_HIGH(FNHashUtilsTests_Dbj2_NonAsciiDistinct, "NEXUS::UnitTests::NCore::FNHashUtils::Dbj2_NonAsciiDistinct", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that characters sharing the same low byte hash differently: U+03A9 (Greek
+	// capital omega) and U+00A9 (copyright sign) collide when TCHARs are truncated to one byte.
+	const uint64 HashOmega = FNHashUtils::djb2(TEXT("\u03A9"));
+	const uint64 HashCopyright = FNHashUtils::djb2(TEXT("\u00A9"));
+	CHECK_MESSAGE(TEXT("Characters sharing a low byte should produce different hashes"), HashOmega != HashCopyright);
+}
+
 #endif //WITH_TESTS

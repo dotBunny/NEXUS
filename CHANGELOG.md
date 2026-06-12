@@ -18,7 +18,7 @@
 - Clients with `BeginPlay` flagged `UNOrganComponents` will not generate without authority.
 - `FNGameplayTagCounterConstraint` defaults the comparison value to `0` if the tag is not found.
 - `FNGameplayTagCounter` no longer floors counts at zero; the mutation API (`Add`/`Subtract`/`Increment`/`Decrement`) now produces signed values, keeping operations losslessly reversible and consistent with `GetDifference`/`Combine`.
-- Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope.
+- Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope, Blueprint-exposed under the `NEXUS|Core|Random` category (`Seed`, `Random Bool`, `Random Bools`, `Random Integer In Range`).
 - Consolidated `Twisted` to `Next` concept/naming.
 
 ### Fixed
@@ -28,6 +28,7 @@
 - Macros for PostEngineInit for modules now function properly during teardown.
 - Bounds and Center on `FNRawMesh` now initialized at creation (no more garbage memory comparisons).
 - `FNMultiplayerUtils` player-lookup helpers now guard against a null `AGameStateBase`, and `HasWorldAuthority(const UWorld*)` guards against a null `UWorld`, preventing crashes during world startup/teardown and on clients before initial replication.
+- `FNHashUtils::djb2` now hashes the string's UTF-8 encoding instead of truncating each `TCHAR` to its low byte, so non-ASCII characters that share a low byte (e.g. `Ω` and `©`) no longer collide and `FNSeedGenerator::SeedFromString` gains full character information from non-Latin seed phrases. Pure-ASCII input hashes are unchanged.
 
 ### Removed
 
