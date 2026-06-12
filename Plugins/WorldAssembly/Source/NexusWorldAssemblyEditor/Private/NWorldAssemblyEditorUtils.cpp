@@ -201,8 +201,14 @@ void FNWorldAssemblyEditorUtils::SaveCell(UWorld* World, ANCellActor* CellActor,
 		return;
 	}
 
-	if (UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World); 
-		(UpdateCell(Cell, CellActor) || bForceSave))
+	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage(World);
+	if (Cell == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Unable to get or create the UNCell side-car package when trying to save."));
+		return;
+	}
+
+	if (UpdateCell(Cell, CellActor) || bForceSave)
 	{
 		// Need to tell the cell it's dirty so it gets saved to disk
 		// ReSharper disable once CppExpressionWithoutSideEffects

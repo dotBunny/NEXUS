@@ -70,6 +70,8 @@ public:
 	//End USceneComponent
 
 #if WITH_EDITOR
+	virtual void PostEditImport() override;
+
 	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent) override;
 
 	/** Editor hook: re-snaps the bone when its transform changes. */

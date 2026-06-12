@@ -84,9 +84,7 @@ FNRawMesh FNWorldAssemblyUtils::CalculateConvexHull(ULevel* InLevel, const FNCel
 			
 			// Author Time Only
 			if (CellActor != nullptr && CellActor->IsAuthorTimeActor(Actor)) continue;
-			
-			if (FNArrayUtils::ContainsAny(Actor->Tags, Settings.ActorIgnoreTags)) continue;
-			
+
 			FBox ActorBox = Actor->GetComponentsBoundingBox(Settings.bIncludeNonColliding);
 			if (ActorBox.IsValid && 
 				(ActorBox.GetExtent().X > 0 && ActorBox.GetExtent().Y > 0 && ActorBox.GetExtent().Z > 0))

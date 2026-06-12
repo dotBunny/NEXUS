@@ -98,6 +98,19 @@ void UNOrganComponent::OnUnregister()
 	Super::OnUnregister();
 }
 
+#if WITH_EDITOR
+void UNOrganComponent::PostEditImport()
+{
+	Super::PostEditImport();
+
+	// Editor duplication (alt-drag) and copy/paste both go through text import, which carries the serialized
+	// Identifier across to the copy. Regenerate it so duplicated organs don't share the GUID used for
+	// deterministic ordering and as the OrganResults / OrganCellCount map key. This hook does not fire on load,
+	// so the source organ keeps its identifier across saves.
+	Identifier = FGuid::NewGuid();
+}
+#endif // WITH_EDITOR
+
 void UNOrganComponent::GetTissueMap(TMap<TObjectPtr<UNCell>, FNTissueEntry>& OutMap, FNTissueTagGroups& OutTagGroups) const
 {
 	TArray<UNTissue*> ReferencedTissues;

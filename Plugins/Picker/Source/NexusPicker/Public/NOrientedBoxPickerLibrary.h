@@ -138,7 +138,7 @@ class NEXUSPICKER_API UNOrientedBoxPickerLibrary : public UBlueprintFunctionLibr
 	 * @return The initialized FNOrientedBoxPickerParams.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "OrientedBox: Initialize Params", Category = "NEXUS|Picker|OrientedBox")
-	static FNOrientedBoxPickerParams InitializeParms(const FOrientedBox& OrientedBox)
+	static FNOrientedBoxPickerParams InitializeParams(const FOrientedBox& OrientedBox)
 	{
 		FNOrientedBoxPickerParams Params;
 		Params.InitializeFrom(OrientedBox);

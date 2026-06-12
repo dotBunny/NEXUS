@@ -37,6 +37,9 @@ public:
 	 */
 	static void ClearContext(const TArray<int32>& OperationTickets);
 
+	
+	static void ClearAllContext();
+	
 	/**
 	 * Read the tag-counter value for a tag without exposing the cached counter.
 	 * @param OperationTicket The operation whose counter to query.

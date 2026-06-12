@@ -16,13 +16,10 @@ ANCellLevelInstance::ANCellLevelInstance()
 	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 	
 	// Ensure that we are never less than what we consider nearby
-	if (HasAuthority())
+	const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
+	if (GetNetCullDistanceSquared() < SquaredNearbyRange)
 	{
-		const float SquaredNearbyRange = Settings->NetworkNearbyRange * Settings->NetworkNearbyRange;
-		if (GetNetCullDistanceSquared() < SquaredNearbyRange)
-		{
-			SetNetCullDistanceSquared(SquaredNearbyRange);
-		}
+		SetNetCullDistanceSquared(SquaredNearbyRange);
 	}
 	
 	if (Settings->NetworkingMode == ENWorldAssemblyNetworkMode::AlwaysRelevantLevelInstances)
@@ -33,10 +30,12 @@ ANCellLevelInstance::ANCellLevelInstance()
 
 void ANCellLevelInstance::OnLevelInstanceLoaded()
 {
-	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromLevel(GetLoadedLevel());
+	const ULevel* LoadedLevel = GetLoadedLevel();
+	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromLevel(LoadedLevel);
 	if (!CellActor)
 	{
-		UE_LOG(LogNexusWorldAssembly, Error, TEXT("No ANCellActor found in level '%s'."), *GetLoadedLevel()->GetName());
+		UE_LOG(LogNexusWorldAssembly, Error, TEXT("No ANCellActor found in level '%s'."),
+			LoadedLevel ? *LoadedLevel->GetName() : TEXT("null"));
 		Super::OnLevelInstanceLoaded();
 		return;
 	}

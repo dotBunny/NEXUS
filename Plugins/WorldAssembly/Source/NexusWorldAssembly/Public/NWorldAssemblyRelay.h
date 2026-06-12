@@ -70,12 +70,18 @@ protected:
 	void Client_ReceiveNearbyCells(const TArray<FNCellLevelInstanceLocator>& Results);
 
 private:
-	
-	/** Handle for the delegate wiring this relay into the registry's nearby-request pipeline. */
-	FDelegateHandle OnRequestNearbyHandle;
 
 	/** True when CachedNearbyCellLevelInstances has been populated by the server at least once. */
 	bool bHasNearbyCellLevelInstances = false;
+
+	/** True between dispatching a nearby-cells request and receiving its reply; coalesces overlapping refreshes. */
+	bool bNearbyCellsRequestInFlight = false;
+
+	/** True when UpdateNearbyCells was called while a request was in flight; drives a single trailing refresh. */
+	bool bNearbyCellsUpdatePending = false;
+
+	/** bIsLevelLoaded value captured from the most recent UpdateNearbyCells call that coalesced into a pending refresh. */
+	bool bPendingIsLevelLoaded = true;
 
 	/** Most recently received nearby-cell payload. */
 	TArray<FNCellLevelInstanceLocator> CachedNearbyCellLevelInstances;

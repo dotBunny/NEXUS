@@ -32,7 +32,7 @@ UNAssemblyOperation* UNAssemblyOperation::CreateInstance(const TArray<UNOrganCom
 	{
 		Operation->AddToContext(Component);
 	}
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNWorldAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
 		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }
@@ -46,7 +46,7 @@ UNAssemblyOperation* UNAssemblyOperation::CreateInstance(const TArray<TWeakObjec
 	{
 		Operation->AddToContext(Organ);
 	}
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNWorldAssemblyOperation(%s) with GUID(%i) and Seed(%s)"),
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
 		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }
@@ -57,7 +57,7 @@ UNAssemblyOperation* UNAssemblyOperation::CreateInstance(UNOrganComponent* BaseC
 	Operation->ApplySettings(OperationSettings);
 	Operation->AddToContext(BaseComponent);
 	
-	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNWorldAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
+	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Created new UNAssemblyOperation(%s) with Ticket(%i) and Seed(%s)"),
 		*Operation->DisplayName.ToString(), Operation->GetTicket(), *OperationSettings.Seed);
 	return Operation;
 }

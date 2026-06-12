@@ -14,7 +14,7 @@
  * A utility class providing functionality to support World Assembly operations.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | World Assembly")
-class UNWorldAssemblyLibrary : public UBlueprintFunctionLibrary
+class NEXUSWORLDASSEMBLY_API UNWorldAssemblyLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 
@@ -26,41 +26,45 @@ public:
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The final context tags associated with the world assembly.
+	 * @note Returns a copy; edits made to it are not written back to the cell. Use Append/Remove Context Tags to persist changes.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags")
-	static FGameplayTagContainer& GetContextTags(ANCellLevelInstance* LevelInstance)
+	static FGameplayTagContainer GetContextTags(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetContextTags();
+		return IsValid(LevelInstance) ? LevelInstance->GetContextTags() : FGameplayTagContainer();
 	}
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The state of context tags when this cell was selected.
+	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags State")
-	static FGameplayTagContainer& GetContextTagsState(ANCellLevelInstance* LevelInstance)
+	static FGameplayTagContainer GetContextTagsState(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetContextTagsState();
+		return IsValid(LevelInstance) ? LevelInstance->GetContextTagsState() : FGameplayTagContainer();
 	}
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The context tags this cell added to the overall state.
+	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags Added")
-	static FGameplayTagContainer& GetContextTagsAdded(ANCellLevelInstance* LevelInstance)
+	static FGameplayTagContainer GetContextTagsAdded(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetContextTagsAdded();
+		return IsValid(LevelInstance) ? LevelInstance->GetContextTagsAdded() : FGameplayTagContainer();
 	}
 
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The assembly tags used by the cell itself.
+	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Assembly Tags")
-	static FGameplayTagContainer& GetAssemblyTags(ANCellLevelInstance* LevelInstance)
+	static FGameplayTagContainer GetAssemblyTags(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetAssemblyTags();
+		return IsValid(LevelInstance) ? LevelInstance->GetAssemblyTags() : FGameplayTagContainer();
 	}
 
 	/**
@@ -70,7 +74,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Hex Seed")
 	static FString GetHexSeed(ANCellLevelInstance* LevelInstance)
 	{
-		return FNSeedGenerator::HexFromSeed(LevelInstance->GetSeed());
+		return IsValid(LevelInstance) ? FNSeedGenerator::HexFromSeed(LevelInstance->GetSeed()) : FString();
 	}
 
 	/**
@@ -80,37 +84,40 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Node Identifier")
 	static int32 GetNodeIdentifier(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetNodeIdentifier();
+		return IsValid(LevelInstance) ? LevelInstance->GetNodeIdentifier() : INDEX_NONE;
 	}
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The final TagCounter for the assembly operation.
+	 * @note Returns a copy; edits made to it are not written back to the cell. Use Add/Subtract Tag Counter to persist changes.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Map)")
 	static TMap<FGameplayTag, int32> GetTagCounter(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetTagCounter();
+		return IsValid(LevelInstance) ? LevelInstance->GetTagCounter() : TMap<FGameplayTag, int32>();
 	}
 
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The final TagCounter for the assembly operation as an array of tag/count pairs.
+	 * @note Returns a copy; edits made to it are not written back to the cell. Use Add/Subtract Tag Counter to persist changes.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter (Array)")
 	static TArray<FNGameplayTagCount> GetTagCounterArray(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetTagCounterArray();
+		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterArray() : TArray<FNGameplayTagCount>();
 	}
 
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The state of the TagCounter when this cell was added, as an array of tag/count pairs.
+	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter State (Array)")
 	static TArray<FNGameplayTagCount> GetTagCounterStateArray(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetTagCounterStateArray();
+		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterStateArray() : TArray<FNGameplayTagCount>();
 	}
 
 	/**
@@ -120,17 +127,18 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Ticket")
 	static int32 GetOperationTicket(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetOperationTicket();
+		return IsValid(LevelInstance) ? LevelInstance->GetOperationTicket() : INDEX_NONE;
 	}
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The state of the TagCounter when this cell was added.
+	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter State (Map)")
 	static TMap<FGameplayTag, int32> GetTagCounterState(ANCellLevelInstance* LevelInstance)
 	{
-		return LevelInstance->GetTagCounterState();
+		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterState() : TMap<FGameplayTag, int32>();
 	}
 	
 	
@@ -142,7 +150,7 @@ public:
 	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Tag Counter")
 	static bool HasTagCounter(ANCellLevelInstance* LevelInstance, const FGameplayTag Tag)
 	{
-		return LevelInstance->GetTagCounter().Contains(Tag);
+		return IsValid(LevelInstance) && LevelInstance->GetTagCounter().Contains(Tag);
 	};
 
 	/**
@@ -155,9 +163,93 @@ public:
 		meta = (ExpandBoolAsExecs="ReturnValue"))
 	static bool HasTagCounterExec(ANCellLevelInstance* LevelInstance, const FGameplayTag Tag)
 	{
-		return LevelInstance->GetTagCounter().Contains(Tag);
+		return IsValid(LevelInstance) && LevelInstance->GetTagCounter().Contains(Tag);
 	};
-	
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @param TagContainer Tags that must all be present.
+	 * @return true if the cell's final context tags contain every tag in TagContainer (exact match).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Context Tag(s)")
+	static bool HasContextTags(ANCellLevelInstance* LevelInstance, const FGameplayTagContainer TagContainer)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetContextTags().HasAllExact(TagContainer);
+	};
+
+	/**
+	 * Exec-pin variant of Has Context Tag(s); the result drives the True/False execution outputs in Blueprint.
+	 * @param LevelInstance The cell level instance to query.
+	 * @param TagContainer Tags that must all be present.
+	 * @return true if the cell's final context tags contain every tag in TagContainer (exact match).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Has Context Tag(s) ?",
+		meta = (ExpandBoolAsExecs="ReturnValue"))
+	static bool HasContextTagsExec(ANCellLevelInstance* LevelInstance, const FGameplayTagContainer TagContainer)
+	{
+		return IsValid(LevelInstance) && LevelInstance->GetContextTags().HasAllExact(TagContainer);
+	};
+
+	/**
+	 * Adds tags to the cell's final context tag set (union; duplicates are ignored). Use this to persist edits:
+	 * Get Context Tags returns a Blueprint copy, so changes made to that copy are not written back to the cell.
+	 * @param LevelInstance The cell level instance to modify.
+	 * @param TagContainer Tags to add.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Append Context Tags")
+	static void AppendContextTags(ANCellLevelInstance* LevelInstance, FGameplayTagContainer TagContainer)
+	{
+		if (IsValid(LevelInstance))
+		{
+			LevelInstance->GetContextTags().AppendTags(TagContainer);
+		}
+	}
+
+	/**
+	 * Removes tags from the cell's final context tag set.
+	 * @param LevelInstance The cell level instance to modify.
+	 * @param TagContainer Tags to remove.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Remove Context Tags")
+	static void RemoveContextTags(ANCellLevelInstance* LevelInstance, FGameplayTagContainer TagContainer)
+	{
+		if (IsValid(LevelInstance))
+		{
+			LevelInstance->GetContextTags().RemoveTags(TagContainer);
+		}
+	}
+
+	/**
+	 * Adds to the cell's final TagCounter for a tag, creating the entry if needed. Use this to persist edits:
+	 * the Get Tag Counter accessors return Blueprint copies, so changes made to those copies are not written back.
+	 * @param LevelInstance The cell level instance to modify.
+	 * @param Tag Tag whose counter to increase.
+	 * @param Value Amount to add (defaults to 1).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Add Tag Counter")
+	static void AddTagCounter(ANCellLevelInstance* LevelInstance, FGameplayTag Tag, int32 Value = 1)
+	{
+		if (IsValid(LevelInstance))
+		{
+			FindOrAddTagCount(LevelInstance->GetTagCounterArray(), Tag).Count += Value;
+		}
+	}
+
+	/**
+	 * Subtracts from the cell's final TagCounter for a tag, creating the entry if needed.
+	 * @param LevelInstance The cell level instance to modify.
+	 * @param Tag Tag whose counter to decrease.
+	 * @param Value Amount to subtract (defaults to 1).
+	 */
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Subtract Tag Counter")
+	static void SubtractTagCounter(ANCellLevelInstance* LevelInstance, FGameplayTag Tag, int32 Value = 1)
+	{
+		if (IsValid(LevelInstance))
+		{
+			FindOrAddTagCount(LevelInstance->GetTagCounterArray(), Tag).Count -= Value;
+		}
+	}
+
 	/**
 	 * Tests whether the context cache still holds state for an assembly operation. The cache is keyed by the
 	 * operation's ticket (see Get Operation Ticket) and is what the Operation Tag Counter / Context Tag accessors below
@@ -290,5 +382,27 @@ public:
 	static void RemoveOperationContextTags(int32 OperationTicket, FGameplayTagContainer TagContainer)
 	{
 		FNWorldAssemblyContextCache::RemoveContextTags(OperationTicket, TagContainer);
+	}
+
+private:
+	/**
+	 * Finds the counter entry for Tag in Counter, appending a zero-initialized entry (Count = 0) when absent so
+	 * callers can adjust Count in place.
+	 * @param Counter The flat tag-counter array to search.
+	 * @param Tag The tag whose entry to locate or create.
+	 * @return A reference to the existing or newly appended entry for Tag.
+	 */
+	static FNGameplayTagCount& FindOrAddTagCount(TArray<FNGameplayTagCount>& Counter, const FGameplayTag& Tag)
+	{
+		for (FNGameplayTagCount& Entry : Counter)
+		{
+			if (Entry.Tag == Tag)
+			{
+				return Entry;
+			}
+		}
+		FNGameplayTagCount& Added = Counter.AddDefaulted_GetRef();
+		Added.Tag = Tag;
+		return Added;
 	}
 };

@@ -321,7 +321,7 @@ bool FNWorldAssemblyRegistry::RegisterOperation(UNAssemblyOperation* Operation)
 {
 	if (Operations.Contains(Operation))
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to register UNWorldAssemblyOperation(%s) as it is already registered"), *Operation->GetName());
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to register UNAssemblyOperation(%s) as it is already registered"), *Operation->GetName());
 		return false;
 	}
 
@@ -406,7 +406,7 @@ bool FNWorldAssemblyRegistry::UnregisterOperation(UNAssemblyOperation* Operation
 {
 	if (!Operations.Contains(Operation))
 	{
-		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to find UNWorldAssemblyOperation(%s) when attempting to unregister it."), *Operation->GetName());
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Failed to find UNAssemblyOperation(%s) when attempting to unregister it."), *Operation->GetName());
 		return false;
 	}
 

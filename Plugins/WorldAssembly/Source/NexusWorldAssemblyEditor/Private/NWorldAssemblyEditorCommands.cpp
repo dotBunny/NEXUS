@@ -679,6 +679,11 @@ void FNWorldAssemblyEditorCommands::CellResetCell()
 
 	// Get the cell
 	UNCell* Cell = UAssetDefinition_NCell::GetOrCreatePackage( FNEditorUtils::GetCurrentWorld());
+	if (Cell == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Unable to get or create the UNCell side-car package when trying to reset the cell."));
+		return;
+	}
 	Cell->Root = FNCellRootDetails();
 	Cell->Junctions.Empty();
 

@@ -136,6 +136,12 @@ public:
 	//~UActorComponent
 	virtual void BeginPlay() override;
 	//End UActorComponent
+
+#if WITH_EDITOR
+	//~UObject
+	virtual void PostEditImport() override;
+	//End UObject
+#endif // WITH_EDITOR
 protected:
 
 	//~UActorComponent

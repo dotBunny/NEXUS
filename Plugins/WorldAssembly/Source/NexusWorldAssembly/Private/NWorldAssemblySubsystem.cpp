@@ -162,6 +162,7 @@ FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
 
 void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
 {
+	if (Actor == nullptr) return;
 	TrackedActorsForCleanup.AddUnique(Actor);
 }
 

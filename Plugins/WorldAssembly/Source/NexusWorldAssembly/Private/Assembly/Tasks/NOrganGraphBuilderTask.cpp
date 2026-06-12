@@ -38,6 +38,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 			FString(TEXT("Organ context failed validation; build was not attempted.")))
 		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+		// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 		return;
 	}
 	
@@ -73,6 +76,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Unable to place a starting cell (no valid starter cell available or every candidate collided).")))
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
 		int32 NodeCount = OrganContextPtr->CellGraph->GetNodeCount();
@@ -81,6 +87,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
 				FString(TEXT("Starting graph contained no nodes after placement.")))
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
 
@@ -92,6 +101,9 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 				OrganContextPtr->CellGraph->GetCellNodeCount(),
 				FString(TEXT("Starter cell has no open junctions; the graph cannot grow past it.")))
 			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+			// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Unsuccessful"), 0.f);
+			TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
 			return;
 		}
 		

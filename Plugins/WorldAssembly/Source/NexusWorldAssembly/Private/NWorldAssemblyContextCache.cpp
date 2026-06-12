@@ -33,6 +33,13 @@ void FNWorldAssemblyContextCache::ClearContext(const TArray<int32>& OperationTic
 	}
 }
 
+void FNWorldAssemblyContextCache::ClearAllContext()
+{
+	FScopeLock Lock(&OperationContextLock);
+	OperationGameplayContextTags.Empty();
+	OperationGameplayTagCounters.Empty();
+}
+
 bool FNWorldAssemblyContextCache::HasOperation(const int32 OperationTicket)
 {
 	FScopeLock Lock(&OperationContextLock);

@@ -75,6 +75,17 @@ void UNBoneComponent::OnUnregister()
 }
 
 #if WITH_EDITOR
+void UNBoneComponent::PostEditImport()
+{
+	Super::PostEditImport();
+
+	// Editor duplication (alt-drag) and copy/paste both go through text import, which carries the serialized
+	// Identifier across to the copy. Regenerate it so duplicated bones don't share the GUID used to keep their
+	// generation order deterministic. This hook does not fire on load, so the source bone keeps its identifier
+	// across saves.
+	Identifier = FGuid::NewGuid();
+}
+
 void UNBoneComponent::OnTransformUpdated(USceneComponent* SceneComponent, EUpdateTransformFlags UpdateTransformFlags,
                                          ETeleportType Teleport)
 {

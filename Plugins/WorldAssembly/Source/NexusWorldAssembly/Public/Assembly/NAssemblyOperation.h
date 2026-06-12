@@ -266,9 +266,7 @@ private:
 
 	/** true while StartBuild has been called and the task graph has not yet finished. */
 	bool bIsRunning;
-	
-	/** Mirrors Context->IsLocked(); cached here to avoid reaching through the TUniquePtr from const callers. */
-	bool bIsContextLocked;
+
 	/** Human-friendly label for UI. */
 	FText DisplayName;
 	

@@ -260,7 +260,7 @@ struct FNCollisionVisualizerDrawing
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusToolingEditor.ECollisionVisualizerDrawMode", Tooltip="Contexts in which the visualization is drawn (Editor, Play-In-Editor, Simulate-In-Editor)."))
+	UPROPERTY(EditAnywhere, DisplayName="Draw Mode", meta=(Bitmask,BitmaskEnum="/Script/NexusToolingEditor.ENCollisionVisualizerDrawMode", Tooltip="Contexts in which the visualization is drawn (Editor, Play-In-Editor, Simulate-In-Editor)."))
 	uint8 DrawMode =	static_cast<uint8>(ENCollisionVisualizerDrawMode::EditorOnly) |
 						static_cast<uint8>(ENCollisionVisualizerDrawMode::PlayInEditor) |
 						static_cast<uint8>(ENCollisionVisualizerDrawMode::SimulateInEditor);

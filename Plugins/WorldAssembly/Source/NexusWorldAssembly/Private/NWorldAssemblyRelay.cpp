@@ -99,13 +99,23 @@ void ANWorldAssemblyRelay::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 {
+	// Coalesce: while a request is awaiting its server reply, fold this call into a single trailing
+	// refresh instead of dispatching another reliable RPC. Operation bursts (e.g. several finishing
+	// at once via Client_OperationFinished) would otherwise fire one full-registry query each.
+	if (bNearbyCellsRequestInFlight)
+	{
+		bNearbyCellsUpdatePending = true;
+		bPendingIsLevelLoaded = bIsLevelLoaded;
+		return;
+	}
+
 	bHasNearbyCellLevelInstances = false;
 	CachedNearbyCellLevelInstances.Reset();
-	
+
 	// Setup initial query
 	const APlayerController* OwningPC = Cast<APlayerController>(GetOwner());
 	if (OwningPC == nullptr) return;
-	
+
 	FVector Location  = OwningPC->GetSpawnLocation();
 	APawn* SafePawn = OwningPC->GetPawnOrSpectator();
 	if (SafePawn!= nullptr)
@@ -113,6 +123,9 @@ void ANWorldAssemblyRelay::UpdateNearbyCells(bool bIsLevelLoaded)
 		Location = SafePawn->GetActorLocation();
 	}
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Request nearby(%s) ANCellLevelInstances list."), *Location.ToString());
+
+	// Mark in-flight only at dispatch so an early-out above can never wedge the guard.
+	bNearbyCellsRequestInFlight = true;
 	Server_RequestNearbyCells(Location, 0, bIsLevelLoaded);
 }
 
@@ -166,4 +179,12 @@ void ANWorldAssemblyRelay::Client_ReceiveNearbyCells_Implementation(const TArray
 	UE_LOG(LogNexusWorldAssembly, Log, TEXT("Received nearby list(%i) of ANCellLevelInstances for player."), Results.Num());
 	bHasNearbyCellLevelInstances = false;
 	CachedNearbyCellLevelInstances = Results; // Copy
+
+	// Request answered; fire the single trailing refresh if one coalesced while we were waiting.
+	bNearbyCellsRequestInFlight = false;
+	if (bNearbyCellsUpdatePending)
+	{
+		bNearbyCellsUpdatePending = false;
+		UpdateNearbyCells(bPendingIsLevelLoaded);
+	}
 }

@@ -10,11 +10,6 @@
 
 #define N_PICKER_PARAMS_WORLD_SAFETY \
 	UWorld* CachedWorld = Params.CachedWorld.Get(); \
-	if (CachedWorld == nullptr) \
-	{ \
-		UE_LOG(LogNexusPicker, Error, TEXT("A null/non-existent UWorld was provided to Picker.")) \
-		return; \
-	}
 
 #define N_PICKER_RANDOM_DETERMINISTIC FNMersenneTwister& Random = FNRandom::GetDeterministic();
 
@@ -23,14 +18,16 @@
 #define N_PICKER_PROJECTION_TRACE_PREFIX \
 	FHitResult HitResult(ForceInit);
 #define N_PICKER_PROJECTION_TRACE \
-	if (CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::CollisionQueryParams)) \
+	if (CachedWorld != nullptr && CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::CollisionQueryParams)) \
 	{ \
 		Location = HitResult.Location; \
 	}
 
 #define N_PICKER_PROJECTION_NAVMESH_V1_PREFIX \
-	UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(CachedWorld); \
+	UNavigationSystemV1* NavigationSystem = nullptr; \
+	if(CachedWorld != nullptr) NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(CachedWorld); \
 	FNavLocation NavLocation;
+
 #define N_PICKER_PROJECTION_NAVMESH_V1 \
 	if (NavigationSystem != nullptr) \
 	{ \
