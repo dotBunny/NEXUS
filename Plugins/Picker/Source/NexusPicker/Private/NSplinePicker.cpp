@@ -9,6 +9,7 @@
 #include "Math/NMersenneTwister.h"
 
 #define N_PICKER_SPLINE_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
 	if (!IsValid(Params.SplineComponent)) \
@@ -25,7 +26,7 @@
 		Random.FloatRange(0.f, Params.SplineComponent->GetSplineLength()), ESplineCoordinateSpace::World)
 #if ENABLE_VISUAL_LOG
 #define N_VLOG_SPLINE \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) { \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) { \
 		TArray<FVector> SplinePoints; \
 		const float SplineLength = Params.SplineComponent->GetSplineLength(); \
 		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); \
@@ -39,11 +40,11 @@
 		} \
 		for (int32 i = 0; i < NumSegments; ++i) \
 		{ \
-			UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, SplinePoints[i], SplinePoints[i+1], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_SEGMENT(CachedWorld, LogNexusPicker, Verbose, SplinePoints[i], SplinePoints[i+1], NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -58,7 +59,7 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 {
 	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -68,7 +69,7 @@ void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerP
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -94,7 +95,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 {
 	const FRandomStream Random(Seed);
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -104,7 +105,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -130,7 +131,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 void FNSplinePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -140,7 +141,7 @@ void FNSplinePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)

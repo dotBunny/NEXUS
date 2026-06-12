@@ -9,6 +9,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_RECTANGLE_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumDimensions.IsZero(); \
 	const bool bHasRotation = !Params.Rotation.IsZero(); \
@@ -41,7 +42,7 @@
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_RECTANGLE_VALID_RANGES \
 	TArray<FVector4> ValidRanges = Params.GetValidRanges(); \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		for(int32 v = 0; v < ValidRanges.Num(); v++) \
 		{ \
@@ -53,7 +54,7 @@
 			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(FVector(MaxPoint.X, MinPoint.Y, 0.f))); \
 			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(MaxPoint)); \
 			RangeVertices.Add(Params.Origin + Params.Rotation.RotateVector(FVector(MinPoint.X, MaxPoint.Y, 0.f))); \
-			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, RangeVertices, NEXUS::Picker::VLog::OuterColor) \
+			N_PICKER_RECTANGLE_VLOG_DRAW(CachedWorld, RangeVertices, NEXUS::Picker::VLog::OuterColor) \
 		} \
 	} \
 	N_PICKER_RECTANGLE_CUMULATIVE
@@ -72,18 +73,18 @@
 	UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[2], VerticesVariable[3], Color, TEXT("")); \
 	UE_VLOG_SEGMENT(World, LogNexusPicker, Verbose, VerticesVariable[3], VerticesVariable[0], Color, TEXT(""));
 #define N_PICKER_RECTANGLE_VLOG(HasMinimumDimensions) \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		if(HasMinimumDimensions) \
 		{ \
 			N_PICKER_RECTANGLE_VLOG_VERTICES(Params.Origin, Params.MinimumDimensions, Params.Rotation, MinimumPoints) \
-			N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor) \
+			N_PICKER_RECTANGLE_VLOG_DRAW(CachedWorld, MinimumPoints, NEXUS::Picker::VLog::InnerColor) \
 		} \
 		N_PICKER_RECTANGLE_VLOG_VERTICES(Params.Origin, Params.MaximumDimensions, Params.Rotation, MaximumPoints) \
-		N_PICKER_RECTANGLE_VLOG_DRAW(Params.CachedWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor) \
+		N_PICKER_RECTANGLE_VLOG_DRAW(CachedWorld, MaximumPoints, NEXUS::Picker::VLog::OuterColor) \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -104,7 +105,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 	if (bSimpleMode)
 	{
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -126,7 +127,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -169,7 +170,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 	else
 	{		
 		N_PICKER_RECTANGLE_VALID_RANGES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -193,7 +194,7 @@ void FNRectanglePicker::Random(TArray<FVector>& OutLocations, const FNRectangleP
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -250,7 +251,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 	if (bSimpleMode)
 	{
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -272,7 +273,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -315,7 +316,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 	else
 	{
 		N_PICKER_RECTANGLE_VALID_RANGES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -339,7 +340,7 @@ void FNRectanglePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, cons
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -397,7 +398,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& R
 	if (bSimpleMode)
 	{
 		N_PICKER_RECTANGLE_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -419,7 +420,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& R
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -462,7 +463,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& R
 	else
 	{
 		N_PICKER_RECTANGLE_VALID_RANGES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -486,7 +487,7 @@ void FNRectanglePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& R
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)

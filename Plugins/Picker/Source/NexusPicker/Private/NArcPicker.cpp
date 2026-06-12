@@ -9,6 +9,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_ARC_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
 	const float MaxDegrees = (Params.Degrees * 0.5f); \
@@ -28,7 +29,7 @@
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_RADIAL_VLOG \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		const float MaxAngle = FMath::DegreesToRadians(MaxDegrees); \
 		const float MinAngle = FMath::DegreesToRadians(MinDegrees); \
@@ -36,11 +37,11 @@
 		const FVector OutMinPoint = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(MinAngle), FMath::Sin(MinAngle), 0) * Params.MaximumDistance); \
 		const FVector InMaxPoint = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(MaxAngle), FMath::Sin(MaxAngle), 0) * Params.MinimumDistance); \
 		const FVector OutMaxPoint = Params.Origin + Params.Rotation.RotateVector(FVector(FMath::Cos(MaxAngle), FMath::Sin(MaxAngle), 0) *Params.MaximumDistance); \
-		UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, InMinPoint, OutMinPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
-		UE_VLOG_SEGMENT(Params.CachedWorld, LogNexusPicker, Verbose, InMaxPoint, OutMaxPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_SEGMENT(CachedWorld, LogNexusPicker, Verbose, InMinPoint, OutMinPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_SEGMENT(CachedWorld, LogNexusPicker, Verbose, InMaxPoint, OutMaxPoint, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -52,7 +53,7 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 {
 	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_ARC_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -62,7 +63,7 @@ void FNArcPicker::Random(TArray<FVector>& OutLocations, const FNArcPickerParams&
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -89,7 +90,7 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 {
 	const FRandomStream Random(Seed);
 	N_PICKER_ARC_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -99,7 +100,7 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -127,7 +128,7 @@ void FNArcPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNAr
 void FNArcPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params)
 {
 	N_PICKER_ARC_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -137,7 +138,7 @@ void FNArcPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random,
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)

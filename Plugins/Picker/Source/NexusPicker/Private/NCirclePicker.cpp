@@ -8,6 +8,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_CIRCLE_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.Rotation.IsZero(); \
 	const float MinRadiusSq = Params.MinimumRadius * Params.MinimumRadius; \
@@ -29,16 +30,16 @@
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_CIRCLE_VLOG(HasMinimumDimensions) \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		if(HasMinimumDimensions) \
 		{ \
-			UE_VLOG_WIRECIRCLE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIRECIRCLE(CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
-		UE_VLOG_WIRECIRCLE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_WIRECIRCLE(CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.Rotation.RotateVector(FVector::UpVector), Params.MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -55,7 +56,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -67,7 +68,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -91,7 +92,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 	}
 	else
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -103,7 +104,7 @@ void FNCirclePicker::Random(TArray<FVector>& OutLocations, const FNCirclePickerP
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -137,7 +138,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -149,7 +150,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -173,7 +174,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 	}
 	else
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -185,7 +186,7 @@ void FNCirclePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -219,7 +220,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 	N_PICKER_CIRCLE_PREFIX
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -231,7 +232,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -255,7 +256,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 	}
 	else
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -267,7 +268,7 @@ void FNCirclePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)

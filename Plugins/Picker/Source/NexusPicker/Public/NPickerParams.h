@@ -30,7 +30,7 @@ struct NEXUSPICKER_API FNPickerParams
 	
 	/** The world for line tracing and drawing. */
 	UPROPERTY(Category = "Base", BlueprintReadOnly, VisibleInstanceOnly)
-	TObjectPtr<UWorld> CachedWorld = nullptr;
+	TWeakObjectPtr<UWorld> CachedWorld = nullptr;
 
 	/** Should the point be projected somewhere? */
 	UPROPERTY(Category = "Projection", BlueprintReadWrite, AdvancedDisplay)

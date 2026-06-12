@@ -10,6 +10,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_BOX_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumBox.IsValid == 0; \
 	OutLocations.Reserve(OutLocationsStartIndex + Params.Count); \
@@ -49,28 +50,28 @@
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_BOX_VALID_BOXES \
 	TArray<FBox> ValidBoxes = Params.GetValidBoxes(); \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		for(int32 v = 0; v < ValidBoxes.Num(); v++) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v].ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_WIREBOX(CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v].ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 	} \
 	N_PICKER_BOX_CUMULATIVE
 #define N_PICKER_BOX_VLOG(HasMinimumBox) \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		if(HasMinimumBox) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MinimumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIREBOX(CachedWorld , LogNexusPicker, Verbose, Params.MinimumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
 		if(Params.MaximumBox.IsValid != 0) \
 		{ \
-			UE_VLOG_WIREBOX(Params.CachedWorld , LogNexusPicker, Verbose, Params.MaximumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_WIREBOX(CachedWorld , LogNexusPicker, Verbose, Params.MaximumBox.ShiftBy(Params.Origin), NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -92,7 +93,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 	
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -102,7 +103,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -124,7 +125,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 	{
 		N_PICKER_BOX_VALID_BOXES
 		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -135,7 +136,7 @@ void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams&
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -168,7 +169,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -178,7 +179,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -200,7 +201,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 	{
 		N_PICKER_BOX_VALID_BOXES
 		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -211,7 +212,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -244,7 +245,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random,
 	
 	if (bSimpleMode)
 	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -254,7 +255,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random,
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -276,7 +277,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random,
 	{
 		N_PICKER_BOX_VALID_BOXES
 		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)
@@ -287,7 +288,7 @@ void FNBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random,
 				OutLocations.Add(Location);
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			for (int32 i = 0; i < Params.Count; i++)

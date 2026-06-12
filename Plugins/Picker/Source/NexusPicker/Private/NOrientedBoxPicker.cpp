@@ -9,6 +9,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_ORIENTED_BOX_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const bool bSimpleMode = Params.MinimumDimensions.IsZero(); \
 	const bool bHasRotation = !Params.Rotation.IsZero(); \
@@ -52,29 +53,29 @@
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_ORIENTED_BOX_VALID_BOXES \
 	TArray<FBox> ValidBoxes = Params.GetValidBoxes(); \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		FTransform VLogTransform(Params.Rotation, Params.Origin); \
 		FMatrix Matrix = VLogTransform.ToMatrixWithScale(); \
 		for(int32 v = 0; v < ValidBoxes.Num(); v++) \
 		{ \
-			UE_VLOG_WIREOBOX(Params.CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v], Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+			UE_VLOG_WIREOBOX(CachedWorld , LogNexusPicker, Verbose, ValidBoxes[v], Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		} \
 	} \
 	N_PICKER_ORIENTED_BOX_CUMULATIVE
 #define N_PICKER_ORIENTED_BOX_VLOG(HasMinimumDimensions) \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
 		FTransform VLogTransform(Params.Rotation, Params.Origin); \
 		FMatrix Matrix = VLogTransform.ToMatrixWithScale(); \
 		if(HasMinimumDimensions) \
 		{ \
-			UE_VLOG_WIREOBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMinimumAlignedBox(), Matrix, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+			UE_VLOG_WIREOBOX(CachedWorld, LogNexusPicker, Verbose, Params.GetMinimumAlignedBox(), Matrix, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
 		} \
-		UE_VLOG_WIREOBOX(Params.CachedWorld, LogNexusPicker, Verbose, Params.GetMaximumAlignedBox(), Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_WIREOBOX(CachedWorld, LogNexusPicker, Verbose, Params.GetMaximumAlignedBox(), Matrix, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld, LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -95,7 +96,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 	if (bSimpleMode)
 	{
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -117,7 +118,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -160,7 +161,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 	else
 	{
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -184,7 +185,7 @@ void FNOrientedBoxPicker::Random(TArray<FVector>& OutLocations, const FNOriented
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -240,7 +241,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 	if (bSimpleMode)
 	{
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -262,7 +263,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -305,7 +306,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 	else
 	{
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -329,7 +330,7 @@ void FNOrientedBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, co
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -386,7 +387,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister&
 	if (bSimpleMode)
 	{
 		N_PICKER_ORIENTED_BOX_EXTENTS_SIMPLE
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -408,7 +409,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister&
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)
@@ -451,7 +452,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister&
 	else
 	{
 		N_PICKER_ORIENTED_BOX_VALID_BOXES
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_TRACE_PREFIX
 			if (bHasRotation)
@@ -475,7 +476,7 @@ void FNOrientedBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister&
 				}
 			}
 		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
 			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 			if (bHasRotation)

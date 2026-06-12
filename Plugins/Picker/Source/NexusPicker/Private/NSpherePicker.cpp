@@ -8,6 +8,7 @@
 #include "NRandom.h"
 
 #define N_PICKER_SPHERE_PREFIX \
+	N_PICKER_PARAMS_WORLD_SAFETY \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
 	const float MinRadiusCubed = Params.MinimumRadius * Params.MinimumRadius * Params.MinimumRadius; \
 	const float MaxRadiusCubed = Params.MaximumRadius * Params.MaximumRadius * Params.MaximumRadius; \
@@ -24,13 +25,13 @@
 
 #if ENABLE_VISUAL_LOG
 #define N_PICKER_SPHERE_VLOG \
-	if(Params.CachedWorld != nullptr && FVisualLogger::IsRecording()) \
+	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) \
 	{ \
-		UE_VLOG_WIRESPHERE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
-		UE_VLOG_WIRESPHERE(Params.CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
+		UE_VLOG_WIRESPHERE(CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.MinimumRadius, NEXUS::Picker::VLog::InnerColor, TEXT("")); \
+		UE_VLOG_WIRESPHERE(CachedWorld, LogNexusPicker, Verbose, Params.Origin, Params.MaximumRadius, NEXUS::Picker::VLog::OuterColor, TEXT("")); \
 		for (int32 i = 0; i < Params.Count; i++) \
 		{ \
-			UE_VLOG_LOCATION(Params.CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
+			UE_VLOG_LOCATION(CachedWorld , LogNexusPicker, Verbose, OutLocations[OutLocationsStartIndex + i], NEXUS::Picker::VLog::PointSize, NEXUS::Picker::VLog::PointColor, TEXT("%s"), *OutLocations[OutLocationsStartIndex + i].ToCompactString()); \
 		} \
 	}
 #else // !ENABLE_VISUAL_LOG
@@ -46,7 +47,7 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 {
 	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPHERE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -57,7 +58,7 @@ void FNSpherePicker::Random(TArray<FVector>& OutLocations, const FNSpherePickerP
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -87,7 +88,7 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 {
 	const FRandomStream Random(Seed);
 	N_PICKER_SPHERE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -98,7 +99,7 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -129,7 +130,7 @@ void FNSpherePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 void FNSpherePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params)
 {
 	N_PICKER_SPHERE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
+	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_TRACE_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
@@ -140,7 +141,7 @@ void FNSpherePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Rand
 			OutLocations.Add(Location);
 		}
 	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
+	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 	{
 		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
 		for (int32 i = 0; i < Params.Count; i++)
