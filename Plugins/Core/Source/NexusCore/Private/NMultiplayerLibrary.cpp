@@ -18,7 +18,7 @@ float UNMultiplayerLibrary::Ping(const UObject* WorldContextObject)
 
 bool UNMultiplayerLibrary::KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState)
 {
-	N_VALIDATE_RETURN(LogNexusCore, PlayerState, false)
+	N_VALIDATE_RETURN(LogNexusCore, PlayerState, false);
 
 	if (PlayerState->GetPlayerController() != nullptr && PlayerState->GetPlayerController()->HasAuthority())
 	{

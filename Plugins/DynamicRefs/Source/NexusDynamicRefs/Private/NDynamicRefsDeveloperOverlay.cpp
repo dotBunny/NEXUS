@@ -12,10 +12,10 @@ void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader)
-	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences)
-	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader)
-	N_VALIDATE(LogNexusDynamicRefs, NamedReferences)
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferencesHeader);
+	N_VALIDATE(LogNexusDynamicRefs, DynamicReferences);
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferencesHeader);
+	N_VALIDATE(LogNexusDynamicRefs, NamedReferences);
 }
 
 void UNDynamicRefsDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, const float InDeltaTime)

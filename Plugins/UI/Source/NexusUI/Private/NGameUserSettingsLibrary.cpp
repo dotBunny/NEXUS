@@ -153,7 +153,7 @@ TArray<FString> UNGameUserSettingsLibrary::GetSupportedDisplayResolutions()
 
 void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
-	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox);
 	ComboBox->ClearOptions();
 	for (const FText& Text : DisplayModeTexts)
 	{
@@ -167,7 +167,7 @@ void UNGameUserSettingsLibrary::InitializeWindowModeComboBoxString(UNComboBoxStr
 
 void UNGameUserSettingsLibrary::InitializeDisplayResolutionComboBoxString(UNComboBoxString* ComboBox, const bool bSelectCurrent)
 {
-	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox)
+	N_VALIDATE_RETURN_VOID(LogNexusUI, ComboBox);
 	ComboBox->ClearOptions();
 	for (auto& Resolution : GetSupportedDisplayResolutions())
 	{

@@ -97,10 +97,10 @@ protected:
 		Super::NativeConstruct();
 
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, ProgressBar)
-		N_VALIDATE(LogNexusUI, LeftText)
-		N_VALIDATE(LogNexusUI, CenterText)
-		N_VALIDATE(LogNexusUI, RightText)
+		N_VALIDATE(LogNexusUI, ProgressBar);
+		N_VALIDATE(LogNexusUI, LeftText);
+		N_VALIDATE(LogNexusUI, CenterText);
+		N_VALIDATE(LogNexusUI, RightText);
 	}
 	virtual void NativeDestruct() override;
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;

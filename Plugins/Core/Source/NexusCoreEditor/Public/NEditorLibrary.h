@@ -28,7 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName = "Select Actor", Category = "NEXUS|Editor")
 	static void SelectActor(AActor* Actor)
 	{
-		N_VALIDATE_RETURN_VOID(LogNexusCoreEditor, Actor)
+		N_VALIDATE_RETURN_VOID(LogNexusCoreEditor, Actor);
 		FNEditorUtils::SelectActor(Actor);
 	}
 };

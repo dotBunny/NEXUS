@@ -75,7 +75,7 @@ public:
 	 * @note Because the combination is a bitwise XOR, duplicate pointers will cancel each other out.
 	 */
 	template<typename T>
-	FORCEINLINE static uint32 GetPointersHash(TArray<T*> Elements)
+	FORCEINLINE static uint32 GetPointersHash(const TArray<T*>& Elements)
 	{
 		uint32 Hash = 0;
 		for (T* Element : Elements)
@@ -90,7 +90,7 @@ public:
 	 * @param Objects The weak pointers to pin.
 	 * @return A matching array of TStrongObjectPtr values; entries corresponding to stale weak pointers will be null.
 	 */
-	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(TArray<TWeakObjectPtr<UObject>> Objects)
+	FORCEINLINE static TArray<TStrongObjectPtr<UObject>> PinAll(const TArray<TWeakObjectPtr<UObject>>& Objects)
 	{
 		TArray<TStrongObjectPtr<UObject>> Pinned;
 		Pinned.Reserve(Objects.Num());

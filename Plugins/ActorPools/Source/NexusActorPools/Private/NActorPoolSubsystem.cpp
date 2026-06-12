@@ -192,7 +192,7 @@ FNActorPoolSettings UNActorPoolSubsystem::GetDefaultSettings(const TSubclassOf<A
 
 void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 {
-	N_VALIDATE_RETURN_VOID(LogNexusActorPools, ActorPoolSet)
+	N_VALIDATE_RETURN_VOID(LogNexusActorPools, ActorPoolSet);
 
 	if (ActorPoolSet->NestedSets.IsEmpty())
 	{
@@ -275,7 +275,7 @@ bool UNActorPoolSubsystem::HasTickableActorPool(FNActorPool* ActorPool) const
 bool UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& ReturnedActor)
 {
 	ReturnedActor = nullptr;
-	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false);
 	ReturnedActor = GetActor<AActor>(ActorClass);
 	return ReturnedActor != nullptr;
 }
@@ -283,14 +283,14 @@ bool UNActorPoolSubsystem::GetActor(TSubclassOf<AActor> ActorClass, AActor*& Ret
 bool UNActorPoolSubsystem::SpawnActor(TSubclassOf<AActor> ActorClass, FVector Position, FRotator Rotation, AActor*& SpawnedActor)
 {
 	SpawnedActor = nullptr;
-	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false)
+	N_VALIDATE_RETURN(LogNexusActorPools, ActorClass, false);
 	SpawnedActor = SpawnActor<AActor>(ActorClass, Position, Rotation);
 	return SpawnedActor != nullptr;
 }
 
 bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 {
-	N_VALIDATE_RETURN(LogNexusActorPools, Actor, false)
+	N_VALIDATE_RETURN(LogNexusActorPools, Actor, false);
 	
 	UClass* ActorClass = Actor->GetClass();
 	if (ActorPools.Contains(ActorClass))

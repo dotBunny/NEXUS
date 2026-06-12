@@ -13,10 +13,10 @@ void UNGuardianDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	N_VALIDATE(LogNexusGuardian, ObjectCountBox)
-	N_VALIDATE(LogNexusGuardian, ObjectCountNumber)
-	N_VALIDATE(LogNexusGuardian, BaseCountNumber)
-	N_VALIDATE(LogNexusGuardian, ObjectCountNextNumber)
+	N_VALIDATE(LogNexusGuardian, ObjectCountBox);
+	N_VALIDATE(LogNexusGuardian, ObjectCountNumber);
+	N_VALIDATE(LogNexusGuardian, BaseCountNumber);
+	N_VALIDATE(LogNexusGuardian, ObjectCountNextNumber);
 }
 
 void UNGuardianDeveloperOverlay::BindWorld(UWorld* World)

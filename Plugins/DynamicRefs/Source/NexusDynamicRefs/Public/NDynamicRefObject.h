@@ -71,7 +71,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void AddObject(UObject* Object)
 	{
-		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object)
+		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object);
 		TargetObjects.AddUnique(Object);
 		Changed.ExecuteIfBound();
 	}

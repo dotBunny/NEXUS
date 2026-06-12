@@ -88,8 +88,8 @@ protected:
 		Super::NativeConstruct();
 
 		// Will validate it here only to throw a message in log for someone to realize they havent hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, Text)
-		N_VALIDATE_RETURN_VOID(LogNexusUI, Button)
+		N_VALIDATE(LogNexusUI, Text);
+		N_VALIDATE_RETURN_VOID(LogNexusUI, Button);
 		
 		
 		Button->OnClicked.AddDynamic(this, &UNButtonListViewEntry::OnButtonPressed);

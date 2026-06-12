@@ -24,7 +24,7 @@ void UNActorPoolsDeveloperOverlay::NativeConstruct()
 {
 	Super::NativeConstruct();
 	
-	N_VALIDATE(LogNexusActorPools, ActorPoolList)
+	N_VALIDATE(LogNexusActorPools, ActorPoolList);
 
 	UpdateTimer = NEXUS::ActorPools::ConsoleCommands::DeveloperOverlayUpdateRate;
 

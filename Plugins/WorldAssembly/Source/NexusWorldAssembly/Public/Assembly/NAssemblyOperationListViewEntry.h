@@ -53,12 +53,12 @@ protected:
 		Super::NativeConstruct();
 		
 		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView)
-		N_VALIDATE(LogNexusWorldAssembly, ProgressBar)
-		N_VALIDATE(LogNexusWorldAssembly, LeftText)
-		N_VALIDATE(LogNexusWorldAssembly, CenterText)
-		N_VALIDATE(LogNexusWorldAssembly, RightText)
-		N_VALIDATE(LogNexusWorldAssembly, CancelButton)
+		N_VALIDATE(LogNexusWorldAssembly, ChildProgressListView);
+		N_VALIDATE(LogNexusWorldAssembly, ProgressBar);
+		N_VALIDATE(LogNexusWorldAssembly, LeftText);
+		N_VALIDATE(LogNexusWorldAssembly, CenterText);
+		N_VALIDATE(LogNexusWorldAssembly, RightText);
+		N_VALIDATE(LogNexusWorldAssembly, CancelButton);
 		
 		if (IsValid(CancelButton))
 		{

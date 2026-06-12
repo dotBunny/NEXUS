@@ -16,10 +16,10 @@ void UNCollisionVisualizerWidget::NativeConstruct()
 	UniqueIdentifier = NEXUS::ToolingEditor::CollisionVisualizer::Identifier;
 	bIsPersistent = true;
 	
-	N_VALIDATE(LogNexusToolingEditor, SelectStartButton)
-	N_VALIDATE(LogNexusToolingEditor, SelectEndButton)
-	N_VALIDATE(LogNexusToolingEditor, ActorNameText)
-	N_VALIDATE(LogNexusToolingEditor, ObjectDetails)
+	N_VALIDATE(LogNexusToolingEditor, SelectStartButton);
+	N_VALIDATE(LogNexusToolingEditor, SelectEndButton);
+	N_VALIDATE(LogNexusToolingEditor, ActorNameText);
+	N_VALIDATE(LogNexusToolingEditor, ObjectDetails);
 	
 	Super::NativeConstruct();
 	

@@ -14,10 +14,13 @@
  * @param Expr        The pointer/class/TSubclassOf to validate.
  */
 #define N_VALIDATE(LogCategory, Expr) \
-	if (!IsValid(Expr)) \
+	do \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
-	}
+		if (!IsValid(Expr)) \
+		{ \
+			UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+		} \
+	} while (false)
 
 /**
  * Guard a Blueprint-callable entry point against a null pointer/class input. If Expr fails IsValid,
@@ -28,11 +31,14 @@
  * @param ReturnValue The value to return when Expr is invalid.
  */
 #define N_VALIDATE_RETURN(LogCategory, Expr, ReturnValue) \
-	if (!IsValid(Expr)) \
+	do \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
-		return ReturnValue; \
-	}
+		if (!IsValid(Expr)) \
+		{ \
+			UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+			return ReturnValue; \
+		} \
+	} while (false)
 
 /**
  * Void-returning variant of N_VALIDATE_RETURN.
@@ -41,11 +47,14 @@
  * @param Expr        The pointer/class/TSubclassOf to validate.
  */
 #define N_VALIDATE_RETURN_VOID(LogCategory, Expr) \
-	if (!IsValid(Expr)) \
+	do \
 	{ \
-		UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
-		return; \
-	}
+		if (!IsValid(Expr)) \
+		{ \
+			UE_LOG(LogCategory, Warning, TEXT("%s: '%hs' was null."), UE_SOURCE_LOCATION, #Expr); \
+			return; \
+		} \
+	} while (false)
 
 /**
  * Skip the current loop iteration when Expr is invalid, after logging a warning. Intended for
@@ -55,6 +64,9 @@
  *
  * @param LogCategory The log category to emit the warning on.
  * @param Expr        The current iteration's pointer/class to validate.
+ * @note Unlike the other validation macros, this cannot be wrapped in do/while(0) because the
+ *       `continue` must bind to the caller's loop. The expansion is therefore a bare `if`; do not
+ *       use it as the unbraced body of an `if` that has an `else` (dangling-else mis-binding).
  */
 #define N_VALIDATE_CONTINUE(LogCategory, Expr) \
 	if (!IsValid(Expr)) \

@@ -11,7 +11,7 @@
 
 bool UNGameLayerLibrary::SetLayerVisibility(ULocalPlayer* LocalPlayer, const FName Name, const ESlateVisibility Visibility)
 {
-	N_VALIDATE_RETURN(LogNexusUI, LocalPlayer, false)
+	N_VALIDATE_RETURN(LogNexusUI, LocalPlayer, false);
 
 	const UWorld* World = LocalPlayer->GetWorld();
 	if (World == nullptr || !World->IsGameWorld()) return false;
