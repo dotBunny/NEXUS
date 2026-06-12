@@ -93,4 +93,74 @@ N_TEST_MEDIUM(FNSeedGeneratorTests_SeedFromFriendlySeed_Determinism, "NEXUS::Uni
 	CHECK_EQUALS("Same friendly seed should always produce the same numeric seed", SeedA, SeedB);
 }
 
+N_TEST_HIGH(FNSeedGeneratorTests_RandomFriendlySeed_Format, "NEXUS::UnitTests::NCore::FNSeedGenerator::RandomFriendlySeed_Format", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies the generated layout of 20 digit letters (a-j) in dash-separated groups of 5.
+	const FString Seed = FNSeedGenerator::RandomFriendlySeed();
+	CHECK_EQUALS("Friendly seed should be 23 characters (20 letters + 3 dashes)", Seed.Len(), 23);
+	for (int32 i = 0; i < Seed.Len(); i++)
+	{
+		if (i == 5 || i == 11 || i == 17)
+		{
+			if (Seed[i] != '-')
+			{
+				ADD_ERROR(FString::Printf(TEXT("Expected a dash at index %i of friendly seed \"%s\"."), i, *Seed));
+			}
+		}
+		else if (Seed[i] < 'a' || Seed[i] > 'j')
+		{
+			ADD_ERROR(FString::Printf(TEXT("Expected a letter in a-j at index %i of friendly seed \"%s\"."), i, *Seed));
+		}
+	}
+}
+
+N_TEST_HIGH(FNSeedGeneratorTests_SeedFromFriendlySeed_KnownValues, "NEXUS::UnitTests::NCore::FNSeedGenerator::SeedFromFriendlySeed_KnownValues", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Letters map a-j to the digits 0-9, read as a base-10 number.
+	CHECK_EQUALS("\"bcdef\" should parse as 12345", FNSeedGenerator::SeedFromFriendlySeed(TEXT("bcdef")), 12345ull);
+	CHECK_EQUALS("Uppercase letters should parse identically to lowercase", FNSeedGenerator::SeedFromFriendlySeed(TEXT("BCDEF")), 12345ull);
+	CHECK_EQUALS("A front-padded generated-format seed should parse exactly",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("aaaaa-aaaaa-bcdef-ghija")), 1234567890ull);
+
+	// MAX_uint64 (18446744073709551615) is the largest value a generated seed can encode;
+	// it must reconstruct exactly, without any overflow along the way.
+	CHECK_EQUALS("The friendly form of MAX_uint64 should parse exactly",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("bieeg-heeah-dhajf-fbgbf")), MAX_uint64);
+}
+
+N_TEST_MEDIUM(FNSeedGeneratorTests_SeedFromFriendlySeed_IgnoresNonDigitCharacters, "NEXUS::UnitTests::NCore::FNSeedGenerator::SeedFromFriendlySeed_IgnoresNonDigitCharacters", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that anything outside a-j is skipped rather than parsed: separators,
+	// the letters k-z, and wide characters whose low byte happens to land in a-j.
+	CHECK_EQUALS("Dashes and spaces should be ignored", FNSeedGenerator::SeedFromFriendlySeed(TEXT("b-c d-e f")), 12345ull);
+	CHECK_EQUALS("The letters k-z should be ignored, not parsed as values of 10 or more",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("kz")), 0ull);
+	CHECK_EQUALS("Letters k-z embedded in a seed should not shift the surrounding digits",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("bkzc")), 12ull);
+
+	FString WideCharacterSeed;
+	WideCharacterSeed.AppendChar(TCHAR(0x0161)); // 'š' — low byte is 0x61 ('a')
+	CHECK_EQUALS("Wide characters should be ignored, not truncated into the a-j range",
+		FNSeedGenerator::SeedFromFriendlySeed(WideCharacterSeed), 0ull);
+}
+
+N_TEST_MEDIUM(FNSeedGeneratorTests_SeedFromFriendlySeed_ReadsLastTwentyDigits, "NEXUS::UnitTests::NCore::FNSeedGenerator::SeedFromFriendlySeed_ReadsLastTwentyDigits", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that over-long pasted input only contributes its last 20 digit letters
+	// (the low-order digits), no matter how long the string is.
+	const FString LongSeed = FString::ChrN(300, 'b');
+	CHECK_EQUALS("300 'b's should parse as twenty 1s", FNSeedGenerator::SeedFromFriendlySeed(LongSeed), 11111111111111111111ull);
+	CHECK_EQUALS("Digits beyond the last 20 should be ignored entirely",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("jjjjj-bieeg-heeah-dhajf-fbgbf")), MAX_uint64);
+}
+
+N_TEST_LOW(FNSeedGeneratorTests_SeedFromFriendlySeed_WrapsAboveMax, "NEXUS::UnitTests::NCore::FNSeedGenerator::SeedFromFriendlySeed_WrapsAboveMax", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Hand-typed seeds between MAX_uint64 and 10^20-1 wrap mod 2^64 by design; this pins
+	// the wraparound so it is not "fixed" later with saturation, which would alias them all.
+	// (10^20 - 1) mod 2^64 == 7766279631452241919.
+	CHECK_EQUALS("The largest 20-digit seed should wrap mod 2^64, not saturate",
+		FNSeedGenerator::SeedFromFriendlySeed(TEXT("jjjjj-jjjjj-jjjjj-jjjjj")), 7766279631452241919ull);
+}
+
 #endif //WITH_TESTS

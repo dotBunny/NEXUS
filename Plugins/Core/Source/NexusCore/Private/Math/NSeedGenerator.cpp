@@ -152,30 +152,28 @@ uint64 FNSeedGenerator::SeedFromString(const FString& InSeed)
 uint64 FNSeedGenerator::SeedFromFriendlySeed(const FString& InSeed)
 {
 	uint64 Seed = 0;
-	
-	// We're going to go in reverse as we use it as a multiplier
-	uint8 Multiplier = 0;
-	for (int32 i = InSeed.Len() - 1; i >= 0; i--)
+
+	// We're going to go in reverse so the last letter is the least significant digit.
+	// Only a-j map to digits (0-9), matching RandomFriendlySeed; everything else is
+	// ignored, and only the last 20 digits are read as that is all a uint64 can hold.
+	// Hand-typed seeds above the uint64 maximum intentionally wrap mod 2^64.
+	uint64 PlaceValue = 1;
+	int32 DigitCount = 0;
+	for (int32 i = InSeed.Len() - 1; i >= 0 && DigitCount < 20; i--)
 	{
-		uint8 CharacterValue = InSeed[i];
-		
+		TCHAR CharacterValue = InSeed[i];
+
 		// Move uppercase to lowercase region
-		if (CharacterValue >= 65 && CharacterValue <= 90)
+		if (CharacterValue >= 'A' && CharacterValue <= 'Z')
 		{
 			CharacterValue += 32;
 		}
-		// Ensure we are only dealing with lowercase digits
-		if (CharacterValue < 97|| CharacterValue > 122) continue;
+		// Ensure we are only dealing with digit letters
+		if (CharacterValue < 'a' || CharacterValue > 'j') continue;
 
-		const uint8 ParsedValue = static_cast<uint8>(CharacterValue - 97);
-		
-		uint64 FactorialMultiplier = 1;
-		for (int32 f = 0; f < Multiplier; f++)
-		{
-			FactorialMultiplier *= 10;
-		}
-		Multiplier++;
-		Seed += (ParsedValue * FactorialMultiplier);
+		Seed += static_cast<uint64>(CharacterValue - 'a') * PlaceValue;
+		PlaceValue *= 10;
+		DigitCount++;
 	}
 	return Seed;
 }

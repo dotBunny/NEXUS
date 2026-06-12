@@ -102,12 +102,9 @@ public:
 	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMesh& RightMesh, float EarlyExitDepth = MAX_flt);
 	
 	
-	static float GetIntersectDepth(
-		const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation,
-		const FVector& WorldPosition, 
-		float EarlyExitDepth = MAX_flt);
+	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition);
 	
-	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth = MAX_flt);
+	static float GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition);
 
 
 	/**

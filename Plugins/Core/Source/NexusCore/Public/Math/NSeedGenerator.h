@@ -43,6 +43,9 @@ public:
 	 * Converts a friendly-format seed string back into a numeric seed.
 	 * @param InSeed The human-friendly seed produced by RandomFriendlySeed.
 	 * @return a numeric seed suitable for FNMersenneTwister.
+	 * @note Only the letters a-j (case-insensitive) are read, as the digits 0-9; all other
+	 *       characters are ignored. Only the last 20 digits are used, and hand-typed values
+	 *       above the uint64 maximum wrap mod 2^64.
 	 */
 	static uint64 SeedFromFriendlySeed(const FString& InSeed);
 	

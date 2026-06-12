@@ -370,7 +370,7 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FNRawMe
 	return MaxDepth;
 }
 
-float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition, float EarlyExitDepth)
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& LeftOrigin, const FRotator& LeftRotation, const FVector& WorldPosition)
 {
 	if (LeftMesh.HasBounds())
 	{
@@ -396,13 +396,13 @@ float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector
 	return ComputePointDepthInside(LeftMesh, LeftLocal);
 }
 
-float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition, float EarlyExitDepth)
+float FNRawMeshUtils::GetIntersectDepth(const FNRawMesh& LeftMesh, const FVector& WorldPosition)
 {
 	// LeftMesh has already had its transform baked into its vertices (and Bounds), so it lives in the world
 	// frame and WorldPosition can be tested against it directly. Delegate to the transform-aware point-depth
 	// query with an identity transform — the local-space conversion of WorldPosition reduces to the identity,
 	// so the point is measured against the mesh as-is.
-	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator, WorldPosition, EarlyExitDepth);
+	return GetIntersectDepth(LeftMesh, FVector::ZeroVector, FRotator::ZeroRotator, WorldPosition);
 }
 
 TArray<ANDebugActor*> FNRawMeshUtils::CreateRawMeshVisualizers(UWorld* World, const TArray<FNRawMesh>& Meshes, const TArray<FTransform>& Transforms,  UMaterialInterface* MaterialInterface, bool bSingleActor, bool bProcessMeshes)
