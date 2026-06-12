@@ -17,22 +17,6 @@ namespace NEXUS::PerfTests::NPicker::FNSpherePickerHarness
 class FNSpherePickerPerfTests
 {
 public:
-	static void NextSimple()
-	{
-		FNSpherePickerParams Params;
-		Params.Origin = FVector::ZeroVector;
-		Params.Count = 1000;
-		Params.MinimumRadius = 1.f;
-		Params.MaximumRadius = 100.f;
-		TArray<FVector> Points;
-		// TEST
-		{
-			N_TEST_TIMER_SCOPE(FNSpherePickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNSpherePickerHarness::MaxDuration)
-			FNSpherePicker::Next(Points, Params);
-			NTestTimer.ManualStop();
-		}
-	}
-
 	static void Next()
 	{
 		FNSpherePickerParams Params;
@@ -41,10 +25,11 @@ public:
 		Params.MinimumRadius = 1.f;
 		Params.MaximumRadius = 100.f;
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNSpherePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNSpherePickerHarness::MaxDuration)
-			FNSpherePicker::Next(Points, Params);
+			FNSpherePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
@@ -114,13 +99,6 @@ public:
 		}
 	}
 };
-
-N_TEST_PERF(FNSpherePickerPerfTests_NextSimple, "NEXUS::PerfTests::NPicker::FNSpherePicker::NextSimple", N_TEST_CONTEXT_ANYWHERE)
-{
-	N_TESTS_PERF_START_LATENT_TEST
-	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand(&FNSpherePickerPerfTests::NextSimple));
-	N_TESTS_PERF_FINISH_LATENT_TEST
-}
 
 N_TEST_PERF(FNSpherePickerPerfTests_Next, "NEXUS::PerfTests::NPicker::FNSpherePicker::Next", N_TEST_CONTEXT_ANYWHERE)
 {

@@ -78,9 +78,10 @@ N_TEST_HIGH(FNFloatRangeTests_NextValue_WithinBounds, "NEXUS::UnitTests::NCore::
 	FNFloatRange Range;
 	Range.Minimum = 0.25f;
 	Range.Maximum = 0.75f;
+	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{
-		const float Value = Range.NextValue();
+		const float Value = Range.NextValue(Random);
 		CHECK_MESSAGE(FString::Printf(TEXT("NextValue[%d] should be >= Minimum"), i), Value >= 0.25f - 0.001f);
 		CHECK_MESSAGE(FString::Printf(TEXT("NextValue[%d] should be <= Maximum"), i), Value <= 0.75f + 0.001f);
 	}
@@ -91,9 +92,10 @@ N_TEST_HIGH(FNFloatRangeTests_NextValueInSubRange_Clamping, "NEXUS::UnitTests::N
 	FNFloatRange Range;
 	Range.Minimum = 5.5f;
 	Range.Maximum = 15.5f;
+	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{
-		const float Value = Range.NextValueInSubRange(0.f, 100.f);
+		const float Value = Range.NextValueInSubRange(Random, 0.f, 100.f);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be >= Range.Minimum"), i), Value >= 5.5f - 0.001f);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be <= Range.Maximum"), i), Value <= 15.5f + 0.001f);
 	}

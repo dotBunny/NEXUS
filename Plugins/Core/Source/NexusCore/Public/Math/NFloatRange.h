@@ -5,6 +5,7 @@
 
 #include "NRandom.h"
 #include "NRangeMacros.h"
+#include "NMersenneTwister.h"
 #include "NFloatRange.generated.h"
 
 /**
@@ -20,7 +21,7 @@ struct NEXUSCORE_API FNFloatRange
 
 	/** Lower bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float Minimum = MIN_flt;
+	float Minimum = -MIN_flt;
 
 	/** Upper bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

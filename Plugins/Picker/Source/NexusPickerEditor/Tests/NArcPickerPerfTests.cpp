@@ -27,15 +27,15 @@ public:
 		Params.MinimumDistance = 0.f;
 		Params.MaximumDistance = 500.f;
 		TArray<FVector> Points;
-		
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNArcPickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNArcPickerHarness::MaxDuration)
-			FNArcPicker::Next(Points, Params);
+			FNArcPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	static void Next()
 	{
 		FNArcPickerParams Params;
@@ -46,10 +46,11 @@ public:
 		Params.MinimumDistance = 10.f;
 		Params.MaximumDistance = 500.f;
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNArcPickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNArcPickerHarness::MaxDuration)
-			FNArcPicker::Next(Points, Params);
+			FNArcPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

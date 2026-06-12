@@ -18,6 +18,8 @@
 - Clients with `BeginPlay` flagged `UNOrganComponents` will not generate without authority.
 - `FNGameplayTagCounterConstraint` defaults the comparison value to `0` if the tag is not found.
 - `FNGameplayTagCounter` no longer floors counts at zero; the mutation API (`Add`/`Subtract`/`Increment`/`Decrement`) now produces signed values, keeping operations losslessly reversible and consistent with `GetDifference`/`Combine`.
+- Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope.
+- Consolidated `Twisted` to `Next` concept/naming.
 
 ### Fixed
 

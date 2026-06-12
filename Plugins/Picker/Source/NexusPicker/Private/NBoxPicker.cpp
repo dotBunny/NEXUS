@@ -84,82 +84,6 @@
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
 
-#define RANDOM_FLOAT_RANGE FloatRange
-void FNBoxPicker::Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
-{
-	N_PICKER_RANDOM_DETERMINISTIC
-	N_PICKER_BOX_PREFIX
-	
-	if (bSimpleMode)
-	{
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
-		{
-			N_PICKER_PROJECTION_TRACE_PREFIX
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-				N_PICKER_PROJECTION_TRACE
-				OutLocations.Add(Location);
-			}
-		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
-		{
-			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				FVector Location = N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE);
-				N_PICKER_PROJECTION_NAVMESH_V1
-				OutLocations.Add(Location);
-			}
-		}
-		else
-		{
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				OutLocations.Add(N_PICKER_BOX_LOCATION_SIMPLE(RANDOM_FLOAT_RANGE));
-			}
-		}
-	}
-	else
-	{
-		N_PICKER_BOX_VALID_BOXES
-		
-		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
-		{
-			N_PICKER_PROJECTION_TRACE_PREFIX
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
-				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-				N_PICKER_PROJECTION_TRACE
-				OutLocations.Add(Location);
-			}
-		}
-		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
-		{
-			N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
-				FVector Location = N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE);
-				N_PICKER_PROJECTION_NAVMESH_V1
-				OutLocations.Add(Location);
-			}
-		}
-		else
-		{
-			for (int32 i = 0; i < Params.Count; i++)
-			{
-				N_PICKER_BOX_VALID_BOXES_CHOICE(RANDOM_FLOAT_RANGE)
-				OutLocations.Add(N_PICKER_BOX_LOCATION(RANDOM_FLOAT_RANGE));
-			}
-		}
-	}
-	
-	N_PICKER_BOX_VLOG(!bSimpleMode)
-}
-#undef RANDOM_FLOAT_RANGE
-
 #define RANDOM_FLOAT_RANGE FRandRange
 void FNBoxPicker::Random(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params)
 {
@@ -314,7 +238,7 @@ void FNBoxPicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNBo
 #undef RANDOM_FLOAT_RANGE
 
 #define RANDOM_FLOAT_RANGE FloatRange
-void FNBoxPicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params)
+void FNBoxPicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params)
 {
 	N_PICKER_BOX_PREFIX
 	

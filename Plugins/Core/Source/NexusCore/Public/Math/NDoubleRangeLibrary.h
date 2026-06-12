@@ -5,6 +5,7 @@
 
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "NDoubleRange.h"
+#include "NMersenneTwisterObject.h"
 #include "NDoubleRangeLibrary.generated.h"
 
 /**
@@ -20,16 +21,16 @@ class NEXUSCORE_API UNDoubleRangeLibrary : public UBlueprintFunctionLibrary
 
 	/** Deterministic sample from Range's full span. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value (Double)", Category = "NEXUS|Core|Range")
-	static double NextValue(const FNDoubleRange& Range)
+	static double NextValue(const FNDoubleRange& Range, UNMersenneTwisterObject* TwisterObject)
 	{
-		return Range.NextValue();
+		return Range.NextValue(TwisterObject->GetTwisterRef());
 	}
 
 	/** Deterministic sample clamped to [MinimumValue, MaximumValue] within Range. */
 	UFUNCTION(BlueprintCallable, DisplayName="Next Value In Sub-Range (Double)",  Category = "NEXUS|Core|Range")
-	static double NextValueInSubRange(const FNDoubleRange& Range, double MinimumValue, double MaximumValue)
+	static double NextValueInSubRange(const FNDoubleRange& Range, UNMersenneTwisterObject* TwisterObject, double MinimumValue, double MaximumValue)
 	{
-		return Range.NextValueInSubRange(MinimumValue, MaximumValue);
+		return Range.NextValueInSubRange(TwisterObject->GetTwisterRef(), MinimumValue, MaximumValue);
 	}
 
 	/** Linearly interpolates between Range's Minimum and Maximum using Percentage (0..1). */

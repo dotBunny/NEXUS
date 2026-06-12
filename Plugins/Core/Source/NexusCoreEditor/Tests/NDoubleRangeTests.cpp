@@ -78,9 +78,10 @@ N_TEST_HIGH(FNDoubleRangeTests_NextValue_WithinBounds, "NEXUS::UnitTests::NCore:
 	FNDoubleRange Range;
 	Range.Minimum = 0.25;
 	Range.Maximum = 0.75;
+	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{
-		const double Value = Range.NextValue();
+		const double Value = Range.NextValue(Random);
 		CHECK_MESSAGE(FString::Printf(TEXT("NextValue[%d] should be >= Minimum"), i), Value >= 0.25 - 0.001);
 		CHECK_MESSAGE(FString::Printf(TEXT("NextValue[%d] should be <= Maximum"), i), Value <= 0.75 + 0.001);
 	}
@@ -91,9 +92,10 @@ N_TEST_HIGH(FNDoubleRangeTests_NextValueInSubRange_Clamping, "NEXUS::UnitTests::
 	FNDoubleRange Range;
 	Range.Minimum = 5.5;
 	Range.Maximum = 15.5;
+	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{
-		const double Value = Range.NextValueInSubRange(0.0, 100.0);
+		const double Value = Range.NextValueInSubRange(Random, 0.0, 100.0);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be >= Range.Minimum"), i), Value >= 5.5 - 0.001);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be <= Range.Maximum"), i), Value <= 15.5 + 0.001);
 	}

@@ -68,9 +68,11 @@ N_TEST_HIGH(FNIntegerRangeTests_NextValueInSubRange_Clamping, "NEXUS::UnitTests:
 	FNIntegerRange Range;
 	Range.Minimum = 10;
 	Range.Maximum = 50;
+	
+	FNMersenneTwister Random = FNMersenneTwister(42);
 	for (int32 i = 0; i < 100; ++i)
 	{
-		const int32 Value = Range.NextValueInSubRange(0, 100);
+		const int32 Value = Range.NextValueInSubRange(Random, 0, 100);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be >= Range.Minimum"), i), Value >= 10);
 		CHECK_MESSAGE(FString::Printf(TEXT("SubRange value[%d] should be <= Range.Maximum"), i), Value <= 50);
 	}

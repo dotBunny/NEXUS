@@ -9,10 +9,12 @@
 #include "Engine/Font.h"
 #include "Kismet/KismetSystemLibrary.h"
 // ReSharper restore CppUnusedIncludeDirective
+#include "NCoreMinimal.h"
 #include "NSamplesDisplayComponents.h"
 #include "NSamplesDisplayMaterials.h"
 #include "NSamplesDisplaySettings.h"
 #include "NSamplesDisplayTest.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NSamplesDisplayActor.generated.h"
 
 class UCameraComponent;
@@ -58,6 +60,17 @@ public:
 		
 	UFUNCTION(BlueprintPure, Category = "NEXUS|Samples Display|Test Settings")
 	int GetTestIterationCount() const { return TestingSettings.TestIterationCount; }
+	
+	UFUNCTION(BlueprintPure, Category = "NEXUS|Samples Display")
+	UNMersenneTwisterObject* GetTwisterObject()
+	{
+		if (!IsValid(TwisterObject))
+		{
+			TwisterObject = NewObject<UNMersenneTwisterObject>(this);
+			TwisterObject->Seed("NEXUS");
+		}
+		return TwisterObject.Get();
+	}
 	
 	void PrepareTest();
 	void StartTest();
@@ -119,7 +132,11 @@ private:
 	
 	UPROPERTY()
 	TObjectPtr<UNSamplesDisplayMaterials> Materials;
-
+	
+	UPROPERTY()
+	TObjectPtr<UNMersenneTwisterObject> TwisterObject;
+	
 	FTransform MainPanelTransform;
 	FTransform FloorPanelTransform;
+	
 };

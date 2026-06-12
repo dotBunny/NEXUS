@@ -6,6 +6,7 @@
 #include "NOrientedBoxPicker.h"
 #include "NOrientedBoxPickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
 
 N_TEST_CRITICAL(FNOrientedBoxPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -14,8 +15,9 @@ N_TEST_CRITICAL(FNOrientedBoxPickerTests_Next_PointCount, "NEXUS::UnitTests::NPi
 	Params.Count = 50;
 	Params.MaximumDimensions = FVector(100.f);
 	Params.Rotation = FRotator::ZeroRotator;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNOrientedBoxPicker::Next(Points, Params);
+	FNOrientedBoxPicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
 }
 
@@ -26,8 +28,9 @@ N_TEST_CRITICAL(FNOrientedBoxPickerTests_Next_PointsInsideBox, "NEXUS::UnitTests
 	Params.Count = 200;
 	Params.MaximumDimensions = FVector(50.f, 30.f, 20.f);
 	Params.Rotation = FRotator::ZeroRotator;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNOrientedBoxPicker::Next(Points, Params);
+	FNOrientedBoxPicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the oriented box"), i),
@@ -129,14 +132,15 @@ N_TEST_HIGH(FNOrientedBoxPickerTests_Random_PointsInsideRotatedBox, "NEXUS::Unit
 
 N_TEST_HIGH(FNOrientedBoxPickerTests_Next_PointsInsideRotatedBox, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::Next_PointsInsideRotatedBox", N_TEST_CONTEXT_ANYWHERE)
 {
-	// Mirror Random coverage on the deterministic Next path.
+	// Mirror Random coverage on the seeded Next path.
 	FNOrientedBoxPickerParams Params;
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 200;
 	Params.MaximumDimensions = FVector(50.f, 10.f, 5.f);
 	Params.Rotation = FRotator(0.f, 45.f, 30.f);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNOrientedBoxPicker::Next(Points, Params);
+	FNOrientedBoxPicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Next rotated oriented box point[%d] should be inside"), i),

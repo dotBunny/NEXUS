@@ -32,23 +32,10 @@ N_TEST_CRITICAL(FNSplinePickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker:
 	FNSplinePickerParams Params;
 	Params.SplineComponent = NEXUS::UnitTests::NPicker::FNSplinePickerHarness::CreateStraightSpline();
 	Params.Count = 50;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNSplinePicker::Next(Points, Params);
+	FNSplinePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
-}
-
-N_TEST_CRITICAL(FNSplinePickerTests_Next_PointsOnSpline, "NEXUS::UnitTests::NPicker::FNSplinePicker::Next_PointsOnSpline", N_TEST_CONTEXT_ANYWHERE)
-{
-	FNSplinePickerParams Params;
-	Params.SplineComponent = NEXUS::UnitTests::NPicker::FNSplinePickerHarness::CreateStraightSpline();
-	Params.Count = 100;
-	TArray<FVector> Points;
-	FNSplinePicker::Next(Points, Params);
-	for (int32 i = 0; i < Points.Num(); ++i)
-	{
-		CHECK_MESSAGE(FString::Printf(TEXT("Next point[%d] should be on the spline"), i),
-			FNSplinePicker::IsPointOn(Params.SplineComponent, Points[i]));
-	}
 }
 
 N_TEST_MEDIUM(FNSplinePickerTests_Next_AppendsToExisting, "NEXUS::UnitTests::NPicker::FNSplinePicker::Next_AppendsToExisting", N_TEST_CONTEXT_ANYWHERE)
@@ -58,9 +45,10 @@ N_TEST_MEDIUM(FNSplinePickerTests_Next_AppendsToExisting, "NEXUS::UnitTests::NPi
 	Params.SplineComponent = NEXUS::UnitTests::NPicker::FNSplinePickerHarness::CreateStraightSpline();
 	Params.Count = 10;
 	const FVector Sentinel(-999.f, -999.f, -999.f);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
 	Points.Add(Sentinel);
-	FNSplinePicker::Next(Points, Params);
+	FNSplinePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should append Count points after the existing entries"), Points.Num() == 11);
 	CHECK_MESSAGE(TEXT("Next should not modify pre-existing entries"), Points[0].Equals(Sentinel, 0.001f));
 }
@@ -130,7 +118,7 @@ N_TEST_HIGH(FNSplinePickerTests_OneShot_MatchesTracked, "NEXUS::UnitTests::NPick
 	}
 }
 
-N_TEST_HIGH(FNSplinePickerTests_Twisted_Determinism, "NEXUS::UnitTests::NPicker::FNSplinePicker::Twisted_Determinism", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNSplinePickerTests_Next_Determinism, "NEXUS::UnitTests::NPicker::FNSplinePicker::Next_Determinism", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNSplinePickerParams Params;
 	Params.SplineComponent = NEXUS::UnitTests::NPicker::FNSplinePickerHarness::CreateStraightSpline();
@@ -139,13 +127,13 @@ N_TEST_HIGH(FNSplinePickerTests_Twisted_Determinism, "NEXUS::UnitTests::NPicker:
 	FNMersenneTwister TwisterA(0xC11C1E);
 	FNMersenneTwister TwisterB(0xC11C1E);
 	TArray<FVector> PointsA, PointsB;
-	FNSplinePicker::Twisted(PointsA, TwisterA, Params);
-	FNSplinePicker::Twisted(PointsB, TwisterB, Params);
+	FNSplinePicker::Next(PointsA, TwisterA, Params);
+	FNSplinePicker::Next(PointsB, TwisterB, Params);
 	for (int32 i = 0; i < PointsA.Num(); ++i)
 	{
-		CHECK_MESSAGE(FString::Printf(TEXT("Twisted spline point[%d] should be deterministic"), i),
+		CHECK_MESSAGE(FString::Printf(TEXT("Next spline point[%d] should be deterministic"), i),
 			PointsA[i].Equals(PointsB[i], 0.001f));
-		CHECK_MESSAGE(FString::Printf(TEXT("Twisted spline point[%d] should be on the spline"), i),
+		CHECK_MESSAGE(FString::Printf(TEXT("Next spline point[%d] should be on the spline"), i),
 			FNSplinePicker::IsPointOn(Params.SplineComponent, PointsA[i]));
 	}
 }
@@ -199,8 +187,9 @@ N_TEST_MEDIUM(FNSplinePickerTests_InvalidComponent_DefaultsToOrigin, "NEXUS::Uni
 
 	FNSplinePickerParams Params;
 	Params.Count = 5;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNSplinePicker::Next(Points, Params);
+	FNSplinePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("An invalid spline should still produce the requested number of points"), Points.Num() == 5);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{

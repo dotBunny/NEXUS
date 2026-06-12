@@ -15,14 +15,6 @@
 class NEXUSPICKER_API FNOrientedBoxPicker
 {
 public:
-	
-	/**
-	 * Generate deterministic points in relation to an FOrientedBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNOrientedBoxPickerParams& Params);
 
 	/**
 	 * Generate random points in relation to an FOrientedBox.
@@ -60,7 +52,7 @@ public:
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params);
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNOrientedBoxPickerParams& Params);
 	
 	/**
 	 * Checks if a point is inside or on the surface of the FOrientedBox.

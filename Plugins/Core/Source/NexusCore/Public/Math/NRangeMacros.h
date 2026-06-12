@@ -24,15 +24,15 @@
  * @param Type The underlying scalar type of the range (double, float, int32, ...).
  */
 #define N_RANGE_BASE(Type) \
-	inline Type NextValue() const \
+	inline Type NextValue(FNMersenneTwister& Twister) const \
 	{ \
-		return FNRandom::GetDeterministic().RandRange(Minimum, Maximum); \
+		return Twister.RandRange(Minimum, Maximum); \
 	} \
-	inline Type NextValueInSubRange(Type MinimumValue, Type MaximumValue) const \
+	inline Type NextValueInSubRange(FNMersenneTwister& Twister, Type MinimumValue, Type MaximumValue) const \
 	{ \
 		if (MinimumValue < Minimum) { MinimumValue = Minimum; } \
 		if (MaximumValue > Maximum) { MaximumValue = Maximum; } \
-		return FNRandom::GetDeterministic().RandRange(MinimumValue, MaximumValue); \
+		return Twister.RandRange(MinimumValue, MaximumValue); \
 	} \
 	inline Type PercentageValue(const float Percentage) const \
 	{ \

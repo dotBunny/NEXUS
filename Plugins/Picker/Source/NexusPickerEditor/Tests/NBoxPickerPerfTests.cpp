@@ -24,10 +24,11 @@ public:
 		Params.Count = 1000;
 		Params.MaximumBox = FBox(FVector::ZeroVector, FVector::OneVector);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNBoxPickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNBoxPickerHarness::MaxDuration)
-			FNBoxPicker::Next(Points, Params);
+			FNBoxPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
@@ -40,10 +41,11 @@ public:
 		Params.MinimumBox = FBox(FVector::OneVector, FVector::OneVector);
 		Params.MaximumBox = FBox(FVector::ZeroVector, FVector::OneVector * 100.f);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNBoxPickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNBoxPickerHarness::MaxDuration)
-			FNBoxPicker::Next(Points, Params);
+			FNBoxPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

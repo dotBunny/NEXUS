@@ -4,6 +4,7 @@
 #pragma once
 
 #include "NRandom.h"
+#include "Math/NMersenneTwister.h"
 #include "NWeightedIntegerArray.generated.h"
 
 /**
@@ -82,28 +83,6 @@ struct FNWeightedIntegerArray
 			if (Limit == 0) break;
 		}
 		CachedMaxIndex = Data.Num() - 1;
-	}
-
-	/**
-	 * Get the next deterministic value from the array.
-	 * @return Uses FNRandom::GetDeterministic()
-	 */
-	int32 NextValue() const
-	{
-		if (!HasData()) return INDEX_NONE;
-		return Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];
-	}
-
-	/**
-	 * Get the next deterministic value from the array, then remove every copy of it.
-	 * @return The picked value, which will no longer appear in the array on subsequent calls. Uses FNRandom::GetDeterministic().
-	 */
-	int32 NextValueAndRemove()
-	{
-		if (!HasData()) return INDEX_NONE;
-		const int32 ReturnValue = Data[FNRandom::GetDeterministic().IntegerRange(0, CachedMaxIndex)];;
-		Remove(ReturnValue);
-		return ReturnValue;
 	}
 
 	/**

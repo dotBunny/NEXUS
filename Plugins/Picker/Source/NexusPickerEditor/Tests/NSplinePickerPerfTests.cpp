@@ -37,10 +37,11 @@ public:
 		Params.SplineComponent = NEXUS::PerfTests::NPicker::FNSplinePickerHarness::CreateStraightSpline();
 		Params.Count = 1000;
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNSplinePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNSplinePickerHarness::MaxDuration)
-			FNSplinePicker::Next(Points, Params);
+			FNSplinePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

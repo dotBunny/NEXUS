@@ -8,6 +8,7 @@
 #include "NSpherePickerParams.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NWorldMacros.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NSpherePickerLibrary.generated.h"
 
 
@@ -23,21 +24,22 @@ class NEXUSPICKER_API UNSpherePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point inside or on the surface of a sphere.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param Params The parameters for the point generation. 
+	 * Uses the provided Mersenne Twister to ensure reproducible results.
+	 * @param Params The parameters for the point generation.
+	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Sphere: Next Point", Category = "NEXUS|Picker|Sphere", 
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/sphere/#next-point", WorldContext = "WorldContextObject"))
-	static TArray<FVector> NextPoint(UPARAM(ref) FNSpherePickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPoint(UPARAM(ref) FNSpherePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
-		FNSpherePicker::Next(ReturnLocations, Params);
+		FNSpherePicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
 	

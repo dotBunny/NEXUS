@@ -25,10 +25,11 @@ public:
 		Params.MinimumRadius = 1.f;
 		Params.MaximumRadius = 100.f;
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNCirclePickerHarness::MaxDuration)
-			FNCirclePicker::Next(Points, Params);
+			FNCirclePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
@@ -42,10 +43,11 @@ public:
 		Params.MaximumRadius = 100.f;
 		Params.Rotation = FRotator(10.4);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNCirclePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNCirclePickerHarness::MaxDuration)
-			FNCirclePicker::Next(Points, Params);
+			FNCirclePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

@@ -6,6 +6,7 @@
 #include "NBoxPicker.h"
 #include "NBoxPickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
 
 N_TEST_CRITICAL(FNBoxPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNBoxPicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -13,8 +14,9 @@ N_TEST_CRITICAL(FNBoxPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FN
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 50;
 	Params.MaximumBox = FBox(FVector(-100.f), FVector(100.f));
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNBoxPicker::Next(Points, Params);
+	FNBoxPicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
 }
 
@@ -24,8 +26,9 @@ N_TEST_CRITICAL(FNBoxPickerTests_Next_PointsInsideBounds, "NEXUS::UnitTests::NPi
 	Params.Origin = FVector(50.f, 50.f, 50.f);
 	Params.Count = 200;
 	Params.MaximumBox = FBox(FVector(-10.f), FVector(10.f));
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNBoxPicker::Next(Points, Params);
+	FNBoxPicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the box"), i),

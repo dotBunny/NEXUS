@@ -24,10 +24,11 @@ public:
 		Params.Count = 1000;
 		Params.MaximumDimensions = FVector2D(100, 100);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
-			FNRectanglePicker::Next(Points, Params);
+			FNRectanglePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
@@ -40,10 +41,11 @@ public:
 		Params.MinimumDimensions = FVector2D(1, 1);
 		Params.MaximumDimensions = FVector2D(100, 100);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNRectanglePickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNRectanglePickerHarness::MaxDuration)
-			FNRectanglePicker::Next(Points, Params);
+			FNRectanglePicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

@@ -6,6 +6,7 @@
 #include "NRectanglePicker.h"
 #include "NRectanglePickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
 
 N_TEST_CRITICAL(FNRectanglePickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNRectanglePicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -13,8 +14,9 @@ N_TEST_CRITICAL(FNRectanglePickerTests_Next_PointCount, "NEXUS::UnitTests::NPick
 	Params.Origin = FVector::ZeroVector;
 	Params.Count = 50;
 	Params.MaximumDimensions = FVector2D(100.f, 100.f);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNRectanglePicker::Next(Points, Params);
+	FNRectanglePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
 }
 
@@ -25,8 +27,9 @@ N_TEST_CRITICAL(FNRectanglePickerTests_Next_PointsInsideRectangle, "NEXUS::UnitT
 	Params.Count = 200;
 	Params.MaximumDimensions = FVector2D(50.f, 30.f);
 	Params.Rotation = FRotator::ZeroRotator;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNRectanglePicker::Next(Points, Params);
+	FNRectanglePicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the rectangle"), i),
@@ -121,8 +124,9 @@ N_TEST_HIGH(FNRectanglePickerTests_Next_PointsInsideRotatedRectangle, "NEXUS::Un
 	Params.Count = 200;
 	Params.MaximumDimensions = FVector2D(30.f, 10.f);
 	Params.Rotation = FRotator(0.f, 60.f, 0.f);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNRectanglePicker::Next(Points, Params);
+	FNRectanglePicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Next rotated rectangle point[%d] should be inside"), i),
@@ -143,8 +147,9 @@ N_TEST_CRITICAL(FNRectanglePickerTests_Next_DegenerateHollow, "NEXUS::UnitTests:
 	// The degenerate-hollow fallback in GetValidRanges() logs a warning; declare it expected so this test
 	// stays clean (and green under stricter automation configs that elevate log warnings to failures).
 	this->AddExpectedError(TEXT("matches the MaximumDimensions on both axes"), EAutomationExpectedErrorFlags::Contains, 1);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNRectanglePicker::Next(Points, Params); // must not crash
+	FNRectanglePicker::Next(Points, Twister, Params); // must not crash
 	CHECK_MESSAGE(TEXT("Degenerate hollow rectangle should still return Count points"), Points.Num() == 16);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
@@ -162,8 +167,9 @@ N_TEST_HIGH(FNRectanglePickerTests_Next_HollowPointsInsideOuter, "NEXUS::UnitTes
 	Params.Count = 200;
 	Params.MinimumDimensions = FVector2D(40.f, 40.f);
 	Params.MaximumDimensions = FVector2D(100.f, 100.f);
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNRectanglePicker::Next(Points, Params);
+	FNRectanglePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Hollow rectangle should return Count points"), Points.Num() == 200);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{

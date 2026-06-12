@@ -270,7 +270,6 @@ void ANSamplesDisplayActor::BeginDestroy()
 
 void ANSamplesDisplayActor::BeginPlay()
 {
-	
 	// If we are running in automation, we absolutely do not want timers in other places running, so we disable them
 	if (!GIsAutomationTesting && TimerSettings.bTimerEnabled)
 	{

@@ -3,27 +3,12 @@
 
 #pragma once
 
-#include "Math/NMersenneTwister.h"
-
 /**
  * A collection of random number generators.
  */
 class NEXUSCORE_API FNRandom
 {
 public:
-	/**
-	 * Access the shared deterministic random number generator.
-	 * @return A reference to the framework-wide Mersenne Twister seeded from the "NEXUS" string.
-	 * @note Values must be drawn from this generator in a deterministic order across runs; any divergence in call order will desync downstream consumers.
-	 * @note It is on the developer to handle cross thread issues (tldr don't there's no way to ensure order).
-	 */
-	FORCEINLINE static FNMersenneTwister& GetDeterministic()
-	{
-		// Not really sure if this 
-		check(IsInGameThread())
-		return Deterministic;
-	}
-
 	/**
 	 * Access the shared non-deterministic random number generator.
 	 * @return A reference to the framework-wide FRandomStream seeded from the current wall-clock millisecond.
@@ -33,11 +18,4 @@ public:
 		static FRandomStream NonDeterministic(static_cast<int32>(FPlatformTime::Cycles64() ^ FDateTime::UtcNow().GetTicks()));
 		return NonDeterministic;
 	}
-	
-private:
-	/**
-	 * A deterministic random number generator.
-	 * @note It is SUPER important that values are called from this in a deterministic order.
-	 */
-	static FNMersenneTwister Deterministic;
 };

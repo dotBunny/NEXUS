@@ -11,6 +11,7 @@
 #include "NRandom.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NWorldMacros.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NDeveloperLibrary.generated.h"
 
 /**
@@ -157,14 +158,15 @@ public:
 			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);		
 	}
 	
-	/**
-	 * Re-seed the framework-wide deterministic random number generator, restarting its sequence from the given seed.
-	 * @param Seed The seed to initialize the shared FNRandom::GetDeterministic() generator with.
-	 * @note Affects every consumer of the shared deterministic generator; call once up front rather than mid-sequence, as re-seeding resets the stream and desyncs anything already drawing from it.
-	 */
-	UFUNCTION(BlueprintCallable, DisplayName = "Set Global Deterministic Seed", Category = "NEXUS|Developer")
-	static void SetDeterministicSeed(const int64 Seed)
+	UFUNCTION(BlueprintCallable, DisplayName = "Create Mersenne Twister Object", Category = "NEXUS|Developer",
+		meta = (WorldContext = "WorldContextObject"))
+	static UNMersenneTwisterObject* CreateMersenneTwisterObject(const UObject* WorldContextObject, const FString& Seed)
 	{
-		FNRandom::GetDeterministic().Initialize(Seed);
-	}
+		UWorld* InWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);
+
+		UNMersenneTwisterObject* TwisterObject = NewObject<UNMersenneTwisterObject>(InWorld);
+		TwisterObject->Seed(Seed);
+		
+		return TwisterObject;
+	};
 };

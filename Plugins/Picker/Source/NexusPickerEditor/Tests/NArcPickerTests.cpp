@@ -6,6 +6,7 @@
 #include "NArcPicker.h"
 #include "NArcPickerParams.h"
 #include "Macros/NTestMacros.h"
+#include "Math/NMersenneTwister.h"
 
 N_TEST_CRITICAL(FNArcPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNArcPicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -16,8 +17,9 @@ N_TEST_CRITICAL(FNArcPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FN
 	Params.Degrees = 90.f;
 	Params.MinimumDistance = 0.f;
 	Params.MaximumDistance = 100.f;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNArcPicker::Next(Points, Params);
+	FNArcPicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
 }
 
@@ -30,8 +32,9 @@ N_TEST_CRITICAL(FNArcPickerTests_Next_PointsInsideArc, "NEXUS::UnitTests::NPicke
 	Params.Degrees = 180.f;
 	Params.MinimumDistance = 0.f;
 	Params.MaximumDistance = 50.f;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNArcPicker::Next(Points, Params);
+	FNArcPicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the arc"), i),

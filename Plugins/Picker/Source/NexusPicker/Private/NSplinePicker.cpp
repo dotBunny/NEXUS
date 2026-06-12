@@ -6,6 +6,7 @@
 #include "NPickerMinimal.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
+#include "Math/NMersenneTwister.h"
 
 #define N_PICKER_SPLINE_PREFIX \
 	const int32 OutLocationsStartIndex = OutLocations.Num(); \
@@ -51,42 +52,6 @@
 
 // #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
 // Excluded from code duplication
-
-#define RANDOM_FLOAT_RANGE FloatRange
-void FNSplinePicker::Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
-{
-	N_PICKER_RANDOM_DETERMINISTIC
-	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_TRACE_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_TRACE
-			OutLocations.Add(Location);
-		}
-	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && Params.CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_NAVMESH_V1
-			OutLocations.Add(Location);
-		}
-	}
-	else
-	{
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
-		}
-	}
-	N_VLOG_SPLINE
-}
-#undef RANDOM_FLOAT_RANGE
 
 #define RANDOM_FLOAT_RANGE FRandRange
 void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
@@ -162,7 +127,7 @@ void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const F
 #undef RANDOM_FLOAT_RANGE
 
 #define RANDOM_FLOAT_RANGE FloatRange
-void FNSplinePicker::Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params)
+void FNSplinePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX
 	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && Params.CachedWorld != nullptr)

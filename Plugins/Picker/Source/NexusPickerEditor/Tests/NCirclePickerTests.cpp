@@ -61,8 +61,9 @@ N_TEST_CRITICAL(FNCirclePickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker:
 	Params.Count = 50;
 	Params.MinimumRadius = 0.f;
 	Params.MaximumRadius = 100.f;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNCirclePicker::Next(Points, Params);
+	FNCirclePicker::Next(Points, Twister, Params);
 	CHECK_MESSAGE(TEXT("Next should generate the requested number of points"), Points.Num() == 50);
 }
 
@@ -74,8 +75,9 @@ N_TEST_CRITICAL(FNCirclePickerTests_Next_PointsInsideAnnulus, "NEXUS::UnitTests:
 	Params.MinimumRadius = 0.f;
 	Params.MaximumRadius = 50.f;
 	Params.Rotation = FRotator::ZeroRotator;
+	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNCirclePicker::Next(Points, Params);
+	FNCirclePicker::Next(Points, Twister, Params);
 	for (int32 i = 0; i < Points.Num(); ++i)
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the circle"), i),
@@ -139,42 +141,6 @@ N_TEST_HIGH(FNCirclePickerTests_Random_PointsInsideAnnulus, "NEXUS::UnitTests::N
 	}
 }
 
-N_TEST_HIGH(FNCirclePickerTests_Next_PointsInsideAnnulusInnerRadius, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_PointsInsideAnnulusInnerRadius", N_TEST_CONTEXT_ANYWHERE)
-{
-	// The default Next_PointsInsideAnnulus test uses MinimumRadius = 0 so it cannot detect a
-	// regression that ignores the inner radius. This case asserts that no Next point falls in the hole.
-	FNCirclePickerParams Params;
-	Params.Origin = FVector::ZeroVector;
-	Params.Count = 200;
-	Params.MinimumRadius = 8.f;
-	Params.MaximumRadius = 25.f;
-	Params.Rotation = FRotator::ZeroRotator;
-	TArray<FVector> Points;
-	FNCirclePicker::Next(Points, Params);
-	for (int32 i = 0; i < Points.Num(); ++i)
-	{
-		CHECK_MESSAGE(FString::Printf(TEXT("Next annulus point[%d] should respect the non-zero inner radius"), i),
-			FNCirclePicker::IsPointInsideOrOn(Params.Origin, Params.MinimumRadius, Params.MaximumRadius, Params.Rotation, Points[i]));
-	}
-}
-
-N_TEST_HIGH(FNCirclePickerTests_Next_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
-{
-	// Verifies that Next produces an area-uniform distribution. A regression that samples
-	// the radius linearly in [MinR, MaxR] (instead of the sqrt-CDF transform) would cluster
-	// points near MinimumRadius and fail by over-counting the inner equal-area bin.
-	using namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness;
-	FNCirclePickerParams Params;
-	Params.Origin = FVector::ZeroVector;
-	Params.Count = DensitySampleCount;
-	Params.MinimumRadius = 10.f;
-	Params.MaximumRadius = 100.f;
-	Params.Rotation = FRotator::ZeroRotator;
-	TArray<FVector> Points;
-	FNCirclePicker::Next(Points, Params);
-	CheckAreaUniformity(TEXT("Next"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
-}
-
 N_TEST_HIGH(FNCirclePickerTests_Random_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Random_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
 {
 	// Verifies Random's annular distribution is area-uniform on the FRand-based path.
@@ -190,9 +156,9 @@ N_TEST_HIGH(FNCirclePickerTests_Random_DensityUniformity, "NEXUS::UnitTests::NPi
 	CheckAreaUniformity(TEXT("Random"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
 }
 
-N_TEST_HIGH(FNCirclePickerTests_Twisted_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Twisted_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
+N_TEST_HIGH(FNCirclePickerTests_Next_DensityUniformity, "NEXUS::UnitTests::NPicker::FNCirclePicker::Next_DensityUniformity", N_TEST_CONTEXT_ANYWHERE)
 {
-	// Verifies the Mersenne-Twister path also samples uniformly by area. Twisted has its own
+	// Verifies the Mersenne-Twister path also samples uniformly by area. Next has its own
 	// RNG instance, so a regression in the FNMersenneTwister::Float pipeline would only show up here.
 	using namespace NEXUS::UnitTests::NPicker::FNCirclePickerHarness;
 	FNCirclePickerParams Params;
@@ -203,8 +169,8 @@ N_TEST_HIGH(FNCirclePickerTests_Twisted_DensityUniformity, "NEXUS::UnitTests::NP
 	Params.Rotation = FRotator::ZeroRotator;
 	FNMersenneTwister Twister(0xC11C1E);
 	TArray<FVector> Points;
-	FNCirclePicker::Twisted(Points, Twister, Params);
-	CheckAreaUniformity(TEXT("Twisted"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
+	FNCirclePicker::Next(Points, Twister, Params);
+	CheckAreaUniformity(TEXT("Next"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
 }
 
 #endif //WITH_TESTS

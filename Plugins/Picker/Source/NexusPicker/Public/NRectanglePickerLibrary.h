@@ -7,6 +7,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NWorldMacros.h"
 #include "NRectanglePicker.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NRectanglePickerLibrary.generated.h"
 
 /**
@@ -21,21 +22,22 @@ class NEXUSPICKER_API UNRectanglePickerLibrary : public UBlueprintFunctionLibrar
 
 	/**
 	 * Generates a deterministic point inside or on the boundary of a rectangle.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param Params The parameters for the point generation. 
+	 * Uses the provided Mersenne Twister to ensure reproducible results.
+	 * @param Params The parameters for the point generation.
+	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Rectangle: Next Point", Category = "NEXUS|Picker|Rectangle", 
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/rectangle/#next-point", WorldContext = "WorldContextObject"))
-	static TArray<FVector> NextPoint(UPARAM(ref) FNRectanglePickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPoint(UPARAM(ref) FNRectanglePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
-		FNRectanglePicker::Next(ReturnLocations, Params);
+		FNRectanglePicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
 	

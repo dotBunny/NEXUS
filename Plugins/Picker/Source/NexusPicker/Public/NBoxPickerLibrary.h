@@ -7,6 +7,7 @@
 #include "NBoxPicker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NWorldMacros.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NBoxPickerLibrary.generated.h"
 
 /**
@@ -21,21 +22,22 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Generates a deterministic point in relation to an FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param Params The parameters for the point generation. 
+	 * Uses the provided Mersenne Twister to ensure reproducible results.
+	 * @param Params The parameters for the point generation.
+	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Box: Next Point", Category = "NEXUS|Picker|Box", 
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/box/#next-point", WorldContext = "WorldContextObject"))
-	static TArray<FVector> NextPoint(UPARAM(ref) FNBoxPickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPoint(UPARAM(ref) FNBoxPickerParams& Params, UNMersenneTwisterObject* TwisterObject,  UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
-		FNBoxPicker::Next(ReturnLocations, Params);
+		FNBoxPicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
 	

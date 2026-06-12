@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NCollectionsLibrary.generated.h"
 
 
@@ -95,9 +96,9 @@ public:
 	 * @return The picked value.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Next Value")
-	static int32 WeightedIntegerArrayNextValue(const FNWeightedIntegerArray& WeightedIntegerArray)
+	static int32 WeightedIntegerArrayNextValue(const FNWeightedIntegerArray& WeightedIntegerArray, UNMersenneTwisterObject* TwisterObject)
 	{
-		return WeightedIntegerArray.NextValue();
+		return WeightedIntegerArray.TwistedValue(TwisterObject->GetTwisterRef());
 	}
 
 	/**
@@ -106,9 +107,9 @@ public:
 	 * @return The picked value, which will no longer appear in the array on subsequent calls.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|Collections|Weighted Integer Array", DisplayName = "Next Value And Remove")
-	static int32 WeightedIntegerArrayNextValueAndRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray)
+	static int32 WeightedIntegerArrayNextValueAndRemove(UPARAM(ref) FNWeightedIntegerArray& WeightedIntegerArray, UNMersenneTwisterObject* TwisterObject)
 	{
-		return WeightedIntegerArray.NextValueAndRemove();
+		return WeightedIntegerArray.TwistedValueAndRemove(TwisterObject->GetTwisterRef());
 	}
 
 	/**

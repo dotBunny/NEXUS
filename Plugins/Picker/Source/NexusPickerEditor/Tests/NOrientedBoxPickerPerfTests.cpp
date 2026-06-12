@@ -25,10 +25,11 @@ public:
 		Params.MaximumDimensions = FVector(100.f);
 		Params.Rotation = FRotator::ZeroRotator;
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNOrientedBoxPickerPerfTests_NextSimple, NEXUS::PerfTests::NPicker::FNOrientedBoxPickerHarness::MaxDuration)
-			FNOrientedBoxPicker::Next(Points, Params);
+			FNOrientedBoxPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}
@@ -42,10 +43,11 @@ public:
 		Params.MaximumDimensions = FVector(100.f);
 		Params.Rotation = FRotator(0.f, 45.f, 0.f);
 		TArray<FVector> Points;
+		FNMersenneTwister Twister(123456789);
 		// TEST
 		{
 			N_TEST_TIMER_SCOPE(FNOrientedBoxPickerPerfTests_Next, NEXUS::PerfTests::NPicker::FNOrientedBoxPickerHarness::MaxDuration)
-			FNOrientedBoxPicker::Next(Points, Params);
+			FNOrientedBoxPicker::Next(Points, Twister, Params);
 			NTestTimer.ManualStop();
 		}
 	}

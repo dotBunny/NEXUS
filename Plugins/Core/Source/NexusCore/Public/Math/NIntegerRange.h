@@ -5,6 +5,7 @@
 
 #include "NRandom.h"
 #include "NRangeMacros.h"
+#include "NMersenneTwister.h"
 #include "NIntegerRange.generated.h"
 
 /**
@@ -20,7 +21,7 @@ struct NEXUSCORE_API FNIntegerRange
 
 	/** Lower bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Minimum = MIN_int32;
+	int32 Minimum = -MIN_int32;
 
 	/** Upper bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

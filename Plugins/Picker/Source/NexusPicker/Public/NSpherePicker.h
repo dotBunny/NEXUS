@@ -17,14 +17,6 @@ class NEXUSPICKER_API FNSpherePicker
 public:
 
 	/**
-	 * Generate deterministic points inside or on the surface of a sphere.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNSpherePickerParams& Params);
-
-	/**
 	 * Generate random points inside or on the surface of a sphere.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
@@ -61,7 +53,7 @@ public:
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params);
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSpherePickerParams& Params);
 
 	/**
 	 * Checks if a point is inside or on the surface of a sphere.

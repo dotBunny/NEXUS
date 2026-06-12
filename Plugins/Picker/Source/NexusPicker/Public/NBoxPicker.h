@@ -17,14 +17,6 @@ class NEXUSPICKER_API FNBoxPicker
 public:
 	
 	/**
-	 * Generate deterministic points in relation to an axis-aligned FBox.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNBoxPickerParams& Params);
-
-	/**
 	 * Generate random points in relation to an axis-aligned FBox.
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
@@ -60,7 +52,7 @@ public:
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params);
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNBoxPickerParams& Params);
 	
 	/**
 	 * Checks if a point is inside or on the surface of the axis-aligned FBox.

@@ -7,6 +7,7 @@
 #include "NCirclePicker.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Macros/NWorldMacros.h"
+#include "Math/NMersenneTwisterObject.h"
 #include "NCirclePickerLibrary.generated.h"
 
 /**
@@ -21,21 +22,22 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param Params The parameters for the point generation. 
+	 * Uses the provided Mersenne Twister to ensure reproducible results.
+	 * @param Params The parameters for the point generation.
+	 * @param TwisterObject The Mersenne Twister to query for random.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Circle: Next Point", Category = "NEXUS|Picker|Circle", 
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/picker/distributions/circle/#next-point", WorldContext = "WorldContextObject"))
-	static TArray<FVector> NextPoint(UPARAM(ref) FNCirclePickerParams& Params, UObject* WorldContextObject)
+	static TArray<FVector> NextPoint(UPARAM(ref) FNCirclePickerParams& Params, UNMersenneTwisterObject* TwisterObject, UObject* WorldContextObject)
 	{
 		TArray<FVector> ReturnLocations;
 		if (Params.CachedWorld == nullptr)
 		{
 			Params.CachedWorld = N_GET_WORLD_FROM_CONTEXT(WorldContextObject);	
 		}
-		FNCirclePicker::Next(ReturnLocations, Params);
+		FNCirclePicker::Next(ReturnLocations, TwisterObject->GetTwisterRef(), Params);
 		return ReturnLocations;
 	}
 	

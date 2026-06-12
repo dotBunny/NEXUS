@@ -8,6 +8,7 @@
 #include "NRandom.h"
 #include "NSplinePickerParams.h"
 #include "Components/SplineComponent.h"
+#include "Math/NMersenneTwister.h"
 
 /**
  * Provides various functions for generating points along a USplineComponent spline using different
@@ -17,14 +18,6 @@
 class NEXUSPICKER_API FNSplinePicker
 {
 public:
-	
-	/**
-	 * Generate deterministic points on a spline.
-	 * Uses the deterministic random generator to ensure reproducible results.
-	 * @param OutLocations An array to store the generated points.
-	 * @param Params The parameters for the point generation.
-	 */
-	static void Next(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
 	/**
 	 * Generate random points on a spline.
@@ -62,7 +55,7 @@ public:
 	 * @param Random The Mersenne Twister to query for random.
 	 * @param Params The parameters for the point generation.
 	 */
-	static void Twisted(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
+	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params);
 	
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.

@@ -5,6 +5,7 @@
 
 #include "NRandom.h"
 #include "NRangeMacros.h"
+#include "NMersenneTwister.h"
 #include "NDoubleRange.generated.h"
 
 /**
@@ -20,7 +21,7 @@ struct NEXUSCORE_API FNDoubleRange
 
 	/** Lower bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	double Minimum = MIN_dbl;
+	double Minimum = -MIN_dbl;
 
 	/** Upper bound of the range (inclusive). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
