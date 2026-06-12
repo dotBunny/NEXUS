@@ -72,8 +72,9 @@ bool FNSeedGenerator::IsValidHexSeed(const FString& InHexSeed)
 		return false;
 	}
 
-	// Check that we have an equal number of sets
-	if (SeedLength != 1 && SeedLength % 2 != 0)
+	// Check that we have an equal number of sets; SanitizeHexSeed pads a single
+	// digit to a pair, so the length here is always 0 or 2-16.
+	if (SeedLength % 2 != 0)
 	{
 		return false;
 	}
@@ -184,7 +185,8 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 	FString ParsedSeed = SanitizeHexSeed(InHexSeed);
 	const int32 SeedLength = ParsedSeed.Len();
 
-	if (SeedLength == 0 || SeedLength == 1)
+	// SanitizeHexSeed pads a single digit to a pair, so only empty is invalid here
+	if (SeedLength == 0)
 	{
 		UE_LOG(LogNexusCore, Warning, TEXT("The parsed(%s) seed(%s) length(%i) was below any possible valid value; returning 0."), *ParsedSeed, *InHexSeed, SeedLength);
 		return 0;
@@ -200,15 +202,12 @@ uint64 FNSeedGenerator::SeedFromHex(const FString& InHexSeed)
 	uint64 NewSeed = 0;
 	for (int32 i = 0; i < ParsedSeed.Len(); i += 2)
 	{
-		// Get our two hexadecimal characters in the series
+		// Get our two hexadecimal characters in the series; SanitizeHexSeed
+		// guarantees both are hex digits.
 		const TCHAR CachedLeftCharacter = ParsedSeed[i];
 		const TCHAR CachedRightCharacter = ParsedSeed[i + 1];
 
-		// Double-check them (why?)
-		if (TChar<TCHAR>::IsHexDigit(CachedLeftCharacter) && TChar<TCHAR>::IsHexDigit(CachedRightCharacter))
-		{
-			NewSeed = (NewSeed * 256) + (HexToInteger(CachedRightCharacter) + (HexToInteger(CachedLeftCharacter) * 16));
-		}
+		NewSeed = (NewSeed * 256) + (HexToInteger(CachedRightCharacter) + (HexToInteger(CachedLeftCharacter) * 16));
 	}
 
 	return NewSeed;

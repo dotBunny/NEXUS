@@ -457,6 +457,46 @@ N_TEST_CRITICAL(FNRawMeshTests_CheckConvex_FaceLoops_FanTriangulatedCubeAfterVer
 	CHECK_MESSAGE(TEXT("Nudging a corner inward must still report convex when CheckConvex walks FaceLoops"), Mesh.IsConvex());
 }
 
+N_TEST_HIGH(FNRawMeshTests_CheckConvex_PlaneSide_ExtentScaledTolerance,
+	"NEXUS::UnitTests::NCore::FNRawMesh::CheckConvex::PlaneSide_ExtentScaledTolerance",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The plane-side test must share the extent-scaled planarity budget rather than use an absolute
+	// epsilon. A cube with a diagonally split top: raising the corner only one triangle owns keeps
+	// every face planar and every loop convex, but puts that corner (and the opposite top corner) a
+	// hair in front of the other triangle's plane — sub-tolerance drift that an absolute epsilon
+	// false-fails at editor-realistic scale (matching FaceLoops_FanTriangulatedCubeAfterVertexNudge).
+	FNRawMesh Mesh;
+	Mesh.Vertices = {
+		{ -500, -500, -500 }, { +500, -500, -500 }, { +500, +500, -500 }, { -500, +500, -500 },
+		{ -500, -500, +500 }, { +500, -500, +500 }, { +500, +500, +500 }, { -500, +500, +500 },
+	};
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 3, 2, 1)); // -Z
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 5, 6));    // +Z split diagonally so vertex 5
+	Mesh.FaceLoops.Add(FNRawMeshLoop(4, 6, 7));    // belongs to only one of the halves
+	Mesh.FaceLoops.Add(FNRawMeshLoop(0, 1, 5, 4)); // -Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(1, 2, 6, 5)); // +X
+	Mesh.FaceLoops.Add(FNRawMeshLoop(2, 3, 7, 6)); // +Y
+	Mesh.FaceLoops.Add(FNRawMeshLoop(3, 0, 4, 7)); // -X
+	Mesh.Loops = Mesh.FaceLoops;
+	Mesh.ConvertToTriangles();
+	Mesh.CalculateCenterAndBounds();
+	Mesh.Validate();
+
+	CHECK_MESSAGE(TEXT("Diagonally split cube should pass CheckConvex out of the gate"), Mesh.IsConvex());
+
+	// Raise the corner by 0.4 — well inside the 1.0 (1e-3 x extent) budget at this scale, but four
+	// thousand times an absolute UE_DOUBLE_KINDA_SMALL_NUMBER threshold.
+	Mesh.Vertices[5].Z = 500.4;
+	Mesh.Validate();
+	CHECK_MESSAGE(TEXT("Sub-tolerance ridge across the split top must still report convex"), Mesh.IsConvex());
+
+	// Push it past the budget — the scaled threshold must still reject real concavity.
+	Mesh.Vertices[5].Z = 505.0;
+	Mesh.Validate();
+	CHECK_FALSE_MESSAGE(TEXT("Above-tolerance ridge must trip the plane-side test"), Mesh.IsConvex());
+}
+
 N_TEST_HIGH(FNRawMeshTests_CheckConvex_FaceLoops_DetectsConcavity,
 	"NEXUS::UnitTests::NCore::FNRawMesh::CheckConvex::FaceLoops_DetectsConcavity",
 	N_TEST_CONTEXT_ANYWHERE)

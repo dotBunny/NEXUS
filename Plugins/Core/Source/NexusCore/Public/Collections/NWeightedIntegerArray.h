@@ -25,7 +25,7 @@ struct FNWeightedIntegerArray
 	 */
 	void Add(const int32 Value, const int32 Weight = 1)
 	{
-		if (Weight == 0) return;
+		if (Weight <= 0) return;
 		Data.Reserve(Data.Num() + Weight);
 		for (int32 i = 0; i < Weight; i++)
 		{
@@ -233,7 +233,7 @@ struct FNWeightedIntegerArray
 	 *
 	 * @return A new array containing each unique value present in the weighted array.
 	 */
-	TArray<int32> GetUniqueValues()
+	TArray<int32> GetUniqueValues() const
 	{
 		TArray<int32> Values;
 		for (int32 i = 0; i < Data.Num(); i++)

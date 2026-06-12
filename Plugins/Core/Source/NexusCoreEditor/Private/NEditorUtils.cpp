@@ -44,8 +44,15 @@ IAssetEditorInstance* FNEditorUtils::GetForegroundAssetEditor()
 	const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
 	for (IAssetEditorInstance* AssetEditorInstance : AssetEditorInstances)
 	{
-		const TSharedPtr<SDockTab> Tab = AssetEditorInstance->GetAssociatedTabManager()->GetOwnerTab();
-		if (Tab->IsForeground())
+		// World-centric or partially initialized editors may have no tab manager or owner tab
+		const TSharedPtr<FTabManager> TabManager = AssetEditorInstance->GetAssociatedTabManager();
+		if (!TabManager.IsValid())
+		{
+			continue;
+		}
+
+		const TSharedPtr<SDockTab> Tab = TabManager->GetOwnerTab();
+		if (Tab.IsValid() && Tab->IsForeground())
 		{
 			TSharedPtr<SWindow> ParentWindow = Tab->GetParentWindow();
 			if (ParentWindow == ActiveWindow)
@@ -68,7 +75,7 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 
 	if (!FKismetEditorUtilities::CanCreateBlueprintOfClass(InParentClass))
 	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to create a UBlueprint from UClass(%s)."), *InParentClass->GetName());
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to create a UBlueprint from UClass(%s)."), *GetNameSafe(InParentClass));
 		return nullptr;
 	}
 
@@ -87,6 +94,11 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 
 	UBlueprint* Blueprint = FKismetEditorUtilities::CreateBlueprint(InParentClass, Package,
 		*FPaths::GetBaseFilename(InPath), BPTYPE_Normal, BlueprintClass, BlueprintGeneratedClass);
+	if (Blueprint == nullptr)
+	{
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Failed to create a UBlueprint from UClass(%s) at path(%s)."), *InParentClass->GetName(), *InPath);
+		return nullptr;
+	}
 
 	FAssetRegistryModule::AssetCreated(Blueprint);
 	

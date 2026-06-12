@@ -803,7 +803,10 @@ bool FNRawMesh::CheckConvex() const
 			}
 		}
 
-		// Plane-side test: every vertex not on this face must lie on or behind its supporting plane.
+		// Plane-side test: every vertex not on this face must lie on or behind its supporting plane,
+		// within the same extent-scaled budget as planarity. A vertex permitted to drift off its own
+		// face by PlanarityTolerance protrudes in front of adjacent or coplanar faces' planes by the
+		// same order, so any tighter threshold here re-rejects meshes planarity deliberately accepts.
 		// Ordering matters here — the original code called Loop.Indices.Contains(v) on every vertex
 		// to skip the K face vertices, paying O(K) per vertex even though the vast majority of
 		// non-face vertices on a convex hull have Signed << 0 and never need the skip at all.
@@ -813,7 +816,7 @@ bool FNRawMesh::CheckConvex() const
 		for (int32 v = 0; v < Vertices.Num(); v++)
 		{
 			const double Signed = FVector::DotProduct(FaceNormal, Vertices[v]) - PlaneD;
-			if (Signed > UE_DOUBLE_KINDA_SMALL_NUMBER && !Loop.Indices.Contains(v))
+			if (Signed > PlanarityTolerance && !Loop.Indices.Contains(v))
 			{
 				return false;
 			}

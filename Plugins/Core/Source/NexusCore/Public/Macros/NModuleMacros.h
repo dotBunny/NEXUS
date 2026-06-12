@@ -76,7 +76,7 @@ public: \
 // Only do version updates in the editor
 #if WITH_EDITOR && WITH_EDITORONLY_DATA
 #define N_UPDATE_UPLUGIN(PluginName) \
-	if (const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(PluginName); Plugin.IsValid()) \
+	if (const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(PluginName); Plugin.IsValid() && (!IsRunningCommandlet() && !IsRunningCookCommandlet())) \
 	{ \
 		const FPluginDescriptor CurrentDescriptor = Plugin->GetDescriptor(); \
 		FPluginDescriptor UpdatedDescriptor = FPluginDescriptor(CurrentDescriptor); \
@@ -94,7 +94,7 @@ public: \
 		} \
 		if(bIsDirty) \
 		{ \
-			UE_LOG(LogNexusCore, Verbose, TEXT("Updating plugin(%s) definition."), TEXT(PluginName)) \
+			UE_LOG(LogNexusCore, Log, TEXT("Updating plugin(%s) definition."), TEXT(PluginName)) \
 			if (FText FailReason; !Plugin->UpdateDescriptor(UpdatedDescriptor, FailReason)) \
 			{ \
 				UE_LOG(LogNexusCore, Error, TEXT("Failed to update plugin(%s) descriptor: %s"), TEXT(PluginName), *FailReason.ToString()) \
