@@ -105,7 +105,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	
 	/**
 	 * Checks if a point is inside or on the FBox.
-	 * @param Origin The center point of the FBox.
+	 * @param Origin The world-space origin the FBox is offset from.
 	 * @param Box The FBox to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the FBox, false otherwise.
@@ -119,7 +119,7 @@ class NEXUSPICKER_API UNBoxPickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Checks if multiple points are inside or on the FBox.
 	 * @param Points Array of points to check.
-	 * @param Origin  The center point of the FBox.
+	 * @param Origin  The world-space origin the boxes are offset from.
 	 * @param MinimumBox The minimum FBox.
 	 * @param MaximumBox The maximum FBox.
 	 * @return Array of booleans indicating if each point is inside or on the FBox.

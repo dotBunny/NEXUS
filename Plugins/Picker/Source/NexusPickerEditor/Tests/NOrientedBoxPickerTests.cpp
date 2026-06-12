@@ -7,6 +7,7 @@
 #include "NOrientedBoxPickerParams.h"
 #include "Macros/NTestMacros.h"
 #include "Math/NMersenneTwister.h"
+#include "Math/OrientedBox.h"
 
 N_TEST_CRITICAL(FNOrientedBoxPickerTests_Next_PointCount, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::Next_PointCount", N_TEST_CONTEXT_ANYWHERE)
 {
@@ -127,6 +128,63 @@ N_TEST_HIGH(FNOrientedBoxPickerTests_Random_PointsInsideRotatedBox, "NEXUS::Unit
 	{
 		CHECK_MESSAGE(FString::Printf(TEXT("Random rotated oriented box point[%d] should be inside"), i),
 			FNOrientedBoxPicker::IsPointInsideOrOn(Params.Origin, Params.MaximumDimensions, Params.Rotation, Points[i]));
+	}
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerParamsTests_InitializeFrom_MatchesSource, "NEXUS::UnitTests::NPicker::FNOrientedBoxPickerParams::InitializeFrom_MatchesSource", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that InitializeFrom adopts the source box's center, rotation, and local dimensions
+	// rather than the world-space AABB of the rotated corners.
+	const FRotator SourceRotation(10.f, 45.f, 20.f);
+	const FQuat SourceQuat = SourceRotation.Quaternion();
+	FOrientedBox OrientedBox;
+	OrientedBox.Center = FVector(25.f, -10.f, 5.f);
+	OrientedBox.AxisX = SourceQuat.GetAxisX();
+	OrientedBox.AxisY = SourceQuat.GetAxisY();
+	OrientedBox.AxisZ = SourceQuat.GetAxisZ();
+	OrientedBox.ExtentX = 20.f;
+	OrientedBox.ExtentY = 10.f;
+	OrientedBox.ExtentZ = 5.f;
+
+	FNOrientedBoxPickerParams Params;
+	Params.InitializeFrom(OrientedBox);
+
+	CHECK_MESSAGE(TEXT("Origin should match the source box center"),
+		Params.Origin.Equals(OrientedBox.Center, 0.001f));
+	CHECK_MESSAGE(TEXT("MaximumDimensions should be twice the source extents"),
+		Params.MaximumDimensions.Equals(FVector(40.f, 20.f, 10.f), 0.001f));
+	CHECK_MESSAGE(TEXT("Rotation should match the source box orientation"),
+		Params.Rotation.Equals(SourceRotation, 0.001f));
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerParamsTests_InitializeFrom_PointsInsideSourceBox, "NEXUS::UnitTests::NPicker::FNOrientedBoxPickerParams::InitializeFrom_PointsInsideSourceBox", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A yawed cube's world-space AABB is sqrt(2) wider in X and Y; dimensions derived from that
+	// AABB instead of the box extents would routinely place points outside the source box.
+	const FQuat SourceQuat = FRotator(0.f, 45.f, 0.f).Quaternion();
+	FOrientedBox OrientedBox;
+	OrientedBox.Center = FVector(10.f, 20.f, 30.f);
+	OrientedBox.AxisX = SourceQuat.GetAxisX();
+	OrientedBox.AxisY = SourceQuat.GetAxisY();
+	OrientedBox.AxisZ = SourceQuat.GetAxisZ();
+	OrientedBox.ExtentX = 25.f;
+	OrientedBox.ExtentY = 25.f;
+	OrientedBox.ExtentZ = 25.f;
+
+	FNOrientedBoxPickerParams Params;
+	Params.InitializeFrom(OrientedBox);
+	Params.Count = 200;
+
+	FNMersenneTwister Twister(0xC11C1E);
+	TArray<FVector> Points;
+	FNOrientedBoxPicker::Next(Points, Twister, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		const FVector Local = Points[i] - OrientedBox.Center;
+		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the source oriented box"), i),
+			FMath::Abs(Local | OrientedBox.AxisX) <= OrientedBox.ExtentX + 0.001f &&
+			FMath::Abs(Local | OrientedBox.AxisY) <= OrientedBox.ExtentY + 0.001f &&
+			FMath::Abs(Local | OrientedBox.AxisZ) <= OrientedBox.ExtentZ + 0.001f);
 	}
 }
 

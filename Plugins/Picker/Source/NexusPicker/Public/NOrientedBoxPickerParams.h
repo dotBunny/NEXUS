@@ -38,31 +38,14 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	/**
 	 * Set up parameters based on a provided FOrientedBox.
 	 * @param OrientedBox FOrientedBox to use for initialization.
+	 * @note Assumes the box axes are orthonormal (unit length).
 	 */
 	void InitializeFrom(const FOrientedBox& OrientedBox)
 	{
 		Rotation = FMatrix(OrientedBox.AxisX, OrientedBox.AxisY, OrientedBox.AxisZ, FVector::ZeroVector).Rotator();
-		
-		// We need to figure out the final corners
-		TArray<FVector> Vertices;
-		Vertices.SetNum(8);
-		OrientedBox.CalcVertices(Vertices.GetData());
-		FVector MinPoint = Vertices[0];
-		FVector MaxPoint = Vertices[0];
-		for (int32 i = 1; i < 8; i++)
-		{
-			MinPoint = MinPoint.ComponentMin(Vertices[i]);
-			MaxPoint = MaxPoint.ComponentMax(Vertices[i]);
-		}
-		
-		// We can't use the center as it's not the "real" center
-		Origin = (MinPoint + MaxPoint) * 0.5f;
-		
-		// Calculate dimensions
-		MaximumDimensions = FVector(
-			MaxPoint.X - MinPoint.X, 
-			MaxPoint.Y - MinPoint.Y, 
-			MaxPoint.Z - MinPoint.Z);
+		Origin = OrientedBox.Center;
+		// Dimensions are local-space (Rotation is applied on top), so use the extents directly
+		MaximumDimensions = FVector(OrientedBox.ExtentX, OrientedBox.ExtentY, OrientedBox.ExtentZ) * 2.0f;
 	}
 	
 	/** @return An origin-centered, axis-aligned box sized from MinimumDimensions, or an empty box when MinimumDimensions is zero. */

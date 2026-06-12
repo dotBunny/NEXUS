@@ -78,6 +78,33 @@ N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Inside, "NEXUS::UnitTests::NPicke
 	CHECK_MESSAGE(TEXT("Corner should be on box"), FNBoxPicker::IsPointInsideOrOn(Origin, Box, FVector(10.f)));
 }
 
+N_TEST_CRITICAL(FNBoxPickerTests_Next_PointsInsideBounds_OffsetBox, "NEXUS::UnitTests::NPicker::FNBoxPicker::Next_PointsInsideBounds_OffsetBox", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that points generated from a box not centered at local zero pass their own inclusion test.
+	FNBoxPickerParams Params;
+	Params.Origin = FVector(1000.f, 0.f, 0.f);
+	Params.Count = 200;
+	Params.MaximumBox = FBox(FVector(0.f), FVector(100.f));
+	FNMersenneTwister Twister(0xC11C1E);
+	TArray<FVector> Points;
+	FNBoxPicker::Next(Points, Twister, Params);
+	for (int32 i = 0; i < Points.Num(); ++i)
+	{
+		CHECK_MESSAGE(FString::Printf(TEXT("Point[%d] should be inside the offset box"), i),
+			FNBoxPicker::IsPointInsideOrOn(Params.Origin, Params.MaximumBox, Points[i]));
+	}
+}
+
+N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_OffsetBox, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_OffsetBox", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Verifies that the box is treated as an offset region relative to Origin, not re-centered on it.
+	const FVector Origin(1000.f, 0.f, 0.f);
+	const FBox Box(FVector(0.f), FVector(100.f));
+	CHECK_MESSAGE(TEXT("Shifted minimum corner should be on box"), FNBoxPicker::IsPointInsideOrOn(Origin, Box, FVector(1000.f, 0.f, 0.f)));
+	CHECK_MESSAGE(TEXT("Shifted maximum corner should be on box"), FNBoxPicker::IsPointInsideOrOn(Origin, Box, FVector(1100.f, 100.f, 100.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point inside the re-centered region should not be inside the shifted box"), FNBoxPicker::IsPointInsideOrOn(Origin, Box, FVector(960.f, -10.f, -10.f)));
+}
+
 N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Outside, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_Outside", N_TEST_CONTEXT_ANYWHERE)
 {
 	const FVector Origin(0.f);
