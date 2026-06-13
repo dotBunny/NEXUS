@@ -7,6 +7,7 @@
 ### Added
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
+- `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 
 ### Changed
 
@@ -34,6 +35,7 @@
 
 - Junctions no longer store if they are inside of a hull.
 - `ANPooledActor` from the placement pallete.
+- `ANCellLevelInstance` no longer maintains state before the choice to place it in the graph.
 
 ### Core Redirects
 

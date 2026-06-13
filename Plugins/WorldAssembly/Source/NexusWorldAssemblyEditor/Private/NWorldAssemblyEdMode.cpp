@@ -385,7 +385,8 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 		{
 			if (JunctionComponent == nullptr) continue;
 			
-			if (!JunctionComponent->LinkDetails.bConnected)
+			// Runtime
+			if (JunctionComponent->LinkDetails.JunctionInstanceIdentifier != -1 && !JunctionComponent->LinkDetails.bConnected)
 			{
 				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
 				{
