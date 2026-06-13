@@ -20,6 +20,7 @@ public:
 
 	virtual ~FNOrganComponentCustomization() override;
 
+
 	//~IDetailCustomization
 	virtual void CustomizeDetails(IDetailLayoutBuilder& DetailBuilder) override;
 	//End IDetailCustomization
@@ -28,8 +29,8 @@ private:
 	/** Kick off a new editor-side World Assembly operation for the selected organ component(s). */
 	FReply OnGenerateClicked(const TArray<TWeakObjectPtr<UObject>> Objects);
 
-	/** Cancel the currently-running operation associated with the selected organ component(s). */
-	FReply OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object);
+	/** Cancel the currently-running operation(s) associated with the selected organ component(s). */
+	FReply OnCancelClicked();
 
 	/** Remove previously-spawned generated proxies for the selected organ component(s). */
 	FReply OnClearClicked(TArray<TWeakObjectPtr<UObject>> Object);
@@ -37,8 +38,10 @@ private:
 	/** @return Visible only while an operation is running for the selected component(s). */
 	EVisibility CancelButtonVisible() const;
 
-	/** @return Visible when previously-generated proxies exist that could be cleared. */
+	/** @return Visible when the selected organ component(s)' last operation still has proxies that could be cleared. */
 	EVisibility ClearButtonVisible() const;
+	
+	EVisibility GenerateButtonVisible() const;
 
 	/**
 	 * @return true when the panel's organ component(s) can be generated: not in PIE, no operation
@@ -49,6 +52,9 @@ private:
 	 * leave the button stuck disabled even though this panel is still bound to a valid component.
 	 */
 	bool CanGenerate() const;
+
+	/** @return Running operations whose generation context contains any of the customized organ component(s). */
+	TArray<UNAssemblyOperation*> GetActiveOperations() const;
 
 	/** Re-evaluates the cached enabled-state of the action buttons when an operation registers/unregisters. */
 	void HandleOperationStateChanged(UNAssemblyOperation* Operation, ENWorldAssemblyOperationState NewState);

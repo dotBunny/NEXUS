@@ -195,6 +195,14 @@ public:
 	 */
 	bool AddToContext(UNOrganComponent* Component) const;
 
+	/**
+	 * Query whether an organ component participates in this operation's generation context.
+	 * @param Component Organ component to look for.
+	 * @return true if the component is part of the operation's context.
+	 * @note Returns false once the operation has been torn down and its context released.
+	 */
+	bool ContainsComponent(const UNOrganComponent* Component) const;
+
 	/** @return true if the context has been locked and the dependency order resolved. */
 	bool IsLocked() const { return Context->IsLocked(); }
 	/** @return true if a build is currently running for this operation. */

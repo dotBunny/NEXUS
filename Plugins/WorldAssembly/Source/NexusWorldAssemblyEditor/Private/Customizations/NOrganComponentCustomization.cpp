@@ -7,6 +7,7 @@
 #include "DetailWidgetRow.h"
 #include "IPropertyUtilities.h"
 #include "NEditorUtils.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyRegistry.h"
@@ -21,6 +22,11 @@ TSharedRef<IDetailCustomization> FNOrganComponentCustomization::MakeInstance()
 FNOrganComponentCustomization::~FNOrganComponentCustomization()
 {
 	FNWorldAssemblyRegistry::OnOperationStateChanged.Remove(OperationStateChangedHandle);
+}
+
+EVisibility FNOrganComponentCustomization::GenerateButtonVisible() const
+{
+	return GetActiveOperations().IsEmpty() ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 void FNOrganComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailBuilder)
@@ -65,7 +71,7 @@ FText::FromString("Organ Component"), ECategoryPriority::Important);
 					.HAlign(HAlign_Left)
 					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentGenerate", "Generate"))
 					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentGenerateTooltip", "Generate content for volume and contained volumes."))
-					.IsEnabled(this, &FNOrganComponentCustomization::CanGenerate)
+					.Visibility(this, &FNOrganComponentCustomization::GenerateButtonVisible)
 					.OnClicked(this, &FNOrganComponentCustomization::OnGenerateClicked, ObjectsBeingCustomized)
 			]
 			+ SHorizontalBox::Slot()
@@ -79,7 +85,7 @@ FText::FromString("Organ Component"), ECategoryPriority::Important);
 					.Text(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentCancel", "Cancel"))
 					.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "OrganComponentCancelTooltip", "Cancel on-going generation for this."))
 					.Visibility(this, &FNOrganComponentCustomization::CancelButtonVisible)
-					.OnClicked(this, &FNOrganComponentCustomization::OnCancelClicked, ObjectsBeingCustomized)
+					.OnClicked(this, &FNOrganComponentCustomization::OnCancelClicked)
 			]
 			+ SHorizontalBox::Slot()
 			.AutoWidth()
@@ -104,8 +110,12 @@ FReply FNOrganComponentCustomization::OnGenerateClicked(const TArray<TWeakObject
 	return FReply::Handled();
 }
 
-FReply FNOrganComponentCustomization::OnCancelClicked(TArray<TWeakObjectPtr<UObject>> Object)
+FReply FNOrganComponentCustomization::OnCancelClicked()
 {
+	for (UNAssemblyOperation* Operation : GetActiveOperations())
+	{
+		Operation->Cancel();
+	}
 	return FReply::Handled();
 }
 
@@ -131,12 +141,48 @@ FReply FNOrganComponentCustomization::OnClearClicked(TArray<TWeakObjectPtr<UObje
 
 EVisibility FNOrganComponentCustomization::CancelButtonVisible() const
 {
-	return EVisibility::Collapsed;
+	return GetActiveOperations().IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible;
+}
+
+TArray<UNAssemblyOperation*> FNOrganComponentCustomization::GetActiveOperations() const
+{
+	TArray<UNAssemblyOperation*> ActiveOperations;
+	const TArray<UNOrganComponent*> OrganComponents = UNOrganComponent::GetOrganComponents(CustomizedObjects);
+	if (OrganComponents.IsEmpty())
+	{
+		return ActiveOperations;
+	}
+
+	for (UNAssemblyOperation* Operation : FNWorldAssemblyRegistry::GetOperations())
+	{
+		if (Operation == nullptr || !Operation->IsRunning())
+		{
+			continue;
+		}
+		for (const UNOrganComponent* Component : OrganComponents)
+		{
+			if (Operation->ContainsComponent(Component))
+			{
+				ActiveOperations.Add(Operation);
+				break;
+			}
+		}
+	}
+	return ActiveOperations;
 }
 
 EVisibility FNOrganComponentCustomization::ClearButtonVisible() const
 {
-	return EVisibility::Visible;
+	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	for (const UNOrganComponent* Component : UNOrganComponent::GetOrganComponents(CustomizedObjects))
+	{
+		const int32 LastOperationTicket = Component->GetLastOperationTicket();
+		if (LastOperationTicket != 0 && Subsystem->HasGeneratedProxies(LastOperationTicket))
+		{
+			return EVisibility::Visible;
+		}
+	}
+	return EVisibility::Collapsed;
 }
 
 bool FNOrganComponentCustomization::CanGenerate() const

@@ -363,6 +363,11 @@ bool UNAssemblyOperation::AddToContext(UNOrganComponent* Component) const
 	return Context->AddOrganComponent(Component);
 }
 
+bool UNAssemblyOperation::ContainsComponent(const UNOrganComponent* Component) const
+{
+	return Context.IsValid() && Context->InputComponents.Contains(Component);
+}
+
 void UNAssemblyOperation::LockContext(UWorld* World)
 {
 	Context->LockAndPreprocess(World);

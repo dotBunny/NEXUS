@@ -73,6 +73,9 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	/** @return true if there are cell proxies currently alive from a generation pass. */
 	bool HasGeneratedCellProxies() const { return !KnownProxies.IsEmpty(); }
 
+	/** @return true if proxies spawned by the given operation are still tracked and could be cleared. */
+	bool HasGeneratedProxies(const int32& OperationTicket) const { return ProxyMap.Contains(OperationTicket); }
+
 	/** Destroy every known proxy and drop tracking. */
 	void ClearAllProxies();
 
