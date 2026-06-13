@@ -15,21 +15,24 @@ FNAssemblyFinalizeTask::FNAssemblyFinalizeTask(UNAssemblyOperation* TargetOperat
 
 void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
-	if (!IsValid(Operation))
+	// Resolve the weak reference; a cancel may have torn the operation down (and GC purged it)
+	// while the graph was still draining.
+	UNAssemblyOperation* ResolvedOperation = Operation.Get();
+	if (!IsValid(ResolvedOperation))
 	{
 		return;
 	}
-	
+
 #if !UE_BUILD_SHIPPING
-	
-	
-	const int32 OutputContentTicket = Operation->GetReport()->CreateContentBlock();
-	FNReportContentBlock* OutputContentBlock = Operation->GetReport()->GetContentBlock(OutputContentTicket);
+
+
+	const int32 OutputContentTicket = ResolvedOperation->GetReport()->CreateContentBlock();
+	FNReportContentBlock* OutputContentBlock = ResolvedOperation->GetReport()->GetContentBlock(OutputContentTicket);
 	OutputContentBlock->SetHeading("Output");
-	
+
 	// Add our Context Tags to report
-	const int32 ContextTagsContentTicket = Operation->GetReport()->CreateListBlock(OutputContentTicket);
-	FNReportListBlock* ContextTagsContentBlock = Operation->GetReport()->GetListBlock(ContextTagsContentTicket);
+	const int32 ContextTagsContentTicket = ResolvedOperation->GetReport()->CreateListBlock(OutputContentTicket);
+	FNReportListBlock* ContextTagsContentBlock = ResolvedOperation->GetReport()->GetListBlock(ContextTagsContentTicket);
 	ContextTagsContentBlock->SetHeading("Context Tags");
 	for (const FGameplayTag& Tag : TaskGraphContextPtr->ContextTags)
 	{
@@ -37,8 +40,8 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 	
 	// Add our Tag Counter to report
-	const int32 TagCounterContentTicket = Operation->GetReport()->CreateTableBlock(OutputContentTicket);
-	FNReportTableBlock* TagCounterTableBlock = Operation->GetReport()->GetTableBlock(TagCounterContentTicket);
+	const int32 TagCounterContentTicket = ResolvedOperation->GetReport()->CreateTableBlock(OutputContentTicket);
+	FNReportTableBlock* TagCounterTableBlock = ResolvedOperation->GetReport()->GetTableBlock(TagCounterContentTicket);
 	TagCounterTableBlock->SetHeading("Tag Counter");
 	TagCounterTableBlock->Initialize({ "Tag", "Count"});
 	for (const TPair<FGameplayTag, int32>& Pair : TaskGraphContextPtr->TagCounter.GameplayTags)
@@ -47,15 +50,15 @@ void FNAssemblyFinalizeTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 	}
 
 	// Add Analytics to report
-	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(Operation->GetReport());
-	TaskGraphContextPtr->ReportFilePath = Operation->OutputReportToFile();
+	N_ASSEMBLY_ANALYTICS_MEMBER_PTR->AddToReport(ResolvedOperation->GetReport());
+	TaskGraphContextPtr->ReportFilePath = ResolvedOperation->OutputReportToFile();
 #endif // !UE_BUILD_SHIPPING
 
 	// Send the finalized shared data back to the operation for doings.
 	// Defer to next tick so FinishBuild never runs inside a named-thread pump triggered by
 	// a sync load / FlushRenderingCommands — ProcessEvent (e.g. relay Client_* RPCs) would
 	// assert if a PostLoad is still on the stack above us.
-	TWeakObjectPtr<UNAssemblyOperation> WeakOperation(Operation);
+	TWeakObjectPtr<UNAssemblyOperation> WeakOperation = Operation;
 	TSharedRef<FNAssemblyTaskGraphContext> ContextRef = TaskGraphContextPtr;
 	FTSTicker::GetCoreTicker().AddTicker(TEXT("NAssemblyFinalize"), 0.0f,
 		[WeakOperation, ContextRef](float) -> bool

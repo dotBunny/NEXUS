@@ -16,7 +16,15 @@ FNProcessPassTask::FNProcessPassTask(const TSharedPtr<FNPassContext>& PassContex
 void FNProcessPassTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent)
 {
 	N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesStart)
-	
+
+	// Cooperative cancellation — drop this pass's graphs instead of propagating them downstream.
+	if (TaskGraphContextPtr->IsCancelled())
+	{
+		PassContextPtr->Graphs.Reset();
+		N_ASSEMBLY_ANALYTICS_INDEX(CollectGenerationPassesFinish)
+		return;
+	}
+
 	TaskGraphContextPtr->SetStatusMessage(FString::Printf(TEXT("Collect Pass (%i)"), PassContextPtr->Graphs.Num()));
 	
 	for (TUniquePtr<FNAssemblyGraph>& Graph : PassContextPtr->Graphs)

@@ -35,11 +35,8 @@ struct FNOrganGraphBuilderTask
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	/** Cached world-collision simple-mesh hulls intersecting this organ's bounds. */
-	TArray<FNRawMesh> WorldCollisionMeshes;
-
-	/** Cached hulls of cells already placed by earlier organs that overlap this organ's bounds. */
-	TArray<FNRawMesh> ExistingNodeCollisionMeshes;
+	/** Count of placed-cell hulls in the shared world context visible to this organ, captured at task start; the shared array only grows between passes. */
+	int32 ExistingNodeCollisionMeshCount = 0;
 
 	/** Per-organ input data and output graph reference. */
 	TSharedRef<FNVirtualOrganContext> OrganContextPtr;
@@ -59,10 +56,10 @@ private:
 	/** Seed the graph with the organ's bones and the root node. */
 	void StartGraph(FNMersenneTwister& Random);
 
-	/** @return true when CellNode's hull intersects any of the cached world-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
+	/** @return true when CellNode's hull intersects any of the shared world-collision meshes (immutable after FNProcessVirtualWorldTask) and exceeds the penetration threshold. */
 	bool DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
-	
-	/** @return true when CellNode's hull intersects any of the cached node-collision meshes (parallel mesh/location/rotation arrays) and exceeds the penetration threshold. */
+
+	/** @return true when CellNode's hull intersects any of the shared node-collision meshes visible at task start and exceeds the penetration threshold. */
 	bool DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const;
 
 	/** @return Every existing cell whose world bounds intersect NewNode's. */

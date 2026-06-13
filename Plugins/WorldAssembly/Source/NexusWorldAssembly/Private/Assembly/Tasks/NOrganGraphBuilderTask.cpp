@@ -44,12 +44,26 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		return;
 	}
 	
+	// Cooperative cancellation — the operation may have been cancelled before this organ's build started.
+	if (TaskGraphContextPtr->IsCancelled())
+	{
+		N_ASSEMBLY_ANALYTICS_THREE_PARAM(OrganGraphBuilder_SetFailure, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, 0,
+			FString(TEXT("Operation was cancelled before the organ build started.")))
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilderFinish)
+		// Drive the per-organ channel to a terminal state so its overlay row doesn't linger mid-build.
+		TaskGraphContextPtr->SetChannelStatus(StatusChannel, TEXT("Cancelled"), 0.f);
+		TaskGraphContextPtr->CloseStatusChannel(StatusChannel);
+		return;
+	}
+
 	// Create our deterministic random for the task which will get passed byref to sub-methods
 	FNMersenneTwister Random(OrganContextPtr->GetSeed());
 	
-	// We're going to copy the state of world collision at the start here, we know they're filled cause of dep chain.
-	WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
-	ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
+	// World-collision hulls are baked (and face-plane cached) by FNProcessVirtualWorldTask and immutable after, so they
+	// are read straight from the shared context instead of copied per organ (FNRawMesh copies drop the face-plane cache).
+	// The node hulls grow between passes, so snapshot how many exist now; entries below the count never mutate, and
+	// FNProcessPassTask's appends never overlap a builder thanks to the pass dependency chain.
+	ExistingNodeCollisionMeshCount = WorldContextPtr->NodeCollisionMeshes.Num();
 	
 	// Capture our context tags, base that we cant avoid, and our working copy
 	OrganContextPtr->BaseContextTags = WorldContextPtr->ContextTags;
@@ -59,6 +73,12 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	
 	while (!OrganContextPtr->IsSuccessful())
 	{
+		// Cooperative cancellation — stop retrying and fall through to the unsuccessful teardown below.
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			break;
+		}
+
 		TaskGraphContextPtr->SetChannelStatus(StatusChannel, FString::Printf(TEXT("Iteration %i/%i"), OrganContextPtr->GetRetryCount(), OrganContextPtr->MaximumRetryCount));
 		
 		// Coarse attempt-based progress for the per-organ channel; success drives it to 100% below.
@@ -120,6 +140,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		TArray<FNAssemblyGraphNode*> Frontier = ProcessNode(Random, OrganContextPtr->CellGraph->GetLastNode());
 		while (Frontier.Num() > 0)
 		{
+			if (TaskGraphContextPtr->IsCancelled())
+			{
+				break;
+			}
 			if (MaxCellCount > 0 && OrganContextPtr->CellGraph->GetCellNodeCount() >= MaxCellCount)
 			{
 				break;
@@ -140,6 +164,8 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 		// If still below minimum, try filling remaining open junctions
 		while (OrganContextPtr->CellGraph->GetCellNodeCount() < TargetCellCount)
 		{
+			if (TaskGraphContextPtr->IsCancelled()) break;
+
 			TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
 			if (OpenNodes.IsEmpty()) break;
 
@@ -153,8 +179,14 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			if (OrganContextPtr->CellGraph->GetCellNodeCount() == CountBefore) break;
 		}
 
+		// Cooperative cancellation — skip the finishing passes and validation; the result will not be used.
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			break;
+		}
+
 		CapBranchesWithFinishers(Random);
-		
+
 		EnforceNotFinisherConstraint();
 
 		// At this point we need to validate the graph against the overall requirements from the input settings.
@@ -212,7 +244,11 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 	else
 	{
 		// Ensure we close the channel
-		if (OrganContextPtr->IsRequired())
+		if (TaskGraphContextPtr->IsCancelled())
+		{
+			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Cancelled"), 0.f);
+		}
+		else if (OrganContextPtr->IsRequired())
 		{
 			TaskGraphContextPtr->SetChannelStatus(StatusChannel,TEXT("Unsuccessful"), 0.f);
 		}
@@ -366,6 +402,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
 	const float WorldHullPenetration = OrganContextPtr->WorldHullPenetration;
+	const TArray<FNRawMesh>& WorldCollisionMeshes = WorldContextPtr->WorldCollisionMeshes;
 	for (int32 i = 0; i < WorldCollisionMeshes.Num(); i++)
 	{
 		const float PenetrationDepth = CellNode->GetHullIntersectDepth(WorldCollisionMeshes[i], WorldHullPenetration);
@@ -388,7 +425,8 @@ bool FNOrganGraphBuilderTask::DoesWorldCollide(const FNAssemblyGraphCellNode* Ce
 bool FNOrganGraphBuilderTask::DoesExistingNodeWorldCollide(const FNAssemblyGraphCellNode* CellNode) const
 {
 	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
-	for (int32 i = 0; i < ExistingNodeCollisionMeshes.Num(); i++)
+	const TArray<FNRawMesh>& ExistingNodeCollisionMeshes = WorldContextPtr->NodeCollisionMeshes;
+	for (int32 i = 0; i < ExistingNodeCollisionMeshCount; i++)
 	{
 		const float PenetrationDepth = CellNode->GetHullIntersectDepth(ExistingNodeCollisionMeshes[i], CellHullPenetration);
 		if (PenetrationDepth == 0.0f)

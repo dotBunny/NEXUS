@@ -31,8 +31,12 @@ public:
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
 
 private:
-	/** Operation whose completion this task signals. */
-	TObjectPtr<UNAssemblyOperation> Operation;
+	/**
+	 * Operation whose completion this task signals.
+	 * @note Weak because the task struct is invisible to GC; a cancel can tear the operation down
+	 * (RemoveFromRoot + MarkAsGarbage) and a GC purge can free it while the graph is still draining.
+	 */
+	TWeakObjectPtr<UNAssemblyOperation> Operation;
 
 	/** Top-level task-graph context containing the produced graphs and spawned proxies. */
 	TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContextPtr;

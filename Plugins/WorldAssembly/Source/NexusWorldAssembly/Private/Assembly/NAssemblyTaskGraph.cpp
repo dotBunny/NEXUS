@@ -191,6 +191,8 @@ void FNAssemblyTaskGraph::Cancel()
 	}
 	if (TaskGraphContextPtr.IsValid())
 	{
+		// Flag cooperative cancellation so in-flight worker tasks (organ builders, pass collectors) bail early.
+		TaskGraphContextPtr->RequestCancel();
 		TaskGraphContextPtr->CreatedProxies.Empty();
 	}
 }

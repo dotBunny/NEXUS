@@ -75,6 +75,15 @@ public:
 	}
 
 	/**
+	 * Request cooperative cancellation of the graph's remaining work. Safe to call from any thread.
+	 * Tasks poll IsCancelled at their loop boundaries and bail out early; completed work is unaffected.
+	 */
+	void RequestCancel() { bCancelled.Store(true); }
+
+	/** @return true once RequestCancel has been called. Safe to call from any task thread. */
+	bool IsCancelled() const { return bCancelled.Load(); }
+
+	/**
 	 * Record a progress/status message for display. Safe to call from any task thread.
 	 * The message is coalesced (latest wins) and drained on the game thread via ConsumeDisplayMessage.
 	 * @param Message The new display message.
@@ -230,6 +239,9 @@ public:
 	FString ReportFilePath;
 
 private:
+	/** Set once a cancel is requested; polled by tasks at loop boundaries for cooperative early-out. */
+	TAtomic<bool> bCancelled{false};
+
 	FCriticalSection ContextTagMutex;
 	FCriticalSection TagCounterMutex;
 	FCriticalSection TakeGraphMutex;
