@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "NCellJunctionDetails.h"
+#include "NCellJunctionFillEntry.h"
 #include "NCellLinkDetails.h"
 #include "NColor.h"
 #include "NWorldAssemblySettings.h"
@@ -60,8 +61,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	FNCellJunctionDetails Details;
 	
-	// TODO: Transform for filling?
-	// TODO: List of bp?
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
+	TArray<FNCellJunctionFillEntry> Fillers;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
 	FNCellLinkDetails LinkDetails;

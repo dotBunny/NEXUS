@@ -5,15 +5,15 @@
 
 #include "CoreMinimal.h"
 #include "NCellLevelInstance.h"
-#include "INCellJunctionInitialized.generated.h"
+#include "INCellJunctionFiller.generated.h"
 
 UINTERFACE()
-class NEXUSWORLDASSEMBLY_API UNCellJunctionInitialized : public UInterface
+class NEXUSWORLDASSEMBLY_API UNCellJunctionFiller : public UInterface
 {
 	GENERATED_BODY()
 };
 
-class NEXUSWORLDASSEMBLY_API INCellJunctionInitialized
+class NEXUSWORLDASSEMBLY_API INCellJunctionFiller
 {
 	GENERATED_BODY()
 public:
