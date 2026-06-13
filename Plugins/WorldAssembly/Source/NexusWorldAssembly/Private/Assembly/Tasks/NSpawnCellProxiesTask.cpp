@@ -55,9 +55,9 @@ void FNSpawnCellProxiesTask::DoTask(ENamedThreads::Type CurrentThread, const FGr
 		CellAssemblyData.NodeIdentifier = CellNode->GetNodeIdentifier();
 		CellAssemblyData.AssemblyTags = CellNode->GetAssemblyTags();
 		CellAssemblyData.ContextTagsAdded = CellNode->GetContextTagsAdded();
-		CellAssemblyData.ContextTagsState = CellNode->GetContextTagsState();
-		CellAssemblyData.TagCounterState = CellNode->GetTagCountersState().ToTagCount();
 		CellAssemblyData.LinkDetails = CellNode->GetLinkDetails();
+		CellAssemblyData.bHotPathShortest = CellNode->IsHotPathShortest();
+		CellAssemblyData.bHotPathSequential = CellNode->IsHotPathSequential();
 		
 		// Convert to basic array
 		CellNode->GetJunctions().GenerateValueArray(CellAssemblyData.JunctionDetails);

@@ -333,9 +333,7 @@ void FNOrganGraphBuilderTask::StartGraph(FNMersenneTwister& Random)
 
 			// Create our first cell node, attaching it to the bone node
 			FNAssemblyGraphNodeParams NodeParams;
-			NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
 			NodeParams.ContextTagsAdded = StartCellInputData->ContextTagsAdded;
-			NodeParams.TagCounterState = OrganContextPtr->TagCounter;
 			NodeParams.AssemblyTags = StartCellInputData->AssemblyTags;
 			NodeParams.Seed = Random.UnsignedInteger64();
 			NodeParams.WorldPosition = CellWorldPosition;
@@ -592,8 +590,6 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
 	
 		FNAssemblyGraphNodeParams NodeParams;
-		NodeParams.ContextTagsState = OrganContextPtr->ContextTags;
-		NodeParams.TagCounterState = OrganContextPtr->TagCounter;
 		NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
 		NodeParams.AssemblyTags = CellInputData->AssemblyTags;
 		NodeParams.Seed = Random.UnsignedInteger64();

@@ -21,6 +21,20 @@ public:
 	/** @return The most recently registered node. */
 	FNAssemblyGraphNode* GetLastNode() { return Nodes.Last(); }
 
+	/** @return The starting node the graph was expanded from (usually the root bone). */
+	const FNAssemblyGraphNode* GetRootNode() const { return RootNode; }
+
+	/**
+	 * Compute this graph's hot path and flag the cell nodes that lie on it.
+	 *
+	 * Starting from the start cell (the root, or the cell linked to the root bone), threads a path
+	 * through every Hotpath-flagged cell and branches out to any additional bones. Two variants are
+	 * resolved per cell: the shortest-path spokes from the start, and the nearest-first visiting chain.
+	 * Both use unweighted (hop-count) BFS over the undirected node connectivity. Must run before
+	 * FNAssemblyGraphCellNode::GenerateLinkDetails so the per-junction flags can read neighbour state.
+	 */
+	void FlagHotPath();
+
 	/** @return All nodes currently in the graph, in registration order. */
 	const TArray<FNAssemblyGraphNode*>& GetNodes() const { return Nodes; }
 

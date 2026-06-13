@@ -123,6 +123,21 @@ public:
 		InputDataPtr = nullptr;
 	}
 	
+	/** Flag whether this cell lies on the shortest-path hot path variant (spokes from start). */
+	void SetHotPathShortest(bool bValue) { bHotPathShortest = bValue; }
+
+	/** Flag whether this cell lies on the sequential hot path variant (nearest-first visiting chain). */
+	void SetHotPathSequential(bool bValue) { bHotPathSequential = bValue; }
+
+	/** @return true if this cell lies on the shortest-path hot path variant. */
+	bool IsHotPathShortest() const { return bHotPathShortest; }
+
+	/** @return true if this cell lies on the sequential hot path variant. */
+	bool IsHotPathSequential() const { return bHotPathSequential; }
+
+	/** @return true if this cell lies on either hot path variant. */
+	bool IsHotPath() const { return bHotPathShortest || bHotPathSequential; }
+
 	/** Populate LinkDetails with one entry per junction describing its connection state; no-op once generated. */
 	void GenerateLinkDetails();
 
@@ -143,6 +158,12 @@ private:
 
 	/** Cell junctions transformed into world space. */
 	TMap<int32, FNCellJunctionDetails> WorldJunctions;
+	
+	/** Set just before spawning (game thread): does this cell lie on the shortest-path hot path (spokes from start). */
+	bool bHotPathShortest = false;
+
+	/** Set just before spawning (game thread): does this cell lie on the sequential hot path (nearest-first visiting chain). */
+	bool bHotPathSequential = false;
 	
 	/** Generated just before spawning, before on main thread, traverses graph and generates useful additional data. */
 	TArray<FNCellLinkDetails> LinkDetails;

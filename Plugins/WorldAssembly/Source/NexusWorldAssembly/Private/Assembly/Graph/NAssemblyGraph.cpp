@@ -4,6 +4,100 @@
 #include "Assembly/Graph/NAssemblyGraph.h"
 #include "Assembly/Graph/NAssemblyGraphCellNode.h"
 
+#include "Algo/Reverse.h"
+
+namespace
+{
+	/** @return The start cell: Root if it is a cell, otherwise the first cell linked downstream of it. */
+	FNAssemblyGraphCellNode* ResolveStartCell(FNAssemblyGraphNode* Root)
+	{
+		if (Root == nullptr) return nullptr;
+		if (Root->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+		{
+			return static_cast<FNAssemblyGraphCellNode*>(Root);
+		}
+		for (FNAssemblyGraphNode* Downstream : Root->GetDownstreamNodes())
+		{
+			if (Downstream->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+			{
+				return static_cast<FNAssemblyGraphCellNode*>(Downstream);
+			}
+		}
+		return nullptr;
+	}
+
+	/**
+	 * Unweighted BFS from Source over the undirected graph (downstream ∪ upstream), stopping at the first
+	 * node satisfying IsTarget. Because every edge has weight 1, the first target reached is a shortest one.
+	 * @return The node path from Source to that target inclusive, or empty if no target is reachable.
+	 */
+	template <typename TPredicate>
+	TArray<FNAssemblyGraphNode*> BreadthFirstPathTo(FNAssemblyGraphNode* Source, TPredicate&& IsTarget)
+	{
+		TArray<FNAssemblyGraphNode*> Path;
+		if (Source == nullptr) return Path;
+
+		if (IsTarget(Source))
+		{
+			Path.Add(Source);
+			return Path;
+		}
+
+		// node -> predecessor along the BFS tree; also doubles as the visited set.
+		TMap<FNAssemblyGraphNode*, FNAssemblyGraphNode*> CameFrom;
+		CameFrom.Add(Source, nullptr);
+
+		TQueue<FNAssemblyGraphNode*> Frontier;
+		Frontier.Enqueue(Source);
+
+		FNAssemblyGraphNode* Found = nullptr;
+		FNAssemblyGraphNode* Current = nullptr;
+		while (Found == nullptr && Frontier.Dequeue(Current))
+		{
+			// Treat the graph as undirected: scan both directions.
+			for (int32 Direction = 0; Direction < 2 && Found == nullptr; Direction++)
+			{
+				const TArray<FNAssemblyGraphNode*>& Neighbours =
+					Direction == 0 ? Current->GetDownstreamNodes() : Current->GetUpstreamNodes();
+				for (FNAssemblyGraphNode* Neighbour : Neighbours)
+				{
+					if (CameFrom.Contains(Neighbour)) continue;
+					CameFrom.Add(Neighbour, Current);
+					if (IsTarget(Neighbour))
+					{
+						Found = Neighbour;
+						break;
+					}
+					Frontier.Enqueue(Neighbour);
+				}
+			}
+		}
+
+		if (Found == nullptr) return Path;
+
+		// Walk predecessors back to Source, then flip to Source -> Found order.
+		for (FNAssemblyGraphNode* Node = Found; Node != nullptr; Node = CameFrom[Node])
+		{
+			Path.Add(Node);
+		}
+		Algo::Reverse(Path);
+		return Path;
+	}
+
+	/** Apply Setter to every cell node in OnPath (non-cell nodes carry no hot path flag). */
+	template <typename TSetter>
+	void FlagCellsOnPath(const TSet<FNAssemblyGraphNode*>& OnPath, TSetter&& Setter)
+	{
+		for (FNAssemblyGraphNode* Node : OnPath)
+		{
+			if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
+			{
+				Setter(static_cast<FNAssemblyGraphCellNode*>(Node));
+			}
+		}
+	}
+}
+
 FNAssemblyGraph::FNAssemblyGraph(FNAssemblyGraphNode* RootNodePtr, const FVector& Origin, const FBoxSphereBounds& Bounds, const bool bUnbounded)
 : bUnbounded(bUnbounded), Bounds(Bounds), Origin(Origin), RootNode(RootNodePtr)
 {
@@ -83,7 +177,7 @@ TArray<FNAssemblyGraphNode*> FNAssemblyGraph::GetNodesWithOpenJunctions()
 void FNAssemblyGraph::CleanupBuilderReferences()
 {
 	if (Nodes.IsEmpty()) return;
-	
+
 	for (FNAssemblyGraphNode* Node : Nodes)
 	{
 		if (Node->GetNodeType() == ENAssemblyGraphNodeType::Cell)
@@ -91,6 +185,90 @@ void FNAssemblyGraph::CleanupBuilderReferences()
 			FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
 			CellNode->CleanupBuilderReferences();
 		}
+	}
+}
+
+void FNAssemblyGraph::FlagHotPath()
+{
+	FNAssemblyGraphCellNode* StartCell = ResolveStartCell(RootNode);
+	if (StartCell == nullptr) return;
+
+	// Goals are the Hotpath-flagged cells; extra bones are any bone nodes other than the root.
+	TArray<FNAssemblyGraphCellNode*> Goals;
+	TArray<FNAssemblyGraphNode*> ExtraBones;
+	for (FNAssemblyGraphNode* Node : Nodes)
+	{
+		switch (Node->GetNodeType())
+		{
+		case ENAssemblyGraphNodeType::Cell:
+			if (Node->IsHotPathFlagged())
+			{
+				Goals.Add(static_cast<FNAssemblyGraphCellNode*>(Node));
+			}
+			break;
+		case ENAssemblyGraphNodeType::Bone:
+			if (Node != RootNode)
+			{
+				ExtraBones.Add(Node);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	// With no goals there is no hot path; leave every flag at its default false.
+	if (Goals.Num() == 0) return;
+
+	// Branch from the nearest already-on-path node out to each additional bone. Shared by both variants.
+	auto BranchToBones = [&ExtraBones](TSet<FNAssemblyGraphNode*>& OnPath)
+	{
+		for (FNAssemblyGraphNode* Bone : ExtraBones)
+		{
+			TArray<FNAssemblyGraphNode*> Path = BreadthFirstPathTo(Bone,
+				[&OnPath](FNAssemblyGraphNode* Node) { return OnPath.Contains(Node); });
+			OnPath.Append(Path);
+		}
+	};
+
+	// Shortest variant: union of the independent shortest path from the start cell to each goal.
+	{
+		TSet<FNAssemblyGraphNode*> OnPath;
+		for (FNAssemblyGraphCellNode* Goal : Goals)
+		{
+			TArray<FNAssemblyGraphNode*> Path = BreadthFirstPathTo(StartCell,
+				[Goal](FNAssemblyGraphNode* Node) { return Node == Goal; });
+			OnPath.Append(Path);
+		}
+		BranchToBones(OnPath);
+		FlagCellsOnPath(OnPath, [](FNAssemblyGraphCellNode* Cell) { Cell->SetHotPathShortest(true); });
+	}
+
+	// Sequential variant: thread start -> nearest goal -> next-nearest -> ... unioning each leg.
+	{
+		TSet<FNAssemblyGraphNode*> OnPath;
+		OnPath.Add(StartCell);
+
+		TSet<FNAssemblyGraphNode*> RemainingGoals;
+		for (FNAssemblyGraphCellNode* Goal : Goals)
+		{
+			RemainingGoals.Add(Goal);
+		}
+		RemainingGoals.Remove(StartCell); // No-op unless the start cell is itself a goal.
+
+		FNAssemblyGraphNode* Current = StartCell;
+		while (RemainingGoals.Num() > 0)
+		{
+			TArray<FNAssemblyGraphNode*> Path = BreadthFirstPathTo(Current,
+				[&RemainingGoals](FNAssemblyGraphNode* Node) { return RemainingGoals.Contains(Node); });
+			if (Path.Num() == 0) break; // Remaining goals are unreachable from the current node.
+
+			Current = Path.Last();
+			OnPath.Append(Path);
+			RemainingGoals.Remove(Current);
+		}
+		BranchToBones(OnPath);
+		FlagCellsOnPath(OnPath, [](FNAssemblyGraphCellNode* Cell) { Cell->SetHotPathSequential(true); });
 	}
 }
 

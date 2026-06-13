@@ -52,29 +52,30 @@ public:
 	{
 		return AssemblyData.ContextTagsAdded;
 	}
-	
-	FGameplayTagContainer& GetContextTagsState()
-	{
-		return AssemblyData.ContextTagsState;
-	}
-	
-	TArray<FNGameplayTagCount>& GetTagCounterStateArray()
-	{
-		return AssemblyData.TagCounterState;
-	}
+
 	TArray<FNGameplayTagCount>& GetTagCounterArray()
 	{
 		return AssemblyData.TagCounter;
 	}
 	
-	TMap<FGameplayTag, int32> GetTagCounterState() const
-	{
-		return FNGameplayTagCounter(AssemblyData.TagCounterState).GameplayTags;
-	}
-	
 	TMap<FGameplayTag, int32> GetTagCounter() const
 	{
 		return FNGameplayTagCounter(AssemblyData.TagCounter).GameplayTags;
+	}
+	
+	bool IsHotPath() const
+	{
+		return AssemblyData.bHotPathShortest || AssemblyData.bHotPathSequential;
+	}
+
+	bool IsHotPathShortest() const
+	{
+		return AssemblyData.bHotPathShortest;
+	}
+
+	bool IsHotPathSequential() const
+	{
+		return AssemblyData.bHotPathSequential;
 	}
 
 	/** @return Mutable access to the assembly tags recorded on this cell's assembly data. */

@@ -33,6 +33,9 @@ UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Behavior_BadNeighbors, "NEXUS.Worl
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Flag_AlwaysRelevant, "NEXUS.WorldAssembly.Flag.AlwaysRelevant", 
 	"Cells tagged with AlwaysRelevant will be always considered relevant for networking purposes.");
 
+UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Flag_Hotpath, "NEXUS.WorldAssembly.Flag.Hotpath", 
+	"Cells tagged with Hotpath are treated as goals inside of the cell graph, starting with bone following the shortest path to connect all flagged Hotpath items, and connecting to any other bones. INCellInitialized-implementors have access to determine if they are on the Hotpath.");
+
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Counter_Alpha, "NEXUS.WorldAssembly.Counter.Alpha", "Built-in counter-based tag (Alpha).");
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Counter_Beta, "NEXUS.WorldAssembly.Counter.Beta", "Built-in counter-based tag (Beta).");
 UE_DEFINE_GAMEPLAY_TAG_COMMENT(NWorldAssembly_Counter_Charlie, "NEXUS.WorldAssembly.Counter.Charlie", "Built-in counter-based tag (Charlie).");

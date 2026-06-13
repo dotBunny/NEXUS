@@ -33,6 +33,9 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 	// Iterate over all graphs that we have had generate
 	for (const TUniquePtr<FNAssemblyGraph>& Graph : TaskGraphContextPtr->Graphs)
 	{
+		// Resolve the hot path before generating link details, so each junction can read its neighbour's flags.
+		Graph->FlagHotPath();
+
 		// Iterate raw nodes of graph and spawn them
 		for (const auto Node : Graph->GetNodes())
 		{
@@ -40,10 +43,10 @@ void FNCreateSpawnsTask::DoTask(ENamedThreads::Type CurrentThread, const FGraphE
 			{
 				// Add to our list of things to spawn
 				FNAssemblyGraphCellNode* CellNode = static_cast<FNAssemblyGraphCellNode*>(Node);
-				
+
 				// Build out the data we are going to use
 				CellNode->GenerateLinkDetails();
-				
+
 				SpawnCellsContextPtr->CellNodes.Add(CellNode);
 			}
 		}

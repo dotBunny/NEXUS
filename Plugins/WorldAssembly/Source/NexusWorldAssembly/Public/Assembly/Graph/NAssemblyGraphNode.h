@@ -4,6 +4,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "NWorldAssemblyGameplayTags.h"
 #include "Collections/NGameplayTagCounter.h"
 
 /**
@@ -22,8 +23,6 @@ struct FNAssemblyGraphNodeParams
 	uint64 Seed = 0;
 	FGameplayTagContainer AssemblyTags;
 	FGameplayTagContainer ContextTagsAdded;
-	FGameplayTagContainer ContextTagsState;
-	FNGameplayTagCounter TagCounterState;
 	FVector WorldPosition;
 	FRotator WorldRotation;
 };
@@ -57,6 +56,11 @@ public:
 	
 	/** @return The shortest hop-count from the start node to this node. */
 	int32 GetNodeDepth() const { return NodeDepth; }
+	
+	bool IsHotPathFlagged() const
+	{
+		return AssemblyTags.HasTagExact(NWorldAssembly_Flag_Hotpath);
+	}
 
 	/**
 	 * Wire Upstream -> Downstream and relax Downstream's NodeDepth (and its subtree) so depth tracks
@@ -82,10 +86,6 @@ public:
 	const FGameplayTagContainer& GetAssemblyTags() { return AssemblyTags; }
 	/** @return The context tags this node contributes to the generation context once placed. */
 	const FGameplayTagContainer& GetContextTagsAdded() { return ContextTagsAdded; }
-	/** @return The context tags state when this placed. */
-	const FGameplayTagContainer& GetContextTagsState() { return ContextTagsState; }
-	/** @return The tag counter state when this placed. */
-	const FNGameplayTagCounter& GetTagCountersState() { return TagCounterState; }
 	
 	/** @return true if this cell node carries any assembly tags. */
 	bool HasAssemblyTags() const { return !AssemblyTags.IsEmpty(); }
@@ -126,12 +126,6 @@ protected:
 	
 	FGameplayTagContainer AssemblyTags;
 	FGameplayTagContainer ContextTagsAdded;
-	
-	/** The state of the operations ContextTags when the decision was made to place this cell. */
-	FGameplayTagContainer ContextTagsState;
-	
-	/** The state of the operations TagCounters when the decision was made to place this cell. */
-	FNGameplayTagCounter TagCounterState;
 
 private:
 	static void PropagateDepth(FNAssemblyGraphNode* Root)

@@ -172,6 +172,10 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 		{
 			Details.ConnectedJunctionInstanceIdentifier = ConnectedJunction->InstanceIdentifier;
 		}
+
+		// The junction lies along a hot path when both this cell and the cell it links to are on it.
+		Details.bHotPathShortest = bHotPathShortest && LinkedCellNode->bHotPathShortest;
+		Details.bHotPathSequential = bHotPathSequential && LinkedCellNode->bHotPathSequential;
 	}
 }
 

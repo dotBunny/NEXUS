@@ -36,17 +36,6 @@ public:
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
-	 * @return The state of context tags when this cell was selected.
-	 * @note Returns a copy; edits made to it are not written back to the cell.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Context Tags State")
-	static FGameplayTagContainer GetContextTagsState(ANCellLevelInstance* LevelInstance)
-	{
-		return IsValid(LevelInstance) ? LevelInstance->GetContextTagsState() : FGameplayTagContainer();
-	}
-	
-	/**
-	 * @param LevelInstance The cell level instance to query.
 	 * @return The context tags this cell added to the overall state.
 	 * @note Returns a copy; edits made to it are not written back to the cell.
 	 */
@@ -111,17 +100,6 @@ public:
 
 	/**
 	 * @param LevelInstance The cell level instance to query.
-	 * @return The state of the TagCounter when this cell was added, as an array of tag/count pairs.
-	 * @note Returns a copy; edits made to it are not written back to the cell.
-	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter State (Array)")
-	static TArray<FNGameplayTagCount> GetTagCounterStateArray(ANCellLevelInstance* LevelInstance)
-	{
-		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterStateArray() : TArray<FNGameplayTagCount>();
-	}
-
-	/**
-	 * @param LevelInstance The cell level instance to query.
 	 * @return The ticket identifying the assembly operation this cell belongs to, used to key the context cache.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Operation Ticket")
@@ -129,18 +107,70 @@ public:
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetOperationTicket() : INDEX_NONE;
 	}
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return true if this cell lies on the assembly's hot path.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath")
+	static bool IsHotPath(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) && LevelInstance->IsHotPath();
+	};
+
+	/**
+	 * Exec-pin variant of Is HotPath; the result drives the True/False execution outputs in Blueprint.
+	 * @param LevelInstance The cell level instance to query.
+	 * @return true if this cell lies on the assembly's hot path.
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath ?",
+		meta = (ExpandBoolAsExecs="ReturnValue"))
+	static bool IsHotPathExec(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) && LevelInstance->IsHotPath();
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return true if this cell lies on the shortest-path hot path (spokes from the start cell).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Shortest)")
+	static bool IsHotPathShortest(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) && LevelInstance->IsHotPathShortest();
+	};
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.
-	 * @return The state of the TagCounter when this cell was added.
-	 * @note Returns a copy; edits made to it are not written back to the cell.
+	 * @return true if this cell lies on the shortest-path hot path (spokes from the start cell).
 	 */
-	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName="Get Tag Counter State (Map)")
-	static TMap<FGameplayTag, int32> GetTagCounterState(ANCellLevelInstance* LevelInstance)
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Shortest) ?",
+		meta = (ExpandBoolAsExecs="ReturnValue"))
+	static bool IsHotPathShortestExec(ANCellLevelInstance* LevelInstance)
 	{
-		return IsValid(LevelInstance) ? LevelInstance->GetTagCounterState() : TMap<FGameplayTag, int32>();
-	}
+		return IsValid(LevelInstance) && LevelInstance->IsHotPathShortest();
+	};
+
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return true if this cell lies on the sequential hot path (nearest-first visiting chain).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Sequential)")
+	static bool IsHotPathSequential(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
+	};
 	
+	/**
+	 * @param LevelInstance The cell level instance to query.
+	 * @return true if this cell lies on the sequential hot path (nearest-first visiting chain).
+	 */
+	UFUNCTION(BlueprintCallable,  Category = "NEXUS|WorldAssembly", DisplayName = "Is HotPath (Sequential) ?",
+		meta = (ExpandBoolAsExecs="ReturnValue"))
+	static bool IsHotPathSequentialExec(ANCellLevelInstance* LevelInstance)
+	{
+		return IsValid(LevelInstance) && LevelInstance->IsHotPathSequential();
+	};
 	
 	/**
 	 * @param LevelInstance The cell level instance to query.

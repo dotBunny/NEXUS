@@ -18,9 +18,7 @@ FNAssemblyGraphNode::FNAssemblyGraphNode(const FNAssemblyGraphNodeParams& Params
 	WorldRotation = Params.WorldRotation;
 	
 	ContextTagsAdded = Params.ContextTagsAdded;
-	ContextTagsState = Params.ContextTagsState;
 	AssemblyTags = Params.AssemblyTags;
-	TagCounterState = Params.TagCounterState;
 }
 
 void FNAssemblyGraphNode::SetWorldPosition(const FVector& Position)

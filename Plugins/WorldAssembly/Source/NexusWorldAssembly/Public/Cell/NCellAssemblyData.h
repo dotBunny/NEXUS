@@ -30,6 +30,14 @@ struct FNCellAssemblyData
 	UPROPERTY(VisibleInstanceOnly)
 	uint64 Seed = 0;
 
+	/** Is this cell on the shortest-path hot path (spokes from start)? */
+	UPROPERTY(VisibleInstanceOnly)
+	bool bHotPathShortest = false;
+
+	/** Is this cell on the sequential hot path (nearest-first visiting chain)? */
+	UPROPERTY(VisibleInstanceOnly)
+	bool bHotPathSequential = false;
+
 	/** Assembly tags applied to this cell during the assembly operation. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer AssemblyTags;
@@ -38,10 +46,6 @@ struct FNCellAssemblyData
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTags;
 	
-	/** The state of the ContextTags when this cell was added. */
-	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	FGameplayTagContainer ContextTagsState;
-	
 	/** The ContextTags this cell added. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	FGameplayTagContainer ContextTagsAdded;
@@ -49,10 +53,6 @@ struct FNCellAssemblyData
 	/** The final TagCounter */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
 	TArray<FNGameplayTagCount> TagCounter;
-	
-	/** The state of the tag counter when this cell was added. */
-	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)
-	TArray<FNGameplayTagCount> TagCounterState;
 	
 	/** World-space details for every junction on this cell, captured from the source graph node. */
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly)

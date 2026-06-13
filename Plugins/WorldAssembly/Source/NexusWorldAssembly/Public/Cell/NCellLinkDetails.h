@@ -25,4 +25,12 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	/** The unique cell identifier that the junction this link represents connects to. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 ConnectedJunctionInstanceIdentifier = -1;	
+
+	/** Does this junction connect two cells that both lie on the shortest-path hot path (spokes from start). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bHotPathShortest = false;
+
+	/** Does this junction connect two cells that both lie on the sequential hot path (visiting chain). */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bHotPathSequential = false;
 };
