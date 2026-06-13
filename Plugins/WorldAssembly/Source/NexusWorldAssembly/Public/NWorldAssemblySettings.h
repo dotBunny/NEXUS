@@ -103,6 +103,9 @@ public:
 	meta=(ToolTip="The target maximum allowed frame time to spawn cells before a new task is queued with the remainder."))
 	float AssemblySpawningCellProxiesTimeSlice = 2.f;
 	
+	UPROPERTY(Config, EditAnywhere, DisplayName="Default Filler", Category="Assembly|Spawning", meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller"))
+	TSubclassOf<AActor> DefaultFillerActor;
+	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;
