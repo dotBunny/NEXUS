@@ -8,14 +8,26 @@
 #include "NCellJunctionFillerEntry.generated.h"
 
 
+/**
+ * An authored candidate for filling an unconnected junction.
+ *
+ * Each entry names an actor to spawn along with a placement offset, eligibility constraints, and a selection weight.
+ * At fill time the owning junction gates entries by their context-tag and tag-counter constraints, then picks one
+ * weighted-at-random from the survivors (see UNCellJunctionComponent::Fill).
+ */
 USTRUCT(BlueprintType)
 struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 {
 	GENERATED_BODY()
-	
+
+	/** The actor to spawn when this entry is selected; must implement INCellJunctionFiller. */
 	UPROPERTY(EditAnywhere, DisplayName="Actor", Category="Object", meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller"))
 	TSubclassOf<AActor> Actor;
-	
+
+	/**
+	 * Placement offset applied relative to the junction's frame: the location is rotated by the junction's orientation
+	 * before being added, the rotation spins the actor in place at that spot, and the scale multiplies the actor's own scale.
+	 */
 	UPROPERTY(EditAnywhere, DisplayName="Offset", Category="Object")
 	FTransform Offset = FTransform::Identity;
 	

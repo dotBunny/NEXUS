@@ -103,7 +103,8 @@ public:
 	meta=(ToolTip="The target maximum allowed frame time to spawn cells before a new task is queued with the remainder."))
 	float AssemblySpawningCellProxiesTimeSlice = 2.f;
 	
-	UPROPERTY(Config, EditAnywhere, DisplayName="Default Filler", Category="Assembly|Spawning", meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller"))
+	UPROPERTY(Config, EditAnywhere, DisplayName="Default Filler", Category="Assembly|Spawning",
+		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller."))
 	TSubclassOf<AActor> DefaultFillerActor;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",

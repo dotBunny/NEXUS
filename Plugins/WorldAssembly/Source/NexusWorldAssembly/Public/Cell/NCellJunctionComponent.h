@@ -64,9 +64,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	FNCellJunctionDetails Details;
 	
+	/** Candidate fillers for this junction; one is selected (constraint-gated, then weighted-random) and spawned when the junction is left unconnected. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	TArray<FNCellJunctionFillerEntry> Fillers;
-	
+
+	/** Connection state for this junction, resolved during generation; its bConnected flag gates whether the junction is filled at BeginPlay. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
 	FNCellLinkDetails LinkDetails;
 
@@ -105,6 +107,11 @@ public:
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
 	
 private:
+	/**
+	 * Spawn a filler actor for this junction when it is left unconnected: select an eligible entry from Fillers
+	 * (constraint-gated, then weighted-random), fall back to the project-wide Default Filler when none qualify, and
+	 * notify the spawned actor through INCellJunctionFiller.
+	 */
 	void Fill(bool bUseDelayedSpawner = true);
 	/**
 	 * Filter this junction's Fillers down to the entries whose context-tag and tag-counter constraints are

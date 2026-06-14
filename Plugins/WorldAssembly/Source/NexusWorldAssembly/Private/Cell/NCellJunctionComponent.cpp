@@ -355,7 +355,7 @@ void UNCellJunctionComponent::Fill(bool bUseDelayedSpawner)
 	{
 		if (SpawnedActor->Implements<UNCellJunctionFiller>())
 		{
-			INCellJunctionFiller::Execute_OnInitializedFromProxy(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
+			INCellJunctionFiller::Execute_OnInitializedFromJunction(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
 		}
 
 		UNWorldAssemblySubsystem::Get(GetWorld())->RegisterActorForCleanup(SpawnedActor);
