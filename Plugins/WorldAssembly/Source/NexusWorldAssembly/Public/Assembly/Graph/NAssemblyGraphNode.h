@@ -23,8 +23,8 @@ struct FNAssemblyGraphNodeParams
 	uint64 Seed = 0;
 	FGameplayTagContainer AssemblyTags;
 	FGameplayTagContainer ContextTagsAdded;
-	FVector WorldPosition;
-	FRotator WorldRotation;
+	FVector WorldPosition = FVector::ZeroVector;
+	FRotator WorldRotation = FRotator::ZeroRotator;
 };
 
 /**

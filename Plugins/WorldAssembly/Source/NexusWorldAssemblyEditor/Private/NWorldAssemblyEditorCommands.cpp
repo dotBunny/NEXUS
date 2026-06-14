@@ -686,7 +686,6 @@ void FNWorldAssemblyEditorCommands::CellResetCell()
 	}
 	Cell->Root = FNCellRootDetails();
 	Cell->Junctions.Empty();
-	Cell->Fillers.Empty();
 
 	// Update the data
 	FNWorldAssemblyEditorUtils::UpdateCell(Cell, CellActor);

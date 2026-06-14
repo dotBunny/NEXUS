@@ -5,6 +5,9 @@
 
 #include "CoreMinimal.h"
 #include "NWorldAssemblyContextCache.h"
+#include "NWorldAssemblyMinimal.h"
+#include "NWorldAssemblySettings.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellLevelInstance.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Math/NSeedGenerator.h"
@@ -19,6 +22,53 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblyLibrary : public UBlueprintFunctionL
 	GENERATED_BODY()
 
 public:
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size")
+	static FVector GetJunctionWorldSize(UNCellJunctionComponent* JunctionComponent, bool bWithDepth = false)
+	{
+		if (JunctionComponent == nullptr)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to get Junction World Size as no JunctionComponent was made available."));
+			return  FVector::ZeroVector;
+		}
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		FVector ReturnVector = FVector::OneVector;
+		ReturnVector.X = JunctionComponent->Details.SocketSize.X * Settings->SocketSize.X;
+		ReturnVector.Y = JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y;
+		if (bWithDepth)
+		{
+			ReturnVector.Z = Settings->SocketDepth;
+		}
+		return ReturnVector;
+	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size (Shifted)", meta=(ToolTip="Depth, X, Y"))
+	static FVector GetJunctionWorldSizeShifted(UNCellJunctionComponent* JunctionComponent, float Scale = 1.f)
+	{
+		if (JunctionComponent == nullptr)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to get Junction World Size as no JunctionComponent was made available."));
+			return  FVector::ZeroVector;
+		}
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		return FVector(
+			Settings->SocketDepth * Scale, 
+			(JunctionComponent->Details.SocketSize.X * Settings->SocketSize.X) * Scale, 
+			(JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y) * Scale);
+	}
+	
+	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Corner Points")
+	static TArray<FVector> GetJunctionWorldCornerPoints(UNCellJunctionComponent* JunctionComponent, const FVector2D& SocketSize)
+	{
+		if (JunctionComponent == nullptr)
+		{
+			UE_LOG(LogNexusWorldAssembly, Error, TEXT("Unable to get Junction World Corner Points as no JunctionComponent was made available."));
+			return  TArray<FVector>();
+		}
+		return JunctionComponent->GetWorldCornerPoints(SocketSize);
+	};
+	
+	
 	/** @return A freshly generated human-friendly seed string suitable for use as FNAssemblyOperationSettings::Seed. */
 	UFUNCTION(BlueprintPure, Category = "NEXUS|WorldAssembly", DisplayName="Get New Friendly Seed")
 	static FString GetNewFriendlySeed() { return FNSeedGenerator::RandomFriendlySeed(); }

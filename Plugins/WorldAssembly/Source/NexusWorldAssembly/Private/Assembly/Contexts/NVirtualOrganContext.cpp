@@ -152,12 +152,6 @@ FNVirtualOrganContext::FNVirtualOrganContext(const FNWorldOrganData* WorldOrganC
 			VirtualJunction.CachedInverseWorldQuat = Junction.Value.WorldRotation.Quaternion().Inverse();
 		}
 		
-		// Copy over junction filler information for later
-		for (const TPair<int32, FNCellJunctionFillerDetailsArray>& Junction :  Cell.Key->Fillers)
-		{
-			CellDetails.JunctionFillers.Add(Junction.Key, Junction.Value);
-		}
-		
 		// Record once whether the pool uses these features at all, so FilterCellInputData can skip the matching
 		// gate entirely on builds where no cell could ever be affected by it.
 		if (!CellInputDataSummary.bAnyContextTagsRequired && !CellDetails.ContextTagsRequired.IsEmpty())

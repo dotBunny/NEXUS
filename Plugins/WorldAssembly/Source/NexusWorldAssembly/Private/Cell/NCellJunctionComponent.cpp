@@ -9,6 +9,7 @@
 #include "NWorldAssemblyDebugDraw.h"
 #include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
+#include "NWorldAssemblySubsystem.h"
 #include "NWorldAssemblyUtils.h"
 #include "Cell/INCellJunctionFiller.h"
 #include "Cell/NCellLevelInstance.h"
@@ -59,24 +60,14 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 	return FVector::ZeroVector;
 }
 
-TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& SocketUnitSize) const
-{
-
-	const TArray<FVector> UnrotatedCornerPoints = FNWorldAssemblyUtils::GetCenteredWorldCornerPoints2D(
-		this->Details.SocketSize.X * SocketUnitSize.X,this->Details.SocketSize.Y * SocketUnitSize.Y, ENAxis::Z);
-
-	// Compose with quaternions; rotator addition only matches composition for yaw-only rotations.
-	const FQuat DisplayQuat = FQuat(GetComponentRotation()) * FQuat(FRotator(0.0f, 90.0f, 0.0f));
-	const FRotator DisplayRotation = DisplayQuat.Rotator();
-	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
-
-	return RotatedCornerPoints;
-}
-
 void UNCellJunctionComponent::BeginPlay()
 {
-	// TODO: here is where we would spawn the replacement peice
 	Super::BeginPlay();
+	
+	if (!LinkDetails.bConnected)
+	{
+		Fill();
+	}
 }
 
 
@@ -229,12 +220,6 @@ void UNCellJunctionComponent::OnRegister()
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 		LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
-		
-		// Because we are not connected to anywhere we want to fill the junctions space
-		if (!LinkDetails.bConnected)
-		{
-			Fill(CellLevelInstance);
-		}
 	}
 	
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);
@@ -311,12 +296,13 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 	return RotatedCornerPoints;
 }
 
-UE_DISABLE_OPTIMIZATION
 
-void UNCellJunctionComponent::Fill(ANCellLevelInstance* CellLevelInstance)
+void UNCellJunctionComponent::Fill(bool bUseDelayedSpawner)
 {
-	// TODO: Can we move this off thread? atleast the actual picking? we could make this a task
-	// We can spawn this in OnRegister as the position is wrong
+	ALevelInstance* LocalLevelInstance = LevelInstance.Get();
+	if (LocalLevelInstance == nullptr) return;
+	ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LocalLevelInstance);
+	if (CellLevelInstance == nullptr) return;
 	
 	// Create our spawning parameters
 	FActorSpawnParameters SpawnParams;
@@ -327,6 +313,7 @@ void UNCellJunctionComponent::Fill(ANCellLevelInstance* CellLevelInstance)
 	
 	AActor* SpawnedActor = nullptr;
 	FNCellAssemblyData& AssemblyData = CellLevelInstance->GetAssemblyData();
+	const FQuat FillerRotation = GetComponentRotation().Quaternion();
 	
 	if (Fillers.Num() > 0)
 	{
@@ -338,9 +325,11 @@ void UNCellJunctionComponent::Fill(ANCellLevelInstance* CellLevelInstance)
 		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
 		if (FillerIndex != INDEX_NONE)
 		{
+			// Location offset is authored in the junction's frame, so rotate it by the junction's orientation before
+			// nudging; the rotation offset then spins the filler in place at that spot.
 			SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
-				GetComponentLocation() + Fillers[FillerIndex].Offset.GetLocation(),
-				GetComponentRotation() + Fillers[FillerIndex].Offset.Rotator(),
+				GetComponentLocation() + FillerRotation.RotateVector(Fillers[FillerIndex].Offset.GetLocation()),
+				(FillerRotation * FQuat(Fillers[FillerIndex].Offset.Rotator())).Rotator(),
 				SpawnParams);
 
 			if (SpawnedActor != nullptr)
@@ -355,19 +344,23 @@ void UNCellJunctionComponent::Fill(ANCellLevelInstance* CellLevelInstance)
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
 		if (!IsValid(Settings->DefaultFillerActor))
 		{
+			
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to fill junction as no fillers were available, and no default filler was available."));
 			return;
 		}
-		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->DefaultFillerActor, GetComponentLocation(), GetComponentRotation(), SpawnParams);
+		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->DefaultFillerActor, GetComponentLocation(), FillerRotation.Rotator(), SpawnParams);
 	}
 
-	if (SpawnedActor->Implements<UNCellJunctionFiller>())
+	if (SpawnedActor != nullptr)
 	{
-		INCellJunctionFiller::Execute_OnInitializedFromProxy(SpawnedActor, CellLevelInstance);
+		if (SpawnedActor->Implements<UNCellJunctionFiller>())
+		{
+			INCellJunctionFiller::Execute_OnInitializedFromProxy(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
+		}
+
+		UNWorldAssemblySubsystem::Get(GetWorld())->RegisterActorForCleanup(SpawnedActor);
 	}
 }
-
-UE_ENABLE_OPTIMIZATION
 
 FNWeightedIntegerArray UNCellJunctionComponent::GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const
 {

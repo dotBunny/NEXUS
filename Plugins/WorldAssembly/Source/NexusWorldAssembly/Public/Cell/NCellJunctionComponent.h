@@ -77,14 +77,9 @@ public:
 
 	/** @return The rotational offset authored on the junction's details. */
 	FRotator GetOffsetRotator() const;
+	
 	/** @return The location offset authored on the junction's details. */
 	FVector GetOffsetLocation() const;
-
-	/**
-	 * Compute the four corner points of the junction in component space.
-	 * @param SocketUnitSize Project-configured socket unit size used to size the junction.
-	 */
-	TArray<FVector> GetCornerPoints(const FVector2D& SocketUnitSize) const;
 
 	virtual void BeginPlay() override;
 	
@@ -110,7 +105,7 @@ public:
 	TArray<FVector> GetWorldCornerPoints(const FVector2D& SocketSize) const;
 	
 private:
-	void Fill(ANCellLevelInstance* CellLevelInstance);
+	void Fill(bool bUseDelayedSpawner = true);
 	/**
 	 * Filter this junction's Fillers down to the entries whose context-tag and tag-counter constraints are
 	 * satisfied by the generated cell's assembly state, weighted for selection.

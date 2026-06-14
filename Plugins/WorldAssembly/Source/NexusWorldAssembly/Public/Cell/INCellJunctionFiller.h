@@ -19,5 +19,5 @@ class NEXUSWORLDASSEMBLY_API INCellJunctionFiller
 public:
 
 	UFUNCTION(BlueprintNativeEvent, CallInEditor, Category="NEXUS|World Assembly")
-	void OnInitializedFromProxy(ANCellLevelInstance* CellLevelInstance);
+	void OnInitializedFromProxy(ANCellLevelInstance* CellLevelInstance, UNCellJunctionComponent* JunctionComponent,  int32 JunctionIndex);
 };

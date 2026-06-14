@@ -141,8 +141,6 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 * Value: Details about the junction including position, rotation, and socket size.
 	 */
 	TMap<int32, FNCellJunctionDetails> Junctions;
-	
-	TMap<int32, FNCellJunctionFillerDetailsArray> JunctionFillers;
 
 	/** 
 	 * Reference to the cell template asset.

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "NCellJunctionDetails.h"
-#include "NCellJunctionFillerDetails.h"
 #include "NCellRootDetails.h"
 #include "NCell.generated.h"
 
@@ -31,9 +30,6 @@ public:
 	/** Per-junction metadata keyed by junction identifier; populated from NCellJunctionComponents found in the level. */
 	UPROPERTY(VisibleAnywhere)
 	TMap<int32, FNCellJunctionDetails> Junctions;
-	
-	UPROPERTY(VisibleAnywhere)
-	TMap<int32, FNCellJunctionFillerDetailsArray> Fillers;
 
 	/**
 	 * Returns the cell's stored schema version.
