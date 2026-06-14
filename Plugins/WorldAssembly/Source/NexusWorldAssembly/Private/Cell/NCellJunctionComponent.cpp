@@ -10,10 +10,13 @@
 #include "NWorldAssemblyMinimal.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblyUtils.h"
+#include "Cell/INCellJunctionFiller.h"
 #include "Cell/NCellLevelInstance.h"
+#include "Collections/NWeightedIntegerArray.h"
 #include "Developer/NPrimitiveFont.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
+#include "Math/NMersenneTwister.h"
 #include "Math/NVectorUtils.h"
 #include "Types/NRawMeshUtils.h"
 
@@ -68,6 +71,12 @@ TArray<FVector> UNCellJunctionComponent::GetCornerPoints(const FVector2D& Socket
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
 
 	return RotatedCornerPoints;
+}
+
+void UNCellJunctionComponent::BeginPlay()
+{
+	// TODO: here is where we would spawn the replacement peice
+	Super::BeginPlay();
 }
 
 
@@ -220,6 +229,12 @@ void UNCellJunctionComponent::OnRegister()
 			SetWorldRotation(Details.WorldRotation, false, nullptr, ETeleportType::ResetPhysics);
 		}
 		LinkDetails = CellLevelInstance->GetCellLinkDetails(Details.InstanceIdentifier);
+		
+		// Because we are not connected to anywhere we want to fill the junctions space
+		if (!LinkDetails.bConnected)
+		{
+			Fill(CellLevelInstance);
+		}
 	}
 	
 	FNWorldAssemblyRegistry::RegisterCellJunctionComponent(this);
@@ -295,3 +310,104 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 	const TArray<FVector> RotatedCornerPoints = FNVectorUtils::RotateAndOffsetPoints(UnrotatedCornerPoints, DisplayRotation, GetComponentLocation());
 	return RotatedCornerPoints;
 }
+
+UE_DISABLE_OPTIMIZATION
+
+void UNCellJunctionComponent::Fill(ANCellLevelInstance* CellLevelInstance)
+{
+	// TODO: Can we move this off thread? atleast the actual picking? we could make this a task
+	// We can spawn this in OnRegister as the position is wrong
+	
+	// Create our spawning parameters
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.OverrideLevel = GetComponentLevel();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.ObjectFlags |= RF_Transient;
+	
+	AActor* SpawnedActor = nullptr;
+	FNCellAssemblyData& AssemblyData = CellLevelInstance->GetAssemblyData();
+	
+	if (Fillers.Num() > 0)
+	{
+		FNMersenneTwister RandomGenerator(AssemblyData.Seed);
+		FNWeightedIntegerArray WeightedAvailableIndices = GetJunctionFillEntries(AssemblyData);
+
+		// TwistedValue returns INDEX_NONE when every filler was gated out by its constraints; leaving SpawnedActor
+		// null lets the default-filler fallback below take over rather than indexing Fillers with -1.
+		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
+		if (FillerIndex != INDEX_NONE)
+		{
+			SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
+				GetComponentLocation() + Fillers[FillerIndex].Offset.GetLocation(),
+				GetComponentRotation() + Fillers[FillerIndex].Offset.Rotator(),
+				SpawnParams);
+
+			if (SpawnedActor != nullptr)
+			{
+				SpawnedActor->SetActorScale3D(SpawnedActor->GetActorScale3D() * Fillers[FillerIndex].Offset.GetScale3D());
+			}
+		}
+	}
+	
+	if (SpawnedActor == nullptr)
+	{
+		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+		if (!IsValid(Settings->DefaultFillerActor))
+		{
+			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to fill junction as no fillers were available, and no default filler was available."));
+			return;
+		}
+		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->DefaultFillerActor, GetComponentLocation(), GetComponentRotation(), SpawnParams);
+	}
+
+	if (SpawnedActor->Implements<UNCellJunctionFiller>())
+	{
+		INCellJunctionFiller::Execute_OnInitializedFromProxy(SpawnedActor, CellLevelInstance);
+	}
+}
+
+UE_ENABLE_OPTIMIZATION
+
+FNWeightedIntegerArray UNCellJunctionComponent::GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const
+{
+	FNWeightedIntegerArray Indices;
+
+	// Rebuild the cell's final tag-counter state once up front so each filler's constraints can be evaluated
+	// against it without reconstructing the map per entry. Mirrors FNVirtualOrganContext::FilterCellInputData,
+	// gating each candidate against the assembly state instead of the in-flight graph state.
+	const FNGameplayTagCounter TagCounter(AssemblyData.TagCounter);
+
+	for (int32 i = 0; i < Fillers.Num(); i++)
+	{
+		const FNCellJunctionFillEntry& Filler = Fillers[i];
+
+		// REQUIRED CONTEXT TAGS — the cell's resolved context must satisfy every tag the filler requires.
+		if (!Filler.RequiredContextTags.IsEmpty() && !AssemblyData.ContextTags.HasAllExact(Filler.RequiredContextTags))
+		{
+			continue;
+		}
+
+		// TAG COUNTER CONSTRAINTS — every constraint must pass against the cell's final counter state. A tag the
+		// counter does not track compares as a count of zero (see FNGameplayTagCounterConstraint::DoesPassComparison).
+		bool bGatedByTagCounter = false;
+		for (const FNGameplayTagCounterConstraint& Constraint : Filler.TagCounterConstraints)
+		{
+			if (!Constraint.DoesPassComparison(TagCounter))
+			{
+				bGatedByTagCounter = true;
+				break;
+			}
+		}
+		if (bGatedByTagCounter)
+		{
+			continue;
+		}
+
+		// Survivor: add it weighted so selection honors the authored relative likelihood.
+		Indices.Add(i, Filler.Weighting);
+	}
+
+	return Indices;
+}
+
