@@ -18,15 +18,19 @@ enum class ENCellJunctionType : uint8
 	OneWaySocket = 3 UMETA(DisplayName="One-Way", ToolTip="A passage can only happen once, in either direction.")
 };
 
+
 /**
- * How a junction may be satisfied during generation — required, optionally blocked, or allowed to remain empty.
+ * How a junction must be resolved during generation when it is left unconnected to another junction.
+ *
+ * Evaluated after the cell graph is linked: Required junctions force the generator to keep a connection,
+ * while the Allow* variants permit an unconnected junction and choose what happens to the open socket.
  */
 UENUM()
 enum class ENCellJunctionRequirements : uint8
 {
-	Required =		0 UMETA(DisplayName = "Required", ToolTip = "This junction must have an associated junction socketed to it."),
-	AllowBlocking = 1 UMETA(DisplayName = "Allow Blocking", ToolTip = "This junction can be filled with the components referenced blocker(s) instead of being linked to another junction."),
-	AllowEmpty =	2 UMETA(DisplayName = "Allow Empty", ToolTip = "This junction can be left unfilled and not linked."),
+	Required =		0 UMETA(DisplayName = "Required", ToolTip = "This junction must have an associated junction socketed to it. Weights for required junctions are automatically doubled."),
+	AllowBlocking = 1 UMETA(DisplayName = "Allow Blocking", ToolTip = "This junction will be filled if it is not linked to another junction."),
+	AllowEmpty =	2 UMETA(DisplayName = "Allow Empty", ToolTip = "This junction will be left unfilled when not linked to another junction."),
 };
 
 /**
@@ -44,7 +48,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionDetails
 	UPROPERTY(EditInstanceOnly, BlueprintReadOnly)
 	ENCellJunctionType Type = ENCellJunctionType::TwoWaySocket;
 
-	/** Requirement satisfied during graph generation. */
+	/** Requirement satisfied during graph generation and spawning. */
 	UPROPERTY(EditInstanceOnly)
 	ENCellJunctionRequirements Requirements = ENCellJunctionRequirements::AllowBlocking;
 	

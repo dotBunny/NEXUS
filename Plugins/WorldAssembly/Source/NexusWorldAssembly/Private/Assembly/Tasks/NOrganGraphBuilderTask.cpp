@@ -496,7 +496,15 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 	FNWeightedIntegerArray WeightedOpenJunctionKeys;
 	for (const auto Junction : OpenJunctions)
 	{
-		WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting);
+		// Double the likelihood of using a required junction
+		if (Junction.Value->Requirements == ENCellJunctionRequirements::Required)
+		{
+			WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting * 2);
+		}
+		else
+		{
+			WeightedOpenJunctionKeys.Add(Junction.Key, Junction.Value->Weighting);
+		}
 	}
 	const int32 OpenJunctionCount = OpenJunctions.Num();
 	

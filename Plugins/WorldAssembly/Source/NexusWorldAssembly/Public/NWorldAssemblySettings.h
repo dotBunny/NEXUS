@@ -112,7 +112,7 @@ public:
 	bool bAssemblySpawningDelayedJunctionSpawning = true;
 	
 	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Time Slice", Category="Assembly|Spawning",
-		meta=(ToolTip="How long per frame can be spent spawning junction fillers."))
+		meta=(ToolTip="How long per frame, in milliseconds, can be spent spawning junction fillers. At least one filler is always spawned per tick."))
 	float AssemblySpawningDelayedJunctionSpawningTimeSlice = 0.5f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",

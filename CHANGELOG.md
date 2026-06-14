@@ -8,6 +8,7 @@
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
+- `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.
 
 ### Changed
 
@@ -21,6 +22,7 @@
 - `FNGameplayTagCounter` no longer floors counts at zero; the mutation API (`Add`/`Subtract`/`Increment`/`Decrement`) now produces signed values, keeping operations losslessly reversible and consistent with `GetDifference`/`Combine`.
 - Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope, Blueprint-exposed under the `NEXUS|Core|Random` category (`Seed`, `Random Bool`, `Random Bools`, `Random Integer In Range`).
 - Consolidated `Twisted` to `Next` concept/naming.
+- Cell junction `Requirements` now respected, weights for junctions are automatically doubled when they are `Required`.
 
 ### Fixed
 

@@ -66,14 +66,27 @@ void UNCellJunctionComponent::BeginPlay()
 	
 	if (LinkDetails.bConnected) return;
 	
-	if (!UNWorldAssemblySettings::Get()->bAssemblySpawningDelayedJunctionSpawning)
+	switch (Details.Requirements)
 	{
-		Fill();
+	case ENCellJunctionRequirements::Required:
+		// Should not be here!
+		break;
+	case ENCellJunctionRequirements::AllowBlocking:
+		// Fill immediately or register for deferred
+		if (!UNWorldAssemblySettings::Get()->bAssemblySpawningDelayedJunctionSpawning || bSpawnFillerImmediately)
+		{
+			Fill();
+		}
+		else
+		{
+			UNWorldAssemblySubsystem::Get(GetWorld())->RegisterCellJunctionToFill(this);
+		}
+		break;
+	case ENCellJunctionRequirements::AllowEmpty:
+		break;
 	}
-	else
-	{
-		// TODO: Register with world assembly subsystem to do the spawning
-	}
+	
+	
 }
 
 
@@ -323,7 +336,9 @@ void UNCellJunctionComponent::Fill()
 	
 	if (Fillers.Num() > 0)
 	{
-		FNMersenneTwister RandomGenerator(AssemblyData.Seed);
+		// Create a deterministic random based on the overall seed, the node were in, and the junction itself.
+		FNMersenneTwister RandomGenerator(AssemblyData.Seed ^ AssemblyData.NodeIdentifier ^ LinkDetails.JunctionInstanceIdentifier);
+		
 		FNWeightedIntegerArray WeightedAvailableIndices = GetJunctionFillEntries(AssemblyData);
 
 		// TwistedValue returns INDEX_NONE when every filler was gated out by its constraints; leaving SpawnedActor
@@ -357,14 +372,15 @@ void UNCellJunctionComponent::Fill()
 		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->AssemblySpawningDefaultJunctionFiller, GetComponentLocation(), FillerRotation.Rotator(), SpawnParams);
 	}
 
+	
 	if (SpawnedActor != nullptr)
 	{
 		if (SpawnedActor->Implements<UNCellJunctionFiller>())
 		{
 			INCellJunctionFiller::Execute_OnInitializedFromJunction(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
 		}
-
-		UNWorldAssemblySubsystem::Get(GetWorld())->RegisterActorForCleanup(SpawnedActor);
+		UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(GetWorld());
+		System->RegisterActorForCleanup(SpawnedActor);
 	}
 }
 

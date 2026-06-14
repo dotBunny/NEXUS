@@ -25,6 +25,14 @@ public:
 	/** @return true if at least one junction on this cell is still unlinked. */
 	bool HasOpenJunctions() const;
 
+	/**
+	 * @return The key of the first junction flagged ENCellJunctionRequirements::Required that is still unconnected
+	 *         (in the free pool), or INDEX_NONE when every Required junction has been linked.
+	 * @note Unlike HasOpenJunctions, which reports whether any junction at all is free, this only considers
+	 *       junctions whose Requirements demand a connection; enforced by FNVirtualOrganContext::CheckGraph.
+	 */
+	int32 FindUnconnectedRequiredJunctionKey() const;
+
 	/** @return Pointers into the cell's world-space junction map for every junction that is still free. */
 	TMap<int32, FNCellJunctionDetails*> GetOpenJunctions();
 

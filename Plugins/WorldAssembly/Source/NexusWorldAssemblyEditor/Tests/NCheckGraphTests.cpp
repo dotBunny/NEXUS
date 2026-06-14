@@ -65,6 +65,22 @@ namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness
 			Context.CellGraph->RegisterNode(Node);
 		}
 	}
+
+	/**
+	 * Register a single cell node carrying one junction (key 0) with the given Requirements onto Context's graph and
+	 * return it so a test can inspect or link the junction. Cells supplies the backing storage for the node input
+	 * data and must outlive Context; reserve it for the full cell count before the first call so the pointers stay
+	 * stable. Context must already hold a graph (e.g. via GiveEmptyGraph).
+	 */
+	static FNAssemblyGraphCellNode* AddCellNodeWithJunction(FNVirtualOrganContext& Context, TArray<FNVirtualCellData>& Cells,
+		const ENCellJunctionRequirements Requirements)
+	{
+		FNVirtualCellData& Cell = Cells.Add_GetRef(MakeCell());
+		Cell.Junctions[0].Requirements = Requirements;
+		FNAssemblyGraphCellNode* Node = FNAssemblyGraphNodeFactory::CreateCellNode(FNAssemblyGraphNodeParams(), &Cell, FVector(100.f));
+		Context.CellGraph->RegisterNode(Node);
+		return Node;
+	}
 }
 
 N_TEST_CRITICAL(FNCheckGraphTests_CheckGraph_NullGraphFails,
@@ -304,6 +320,60 @@ N_TEST_HIGH(FNCheckGraphTests_CheckGraph_MinimumCountSkippedForUniqueRequired,
 	Ordinary.UsedCount = 1;
 
 	CHECK_FALSE_MESSAGE(TEXT("An ordinary cell below its minimum must still fail the check."), Context.CheckGraph())
+}
+
+N_TEST_HIGH(FNCheckGraphTests_CheckGraph_RequiredJunctionUnconnectedFails,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::RequiredJunctionUnconnectedFails",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// A placed cell with a Required junction left in the free pool means a mandatory connection is missing, so the
+	// graph must be rejected.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	TArray<FNVirtualCellData> Cells;
+	Cells.Reserve(1);
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+	AddCellNodeWithJunction(Context, Cells, ENCellJunctionRequirements::Required);
+
+	CHECK_FALSE_MESSAGE(TEXT("A cell with an unconnected Required junction must fail the check."), Context.CheckGraph())
+}
+
+N_TEST_HIGH(FNCheckGraphTests_CheckGraph_RequiredJunctionConnectedPasses,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::RequiredJunctionConnectedPasses",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// The same Required junction, once linked to another node, satisfies the requirement and the graph passes.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	TArray<FNVirtualCellData> Cells;
+	Cells.Reserve(2);
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+
+	FNAssemblyGraphCellNode* RequiredNode = AddCellNodeWithJunction(Context, Cells, ENCellJunctionRequirements::Required);
+	FNAssemblyGraphCellNode* PartnerNode = AddCellNodeWithJunction(Context, Cells, ENCellJunctionRequirements::AllowEmpty);
+	RequiredNode->LinkJunction(0, PartnerNode);
+
+	CHECK_MESSAGE(TEXT("A Required junction that is connected must satisfy the check."), Context.CheckGraph())
+}
+
+N_TEST_MEDIUM(FNCheckGraphTests_CheckGraph_NonRequiredOpenJunctionsPass,
+	"NEXUS::UnitTests::NWorldAssembly::FNVirtualOrganContext::CheckGraph::NonRequiredOpenJunctionsPass",
+	N_TEST_CONTEXT_ANYWHERE)
+{
+	// Only Required junctions gate the graph: AllowBlocking and AllowEmpty junctions left open must not fail the
+	// check, guarding against the gate rejecting every unconnected junction.
+	using namespace NEXUS::UnitTests::NWorldAssembly::FNCheckGraphHarness;
+
+	TArray<FNVirtualCellData> Cells;
+	Cells.Reserve(2);
+	FNVirtualOrganContext Context(1234ull, TEXT("CheckGraphTest"));
+	GiveEmptyGraph(Context);
+	AddCellNodeWithJunction(Context, Cells, ENCellJunctionRequirements::AllowBlocking);
+	AddCellNodeWithJunction(Context, Cells, ENCellJunctionRequirements::AllowEmpty);
+
+	CHECK_MESSAGE(TEXT("Open junctions that are not Required must not fail the check."), Context.CheckGraph())
 }
 
 #endif //WITH_TESTS

@@ -324,6 +324,23 @@ bool FNVirtualOrganContext::CheckGraph()
 		}
 	}
 
+	// Every placed cell must have all of its Required junctions connected to another junction. An unconnected
+	// Required junction means the graph is structurally incomplete, so reject it.
+	for (const FNAssemblyGraphNode* Node : CellGraph->GetNodes())
+	{
+		if (Node->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+
+		const FNAssemblyGraphCellNode* CellNode = static_cast<const FNAssemblyGraphCellNode*>(Node);
+		const int32 UnconnectedKey = CellNode->FindUnconnectedRequiredJunctionKey();
+		if (UnconnectedKey != INDEX_NONE)
+		{
+			N_VIRTUAL_ORGAN_MESSAGE(FString::Printf(
+				TEXT("CheckGraph FAILED: Cell node %i has an unconnected Required junction (key %i)"),
+				Node->GetNodeIdentifier(), UnconnectedKey))
+			return false;
+		}
+	}
+
 	return true;
 }
 

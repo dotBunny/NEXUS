@@ -10,6 +10,7 @@
 #include "Types/NSimpleDelegates.h"
 #include "NWorldAssemblySubsystem.generated.h"
 
+class UNCellJunctionComponent;
 class UNOrganComponent;
 class ANWorldAssemblyRelay;
 class UNAssemblyOperation;
@@ -115,6 +116,9 @@ public:
 	bool HasQueuedOrgansForAssembly() const { return !QueuedOrgansForAssembly.IsEmpty(); }
 	/** Queue an organ component to be assembled on a subsequent tick. */
 	void RegisterOrganForAssembly(TObjectPtr<UNOrganComponent> Organ);
+	
+	bool HasQueuedCellJunctionsToFill() const { return !QueuedCellJunctionsToFill.IsEmpty(); }
+	void RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction);
 
 	/** Fired each time a new operation begins being tracked by the subsystem, immediately before its build is kicked off. */
 	UPROPERTY(BlueprintAssignable)
@@ -142,6 +146,8 @@ private:
 	 */
 	bool bCachedSeamlessTravelMonitor = false;
 	
+	float CachedCellJunctionTimeSlice = 0.5f * 0.001f;
+	
 	/** Operations currently known to the subsystem; held strong to keep them alive across their build. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
@@ -153,6 +159,9 @@ private:
 	 */
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
+	
+	UPROPERTY()
+	TArray<TObjectPtr<UNCellJunctionComponent>> QueuedCellJunctionsToFill;
 
 	/**
 	 * Organs waiting to be folded into an assembly operation.

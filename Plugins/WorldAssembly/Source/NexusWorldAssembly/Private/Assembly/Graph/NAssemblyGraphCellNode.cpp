@@ -57,8 +57,23 @@ FNAssemblyGraphCellNode::FNAssemblyGraphCellNode(const FNAssemblyGraphNodeParams
 
 bool FNAssemblyGraphCellNode::HasOpenJunctions() const
 {
-	// TODO: some sort of thing will need to be added for requirements
+	// Reports whether any junction is free at all; for the Required-only variant the builder/validator wants,
+	// see FindUnconnectedRequiredJunctionKey.
 	return FreeJunctionKeys.Num() > 0;
+}
+
+int32 FNAssemblyGraphCellNode::FindUnconnectedRequiredJunctionKey() const
+{
+	// FreeJunctionKeys holds exactly the unconnected junctions, so a Required junction appearing here means the
+	// graph left a mandatory connection open.
+	for (const int32 JunctionKey : FreeJunctionKeys)
+	{
+		if (WorldJunctions[JunctionKey].Requirements == ENCellJunctionRequirements::Required)
+		{
+			return JunctionKey;
+		}
+	}
+	return INDEX_NONE;
 }
 
 TMap<int32, FNCellJunctionDetails*> FNAssemblyGraphCellNode::GetOpenJunctions()

@@ -11,7 +11,9 @@
 #include "Assembly/NAssemblyOperation.h"
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyRelay.h"
+#include "Cell/NCellJunctionComponent.h"
 #include "Cell/NCellProxy.h"
+#include "Developer/NMethodScopeTimer.h"
 #include "Engine/World.h"
 #include "GameFramework/GameModeBase.h"
 #include "GameFramework/PlayerController.h"
@@ -179,7 +181,7 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 		EnsurePlayerControllerRelays(GetWorld());
 	}
 	
-	if (HasKnownOperation())
+	if (KnownOperations.Num() > 0)
 	{
 		for (int32 i = KnownOperations.Num() - 1; i >= 0; i--)
 		{
@@ -206,11 +208,34 @@ void UNWorldAssemblySubsystem::Tick(float DeltaTime)
 			QueuedOrgansForAssembly.Empty();
 		}
 	}
+	
+	// Handle spawning / filling junctions, time-sliced so a large backlog
+	// drains across multiple ticks instead of stalling one frame.
+	if (QueuedCellJunctionsToFill.Num() > 0)
+	{
+		// Setting is authored in milliseconds; convert to seconds for the timer.
+		const double SliceSeconds = CachedCellJunctionTimeSlice;
+		const double StartTime = FPlatformTime::Seconds();
+		for (int32 i = QueuedCellJunctionsToFill.Num() - 1; i >= 0; i--)
+		{
+			if (UNCellJunctionComponent* Junction = QueuedCellJunctionsToFill[i])
+			{
+				Junction->Fill();
+			}
+			QueuedCellJunctionsToFill.RemoveAt(i);
+
+			// Always fill at least one per tick; stop once the slice is spent.
+			if (FPlatformTime::Seconds() - StartTime > SliceSeconds)
+			{
+				break;
+			}
+		}
+	}
 }
 
 bool UNWorldAssemblySubsystem::IsTickable() const
 {
-	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
+	if (KnownOperations.Num() > 0 || QueuedOrgansForAssembly.Num() > 0  || QueuedCellJunctionsToFill.Num() > 0 || bCachedSeamlessTravelMonitor) return true;
 	return false;
 }
 
@@ -296,21 +321,26 @@ void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganCompon
 	QueuedOrgansForAssembly.AddUnique(Organ);
 }
 
+void UNWorldAssemblySubsystem::RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction)
+{
+	// TODO: Do we want to actually do this on the client? as well?
+	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return;
+	QueuedCellJunctionsToFill.AddUnique(CellJunction);
+}
+
 void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	// Only do this on the server
-	if (FNMultiplayerUtils::HasWorldAuthority(InWorld))
+	const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
+	bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
+	CachedCellJunctionTimeSlice = Settings->AssemblySpawningDelayedJunctionSpawningTimeSlice * 0.001f;
+	
+	if (FNMultiplayerUtils::HasWorldAuthority(InWorld) && !bCachedSeamlessTravelMonitor)
 	{
-		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		bCachedSeamlessTravelMonitor = Settings->bSupportSeamlessTravel;
-		if (!bCachedSeamlessTravelMonitor)
-		{
-			OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
-			OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
-			EnsurePlayerControllerRelays(InWorld.GetWorld());
-		}
+		OnLoginHandle = FGameModeEvents::GameModePostLoginEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnPostLogin);
+		OnLogoutHandle = FGameModeEvents::GameModeLogoutEvent.AddUObject(this, &UNWorldAssemblySubsystem::OnLogout);
+		EnsurePlayerControllerRelays(InWorld.GetWorld());
 	}
-	//FWorldDelegates::OnSeamlessTravelTransition
 	Super::OnWorldBeginPlay(InWorld);
 }
 
