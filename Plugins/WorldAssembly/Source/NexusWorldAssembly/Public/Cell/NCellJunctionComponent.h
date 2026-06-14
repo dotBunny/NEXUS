@@ -112,7 +112,7 @@ private:
 	 * (constraint-gated, then weighted-random), fall back to the project-wide Default Filler when none qualify, and
 	 * notify the spawned actor through INCellJunctionFiller.
 	 */
-	void Fill(bool bUseDelayedSpawner = true);
+	void Fill();
 	/**
 	 * Filter this junction's Fillers down to the entries whose context-tag and tag-counter constraints are
 	 * satisfied by the generated cell's assembly state, weighted for selection.

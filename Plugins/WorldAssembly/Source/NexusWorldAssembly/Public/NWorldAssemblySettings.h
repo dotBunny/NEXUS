@@ -101,11 +101,19 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Assembly|Spawning", DisplayName="Cell Time Slice",
 	meta=(ToolTip="The target maximum allowed frame time to spawn cells before a new task is queued with the remainder."))
-	float AssemblySpawningCellProxiesTimeSlice = 2.f;
+	float AssemblySpawningCellProxiesTimeSlice = 1.f;
 	
-	UPROPERTY(Config, EditAnywhere, DisplayName="Default Filler", Category="Assembly|Spawning",
+	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Filler", Category="Assembly|Spawning",
 		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller."))
-	TSubclassOf<AActor> DefaultFillerActor;
+	TSubclassOf<AActor> AssemblySpawningDefaultJunctionFiller;
+	
+	UPROPERTY(Config, EditAnywhere, DisplayName="Delayed Junction Spawning", Category="Assembly|Spawning",
+		meta=(ToolTip="Should junctions that are being filled register themselves with the UWorldAssemblySubsystem to be filled time-sliced via Junction Time Slice?"))
+	bool bAssemblySpawningDelayedJunctionSpawning = true;
+	
+	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Time Slice", Category="Assembly|Spawning",
+		meta=(ToolTip="How long per frame can be spent spawning junction fillers."))
+	float AssemblySpawningDelayedJunctionSpawningTimeSlice = 0.5f;
 	
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
 		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))

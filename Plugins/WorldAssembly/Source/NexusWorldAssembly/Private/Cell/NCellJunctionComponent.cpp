@@ -64,9 +64,15 @@ void UNCellJunctionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (!LinkDetails.bConnected)
+	if (LinkDetails.bConnected) return;
+	
+	if (!UNWorldAssemblySettings::Get()->bAssemblySpawningDelayedJunctionSpawning)
 	{
 		Fill();
+	}
+	else
+	{
+		// TODO: Register with world assembly subsystem to do the spawning
 	}
 }
 
@@ -297,7 +303,7 @@ TArray<FVector> UNCellJunctionComponent::GetWorldCornerPoints(const FVector2D& S
 }
 
 
-void UNCellJunctionComponent::Fill(bool bUseDelayedSpawner)
+void UNCellJunctionComponent::Fill()
 {
 	ALevelInstance* LocalLevelInstance = LevelInstance.Get();
 	if (LocalLevelInstance == nullptr) return;
@@ -342,13 +348,13 @@ void UNCellJunctionComponent::Fill(bool bUseDelayedSpawner)
 	if (SpawnedActor == nullptr)
 	{
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		if (!IsValid(Settings->DefaultFillerActor))
+		if (!IsValid(Settings->AssemblySpawningDefaultJunctionFiller))
 		{
 			
 			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to fill junction as no fillers were available, and no default filler was available."));
 			return;
 		}
-		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->DefaultFillerActor, GetComponentLocation(), FillerRotation.Rotator(), SpawnParams);
+		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->AssemblySpawningDefaultJunctionFiller, GetComponentLocation(), FillerRotation.Rotator(), SpawnParams);
 	}
 
 	if (SpawnedActor != nullptr)
