@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "Cell/NCell.h"
 #include "Cell/NCellJunctionDetails.h"
+#include "Cell/NCellJunctionFillerEntry.h"
 #include "Cell/NCellRootDetails.h"
 #include "Cell/NTissueTagGroups.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
@@ -140,6 +141,8 @@ struct NEXUSWORLDASSEMBLY_API FNVirtualCellData
 	 * Value: Details about the junction including position, rotation, and socket size.
 	 */
 	TMap<int32, FNCellJunctionDetails> Junctions;
+	
+	TMap<int32, FNCellJunctionFillerDetailsArray> JunctionFillers;
 
 	/** 
 	 * Reference to the cell template asset.

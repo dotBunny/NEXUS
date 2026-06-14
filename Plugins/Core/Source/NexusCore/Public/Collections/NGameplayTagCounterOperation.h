@@ -28,4 +28,17 @@ struct FNGameplayTagCounterOperation
 	/** The right-hand operand combined with the tag's current count via Operation. */
 	UPROPERTY(EditAnywhere)
 	int32 Value = 0;
+
+	/** Exact field-wise equality. */
+	bool operator==(const FNGameplayTagCounterOperation& Other) const
+	{
+		return Tag == Other.Tag
+		&& Operation == Other.Operation
+		&& Value == Other.Value;
+	}
+
+	bool operator!=(const FNGameplayTagCounterOperation& Other) const
+	{
+		return !(*this == Other);
+	}
 };

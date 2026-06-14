@@ -48,6 +48,27 @@ public:
 	}
 
 	/**
+	 * Compares two arrays of differing element types element-by-element and in the same order using a custom equality predicate.
+	 * @param Left The first array to compare.
+	 * @param Right The second array to compare.
+	 * @param Predicate Invoked as Predicate(Left[i], Right[i]); returns true when the two elements are considered equal.
+	 * @return true if both arrays have the same length and every matching pair satisfies Predicate.
+	 */
+	template<typename TLeft, typename TRight, typename TPredicate>
+	FORCEINLINE static bool IsSameOrderedValues(const TArray<TLeft>& Left, const TArray<TRight>& Right, TPredicate Predicate)
+	{
+		if (Left.Num() != Right.Num())
+		{
+			return false;
+		}
+		for (int32 i = 0; i < Left.Num(); i++)
+		{
+			if (!Predicate(Left[i], Right[i])) return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Compares two arrays for equality without regard to ordering. Assumes elements are unique within each array.
 	 * @param Left The first array to compare.
 	 * @param Right The second array to compare.

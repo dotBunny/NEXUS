@@ -380,7 +380,7 @@ FNWeightedIntegerArray UNCellJunctionComponent::GetJunctionFillEntries(const FNC
 
 	for (int32 i = 0; i < Fillers.Num(); i++)
 	{
-		const FNCellJunctionFillEntry& Filler = Fillers[i];
+		const FNCellJunctionFillerEntry& Filler = Fillers[i];
 
 		// REQUIRED CONTEXT TAGS — the cell's resolved context must satisfy every tag the filler requires.
 		if (!Filler.RequiredContextTags.IsEmpty() && !AssemblyData.ContextTags.HasAllExact(Filler.RequiredContextTags))

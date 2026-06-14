@@ -5,11 +5,11 @@
 #include "GameplayTagContainer.h"
 #include "Collections/NGameplayTagCounterConstraint.h"
 
-#include "NCellJunctionFillEntry.generated.h"
+#include "NCellJunctionFillerEntry.generated.h"
 
 
 USTRUCT(BlueprintType)
-struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillEntry
+struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 {
 	GENERATED_BODY()
 	

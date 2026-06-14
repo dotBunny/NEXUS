@@ -310,6 +310,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		for (int32 i = 0; i < ToRemove.Num(); i++)
 		{
 			Cell->Junctions.Remove(ToRemove[i]);
+			Cell->Fillers.Remove(ToRemove[i]);   // keep fillers in lock-step
 		}
 		bUpdatedCellData = true;
 	}
@@ -317,6 +318,7 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 
 	for (const TPair<int32, TObjectPtr<UNCellJunctionComponent>>& JunctionPair : JunctionComponents)
 	{
+		// Junction Details
 		if (Cell->Junctions.Contains(JunctionPair.Key) )
 		{
 			if (!Cell->Junctions[JunctionPair.Key].IsEqual(JunctionPair.Value->Details))
@@ -329,6 +331,28 @@ bool FNWorldAssemblyEditorUtils::UpdateCell(UNCell* Cell, ANCellActor* CellActor
 		{
 			Cell->Junctions.Add(JunctionPair.Key, JunctionPair.Value->Details);
 			bUpdatedCellData =  true;
+		}
+		
+		// Filler Details — convert the live junction's authored fillers into their data-only
+		// details (dropping the Actor), syncing the side-car only when they actually differ.
+		const TArray<FNCellJunctionFillerEntry>& LiveFillers = JunctionPair.Value->Fillers;
+		const FNCellJunctionFillerDetailsArray* ExistingFillers = Cell->Fillers.Find(JunctionPair.Key);
+		const bool bFillersDiffer = ExistingFillers == nullptr
+			|| !FNArrayUtils::IsSameOrderedValues(ExistingFillers->Fillers, LiveFillers,
+				[](const FNCellJunctionFillerDetails& Details, const FNCellJunctionFillerEntry& Filler)
+				{
+					return Details.Equals(Filler);
+				});
+
+		if (bFillersDiffer)
+		{
+			TArray<FNCellJunctionFillerDetails>& FillerDetails = Cell->Fillers.FindOrAdd(JunctionPair.Key).Fillers;
+			FillerDetails.Reset(LiveFillers.Num());
+			for (const FNCellJunctionFillerEntry& Filler : LiveFillers)
+			{
+				FillerDetails.Emplace(Filler);
+			}
+			bUpdatedCellData = true;
 		}
 	}
 	

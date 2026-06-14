@@ -65,8 +65,21 @@ bool ANCellActor::HasDifferencesFromSidecar() const
 	}
 	for (auto Pair : CellJunctions)
 	{
-		if (!Sidecar->Junctions.Contains(Pair.Key)) return true;
+		// Check keys first
+		if (!Sidecar->Junctions.Contains(Pair.Key) || !Sidecar->Fillers.Contains(Pair.Key)) return true;
+		
+		// Same junction data
 		if (!Sidecar->Junctions[Pair.Key].IsEqual(Pair.Value.Get()->Details)) return true;
+		
+		// Check fillers data
+		if (!FNArrayUtils::IsSameOrderedValues(Sidecar->Fillers[Pair.Key].Fillers, Pair.Value.Get()->Fillers,
+			[](const FNCellJunctionFillerDetails& Details, const FNCellJunctionFillerEntry& Filler)
+			{
+				return Details.Equals(Filler);
+			}))
+		{
+			return true;
+		}
 	}
 				
 	return false;

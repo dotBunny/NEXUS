@@ -67,4 +67,17 @@ struct FNGameplayTagCounterConstraint
 		
 		return false;
 	}
+
+	/** Exact field-wise equality. */
+	bool operator==(const FNGameplayTagCounterConstraint& Other) const
+	{
+		return Tag == Other.Tag
+		&& Comparison == Other.Comparison
+		&& Value == Other.Value;
+	}
+
+	bool operator!=(const FNGameplayTagCounterConstraint& Other) const
+	{
+		return !(*this == Other);
+	}
 };

@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "NCellAssemblyData.h"
 #include "NCellJunctionDetails.h"
-#include "NCellJunctionFillEntry.h"
+#include "NCellJunctionFillerEntry.h"
 #include "NCellLinkDetails.h"
 #include "NColor.h"
 #include "NWorldAssemblySettings.h"
@@ -65,7 +65,7 @@ public:
 	FNCellJunctionDetails Details;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
-	TArray<FNCellJunctionFillEntry> Fillers;
+	TArray<FNCellJunctionFillerEntry> Fillers;
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Assembly Operation")
 	FNCellLinkDetails LinkDetails;
