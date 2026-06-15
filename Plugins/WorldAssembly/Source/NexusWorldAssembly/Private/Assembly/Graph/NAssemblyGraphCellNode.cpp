@@ -175,12 +175,14 @@ void FNAssemblyGraphCellNode::GenerateLinkDetails()
 		if (LinkedNodePtr == nullptr) continue;
 
 		FNAssemblyGraphNode* LinkedNode = *LinkedNodePtr;
-		Details.bConnected = true;
 		Details.ConnectedNodeIdentifier = LinkedNode->GetNodeIdentifier();
 
 		// Only cell nodes carry junctions; resolve the junction on the far cell that links back to us.
 		if (LinkedNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
 
+		// Connected means cell connection!
+		Details.bConnected = true;
+		
 		FNAssemblyGraphCellNode* LinkedCellNode = static_cast<FNAssemblyGraphCellNode*>(LinkedNode);
 		const int32 ConnectedJunctionKey = LinkedCellNode->FindJunctionKeyLinkedTo(this);
 		if (const FNCellJunctionDetails* ConnectedJunction = LinkedCellNode->GetJunctionDetails(ConnectedJunctionKey))

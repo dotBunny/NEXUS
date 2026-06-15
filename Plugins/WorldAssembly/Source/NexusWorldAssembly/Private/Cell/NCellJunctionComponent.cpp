@@ -11,6 +11,7 @@
 #include "NWorldAssemblySettings.h"
 #include "NWorldAssemblySubsystem.h"
 #include "NWorldAssemblyUtils.h"
+#include "Cell/INCellJunctionBeginPlay.h"
 #include "Cell/INCellJunctionFiller.h"
 #include "Cell/NCellLevelInstance.h"
 #include "Collections/NWeightedIntegerArray.h"
@@ -63,6 +64,29 @@ FVector UNCellJunctionComponent::GetOffsetLocation() const
 void UNCellJunctionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	// Send out calls to anything linked to it
+	if (OnBeginPlayCallback.Num() > 0)
+	{
+		for (int i = 0; i < OnBeginPlayCallback.Num(); ++i)
+		{
+			if ( OnBeginPlayCallback[i] == nullptr ) continue;
+			
+			
+			AActor* Actor = OnBeginPlayCallback[i].Get();
+			if (Actor == nullptr) continue;
+			
+			
+			if (Actor->Implements<UNCellJunctionBeginPlay>())
+			{
+				INCellJunctionBeginPlay::Execute_OnJunctionBeginPlay(Actor, LinkDetails);
+			}
+			else
+			{
+				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to invoke OnJunctionBeginPlay on %s as it does not implement the INCellJunctionBeginPlay."), *Actor->GetName())
+			}
+		}
+	}
 	
 	if (LinkDetails.bConnected) return;
 	

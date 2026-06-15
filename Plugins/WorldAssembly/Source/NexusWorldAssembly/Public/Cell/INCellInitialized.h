@@ -4,7 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NCellLevelInstance.h"
 #include "INCellInitialized.generated.h"
 
 UINTERFACE()
