@@ -169,8 +169,9 @@ N_TEST_MEDIUM(FNAssemblyGraphCellNodeTests_GenerateLinkDetails_LinkToBoneLeavesJ
 	"NEXUS::UnitTests::NWorldAssembly::FNAssemblyGraphCellNode::GenerateLinkDetails::LinkToBoneLeavesJunctionUnset",
 	N_TEST_CONTEXT_ANYWHERE)
 {
-	// Linking to a non-cell node (a bone) still records the connection and node identifier, but leaves
-	// ConnectedJunctionInstanceIdentifier at -1 because bone nodes carry no junctions.
+	// Linking to a non-cell node (a bone) records the connected node identifier but does not mark the junction
+	// connected — only cell-to-cell links set bConnected — and leaves ConnectedJunctionInstanceIdentifier at -1
+	// because bone nodes carry no junctions.
 	using namespace NEXUS::UnitTests::NWorldAssembly::FNGenerateLinkDetailsHarness;
 
 	FNVirtualCellData CellA = MakeCellShell();
@@ -190,7 +191,8 @@ N_TEST_MEDIUM(FNAssemblyGraphCellNodeTests_GenerateLinkDetails_LinkToBoneLeavesJ
 		ADD_ERROR("Expected a link entry for the junction with InstanceIdentifier 100.");
 		return;
 	}
-	CHECK_MESSAGE(TEXT("A junction linked to a bone must report bConnected == true."), Entry->bConnected)
+	CHECK_FALSE_MESSAGE(TEXT("A junction linked to a bone must report bConnected == false; only cell links count as connected."),
+		Entry->bConnected)
 	CHECK_EQUALS("ConnectedNodeIdentifier must match the linked bone node's identifier.",
 		Entry->ConnectedNodeIdentifier, Bone->GetNodeIdentifier())
 	CHECK_EQUALS("A bone link must leave ConnectedJunctionInstanceIdentifier at -1.",
