@@ -89,6 +89,7 @@ public:
 	FVector GetOffsetLocation() const;
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	
 #if WITH_EDITOR
 
@@ -117,8 +118,18 @@ public:
 	 * notify the spawned actor through INCellJunctionFiller.
 	 */
 	void Fill();
+	
+protected:
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
+	TWeakObjectPtr<AActor> FillerActor;
+	
+	int32 OperationTicket;
+	
+	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Assembly Operation")
+	TWeakObjectPtr<ALevelInstance> LevelInstance;
+	
 private:
-
 	/**
 	 * Filter this junction's Fillers down to the entries whose context-tag and tag-counter constraints are
 	 * satisfied by the generated cell's assembly state, weighted for selection.
@@ -126,7 +137,6 @@ private:
 	 * @return Indices into Fillers, each inserted Weighting times; empty when every filler is gated out.
 	 */
 	FNWeightedIntegerArray GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const;
-	/** Cached level-instance owner when the junction is spawned as part of a streamed-in cell. */
-	TWeakObjectPtr<ALevelInstance> LevelInstance;
+
 	N_WORLD_ICON_HEADER()
 };

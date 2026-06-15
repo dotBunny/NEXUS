@@ -89,6 +89,42 @@ void UNCellJunctionComponent::BeginPlay()
 	
 }
 
+void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	
+	// Cell was removed, and were still doing stuff so the filler should go too
+	if (EndPlayReason == EEndPlayReason::Type::Destroyed || EndPlayReason == EEndPlayReason::Type::RemovedFromWorld )
+	{
+		UWorld* World = GetWorld();
+		if (World != nullptr && FillerActor.Get() != nullptr)
+		{
+			AActor* Actor = FillerActor.Get();
+
+			ALevelInstance* LocalLevelInstance = LevelInstance.Get();
+			if (LocalLevelInstance == nullptr)
+			{
+				UNWorldAssemblySubsystem::Get(World)->UnregisterOperationActor(Actor);
+				Actor->Destroy();
+				return;
+			}
+			ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LocalLevelInstance);
+			if (CellLevelInstance == nullptr)
+			{
+				UNWorldAssemblySubsystem::Get(World)->UnregisterOperationActor(Actor);
+				Actor->Destroy();
+				return;
+			}
+			
+			// If we still have it, be direct
+			UNWorldAssemblySubsystem::Get(World)->UnregisterOperationActorByTicket(Actor,
+				CellLevelInstance->GetAssemblyData().OperationTicket);
+			Actor->Destroy();
+		}
+	}
+	
+}
+
 
 void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor DefaultColor, const UNWorldAssemblySettings* Settings) const
 {
@@ -380,7 +416,8 @@ void UNCellJunctionComponent::Fill()
 			INCellJunctionFiller::Execute_OnInitializedFromJunction(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
 		}
 		UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(GetWorld());
-		System->RegisterActorForCleanup(SpawnedActor);
+		System->RegisterOperationActor(SpawnedActor, AssemblyData.OperationTicket);
+		FillerActor = SpawnedActor;
 	}
 }
 

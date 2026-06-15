@@ -73,23 +73,41 @@ public:
 	FIntVector2 GetRemainingStatus();
 	
 	/**
-	 * Track an externally-owned actor so it will be destroyed by the next Clear() pass.
+	 * Track an externally-owned actor under an Operation Ticket so it will be destroyed by the next Clear() pass, or
+	 * by a DestroyActorsForOperation call for that ticket.
 	 *
 	 * Stored as a weak reference, so the actor is free to be destroyed by other systems first without leaving a dangling entry.
-	 * Safe to call repeatedly with the same actor — duplicates are ignored.
+	 * Safe to call repeatedly with the same actor — duplicates within a ticket are ignored.
 	 * @param Actor Actor to enroll in cleanup. Null is tolerated but ignored.
+	 * @param OperationTicket Ticket of the operation that spawned the actor; 0 (the default) is the unassociated bucket.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Register Actor For Cleanup", Category = "NEXUS|WorldAssembly")
-	void RegisterActorForCleanup(AActor* Actor);
+	UFUNCTION(BlueprintCallable, DisplayName="Register Operation Actor", Category = "NEXUS|WorldAssembly")
+	void RegisterOperationActor(AActor* Actor, int32 OperationTicket = 0);
 
 	/**
-	 * Stop tracking an actor for Clear()-driven destruction.
+	 * Stop tracking an actor for Clear()-driven destruction, regardless of which ticket it was registered under.
 	 *
 	 * Call when the actor's lifetime is taken over elsewhere, or when it has already been destroyed and the slot should be reclaimed early.
 	 * @param Actor Actor previously passed to RegisterActorForCleanup. A no-op if the actor was never registered.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Unregister Actor For Cleanup", Category = "NEXUS|WorldAssembly")
-	void UnregisterActorForCleanup(AActor* Actor);
+	UFUNCTION(BlueprintCallable, DisplayName="Unregister Operation Actor", Category = "NEXUS|WorldAssembly")
+	void UnregisterOperationActor(AActor* Actor);
+
+	/**
+	 * Stop tracking an actor for cleanup under a specific Operation Ticket — a direct-lookup alternative to
+	 * UnregisterActorForCleanup that avoids scanning every ticket bucket.
+	 * @param Actor Actor previously registered under OperationTicket. A no-op if it was not tracked there.
+	 * @param OperationTicket Ticket the actor was registered under; 0 (the default) is the unassociated bucket.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Unregister Operation Actor (By Ticket)", Category = "NEXUS|WorldAssembly")
+	void UnregisterOperationActorByTicket(AActor* Actor, int32 OperationTicket = 0);
+	
+	/**
+	 * Destroy and stop tracking every actor enrolled under a single Operation Ticket, leaving other operations' actors untouched.
+	 * @param OperationTicket Ticket whose tracked actors should be torn down. A no-op if nothing was registered for it.
+	 */
+	UFUNCTION(BlueprintCallable, DisplayName="Destroy Operation Actors", Category = "NEXUS|WorldAssembly")
+	void DestroyOperationActors(int32 OperationTicket);
 
 	//~UTickableWorldSubsystem
 	virtual void Tick(float DeltaTime) override;
@@ -155,11 +173,15 @@ private:
 	TArray<TObjectPtr<UNAssemblyOperation>> KnownOperations;
 	
 	/**
-	 * Externally-owned actors enrolled via RegisterActorForCleanup that should be destroyed on the next Clear() pass.
+	 * Externally-owned actors enrolled via RegisterActorForCleanup, grouped by the Operation Ticket that spawned them,
+	 * destroyed on the next Clear() pass (or per-ticket via DestroyActorsForOperation).
 	 * Held weakly so entries become inert (rather than dangling) if the actor is destroyed by another system first.
+	 * @note Not a UPROPERTY: UHT forbids a TArray nested in a TMap, and TWeakObjectPtr self-nulls so reflection is unneeded.
 	 */
-	UPROPERTY()
-	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
+	TMap<int32, TArray<TWeakObjectPtr<AActor>>> TrackedOperationActors;
+
+	/** Destroy every still-valid actor in Actors (shared by Clear and DestroyActorsForOperation). */
+	void DestroyTrackedActors(const TArray<TWeakObjectPtr<AActor>>& Actors);
 	
 	/** Junctions registered for delayed, time-sliced filling; drained a slice at a time each tick (see Junction Time Slice). */
 	UPROPERTY()

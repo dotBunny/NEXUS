@@ -117,16 +117,13 @@ void UNWorldAssemblySubsystem::Clear()
 		Proxy->Destroy();
 	}
 	
-	// Handle our track for cleanup
-	for (TWeakObjectPtr Actor : TrackedActorsForCleanup)
+	// Handle our track for cleanup — destroy every operation's tracked actors, then drop all buckets.
+	for (const TPair<int32, TArray<TWeakObjectPtr<AActor>>>& Pair : TrackedOperationActors)
 	{
-		if (Actor.IsValid())
-		{
-			Actor.Get()->Destroy(true, false);
-		}
+		DestroyTrackedActors(Pair.Value);
 	}
-	TrackedActorsForCleanup.Empty();
-	
+	TrackedOperationActors.Empty();
+
 	// Allow folks to subscribe for this event
 	OnCleared.Broadcast();
 }
@@ -162,15 +159,59 @@ FIntVector2 UNWorldAssemblySubsystem::GetRemainingStatus()
 	return LocalRelay->GetRemainingStatus();
 }
 
-void UNWorldAssemblySubsystem::RegisterActorForCleanup(AActor* Actor)
+void UNWorldAssemblySubsystem::DestroyTrackedActors(const TArray<TWeakObjectPtr<AActor>>& Actors)
 {
-	if (Actor == nullptr) return;
-	TrackedActorsForCleanup.AddUnique(Actor);
+	for (const TWeakObjectPtr<AActor>& Actor : Actors)
+	{
+		if (Actor.IsValid())
+		{
+			Actor.Get()->Destroy(true, false);
+		}
+	}
 }
 
-void UNWorldAssemblySubsystem::UnregisterActorForCleanup(AActor* Actor)
+void UNWorldAssemblySubsystem::RegisterOperationActor(AActor* Actor, const int32 OperationTicket)
 {
-	TrackedActorsForCleanup.Remove(Actor);
+	if (Actor == nullptr) return;
+	TrackedOperationActors.FindOrAdd(OperationTicket).AddUnique(Actor);
+}
+
+void UNWorldAssemblySubsystem::UnregisterOperationActor(AActor* Actor)
+{
+	// The actor lives under exactly one ticket, but the caller does not pass it; scan every bucket and prune any
+	// that empties so stale ticket keys do not accumulate.
+	for (auto It = TrackedOperationActors.CreateIterator(); It; ++It)
+	{
+		It->Value.Remove(Actor);
+		if (It->Value.IsEmpty())
+		{
+			It.RemoveCurrent();
+		}
+	}
+}
+
+void UNWorldAssemblySubsystem::UnregisterOperationActorByTicket(AActor* Actor, const int32 OperationTicket)
+{
+	// Direct bucket lookup (unlike UnregisterActorForCleanup, which scans every ticket); prune the bucket when the
+	// removal empties it so stale ticket keys do not accumulate.
+	if (TArray<TWeakObjectPtr<AActor>>* Bucket = TrackedOperationActors.Find(OperationTicket))
+	{
+		Bucket->Remove(Actor);
+		if (Bucket->IsEmpty())
+		{
+			TrackedOperationActors.Remove(OperationTicket);
+		}
+	}
+}
+
+
+void UNWorldAssemblySubsystem::DestroyOperationActors(const int32 OperationTicket)
+{
+	TArray<TWeakObjectPtr<AActor>> Bucket;
+	if (TrackedOperationActors.RemoveAndCopyValue(OperationTicket, Bucket))
+	{
+		DestroyTrackedActors(Bucket);
+	}
 }
 
 void UNWorldAssemblySubsystem::Tick(float DeltaTime)
@@ -347,7 +388,7 @@ void UNWorldAssemblySubsystem::OnWorldBeginPlay(UWorld& InWorld)
 void UNWorldAssemblySubsystem::OnWorldEndPlay(UWorld& InWorld)
 {
 	RelayMap.Reset();
-	TrackedActorsForCleanup.Empty();
+	TrackedOperationActors.Empty();
 	LocalRelay = nullptr;
 	
 	// Stop all known operations
