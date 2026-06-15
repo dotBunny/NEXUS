@@ -46,6 +46,7 @@ protected:
 	}
 
 private:
+	/** The delay mechanism driving this task; held (and root-set) between Lock and Release so it survives GC. */
 	UPROPERTY()
 	TObjectPtr<UAsyncEditorDelay> Parent;
 };

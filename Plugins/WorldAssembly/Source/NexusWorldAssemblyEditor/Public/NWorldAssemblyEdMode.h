@@ -16,11 +16,20 @@ class FNAssemblyOperationContext;
 class UNAssemblyOperation;
 struct FPropertyChangedEvent;
 
+/**
+ * Controls how much of the World Assembly edit-mode visualization is drawn, used to produce clean captures.
+ *
+ * Toggled by the screenshot commands so debug overlays and on-screen messages can be suppressed for a tidy image.
+ */
 enum class ENWorldAssemblyEdModeRenderMode
 {
+	/** Full authoring view: debug overlays (bounds/hull/voxel) and HUD warning messages are drawn. */
 	All,
+	/** Cell-thumbnail capture: cell overlays are still drawn, but HUD messages are hidden. */
 	CellScreenshot,
+	/** Level capture: both debug overlays and HUD messages are hidden for a clean level screenshot. */
 	LevelScreenshot,
+	/** Draw nothing: neither overlays nor HUD messages are rendered. */
 	None,
 };
 
@@ -242,7 +251,8 @@ private:
 
 	/** User-disabled auto-hull regeneration; surfaces a HUD warning. */
 	bool bAutoHullDisabled = false;
-	
+
+	/** When true, the focused cell is allowed to keep a non-convex hull rather than forcing convexity. */
 	bool bAllowNonConvexHull = false;
 
 	/** User-disabled auto-voxel regeneration; surfaces a HUD warning. */

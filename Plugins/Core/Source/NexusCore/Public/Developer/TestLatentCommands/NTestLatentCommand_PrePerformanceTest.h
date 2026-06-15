@@ -8,6 +8,13 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that stabilizes the engine immediately before a timed performance test.
+ *
+ * Warms up stack walking, forces a garbage-collection pass, flushes pending logs, and streams in all resources so
+ * that one-time costs do not contaminate the measured region. Runs ahead of the timed body; paired with
+ * FNTestLatentCommand_PostPerformanceTest.
+ */
 class FNTestLatentCommand_PrePerformanceTest : public IAutomationLatentCommand
 {
 public:

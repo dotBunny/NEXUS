@@ -65,6 +65,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State")
 	bool bIsPersistent = false;
 
+	/** When true, the widget removes its cached state from the UNEditorUtilityWidgetSubsystem when its tab is closed. */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="State",
 		meta=(Tooltip="Should the widget attempt to remove itself when the tab is closed from any cached state in the UNEditorUtilityWidgetSubsystem."))
 	bool bHasPermanentState = false;

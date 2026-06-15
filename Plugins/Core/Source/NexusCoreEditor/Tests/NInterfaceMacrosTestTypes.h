@@ -20,6 +20,7 @@ class UNInterfaceMacrosTestSubject : public UInterface
 	GENERATED_BODY()
 };
 
+/** Native interface half of UNInterfaceMacrosTestSubject; see that type for the dispatch matrix it exercises. */
 class NEXUSCOREEDITOR_API INInterfaceMacrosTestSubject
 {
 	GENERATED_BODY()

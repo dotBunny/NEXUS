@@ -23,6 +23,12 @@ class NEXUSWORLDASSEMBLY_API UNWorldAssemblyLibrary : public UBlueprintFunctionL
 
 public:
 	
+	/**
+	 * Convert a junction's grid socket size into world units using the project's SocketSize/SocketDepth settings.
+	 * @param JunctionComponent The junction whose socket size to convert.
+	 * @param bWithDepth When true, fills Z with the configured SocketDepth; otherwise Z stays 1.
+	 * @return The junction's world-space size (X,Y scaled from the socket grid; Z = depth when requested).
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size")
 	static FVector GetJunctionWorldSize(UNCellJunctionComponent* JunctionComponent, bool bWithDepth = false)
 	{
@@ -42,6 +48,12 @@ public:
 		return ReturnVector;
 	}
 	
+	/**
+	 * Variant of GetJunctionWorldSize that returns the size as (Depth, X, Y) — useful when the depth axis must lead.
+	 * @param JunctionComponent The junction whose socket size to convert.
+	 * @param Scale Uniform multiplier applied to all three components.
+	 * @return A vector packed as (SocketDepth, world X, world Y), each scaled by Scale.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Size (Shifted)", meta=(ToolTip="Depth, X, Y"))
 	static FVector GetJunctionWorldSizeShifted(UNCellJunctionComponent* JunctionComponent, float Scale = 1.f)
 	{
@@ -57,6 +69,11 @@ public:
 			(JunctionComponent->Details.SocketSize.Y * Settings->SocketSize.Y) * Scale);
 	}
 	
+	/**
+	 * @param JunctionComponent The junction to query.
+	 * @param SocketSize Socket size (in grid units) to project the corners for.
+	 * @return The junction's four corner points in world space for the given socket size.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|WorldAssembly", DisplayName = "Get Junction World Corner Points")
 	static TArray<FVector> GetJunctionWorldCornerPoints(UNCellJunctionComponent* JunctionComponent, const FVector2D& SocketSize)
 	{

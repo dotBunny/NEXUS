@@ -68,6 +68,7 @@ public:
 	UFUNCTION(BlueprintCallable, DisplayName="Is Ready?", Category = "NEXUS|WorldAssembly")
 	bool IsReady(bool bWaitOnStreaming = true);
 	
+	/** @return On clients, the ANCellLevelInstances still to sync as (Remaining, Total); zero on the server. */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Remaining Status", Category = "NEXUS|WorldAssembly", meta=(ToolTip="Gets the remaining Cell Level Instances to sync (Remaining/Total) on clients. Zero if server."))
 	FIntVector2 GetRemainingStatus();
 	
@@ -160,6 +161,7 @@ private:
 	UPROPERTY()
 	TArray<TWeakObjectPtr<AActor>> TrackedActorsForCleanup;
 	
+	/** Junctions registered for delayed, time-sliced filling; drained a slice at a time each tick (see Junction Time Slice). */
 	UPROPERTY()
 	TArray<TObjectPtr<UNCellJunctionComponent>> QueuedCellJunctionsToFill;
 

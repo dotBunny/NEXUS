@@ -439,6 +439,10 @@ private:
 	 */
 	mutable bool bValidationDirty = false;
 	
+	/**
+	 * Editor-visible diagnostic flag intended to record that a world transform has been baked into Vertices.
+	 * Preserved across copies/assignment; currently informational only — no mutator sets it true.
+	 */
 	UPROPERTY(VisibleAnywhere)
 	mutable bool bHasAppliedTransform = false;
 

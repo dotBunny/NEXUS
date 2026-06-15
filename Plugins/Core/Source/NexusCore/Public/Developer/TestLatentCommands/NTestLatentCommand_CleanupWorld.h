@@ -8,6 +8,12 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that tears down the shared test world created by FNTestLatentCommand_CreateWorld.
+ *
+ * Ends play, destroys the world and its game instance/context, and clears the FNTestUtils::Environment pointers
+ * so the next test starts from a clean slate.
+ */
 class FNTestLatentCommand_CleanupWorld : public IAutomationLatentCommand
 {
 public:

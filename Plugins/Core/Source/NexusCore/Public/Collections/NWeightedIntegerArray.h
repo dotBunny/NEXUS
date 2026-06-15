@@ -229,8 +229,10 @@ struct FNWeightedIntegerArray
 	int32 WeightedCount() const { return Data.Num(); }
 
 private:
+	/** Backing storage: each value appears once per unit of its weight, so a weighted pick is a uniform index draw. */
 	UPROPERTY(VisibleAnywhere)
 	TArray<int32> Data;
+	/** Cached highest valid index into Data (Data.Num() - 1); -1 when the array is empty. */
 	UPROPERTY(VisibleAnywhere)
 	int32 CachedMaxIndex = -1;
 };

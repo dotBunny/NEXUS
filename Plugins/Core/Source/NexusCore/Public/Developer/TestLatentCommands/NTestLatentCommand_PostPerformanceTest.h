@@ -7,6 +7,12 @@
 
 #include "Misc/AutomationTest.h"
 
+/**
+ * Latent automation command that cleans up after a timed performance test by forcing a garbage-collection pass.
+ *
+ * Runs once the timed region is finished so allocations made during the test do not leak into subsequent ones.
+ * Paired with FNTestLatentCommand_PrePerformanceTest.
+ */
 class FNTestLatentCommand_PostPerformanceTest : public IAutomationLatentCommand
 {
 public:

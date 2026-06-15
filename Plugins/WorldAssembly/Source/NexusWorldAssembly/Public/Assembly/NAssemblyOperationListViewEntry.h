@@ -104,6 +104,7 @@ protected:
 	UFUNCTION()
 	void OnOperationTasksChanged(const int32 CompletedTasks, const int32 TotalTasks);
 
+	/** Delegate callback: the entry's cancel button was clicked. */
 	UFUNCTION()
 	void OnCancelButtonClicked();
 

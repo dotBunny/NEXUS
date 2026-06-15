@@ -35,6 +35,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellJunctionFillerEntry
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this fill."))
 	FGameplayTagContainer RequiredContextTags;
 	
+	/** TagCounter constraints that must pass for this entry to be eligible during fill selection (an absent tag compares as 0). */
 	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Constraints", Category="Tagging", meta = (ToolTip="TagCounter constraints that must pass for this entry to be included in fill selection. If a tag is constrained but not present in the current Tag Counter, a value of 0 is compared against."))
 	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
 	

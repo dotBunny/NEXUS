@@ -61,9 +61,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(ClampMin=0))
 	int32 MaximumCellCount = 0;
 	
+	/** Context tags the finished organ must carry; enforced as RequiredContextTags during graph validation. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
 	FGameplayTagContainer ContextTags;
-	
+
+	/** Tag-counter constraints the finished organ must satisfy; enforced as RequiredTagCounters during graph validation. */
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
 	TArray<FNGameplayTagCounterConstraint> TagCounters;
 

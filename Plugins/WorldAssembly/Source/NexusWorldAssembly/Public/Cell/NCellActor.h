@@ -155,6 +155,7 @@ private:
 	UPROPERTY(EditInstanceOnly, Category="Cell Actor")
 	TArray<TObjectPtr<AActor>> AuthorTimeActors;
 
+	/** Actors in this cell implementing INCellInitialized; each receives OnInitializedFromProxy once InitializeFromProxy completes. */
 	UPROPERTY(VisibleInstanceOnly, Category="Cell Actor")
 	TArray<TObjectPtr<AActor>> InitializeCallbackActors;
 

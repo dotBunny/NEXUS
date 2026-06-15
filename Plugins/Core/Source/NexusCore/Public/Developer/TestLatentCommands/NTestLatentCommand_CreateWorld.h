@@ -8,9 +8,17 @@
 #include "Misc/AutomationTest.h"
 #include "Developer/NTestUtils.h"
 
+/**
+ * Latent automation command that stands up the shared test world and begins play.
+ *
+ * Creates a Game-type UWorld plus game instance, world context, and game mode, stores them on
+ * FNTestUtils::Environment for the world-based latent commands to use, and calls BeginPlay. Paired with
+ * FNTestLatentCommand_CleanupWorld, which tears the same environment back down.
+ */
 class FNTestLatentCommand_CreateWorld : public IAutomationLatentCommand
 {
 public:
+	/** @param TestPtr The automation test used to report a world-creation failure. */
 	explicit FNTestLatentCommand_CreateWorld(FAutomationTestBase* TestPtr)
 		: Test(TestPtr)
 	{

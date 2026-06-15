@@ -31,9 +31,11 @@ struct NEXUSWORLDASSEMBLY_API FNTissueEntry
 	UPROPERTY(EditAnywhere, DisplayName="Required Context Tags", Category="Tagging", meta = (ToolTip="Tags required to be found in Context Tags for allowance to place this cell."))
 	FGameplayTagContainer RequiredContextTags;
 	
+	/** TagCounter constraints that must pass for this cell to be eligible for selection (an absent tag compares as 0). */
 	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Constraints", Category="Tagging", meta = (ToolTip="TagCounter constraints that must pass for this cell to be included in cell selection. If a tag is constrained but not present in the current Tag Counter, a value of 0 is compared against."))
 	TArray<FNGameplayTagCounterConstraint> TagCounterConstraints;
-	
+
+	/** Operations applied to the TagCounter when this cell is placed/used. */
 	UPROPERTY(EditAnywhere, DisplayName="Tag Counter Operations", Category="Tagging", meta = (ToolTip="Operations to apply to the TagCounter if the cell is placed/used."))
 	TArray<FNGameplayTagCounterOperation> TagCounterOperations;
 	

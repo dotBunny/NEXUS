@@ -57,6 +57,10 @@ enum class ENActorPoolFlags : uint8
 ENUM_CLASS_FLAGS(ENActorPoolFlags)
 
 
+/**
+ * Bitflags declaring which optional capabilities an FNActorPool advertises, queried before invoking the
+ * corresponding operation (e.g. ReturnAll) so callers can branch on what a given pool supports.
+ */
 UENUM(meta=(Bitflags,UseEnumValuesAsMaskValuesInEditor=true))
 enum class ENActorPoolSupportFlags : uint8
 {
@@ -87,6 +91,7 @@ struct NEXUSACTORPOOLS_API FNActorPoolSettings
 
 public:
 	
+	/** @return true if the ReturnAll support flag is set. */
 	FORCEINLINE bool HasSupportFlag_ReturnAll() const
 	{
 		return N_FLAGS_HAS_UINT8(SupportFlags, ENActorPoolSupportFlags::ReturnAll);

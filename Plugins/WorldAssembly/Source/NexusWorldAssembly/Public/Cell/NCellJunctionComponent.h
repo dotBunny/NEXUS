@@ -68,6 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
 	TArray<FNCellJunctionFillerEntry> Fillers;
 	
+	/** When true, bypass filler timeslicing and spawn this junction's filler immediately during BeginPlay. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, DisplayName="Spawn Filler Immediately", Category = "Cell Junction",
 		meta=(ToolTip="Override timeslicing support and immediately spawn this filler in BeginPlay"))
 	bool bSpawnFillerImmediately = true;

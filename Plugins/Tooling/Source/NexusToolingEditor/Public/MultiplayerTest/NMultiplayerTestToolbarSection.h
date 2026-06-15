@@ -3,6 +3,12 @@
 
 #pragma once
 
+/**
+ * Installs and drives the "Multiplayer Test" toggle in the Level Editor toolbar.
+ *
+ * Registers a UToolMenus section whose single entry starts/stops a multiplayer test session via the editor
+ * subsystem, and keeps its icon/tooltip in sync with the running state through cached delegate bindings.
+ */
 class FNMultiplayerTestToolbarSection
 {
 public:

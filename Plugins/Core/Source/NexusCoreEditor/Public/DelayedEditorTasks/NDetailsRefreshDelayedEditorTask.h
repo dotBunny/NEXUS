@@ -31,7 +31,8 @@ public:
 		DelayedMechanism->Start(0.5f, 5);
 	}
 	
-private:	
+private:
+	/** Delay-completion callback: notifies the property editor of the customization change, then releases the task. */
 	UFUNCTION()
 	void Execute()
 	{

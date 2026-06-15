@@ -158,6 +158,12 @@ public:
 			DepthPriority, ForegroundColor, Scale, LineHeight, Thickness, bInvertLineFeed, bDrawBelowPosition);		
 	}
 	
+	/**
+	 * Create a Mersenne Twister object seeded from a string, outered to the world resolved from the context.
+	 * @param WorldContextObject Object used to resolve the owning UWorld.
+	 * @param Seed String seed used to initialize the random stream.
+	 * @return The newly created, seeded twister object.
+	 */
 	UFUNCTION(BlueprintCallable, DisplayName = "Create Mersenne Twister Object", Category = "NEXUS|Developer",
 		meta = (WorldContext = "WorldContextObject"))
 	static UNMersenneTwisterObject* CreateMersenneTwisterObject(const UObject* WorldContextObject, const FString& Seed)

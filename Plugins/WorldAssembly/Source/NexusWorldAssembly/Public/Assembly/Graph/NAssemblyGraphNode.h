@@ -18,12 +18,21 @@ enum class ENAssemblyGraphNodeType
 };
 
 
+/**
+ * Construction parameters bundled for an FNAssemblyGraphNode, capturing the world transform and tags a node
+ * carries at the moment it is added to the graph.
+ */
 struct FNAssemblyGraphNodeParams
 {
+	/** Deterministic seed assigned to the node's random stream. */
 	uint64 Seed = 0;
+	/** Assembly tags the node carries (starter/finisher/group membership, etc.). */
 	FGameplayTagContainer AssemblyTags;
+	/** Context tags this node contributes to the generation context once placed. */
 	FGameplayTagContainer ContextTagsAdded;
+	/** World-space position the node is placed at. */
 	FVector WorldPosition = FVector::ZeroVector;
+	/** World-space rotation the node is placed with. */
 	FRotator WorldRotation = FRotator::ZeroRotator;
 };
 

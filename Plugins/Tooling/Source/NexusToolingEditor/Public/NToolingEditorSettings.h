@@ -16,10 +16,14 @@
 UENUM(BlueprintType)
 enum class ENValidatorSeverity : uint8
 {
+	/** Validator off: reports nothing and leaves the asset NotValidated. */
 	Disable	= 0,
+	/** Adds a warning and marks the asset Invalid. */
 	Warning = 1,
 	WarningButValid = 2 UMETA(DisplayName = "Warning (Validate)", ToolTip="Throws warning but does not mark the asset as invalid."),
+	/** Adds an error and marks the asset Invalid. */
 	Error = 3,
+	/** Adds an informational message; the asset stays Valid. */
 	Message = 4
 };
 
@@ -64,38 +68,49 @@ public:
 
 #if WITH_EDITORONLY_DATA
 	
+	/** Override for the editor's Starship AppIcon (SVG or image); takes effect after an editor restart. */
 	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "AppIcon Path", meta=(ToolTip="Replaces the Starship AppIcon style, can be in SVG or image format. A restart of the editor is required for it to take effect."))
 	FString ProjectAppIconPath;
 
+	/** Override for the OS window icon (extension-less base path; per-platform extension resolved automatically); takes effect after an editor restart. */
 	UPROPERTY(EditAnywhere, config, Category = "Editor Icon", DisplayName = "Window Icon Path", meta=(ToolTip="Replaces the Unreal Editor window icon at a platform level. This should simply be the path to the file WITHOUT any extension. The extension will be determined by the platform, thus all resources should have the same base name, and be located in the same folder. A restart of the editor is required for it to take effect."))
 	FString ProjectWindowIconPath;
-	
+
+	/** Project levels referenced by NEXUS tooling (e.g. quick-open bookmarks). */
 	UPROPERTY(EditAnywhere, config, Category = "Project", DisplayName = "Levels", meta = (AllowedClasses = "/Script/Engine.World", ToolTip="The set of project levels referenced by NEXUS tooling."))
 	TArray<FSoftObjectPath> ProjectLevels;
 
+	/** Severity reported when a Blueprint contains an empty Tick event. */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Empty Tick", meta=(ToolTip="Severity reported when a Blueprint contains an empty Tick event."))
 	ENValidatorSeverity ValidatorBlueprintEmptyTick = ENValidatorSeverity::Error;
 
+	/** Severity reported when a Blueprint pure node feeds multiple output pins (re-evaluated per pin). */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Blueprint: Multi-Pin Pure Node", meta=(ToolTip="Severity reported when a Blueprint pure node has multiple connected output pins (which causes it to be re-evaluated per pin)."))
 	ENValidatorSeverity ValidatorBlueprintMultiPinPureNode = ENValidatorSeverity::Warning;
 
+	/** Severity reported when engine content has been modified. */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Engine: Content Change", meta=(ToolTip="Severity reported when engine content has been modified."))
 	ENValidatorSeverity ValidatorEngineContentChange = ENValidatorSeverity::Warning;
 
+	/** Severity reported when a level blueprint contains non-ghost logic nodes. */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Severity", DisplayName = "Level: Blueprint Logic",
 		meta=(Tooltip="Determine if there are any non-ghost nodes in the level blueprint."))
 	ENValidatorSeverity ValidatorLevelBlueprint = ENValidatorSeverity::Disable;
-	
+
+	/** Specific assets excluded from all validators (see IsAssetIgnored). */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Assets", meta=(ToolTip="Specific assets excluded from all validators."))
 	TArray<FSoftObjectPath> ValidatorIgnoredAssets;
-	
+
+	/** Path prefixes whose assets are excluded from all validators (matched as a starts-with). */
 	UPROPERTY(EditAnywhere, config, Category = "Validators|Ignored", DisplayName = "Ignored Prefixes",
 		meta = (ToolTip = "This can be folder paths which will ignore by looking if a path starts with this."))
 	TArray<FString> ValidatorIgnoredPrefixes;
-	
+
+	/** When true, the Multiplayer Test toolbar section is installed (toggled live via PostEditChangeProperty). */
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", DisplayName = "Enabled", meta=(ToolTip="Should the Multiplayer Test be enabled?"))
 	bool bMultiplayerTestEnabled = true;
-	
+
+	/** When true, multiplayer-test authentication goes through the Online Subsystem. */
 	UPROPERTY(EditAnywhere, config, Category = "Multiplayer Test", meta = (DisplayName = "Use Online Subsystem", Tooltip = "Should authentication use the Online Subsystem?"))
 	bool bMultiplayerTestUseOnlineSubsystem = false;
 	

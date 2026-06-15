@@ -122,9 +122,11 @@ public:
 	
 protected:
 	
+	/** Replicated post-assembly data for this cell instance; applied on clients via OnRep_AssemblyData. */
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_AssemblyData)
 	FNCellAssemblyData AssemblyData;
-	
+
+	/** RepNotify for AssemblyData: refreshes this instance from the newly received data. */
 	UFUNCTION()
 	void OnRep_AssemblyData();
 

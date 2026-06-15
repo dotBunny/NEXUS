@@ -38,19 +38,23 @@ class NEXUSACTORPOOLS_API UNActorPoolsSettings : public UDeveloperSettings
 	N_SETTINGS_BASE(UNActorPoolsSettings, "Actor Pools", "Settings related to the Actor Pools.");
 
 public:
+	/** Pool settings applied to any FNActorPool created without an explicit FNActorPoolSettings. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Actor Pools", DisplayName ="Default Settings",
 		meta=(ToolTip="The default settings applied to a created NActorPool when no settings are provided."))
 	FNActorPoolSettings DefaultSettings;
-	
+
+	/** Actor pool sets to instantiate automatically whenever a world is created. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category="Initialization", DisplayName="Always Create",
 		meta=(ToolTip="Always create the outlined actor pool sets when a world is created."))
 	TArray<TSoftObjectPtr<UNActorPoolSet>> AlwaysCreateSets;
-	
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes", 
+
+	/** World name prefixes excluded from automatic pool creation (e.g. transient/utility worlds). */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Initialization", DisplayName = "Ignore World Prefixes",
 		meta=(ToolTip="Ignore attempting to auto create pools for worlds thats name starts with or is outlined."))
 	TArray<FString> IgnoreWorldPrefixes;
 
-	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behavior", DisplayName = "Returned Unknown Actor", 
+	/** Policy for an Actor returned to the subsystem that belongs to no known pool. */
+	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Behavior", DisplayName = "Returned Unknown Actor",
 		meta=(ToolTip="What should be done with an AActor returned to APS that is not known to it."))
 	ENActorPoolUnknownBehavior UnknownBehavior;
 };

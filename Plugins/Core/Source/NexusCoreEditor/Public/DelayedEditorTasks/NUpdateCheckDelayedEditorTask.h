@@ -38,8 +38,10 @@ public:
 
 private:
 
+	/** HTTP completion handler: parses the fetched header's version and notifies when a newer release exists. */
 	static void OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfully);
 
+	/** Delay-completion callback: issues the version-query HTTP request for the configured channel. */
 	UFUNCTION()
 	void Execute();
 

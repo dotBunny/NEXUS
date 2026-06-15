@@ -21,12 +21,15 @@ public:
 	
 #if WITH_EDITORONLY_DATA
 
+	/** Show alerts and HUD messages in the viewport while editing cells. */
 	UPROPERTY(EditAnywhere, config,  Category="Cell", DisplayName="Display Viewport Messages", meta=(Tooltip="Show alerts and messages in the viewport while editing Cells."))
 	bool bCellDisplayViewportMessages = true;
 
+	/** Draw debug markers for unfilled (unconnected) junctions in the world preview. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Junctions", DisplayName="Draw Unfilled Junctions")
 	bool bDebugWorldDrawUnfilledJunctions = true;
-	
+
+	/** Color used to draw unfilled junction markers when bDebugWorldDrawUnfilledJunctions is enabled. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly, Category = "Junctions", DisplayName="Unfilled Junctions Color")
 	FLinearColor EmptyJunctionColor = FLinearColor::Gray;
 	
