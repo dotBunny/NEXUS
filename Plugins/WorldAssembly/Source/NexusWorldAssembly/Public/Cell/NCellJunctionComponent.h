@@ -142,5 +142,20 @@ private:
 	 */
 	FNWeightedIntegerArray GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const;
 
+	/**
+	 * Spawn the resolved project-wide default filler class at this junction and run the shared post-spawn handling.
+	 * @param FillerClass The loaded default filler class to spawn.
+	 * @param CellLevelInstance The cell level instance that owns this junction.
+	 */
+	void SpawnDefaultFiller(UClass* FillerClass, ANCellLevelInstance* CellLevelInstance);
+
+	/**
+	 * Run the post-spawn handling shared by every filler path: notify the actor through INCellJunctionFiller, register
+	 * it with the subsystem under the cell's operation ticket, and cache it as this junction's active filler.
+	 * @param SpawnedActor The freshly spawned filler actor.
+	 * @param CellLevelInstance The cell level instance that owns this junction.
+	 */
+	void FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLevelInstance* CellLevelInstance);
+
 	N_WORLD_ICON_HEADER()
 };

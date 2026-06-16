@@ -121,8 +121,8 @@ public:
 
 	/** Fallback filler spawned when none of a junction's authored fillers are eligible; must implement INCellJunctionFiller. */
 	UPROPERTY(Config, EditAnywhere, DisplayName="Junction Default Filler", Category="Assembly|Spawning",
-		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller."))
-	TSubclassOf<AActor> AssemblySpawningDefaultJunctionFiller;
+		meta=(MustImplement="/Script/NexusWorldAssembly.NCellJunctionFiller", ToolTip="The actor spawned to fill a junction when none of that junction's authored fillers are eligible. Must implement NCellJunctionFiller. Setting this Actor does not guarantee its inclusion in a build, you must take steps to include it manually."))
+	TSoftClassPtr<AActor> AssemblySpawningDefaultJunctionFiller;
 
 	/** When true, junction filling registers with the subsystem to be time-sliced via Junction Time Slice rather than spawning immediately. */
 	UPROPERTY(Config, EditAnywhere, DisplayName="Delayed Junction Spawning", Category="Assembly|Spawning",
@@ -136,6 +136,6 @@ public:
 
 	/** Material applied to the dynamic proxy meshes used by ANCellProxy. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Debug", DisplayName="Proxy Material",
-		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy."))
+		meta=(ToolTip="The material to use with the DynamicMeshes as part of ANCellProxy. Setting this Material does not guarantee its inclusion in a build, you must take steps to include it manually."))
 	TSoftObjectPtr<UMaterialInterface> ProxyMaterial;
 };

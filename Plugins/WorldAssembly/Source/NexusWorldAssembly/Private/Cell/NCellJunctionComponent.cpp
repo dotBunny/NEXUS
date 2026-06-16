@@ -16,6 +16,7 @@
 #include "Cell/NCellLevelInstance.h"
 #include "Collections/NWeightedIntegerArray.h"
 #include "Developer/NPrimitiveFont.h"
+#include "Engine/AssetManager.h"
 #include "LevelInstance/LevelInstanceActor.h"
 #include "LevelInstance/LevelInstanceInterface.h"
 #include "Math/NMersenneTwister.h"
@@ -382,33 +383,34 @@ void UNCellJunctionComponent::Fill()
 	if (LocalLevelInstance == nullptr) return;
 	ANCellLevelInstance* CellLevelInstance = Cast<ANCellLevelInstance>(LocalLevelInstance);
 	if (CellLevelInstance == nullptr) return;
-	
-	// Create our spawning parameters
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = GetOwner();
-	SpawnParams.OverrideLevel = GetComponentLevel();
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.ObjectFlags |= RF_Transient;
-	
-	AActor* SpawnedActor = nullptr;
-	FNCellAssemblyData& AssemblyData = CellLevelInstance->GetAssemblyData();
-	const FQuat FillerRotation = GetComponentRotation().Quaternion();
-	
+
+	// AUTHORED FILLERS — pick an eligible, weighted entry and spawn it directly. These classes are hard-referenced by
+	// the junction, so they are always resident and can spawn synchronously.
 	if (Fillers.Num() > 0)
 	{
+		FNCellAssemblyData& AssemblyData = CellLevelInstance->GetAssemblyData();
+		const FQuat FillerRotation = GetComponentRotation().Quaternion();
+
+		// Create our spawning parameters
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = GetOwner();
+		SpawnParams.OverrideLevel = GetComponentLevel();
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.ObjectFlags |= RF_Transient;
+
 		// Create a deterministic random based on the overall seed, the node were in, and the junction itself.
 		FNMersenneTwister RandomGenerator(AssemblyData.Seed ^ AssemblyData.NodeIdentifier ^ LinkDetails.JunctionInstanceIdentifier);
-		
+
 		FNWeightedIntegerArray WeightedAvailableIndices = GetJunctionFillEntries(AssemblyData);
 
-		// TwistedValue returns INDEX_NONE when every filler was gated out by its constraints; leaving SpawnedActor
-		// null lets the default-filler fallback below take over rather than indexing Fillers with -1.
+		// TwistedValue returns INDEX_NONE when every filler was gated out by its constraints; falling through to the
+		// default-filler fallback below rather than indexing Fillers with -1.
 		const int32 FillerIndex = WeightedAvailableIndices.TwistedValue(RandomGenerator);
 		if (FillerIndex != INDEX_NONE)
 		{
 			// Location offset is authored in the junction's frame, so rotate it by the junction's orientation before
 			// nudging; the rotation offset then spins the filler in place at that spot.
-			SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
+			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Fillers[FillerIndex].Actor,
 				GetComponentLocation() + FillerRotation.RotateVector(Fillers[FillerIndex].Offset.GetLocation()),
 				(FillerRotation * FQuat(Fillers[FillerIndex].Offset.Rotator())).Rotator(),
 				SpawnParams);
@@ -416,33 +418,77 @@ void UNCellJunctionComponent::Fill()
 			if (SpawnedActor != nullptr)
 			{
 				SpawnedActor->SetActorScale3D(SpawnedActor->GetActorScale3D() * Fillers[FillerIndex].Offset.GetScale3D());
+				FinalizeFillerSpawn(SpawnedActor, CellLevelInstance);
+				return;
 			}
 		}
 	}
-	
-	if (SpawnedActor == nullptr)
+
+	// DEFAULT FILLER FALLBACK — no authored filler qualified, so fall back to the project-wide default. It is a soft
+	// reference (so an early config load can't null it out), which means it may not be resident yet.
+	const TSoftClassPtr<AActor>& DefaultFiller = UNWorldAssemblySettings::Get()->AssemblySpawningDefaultJunctionFiller;
+	if (DefaultFiller.IsNull())
 	{
-		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get();
-		if (!IsValid(Settings->AssemblySpawningDefaultJunctionFiller))
-		{
-			
-			UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to fill junction as no fillers were available, and no default filler was available."));
-			return;
-		}
-		SpawnedActor = GetWorld()->SpawnActor<AActor>(Settings->AssemblySpawningDefaultJunctionFiller, GetComponentLocation(), FillerRotation.Rotator(), SpawnParams);
+		UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Unable to fill junction as no fillers were available, and no default filler was set."));
+		return;
 	}
 
-	
+	// Already resident: spawn immediately to keep the synchronous fast path.
+	if (UClass* LoadedFiller = DefaultFiller.Get())
+	{
+		SpawnDefaultFiller(LoadedFiller, CellLevelInstance);
+		return;
+	}
+
+	// Not resident: stream it in, then spawn once it lands. Weak captures bail if the junction or its cell were
+	// destroyed (e.g. the cell streamed back out) while the load was in flight.
+	TWeakObjectPtr<UNCellJunctionComponent> WeakThis(this);
+	TWeakObjectPtr<ANCellLevelInstance> WeakCell(CellLevelInstance);
+	UAssetManager::GetStreamableManager().RequestAsyncLoad(DefaultFiller.ToSoftObjectPath(),
+		FStreamableDelegate::CreateLambda([WeakThis, WeakCell, DefaultFiller]()
+		{
+			UNCellJunctionComponent* StrongThis = WeakThis.Get();
+			ANCellLevelInstance* StrongCell = WeakCell.Get();
+			if (StrongThis == nullptr || StrongCell == nullptr) return;
+
+			UClass* LoadedFiller = DefaultFiller.Get();
+			if (LoadedFiller == nullptr)
+			{
+				UE_LOG(LogNexusWorldAssembly, Warning, TEXT("Default junction filler '%s' failed to load; junction left unfilled."),
+					*DefaultFiller.ToString());
+				return;
+			}
+			StrongThis->SpawnDefaultFiller(LoadedFiller, StrongCell);
+		}));
+}
+
+void UNCellJunctionComponent::SpawnDefaultFiller(UClass* FillerClass, ANCellLevelInstance* CellLevelInstance)
+{
+	UWorld* World = GetWorld();
+	if (World == nullptr) return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+	SpawnParams.OverrideLevel = GetComponentLevel();
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.ObjectFlags |= RF_Transient;
+
+	AActor* SpawnedActor = World->SpawnActor<AActor>(FillerClass, GetComponentLocation(), GetComponentRotation(), SpawnParams);
 	if (SpawnedActor != nullptr)
 	{
-		if (SpawnedActor->Implements<UNCellJunctionFiller>())
-		{
-			INCellJunctionFiller::Execute_OnInitializedFromJunction(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
-		}
-		UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(GetWorld());
-		System->RegisterOperationActor(SpawnedActor, AssemblyData.OperationTicket);
-		FillerActor = SpawnedActor;
+		FinalizeFillerSpawn(SpawnedActor, CellLevelInstance);
 	}
+}
+
+void UNCellJunctionComponent::FinalizeFillerSpawn(AActor* SpawnedActor, ANCellLevelInstance* CellLevelInstance)
+{
+	if (SpawnedActor->Implements<UNCellJunctionFiller>())
+	{
+		INCellJunctionFiller::Execute_OnInitializedFromJunction(SpawnedActor, CellLevelInstance, this, LinkDetails.JunctionInstanceIdentifier);
+	}
+	UNWorldAssemblySubsystem* System = UNWorldAssemblySubsystem::Get(GetWorld());
+	System->RegisterOperationActor(SpawnedActor, CellLevelInstance->GetAssemblyData().OperationTicket);
+	FillerActor = SpawnedActor;
 }
 
 FNWeightedIntegerArray UNCellJunctionComponent::GetJunctionFillEntries(const FNCellAssemblyData& AssemblyData) const
