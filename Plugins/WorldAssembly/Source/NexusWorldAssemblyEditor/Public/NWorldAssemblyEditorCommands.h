@@ -38,6 +38,17 @@ public:
 	virtual void RegisterCommands() override;
 	//End TCommands
 
+	/**
+	 * Appends the Organ command bindings to the supplied (global) command list so their input chords fire
+	 * regardless of which menu has focus.
+	 * @param GlobalActions The level editor's global action list to append to.
+	 * @remark Pair every call with UnregisterGlobalActions on the same list — the bindings reference module statics.
+	 */
+	void RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
+
+	/** Removes the Organ command bindings previously added by RegisterGlobalActions from GlobalActions. */
+	void UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const;
+
 	/** Toggle the World Assembly editor mode on the active level editor. */
 	static void WorldAssemblyEdMode();
 	/** @return true if the World Assembly-edit-mode entry should be shown in the current context. */

@@ -292,6 +292,25 @@ FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),
 	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies));
 }
 
+void FNWorldAssemblyEditorCommands::RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
+{
+	GlobalActions->Append(CommandList_Organ.ToSharedRef());
+}
+
+void FNWorldAssemblyEditorCommands::UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
+{
+	// Mirror of the CommandList_Organ mappings above — Append copies these into GlobalActions, so we have to
+	// unmap each one by hand to detach the module statics they bind to.
+	GlobalActions->UnmapAction(CommandInfo_OrganGenerateProxies);
+	GlobalActions->UnmapAction(CommandInfo_OrganGenerateAllProxies);
+	GlobalActions->UnmapAction(CommandInfo_OrganClearProxies);
+	GlobalActions->UnmapAction(CommandInfo_OrganClearAllProxies);
+	GlobalActions->UnmapAction(CommandInfo_OrganCreateLevelInstances);
+	GlobalActions->UnmapAction(CommandInfo_OrganCreateAllLevelInstances);
+	GlobalActions->UnmapAction(CommandInfo_OrganUnloadLevelInstances);
+	GlobalActions->UnmapAction(CommandInfo_OrganUnloadAllLevelInstances);
+}
+
 void FNWorldAssemblyEditorCommands::WorldAssemblyEdMode()
 {
 	GLevelEditorModeTools().ActivateMode(FNWorldAssemblyEdMode::Identifier);

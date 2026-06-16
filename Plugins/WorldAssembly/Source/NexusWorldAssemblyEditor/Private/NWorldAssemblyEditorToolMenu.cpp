@@ -32,9 +32,10 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		const FToolMenuSection* ExistingSection = Menu->FindSection(MenuSection);
 		if (ExistingSection != nullptr) return;
 		
-		// Register command lists with the level editor so input chords work globally
+		// Register command lists with the level editor so input chords work globally.
+		// RemoveMenuEntries detaches these again on shutdown via UnregisterGlobalActions.
 		FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
-		LevelEditorModule.GetGlobalLevelEditorActions()->Append(FNWorldAssemblyEditorCommands::Get().CommandList_Organ.ToSharedRef());
+		FNWorldAssemblyEditorCommands::Get().RegisterGlobalActions(LevelEditorModule.GetGlobalLevelEditorActions());
 		
 		// Always there buttons
 		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal);
@@ -377,24 +378,22 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 
 void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 {
-	UToolMenus* Menu = UToolMenus::TryGet();
-	if (Menu)
+	// Drop the whole sections rather than individual entries. This removes every entry we register (buttons,
+	// dropdowns and the dynamic separators) without having to maintain a name list that can drift out of sync,
+	// and it clears the sections themselves so AddMenuEntries' FindSection guard re-registers cleanly on reload.
+	if (UToolMenus* Menu = UToolMenus::TryGet())
 	{
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSectionGlobal, "NWorldAssemblyEdMode_Button");
-		
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NOrganExtensions_Button");
+		Menu->RemoveSection(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSectionGlobal);
+		Menu->RemoveSection(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection);
+	}
 
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_AddButton");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_SelectButton");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditBoundsMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditHullMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_EditVoxelMode");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellJunctionExtensions_Button");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NCellActor_DrawVoxelData");
-		
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_ToggleCollisionVisualizer");
-		Menu->RemoveEntry(NEXUS::CoreEditor::ToolMenus::LevelEditorToolBarUser, MenuSection, "NWorldAssembly_IgnoreSelectedActorsToggle");
+	// Detach the Organ command bindings appended to the level editor's global action list in AddMenuEntries.
+	// Their delegates point at this module's statics, so leaving them mapped crashes when a global chord
+	// (e.g. Ctrl+Shift+Home) is pressed after the module unloads.
+	if (FModuleManager::Get().IsModuleLoaded("LevelEditor"))
+	{
+		FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
+		FNWorldAssemblyEditorCommands::Get().UnregisterGlobalActions(LevelEditorModule.GetGlobalLevelEditorActions());
 	}
 
 	// Tools/Commandlets Menu
