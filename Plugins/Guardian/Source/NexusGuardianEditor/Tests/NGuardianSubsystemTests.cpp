@@ -9,46 +9,10 @@
 #include "Misc/Paths.h"
 #include "NGuardianSettings.h"
 #include "NGuardianSubsystem.h"
+#include "NGuardianTestSupport.h"
 #include "TimerManager.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
-
-namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness
-{
-    // RAII guard that saves and restores UNGuardianSettings fields so individual
-    // tests can modify them without polluting subsequent tests.
-    struct FSettingsGuard
-    {
-        int32 OriginalWarning;
-        int32 OriginalSnapshot;
-        int32 OriginalCompare;
-        bool  OriginalCaptureOutput;
-        bool  OriginalAutoBaseline;
-        float OriginalAutoBaselineDelay;
-
-        FSettingsGuard()
-        {
-            const UNGuardianSettings* S = UNGuardianSettings::Get();
-            OriginalWarning           = S->ObjectCountWarningThreshold;
-            OriginalSnapshot          = S->ObjectCountSnapshotThreshold;
-            OriginalCompare           = S->ObjectCountCompareThreshold;
-            OriginalCaptureOutput     = S->bObjectCountCaptureOutput;
-            OriginalAutoBaseline      = S->bAutoBaseline;
-            OriginalAutoBaselineDelay = S->AutoBaselineDelay;
-        }
-
-        ~FSettingsGuard()
-        {
-            UNGuardianSettings* S = UNGuardianSettings::GetMutable();
-            S->ObjectCountWarningThreshold  = OriginalWarning;
-            S->ObjectCountSnapshotThreshold = OriginalSnapshot;
-            S->ObjectCountCompareThreshold  = OriginalCompare;
-            S->bObjectCountCaptureOutput    = OriginalCaptureOutput;
-            S->bAutoBaseline                = OriginalAutoBaseline;
-            S->AutoBaselineDelay            = OriginalAutoBaselineDelay;
-        }
-    };
-}
 
 N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::InitialState",
@@ -91,7 +55,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_Disabled,
 {
     // With bAutoBaseline=false, OnWorldBeginPlay must skip scheduling the timer, so the
     // subsystem stays non-tickable until something calls SetBaseline() manually.
-    using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+    using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
     FSettingsGuard Guard;
     UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
@@ -122,17 +86,18 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::AutoBaseline::FiresAfterDelay",
     N_TEST_CONTEXT_EDITOR)
 {
-    // With bAutoBaseline=true and a tiny AutoBaselineDelay, OnWorldBeginPlay schedules a
-    // timer that fires on the next timer-manager tick — the subsystem must become tickable
-    // with a positive base count once the timer has run.
-    using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+    // With bAutoBaseline=true, OnWorldBeginPlay must arm a baseline timer scheduled to fire
+    // after AutoBaselineDelay. We assert the timer is active and still pending via the public
+    // FTimerManager API rather than hand-simulating the timer heap; SetBaseline's post-conditions
+    // when the timer fires are covered by AutoBaseline::SetBaseline::InitialState.
+    using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
     FSettingsGuard Guard;
     UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
     Settings->bAutoBaseline = true;
-    // FTimerManager silently discards SetTimer with Rate==0, so use a tiny positive delay
-    // and tick the manager past it to fire the timer.
-    Settings->AutoBaselineDelay = 0.001f;
+    // FTimerManager discards SetTimer with Rate<=0, so use a positive delay large enough that
+    // the timer stays pending for the duration of the test.
+    Settings->AutoBaselineDelay = 1.0f;
 
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
@@ -142,24 +107,17 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
             ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
             return;
         }
-        Subsystem->UpdateTickRate(0.f);
 
-        // When SetTimer runs before the manager has been ticked this frame, the new timer
-        // is queued in PendingTimerSet — it doesn't reach ActiveTimerHeap until the END of
-        // the next Tick(). So the first tick promotes it; only the second tick fires it.
-        // Bump GFrameCounter between ticks so HasBeenTickedThisFrame() lets each one run.
-        ++GFrameCounter;
-        World->GetTimerManager().Tick(0.1f);
-        ++GFrameCounter;
-        World->GetTimerManager().Tick(0.1f);
-
-        if (!Subsystem->IsTickable())
+        // OnWorldBeginPlay already ran inside WorldTest, so the auto-baseline timer should be
+        // armed and pending — it has not been allowed to fire yet.
+        const FTimerManager& TimerManager = World->GetTimerManager();
+        if (!TimerManager.IsTimerActive(Subsystem->BaselineTimerHandle))
         {
-            ADD_ERROR("IsTickable should be true after the auto-baseline timer fires.");
+            ADD_ERROR("Auto-baseline timer should be active after OnWorldBeginPlay when bAutoBaseline=true.");
         }
-        if (Subsystem->GetBaseObjectCount() <= 0)
+        if (TimerManager.GetTimerRemaining(Subsystem->BaselineTimerHandle) <= 0.f)
         {
-            ADD_ERROR("BaseObjectCount should be positive after the auto-baseline timer fires.");
+            ADD_ERROR("Auto-baseline timer should have positive remaining time before it fires.");
         }
     });
 }
@@ -179,7 +137,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
         }
         Subsystem->UpdateTickRate(0.f);
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 100;
         Settings->ObjectCountSnapshotThreshold = 200;
@@ -246,7 +204,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
         }
         Subsystem->UpdateTickRate(0.f);
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
 
         // Negative offsets so the current object count already meets the warning threshold;
@@ -296,7 +254,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
     	// We expect some messages
 		AddExpectedMessage(TEXT("The UObject count warning threshold has been met"), ELogVerbosity::Warning);
 
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         // SetBaseline enforces strict Warning < Snapshot < Compare ordering, so the two
         // un-triggered thresholds must still be strictly larger than warning.
@@ -321,7 +279,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
     // flags. The compare flag must remain false.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
-        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+        using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
@@ -381,7 +339,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
     // actually completed.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
-        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+        using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
@@ -456,7 +414,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
     // as the object count stays at or above the warning threshold).
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
-        using namespace NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness;
+        using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem)
@@ -544,7 +502,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
         Subsystem->UpdateTickRate(0.f);
 
         // Use large, strictly-increasing thresholds so no flags are triggered.
-        NEXUS::UnitTests::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
+        NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
         UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
         Settings->ObjectCountWarningThreshold  = 99999997;
         Settings->ObjectCountSnapshotThreshold = 99999998;

@@ -46,7 +46,8 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a random point on a spline.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param Params The parameters for the point generation. 
+	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
+	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
@@ -107,7 +108,7 @@ class NEXUSPICKER_API UNSplinePickerLibrary : public UBlueprintFunctionLibrary
 
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
-	 * Uses the N_PICKER_TOLERANCE defined in NPickerUtils.h for proximity checking.
+	 * Uses NEXUS::Picker::SplinePointTolerance defined in NPickerMinimal.h for proximity checking.
 	 * @param SplineComponent The spline component to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is on the spline within the tolerance, false otherwise.

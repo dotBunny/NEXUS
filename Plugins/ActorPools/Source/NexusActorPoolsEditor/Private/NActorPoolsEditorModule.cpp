@@ -31,6 +31,9 @@ void FNActorPoolsEditorModule::ShutdownModule()
 	{
 		GUnrealEd->UnregisterComponentVisualizer(UNActorPoolSpawnerComponent::StaticClass()->GetFName());
 	}
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NActorPools)();
 	FNActorPoolsEditorCommands::RemoveMenuEntries();

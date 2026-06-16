@@ -44,7 +44,8 @@ class NEXUSPICKER_API UNArcPickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a deterministic point inside or on the boundary of an arc.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param Params The parameters for the point generation. 
+	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
+	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */

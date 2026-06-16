@@ -155,8 +155,12 @@ public:
 
 	/** @return true if the active viewport is suitable for thumbnail capture. */
 	static bool CellCaptureThumbnail_CanExecute();
+	static void StartQuickAssembly();
+	static bool StartQuickAssembly_CanExecute();
+	static bool StartQuickAssembly_CanShow();
 
 private:	
+	
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;

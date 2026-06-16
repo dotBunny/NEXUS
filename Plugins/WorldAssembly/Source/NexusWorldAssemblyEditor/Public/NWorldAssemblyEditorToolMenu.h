@@ -2,6 +2,7 @@
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
+#include "Organ/NOrganComponent.h"
 
 /**
  * Registers every World Assembly entry on the editor's tool menus — cell/organ/junction dropdowns,
@@ -73,4 +74,12 @@ public:
 	static void Hull_SplitEdge();
 	/** @return true if the hull split-edge action should be shown (an editable hull edge is selected). */
 	static bool Hull_SplitEdge_CanShow();
+	
+	static bool HasValidQuickAssemblyOrgan();
+	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
+	static void SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent);
+	static UNOrganComponent* GetQuickAssemblyOrganComponent();
+
+private:
+	static TWeakObjectPtr<UNOrganComponent> QuickAssemblyOrganComponent;
 };

@@ -21,6 +21,7 @@ public:
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNArcPickerParams& Params);
 
@@ -55,14 +56,14 @@ public:
 	static void Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNArcPickerParams& Params);
 	
 	/**
-	 * Checks if a point is inside or on the surface of the axis-aligned FBox.
-	 * @param Origin The center point of the FBox.
+	 * Checks if a point is inside or on the arc.
+	 * @param Origin The center point of the arc.
 	 * @param Rotation The base rotation of the arc.
 	 * @param Degrees The angle of the arc in degrees.
 	 * @param MinimumDistance The minimum distance of the arc.
 	 * @param MaximumDistance The maximum distance of the arc.
 	 * @param Point The point to check.
-	 * @return True if the point is inside or on the surface of the FBox, false otherwise.
+	 * @return True if the point is inside or on the arc, false otherwise.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance, const FVector& Point)
 	{

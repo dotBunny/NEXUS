@@ -35,9 +35,11 @@ struct NEXUSPICKER_API FNRectanglePickerParams : public FNPickerParams
 	/**
 	 * Gets the ranges which can be selected from.
 	 * @note This will appropriately cut out portions of available space when the MinimumDimensions are not fully enclosed by the MaximumDimensions.
+	 * @note Allocates and derives the decomposition on every call; callers that invoke a picker repeatedly with
+	 * stable params pay this cost each time. Cheap relative to per-point work, but do not call it inside a hot loop.
 	 * @return An array of packed Min/Max coords representing the possible area to select from based on parameters.
 	 */
-	TArray<FVector4> GetValidRanges() const
+	[[nodiscard]] TArray<FVector4> GetValidRanges() const
 	{
 		// Going to use an FVector4 to pack in our Min, Max
 		// X/Y = Min

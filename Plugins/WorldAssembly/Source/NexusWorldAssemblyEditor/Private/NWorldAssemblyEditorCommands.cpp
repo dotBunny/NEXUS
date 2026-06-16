@@ -18,6 +18,7 @@
 #include "NWorldAssemblyRegistry.h"
 #include "NWorldAssemblyUtils.h"
 #include "NUIEditorStyle.h"
+#include "NWorldAssemblyEditorToolMenu.h"
 #include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Assembly/NAssemblyOperation.h"
@@ -834,4 +835,30 @@ bool FNWorldAssemblyEditorCommands::CellCaptureThumbnail_CanExecute()
 {
 	const UWorld* World = FNEditorUtils::GetCurrentWorld();
 	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
+}
+
+void FNWorldAssemblyEditorCommands::StartQuickAssembly()
+{
+	UNOrganComponent* Component = FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent();
+	if (Component == nullptr) return;
+	
+	UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	Subsystem->ClearGenerated(Component->GetAndResetLastOperationTicket());
+	
+	FNAssemblyOperationSettings EditorSettings = FNAssemblyOperationSettings::GetDefaultEditorSettings();
+	EditorSettings.bCreateLevelInstances = true;
+	UNWorldAssemblyEditorSubsystem::Get()->StartOperation(UNAssemblyOperation::CreateInstance(Component, EditorSettings));
+}
+
+bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute()
+{
+	return	FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan() && 
+			FNEditorUtils::IsNotPlayInEditor() && 
+			!FNWorldAssemblyRegistry::HasOperations();
+}
+
+bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanShow()
+{
+	FNWorldAssemblyEditorToolMenu::ShowOrganDropdown
+	bShowOrganToolbarDropdownForGeneration
 }

@@ -22,6 +22,7 @@ public:
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNCirclePickerParams& Params);
 
@@ -77,7 +78,7 @@ public:
 	/**
 	 * Checks if multiple points are inside or on the perimeter of a circle.
 	 * @param Points The array of points to check.
-	 * @param Origin The center point of the FBox.
+	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation The rotation of the circle plane.

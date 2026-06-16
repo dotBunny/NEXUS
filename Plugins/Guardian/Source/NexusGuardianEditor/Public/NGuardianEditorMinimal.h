@@ -3,5 +3,5 @@
 
 #pragma once
 
-/** Log category used by all NexusGuardianEditor module. */
+/** Log category used by all NexusGuardianEditor logging. */
 DECLARE_LOG_CATEGORY_EXTERN(LogNexusGuardianEditor, Log, All);

@@ -3,6 +3,13 @@
 
 #pragma once
 
+// N_EDITOR_STYLE_HEADER emits inline bodies referencing these types, so the macro header
+// carries its own dependencies; including style classes only need to include this header.
+#include "Interfaces/IPluginManager.h"
+#include "Templates/SharedPointer.h"
+#include "Styling/SlateStyle.h"
+#include "Styling/SlateStyleRegistry.h"
+
 /**
  * Implements the standard boilerplate (Initialize/Shutdown/Get/GetStyleSetName/GetStyleInstance)
  * for a NEXUS Slate style class.

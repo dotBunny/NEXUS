@@ -44,7 +44,8 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Generates a deterministic point inside or on the perimeter of a circle.
 	 * Uses the non-deterministic random generator for true randomness.
-	 * @param Params The parameters for the point generation. 
+	 * @note Not thread-safe. Only call from the Game Thread; all pickers draw from one shared non-deterministic stream.
+	 * @param Params The parameters for the point generation.
 	 * @param WorldContextObject Object that provides access to the world.
 	 * @returns An array of generated points.	 
 	 */
@@ -121,7 +122,7 @@ class NEXUSPICKER_API UNCirclePickerLibrary : public UBlueprintFunctionLibrary
 	/**
 	 * Checks if multiple points are inside or on the perimeter of a circle.
 	 * @param Points The array of points to check.
-	 * @param Origin The center point of the FBox.
+	 * @param Origin The center point of the circle.
 	 * @param MinimumRadius The minimum radius of the circle (inner bound).
 	 * @param MaximumRadius The maximum radius of the circle (outer bound).
 	 * @param Rotation The rotation of the circle plane.

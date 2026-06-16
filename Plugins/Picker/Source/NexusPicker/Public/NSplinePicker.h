@@ -24,6 +24,7 @@ public:
 	 * Uses the non-deterministic random generator for true randomness.
 	 * @param OutLocations An array to store the generated points.
 	 * @param Params The parameters for the point generation.
+	 * @note Not thread-safe; all pickers share a single non-deterministic FRandomStream (FNRandom::GetNonDeterministic()). Only call from the Game-thread.
 	 */
 	static void Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params);
 
@@ -59,7 +60,7 @@ public:
 	
 	/**
 	 * Checks if a point is on a spline within a specified tolerance.
-	 * Uses the N_PICKER_TOLERANCE defined in NPickerUtils.h for proximity checking.
+	 * Uses NEXUS::Picker::SplinePointTolerance defined in NPickerMinimal.h for proximity checking.
 	 * @param SplineComponent The spline component to check against.
 	 * @param Point The point to check.
 	 * @return True if the point is on the spline within the tolerance, false otherwise.

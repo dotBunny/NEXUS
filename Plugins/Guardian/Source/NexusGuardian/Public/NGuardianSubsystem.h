@@ -16,8 +16,14 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Guardian Subsystem")
 class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
-	
-public:	
+
+#if WITH_TESTS
+	// Grants the auto-baseline scheduling test direct access to BaselineTimerHandle so it can
+	// assert the timer is armed via the public FTimerManager API instead of simulating the heap.
+	friend class UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay;
+#endif // WITH_TESTS
+
+public:
 	N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(
 		UNGuardianSubsystem, 
 		(UNGuardianSettings::Get() != nullptr) ? 

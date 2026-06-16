@@ -5,11 +5,6 @@
 
 #include "Macros/NEditorStyleMacros.h"
 
-#include "Templates/SharedPointer.h"
-#include "Interfaces/IPluginManager.h"
-#include "Styling/SlateStyle.h"
-#include "Styling/SlateStyleRegistry.h"
-
 /**
  * Slate style set for the NexusActorPoolsEditor module.
  */

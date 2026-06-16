@@ -5,5 +5,5 @@
 
 #include "CoreMinimal.h"
 
-/** Log category used by all NexusActorPoolsEditor module. */
+/** Log category used by all NexusActorPoolsEditor logging. */
 NEXUSACTORPOOLSEDITOR_API DECLARE_LOG_CATEGORY_EXTERN(LogNexusActorPoolsEditor, Log, All);

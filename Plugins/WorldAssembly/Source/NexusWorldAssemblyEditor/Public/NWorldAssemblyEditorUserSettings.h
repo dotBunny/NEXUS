@@ -25,6 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Cell", DisplayName="Display Viewport Messages", meta=(Tooltip="Show alerts and messages in the viewport while editing Cells."))
 	bool bCellDisplayViewportMessages = true;
 
+	UPROPERTY(EditAnywhere, config,  Category="Operations", DisplayName="Show Quick Generation Dropdown", meta=(Tooltip="Shows a drop down to select the organ to run a World Assembly on."))
+	bool bShowOrganToolbarDropdownForGeneration = false;
+	
 	/** Draw debug markers for unfilled (unconnected) junctions in the world preview. */
 	UPROPERTY(Config, EditAnywhere, BlueprintReadOnly,  Category = "Junctions", DisplayName="Draw Unfilled Junctions")
 	bool bDebugWorldDrawUnfilledJunctions = true;

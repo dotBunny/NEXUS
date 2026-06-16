@@ -6,6 +6,7 @@
 #include "Misc/Timespan.h"
 #include "NGuardianSettings.h"
 #include "NGuardianSubsystem.h"
+#include "NGuardianTestSupport.h"
 #include "Developer/NTestUtils.h"
 #include "Macros/NTestMacros.h"
 
@@ -14,40 +15,6 @@ namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness
     constexpr int32 IterationCount = 1000;
     constexpr float SetBaselineMaxDuration = 5.0f;   // SetBaseline reads GUObjectArray and writes a formatted log line per call
     constexpr float TickBelowMaxDuration   = 0.1f;   // Tick with no thresholds crossed is a cheap read
-
-    // RAII guard that saves and restores UNGuardianSettings fields so individual
-    // tests can modify them without polluting subsequent tests.
-    struct FSettingsGuard
-    {
-        int32 OriginalWarning;
-        int32 OriginalSnapshot;
-        int32 OriginalCompare;
-        bool  OriginalCaptureOutput;
-        bool  OriginalAutoBaseline;
-        float OriginalAutoBaselineDelay;
-
-        FSettingsGuard()
-        {
-            const UNGuardianSettings* S = UNGuardianSettings::Get();
-            OriginalWarning           = S->ObjectCountWarningThreshold;
-            OriginalSnapshot          = S->ObjectCountSnapshotThreshold;
-            OriginalCompare           = S->ObjectCountCompareThreshold;
-            OriginalCaptureOutput     = S->bObjectCountCaptureOutput;
-            OriginalAutoBaseline      = S->bAutoBaseline;
-            OriginalAutoBaselineDelay = S->AutoBaselineDelay;
-        }
-
-        ~FSettingsGuard()
-        {
-            UNGuardianSettings* S = UNGuardianSettings::GetMutable();
-            S->ObjectCountWarningThreshold  = OriginalWarning;
-            S->ObjectCountSnapshotThreshold = OriginalSnapshot;
-            S->ObjectCountCompareThreshold  = OriginalCompare;
-            S->bObjectCountCaptureOutput    = OriginalCaptureOutput;
-            S->bAutoBaseline                = OriginalAutoBaseline;
-            S->AutoBaselineDelay            = OriginalAutoBaselineDelay;
-        }
-    };
 }
 
 class FNGuardianSubsystemPerfTests
@@ -59,6 +26,7 @@ public:
     static void SetBaseline(UWorld* World)
     {
         using namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness;
+        using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;
@@ -93,6 +61,7 @@ public:
     static void Tick_BelowThresholds(UWorld* World)
     {
         using namespace NEXUS::PerfTests::NGuardian::UNGuardianSubsystemHarness;
+        using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
         UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
         if (!Subsystem) return;

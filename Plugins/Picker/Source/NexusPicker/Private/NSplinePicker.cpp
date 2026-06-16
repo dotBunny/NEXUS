@@ -1,9 +1,9 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #include "NSplinePicker.h"
-#include "NavigationSystem.h"
 #include "NPickerMinimal.h"
+#include "NPickerProjection.h"
 #include "NPickerUtils.h"
 #include "NRandom.h"
 #include "Math/NMersenneTwister.h"
@@ -20,15 +20,18 @@
 		} \
 		UE_LOG(LogNexusPicker, Error, TEXT("Unable to pick points on spline as either no spline component was provided, or it was invalid. Defaulting to origin points.")) \
 		return; \
+	} \
+	const float SplineLength = Params.SplineComponent->GetSplineLength();
+#define N_PICKER_SPLINE_POINT(FloatRange) \
+	[&]() -> FVector \
+	{ \
+		return Params.SplineComponent->GetLocationAtDistanceAlongSpline( \
+			Random.FloatRange(0.f, SplineLength), ESplineCoordinateSpace::World); \
 	}
-#define N_PICKER_SPLINE_LOCATION(FloatRange) \
-	Params.SplineComponent->GetLocationAtDistanceAlongSpline( \
-		Random.FloatRange(0.f, Params.SplineComponent->GetSplineLength()), ESplineCoordinateSpace::World)
 #if ENABLE_VISUAL_LOG
 #define N_VLOG_SPLINE \
 	if(CachedWorld != nullptr && FVisualLogger::IsRecording()) { \
 		TArray<FVector> SplinePoints; \
-		const float SplineLength = Params.SplineComponent->GetSplineLength(); \
 		const int32 NumSegments = FMath::Max(20, FMath::RoundToInt(SplineLength / 20.0f)); \
 		const float DistancePerSegment = SplineLength / NumSegments; \
 		SplinePoints.Reserve(NumSegments + 1); \
@@ -51,115 +54,26 @@
 #define N_VLOG_SPLINE
 #endif // ENABLE_VISUAL_LOG
 
-// #SONARQUBE-DISABLE-CPP_S107 Lot of boilerplate code here
-// Excluded from code duplication
-
-#define RANDOM_FLOAT_RANGE FRandRange
 void FNSplinePicker::Random(TArray<FVector>& OutLocations, const FNSplinePickerParams& Params)
 {
 	N_PICKER_RANDOM_NONDETERMINISTIC
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_TRACE_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_TRACE
-			OutLocations.Add(Location);
-		}
-	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_NAVMESH_V1
-			OutLocations.Add(Location);
-		}
-	}
-	else
-	{
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
-		}
-	}
+	FNPickerProjection::Emit(OutLocations, CachedWorld, Params, N_PICKER_SPLINE_POINT(FRandRange));
 	N_VLOG_SPLINE
 }
-#undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FRandRange
 void FNSplinePicker::Tracked(TArray<FVector>& OutLocations, int32& Seed, const FNSplinePickerParams& Params)
 {
 	const FRandomStream Random(Seed);
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_TRACE_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_TRACE
-			OutLocations.Add(Location);
-		}
-	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_NAVMESH_V1
-			OutLocations.Add(Location);
-		}
-	}
-	else
-	{
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
-		}
-	}
+	FNPickerProjection::Emit(OutLocations, CachedWorld, Params, N_PICKER_SPLINE_POINT(FRandRange));
 	N_VLOG_SPLINE
 	Seed = Random.GetCurrentSeed();
 }
-#undef RANDOM_FLOAT_RANGE
 
-#define RANDOM_FLOAT_RANGE FloatRange
 void FNSplinePicker::Next(TArray<FVector>& OutLocations, FNMersenneTwister& Random, const FNSplinePickerParams& Params)
 {
 	N_PICKER_SPLINE_PREFIX
-	if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_TRACE_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_TRACE
-			OutLocations.Add(Location);
-		}
-	}
-	else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
-	{
-		N_PICKER_PROJECTION_NAVMESH_V1_PREFIX
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			FVector Location = N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE);
-			N_PICKER_PROJECTION_NAVMESH_V1
-			OutLocations.Add(Location);
-		}
-	}
-	else
-	{
-		for (int32 i = 0; i < Params.Count; i++)
-		{
-			OutLocations.Add(N_PICKER_SPLINE_LOCATION(RANDOM_FLOAT_RANGE));
-		}
-	}
+	FNPickerProjection::Emit(OutLocations, CachedWorld, Params, N_PICKER_SPLINE_POINT(FloatRange));
 	N_VLOG_SPLINE
 }
-#undef RANDOM_FLOAT_RANGE
-
-// #SONARQUBE-ENABLE

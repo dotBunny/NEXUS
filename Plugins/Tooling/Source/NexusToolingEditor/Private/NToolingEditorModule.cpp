@@ -12,6 +12,7 @@
 #include "NToolingEditorStyle.h"
 #include "NToolingEditorUserSettings.h"
 #include "NToolingEditorUtils.h"
+#include "Brushes/SlateImageBrush.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
 
@@ -31,6 +32,9 @@ void FNToolingEditorModule::StartupModule()
 void FNToolingEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT()
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	if (WindowIconDelegateHandle.IsValid() && GEngine != nullptr)
 	{

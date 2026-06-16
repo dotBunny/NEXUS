@@ -34,8 +34,10 @@ struct NEXUSPICKER_API FNBoxPickerParams : public FNPickerParams
 	/**
 	 * Gets an array of FBox that can be selected from based on the min/max.
 	 * @return An array of valid FBox.
+	 * @note Allocates and derives the decomposition on every call; callers that invoke a picker repeatedly with
+	 * stable params pay this cost each time. Cheap relative to per-point work, but do not call it inside a hot loop.
 	 */
-	TArray<FBox> GetValidBoxes() const
+	[[nodiscard]] TArray<FBox> GetValidBoxes() const
 	{
 		TArray<FBox> Boxes;
 		if (MinimumBox.IsValid == 0)//|| )

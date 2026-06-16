@@ -45,6 +45,9 @@ void FNWorldAssemblyEditorModule::StartupModule()
 void FNWorldAssemblyEditorModule::ShutdownModule()
 {
 	N_MODULE_REMOVE_POST_ENGINE_INIT()
+	// No-op in practice: the startup callback(s) are bound via CreateStatic (no `this` owner
+	// for RemoveAll to match) and RegisterStartupCallback usually runs them immediately. Kept
+	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	FEditorModeRegistry::Get().UnregisterMode(FNWorldAssemblyEdMode::Identifier);
 

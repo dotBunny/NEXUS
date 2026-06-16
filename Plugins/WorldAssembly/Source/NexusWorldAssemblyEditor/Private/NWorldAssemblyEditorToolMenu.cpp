@@ -22,6 +22,7 @@
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
+TWeakObjectPtr<UNOrganComponent> FNWorldAssemblyEditorToolMenu::QuickAssemblyOrganComponent = nullptr;
 
 void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 {
@@ -64,12 +65,36 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			return EVisibility::Collapsed;
 		});
 		
+		// Quick Assembly
+		FToolMenuEntry QuickAssemblyComboBox = FToolMenuEntry::InitWidget(
+			"NWorldAssembly_QuickAssembly",
+			CreateQuickAssemblyComboBox(), // This function returns our Slate combo box
+			FText::FromString("Quick Assembly"),
+			true // Should it be vertically aligned neatly in the toolbar?
+		);
+		
+		// TODO: Add can show?
+		
+		NexusSection.AddEntry(QuickAssemblyComboBox);
+		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
+		const FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
+					"NWorldAssemblyEdMode_QuickAssemblyButton",
+					FUIAction(
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly),
+						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute),
+						FIsActionChecked(),
+						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly_CanShow)),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton", "Start World Assembly Operation"),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton_Tooltip", "Starts a World Assembly Operation for the selected Organ, creating the NCellLevelInstances and loading their content."),
+						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
+		NexusSection.AddEntry(QuickAssemblyButton);
+		
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
 			"NOrganExtensions_Button",
 			FUIAction(
 				FExecuteAction(),
-				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor), // TODO: can we make this run in playmode?
+				FCanExecuteAction::CreateStatic(&FNEditorUtils::IsNotPlayInEditor),
 				FIsActionChecked(),
 				FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 				FOnGetContent::CreateLambda([]()
@@ -617,4 +642,59 @@ bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 	}
 	
 	return false;
+}
+
+bool FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan()
+{
+	return QuickAssemblyOrganComponent.IsValid();
+}
+
+TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
+{
+	return SNew(SComboButton)
+		.OnGetMenuContent_Lambda([]()
+		{
+			// This builds the menu that drops down when you click the button
+			FMenuBuilder MenuBuilder(true, nullptr);
+			TArray<UNOrganComponent*> OrganComponents = FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
+			for (int32 i = 0; i < OrganComponents.Num(); i++)
+			{
+				UNOrganComponent* OrganComponent = OrganComponents[i];
+				FText OrganName = FText::FromString(OrganComponent->GetDebugLabel());
+				MenuBuilder.AddMenuEntry(
+					OrganName,
+					FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "SelectOrganForQuickAssembly", "Select {0} for Quick Assembly"), OrganName),
+					FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent"),
+					FUIAction(FExecuteAction::CreateLambda([OrganComponent]() {
+						SetSelectedQuickAssemblyOption(OrganComponent);
+					}))
+				);
+			}
+			return MenuBuilder.MakeWidget();
+		})
+		.ButtonContent()
+		[
+			// This is the label displayed on the toolbar button itself
+			SNew(STextBlock)
+			.Text_Lambda([]()
+			{
+				if (QuickAssemblyOrganComponent.IsValid())
+				{
+					return FText::FromString(QuickAssemblyOrganComponent->GetDebugLabel());
+				}
+				return FText::FromString("Select Organ");
+			})
+		];
+}
+
+void FNWorldAssemblyEditorToolMenu::SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent)
+{
+	QuickAssemblyOrganComponent = OrganComponent;
+}
+
+UNOrganComponent* FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent()
+{
+	if (!QuickAssemblyOrganComponent.IsValid()) return nullptr;
+	return QuickAssemblyOrganComponent.Get();
+	
 }

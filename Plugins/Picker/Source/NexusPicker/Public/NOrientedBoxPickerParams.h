@@ -73,8 +73,10 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	/**
 	 * Builds the axis-aligned regions valid for point generation, in box-local space (before Rotation is applied).
 	 * @return The maximum box alone when no valid minimum is set (or the minimum exceeds the maximum on any axis); otherwise the six side regions of the shell between the minimum and maximum boxes.
+	 * @note Allocates and derives the decomposition on every call; callers that invoke a picker repeatedly with
+	 * stable params pay this cost each time. Cheap relative to per-point work, but do not call it inside a hot loop.
 	 */
-	TArray<FBox> GetValidBoxes() const
+	[[nodiscard]] TArray<FBox> GetValidBoxes() const
 	{
 		const FBox MinimumBox = GetMinimumAlignedBox();
 		const FBox MaximumBox = GetMaximumAlignedBox();
