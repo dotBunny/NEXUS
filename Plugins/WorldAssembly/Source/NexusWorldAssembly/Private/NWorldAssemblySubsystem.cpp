@@ -364,8 +364,7 @@ void UNWorldAssemblySubsystem::RegisterOrganForAssembly(TObjectPtr<UNOrganCompon
 
 void UNWorldAssemblySubsystem::RegisterCellJunctionToFill(TObjectPtr<UNCellJunctionComponent> CellJunction)
 {
-	// TODO: Do we want to actually do this on the client? as well?
-	if (!FNMultiplayerUtils::HasWorldAuthority(GetWorld())) return;
+	// TODO: Do we want to make cell filling server authoritative? This will need some changes down the line, nothing major.
 	QueuedCellJunctionsToFill.AddUnique(CellJunction);
 }
 
