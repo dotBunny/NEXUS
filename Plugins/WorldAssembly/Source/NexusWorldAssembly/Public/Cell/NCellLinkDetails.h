@@ -14,7 +14,7 @@ struct NEXUSWORLDASSEMBLY_API FNCellLinkDetails
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 JunctionInstanceIdentifier = -1;
 	
-	/** Was this junction connected/filled to another cell? */
+	/** Was this junction connected/filled to another cell/bone? */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bConnected = false;
 
