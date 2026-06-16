@@ -50,7 +50,7 @@ void FNActorPoolSpawnerComponentVisualizer::DrawVisualization(const UActorCompon
 		}
 		case Box:
 		{
-			const FVector BoxRange = SpawnerComponent->GetDistributionRange();
+			const FVector BoxRange = SpawnerComponent->GetDistributionRange() * 0.5f;
 			const FBox ABox = FBox(Origin - BoxRange, Origin + BoxRange);
 			DrawWireBox(PDI, ABox, Settings->VisualizationDistributionOuterColor, SDPG_Foreground, Settings->VisualizationLineThickness);
 			break;

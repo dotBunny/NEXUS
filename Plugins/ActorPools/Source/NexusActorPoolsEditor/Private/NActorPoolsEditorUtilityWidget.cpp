@@ -1,4 +1,4 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #include "NActorPoolsEditorUtilityWidget.h"
@@ -30,46 +30,51 @@ void UNActorPoolsEditorUtilityWidget::OnCreateActorPoolSet()
 {
 	// Don't have an overlay, don't do anything
 	if (Overlay == nullptr) return;
-	
+
 	// Get some initial details
 	TObjectPtr<UNListView> ActorPoolList = Overlay->GetActorPoolList();
 	TArray<UObject*> ListItems = ActorPoolList->GetListItems();
 	const int32 Count = ListItems.Num();
-	
+
 	// No pools, don't do anything
 	if (Count == 0) return;
-	
+
 	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	UNActorPoolSetFactory* Factory = NewObject<UNActorPoolSetFactory>();
 	UObject* TemplateObject = AssetTools.CreateAssetWithDialog(UNActorPoolSet::StaticClass(), Factory );
-	
+
 	// Cancelled
 	if ( TemplateObject == nullptr) return;
-	
-	UNActorPoolSet* NewActorPoolSet = CastChecked<UNActorPoolSet>(TemplateObject);
-	
+
+	UNActorPoolSet* NewActorPoolSet = Cast<UNActorPoolSet>(TemplateObject);
+
 	// Bad File?
 	if ( NewActorPoolSet == nullptr) return;
-	
+
 	const UNActorPoolsSettings* DefaultSettings = UNActorPoolsSettings::Get();
-	
+
 	for (int32 i = 0; i < Count; i++)
 	{
 		UNActorPoolObject* PoolObject = Cast<UNActorPoolObject>(ListItems[i]);
 		if (PoolObject != nullptr)
 		{
-			
+			// An empty pool authors as 0/0; the runtime clamps Max to 1 but leaves Min at 0, so the
+			// asset would misrepresent the pool. Skip it rather than persist a meaningless definition.
+			const int32 Total = PoolObject->GetSpawnedCount() + PoolObject->GetAvailableCount();
+			if (Total == 0) continue;
+
 			FNActorPoolDefinition NewDefinition;
 			NewDefinition.Settings = DefaultSettings->DefaultSettings;
-			
-			NewDefinition.Settings.MinimumActorCount = FMath::CeilToInt((PoolObject->GetSpawnedCount() + PoolObject->GetAvailableCount()) / NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple) * NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple;
+
+			NewDefinition.Settings.MinimumActorCount = FMath::CeilToInt(Total / NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple) * NEXUS::ActorPoolsEditor::ActorPoolSet::NearestMultiple;
 			NewDefinition.Settings.MaximumActorCount = NewDefinition.Settings.MinimumActorCount * 2;
-			
+
 			NewDefinition.ActorClass = PoolObject->GetTemplate();
-			
+
 			NewActorPoolSet->ActorPools.Add(NewDefinition);
 		}
 	}
-	
+
+	NewActorPoolSet->MarkPackageDirty();
 	FAssetRegistryModule::AssetCreated(NewActorPoolSet);
 }
