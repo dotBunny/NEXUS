@@ -54,7 +54,7 @@ public: \
 	} \
 	else \
 	{ \
-		FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
+		OnPostEngineInitDelegateHandle = FCoreDelegates::OnPostEngineInit.AddStatic(&Method); \
 	}
 
 #define N_MODULE_REMOVE_POST_ENGINE_INIT_DELEGATE() \
