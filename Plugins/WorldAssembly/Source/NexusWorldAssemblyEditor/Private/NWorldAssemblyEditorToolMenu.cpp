@@ -91,7 +91,8 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked),
 						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute),
 						FIsActionChecked(),
-						FIsActionButtonVisible()),
+						// Hide the button when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
+						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowQuickAssembly)),
 						TAttribute<FText>::CreateLambda([]()
 						{
 							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
@@ -438,7 +439,11 @@ void FNWorldAssemblyEditorToolMenu::RemoveMenuEntries()
 	// Detach the Organ command bindings appended to the level editor's global action list in AddMenuEntries.
 	// Their delegates point at this module's statics, so leaving them mapped crashes when a global chord
 	// (e.g. Ctrl+Shift+Home) is pressed after the module unloads.
-	if (FModuleManager::Get().IsModuleLoaded("LevelEditor"))
+	//
+	// IsRegistered() guards the cook/commandlet path: OnPostEngineInit only calls Register() (and AddMenuEntries
+	// only appends these actions) when Slate is initialized, so a headless run never creates the commands
+	// singleton and FNWorldAssemblyEditorCommands::Get() would assert during shutdown.
+	if (FNWorldAssemblyEditorCommands::IsRegistered() && FModuleManager::Get().IsModuleLoaded("LevelEditor"))
 	{
 		FLevelEditorModule& LevelEditorModule = FModuleManager::GetModuleChecked<FLevelEditorModule>("LevelEditor");
 		FNWorldAssemblyEditorCommands::Get().UnregisterGlobalActions(LevelEditorModule.GetGlobalLevelEditorActions());
@@ -687,6 +692,8 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 	return SNew(SBox)
 		.Padding(FMargin(8.0f, 0.0f, 0.0f, 0.0f)) // Left, Top, Right, Bottom
 		.MinDesiredWidth(150.0f)
+		// Collapse the whole combo box when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
+		.Visibility_Lambda([]() { return ShowQuickAssembly() ? EVisibility::Visible : EVisibility::Collapsed; })
 		[
 			SNew(SComboButton)
 			.OnGetMenuContent_Lambda([]() -> TSharedRef<SWidget>

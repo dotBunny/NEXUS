@@ -25,6 +25,7 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Cell", DisplayName="Display Viewport Messages", meta=(Tooltip="Show alerts and messages in the viewport while editing Cells."))
 	bool bCellDisplayViewportMessages = true;
 
+	/** Show the Quick Assembly section (Organ dropdown + start/cancel button) on the World Assembly toolbar. */
 	UPROPERTY(EditAnywhere, config,  Category="Operations", DisplayName="Show Quick Assembly Section", meta=(Tooltip="Shows a drop down to select the organ to run a World Assembly on."))
 	bool bShowQuickAssemblySection = true;
 	
