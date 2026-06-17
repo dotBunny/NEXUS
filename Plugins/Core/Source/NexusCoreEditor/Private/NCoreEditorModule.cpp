@@ -33,6 +33,14 @@ void FNCoreEditorModule::ShutdownModule()
 	// for symmetry with Epic's module template; the real menu teardown is below.
 	UToolMenus::UnRegisterStartupCallback(this);
 	FNEditorCommands::RemoveMenuEntries();
+
+	// Mirror the Register() in OnPostEngineInit. IsRegistered() skips the headless cook/commandlet path, where
+	// Register() never ran (gated on IsUserControlled() + Slate init).
+	if (FNEditorCommands::IsRegistered())
+	{
+		FNEditorCommands::Unregister();
+	}
+
 	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }

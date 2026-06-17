@@ -77,6 +77,15 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 	N_TOOLS_MENU_ENTRY_EUW_METHOD_UNREGISTER(EUW_NWorldAssemblySystem)();
 	
 	FNWorldAssemblyEditorToolMenu::RemoveMenuEntries();
+
+	// Mirror the Register() in OnPostEngineInit. RemoveMenuEntries() above has already detached the global
+	// actions that hold the command list alive, so it's now safe to drop the singleton. IsRegistered() skips
+	// the headless cook/commandlet path, where Register() never ran.
+	if (FNWorldAssemblyEditorCommands::IsRegistered())
+	{
+		FNWorldAssemblyEditorCommands::Unregister();
+	}
+
 	FNWorldAssemblyEditorStyle::Shutdown();
 
 	// Remove Undo handler
