@@ -33,4 +33,7 @@ public:
 	static FSlateIcon CellIgnoreIcon();
 	/** @return Icon for the world-collision-ignore tagging action. */
 	static FSlateIcon WorldCollisionIgnoreIcon();
+
+	/** @return Cancel icon while the tracked Quick Assembly operation is running, otherwise the start icon. */
+	static FSlateIcon QuickAssemblyOperationIcon();
 };

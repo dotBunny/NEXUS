@@ -232,7 +232,7 @@ public:
 	 * @param OperationTicket Identifier of the operation that owns this context.
 	 * @param Settings Operation-wide settings forwarded to dependent tasks.
 	 */
-	explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
+	NEXUSWORLDASSEMBLY_API explicit FNAssemblyTaskGraphContext(UWorld* OutputWorld, const int32& OperationTicket, const FNAssemblyOperationSettings& Settings);
 
 	
 	/** Path the operation's report is written to, when report output is enabled. */

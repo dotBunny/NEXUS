@@ -837,6 +837,37 @@ bool FNWorldAssemblyEditorCommands::CellCaptureThumbnail_CanExecute()
 	return World != nullptr && !FNEditorUtils::IsUnsavedWorld(World);
 }
 
+void FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked()
+{
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning())
+	{
+		CancelQuickAssembly();
+	}
+	else
+	{
+		StartQuickAssembly();
+	}
+}
+
+bool FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute()
+{
+	// While the tracked operation runs the button must stay enabled so the user can cancel it; otherwise fall
+	// back to the start preconditions (which require that no operation is currently running).
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()) return true;
+	return StartQuickAssembly_CanExecute();
+}
+
+void FNWorldAssemblyEditorCommands::CancelQuickAssembly()
+{
+	if (UNAssemblyOperation* Operation = FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation();
+		Operation != nullptr && Operation->IsRunning())
+	{
+		// Synchronous: cancels the task graph and tears the operation down, which routes through the subsystem's
+		// OnOperationDestroyed to clear the progress bar and reset the tracked ticket.
+		Operation->Cancel();
+	}
+}
+
 void FNWorldAssemblyEditorCommands::StartQuickAssembly()
 {
 	UNOrganComponent* Component = FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent();
@@ -847,7 +878,16 @@ void FNWorldAssemblyEditorCommands::StartQuickAssembly()
 	
 	FNAssemblyOperationSettings EditorSettings = FNAssemblyOperationSettings::GetDefaultEditorSettings();
 	EditorSettings.bCreateLevelInstances = true;
-	UNWorldAssemblyEditorSubsystem::Get()->StartOperation(UNAssemblyOperation::CreateInstance(Component, EditorSettings));
+	UNAssemblyOperation* Operation = UNAssemblyOperation::CreateInstance(Component, EditorSettings);
+	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(Operation->GetTicket());
+
+	// Drive the toolbar progress bar from the operation's combined task + sub-channel progress, so it keeps
+	// moving during long-running tasks. The delegate lives on the operation, so it auto-detaches when the
+	// operation is destroyed - no manual unbind needed.
+	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(0.0f); // Show an empty bar immediately.
+	Operation->OnPercentageChanged.AddDynamic(Subsystem, &UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged);
+
+	Subsystem->StartOperation(Operation);
 }
 
 bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute()
@@ -855,10 +895,4 @@ bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute()
 	return	FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan() && 
 			FNEditorUtils::IsNotPlayInEditor() && 
 			!FNWorldAssemblyRegistry::HasOperations();
-}
-
-bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanShow()
-{
-	FNWorldAssemblyEditorToolMenu::ShowOrganDropdown
-	bShowOrganToolbarDropdownForGeneration
 }

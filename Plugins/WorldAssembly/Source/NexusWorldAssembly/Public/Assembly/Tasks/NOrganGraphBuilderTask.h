@@ -21,7 +21,7 @@ class FNAssemblyTaskGraphContext;
  */
 struct FNOrganGraphBuilderTask
 {
-	explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
+	NEXUSWORLDASSEMBLY_API explicit FNOrganGraphBuilderTask(const TSharedPtr<FNVirtualOrganContext>& OrganContextPtr,
 		const TSharedPtr<FNPassContext>& PassContextPtr, const TSharedPtr<FNVirtualWorldContext>& WorldContextPtr,
 		const TSharedPtr<FNAssemblyTaskGraphContext>& TaskGraphContextPtr
 		N_ASSEMBLY_ANALYTICS_CONSTRUCTOR);
@@ -33,6 +33,18 @@ struct FNOrganGraphBuilderTask
 
 	/** Executed by the task graph: performs the full organ build. */
 	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& CompletionGraphEvent);
+
+	/**
+	 * Force-place finisher-eligible cells that still fall short of their MinimumCount onto the graph's remaining
+	 * open junctions, before the opportunistic CapBranchesWithFinishers pass can consume those slots.
+	 *
+	 * FinisherOnly cells are gated out of normal expansion and can only ever land at cap time, so without this a
+	 * cell with MinimumCount > 0 has no guaranteed placement and CheckGraph legitimately fails its minimum. This
+	 * is a no-op (no RNG draws, no graph changes) when no finisher-eligible cell has an unmet, enforceable minimum,
+	 * keeping generation byte-identical for tissues that do not use the feature.
+	 * @param Random Deterministic stream shared with the rest of the build.
+	 */
+	NEXUSWORLDASSEMBLY_API void EnsureFinisherMinimums(FNMersenneTwister& Random) const;
 
 private:
 	/** Count of placed-cell hulls in the shared world context visible to this organ, captured at task start; the shared array only grows between passes. */
@@ -73,6 +85,23 @@ private:
 
 	/** Cell-node specialization of ProcessNode: picks candidates for each open junction. */
 	TArray<FNAssemblyGraphNode*> ProcessCellNode(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode, bool bIsEndNode = false) const;
+
+	/**
+	 * Resolve geometry for the chosen candidate, run the bounds/world/hull collision checks, and on success register
+	 * and link it under SourceJunctionKey. Shared by ProcessCellNode (weighted random pick) and the finisher-minimum
+	 * guarantee pass (forced pick) so both apply identical placement rules.
+	 * @return The newly placed node, or nullptr when the candidate was rejected (out of bounds / colliding).
+	 */
+	FNAssemblyGraphCellNode* TryAttachCellToJunction(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode,
+		int32 SourceJunctionKey, const FNCellJunctionDetails* SourceJunctionValue, const FQuat& SourceJunctionWorldQuat,
+		FNVirtualCellData* CellInputData, const TArray<int32>& ValidJunctionIndices) const;
+
+	/**
+	 * Attempt a single placement of the CellInputData[TargetCellIndex] candidate onto any compatible open junction
+	 * in the current graph, in end-node (finisher) filter mode.
+	 * @return true once the candidate was placed; false when no open junction can currently accept it.
+	 */
+	bool TryPlaceTargetCellOnce(FNMersenneTwister& Random, int32 TargetCellIndex) const;
 
 	/** Cap open branch tips with Finisher/FinisherOnly cells when the tissue provides them. */
 	void CapBranchesWithFinishers(FNMersenneTwister& Random) const;

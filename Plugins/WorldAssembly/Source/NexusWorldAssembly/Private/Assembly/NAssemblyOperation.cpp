@@ -257,6 +257,7 @@ void UNAssemblyOperation::Tick()
 		CachedCompletedTasks = Status.X;
 
 		OnTasksChanged.Broadcast(CachedCompletedTasks, CachedTotalTasks);
+		BroadcastCombinedProgress();
 	}
 
 	// Drain any progress message published by the (possibly worker-thread) tasks and broadcast it on the game thread.
@@ -279,7 +280,48 @@ void UNAssemblyOperation::DrainStatusChannels()
 	TArray<FNStatusChannelUpdate> Changes;
 	if (TaskGraph->ConsumeChannelUpdates(Changes))
 	{
+		// Track the live fraction of each open channel so combined progress can move while a long task runs.
+		// A closed channel's work is accounted for by the completed-task count, so drop it from the live set.
+		for (const FNStatusChannelUpdate& Change : Changes)
+		{
+			if (Change.bClosed)
+			{
+				OpenChannelPercents.Remove(Change.ChannelId);
+			}
+			else
+			{
+				OpenChannelPercents.FindOrAdd(Change.ChannelId) = Change.Percent;
+			}
+		}
+
 		FNWorldAssemblyRegistry::NotifyOperationChannelsChanged(this, Changes);
+		BroadcastCombinedProgress();
+	}
+}
+
+void UNAssemblyOperation::BroadcastCombinedProgress()
+{
+	if (CachedTotalTasks <= 0) return;
+
+	// Each open channel contributes up to one task's worth of progress between completed-task milestones,
+	// so the bar advances smoothly as a long task reports 0..1 instead of waiting for the task to finish.
+	float ChannelContribution = 0.0f;
+	for (const TPair<int32, float>& Channel : OpenChannelPercents)
+	{
+		ChannelContribution += FMath::Clamp(Channel.Value, 0.0f, 1.0f);
+	}
+
+	float Combined = (static_cast<float>(CachedCompletedTasks) + ChannelContribution) / static_cast<float>(CachedTotalTasks);
+	Combined = FMath::Clamp(Combined, 0.0f, 1.0f);
+
+	// Hold monotonic: a channel closing before its task is counted (or count/channel mismatch) must not
+	// pull the bar backwards. The completed-task count catches up a moment later.
+	Combined = FMath::Max(Combined, CachedCombinedProgress);
+
+	if (!FMath::IsNearlyEqual(Combined, CachedCombinedProgress))
+	{
+		CachedCombinedProgress = Combined;
+		OnPercentageChanged.Broadcast(Combined);
 	}
 }
 
@@ -290,6 +332,8 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 	
 	// Add one last update to subscribers for task updates
 	const FIntVector2 Status = TaskGraph->GetTaskStatus();
+	CachedCompletedTasks = Status.X;
+	CachedTotalTasks = Status.Y;
 	OnTasksChanged.Broadcast(Status.X, Status.Y);
 
 	// Flush any final display message the tasks published before the poll loop stopped.
@@ -301,6 +345,9 @@ void UNAssemblyOperation::FinishBuild(const TSharedRef<FNAssemblyTaskGraphContex
 
 	// Flush any final channel states (e.g. close-to-100%) the tasks published before the poll loop stopped.
 	DrainStatusChannels();
+
+	// Guarantee a terminal 100% even if the final task tick never routed through Tick().
+	BroadcastCombinedProgress();
 	
 	if (Owner != nullptr && OwnerWeakRef.IsValid())
 	{

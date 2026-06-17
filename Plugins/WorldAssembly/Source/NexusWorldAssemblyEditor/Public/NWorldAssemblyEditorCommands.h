@@ -155,9 +155,17 @@ public:
 
 	/** @return true if the active viewport is suitable for thumbnail capture. */
 	static bool CellCaptureThumbnail_CanExecute();
+	/** Toolbar click handler: cancels the tracked Quick Assembly operation if one is running, otherwise starts a new one. */
+	static void QuickAssemblyButtonClicked();
+	/** @return true when the Quick Assembly button can act — always true while running (to allow cancel), else the start preconditions. */
+	static bool QuickAssemblyButton_CanExecute();
+
+	/** Start a Quick Assembly operation for the selected Organ and track its ticket for the toggle. */
 	static void StartQuickAssembly();
+	/** @return true if a Quick Assembly operation can be started (valid Organ, not PIE, no operation already running). */
 	static bool StartQuickAssembly_CanExecute();
-	static bool StartQuickAssembly_CanShow();
+	/** Cancel the tracked Quick Assembly operation if it is still running. */
+	static void CancelQuickAssembly();
 
 private:	
 	

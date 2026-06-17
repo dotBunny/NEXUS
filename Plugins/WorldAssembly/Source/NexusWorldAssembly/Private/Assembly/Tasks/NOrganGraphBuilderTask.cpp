@@ -185,6 +185,10 @@ void FNOrganGraphBuilderTask::DoTask(ENamedThreads::Type CurrentThread, const FG
 			break;
 		}
 
+		// Guarantee finisher-eligible cells reach their MinimumCount before the opportunistic cap below claims the
+		// remaining open junctions. No-op unless such a cell is actually short, so non-finisher tissues are unchanged.
+		EnsureFinisherMinimums(Random);
+
 		CapBranchesWithFinishers(Random);
 
 		EnforceNotFinisherConstraint();
@@ -582,125 +586,138 @@ TArray<FNAssemblyGraphNode*> FNOrganGraphBuilderTask::ProcessCellNode(FNMersenne
 			
 		}
 		
-		const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
-		// Source guarantees this will find something.
-		const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
-		const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
-		
-		// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
-		// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
-		// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
-		FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
-		FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
-		FRotator RequiredRotation = RequiredRotationQuat.Rotator(); 
-		
-		FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
-		FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
-	
-		FNAssemblyGraphNodeParams NodeParams;
-		NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
-		NodeParams.AssemblyTags = CellInputData->AssemblyTags;
-		NodeParams.Seed = Random.UnsignedInteger64();
-		NodeParams.WorldPosition = TargetJunctionWorldPosition;
-		NodeParams.WorldRotation = RequiredRotation;
-		FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, CellInputData, OrganContextPtr->VoxelSize);
-		
-		// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
-		// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
-		if (!OrganContextPtr->bUnbound)
+		// Resolve geometry, run spatial validation, and link the chosen candidate. Shared with the finisher-minimum
+		// guarantee pass so both placement paths apply identical rotation/bounds/collision rules.
+		FNAssemblyGraphCellNode* TargetCellNode = TryAttachCellToJunction(
+			Random, SourceCellNode, SourceJunctionKey, SourceJunctionValue, SourceJunctionWorldQuat, CellInputData, ValidJunctionIndices);
+		if (TargetCellNode != nullptr)
 		{
-			const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
-			if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
-			{
-				N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
-				delete TargetCellNode;
-				continue;
-			}
+			NewNodes.Add(TargetCellNode);
 		}
-		
-		// Check world collision
-		if (DoesWorldCollide(TargetCellNode))
+	}
+
+	return NewNodes;
+}
+
+FNAssemblyGraphCellNode* FNOrganGraphBuilderTask::TryAttachCellToJunction(FNMersenneTwister& Random, FNAssemblyGraphCellNode* SourceCellNode,
+	const int32 SourceJunctionKey, const FNCellJunctionDetails* SourceJunctionValue, const FQuat& SourceJunctionWorldQuat,
+	FNVirtualCellData* CellInputData, const TArray<int32>& ValidJunctionIndices) const
+{
+	const int32 TargetJunctionKeyIndex = Random.IntegerRange(0, ValidJunctionIndices.Num()-1);
+	// Source guarantees this will find something.
+	const int32 TargetJunctionKey = ValidJunctionIndices[TargetJunctionKeyIndex];
+	const FNCellJunctionDetails* TargetJunctionDetails = CellInputData->Junctions.Find(TargetJunctionKey);
+
+	// Unlike matching to a Bone, when trying to resolve the rotation of a matching one junction to another, we need to find the
+	// rotation which makes them face the opposite directions. We flip 180 degrees around the up axis to reverse the forward
+	// direction, then inverse the target's local rotation to undo it before applying the world rotation (same pattern as bone-to-junction).
+	FQuat TargetJunctionLocalQuat = TargetJunctionDetails->WorldRotation.Quaternion();
+	FQuat RequiredRotationQuat = SourceJunctionWorldQuat * FQuat(FVector::UpVector, PI) * TargetJunctionLocalQuat.Inverse();
+	FRotator RequiredRotation = RequiredRotationQuat.Rotator();
+
+	FVector TargetJunctionWorldOffset = RequiredRotationQuat.RotateVector(TargetJunctionDetails->WorldLocation);
+	FVector TargetJunctionWorldPosition = SourceJunctionValue->WorldLocation - TargetJunctionWorldOffset;
+
+	FNAssemblyGraphNodeParams NodeParams;
+	NodeParams.ContextTagsAdded = CellInputData->ContextTagsAdded;
+	NodeParams.AssemblyTags = CellInputData->AssemblyTags;
+	NodeParams.Seed = Random.UnsignedInteger64();
+	NodeParams.WorldPosition = TargetJunctionWorldPosition;
+	NodeParams.WorldRotation = RequiredRotation;
+	FNAssemblyGraphCellNode* TargetCellNode = FNAssemblyGraphNodeFactory::CreateCellNode(NodeParams, CellInputData, OrganContextPtr->VoxelSize);
+
+	// Reject the node if it falls outside the organ's bounds. Check the AABB first (cheap), then fall back to the
+	// tighter hull check. If neither fits inside Context->Bounds we discard and move on, skip the whole thing if the organ was unbounded.
+	if (!OrganContextPtr->bUnbound)
+	{
+		const FBox ContextBoundsBox = OrganContextPtr->Bounds.GetBox();
+		if (!TargetCellNode->IsBoundsInside(ContextBoundsBox) && !TargetCellNode->IsHullInside(ContextBoundsBox))
 		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
+			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardOutOfBoundsCellNode)
 			delete TargetCellNode;
-			continue;
+			return nullptr;
 		}
-		
-		// Check previous pass existing node world collision (this doesn't check concurrent pass as they have been already filtered as outside its collision)
-		if (DoesExistingNodeWorldCollide(TargetCellNode))
+	}
+
+	// Check world collision
+	if (DoesWorldCollide(TargetCellNode))
+	{
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardWorldCollidingCellNode)
+		delete TargetCellNode;
+		return nullptr;
+	}
+
+	// Check previous pass existing node world collision (this doesn't check concurrent pass as they have been already filtered as outside its collision)
+	if (DoesExistingNodeWorldCollide(TargetCellNode))
+	{
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
+		delete TargetCellNode;
+		return nullptr;
+	}
+
+	// Now check the bounds of other existing nodes
+	TArray<FNAssemblyGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
+	const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
+	for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
+	{
+		if (BoundsIntersectingNodes[j] == SourceCellNode)
 		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardExistingNodeWorldCollidingCellNode)
-			delete TargetCellNode;
-			continue;
-		}
-		
-		// Now check the bounds of other existing nodes
-		TArray<FNAssemblyGraphCellNode*> BoundsIntersectingNodes = CheckNodeBounds(TargetCellNode);
-		const float CellHullPenetration = OrganContextPtr->CellHullPenetration;
-		for (int32 j = BoundsIntersectingNodes.Num() - 1; j >= 0; j--)
-		{
-			if (BoundsIntersectingNodes[j] == SourceCellNode)
-			{
-				// Junction-connected pair: tolerate overlap up to CellHullPenetration
-				const float PenetrationDepth = SourceCellNode->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
-				if (PenetrationDepth < CellHullPenetration)
-				{
-					BoundsIntersectingNodes.RemoveAt(j);
-				}
-			}
-			else if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
+			// Junction-connected pair: tolerate overlap up to CellHullPenetration
+			const float PenetrationDepth = SourceCellNode->GetHullIntersectDepth(TargetCellNode, CellHullPenetration);
+			if (PenetrationDepth < CellHullPenetration)
 			{
 				BoundsIntersectingNodes.RemoveAt(j);
 			}
 		}
-		
-		// Only build when we are not colliding with anything
-		if (BoundsIntersectingNodes.IsEmpty())
+		else if (!BoundsIntersectingNodes[j]->CheckHullIntersects(TargetCellNode))
 		{
-			// Our cell has unique tags that need to get added to the used
-			if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
-			{
-				OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(CellInputData->AssemblyTags));
-			}
-			if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
-			{
-				OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
-					OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(CellInputData->AssemblyTags));
-			}
-			
-			// Add tags to context
-			if (!CellInputData->ContextTagsAdded.IsEmpty())
-			{
-				OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
-			}
-			
-			// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
-			// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
-			for (int32 j = 0; j < CellInputData->TagCounterOperations.Num(); j++)
-			{
-				OrganContextPtr->TagCounter.ApplyOperation(CellInputData->TagCounterOperations[j]);
-			}
-			
-			// We've passed validation, lets register it and move on
-			OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
-			
-			SourceCellNode->LinkJunction(SourceJunctionKey, TargetCellNode);
-			TargetCellNode->LinkJunction(TargetJunctionKey, SourceCellNode);
-			
-			SourceCellNode->Connect(TargetCellNode);
-			
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
-			NewNodes.Add(TargetCellNode);
-		}
-		else
-		{
-			N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
-			delete TargetCellNode;
+			BoundsIntersectingNodes.RemoveAt(j);
 		}
 	}
-	
-	return NewNodes;
+
+	// Only build when we are not colliding with anything
+	if (BoundsIntersectingNodes.IsEmpty())
+	{
+		// Our cell has unique tags that need to get added to the used
+		if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags))
+		{
+			OrganContextPtr->PlacedTagGroups.UniqueTags.AppendTags(
+				OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(CellInputData->AssemblyTags));
+		}
+		if (CellInputData->AssemblyTags.HasAnyExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags))
+		{
+			OrganContextPtr->PlacedTagGroups.RequiredAnyTags.AppendTags(
+				OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags.FilterExact(CellInputData->AssemblyTags));
+		}
+
+		// Add tags to context
+		if (!CellInputData->ContextTagsAdded.IsEmpty())
+		{
+			OrganContextPtr->ContextTags.AppendTags(CellInputData->ContextTagsAdded);
+		}
+
+		// Apply this cell's counter operations in author order. Reversed 1:1 in RemoveCellNode,
+		// so operations are expected to be Add/Subtract only (Multiply/Divide are not invertible).
+		for (int32 j = 0; j < CellInputData->TagCounterOperations.Num(); j++)
+		{
+			OrganContextPtr->TagCounter.ApplyOperation(CellInputData->TagCounterOperations[j]);
+		}
+
+		// We've passed validation, lets register it and move on
+		OrganContextPtr->CellGraph->RegisterNode(TargetCellNode);
+
+		SourceCellNode->LinkJunction(SourceJunctionKey, TargetCellNode);
+		TargetCellNode->LinkJunction(TargetJunctionKey, SourceCellNode);
+
+		SourceCellNode->Connect(TargetCellNode);
+
+		N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_AddCellNode)
+		return TargetCellNode;
+	}
+
+	N_ASSEMBLY_ANALYTICS_INDEX(OrganGraphBuilder_DiscardIntersectingCellNode)
+	delete TargetCellNode;
+	return nullptr;
 }
 
 void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random) const
@@ -727,6 +744,98 @@ void FNOrganGraphBuilderTask::CapBranchesWithFinishers(FNMersenneTwister& Random
 	N_ASSEMBLY_ANALYTICS_TWO_PARAM(OrganGraphBuilder_CappedWithFinisher, N_ASSEMBLY_ANALYTICS_MEMBER_INDEX, CapNum);
 #endif // !UE_BUILD_SHIPPING
 	
+}
+
+void FNOrganGraphBuilderTask::EnsureFinisherMinimums(FNMersenneTwister& Random) const
+{
+	// Cells governed by a combined Unique + RequiredAny group are validated by the RequiredAny check rather than
+	// their per-cell minimum (mirrors CheckGraph), so they are not candidates for forcing.
+	const FGameplayTagContainer UniqueAndRequiredTags =
+		OrganContextPtr->CellInputDataSummary.GroupTags.UniqueTags.FilterExact(OrganContextPtr->CellInputDataSummary.GroupTags.RequiredAnyTags);
+
+	// Gather targets first — no RNG, no graph mutation. When nothing needs forcing this whole pass is a true no-op,
+	// so tissues that never pair a finisher with a MinimumCount keep byte-identical generation.
+	TArray<int32> TargetCellIndices;
+	for (int32 i = 0; i < OrganContextPtr->CellInputData.Num(); i++)
+	{
+		if (FNVirtualOrganContext::IsUnmetFinisherMinimum(OrganContextPtr->CellInputData[i], UniqueAndRequiredTags))
+		{
+			TargetCellIndices.Add(i);
+		}
+	}
+	if (TargetCellIndices.IsEmpty())
+	{
+		return;
+	}
+
+	for (const int32 TargetCellIndex : TargetCellIndices)
+	{
+		const FNVirtualCellData& TargetCell = OrganContextPtr->CellInputData[TargetCellIndex];
+		while (TargetCell.UsedCount < TargetCell.MinimumCount)
+		{
+			// Respect cooperative cancellation and the global cell ceiling, matching the rest of the build.
+			if (TaskGraphContextPtr->IsCancelled()) return;
+			if (OrganContextPtr->MaximumCellCount > 0 &&
+				OrganContextPtr->CellGraph->GetCellNodeCount() >= OrganContextPtr->MaximumCellCount)
+			{
+				break;
+			}
+
+			// No open junction can currently host this cell. CheckGraph will then reject the graph and the build
+			// retries from a fresh attempt — the correct outcome for a layout that genuinely cannot place it.
+			if (!TryPlaceTargetCellOnce(Random, TargetCellIndex))
+			{
+				break;
+			}
+		}
+	}
+}
+
+bool FNOrganGraphBuilderTask::TryPlaceTargetCellOnce(FNMersenneTwister& Random, const int32 TargetCellIndex) const
+{
+	const TArray<FNAssemblyGraphNode*> OpenNodes = OrganContextPtr->CellGraph->GetNodesWithOpenJunctions();
+	for (FNAssemblyGraphNode* OpenNode : OpenNodes)
+	{
+		if (OpenNode->GetNodeType() != ENAssemblyGraphNodeType::Cell) continue;
+		FNAssemblyGraphCellNode* SourceCellNode = static_cast<FNAssemblyGraphCellNode*>(OpenNode);
+
+		for (const TPair<int32, FNCellJunctionDetails*>& Junction : SourceCellNode->GetOpenJunctions())
+		{
+			const int32 SourceJunctionKey = Junction.Key;
+			FNCellJunctionDetails* SourceJunctionValue = Junction.Value;
+
+			// End-node filter so Finisher/FinisherOnly cells are eligible; reuses every geometry/tag/Max/Unique gate.
+			FNCellInputDataFilter NodeFilter;
+			NodeFilter.NodeDepth = SourceCellNode->GetNodeDepth();
+			NodeFilter.SocketSize = SourceJunctionValue->SocketSize;
+			NodeFilter.SourceQuat = SourceJunctionValue->WorldRotation.Quaternion();
+			NodeFilter.SourceCellInputData = SourceCellNode->GetInputDataPtr();
+			NodeFilter.SourceCellNode = SourceCellNode;
+			NodeFilter.WorldPosition = SourceJunctionValue->WorldLocation;
+			NodeFilter.bIsEndNode = true;
+
+			FNWeightedIntegerArray CellInputWeightedIndices;
+			TMap<int32, TArray<int32>> ValidJunctions;
+			OrganContextPtr->FilterCellInputData(NodeFilter, CellInputWeightedIndices, ValidJunctions);
+
+			// Only proceed when the target cell itself is a valid candidate for this specific junction. Filtering
+			// consumes no RNG, so probing junctions that cannot host the cell leaves the stream untouched.
+			const TArray<int32>* ValidJunctionIndices = ValidJunctions.Find(TargetCellIndex);
+			if (ValidJunctionIndices == nullptr || ValidJunctionIndices->IsEmpty())
+			{
+				continue;
+			}
+
+			const FQuat SourceJunctionWorldQuat = SourceJunctionValue->WorldRotation.Quaternion();
+			FNVirtualCellData* TargetCellInputData = &OrganContextPtr->CellInputData[TargetCellIndex];
+			if (TryAttachCellToJunction(Random, SourceCellNode, SourceJunctionKey, SourceJunctionValue,
+				SourceJunctionWorldQuat, TargetCellInputData, *ValidJunctionIndices) != nullptr)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) const

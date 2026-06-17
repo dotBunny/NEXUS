@@ -232,6 +232,17 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAssemblyOperationTasksChanged OnTasksChanged;
 
+	/**
+	 * Broadcast whenever the combined progress changes (0..1). Combines completed-task count with the
+	 * fractional progress of currently-open status channels, so the value keeps moving during long-running
+	 * tasks that report sub-progress instead of freezing between task-completion milestones.
+	 */
+	UPROPERTY(BlueprintAssignable)
+	FOnNWorldAssemblyOperationPercentageChanged OnPercentageChanged;
+
+	/** @return The most recently computed combined task + channel progress in the 0..1 range. */
+	float GetCombinedProgress() const { return CachedCombinedProgress; }
+
 	/** @return Cached (completed, total) task counts captured since the last OnTasksChanged broadcast. */
 	FIntVector2 GetCachedTaskStatusCounts() const { return FIntVector2(CachedCompletedTasks, CachedTotalTasks); }
 	/** @return The unique 32-bit identifier assigned to this operation at creation time. */
@@ -253,6 +264,9 @@ protected:
 
 	/** Drain pending status-channel updates from the task graph and forward them to the registry. Game thread only. */
 	void DrainStatusChannels();
+
+	/** Recompute combined task + open-channel progress and broadcast OnPercentageChanged when it changes. Game thread only. */
+	void BroadcastCombinedProgress();
 
 private:
 	/** Monotonically increasing ticket source used to assign a unique identifier to each operation. */
@@ -285,6 +299,11 @@ private:
 	int32 CachedTotalTasks = 0;
 	/** Most recent completed-task count broadcast to OnTasksChanged. */
 	int32 CachedCompletedTasks = 0;
+
+	/** Latest percent (0..1) reported by each currently-open status channel, keyed by ChannelId. Closed channels are removed. */
+	TMap<int32, float> OpenChannelPercents;
+	/** Most recent combined progress broadcast via OnPercentageChanged; held monotonic so channel churn never moves the bar backwards. */
+	float CachedCombinedProgress = 0.0f;
 
 	/** Unique identifier for this operation, allocated from NextTicket. */
 	int32 Ticket;

@@ -4,6 +4,8 @@
 #pragma once
 #include "Organ/NOrganComponent.h"
 
+class UNAssemblyOperation;
+
 /**
  * Registers every World Assembly entry on the editor's tool menus — cell/organ/junction dropdowns,
  * toolbar buttons, and the editor-utility-window launcher.
@@ -75,11 +77,27 @@ public:
 	/** @return true if the hull split-edge action should be shown (an editable hull edge is selected). */
 	static bool Hull_SplitEdge_CanShow();
 	
+	static bool ShowQuickAssembly();
 	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
 	static void SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent);
 	static UNOrganComponent* GetQuickAssemblyOrganComponent();
 
+	/** Sets the Quick Assembly progress bar fill (clamped 0..1) and makes it visible. Call from the assembly operation. */
+	static void SetQuickAssemblyProgress(float InProgress);
+	/** Hides the Quick Assembly progress bar (e.g. when the operation finishes or is cancelled). */
+	static void ClearQuickAssemblyProgress();
+	static void SetQuickAssemblyOperationTicket(int32 Ticket) { QuickAssemblyOperationTicket = Ticket; }
+	static int32 GetQuickAssemblyOperationTicket() { return QuickAssemblyOperationTicket; }
+
+	/** @return The tracked Quick Assembly operation resolved from QuickAssemblyOperationTicket, or nullptr if none/stale. */
+	static UNAssemblyOperation* GetTrackedQuickAssemblyOperation();
+	/** @return true if the tracked Quick Assembly operation exists and is still running (drives the Start/Cancel toggle). */
+	static bool IsQuickAssemblyOperationRunning();
+
 private:
 	static TWeakObjectPtr<UNOrganComponent> QuickAssemblyOrganComponent;
+	static int32 QuickAssemblyOperationTicket;
+	/** Current Quick Assembly progress (0..1). Unset when no operation is in flight, which hides the bar. */
+	static TOptional<float> QuickAssemblyProgress;
 };

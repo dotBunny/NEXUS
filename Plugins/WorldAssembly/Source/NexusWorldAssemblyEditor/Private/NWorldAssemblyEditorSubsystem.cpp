@@ -9,6 +9,7 @@
 #include "Cell/NCellProxy.h"
 #include "Editor.h"
 #include "NWorldAssemblyContextCache.h"
+#include "NWorldAssemblyEditorToolMenu.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -83,8 +84,21 @@ void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operati
 	Operation->StartBuild(this, this);
 }
 
+void UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged(float Progress)
+{
+	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(Progress);
+}
+
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
+	// Hide the toolbar progress bar once the quick-assembly operation we are tracking completes, and drop the
+	// tracked ticket so the toolbar button reverts to its "start" state.
+	if (Operation->GetTicket() == FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOperationTicket())
+	{
+		FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
+		FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(-1);
+	}
+
 	for (ANCellProxy* Proxy : TaskGraphContext->CreatedProxies)
 	{
 		KnownProxies.Add(Proxy);
@@ -129,6 +143,14 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 
 void UNWorldAssemblyEditorSubsystem::OnOperationDestroyed(UNAssemblyOperation* Operation)
 {
+	// Cancelled/torn down before finishing - make sure the progress bar does not linger and the toolbar button
+	// reverts to its "start" state by dropping the tracked ticket.
+	if (Operation->GetTicket() == FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOperationTicket())
+	{
+		FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
+		FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(-1);
+	}
+
 	KnownOperations.Remove(Operation);
 }
 

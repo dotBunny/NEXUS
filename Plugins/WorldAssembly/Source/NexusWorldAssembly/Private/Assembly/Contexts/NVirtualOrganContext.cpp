@@ -411,6 +411,27 @@ bool FNVirtualOrganContext::IsGatedByFinisherTags(const bool bIsEndNode, const F
 	return bIsEndNode && CandidateTags.HasTag(NWorldAssembly_Behavior_NotFinisher);
 }
 
+bool FNVirtualOrganContext::IsUnmetFinisherMinimum(const FNVirtualCellData& Cell, const FGameplayTagContainer& UniqueAndRequiredTags)
+{
+	// 0 (and any non-positive) carries no real minimum.
+	if (Cell.MinimumCount <= 0) return false;
+
+	// Unsatisfiable configuration: a minimum greater than a positive maximum can never be reached. CheckGraph skips
+	// these too, so forcing them would loop without ever succeeding.
+	if (Cell.MaximumCount > 0 && Cell.MinimumCount > Cell.MaximumCount) return false;
+
+	// Already satisfied — nothing to force.
+	if (Cell.UsedCount >= Cell.MinimumCount) return false;
+
+	// Cells governed by a combined Unique + RequiredAny group are validated by the RequiredAny check rather than
+	// their per-cell minimum (matches CheckGraph), so they are not a target here.
+	if (!UniqueAndRequiredTags.IsEmpty() && Cell.AssemblyTags.HasAnyExact(UniqueAndRequiredTags)) return false;
+
+	// Only finisher-eligible cells can be placed at cap time; anything else gets its chances during normal expansion
+	// and would be gated out of the end-node placement this guarantee performs.
+	return Cell.AssemblyTags.HasTag(NWorldAssembly_Behavior_Finisher) || Cell.AssemblyTags.HasTag(NWorldAssembly_Behavior_FinisherOnly);
+}
+
 bool FNVirtualOrganContext::IsGatedByTagCounterConstraints(const FNVirtualCellData& Candidate, const FNGameplayTagCounter& TagCounter)
 {
 	// The candidate is only eligible when every one of its constraints passes against the current counter state.

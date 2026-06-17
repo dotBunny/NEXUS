@@ -6,14 +6,21 @@
 #include "FileHelpers.h"
 #include "LevelEditor.h"
 #include "NCoreEditorMinimal.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SSeparator.h"
+#include "Widgets/Notifications/SProgressBar.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SNullWidget.h"
+#include "Widgets/SOverlay.h"
 
 #include "Cell/NCellJunctionComponent.h"
 #include "NWorldAssemblyRegistry.h"
+#include "NEditorStyle.h"
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorModule.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "Commandlets/NUpdateCellDataCommandlet.h"
@@ -21,8 +28,11 @@
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
 const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
+
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
 TWeakObjectPtr<UNOrganComponent> FNWorldAssemblyEditorToolMenu::QuickAssemblyOrganComponent = nullptr;
+int32 FNWorldAssemblyEditorToolMenu::QuickAssemblyOperationTicket = -1;
+TOptional<float> FNWorldAssemblyEditorToolMenu::QuickAssemblyProgress;
 
 void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 {
@@ -65,29 +75,42 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			return EVisibility::Collapsed;
 		});
 		
-		// Quick Assembly
+		// Quick Assembly Section
 		FToolMenuEntry QuickAssemblyComboBox = FToolMenuEntry::InitWidget(
 			"NWorldAssembly_QuickAssembly",
 			CreateQuickAssemblyComboBox(), // This function returns our Slate combo box
 			FText::FromString("Quick Assembly"),
 			true // Should it be vertically aligned neatly in the toolbar?
 		);
-		
-		// TODO: Add can show?
-		
 		NexusSection.AddEntry(QuickAssemblyComboBox);
-		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
+		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
+		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning() so they stay in sync.
 		const FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",
 					FUIAction(
-						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly),
-						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute),
+						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked),
+						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute),
 						FIsActionChecked(),
-						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::StartQuickAssembly_CanShow)),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton", "Start World Assembly Operation"),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton_Tooltip", "Starts a World Assembly Operation for the selected Organ, creating the NCellLevelInstances and loading their content."),
-						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
+						FIsActionButtonVisible()),
+						TAttribute<FText>::CreateLambda([]()
+						{
+							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
+								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton", "Cancel World Assembly Operation")
+								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton", "Start World Assembly Operation");
+						}),
+						TAttribute<FText>::CreateLambda([]()
+						{
+							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
+								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton_Tooltip", "Cancels the running World Assembly Operation for the selected Organ.")
+								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton_Tooltip", "Starts a World Assembly Operation for the selected Organ, creating the NCellLevelInstances and loading their content.");
+						}),
+						TAttribute<FSlateIcon>::Create(
+							TAttribute<FSlateIcon>::FGetter::CreateStatic(
+						&FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon)));
 		NexusSection.AddEntry(QuickAssemblyButton);
+		
+		// Actions Section - based on selection
+		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowQuickAssembly() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 		
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -644,16 +667,34 @@ bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 	return false;
 }
 
+bool FNWorldAssemblyEditorToolMenu::ShowQuickAssembly()
+{
+	if (ShowOrganDropdown())
+	{
+		return UNWorldAssemblyEditorUserSettings::Get()->bShowQuickAssemblySection;
+	}
+	return false;
+}
+
 bool FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan()
 {
-	return QuickAssemblyOrganComponent.IsValid();
+	// Route through the getter so the same first-option fallback applies everywhere.
+	return GetQuickAssemblyOrganComponent() != nullptr;
 }
 
 TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 {
-	return SNew(SComboButton)
-		.OnGetMenuContent_Lambda([]()
+	return SNew(SBox)
+		.Padding(FMargin(8.0f, 0.0f, 0.0f, 0.0f)) // Left, Top, Right, Bottom
+		.MinDesiredWidth(150.0f)
+		[
+			SNew(SComboButton)
+			.OnGetMenuContent_Lambda([]() -> TSharedRef<SWidget>
 		{
+			// Lock the selection while the Quick Assembly operation is running: open an empty menu so the
+			// target Organ can't be changed mid-run. Keeps the button (and its progress bar) fully lit.
+			if (IsQuickAssemblyOperationRunning()) return SNullWidget::NullWidget;
+
 			// This builds the menu that drops down when you click the button
 			FMenuBuilder MenuBuilder(true, nullptr);
 			TArray<UNOrganComponent*> OrganComponents = FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
@@ -672,29 +713,124 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 			}
 			return MenuBuilder.MakeWidget();
 		})
-		.ButtonContent()
-		[
-			// This is the label displayed on the toolbar button itself
-			SNew(STextBlock)
-			.Text_Lambda([]()
-			{
-				if (QuickAssemblyOrganComponent.IsValid())
-				{
-					return FText::FromString(QuickAssemblyOrganComponent->GetDebugLabel());
-				}
-				return FText::FromString("Select Organ");
-			})
+			.ButtonContent()
+			[
+				SNew(SOverlay)
+
+				// Progress bar drawn behind the content - only visible while an operation is running
+				//  m .FillColorAndOpacity()
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Fill)
+				[
+					SNew(SProgressBar)
+					.Percent_Lambda([]() { return QuickAssemblyProgress; })
+					.Visibility_Lambda([]()
+					{
+						return QuickAssemblyProgress.IsSet() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+					})
+				]
+
+				// Icon + label drawn on top of the progress bar
+				+ SOverlay::Slot()
+				.HAlign(HAlign_Fill)
+				.VAlign(VAlign_Center)
+				[
+					// This is the label displayed on the toolbar button itself
+					SNew(SHorizontalBox)
+
+					// Organ icon - only shown when a valid Organ is selected
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					.Padding(0.0f, 0.0f, 4.0f, 0.0f)
+					[
+						SNew(SImage)
+						.Image_Lambda([]() -> const FSlateBrush*
+						{
+							// While the operation runs, swap the Organ icon for a padlock to signal the selection is locked.
+							if (IsQuickAssemblyOperationRunning())
+							{
+								return FSlateIcon(FNEditorStyle::GetStyleSetName(), "Lock.Desaturated").GetIcon();
+							}
+							return FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NOrganComponent").GetIcon();
+						})
+						.Visibility_Lambda([]()
+						{
+							return GetQuickAssemblyOrganComponent() != nullptr ? EVisibility::Visible : EVisibility::Collapsed;
+						})
+					]
+
+					// Selected Organ label (or placeholder text)
+					+ SHorizontalBox::Slot()
+					.AutoWidth()
+					.VAlign(VAlign_Center)
+					[
+						SNew(STextBlock)
+						.Text_Lambda([]()
+						{
+							if (const UNOrganComponent* Organ = GetQuickAssemblyOrganComponent())
+							{
+								return FText::FromString(Organ->GetDebugLabel());
+							}
+							return FText::FromString("Select Organ");
+						})
+					]
+				]
+			]
 		];
 }
 
 void FNWorldAssemblyEditorToolMenu::SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent)
 {
+	// Authoritative lock: don't let the Quick Assembly target change while the operation it kicked off is running.
+	if (IsQuickAssemblyOperationRunning()) return;
 	QuickAssemblyOrganComponent = OrganComponent;
+}
+
+void FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(float InProgress)
+{
+	QuickAssemblyProgress = FMath::Clamp(InProgress, 0.0f, 1.0f);
+}
+
+void FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress()
+{
+	QuickAssemblyProgress.Reset();
 }
 
 UNOrganComponent* FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent()
 {
+	// Nothing selected (or the prior selection went stale): default to the first Organ in the level, if any.
+	if (!QuickAssemblyOrganComponent.IsValid())
+	{
+		TArray<UNOrganComponent*> OrganComponents = FNWorldAssemblyRegistry::GetOrganComponentsFromLevel(FNEditorUtils::GetCurrentLevel());
+		if (OrganComponents.Num() > 0)
+		{
+			SetSelectedQuickAssemblyOption(OrganComponents[0]);
+		}
+	}
+
 	if (!QuickAssemblyOrganComponent.IsValid()) return nullptr;
 	return QuickAssemblyOrganComponent.Get();
-	
+}
+
+UNAssemblyOperation* FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation()
+{
+	// A negative ticket means we are not tracking an operation (the subsystem resets it on finish/destroy).
+	if (QuickAssemblyOperationTicket < 0) return nullptr;
+
+	for (UNAssemblyOperation* Operation : FNWorldAssemblyRegistry::GetOperations())
+	{
+		if (Operation != nullptr && Operation->GetTicket() == QuickAssemblyOperationTicket)
+		{
+			return Operation;
+		}
+	}
+	return nullptr;
+}
+
+bool FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
+{
+	const UNAssemblyOperation* Operation = GetTrackedQuickAssemblyOperation();
+	return Operation != nullptr && Operation->IsRunning();
 }

@@ -210,6 +210,17 @@ public:
 	static NEXUSWORLDASSEMBLY_API bool IsGatedByFinisherTags(bool bIsEndNode, const FNVirtualCellDataSummary& Summary, const FGameplayTagContainer& CandidateTags);
 
 	/**
+	 * @param Cell Candidate cell to evaluate.
+	 * @param UniqueAndRequiredTags Intersection of the pool's Unique and RequiredAny group tags; cells matching one
+	 *        of these are governed by the RequiredAny check rather than their per-cell minimum.
+	 * @return true when Cell is finisher-eligible (Finisher/FinisherOnly) and still short of an enforceable
+	 *         MinimumCount — i.e. a cell the finisher-minimum guarantee pass should try to place. The minimum skips
+	 *         mirror FNVirtualOrganContext::CheckGraph (non-positive minimum, minimum above a positive maximum, and
+	 *         combined Unique + RequiredAny cells).
+	 */
+	static NEXUSWORLDASSEMBLY_API bool IsUnmetFinisherMinimum(const FNVirtualCellData& Cell, const FGameplayTagContainer& UniqueAndRequiredTags);
+
+	/**
 	 * @param Candidate Cell being considered for placement.
 	 * @param TagCounter Current tag-counter state to evaluate the candidate's constraints against.
 	 * @return true if any of the candidate's TagCounterConstraints fails its comparison and the candidate must be excluded.

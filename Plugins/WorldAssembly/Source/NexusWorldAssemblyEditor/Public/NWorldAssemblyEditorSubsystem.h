@@ -67,6 +67,13 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	virtual UWorld* GetDefaultWorld() override { return FNEditorUtils::GetCurrentWorld(); };
 	//End INWorldAssemblyOperationOwner
 
+	/**
+	 * Forwards an operation's combined task + sub-channel progress to the Quick Assembly toolbar progress bar.
+	 * Bound to UNAssemblyOperation::OnPercentageChanged for the quick-assembly operation in StartQuickAssembly.
+	 */
+	UFUNCTION()
+	void OnQuickAssemblyProgressChanged(float Progress);
+
 	/** @return true if at least one operation is currently tracked by this subsystem. */
 	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
 

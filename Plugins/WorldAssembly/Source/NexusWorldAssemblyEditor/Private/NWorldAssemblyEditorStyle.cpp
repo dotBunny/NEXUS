@@ -75,6 +75,15 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellIgnoreIcon()
 	
 }
 
+FSlateIcon FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon()
+{
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning())
+	{
+		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CancelQuickAssemblyOperation");
+	}
+	return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.QuickAssemblyOperation");
+}
+
 FSlateIcon FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon()
 {
 	const int32 Mode = FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldIgnore_Mode();
@@ -172,6 +181,13 @@ TSharedRef<FSlateStyleSet> FNWorldAssemblyEditorStyle::Create()
 	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Ignored", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Ignored"), Icon16x16));
 	Style.Set("Command.WorldAssemblyEd.WorldCollisionIgnore_Unknown", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_WorldCollisionIgnore_Unknown"), Icon16x16));
 	
+	
+	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
+	
+	Style.Set("Command.WorldAssemblyEd.SelectNCellJunctionComponent", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_SelectNCellJunctionComponent"), Icon16x16));
+	
+	Style.Set("Command.WorldAssemblyEd.QuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_QuickAssemblyOperation"), Icon128x128));
+	Style.Set("Command.WorldAssemblyEd.CancelQuickAssemblyOperation", new N_MODULE_IMAGE_BRUSH_SVG(PluginDirectory, TEXT("Command_EdMode_CancelQuickAssemblyOperation"), Icon128x128));
 	
 	return StyleRef;
 }
