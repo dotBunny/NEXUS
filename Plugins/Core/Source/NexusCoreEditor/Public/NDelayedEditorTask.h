@@ -25,28 +25,34 @@ public:
 
 protected:
 	/**
-	 * Associates the task with DelayMechanism and root-sets both so neither is GC'd while the task is pending.
+	 * Associates the task with DelayMechanism and registers the task with the EditorUtilitySubsystem so it survives GC
+	 * while pending. The delay mechanism stays reachable transitively — it is both this task's Parent property and its
+	 * Outer — so it does not need its own registration.
 	 * @param DelayMechanism The delay driver that will fire this task's work.
 	 */
 	void Lock(UAsyncEditorDelay* DelayMechanism)
 	{
 		Parent = DelayMechanism;
-		
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		EditorUtilitySubsystem->RegisterReferencedObject(this);
+
+		if (UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
+		{
+			EditorUtilitySubsystem->RegisterReferencedObject(this);
+		}
 	}
 
-	/** Unbinds the task from its delay mechanism and removes both from the root set; safe to call from the completion callback. */
+	/** Unbinds the task from its delay mechanism and unregisters it from the EditorUtilitySubsystem; safe to call from the completion callback. */
 	void Release()
 	{
 		Parent->Complete.RemoveAll(this);
-		
-		UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>();
-		EditorUtilitySubsystem->UnregisterReferencedObject(this);
+
+		if (UEditorUtilitySubsystem* EditorUtilitySubsystem = GEditor->GetEditorSubsystem<UEditorUtilitySubsystem>())
+		{
+			EditorUtilitySubsystem->UnregisterReferencedObject(this);
+		}
 	}
 
 private:
-	/** The delay mechanism driving this task; held (and root-set) between Lock and Release so it survives GC. */
+	/** The delay mechanism driving this task; held between Lock and Release so it stays reachable for GC. */
 	UPROPERTY()
 	TObjectPtr<UAsyncEditorDelay> Parent;
 };

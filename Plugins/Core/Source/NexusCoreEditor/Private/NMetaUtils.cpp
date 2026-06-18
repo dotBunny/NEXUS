@@ -126,7 +126,7 @@ bool FNMetaUtils::TryGetData(UEdGraphNode* Node, const FName& Key, FString& OutV
 
 bool FNMetaUtils::TryGetData(const UScriptStruct* ScriptStruct, const FName& Key, FString& OutValue)
 {
-	if (!ScriptStruct->HasMetaData(Key))
+	if (ScriptStruct == nullptr || !ScriptStruct->HasMetaData(Key))
 	{
 		return false;
 	}
@@ -136,7 +136,7 @@ bool FNMetaUtils::TryGetData(const UScriptStruct* ScriptStruct, const FName& Key
 
 bool FNMetaUtils::TryGetData(const UStruct* Struct, const FName& Key, FString& OutValue)
 {
-	if (!Struct->HasMetaData(Key))
+	if (Struct == nullptr || !Struct->HasMetaData(Key))
 	{
 		return false;
 	}
@@ -145,7 +145,7 @@ bool FNMetaUtils::TryGetData(const UStruct* Struct, const FName& Key, FString& O
 }
 bool FNMetaUtils::TryGetData(const UClass* Class, const FName& Key, FString& OutValue)
 {
-	if (!Class->HasMetaData(Key))
+	if (Class == nullptr || !Class->HasMetaData(Key))
 	{
 		return false;
 	}
@@ -157,9 +157,17 @@ FString FNMetaUtils::GetDataUnsafe(UEdGraphNode* Node, const FName& Key)
 {
 	if (const UK2Node_CallFunction* FunctionCall = Cast<UK2Node_CallFunction>(Node))
 	{
-		const UClass* ParentClass  = FunctionCall->FunctionReference.GetMemberParentClass();
-		const UFunction* Function = ParentClass->FindFunctionByName(FunctionCall->FunctionReference.GetMemberName());
-		return Function->GetMetaData(Key);
+		const UClass* ParentClass = FunctionCall->FunctionReference.GetMemberParentClass();
+		if (ParentClass == nullptr)
+		{
+			return EmptyString;
+		}
+
+		if (const UFunction* Function = ParentClass->FindFunctionByName(FunctionCall->FunctionReference.GetMemberName());
+			Function != nullptr)
+		{
+			return Function->GetMetaData(Key);
+		}
 	}
 	return EmptyString;
 }

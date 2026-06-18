@@ -44,7 +44,13 @@ void FNEditorUtils::UnregisterSettings(const UDeveloperSettings* SettingsObject)
 
 IAssetEditorInstance* FNEditorUtils::GetForegroundAssetEditor()
 {
-	TArray<IAssetEditorInstance*> AssetEditorInstances = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->GetAllOpenEditors();
+	UAssetEditorSubsystem* AssetEditorSubsystem = GEditor->GetEditorSubsystem<UAssetEditorSubsystem>();
+	if (AssetEditorSubsystem == nullptr)
+	{
+		return nullptr;
+	}
+
+	TArray<IAssetEditorInstance*> AssetEditorInstances = AssetEditorSubsystem->GetAllOpenEditors();
 	const TSharedPtr<SWindow> ActiveWindow = FSlateApplication::Get().GetActiveTopLevelWindow();
 	for (IAssetEditorInstance* AssetEditorInstance : AssetEditorInstances)
 	{
