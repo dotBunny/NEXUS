@@ -3,7 +3,9 @@
 
 #include "SceneComponents/NTextRenderComponent.h"
 
+#include "NMultiplayerUtils.h"
 #include "NUIMinimal.h"
+#include "Iris/ReplicationSystem/Prioritization/SphereWithOwnerBoostNetObjectPrioritizer.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
 
@@ -23,12 +25,20 @@ void UNTextRenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Replicated text only propagates if the owning actor itself replicates; warn rather than silently
-	// mutating the owner's network behavior.
-	const AActor* Owner = GetOwner();
-	if (bShouldCheckReplication && Owner != nullptr && Owner->HasAuthority() && !Owner->GetIsReplicated())
+	// Replicated text only propagates if the owning actor itself replicates. Either force replication
+	// on for the owner, or warn rather than silently failing to propagate.
+	AActor* Owner = GetOwner();
+	if (bShouldCheckReplication && Owner != nullptr && FNMultiplayerUtils::HasWorldAuthority(GetWorld()) && !Owner->GetIsReplicated())
 	{
-		UE_LOG(LogNexusUI, Error, TEXT("NTextRenderComponent(%s)'s Owner(%s) is not replicated, so replicated text will not propagate. Enable replication on the owning actor, or disable bShouldCheckReplication on this component."), *GetName(), *Owner->GetActorNameOrLabel());
+		if (bForceOwnerReplication)
+		{
+			Owner->SetReplicates(true);
+			UE_LOG(LogNexusUI, Log, TEXT("NTextRenderComponent(%s)'s Owner(%s) was not replicated; replication has been forced on so replicated text can propagate. Disable bForceOwnerReplication to opt out of this behavior."), *GetName(), *Owner->GetActorNameOrLabel());
+		}
+		else
+		{
+			UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s)'s Owner(%s) is not replicated, so replicated text will not propagate. Enable replication on the owning actor, or disable bShouldCheckReplication on this component."), *GetName(), *Owner->GetActorNameOrLabel());
+		}
 	}
 
 	if (!IsRunningDedicatedServer())
@@ -48,7 +58,7 @@ void UNTextRenderComponent::OnRep_TextValue()
 
 void UNTextRenderComponent::SetFromName(const FName& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		FString NewString = NewValue.ToString();
 		
@@ -70,7 +80,7 @@ void UNTextRenderComponent::SetFromName(const FName& NewValue)
 
 void UNTextRenderComponent::SetFromString(const FString& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		if (CachedValue.Equals(NewValue))
 		{
@@ -90,7 +100,7 @@ void UNTextRenderComponent::SetFromString(const FString& NewValue)
 
 void UNTextRenderComponent::SetFromText(const FText& NewValue)
 {
-	if (GetOwner()->HasAuthority())
+	if (FNMultiplayerUtils::HasWorldAuthority(GetWorld()))
 	{
 		if (NewValue.EqualTo(FText::FromString(CachedValue)))
 		{
