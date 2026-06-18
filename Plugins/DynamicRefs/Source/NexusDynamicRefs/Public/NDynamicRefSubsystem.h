@@ -91,8 +91,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 	N_WORLD_SUBSYSTEM_GAME_ONLY(UNDynamicRefSubsystem, true)
 	
-	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefChangeDelegate, ENDynamicRef, UObject* );
-	DECLARE_MULTICAST_DELEGATE_TwoParams( OnDynamicRefNameChangeDelegate, FName, UObject* );
+	DECLARE_MULTICAST_DELEGATE_TwoParams( FOnDynamicRefChangeDelegate, ENDynamicRef, UObject* );
+	DECLARE_MULTICAST_DELEGATE_TwoParams( FOnDynamicRefNameChangeDelegate, FName, UObject* );
 	
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;
@@ -288,7 +288,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Retrieves the last/newest AActor associated with a specified ENDynamicRef.
 	 * @param DynamicRef The ENDynamicRef collection to iterate.
-	 * @return A pointer to the first AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
+	 * @return A pointer to the last AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor"))
@@ -297,7 +297,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	/**
 	 * Retrieves the last/newest AActor associated with a specified FName.
 	 * @param Name The FName collection to iterate.
-	 * @return A pointer to the first AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
+	 * @return A pointer to the last AActor found for the specified FName, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor-by-name"))
@@ -313,11 +313,11 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	UObject* GetLastObject(const ENDynamicRef DynamicRef);
 	
 	/**
-	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO any bounds/range checking.
+	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
 	* @warning References are weak: if the slot's last entry has been destroyed without removal this returns nullptr even
 	*          though the slot is non-empty. Use GetLastObject() to skip stale entries.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
-	* @return The first UObject of its type.
+	* @return The last UObject in the collection.
 	*/
 	UObject* GetLastObjectUnsafe(const ENDynamicRef DynamicRef);
 	
@@ -503,13 +503,13 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	const FNDynamicRefCollection& GetObjectCollectionByNameRefUnsafe(const FName Name);
 
 	/** Fired when an object is added under an ENDynamicRef slot. */
-	OnDynamicRefChangeDelegate OnAdded;
+	FOnDynamicRefChangeDelegate OnAdded;
 	/** Fired when an object is added under an FName bucket. */
-	OnDynamicRefNameChangeDelegate OnAddedByName;
+	FOnDynamicRefNameChangeDelegate OnAddedByName;
 	/** Fired when an object is removed from an ENDynamicRef slot. */
-	OnDynamicRefChangeDelegate OnRemoved;
+	FOnDynamicRefChangeDelegate OnRemoved;
 	/** Fired when an object is removed from an FName bucket. */
-	OnDynamicRefNameChangeDelegate OnRemovedByName;
+	FOnDynamicRefNameChangeDelegate OnRemovedByName;
 
 private:
 	/** Fast array of collections indexed by ENDynamicRef (size == NDR_Max). */

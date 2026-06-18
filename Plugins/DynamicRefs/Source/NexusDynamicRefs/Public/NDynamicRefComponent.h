@@ -9,7 +9,7 @@
 #include "NDynamicRefComponent.generated.h"
 
 /**
- * A component which registers and unregisters the owning AActor with the UNDynamicRefsSubsystem for future lookup.
+ * A component which registers and unregisters the owning AActor with the UNDynamicRefSubsystem for future lookup.
  * @see <a href="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-component/">UNDynamicRefComponent</a>
  */
 UCLASS(BlueprintType,Blueprintable, ClassGroup="NEXUS", DisplayName = "NEXUS | DynamicRef",
