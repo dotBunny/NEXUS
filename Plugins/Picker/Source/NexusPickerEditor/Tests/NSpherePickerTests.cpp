@@ -202,4 +202,40 @@ N_TEST_HIGH(FNSpherePickerTests_Next_DensityUniformity, "NEXUS::UnitTests::NPick
 	CheckVolumeUniformity(TEXT("Next"), Points, Params.Origin, Params.MinimumRadius, Params.MaximumRadius);
 }
 
+N_TEST_HIGH(FNSpherePickerTests_IsPointInsideOrOn_Shell_InnerBoundary, "NEXUS::UnitTests::NPicker::FNSpherePicker::IsPointInsideOrOn_Shell_InnerBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A point exactly on the inner radius is part of the closed shell.
+	CHECK_MESSAGE(TEXT("Point on the inner radius should be inside the shell"),
+		FNSpherePicker::IsPointInsideOrOn(FVector::ZeroVector, 5.f, 10.f, FVector(5.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNSpherePickerTests_IsPointInsideOrOn_Shell_OuterBoundary, "NEXUS::UnitTests::NPicker::FNSpherePicker::IsPointInsideOrOn_Shell_OuterBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point on the outer radius should be inside the shell"),
+		FNSpherePicker::IsPointInsideOrOn(FVector::ZeroVector, 5.f, 10.f, FVector(10.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNSpherePickerTests_IsPointInsideOrOn_Shell_Hole, "NEXUS::UnitTests::NPicker::FNSpherePicker::IsPointInsideOrOn_Shell_Hole", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_FALSE_MESSAGE(TEXT("Point strictly inside the inner radius should be excluded"),
+		FNSpherePicker::IsPointInsideOrOn(FVector::ZeroVector, 5.f, 10.f, FVector(2.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNSpherePickerTests_IsPointInsideOrOn_Shell_NoHoleIncludesCenter, "NEXUS::UnitTests::NPicker::FNSpherePicker::IsPointInsideOrOn_Shell_NoHoleIncludesCenter", N_TEST_CONTEXT_ANYWHERE)
+{
+	// With a zero inner radius there is no hole, so the center is part of the shell.
+	CHECK_MESSAGE(TEXT("Center should be inside the shell when MinimumRadius is 0"),
+		FNSpherePicker::IsPointInsideOrOn(FVector::ZeroVector, 0.f, 10.f, FVector::ZeroVector));
+}
+
+N_TEST_HIGH(FNSpherePickerTests_IsPointInside_Strict, "NEXUS::UnitTests::NPicker::FNSpherePicker::IsPointInside_Strict", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point strictly inside should be inside"),
+		FNSpherePicker::IsPointInside(FVector::ZeroVector, 10.f, FVector(5.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point on the surface should not be strictly inside"),
+		FNSpherePicker::IsPointInside(FVector::ZeroVector, 10.f, FVector(10.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point outside should not be strictly inside"),
+		FNSpherePicker::IsPointInside(FVector::ZeroVector, 10.f, FVector(20.f, 0.f, 0.f)));
+}
+
 #endif //WITH_TESTS

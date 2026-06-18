@@ -23,11 +23,12 @@ void UNTextRenderComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Ensure an owner is replicating
-	if (!GetOwner()->GetIsReplicated())
+	// Replicated text only propagates if the owning actor itself replicates; warn rather than silently
+	// mutating the owner's network behavior.
+	const AActor* Owner = GetOwner();
+	if (bShouldCheckReplication && Owner != nullptr && !Owner->GetIsReplicated())
 	{
-		UE_LOG(LogNexusUI, Warning, TEXT("NTextRenderComponent(%s) turned on replication for its Owner(%s); was this a mistake?"), *GetName(), *GetOwner()->GetActorNameOrLabel());
-		GetOwner()->SetReplicates(true);
+		UE_LOG(LogNexusUI, Error, TEXT("NTextRenderComponent(%s)'s Owner(%s) is not replicated, so replicated text will not propagate. Enable replication on the owning actor, or disable bShouldCheckReplication on this component."), *GetName(), *Owner->GetActorNameOrLabel());
 	}
 
 	if (!IsRunningDedicatedServer())

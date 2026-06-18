@@ -7,7 +7,7 @@
 #include "Engine/World.h"
 #include "NavigationSystem.h"
 #include "NPickerParams.h"
-#include "NPickerUtils.h"
+#include "NPickerSettings.h"
 // ON_SCOPE_EXIT is used by the navmesh projection path.
 #include "Misc/ScopeExit.h"
 
@@ -32,13 +32,18 @@ public:
 	template <typename FGeneratePoint>
 	static void Emit(TArray<FVector>& OutLocations, UWorld* CachedWorld, const FNPickerParams& Params, FGeneratePoint&& GeneratePoint)
 	{
+		if (Params.ProjectionMode != ENPickerProjectionMode::None && CachedWorld == nullptr)
+		{
+			UE_LOG(LogNexusPicker, Warning, TEXT("A ProjectionMode is set but no world is available (CachedWorld is null); points will be returned unprojected. Ensure a valid WorldContext is supplied, or set Params.CachedWorld before generating points."));
+		}
 		if (Params.ProjectionMode == ENPickerProjectionMode::Trace && CachedWorld != nullptr)
 		{
+			const FCollisionQueryParams CollisionQueryParams = UNPickerSettings::Get()->MakeCollisionQueryParams();
 			FHitResult HitResult(ForceInit);
 			for (int32 i = 0; i < Params.Count; i++)
 			{
 				FVector Location = GeneratePoint();
-				if (CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, FNPickerUtils::CollisionQueryParams))
+				if (CachedWorld->LineTraceSingleByChannel(HitResult, Location, (Location + Params.Projection), Params.CollisionChannel, CollisionQueryParams))
 				{
 					Location = HitResult.Location;
 				}
@@ -47,6 +52,9 @@ public:
 		}
 		else if (Params.ProjectionMode == ENPickerProjectionMode::NearestNavMeshV1 && CachedWorld != nullptr)
 		{
+			const UNPickerSettings* Settings = UNPickerSettings::Get();
+			const FVector NavQueryExtent = Settings->NavQueryExtent;
+			const FNavAgentProperties NavAgentProperties(Settings->NavAgentRadius, Settings->NavAgentHeight);
 			UNavigationSystemV1* NavigationSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(CachedWorld);
 			FNavLocation NavLocation;
 			int32 NavMeshProjectionFailures = 0;
@@ -68,7 +76,7 @@ public:
 						OutLocations.Add(Location);
 						continue;
 					}
-					if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, FNPickerUtils::NavQueryExtent, &FNPickerUtils::NavAgentProperties))
+					if (NavigationSystem->ProjectPointToNavigation(Location, NavLocation, NavQueryExtent, &NavAgentProperties))
 					{
 						if (Location != NavLocation.Location)
 						{

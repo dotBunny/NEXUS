@@ -63,6 +63,7 @@ public:
 	 * @param Rotation The rotation of the rectangle around its center.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the plane of the rectangle, false otherwise.
+	 * @note Inclusive: a point exactly on an edge returns true.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, const FVector& Point)
 	{
@@ -70,30 +71,64 @@ public:
 		const FVector LocalPoint = RotationMatrix.InverseTransformPosition(Point - Origin);
 		const float ExtentX = Dimensions.X * 0.5f;
 		const float ExtentY = Dimensions.Y * 0.5f;
-		
+
 		return LocalPoint.X >= -ExtentX && LocalPoint.X <= ExtentX &&
 			   LocalPoint.Y >= -ExtentY && LocalPoint.Y <= ExtentY;
 	}
 
 	/**
-	 * Checks if multiple points are inside or on the plane of a rectangle.
+	 * Checks if a point is strictly inside the plane of a rectangle, excluding its edges.
+	 * Takes into account the rotation of the rectangle, if any.
+	 * @param Origin The center point of the rectangle.
+	 * @param Dimensions The width and height of the rectangle (X and Y values).
+	 * @param Rotation The rotation of the rectangle around its center.
+	 * @param Point The point to check.
+	 * @return True if the point is strictly inside the rectangle, false if on an edge or outside.
+	 */
+	FORCEINLINE static bool IsPointInside(const FVector& Origin, const FVector2D& Dimensions, const FRotator& Rotation, const FVector& Point)
+	{
+		const FMatrix RotationMatrix = FRotationMatrix::Make(Rotation);
+		const FVector LocalPoint = RotationMatrix.InverseTransformPosition(Point - Origin);
+		const float ExtentX = Dimensions.X * 0.5f;
+		const float ExtentY = Dimensions.Y * 0.5f;
+
+		return LocalPoint.X > -ExtentX && LocalPoint.X < ExtentX &&
+			   LocalPoint.Y > -ExtentY && LocalPoint.Y < ExtentY;
+	}
+
+	/**
+	 * Checks if a point is inside or on the band between two concentric rectangles.
+	 * @param Origin The center point of the rectangle.
+	 * @param MinimumDimensions The minimum dimensions of the rectangle.
+	 * @param MaximumDimensions The maximum dimensions of the rectangle.
+	 * @param Rotation The rotation of the rectangle around its center.
+	 * @param Point The point to check.
+	 * @return True if the point is inside or on the rectangular band, false otherwise.
+	 * @note Closed band: points on the inner OR outer edge are included; only points strictly inside MinimumDimensions (the hole) are excluded. When MinimumDimensions is zero there is no hole, so the center is included.
+	 */
+	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation, const FVector& Point)
+	{
+		return IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point) && !IsPointInside(Origin, MinimumDimensions, Rotation, Point);
+	}
+
+	/**
+	 * Checks if multiple points are inside or on the band between two concentric rectangles.
 	 * @param Points The array of points to check.
 	 * @param Origin The center point of the rectangle.
 	 * @param MinimumDimensions The minimum dimensions of the rectangle.
 	 * @param MaximumDimensions The maximum dimensions of the rectangle.
 	 * @param Rotation The rotation of the rectangle around its center.
-	 * @return An array of boolean values indicating if each point is inside or on the surface of the rectangle.
+	 * @return An array of boolean values indicating if each point is inside or on the rectangular band.
+	 * @note Closed band: points on the inner OR outer edge are included; only points strictly inside MinimumDimensions (the hole) are excluded. When MinimumDimensions is zero there is no hole, so every point inside or on MaximumDimensions (including the center) is included.
 	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FVector2D& MinimumDimensions, const FVector2D& MaximumDimensions, const FRotator& Rotation = FRotator::ZeroRotator)
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
-			const bool bValid = IsPointInsideOrOn(Origin, MaximumDimensions, Rotation, Point)
-							 && !IsPointInsideOrOn(Origin, MinimumDimensions, Rotation, Point);
-			OutResults.Add(bValid);
+			OutResults.Add(IsPointInsideOrOn(Origin, MinimumDimensions, MaximumDimensions, Rotation, Point));
 		}
 		return OutResults;
 	}

@@ -127,4 +127,50 @@ N_TEST_HIGH(FNBoxPickerTests_Random_PointsInsideBounds, "NEXUS::UnitTests::NPick
 	}
 }
 
+N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Shell_InnerBoundary, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_Shell_InnerBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A point exactly on the inner surface is part of the closed shell.
+	const FBox MinBox(FVector(-5.f), FVector(5.f));
+	const FBox MaxBox(FVector(-10.f), FVector(10.f));
+	CHECK_MESSAGE(TEXT("Point on the inner surface should be inside the shell"),
+		FNBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, MinBox, MaxBox, FVector(5.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Shell_OuterBoundary, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_Shell_OuterBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	const FBox MinBox(FVector(-5.f), FVector(5.f));
+	const FBox MaxBox(FVector(-10.f), FVector(10.f));
+	CHECK_MESSAGE(TEXT("Point on the outer surface should be inside the shell"),
+		FNBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, MinBox, MaxBox, FVector(10.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Shell_Hole, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_Shell_Hole", N_TEST_CONTEXT_ANYWHERE)
+{
+	const FBox MinBox(FVector(-5.f), FVector(5.f));
+	const FBox MaxBox(FVector(-10.f), FVector(10.f));
+	CHECK_FALSE_MESSAGE(TEXT("Point strictly inside the inner box should be excluded"),
+		FNBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, MinBox, MaxBox, FVector(2.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNBoxPickerTests_IsPointInsideOrOn_Shell_NoHoleIncludesCenter, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInsideOrOn_Shell_NoHoleIncludesCenter", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A zero-size inner box leaves no hole, so the center is part of the shell.
+	const FBox MinBox(FVector::ZeroVector, FVector::ZeroVector);
+	const FBox MaxBox(FVector(-10.f), FVector(10.f));
+	CHECK_MESSAGE(TEXT("Center should be inside the shell when the inner box is empty"),
+		FNBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, MinBox, MaxBox, FVector::ZeroVector));
+}
+
+N_TEST_HIGH(FNBoxPickerTests_IsPointInside_Strict, "NEXUS::UnitTests::NPicker::FNBoxPicker::IsPointInside_Strict", N_TEST_CONTEXT_ANYWHERE)
+{
+	const FVector Origin(0.f);
+	const FBox Box(FVector(-10.f), FVector(10.f));
+	CHECK_MESSAGE(TEXT("Point strictly inside should be inside"),
+		FNBoxPicker::IsPointInside(Origin, Box, FVector(5.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point on the surface should not be strictly inside"),
+		FNBoxPicker::IsPointInside(Origin, Box, FVector(10.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point outside should not be strictly inside"),
+		FNBoxPicker::IsPointInside(Origin, Box, FVector(20.f, 0.f, 0.f)));
+}
+
 #endif //WITH_TESTS

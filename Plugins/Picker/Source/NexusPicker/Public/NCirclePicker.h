@@ -64,6 +64,7 @@ public:
 	 * @param Rotation The rotation of the circle plane.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the perimeter of the circle, false otherwise.
+	 * @note Closed annulus: points on the inner OR outer radius are included; only points strictly inside MinimumRadius (the hole) are excluded. When MinimumRadius is 0 there is no hole, so the center is included.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const float MinimumRadius, const float MaximumRadius, const FRotator& Rotation, const FVector& Point)
 	{

@@ -206,4 +206,40 @@ N_TEST_HIGH(FNOrientedBoxPickerTests_Next_PointsInsideRotatedBox, "NEXUS::UnitTe
 	}
 }
 
+N_TEST_HIGH(FNOrientedBoxPickerTests_IsPointInsideOrOn_Shell_InnerBoundary, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::IsPointInsideOrOn_Shell_InnerBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A point exactly on the inner surface is part of the closed shell.
+	CHECK_MESSAGE(TEXT("Point on the inner surface should be inside the shell"),
+		FNOrientedBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, FVector(10.f), FVector(20.f), FRotator::ZeroRotator, FVector(5.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerTests_IsPointInsideOrOn_Shell_OuterBoundary, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::IsPointInsideOrOn_Shell_OuterBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point on the outer surface should be inside the shell"),
+		FNOrientedBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, FVector(10.f), FVector(20.f), FRotator::ZeroRotator, FVector(10.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerTests_IsPointInsideOrOn_Shell_Hole, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::IsPointInsideOrOn_Shell_Hole", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_FALSE_MESSAGE(TEXT("Point strictly inside the inner box should be excluded"),
+		FNOrientedBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, FVector(10.f), FVector(20.f), FRotator::ZeroRotator, FVector(2.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerTests_IsPointInsideOrOn_Shell_NoHoleIncludesCenter, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::IsPointInsideOrOn_Shell_NoHoleIncludesCenter", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Zero inner dimensions leave no hole, so the center is part of the shell.
+	CHECK_MESSAGE(TEXT("Center should be inside the shell when MinimumDimensions is zero"),
+		FNOrientedBoxPicker::IsPointInsideOrOn(FVector::ZeroVector, FVector::ZeroVector, FVector(20.f), FRotator::ZeroRotator, FVector::ZeroVector));
+}
+
+N_TEST_HIGH(FNOrientedBoxPickerTests_IsPointInside_Strict, "NEXUS::UnitTests::NPicker::FNOrientedBoxPicker::IsPointInside_Strict", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point strictly inside should be inside"),
+		FNOrientedBoxPicker::IsPointInside(FVector::ZeroVector, FVector(20.f), FRotator::ZeroRotator, FVector(5.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point on the surface should not be strictly inside"),
+		FNOrientedBoxPicker::IsPointInside(FVector::ZeroVector, FVector(20.f), FRotator::ZeroRotator, FVector(10.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point outside should not be strictly inside"),
+		FNOrientedBoxPicker::IsPointInside(FVector::ZeroVector, FVector(20.f), FRotator::ZeroRotator, FVector(20.f, 0.f, 0.f)));
+}
+
 #endif //WITH_TESTS

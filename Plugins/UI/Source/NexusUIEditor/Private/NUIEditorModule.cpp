@@ -4,6 +4,7 @@
 #include "NUIEditorModule.h"
 
 #include "NEditorUtils.h"
+#include "NPropertySections.h"
 #include "NUIEditorStyle.h"
 #include "Interfaces/IPluginManager.h"
 #include "Modules/ModuleManager.h"
@@ -22,12 +23,12 @@ void FNUIEditorModule::ShutdownModule()
 	FNUIEditorStyle::Shutdown();
 }
 
-
 void FNUIEditorModule::OnPostEngineInit()
 {
 	if (!FNEditorUtils::IsUserControlled()) return;
 	
 	FNUIEditorStyle::Initialize();
+	FNPropertySections::AddSceneComponentCategory("Text Render Component");
 }
 
 IMPLEMENT_MODULE(FNUIEditorModule, NexusUIEditor)

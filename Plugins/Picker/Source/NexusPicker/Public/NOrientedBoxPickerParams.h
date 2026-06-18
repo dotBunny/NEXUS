@@ -44,6 +44,8 @@ struct NEXUSPICKER_API FNOrientedBoxPickerParams : public FNPickerParams
 	{
 		Rotation = FMatrix(OrientedBox.AxisX, OrientedBox.AxisY, OrientedBox.AxisZ, FVector::ZeroVector).Rotator();
 		Origin = OrientedBox.Center;
+		// An FOrientedBox has no inner hole, so clear any stale shell config from a reused struct
+		MinimumDimensions = FVector::ZeroVector;
 		// Dimensions are local-space (Rotation is applied on top), so use the extents directly
 		MaximumDimensions = FVector(OrientedBox.ExtentX, OrientedBox.ExtentY, OrientedBox.ExtentZ) * 2.0f;
 	}

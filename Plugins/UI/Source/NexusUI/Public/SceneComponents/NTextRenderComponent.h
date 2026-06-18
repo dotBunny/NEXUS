@@ -28,6 +28,10 @@ public:
 	virtual void BeginPlay() override;
 	//End UActorComponent
 
+	/** When true, BeginPlay verifies the owning actor is replicated and logs an error if it is not. Disable to silence the check on owners that are intentionally non-replicated. */
+	UPROPERTY(EditAnywhere, Category = "Text Render Component")
+	bool bShouldCheckReplication = true;
+
 	/** The currently-authoritative text value; replicated from the server to every client via OnRep_TextValue. */
 	UPROPERTY(Replicated, ReplicatedUsing=OnRep_TextValue)
 	FString CachedValue;

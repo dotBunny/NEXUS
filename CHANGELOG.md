@@ -9,6 +9,7 @@
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 - `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.
+- `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
 
 ### Changed
 
@@ -23,6 +24,7 @@
 - Created `UNMersenneTwisterObject` to hold a twister to be used for deterministic random in a wider scope, Blueprint-exposed under the `NEXUS|Core|Random` category (`Seed`, `Random Bool`, `Random Bools`, `Random Integer In Range`).
 - Consolidated `Twisted` to `Next` concept/naming.
 - Cell junction `Requirements` now respected, weights for junctions are automatically doubled when they are `Required`.
+- `UNTextRenderComponent` now warns about replication instead of setting it, with a toggle.
 
 ### Fixed
 
@@ -39,6 +41,7 @@
 - Junctions no longer store if they are inside of a hull.
 - `ANPooledActor` from the placement pallete.
 - `ANCellLevelInstance` no longer maintains state before the choice to place it in the graph.
+- `FNPickerUtils` static projection configuration (`CollisionQueryParams`, `NavQueryExtent`, `NavAgentProperties`) replaced by `UNPickerSettings`.
 
 ### Core Redirects
 

@@ -104,6 +104,13 @@ N_TEST_HIGH(FNCirclePickerTests_IsPointInsideOrOn_InsideHole, "NEXUS::UnitTests:
 		FNCirclePicker::IsPointInsideOrOn(FVector::ZeroVector, 5.f, 10.f, FRotator::ZeroRotator, FVector::ZeroVector));
 }
 
+N_TEST_HIGH(FNCirclePickerTests_IsPointInsideOrOn_InnerBoundary, "NEXUS::UnitTests::NPicker::FNCirclePicker::IsPointInsideOrOn_InnerBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A point exactly on the inner radius is part of the closed annulus.
+	CHECK_MESSAGE(TEXT("Point on the inner radius should be inside the annulus"),
+		FNCirclePicker::IsPointInsideOrOn(FVector::ZeroVector, 5.f, 10.f, FRotator::ZeroRotator, FVector(5.f, 0.f, 0.f)));
+}
+
 N_TEST_HIGH(FNCirclePickerTests_Tracked_Determinism, "NEXUS::UnitTests::NPicker::FNCirclePicker::Tracked_Determinism", N_TEST_CONTEXT_ANYWHERE)
 {
 	FNCirclePickerParams Params;

@@ -61,6 +61,7 @@ public:
 	 * @param Box The FBox to check the point against.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the surface of the FBox, false otherwise.
+	 * @note Inclusive: a point exactly on the surface returns true.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& Box, const FVector& Point)
 	{
@@ -68,23 +69,48 @@ public:
 	}
 
 	/**
-	 * Checks if multiple points are inside or on the surface of the axis-aligned FBox.
+	 * Checks if a point is strictly inside the axis-aligned FBox, excluding its surface.
+	 * @param Origin The world-space origin the FBox is offset from.
+	 * @param Box The FBox to check the point against.
+	 * @param Point The point to check.
+	 * @return True if the point is strictly inside the FBox, false if on the surface or outside.
+	 */
+	FORCEINLINE static bool IsPointInside(const FVector& Origin, const FBox& Box, const FVector& Point)
+	{
+		return Box.ShiftBy(Origin).IsInside(Point);
+	}
+
+	/**
+	 * Checks if a point is inside or on the shell between two concentric axis-aligned boxes.
+	 * @param Origin The world-space origin the boxes are offset from.
+	 * @param MinimumBox The minimum FBox.
+	 * @param MaximumBox The maximum FBox.
+	 * @param Point The point to check.
+	 * @return True if the point is inside or on the box shell, false otherwise.
+	 * @note Closed shell: points on the inner OR outer surface are included; only points strictly inside MinimumBox (the hole) are excluded. When MinimumBox is empty there is no hole, so the center is included.
+	 */
+	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox, const FVector& Point)
+	{
+		return IsPointInsideOrOn(Origin, MaximumBox, Point) && !IsPointInside(Origin, MinimumBox, Point);
+	}
+
+	/**
+	 * Checks if multiple points are inside or on the shell between two concentric axis-aligned boxes.
 	 * @param Points The array of points to check.
 	 * @param Origin The world-space origin the boxes are offset from.
 	 * @param MinimumBox The minimum FBox.
 	 * @param MaximumBox The maximum FBox.
-	 * @return An array of boolean values indicating if each point is inside or on the surface of the FBox.
+	 * @return An array of boolean values indicating if each point is inside or on the box shell.
+	 * @note Closed shell: points on the inner OR outer surface are included; only points strictly inside MinimumBox (the hole) are excluded. When MinimumBox is empty there is no hole, so every point inside or on MaximumBox (including the center) is included.
 	 */
 	FORCEINLINE static TArray<bool> IsPointsInsideOrOn(const TArray<FVector>& Points, const FVector& Origin, const FBox& MinimumBox, const FBox& MaximumBox)
 	{
 		TArray<bool> OutResults;
 		OutResults.Reserve(Points.Num());
-		
+
 		for (const FVector& Point : Points)
 		{
-			const bool bValid = IsPointInsideOrOn(Origin, MaximumBox, Point)
-							 && !IsPointInsideOrOn(Origin, MinimumBox, Point);
-			OutResults.Add(bValid);
+			OutResults.Add(IsPointInsideOrOn(Origin, MinimumBox, MaximumBox, Point));
 		}
 		return OutResults;
 	}

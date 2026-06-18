@@ -12,6 +12,10 @@
 
 void UNDeveloperOverlay::NativeConstruct()
 {
+	Super::NativeConstruct();
+
+	// ContainerBanner is optional for delegate wiring; validate only to log a message so a designer
+	// realizes they haven't hooked up the widget. This is intentionally not an early-out.
 	N_VALIDATE(LogNexusUI, ContainerBanner);
 
 	AddWorldDelegateHandle = FWorldDelegates::OnPostWorldInitialization.AddUObject(
@@ -20,8 +24,6 @@ void UNDeveloperOverlay::NativeConstruct()
 		this, &UNDeveloperOverlay::OnWorldBeginTearDown);
 
 	BindAllCurrentWorlds();
-
-	Super::NativeConstruct();
 }
 
 void UNDeveloperOverlay::NativeDestruct()

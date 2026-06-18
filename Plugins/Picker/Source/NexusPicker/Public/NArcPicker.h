@@ -64,6 +64,7 @@ public:
 	 * @param MaximumDistance The maximum distance of the arc.
 	 * @param Point The point to check.
 	 * @return True if the point is inside or on the arc, false otherwise.
+	 * @note Closed annulus sector: points on the inner OR outer distance (and on the angular edges) are included; only points strictly inside MinimumDistance (the hole) are excluded. When MinimumDistance is 0 there is no hole, so the center is included.
 	 */
 	FORCEINLINE static bool IsPointInsideOrOn(const FVector& Origin, const FRotator& Rotation, const float& Degrees, const float& MinimumDistance, const float& MaximumDistance, const FVector& Point)
 	{

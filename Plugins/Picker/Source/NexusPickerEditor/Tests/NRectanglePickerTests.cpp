@@ -178,4 +178,40 @@ N_TEST_HIGH(FNRectanglePickerTests_Next_HollowPointsInsideOuter, "NEXUS::UnitTes
 	}
 }
 
+N_TEST_HIGH(FNRectanglePickerTests_IsPointInsideOrOn_Band_InnerBoundary, "NEXUS::UnitTests::NPicker::FNRectanglePicker::IsPointInsideOrOn_Band_InnerBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	// A point exactly on the inner edge is part of the closed band.
+	CHECK_MESSAGE(TEXT("Point on the inner edge should be inside the band"),
+		FNRectanglePicker::IsPointInsideOrOn(FVector::ZeroVector, FVector2D(10.f, 10.f), FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(5.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_IsPointInsideOrOn_Band_OuterBoundary, "NEXUS::UnitTests::NPicker::FNRectanglePicker::IsPointInsideOrOn_Band_OuterBoundary", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point on the outer edge should be inside the band"),
+		FNRectanglePicker::IsPointInsideOrOn(FVector::ZeroVector, FVector2D(10.f, 10.f), FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(10.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_IsPointInsideOrOn_Band_Hole, "NEXUS::UnitTests::NPicker::FNRectanglePicker::IsPointInsideOrOn_Band_Hole", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_FALSE_MESSAGE(TEXT("Point strictly inside the inner rectangle should be excluded"),
+		FNRectanglePicker::IsPointInsideOrOn(FVector::ZeroVector, FVector2D(10.f, 10.f), FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(2.f, 0.f, 0.f)));
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_IsPointInsideOrOn_Band_NoHoleIncludesCenter, "NEXUS::UnitTests::NPicker::FNRectanglePicker::IsPointInsideOrOn_Band_NoHoleIncludesCenter", N_TEST_CONTEXT_ANYWHERE)
+{
+	// Zero inner dimensions leave no hole, so the center is part of the band.
+	CHECK_MESSAGE(TEXT("Center should be inside the band when MinimumDimensions is zero"),
+		FNRectanglePicker::IsPointInsideOrOn(FVector::ZeroVector, FVector2D::ZeroVector, FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector::ZeroVector));
+}
+
+N_TEST_HIGH(FNRectanglePickerTests_IsPointInside_Strict, "NEXUS::UnitTests::NPicker::FNRectanglePicker::IsPointInside_Strict", N_TEST_CONTEXT_ANYWHERE)
+{
+	CHECK_MESSAGE(TEXT("Point strictly inside should be inside"),
+		FNRectanglePicker::IsPointInside(FVector::ZeroVector, FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(5.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point on the edge should not be strictly inside"),
+		FNRectanglePicker::IsPointInside(FVector::ZeroVector, FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(10.f, 0.f, 0.f)));
+	CHECK_FALSE_MESSAGE(TEXT("Point outside should not be strictly inside"),
+		FNRectanglePicker::IsPointInside(FVector::ZeroVector, FVector2D(20.f, 20.f), FRotator::ZeroRotator, FVector(20.f, 0.f, 0.f)));
+}
+
 #endif //WITH_TESTS
