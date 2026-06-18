@@ -8,7 +8,7 @@
 #include "NCheckBox.generated.h"
 
 /**
- * A wrapper around the UNCheckBox class to allow for setting the checked state without broadcasting events.
+ * A wrapper around the UCheckBox class to allow for setting the checked state without broadcasting events.
  * @see <a href="https://nexus-framework.com/docs/plugins/ui/types/components/check-box/">UNCheckBox</a>
  */
 UCLASS(DisplayName = "NEXUS | CheckBox", ClassGroup = UI, meta = (Category = "NEXUS"))

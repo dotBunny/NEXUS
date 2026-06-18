@@ -1,24 +1,23 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
 
-#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NColor.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Border.h"
 #include "NUIMinimal.h"
-#include "Macros/NValidationMacros.h"
 #include "NTextListViewEntry.generated.h"
 
+class UBorder;
+class UCommonTextBlock;
 
 /**
  * Data model for a single row in a UNListView of text labels. Tracks text plus optional
  * foreground/background color overrides via the bHas* flags so unset colors fall through to
  * the entry widget's defaults.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, DisplayName = "NEXUS | Text List Entry")
 class NEXUSUI_API UNTextListEntry : public UObject
 {
 	GENERATED_BODY()
@@ -92,7 +91,7 @@ private:
 
 /**
  * List-view entry widget that renders a UBorder + UCommonTextBlock driven by a bound
- * UNTextListViewEntryObject. Used as a lightweight label row in UNListView controls.
+ * UNTextListEntry. Used as a lightweight label row in UNListView controls.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Text ListView Entry", BlueprintType, Blueprintable, HideDropdown)
 class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEntry
@@ -100,40 +99,14 @@ class NEXUSUI_API UNTextListViewEntry : public UUserWidget, public INListViewEnt
 	GENERATED_BODY()
 
 protected:
-	
-	virtual void NativeConstruct() override
-	{
-		Super::NativeConstruct();
-		
-		// Will validate it here only to throw a message in log for someone to realize they haven't hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, Text);
-		N_VALIDATE(LogNexusUI, Container);
-	}
+
+	virtual void NativeConstruct() override;
+
 	//~INListViewEntry
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
-	{
-		const UNTextListEntry* TextObject = Cast<UNTextListEntry>(ListItemObject);
-		if (TextObject != nullptr)
-		{
-			SetText(TextObject->GetText());
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
-			if (TextObject->HasForegroundColor())
-			{
-				SetTextColor(TextObject->GetForegroundColor());
-			}
-			if (TextObject->HasBackgroundColor())
-			{
-				SetBackgroundColor(TextObject->GetBackgroundColor());
-			}
-		}
-	}
-
-public:	
-	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
-	{
-		OwnerListView = Owner;
-		Execute_OnSetOwnerListView(Widget, Owner);
-	}
+public:
+	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override;
 	//End INListViewEntry
 
 
@@ -142,30 +115,21 @@ public:
 	 * @param NewText The text to display in the row.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetText(const FText NewText) const
-	{
-		Text->SetText(NewText);
-	}
+	void SetText(const FText NewText) const;
 
 	/**
 	 * Applies a palette color to the text block's color-and-opacity.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the text.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetTextColor(ENColor NewColor) const
-	{
-		Text->SetColorAndOpacity(FNColor::GetLinearColor(NewColor));
-	}
+	void SetTextColor(ENColor NewColor) const;
 
 	/**
 	 * Applies a palette color to the container border's brush.
 	 * @param NewColor The ENColor palette entry used to resolve the FLinearColor applied to the border.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|UI")
-	void SetBackgroundColor(ENColor NewColor) const
-	{
-		Container->SetBrushColor(FNColor::GetLinearColor(NewColor));
-	}
+	void SetBackgroundColor(ENColor NewColor) const;
 
 protected:
 	/** Back-pointer to the list view that owns this entry; set by INListViewEntry::SetOwnerListView. */

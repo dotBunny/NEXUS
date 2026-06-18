@@ -3,6 +3,10 @@
 
 #include "Widgets/NDeveloperOverlay.h"
 
+#include "CommonBorder.h"
+#include "CommonTextBlock.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
 #include "NUIMinimal.h"
 #include "Macros/NValidationMacros.h"
 

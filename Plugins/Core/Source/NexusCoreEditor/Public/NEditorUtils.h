@@ -7,6 +7,7 @@
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
+class FConfigFile;
 class UAsyncEditorDelay;
 
 /**
@@ -154,11 +155,23 @@ public:
 	 */
 	static TArray<FString> GetSelectedContentBrowserPaths();
 	
-	/** Marks Config so it will not be bundled with staged/packaged builds. */
+	/** Marks Config so it will not be bundled with staged/packaged builds (undoes AllowConfigFileForStaging). */
 	static void DisallowConfigFileFromStaging(const FString& Config);
 
 	/** Marks Config so it will be bundled with staged/packaged builds (undoes DisallowConfigFileFromStaging). */
 	static void AllowConfigFileForStaging(const FString& Config);
+
+	/**
+	 * Adds RelativeConfig to AddArrayKey and prunes it from RemoveArrayKey within ConfigFile's [Staging]
+	 * section, so a config never lingers in both lists. Operates purely on ConfigFile — no disk I/O.
+	 * @param ConfigFile The config to mutate in place.
+	 * @param RelativeConfig The project-relative ini path to add (e.g. "NEXUS/Config/Foo.ini").
+	 * @param AddArrayKey The Staging array to add RelativeConfig to.
+	 * @param RemoveArrayKey The opposing Staging array to prune RelativeConfig from.
+	 * @return true if ConfigFile was modified.
+	 */
+	static bool ApplyStagingConfigEntry(FConfigFile& ConfigFile, const FString& RelativeConfig,
+		const TCHAR* AddArrayKey, const TCHAR* RemoveArrayKey);
 
 
 	/** Returns the absolute path to Engine/Binaries. */

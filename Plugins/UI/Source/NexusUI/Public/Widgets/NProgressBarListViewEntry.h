@@ -85,7 +85,7 @@ public:
 	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
 	{
 		OwnerListView = Owner;
-		Execute_OnSetOwnerListView(Widget, Owner);
+		INListViewEntry::SetOwnerListView(Widget, Owner);
 	}
 
 	/** Clear all text fields and the progress bar — used between operations and on destruct. */
@@ -137,4 +137,11 @@ private:
 	/** The data object backing this row; nulled when the entry is released. */
 	UPROPERTY()
 	TObjectPtr<UNProgressBarListEntry> Data = nullptr;
+
+	/**
+	 * Last whole-percent value pushed into RightText, used to skip redundant SetText (and the Slate
+	 * relayout it triggers) when the coarse OnChanged broadcast fires without the rounded percent changing.
+	 * Seeded to MIN_int32 so the first update always paints, and reset in Reset() so recycled entries repaint.
+	 */
+	mutable int32 LastShownPercent = MIN_int32;
 };

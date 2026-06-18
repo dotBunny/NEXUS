@@ -168,16 +168,17 @@ TArray<FString> FNEditorUtils::GetSelectedContentBrowserPaths()
 	return SelectedPaths;
 }
 
-void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
+// Loads the project's DefaultGame.ini, applies the add/prune in ApplyStagingConfigEntry, and flushes to
+// disk when something changed. AddArrayKey selects the list to add to, RemoveArrayKey the one to prune
+// ("+AllowedConfigFiles"/"+DisallowedConfigFiles"), and ActionVerb is woven into the log messages.
+static void SetStagingConfigEntry(const FString& Config, const TCHAR* AddArrayKey, const TCHAR* RemoveArrayKey, const TCHAR* ActionVerb)
 {
-	const TCHAR* StagingSectionKey = TEXT("Staging");
-	const TCHAR* DisallowedConfigFilesKey = TEXT("+DisallowedConfigFiles");
 	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
 	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
-	
+
 	if (!GConfig->IsReadyForUse())
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to modify the DefaultGame.ini to disallow Config(%s) from staging due to the GConfig not being ready for use."), *Config);
+		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to modify the DefaultGame.ini to %s Config(%s) from staging due to the GConfig not being ready for use."), ActionVerb, *Config);
 		return;
 	}
 
@@ -190,68 +191,59 @@ void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
 		GConfig->AddNewBranch(ProjectDefaultGamePath);
 		UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Creating missing branch(%s) in GConfig for Config(%s)"), *ProjectDefaultGamePath, *Config);
 	}
-	
-	TArray<FString> DisallowedConfigFiles;
+
 	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
 	if (ProjectDefaultGameConfig == nullptr)
 	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to disallow Config(%s)."), *Config);
+		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to %s Config(%s)."), ActionVerb, *Config);
 		return;
 	}
-	
-	ProjectDefaultGameConfig->GetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
-	if (!DisallowedConfigFiles.Contains(RelativeConfig))
+
+	if (FNEditorUtils::ApplyStagingConfigEntry(*ProjectDefaultGameConfig, RelativeConfig, AddArrayKey, RemoveArrayKey))
 	{
-		DisallowedConfigFiles.Add(RelativeConfig);
-		ProjectDefaultGameConfig->SetArray(StagingSectionKey, DisallowedConfigFilesKey, DisallowedConfigFiles);
-		UE_LOG(LogNexusCoreEditor, Log, TEXT("Updating DefaultGame.ini to disallow relative Config(%s)"), *RelativeConfig);
+		UE_LOG(LogNexusCoreEditor, Log, TEXT("Updating DefaultGame.ini to %s relative Config(%s)"), ActionVerb, *RelativeConfig);
 
 		// Save and close the file that shouldn't be open
 		GConfig->Flush(true, ProjectDefaultGamePath);
 	}
 }
 
-void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
+bool FNEditorUtils::ApplyStagingConfigEntry(FConfigFile& ConfigFile, const FString& RelativeConfig,
+	const TCHAR* AddArrayKey, const TCHAR* RemoveArrayKey)
 {
 	const TCHAR* StagingSectionKey = TEXT("Staging");
-	const TCHAR* AllowedConfigFilesKey = TEXT("+AllowedConfigFiles");
-	const FString ProjectDefaultGamePath = FPaths::ConvertRelativePathToFull(FString::Printf(TEXT("%sDefaultGame.ini"), *FPaths::ProjectConfigDir()));
-	const FString RelativeConfig = FString::Printf(TEXT("%s/Config/%s.ini"), FApp::GetProjectName(), *Config);
-	
-	if (!GConfig->IsReadyForUse())
+	bool bModified = false;
+
+	// Add to the target list.
+	TArray<FString> AddConfigFiles;
+	ConfigFile.GetArray(StagingSectionKey, AddArrayKey, AddConfigFiles);
+	if (!AddConfigFiles.Contains(RelativeConfig))
 	{
-		UE_LOG(LogNexusCoreEditor, Warning, TEXT("Unable to modify the DefaultGame.ini to allow Config(%s) from staging due to the GConfig not being ready for use."), *Config);
-		return;
+		AddConfigFiles.Add(RelativeConfig);
+		ConfigFile.SetArray(StagingSectionKey, AddArrayKey, AddConfigFiles);
+		bModified = true;
 	}
 
-	if (FPaths::FileExists(ProjectDefaultGamePath))
+	// Prune from the opposing list so the config never sits in both.
+	TArray<FString> RemoveConfigFiles;
+	ConfigFile.GetArray(StagingSectionKey, RemoveArrayKey, RemoveConfigFiles);
+	if (RemoveConfigFiles.Remove(RelativeConfig) > 0)
 	{
-		GConfig->LoadFile(ProjectDefaultGamePath);
+		ConfigFile.SetArray(StagingSectionKey, RemoveArrayKey, RemoveConfigFiles);
+		bModified = true;
 	}
-	else
-	{
-		GConfig->AddNewBranch(ProjectDefaultGamePath);
-		UE_LOG(LogNexusCoreEditor, Verbose, TEXT("Creating missing branch(%s) in GConfig for Config(%s)"), *ProjectDefaultGamePath, *Config);
-	}
-	
-	TArray<FString> AllowedConfigFiles;
-	FConfigFile* ProjectDefaultGameConfig = GConfig->FindConfigFile(ProjectDefaultGamePath);
-	if (ProjectDefaultGameConfig == nullptr)
-	{
-		UE_LOG(LogNexusCoreEditor, Error, TEXT("Unable to load project DefaultGame.ini to allow Config(%s)."), *Config);
-		return;
-	}
-	
-	ProjectDefaultGameConfig->GetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
-	if (!AllowedConfigFiles.Contains(RelativeConfig))
-	{
-		AllowedConfigFiles.Add(RelativeConfig);
-		ProjectDefaultGameConfig->SetArray(StagingSectionKey, AllowedConfigFilesKey, AllowedConfigFiles);
-		UE_LOG(LogNexusCoreEditor, Log, TEXT("Updating DefaultGame.ini to allow relative Config(%s)"), *RelativeConfig);
 
-		// Save and close the file that shouldn't be open
-		GConfig->Flush(true, ProjectDefaultGamePath);
-	}
+	return bModified;
+}
+
+void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)
+{
+	SetStagingConfigEntry(Config, TEXT("+DisallowedConfigFiles"), TEXT("+AllowedConfigFiles"), TEXT("disallow"));
+}
+
+void FNEditorUtils::AllowConfigFileForStaging(const FString& Config)
+{
+	SetStagingConfigEntry(Config, TEXT("+AllowedConfigFiles"), TEXT("+DisallowedConfigFiles"), TEXT("allow"));
 }
 
 void FNEditorUtils::SetTabClosedCallback(const FName& TabIdentifier, const SDockTab::FOnTabClosedCallback& OnTabClosedCallback)

@@ -18,7 +18,7 @@ public:
 	 * @param WidgetType The type of widget to find.
 	 * @return The found widget or nullptr if not found.
 	 */
-	static TSharedPtr<SWidget> FindFirstWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType);
+	static TSharedPtr<SWidget> FindFirstWidgetByType(const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType);
 	
 	/**
 	 * Attempts to find any SWidgets by type within a parent widget and its children.
@@ -27,7 +27,7 @@ public:
 	 * @param WidgetType The type of widget to find.
 	 * @param WidgetTypeStop The type of widget to stop recursively searching at.
 	 */
-	static void FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TSharedPtr<SWidget> ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop = NAME_None);
+	static void FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop = NAME_None);
 	
 	/**
 	 * Attempt to find the SDockTab for a given SWidget.

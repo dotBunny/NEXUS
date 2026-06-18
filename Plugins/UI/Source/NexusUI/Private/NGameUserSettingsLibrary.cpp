@@ -64,14 +64,22 @@ TArray<FString> UNGameUserSettingsLibrary::GetWindowModeStringSelections()
 
 FString UNGameUserSettingsLibrary::GetSelectionStringFromCurrentWindowMode()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionStringFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return DisplayModeTexts[0].ToString();
+	}
+	return GetSelectionStringFromWindowMode(Settings->GetFullscreenMode());
 }
 
 FText UNGameUserSettingsLibrary::GetSelectionTextFromCurrentWindowMode()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionTextFromWindowMode(GEngine->GetGameUserSettings()->GetFullscreenMode());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return DisplayModeTexts[0];
+	}
+	return GetSelectionTextFromWindowMode(Settings->GetFullscreenMode());
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionStringFromWindowMode(const EWindowMode::Type Mode)
@@ -110,8 +118,12 @@ FText UNGameUserSettingsLibrary::GetSelectionTextFromWindowMode(EWindowMode::Typ
 
 FString UNGameUserSettingsLibrary::GetSelectionFromCurrentDisplayResolution()
 {
-	// @remark: We are going to assume the GEngine exists at this point; no check!
-	return GetSelectionFromDisplayResolution(GEngine->GetGameUserSettings()->GetScreenResolution());
+	const UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr;
+	if (Settings == nullptr)
+	{
+		return FString();
+	}
+	return GetSelectionFromDisplayResolution(Settings->GetScreenResolution());
 }
 
 FString UNGameUserSettingsLibrary::GetSelectionFromDisplayResolution(const FIntPoint Resolution)

@@ -7,6 +7,7 @@
 #include "Widgets/NDeveloperOverlay.h"
 #include "NDynamicRefsDeveloperOverlay.generated.h"
 
+class UBorder;
 class UNDynamicRefObject;
 class UNListView;
 

@@ -84,11 +84,11 @@ public:
 
 	/**
 	 * Get the cached EWindowMode::Type selection FTexts.
-	 * @return The FTexts array holding the different cached selection strings.
+	 * @return A copy of the FText array holding the different cached selection labels.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get WindowMode Selections (Text)", Category = "NEXUS|User Interface|Game User Settings|Video",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/ui/types/game-user-settings-library/#get-windowmode-selections-text"))
-	static TArray<FText>& GetWindowModeTextSelections() { return DisplayModeTexts; };
+	static TArray<FText> GetWindowModeTextSelections() { return DisplayModeTexts; };
 
 	/**
 	 * Get the selection string from the current display resolution.

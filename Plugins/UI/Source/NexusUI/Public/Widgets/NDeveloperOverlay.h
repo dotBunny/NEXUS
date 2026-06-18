@@ -3,18 +3,19 @@
 
 #pragma once
 
-#include "CommonBorder.h"
-#include "CommonTextBlock.h"
 #include "NColor.h"
 #include "CommonUserWidget.h"
-#include "Engine/World.h"
 #include "NDeveloperOverlay.generated.h"
 
+class UCommonBorder;
+class UCommonTextBlock;
 class UVerticalBox;
 class UHorizontalBox;
 class UCommonHierarchicalScrollBox;
 class UNCheckBox;
 class UButton;
+class UWorld;
+struct FWorldInitializationValues;
 
 /**
  * Abstract base widget for NEXUS developer/diagnostic overlays. Supplies a banner row and a

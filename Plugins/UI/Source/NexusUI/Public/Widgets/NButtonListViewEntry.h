@@ -1,23 +1,23 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
 
-#include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NColor.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Button.h"
 #include "NUIMinimal.h"
-#include "Macros/NValidationMacros.h"
 #include "NButtonListViewEntry.generated.h"
+
+class UButton;
+class UCommonTextBlock;
 
 /**
  * Data model for a single row in a UNListView of buttons. Carries label text, per-state color
  * slots (hover/pressed/unhovered) and a TargetObject passed back through OnPressedEvent so each
  * button can act on a specific domain object.
  */
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, DisplayName = "NEXUS | Button List Entry")
 class NEXUSUI_API UNButtonListEntry : public UObject
 {
 	GENERATED_BODY()
@@ -73,7 +73,7 @@ private:
 
 /**
  * List-view entry widget that renders a UButton + UCommonTextBlock pair driven by a bound
- * UNButtonListViewEntryObject. Swaps background/foreground colors on hover/press/release
+ * UNButtonListEntry. Swaps background/foreground colors on hover/press/release
  * using the palette slots on the bound object.
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | Button ListView Entry", BlueprintType, Blueprintable, HideDropdown)
@@ -83,63 +83,15 @@ class NEXUSUI_API UNButtonListViewEntry : public UUserWidget, public INListViewE
 
 protected:
 	//~UUserWidget
-	virtual void NativeConstruct() override
-	{
-		Super::NativeConstruct();
-
-		// Will validate it here only to throw a message in log for someone to realize they havent hooked up the widget correctly.
-		N_VALIDATE(LogNexusUI, Text);
-		N_VALIDATE_RETURN_VOID(LogNexusUI, Button);
-		
-		
-		Button->OnClicked.AddDynamic(this, &UNButtonListViewEntry::OnButtonPressed);
-		Button->OnHovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonHovered);
-		Button->OnUnhovered.AddDynamic(this, &UNButtonListViewEntry::OnButtonUnhovered);
-		Button->OnReleased.AddDynamic(this, &UNButtonListViewEntry::OnButtonReleased);
-	}
-
-	virtual void NativeDestruct() override
-	{
-		if (IsValid(Button))
-		{
-			Button->OnClicked.RemoveAll(this);
-			Button->OnHovered.RemoveAll(this);
-			Button->OnUnhovered.RemoveAll(this);
-			Button->OnReleased.RemoveAll(this);
-		}
-
-		Super::NativeDestruct();
-	}
+	virtual void NativeConstruct() override;
+	virtual void NativeDestruct() override;
 	//End UUserWidget
 
 	//~INListViewEntry
-	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override
-	{
-		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(ListItemObject);
-		if (IsValid(ButtonObject))
-		{
-			SetText(ButtonObject->GetText());
-			Button->OnClicked.AddDynamic(ButtonObject, &UNButtonListEntry::OnPressed);
-			Object = ListItemObject;
-		}
-		OnButtonUnhovered();
-	}
-	
-	virtual void NativeOnEntryReleased() override
-	{
-		if (Object != nullptr)
-		{
-			const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
-			Button->OnClicked.RemoveAll(ButtonObject);
-			Object = nullptr;
-		}
-	}
+	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+	virtual void NativeOnEntryReleased() override;
 public:
-	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override
-	{
-		OwnerListView = Owner;
-		Execute_OnSetOwnerListView(Widget, Owner);
-	}
+	virtual void SetOwnerListView(UObject* Widget, UNListView* Owner) override;
 	//End INListViewEntry
 
 public:
@@ -148,70 +100,30 @@ public:
 	 * @param NewText The text to display on the button.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|User Interface")
-	void SetText(const FText NewText) const
-	{
-		Text->SetText(NewText);
-	}
+	void SetText(const FText NewText) const;
 
 protected:
 
+	/** Forwards a completed click on the bound button to the current entry object's OnPressedEvent. */
+	UFUNCTION()
+	void HandleClicked();
+
 	/** Applies the bound entry object's pressed-state colors to the button/text. */
 	UFUNCTION()
-	void OnButtonPressed()
-	{
-		if (Object == nullptr) return;
-		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
+	void OnButtonPressed();
 
-		if (ButtonObject != nullptr)
-		{
-			Button->SetBackgroundColor(FNColor::GetLinearColor(ButtonObject->PressedStateBackgroundColor));
-			Text->SetColorAndOpacity(FNColor::GetLinearColor(ButtonObject->PressedStateForegroundColor));
-		}
-	}
-	
 	/** Applies the bound entry object's hover-state colors to the button/text. */
 	UFUNCTION()
-	void OnButtonHovered()
-	{
-		if (Object == nullptr) return;
-		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
+	void OnButtonHovered();
 
-		if (ButtonObject != nullptr)
-		{
-			Button->SetBackgroundColor(FNColor::GetLinearColor(ButtonObject->HoverStateBackgroundColor));
-			Text->SetColorAndOpacity(FNColor::GetLinearColor(ButtonObject->HoverStateForegroundColor));
-		}
-	}
-	
 	/** Applies the bound entry object's hover-state colors on mouse release (pointer is still over the button). */
 	UFUNCTION()
-	void OnButtonReleased()
-	{
-		N_VALIDATE_RETURN_VOID(LogNexusUI, Object);
-		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
+	void OnButtonReleased();
 
-		if (ButtonObject != nullptr)
-		{
-			Button->SetBackgroundColor(FNColor::GetLinearColor(ButtonObject->HoverStateBackgroundColor));
-			Text->SetColorAndOpacity(FNColor::GetLinearColor(ButtonObject->HoverStateForegroundColor));
-		}
-	}
-	
 	/** Applies the bound entry object's idle-state colors when the pointer leaves the button. */
 	UFUNCTION()
-	void OnButtonUnhovered()
-	{
-		
-		if (Object == nullptr) return;
-		const UNButtonListEntry* ButtonObject = Cast<UNButtonListEntry>(Object);
+	void OnButtonUnhovered();
 
-		if (ButtonObject != nullptr)
-		{
-			Button->SetBackgroundColor(FNColor::GetLinearColor(ButtonObject->UnhoveredStateBackgroundColor));
-			Text->SetColorAndOpacity(FNColor::GetLinearColor(ButtonObject->UnhoveredStateForegroundColor));
-		}
-	}
-	
 	/** Back-pointer to the list view that owns this entry; set by INListViewEntry::SetOwnerListView. */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UNListView> OwnerListView;
@@ -226,7 +138,7 @@ protected:
 
 private:
 
-	/** The currently bound UNButtonListViewEntryObject backing this row; nulled when the entry is released. */
+	/** The currently bound UNButtonListEntry backing this row; nulled when the entry is released. */
 	UPROPERTY()
 	TObjectPtr<UObject> Object;
 };

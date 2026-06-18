@@ -6,6 +6,7 @@
 #include "NDynamicRefObject.h"
 #include "NDynamicRefSubsystem.h"
 #include "NStyleLibrary.h"
+#include "Components/Border.h"
 #include "Components/NListView.h"
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()

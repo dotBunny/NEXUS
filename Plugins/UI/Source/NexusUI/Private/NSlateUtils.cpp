@@ -6,7 +6,7 @@
 const FName FNSlateUtils::SDockingTabStackName = FName("SDockingTabStack");
 const FName FNSlateUtils::SDockTabName = FName("SDockTab");
 
-TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(TSharedPtr<SWidget> ParentWidget, const FName& WidgetType)
+TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType)
 {
 	if (!ParentWidget.IsValid())
 	{
@@ -31,7 +31,7 @@ TSharedPtr<SWidget> FNSlateUtils::FindFirstWidgetByType(TSharedPtr<SWidget> Pare
 	return nullptr;
 }
 
-void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, TSharedPtr<SWidget> ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop)
+void FNSlateUtils::FindWidgetsByType(TArray<TSharedPtr<SWidget>>& OutWidgets, const TSharedPtr<SWidget>& ParentWidget, const FName& WidgetType, const FName& WidgetTypeStop)
 {
 	if (!ParentWidget.IsValid() || (WidgetTypeStop != NAME_None && ParentWidget->GetType() == WidgetTypeStop))
 	{

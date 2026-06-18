@@ -22,17 +22,13 @@ struct FNMultiLineTextBoxCanvasItem
 	void Clear()
 	{
 		Lines.Empty();
-		Colors.Empty();
-		bIsLargeFont.Empty();
-		
-		LineWidths.Empty();
-		LineHeights.Empty();
-		LinePositions.Empty();
-		
+
 		BorderColor = FNColor::GreyLight;
 		BackgroundColor = FLinearColor(0.02f, 0.02f, 0.02f, 0.75f);
 		CurrentSeverity = ENSeverity::Message;
-		
+
+		Width = 0;
+		Height = 0;
 		bDirty = false;
 	}
 	
@@ -75,17 +71,13 @@ struct FNMultiLineTextBoxCanvasItem
 	/** Appends a line rendered in the small font with the given color, marking the item dirty. */
 	void AddSmallLine(const FText& Line, const FLinearColor Color = FLinearColor::White)
 	{
-		Lines.Add(Line);
-		Colors.Add(Color);
-		bIsLargeFont.Add(false);
+		Lines.Add(FLine{ Line, Color, /* bIsLargeFont */ false });
 		bDirty = true;
 	}
 	/** Appends a line rendered in the large font with the given color, marking the item dirty. */
 	void AddLargeLine(const FText& Line, const FLinearColor Color = FLinearColor::White)
 	{
-		Lines.Add(Line);
-		Colors.Add(Color);
-		bIsLargeFont.Add(true);
+		Lines.Add(FLine{ Line, Color, /* bIsLargeFont */ true });
 		bDirty = true;
 	}
 
@@ -101,86 +93,77 @@ struct FNMultiLineTextBoxCanvasItem
 	}
 	
 private:
-		
+
+	/** One text line plus the layout measured for it by Process(). */
+	struct FLine
+	{
+		// Content (set when the line is added).
+		FText Text;
+		FLinearColor Color = FLinearColor::White;
+		bool bIsLargeFont = false;
+
+		// Layout (computed by Process()).
+		int32 Width = 0;
+		int32 Height = 0;
+		int32 Position = 0;
+	};
+
 	ENSeverity CurrentSeverity = ENSeverity::Message;
-	
+
 	FLinearColor BackgroundColor = FLinearColor(0.02f, 0.02f, 0.02f, 0.75f);
 	FLinearColor BorderColor = FLinearColor(0.02f, 0.02f, 0.02f, 1.f);
-	
-	TArray<FText> Lines;
-	TArray<FLinearColor> Colors;
-	TArray<bool> bIsLargeFont;
-	
-	TArray<int32> LineWidths;
-	TArray<int32> LineHeights;
-	TArray<int32> LinePositions;
-	
-	int32 Width;
-	int32 Height;
-	
+
+	TArray<FLine> Lines;
+
+	/** Overall box dimensions, computed by Process(). */
+	int32 Width = 0;
+	int32 Height = 0;
+
 	void Process(int32 LineSpacing = 10)
 	{
-		LineWidths.Empty();
-		LineHeights.Empty();
-		LinePositions.Empty();
-
 		UFont* SmallFont = GEngine->GetSmallFont();
 		UFont* LargeFont = GEngine->GetLargeFont();
-		
-		int32 OutWidth;
-		int32 OutHeight;
-		
+
 		Width = 0;
 		Height = 0;
 		int32 LinePositionOffset = LineSpacing;
-		const int LineCount = Lines.Num();
-		for (int i = 0; i < LineCount; ++i)
+		const int32 LineCount = Lines.Num();
+		for (int32 i = 0; i < LineCount; ++i)
 		{
-			const FString Line = Lines[i].ToString();
-			if (bIsLargeFont[i])
+			FLine& Line = Lines[i];
+
+			int32 OutWidth;
+			int32 OutHeight;
+			const FString Text = Line.Text.ToString();
+			if (Line.bIsLargeFont)
 			{
-				LargeFont->GetStringHeightAndWidth(Line, OutHeight, OutWidth);
+				LargeFont->GetStringHeightAndWidth(Text, OutHeight, OutWidth);
 			}
 			else
 			{
-				SmallFont->GetStringHeightAndWidth(Line, OutHeight, OutWidth);
-				
+				SmallFont->GetStringHeightAndWidth(Text, OutHeight, OutWidth);
 			}
-			LineWidths.Add(OutWidth);
-			LineHeights.Add(OutHeight);
-			LinePositions.Add(LinePositionOffset);
-			
+
+			Line.Width = OutWidth;
+			Line.Height = OutHeight;
+			Line.Position = LinePositionOffset;
+
 			Height += OutHeight;
 			LinePositionOffset += (OutHeight + LineSpacing);
 			if (OutWidth > Width)
 			{
 				Width = OutWidth;
 			}
-			
-			if (i != Lines.Num() - 1)
+
+			if (i != LineCount - 1)
 			{
 				Height += LineSpacing;
 			}
 		}
 
-		// Validate
-		
-		if (Lines.Num() == LineCount &&  
-			Colors.Num() == LineCount && 
-			bIsLargeFont.Num() == LineCount && 
-			LineWidths.Num() == LineCount && 
-			LineHeights.Num() == LineCount && 
-			LinePositions.Num() == LineCount)
-		{
-			bDirty = false;
-		}
-		else
-		{
-			
-			UE_LOG(LogNexusUI, Warning, TEXT("Invalid MultiLineTextBoxCanvasItem contents, clearing and resetting."))
-			Clear();
-		}
+		// No parallel arrays to validate — content and layout live together in FLine.
+		bDirty = false;
 	}
-	
+
 	bool bDirty = false;
 };

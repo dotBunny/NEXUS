@@ -14,6 +14,6 @@
 	virtual UObject* FactoryCreateNew(UClass* InClass, UObject* InParent, FName InName, \
 	EObjectFlags Flags, UObject* Context, FFeedbackContext* Warn, FName CallingContext) override \
 	{ \
-		check(InClass->IsChildOf(Type::StaticClass())); \
+		check(InClass && InClass->IsChildOf(Type::StaticClass())); \
 		return NewObject<Type>(InParent, InClass, InName, Flags); \
 	}
