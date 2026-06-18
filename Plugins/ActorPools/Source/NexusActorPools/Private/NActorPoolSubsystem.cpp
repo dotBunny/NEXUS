@@ -69,9 +69,13 @@ void UNActorPoolSubsystem::OnWorldEndPlay(UWorld& InWorld)
 	for (TPair<UClass*, TUniquePtr<FNActorPool>>& Pool : ActorPools)
 	{
 		Pool.Value->Clear(); // Releases all actors from pool (not forcibly destroying cause of world teardown)
-		Pool.Value.Reset(); // Releases back-pointer to UObject through destructor
 	}
 
+	// Destroy the pools in one pass via Empty() rather than Reset()-ing each in the loop above. Clear() can
+	// re-enter Blueprint (ReleaseActor -> OnReleasedFromActorPool), and a re-entrant GetActorPoolStats() would
+	// observe a map entry whose TUniquePtr had already been reset to null and dereference it. Empty() destroys
+	// every pool atomically (running ~FNActorPool, which releases the UObject back-pointer), so the map is never
+	// left holding a present-but-null entry.
 	ActorPools.Empty();
 
 	Super::OnWorldEndPlay(InWorld);
@@ -201,9 +205,9 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 		{
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
-				UE_LOG(LogNexusActorPools, Log, 
-					TEXT("Attempting to create a new FNActorPool(%p|%s) via UNActorPoolSet that already exists; ignored."), 
-					Definition.ActorClass.Get(), 
+				UE_LOG(LogNexusActorPools, Verbose,
+					TEXT("Attempting to create a new FNActorPool(%p|%s) via UNActorPoolSet that already exists; ignored."),
+					Definition.ActorClass.Get(),
 					*Definition.ActorClass->GetName());
 			}
 			else
@@ -216,27 +220,24 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 
 	// We are going to evaluate and ensure that we are only operating on unique actor pool sets
 	TArray<UNActorPoolSet*> OutActorPoolSets;
-	if (ActorPoolSet->TryGetUniqueSets(OutActorPoolSets))
+	ActorPoolSet->GetUniqueSets(OutActorPoolSets);
+	for (const UNActorPoolSet* Set : OutActorPoolSets)
 	{
-		for (const UNActorPoolSet* Set : OutActorPoolSets)
+		for (const FNActorPoolDefinition& Definition : Set->ActorPools)
 		{
-			for (const FNActorPoolDefinition& Definition : Set->ActorPools)
+			if (ActorPools.Contains(Definition.ActorClass))
 			{
-				if (ActorPools.Contains(Definition.ActorClass))
-				{
-					UE_LOG(LogNexusActorPools, Verbose, 
-						TEXT("Attempting to create a new FNActorPool(%p|%s) via a nested UNActorPoolSet that already exists; ignored."),
-						Definition.ActorClass.Get(), 
-						*Definition.ActorClass->GetName());
-				}
-				else
-				{
-					CreateActorPool(Definition.ActorClass, Definition.Settings);
-				}			
+				UE_LOG(LogNexusActorPools, Verbose,
+					TEXT("Attempting to create a new FNActorPool(%p|%s) via a nested UNActorPoolSet that already exists; ignored."),
+					Definition.ActorClass.Get(),
+					*Definition.ActorClass->GetName());
+			}
+			else
+			{
+				CreateActorPool(Definition.ActorClass, Definition.Settings);
 			}
 		}
 	}
-	
 }
 
 TArray<FNActorPool*> UNActorPoolSubsystem::GetAllPools() const

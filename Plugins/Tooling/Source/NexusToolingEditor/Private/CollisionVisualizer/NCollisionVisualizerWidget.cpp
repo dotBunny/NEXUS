@@ -267,7 +267,12 @@ void UNCollisionVisualizerWidget::CreateActor(UWorld* TargetWorld)
 		if (TargetWorld != nullptr) World = TargetWorld;
 		if (World == nullptr) World = GEngine->GetCurrentPlayWorld();
 		if (World == nullptr) World = GetWorld();
-		
+		if (World == nullptr)
+		{
+			UE_LOG(LogNexusToolingEditor, Warning, TEXT("CreateActor: no valid world to spawn the collision visualizer actor into."));
+			return;
+		}
+
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.bDeferConstruction = false;
 		SpawnParams.InitialActorLabel = TEXT("NCollisionVisualizer");

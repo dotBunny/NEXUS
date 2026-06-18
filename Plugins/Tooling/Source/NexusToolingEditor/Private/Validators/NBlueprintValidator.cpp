@@ -22,14 +22,17 @@ EDataValidationResult UNBlueprintValidator::ValidateLoadedAsset_Implementation(c
 
 	// Check Type
 	UBlueprint* Blueprint = Cast<UBlueprint>(InAsset);
+	if (Blueprint == nullptr) return EDataValidationResult::NotValidated;
 
 	EDataValidationResult Result = EDataValidationResult::Valid;
 	for (UEdGraph* Graph : Blueprint->UbergraphPages)
 	{
 		if (Graph == nullptr) continue;
-		
+
 		for (UEdGraphNode* Node : Graph->Nodes)
 		{
+			if (Node == nullptr) continue;
+
 			// Check for Empty Ticks
 			if (Settings->ValidatorBlueprintEmptyTick != ENValidatorSeverity::Disable)
 			{

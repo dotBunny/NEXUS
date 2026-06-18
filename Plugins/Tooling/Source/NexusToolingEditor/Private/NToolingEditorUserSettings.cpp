@@ -65,10 +65,16 @@ void UNToolingEditorUserSettings::ApplyAlwaysShowFrameRateAndMemory() const
 
 void UNToolingEditorUserSettings::ApplySpaceToPan() const
 {
-	if (FNEditorUtils::IsUserControlled())
+	if (!FNEditorUtils::IsUserControlled())
 	{
-		const FNToolingEditorModule& ToolingModule = FModuleManager::GetModuleChecked<FNToolingEditorModule>("NexusToolingEditor");
-		FNEditorInputProcessor* InputProcessor = ToolingModule.GetInputProcessor();
+		return;
+	}
+
+	// The processor is created in StartupModule under the same !IsRunningCommandlet() gate as IsUserControlled,
+	// so it is normally valid here. Guard anyway so this use site does not depend on that invariant holding.
+	const FNToolingEditorModule& ToolingModule = FModuleManager::GetModuleChecked<FNToolingEditorModule>("NexusToolingEditor");
+	if (FNEditorInputProcessor* InputProcessor = ToolingModule.GetInputProcessor())
+	{
 		InputProcessor->bCachedGraphNavigationSpaceToPan = bGraphNavigationSpaceToPan;
 		InputProcessor->CachedGraphNavigationPanSpeedMultiplier = GraphNavigationPanSpeedMultiplier;
 	}

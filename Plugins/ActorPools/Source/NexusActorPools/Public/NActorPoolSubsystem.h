@@ -153,7 +153,9 @@ public:
 	FIntVector2 GetActorPoolStats(const TSubclassOf<AActor> ActorClass) const
 	{
 		const TUniquePtr<FNActorPool>* Found = ActorPools.Find(ActorClass);
-		if (Found)
+		// OnWorldEndPlay tears pools down with a single Empty(), so a found entry should never hold a null
+		// pointer; ensure() makes a violation loud in development while keeping Shipping safe from a null deref.
+		if (Found && ensure(Found->IsValid()))
 		{
 			const FNActorPool* Pool  = Found->Get();
 			return FIntVector2(Pool->GetSpawnedCount(), Pool->GetAvailableCount());

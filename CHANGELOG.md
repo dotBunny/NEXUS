@@ -35,6 +35,8 @@
 - `FNMultiplayerUtils` player-lookup helpers now guard against a null `AGameStateBase`, and `HasWorldAuthority(const UWorld*)` guards against a null `UWorld`, preventing crashes during world startup/teardown and on clients before initial replication.
 - `FNHashUtils::djb2` now hashes the string's UTF-8 encoding instead of truncating each `TCHAR` to its low byte, so non-ASCII characters that share a low byte (e.g. `Ω` and `©`) no longer collide and `FNSeedGenerator::SeedFromString` gains full character information from non-Latin seed phrases. Pure-ASCII input hashes are unchanged.
 - `CellLinkDetails.bConnected` will only be true connecting to another Cell.
+- `UNMultiplayerTestSubsystem` now always removes its `BeginStandaloneLocalPlay` delegate binding when stopping, including on the editor teardown path where the previous guard skipped cleanup.
+- `UNBlueprintValidator` now guards against a null `Blueprint` cast and null `Node` entries while iterating graph nodes, matching `UNLevelBlueprintValidator`.
 
 ### Removed
 
@@ -171,7 +173,7 @@
 
 - `UNEditorUtilityWidget::DelayedConstructTask` no longer divides by a zero geometry size when the widget hasn't been laid out yet, which previously left `UnitScale` as NaN/inf.
 - `FNDrawDebugHelpers::DrawString`, `FNPrimitiveFont::DrawPDI`, and `FNPrimitiveFont::DrawBatchString` now take the string as `const FString&`, allowing literals and rvalues to be passed.
-- `FNPosseAssetFixer::OutOfDataAnimationSource` will no longer allow operation on `/All`, select a subfolder.
+- `FNPoseAssetFixer::OutOfDateAnimationSource` will no longer allow operation on `/All`, select a subfolder.
 - `UNSamplesLevelActor` and `UNSamplesDisplayActor` now properly build at runtime.
 - Fixed crash in `FNWeightedIntegerArray` where removing could end up out of bounds.
 - Fixed `FNSpherePicker` scenarios where points could be ever-so-slightly out of the `MaximumRadius`.

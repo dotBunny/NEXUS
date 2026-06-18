@@ -97,6 +97,8 @@ void FNToolingEditorModule::ApplyAppIcon(const FString& IconPath)
 	const FString FullPath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *IconPath);
 	if (FPaths::FileExists(FullPath))
 	{
+		// Brushes are heap-allocated and handed off to the engine app style set, which owns and frees them
+		// (see ReplaceAppIcon[SVG]). ApplyAppIcon runs once on startup, so no repeated-swap leak occurs.
 		if (FullPath.EndsWith(TEXT(".svg"), ESearchCase::IgnoreCase))
 		{
 			FNToolingEditorUtils::ReplaceAppIconSVG(new FSlateVectorImageBrush(FullPath, IconSize));
@@ -120,8 +122,8 @@ void FNToolingEditorModule::ApplyWindowIcon(const FString& IconPath)
 		return;
 	}
 
-	const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *IconPath);
-	if (FNToolingEditorUtils::ReplaceWindowIcon(BasePath))
+	WindowIconPath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *IconPath);
+	if (FNToolingEditorUtils::ReplaceWindowIcon(WindowIconPath))
 	{
 		// Register the window delegate to make sure our windows get changed, this will change the loading window as well as an indicator of success.
 		WindowIconDelegateHandle = GEngine->OnPostEditorTick().AddRaw(this, &FNToolingEditorModule::ApplyWindowIconPostEditorTick);
@@ -132,9 +134,8 @@ void FNToolingEditorModule::ApplyWindowIconPostEditorTick(float Time)
 {
 	GEngine->OnPostEditorTick().Remove(WindowIconDelegateHandle);
 	WindowIconDelegateHandle.Reset();
-	
-	const FString BasePath = FString::Printf(TEXT("%s%s"), *FPaths::ConvertRelativePathToFull(FPaths::ProjectDir()), *UNToolingEditorSettings::Get()->ProjectWindowIconPath);
-	FNToolingEditorUtils::ReplaceWindowIcon(BasePath);
+
+	FNToolingEditorUtils::ReplaceWindowIcon(WindowIconPath);
 }
 
 IMPLEMENT_MODULE(FNToolingEditorModule, NexusToolingEditor)

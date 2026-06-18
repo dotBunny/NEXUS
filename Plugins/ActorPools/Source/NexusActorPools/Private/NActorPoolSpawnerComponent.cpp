@@ -91,6 +91,7 @@ void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick
 {
 	TimeSinceSpawned += DeltaTime;
 	if (TimeSinceSpawned < SpawnRate) return;
+	TimeSinceSpawned = 0.f; // Consume the interval whether or not Spawn() actually spawns.
 	Spawn();
 }
 
@@ -181,7 +182,6 @@ void UNActorPoolSpawnerComponent::Spawn(const bool bIgnoreSpawningFlag)
 		}
 		Subsystem->SpawnActor<AActor>(Templates[RandomIndex].Template, OutLocations[i], SpawnRotator);
 	}
-	TimeSinceSpawned = 0;
 }
 
 void UNActorPoolSpawnerComponent::CacheSplineComponent()

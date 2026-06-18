@@ -98,10 +98,15 @@ void UNMultiplayerTestSubsystem::StopMultiplayerTest()
 	if (GUnrealEd && !IsEngineExitRequested())
 	{
 		const FNToolingEditorModule& Module = FNToolingEditorModule::Get();
-	
+
 		GUnrealEd->EndPlayOnLocalPc();
 		Module.OnMultiplayerTestEnded.Broadcast();
-	
+	}
+
+	// Always remove the binding; FEditorDelegates is a global static that outlives this subsystem, so cleanup must
+	// happen even on the teardown path (e.g. Deinitialize during engine exit) where the guard above is skipped.
+	if (LocalProcessDelegateHandle.IsValid())
+	{
 		FEditorDelegates::BeginStandaloneLocalPlay.Remove(LocalProcessDelegateHandle);
 		LocalProcessDelegateHandle.Reset();
 	}

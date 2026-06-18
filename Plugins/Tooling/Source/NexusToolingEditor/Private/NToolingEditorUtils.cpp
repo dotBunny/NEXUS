@@ -50,6 +50,8 @@ void FNToolingEditorUtils::ReplaceAppIconSVG(FSlateVectorImageBrush* Icon)
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
+		// Set() takes ownership of Icon (stored in BrushResources, deleted when the style set is torn down).
+		// It does not delete the brush previously registered under "AppIcon", so each swap orphans one brush.
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
 	else
@@ -64,6 +66,8 @@ void FNToolingEditorUtils::ReplaceAppIcon(FSlateImageBrush* Icon)
 	FSlateStyleSet* MutableStyleSet = const_cast<FSlateStyleSet*>(static_cast<const FSlateStyleSet*>(&FAppStyle::Get()));
 	if (MutableStyleSet != nullptr)
 	{
+		// Set() takes ownership of Icon (stored in BrushResources, deleted when the style set is torn down).
+		// It does not delete the brush previously registered under "AppIcon", so each swap orphans one brush.
 		MutableStyleSet->Set("AppIcon", Icon);
 	}
 	else

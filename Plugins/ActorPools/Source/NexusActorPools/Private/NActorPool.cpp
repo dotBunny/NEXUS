@@ -63,8 +63,15 @@ FText FNActorPool::GetDescription() const
 #if WITH_EDITOR
 	ActorDetails += TEXT("\tSpawn Prefix: ") + Name + TEXT("\n");
 #endif
-	ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
-	ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
+	if (Template != nullptr)
+	{
+		ActorDetails += FString::Printf(TEXT("\tTemplate Name: %s\n"), *Template->GetName());
+		ActorDetails += FString::Printf(TEXT("\tTemplate Ptr: %p\n"), Template.Get());
+	}
+	else
+	{
+		ActorDetails += TEXT("\tTemplate: NULL\n");
+	}
 	
 	switch (Settings.Strategy)
 	{
@@ -186,6 +193,14 @@ AActor* FNActorPool::Get()
 		return nullptr;
 	}
 
+	// ApplyStrategy() reporting success implies a poppable actor for every strategy today, but that contract is
+	// implicit — a future strategy that batches creation could break it. ensure() makes the invariant loud at
+	// dev time while keeping Shipping safe from an empty-array Pop().
+	if (!ensure(!InActors.IsEmpty()))
+	{
+		return nullptr;
+	}
+
 	AActor* ReturnActor = InActors.Pop();
 	OutActors.Add(ReturnActor);
 	return ReturnActor;
@@ -194,6 +209,11 @@ AActor* FNActorPool::Get()
 AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 {
 	if (InActors.IsEmpty() && !ApplyStrategy())
+	{
+		return nullptr;
+	}
+
+	if (!ensure(!InActors.IsEmpty()))
 	{
 		return nullptr;
 	}
@@ -267,6 +287,33 @@ bool FNActorPool::Return(AActor* Actor)
 		break;
 	}
 	
+	FinalizeReturn(Actor);
+	return true;
+}
+
+bool FNActorPool::ReturnAtIndex(const int32 OutIndex)
+{
+	// Recycle-only fast path. ApplyStrategy already located the element being recycled, so we remove
+	// it by its known index instead of making Return() re-scan OutActors for a pointer it was just
+	// handed (and skip the external-caller contract checks, which a self-recycle always satisfies).
+	// RemoveAt keeps the surviving elements ordered, preserving the FIFO/LIFO semantics the recycle
+	// strategies depend on; EAllowShrinking::No matches Return() and avoids a realloc on this
+	// (saturated-pool) hot path.
+	AActor* Actor = OutActors[OutIndex];
+	if (Actor == nullptr)
+	{
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Attempted to recycle a NULL reference from a FNActorPool."));
+		return false;
+	}
+
+	ApplyReturnState(Actor);
+	OutActors.RemoveAt(OutIndex, EAllowShrinking::No);
+	FinalizeReturn(Actor);
+	return true;
+}
+
+void FNActorPool::FinalizeReturn(AActor* Actor)
+{
 	InActors.Add(Actor);
 
 	if (bImplementsInterface)
@@ -281,12 +328,13 @@ bool FNActorPool::Return(AActor* Actor)
 			Actor->ProcessEvent(Function, nullptr);
 		}
 	}
-
-	return true;
 }
 
 void FNActorPool::ReturnAll(bool bSkipCheck)
 {
+	// Stub pools never populate OutActors; mirror Return()'s short-circuit for symmetry.
+	if (bStubMode) return;
+
 	if (!bSkipCheck && !Settings.HasSupportFlag_ReturnAll())
 	{
 		UE_LOG(LogNexusActorPools, Warning, TEXT("ReturnAll called on a FNActorPool(%s) that does not support it."), *Template->GetName());
@@ -361,23 +409,51 @@ bool FNActorPool::ApplyStrategy()
 		return CreateActors();
 	case CreateRecycleFirst:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-			return Return(OutActors[0]);
+			return ReturnAtIndex(0);
 		return CreateActors();
 	case CreateRecycleLast:
 		if (OutActors.Num() >= Settings.MaximumActorCount)
-			return Return(OutActors[OutActors.Num() - 1]);
+			return ReturnAtIndex(OutActors.Num() - 1);
 		return CreateActors();
 	case Fixed:
-		return false;
+		// Self-heal: warm-up for a Fixed pool is normally time-sliced by Tick() toward MinimumActorCount.
+		// If that tick was never delivered (e.g. the pool was created in a world that won't tick again),
+		// the pool would otherwise stay permanently empty since Fixed creates nothing on demand. Fill the
+		// remaining deficit here. A warmed-then-exhausted pool has TotalActors == MinimumActorCount and
+		// correctly falls through to return false.
+		return WarmUpDeficit();
 	case FixedRecycleFirst:
-		if (OutActors.IsEmpty()) return false;
-		return Return(OutActors[0]);
+		// OutActors empty means nothing is checked out to recycle: either the pool is under-warmed (fill
+		// the deficit, mirroring Fixed) or genuinely sized to zero, where there is nothing to hand back.
+		if (OutActors.IsEmpty()) return WarmUpDeficit();
+		return ReturnAtIndex(0);
 	case FixedRecycleLast:
-		if (OutActors.IsEmpty()) return false;
-		return Return(OutActors[OutActors.Num() - 1]);
+		if (OutActors.IsEmpty()) return WarmUpDeficit();
+		return ReturnAtIndex(OutActors.Num() - 1);
 	default:
 		return false;
 	}
+}
+
+bool FNActorPool::WarmUpDeficit()
+{
+	// Shared on-demand warm-up for the Fixed* strategies. Mirrors Tick()/Fill() deficit math, but creates the
+	// whole remaining deficit in one shot because the caller (Get/Spawn) needs a poppable actor now rather than
+	// across future ticks. Stub pools never reach here — ApplyStrategy short-circuits them before this call.
+	const int32 Total = InActors.Num() + OutActors.Num();
+	if (Total < Settings.MinimumActorCount)
+	{
+		ReserveForPoolSize(Settings.MinimumActorCount);
+		return CreateActors(Settings.MinimumActorCount - Total);
+	}
+	return false;
+}
+
+void FNActorPool::ReserveForPoolSize(const int32 PoolSize)
+{
+	// Reserve only grows, so this is a no-op once both arrays already hold the target capacity.
+	InActors.Reserve(PoolSize);
+	OutActors.Reserve(PoolSize);
 }
 
 bool FNActorPool::CreateActors(const int32 Count)
@@ -395,37 +471,9 @@ bool FNActorPool::CreateActors(const int32 Count)
 	// We need to tell the spawn to occur and not warn about collisions.
 	SpawnInfo.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	// Reserve space for the new actors
-	if (Count > 1)
-	{
-		const int32 InActorsMax = InActors.Max();
-		const int32 OutActorsMax = OutActors.Max();
-		
-		if (InActorsMax == 0 || OutActorsMax == 0)
-		{
-			// Initial allocation we really don't know what it's going to look like and given they're pointers,
-			// we will just use a double allocation strategy.
-			InActors.Reserve(Count * 2);
-			OutActors.Reserve(Count * 2);
-			
-		}
-		else
-		{
-			// Since we actually have existing actors, we can look at the usage and try to think of a good way to reasonably grow the array
-			// if it's actually needed.
-			const float OutArrayUsage = static_cast<float>(OutActors.Num()) / static_cast<float>(OutActorsMax);
-			if (OutArrayUsage > 0.75f)
-			{
-				OutActors.Reserve(OutActorsMax + (OutActorsMax * 0.5f));
-			}
-			const float InArrayUsage = static_cast<float>(InActors.Num()) / static_cast<float>(InActorsMax);
-			if (InArrayUsage > 0.85f)
-			{
-				InActors.Reserve(InActorsMax + (InActorsMax * 0.75f));
-			}
-		}
-	}
-	
+	// Array capacity is reserved by the warm-up callers (Fill/Prewarm/Tick) against their known target via
+	// ReserveForPoolSize; the on-demand Count == 1 path relies on TArray's geometric growth.
+
 #if WITH_EDITOR
 	int32 LabelNumber = (InActors.Num() + OutActors.Num());
 #endif // WITH_EDITOR
@@ -636,6 +684,7 @@ void FNActorPool::Fill()
 	const int32 Deficit = Settings.MinimumActorCount - (InActors.Num() + OutActors.Num());
 	if (Deficit > 0)
 	{
+		ReserveForPoolSize(Settings.MinimumActorCount);
 		UE_LOG(LogNexusActorPools, Verbose, TEXT("Filling FNActorPool(%s) to %i items (+%i)"), *Template->GetName(), Settings.MinimumActorCount, Deficit);
 		CreateActors(Deficit);
 	}
@@ -646,6 +695,7 @@ void FNActorPool::Prewarm(const int32 Count)
 	// Ensure the pool is a stub when WorldAuthority is flagged.
 	if (bStubMode) return;
 	
+	ReserveForPoolSize(InActors.Num() + OutActors.Num() + Count);
 	UE_LOG(LogNexusActorPools, Verbose, TEXT("Warming FNActorPool(%s) with %i items."), *Template->GetName(), Count);
 	CreateActors(Count);
 }
@@ -658,6 +708,8 @@ bool FNActorPool::Tick()
 	if (const int32 TotalActors = InActors.Num() + OutActors.Num();
 		TotalActors < Settings.MinimumActorCount)
 	{
+		// Reserve to the final warm-up target once; Reserve is grow-only, so later ticks don't re-allocate.
+		ReserveForPoolSize(Settings.MinimumActorCount);
 		CreateActors(FMath::Min(Settings.CreateObjectsPerTick, (Settings.MinimumActorCount - TotalActors)));
 		return true; // still warming
 	}

@@ -46,9 +46,8 @@ public:
 	/**
 	 * Recursively resolves this set plus every nested set into a flat, unique array (cycle-safe).
 	 * @param OutActorPoolSets Inout array receiving each unique set encountered.
-	 * @return true if at least one set (this one) was added.
 	 */
-	bool TryGetUniqueSets(TArray<UNActorPoolSet*>& OutActorPoolSets)
+	void GetUniqueSets(TArray<UNActorPoolSet*>& OutActorPoolSets)
 	{
 		const int32 AdditionalCount = NestedSets.Num();
 		OutActorPoolSets.Reserve(OutActorPoolSets.Num() + AdditionalCount + 1);
@@ -62,6 +61,7 @@ public:
 		// Add children/s
 		for (int32 i = 0; i < AdditionalCount; i++)
 		{
+			// Intentional blocking load: resolved once during begin-play setup of this pre-warm system.
 			UNActorPoolSet* NestedSetPtr = NestedSets[i].LoadSynchronous();
 			if (NestedSetPtr == nullptr)
 			{
@@ -70,10 +70,8 @@ public:
 			}
 			if (!OutActorPoolSets.Contains(NestedSetPtr)) // Prevent infinite loop
 			{
-				NestedSetPtr->TryGetUniqueSets(OutActorPoolSets);
+				NestedSetPtr->GetUniqueSets(OutActorPoolSets);
 			}
 		}
-
-		return OutActorPoolSets.Num() >= 1;
 	}
 };

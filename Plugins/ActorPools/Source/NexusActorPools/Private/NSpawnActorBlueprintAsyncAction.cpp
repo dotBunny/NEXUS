@@ -45,6 +45,14 @@ void UNSpawnActorBlueprintAsyncAction::BeginDestroy()
 			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 		}
 	}
+
+	// Cancel any load still in flight on teardown (e.g. PIE-end / level transition) rather than leaving the
+	// streamable request to run to completion and the handle to be released only at GC.
+	if (StreamingHandle.IsValid())
+	{
+		StreamingHandle->CancelHandle();
+		StreamingHandle.Reset();
+	}
 	Super::BeginDestroy();
 }
 

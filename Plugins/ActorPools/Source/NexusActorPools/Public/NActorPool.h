@@ -158,8 +158,29 @@ private:
 
 	bool ApplyStrategy();
 
+	/**
+	 * Create up to MinimumActorCount on demand when a Fixed* pool's time-sliced warm-up never completed.
+	 * @return true if at least one actor was created; false if the pool already holds MinimumActorCount or more.
+	 * @note Fixed strategies create nothing through ApplyStrategy's normal path, so this is their only self-heal if the warm-up Tick() was never delivered (e.g. the pool was created in a world that won't tick again).
+	 */
+	bool WarmUpDeficit();
+
+	/**
+	 * Return the out-actor at a known OutActors index back to the pool (recycle fast path).
+	 * @param OutIndex Index into OutActors of the actor being recycled; must be in range.
+	 * @return true if the actor was recycled; false if the slot held a null reference.
+	 * @note Used only by ApplyStrategy's recycle strategies, which already know the index. Skips the pointer re-scan and external-caller contract checks that Return() performs, and uses an ordered RemoveAt to preserve the FIFO/LIFO ordering those strategies rely on.
+	 */
+	bool ReturnAtIndex(int32 OutIndex);
+
+	/** Shared tail of the return paths: move the actor (already removed from OutActors) into InActors and fire the return callback. */
+	void FinalizeReturn(AActor* Actor);
+
 	bool CreateActors(const int32 Count = 1);
-	
+
+	/** Reserve both staging arrays so each can hold the whole pool population, since churn (Get/Spawn/Return) can move every actor onto either side. */
+	FORCEINLINE void ReserveForPoolSize(const int32 PoolSize);
+
 	FORCEINLINE bool CreateActor(const FActorSpawnParameters& SpawnInfo);
 	
 	void ReleaseActor(TObjectPtr<AActor> Actor, bool bForceDestroy) const;

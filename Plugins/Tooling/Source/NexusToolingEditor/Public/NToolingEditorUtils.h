@@ -66,10 +66,24 @@ public:
 		return EDataValidationResult::NotValidated;
 	}
 
-	/** Replace the Starship app icon with the supplied raster brush; caller retains ownership. */
+	/**
+	 * Replace the Starship app icon with the supplied raster brush.
+	 *
+	 * Ownership transfers to the engine's shared app style set (FAppStyle), which deletes the brush when it is
+	 * torn down. Pass a heap-allocated brush (e.g. new FSlateImageBrush(...)) and do not delete it afterwards.
+	 * @note Set() overwrites the existing "AppIcon" entry without deleting the brush previously registered under
+	 *       that key, so each swap orphans a single brush. Intended to be applied once at startup, not repeatedly.
+	 */
 	static void ReplaceAppIcon(FSlateImageBrush* Icon);
 
-	/** Replace the Starship app icon with the supplied vector brush; caller retains ownership. */
+	/**
+	 * Replace the Starship app icon with the supplied vector brush.
+	 *
+	 * Ownership transfers to the engine's shared app style set (FAppStyle), which deletes the brush when it is
+	 * torn down. Pass a heap-allocated brush (e.g. new FSlateVectorImageBrush(...)) and do not delete it afterwards.
+	 * @note Set() overwrites the existing "AppIcon" entry without deleting the brush previously registered under
+	 *       that key, so each swap orphans a single brush. Intended to be applied once at startup, not repeatedly.
+	 */
 	static void ReplaceAppIconSVG(FSlateVectorImageBrush* Icon);
 
 	/** Replace the platform-level editor window icon with the resource at IconPath (extensionless). */

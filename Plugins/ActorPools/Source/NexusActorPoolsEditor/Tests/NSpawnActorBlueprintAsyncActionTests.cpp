@@ -9,6 +9,8 @@
 #include "NTestPooledActor.h"
 #include "Developer/NDebugActor.h"
 #include "Developer/NTestUtils.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Macros/NTestMacros.h"
 
 N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_OnHasPool_NullPool,
@@ -85,8 +87,8 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 	N_TEST_CONTEXT_EDITOR)
 {
 	// Verifies that BeginDestroy unregisters the OnActorPoolAdded subscription left behind when
-	// no matching pool ever arrived. If this cleanup is skipped the subsystem retains a binding
-	// to a destroyed UObject (the H-5 handle leak).
+	// no matching pool ever arrived (the H-5 handle leak) and releases the in-flight streamable
+	// handle rather than leaving it to be freed only at GC (AP-R-18).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
 		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
@@ -111,6 +113,12 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 		Action->OnCreatedPoolHandle = Subsystem->OnActorPoolAdded.AddUObject(Action, &UNSpawnActorBlueprintAsyncAction::OnHasPool);
 		CHECK_MESSAGE(TEXT("Subsystem should report a binding after the action registers."), Subsystem->OnActorPoolAdded.IsBound())
 
+		// Plant a streamable handle to mirror the load Activate() would hold so we can observe that
+		// BeginDestroy cancels and releases it.
+		FStreamableManager& StreamableManager = UAssetManager::Get().GetStreamableManager();
+		Action->StreamingHandle = StreamableManager.RequestAsyncLoad(Action->ActorClass.ToSoftObjectPath());
+		CHECK_MESSAGE(TEXT("Pre-condition: the action should hold a streamable handle before destroy."), Action->StreamingHandle.IsValid())
+
 		// Broadcast a non-matching pool — OnHasPool early-returns without clearing the handle,
 		// which is the leak scenario BeginDestroy must clean up.
 		Subsystem->CreateActorPool(ANDebugActor::StaticClass(), FNActorPoolSettings());
@@ -119,6 +127,7 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 		Action->ConditionalBeginDestroy();
 
 		CHECK_FALSE_MESSAGE(TEXT("Subsystem must not retain a binding after the action is destroyed."), Subsystem->OnActorPoolAdded.IsBound())
+		CHECK_FALSE_MESSAGE(TEXT("BeginDestroy must release the streamable handle."), Action->StreamingHandle.IsValid())
 	});
 }
 

@@ -261,7 +261,7 @@ struct FNCollisionVisualizerOptions
 	
 	
 	
-	/** @return A FCollisionQueryParams populated from the boolean toggles on this struct (mobility is applied separately by the caller). */
+	/** @return A FCollisionQueryParams populated from the boolean toggles and mobility filter on this struct. */
 	FCollisionQueryParams GetCollisionQueryParams() const
 	{
 		FCollisionQueryParams Parameters;
@@ -270,7 +270,25 @@ struct FNCollisionVisualizerOptions
 		Parameters.bIgnoreBlocks = bIgnoreBlocks;
 		Parameters.bIgnoreTouches = bIgnoreTouches;
 		Parameters.bSkipNarrowPhase = bSkipNarrowPhase;
+		Parameters.MobilityType = ToQueryMobilityType(QueryMobility);
 		return Parameters;
+	}
+
+	/** Map the visualizer's mobility enum onto the engine's EQueryMobilityType. */
+	static EQueryMobilityType ToQueryMobilityType(const ENCollisionVisualizerMobility Mobility)
+	{
+		switch (Mobility)
+		{
+			using enum ENCollisionVisualizerMobility;
+		case Any:
+			return EQueryMobilityType::Any;
+		case Static:
+			return EQueryMobilityType::Static;
+		case Dynamic:
+			return EQueryMobilityType::Dynamic;
+		default:
+			return EQueryMobilityType::Any;
+		}
 	}
 };
 

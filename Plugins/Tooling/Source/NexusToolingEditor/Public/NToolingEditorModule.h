@@ -46,6 +46,9 @@ private:
 	/** Handle for the tick delegate that re-applies the window icon after the editor initializes. */
 	FDelegateHandle WindowIconDelegateHandle;
 
+	/** Fully-resolved window icon path computed in ApplyWindowIcon and reused by the tick callback. */
+	FString WindowIconPath;
+
 	/** Replace the editor app icon with the resource at IconPath (SVG or raster). */
 	static void ApplyAppIcon(const FString& IconPath);
 

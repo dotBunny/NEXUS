@@ -14,8 +14,8 @@ public:
 	/** Update the currently-selected pose assets' sources; bIsContextMenu toggles confirmation UI. */
 	static void OutOfDateAnimationSource(bool bIsContextMenu);
 
-	/** @return true if the current selection contains at least one pose asset that can be updated. */
-	static bool CanExecuteOutOfDataAnimationSource();
+	/** @return true if a content path other than /All is selected (cheap gate; the actual pose-asset scan runs in OutOfDateAnimationSource). */
+	static bool CanExecuteOutOfDateAnimationSource();
 
 private:
 	/** Re-source PoseAsset from its configured animation and mark dependent packages for save. */

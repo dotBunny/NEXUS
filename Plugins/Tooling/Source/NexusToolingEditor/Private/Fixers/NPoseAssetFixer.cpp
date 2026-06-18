@@ -38,7 +38,7 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 		}
 		
 		SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
-		for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+		for (const FString& AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 		{
 			SelectedPaths.AddUnique(AdditionalPath);
 		}
@@ -74,7 +74,7 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 			continue;
 		}
 
-		for (FString AssetPath : EditorAssetSubsystem->ListAssets(SelectedPaths[i], true))
+		for (const FString& AssetPath : EditorAssetSubsystem->ListAssets(SelectedPaths[i], true))
 		{
 			FAssetData AssetData = AssetRegistry.GetAssetByObjectPath(FSoftObjectPath(AssetPath));
 			if (AssetData.IsValid() && AssetData.AssetClassPath == UPoseAsset::StaticClass()->GetClassPathName())
@@ -152,10 +152,10 @@ void FNPoseAssetFixer::OutOfDateAnimationSource(bool bIsContextMenu)
 	UPackageTools::UnloadPackages(CleanupPackages);
 }
 
-bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
+bool FNPoseAssetFixer::CanExecuteOutOfDateAnimationSource()
 {
 	TArray<FString>SelectedPaths = FNEditorUtils::GetSelectedContentBrowserPaths();
-	for (FString AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
+	for (const FString& AdditionalPath : UEditorUtilityLibrary::GetSelectedPathViewFolderPaths())
 	{
 		SelectedPaths.AddUnique(AdditionalPath);
 	}
@@ -167,9 +167,12 @@ bool FNPoseAssetFixer::CanExecuteOutOfDataAnimationSource()
 	}
 	
 	// We cannot operate on /All
-	if (SelectedPaths[0] == "/All")
+	for (const FString& SelectedPath : SelectedPaths)
 	{
-		return false;
+		if (SelectedPath == "/All")
+		{
+			return false;
+		}
 	}
 	
 	return true;

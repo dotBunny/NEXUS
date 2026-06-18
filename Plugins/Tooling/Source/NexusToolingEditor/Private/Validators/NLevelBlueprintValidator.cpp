@@ -23,7 +23,7 @@ EDataValidationResult UNLevelBlueprintValidator::ValidateLoadedAsset_Implementat
 	UObject* InAsset, FDataValidationContext& Context)
 {
 	const UWorld* World = Cast<UWorld>(InAsset);
-	if (World == nullptr) return EDataValidationResult::Valid;
+	if (World == nullptr) return EDataValidationResult::NotValidated;
 	
 	const TArray<ULevel*> Levels = World->GetLevels();
 	if (Levels.Num() <= 0) return EDataValidationResult::Valid;

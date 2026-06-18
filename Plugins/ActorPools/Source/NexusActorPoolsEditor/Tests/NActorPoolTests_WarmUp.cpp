@@ -11,8 +11,10 @@
 
 // Covers the time-sliced warm-up path: a pool created with CreateObjectsPerTick > 0 defers creation and
 // fills MinimumActorCount actors across several ticks rather than synchronously. The Fixed strategy is used
-// throughout because ApplyStrategy() returns false for it (NActorPool.cpp), so warm-up is the *only* source
-// of actors — making any under-fill immediately observable as a failed Spawn.
+// throughout because it never grows beyond MinimumActorCount on demand, so a ticked warm-up's actor count is
+// exactly observable with no create-on-demand overshoot. Its one on-demand behavior is the self-heal in
+// ApplyStrategy() -> WarmUpDeficit(): if a Fixed pool's warm-up Tick() is never delivered, the first Get/Spawn
+// fills the remaining deficit so the pool can't be left permanently empty (see FixedSelfHealsWhenNeverTicked).
 //
 // Every pool drops the ServerOnly flag (kept out of Flags below): the PIE test world has no auth game mode,
 // so a ServerOnly pool would resolve to a client stub whose Tick() is a no-op, defeating the test.
@@ -243,6 +245,69 @@ N_TEST_MEDIUM(FNActorPoolTests_WarmUp_UpdateSettingsStopsTicking,
 
 		CHECK_EQUALS("Once CreateObjectsPerTick is disabled the pool must be unregistered and stop creating actors.",
 			Pool->GetAvailableCount(), AvailableAfterOneTick)
+	});
+}
+
+N_TEST_HIGH(FNActorPoolTests_WarmUp_FixedSelfHealsWhenNeverTicked,
+	"NEXUS::UnitTests::NActorPools::FNActorPool::WarmUp::FixedSelfHealsWhenNeverTicked",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Regression: a Fixed pool configured for time-sliced warm-up (CreateObjectsPerTick > 0) whose warm-up
+	// Tick() is never delivered — e.g. it was created in a world that won't tick again — must not be left
+	// permanently empty. The first Spawn self-heals via ApplyStrategy() -> WarmUpDeficit(), filling the
+	// remaining deficit to MinimumActorCount, after which it behaves like any warmed Fixed pool: it hands out
+	// exactly MinimumActorCount actors and then returns null (the self-heal must not overshoot the minimum).
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
+		if (!Subsystem)
+		{
+			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
+			return;
+		}
+
+		FNActorPoolSettings Settings;
+		Settings.Strategy = ENActorPoolStrategy::Fixed;
+		Settings.MinimumActorCount = 4;
+		Settings.MaximumActorCount = 4;
+		Settings.CreateObjectsPerTick = 2;
+		Settings.Flags = static_cast<uint8>(ENActorPoolFlags::ReturnToStorage | ENActorPoolFlags::DeferConstruction);
+		Subsystem->CreateActorPool(ANDebugActor::StaticClass(), Settings);
+
+		FNActorPool* Pool = Subsystem->GetActorPool(ANDebugActor::StaticClass());
+		if (Pool == nullptr)
+		{
+			ADD_ERROR("Pool was not created.");
+			return;
+		}
+
+		// Deliberately never ticked: the throttled pool defers creation and so starts empty. Without the
+		// self-heal this is the permanently-dead state the regression guards against.
+		CHECK_EQUALS("A throttled Fixed pool starts empty before any tick.", Pool->GetAvailableCount(), 0)
+
+		// First Spawn on the never-ticked pool must self-heal rather than return null.
+		if (Pool->Spawn(FVector::ZeroVector, FRotator::ZeroRotator) == nullptr)
+		{
+			ADD_ERROR("First Spawn on a never-ticked Fixed pool must self-heal rather than return null.");
+			return;
+		}
+
+		// The self-heal creates the full minimum (4) in one shot; one handed out leaves the remainder available.
+		CHECK_EQUALS("Self-heal fills to MinimumActorCount; one handed out leaves the rest available.",
+			Pool->GetAvailableCount(), 3)
+
+		// The remaining three also come from the pool: total handed out equals MinimumActorCount.
+		for (int32 i = 1; i < 4; ++i)
+		{
+			if (Pool->Spawn(FVector::ZeroVector, FRotator::ZeroRotator) == nullptr)
+			{
+				ADD_ERROR(FString::Printf(TEXT("Spawn %d should succeed from the self-healed Fixed pool."), i));
+			}
+		}
+
+		// Self-heal must not overshoot: a Fixed pool still caps at MinimumActorCount and returns null once exhausted.
+		CHECK_MESSAGE(TEXT("A self-healed Fixed pool still caps at MinimumActorCount, returning null once exhausted."),
+			Pool->Spawn(FVector::ZeroVector, FRotator::ZeroRotator) == nullptr)
 	});
 }
 
