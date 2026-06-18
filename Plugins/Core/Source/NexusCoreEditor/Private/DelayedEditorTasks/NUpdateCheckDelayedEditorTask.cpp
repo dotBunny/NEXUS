@@ -55,7 +55,7 @@ void UNUpdateCheckDelayedEditorTask::Execute()
 	Release();
 }
 
-void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfull)
+void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bProcessedSuccessfully)
 {
 	// Editor may have started shutting down between Execute() releasing this task and the HTTP
 	// response landing. Avoid touching settings or opening dialogs once exit has been requested.
@@ -64,7 +64,7 @@ void UNUpdateCheckDelayedEditorTask::OnUpdateQueryResponse(FHttpRequestPtr Reque
 		return;
 	}
 
-	if (!bProcessedSuccessfull)
+	if (!bProcessedSuccessfully)
 	{
 		UE_LOG(LogNexusCoreEditor, Warning, TEXT("The update check web request was unable to be processed."));
 		return;

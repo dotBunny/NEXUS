@@ -100,7 +100,7 @@ public:
 	{
 		return IsValid(LevelInstance) ? LevelInstance->GetContextTags() : FGameplayTagContainer();
 	}
-	
+
 	/**
 	 * @param LevelInstance The cell level instance to query.
 	 * @return The context tags this cell added to the overall state.

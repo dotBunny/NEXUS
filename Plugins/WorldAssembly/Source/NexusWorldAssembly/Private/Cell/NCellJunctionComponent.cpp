@@ -151,9 +151,9 @@ void UNCellJunctionComponent::EndPlay(const EEndPlayReason::Type EndPlayReason)
 }
 
 
-void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor DefaultColor, const UNWorldAssemblySettings* Settings) const
+void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const bool bShowDepth, FLinearColor ValidColor, FLinearColor InvalidColor, const UNWorldAssemblySettings* Settings) const
 {
-	FLinearColor GizmoColor = DefaultColor; // Default color
+	FLinearColor GizmoColor = ValidColor; // Default color
 	const FVector ComponentLocation = GetComponentLocation();
 	const FRotator ComponentRotation = GetComponentRotation();
 	const ULevel* Level = GetComponentLevel();
@@ -183,7 +183,7 @@ void UNCellJunctionComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const b
 		
 		if (MaximumDepth > Settings->AssemblyJunctionMatchingCellHullPenetration)
 		{
-			GizmoColor = FLinearColor::Red;
+			GizmoColor = InvalidColor;
 		}
 		
 		// Draw the depth text

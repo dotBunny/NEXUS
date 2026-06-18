@@ -9,6 +9,7 @@
 
 /**
  * Source channel used by the NEXUS framework update-check task.
+ * @note Gap in values is reserved for future use.
  */
 UENUM(BlueprintType)
 enum class ENUpdatesChannel : uint8

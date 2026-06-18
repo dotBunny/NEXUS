@@ -16,7 +16,7 @@
  * Saved to the NexusEditor config hierarchy and surfaced under Project Settings → NEXUS → Core.
  */
 UCLASS(config = NexusEditor, defaultconfig)
-class UNEditorSettings : public UDeveloperSettings
+class NEXUSCOREEDITOR_API UNEditorSettings : public UDeveloperSettings
 {
 public:
 	GENERATED_BODY()

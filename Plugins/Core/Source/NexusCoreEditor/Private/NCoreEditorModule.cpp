@@ -41,6 +41,10 @@ void FNCoreEditorModule::ShutdownModule()
 		FNEditorCommands::Unregister();
 	}
 
+	// Mirror the FNPropertySections::Register() in OnPostEngineInit. Safe to call unconditionally: when Register()
+	// never ran (headless cook/commandlet path), the cached pointers are null and the queues empty, so this is a no-op.
+	FNPropertySections::Unregister();
+
 	FNEditorStyle::Shutdown();
 	IModuleInterface::ShutdownModule();
 }

@@ -3,11 +3,15 @@
 
 #include "NEditorUtils.h"
 #include "BlueprintEditor.h"
+#include "ContentBrowserModule.h"
 #include "IBlutilityModule.h"
+#include "IContentBrowserSingleton.h"
 #include "ISettingsModule.h"
 #include "KismetCompilerModule.h"
 #include "LevelEditor.h"
+#include "LevelEditorSubsystem.h"
 #include "NCoreEditorMinimal.h"
+#include "Selection.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Kismet2/KismetEditorUtilities.h"
 
@@ -101,11 +105,61 @@ UBlueprint* FNEditorUtils::CreateBlueprint(const FString& InPath, const TSubclas
 	}
 
 	FAssetRegistryModule::AssetCreated(Blueprint);
-	
+
 	// ReSharper disable once CppExpressionWithoutSideEffects
 	Blueprint->MarkPackageDirty();
 
 	return Blueprint;
+}
+
+ULevel* FNEditorUtils::GetCurrentLevel()
+{
+	if (IsPlayInEditor())
+	{
+		return nullptr;
+	}
+
+	ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
+	if (LevelEditorSubsystem != nullptr)
+	{
+		return LevelEditorSubsystem->GetCurrentLevel();
+	}
+	return nullptr;
+}
+
+UWorld* FNEditorUtils::GetCurrentWorld()
+{
+	ULevel* CurrentLevel = GetCurrentLevel();
+	if (CurrentLevel != nullptr)
+	{
+		return CurrentLevel->OwningWorld;
+	}
+	return nullptr;
+}
+
+void FNEditorUtils::SelectActor(AActor* Actor)
+{
+	USelection* ActorSelection = GEditor->GetSelectedActors();
+	ActorSelection->Modify();
+	ActorSelection->DeselectAll();
+
+	GEditor->SelectActor(Actor, true, true, true, true);
+}
+
+TArray<FString> FNEditorUtils::GetSelectedContentBrowserPaths()
+{
+	TArray<FString> SelectedPaths;
+
+	IContentBrowserSingleton& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser").Get();
+	ContentBrowser.GetSelectedFolders(SelectedPaths);
+
+	TArray<FString> AdditionalPaths;
+	ContentBrowser.GetSelectedPathViewFolders(AdditionalPaths);
+	for (const FString& AdditionalPath : AdditionalPaths)
+	{
+		SelectedPaths.AddUnique(AdditionalPath);
+	}
+	return SelectedPaths;
 }
 
 void FNEditorUtils::DisallowConfigFileFromStaging(const FString& Config)

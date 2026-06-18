@@ -283,9 +283,9 @@ TArray<FVector> UNBoneComponent::GetCornerPoints(const FVector2D& SocketUnitSize
 }
 
 
-void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth, const UNWorldAssemblySettings* Settings, float WorldPenetration) const
+void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FLinearColor& ValidColor, const FLinearColor& InvalidColor, const bool bShowDepth, const UNWorldAssemblySettings* Settings, float WorldPenetration) const
 {
-	FLinearColor GizmoColor = FLinearColor::White;
+	FLinearColor GizmoColor = ValidColor;
 
 	switch (Mode)
 	{
@@ -293,7 +293,7 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth
 	case Manual:
 		break;
 	case Automatic:
-		GizmoColor = FNColor::NexusLightBlue;
+		GizmoColor = FNColor::NexusLightBlue; // TODO: Should make this symbol not color
 		break;
 	case Disabled:
 		// Were not drawing this
@@ -313,7 +313,7 @@ void UNBoneComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, bool bShowDepth
 
 		if (MaximumDepth > Settings->AssemblyJunctionMatchingWorldPenetration)
 		{
-			GizmoColor = FLinearColor::Red;
+			GizmoColor = InvalidColor;
 		}
 		
 		// Draw the depth text

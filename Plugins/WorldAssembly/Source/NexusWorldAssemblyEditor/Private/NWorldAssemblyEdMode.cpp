@@ -214,6 +214,18 @@ void FNWorldAssemblyEdMode::OnUndoRedo()
 	}
 }
 
+void FNWorldAssemblyEdMode::CacheUserSettings()
+{
+	const UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::Get();
+	
+	CachedCellHullColor = Settings->CellHullColor;
+	CachedCellBoundsColor = Settings->CellBoundsColor;
+	
+	CachedJunctionUnfilledColor = Settings->JunctionsUnfilledColor;
+	CachedJunctionValidColor = Settings->JunctionsValidColor;
+	CachedJunctionInvalidColor = Settings->JunctionsInvalidColor;
+}
+
 const FEditorModeID FNWorldAssemblyEdMode::Identifier = TEXT("NWorldAssemblyEdMode");
 const FText FNWorldAssemblyEdMode::DirtyMessage = FText::FromString("Dirty Cell Actor");
 const FText FNWorldAssemblyEdMode::AutoBoundsMessage = FText::FromString("Cell Bounds not calculated on save.");
@@ -225,10 +237,18 @@ TWeakObjectPtr<ANCellActor> FNWorldAssemblyEdMode::CellActor = nullptr;
 FNWorldAssemblyEdMode::ENCellEdMode FNWorldAssemblyEdMode::CellEdMode = ENCellEdMode::Bounds;
 TArray<FVector> FNWorldAssemblyEdMode::CachedHullVertices;
 TArray<FIntVector2> FNWorldAssemblyEdMode::CachedHullEdges;
-FLinearColor FNWorldAssemblyEdMode::CachedHullColor = FColor::Blue;
+
 FBox FNWorldAssemblyEdMode::CachedBounds;
 FNCellVoxelData FNWorldAssemblyEdMode::CachedVoxelData;
-FLinearColor FNWorldAssemblyEdMode::CachedBoundsColor = FColor::Red;
+
+FLinearColor FNWorldAssemblyEdMode::CachedCellHullColor = NEXUS::WorldAssembly::DefaultColors::CellHull;
+FLinearColor FNWorldAssemblyEdMode::CachedCellBoundsColor = NEXUS::WorldAssembly::DefaultColors::CellBounds;
+FLinearColor FNWorldAssemblyEdMode::CachedJunctionUnfilledColor = NEXUS::WorldAssembly::DefaultColors::JunctionUnfilled;
+FLinearColor FNWorldAssemblyEdMode::CachedJunctionInvalidColor = NEXUS::WorldAssembly::DefaultColors::JunctionInvalid;
+FLinearColor FNWorldAssemblyEdMode::CachedJunctionValidColor = NEXUS::WorldAssembly::DefaultColors::JunctionValid;
+FLinearColor FNWorldAssemblyEdMode::CachedBoneValidColor = NEXUS::WorldAssembly::DefaultColors::BoneValid;
+FLinearColor FNWorldAssemblyEdMode::CachedBoneInvalidColor = NEXUS::WorldAssembly::DefaultColors::BoneInvalid;
+
 TArray<FVector> FNWorldAssemblyEdMode::CachedBoundsVertices;
 FNWorldAssemblyEdMode::ENCellVoxelMode FNWorldAssemblyEdMode::CellVoxelMode = ENCellVoxelMode::None;
 TObjectPtr<ANDebugActor> FNWorldAssemblyEdMode::CollisionVisualizer = nullptr;
@@ -255,12 +275,12 @@ void FNWorldAssemblyEdMode::Enter()
 	CellActor = nullptr;
 	CachedHullVertices.Empty();
 	CachedHullEdges.Empty();
-	CachedHullColor = FColor::Blue;
 	CachedBounds = FBox(ForceInit);
 	CachedVoxelData = FNCellVoxelData();
-	CachedBoundsColor = FColor::Red;
 	CachedBoundsVertices.Empty();
 	RenderMode = ENWorldAssemblyEdModeRenderMode::All;
+	
+	CacheUserSettings();
 	
 	bCanTick = true;
 
@@ -374,7 +394,8 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			}
 			
 			// Draw debug information
-			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode())); // We can't use caching because we are drawing ALL of the possible roots
+			RootComponent->DrawDebugPDI(PDI, static_cast<uint8>(GetCellVoxelMode()), GetCachedCellBoundsColor(), GetCachedCellHullColor()); 
+			// We can't use caching because we are drawing ALL of the possible roots
 		}
 	}
 	if (FNWorldAssemblyRegistry::HasJunctionComponents())
@@ -390,12 +411,18 @@ void FNWorldAssemblyEdMode::Render(const FSceneView* View, FViewport* Viewport, 
 			{
 				if (WorldAssemblyEditorUserSettings->bDebugWorldDrawUnfilledJunctions)
 				{
-					JunctionComponent->DrawDebugPDI(PDI, true, WorldAssemblyEditorUserSettings->EmptyJunctionColor, WorldAssemblySettings);
+					JunctionComponent->DrawDebugPDI(PDI, true, 
+						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor,
+						WorldAssemblyEditorUserSettings->JunctionsUnfilledColor, 
+						WorldAssemblySettings);
 				}
 			}
 			else
 			{
-				JunctionComponent->DrawDebugPDI(PDI, true, FNColor::GreenLight, WorldAssemblySettings);
+				JunctionComponent->DrawDebugPDI(PDI, true, 
+					WorldAssemblyEditorUserSettings->JunctionsValidColor,
+					WorldAssemblyEditorUserSettings->JunctionsInvalidColor, 
+					WorldAssemblySettings);
 			}
 		}	
 	}

@@ -53,27 +53,27 @@ void FNEditorCommands::RegisterCommands()
 	
 	CommandList_Help = MakeShared<FUICommandList>();
 	
-	CommandList_Help->MapAction(Get().CommandInfo_Help_Discord,
+	CommandList_Help->MapAction(CommandInfo_Help_Discord,
 	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDiscord),
 	FCanExecuteAction());
-	
-	CommandList_Help->MapAction(Get().CommandInfo_Help_BugReport,
+
+	CommandList_Help->MapAction(CommandInfo_Help_BugReport,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpBugReport),
 		FCanExecuteAction());
 
-	CommandList_Help->MapAction(Get().CommandInfo_Help_Overwatch,
+	CommandList_Help->MapAction(CommandInfo_Help_Overwatch,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpOverwatch),
 		FCanExecuteAction());
 
-	CommandList_Help->MapAction(Get().CommandInfo_Help_Issues,
+	CommandList_Help->MapAction(CommandInfo_Help_Issues,
 	FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpIssues),
 	FCanExecuteAction());
 
-	CommandList_Help->MapAction(Get().CommandInfo_Help_Roadmap,
+	CommandList_Help->MapAction(CommandInfo_Help_Roadmap,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpRoadmap),
 		FCanExecuteAction());
 
-	CommandList_Help->MapAction(Get().CommandInfo_Help_Documentation,
+	CommandList_Help->MapAction(CommandInfo_Help_Documentation,
 		FExecuteAction::CreateStatic(&FNEditorCommands::OnHelpDocumentation),
 		FCanExecuteAction());
 }
@@ -137,7 +137,7 @@ void FNEditorCommands::RemoveMenuEntries()
 
 void FNEditorCommands::GenerateHelpSubMenu(UToolMenu* Menu)
 {
-	const FNEditorCommands Commands = Get();
+	const FNEditorCommands& Commands = Get();
 
 	FToolMenuSection& ReferenceSection = Menu->FindOrAddSection("Reference");
 	ReferenceSection.Label = NSLOCTEXT("NexusCoreEditor", "NHelp_Reference", "Reference");

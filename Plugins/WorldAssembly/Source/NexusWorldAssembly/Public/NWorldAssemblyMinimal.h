@@ -25,6 +25,7 @@ namespace NEXUS::WorldAssembly
 	{
 		/** Line thickness (cm) used when drawing World Assembly debug visualization. */
 		constexpr float LineThickness = 1.5f;
+		constexpr float LineExtraThickness = 3.f;
 	}
 
 	/**

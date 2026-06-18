@@ -66,7 +66,7 @@ public:
 	FGameplayTagContainer ContextTags;
 
 	/** Tag-counter constraints the finished organ must satisfy; enforced as RequiredTagCounters during graph validation. */
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements")
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Organ Component|Requirements", meta=(TitleProperty="{Tag}"))
 	TArray<FNGameplayTagCounterConstraint> TagCounters;
 
 	/** Tissues (and transitively, cells) the organ may draw from during generation. */

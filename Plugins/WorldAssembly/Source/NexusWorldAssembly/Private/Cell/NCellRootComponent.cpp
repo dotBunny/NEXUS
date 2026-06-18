@@ -62,13 +62,13 @@ ANCellActor* UNCellRootComponent::GetNCellActor() const
 	return Cast<ANCellActor>(GetOwner());
 }
 
-void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const
+void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode, const FLinearColor& BoundsColor, const FLinearColor& HullColor) const
 {
 	// We need a version that has zero reliance on the EdMode tool
 	const FBox RotatedBounds = GetOffsetBounds();
 	const TArray<FVector> RotatedVertices = FNVectorUtils::RotateAndOffsetPoints(this->Details.Hull.Vertices, GetOffsetRotator(), GetOffsetLocation());
 	
-	DrawDebugPDI(PDI, RotatedBounds, FLinearColor::Red, RotatedVertices, FLinearColor::Blue, DrawVoxelMode);
+	DrawDebugPDI(PDI, RotatedBounds, BoundsColor, RotatedVertices, HullColor, DrawVoxelMode);
 }
 
 void UNCellRootComponent::DrawDebugPDI(FPrimitiveDrawInterface* PDI,  const FBox& WorldBoundsBox, const FLinearColor& BoundsColor,  const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode) const

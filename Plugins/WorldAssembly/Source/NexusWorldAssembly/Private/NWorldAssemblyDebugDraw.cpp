@@ -27,7 +27,7 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 	const TArray<FVector2D> UnrotatedSocketPoints = FNWorldAssemblyUtils::GetSocketPoints2D(UnitSize, SocketSize);
 	const int32 SocketPointsCount = UnrotatedSocketPoints.Num();
 	
-	const FVector DirectionEndPoint = Location + (FacingRotation * 42.f);
+	const FVector DirectionEndPoint = Location + (FacingRotation * 50.f);
 	const FVector DirectionTop = Location + (FVector::UpVector * 5.f);
 	const FVector DirectionTopPoint = DirectionTop + (FacingRotation * 35.f);
 	
@@ -64,17 +64,17 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 		case TwoWaySocket:
 			const FVector TwoWayPointA = RotatedCornerPoints[i] + (FacingRotation * LineLength);
 			const FVector TwoWayPointB = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
-			PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+			PDI->DrawLine(TwoWayPointA, TwoWayPointB, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 			break;
 		
 		case InOnlySocket:
 			const FVector InOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * -LineLength);
-			PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+			PDI->DrawLine(RotatedCornerPoints[i], InOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 			break;	
 		
 		case OutOnlySocket:
 			const FVector OutOnlySocketPoint = RotatedCornerPoints[i] + (FacingRotation * LineLength);
-			PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+			PDI->DrawLine(RotatedCornerPoints[i], OutOnlySocketPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 			break;		
 
 		case OneWaySocket:
@@ -83,9 +83,9 @@ void FNWorldAssemblyDebugDraw::DrawSocket(FPrimitiveDrawInterface* PDI, const FV
 	}
 	
 	// Draw Direction
-	PDI->DrawLine(Location, DirectionEndPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	PDI->DrawLine(DirectionEndPoint, DirectionTopPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
-	PDI->DrawLine(DirectionEndPoint, DirectionBottomPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineThickness);
+	PDI->DrawLine(Location, DirectionEndPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+	PDI->DrawLine(DirectionEndPoint, DirectionTopPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
+	PDI->DrawLine(DirectionEndPoint, DirectionBottomPoint, Color, SDPG_Foreground, NEXUS::WorldAssembly::Debug::LineExtraThickness);
 }
 
 void FNWorldAssemblyDebugDraw::DrawDashedRawMesh(FPrimitiveDrawInterface* PDI, const FNRawMesh& Mesh, const FRotator& Rotation, const FVector& Offset, const FLinearColor Color, const float DashSize, const ESceneDepthPriorityGroup Priority)

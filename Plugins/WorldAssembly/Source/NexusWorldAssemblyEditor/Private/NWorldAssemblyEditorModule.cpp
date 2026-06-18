@@ -30,6 +30,8 @@
 #include "NWorldAssemblyEdMode.h"
 #include "UnrealEdGlobals.h"
 #include "Customizations/NOrganComponentCustomization.h"
+#include "Customizations/NWorldAssemblyEditorUserSettingsCustomization.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "Editor/UnrealEdEngine.h"
 #include "Macros/NEditorModuleMacros.h"
 #include "Organ/NBoneActor.h"
@@ -69,6 +71,7 @@ void FNWorldAssemblyEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomClassLayout(ANCellActor::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(ANCellProxy::StaticClass()->GetFName());
 		PropertyModule.UnregisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName());
+		PropertyModule.UnregisterCustomClassLayout(UNWorldAssemblyEditorUserSettings::StaticClass()->GetFName());
 
 		PropertyModule.NotifyCustomizationModuleChanged();
 	}
@@ -158,6 +161,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	PropertyModule.RegisterCustomClassLayout(UNOrganComponent::StaticClass()->GetFName(),
 		FOnGetDetailCustomizationInstance::CreateStatic(&FNOrganComponentCustomization::MakeInstance));
 
+	PropertyModule.RegisterCustomClassLayout(UNWorldAssemblyEditorUserSettings::StaticClass()->GetFName(),
+		FOnGetDetailCustomizationInstance::CreateStatic(&FNWorldAssemblyEditorUserSettingsCustomization::MakeInstance));
+
 	PropertyModule.NotifyCustomizationModuleChanged();
 	
 	// Handle Placement Definitions
@@ -190,6 +196,9 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	FNPropertySections::AddSceneComponentCategory("Cell Root");
 	FNPropertySections::AddSceneComponentCategory("Cell Junction");
 	FNPropertySections::AddSceneComponentCategory("Bone Component");
+	
+	// Cache stuff
+	FNWorldAssemblyEdMode::CacheUserSettings();
 }
 
 IMPLEMENT_MODULE(FNWorldAssemblyEditorModule, NexusWorldAssemblyEditor)

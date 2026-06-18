@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "ComponentVisualizer.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "Macros/NModuleMacros.h"
 #include "Menus/NToolsMenuMacros.h"

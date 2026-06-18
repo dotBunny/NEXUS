@@ -65,7 +65,7 @@ public:
 	FNCellJunctionDetails Details;
 	
 	/** Candidate fillers for this junction; one is selected (constraint-gated, then weighted-random) and spawned when the junction is left unconnected. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Cell Junction", meta=(TitleProperty="{Actor}"))
 	TArray<FNCellJunctionFillerEntry> Fillers;
 	
 	/** When true, bypass filler time-slicing and spawn this junction's filler immediately during BeginPlay. */
@@ -107,7 +107,7 @@ public:
 	
 	/** Draw the junction's debug visualization through the supplied PDI. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, 
-		bool bShowDepth = false, FLinearColor DefaultColor = FNColor::GreenLight, 
+		bool bShowDepth = false, FLinearColor ValidColor = FNColor::GreenLight, FLinearColor Invalid = FLinearColor::Red, 
 		const UNWorldAssemblySettings* Settings = UNWorldAssemblySettings::Get()) const;
 
 	/**

@@ -3,6 +3,10 @@
 
 #pragma once
 
+#include "CoreMinimal.h"
+
+class FPropertySection;
+
 /**
  * Registers and manages the "NEXUS" property sections (the grouping tabs shown at the top of the Details panel)
  * for Actors, Actor Components, Scene Components, and Objects.
@@ -15,6 +19,9 @@ class NEXUSCOREEDITOR_API FNPropertySections
 public:
 	/** Creates the NEXUS property sections with the PropertyEditor module and flushes any categories queued beforehand. */
 	static void Register();
+
+	/** Releases the cached property sections, clears any queued categories, and resets registration state so a later Register() rebinds cleanly. */
+	static void Unregister();
 
 	/** Adds a category to all four NEXUS property sections (Actor, Actor Component, Scene Component, and Object). */
 	static void AddCategory(FName Category);

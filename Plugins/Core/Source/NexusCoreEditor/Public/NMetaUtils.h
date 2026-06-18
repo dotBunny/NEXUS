@@ -51,7 +51,7 @@ class NEXUSCOREEDITOR_API FNMetaUtils
 {
 public:
 	/** Shared empty string returned by accessors when no meta-data value is available. */
-	static FString EmptyString;
+	static const FString EmptyString;
 
 	/**
 	 * Does the target node have any meta-data for the defined key?

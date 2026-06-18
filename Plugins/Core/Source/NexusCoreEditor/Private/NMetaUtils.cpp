@@ -4,7 +4,7 @@
 #include "NMetaUtils.h"
 #include "K2Node_CallFunction.h"
 
-FString FNMetaUtils::EmptyString = TEXT("");
+const FString FNMetaUtils::EmptyString = TEXT("");
 
 N_META_TYPE(ExternalDocumentation, DocsURL)
 

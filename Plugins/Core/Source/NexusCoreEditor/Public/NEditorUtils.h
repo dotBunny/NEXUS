@@ -4,10 +4,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "ContentBrowserModule.h"
-#include "IContentBrowserSingleton.h"
-#include "LevelEditorSubsystem.h"
-#include "Selection.h"
 #include "UnrealEdGlobals.h"
 #include "Editor/UnrealEdEngine.h"
 
@@ -67,7 +63,8 @@ public:
 	/** Is in PIE and not paused. */
 	FORCEINLINE static bool IsPlayInEditorRunning()
 	{
-		return IsPlayInEditor() && !GUnrealEd->PlayWorld->bDebugPauseExecution;
+		const UWorld* PlayWorld = GEditor->PlayWorld;
+		return PlayWorld != nullptr && !PlayWorld->bDebugPauseExecution;
 	}
 	
 	/**
@@ -124,34 +121,13 @@ public:
 	 * Returns the current editor level.
 	 * @return The ULevel the user is editing, or nullptr while PIE is active.
 	 */
-	FORCEINLINE static ULevel* GetCurrentLevel()
-	{
-		if (IsPlayInEditor())
-		{
-			return nullptr;
-		}
-		
-		ULevelEditorSubsystem* LevelEditorSubsystem = GEditor->GetEditorSubsystem<ULevelEditorSubsystem>();
-		if (LevelEditorSubsystem != nullptr)
-		{
-			return LevelEditorSubsystem->GetCurrentLevel();
-		}
-		return nullptr;
-	}
-	
+	static ULevel* GetCurrentLevel();
+
 	/**
 	 * Returns the world that owns the current editor level.
 	 * @return The owning UWorld, or nullptr while PIE is active or no level is loaded.
 	 */
-	FORCEINLINE static UWorld* GetCurrentWorld()
-	{
-		ULevel* CurrentLevel = GetCurrentLevel();
-		if (CurrentLevel != nullptr)
-		{
-			return CurrentLevel->OwningWorld;
-		}
-		return nullptr;
-	}
+	static UWorld* GetCurrentWorld();
 
 	/**
 	 * Tests whether World has never been saved (new map or in-memory only).
@@ -170,34 +146,13 @@ public:
 	 * Replaces the current actor selection with Actor.
 	 * @param Actor The actor to select.
 	 */
-	FORCEINLINE static void SelectActor(AActor* Actor)
-	{
-		USelection* ActorSelection = GEditor->GetSelectedActors();
-		ActorSelection->Modify();
-		ActorSelection->DeselectAll();
-
-		GEditor->SelectActor(Actor, true, true, true, true);
-	}
+	static void SelectActor(AActor* Actor);
 
 	/**
 	 * Returns the union of folders selected in the Content Browser's main view and path view.
 	 * @return A de-duplicated list of asset path roots.
 	 */
-	static TArray<FString> GetSelectedContentBrowserPaths()
-	{
-		TArray<FString> SelectedPaths;
-
-		IContentBrowserSingleton& ContentBrowser = FModuleManager::LoadModuleChecked<FContentBrowserModule>("ContentBrowser").Get();
-		ContentBrowser.GetSelectedFolders(SelectedPaths);
-
-		TArray<FString> AdditionalPaths;
-		ContentBrowser.GetSelectedPathViewFolders(AdditionalPaths);
-		for (FString AdditionalPath : AdditionalPaths)
-		{
-			SelectedPaths.AddUnique(AdditionalPath);
-		}
-		return SelectedPaths;
-	}
+	static TArray<FString> GetSelectedContentBrowserPaths();
 	
 	/** Marks Config so it will not be bundled with staged/packaged builds. */
 	static void DisallowConfigFileFromStaging(const FString& Config);

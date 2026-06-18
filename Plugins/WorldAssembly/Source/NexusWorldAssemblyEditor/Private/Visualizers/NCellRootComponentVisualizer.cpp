@@ -3,7 +3,6 @@
 
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
-#include "EditorModes.h"
 #include "Cell/NCellRootComponent.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
@@ -30,7 +29,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	// We need to draw the base wireframes
 	if (!FNWorldAssemblyEdMode::IsActive())
 	{
-		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(FNWorldAssemblyEdMode::GetCellVoxelMode()));
+		CellRootComponent->DrawDebugPDI(PDI, static_cast<uint8>(FNWorldAssemblyEdMode::GetCellVoxelMode()), FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), FNWorldAssemblyEdMode::GetCachedCellHullColor());
 		return;
 	}
 
@@ -41,10 +40,10 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		
 		// Draw Min Max
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
-		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Min, FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 1));
-		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEdMode::GetCachedBoundsColor(), PointSize, SDPG_World);
+		PDI->DrawPoint(Bounds.Max, FNWorldAssemblyEdMode::GetCachedCellBoundsColor(), PointSize, SDPG_World);
 		PDI->SetHitProxy(nullptr);
 
 	}
@@ -57,7 +56,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 		{
 			// TODO: Selection color?
 			PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, i));
-			PDI->DrawPoint(WorldVertices[i], FNWorldAssemblyEdMode::GetCachedHullColor(), PointSize, SDPG_World);
+			PDI->DrawPoint(WorldVertices[i], FNWorldAssemblyEdMode::GetCachedCellHullColor(), PointSize, SDPG_World);
 			PDI->SetHitProxy(nullptr);
 		}
 		
@@ -75,7 +74,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			}
 			else
 			{
-				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FNWorldAssemblyEdMode::GetCachedHullColor(), 2.f, SDPG_World);
+				PDI->DrawLine(WorldVertices[WorldEdges[i].X], WorldVertices[WorldEdges[i].Y], FNWorldAssemblyEdMode::GetCachedCellHullColor(), 2.f, SDPG_World);
 			
 			}
 			PDI->SetHitProxy(nullptr);

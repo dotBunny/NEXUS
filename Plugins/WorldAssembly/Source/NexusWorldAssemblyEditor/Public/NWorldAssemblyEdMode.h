@@ -33,6 +33,19 @@ enum class ENWorldAssemblyEdModeRenderMode
 	None,
 };
 
+namespace NEXUS::WorldAssembly::DefaultColors
+{
+	static constexpr FLinearColor BoneValid = FLinearColor(1.f,1.f,1.f, 1.f);
+	static constexpr FLinearColor BoneInvalid = FLinearColor(0.73f,0.127f,0.067f, 1.f);
+	
+	static constexpr FLinearColor JunctionValid = FLinearColor(0.f,1.f,0.402f, 1.f);
+	static constexpr FLinearColor JunctionInvalid = FLinearColor(0.73f,0.127f,0.067f, 1.f);
+	static constexpr FLinearColor JunctionUnfilled = FLinearColor(0.5f,0.5f,0.5f, 1.f);
+	
+	static constexpr FLinearColor CellHull = FLinearColor(0.f,0.491f,0.863f, 1.f);
+	static constexpr FLinearColor CellBounds = FLinearColor(0.73f,0.127f,0.067f, 1.f);
+}
+
 /**
  * Custom editor mode for World Assembly cell/organ authoring.
  *
@@ -43,6 +56,7 @@ enum class ENWorldAssemblyEdModeRenderMode
 class FNWorldAssemblyEdMode final : public FEdMode
 {
 public:
+	
 	/**
 	 * Which side-car slot the cell-editor view is currently focused on.
 	 */
@@ -67,13 +81,23 @@ public:
 	static FBox GetCachedBounds() { return CachedBounds; }
 
 	/** @return Cached bounds overlay color. */
-	static const FLinearColor& GetCachedBoundsColor() { return CachedBoundsColor; }
-
-	/** @return Cached bounds overlay vertex positions. */
-	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
+	static const FLinearColor& GetCachedCellBoundsColor() { return CachedCellBoundsColor; }
 
 	/** @return Cached hull overlay color. */
-	static const FLinearColor& GetCachedHullColor() { return CachedHullColor; }
+	static const FLinearColor& GetCachedCellHullColor() { return CachedCellHullColor; }
+	
+	static const FLinearColor& GetCachedJunctionInvalidColor() { return CachedJunctionInvalidColor; }
+	
+	static const FLinearColor& GetCachedJunctionValidColor() { return CachedJunctionValidColor; }
+	
+	static const FLinearColor& GetCachedJunctionUnfilledColor() { return CachedJunctionUnfilledColor; }
+	
+	static const FLinearColor& GetCachedBoneValidColor() { return CachedBoneValidColor; }
+	
+	static const FLinearColor& GetCachedBoneInvalidColor() { return CachedBoneInvalidColor; }
+	
+	/** @return Cached bounds overlay vertex positions. */
+	static const TArray<FVector>& GetCachedBoundsVertices() { return CachedBoundsVertices; }
 
 	/** @return Cached voxel overlay data. */
 	static const FNCellVoxelData& GetCachedVoxelData() { return CachedVoxelData; }
@@ -178,6 +202,8 @@ public:
 	virtual void DrawHUD(FEditorViewportClient* ViewportClient, FViewport* Viewport, const FSceneView* View, FCanvas* Canvas) override;
 	//End FEdMode
 
+	static void CacheUserSettings();
+	
 private:
 	/** Subscribe to the editor world-change delegates that drive live visualizer refreshes. Called when one is spawned. */
 	static void BindWorldChangeDelegates();
@@ -209,16 +235,25 @@ private:
 
 	/** Delegate: an undo/redo transaction completed — geometry can't be cheaply diffed, so always flag a refresh. */
 	static void OnUndoRedo();
+	
+	
 
 	/** Pixel spacing between stacked HUD messages. */
 	const int32 MessageSpacing = 20;
 
 	static TArray<FVector> CachedHullVertices;
 	static TArray<FIntVector2> CachedHullEdges;
-	static FLinearColor CachedHullColor;
+	
+	static FLinearColor CachedCellHullColor;
+	static FLinearColor CachedCellBoundsColor;
+	static FLinearColor CachedJunctionUnfilledColor;
+	static FLinearColor CachedJunctionInvalidColor;
+	static FLinearColor CachedJunctionValidColor;
+	static FLinearColor CachedBoneValidColor;
+	static FLinearColor CachedBoneInvalidColor;
+	
 	static FBox CachedBounds;
 	static FNCellVoxelData CachedVoxelData;
-	static FLinearColor CachedBoundsColor;
 	static TArray<FVector> CachedBoundsVertices;
 	static TWeakObjectPtr<ANCellActor> CellActor;
 	static ENCellEdMode CellEdMode;

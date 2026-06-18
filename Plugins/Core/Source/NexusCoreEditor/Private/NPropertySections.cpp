@@ -1,4 +1,10 @@
-﻿#include "NPropertySections.h"
+﻿// Copyright dotBunny Inc. All Rights Reserved.
+// See the LICENSE file at the repository root for more information.
+
+#include "NPropertySections.h"
+
+#include "PropertyEditorModule.h"
+#include "Modules/ModuleManager.h"
 
 const FText FNPropertySections::DisplayName = FText::FromString(TEXT("NEXUS"));
 const FName FNPropertySections::Identifier = FName(TEXT("NEXUS"));
@@ -77,6 +83,24 @@ void FNPropertySections::Register()
 	}
 	
 	bHasRegistered = true;
+}
+
+void FNPropertySections::Unregister()
+{
+	// Drop our shared references to the sections. The PropertyEditor module holds its own references, so this does
+	// not remove the sections while it remains loaded; it ensures a later Register() rebinds against the current
+	// module instance rather than leaving stale pointers behind across a module reload.
+	ActorPropertySection.Reset();
+	ActorComponentPropertySection.Reset();
+	SceneComponentPropertySection.Reset();
+	ObjectPropertySection.Reset();
+
+	PendingActors.Empty();
+	PendingActorComponents.Empty();
+	PendingSceneComponents.Empty();
+	PendingObjectComponents.Empty();
+
+	bHasRegistered = false;
 }
 
 void FNPropertySections::AddCategory(const FName Category)

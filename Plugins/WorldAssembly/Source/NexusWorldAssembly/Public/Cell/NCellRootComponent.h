@@ -37,7 +37,7 @@ public:
 	ANCellActor* GetNCellActor() const;
 
 	/** Draw the cell's debug bounds, hull and voxels using the current stored Details. */
-	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode) const;
+	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const uint8 DrawVoxelMode, const FLinearColor& BoundsColor, const FLinearColor& HullColor) const;
 	/** Draw the cell's debug bounds, hull and voxels using an override world-space bounds/hull. */
 	void DrawDebugPDI(FPrimitiveDrawInterface* PDI, const FBox& WorldBoundsBox,  const FLinearColor& BoundsColor, const TArray<FVector>& WorldHullVertices, const FLinearColor& HullColor, const uint8 DrawVoxelMode) const;
 

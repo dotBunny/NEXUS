@@ -16,16 +16,18 @@
  *
  * Pair with N_EDITOR_STYLE and N_EDITOR_STYLE_CREATE in the matching .cpp.
  *
- * @param ModuleName The plugin's module name; used to locate the plugin base directory.
+ * @param PluginName The plugin name (the .uplugin basename, e.g. "NexusCore"); used to locate the plugin base directory.
  * @param StyleName The Slate style set's registered name.
  */
-#define N_EDITOR_STYLE_HEADER(ModuleName, StyleName) \
+#define N_EDITOR_STYLE_HEADER(PluginName, StyleName) \
 	public: \
 		static void Initialize() \
 		{ \
 			if (!StyleInstance.IsValid()) \
 			{ \
-				PluginDirectory = IPluginManager::Get().FindPlugin(TEXT(ModuleName))->GetBaseDir(); \
+				const TSharedPtr<IPlugin> Plugin = IPluginManager::Get().FindPlugin(TEXT(PluginName)); \
+				checkf(Plugin.IsValid(), TEXT("NEXUS: plugin '%hs' not found while initializing Slate style."), PluginName); \
+				PluginDirectory = Plugin->GetBaseDir(); \
 				StyleInstance = Create(); \
 				FSlateStyleRegistry::RegisterSlateStyle(*StyleInstance); \
 			} \

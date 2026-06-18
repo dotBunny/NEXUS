@@ -3,6 +3,7 @@
 
 #include "Visualizers/NBoneComponentVisualizer.h"
 
+#include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblySettings.h"
 #include "NWorldCollisionCache.h"
 #include "Organ/NBoneComponent.h"
@@ -39,5 +40,5 @@ void FNBoneComponentVisualizer::DrawVisualization(const UActorComponent* Compone
 	}
 
 	// We are always going to draw this
-	BoneComponent->DrawDebugPDI(PDI, true, Settings, WorldPenetration);
+	BoneComponent->DrawDebugPDI(PDI, FNWorldAssemblyEdMode::GetCachedBoneValidColor(),  FNWorldAssemblyEdMode::GetCachedBoneInvalidColor(), true, Settings, WorldPenetration);
 }
