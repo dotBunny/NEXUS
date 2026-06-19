@@ -40,11 +40,13 @@ void UNGuardianDeveloperOverlay::UnbindWorld(const UWorld* World)
 	
 	if (World->WorldType == EWorldType::PIE || World->WorldType == EWorldType::Game)
 	{
-		UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World);
-		if (System != nullptr && Subsystems.Contains(System))
+		// Remove the world's subsystem if it still resolves, then purge any slots GC has nulled so a
+		// dead entry can never linger at index 0 and silently freeze NativeTick.
+		if (UNGuardianSubsystem* System = UNGuardianSubsystem::Get(World))
 		{
 			Subsystems.Remove(System);
 		}
+		Subsystems.RemoveAll([](const TObjectPtr<UNGuardianSubsystem>& Subsystem){ return Subsystem == nullptr; });
 	}
 	UpdateBanner();
 }
@@ -79,7 +81,17 @@ void UNGuardianDeveloperOverlay::NativeTick(const FGeometry& MyGeometry, float I
 
 	// TODO: This forces us to only show the active game world or PIE, despite the possibility there is more
 	// TODO: We should make this a list entry like the others to support multiple worlds
-	UNGuardianSubsystem* System = Subsystems[0];
+	// Find the first live subsystem rather than assuming index 0; a null slot there would otherwise
+	// freeze the overlay while a valid world is still tracked further down the array.
+	UNGuardianSubsystem* System = nullptr;
+	for (const TObjectPtr<UNGuardianSubsystem>& Candidate : Subsystems)
+	{
+		if (Candidate != nullptr)
+		{
+			System = Candidate;
+			break;
+		}
+	}
 	if (System == nullptr) return;
 	
 	ObjectCountNumber->SetCurrentValue(System->GetLastObjectCount());

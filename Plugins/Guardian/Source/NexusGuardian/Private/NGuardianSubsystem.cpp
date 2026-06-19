@@ -31,7 +31,7 @@ void UNGuardianSubsystem::SetBaseline()
 	bPassedObjectCountWarningThreshold = false;
 	bPassedObjectCountSnapshotThreshold = false;
 	bPassedObjectCountCompareThreshold = false;
-	CaptureSnapshot.Reset();
+	CapturedSnapshot.Reset();
 	
 	BaseObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 
@@ -71,7 +71,7 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		bPassedObjectCountWarningThreshold = false;
 		bPassedObjectCountSnapshotThreshold = false;
 		bPassedObjectCountCompareThreshold = false;
-		CaptureSnapshot.Reset();
+		CapturedSnapshot.Reset();
 		return;
 	}
 	
@@ -87,16 +87,16 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 	if (LastObjectCount >= ObjectCountSnapshotThreshold && !bPassedObjectCountSnapshotThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count snapshot threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountSnapshotThreshold);
-		CaptureSnapshot = FNObjectSnapshotUtils::Snapshot();
+		CapturedSnapshot = FNObjectSnapshotUtils::Snapshot();
 		if (bShouldOutputSnapshot)
 		{
 			FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-				FString::Printf(TEXT("%s_%s.txt"), *SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+				FString::Printf(TEXT("%s_%s.txt"), SnapshotPrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 			
 			// The thought process here is that the ToReport is actually more expensive than you would think given it is doing more string manipulation/etc.
 			// Maybe it's faster to generate it on the main thread and pass the report in, but the idea was to minimize hitch on GameThread.
 			Async(EAsyncExecution::TaskGraph,
-				[Snapshot = CaptureSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
+				[Snapshot = CapturedSnapshot, DumpFilePath = MoveTemp(DumpFilePath)]()
 				{
 					const TArray<FString> Output = Snapshot.ToReport().GetReportLines(ENReportOutputFormat::PlainText);
 					FFileHelper::SaveStringArrayToFile(Output, *DumpFilePath, FFileHelper::EEncodingOptions::ForceUTF8, &IFileManager::Get(), FILEWRITE_Silent);
@@ -115,11 +115,11 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 		UE_LOG(LogNexusGuardian, Error, TEXT("The UObject count compare threshold has been met with %d/%d objects."), LastObjectCount, ObjectCountCompareThreshold);
 		
 		const FNObjectSnapshot CompareSnapshot = FNObjectSnapshotUtils::Snapshot();
-		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CaptureSnapshot, CompareSnapshot, false);
-		CaptureSnapshot.Reset();
+		FNObjectSnapshotDiff Diff = FNObjectSnapshotUtils::Diff(CapturedSnapshot, CompareSnapshot, false);
+		CapturedSnapshot.Reset();
 		
 		FString DumpFilePath = FPaths::Combine(FPaths::ProjectLogDir(),
-			FString::Printf(TEXT("%s_%s.txt"), *ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
+			FString::Printf(TEXT("%s_%s.txt"), ComparePrefix, *FDateTime::Now().ToString(TEXT("%Y%m%d_%H%M%S"))));
 		Async(EAsyncExecution::TaskGraph,
 			[Diff = MoveTemp(Diff), DumpFilePath = MoveTemp(DumpFilePath)]()
 			{

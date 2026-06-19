@@ -78,8 +78,8 @@ public:
 	bool HasPassedCompareThreshold() const { return bPassedObjectCountCompareThreshold; }
 	
 private:
-	const FString ComparePrefix = TEXT("NEXUS_Compare");
-	const FString SnapshotPrefix = TEXT("NEXUS_Snapshot");
+	static constexpr const TCHAR* ComparePrefix = TEXT("NEXUS_Compare");
+	static constexpr const TCHAR* SnapshotPrefix = TEXT("NEXUS_Snapshot");
 	
 	/** Latched true once the warning threshold has been crossed. */
 	bool bPassedObjectCountWarningThreshold = false;
@@ -105,7 +105,7 @@ private:
 	bool bShouldOutputSnapshot = false;
 
 	/** In-memory snapshot captured at the snapshot threshold and compared at the compare threshold. */
-	FNObjectSnapshot CaptureSnapshot;
+	FNObjectSnapshot CapturedSnapshot;
 	
 	
 	FTimerHandle BaselineTimerHandle;
