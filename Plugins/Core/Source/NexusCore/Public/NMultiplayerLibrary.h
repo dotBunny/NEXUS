@@ -39,7 +39,7 @@ public:
 	 * @param PlayerState The target player to kick.
 	 * @return Was the player able to be kicked? true/false.
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure = false, DisplayName = "Kick Player", Category = "NEXUS|Multiplayer",
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, BlueprintAuthorityOnly, DisplayName = "Kick Player", Category = "NEXUS|Multiplayer",
 		meta = (WorldContext = "WorldContextObject", DocsURL="https://nexus-framework.com/docs/plugins/core/types/multiplayer-library/#kick-player"))
 	static bool KickPlayer(UObject* WorldContextObject, APlayerState* PlayerState);
 
