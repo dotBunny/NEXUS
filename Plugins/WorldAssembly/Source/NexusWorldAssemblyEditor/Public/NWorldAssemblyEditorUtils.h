@@ -140,7 +140,12 @@ public:
 
 	/** @return true if every organ in the current level can be generated. */
 	static bool CanGenerateAllOrgans();
-	
-	
-	static TArray<FAssetData> GetAllCellDataAssetData();
+
+	/**
+	 * Gather the asset data for every UNCell (and subclass) known to the asset registry.
+	 * @param bWaitForFullScan when true, blocks until the entire asset registry has been scanned before gathering.
+	 * @return the asset data for all discovered cell data assets.
+	 * @note Pass true only from commandlets or other headless contexts; the synchronous scan will hard-stall an interactive editor on large projects.
+	 */
+	static TArray<FAssetData> GetAllCellDataAssetData(bool bWaitForFullScan);
 };

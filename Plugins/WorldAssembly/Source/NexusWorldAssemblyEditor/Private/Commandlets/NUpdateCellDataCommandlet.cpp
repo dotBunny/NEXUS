@@ -35,7 +35,7 @@ int32 UNUpdateCellDataCommandlet::Main(const FString& Params)
 int32 UNUpdateCellDataCommandlet::Execute(bool bShouldErrorOnChanges, bool bShouldCommitChanges)
 {
 	TArray<FString> ChangedAssetPaths;
-	TArray<FAssetData> CellAssetData = FNWorldAssemblyEditorUtils::GetAllCellDataAssetData();
+	TArray<FAssetData> CellAssetData = FNWorldAssemblyEditorUtils::GetAllCellDataAssetData(true);
 	UEditorAssetSubsystem* EditorAssetSubsystem = GEditor->GetEditorSubsystem<UEditorAssetSubsystem>();
 	TArray<FString> CommitPaths;
 	int32 ReturnCode = 0;

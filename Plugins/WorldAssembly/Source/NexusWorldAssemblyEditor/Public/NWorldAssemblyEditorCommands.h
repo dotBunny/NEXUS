@@ -167,8 +167,26 @@ public:
 	/** Cancel the tracked Quick Assembly operation if it is still running. */
 	static void CancelQuickAssembly();
 
-private:	
-	
+private:
+
+	/**
+	 * One Organ command paired with the delegates it binds to.
+	 *
+	 * GetGlobalOrganActions() is the single source of truth for the Organ commands that are mapped into
+	 * CommandList_Organ and appended to the level editor's global action list. Driving both the MapAction
+	 * and the matching UnmapAction from the same list keeps them from drifting apart as commands are
+	 * added or removed.
+	 */
+	struct FOrganGlobalAction
+	{
+		TSharedPtr<FUICommandInfo> CommandInfo;
+		FExecuteAction Execute;
+		FCanExecuteAction CanExecute;
+	};
+
+	/** @return every Organ command appended to the global action list (see FOrganGlobalAction). */
+	TArray<FOrganGlobalAction> GetGlobalOrganActions() const;
+
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCalculateAll;

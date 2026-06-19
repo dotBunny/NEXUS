@@ -136,6 +136,11 @@ void FNWorldAssemblyEditorModule::OnPostEngineInit()
 	// Visualizers
 	if (GUnrealEd != nullptr)
 	{
+		// Only the cell-root visualizer is retained as a module member: the tool menu (Hull_SplitEdge etc.)
+		// calls back into it through the derived type for selection state (GetEdgeSelection/ClearSelection/
+		// GetMode/HasEdgeSelected), none of which exist on the base FComponentVisualizer interface. The
+		// junction and bone visualizers are only ever used through the base interface, so locals suffice —
+		// UnrealEd holds its own shared ref once registered. The member is released in ShutdownModule().
 		RootComponentVisualizer = MakeShared<FNCellRootComponentVisualizer>();
 		GUnrealEd->RegisterComponentVisualizer(UNCellRootComponent::StaticClass()->GetFName(), RootComponentVisualizer);
 		RootComponentVisualizer->OnRegister();

@@ -23,11 +23,18 @@ bool UNCellActorFactory::CanCreateActorFrom(const FAssetData& AssetData, FText& 
 
 void UNCellActorFactory::PostSpawnActor(UObject* Asset, AActor* NewActor)
 {
-	ANCellProxy* Proxy = Cast<ANCellProxy>(NewActor);
-	Proxy->InitializeFromNCell(Cast<UNCell>(Asset));
+	if (ANCellProxy* Proxy = Cast<ANCellProxy>(NewActor))
+	{
+		// InitializeFromNCell null-checks the cell internally, so a non-UNCell Asset is handled gracefully.
+		Proxy->InitializeFromNCell(Cast<UNCell>(Asset));
+	}
 }
 
 FString UNCellActorFactory::GetDefaultActorLabel(UObject* InAsset) const
 {
-	return InAsset->GetName().Mid(0, InAsset->GetName().Len() - 5) + TEXT("0");
+	// Cell assets follow the <Name>_NCell convention; strip the suffix and let the engine append the
+	// numeric disambiguator via SetActorLabelUnique (this label must not include one itself).
+	FString Label = InAsset->GetName();
+	Label.RemoveFromEnd(TEXT("_NCell"));
+	return Label;
 }

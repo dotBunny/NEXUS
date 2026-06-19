@@ -32,7 +32,8 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 
 	auto OnBoundsNoCalcWarning = [CellRoot]
 	{
-		if (CellRoot->Details.BoundsSettings.bCalculateOnSave)
+		const UNCellRootComponent* Root = CellRoot.Get();
+		if (Root == nullptr || Root->Details.BoundsSettings.bCalculateOnSave)
 		{
 			return EVisibility::Hidden;
 		}
@@ -57,7 +58,8 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 
 	auto OnHullNoCalcWarning = [CellRoot]
 	{
-		if (CellRoot->Details.HullSettings.bCalculateOnSave)
+		const UNCellRootComponent* Root = CellRoot.Get();
+		if (Root == nullptr || Root->Details.HullSettings.bCalculateOnSave)
 		{
 			return EVisibility::Hidden;
 		}
@@ -80,7 +82,8 @@ void FNCellRootComponentCustomization::CustomizeDetails(IDetailLayoutBuilder& De
 		];
 	auto OnVoxelNoCalcWarning = [CellRoot]
 	{
-		if (CellRoot->Details.VoxelSettings.bCalculateOnSave)
+		const UNCellRootComponent* Root = CellRoot.Get();
+		if (Root == nullptr || Root->Details.VoxelSettings.bCalculateOnSave)
 		{
 			return EVisibility::Hidden;
 		}

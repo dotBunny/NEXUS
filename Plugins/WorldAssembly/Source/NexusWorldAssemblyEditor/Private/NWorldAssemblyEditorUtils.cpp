@@ -380,13 +380,15 @@ bool FNWorldAssemblyEditorUtils::CanGenerateAllOrgans()
 	return false;
 }
 
-TArray<FAssetData> FNWorldAssemblyEditorUtils::GetAllCellDataAssetData()
+TArray<FAssetData> FNWorldAssemblyEditorUtils::GetAllCellDataAssetData(bool bWaitForFullScan)
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	AssetRegistry.SearchAllAssets(true);
+	if (bWaitForFullScan)
+	{
+		AssetRegistry.SearchAllAssets(true);
+	}
 
-	
 	FARFilter Filter;
 	Filter.ClassPaths.Add(UNCell::StaticClass()->GetClassPathName());
 	Filter.bRecursiveClasses = true;

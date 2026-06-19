@@ -5,6 +5,8 @@
 
 #include "FileHelpers.h"
 #include "LevelEditor.h"
+#include "Misc/PackageName.h"
+#include "Selection.h"
 #include "NCoreEditorMinimal.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Layout/SBox.h"
@@ -60,7 +62,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow)),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To NWorldAssembly Editor Mode"),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch the current editor mode to the NWorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button_Tooltip", "Switch the current editor mode to the NWorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
 						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
 		NexusGlobalSection.AddEntry(NWorldAssemblyEdMode_Button);
 		
@@ -416,10 +418,33 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 	UpdateCellDataMenuEntry.Icon = FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCell");
 	UpdateCellDataMenuEntry.Execute = FExecuteAction::CreateLambda([]()
 	{
+		// The commandlet swaps the active map as it loads each Cell world, discarding any unsaved work.
+		// Prompt the user to save first; abort the whole operation if they cancel (Don't Save still proceeds).
+		constexpr bool bPromptUserToSave = true;
+		constexpr bool bSaveMapPackages = true;
+		constexpr bool bSaveContentPackages = true;
+		constexpr bool bFastSave = false;
+		constexpr bool bNotifyNoPackagesSaved = false;
+		constexpr bool bCanBeDeclined = true;
+		if (!FEditorFileUtils::SaveDirtyPackages(bPromptUserToSave, bSaveMapPackages, bSaveContentPackages,
+			bFastSave, bNotifyNoPackagesSaved, bCanBeDeclined))
+		{
+			return;
+		}
+
+		// Capture the active map so we can restore it after the commandlet loads each Cell world in turn.
+		// Best-effort only: skip restoration when there is no map open or it is transient (e.g. /Temp/Untitled).
 		const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
-		const FString CurrentWorldPath = CurrentWorld->GetPackage()->GetName();
+		const UPackage* CurrentPackage = CurrentWorld != nullptr ? CurrentWorld->GetPackage() : nullptr;
+		const FString CurrentWorldPath = (CurrentPackage != nullptr && FPackageName::DoesPackageExist(CurrentPackage->GetName()))
+			? CurrentPackage->GetName() : FString();
+
 		UNUpdateCellDataCommandlet::Execute();
-		FEditorFileUtils::LoadMap(CurrentWorldPath);
+
+		if (!CurrentWorldPath.IsEmpty())
+		{
+			FEditorFileUtils::LoadMap(CurrentWorldPath);
+		}
 	});
 	UpdateCellDataMenuEntry.CanExecute = FCanExecuteAction::CreateStatic(FNEditorUtils::IsNotPlayInEditor);
 	FNToolsMenu::AddMenuEntry(UpdateCellDataMenuEntry);
@@ -510,7 +535,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 	
 	if (TagSelectedActors_CellIgnore_Mode() == 0)
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore", "Add CellIgnore Tags"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore_Add", "Add CellIgnore Tags"));
 		
 		// ADD
 		USelection* AddSelection = GEditor->GetSelectedActors();
@@ -523,7 +548,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_CellIgnore()
 	}
 	else
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore", "Remove CellIgnore Tags"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_CellIgnore_Remove", "Remove CellIgnore Tags"));
 		
 		// REMOVE
 		USelection* RemoveSelection = GEditor->GetSelectedActors();
@@ -581,7 +606,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 {
 	if (TagSelectedActors_WorldIgnore_Mode() == 0)
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore", "Add WorldCollisionIgnore Tags"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore_Add", "Add WorldCollisionIgnore Tags"));
 		// ADD
 		USelection* AddSelection = GEditor->GetSelectedActors();
 		for (FSelectionIterator It(*AddSelection); It; ++It)
@@ -593,7 +618,7 @@ void FNWorldAssemblyEditorToolMenu::TagSelectedActors_WorldCollisionIgnore()
 	}
 	else
 	{
-		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore", "Remove WorldCollisionIgnore Tags"));
+		const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorToolMenu_TagSelectedActors_WorldCollisionIgnore_Remove", "Remove WorldCollisionIgnore Tags"));
 		
 		// REMOVE
 		USelection* RemoveSelection = GEditor->GetSelectedActors();
@@ -651,6 +676,8 @@ void FNWorldAssemblyEditorToolMenu::Hull_SplitEdge()
 	FIntVector2 Selection = Module.RootComponentVisualizer->GetEdgeSelection();
 	
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	if (CellActor == nullptr) return;
+
 	CellActor->SplitHullEdge(Selection.X, Selection.Y);
 	Module.RootComponentVisualizer->ClearSelection();
 }
@@ -661,7 +688,12 @@ bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 	{
 		return false;
 	}
-	
+
+	if (!FNWorldAssemblyEdMode::HasCellActor())
+	{
+		return false;
+	}
+
 	FNWorldAssemblyEditorModule& Module = FNWorldAssemblyEditorModule::Get();
 	if (Module.RootComponentVisualizer->GetMode() == FNCellRootComponentVisualizer::ENCellEditMode::HullEdge &&
 		Module.RootComponentVisualizer->HasEdgeSelected())

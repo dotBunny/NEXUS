@@ -70,7 +70,7 @@ void FNWorldAssemblyEditorCommands::RegisterCommands()
 		EUserInterfaceActionType::ToggleButton, FInputChord());
 	
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_CellToggleHullAllowNonConvex,
-	"NWorldAssembly.NCellToggleHullAllowNonConvex",
+	"NWorldAssembly.NCell.ToggleHullAllowNonConvex",
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleHullAllowNonConvex", "Allow Non-Convex Hull"),
 	NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_ToggleHullAllowNonConvex_Tooltip", "Allows for more complex collision mesh to be used instead of optimized convex hull."),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.AllowNonConvex"),
@@ -258,39 +258,27 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 	
+	// Map every Organ command from the single source of truth so this list and UnregisterGlobalActions
+	// stay in lockstep — add or remove a command in GetGlobalOrganActions() and both sides pick it up.
 	CommandList_Organ = MakeShared<FUICommandList>();
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateProxies,
-		FExecuteAction::CreateStatic(&OrganGenerateProxies),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganGenerateAllProxies,
-		FExecuteAction::CreateStatic(&OrganGenerateAllProxies),
-		FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateAllOrgans));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearProxies,
-	FExecuteAction::CreateStatic(&OrganClearGenerated),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganClearAllProxies,
-	FExecuteAction::CreateStatic(&OrganClearAllProxies),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganCreateLevelInstances,
-FExecuteAction::CreateStatic(&OrganLoadProxyLevels),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganCreateAllLevelInstances,
-	FExecuteAction::CreateStatic(&OrganLoadAllProxyLevels),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadLevelInstances,
-FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies));
-	
-	CommandList_Organ->MapAction(Get().CommandInfo_OrganUnloadAllLevelInstances,
-	FExecuteAction::CreateStatic(&OrganUnloadAllProxyLevels),
-	FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies));
+	for (const FOrganGlobalAction& Action : GetGlobalOrganActions())
+	{
+		CommandList_Organ->MapAction(Action.CommandInfo, Action.Execute, Action.CanExecute);
+	}
+}
+
+TArray<FNWorldAssemblyEditorCommands::FOrganGlobalAction> FNWorldAssemblyEditorCommands::GetGlobalOrganActions() const
+{
+	return {
+		{ CommandInfo_OrganGenerateProxies,         FExecuteAction::CreateStatic(&OrganGenerateProxies),      FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan) },
+		{ CommandInfo_OrganGenerateAllProxies,      FExecuteAction::CreateStatic(&OrganGenerateAllProxies),   FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateAllOrgans) },
+		{ CommandInfo_OrganClearProxies,            FExecuteAction::CreateStatic(&OrganClearGenerated),       FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies) },
+		{ CommandInfo_OrganClearAllProxies,         FExecuteAction::CreateStatic(&OrganClearAllProxies),      FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies) },
+		{ CommandInfo_OrganCreateLevelInstances,    FExecuteAction::CreateStatic(&OrganLoadProxyLevels),      FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies) },
+		{ CommandInfo_OrganCreateAllLevelInstances, FExecuteAction::CreateStatic(&OrganLoadAllProxyLevels),   FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies) },
+		{ CommandInfo_OrganUnloadLevelInstances,    FExecuteAction::CreateStatic(&OrganUnloadProxyLevels),    FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasSelectedGeneratedCellProxies) },
+		{ CommandInfo_OrganUnloadAllLevelInstances, FExecuteAction::CreateStatic(&OrganUnloadAllProxyLevels), FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::HasGeneratedCellProxies) },
+	};
 }
 
 void FNWorldAssemblyEditorCommands::RegisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
@@ -300,16 +288,13 @@ void FNWorldAssemblyEditorCommands::RegisterGlobalActions(const TSharedRef<FUICo
 
 void FNWorldAssemblyEditorCommands::UnregisterGlobalActions(const TSharedRef<FUICommandList>& GlobalActions) const
 {
-	// Mirror of the CommandList_Organ mappings above — Append copies these into GlobalActions, so we have to
-	// unmap each one by hand to detach the module statics they bind to.
-	GlobalActions->UnmapAction(CommandInfo_OrganGenerateProxies);
-	GlobalActions->UnmapAction(CommandInfo_OrganGenerateAllProxies);
-	GlobalActions->UnmapAction(CommandInfo_OrganClearProxies);
-	GlobalActions->UnmapAction(CommandInfo_OrganClearAllProxies);
-	GlobalActions->UnmapAction(CommandInfo_OrganCreateLevelInstances);
-	GlobalActions->UnmapAction(CommandInfo_OrganCreateAllLevelInstances);
-	GlobalActions->UnmapAction(CommandInfo_OrganUnloadLevelInstances);
-	GlobalActions->UnmapAction(CommandInfo_OrganUnloadAllLevelInstances);
+	// Append (in RegisterGlobalActions) copies CommandList_Organ's bindings into GlobalActions, so each one has
+	// to be unmapped by hand to detach the module statics it binds to. Both the mapping and this unmapping iterate
+	// GetGlobalOrganActions(), so adding or removing an Organ command updates both sides and they can't drift apart.
+	for (const FOrganGlobalAction& Action : GetGlobalOrganActions())
+	{
+		GlobalActions->UnmapAction(Action.CommandInfo);
+	}
 }
 
 void FNWorldAssemblyEditorCommands::WorldAssemblyEdMode()
@@ -396,6 +381,11 @@ void FNWorldAssemblyEditorCommands::CellAddActor()
 	}
 	
 	ANCellActor* SpawnedActor = CurrentWorld->SpawnActor<ANCellActor>(ANCellActor::StaticClass(), FTransform::Identity, FActorSpawnParameters());
+	if (SpawnedActor == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to spawn the UNCellActor in the current world."));
+		return;
+	}
 
 	// Apply default settings to the Cell
 	const UNWorldAssemblyEditorSettings* Settings = UNWorldAssemblyEditorSettings::Get();
@@ -500,6 +490,7 @@ void FNWorldAssemblyEditorCommands::CellCalculateBounds()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellCalculateBounds", "Calculate Cell Bounds"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	if (!ensure(CellActor != nullptr)) return;
 	CellActor->CalculateBounds();
 }
 
@@ -507,6 +498,7 @@ void FNWorldAssemblyEditorCommands::CellCalculateHull()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellCalculateHull", "Calculate Cell Hull"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	if (!ensure(CellActor != nullptr)) return;
 	CellActor->CalculateHull();
 	
 	FNWorldAssemblyEdMode::ProtectCellEdMode();
@@ -516,6 +508,7 @@ void FNWorldAssemblyEditorCommands::CellCalculateVoxelData()
 {
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellCalculateVoxel", "Calculate Voxel Data"));
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	if (!ensure(CellActor != nullptr)) return;
 	CellActor->CalculateVoxelData();
 }
 
@@ -691,6 +684,7 @@ void FNWorldAssemblyEditorCommands::CellResetCell()
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellResetCell", "Reset Cell"));
 	// Get the cell actor
 	ANCellActor* CellActor = FNWorldAssemblyEditorUtils::GetCellActorFromCurrentWorld();
+	if (!ensure(CellActor != nullptr)) return;
 	CellActor->Modify();
 	
 	// Apply default settings to the Cell
@@ -725,6 +719,7 @@ void FNWorldAssemblyEditorCommands::CellRemoveActor()
 	const FScopedTransaction Transaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNWorldAssemblyEditorCommands_CellRemoveActor", "Remove Cell Actor"));
 	UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 	ANCellActor* CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+	if (!ensure(CellActor != nullptr)) return;
 	CellActor->Destroy();
 	// ReSharper disable once CppExpressionWithoutSideEffects
 	CurrentWorld->MarkPackageDirty();

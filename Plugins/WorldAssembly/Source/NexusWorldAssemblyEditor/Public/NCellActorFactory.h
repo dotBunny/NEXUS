@@ -7,8 +7,8 @@
 #include "NCellActorFactory.generated.h"
 
 /**
- * Actor factory for ANCellActor — spawns a cell actor from a UNCell asset drag-drop and applies
- * the editor's default generation settings via UNWorldAssemblyEditorSettings::ApplyDefaultSettings.
+ * Actor factory for ANCellProxy — spawns a cell proxy from a UNCell asset drag-drop and initializes
+ * it from the dropped cell via ANCellProxy::InitializeFromNCell.
  */
 UCLASS()
 class UNCellActorFactory : public UActorFactory

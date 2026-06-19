@@ -36,7 +36,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Bounds)
 	{
 		const FBox Bounds = FNWorldAssemblyEdMode::GetCachedBounds();
-		const TArray<FVector> BoundsVertices = FNWorldAssemblyEdMode::GetCachedBoundsVertices();
+		const TArray<FVector>& BoundsVertices = FNWorldAssemblyEdMode::GetCachedBoundsVertices();
 		
 		// Draw Min Max
 		PDI->SetHitProxy(new HNIndexComponentVisProxy(Component, 0));
@@ -49,7 +49,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 	}
 	else if (FNWorldAssemblyEdMode::GetCellEdMode() == FNWorldAssemblyEdMode::ENCellEdMode::Hull)
 	{
-		const TArray<FVector> WorldVertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		const TArray<FVector>& WorldVertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
 		
 		const int32 VertCount = WorldVertices.Num();
 		for (int32 i = 0; i < VertCount; i++)
@@ -60,7 +60,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			PDI->SetHitProxy(nullptr);
 		}
 		
-		const TArray<FIntVector2> WorldEdges = FNWorldAssemblyEdMode::GetCachedHullEdges();
+		const TArray<FIntVector2>& WorldEdges = FNWorldAssemblyEdMode::GetCachedHullEdges();
 		// TODO: if selected color? 
 		const int32 EdgeCount = WorldEdges.Num();
 		for (int32 i = 0; i < EdgeCount; i++)
@@ -88,7 +88,7 @@ void FNCellRootComponentVisualizer::DrawVisualization(const UActorComponent* Com
 			FNWorldAssemblyEdMode::SetCellVoxelMode(FNWorldAssemblyEdMode::ENCellVoxelMode::None);
 		}
 		
-		const FNCellVoxelData CachedData = FNWorldAssemblyEdMode::GetCachedVoxelData();
+		const FNCellVoxelData& CachedData = FNWorldAssemblyEdMode::GetCachedVoxelData();
 		if (!CachedData.IsValid())
 		{
 			return;
@@ -208,10 +208,13 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::Empty));
 		Component->Details.VoxelData.SetData(Index, Data);
 		Component->Details.VoxelSettings.bCalculateOnSave = false;
-		Component->GetNCellActor()->SetActorDirty();
+		if (ANCellActor* CellActor = Component->GetNCellActor())
+		{
+			CellActor->SetActorDirty();
+		}
 		return true;
 	}
-	
+
 	// Handle Empty
 	if (N_FLAGS_HAS(Data, static_cast<uint8>(ENCellVoxel::Empty)))
 	{
@@ -221,10 +224,13 @@ bool FNCellRootComponentVisualizer::ToggleVoxelPoint(UNCellRootComponent* Compon
 		N_FLAGS_ADD(Data, static_cast<uint8>(ENCellVoxel::Occupied));
 		Component->Details.VoxelData.SetData(Index, Data);
 		Component->Details.VoxelSettings.bCalculateOnSave = false;
-		Component->GetNCellActor()->SetActorDirty();
+		if (ANCellActor* CellActor = Component->GetNCellActor())
+		{
+			CellActor->SetActorDirty();
+		}
 		return true;
 	}
-	
+
 	return true;
 }
 
@@ -243,8 +249,15 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 	
 	if (CurrentEditMode == ENCellEditMode::HullVertex)
 	{
+		// A hull recompute (Calculate Hull, undo/redo) can shrink the vertex array beneath the captured index; end the edit rather than writing out of bounds.
+		if (!RootComponent->Details.Hull.Vertices.IsValidIndex(VertexIndex))
+		{
+			EndEditing();
+			return false;
+		}
+
 		const FScopedTransaction HullVertexTransaction(NSLOCTEXT("NexusWorldAssemblyEditor", "FNCellRootComponentVisualizer_AdjustHullVertex", "Adjust Hull Vertex"));
-	
+
 		RootComponent->Modify();
 		RootComponent->Details.HullSettings.bCalculateOnSave = false;
 		RootComponent->Details.Hull.bIsChaosGenerated = false;
@@ -259,8 +272,11 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		{
 			RootComponent->Details.Hull.Vertices[VertexIndex] = PreviousPosition;
 		}
-		
-		RootComponent->GetNCellActor()->SetActorDirty();
+
+		if (ANCellActor* CellActor = RootComponent->GetNCellActor())
+		{
+			CellActor->SetActorDirty();
+		}
 		return true;
 	}
 	
@@ -278,7 +294,10 @@ bool FNCellRootComponentVisualizer::HandleInputDelta(FEditorViewportClient* View
 		{
 			RootComponent->Details.Bounds.Max += DeltaTranslate;
 		}
-		RootComponent->GetNCellActor()->SetActorDirty();
+		if (ANCellActor* CellActor = RootComponent->GetNCellActor())
+		{
+			CellActor->SetActorDirty();
+		}
 		return true;
 	}
 	
@@ -305,13 +324,20 @@ bool FNCellRootComponentVisualizer::GetWidgetLocation(const FEditorViewportClien
 	case ENCellEditMode::None:
 		return false;
 	case ENCellEditMode::HullVertex:
-		if (VertexIndex == -1) return false;
-		OutLocation = FNWorldAssemblyEdMode::GetCachedHullVertices()[VertexIndex];
+	{
+		// The cached hull is rebuilt every tick; a recompute (Calculate Hull, undo/redo) can shrink it beneath a captured index.
+		const TArray<FVector>& Vertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		if (!Vertices.IsValidIndex(VertexIndex)) return false;
+		OutLocation = Vertices[VertexIndex];
 		return true;
+	}
 	case ENCellEditMode::HullEdge:
-		if (EdgeStartIndex == -1 || EdgeEndIndex == -1) return false;
-		OutLocation = (FNWorldAssemblyEdMode::GetCachedHullVertices()[EdgeStartIndex] + FNWorldAssemblyEdMode::GetCachedHullVertices()[EdgeEndIndex]) * 0.5f;
+	{
+		const TArray<FVector>& Vertices = FNWorldAssemblyEdMode::GetCachedHullVertices();
+		if (!Vertices.IsValidIndex(EdgeStartIndex) || !Vertices.IsValidIndex(EdgeEndIndex)) return false;
+		OutLocation = (Vertices[EdgeStartIndex] + Vertices[EdgeEndIndex]) * 0.5f;
 		return true;
+	}
 	case ENCellEditMode::BoundsVertex:
 		if (VertexIndex == -1) return false;
 		if (VertexIndex == 0)

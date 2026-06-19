@@ -10,6 +10,7 @@
 #include "IAssetTools.h"
 #include "Cell/NCellActor.h"
 #include "NEditorDefaults.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorStyle.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyUtils.h"
@@ -211,6 +212,11 @@ UNCell* UAssetDefinition_NCell::GetOrCreatePackage(UWorld* World)
 	// Create Asset
 	IAssetTools& AssetTools = FModuleManager::GetModuleChecked<FAssetToolsModule>("AssetTools").Get();
 	UNCell* Asset = Cast<UNCell>(AssetTools.CreateAsset(ShortName, *PackagePath, UNCell::StaticClass(), Factory));
+	if (Asset == nullptr)
+	{
+		UE_LOG(LogNexusWorldAssemblyEditor, Warning, TEXT("Failed to create UNCell side-car package at %s."), *FullName);
+		return nullptr;
+	}
 
 	Asset->World = TSoftObjectPtr<UWorld>(World);
 	

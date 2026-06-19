@@ -69,6 +69,8 @@ void UNWorldAssemblyEditorSubsystem::Deinitialize()
 
 void UNWorldAssemblyEditorSubsystem::StartOperation(UNAssemblyOperation* Operation)
 {
+	if (Operation == nullptr || !Operation->Context.IsValid()) return;
+
 	// Clear for anything in operation
 	for (UNOrganComponent* Component :  Operation->Context->InputComponents)
 	{
@@ -210,7 +212,10 @@ void UNWorldAssemblyEditorSubsystem::LoadAllGeneratedProxies()
 {
 	for (int32 i = 0; i < KnownProxies.Num(); i++)
 	{
-		KnownProxies[i]->LoadLevelInstance();
+		if (IsValid(KnownProxies[i]))
+		{
+			KnownProxies[i]->LoadLevelInstance();
+		}
 	}
 }
 
@@ -222,7 +227,10 @@ void UNWorldAssemblyEditorSubsystem::LoadGeneratedProxies(const int32& Operation
 		const int32 FoundCount = ProxiesArray.Num();
 		for (int32 i = 0; i < FoundCount; i++)
 		{
-			ProxiesArray[i]->LoadLevelInstance();
+			if (IsValid(ProxiesArray[i]))
+			{
+				ProxiesArray[i]->LoadLevelInstance();
+			}
 		}
 	}
 }
@@ -248,7 +256,10 @@ void UNWorldAssemblyEditorSubsystem::UnloadGeneratedProxies(const int32& Operati
 		const int32 FoundCount = ProxiesArray.Num();
 		for (int32 i = 0; i < FoundCount; i++)
 		{
-			ProxiesArray[i]->UnloadLevelInstance();
+			if (IsValid(ProxiesArray[i]))
+			{
+				ProxiesArray[i]->UnloadLevelInstance();
+			}
 		}
 	}
 }
