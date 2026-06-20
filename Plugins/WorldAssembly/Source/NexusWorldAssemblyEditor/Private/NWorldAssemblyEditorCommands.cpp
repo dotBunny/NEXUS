@@ -13,6 +13,7 @@
 #include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorSettings.h"
 #include "NWorldAssemblyEditorSubsystem.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
 #include "NWorldAssemblyRegistry.h"
@@ -258,16 +259,39 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.NCellLevelInstance"),
 	EUserInterfaceActionType::Button, FInputChord());
 
+	// Build out quick assembly options
+	CommandList_QuickAssembly = MakeShared<FUICommandList>();
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_QuickAssemblyToggleLoadInstances,
+		"NWorldAssembly.QuickAssembly.ToggleLoadInstances",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleLoadInstances", "Load Cell Instances"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleLoadInstances_Tooltip", ""),
+		FSlateIcon(), EUserInterfaceActionType::Check, FInputChord());
+	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_QuickAssemblyToggleAutoAssembly,
+		"NWorldAssembly.QuickAssembly.ToggleAutoAssembly",
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly", "Auto Assembly"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly_Tooltip", ""),
+		FSlateIcon(), EUserInterfaceActionType::Check, FInputChord());
+
+	CommandList_QuickAssembly->MapAction(Get().CommandInfo_QuickAssemblyToggleLoadInstances,
+		FExecuteAction::CreateStatic(&QuickAssemblyToggleLoadInstances),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateStatic(&QuickAssemblyToggleLoadInstances_IsActionChecked));
+
+	CommandList_QuickAssembly->MapAction(Get().CommandInfo_QuickAssemblyToggleAutoAssembly,
+		FExecuteAction::CreateStatic(&QuickAssemblyToggleAutoAssembly),
+		FCanExecuteAction(),
+		FIsActionChecked::CreateStatic(&QuickAssemblyToggleAutoAssembly_IsActionChecked));
+
 	// Map every Organ command from the single source of truth so this list and UnregisterGlobalActions
 	// stay in lockstep — add or remove a command in GetGlobalOrganActions() and both sides pick it up.
 	CommandList_Organ = MakeShared<FUICommandList>();
-	for (const FOrganGlobalAction& Action : GetGlobalOrganActions())
+	for (const FNCommandInfoAction& Action : GetGlobalOrganActions())
 	{
 		CommandList_Organ->MapAction(Action.CommandInfo, Action.Execute, Action.CanExecute);
 	}
 }
 
-TArray<FNWorldAssemblyEditorCommands::FOrganGlobalAction> FNWorldAssemblyEditorCommands::GetGlobalOrganActions() const
+TArray<FNWorldAssemblyEditorCommands::FNCommandInfoAction> FNWorldAssemblyEditorCommands::GetGlobalOrganActions() const
 {
 	return {
 		{ CommandInfo_OrganGenerateProxies,         FExecuteAction::CreateStatic(&OrganGenerateProxies),      FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorUtils::CanGenerateSelectedOrgan) },
@@ -290,8 +314,8 @@ void FNWorldAssemblyEditorCommands::UnregisterGlobalActions(const TSharedRef<FUI
 {
 	// Append (in RegisterGlobalActions) copies CommandList_Organ's bindings into GlobalActions, so each one has
 	// to be unmapped by hand to detach the module statics it binds to. Both the mapping and this unmapping iterate
-	// GetGlobalOrganActions(), so adding or removing an Organ command updates both sides and they can't drift apart.
-	for (const FOrganGlobalAction& Action : GetGlobalOrganActions())
+	// GetGlobalOrganActions(), so adding or removing an Organ command updates both sides, and they can't drift apart.
+	for (const FNCommandInfoAction& Action : GetGlobalOrganActions())
 	{
 		GlobalActions->UnmapAction(Action.CommandInfo);
 	}
@@ -863,6 +887,30 @@ void FNWorldAssemblyEditorCommands::CancelQuickAssembly()
 	}
 }
 
+void FNWorldAssemblyEditorCommands::QuickAssemblyToggleLoadInstances()
+{
+	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+	Settings->bQuickAssemblyLoadLevelInstances = !Settings->bQuickAssemblyLoadLevelInstances;
+	Settings->SaveConfig();
+}
+
+bool FNWorldAssemblyEditorCommands::QuickAssemblyToggleLoadInstances_IsActionChecked()
+{
+	return UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyLoadLevelInstances;
+}
+
+void FNWorldAssemblyEditorCommands::QuickAssemblyToggleAutoAssembly()
+{
+	UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+	Settings->bQuickAssemblyAutoAssembly = !Settings->bQuickAssemblyAutoAssembly;
+	Settings->SaveConfig();
+}
+
+bool FNWorldAssemblyEditorCommands::QuickAssemblyToggleAutoAssembly_IsActionChecked()
+{
+	return UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly;
+}
+
 void FNWorldAssemblyEditorCommands::StartQuickAssembly()
 {
 	UNOrganComponent* Component = FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOrganComponent();
@@ -871,8 +919,11 @@ void FNWorldAssemblyEditorCommands::StartQuickAssembly()
 	UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
 	Subsystem->ClearGenerated(Component->GetAndResetLastOperationTicket());
 
+	const UNWorldAssemblyEditorUserSettings* UserSettings = UNWorldAssemblyEditorUserSettings::Get();
+
 	FNAssemblyOperationSettings EditorSettings = FNAssemblyOperationSettings::GetDefaultEditorSettings();
-	EditorSettings.bCreateLevelInstances = true;
+	EditorSettings.bCreateLevelInstances = UserSettings->bQuickAssemblyLoadLevelInstances;
+
 	UNAssemblyOperation* Operation = UNAssemblyOperation::CreateInstance(Component, EditorSettings);
 	FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(Operation->GetTicket());
 

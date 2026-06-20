@@ -167,17 +167,22 @@ public:
 	/** Cancel the tracked Quick Assembly operation if it is still running. */
 	static void CancelQuickAssembly();
 
+
+	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyLoadLevelInstances and persist it. */
+	static void QuickAssemblyToggleLoadInstances();
+	/** @return checked state of the load-level-instances toggle for UI binding. */
+	static bool QuickAssemblyToggleLoadInstances_IsActionChecked();
+	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyAutoAssembly and persist it. */
+	static void QuickAssemblyToggleAutoAssembly();
+	/** @return checked state of the auto-assembly toggle for UI binding. */
+	static bool QuickAssemblyToggleAutoAssembly_IsActionChecked();
+
 private:
 
 	/**
-	 * One Organ command paired with the delegates it binds to.
-	 *
-	 * GetGlobalOrganActions() is the single source of truth for the Organ commands that are mapped into
-	 * CommandList_Organ and appended to the level editor's global action list. Driving both the MapAction
-	 * and the matching UnmapAction from the same list keeps them from drifting apart as commands are
-	 * added or removed.
+	 * One command paired with the delegates it binds to.
 	 */
-	struct FOrganGlobalAction
+	struct FNCommandInfoAction
 	{
 		TSharedPtr<FUICommandInfo> CommandInfo;
 		FExecuteAction Execute;
@@ -185,7 +190,8 @@ private:
 	};
 
 	/** @return every Organ command appended to the global action list (see FOrganGlobalAction). */
-	TArray<FOrganGlobalAction> GetGlobalOrganActions() const;
+	TArray<FNCommandInfoAction> GetGlobalOrganActions() const;
+	TArray<FNCommandInfoAction> GetQuickAssemblyActions() const;
 
 	TSharedPtr<FUICommandList> CommandList_Cell;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellCaptureThumbnail;
@@ -202,6 +208,10 @@ private:
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleHullAllowNonConvex;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelCalculateOnSave;
 	TSharedPtr<FUICommandInfo> CommandInfo_CellToggleVoxelData;
+
+	TSharedPtr<FUICommandList> CommandList_QuickAssembly;
+	TSharedPtr<FUICommandInfo> CommandInfo_QuickAssemblyToggleLoadInstances;
+	TSharedPtr<FUICommandInfo> CommandInfo_QuickAssemblyToggleAutoAssembly;
 
 	TSharedPtr<FUICommandList> CommandList_Organ;
 	TSharedPtr<FUICommandInfo> CommandInfo_OrganGenerateProxies;

@@ -87,7 +87,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(QuickAssemblyComboBox);
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
 		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning() so they stay in sync.
-		const FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
+		FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",
 					FUIAction(
 						FExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked),
@@ -110,7 +110,34 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						TAttribute<FSlateIcon>::Create(
 							TAttribute<FSlateIcon>::FGetter::CreateStatic(
 						&FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon)));
+
+		QuickAssemblyButton.StyleNameOverride = "Toolbar.BackplateLeft";
 		NexusSection.AddEntry(QuickAssemblyButton);
+
+		// Quick Assembly Quick Options for Quick People
+		FToolMenuEntry QuickAssemblyOptionsButton = FToolMenuEntry::InitComboButton(
+			"NWorldAssemblyEdMode_QuickAssemblyOptions",
+			FUIAction(
+				FExecuteAction(),
+				FCanExecuteAction(),
+				FIsActionChecked(),
+				FIsActionButtonVisible()),
+				FOnGetContent::CreateLambda([]()
+				{
+					FMenuBuilder MenuBuilder(true, FNWorldAssemblyEditorCommands::Get().CommandList_QuickAssembly);
+					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
+
+					// Selected
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleLoadInstances);
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleAutoAssembly);
+
+					return MenuBuilder.MakeWidget();
+				}),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganExtensions_Label", "Organ"),
+			NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganExtensions_ToolTip", "Making procedural content easier since 2017.")
+		);
+		QuickAssemblyOptionsButton.StyleNameOverride = "Toolbar.BackplateRightCombo";
+		NexusSection.AddEntry(QuickAssemblyOptionsButton);
 
 		// Actions Section - based on selection
 		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowQuickAssembly() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
@@ -433,7 +460,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		}
 
 		// Capture the active map so we can restore it after the commandlet loads each Cell world in turn.
-		// Best-effort only: skip restoration when there is no map open or it is transient (e.g. /Temp/Untitled).
+		// Best-effort only: skip restoration when there is no map open, or it is transient (e.g. /Temp/Untitled).
 		const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
 		const UPackage* CurrentPackage = CurrentWorld != nullptr ? CurrentWorld->GetPackage() : nullptr;
 		const FString CurrentWorldPath = (CurrentPackage != nullptr && FPackageName::DoesPackageExist(CurrentPackage->GetName()))

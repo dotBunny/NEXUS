@@ -23,8 +23,17 @@ public:
 #if WITH_EDITORONLY_DATA
 
 	/** Show the Quick Assembly section (Organ dropdown + start/cancel button) on the World Assembly toolbar. */
-	UPROPERTY(EditAnywhere, config,  Category="Operations", DisplayName="Show Quick Assembly Section", meta=(Tooltip="Shows a drop down to select the organ to run a World Assembly on."))
+	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Show Quick Assembly Section", meta=(Tooltip="Shows a drop down to select the organ to run a World Assembly on."))
 	bool bShowQuickAssemblySection = true;
+
+	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Load Level Instances", meta=(Tooltip="Create and load the level instances from the ANCellProxy(s)."))
+	bool bQuickAssemblyLoadLevelInstances = true;
+
+	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, until cancelled."))
+	bool bQuickAssemblyAutoAssembly = false;
+
+	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly Timer", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, post completion, until cancelled."))
+	float QuickAssemblyAutoAssemblyTimer = 2.f;
 
 	/** Show alerts and HUD messages in the viewport while editing cells. */
 	UPROPERTY(EditAnywhere, config,  Category="Cell", DisplayName="Display Viewport Messages", meta=(Tooltip="Show alerts and messages in the viewport while editing Cells."))
