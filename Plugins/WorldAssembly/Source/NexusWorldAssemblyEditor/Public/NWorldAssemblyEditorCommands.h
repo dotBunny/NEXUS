@@ -167,7 +167,6 @@ public:
 	/** Cancel the tracked Quick Assembly operation if it is still running. */
 	static void CancelQuickAssembly();
 
-
 	/** Toggle UNWorldAssemblyEditorUserSettings::bQuickAssemblyLoadLevelInstances and persist it. */
 	static void QuickAssemblyToggleLoadInstances();
 	/** @return checked state of the load-level-instances toggle for UI binding. */
