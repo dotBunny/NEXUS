@@ -33,7 +33,7 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusUI"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker", "NexusUI"]);
+			PrivateDependencyModuleNames.AddRange(["NexusPicker"]);
 
 			if (Target.bBuildEditor)
 			{

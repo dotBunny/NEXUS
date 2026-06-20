@@ -31,7 +31,7 @@ namespace UnrealBuildTool.Rules
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusDynamicRefs"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusDynamicRefs", "NexusToolingEditor", "NexusUIEditor"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusToolingEditor", "NexusUIEditor"]);
 
 			ShortName = "NexusDynamicRefsEditor";						
 		}

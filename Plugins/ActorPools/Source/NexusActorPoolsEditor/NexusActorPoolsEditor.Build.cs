@@ -33,14 +33,13 @@ namespace UnrealBuildTool.Rules
 					"SlateCore",
 					"ToolMenus",
 					"UMG",
-					"UMGEditor",
-					"UnrealEd", 
+					"UMGEditor"
 				]
 			);
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusActorPools", "NexusUIEditor"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusActorPools", "NexusToolingEditor", "NexusUIEditor"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusToolingEditor"]);
 
 			ShortName = "NexusActorPoolsEditor";						
 		}

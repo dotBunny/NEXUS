@@ -48,7 +48,7 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCoreEditor", "NexusWorldAssembly"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusCoreEditor", "NexusToolingEditor", "NexusUI", "NexusUIEditor", "NexusWorldAssembly"]);
+			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusToolingEditor", "NexusUI", "NexusUIEditor"]);
 
 			ShortName = "NexusWorldAssemblyEditor";						
 		}

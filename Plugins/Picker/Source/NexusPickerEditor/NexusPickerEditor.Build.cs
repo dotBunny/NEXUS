@@ -24,7 +24,6 @@ namespace UnrealBuildTool.Rules
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore", "NexusPicker"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusPicker"]);
 
 			ShortName = "NexusPickerEditor";						
 		}

@@ -28,7 +28,6 @@ namespace UnrealBuildTool.Rules
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore",  "NexusSharedSamples"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore", "NexusSharedSamples"]);
 
 			ShortName = "NexusSharedSamplesTests";						
 		}

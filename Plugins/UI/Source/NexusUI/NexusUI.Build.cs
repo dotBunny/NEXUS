@@ -25,7 +25,6 @@ namespace UnrealBuildTool.Rules
 
 			PrivateDependencyModuleNames.AddRange(
 				[
-					"CoreUObject",
 					"NetCore",
 					"Projects"
 				]
@@ -33,7 +32,6 @@ namespace UnrealBuildTool.Rules
 			
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
 			ShortName = "NexusUI";						
 		}

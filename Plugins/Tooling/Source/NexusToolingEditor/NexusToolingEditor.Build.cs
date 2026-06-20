@@ -35,11 +35,9 @@ namespace UnrealBuildTool.Rules
 					"Kismet",
 					"LevelEditor",
 					"Projects",
-					"ScriptableEditorWidgets",
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
 					"UMG",
 					"UMGEditor", 
 				]

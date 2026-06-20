@@ -24,7 +24,6 @@ namespace UnrealBuildTool.Rules
 				[
 					"AssetDefinition",
 					"BlueprintGraph",
-					"Blutility",
 					"Chaos",
 					"ChaosCore",
 					"ContentBrowser",
@@ -38,11 +37,9 @@ namespace UnrealBuildTool.Rules
 					"LevelEditor",
 					"Projects",
 					"PropertyEditor",
-					"ScriptableEditorWidgets",
 					"Slate",
 					"SlateCore",
 					"ToolMenus",
-					"UnrealEd",
 					"UMG",
 					"UMGEditor"
 				]
@@ -50,7 +47,6 @@ namespace UnrealBuildTool.Rules
 
 			// NEXUS
 			PublicDependencyModuleNames.AddRange(["NexusCore"]);
-			PrivateDependencyModuleNames.AddRange(["NexusCore"]);
 
 			ShortName = "NexusCoreEditor";						
 		}
