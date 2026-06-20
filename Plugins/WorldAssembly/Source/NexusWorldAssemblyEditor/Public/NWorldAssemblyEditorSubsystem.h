@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Assembly/INAssemblyOperationOwner.h"
+#include "Engine/TimerHandle.h"
 #include "NEditorUtils.h"
 #include "Assembly/NAssemblyOperation.h"
 #include "Macros/NEditorSubsystemMacros.h"
@@ -37,19 +38,25 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 		{
 			KnownOperations[i]->Tick();
 		}
+
+		// While waiting between auto-assembly runs there is no live operation, so drive the toolbar progress
+		// bar from the inter-run timer's countdown instead (no-op when no loop is waiting).
+		UpdateAutoAssemblyCountdownBar();
+
 		LastFrameNumberWeTicked = GFrameCounter;
 	}
 
 	virtual bool IsTickable() const override
 	{
-		if (!HasKnownOperation() ||
-			LastFrameNumberWeTicked == GFrameCounter ||
+		if (LastFrameNumberWeTicked == GFrameCounter ||
 			FNEditorUtils::IsEditorShuttingDown())
 		{
 			return false;
 		}
 
-		return true;
+		// Tick while operations run, or while an auto-assembly loop is waiting between runs so the toolbar
+		// countdown bar keeps advancing.
+		return HasKnownOperation() || (bAutoAssemblyLoopActive && AutoAssemblyTimerHandle.IsValid());
 	}
 	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Conditional; }
 	virtual TStatId GetStatId() const override
@@ -73,6 +80,15 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	 */
 	UFUNCTION()
 	void OnQuickAssemblyProgressChanged(float Progress);
+
+	/** @return true while an auto-assembly loop is engaged — covers both the running operation and the wait between runs. */
+	bool IsAutoAssemblyLoopActive() const { return bAutoAssemblyLoopActive; }
+
+	/** Engage the auto-assembly loop so the Quick Assembly button stays in its cancel state across inter-run waits. */
+	void BeginAutoAssemblyLoop();
+
+	/** Disengage the auto-assembly loop, clearing any pending inter-run timer and (when idle) the toolbar progress bar. */
+	void StopAutoAssemblyLoop();
 
 	/** @return true if at least one operation is currently tracked by this subsystem. */
 	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
@@ -112,6 +128,15 @@ protected:
 	void OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap);
 
 private:
+	/** Schedule the next auto-assembly run using the live QuickAssemblyAutoAssemblyTimer value. */
+	void ScheduleNextAutoAssembly();
+
+	/** Inter-run timer callback: starts the next auto-assembly run, or stops the loop if it can no longer run. */
+	void OnAutoAssemblyTimerElapsed();
+
+	/** Push the inter-run countdown (0..1) onto the toolbar progress bar while waiting between auto-assembly runs. Game thread only. */
+	void UpdateAutoAssemblyCountdownBar();
+
 	/** Operations currently owned by this subsystem. */
 	// ReSharper disable once CppUE4ProbableMemoryIssuesWithUObjectsInContainer
 	UPROPERTY()
@@ -140,4 +165,10 @@ private:
 
 	/** Handle for the PreBeginPIE delegate subscription. */
 	FDelegateHandle PreBeginPIEHandle;
+
+	/** true while an auto-assembly loop is engaged (running operation or waiting on AutoAssemblyTimerHandle). */
+	bool bAutoAssemblyLoopActive = false;
+
+	/** Handle for the inter-run delay timer scheduled on the editor timer manager. */
+	FTimerHandle AutoAssemblyTimerHandle;
 };

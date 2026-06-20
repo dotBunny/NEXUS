@@ -264,12 +264,12 @@ FExecuteAction::CreateStatic(&CellJunctionAddComponent),
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_QuickAssemblyToggleLoadInstances,
 		"NWorldAssembly.QuickAssembly.ToggleLoadInstances",
 		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleLoadInstances", "Load Cell Instances"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleLoadInstances_Tooltip", ""),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleLoadInstances_Tooltip", "Load the Cell Instances themselves from the generated ANCellProxy(s)."),
 		FSlateIcon(), EUserInterfaceActionType::Check, FInputChord());
 	FUICommandInfo::MakeCommandInfo(this->AsShared(), CommandInfo_QuickAssemblyToggleAutoAssembly,
 		"NWorldAssembly.QuickAssembly.ToggleAutoAssembly",
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly", "Auto Assembly"),
-		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly_Tooltip", ""),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly", "Enabled"),
+		NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_ToggleAutoAssembly_Tooltip", "Should the selected organ continue to run assembly operations after completion, until stopped."),
 		FSlateIcon(), EUserInterfaceActionType::Check, FInputChord());
 
 	CommandList_QuickAssembly->MapAction(Get().CommandInfo_QuickAssemblyToggleLoadInstances,
@@ -858,7 +858,9 @@ bool FNWorldAssemblyEditorCommands::CellCaptureThumbnail_CanExecute()
 
 void FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked()
 {
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning())
+	// "Active" spans both a running operation and the wait between auto-assembly runs, so a click during the
+	// inter-run gap cancels the loop rather than kicking off a second, overlapping operation.
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive())
 	{
 		CancelQuickAssembly();
 	}
@@ -870,14 +872,18 @@ void FNWorldAssemblyEditorCommands::QuickAssemblyButtonClicked()
 
 bool FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute()
 {
-	// While the tracked operation runs the button must stay enabled so the user can cancel it; otherwise fall
-	// back to the start preconditions (which require that no operation is currently running).
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()) return true;
+	// While the loop is active (operation running or waiting between auto-runs) the button must stay enabled so the
+	// user can cancel it; otherwise fall back to the start preconditions (which require that no operation is running).
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()) return true;
 	return StartQuickAssembly_CanExecute();
 }
 
 void FNWorldAssemblyEditorCommands::CancelQuickAssembly()
 {
+	// Disengage the auto-assembly loop first so the pending operation's teardown can't re-arm the inter-run timer.
+	// When cancelled during the inter-run gap (no live operation) this also clears the toolbar countdown bar.
+	UNWorldAssemblyEditorSubsystem::Get()->StopAutoAssemblyLoop();
+
 	if (UNAssemblyOperation* Operation = FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation();
 		Operation != nullptr && Operation->IsRunning())
 	{
@@ -934,6 +940,15 @@ void FNWorldAssemblyEditorCommands::StartQuickAssembly()
 	Operation->OnPercentageChanged.AddDynamic(Subsystem, &UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged);
 
 	Subsystem->StartOperation(Operation);
+
+	// With Auto Assembly enabled, engage the loop so the button stays in its cancel state through the inter-run
+	// waits; the subsystem re-arms the timer each time the operation finishes (this same function is re-entered
+	// from the timer, so settings are re-read live every run). Guard on IsRunning so a no-op StartOperation
+	// (e.g. invalid context) doesn't leave the loop engaged with nothing scheduled.
+	if (Operation->IsRunning() && UserSettings->bQuickAssemblyAutoAssembly)
+	{
+		Subsystem->BeginAutoAssemblyLoop();
+	}
 }
 
 bool FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute()

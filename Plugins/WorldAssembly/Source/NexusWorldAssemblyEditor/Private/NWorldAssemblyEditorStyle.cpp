@@ -77,7 +77,8 @@ FSlateIcon FNWorldAssemblyEditorStyle::CellIgnoreIcon()
 
 FSlateIcon FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon()
 {
-	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning())
+	// Show the cancel icon for the whole loop — both while an operation runs and during the wait between auto-runs.
+	if (FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive())
 	{
 		return FSlateIcon(GetStyleSetName(), "Command.WorldAssemblyEd.CancelQuickAssemblyOperation");
 	}

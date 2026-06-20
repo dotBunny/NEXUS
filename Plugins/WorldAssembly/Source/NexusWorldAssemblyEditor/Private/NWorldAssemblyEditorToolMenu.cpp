@@ -9,6 +9,7 @@
 #include "Selection.h"
 #include "NCoreEditorMinimal.h"
 #include "Widgets/Images/SImage.h"
+#include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "Widgets/Notifications/SProgressBar.h"
@@ -22,6 +23,7 @@
 #include "NEditorUtils.h"
 #include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorModule.h"
+#include "NWorldAssemblyEditorSubsystem.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "NWorldAssemblyEditorUtils.h"
 #include "NWorldAssemblyEdMode.h"
@@ -86,7 +88,8 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		);
 		NexusSection.AddEntry(QuickAssemblyComboBox);
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
-		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning() so they stay in sync.
+		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive() so they stay in sync across both
+		// a running operation and the wait between auto-assembly runs.
 		FToolMenuEntry QuickAssemblyButton = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_QuickAssemblyButton",
 					FUIAction(
@@ -97,13 +100,13 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowQuickAssembly)),
 						TAttribute<FText>::CreateLambda([]()
 						{
-							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
+							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
 								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton", "Cancel World Assembly Operation")
 								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton", "Start World Assembly Operation");
 						}),
 						TAttribute<FText>::CreateLambda([]()
 						{
-							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
+							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
 								? NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_CancelQuickAssemblyButton_Tooltip", "Cancels the running World Assembly Operation for the selected Organ.")
 								: NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_QuickAssemblyButton_Tooltip", "Starts a World Assembly Operation for the selected Organ, creating the NCellLevelInstances and loading their content.");
 						}),
@@ -127,11 +130,22 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					FMenuBuilder MenuBuilder(true, FNWorldAssemblyEditorCommands::Get().CommandList_QuickAssembly);
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 
-					// Selected
+					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_CellBehavior", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_CellBehavior", "Cell Behavior"));
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleLoadInstances);
-					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleAutoAssembly);
+					MenuBuilder.EndSection();
 
-					return MenuBuilder.MakeWidget();
+					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_AutoAssembly", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_AutoAssembly", "Auto Assembly"));
+					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleAutoAssembly);
+					MenuBuilder.AddWidget(CreateQuickAssemblyAutoAssemblyTimerWidget(),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_AutoAssemblyTimer", "Gap Timer"));
+					MenuBuilder.EndSection();
+
+					// Floor the menu width so the section headers/timer don't collapse to a cramped popup.
+					return SNew(SBox)
+						.MinDesiredWidth(250.0f)
+						[
+							MenuBuilder.MakeWidget()
+						];
 				}),
 			NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganExtensions_Label", "Organ"),
 			NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganExtensions_ToolTip", "Making procedural content easier since 2017.")
@@ -757,9 +771,9 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 			SNew(SComboButton)
 			.OnGetMenuContent_Lambda([]() -> TSharedRef<SWidget>
 		{
-			// Lock the selection while the Quick Assembly operation is running: open an empty menu so the
-			// target Organ can't be changed mid-run. Keeps the button (and its progress bar) fully lit.
-			if (IsQuickAssemblyOperationRunning()) return SNullWidget::NullWidget;
+			// Lock the selection while the Quick Assembly loop is active (operation running or waiting between
+			// auto-runs): open an empty menu so the target Organ can't be changed mid-loop. Keeps the button lit.
+			if (IsQuickAssemblyActive()) return SNullWidget::NullWidget;
 
 			// This builds the menu that drops down when you click the button
 			FMenuBuilder MenuBuilder(true, nullptr);
@@ -814,8 +828,8 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 						SNew(SImage)
 						.Image_Lambda([]() -> const FSlateBrush*
 						{
-							// While the operation runs, swap the Organ icon for a padlock to signal the selection is locked.
-							if (IsQuickAssemblyOperationRunning())
+							// While the loop is active, swap the Organ icon for a padlock to signal the selection is locked.
+							if (IsQuickAssemblyActive())
 							{
 								return FSlateIcon(FNEditorStyle::GetStyleSetName(), "Lock.Desaturated").GetIcon();
 							}
@@ -847,10 +861,46 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 		];
 }
 
+TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyAutoAssemblyTimerWidget()
+{
+	return SNew(SBox)
+		.MinDesiredWidth(72.0f)
+		.HAlign(HAlign_Right)
+		.Padding(FMargin(8.0f, 0.0f, 0.0f, 0.0f))
+		[
+			SNew(SNumericEntryBox<float>)
+			.AllowSpin(true)
+			.MinValue(2.0f)         // Negative delays make no sense; the scheduler also clamps to a tiny positive minimum.
+			.MinSliderValue(2.0f)
+			.MaxSliderValue(180.0f)  // Slider range only; larger values can still be typed.
+			.Delta(0.1f)
+			.MinDesiredValueWidth(48.0f)
+			.ToolTipText(NSLOCTEXT("NexusWorldAssemblyEditor", "Command_QuickAssembly_AutoAssemblyTimer_Tooltip", "Seconds to wait after an Auto Assembly run completes before starting the next one. Applied live to the next wait."))
+			// Only meaningful while Auto Assembly is enabled, so grey it out otherwise.
+			.IsEnabled_Lambda([]() { return UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly; })
+			.Value_Lambda([]() -> TOptional<float>
+			{
+				return UNWorldAssemblyEditorUserSettings::Get()->QuickAssemblyAutoAssemblyTimer;
+			})
+			// Update in-memory while scrubbing so the live loop and the field stay in sync; persist on commit.
+			.OnValueChanged_Lambda([](float NewValue)
+			{
+				UNWorldAssemblyEditorUserSettings::GetMutable()->QuickAssemblyAutoAssemblyTimer = FMath::Max(0.0f, NewValue);
+			})
+			.OnValueCommitted_Lambda([](float NewValue, ETextCommit::Type)
+			{
+				UNWorldAssemblyEditorUserSettings* Settings = UNWorldAssemblyEditorUserSettings::GetMutable();
+				Settings->QuickAssemblyAutoAssemblyTimer = FMath::Max(0.0f, NewValue);
+				Settings->SaveConfig();
+			})
+		];
+}
+
 void FNWorldAssemblyEditorToolMenu::SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent)
 {
-	// Authoritative lock: don't let the Quick Assembly target change while the operation it kicked off is running.
-	if (IsQuickAssemblyOperationRunning()) return;
+	// Authoritative lock: don't let the Quick Assembly target change while a loop it kicked off is active
+	// (operation running or waiting between auto-runs).
+	if (IsQuickAssemblyActive()) return;
 	QuickAssemblyOrganComponent = OrganComponent;
 }
 
@@ -899,4 +949,14 @@ bool FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning()
 {
 	const UNAssemblyOperation* Operation = GetTrackedQuickAssemblyOperation();
 	return Operation != nullptr && Operation->IsRunning();
+}
+
+bool FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
+{
+	if (IsQuickAssemblyOperationRunning()) return true;
+
+	// The loop also counts as "active" while it waits between auto-assembly runs, so the button stays in its
+	// cancel state (and the organ selection stays locked) across the inter-run gap.
+	const UNWorldAssemblyEditorSubsystem* Subsystem = UNWorldAssemblyEditorSubsystem::Get();
+	return Subsystem != nullptr && Subsystem->IsAutoAssemblyLoopActive();
 }

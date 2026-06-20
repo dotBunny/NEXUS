@@ -8,8 +8,11 @@
 #include "Assembly/Contexts/NAssemblyTaskGraphContext.h"
 #include "Cell/NCellProxy.h"
 #include "Editor.h"
+#include "TimerManager.h"
 #include "NWorldAssemblyContextCache.h"
+#include "NWorldAssemblyEditorCommands.h"
 #include "NWorldAssemblyEditorToolMenu.h"
+#include "NWorldAssemblyEditorUserSettings.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Organ/NOrganComponent.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -24,6 +27,9 @@ void UNWorldAssemblyEditorSubsystem::Initialize(FSubsystemCollectionBase& Collec
 
 void UNWorldAssemblyEditorSubsystem::Deinitialize()
 {
+	// Tear down the auto-assembly loop first so its timer can never fire into a half-deinitialized subsystem.
+	StopAutoAssemblyLoop();
+
 	// Clear cached persistent operation data
 	if (CachedOperationTickets.Num() > 0)
 	{
@@ -93,12 +99,26 @@ void UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged(float Progre
 
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
-	// Hide the toolbar progress bar once the quick-assembly operation we are tracking completes, and drop the
-	// tracked ticket so the toolbar button reverts to its "start" state.
+	// Drop the tracked ticket for the quick-assembly operation we were following so the toolbar button can leave
+	// its "operation running" state. This is the natural-completion path only; a cancelled operation routes
+	// through OnOperationDestroyed instead and must never re-arm the loop.
 	if (Operation->GetTicket() == FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOperationTicket())
 	{
-		FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
 		FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(-1);
+
+		// Re-arm the inter-run timer when an auto-assembly loop is engaged and still enabled. Re-reading the live
+		// setting here is what makes toggling Auto Assembly off mid-loop stop it gracefully after the current run.
+		if (bAutoAssemblyLoopActive && UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly)
+		{
+			ScheduleNextAutoAssembly();
+			// Keep the bar visible and reset it to 0 so the countdown to the next run reads from empty.
+			FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(0.0f);
+		}
+		else
+		{
+			FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
+			StopAutoAssemblyLoop();
+		}
 	}
 
 	for (ANCellProxy* Proxy : TaskGraphContext->CreatedProxies)
@@ -266,10 +286,82 @@ void UNWorldAssemblyEditorSubsystem::UnloadGeneratedProxies(const int32& Operati
 
 void UNWorldAssemblyEditorSubsystem::OnPreBeginPIE([[maybe_unused]] bool bArg)
 {
+	// Entering PIE invalidates the editor-world organs the loop runs against, so disengage it before clearing proxies.
+	StopAutoAssemblyLoop();
 	ClearAllProxies();
 }
 
 void UNWorldAssemblyEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap)
 {
+	// A map change invalidates the loop's target organs; disengage it before clearing proxies.
+	StopAutoAssemblyLoop();
 	ClearAllProxies();
+}
+
+void UNWorldAssemblyEditorSubsystem::BeginAutoAssemblyLoop()
+{
+	bAutoAssemblyLoopActive = true;
+}
+
+void UNWorldAssemblyEditorSubsystem::StopAutoAssemblyLoop()
+{
+	const bool bWasActive = bAutoAssemblyLoopActive;
+	bAutoAssemblyLoopActive = false;
+
+	if (AutoAssemblyTimerHandle.IsValid())
+	{
+		GEditor->GetTimerManager()->ClearTimer(AutoAssemblyTimerHandle);
+		AutoAssemblyTimerHandle.Invalidate();
+	}
+
+	// If we were waiting between runs (no live operation owns the bar), the countdown bar is ours to hide. When an
+	// operation is still running the cancel path tears it down through OnOperationDestroyed instead.
+	if (bWasActive && !FNWorldAssemblyEditorToolMenu::IsQuickAssemblyOperationRunning())
+	{
+		FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::ScheduleNextAutoAssembly()
+{
+	// QuickAssemblyAutoAssemblyTimer is user-editable; clamp so a zero/negative value can't assert or busy-loop.
+	const float Delay = FMath::Max(KINDA_SMALL_NUMBER, UNWorldAssemblyEditorUserSettings::Get()->QuickAssemblyAutoAssemblyTimer);
+	GEditor->GetTimerManager()->SetTimer(AutoAssemblyTimerHandle,
+		FTimerDelegate::CreateUObject(this, &UNWorldAssemblyEditorSubsystem::OnAutoAssemblyTimerElapsed),
+		Delay, false);
+}
+
+void UNWorldAssemblyEditorSubsystem::OnAutoAssemblyTimerElapsed()
+{
+	// One-shot timer: it has fired, so the handle is spent.
+	AutoAssemblyTimerHandle.Invalidate();
+
+	// Stop cleanly if the loop was disengaged, Auto Assembly was toggled off, or a new run can't start right now
+	// (no valid organ, in PIE, or another operation is in flight). This keeps the button from sticking on "cancel".
+	if (!bAutoAssemblyLoopActive ||
+		!UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly ||
+		!FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute())
+	{
+		StopAutoAssemblyLoop();
+		return;
+	}
+
+	FNWorldAssemblyEditorCommands::StartQuickAssembly();
+}
+
+void UNWorldAssemblyEditorSubsystem::UpdateAutoAssemblyCountdownBar()
+{
+	if (!bAutoAssemblyLoopActive || !AutoAssemblyTimerHandle.IsValid())
+	{
+		return;
+	}
+
+	// Fill the bar 0..1 as the inter-run delay elapses, so it reads as a countdown to the next run.
+	const FTimerManager& TimerManager = *GEditor->GetTimerManager();
+	const float Rate = TimerManager.GetTimerRate(AutoAssemblyTimerHandle);
+	if (Rate > 0.0f)
+	{
+		const float Remaining = TimerManager.GetTimerRemaining(AutoAssemblyTimerHandle);
+		FNWorldAssemblyEditorToolMenu::SetQuickAssemblyProgress(1.0f - (Remaining / Rate));
+	}
 }

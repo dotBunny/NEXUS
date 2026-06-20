@@ -80,6 +80,10 @@ public:
 	static bool ShowQuickAssembly();
 	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
+
+	/** @return A numeric-entry widget bound to UNWorldAssemblyEditorUserSettings::QuickAssemblyAutoAssemblyTimer (seconds), for the Quick Assembly options dropdown. */
+	static TSharedRef<SWidget> CreateQuickAssemblyAutoAssemblyTimerWidget();
+
 	static void SetSelectedQuickAssemblyOption(UNOrganComponent* OrganComponent);
 	static UNOrganComponent* GetQuickAssemblyOrganComponent();
 
@@ -94,6 +98,12 @@ public:
 	static UNAssemblyOperation* GetTrackedQuickAssemblyOperation();
 	/** @return true if the tracked Quick Assembly operation exists and is still running (drives the Start/Cancel toggle). */
 	static bool IsQuickAssemblyOperationRunning();
+
+	/**
+	 * @return true while a Quick Assembly loop is active — the tracked operation is running, or an auto-assembly
+	 * loop is waiting between runs. Drives the Start/Cancel toggle, the cancel icon, and the organ-selection lock.
+	 */
+	static bool IsQuickAssemblyActive();
 
 private:
 	static TWeakObjectPtr<UNOrganComponent> QuickAssemblyOrganComponent;

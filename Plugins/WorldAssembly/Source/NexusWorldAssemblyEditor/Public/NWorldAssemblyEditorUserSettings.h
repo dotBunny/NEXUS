@@ -32,7 +32,9 @@ public:
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, until cancelled."))
 	bool bQuickAssemblyAutoAssembly = false;
 
-	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly Timer", meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, post completion, until cancelled."))
+	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Auto Assembly Timer",
+		meta=(Tooltip="Continuously trigger Assembly Operations for the target organ on a timer, post completion, until cancelled.",
+			ClampMin="2", ClampMax="180", UIMin="2", UIMax="180", SliderExponent = 0.5))
 	float QuickAssemblyAutoAssemblyTimer = 2.f;
 
 	/** Show alerts and HUD messages in the viewport while editing cells. */
