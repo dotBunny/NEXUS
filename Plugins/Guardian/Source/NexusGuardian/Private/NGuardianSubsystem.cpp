@@ -65,6 +65,17 @@ void UNGuardianSubsystem::Tick(float DeltaTime)
 
 	LastObjectCount = FNDeveloperUtils::GetCurrentObjectCount();
 
+	// The threshold ladder below evaluates one rung per tick: each rung latches its flag and returns so the next
+	// rung is only considered on a later tick. This is deliberate — it spreads the two synchronous Snapshot()
+	// calls (capture and compare) across separate frames to minimize game-thread hitching.
+	//
+	// As a consequence, the compare diff only attributes growth that occurs *between* the snapshot threshold and
+	// the compare threshold being crossed, i.e. gradual growth. A burst that climbs from below the warning
+	// threshold to above the compare threshold within a single sample (TickRate) has already completed before
+	// either snapshot is taken, so both snapshots are post-burst and the resulting diff is near-empty. In that
+	// case rely on the warning/error logs (which still fire) and, when bObjectCountCaptureOutput is set, the full
+	// snapshot dump written at the snapshot threshold, which records the post-burst world as absolute counts.
+
 	if (LastObjectCount < ObjectCountWarningThreshold && bPassedObjectCountWarningThreshold)
 	{
 		UE_LOG(LogNexusGuardian, Log, TEXT("The last UObject count has dropped below the warning threshold, resetting threshold triggers and releasing any captured snapshot."));

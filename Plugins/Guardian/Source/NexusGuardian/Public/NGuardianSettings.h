@@ -16,7 +16,7 @@
  * @see <a href="https://nexus-framework.com/docs/plugins/guardian/project-settings//">UNGuardianSettings</a>
  */
 UCLASS(ClassGroup = "NEXUS", DisplayName = "Guardian Settings", Config=NexusGame, defaultconfig)
-class UNGuardianSettings : public UDeveloperSettings
+class NEXUSGUARDIAN_API UNGuardianSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 

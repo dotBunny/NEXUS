@@ -869,6 +869,17 @@ void FNOrganGraphBuilderTask::RemoveCellNode(FNAssemblyGraphCellNode* CellNode) 
 			OrganContextPtr->CellGraph->UnregisterNode(NullNode);
 			delete NullNode;
 		}
+		else if (LinkedNode->GetNodeType() == ENAssemblyGraphNodeType::Bone)
+		{
+			// The bone is a pre-placed anchor the graph keeps, so we free its socket and sever the
+			// connection but never unregister/delete it. Releasing the bone's Linked pointer here is
+			// essential: EnforceNotFinisherConstraint can prune the start cell, and without this the
+			// bone is left pointing at (and marked linked to) the freed node.
+			FNAssemblyGraphBoneNode* BoneNode = static_cast<FNAssemblyGraphBoneNode*>(LinkedNode);
+			BoneNode->Unlink();
+			CellNode->UnlinkJunction(JunctionKey);
+			CellNode->Disconnect(BoneNode);
+		}
 	}
 
 	// Reverse unique-tag tracking so the cell template becomes eligible again

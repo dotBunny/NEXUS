@@ -3,6 +3,7 @@
 
 #include "NGuardianDeveloperOverlay.h"
 
+#include "CommonNumericTextBlock.h"
 #include "NGuardianMinimal.h"
 #include "NGuardianSubsystem.h"
 #include "NStyleLibrary.h"

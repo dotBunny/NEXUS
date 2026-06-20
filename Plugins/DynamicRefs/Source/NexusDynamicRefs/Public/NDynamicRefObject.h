@@ -6,6 +6,8 @@
 #include "NDynamicRefsDeveloperOverlay.h"
 #include "NDynamicRefObject.generated.h"
 
+class UWorld;
+
 /**
  * Blueprint-friendly UObject wrapper around a single ENDynamicRef slot or FName bucket.
  *
@@ -59,6 +61,15 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
 	void RemoveObject(UObject* Object);
+
+	/**
+	 * Remove every tracked object that belongs to World, used when that world unbinds from the overlay.
+	 * @remark Scoped via each object's own UObject::GetWorld(); world-agnostic objects (GetWorld() == nullptr)
+	 *         are never matched and are dropped only once they go stale.
+	 * @param World The world whose objects should be dropped.
+	 * @return true if any object was removed.
+	 */
+	bool RemoveObjectsForWorld(const UWorld* World);
 
 	/** @return The number of live objects currently tracked by this wrapper (stale entries are pruned first). */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")

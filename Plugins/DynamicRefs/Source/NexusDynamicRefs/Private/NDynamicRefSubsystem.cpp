@@ -243,8 +243,12 @@ UObject* UNDynamicRefSubsystem::GetFirstObject(const ENDynamicRef DynamicRef) co
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectUnsafe(const ENDynamicRef DynamicRef) const
 {
-	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
-	return FastCollection[DynamicRef].Objects[0].Get();
+	checkf(DynamicRef != NDR_None && DynamicRef != NDR_Max,
+		TEXT("GetFirstObjectUnsafe requires a valid ENDynamicRef (not NDR_None/NDR_Max)."));
+	const FNDynamicRefCollection& Collection = FastCollection[DynamicRef];
+	checkf(Collection.Objects.Num() > 0,
+		TEXT("GetFirstObjectUnsafe requires a non-empty slot; check GetCount() > 0 before calling."));
+	return Collection.Objects[0].Get();
 }
 
 UObject* UNDynamicRefSubsystem::GetLastObject(const ENDynamicRef DynamicRef) const
@@ -260,8 +264,12 @@ UObject* UNDynamicRefSubsystem::GetLastObject(const ENDynamicRef DynamicRef) con
 
 UObject* UNDynamicRefSubsystem::GetLastObjectUnsafe(const ENDynamicRef DynamicRef) const
 {
-	if (DynamicRef == NDR_None || DynamicRef == NDR_Max) return nullptr;
-	return FastCollection[DynamicRef].Objects.Last().Get();
+	checkf(DynamicRef != NDR_None && DynamicRef != NDR_Max,
+		TEXT("GetLastObjectUnsafe requires a valid ENDynamicRef (not NDR_None/NDR_Max)."));
+	const FNDynamicRefCollection& Collection = FastCollection[DynamicRef];
+	checkf(Collection.Objects.Num() > 0,
+		TEXT("GetLastObjectUnsafe requires a non-empty slot; check GetCount() > 0 before calling."));
+	return Collection.Objects.Last().Get();
 }
 
 TArray<AActor*> UNDynamicRefSubsystem::GetActors(const ENDynamicRef DynamicRef) const
@@ -327,7 +335,12 @@ UObject* UNDynamicRefSubsystem::GetFirstObjectByName(const FName Name) const
 
 UObject* UNDynamicRefSubsystem::GetFirstObjectByNameUnsafe(const FName Name) const
 {
-	return NamedCollection[Name].Objects[0].Get();
+	const FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	checkf(Collection != nullptr,
+		TEXT("GetFirstObjectByNameUnsafe called with unregistered name '%s'."), *Name.ToString());
+	checkf(Collection->Objects.Num() > 0,
+		TEXT("GetFirstObjectByNameUnsafe requires a non-empty bucket '%s'; check GetCountByName() > 0 before calling."), *Name.ToString());
+	return Collection->Objects[0].Get();
 }
 
 AActor* UNDynamicRefSubsystem::GetLastActor(const ENDynamicRef DynamicRef) const
@@ -372,7 +385,12 @@ UObject* UNDynamicRefSubsystem::GetLastObjectByName(const FName Name) const
 
 UObject* UNDynamicRefSubsystem::GetLastObjectByNameUnsafe(const FName Name) const
 {
-	return NamedCollection[Name].Objects.Last().Get();
+	const FNDynamicRefCollection* Collection = NamedCollection.Find(Name);
+	checkf(Collection != nullptr,
+		TEXT("GetLastObjectByNameUnsafe called with unregistered name '%s'."), *Name.ToString());
+	checkf(Collection->Objects.Num() > 0,
+		TEXT("GetLastObjectByNameUnsafe requires a non-empty bucket '%s'; check GetCountByName() > 0 before calling."), *Name.ToString());
+	return Collection->Objects.Last().Get();
 }
 
 TArray<FName> UNDynamicRefSubsystem::GetNames() const

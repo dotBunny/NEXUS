@@ -328,35 +328,53 @@ void FNWorldAssemblyEdMode::Tick(FEditorViewportClient* ViewportClient, float De
 		bCollisionVisualizerDirty = false;
 	}
 
-	// Cache if we have a NCellActor setup
-	CellActor.Reset();
-
-	if (const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld(); CurrentWorld != nullptr)
+	// Resolve the cell actor for the active world. Reuse the cached pointer while it's still alive and belongs to
+	// that world; only fall back to the full GetCellActorFromWorld level/actor scan when it's gone. Deletion of the
+	// cached actor is handled by OnActorDeleted (it clears the pointer), a world switch is caught by the world
+	// compare, and while no cell actor exists the scan repeats each tick — which is also what lets us pick one up
+	// once it's added.
+	const UWorld* CurrentWorld = FNEditorUtils::GetCurrentWorld();
+	if (CurrentWorld == nullptr)
 	{
-		CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+		CellActor.Reset();
+	}
+	else
+	{
+		if (const ANCellActor* Cached = CellActor.Get(); Cached == nullptr || Cached->GetWorld() != CurrentWorld)
+		{
+			CellActor = FNWorldAssemblyUtils::GetCellActorFromWorld(CurrentWorld, true);
+		}
+
 		if (ANCellActor* Actor = CellActor.Get(); Actor != nullptr && !Actor->WasSpawnedFromProxy())
 		{
 			UNCellRootComponent* RootComponent = Actor->GetCellRoot();
-			const FRotator Rotation = RootComponent->GetOffsetRotator();;
+			const FRotator Rotation = RootComponent->GetOffsetRotator();
 			const FVector Offset = RootComponent->GetOffsetLocation();
 
-			// We only update them during tick
-			CachedHullVertices = FNVectorUtils::RotateAndOffsetPoints(RootComponent->Details.Hull.Vertices, Rotation, Offset);
-			CachedHullEdges = RootComponent->Details.Hull.GetEdgeIndices();
-			CachedBounds = FNWorldAssemblyUtils::CreateRotatedBox(RootComponent->Details.Bounds, Rotation, Offset);
-			CachedBoundsVertices = FNBoxUtils::GetVertices(CachedBounds);
-			// Voxel data is the only heavy member here and is consumed solely by the Voxel ed-mode overlay, so
-			// only touch it while that overlay is active; otherwise we'd pay an O(n) compare/copy every tick for a
-			// cache nothing reads. Within Voxel mode, the IsEqual guard skips the array copy when the source grid is
-			// unchanged (covering in-place voxel edits that keep the count) and the Origin guard catches a
-			// re-anchored grid whose contents happen to match.
-			if (CellEdMode == ENCellEdMode::Voxel)
+			// The hull, bounds and voxel caches are each consumed only by NCellRootComponentVisualizer, and only in
+			// their matching ed-mode (hull points/edges in Hull, min/max in Bounds, the grid overlay in Voxel). Only
+			// the active mode's cache is ever read, so refresh just that one rather than rebuilding all of them every
+			// tick. Hull and bounds derive from the live offset transform, so they recompute each tick while active to
+			// track viewport drags.
+			switch (CellEdMode)
 			{
+			case ENCellEdMode::Hull:
+				CachedHullVertices = FNVectorUtils::RotateAndOffsetPoints(RootComponent->Details.Hull.Vertices, Rotation, Offset);
+				CachedHullEdges = RootComponent->Details.Hull.GetEdgeIndices();
+				break;
+			case ENCellEdMode::Bounds:
+				CachedBounds = FNWorldAssemblyUtils::CreateRotatedBox(RootComponent->Details.Bounds, Rotation, Offset);
+				CachedBoundsVertices = FNBoxUtils::GetVertices(CachedBounds);
+				break;
+			case ENCellEdMode::Voxel:
+				// The IsEqual guard skips the array copy when the source grid is unchanged (covering in-place voxel
+				// edits that keep the count) and the Origin guard catches a re-anchored grid whose contents match.
 				if (const FNCellVoxelData& SourceVoxelData = RootComponent->Details.VoxelData;
 					!CachedVoxelData.IsEqual(SourceVoxelData) || CachedVoxelData.GetOrigin() != SourceVoxelData.GetOrigin())
 				{
 					CachedVoxelData = SourceVoxelData;
 				}
+				break;
 			}
 
 			bAutoBoundsDisabled = !RootComponent->Details.BoundsSettings.bCalculateOnSave;

@@ -41,6 +41,21 @@ void UNDynamicRefObject::RemoveObject(UObject* Object)
 	}
 }
 
+bool UNDynamicRefObject::RemoveObjectsForWorld(const UWorld* World)
+{
+	const int32 Removed = TargetObjects.RemoveAll([World](const TWeakObjectPtr<UObject>& Entry)
+	{
+		const UObject* Object = Entry.Get();
+		return Object != nullptr && Object->GetWorld() == World;
+	});
+	if (Removed > 0)
+	{
+		Changed.ExecuteIfBound();
+		return true;
+	}
+	return false;
+}
+
 int32 UNDynamicRefObject::GetCount()
 {
 	Compact();

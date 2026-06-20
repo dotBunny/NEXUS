@@ -64,12 +64,13 @@ void UNDynamicRefComponent::Register()
 	const int32 TagReferenceCount = TagReferences.Num();
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
-		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
+		UWorld* World = GetWorld();
 		AActor* Owner = GetOwner();
+		UNDynamicRefSubsystem* Subsystem = World ? UNDynamicRefSubsystem::Get(World) : nullptr;
 
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Error, TEXT("Failed to register NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *GetNameSafe(Owner));
 			return;
 		}
 
@@ -103,12 +104,13 @@ void UNDynamicRefComponent::Unregister()
 
 	if (FastReferenceCount > 0 || NamedReferenceCount > 0 || TagReferenceCount > 0)
 	{
-		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(GetWorld());
+		UWorld* World = GetWorld();
 		AActor* Owner = GetOwner();
+		UNDynamicRefSubsystem* Subsystem = World ? UNDynamicRefSubsystem::Get(World) : nullptr;
 
 		if (Subsystem == nullptr)
 		{
-			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *Owner->GetName());
+			UE_LOG(LogNexusDynamicRefs, Warning, TEXT("Failed to unregister NDynamicRefComponent(%s) as no UNDynamicRefSubsystem was found."), *GetNameSafe(Owner));
 			return;
 		}
 

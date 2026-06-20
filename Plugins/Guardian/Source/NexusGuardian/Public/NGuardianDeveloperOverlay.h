@@ -3,13 +3,11 @@
 
 #pragma once
 
-#include "CommonNumericTextBlock.h"
-#include "NGuardianSubsystem.h"
 #include "Widgets/NDeveloperOverlay.h"
 #include "NGuardianDeveloperOverlay.generated.h"
 
-class UNDynamicRefObject;
-class UNListView;
+class UCommonNumericTextBlock;
+class UNGuardianSubsystem;
 
 /**
  * Developer overlay widget that displays the Guardian subsystem's baseline, current count, and next threshold.

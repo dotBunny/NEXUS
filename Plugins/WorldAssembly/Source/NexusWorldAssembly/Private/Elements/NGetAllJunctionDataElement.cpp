@@ -50,6 +50,10 @@ bool FNGetAllJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 	N_PCG_JUNCTION_PREFIX
 	for (const UNCellJunctionComponent* JunctionComponent :  FNWorldAssemblyRegistry::GetCellJunctionComponents())
 	{
+		if (JunctionComponent == nullptr)
+		{
+			continue;
+		}
 		N_PCG_JUNCTION_DATA
 	}
 

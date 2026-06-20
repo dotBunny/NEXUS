@@ -173,24 +173,24 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 		OnRemovedByNameDelegates.Remove(World);
 	}
 
-	if (System != nullptr)
+	// Drop only the entries this world registered. Sweeping the wrappers directly (rather than replaying the
+	// subsystem's current objects) keeps a sibling PIE world's entries intact and works even when the subsystem
+	// has already cleared its collections during teardown.
+	for (auto It = DynamicRefObjects.CreateIterator(); It; ++It)
 	{
-		TArray<ENDynamicRef> DynamicRefs = System->GetDynamicRefs();
-		for (ENDynamicRef DynamicRef : DynamicRefs)
+		if (It.Value()->RemoveObjectsForWorld(World) && It.Value()->GetCount() == 0)
 		{
-			for (UObject* Object : System->GetObjects(DynamicRef))
-			{
-				RemoveListItem(DynamicRef, Object);
-			}
+			DynamicReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
 		}
+	}
 
-		TArray<FName> Names = System->GetNames();
-		for (FName Name : Names)
+	for (auto It = NamedObjects.CreateIterator(); It; ++It)
+	{
+		if (It.Value()->RemoveObjectsForWorld(World) && It.Value()->GetCount() == 0)
 		{
-			for (UObject* Object : System->GetObjectsByName(Name))
-			{
-				RemoveListItem(Name, Object);
-			}
+			NamedReferences->RemoveItem(It.Value());
+			It.RemoveCurrent();
 		}
 	}
 

@@ -41,21 +41,27 @@ bool FNGetJunctionDataElement::ExecuteInternal(FPCGContext* Context) const
 	for (const FPCGTaggedData& Input : Context->InputData.GetInputsByPin(PCGPinConstants::DefaultInputLabel))
 	{
 		const UPCGParamData* ParamData = Cast<UPCGParamData>(Input.Data);
-		if (ParamData && ParamData->Metadata)
+		if (ParamData == nullptr || ParamData->Metadata == nullptr)
 		{
-			for (int64 i = 0; i < ParamData->Metadata->GetItemCountForChild(); ++i)
-			{
-				const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr =
-					ParamData->Metadata->GetConstTypedAttribute<FSoftObjectPath>(ComponentReferenceName);
+			continue;
+		}
 
-				FSoftObjectPath ComponentSoftObjectPath = ComponentAttr->GetValueFromItemKey(i);
-				if (ComponentSoftObjectPath.IsValid())
+		const FPCGMetadataAttribute<FSoftObjectPath>* ComponentAttr =
+			ParamData->Metadata->GetConstTypedAttribute<FSoftObjectPath>(ComponentReferenceName);
+		if (ComponentAttr == nullptr)
+		{
+			continue;
+		}
+
+		for (int64 i = 0; i < ParamData->Metadata->GetItemCountForChild(); ++i)
+		{
+			const FSoftObjectPath ComponentSoftObjectPath = ComponentAttr->GetValueFromItemKey(i);
+			if (ComponentSoftObjectPath.IsValid())
+			{
+				UNCellJunctionComponent* JunctionComponent = Cast<UNCellJunctionComponent>(ComponentSoftObjectPath.ResolveObject());
+				if (JunctionComponent != nullptr)
 				{
-					UNCellJunctionComponent* JunctionComponent = Cast<UNCellJunctionComponent>(ComponentSoftObjectPath.ResolveObject());
-					if (JunctionComponent != nullptr)
-					{
-						N_PCG_JUNCTION_DATA
-					}
+					N_PCG_JUNCTION_DATA
 				}
 			}
 		}

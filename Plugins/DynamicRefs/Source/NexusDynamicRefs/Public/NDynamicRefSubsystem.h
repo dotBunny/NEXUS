@@ -271,6 +271,9 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 
 	/**
 	* Gets the first/oldest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
+	* @note The caller must ensure DynamicRef is valid (not NDR_None/NDR_Max) and the slot is non-empty
+	*       (GetCount() > 0). Violating either precondition asserts in development builds and is undefined behavior
+	*       in shipping. Use GetFirstObject() for a fully checked lookup.
 	* @warning References are weak: if the slot's first entry has been destroyed without removal this returns nullptr even
 	*          though the slot is non-empty. Use GetFirstObject() to skip stale entries.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
@@ -289,6 +292,9 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 
 	/**
 	* Gets the first/oldest UObject associated with the provided FName with NO bounds/range checking.
+	* @note The caller must ensure the bucket exists (the FName has been registered) and is non-empty
+	*       (GetCountByName() > 0). Violating either precondition asserts in development builds and is undefined
+	*       behavior in shipping. Use GetFirstObjectByName() for a fully checked lookup.
 	* @warning References are weak: if the bucket's first entry has been destroyed without removal this returns nullptr even
 	*          though the bucket is non-empty. Use GetFirstObjectByName() to skip stale entries.
 	* @param Name The desired FName to access.
@@ -325,6 +331,9 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 
 	/**
 	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
+	* @note The caller must ensure DynamicRef is valid (not NDR_None/NDR_Max) and the slot is non-empty
+	*       (GetCount() > 0). Violating either precondition asserts in development builds and is undefined behavior
+	*       in shipping. Use GetLastObject() for a fully checked lookup.
 	* @warning References are weak: if the slot's last entry has been destroyed without removal this returns nullptr even
 	*          though the slot is non-empty. Use GetLastObject() to skip stale entries.
 	* @param DynamicRef The desired ENDynamicRef collection to access.
@@ -343,6 +352,9 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 
 	/**
 	* Gets the last/newest UObject associated with the provided FName with NO bounds/range checking.
+	* @note The caller must ensure the bucket exists (the FName has been registered) and is non-empty
+	*       (GetCountByName() > 0). Violating either precondition asserts in development builds and is undefined
+	*       behavior in shipping. Use GetLastObjectByName() for a fully checked lookup.
 	* @warning References are weak: if the bucket's last entry has been destroyed without removal this returns nullptr even
 	*          though the bucket is non-empty. Use GetLastObjectByName() to skip stale entries.
 	* @param Name The desired FName type to access.
@@ -513,13 +525,31 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 */
 	const FNDynamicRefCollection& GetObjectCollectionByNameRefUnsafe(const FName Name) const;
 
-	/** Fired when an object is added under an ENDynamicRef slot. */
+	/**
+	 * Fired when an object is added under an ENDynamicRef slot.
+	 * @remark Only fired for genuine adds; a duplicate AddUnique is a no-op and does not re-broadcast.
+	 */
 	FOnDynamicRefChangeDelegate OnAdded;
-	/** Fired when an object is added under an FName bucket. */
+	/**
+	 * Fired when an object is added under an FName bucket.
+	 * @remark Only fired for genuine adds; a duplicate AddUnique is a no-op and does not re-broadcast.
+	 */
 	FOnDynamicRefNameChangeDelegate OnAddedByName;
-	/** Fired when an object is removed from an ENDynamicRef slot. */
+	/**
+	 * Fired when an object is removed from an ENDynamicRef slot.
+	 * @remark Only fired for explicit RemoveObject/RemoveObjects calls. Objects that go stale (destroyed/GC'd without
+	 *         removal) are pruned lazily on the next Add (see FNDynamicRefCollection) and do NOT broadcast, so the
+	 *         add/remove pair is asymmetric for stale departures. Listeners that keep per-object bookkeeping must
+	 *         poll/reconcile against the live collection to detect those.
+	 */
 	FOnDynamicRefChangeDelegate OnRemoved;
-	/** Fired when an object is removed from an FName bucket. */
+	/**
+	 * Fired when an object is removed from an FName bucket.
+	 * @remark Only fired for explicit RemoveObjectByName/RemoveObjectsByName calls. Objects that go stale (destroyed/GC'd
+	 *         without removal) are pruned lazily on the next Add (see FNDynamicRefCollection) and do NOT broadcast, so the
+	 *         add/remove pair is asymmetric for stale departures. Listeners that keep per-object bookkeeping must
+	 *         poll/reconcile against the live collection to detect those.
+	 */
 	FOnDynamicRefNameChangeDelegate OnRemovedByName;
 
 private:

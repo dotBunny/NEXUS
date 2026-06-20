@@ -104,7 +104,11 @@ private:
 	 * @note Cached when the baseline is set, to avoid polling during Tick. */
 	bool bShouldOutputSnapshot = false;
 
-	/** In-memory snapshot captured at the snapshot threshold and compared at the compare threshold. */
+	/**
+	 * In-memory snapshot captured at the snapshot threshold and diffed against a fresh snapshot at the compare
+	 * threshold. The diff only attributes growth occurring between those two thresholds (gradual growth); a
+	 * sub-TickRate burst lands both snapshots post-spike, yielding a near-empty diff. See Tick for details.
+	 */
 	FNObjectSnapshot CapturedSnapshot;
 
 
