@@ -7,6 +7,7 @@
 ### Added
 
 - `UNOrganComponent` now have both `Context Tag` and `Tag Counter` requirements.
+- `Quick Assembly` workflow on the World Assembly editor-mode toolbar: select a target `UNOrganComponent` from a dropdown and start/cancel an assembly operation in place, with an optional `Auto Assembly` mode that re-runs on a configurable timer. Adds `World Assembly (User)` settings `Load Level Instances`, `Auto Assembly`, and `Auto Assembly Timer`.
 - `NEXUS.WorldAssembly.Flag.Hotpath` assembly flag for creating pathing feedback post assembly in both the `ANCellLevelInstance` as well as junctions.
 - `INCellJunctionFiller` interface for filler objects to implement to get callbacks when used to fill empty junctions.
 - `UNPickerSettings` project settings (Project Settings > NEXUS > Picker, stored in `DefaultNexusGame.ini`) exposing point-projection configuration: `Trace Complex`, `Nav Query Extent`, `Nav Agent Radius`, and `Nav Agent Height`.
@@ -25,6 +26,7 @@
 - Consolidated `Twisted` to `Next` concept/naming.
 - Cell junction `Requirements` now respected, weights for junctions are automatically doubled when they are `Required`.
 - `UNTextRenderComponent` now warns about replication instead of setting it, with a toggle.
+- `UNMultiplayerLibrary::KickPlayer` is now `BlueprintAuthorityOnly`; the Blueprint node only executes on the authority.
 
 ### Fixed
 
