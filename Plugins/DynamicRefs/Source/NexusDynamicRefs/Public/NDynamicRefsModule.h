@@ -9,7 +9,6 @@
 /**
  * NEXUS: DynamicRefs Module
  */
-// ReSharper disable once CppUE4CodingStandardNamingViolationWarning
 class FNDynamicRefsModule final : public IModuleInterface
 {
 public:
