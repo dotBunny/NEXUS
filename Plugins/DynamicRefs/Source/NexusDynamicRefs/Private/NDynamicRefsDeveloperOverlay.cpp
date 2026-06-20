@@ -4,10 +4,12 @@
 #include "NDynamicRefsDeveloperOverlay.h"
 
 #include "NDynamicRefObject.h"
+#include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 #include "NStyleLibrary.h"
 #include "Components/Border.h"
 #include "Components/NListView.h"
+#include "Macros/NValidationMacros.h"
 
 void UNDynamicRefsDeveloperOverlay::NativeConstruct()
 {

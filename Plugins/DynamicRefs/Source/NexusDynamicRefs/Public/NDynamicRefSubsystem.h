@@ -11,14 +11,15 @@
 /**
  * Holds the set of UObjects registered for a single ENDynamicRef slot or FName bucket.
  * @remark References are stored weakly; the subsystem never keeps a registered object alive. Entries whose
- *         object is destroyed/GC'd go stale and are skipped by every accessor and pruned lazily by Compact().
+ *         object is destroyed/GC'd go stale and are skipped by every accessor; they are pruned lazily the next
+ *         time an object is added to the same slot/bucket (read accessors never mutate the collection).
  */
 USTRUCT()
 struct FNDynamicRefCollection
 {
 	GENERATED_BODY()
 
-	/** The registered UObjects (weak), in registration order. May contain stale entries until Compact() runs. */
+	/** The registered UObjects (weak), in registration order. May contain stale entries until the next Add() prunes them. */
 	UPROPERTY()
 	TArray<TWeakObjectPtr<UObject>> Objects;
 
@@ -36,6 +37,16 @@ struct FNDynamicRefCollection
 			if (Object.IsValid()) return true;
 		}
 		return false;
+	}
+	/** @return The number of live objects, excluding stale entries, without pruning. */
+	int32 CountValid() const
+	{
+		int32 Count = 0;
+		for (const TWeakObjectPtr<UObject>& Object : Objects)
+		{
+			if (Object.Get()) ++Count;
+		}
+		return Count;
 	}
 	/** @return A copy of the currently registered objects as raw pointers, excluding any stale entries. */
 	TArray<UObject*> GetObjectsCopy() const
@@ -115,7 +126,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Objects", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#add-objects"))
-	void AddObjects(ENDynamicRef DynamicRef, TArray<UObject*> InObjects);
+	void AddObjects(ENDynamicRef DynamicRef, const TArray<UObject*>& InObjects);
 
 	/**
 	 * Add a reference by FName to a specified UObject.
@@ -135,7 +146,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Add Objects (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#add-objects-by-name"))
-	void AddObjectsByName(FName Name, TArray<UObject*> InObjects);
+	void AddObjectsByName(FName Name, const TArray<UObject*>& InObjects);
 
 	/**
 	 * Remove a reference by ENDynamicRef to a specified UObject.
@@ -153,7 +164,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Remove Objects", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-objects"))
-	void RemoveObjects(ENDynamicRef DynamicRef, TArray<UObject*> InObjects);
+	void RemoveObjects(ENDynamicRef DynamicRef, const TArray<UObject*>& InObjects);
 
 	/**
 	 * Remove a reference by FName to a specified UObject.
@@ -173,7 +184,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Remove Objects (By Name)", Category = "NEXUS|DynamicRefs",
 		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#remove-objects-by-name"))
-	void RemoveObjectsByName(FName Name, TArray<UObject*> InObjects);
+	void RemoveObjectsByName(FName Name, const TArray<UObject*>& InObjects);
 
 	/**
 	 * Gets an array of AActor dynamically associated with the provided ENDynamicRef.
@@ -182,8 +193,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return An array of UObject.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actors", Category = "NEXUS|DynamicRefs",
-			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-actors"))
-	TArray<AActor*> GetActors(const ENDynamicRef DynamicRef);
+			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-actors", BlueprintPure="false"))
+	TArray<AActor*> GetActors(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Gets an array of AActor dynamically associated with the provided FName.
@@ -192,8 +203,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return An array of UObject.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Name)", Category = "NEXUS|DynamicRefs",
-			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-actors-by-name"))
-	TArray<AActor*> GetActorsByName(FName Name);
+			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-actors-by-name", BlueprintPure="false"))
+	TArray<AActor*> GetActorsByName(FName Name) const;
 
 	/**
 	 * Retrieves the count of UObjects associated with a specified ENDynamicRef collection.
@@ -201,8 +212,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return The number of UObjects associated with the specified ENDynamicRef collection.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Count", Category = "NEXUS|DynamicRefs",
-			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-count"))
-	int32 GetCount(const ENDynamicRef DynamicRef);
+			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-count", BlueprintPure="false"))
+	int32 GetCount(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Retrieves the count of UObjects associated with a specified FName collection.
@@ -210,8 +221,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return The number of UObjects associated with the specified FName collection.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Name)", Category = "NEXUS|DynamicRefs",
-			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-count-by-name"))
-	int32 GetCountByName(FName Name);
+			meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-count-by-name", BlueprintPure="false"))
+	int32 GetCountByName(FName Name) const;
 
 	/**
 	 * Gets an array of UObject dynamically associated with the provided ENDynamicRef.
@@ -219,8 +230,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return An array of UObject.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Objects", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects"))
-	TArray<UObject*> GetObjects(const ENDynamicRef DynamicRef);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects", BlueprintPure="false"))
+	TArray<UObject*> GetObjects(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Gets an array of UObject dynamically associated with the provided FName.
@@ -228,8 +239,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return An array of UObject.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Name)", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects-by-name"))
-	TArray<UObject*> GetObjectsByName(FName Name);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-objects-by-name", BlueprintPure="false"))
+	TArray<UObject*> GetObjectsByName(FName Name) const;
 
 	/**
 	 * Retrieves the first/oldest AActor associated with a specified ENDynamicRef.
@@ -237,8 +248,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return A pointer to the first AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get First Actor", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-actor"))
-	AActor* GetFirstActor(const ENDynamicRef DynamicRef);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-actor", BlueprintPure="false"))
+	AActor* GetFirstActor(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Retrieves the first/oldest AActor associated with a specified FName.
@@ -246,8 +257,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return A pointer to the first AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get First Actor (By Name)", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-actor-by-name"))
-	AActor* GetFirstActorByName(FName Name);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-actor-by-name", BlueprintPure="false"))
+	AActor* GetFirstActorByName(FName Name) const;
 
 	/**
 	* Gets the first/oldest UObject associated with the provided ENDynamicRef.
@@ -255,8 +266,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @return The first UObject in the collection.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName="Get First Object", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-object"))
-	UObject* GetFirstObject(const ENDynamicRef DynamicRef);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-object", BlueprintPure="false"))
+	UObject* GetFirstObject(const ENDynamicRef DynamicRef) const;
 
 	/**
 	* Gets the first/oldest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
@@ -265,7 +276,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @param DynamicRef The desired ENDynamicRef collection to access.
 	* @return The first UObject in the collection.
 	*/
-	UObject* GetFirstObjectUnsafe(const ENDynamicRef DynamicRef);
+	UObject* GetFirstObjectUnsafe(const ENDynamicRef DynamicRef) const;
 
 	/**
 	* Gets the first/oldest UObject associated with the provided FName.
@@ -273,8 +284,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @return The first UObject in the collection.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName="Get First Object (By Name)", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-object-by-name"))
-	UObject* GetFirstObjectByName(FName Name);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-first-object-by-name", BlueprintPure="false"))
+	UObject* GetFirstObjectByName(FName Name) const;
 
 	/**
 	* Gets the first/oldest UObject associated with the provided FName with NO bounds/range checking.
@@ -283,7 +294,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @param Name The desired FName to access.
 	* @return The first UObject in the collection.
 	*/
-	UObject* GetFirstObjectByNameUnsafe(FName Name);
+	UObject* GetFirstObjectByNameUnsafe(FName Name) const;
 
 	/**
 	 * Retrieves the last/newest AActor associated with a specified ENDynamicRef.
@@ -291,8 +302,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return A pointer to the last AActor found for the specified ENDynamicRef, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor"))
-	AActor* GetLastActor(const ENDynamicRef DynamicRef);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor", BlueprintPure="false"))
+	AActor* GetLastActor(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Retrieves the last/newest AActor associated with a specified FName.
@@ -300,8 +311,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @return A pointer to the last AActor found for the specified FName, or nullptr if no actors are found.
 	 */
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor (By Name)", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor-by-name"))
-	AActor* GetLastActorByName(FName Name);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-actor-by-name", BlueprintPure="false"))
+	AActor* GetLastActorByName(FName Name) const;
 
 	/**
 	* Gets the last/newest UObject associated with the provided ENDynamicRef.
@@ -309,8 +320,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @return The last UObject in the collection.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Object", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-object"))
-	UObject* GetLastObject(const ENDynamicRef DynamicRef);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-object", BlueprintPure="false"))
+	UObject* GetLastObject(const ENDynamicRef DynamicRef) const;
 
 	/**
 	* Gets the last/newest UObject associated with the provided ENDynamicRef with NO bounds/range checking.
@@ -319,7 +330,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @param DynamicRef The desired ENDynamicRef collection to access.
 	* @return The last UObject in the collection.
 	*/
-	UObject* GetLastObjectUnsafe(const ENDynamicRef DynamicRef);
+	UObject* GetLastObjectUnsafe(const ENDynamicRef DynamicRef) const;
 
 	/**
 	* Gets the last/newest UObject associated with the provided FName.
@@ -327,8 +338,8 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @return The last UObject in the collection.
 	*/
 	UFUNCTION(BlueprintCallable, DisplayName="Get Last Object (By Name)", Category = "NEXUS|DynamicRefs",
-		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-object-by-name"))
-	UObject* GetLastObjectByName(FName Name);
+		meta=(DocsURL="https://nexus-framework.com/docs/plugins/dynamic-references/types/dynamic-ref-subsystem/#get-last-object-by-name", BlueprintPure="false"))
+	UObject* GetLastObjectByName(FName Name) const;
 
 	/**
 	* Gets the last/newest UObject associated with the provided FName with NO bounds/range checking.
@@ -337,7 +348,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	* @param Name The desired FName type to access.
 	* @return The last UObject in the collection.
 	*/
-	UObject* GetLastObjectByNameUnsafe(FName Name);
+	UObject* GetLastObjectByNameUnsafe(FName Name) const;
 
 
 	/** @return All FName buckets that currently have at least one registered object. */
@@ -356,70 +367,70 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return An array of AActor.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Tag)", Category = "NEXUS|DynamicRefs")
-	TArray<AActor*> GetActorsByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<AActor*> GetActorsByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Retrieves the count of UObjects associated with a specified FGameplayTag collection.
 	 * @param Tag The desired FGameplayTag collection.
 	 * @return The number of UObjects associated with the specified FGameplayTag collection.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Tag)", Category = "NEXUS|DynamicRefs")
-	int32 GetCountByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	int32 GetCountByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Gets an array of UObject dynamically associated with the provided FGameplayTag.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return An array of UObject.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Tag)", Category = "NEXUS|DynamicRefs")
-	TArray<UObject*> GetObjectsByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<UObject*> GetObjectsByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Retrieves the first/oldest AActor associated with a specified FGameplayTag.
 	 * @param Tag The FGameplayTag collection to iterate.
 	 * @return A pointer to the first AActor found for the specified FGameplayTag, or nullptr if no actors are found.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get First Actor (By Tag)", Category = "NEXUS|DynamicRefs")
-	AActor* GetFirstActorByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get First Actor (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	AActor* GetFirstActorByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Gets the first/oldest UObject associated with the provided FGameplayTag.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The first UObject in the collection.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get First Object (By Tag)", Category = "NEXUS|DynamicRefs")
-	UObject* GetFirstObjectByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get First Object (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	UObject* GetFirstObjectByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Gets the first/oldest UObject associated with the provided FGameplayTag with NO bounds/range checking.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The first UObject in the collection.
 	 */
-	UObject* GetFirstObjectByTagUnsafe(FGameplayTag Tag);
+	UObject* GetFirstObjectByTagUnsafe(FGameplayTag Tag) const;
 
 	/**
 	 * Retrieves the last/newest AActor associated with a specified FGameplayTag.
 	 * @param Tag The FGameplayTag collection to iterate.
 	 * @return A pointer to the last AActor found for the specified FGameplayTag, or nullptr if no actors are found.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor (By Tag)", Category = "NEXUS|DynamicRefs")
-	AActor* GetLastActorByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Last Actor (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	AActor* GetLastActorByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Gets the last/newest UObject associated with the provided FGameplayTag.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The last UObject in the collection.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Last Object (By Tag)", Category = "NEXUS|DynamicRefs")
-	UObject* GetLastObjectByTag(FGameplayTag Tag);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Last Object (By Tag)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	UObject* GetLastObjectByTag(FGameplayTag Tag) const;
 
 	/**
 	 * Gets the last/newest UObject associated with the provided FGameplayTag with NO bounds/range checking.
 	 * @param Tag The desired FGameplayTag to access.
 	 * @return The last UObject in the collection.
 	 */
-	UObject* GetLastObjectByTagUnsafe(FGameplayTag Tag);
+	UObject* GetLastObjectByTagUnsafe(FGameplayTag Tag) const;
 
 	/**
 	 * Gets a const reference to the underlying collection for the provided FGameplayTag bucket.
@@ -429,53 +440,53 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @param Tag The desired FGameplayTag bucket to access.
 	 * @return A const reference to the FNDynamicRefCollection for the bucket.
 	 */
-	const FNDynamicRefCollection& GetObjectCollectionByTagRefUnsafe(FGameplayTag Tag);
+	const FNDynamicRefCollection& GetObjectCollectionByTagRefUnsafe(FGameplayTag Tag) const;
 
 	/**
 	 * Gets the union of UObjects registered under any of the supplied FGameplayTags. Results are deduplicated.
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
 	 * @return An array of UObject. Empty if no provided tag has a registered bucket.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Any Tags)", Category = "NEXUS|DynamicRefs")
-	TArray<UObject*> GetObjectsByAnyTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By Any Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<UObject*> GetObjectsByAnyTags(const FGameplayTagContainer& Tags) const;
 
 	/**
 	 * Gets the union of AActors registered under any of the supplied FGameplayTags. Results are deduplicated and non-AActor UObjects are filtered out.
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
 	 * @return An array of AActor.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Any Tags)", Category = "NEXUS|DynamicRefs")
-	TArray<AActor*> GetActorsByAnyTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By Any Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<AActor*> GetActorsByAnyTags(const FGameplayTagContainer& Tags) const;
 
 	/**
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be unioned.
 	 * @return The number of unique UObjects registered under any of the supplied tags.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Any Tags)", Category = "NEXUS|DynamicRefs")
-	int32 GetCountByAnyTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By Any Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	int32 GetCountByAnyTags(const FGameplayTagContainer& Tags) const;
 
 	/**
 	 * Gets the intersection of UObjects registered under every supplied FGameplayTag. A UObject must appear under every requested tag to be returned.
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
 	 * @return An array of UObject. Empty if any provided tag has no registered bucket.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By All Tags)", Category = "NEXUS|DynamicRefs")
-	TArray<UObject*> GetObjectsByAllTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Objects (By All Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<UObject*> GetObjectsByAllTags(const FGameplayTagContainer& Tags) const;
 
 	/**
 	 * Gets the intersection of AActors registered under every supplied FGameplayTag. Non-AActor UObjects are filtered out.
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
 	 * @return An array of AActor.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By All Tags)", Category = "NEXUS|DynamicRefs")
-	TArray<AActor*> GetActorsByAllTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Actors (By All Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	TArray<AActor*> GetActorsByAllTags(const FGameplayTagContainer& Tags) const;
 
 	/**
 	 * @param Tags The FGameplayTagContainer whose tags' buckets should be intersected.
 	 * @return The number of UObjects registered under every supplied tag.
 	 */
-	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By All Tags)", Category = "NEXUS|DynamicRefs")
-	int32 GetCountByAllTags(const FGameplayTagContainer& Tags);
+	UFUNCTION(BlueprintCallable, DisplayName="Get Count (By All Tags)", Category = "NEXUS|DynamicRefs", meta=(BlueprintPure="false"))
+	int32 GetCountByAllTags(const FGameplayTagContainer& Tags) const;
 
 
 	/**
@@ -488,7 +499,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @param DynamicRef The desired ENDynamicRef slot to access.
 	 * @return A const reference to the FNDynamicRefCollection for the slot.
 	 */
-	const FNDynamicRefCollection& GetObjectCollectionRefUnsafe(const ENDynamicRef DynamicRef);
+	const FNDynamicRefCollection& GetObjectCollectionRefUnsafe(const ENDynamicRef DynamicRef) const;
 
 	/**
 	 * Gets a const reference to the underlying collection for the provided FName bucket.
@@ -500,7 +511,7 @@ class NEXUSDYNAMICREFS_API UNDynamicRefSubsystem : public UWorldSubsystem
 	 * @param Name The desired FName bucket to access.
 	 * @return A const reference to the FNDynamicRefCollection for the bucket.
 	 */
-	const FNDynamicRefCollection& GetObjectCollectionByNameRefUnsafe(const FName Name);
+	const FNDynamicRefCollection& GetObjectCollectionByNameRefUnsafe(const FName Name) const;
 
 	/** Fired when an object is added under an ENDynamicRef slot. */
 	FOnDynamicRefChangeDelegate OnAdded;

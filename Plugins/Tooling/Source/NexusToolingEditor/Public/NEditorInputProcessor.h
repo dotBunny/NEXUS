@@ -117,4 +117,7 @@ private:
 
 	/** Most recent pointer event dispatched synthetically during space-to-pan drag. */
 	FPointerEvent LastSyntheticEvent;
+
+	/** Backing storage for LastSyntheticEvent's button set — FPointerEvent only holds a pointer to it. */
+	TSet<FKey> LastSyntheticPressedButtons;
 };

@@ -32,13 +32,9 @@ namespace NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness
 
     static void SetComponentTagReferences(UNDynamicRefComponent* Component, const FGameplayTagContainer& Tags)
     {
-        // TagReferences is protected; reach it via reflection so the test does not
-        // require changing the production API surface.
-        FProperty* Prop = UNDynamicRefComponent::StaticClass()->FindPropertyByName(TEXT("TagReferences"));
-        if (Prop == nullptr) return;
-        FGameplayTagContainer* Container = Prop->ContainerPtrToValuePtr<FGameplayTagContainer>(Component);
-        if (Container == nullptr) return;
-        *Container = Tags;
+        // TagReferences is protected; use the WITH_TESTS-only seam on the component so a
+        // rename of the backing field fails the build instead of silently no-opping.
+        Component->SetTagReferencesForTesting(Tags);
     }
 }
 

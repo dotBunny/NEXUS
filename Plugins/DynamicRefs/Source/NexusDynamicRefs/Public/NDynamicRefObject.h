@@ -1,12 +1,9 @@
-﻿// Copyright dotBunny Inc. All Rights Reserved.
+// Copyright dotBunny Inc. All Rights Reserved.
 // See the LICENSE file at the repository root for more information.
 
 #pragma once
 #include "NDynamicRef.h"
-#include "NDynamicRefComponent.h"
 #include "NDynamicRefsDeveloperOverlay.h"
-#include "NDynamicRefsMinimal.h"
-#include "Macros/NValidationMacros.h"
 #include "NDynamicRefObject.generated.h"
 
 /**
@@ -26,29 +23,14 @@ public:
 	 * @param Outer The UObject owner (typically the developer overlay).
 	 * @param Name The FName bucket this wrapper reflects.
 	 */
-	static UNDynamicRefObject* Create(UObject* Outer, const FName Name)
-	{
-		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
-		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
-		Object->TargetName = Name;
-		Object->TargetDynamicRef = NDR_None;
-		return Object;
-	};
+	static UNDynamicRefObject* Create(UObject* Outer, FName Name);
 
 	/**
 	 * Factory for an ENDynamicRef-slot wrapper.
 	 * @param Outer The UObject owner (typically the developer overlay).
 	 * @param DynamicRef The ENDynamicRef slot this wrapper reflects.
 	 */
-	static UNDynamicRefObject* Create(UObject* Outer, const ENDynamicRef DynamicRef)
-	{
-		UNDynamicRefObject* Object = NewObject<UNDynamicRefObject>(Outer, StaticClass(), NAME_None, RF_Transient);
-		Object->Overlay = Cast<UNDynamicRefsDeveloperOverlay>(Outer);
-		Object->TargetDynamicRef = DynamicRef;
-		Object->TargetName = NAME_None;
-		return Object;
-	};
-
+	static UNDynamicRefObject* Create(UObject* Outer, ENDynamicRef DynamicRef);
 
 	/** @return The ENDynamicRef slot this wrapper targets (meaningful only when TargetName is None). */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
@@ -69,56 +51,27 @@ public:
 	 * @param Object The object to add.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
-	void AddObject(UObject* Object)
-	{
-		N_VALIDATE_RETURN_VOID(LogNexusDynamicRefs, Object);
-		TargetObjects.AddUnique(Object);
-		Changed.ExecuteIfBound();
-	}
+	void AddObject(UObject* Object);
 
 	/**
 	 * Remove an object from this wrapper's cached list and broadcast Changed.
 	 * @param Object The object to remove.
 	 */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
-	void RemoveObject(UObject* Object)
-	{
-		if (TargetObjects.Remove(Object) > 0)
-		{
-			Changed.ExecuteIfBound();
-		}
-	}
+	void RemoveObject(UObject* Object);
 
 	/** @return The number of live objects currently tracked by this wrapper (stale entries are pruned first). */
 	UFUNCTION(BlueprintCallable, Category = "NEXUS|DynamicRefs")
-	int32 GetCount()
-	{
-		Compact();
-		return TargetObjects.Num();
-	}
+	int32 GetCount();
 
 	/** @return A display-friendly label for the target (FName when set, otherwise the ENDynamicRef display name). */
-	FText GetReferenceText() const
-	{
-		if (TargetName != NAME_None)
-		{
-			return FText::FromName(TargetName);
-		}
-		return FText::FromString(UNDynamicRefComponent::ToStringSlow(TargetDynamicRef));
-	}
+	FText GetReferenceText() const;
 
 	/** @return A mutable view of the tracked objects, with stale entries pruned first. */
-	TArray<TWeakObjectPtr<UObject>>& GetObjects()
-	{
-		Compact();
-		return TargetObjects;
-	}
+	TArray<TWeakObjectPtr<UObject>>& GetObjects();
 
 	/** Prune entries whose object has been destroyed/GC'd so the wrapper only reflects live objects. */
-	void Compact()
-	{
-		TargetObjects.RemoveAll([](const TWeakObjectPtr<UObject>& Object){ return !Object.IsValid(); });
-	}
+	void Compact();
 
 	/** Fired whenever AddObject/RemoveObject is called so bound UI can refresh. */
 	FSimpleDelegate Changed;

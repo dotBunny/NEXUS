@@ -101,17 +101,19 @@ bool FNEditorInputProcessor::HandleMouseMoveEvent(FSlateApplication& SlateApp, c
 		IAssetEditorInstance* ForegroundAssetEditor = FNEditorUtils::GetForegroundAssetEditor();
 		if (ForegroundAssetEditor == nullptr) return false;
 
-		// We're going to make a synthetic mouse event from the current event
-		TSet<FKey> PressedButtons = MouseEvent.GetPressedButtons();
-		PressedButtons.Remove(EKeys::LeftMouseButton);
-		PressedButtons.Add(EKeys::RightMouseButton);
+		// We're going to make a synthetic mouse event from the current event.
+		// FPointerEvent only stores a pointer to the button set, so it must outlive the event;
+		// keep it in a member rather than a local that dies when this function returns.
+		LastSyntheticPressedButtons = MouseEvent.GetPressedButtons();
+		LastSyntheticPressedButtons.Remove(EKeys::LeftMouseButton);
+		LastSyntheticPressedButtons.Add(EKeys::RightMouseButton);
 
 		// Build a synthetic event
      	LastSyntheticEvent = FPointerEvent(
 		FSlateApplicationBase::CursorPointerIndex,
 		MouseEvent.GetScreenSpacePosition(),
 		MouseEvent.GetLastScreenSpacePosition(),
-		PressedButtons,
+		LastSyntheticPressedButtons,
 		EKeys::RightMouseButton,
 		MouseEvent.GetWheelDelta(),
 		MouseEvent.GetModifierKeys());

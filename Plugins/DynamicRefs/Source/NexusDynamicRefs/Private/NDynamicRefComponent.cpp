@@ -6,6 +6,11 @@
 #include "NDynamicRefsMinimal.h"
 #include "NDynamicRefSubsystem.h"
 
+FString UNDynamicRefComponent::ToStringSlow(const ENDynamicRef& DynamicReference)
+{
+	return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
+}
+
 UNDynamicRefComponent::UNDynamicRefComponent()
 {
 	// InitializeComponent() is gated by bWantsInitializeComponent, which the engine reads during its

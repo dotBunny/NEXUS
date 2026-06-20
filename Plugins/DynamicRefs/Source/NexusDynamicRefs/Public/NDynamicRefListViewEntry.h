@@ -3,7 +3,6 @@
 
 #pragma once
 
-
 #include "CommonTextBlock.h"
 #include "INListViewEntry.h"
 #include "NDynamicRefsMinimal.h"
@@ -13,7 +12,6 @@
 #include "NDynamicRefListViewEntry.generated.h"
 
 class UNDynamicRefObject;
-class UCommonTextBlock;
 
 /**
  * UMG list view entry widget for a single dynamic-reference row (reference label + nested actor list).
@@ -22,7 +20,6 @@ UCLASS(ClassGroup = "NEXUS", DisplayName = "NEXUS | DynamicRef ListView Entry", 
 class NEXUSDYNAMICREFS_API UNDynamicRefListViewEntry : public UUserWidget, public INListViewEntry
 {
 	GENERATED_BODY()
-
 
 public:
 

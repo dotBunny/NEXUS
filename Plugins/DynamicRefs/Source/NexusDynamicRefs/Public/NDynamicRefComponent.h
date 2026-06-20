@@ -26,10 +26,7 @@ public:
 	 * @return The display name (e.g. "Objective A").
 	 * @note Uses reflection; avoid in tight loops.
 	 */
-	static FString ToStringSlow(const ENDynamicRef& DynamicReference)
-	{
-		return StaticEnum<ENDynamicRef>()->GetDisplayNameTextByValue(DynamicReference).ToString();
-	}
+	static FString ToStringSlow(const ENDynamicRef& DynamicReference);
 
 	UNDynamicRefComponent();
 
@@ -56,6 +53,16 @@ protected:
 	/** The set of gameplay-tag identifiers this Actor will claim (tag-container lookup). */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="DynamicRef")
 	FGameplayTagContainer TagReferences;
+
+#if WITH_TESTS
+public:
+	/**
+	 * Assign the gameplay-tag references directly, bypassing the editor UI.
+	 * @param InTagReferences The tag container to assign.
+	 * @remark Test-only seam; compiled only when WITH_TESTS is set. A rename of the backing field breaks the build here.
+	 */
+	void SetTagReferencesForTesting(const FGameplayTagContainer& InTagReferences) { TagReferences = InTagReferences; }
+#endif // WITH_TESTS
 
 private:
 	/** Register this Actor with UNDynamicRefSubsystem under all configured references. */
