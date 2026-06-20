@@ -33,20 +33,15 @@ void UNActorPoolSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// Check if we have any prefixes to ignore
 	if (!Settings->IgnoreWorldPrefixes.IsEmpty())
 	{
-		bool bShouldIgnoreLevel = false;
 		const FString WorldName = InWorld.GetName();
-		for (auto& LevelPrefix : Settings->IgnoreWorldPrefixes)
+		for (const FString& LevelPrefix : Settings->IgnoreWorldPrefixes)
 		{
 			if (WorldName.StartsWith(LevelPrefix))
 			{
 				UE_LOG(LogNexusActorPools, Verbose, TEXT("The UWorld(%s) name matches the ignore prefix (%s); skipping UNActorPoolSets set to always create."), *WorldName, *LevelPrefix);
-				bShouldIgnoreLevel = true;
+				Super::OnWorldBeginPlay(InWorld);
+				return;
 			}
-		}
-		if (bShouldIgnoreLevel)
-		{
-			Super::OnWorldBeginPlay(InWorld);
-			return;
 		}
 	}
 	
@@ -118,7 +113,7 @@ void UNActorPoolSubsystem::Tick(float DeltaTime)
 		{
 			if (UNActorPoolSpawnerComponent* Spawner = TickableSpawners[Index])
 			{
-				Spawner->TickComponent(DeltaTime, LEVELTICK_All, nullptr);
+				Spawner->TickSpawner(DeltaTime);
 			}
 		}
 		bHasTickableSpawners = !TickableSpawners.IsEmpty();
@@ -146,8 +141,8 @@ bool UNActorPoolSubsystem::CreateActorPool(TSubclassOf<AActor> ActorClass, const
 	{
 		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, Settings));
 
-		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new FNActorPool(%p|%s) in UWorld(%s), raising the total pool count to %i."), 
-			ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new FNActorPool(%s) in UWorld(%s), raising the total pool count to %i."),
+			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		
 		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return true;
@@ -206,8 +201,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
 				UE_LOG(LogNexusActorPools, Verbose,
-					TEXT("Attempting to create a new FNActorPool(%p|%s) via UNActorPoolSet that already exists; ignored."),
-					Definition.ActorClass.Get(),
+					TEXT("Attempting to create a new FNActorPool(%s) via UNActorPoolSet that already exists; ignored."),
 					*Definition.ActorClass->GetName());
 			}
 			else
@@ -228,8 +222,7 @@ void UNActorPoolSubsystem::ApplyActorPoolSet(UNActorPoolSet* ActorPoolSet)
 			if (ActorPools.Contains(Definition.ActorClass))
 			{
 				UE_LOG(LogNexusActorPools, Verbose,
-					TEXT("Attempting to create a new FNActorPool(%p|%s) via a nested UNActorPoolSet that already exists; ignored."),
-					Definition.ActorClass.Get(),
+					TEXT("Attempting to create a new FNActorPool(%s) via a nested UNActorPoolSet that already exists; ignored."),
 					*Definition.ActorClass->GetName());
 			}
 			else
@@ -247,7 +240,10 @@ TArray<FNActorPool*> UNActorPoolSubsystem::GetAllPools() const
 		
 	for ( auto Pair = ActorPools.CreateConstIterator(); Pair; ++Pair )
 	{
-		ReturnPools.Add(Pair.Value().Get());
+		if (FNActorPool* Pool = Pair.Value().Get())
+		{
+			ReturnPools.Add(Pool);
+		}
 	}
 	return ReturnPools;
 }
@@ -294,9 +290,10 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 	N_VALIDATE_RETURN(LogNexusActorPools, Actor, false);
 	
 	UClass* ActorClass = Actor->GetClass();
-	if (ActorPools.Contains(ActorClass))
+	// Hot path: single lookup, branch on the result rather than Contains() + Find().
+	if (const TUniquePtr<FNActorPool>* Existing = ActorPools.Find(ActorClass))
 	{
-		return (*ActorPools.Find(ActorClass))->Return(Actor);
+		return (*Existing)->Return(Actor);
 	}
 	
 	switch (UnknownBehavior)
@@ -307,21 +304,23 @@ bool UNActorPoolSubsystem::ReturnActor(AActor* Actor)
 			if (HasDefaultSettings(ActorClass))
 			{
 				UE_LOG(LogNexusActorPools, Log, 
-					TEXT("Creating a new pool via ReturnActor for %p|%s (%s) using the registered default settings, raising the total pool count to %i."),
-					ActorClass, *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+					TEXT("Creating a new pool via ReturnActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
+					*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 				
-				const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
+				// Presence was just verified, so pass the map entry straight to the constructor rather than
+				// GetDefaultSettings(), which would return the ~176-byte struct by value (an extra copy).
+				const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, DefaultSettings.FindChecked(ActorClass)));
 				OnActorPoolAdded.Broadcast(NewPool.Get());
 				if (NewPool->ImplementsPoolItemInterface())
 				{
 					INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
-					ActorItem->InitializeActorPoolItem(NewPool.Get());		
+					ActorItem->InitializeActorPoolItem(NewPool.Get());
 				}
 				return NewPool->Return(Actor);
 			}
-			
-			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via ReturnActor for %p|%s (%s), raising the total pool count to %i."),
-				ActorClass, *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+
+			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via ReturnActor for %s (%s), raising the total pool count to %i."),
+				*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
 			OnActorPoolAdded.Broadcast(NewPool.Get());
 			if (NewPool->ImplementsPoolItemInterface())

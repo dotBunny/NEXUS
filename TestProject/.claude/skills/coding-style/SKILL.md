@@ -17,8 +17,11 @@ Every `.h` also adds `#pragma once` immediately after the copyright.
 
 ## Formatting
 
-Style is enforced via `.editorconfig`. Key rules:
+Conventions are declared in `Plugins/.editorconfig` (applies to everything under `Plugins/`). This is editor config, not a gate: IDEs that honor it apply it as you type / on Reformat, but there is no clang-format, pre-commit hook, or CI check, so existing files may not conform. Match the convention by hand — don't assume a tool will fix it.
+
+Key rules (see `.editorconfig` for the full set):
 - Tabs, width 4; max line length 150
+- Trailing whitespace trimmed (`trim_trailing_whitespace = true`) — but only by editors that honor EditorConfig; nothing gates it
 - Inline brace style — no brace-on-new-line for namespaces, types, or functions
 - Pointer/reference alignment: left (`int* Ptr`, not `int *Ptr`)
 

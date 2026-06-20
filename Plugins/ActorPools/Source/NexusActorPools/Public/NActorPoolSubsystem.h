@@ -182,7 +182,7 @@ public:
 
 	/**
 	 * Get an array of all the Actor Pools.
-	 * @return An array of raw pointers to all the known FNActorPools
+	 * @return An array of raw pointers to all the known FNActorPools; entries are guaranteed non-null.
 	 * @remark This is not meant to be used often and is more for debugging purposes.
 	 */
 	TArray<FNActorPool*> GetAllPools() const;
@@ -265,44 +265,50 @@ private:
 template <typename T>
 T* UNActorPoolSubsystem::GetActor(const TSubclassOf<AActor> ActorClass)
 {
-	if (!ActorPools.Contains(ActorClass))
+	// Hot path: single lookup, branch on the result rather than Contains() + Find().
+	if (const TUniquePtr<FNActorPool>* Existing = ActorPools.Find(ActorClass))
 	{
-		if (HasDefaultSettings(ActorClass))
-		{
-			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
-			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %p|%s (%s) using the registered default settings, raising the total pool count to %i."),
-				ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
-			OnActorPoolAdded.Broadcast(NewPool.Get());
-			return Cast<T>(NewPool->Get());
-		}
-		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
-		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %p|%s (%s), raising the total pool count to %i."),
-			ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		return Cast<T>((*Existing)->Get());
+	}
+	if (HasDefaultSettings(ActorClass))
+	{
+		// Presence was just verified, so pass the map entry straight to the constructor rather than
+		// GetDefaultSettings(), which would return the ~176-byte struct by value (an extra copy).
+		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, DefaultSettings.FindChecked(ActorClass)));
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
+			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Get());
 	}
-	return Cast<T>((*ActorPools.Find(ActorClass))->Get());
+	const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
+	UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool in GetActor for %s (%s), raising the total pool count to %i."),
+		*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+	OnActorPoolAdded.Broadcast(NewPool.Get());
+	return Cast<T>(NewPool->Get());
 }
 
 template <typename T>
 T* UNActorPoolSubsystem::SpawnActor(const TSubclassOf<AActor> ActorClass, const FVector Position, const FRotator Rotation)
 {
-	if (!ActorPools.Contains(ActorClass))
+	// Hot path: single lookup, branch on the result rather than Contains() + Find().
+	if (const TUniquePtr<FNActorPool>* Existing = ActorPools.Find(ActorClass))
 	{
-		if (HasDefaultSettings(ActorClass))
-		{
-			const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, GetDefaultSettings(ActorClass)));
-			UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %p|%s (%s) using the registered default settings, raising the total pool count to %i."),
-				ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
-			OnActorPoolAdded.Broadcast(NewPool.Get());
-			return Cast<T>(NewPool->Spawn(Position, Rotation));
-		}
-		
-		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
-		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %p|%s (%s), raising the total pool count to %i."),
-			ActorClass.Get(), *ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+		return Cast<T>((*Existing)->Spawn(Position, Rotation));
+	}
+	if (HasDefaultSettings(ActorClass))
+	{
+		// Presence was just verified, so pass the map entry straight to the constructor rather than
+		// GetDefaultSettings(), which would return the ~176-byte struct by value (an extra copy).
+		const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass, DefaultSettings.FindChecked(ActorClass)));
+		UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s) using the registered default settings, raising the total pool count to %i."),
+			*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
 		OnActorPoolAdded.Broadcast(NewPool.Get());
 		return Cast<T>(NewPool->Spawn(Position, Rotation));
 	}
-	return Cast<T>((ActorPools.Find(ActorClass)->Get())->Spawn(Position, Rotation));
+
+	const TUniquePtr<FNActorPool>& NewPool = ActorPools.Add(ActorClass, MakeUnique<FNActorPool>(GetWorld(), ActorClass));
+	UE_LOG(LogNexusActorPools, Log, TEXT("Creating a new pool via SpawnActor for %s (%s), raising the total pool count to %i."),
+		*ActorClass->GetName(), *GetWorld()->GetName(), ActorPools.Num());
+	OnActorPoolAdded.Broadcast(NewPool.Get());
+	return Cast<T>(NewPool->Spawn(Position, Rotation));
 }

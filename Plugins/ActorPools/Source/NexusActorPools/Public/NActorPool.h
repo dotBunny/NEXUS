@@ -103,7 +103,7 @@ public:
 	void UpdateSettings(const FNActorPoolSettings& InNewSettings);
 
 	/** Does the ActorPool's Template implement the IActorPoolItem interface? */
-	bool ImplementsPoolItemInterface() const { return bImplementsInterface; }
+	bool ImplementsPoolItemInterface() const { return bImplementsPoolItemInterface; }
 
 	/** Will the ActorPool attempt to invoke UFUNCTIONs for events? */
 	bool ShouldInvokeUFunctions() const { return Settings.HasFlag_InvokeUFunctions(); }
@@ -199,7 +199,7 @@ private:
 	FString Name;
 	static int32 ActorPoolTicket;
 #endif // WITH_EDITOR
-	bool bImplementsInterface = false;
+	bool bImplementsPoolItemInterface = false;
 
 	
 	ENToggle SpawnPhysicsSimulation = ENToggle::Default;

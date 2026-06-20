@@ -32,11 +32,13 @@ void UNKillZoneComponent::BeginPlay()
 	Super::BeginPlay();
 
 	const UWorld* World = GetWorld();
+	WorldFallDamageType = GetDefault<UDamageType>();
+	if (!World) return;
+
 	ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
 
-	WorldFallDamageType = GetDefault<UDamageType>();
-	AWorldSettings* WorldSettings = World->GetWorldSettings( true );
-	if ( WorldSettings && WorldSettings->KillZDamageType )
+	if (const AWorldSettings* WorldSettings = World->GetWorldSettings(true);
+		WorldSettings && WorldSettings->KillZDamageType)
 	{
 		WorldFallDamageType = WorldSettings->KillZDamageType->GetDefaultObject<UDamageType>();
 	}

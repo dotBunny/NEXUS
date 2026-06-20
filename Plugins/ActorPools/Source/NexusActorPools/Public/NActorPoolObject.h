@@ -24,6 +24,7 @@ public:
 	 * @param ActorPool The native pool this wrapper should reflect.
 	 * @return The pool's existing wrapper if one is already linked, otherwise a newly allocated, linked UNActorPoolObject.
 	 * @note Each FNActorPool may only have a single UNActorPoolObject linked at a time so the pool's destructor has a deterministic back-pointer to clear.
+	 * @note An already-linked wrapper is returned unchanged; its cached ClassName/OwningWorld derive from the pool's immutable template/world, so no refresh is needed.
 	 */
 	static UNActorPoolObject* Create(UObject* Outer, FNActorPool* ActorPool)
 	{

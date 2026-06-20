@@ -11,14 +11,14 @@
 
 namespace NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness
 {
-    constexpr int32 ObjectCount = 1000;
+	constexpr int32 ObjectCount = 1000;
 	constexpr int32 QueryCount = 100;
-	
-    constexpr float AddObjectMaxDuration =1.25f;
-    constexpr float RemoveObjectMaxDuration = 1.0f;
-	
-    constexpr float GetObjectsMaxDuration = 0.15f;
-    constexpr float GetByNameMaxDuration = 0.1f;
+
+	constexpr float AddObjectMaxDuration = 1.25f;
+	constexpr float RemoveObjectMaxDuration = 1.0f;
+
+	constexpr float GetObjectsMaxDuration = 0.15f;
+	constexpr float GetByNameMaxDuration = 0.1f;
 }
 
 class FNDynamicRefSubsystemPerfTests
@@ -28,32 +28,31 @@ public:
 	static void AddObject(UWorld* World)
 	{
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-	      if (!Subsystem) return;
-	
-	      // Pre-spawn actors outside the timed region.
-	      TArray<AActor*> Actors;
-	      Actors.Reserve(NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount);
-	      for (int32 i = 0; i < NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount; ++i)
-	      {
-		    Actors.Add(World->SpawnActor<AActor>());
-	      }
-	
-	      // TEST
-	      {
-	          N_TEST_TIMER_SCOPE(UNDynamicRefSubsystemPerfTests_AddObject,
-	              NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::AddObjectMaxDuration)
-	          for (int32 i = 0; i < NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount; ++i)
-	          {
-	              Subsystem->AddObject(NDR_Enemy_A, Actors[i]);
-	          }
-	          NTestTimer.ManualStop();
-	      }
+		if (!Subsystem) return;
+
+		// Pre-spawn actors outside the timed region.
+		TArray<AActor*> Actors;
+		Actors.Reserve(NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount);
+		for (int32 i = 0; i < NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount; ++i)
+		{
+			Actors.Add(World->SpawnActor<AActor>());
+		}
+
+		// TEST
+		{
+			N_TEST_TIMER_SCOPE(UNDynamicRefSubsystemPerfTests_AddObject,
+				NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::AddObjectMaxDuration)
+			for (int32 i = 0; i < NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystemHarness::ObjectCount; ++i)
+			{
+				Subsystem->AddObject(NDR_Enemy_A, Actors[i]);
+			}
+			NTestTimer.ManualStop();
+		}
 	}
-	
+
 	// Measures the cost of removing ObjectCount actors from a single ENDynamicRef bucket.
 	static void RemoveObject(UWorld* World)
 	{
-		
 		UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
 		if (!Subsystem) return;
 
@@ -77,7 +76,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	// Measures the cost of calling GetObjects ObjectCount times on a populated bucket.
 	static void GetObjects(UWorld* World)
 	{
@@ -104,7 +103,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	// Measures the cost of calling GetFirstObject ObjectCount times on a populated bucket.
 	static void GetFirstObject(UWorld* World)
 	{
@@ -131,7 +130,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
-	
+
 	// Measures the cost of adding ObjectCount unique actors to a single named bucket.
 	static void AddObjectByName(UWorld* World)
 	{
@@ -157,6 +156,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
+
 	// Measures the cost of removing ObjectCount actors from a single named bucket.
 	static void RemoveObjectByName(UWorld* World)
 	{
@@ -184,6 +184,7 @@ public:
 			NTestTimer.ManualStop();
 		}
 	}
+
 	// Measures the cost of calling GetObjectsByName ObjectCount times on a populated named bucket.
 	static void GetObjectsByName(UWorld* World)
 	{
@@ -214,18 +215,17 @@ public:
 };
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_AddObject,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::AddObject",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::AddObject",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::AddObject, true));
 	N_TESTS_PERF_FINISH_LATENT_TEST_WORLD
 }
 
-
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_RemoveObject,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::RemoveObject",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::RemoveObject",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::RemoveObject, true));
@@ -233,8 +233,8 @@ N_TEST_PERF(UNDynamicRefSubsystemPerfTests_RemoveObject,
 }
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_GetObjects,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetObjects",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetObjects",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::GetObjects, true));
@@ -242,8 +242,8 @@ N_TEST_PERF(UNDynamicRefSubsystemPerfTests_GetObjects,
 }
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_GetFirstObject,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetFirstObject",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetFirstObject",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::GetFirstObject, true));
@@ -251,8 +251,8 @@ N_TEST_PERF(UNDynamicRefSubsystemPerfTests_GetFirstObject,
 }
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_AddObjectByName,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::AddObjectByName",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::AddObjectByName",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::AddObjectByName, true));
@@ -260,8 +260,8 @@ N_TEST_PERF(UNDynamicRefSubsystemPerfTests_AddObjectByName,
 }
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_RemoveObjectByName,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::RemoveObjectByName",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::RemoveObjectByName",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::RemoveObjectByName, true));
@@ -269,8 +269,8 @@ N_TEST_PERF(UNDynamicRefSubsystemPerfTests_RemoveObjectByName,
 }
 
 N_TEST_PERF(UNDynamicRefSubsystemPerfTests_GetObjectsByName,
-    "NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetObjectsByName",
-    N_TEST_CONTEXT_EDITOR)
+	"NEXUS::PerfTests::NDynamicRefs::UNDynamicRefSubsystem::GetObjectsByName",
+	N_TEST_CONTEXT_EDITOR)
 {
 	N_TESTS_PERF_START_LATENT_TEST_WORLD
 	ADD_LATENT_AUTOMATION_COMMAND(FNTestLatentCommand_WorldTest(&FNDynamicRefSubsystemPerfTests::GetObjectsByName, true));

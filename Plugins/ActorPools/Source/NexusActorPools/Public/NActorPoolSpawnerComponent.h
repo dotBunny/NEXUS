@@ -111,7 +111,13 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	/**
+	 * Advance the spawner's internal spawn timer, spawning when the interval elapses.
+	 * @param DeltaTime Time in seconds since the previous tick.
+	 * @remark Driven exclusively by UNActorPoolSubsystem::Tick; this component is never registered with the engine's component-tick framework.
+	 */
+	void TickSpawner(float DeltaTime);
 
 	/**
 	 * Initiate a spawn call for the component, ignoring any timers.

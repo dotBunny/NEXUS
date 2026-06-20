@@ -16,7 +16,7 @@ int32 FNActorPool::ActorPoolTicket = 0;
 FNActorPool::FNActorPool(UWorld* TargetWorld, const TSubclassOf<AActor>& ActorClass)
 {
 	PreInitialize(TargetWorld, ActorClass);
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		AActor* DefaultActor = ActorClass->GetDefaultObject<AActor>();
 		UpdateSettings(Cast<INActorPoolItem>(DefaultActor)->GetActorPoolSettings());
@@ -145,7 +145,7 @@ void FNActorPool::PreInitialize(UWorld* TargetWorld, const TSubclassOf<AActor>& 
 	}
 	
 	USceneComponent* RootComponent = FNActorUtils::GetRootComponentFromDefaultObject(ActorClass);
-	bImplementsInterface = Template->ImplementsInterface(UNActorPoolItem::StaticClass());
+	bImplementsPoolItemInterface = Template->ImplementsInterface(UNActorPoolItem::StaticClass());
 
 	// The ActorPool system requires that the root component of its actors be used to determine the physics settings.
 	if (RootComponent != nullptr)
@@ -222,7 +222,7 @@ AActor* FNActorPool::Spawn(const FVector& Position, const FRotator& Rotation)
 	OutActors.Add(ReturnActor);
 	ApplySpawnState(ReturnActor, Position, Rotation);
 	
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		(Cast<INActorPoolItem>(ReturnActor))->OnSpawnedFromActorPool();
 	}
@@ -316,7 +316,7 @@ void FNActorPool::FinalizeReturn(AActor* Actor)
 {
 	InActors.Add(Actor);
 
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		(Cast<INActorPoolItem>(Actor))->OnReturnToActorPool();
 	}
@@ -503,7 +503,7 @@ bool FNActorPool::CreateActor(const FActorSpawnParameters& SpawnInfo)
 		return false;
 	}
 
-	if (bImplementsInterface)
+	if (bImplementsPoolItemInterface)
 	{
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(CreatedActor);
 		ActorItem->InitializeActorPoolItem(this);
@@ -647,7 +647,7 @@ void FNActorPool::ReleaseActor(const TObjectPtr<AActor> Actor, const bool bForce
 	}
 
 	const bool bBroadcastRelease = Settings.HasFlag_BroadcastRelease();
-	if (bImplementsInterface && bBroadcastRelease)
+	if (bImplementsPoolItemInterface && bBroadcastRelease)
 	{
 		INActorPoolItem* ActorItem = Cast<INActorPoolItem>(Actor);
 		ActorItem->OnReleasedFromActorPool();

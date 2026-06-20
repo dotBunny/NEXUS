@@ -14,8 +14,8 @@
 UNActorPoolSpawnerComponent::UNActorPoolSpawnerComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bStartWithTickEnabled = false;
+	// Ticked manually by UNActorPoolSubsystem (see TickSpawner); this component never uses the engine's component-tick framework.
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// Only the server will have this
 	SetIsReplicatedByDefault(false);
@@ -58,7 +58,7 @@ void UNActorPoolSpawnerComponent::BeginPlay()
 		// We want to register some settings, we don't create the pool here so that APS can be ahead of this.
 		if (!Subsystem->AddDefaultSettings(Templates[i].Template, Templates[i].Settings))
 		{
-			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%p|%s) are already added to the subsystem, skipping."), Templates[i].Template.Get(), *Templates[i].Template->GetName());
+			UE_LOG(LogNexusActorPools, Verbose, TEXT("Default settings for Actor(%s) are already added to the subsystem, skipping."), *Templates[i].Template->GetName());
 		}
 
 		// Add to the weighted list
@@ -87,7 +87,7 @@ void UNActorPoolSpawnerComponent::EndPlay(const EEndPlayReason::Type EndPlayReas
 	}
 }
 
-void UNActorPoolSpawnerComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNActorPoolSpawnerComponent::TickSpawner(float DeltaTime)
 {
 	TimeSinceSpawned += DeltaTime;
 	if (TimeSinceSpawned < SpawnRate) return;
