@@ -11,6 +11,7 @@
 #include "TimerManager.h"
 #include "NWorldAssemblyContextCache.h"
 #include "NWorldAssemblyEditorCommands.h"
+#include "NWorldAssemblyEditorMinimal.h"
 #include "NWorldAssemblyEditorToolMenu.h"
 #include "NWorldAssemblyEditorUserSettings.h"
 #include "Framework/Notifications/NotificationManager.h"
@@ -376,6 +377,12 @@ void UNWorldAssemblyEditorSubsystem::AccumulateAutoAssemblyResult(const FNAssemb
 
 void UNWorldAssemblyEditorSubsystem::ShowAutoAssemblySummaryToast() const
 {
+	// Echo the same tally to the log so it persists beyond the transient toast.
+	UE_LOG(LogNexusWorldAssemblyEditor, Log,
+		TEXT("Auto Assembly summary: %d runs - %d passed, %d warnings, %d failed (%d cells, %.0f ms)"),
+		AutoAssemblySummary.TotalRuns, AutoAssemblySummary.PassCount, AutoAssemblySummary.WarningCount,
+		AutoAssemblySummary.FailCount, AutoAssemblySummary.TotalCreatedCells, AutoAssemblySummary.TotalDurationMs);
+
 	// Durations are accumulated in milliseconds. Quick-assembly runs are usually sub-second, so format adaptively
 	// (ms under a second, seconds with one decimal under a minute, m/s above) to avoid collapsing to "0s".
 	const double TotalMs = AutoAssemblySummary.TotalDurationMs;
