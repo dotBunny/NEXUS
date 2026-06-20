@@ -31,9 +31,8 @@
 #include "Macros/NEditorToolsMacros.h"
 #include "Visualizers/NCellRootComponentVisualizer.h"
 
-const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssembly");
-
 const FName FNWorldAssemblyEditorToolMenu::MenuSectionGlobal = FName("NEXUS_WorldAssemblyGlobal");
+const FName FNWorldAssemblyEditorToolMenu::MenuSection = FName("NEXUS_WorldAssemblyEdMode");
 TWeakObjectPtr<UNOrganComponent> FNWorldAssemblyEditorToolMenu::QuickAssemblyOrganComponent = nullptr;
 int32 FNWorldAssemblyEditorToolMenu::QuickAssemblyOperationTicket = -1;
 TOptional<float> FNWorldAssemblyEditorToolMenu::QuickAssemblyProgress;
@@ -53,7 +52,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		FNWorldAssemblyEditorCommands::Get().RegisterGlobalActions(LevelEditorModule.GetGlobalLevelEditorActions());
 
 		// Always there buttons
-		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal)
+		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal);
 		NexusGlobalSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
 		{
 			if (FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld() || FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld())
@@ -64,6 +63,8 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		});
 
 		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
+		NexusGlobalSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+
 		const FToolMenuEntry NWorldAssemblyEdMode_Button = FToolMenuEntry::InitToolBarButton(
 					"NWorldAssemblyEdMode_Button",
 					FUIAction(
@@ -76,9 +77,10 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
 		NexusGlobalSection.AddEntry(NWorldAssemblyEdMode_Button);
 
+
 		// Editor Mode Dependent
-		FToolMenuSection& NexusSection = Menu->AddSection(MenuSection);
-		NexusSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
+		FToolMenuSection& EdModeSection = Menu->AddSection(MenuSection);
+		EdModeSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
 		{
 			if (FNWorldAssemblyEdMode::IsActive())
 			{
@@ -94,7 +96,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			FText::FromString("Quick Assembly"),
 			true // Should it be vertically aligned neatly in the toolbar?
 		);
-		NexusSection.AddEntry(QuickAssemblyComboBox);
+		EdModeSection.AddEntry(QuickAssemblyComboBox);
 		// Toggles between starting a Quick Assembly operation and cancelling the one it started. The icon, label and
 		// tooltip all key off FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive() so they stay in sync across both
 		// a running operation and the wait between auto-assembly runs.
@@ -123,7 +125,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						&FNWorldAssemblyEditorStyle::QuickAssemblyOperationIcon)));
 
 		QuickAssemblyButton.StyleNameOverride = "Toolbar.BackplateLeft";
-		NexusSection.AddEntry(QuickAssemblyButton);
+		EdModeSection.AddEntry(QuickAssemblyButton);
 
 		// Quick Assembly Quick Options for Quick People
 		FToolMenuEntry QuickAssemblyOptionsButton = FToolMenuEntry::InitComboButton(
@@ -159,10 +161,10 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			NSLOCTEXT("NexusWorldAssemblyEditor", "NOrganExtensions_ToolTip", "Making procedural content easier since 2017.")
 		);
 		QuickAssemblyOptionsButton.StyleNameOverride = "Toolbar.BackplateRightCombo";
-		NexusSection.AddEntry(QuickAssemblyOptionsButton);
+		EdModeSection.AddEntry(QuickAssemblyOptionsButton);
 
 		// Actions Section - based on selection
-		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowOrganDropdown() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowOrganDropdown() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -217,7 +219,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NOrganComponent")
 		);
 		NOrganDropdownMenu.StyleNameOverride = "CalloutToolbar";
-		NexusSection.AddEntry(NOrganDropdownMenu);
+		EdModeSection.AddEntry(NOrganDropdownMenu);
 
 		// Create our option Add NCellActor button that only shows in NWorldAssemblyEdMode + no present NCellActor
 		const FToolMenuEntry NCellActor_AddButton = FToolMenuEntry::InitToolBarButton(
@@ -230,7 +232,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor", "Add Actor"),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_AddActor_Tooltip", "Create the singleton-like actor which will facilitate creating a NCell from the level it is placed in."),
 						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.AddNCellActor"));
-		NexusSection.AddEntry(NCellActor_AddButton);
+		EdModeSection.AddEntry(NCellActor_AddButton);
 
 		// Create our option to select the NCellActor if we are in NWorldAssemblyEdMode and there is a NCellActor
 		const FToolMenuEntry NCellActor_SelectButton = FToolMenuEntry::InitToolBarButton(
@@ -243,7 +245,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor", "Select Actor"),
 						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NCell_SelectActor_Tooltip", "Select the NCellActor in the level."),
 						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.SelectNCellActor.Selected"));
-		NexusSection.AddEntry(NCellActor_SelectButton);
+		EdModeSection.AddEntry(NCellActor_SelectButton);
 
 		// Display EditMode toggle buttons
 		FToolMenuEntry NCellActor_EditBoundsMode = FToolMenuEntry::InitToolBarButton(
@@ -259,7 +261,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 							TAttribute<FSlateIcon>::FGetter::CreateStatic(
 						&FNWorldAssemblyEditorStyle::CellActorEditBoundsModeIcon)));
 		NCellActor_EditBoundsMode.StyleNameOverride = "Toolbar.BackplateLeft";
-		NexusSection.AddEntry(NCellActor_EditBoundsMode);
+		EdModeSection.AddEntry(NCellActor_EditBoundsMode);
 
 		FToolMenuEntry NCellActor_EditHullMode = FToolMenuEntry::InitToolBarButton(
 			"NCellActor_EditHullMode",
@@ -274,7 +276,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::CellActorEditHullModeIcon)));
 		NCellActor_EditHullMode.StyleNameOverride = "Toolbar.BackplateCenter";
-		NexusSection.AddEntry(NCellActor_EditHullMode);
+		EdModeSection.AddEntry(NCellActor_EditHullMode);
 
 		FToolMenuEntry NCellActor_EditVoxelMode = FToolMenuEntry::InitToolBarButton(
 	"NCellActor_EditVoxelMode",
@@ -289,7 +291,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			TAttribute<FSlateIcon>::FGetter::CreateStatic(
 		&FNWorldAssemblyEditorStyle::CellActorEditVoxelModeIcon)));
 		NCellActor_EditVoxelMode.StyleNameOverride = "Toolbar.BackplateRight";
-		NexusSection.AddEntry(NCellActor_EditVoxelMode);
+		EdModeSection.AddEntry(NCellActor_EditVoxelMode);
 
 		// NCell Dropdown
 		FToolMenuEntry NCellDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -336,7 +338,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCellActor")
 		);
 		NCellDropdownMenu.StyleNameOverride = "CalloutToolbar";
-		NexusSection.AddEntry(NCellDropdownMenu);
+		EdModeSection.AddEntry(NCellDropdownMenu);
 
 		// NCellJunction Dropdown
 		FToolMenuEntry NCellJunctionDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -377,10 +379,10 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 			FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "ClassIcon.NCellJunctionComponent")
 		);
 		NCellJunctionDropdownMenu.StyleNameOverride = "CalloutToolbar";
-		NexusSection.AddEntry(NCellJunctionDropdownMenu);
+		EdModeSection.AddEntry(NCellJunctionDropdownMenu);
 
 		// Visualizers Section
-		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_VisualizersSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// Toggle Drawing Voxel Data
 		FToolMenuEntry NCellActor_DrawVoxelData = FToolMenuEntry::InitToolBarButton(
@@ -395,7 +397,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::CellActorToggleDrawVoxelDataIcon)));
-		NexusSection.AddEntry(NCellActor_DrawVoxelData);
+		EdModeSection.AddEntry(NCellActor_DrawVoxelData);
 
 		// Collision Visualizer
 		FToolMenuEntry CollisionVisualizerEntry  = FToolMenuEntry::InitToolBarButton(
@@ -410,10 +412,10 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::CollisionVisualizerToggleIcon)));
-		NexusSection.AddEntry(CollisionVisualizerEntry);
+		EdModeSection.AddEntry(CollisionVisualizerEntry);
 
 		// Actions Section - based on selection
-		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		EdModeSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_ActionsSeparator", FNWorldAssemblyEdMode::IsActive() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// Ignore Actor Toggle
 		FToolMenuEntry CellIgnoreToggle  = FToolMenuEntry::InitToolBarButton(
@@ -428,7 +430,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::CellIgnoreIcon)));
-		NexusSection.AddEntry(CellIgnoreToggle);
+		EdModeSection.AddEntry(CellIgnoreToggle);
 
 		// Ignore Actor Toggle
 		FToolMenuEntry WorldCollisionIgnoreToggle  = FToolMenuEntry::InitToolBarButton(
@@ -443,7 +445,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				TAttribute<FSlateIcon>::Create(
 					TAttribute<FSlateIcon>::FGetter::CreateStatic(
 				&FNWorldAssemblyEditorStyle::WorldCollisionIgnoreIcon)));
-		NexusSection.AddEntry(WorldCollisionIgnoreToggle);
+		EdModeSection.AddEntry(WorldCollisionIgnoreToggle);
 
 		FToolMenuEntry HullSplitEdgeEntry  = FToolMenuEntry::InitToolBarButton(
 			"NWorldAssembly_Hull_SplitEdge",
@@ -455,7 +457,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Hull_SplitEdge", "Split Hull Edge"),
 				NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Hull_SplitEdge_Tooltip", "Splits the hull edge and retriangulates the Hull."),
 				FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Command.WorldAssemblyEd.Hull.SplitEdge"));
-		NexusSection.AddEntry(HullSplitEdgeEntry);
+		EdModeSection.AddEntry(HullSplitEdgeEntry);
 	}
 
 	// Tools/Commandlets Menu
