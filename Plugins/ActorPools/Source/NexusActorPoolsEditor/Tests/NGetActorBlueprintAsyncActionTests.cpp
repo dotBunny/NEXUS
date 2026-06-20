@@ -21,12 +21,7 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnHasPool_NullPool,
 	// the OnCreatedPoolHandle reset and Completed broadcast that follow must not run.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		UNGetActorBlueprintAsyncAction* Action = NewObject<UNGetActorBlueprintAsyncAction>();
 		Action->WorldContext = World;
@@ -53,12 +48,7 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate,
 	// ActorClass — the handle must not be reset and the subsystem binding must remain.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings PoolSettings;
 		PoolSettings.MinimumActorCount = 0;
@@ -92,12 +82,7 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 	// handle rather than leaving it to be freed only at GC (AP-R-18).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		// The developer-overlay framework (UNDeveloperOverlay) subscribes one lambda per world via
 		// FWorldDelegates::OnPostWorldInitialization, so a freshly created world's subsystem can already
@@ -142,12 +127,7 @@ N_TEST_HIGH(UNGetActorBlueprintAsyncActionTests_OnLoaded_FailedLoad,
 	// Observe that no subscription is left behind after a failed load.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		// Start from a known-empty delegate so we only observe this action's behavior (see HandleCleanup test
 		// for why an interactive editor session can otherwise carry overlay subscribers).

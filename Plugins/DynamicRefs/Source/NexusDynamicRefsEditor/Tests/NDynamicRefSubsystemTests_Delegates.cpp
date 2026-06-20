@@ -17,12 +17,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnAdded,
     // with the correct ENDynamicRef and UObject pointer.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -60,12 +55,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnRemoved,
     // with the correct ENDynamicRef and UObject pointer.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -103,12 +93,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAdded_BulkFiresPerObject,
     // Verifies AddObjects fires OnAdded once per object in the supplied array.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         constexpr int32 Count = 4;
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
@@ -141,12 +126,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemoved_DoesNotFireForMissing
     // the broadcast is guarded on the removal actually succeeding (Remove() returning > 0).
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -171,12 +151,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAdded_DoesNotFireForDuplicate
     // pair drifts for any external listener (RemoveObject only fires once, on the real removal).
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -200,12 +175,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnAddedByName_DoesNotFireForDup
     // no-op and must not re-fire OnAddedByName.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -230,12 +200,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnAddedByName,
     // correct FName and UObject pointer.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -274,12 +239,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_Delegates_OnRemovedByName,
     // the correct FName and UObject pointer.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();
@@ -319,12 +279,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_Delegates_OnRemovedByName_NotFiredForUnkn
     // named bucket does not exist.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const TUniquePtr<FNTestObject> TestObject = MakeUnique<FNTestObject>();
         FNTestObject* Tracker = TestObject.Get();

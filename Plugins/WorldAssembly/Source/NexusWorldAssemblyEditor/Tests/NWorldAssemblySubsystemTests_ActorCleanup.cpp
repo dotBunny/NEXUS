@@ -16,12 +16,7 @@ N_TEST_HIGH(UNWorldAssemblySubsystemTests_ActorCleanup_DestroyActorsForOperation
 	// leaving actors registered under other tickets untouched.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNWorldAssemblySubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNWorldAssemblySubsystem, World)
 
 		ANDebugActor* TicketAActorOne = World->SpawnActor<ANDebugActor>();
 		ANDebugActor* TicketAActorTwo = World->SpawnActor<ANDebugActor>();
@@ -51,12 +46,7 @@ N_TEST_MEDIUM(UNWorldAssemblySubsystemTests_ActorCleanup_DestroyActorsForOperati
 	// Verifies that destroying a ticket with nothing registered is a no-op and does not touch other tracked actors.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNWorldAssemblySubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNWorldAssemblySubsystem, World)
 
 		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
 		if (Actor == nullptr)
@@ -79,12 +69,7 @@ N_TEST_HIGH(UNWorldAssemblySubsystemTests_ActorCleanup_ClearDestroysAllTickets,
 	// Verifies that Clear destroys tracked actors across every ticket bucket, not just one.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNWorldAssemblySubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNWorldAssemblySubsystem, World)
 
 		ANDebugActor* ActorA = World->SpawnActor<ANDebugActor>();
 		ANDebugActor* ActorB = World->SpawnActor<ANDebugActor>();
@@ -111,12 +96,7 @@ N_TEST_MEDIUM(UNWorldAssemblySubsystemTests_ActorCleanup_UnregisterActorForClean
 	// Verifies that an unregistered actor is no longer destroyed by its former ticket's teardown.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNWorldAssemblySubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNWorldAssemblySubsystem, World)
 
 		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
 		if (Actor == nullptr)
@@ -141,12 +121,7 @@ N_TEST_MEDIUM(UNWorldAssemblySubsystemTests_ActorCleanup_UnregisterActorForClean
 	// passing the wrong ticket leaves the actor tracked (and still destroyed by its real ticket).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNWorldAssemblySubsystem* Subsystem = UNWorldAssemblySubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNWorldAssemblySubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNWorldAssemblySubsystem, World)
 
 		ANDebugActor* MatchingActor = World->SpawnActor<ANDebugActor>();
 		ANDebugActor* WrongTicketActor = World->SpawnActor<ANDebugActor>();

@@ -206,12 +206,7 @@ N_TEST_CRITICAL(UNKillZoneComponentTests_OnOverlapBegin_IncrementOnActorWithKnow
 			return;
 		}
 
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings PoolSettings;
 		PoolSettings.MinimumActorCount = 2;
@@ -380,12 +375,7 @@ N_TEST_HIGH(UNKillZoneComponentTests_OnOverlapBegin_UnknownBehaviorReturnToActor
 			return;
 		}
 
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		// Project default is CreateDefaultPool, which would auto-pool and return true; force
 		// Ignore so ReturnActor returns false (without destroying) and the kill zone takes the warning path.

@@ -50,12 +50,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_TagCollection_AddObjectByTag,
     // returned by GetObjectsByTag (storage is shared between named and tag references).
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         AActor* Actor = World->SpawnActor<AActor>();
@@ -79,12 +74,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_EmptyTag,
     // Verifies that querying with FGameplayTag::EmptyTag short-circuits to empty results.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         CHECK_EQUALS("GetCountByTag(Empty) should be 0.", Subsystem->GetCountByTag(FGameplayTag::EmptyTag), 0)
         CHECK_EQUALS("GetObjectsByTag(Empty) should return empty array.", Subsystem->GetObjectsByTag(FGameplayTag::EmptyTag).Num(), 0)
@@ -107,12 +97,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_UnknownTag,
     // Verifies that a registered tag that was never added to any bucket returns empty / nullptr.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag UnusedTag = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
 
@@ -133,12 +118,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_ParityWithByName,
     // when the FName matches Tag.GetTagName().
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         AActor* A = World->SpawnActor<AActor>();
@@ -162,12 +142,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_FirstLastByTag,
     // Verifies GetFirstObjectByTag / GetLastObjectByTag honor registration order.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         AActor* First = World->SpawnActor<AActor>();
@@ -201,12 +176,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_TagCollection_GetObjectsByAnyTags_Uni
     // Verifies union semantics across multiple tags with shared and unique members; result is deduplicated.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -239,12 +209,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_GetObjectsByAnyTags_Partial
     // Verifies AnyTags still returns the union when some requested tags have no bucket.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -273,12 +238,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_TagCollection_GetObjectsByAllTags_Int
     // Verifies AllTags returns only objects present under every requested tag.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -312,12 +272,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_GetObjectsByAllTags_Missing
     // Verifies AllTags returns empty when any requested tag has no bucket.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -340,12 +295,7 @@ N_TEST_MEDIUM(UNDynamicRefSubsystemTests_TagCollection_GetObjectsByAllTags_Singl
     // Verifies AllTags with a single-tag container equals GetObjectsByTag for that tag.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         AActor* A = World->SpawnActor<AActor>();
@@ -368,12 +318,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_GetActorsByAnyTags_FiltersN
     // Verifies GetActorsByAnyTags / GetActorsByAllTags drop non-AActor UObjects.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -406,12 +351,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_TagCollection_GetTags,
     // skipping FName-only buckets.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();
@@ -445,12 +385,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_TagCollection_Component_BeginPlayEndP
     // tags is registered on BeginPlay and unregistered on EndPlay/destroy.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FGameplayTag TagA = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagA();
         const FGameplayTag TagB = NEXUS::UnitTests::NDynamicRefs::UNDynamicRefSubsystemTagsHarness::EditorTagB();

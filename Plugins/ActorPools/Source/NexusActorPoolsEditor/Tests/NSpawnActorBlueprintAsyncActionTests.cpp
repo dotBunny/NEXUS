@@ -21,12 +21,7 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_OnHasPool_NullPool,
 	// the OnCreatedPoolHandle reset and Completed broadcast that follow must not run.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		UNSpawnActorBlueprintAsyncAction* Action = NewObject<UNSpawnActorBlueprintAsyncAction>();
 		Action->WorldContext = World;
@@ -52,12 +47,7 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate,
 	// ActorClass — the handle must not be reset and the subsystem binding must remain.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings PoolSettings;
 		PoolSettings.MinimumActorCount = 0;
@@ -91,12 +81,7 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 	// handle rather than leaving it to be freed only at GC (AP-R-18).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		// The developer-overlay framework (UNDeveloperOverlay) subscribes one lambda per world via
 		// FWorldDelegates::OnPostWorldInitialization, so a freshly created world's subsystem can already

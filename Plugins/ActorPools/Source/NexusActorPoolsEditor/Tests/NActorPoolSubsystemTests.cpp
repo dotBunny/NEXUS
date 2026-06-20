@@ -16,12 +16,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_CreateActorPool_CreatesPool,
 	// Verifies that CreateActorPool returns true and HasActorPool reflects the newly created pool.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.MinimumActorCount = 2;
@@ -40,12 +35,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_CreateActorPool_NoDuplicate,
 	// Verifies that creating a pool for the same class a second time is idempotent and returns false.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
@@ -62,12 +52,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_HasActorPool_FalseForUnknownClass,
 	// Verifies that HasActorPool returns false for a class that has never had a pool created.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		CHECK_FALSE_MESSAGE(TEXT("HasActorPool should return false for a class with no registered pool."),
 			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
@@ -81,12 +66,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_GetActor_LazyCreatesPool,
 	// Verifies that GetActor lazily creates a pool on first access and HasActorPool reflects this.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		CHECK_FALSE_MESSAGE(TEXT("HasActorPool should be false before GetActor is called."),
 			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
@@ -106,12 +86,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_GetActor_ReturnsValidActor,
 	// pool's spawned-count reflects that the actor was sourced from the pool.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		AActor* Actor = Subsystem->GetActor<AActor>(ANDebugActor::StaticClass());
 		if (Actor == nullptr)
@@ -151,12 +126,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_SpawnActor_LazyCreatesPool,
 	// Verifies that SpawnActor lazily creates a pool on first access and HasActorPool reflects this.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		CHECK_FALSE_MESSAGE(TEXT("HasActorPool should be false before SpawnActor is called."),
 			Subsystem->HasActorPool(ANDebugActor::StaticClass()))
@@ -175,12 +145,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_SpawnActor_PlacesActorAtPosition,
 	// Verifies that SpawnActor places the returned actor at the requested world position.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		const FVector SpawnPos(100.0f, 200.0f, 300.0f);
 		AActor* Actor = Subsystem->SpawnActor<AActor>(ANDebugActor::StaticClass(), SpawnPos, FRotator::ZeroRotator);
@@ -207,12 +172,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_ReturnActor_ReturnsTrueForKnownPool,
 	// return. A bool-only assertion would pass even if the implementation lied about success.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.MinimumActorCount = 3;
@@ -255,12 +215,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_DestroyModeReturnsTrue,
 	// so the call reports success ("handled") rather than false.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Destroy);
 
 		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
@@ -286,12 +241,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_ReturnActor_IgnoreModeReturnsFalse,
 	// Ignore and no pool exists for the actor's class.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 		Subsystem->SetUnknownBehavior(ENActorPoolUnknownBehavior::Ignore);
 
 		ANDebugActor* Actor = World->SpawnActor<ANDebugActor>();
@@ -319,12 +269,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_GetActorPool_ReturnsCreatedPool,
 	// Verifies that GetActorPool returns a valid pointer with the correct template class.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Subsystem->CreateActorPool(AActor::StaticClass(), Settings);
@@ -351,12 +296,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_GetAllPools_CountMatchesCreated,
 	// template class. A count-only assertion would pass even if the wrong pools were returned.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		const int32 CountBefore = Subsystem->GetAllPools().Num();
 
@@ -387,12 +327,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_DefaultSettings_AddAndHas,
 	// Verifies that AddDefaultSettings registers the settings and HasDefaultSettings reflects them.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		CHECK_FALSE_MESSAGE(TEXT("HasDefaultSettings should be false before any default is registered."),
 			Subsystem->HasDefaultSettings(ANDebugActor::StaticClass()))
@@ -413,12 +348,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_DefaultSettings_Remove,
 	// Verifies that RemoveDefaultSettings returns true and HasDefaultSettings becomes false.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Subsystem->AddDefaultSettings(ANDebugActor::StaticClass(), Settings);
@@ -437,12 +367,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_DefaultSettings_Update,
 	// Verifies that UpdateDefaultSettings modifies the stored settings and returns true.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings OriginalSettings;
 		OriginalSettings.MinimumActorCount = 2;
@@ -465,12 +390,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_DefaultSettings_GetFallsBackToGlobal,
 	// class-specific default has been registered.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		const FNActorPoolSettings GlobalDefaults = UNActorPoolsSettings::Get()->DefaultSettings;
 		const FNActorPoolSettings Retrieved = Subsystem->GetDefaultSettings(ANDebugActor::StaticClass());
@@ -488,12 +408,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnCreate,
 	// Verifies that OnActorPoolAdded fires exactly once per new pool and does not fire for duplicates.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		int32 FireCount = 0;
 		const FDelegateHandle Handle = Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)
@@ -522,12 +437,7 @@ N_TEST_HIGH(UNActorPoolSubsystemTests_OnActorPoolAdded_FiredOnLazyGetActor,
 	// Verifies that OnActorPoolAdded fires when GetActor lazily creates a pool, and not on subsequent calls.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		int32 FireCount = 0;
 		const FDelegateHandle Handle = Subsystem->OnActorPoolAdded.AddLambda([&FireCount](FNActorPool*)

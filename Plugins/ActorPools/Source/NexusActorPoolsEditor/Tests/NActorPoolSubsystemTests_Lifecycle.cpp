@@ -19,12 +19,7 @@ N_TEST_CRITICAL(UNActorPoolSubsystemTests_WorldTeardown_NoAssertsOnEndPlay,
 	// leaking UObjects.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.MinimumActorCount = 2;

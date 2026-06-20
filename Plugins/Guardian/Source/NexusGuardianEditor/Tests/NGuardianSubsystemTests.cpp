@@ -23,12 +23,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_InitialState,
     // flags false, a positive base count, and IsTickable() true.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         Subsystem->SetBaseline();
@@ -63,12 +58,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_Disabled,
 
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         World->GetTimerManager().Tick(1.0f);
@@ -101,12 +91,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
 
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
 
         // OnWorldBeginPlay already ran inside WorldTest, so the auto-baseline timer should be
         // armed and pending — it has not been allowed to fire yet.
@@ -129,12 +114,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
     // Thresholds must equal BaseObjectCount + the respective settings offset.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
@@ -163,12 +143,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_SetBaseline_ThresholdOrdering,
     // thresholds must maintain the same strict ordering.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         Subsystem->SetBaseline();
@@ -196,12 +171,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ResetsFlags,
     // again must reset all flags to false.
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness::FSettingsGuard Guard;
@@ -243,12 +213,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_WarningThreshold,
     // The snapshot and compare flags must remain false (each needs a separate Tick).
     FNTestUtils::WorldTest(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
     	// We expect some messages
@@ -281,12 +246,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_SnapshotThreshold,
     {
         using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
     	// We expect some messages
@@ -341,12 +301,7 @@ N_TEST_CRITICAL(UNGuardianSubsystemTests_Tick_CompareThreshold,
     {
         using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
@@ -416,12 +371,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_FlagsStableOnceSet,
     {
         using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
 
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         FSettingsGuard Guard;
@@ -493,12 +443,7 @@ N_TEST_HIGH(UNGuardianSubsystemTests_Tick_LastObjectCountUpdated,
     // GetLastObjectCount() must reflect the most recent object count read during Tick.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
     {
-        UNGuardianSubsystem* Subsystem = UNGuardianSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNGuardianSubsystem from PIE world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
         Subsystem->UpdateTickRate(0.f);
 
         // Use large, strictly-increasing thresholds so no flags are triggered.

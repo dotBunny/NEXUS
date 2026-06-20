@@ -17,12 +17,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_PreAllocated,
     // enum value is a valid index with zero objects after subsystem creation.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         // Every bucket should start empty; none should crash on access, skip empty NONE bucket
         for (int32 i = 1; i < NDR_Max; ++i)
@@ -41,12 +36,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_AddObject,
     // Verifies that AddObject increases the count and GetObjects returns the object.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* Actor = World->SpawnActor<AActor>();
         Subsystem->AddObject(NDR_Player, Actor);
@@ -70,12 +60,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_AddObjectsDeduplicatio
     // should keep the count at 1.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* Actor = World->SpawnActor<AActor>();
         Subsystem->AddObject(NDR_Enemy, Actor);
@@ -92,12 +77,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_RemoveObject,
     // Verifies that RemoveObject decreases the count back to zero.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* Actor = World->SpawnActor<AActor>();
         Subsystem->AddObject(NDR_NonPlayableCharacter, Actor);
@@ -114,12 +94,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_AddObjectsArray,
     // Verifies that AddObjects (bulk) registers all supplied objects.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         constexpr int32 Count = 5;
         TArray<UObject*> Added;
@@ -145,12 +120,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_RemoveObjectsArray,
     // Verifies that RemoveObjects (bulk) clears all supplied objects at once.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         constexpr int32 Count = 4;
         TArray<UObject*> Added;
@@ -178,12 +148,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_GetFirstObject,
     // Verifies GetFirstObject returns the first added object and nullptr when empty.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         // Empty bucket should return nullptr safely.
         UObject* NullResult = Subsystem->GetFirstObject(NDR_Location_A);
@@ -212,12 +177,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_FastCollection_GetLastObject,
     // Verifies GetLastObject returns the last added object and nullptr when empty.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         UObject* NullResult = Subsystem->GetLastObject(NDR_Location_B);
         if (NullResult != nullptr)
@@ -245,12 +205,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetFirstActor,
     // Verifies GetFirstActor skips non-AActor objects and returns the first actor.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         // Add a plain UObject first, then an Actor — GetFirstActor must skip the UObject.
         UObject* PlainObject = NewObject<UNTestUObject>(World);
@@ -273,12 +228,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetLastActor,
     // Verifies GetLastActor iterates in reverse and returns the last actor.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* First = World->SpawnActor<AActor>();
         AActor* Last = World->SpawnActor<AActor>();
@@ -300,12 +250,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetActors_FiltersNonActors
     // Verifies GetActors only returns AActor objects, silently dropping plain UObjects.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         UObject* Plain = NewObject<UNTestUObject>(World);
         AActor* Actor = World->SpawnActor<AActor>();
@@ -328,12 +273,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_GetDynamicRefs,
     // Verifies GetDynamicRefs only lists non-empty buckets.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const int32 CountBefore = Subsystem->GetDynamicRefs().Num();
 
@@ -358,12 +298,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_NamedCollection_AddObjectByName,
     // Verifies AddObjectByName lazily creates a bucket and registers the object.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestPlayerRef");
         AActor* Actor = World->SpawnActor<AActor>();
@@ -387,12 +322,7 @@ N_TEST_CRITICAL(UNDynamicRefSubsystemTests_NamedCollection_RemoveObjectByName,
     // Verifies RemoveObjectByName decreases the count to zero.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestEnemyRef");
         AActor* Actor = World->SpawnActor<AActor>();
@@ -410,12 +340,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_RemoveNonExistentBucket,
     // RemoveObjectByName on a name that was never added should not crash.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* Actor = World->SpawnActor<AActor>();
         // No add — remove should be a no-op.
@@ -432,12 +357,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_AddObjectsByName,
     // Verifies AddObjectsByName bulk-registers all supplied objects under a name.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestBulkName");
         constexpr int32 Count = 3;
@@ -464,12 +384,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetFirstObjectByName,
     // Verifies GetFirstObjectByName returns the first added object; nullptr for unknown names.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         UObject* NullResult = Subsystem->GetFirstObjectByName(TEXT("UnknownName"));
         if (NullResult != nullptr)
@@ -498,12 +413,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetLastObjectByName,
     // Verifies GetLastObjectByName returns the last added object; nullptr for unknown names.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         UObject* NullResult = Subsystem->GetLastObjectByName(TEXT("UnknownName2"));
         if (NullResult != nullptr)
@@ -532,12 +442,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetActorsByName,
     // Verifies GetActorsByName filters out non-AActor objects.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestActorsByName");
         UObject* Plain = NewObject<UNTestUObject>(World);
@@ -557,12 +462,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_GetNames,
     // Verifies GetNames includes any name that has been added.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestGetNames_Unique");
         const int32 CountBefore = Subsystem->GetNames().Num();
@@ -588,12 +488,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_FastCollection_StaleEntryDropped,
     // reference goes invalid and every accessor skips it (count drops, getters return the survivor/null).
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         AActor* Doomed = World->SpawnActor<AActor>();
         AActor* Survivor = World->SpawnActor<AActor>();
@@ -629,12 +524,7 @@ N_TEST_HIGH(UNDynamicRefSubsystemTests_NamedCollection_StaleEntryDropped,
     // bucket whose only object was destroyed without removal.
     FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
     {
-        UNDynamicRefSubsystem* Subsystem = UNDynamicRefSubsystem::Get(World);
-        if (!Subsystem)
-        {
-            ADD_ERROR("Could not retrieve UNDynamicRefSubsystem from editor world.");
-            return;
-        }
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNDynamicRefSubsystem, World)
 
         const FName TestName = TEXT("TestStaleByName");
         AActor* Doomed = World->SpawnActor<AActor>();

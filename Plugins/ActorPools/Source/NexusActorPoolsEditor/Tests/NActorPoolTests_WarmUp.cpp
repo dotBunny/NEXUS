@@ -27,12 +27,7 @@ N_TEST_CRITICAL(FNActorPoolTests_WarmUp_FixedDeferUntilTicked,
 	// ticking so warm-up can proceed over subsequent frames.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
@@ -64,12 +59,7 @@ N_TEST_CRITICAL(FNActorPoolTests_WarmUp_TickFillsPerTickAndClamps,
 	// thereafter (the one-shot dropout signal the subsystem uses to unregister the pool).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		// Minimum 5 with a per-tick of 2 exercises the clamp: 2, 2, then 1 (the remaining deficit).
 		FNActorPoolSettings Settings;
@@ -117,12 +107,7 @@ N_TEST_HIGH(FNActorPoolTests_WarmUp_DrivenBySubsystemTick,
 	// stops creating (no overshoot), proving the create-time tick registration is wired end to end.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
@@ -159,12 +144,7 @@ N_TEST_HIGH(FNActorPoolTests_WarmUp_FixedYieldsMinimumThenNull,
 	// actors: once warmed it must hand out exactly MinimumActorCount actors and then return null.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
@@ -206,12 +186,7 @@ N_TEST_MEDIUM(FNActorPoolTests_WarmUp_UpdateSettingsStopsTicking,
 	// subsystem stops ticking the pool; its actor count then freezes mid-warm-up.
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
@@ -259,12 +234,7 @@ N_TEST_HIGH(FNActorPoolTests_WarmUp_FixedSelfHealsWhenNeverTicked,
 	// exactly MinimumActorCount actors and then returns null (the self-heal must not overshoot the minimum).
 	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
 	{
-		UNActorPoolSubsystem* Subsystem = UNActorPoolSubsystem::Get(World);
-		if (!Subsystem)
-		{
-			ADD_ERROR("Could not retrieve UNActorPoolSubsystem from PIE world.");
-			return;
-		}
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
 
 		FNActorPoolSettings Settings;
 		Settings.Strategy = ENActorPoolStrategy::Fixed;
