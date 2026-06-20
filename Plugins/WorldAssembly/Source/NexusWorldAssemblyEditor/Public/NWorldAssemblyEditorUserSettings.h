@@ -22,10 +22,6 @@ public:
 
 #if WITH_EDITORONLY_DATA
 
-	/** Show the Quick Assembly section (Organ dropdown + start/cancel button) on the World Assembly toolbar. */
-	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Show Quick Assembly Section", meta=(Tooltip="Shows a drop down to select the organ to run a World Assembly on."))
-	bool bShowQuickAssemblySection = true;
-
 	UPROPERTY(EditAnywhere, config,  Category="Quick Assembly", DisplayName="Load Level Instances", meta=(Tooltip="Create and load the level instances from the ANCellProxy(s)."))
 	bool bQuickAssemblyLoadLevelInstances = true;
 

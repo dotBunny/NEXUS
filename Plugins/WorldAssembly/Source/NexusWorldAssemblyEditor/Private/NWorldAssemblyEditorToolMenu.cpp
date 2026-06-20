@@ -53,7 +53,15 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		FNWorldAssemblyEditorCommands::Get().RegisterGlobalActions(LevelEditorModule.GetGlobalLevelEditorActions());
 
 		// Always there buttons
-		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal);
+		FToolMenuSection& NexusGlobalSection = Menu->AddSection(MenuSectionGlobal)
+		NexusGlobalSection.Visibility =  TAttribute<EVisibility>::CreateLambda([]()
+		{
+			if (FNWorldAssemblyEditorUtils::IsOrganComponentPresentInCurrentWorld() || FNWorldAssemblyEditorUtils::IsCellActorPresentInCurrentWorld())
+			{
+				return EVisibility::Visible;
+			}
+			return EVisibility::Collapsed;
+		});
 
 		// Add a button that if a NCellActor/Pin is selected and were not in the ToolMode it will show and clicking switches mode
 		const FToolMenuEntry NWorldAssemblyEdMode_Button = FToolMenuEntry::InitToolBarButton(
@@ -63,8 +71,8 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEdMode::IsNotActive),
 						FIsActionChecked(),
 						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorCommands::WorldAssemblyEdMode_CanShow)),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To NWorldAssembly Editor Mode"),
-						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button_Tooltip", "Switch the current editor mode to the NWorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button", "Switch To WorldAssembly Editor Mode"),
+						NSLOCTEXT("NexusWorldAssemblyEditor", "Command_NWorldAssemblyEdMode_Button_Tooltip", "Switch the current editor mode to the WorldAssembly Editor Mode, which enables specific tools for working with NCells, etc."),
 						FSlateIcon(FNWorldAssemblyEditorStyle::GetStyleSetName(), "Icon.WorldAssembly"));
 		NexusGlobalSection.AddEntry(NWorldAssemblyEdMode_Button);
 
@@ -97,7 +105,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 						FCanExecuteAction::CreateStatic(&FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute),
 						FIsActionChecked(),
 						// Hide the button when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
-						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowQuickAssembly)),
+						FIsActionButtonVisible::CreateStatic(&FNWorldAssemblyEditorToolMenu::ShowOrganDropdown)),
 						TAttribute<FText>::CreateLambda([]()
 						{
 							return FNWorldAssemblyEditorToolMenu::IsQuickAssemblyActive()
@@ -130,7 +138,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 					FMenuBuilder MenuBuilder(true, FNWorldAssemblyEditorCommands::Get().CommandList_QuickAssembly);
 					MenuBuilder.SetSearchable(false); // Life's too short to search this menu.
 
-					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_CellBehavior", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_CellBehavior", "Cell Behavior"));
+					MenuBuilder.BeginSection("NWorldAssemblyEdMode_QuickAssemblyOptions_CellBehavior", NSLOCTEXT("NexusWorldAssemblyEditor", "QuickAssemblyOptions_CellProxy", "Cell Proxy"));
 					MenuBuilder.AddMenuEntry(FNWorldAssemblyEditorCommands::Get().CommandInfo_QuickAssemblyToggleLoadInstances);
 					MenuBuilder.EndSection();
 
@@ -154,7 +162,7 @@ void FNWorldAssemblyEditorToolMenu::AddMenuEntries()
 		NexusSection.AddEntry(QuickAssemblyOptionsButton);
 
 		// Actions Section - based on selection
-		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowQuickAssembly() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
+		NexusSection.AddEntry(N_DYNAMIC_SEPARATOR("NexusSection_QuickAssemblySeparator", FNWorldAssemblyEditorToolMenu::ShowOrganDropdown() ? EVisibility::Visible : EVisibility::Collapsed, FText::GetEmpty()));
 
 		// NOrgan Dropdown
 		FToolMenuEntry NOrganDropdownMenu = FToolMenuEntry::InitComboButton(
@@ -745,15 +753,6 @@ bool FNWorldAssemblyEditorToolMenu::Hull_SplitEdge_CanShow()
 	return false;
 }
 
-bool FNWorldAssemblyEditorToolMenu::ShowQuickAssembly()
-{
-	if (ShowOrganDropdown())
-	{
-		return UNWorldAssemblyEditorUserSettings::Get()->bShowQuickAssemblySection;
-	}
-	return false;
-}
-
 bool FNWorldAssemblyEditorToolMenu::HasValidQuickAssemblyOrgan()
 {
 	// Route through the getter so the same first-option fallback applies everywhere.
@@ -766,7 +765,7 @@ TSharedRef<SWidget> FNWorldAssemblyEditorToolMenu::CreateQuickAssemblyComboBox()
 		.Padding(FMargin(8.0f, 0.0f, 0.0f, 0.0f)) // Left, Top, Right, Bottom
 		.MinDesiredWidth(150.0f)
 		// Collapse the whole combo box when the Quick Assembly section is hidden (no Organ components, or disabled in settings).
-		.Visibility_Lambda([]() { return ShowQuickAssembly() ? EVisibility::Visible : EVisibility::Collapsed; })
+		.Visibility_Lambda([]() { return ShowOrganDropdown() ? EVisibility::Visible : EVisibility::Collapsed; })
 		[
 			SNew(SComboButton)
 			.OnGetMenuContent_Lambda([]() -> TSharedRef<SWidget>

@@ -77,7 +77,6 @@ public:
 	/** @return true if the hull split-edge action should be shown (an editable hull edge is selected). */
 	static bool Hull_SplitEdge_CanShow();
 
-	static bool ShowQuickAssembly();
 	static bool HasValidQuickAssemblyOrgan();
 	static TSharedRef<SWidget> CreateQuickAssemblyComboBox();
 
