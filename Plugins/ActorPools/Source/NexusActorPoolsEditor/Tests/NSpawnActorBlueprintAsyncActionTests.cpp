@@ -116,4 +116,37 @@ N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy,
 	});
 }
 
+N_TEST_HIGH(UNSpawnActorBlueprintAsyncActionTests_OnLoaded_ExpiredContext,
+	"NEXUS::UnitTests::NActorPools::UNSpawnActorBlueprintAsyncAction::OnLoaded::ExpiredContext",
+	N_TEST_CONTEXT_EDITOR)
+{
+	// Regression (AP-3): if the world context expires while the class is streaming in (a level transition
+	// completing mid-load), OnLoaded must resolve the subsystem defensively and complete with null rather
+	// than dereferencing a null world via Get(nullptr). Reaching the assertions below at all proves the
+	// crash is gone; we also confirm it leaves no pool-created handle or subsystem subscription behind.
+	FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](UWorld* World)
+	{
+		N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNActorPoolSubsystem, World)
+
+		// Start from a known-empty delegate so we only observe this action's behavior (see HandleCleanup test
+		// for why an interactive editor session can otherwise carry overlay subscribers).
+		Subsystem->OnActorPoolAdded.Clear();
+
+		UNSpawnActorBlueprintAsyncAction* Action = NewObject<UNSpawnActorBlueprintAsyncAction>();
+		// Leave WorldContext unset so WorldContext.Get() resolves to null — the expired-context scenario.
+		Action->ActorClass = TSoftClassPtr<AActor>(ANTestPooledActor::StaticClass());
+
+		// The expired-context branch logs a Warning by design; register it as expected so it is treated as the
+		// asserted outcome rather than stray log noise (and the test fails if the branch ever stops logging it).
+		AddExpectedMessage(TEXT("world context expired"), ELogVerbosity::Warning);
+
+		Action->OnLoaded();
+
+		CHECK_FALSE_MESSAGE(TEXT("An expired world context must not register an OnActorPoolAdded subscription."), Subsystem->OnActorPoolAdded.IsBound())
+		CHECK_FALSE_MESSAGE(TEXT("An expired world context must not leave a pending pool-created handle."), Action->OnCreatedPoolHandle.IsValid())
+
+		Action->ConditionalBeginDestroy();
+	});
+}
+
 #endif //WITH_TESTS

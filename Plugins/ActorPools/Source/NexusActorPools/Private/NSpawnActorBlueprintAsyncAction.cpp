@@ -5,7 +5,6 @@
 #include "NActorPoolSubsystem.h"
 #include "Engine/AssetManager.h"
 #include "Engine/Engine.h"
-#include "Macros/NWorldMacros.h"
 
 UNSpawnActorBlueprintAsyncAction* UNSpawnActorBlueprintAsyncAction::SpawnActorAsync(UObject* WorldContextObject, TSoftClassPtr<AActor> ActorClass, FVector Position, FRotator Rotation)
 {
@@ -38,9 +37,7 @@ void UNSpawnActorBlueprintAsyncAction::BeginDestroy()
 {
 	if (OnCreatedPoolHandle.IsValid())
 	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
-		if (ActorPoolSubsystem)
+		if (UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem())
 		{
 			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 		}
@@ -58,11 +55,13 @@ void UNSpawnActorBlueprintAsyncAction::BeginDestroy()
 
 void UNSpawnActorBlueprintAsyncAction::OnLoaded()
 {
-	const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-	UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
+	UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem();
 	if (!ActorPoolSubsystem)
 	{
-		UE_LOG(LogNexusActorPools, Error, TEXT("Unable to complete Spawn Actor Async as ActorPoolSubsystem is NULL"));
+		// The world context expired (or carries no pool subsystem) while the class streamed in — the level
+		// changed mid-load. Complete with null so the latent node releases instead of hanging, then tear down.
+		UE_LOG(LogNexusActorPools, Warning, TEXT("Spawn Actor Async completed after its world context expired; completing with null."));
+		Completed.Broadcast(nullptr);
 		SetReadyToDestroy();
 		return;
 	}
@@ -99,9 +98,7 @@ void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 	// Unregister callback
 	if (OnCreatedPoolHandle.IsValid())
 	{
-		const UWorld* World = N_GET_WORLD_FROM_CONTEXT(WorldContext.Get());
-		UNActorPoolSubsystem* ActorPoolSubsystem = UNActorPoolSubsystem::Get(World);
-		if (ActorPoolSubsystem)
+		if (UNActorPoolSubsystem* ActorPoolSubsystem = ResolveActorPoolSubsystem())
 		{
 			ActorPoolSubsystem->OnActorPoolAdded.Remove(OnCreatedPoolHandle);
 		}
@@ -116,4 +113,20 @@ void UNSpawnActorBlueprintAsyncAction::OnHasPool(FNActorPool* ActorPool)
 
 	Completed.Broadcast(SpawnedActor);
 	SetReadyToDestroy();
+}
+
+UNActorPoolSubsystem* UNSpawnActorBlueprintAsyncAction::ResolveActorPoolSubsystem() const
+{
+	// WorldContext is a weak pointer that legitimately expires when the level changes while the class is
+	// still streaming in — the exact scenario async loading exists for. Resolve defensively (ReturnNull in
+	// every build) instead of via N_GET_WORLD_FROM_CONTEXT, whose shipping arm dereferences a null context,
+	// and never feed a null world into Get(), which dereferences it unconditionally.
+	if (UObject* Context = WorldContext.Get())
+	{
+		if (const UWorld* World = GEngine->GetWorldFromContextObject(Context, EGetWorldErrorMode::ReturnNull))
+		{
+			return UNActorPoolSubsystem::Get(World);
+		}
+	}
+	return nullptr;
 }

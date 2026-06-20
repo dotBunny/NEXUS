@@ -9,6 +9,8 @@
 #include "Engine/StreamableManager.h"
 #include "NGetActorBlueprintAsyncAction.generated.h"
 
+class UNActorPoolSubsystem;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FGetActorAsyncOutputPin, AActor*, SpawnedActor);
 
 /**
@@ -24,6 +26,7 @@ class NEXUSACTORPOOLS_API UNGetActorBlueprintAsyncAction : public UBlueprintAsyn
 	friend class UNGetActorBlueprintAsyncActionTests_OnHasPool_MismatchedTemplate;
 	friend class UNGetActorBlueprintAsyncActionTests_HandleCleanup_OnDestroy;
 	friend class UNGetActorBlueprintAsyncActionTests_OnLoaded_FailedLoad;
+	friend class UNGetActorBlueprintAsyncActionTests_OnLoaded_ExpiredContext;
 #endif // WITH_TESTS
 
 public:
@@ -50,6 +53,15 @@ private:
 	TWeakObjectPtr<UObject> WorldContext;
 	TSoftClassPtr<AActor> ActorClass;
 	TSharedPtr<FStreamableHandle> StreamingHandle;
+
+	/**
+	 * Resolves the Actor Pool subsystem from the (weak) world context, tolerating an expired context.
+	 * @return The subsystem, or null if the context/world has gone away (e.g. a level transition completed
+	 *         while the class was still streaming in).
+	 * @note Async actions outlive their world context via the game instance, so this must never assume the
+	 *       context is still valid — unlike N_GET_WORLD_FROM_CONTEXT, whose shipping arm dereferences it raw.
+	 */
+	UNActorPoolSubsystem* ResolveActorPoolSubsystem() const;
 
 	void OnLoaded();
 	void OnHasPool(FNActorPool* ActorPool);

@@ -18,9 +18,10 @@ class NEXUSGUARDIAN_API UNGuardianSubsystem : public UTickableWorldSubsystem
 	GENERATED_BODY()
 
 #if WITH_TESTS
-	// Grants the auto-baseline scheduling test direct access to BaselineTimerHandle so it can
-	// assert the timer is armed via the public FTimerManager API instead of simulating the heap.
+	// Grants the auto-baseline scheduling tests direct access to BaselineTimerHandle so they can
+	// assert the timer is armed / cancelled via the public FTimerManager API instead of simulating the heap.
 	friend class UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay;
+	friend class UNGuardianSubsystemTests_AutoBaseline_ManualSupersedesPending;
 #endif // WITH_TESTS
 
 public:

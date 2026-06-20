@@ -10,6 +10,8 @@
  * and to supply the tick stat id. For tickable subsystems, see N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY.
  *
  * @param Type The concrete subsystem class itself (used as template argument to GetSubsystem).
+ * @note Get(const UWorld*) dereferences World without a null check for speed; callers must pass a valid,
+ *       non-null world. Resolve a possibly-expired weak context to a non-null world before calling.
  */
 #define N_WORLD_SUBSYSTEM(Type) \
 	public: \
@@ -32,6 +34,8 @@
  *
  * @param Type The concrete subsystem class.
  * @param ShouldCreate Boolean expression evaluated inside ShouldCreateSubsystem; false skips creation.
+ * @note Get(const UWorld*) dereferences World without a null check for speed; callers must pass a valid,
+ *       non-null world. Resolve a possibly-expired weak context to a non-null world before calling.
  */
 #if WITH_EDITOR
 #define N_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \
@@ -96,6 +100,8 @@
  *
  * @param Type The concrete tickable subsystem class.
  * @param ShouldCreate Boolean expression that gates subsystem creation.
+ * @note Get(const UWorld*) dereferences World without a null check for speed; callers must pass a valid,
+ *       non-null world. Resolve a possibly-expired weak context to a non-null world before calling.
  */
 #if WITH_EDITOR
 #define N_TICKABLE_WORLD_SUBSYSTEM_GAME_ONLY(Type, ShouldCreate) \

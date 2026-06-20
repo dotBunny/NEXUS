@@ -176,9 +176,15 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 	// Drop only the entries this world registered. Sweeping the wrappers directly (rather than replaying the
 	// subsystem's current objects) keeps a sibling PIE world's entries intact and works even when the subsystem
 	// has already cleared its collections during teardown.
+	//
+	// RemoveObjectsForWorld only matches live objects, so an object destroyed before teardown leaves a stale
+	// (null) entry it can't attribute to this world. We must not gate removal on its return value: GetCount()
+	// compacts stale entries first, so an empty wrapper is dropped whether its last object was removed here or
+	// simply went stale. A wrapper still holding a sibling world's live object keeps GetCount() > 0 and survives.
 	for (auto It = DynamicRefObjects.CreateIterator(); It; ++It)
 	{
-		if (It.Value()->RemoveObjectsForWorld(World) && It.Value()->GetCount() == 0)
+		It.Value()->RemoveObjectsForWorld(World);
+		if (It.Value()->GetCount() == 0)
 		{
 			DynamicReferences->RemoveItem(It.Value());
 			It.RemoveCurrent();
@@ -187,7 +193,8 @@ void UNDynamicRefsDeveloperOverlay::UnbindWorld(const UWorld* World)
 
 	for (auto It = NamedObjects.CreateIterator(); It; ++It)
 	{
-		if (It.Value()->RemoveObjectsForWorld(World) && It.Value()->GetCount() == 0)
+		It.Value()->RemoveObjectsForWorld(World);
+		if (It.Value()->GetCount() == 0)
 		{
 			NamedReferences->RemoveItem(It.Value());
 			It.RemoveCurrent();

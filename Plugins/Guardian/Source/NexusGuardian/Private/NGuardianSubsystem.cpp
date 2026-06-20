@@ -12,7 +12,16 @@
 
 void UNGuardianSubsystem::SetBaseline()
 {
-	BaselineTimerHandle.Invalidate();
+	// A manual baseline supersedes any pending auto-baseline; cancel (not just forget) the timer. ClearTimer also
+	// invalidates the handle, so the OnWorldEndPlay path stays consistent. Safe when SetBaseline is itself the timer
+	// callback — FTimerManager supports clearing the currently-executing one-shot from inside its own delegate.
+	if (BaselineTimerHandle.IsValid())
+	{
+		if (const UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(BaselineTimerHandle);
+		}
+	}
 
 	const UNGuardianSettings* Settings = UNGuardianSettings::Get();
 	if (Settings == nullptr)

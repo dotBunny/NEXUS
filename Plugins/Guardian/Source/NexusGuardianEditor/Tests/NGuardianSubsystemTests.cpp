@@ -107,6 +107,50 @@ N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_FiresAfterDelay,
     });
 }
 
+N_TEST_HIGH(UNGuardianSubsystemTests_AutoBaseline_ManualSupersedesPending,
+    "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::AutoBaseline::ManualSupersedesPending",
+    N_TEST_CONTEXT_EDITOR)
+{
+    // A manual SetBaseline() must cancel — not merely forget — a still-pending auto-baseline timer; otherwise the
+    // timer fires later and silently overwrites the deliberate baseline. We copy the armed handle before the manual
+    // call (SetBaseline invalidates the subsystem's own copy, so querying that copy can't tell a cancelled timer
+    // apart from a forgotten one) and assert the timer registered under the original handle is no longer active.
+    using namespace NEXUS::Testing::NGuardian::UNGuardianSubsystemHarness;
+
+    FSettingsGuard Guard;
+    UNGuardianSettings* Settings = UNGuardianSettings::GetMutable();
+    Settings->bAutoBaseline = true;
+    // Positive delay large enough that the timer stays pending until we cancel it (SetTimer discards Rate<=0).
+    Settings->AutoBaselineDelay = 1.0f;
+
+    FNTestUtils::WorldTestChecked(EWorldType::PIE, [this](const UWorld* World)
+    {
+        N_TEST_GET_SUBSYSTEM_CHECKED(Subsystem, UNGuardianSubsystem, World)
+        Subsystem->UpdateTickRate(0.f);
+
+        const FTimerManager& TimerManager = World->GetTimerManager();
+
+        // OnWorldBeginPlay already armed the auto-baseline timer; copy the handle so we can still query the timer
+        // manager for it after SetBaseline clears the subsystem's own handle.
+        const FTimerHandle PendingHandle = Subsystem->BaselineTimerHandle;
+        if (!TimerManager.IsTimerActive(PendingHandle))
+        {
+            ADD_ERROR("Precondition failed: auto-baseline timer should be armed before the manual SetBaseline call.");
+            return;
+        }
+
+        Subsystem->SetBaseline();
+
+        CHECK_FALSE_MESSAGE(TEXT("Manual SetBaseline must cancel the pending auto-baseline timer, not just forget the handle."),
+            TimerManager.IsTimerActive(PendingHandle))
+
+        if (Subsystem->GetBaseObjectCount() <= 0)
+        {
+            ADD_ERROR("BaseObjectCount should be positive after the manual SetBaseline.");
+        }
+    });
+}
+
 N_TEST_CRITICAL(UNGuardianSubsystemTests_SetBaseline_ThresholdCalculation,
     "NEXUS::UnitTests::NGuardian::UNGuardianSubsystem::SetBaseline::ThresholdCalculation",
     N_TEST_CONTEXT_EDITOR)
