@@ -87,8 +87,13 @@ class NEXUSWORLDASSEMBLYEDITOR_API UNWorldAssemblyEditorSubsystem : public UEdit
 	/** Engage the auto-assembly loop so the Quick Assembly button stays in its cancel state across inter-run waits. */
 	void BeginAutoAssemblyLoop();
 
-	/** Disengage the auto-assembly loop, clearing any pending inter-run timer and (when idle) the toolbar progress bar. */
-	void StopAutoAssemblyLoop();
+	/**
+	 * Disengage the auto-assembly loop, clearing any pending inter-run timer and (when idle) the toolbar progress bar.
+	 * @param bEmitSummary When true, and at least one run was accumulated, surface the pass/warn/fail summary toast
+	 *        before discarding the accumulator. Pass true only for user-initiated stops (toolbar cancel, toggling
+	 *        Auto Assembly off); leave false for environment-driven stops (can't-run, PIE, map-load, shutdown).
+	 */
+	void StopAutoAssemblyLoop(bool bEmitSummary = false);
 
 	/** @return true if at least one operation is currently tracked by this subsystem. */
 	bool HasKnownOperation() const { return !KnownOperations.IsEmpty(); }
@@ -128,6 +133,34 @@ protected:
 	void OnMapLoad(const FString& String, FCanLoadMap& CanLoadMap);
 
 private:
+	/**
+	 * Running pass/warn/fail tally accumulated across the runs of a single auto-assembly loop session, so the loop can
+	 * report one summary toast on stop instead of one toast per run.
+	 */
+	struct FNAutoAssemblySummary
+	{
+		/** Number of completed runs folded into this summary. */
+		int32 TotalRuns = 0;
+		/** Runs that succeeded with no warnings. */
+		int32 PassCount = 0;
+		/** Runs that completed with one or more warnings (takes precedence over success, matching the toast icon logic). */
+		int32 WarningCount = 0;
+		/** Runs that failed. */
+		int32 FailCount = 0;
+		/** Total cells created across all accumulated runs. */
+		int32 TotalCreatedCells = 0;
+		/** Total wall-clock time across all accumulated runs, in milliseconds. */
+		double TotalDurationMs = 0.0;
+
+		void Reset() { *this = FNAutoAssemblySummary(); }
+	};
+
+	/** Fold a finished loop run's result into AutoAssemblySummary using the same warn-over-success precedence as the per-op toast. */
+	void AccumulateAutoAssemblyResult(const FNAssemblyOperationResult& Result);
+
+	/** Surface the accumulated pass/warn/fail summary (with totals) as a single toast. Game thread only. */
+	void ShowAutoAssemblySummaryToast() const;
+
 	/** Schedule the next auto-assembly run using the live QuickAssemblyAutoAssemblyTimer value. */
 	void ScheduleNextAutoAssembly();
 
@@ -171,4 +204,7 @@ private:
 
 	/** Handle for the inter-run delay timer scheduled on the editor timer manager. */
 	FTimerHandle AutoAssemblyTimerHandle;
+
+	/** Pass/warn/fail tally for the current auto-assembly loop session; reset when a loop begins and after each stop. */
+	FNAutoAssemblySummary AutoAssemblySummary;
 };

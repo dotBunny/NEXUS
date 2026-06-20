@@ -99,10 +99,19 @@ void UNWorldAssemblyEditorSubsystem::OnQuickAssemblyProgressChanged(float Progre
 
 void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Operation, TSharedRef<FNAssemblyTaskGraphContext> TaskGraphContext)
 {
+	// A run belongs to an auto-assembly loop when it is the tracked quick-assembly operation and the loop is engaged.
+	// Loop runs are folded into the summary instead of toasting one-per-run; standalone runs keep their own toast.
+	const bool bIsQuickAssemblyOp = Operation->GetTicket() == FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOperationTicket();
+	const bool bWasAutoLoopRun = bIsQuickAssemblyOp && bAutoAssemblyLoopActive;
+	if (bWasAutoLoopRun)
+	{
+		AccumulateAutoAssemblyResult(Operation->GetResult());
+	}
+
 	// Drop the tracked ticket for the quick-assembly operation we were following so the toolbar button can leave
 	// its "operation running" state. This is the natural-completion path only; a cancelled operation routes
 	// through OnOperationDestroyed instead and must never re-arm the loop.
-	if (Operation->GetTicket() == FNWorldAssemblyEditorToolMenu::GetQuickAssemblyOperationTicket())
+	if (bIsQuickAssemblyOp)
 	{
 		FNWorldAssemblyEditorToolMenu::SetQuickAssemblyOperationTicket(-1);
 
@@ -117,7 +126,9 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 		else
 		{
 			FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
-			StopAutoAssemblyLoop();
+			// Reaching here with the loop still active means Auto Assembly was toggled off mid-loop - a deliberate
+			// user stop, so surface the accumulated summary. A standalone run (loop never active) emits nothing.
+			StopAutoAssemblyLoop(/*bEmitSummary*/ bAutoAssemblyLoopActive);
 		}
 	}
 
@@ -129,6 +140,12 @@ void UNWorldAssemblyEditorSubsystem::OnOperationFinished(UNAssemblyOperation* Op
 	// Make our own map to the created proxies tied to the operation ticket
 	ProxyMap.Add(Operation->GetTicket(), TArray<TObjectPtr<ANCellProxy>>(TaskGraphContext->CreatedProxies));
 	KnownOperations.Remove(Operation);
+
+	// Auto-assembly loop runs are summarized on stop, so suppress their per-run toast here.
+	if (bWasAutoLoopRun)
+	{
+		return;
+	}
 
 	// Toast
 	const FNAssemblyOperationResult Results = Operation->GetResult();
@@ -300,10 +317,16 @@ void UNWorldAssemblyEditorSubsystem::OnMapLoad(const FString& String, FCanLoadMa
 
 void UNWorldAssemblyEditorSubsystem::BeginAutoAssemblyLoop()
 {
+	// StartQuickAssembly re-enters this for every run of the loop (the inter-run timer re-arms through it), so only
+	// clear the tally when the loop first engages - otherwise each run would wipe the accumulated summary.
+	if (!bAutoAssemblyLoopActive)
+	{
+		AutoAssemblySummary.Reset();
+	}
 	bAutoAssemblyLoopActive = true;
 }
 
-void UNWorldAssemblyEditorSubsystem::StopAutoAssemblyLoop()
+void UNWorldAssemblyEditorSubsystem::StopAutoAssemblyLoop(bool bEmitSummary)
 {
 	const bool bWasActive = bAutoAssemblyLoopActive;
 	bAutoAssemblyLoopActive = false;
@@ -320,6 +343,91 @@ void UNWorldAssemblyEditorSubsystem::StopAutoAssemblyLoop()
 	{
 		FNWorldAssemblyEditorToolMenu::ClearQuickAssemblyProgress();
 	}
+
+	// On a deliberate user stop, surface the accumulated pass/warn/fail summary before discarding it. Environment-driven
+	// stops pass bEmitSummary=false and silently drop the tally.
+	if (bEmitSummary && AutoAssemblySummary.TotalRuns > 0)
+	{
+		ShowAutoAssemblySummaryToast();
+	}
+	AutoAssemblySummary.Reset();
+}
+
+void UNWorldAssemblyEditorSubsystem::AccumulateAutoAssemblyResult(const FNAssemblyOperationResult& Result)
+{
+	AutoAssemblySummary.TotalRuns++;
+	AutoAssemblySummary.TotalCreatedCells += Result.CreatedCells;
+	AutoAssemblySummary.TotalDurationMs += Result.Duration;
+
+	// Mirror the per-op toast icon precedence: a warning outranks success, and success outranks failure.
+	if (Result.bWarning)
+	{
+		AutoAssemblySummary.WarningCount++;
+	}
+	else if (Result.bSuccess)
+	{
+		AutoAssemblySummary.PassCount++;
+	}
+	else
+	{
+		AutoAssemblySummary.FailCount++;
+	}
+}
+
+void UNWorldAssemblyEditorSubsystem::ShowAutoAssemblySummaryToast() const
+{
+	// Durations are accumulated in milliseconds. Quick-assembly runs are usually sub-second, so format adaptively
+	// (ms under a second, seconds with one decimal under a minute, m/s above) to avoid collapsing to "0s".
+	const double TotalMs = AutoAssemblySummary.TotalDurationMs;
+	FText DurationText;
+	if (TotalMs < 1000.0)
+	{
+		DurationText = FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "AutoAssemblySummaryDurationMs", "{0} ms"),
+			FText::AsNumber(FMath::RoundToInt(TotalMs)));
+	}
+	else if (TotalMs < 60000.0)
+	{
+		FNumberFormattingOptions SecondsFormat;
+		SecondsFormat.MinimumFractionalDigits = 1;
+		SecondsFormat.MaximumFractionalDigits = 1;
+		DurationText = FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "AutoAssemblySummaryDurationSeconds", "{0}s"),
+			FText::AsNumber(TotalMs / 1000.0, &SecondsFormat));
+	}
+	else
+	{
+		// Round to whole seconds first so splitting into minutes/seconds can't surface a "1m 60s".
+		const int32 TotalSeconds = FMath::RoundToInt(TotalMs / 1000.0);
+		DurationText = FText::Format(NSLOCTEXT("NexusWorldAssemblyEditor", "AutoAssemblySummaryDurationMinutes", "{0}m {1}s"),
+			FText::AsNumber(TotalSeconds / 60), FText::AsNumber(TotalSeconds % 60));
+	}
+
+	FNotificationInfo Info(FText::Format(
+		NSLOCTEXT("NexusWorldAssemblyEditor", "AutoAssemblySummaryTitle", "Auto Assembly — {0} passed, {1} warnings, {2} failed"),
+		FText::AsNumber(AutoAssemblySummary.PassCount),
+		FText::AsNumber(AutoAssemblySummary.WarningCount),
+		FText::AsNumber(AutoAssemblySummary.FailCount)));
+	Info.SubText = FText::Format(
+		NSLOCTEXT("NexusWorldAssemblyEditor", "AutoAssemblySummarySubText", "{0} runs · {1} cells created · {2}"),
+		FText::AsNumber(AutoAssemblySummary.TotalRuns),
+		FText::AsNumber(AutoAssemblySummary.TotalCreatedCells),
+		DurationText);
+	Info.ExpireDuration = 8.0f;
+	Info.bFireAndForget = true;
+
+	// Aggregate severity: any failure makes the whole session an error, otherwise any warning a warning, else success.
+	if (AutoAssemblySummary.FailCount > 0)
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.ErrorWithColor");
+	}
+	else if (AutoAssemblySummary.WarningCount > 0)
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.WarningWithColor");
+	}
+	else
+	{
+		Info.Image = FAppStyle::GetBrush("Icons.SuccessWithColor");
+	}
+	FSlateNotificationManager::Get().AddNotification(Info);
 }
 
 void UNWorldAssemblyEditorSubsystem::ScheduleNextAutoAssembly()
@@ -336,13 +444,25 @@ void UNWorldAssemblyEditorSubsystem::OnAutoAssemblyTimerElapsed()
 	// One-shot timer: it has fired, so the handle is spent.
 	AutoAssemblyTimerHandle.Invalidate();
 
-	// Stop cleanly if the loop was disengaged, Auto Assembly was toggled off, or a new run can't start right now
-	// (no valid organ, in PIE, or another operation is in flight). This keeps the button from sticking on "cancel".
-	if (!bAutoAssemblyLoopActive ||
-		!UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly ||
-		!FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute())
+	// Already disengaged (e.g. a cancel landed during the wait) - nothing to summarize here.
+	if (!bAutoAssemblyLoopActive)
 	{
-		StopAutoAssemblyLoop();
+		StopAutoAssemblyLoop(/*bEmitSummary*/ false);
+		return;
+	}
+
+	// Auto Assembly was toggled off during the inter-run wait - a deliberate user stop, so surface the summary.
+	if (!UNWorldAssemblyEditorUserSettings::Get()->bQuickAssemblyAutoAssembly)
+	{
+		StopAutoAssemblyLoop(/*bEmitSummary*/ true);
+		return;
+	}
+
+	// A new run can't start right now (no valid organ, in PIE, or another operation is in flight). This is an
+	// environment-driven stop, not a user one, so drop the tally silently and keep the button off "cancel".
+	if (!FNWorldAssemblyEditorCommands::StartQuickAssembly_CanExecute())
+	{
+		StopAutoAssemblyLoop(/*bEmitSummary*/ false);
 		return;
 	}
 

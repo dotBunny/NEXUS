@@ -881,8 +881,9 @@ bool FNWorldAssemblyEditorCommands::QuickAssemblyButton_CanExecute()
 void FNWorldAssemblyEditorCommands::CancelQuickAssembly()
 {
 	// Disengage the auto-assembly loop first so the pending operation's teardown can't re-arm the inter-run timer.
-	// When cancelled during the inter-run gap (no live operation) this also clears the toolbar countdown bar.
-	UNWorldAssemblyEditorSubsystem::Get()->StopAutoAssemblyLoop();
+	// When cancelled during the inter-run gap (no live operation) this also clears the toolbar countdown bar. A
+	// cancel is a deliberate user stop, so surface the accumulated pass/warn/fail summary for any completed runs.
+	UNWorldAssemblyEditorSubsystem::Get()->StopAutoAssemblyLoop(/*bEmitSummary*/ true);
 
 	if (UNAssemblyOperation* Operation = FNWorldAssemblyEditorToolMenu::GetTrackedQuickAssemblyOperation();
 		Operation != nullptr && Operation->IsRunning())
