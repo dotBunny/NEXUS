@@ -8,6 +8,8 @@
 #include "Misc/PackageName.h"
 #include "Selection.h"
 #include "NCoreEditorMinimal.h"
+#include "Styling/AppStyle.h"        // FAppStyle, used by N_DYNAMIC_SEPARATOR
+#include "Styling/ToolBarStyle.h"    // FToolBarStyle, used by N_DYNAMIC_SEPARATOR
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Layout/SBox.h"
